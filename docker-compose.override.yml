@@ -1,13 +1,13 @@
 # Docker Compose Override for Development
-# This file is automatically loaded by docker-compose and overrides settings in docker-compose.dev.yml
+# This file is automatically loaded by docker-compose and overrides settings
 # Perfect for developer-specific settings and Mac/Windows performance optimizations
 
 version: '3.8'
 
 services:
-  backend:
+  # Development environment overrides
+  dev-backend:
     # Performance optimizations for Mac/Windows
-    # Using delegated for better write performance on Mac
     volumes:
       - ./netra_backend:/app/netra_backend:delegated
       - ./shared:/app/shared:delegated
@@ -47,7 +47,7 @@ services:
           --log-level debug
       "
 
-  auth:
+  dev-auth:
     # Performance optimizations for Mac/Windows
     volumes:
       - ./auth_service:/app/auth_service:delegated
@@ -77,7 +77,7 @@ services:
       "
 
   # Frontend already has hot reload via Next.js
-  frontend:
+  dev-frontend:
     volumes:
       - ./frontend/src:/app/src:delegated
       - ./frontend/public:/app/public:delegated
@@ -95,19 +95,17 @@ services:
       CHOKIDAR_INTERVAL: 1000
 
   # Redis configuration override for development
-  redis:
+  dev-redis:
     command: >
       redis-server
       --appendonly yes
       --maxmemory 256mb
       --maxmemory-policy allkeys-lru
-    ports:
-      - "${REDIS_PORT:-6382}:6379"  # Use environment variable for port
 
   # ClickHouse performance optimizations
-  clickhouse:
+  dev-clickhouse:
     volumes:
-      - clickhouse_data:/var/lib/clickhouse:delegated
+      - dev_clickhouse_data:/var/lib/clickhouse:delegated
       - ./scripts/init_clickhouse.sql:/docker-entrypoint-initdb.d/01-init.sql:cached
     environment:
       # ClickHouse specific optimizations

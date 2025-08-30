@@ -39,7 +39,7 @@
             <critical-takeaway>Each service needs its own SERVICE_ID - auth-service not netra-backend (environment_loading_race_condition.xml).</critical-takeaway>
         </category>
         
-        <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session, OAuth, Token, CORS, OAUTH_ENV, OAuth Environment Variables, OAuth Validation, OAuth Startup, OAuth Secrets, Secret Naming, Service Independence, Logout, JWT_SECRET_KEY, Docker Compose, Dev Login, Development Mode, Auto-Login, Dev Auto-Login, Token Persistence, Token Initialization">
+        <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session, OAuth, Token, CORS, OAUTH_ENV, OAuth Environment Variables, OAuth Validation, OAuth Startup, OAuth Secrets, Secret Naming, Service Independence, Logout, JWT_SECRET_KEY, Docker Compose, Dev Login, Development Mode, Auto-Login, Dev Auto-Login, Token Persistence, Token Initialization, Refresh Token, Token Refresh, Refresh Loop, Same Token, Hardcoded Values">
             <critical-takeaway>MANDATORY: All services must integrate with the shared auth service (SPEC/shared_auth_integration.xml).</critical-takeaway>
             <critical-takeaway>CRITICAL: Use JWT_SECRET_KEY exclusively - JWT_SECRET is deprecated (jwt_secret_standardization.xml).</critical-takeaway>
             <critical-takeaway>Ensure consistent JWT secret configuration across services - both auth and backend MUST use JWT_SECRET_KEY (jwt_secret_standardization.xml).</critical-takeaway>
@@ -48,6 +48,9 @@
             <critical-takeaway>Frontend pages receiving OAuth tokens via URL must handle token extraction and storage (oauth_token_persistence.xml).</critical-takeaway>
             <critical-takeaway>Always verify OAuth configuration matches between code and provider console (oauth_deployment_verification.xml).</critical-takeaway>
             <critical-takeaway>Next.js proxy rewrites must be disabled in production - frontend should call services directly (oauth_staging_issues.xml).</critical-takeaway>
+            <critical-takeaway>CRITICAL: Token refresh returning same token is ALWAYS a bug - indicates hardcoded placeholders (auth_token_refresh_root_cause.xml).</critical-takeaway>
+            <critical-takeaway>Never use placeholder values in production code paths - they will reach production (auth_token_refresh_root_cause.xml).</critical-takeaway>
+            <critical-takeaway>Implement cooldown and max failure limits for token refresh to prevent loops (frontend_refresh_loop_fix.xml).</critical-takeaway>
             <critical-takeaway>Auth service routes ALWAYS use /auth/* prefix - frontend must include this (frontend_auth_urls.xml).</critical-takeaway>
             <critical-takeaway>Run python scripts/validate_oauth_configuration.py before every deployment to prevent OAuth redirect URI misconfigurations.</critical-takeaway>
             <critical-takeaway>Database connection args must be conditional on database type - 'command_timeout' fails with SQLite (auth_service_endpoint_fixes.xml).</critical-takeaway>
@@ -1826,3 +1829,4 @@
         </category>
     </environment_security>
 </specification>
+    <auth_refresh_loops>

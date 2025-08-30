@@ -26,14 +26,19 @@ def generate_secure_key(length: int = 32) -> str:
 def check_gcloud_auth() -> bool:
     """Check if gcloud is authenticated."""
     try:
+        # Try to use gcloud.cmd on Windows, gcloud on Unix
+        gcloud_cmd = "gcloud.cmd" if sys.platform == "win32" else "gcloud"
         result = subprocess.run(
-            ["gcloud", "auth", "list", "--format=json"],
+            [gcloud_cmd, "auth", "list", "--format=json"],
             capture_output=True,
             text=True,
             check=True
         )
         accounts = json.loads(result.stdout)
-        return len(accounts) > 0 and any(acc.get("status") == "ACTIVE" for acc in accounts)
+        # Check if any account is ACTIVE or if we have accounts at all
+        has_active = any(acc.get("status") == "ACTIVE" for acc in accounts)
+        has_accounts = len(accounts) > 0
+        return has_active or has_accounts
     except (subprocess.CalledProcessError, json.JSONDecodeError, FileNotFoundError):
         return False
 
@@ -41,8 +46,9 @@ def check_gcloud_auth() -> bool:
 def secret_exists(project_id: str, secret_name: str) -> bool:
     """Check if a secret already exists in Google Secrets Manager."""
     try:
+        gcloud_cmd = "gcloud.cmd" if sys.platform == "win32" else "gcloud"
         result = subprocess.run(
-            ["gcloud", "secrets", "describe", secret_name, f"--project={project_id}"],
+            [gcloud_cmd, "secrets", "describe", secret_name, f"--project={project_id}"],
             capture_output=True,
             text=True
         )
@@ -55,9 +61,10 @@ def secret_exists(project_id: str, secret_name: str) -> bool:
 def create_secret(project_id: str, secret_name: str, secret_value: str) -> bool:
     """Create a new secret in Google Secrets Manager."""
     try:
+        gcloud_cmd = "gcloud.cmd" if sys.platform == "win32" else "gcloud"
         # Create the secret
         result = subprocess.run(
-            ["gcloud", "secrets", "create", secret_name, f"--project={project_id}", "--replication-policy=automatic"],
+            [gcloud_cmd, "secrets", "create", secret_name, f"--project={project_id}", "--replication-policy=automatic"],
             capture_output=True,
             text=True
         )
@@ -68,7 +75,7 @@ def create_secret(project_id: str, secret_name: str, secret_value: str) -> bool:
         
         # Add the secret version with the value
         result = subprocess.run(
-            ["gcloud", "secrets", "versions", "add", secret_name, f"--project={project_id}", "--data-file=-"],
+            [gcloud_cmd, "secrets", "versions", "add", secret_name, f"--project={project_id}", "--data-file=-"],
             input=secret_value,
             capture_output=True,
             text=True
@@ -88,8 +95,9 @@ def create_secret(project_id: str, secret_name: str, secret_value: str) -> bool:
 def update_secret(project_id: str, secret_name: str, secret_value: str) -> bool:
     """Update an existing secret in Google Secrets Manager."""
     try:
+        gcloud_cmd = "gcloud.cmd" if sys.platform == "win32" else "gcloud"
         result = subprocess.run(
-            ["gcloud", "secrets", "versions", "add", secret_name, f"--project={project_id}", "--data-file=-"],
+            [gcloud_cmd, "secrets", "versions", "add", secret_name, f"--project={project_id}", "--data-file=-"],
             input=secret_value,
             capture_output=True,
             text=True
@@ -109,10 +117,11 @@ def update_secret(project_id: str, secret_name: str, secret_value: str) -> bool:
 def grant_secret_access(project_id: str, secret_name: str, service_account: str) -> bool:
     """Grant a service account access to read the secret."""
     try:
+        gcloud_cmd = "gcloud.cmd" if sys.platform == "win32" else "gcloud"
         member = f"serviceAccount:{service_account}"
         result = subprocess.run(
             [
-                "gcloud", "secrets", "add-iam-policy-binding", secret_name,
+                gcloud_cmd, "secrets", "add-iam-policy-binding", secret_name,
                 f"--project={project_id}",
                 "--role=roles/secretmanager.secretAccessor",
                 f"--member={member}"

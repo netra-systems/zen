@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Staging Environment Configuration - Localhost URL Prevention</title>
+    <date>2025-08-30</date>
+    <severity>HIGH</severity>
+    <components>
+      <component>frontend/lib/unified-api-config.ts</component>
+      <component>docker-compose.yml</component>
+      <component>scripts/deploy_to_gcp.py</component>
+    </components>
+    <related_learnings>
+      <learning>frontend_refresh_loop_fix.xml</learning>
+      <learning>auth_token_refresh_root_cause.xml</learning>
+    </related_learnings>
+  </metadata>
+
+  <problem>
+    <description>
+      Staging environment configurations contained localhost URL fallbacks that would
+      cause CORS errors and authentication failures in production environments.
+    </description>
+    <examples>
+      <example>
+        Docker compose using localhost fallbacks:
+        API_URL: ${API_URL:-http://localhost:8000}
+      </example>
+      <example>
+        Frontend config with localhost defaults:
+        process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      </example>
+    </examples>
+  </problem>
+
+  <fixes_applied>
+    <fix>
+      <title>Multi-Layer URL Validation</title>
+      <description>
+        Implemented validation at multiple levels to prevent localhost URLs in staging/production
+      </description>
+      <implementations>
+        <implementation location="frontend/lib/unified-api-config.ts:102-118">
+          Frontend validation throws error if localhost detected in staging/production
+        </implementation>
+        <implementation location="scripts/deploy_to_gcp.py:234-248">
+          Deployment script validates environment variables before deployment
+        </implementation>
+        <implementation location="scripts/validate_staging_urls.py">
+          Comprehensive validation script for all configuration files
+        </implementation>
+      </implementations>
+    </fix>
+
+    <fix>
+      <title>Staging-Specific Configurations</title>
+      <files>
+        <file>nginx/nginx.staging.conf</file>
+        <file>docker-compose.staging.yml</file>
+        <file>.env.staging</file>
+      </files>
+      <description>
+        Created dedicated staging configurations with proper domain references
+      </description>
+    </fix>
+  </fixes_applied>
+
+  <validation_strategy>
+    <layer level="1">
+      <name>Pre-deployment Validation</name>
+      <description>Scripts check for localhost URLs before deployment</description>
+      <implementation>scripts/deploy_to_gcp.py validates URLs</implementation>
+    </layer>
+    <layer level="2">
+      <name>Runtime Validation</name>
+      <description>Application code validates configuration at startup</description>
+      <implementation>unified-api-config.ts validateConfig()</implementation>
+    </layer>
+    <layer level="3">
+      <name>Continuous Validation</name>
+      <description>Shell scripts validate environment during container startup</description>
+      <implementation>scripts/validate_urls_runtime.sh</implementation>
+    </layer>
+  </validation_strategy>
+
+  <key_insight>
+    <title>Environment Variables Must Be Explicit in Staging/Production</title>
+    <description>
+      Never use fallback values for critical URLs in staging/production.
+      If environment variables are missing, fail fast with clear error messages
+      rather than falling back to localhost defaults.
+    </description>
+  </key_insight>
+
+  <prevention>
+    <measure>Always use explicit environment variables in staging/production</measure>
+    <measure>Fail deployment if required URLs are not configured</measure>
+    <measure>Use separate configuration files for each environment</measure>
+    <measure>Validate all URLs before deployment</measure>
+  </prevention>
+
+  <tools_created>
+    <tool>scripts/validate_staging_urls.py - Comprehensive URL validation</tool>
+    <tool>scripts/validate_urls_runtime.sh - Runtime validation for containers</tool>
+  </tools_created>
+</learning>

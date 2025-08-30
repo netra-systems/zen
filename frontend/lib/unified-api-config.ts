@@ -96,6 +96,28 @@ function isRunningInDocker(): boolean {
 }
 
 /**
+ * Validate URLs for staging/production environments
+ * Prevents localhost URLs from being used in non-development environments
+ */
+function validateUrlsForEnvironment(environment: Environment, urls: any): void {
+  if (environment === 'staging' || environment === 'production') {
+    const localhostUrls = Object.entries(urls)
+      .filter(([_, url]) => typeof url === 'string' && url.includes('localhost'))
+      .map(([key, url]) => `${key}: ${url}`);
+    
+    if (localhostUrls.length > 0) {
+      const error = `CRITICAL: localhost URLs detected in ${environment} environment!\n` +
+                   `This will cause CORS and authentication failures:\n` +
+                   localhostUrls.map(url => `  - ${url}`).join('\n') + '\n' +
+                   `Fix: Set proper environment variables for ${environment}`;
+      
+      logger.error(error);
+      throw new Error(error);
+    }
+  }
+}
+
+/**
  * Get environment-specific configuration
  * NO localhost references in staging/production
  */

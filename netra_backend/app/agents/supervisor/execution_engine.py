@@ -48,7 +48,20 @@ class ExecutionEngine:
                            state: DeepAgentState) -> AgentExecutionResult:
         """Execute a single agent with retry logic."""
         await self.websocket_notifier.send_agent_started(context)
+        
+        # Send initial thinking update
+        await self.send_agent_thinking(
+            context, 
+            f"Starting execution of {context.agent_name} agent...",
+            step_number=1
+        )
+        
         result = await self._execute_with_error_handling(context, state)
+        
+        # Send final report if successful
+        if result.success:
+            await self._send_final_execution_report(context, result, state)
+        
         self._update_history(result)
         return result
     
@@ -57,7 +70,25 @@ class ExecutionEngine:
         """Execute agent with error handling and fallback."""
         start_time = time.time()
         try:
-            return await self.agent_core.execute_agent(context, state)
+            # Send thinking updates during execution
+            await self.send_agent_thinking(
+                context,
+                f"Processing request: {getattr(state, 'user_prompt', 'Task')[:100]}...",
+                step_number=2
+            )
+            
+            # Execute the agent
+            result = await self.agent_core.execute_agent(context, state)
+            
+            # Send partial result if available
+            if result.success and hasattr(state, 'final_answer'):
+                await self.send_partial_result(
+                    context,
+                    str(state.final_answer)[:500],
+                    is_complete=True
+                )
+            
+            return result
         except Exception as e:
             return await self._handle_execution_error(context, state, e, start_time)
     
@@ -317,6 +348,38 @@ class ExecutionEngine:
                                report: dict, duration_ms: float) -> None:
         """Send final report notification."""
         await self.websocket_notifier.send_final_report(context, report, duration_ms)
+    
+    async def _send_final_execution_report(self, context: AgentExecutionContext,
+                                          result: AgentExecutionResult,
+                                          state: DeepAgentState) -> None:
+        """Send comprehensive final report after successful execution."""
+        try:
+            # Build comprehensive report
+            report = {
+                "agent_name": context.agent_name,
+                "success": result.success,
+                "duration_ms": result.duration * 1000 if result.duration else 0,
+                "user_prompt": getattr(state, 'user_prompt', 'N/A'),
+                "final_answer": getattr(state, 'final_answer', 'Completed'),
+                "step_count": getattr(state, 'step_count', 0),
+                "status": "completed"
+            }
+            
+            # Send final report
+            await self.send_final_report(
+                context, 
+                report, 
+                result.duration * 1000 if result.duration else 0
+            )
+            
+            # Send completion notification
+            await self.websocket_notifier.send_agent_completed(
+                context,
+                report,
+                result.duration * 1000 if result.duration else 0
+            )
+        except Exception as e:
+            logger.warning(f"Failed to send final execution report: {e}")
     
     def _log_fallback_trigger(self, context: AgentExecutionContext) -> None:
         """Log fallback trigger if flow_id is available."""

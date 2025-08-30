@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Auth Service Token Refresh Root Cause - Hardcoded Placeholders</title>
+    <date>2025-08-30</date>
+    <severity>CRITICAL</severity>
+    <components>
+      <component>auth_service/auth_core/services/auth_service.py</component>
+      <component>auth_service/auth_core/core/jwt_handler.py</component>
+    </components>
+    <related_learnings>
+      <learning>frontend_refresh_loop_fix.xml</learning>
+      <learning>staging_environment_config.xml</learning>
+    </related_learnings>
+  </metadata>
+
+  <root_cause>
+    <description>
+      Auth service was returning identical tokens on refresh due to hardcoded placeholder values
+      that were never replaced with real user data.
+    </description>
+    <code_snippets>
+      <snippet location="auth_service/auth_core/services/auth_service.py:325-326">
+        # BUGGY CODE - Never use placeholders in production!
+        email = "user@example.com"  # Placeholder
+        permissions = []
+      </snippet>
+      <snippet location="auth_service/auth_core/core/jwt_handler.py:291-292">
+        # BUGGY CODE - Hardcoded values cause identical tokens
+        email = "user@example.com"  # Placeholder
+        permissions = []
+      </snippet>
+    </code_snippets>
+    <impact>
+      Every user got identical JWT tokens with same email/permissions, causing:
+      - Infinite refresh loops (token never actually refreshed)
+      - Security issues (all users share same token payload)
+      - Frontend retry storms against auth service
+    </impact>
+  </root_cause>
+
+  <fix_applied>
+    <description>Extract real user data from token payload or database</description>
+    <changes>
+      <change>
+        Modified refresh_token method to extract email/permissions from token payload:
+        email = payload.get("email", "user@example.com")
+        permissions = payload.get("permissions", [])
+      </change>
+      <change>
+        Enhanced refresh tokens to include user data in payload:
+        create_refresh_token(user_id, email, permissions)
+      </change>
+      <change>
+        Added database lookup fallback for user data when available
+      </change>
+    </changes>
+  </fix_applied>
+
+  <key_insight>
+    <title>Same Token on Refresh is NEVER Normal</title>
+    <description>
+      Returning the same token on refresh is ALWAYS a bug. Proper refresh behavior:
+      1. Accept valid refresh token
+      2. Extract user details from token or database
+      3. Generate NEW unique access and refresh tokens
+      4. Return new tokens with updated expiry
+      
+      If same token is returned, it indicates:
+      - Hardcoded/placeholder values being used
+      - Token generation not using current timestamp
+      - Critical bug in refresh logic
+    </description>
+  </key_insight>
+
+  <prevention>
+    <measure>Never use placeholder values in production code paths</measure>
+    <measure>Always test that refresh returns different tokens</measure>
+    <measure>Include user-specific data in token generation</measure>
+    <measure>Add automated tests comparing consecutive refresh tokens</measure>
+  </prevention>
+
+  <tests_added>
+    <test>auth_service/tests/test_refresh_critical_fix.py::test_refresh_tokens_are_unique_critical</test>
+    <test>auth_service/tests/test_refresh_critical_fix.py::test_jwt_handler_refresh_not_hardcoded</test>
+    <test>auth_service/tests/test_refresh_token_fix.py::test_refresh_token_contains_user_data</test>
+  </tests_added>
+</learning>

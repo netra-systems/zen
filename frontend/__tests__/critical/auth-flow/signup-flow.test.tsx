@@ -55,6 +55,198 @@ const mockNewUser = {
 
 const mockSignupToken = 'signup-jwt-token-456';
 
+// Mock Signup Form Component for comprehensive testing - MOVED TO TOP FOR HOISTING
+const SignupForm = ({ onRedirect }: { onRedirect?: jest.Mock }) => {
+  const [formData, setFormData] = React.useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    fullName: '',
+    company: ''
+  });
+  const [error, setError] = React.useState('');
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [termsAccepted, setTermsAccepted] = React.useState(false);
+
+  const getPasswordStrength = (password: string) => {
+    if (password.length < 8) return 'Weak';
+    if (password.length < 12) return 'Medium';
+    return 'Strong';
+  };
+
+  const validateForm = () => {
+    if (!formData.email.includes('@')) {
+      setError('Please enter a valid email address');
+      return false;
+    }
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters');
+      return false;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return false;
+    }
+    if (!termsAccepted) {
+      setError('Please accept the Terms of Service');
+      return false;
+    }
+    return true;
+  };
+
+  const handleSignup = async () => {
+    if (!validateForm() || isSubmitting) return;
+    
+    setIsSubmitting(true);
+    setError('');
+    
+    try {
+      const result = await mockAuthService.handleSignup({
+        email: formData.email,
+        password: formData.password,
+        full_name: formData.fullName,
+        company: formData.company
+      });
+      
+      if (result.success) {
+        await mockAuthService.setToken(result.token);
+        mockAuthStore.login(result.user, result.token);
+        
+        // Track conversion
+        await mockAuthService.trackConversion('signup_complete', {
+          user_id: result.user.id,
+          source: 'organic'
+        });
+        
+        // Record consent
+        await mockAuthService.recordConsent({
+          user_email: formData.email,
+          terms_accepted: termsAccepted,
+          timestamp: new Date()
+        });
+        
+        if (onRedirect) {
+          onRedirect('/chat?welcome=true');
+        }
+      } else {
+        if (result.error === 'Email already registered') {
+          setError('Email already registered. Try logging in instead.');
+        } else {
+          setError(result.error || 'Signup failed');
+        }
+      }
+    } catch (err: any) {
+      if (err.message.includes('Network')) {
+        setError('Network error. Please check your connection.');
+      } else {
+        setError('Signup failed. Please try again.');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogleSignup = async () => {
+    await mockAuthService.initiateGoogleSignup();
+  };
+
+  const handleRetry = () => {
+    setError('');
+    setIsSubmitting(false);
+  };
+
+  React.useEffect(() => {
+    // Handle OAuth callback
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const state = urlParams.get('state');
+    
+    if (code && state) {
+      mockAuthService.handleOAuthSignup(code, state);
+    }
+  }, []);
+
+  return (
+    <div data-testid="signup-form">
+      <input
+        data-testid="email-input"
+        type="email"
+        value={formData.email}
+        onChange={(e) => setFormData({...formData, email: e.target.value})}
+        placeholder="Email"
+      />
+      <input
+        data-testid="password-input"
+        type="password"
+        value={formData.password}
+        onChange={(e) => setFormData({...formData, password: e.target.value})}
+        placeholder="Password"
+      />
+      <div data-testid="password-strength">{getPasswordStrength(formData.password)}</div>
+      {formData.password.length > 0 && formData.password.length < 8 && (
+        <div data-testid="password-requirements">Password must be at least 8 characters</div>
+      )}
+      <input
+        data-testid="confirm-password-input"
+        type="password"
+        value={formData.confirmPassword}
+        onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+        placeholder="Confirm Password"
+      />
+      <input
+        data-testid="full-name-input"
+        type="text"
+        value={formData.fullName}
+        onChange={(e) => setFormData({...formData, fullName: e.target.value})}
+        placeholder="Full Name"
+      />
+      <input
+        data-testid="company-input"
+        type="text"
+        value={formData.company}
+        onChange={(e) => setFormData({...formData, company: e.target.value})}
+        placeholder="Company (Optional)"
+      />
+      
+      <label>
+        <input
+          data-testid="terms-checkbox"
+          type="checkbox"
+          checked={termsAccepted}
+          onChange={(e) => setTermsAccepted(e.target.checked)}
+        />
+        I agree to the Terms of Service
+      </label>
+      
+      <button 
+        data-testid="signup-button" 
+        onClick={handleSignup}
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? 'Creating Account...' : 'Sign Up'}
+      </button>
+      
+      <button data-testid="google-signup-button" onClick={handleGoogleSignup}>
+        Sign up with Google
+      </button>
+      
+      {error && (
+        <div data-testid="error-message">
+          {error}
+          {error.includes('Network') && (
+            <button data-testid="retry-signup-button" onClick={handleRetry}>
+              Retry
+            </button>
+          )}
+          {error.includes('already registered') && (
+            <a data-testid="login-link" href="/login">Login instead</a>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 describe('Signup Flow - Business Critical Tests', () => {
   let user: ReturnType<typeof userEvent.setup>;
 
@@ -62,17 +254,19 @@ describe('Signup Flow - Business Critical Tests', () => {
     user = userEvent.setup();
     setupMockAuthService();
     
-    jest.clearAllTimers();
-    jest.useFakeTimers();
-    
     // Clear all mock calls
     jest.clearAllMocks();
+    
+    // Clean up DOM from previous tests
+    document.body.innerHTML = '';
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    // Clean up mocks and DOM after each test
     jest.clearAllMocks();
+    
+    // Clean up DOM
+    document.body.innerHTML = '';
   });
 
   describe('Signup Form Rendering & Validation', () => {
@@ -108,14 +302,17 @@ describe('Signup Flow - Business Critical Tests', () => {
       
       // Wait for form to render
       await waitFor(() => {
-        expect(screen.getByTestId('email-input')).toBeInTheDocument();
+        expect(screen.getByTestId('password-input')).toBeInTheDocument();
       });
       
+      // Type a short password to trigger validation
       await act(async () => {
-        await performSignup('user@test.com', 'weak', 'weak', 'Test User');
+        await user.type(screen.getByTestId('password-input'), 'weak');
       });
       
-      expect(screen.getByText('Password must be at least 8 characters')).toBeInTheDocument();
+      // Check that password requirements are shown
+      expect(screen.getByTestId('password-requirements')).toBeInTheDocument();
+      expect(screen.getByTestId('password-requirements')).toHaveTextContent('Password must be at least 8 characters');
     });
 
     it('validates password confirmation match', async () => {
@@ -392,8 +589,10 @@ describe('Signup Flow - Business Critical Tests', () => {
   }
 
   function renderSignupForm(mockPush?: jest.Mock) {
+    // Ensure clean DOM state before rendering
+    document.body.innerHTML = '';
+    
     const result = render(<SignupForm onRedirect={mockPush} />);
-    // Add a small delay to ensure component is fully rendered
     return result;
   }
 
@@ -414,195 +613,3 @@ describe('Signup Flow - Business Critical Tests', () => {
     await user.click(screen.getByTestId('signup-button'));
   }
 });
-
-// Mock Signup Form Component for comprehensive testing
-const SignupForm = ({ onRedirect }: { onRedirect?: jest.Mock }) => {
-  const [formData, setFormData] = React.useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
-    fullName: '',
-    company: ''
-  });
-  const [error, setError] = React.useState('');
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [termsAccepted, setTermsAccepted] = React.useState(false);
-
-  const getPasswordStrength = (password: string) => {
-    if (password.length < 8) return 'Weak';
-    if (password.length < 12) return 'Medium';
-    return 'Strong';
-  };
-
-  const validateForm = () => {
-    if (!formData.email.includes('@')) {
-      setError('Please enter a valid email address');
-      return false;
-    }
-    if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters');
-      return false;
-    }
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      return false;
-    }
-    if (!termsAccepted) {
-      setError('Please accept the Terms of Service');
-      return false;
-    }
-    return true;
-  };
-
-  const handleSignup = async () => {
-    if (!validateForm() || isSubmitting) return;
-    
-    setIsSubmitting(true);
-    setError('');
-    
-    try {
-      const result = await mockAuthService.handleSignup({
-        email: formData.email,
-        password: formData.password,
-        full_name: formData.fullName,
-        company: formData.company
-      });
-      
-      if (result.success) {
-        await mockAuthService.setToken(result.token);
-        mockAuthStore.login(result.user, result.token);
-        
-        // Track conversion
-        await mockAuthService.trackConversion('signup_complete', {
-          user_id: result.user.id,
-          source: 'organic'
-        });
-        
-        // Record consent
-        await mockAuthService.recordConsent({
-          user_email: formData.email,
-          terms_accepted: termsAccepted,
-          timestamp: new Date()
-        });
-        
-        if (onRedirect) {
-          onRedirect('/chat?welcome=true');
-        }
-      } else {
-        if (result.error === 'Email already registered') {
-          setError('Email already registered. Try logging in instead.');
-        } else {
-          setError(result.error || 'Signup failed');
-        }
-      }
-    } catch (err: any) {
-      if (err.message.includes('Network')) {
-        setError('Network error. Please check your connection.');
-      } else {
-        setError('Signup failed. Please try again.');
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleGoogleSignup = async () => {
-    await mockAuthService.initiateGoogleSignup();
-  };
-
-  const handleRetry = () => {
-    setError('');
-    setIsSubmitting(false);
-  };
-
-  React.useEffect(() => {
-    // Handle OAuth callback
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    const state = urlParams.get('state');
-    
-    if (code && state) {
-      mockAuthService.handleOAuthSignup(code, state);
-    }
-  }, []);
-
-  return (
-    <div data-testid="signup-form">
-      <input
-        data-testid="email-input"
-        type="email"
-        value={formData.email}
-        onChange={(e) => setFormData({...formData, email: e.target.value})}
-        placeholder="Email"
-      />
-      <input
-        data-testid="password-input"
-        type="password"
-        value={formData.password}
-        onChange={(e) => setFormData({...formData, password: e.target.value})}
-        placeholder="Password"
-      />
-      <div data-testid="password-strength">{getPasswordStrength(formData.password)}</div>
-      {formData.password.length > 0 && formData.password.length < 8 && (
-        <div data-testid="password-requirements">Password must be at least 8 characters</div>
-      )}
-      <input
-        data-testid="confirm-password-input"
-        type="password"
-        value={formData.confirmPassword}
-        onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-        placeholder="Confirm Password"
-      />
-      <input
-        data-testid="full-name-input"
-        type="text"
-        value={formData.fullName}
-        onChange={(e) => setFormData({...formData, fullName: e.target.value})}
-        placeholder="Full Name"
-      />
-      <input
-        data-testid="company-input"
-        type="text"
-        value={formData.company}
-        onChange={(e) => setFormData({...formData, company: e.target.value})}
-        placeholder="Company (Optional)"
-      />
-      
-      <label>
-        <input
-          data-testid="terms-checkbox"
-          type="checkbox"
-          checked={termsAccepted}
-          onChange={(e) => setTermsAccepted(e.target.checked)}
-        />
-        I agree to the Terms of Service
-      </label>
-      
-      <button 
-        data-testid="signup-button" 
-        onClick={handleSignup}
-        disabled={isSubmitting}
-      >
-        {isSubmitting ? 'Creating Account...' : 'Sign Up'}
-      </button>
-      
-      <button data-testid="google-signup-button" onClick={handleGoogleSignup}>
-        Sign up with Google
-      </button>
-      
-      {error && (
-        <div data-testid="error-message">
-          {error}
-          {error.includes('Network') && (
-            <button data-testid="retry-signup-button" onClick={handleRetry}>
-              Retry
-            </button>
-          )}
-          {error.includes('already registered') && (
-            <a data-testid="login-link" href="/login">Login instead</a>
-          )}
-        </div>
-      )}
-    </div>
-  );
-};

@@ -84,6 +84,11 @@ afterEach(() => {
       }
     });
   }
+  
+  // Force garbage collection if available
+  if (global.gc) {
+    global.gc();
+  }
 });
 
 global.TransformStream = class TransformStream {
@@ -116,6 +121,32 @@ if (typeof global.StorageEvent === 'undefined') {
 
 // Enable fetch mocking
 fetchMock.enableMocks();
+
+// ============================================================================
+// DOCUMENT EVENT LISTENER SETUP
+// ============================================================================
+// Setup document event listeners for keyboard shortcuts and other features
+const documentEventHandlers = new Map();
+const mockDocumentAddEventListener = jest.fn((event, handler) => {
+  documentEventHandlers.set(event, handler);
+});
+const mockDocumentRemoveEventListener = jest.fn((event, handler) => {
+  documentEventHandlers.delete(event);
+});
+
+// Only attach if document is available
+if (typeof document !== 'undefined') {
+  Object.defineProperty(document, 'addEventListener', {
+    value: mockDocumentAddEventListener,
+    writable: true,
+    configurable: true
+  });
+  Object.defineProperty(document, 'removeEventListener', {
+    value: mockDocumentRemoveEventListener,
+    writable: true,
+    configurable: true
+  });
+}
 
 // ============================================================================
 // ENVIRONMENT VARIABLES
@@ -276,13 +307,25 @@ class MockWebSocket {
   simulateClose(code = 1000, reason = '') {
     if (this.readyState !== MockWebSocket.CLOSED) {
       this.readyState = MockWebSocket.CLOSING;
-      setTimeout(() => {
+      const closeTimeout = setTimeout(() => {
         this.readyState = MockWebSocket.CLOSED;
         const closeEvent = new CloseEvent('close', { code, reason });
         this.onclose?.(closeEvent);
         this.dispatchEvent(closeEvent);
+        // Clean up the timeout reference
+        timeoutIds.delete(closeTimeout);
       }, 0);
+      timeoutIds.add(closeTimeout);
     }
+  }
+  
+  // Add cleanup method
+  cleanup() {
+    this.eventListeners.clear();
+    this.onopen = null;
+    this.onclose = null;
+    this.onerror = null;
+    this.onmessage = null;
   }
 }
 
@@ -292,6 +335,58 @@ MockWebSocket.CLOSING = 2;
 MockWebSocket.CLOSED = 3;
 
 global.WebSocket = MockWebSocket;
+
+// Global cleanup function to be called after each test
+global.cleanupAllResources = function() {
+  // Clear all timers
+  for (const id of timeoutIds) {
+    originalClearTimeout(id);
+  }
+  for (const id of intervalIds) {
+    originalClearInterval(id);
+  }
+  timeoutIds.clear();
+  intervalIds.clear();
+  
+  // Clean up WebSocket connections
+  if (global.mockWebSocketInstances) {
+    global.mockWebSocketInstances.forEach(ws => {
+      if (ws.cleanup && typeof ws.cleanup === 'function') {
+        ws.cleanup();
+      }
+    });
+    global.mockWebSocketInstances.length = 0;
+  }
+  
+  // Clean up event listeners
+  documentEventHandlers.clear();
+  
+  // Force clear any remaining Node.js handles
+  if (typeof global._getActiveHandles === 'function') {
+    const handles = global._getActiveHandles();
+    handles.forEach(handle => {
+      if (handle && typeof handle.close === 'function') {
+        try {
+          handle.close();
+        } catch (e) {
+          // Ignore cleanup errors
+        }
+      }
+    });
+  }
+  
+  // Clear any pending promises/microtasks
+  if (typeof global.setImmediate !== 'undefined') {
+    global.setImmediate(() => {
+      if (global.gc) {
+        global.gc();
+      }
+    });
+  }
+};
+
+// Track WebSocket instances for cleanup
+global.mockWebSocketInstances = [];
 
 // ============================================================================
 // STORAGE MOCKS
@@ -857,92 +952,384 @@ jest.mock('@/hooks/useMCPTools', () => ({
 // ============================================================================
 // STORE MOCKS
 // ============================================================================
-jest.mock('@/store/authStore', () => ({
-  useAuthStore: jest.fn(() => {
-    const currentState = global.mockAuthState || {
-      isAuthenticated: true,
-      user: mockUser,
-      token: mockJWTToken
-    };
+jest.mock('@/store/authStore', () => {
+  // Store state variable that will be shared between hook and store methods
+  let storeState = {
+    isAuthenticated: false,
+    user: null,
+    token: null,
+    loading: false,
+    error: null
+  };
+  
+  const listeners = new Set();
+
+  // Store actions that update the state
+  const storeActions = {
+    login: jest.fn((user, token) => {
+      if (global.localStorage) {
+        global.localStorage.setItem('jwt_token', token || mockJWTToken);
+        global.localStorage.setItem('token', token || mockJWTToken);
+        global.localStorage.setItem('auth_token', token || mockJWTToken);
+        global.localStorage.setItem('user_data', JSON.stringify(user || mockUser));
+      }
+      // Update global state
+      global.mockAuthState = {
+        ...global.mockAuthState,
+        user: user || mockUser,
+        token: token || mockJWTToken,
+        isAuthenticated: true,
+        error: null
+      };
+      // Update store state
+      storeState = {
+        ...storeState,
+        isAuthenticated: true,
+        user: user || mockUser,
+        token: token || mockJWTToken,
+        error: null
+      };
+      // Update hook return value
+      useAuthStore.mockReturnValue(storeState);
+      // Notify listeners
+      listeners.forEach(listener => listener(storeState));
+    }),
+    logout: jest.fn(() => {
+      if (global.localStorage) {
+        global.localStorage.removeItem('jwt_token');
+        global.localStorage.removeItem('token');
+        global.localStorage.removeItem('auth_token');
+        global.localStorage.removeItem('user_data');
+      }
+      // Update global state
+      global.mockAuthState = {
+        ...global.mockAuthState,
+        user: null,
+        token: null,
+        isAuthenticated: false,
+        error: null
+      };
+      // Update store state
+      storeState = {
+        ...storeState,
+        isAuthenticated: false,
+        user: null,
+        token: null,
+        error: null
+      };
+      // Update hook return value
+      useAuthStore.mockReturnValue(storeState);
+      // Notify listeners
+      listeners.forEach(listener => listener(storeState));
+    }),
+    setLoading: jest.fn((loading) => {
+      global.mockAuthState = {
+        ...global.mockAuthState,
+        loading
+      };
+      storeState = { ...storeState, loading };
+      useAuthStore.mockReturnValue(storeState);
+      listeners.forEach(listener => listener(storeState));
+    }),
+    setError: jest.fn((error) => {
+      global.mockAuthState = {
+        ...global.mockAuthState,
+        error
+      };
+      storeState = { ...storeState, error };
+      useAuthStore.mockReturnValue(storeState);
+      listeners.forEach(listener => listener(storeState));
+    }),
+    updateUser: jest.fn((userUpdate) => {
+      if (storeState.user) {
+        const updatedUser = { ...storeState.user, ...userUpdate };
+        global.mockAuthState = {
+          ...global.mockAuthState,
+          user: updatedUser
+        };
+        storeState = { ...storeState, user: updatedUser };
+        useAuthStore.mockReturnValue(storeState);
+        listeners.forEach(listener => listener(storeState));
+      }
+    }),
+    updateToken: jest.fn((token) => {
+      if (global.localStorage) {
+        global.localStorage.setItem('jwt_token', token);
+        global.localStorage.setItem('token', token);
+        global.localStorage.setItem('auth_token', token);
+      }
+      global.mockAuthState = {
+        ...global.mockAuthState,
+        token: token
+      };
+      storeState = { ...storeState, token };
+      useAuthStore.mockReturnValue(storeState);
+      listeners.forEach(listener => listener(storeState));
+    }),
+    reset: jest.fn(() => {
+      if (global.localStorage) {
+        global.localStorage.removeItem('jwt_token');
+        global.localStorage.removeItem('token');
+        global.localStorage.removeItem('auth_token');
+        global.localStorage.removeItem('user_data');
+      }
+      global.mockAuthState = {
+        isAuthenticated: false,
+        user: null,
+        token: null,
+        loading: false,
+        error: null
+      };
+      storeState = {
+        isAuthenticated: false,
+        user: null,
+        token: null,
+        loading: false,
+        error: null
+      };
+      useAuthStore.mockReturnValue(storeState);
+      listeners.forEach(listener => listener(storeState));
+    }),
+    initializeFromStorage: jest.fn(() => {
+      // Mock initialization from storage
+      const token = global.localStorage?.getItem('jwt_token') || global.localStorage?.getItem('token');
+      const userData = global.localStorage?.getItem('user_data');
+      
+      if (token && userData) {
+        try {
+          const user = JSON.parse(userData);
+          storeState = {
+            ...storeState,
+            isAuthenticated: true,
+            user: user,
+            token: token,
+            error: null
+          };
+        } catch (error) {
+          storeState = {
+            ...storeState,
+            isAuthenticated: false,
+            user: null,
+            token: null,
+            error: null
+          };
+        }
+        useAuthStore.mockReturnValue(storeState);
+        listeners.forEach(listener => listener(storeState));
+      }
+    }),
     
-    return {
-      isAuthenticated: currentState.isAuthenticated || false,
-      user: currentState.user || null,
-      token: currentState.token || null,
-      login: jest.fn((user, token) => {
-        if (global.localStorage) {
-          global.localStorage.setItem('jwt_token', token || mockJWTToken);
-          global.localStorage.setItem('token', token || mockJWTToken);
-          global.localStorage.setItem('auth_token', token || mockJWTToken);
-        }
-        // Update global state
-        global.mockAuthState = {
-          ...global.mockAuthState,
-          user: user || mockUser,
-          token: token || mockJWTToken,
-          isAuthenticated: true
-        };
-        return Promise.resolve();
-      }),
-      logout: jest.fn(() => {
-        if (global.localStorage) {
-          global.localStorage.removeItem('jwt_token');
-          global.localStorage.removeItem('token');
-          global.localStorage.removeItem('auth_token');
-        }
-        // Update global state
-        global.mockAuthState = {
-          ...global.mockAuthState,
-          user: null,
-          token: null,
-          isAuthenticated: false
-        };
-        return Promise.resolve();
-      }),
-      clearAuth: jest.fn(() => {
-        if (global.localStorage) {
-          global.localStorage.removeItem('jwt_token');
-          global.localStorage.removeItem('token');
-          global.localStorage.removeItem('auth_token');
-        }
-        // Update global state
-        global.mockAuthState = {
-          ...global.mockAuthState,
-          user: null,
-          token: null,
-          isAuthenticated: false
-        };
-      }),
-      setUser: jest.fn((user) => {
-        global.mockAuthState = {
-          ...global.mockAuthState,
-          user: user
-        };
-      }),
-      setToken: jest.fn((token) => {
-        if (global.localStorage) {
-          global.localStorage.setItem('jwt_token', token);
-          global.localStorage.setItem('token', token);
-          global.localStorage.setItem('auth_token', token);
-        }
-        global.mockAuthState = {
-          ...global.mockAuthState,
-          token: token
-        };
-      }),
-      // Add missing permission functions to match real authStore interface
-      hasPermission: jest.fn(() => false),
-      hasAnyPermission: jest.fn(() => false),
-      hasAllPermissions: jest.fn(() => false),
-      isAdminOrHigher: jest.fn(() => false),
-      isDeveloper: jest.fn(() => false),
-      isDeveloperOrHigher: jest.fn(() => false)
+    // Permission helpers that work with current state
+    hasPermission: jest.fn((permission) => {
+      if (!storeState.user) return false;
+      return storeState.user.permissions?.includes(permission) || false;
+    }),
+    hasAnyPermission: jest.fn((permissions) => {
+      if (!storeState.user) return false;
+      return permissions.some(p => storeState.user?.permissions?.includes(p)) || false;
+    }),
+    hasAllPermissions: jest.fn((permissions) => {
+      if (!storeState.user) return false;
+      return permissions.every(p => storeState.user?.permissions?.includes(p)) || false;
+    }),
+    isAdminOrHigher: jest.fn(() => {
+      if (!storeState.user) return false;
+      return ['admin', 'super_admin'].includes(storeState.user.role || '') || 
+             storeState.user.is_superuser || false;
+    }),
+    isDeveloperOrHigher: jest.fn(() => {
+      if (!storeState.user) return false;
+      return ['developer', 'admin', 'super_admin'].includes(storeState.user.role || '') || 
+             storeState.user.is_developer || 
+             storeState.user.is_superuser || false;
+    })
+  };
+
+  // Helper function to get current full state
+  const getCurrentState = () => ({ ...storeState, ...storeActions });
+  
+  // Create the hook that returns the current state with actions
+  const useAuthStore = jest.fn(() => getCurrentState());
+  
+  // Add Zustand store methods to the hook function
+  useAuthStore.getState = jest.fn(() => getCurrentState());
+  useAuthStore.setState = jest.fn((partial) => {
+    const newState = typeof partial === 'function' ? partial(storeState) : { ...storeState, ...partial };
+    storeState = { ...newState };
+    const newFullState = getCurrentState();
+    useAuthStore.mockReturnValue(newFullState);
+    useAuthStore.getState.mockReturnValue(newFullState);
+    listeners.forEach(listener => listener(newFullState));
+  });
+  useAuthStore.subscribe = jest.fn((listener) => {
+    listeners.add(listener);
+    return () => listeners.delete(listener);
+  });
+  useAuthStore.destroy = jest.fn(() => {
+    listeners.clear();
+  });
+
+  // Update the store actions to also update the hook's return value properly
+  const updateStoreState = (newState) => {
+    storeState = { ...storeState, ...newState };
+    const fullState = getCurrentState();
+    useAuthStore.mockReturnValue(fullState);
+    useAuthStore.getState.mockReturnValue(fullState);
+    listeners.forEach(listener => listener(fullState));
+  };
+
+  // Update all the action functions to use updateStoreState
+  storeActions.login.mockImplementation((user, token) => {
+    if (global.localStorage) {
+      global.localStorage.setItem('jwt_token', token || mockJWTToken);
+      global.localStorage.setItem('token', token || mockJWTToken);
+      global.localStorage.setItem('auth_token', token || mockJWTToken);
+      global.localStorage.setItem('user_data', JSON.stringify(user || mockUser));
+    }
+    // Update global state
+    global.mockAuthState = {
+      ...global.mockAuthState,
+      user: user || mockUser,
+      token: token || mockJWTToken,
+      isAuthenticated: true,
+      error: null
     };
-  })
-}));
+    // Update store state
+    updateStoreState({
+      isAuthenticated: true,
+      user: user || mockUser,
+      token: token || mockJWTToken,
+      error: null
+    });
+  });
+
+  storeActions.logout.mockImplementation(() => {
+    if (global.localStorage) {
+      global.localStorage.removeItem('jwt_token');
+      global.localStorage.removeItem('token');
+      global.localStorage.removeItem('auth_token');
+      global.localStorage.removeItem('user_data');
+    }
+    // Update global state
+    global.mockAuthState = {
+      ...global.mockAuthState,
+      user: null,
+      token: null,
+      isAuthenticated: false,
+      error: null
+    };
+    // Update store state
+    updateStoreState({
+      isAuthenticated: false,
+      user: null,
+      token: null,
+      error: null
+    });
+  });
+
+  storeActions.setLoading.mockImplementation((loading) => {
+    global.mockAuthState = {
+      ...global.mockAuthState,
+      loading
+    };
+    updateStoreState({ loading });
+  });
+
+  storeActions.setError.mockImplementation((error) => {
+    global.mockAuthState = {
+      ...global.mockAuthState,
+      error
+    };
+    updateStoreState({ error });
+  });
+
+  storeActions.updateUser.mockImplementation((userUpdate) => {
+    if (storeState.user) {
+      const updatedUser = { ...storeState.user, ...userUpdate };
+      global.mockAuthState = {
+        ...global.mockAuthState,
+        user: updatedUser
+      };
+      updateStoreState({ user: updatedUser });
+    }
+  });
+
+  storeActions.updateToken.mockImplementation((token) => {
+    if (global.localStorage) {
+      global.localStorage.setItem('jwt_token', token);
+      global.localStorage.setItem('token', token);
+      global.localStorage.setItem('auth_token', token);
+    }
+    global.mockAuthState = {
+      ...global.mockAuthState,
+      token: token
+    };
+    updateStoreState({ token });
+  });
+
+  storeActions.reset.mockImplementation(() => {
+    if (global.localStorage) {
+      global.localStorage.removeItem('jwt_token');
+      global.localStorage.removeItem('token');
+      global.localStorage.removeItem('auth_token');
+      global.localStorage.removeItem('user_data');
+    }
+    global.mockAuthState = {
+      isAuthenticated: false,
+      user: null,
+      token: null,
+      loading: false,
+      error: null
+    };
+    updateStoreState({
+      isAuthenticated: false,
+      user: null,
+      token: null,
+      loading: false,
+      error: null
+    });
+  });
+
+  // Initialize the return values
+  const initialFullState = getCurrentState();
+  useAuthStore.mockReturnValue(initialFullState);
+  useAuthStore.getState.mockReturnValue(initialFullState);
+
+  return { useAuthStore };
+});
 
 jest.mock('@/store/unified-chat', () => {
-  const storeState = {
+  // Create a proper Zustand store mock for unified chat
+  const createChatStoreMock = (initialState) => {
+    let state = { ...initialState };
+    const listeners = new Set();
+    
+    const storeMethods = {
+      getState: () => state,
+      setState: (partial) => {
+        const newState = typeof partial === 'function' ? partial(state) : { ...state, ...partial };
+        state = newState;
+        listeners.forEach(listener => listener(state));
+      },
+      subscribe: (listener) => {
+        listeners.add(listener);
+        return () => listeners.delete(listener);
+      },
+      destroy: () => {
+        listeners.clear();
+      }
+    };
+
+    // Create the hook function
+    const hookFunction = jest.fn(() => state);
+    
+    // Add store methods to the hook function
+    Object.assign(hookFunction, storeMethods);
+    
+    return hookFunction;
+  };
+
+  const getInitialChatState = () => ({
     isAuthenticated: true,
     activeThreadId: 'test-thread-123',
     isProcessing: false,
@@ -952,45 +1339,62 @@ jest.mock('@/store/unified-chat', () => {
     fastLayerData: null,
     sendMessage: jest.fn(),
     addMessage: jest.fn(),
-    setProcessing: jest.fn(),
-    setActiveThread: jest.fn(),
+    setProcessing: jest.fn((processing) => {
+      useUnifiedChatStore.setState({ isProcessing: processing });
+    }),
+    setActiveThread: jest.fn((threadId) => {
+      useUnifiedChatStore.setState({ activeThreadId: threadId });
+    }),
     addOptimisticMessage: jest.fn(),
     updateOptimisticMessage: jest.fn(),
     removeOptimisticMessage: jest.fn(),
     clearOptimisticMessages: jest.fn(),
     resetLayers: jest.fn(),
     setConnectionStatus: jest.fn(),
-    setThreadLoading: jest.fn(),
-    startThreadLoading: jest.fn(),
-    completeThreadLoading: jest.fn(),
-    clearMessages: jest.fn(),
+    setThreadLoading: jest.fn((loading) => {
+      useUnifiedChatStore.setState({ isThreadLoading: loading });
+    }),
+    startThreadLoading: jest.fn(() => {
+      useUnifiedChatStore.setState({ isThreadLoading: true });
+    }),
+    completeThreadLoading: jest.fn(() => {
+      useUnifiedChatStore.setState({ isThreadLoading: false });
+    }),
+    clearMessages: jest.fn(() => {
+      useUnifiedChatStore.setState({ messages: [] });
+    }),
     loadMessages: jest.fn(),
     handleWebSocketEvent: jest.fn((event) => {
       // Mock implementation that processes WebSocket events
       if (event.type === 'agent_started') {
-        storeState.isProcessing = true;
-        storeState.currentRunId = event.payload?.run_id || 'mock-run-id';
+        useUnifiedChatStore.setState({
+          isProcessing: true,
+          currentRunId: event.payload?.run_id || 'mock-run-id'
+        });
       } else if (event.type === 'agent_completed') {
-        storeState.isProcessing = false;
-        storeState.currentRunId = null;
+        useUnifiedChatStore.setState({
+          isProcessing: false,
+          currentRunId: null
+        });
       } else if (event.type === 'error') {
-        storeState.isProcessing = false;
-        // Could add error state if needed
+        useUnifiedChatStore.setState({
+          isProcessing: false
+        });
       }
       return Promise.resolve();
     }),
     resetState: jest.fn(() => {
-      // Reset to initial state
-      storeState.isProcessing = false;
-      storeState.isThreadLoading = false;
-      storeState.messages = [];
-      storeState.currentRunId = null;
-      storeState.fastLayerData = null;
+      useUnifiedChatStore.setState({
+        isProcessing: false,
+        isThreadLoading: false,
+        messages: [],
+        currentRunId: null,
+        fastLayerData: null
+      });
     })
-  };
+  });
   
-  const useUnifiedChatStore = jest.fn(() => storeState);
-  useUnifiedChatStore.getState = jest.fn(() => storeState);
+  const useUnifiedChatStore = createChatStoreMock(getInitialChatState());
   
   return { useUnifiedChatStore };
 });
@@ -1102,41 +1506,31 @@ jest.mock('@/hooks/useAgentUpdates', () => ({
 // usePerformanceMetrics is not globally mocked to allow its own tests to work
 
 // Mock additional missing hooks
-jest.mock('@/hooks/useKeyboardShortcuts', () => ({
-  useKeyboardShortcuts: jest.fn(() => {
-    const eventHandlers = new Map();
-    
-    // Mock event listener registration that actually responds to test events
-    const addEventListener = jest.fn((event, handler) => {
-      eventHandlers.set(event, handler);
-    });
-    
-    const removeEventListener = jest.fn((event, handler) => {
-      eventHandlers.delete(event);
-    });
-    
-    // Attach to global document mock
-    Object.defineProperty(document, 'addEventListener', {
-      value: addEventListener,
-      writable: true
-    });
-    Object.defineProperty(document, 'removeEventListener', {
-      value: removeEventListener,
-      writable: true
-    });
-    
-    return {
-      shortcuts: {},
-      registerShortcut: jest.fn(),
-      unregisterShortcut: jest.fn(),
-      isEnabled: true,
-      // Expose handlers for testing
-      _mockEventHandlers: eventHandlers,
-      _mockAddEventListener: addEventListener,
-      _mockRemoveEventListener: removeEventListener
-    };
-  })
-}));
+jest.mock('@/hooks/useKeyboardShortcuts', () => {
+  // Create these outside the mock factory to avoid scope issues
+  const mockEventHandlers = new Map();
+  const mockAddEventListener = jest.fn((event, handler) => {
+    mockEventHandlers.set(event, handler);
+  });
+  const mockRemoveEventListener = jest.fn((event, handler) => {
+    mockEventHandlers.delete(event);
+  });
+
+  return {
+    useKeyboardShortcuts: jest.fn(() => {
+      return {
+        shortcuts: {},
+        registerShortcut: jest.fn(),
+        unregisterShortcut: jest.fn(),
+        isEnabled: true,
+        // Expose handlers for testing
+        _mockEventHandlers: mockEventHandlers,
+        _mockAddEventListener: mockAddEventListener,
+        _mockRemoveEventListener: mockRemoveEventListener
+      };
+    })
+  };
+});
 
 // useInitializationCoordinator is not globally mocked to allow its own tests to work
 
@@ -1840,8 +2234,16 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  // Clear Jest state first
   jest.clearAllMocks();
+  jest.clearAllTimers();
+  jest.restoreAllMocks();
   fetchMock.resetMocks();
+  
+  // Use global cleanup function
+  if (global.cleanupAllResources) {
+    global.cleanupAllResources();
+  }
   
   // Reset storage but preserve auth tokens for consistent test state
   const token = localStorageData.get('token');
@@ -1877,7 +2279,15 @@ afterEach(() => {
     Object.defineProperty(window, 'pageYOffset', { value: 0, writable: true });
   }
   
-  // Ensure all mocks are properly cleaned up to prevent cross-test contamination
-  jest.restoreAllMocks();
-  jest.clearAllTimers();
+  // Clean up DOM
+  document.body.innerHTML = '';
+  
+  // Additional forced cleanup
+  if (typeof setImmediate !== 'undefined') {
+    setImmediate(() => {
+      if (global.gc) {
+        global.gc();
+      }
+    });
+  }
 });

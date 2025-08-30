@@ -231,10 +231,27 @@ class GCPDeployer:
             print("     Set these variables before deploying to staging")
             return False
         
-        # Validate database URL format (prevent localhost in staging)
-        database_url = os.getenv("DATABASE_URL", "")
-        if "localhost" in database_url:
-            print("  ⚠️ DATABASE_URL contains localhost - will use staging default")
+        # CRITICAL: Validate no localhost URLs in staging/production
+        localhost_vars = []
+        url_vars_to_check = [
+            "API_URL", "NEXT_PUBLIC_API_URL", "BACKEND_URL",
+            "AUTH_URL", "NEXT_PUBLIC_AUTH_URL", "AUTH_SERVICE_URL", 
+            "FRONTEND_URL", "NEXT_PUBLIC_FRONTEND_URL",
+            "WS_URL", "NEXT_PUBLIC_WS_URL", "WEBSOCKET_URL", "NEXT_PUBLIC_WEBSOCKET_URL"
+        ]
+        
+        for var_name in url_vars_to_check:
+            var_value = os.getenv(var_name, "")
+            if "localhost" in var_value:
+                localhost_vars.append(f"{var_name}={var_value}")
+        
+        if localhost_vars:
+            print(f"  ❌ Found localhost URLs in {self.project_id} environment:")
+            for var in localhost_vars:
+                print(f"     {var}")
+            print("  This will cause CORS and authentication failures in staging!")
+            print("  Run: python scripts/validate_staging_urls.py --environment staging --fix")
+            return False
         
         print("  ✅ Deployment configuration valid")
         return True

@@ -45,6 +45,15 @@ except ImportError:
     # Hard failure - IsolatedEnvironment is required for test runner
     raise RuntimeError("IsolatedEnvironment required for test runner. Cannot import from dev_launcher.isolated_environment")
 
+# Import Windows process cleanup utilities if on Windows
+if sys.platform == "win32":
+    try:
+        from shared.windows_process_cleanup import WindowsProcessCleanup, cleanup_subprocess
+    except ImportError:
+        # Create dummy functions if import fails
+        WindowsProcessCleanup = None
+        cleanup_subprocess = lambda p, t=10: True
+
 # Import test framework - using absolute imports from project root
 from test_framework.runner import UnifiedTestRunner as FrameworkRunner
 from test_framework.test_config import configure_dev_environment, configure_mock_environment, configure_test_environment
@@ -712,18 +721,62 @@ class UnifiedTestRunner:
             subprocess_env = env_manager.get_subprocess_env()
             subprocess_env.update({'PYTHONUNBUFFERED': '1', 'PYTHONUTF8': '1'})
             
-            # Use subprocess.run with proper buffering for Windows
-            result = subprocess.run(
-                cmd,
-                cwd=config["path"],
-                capture_output=True,
-                text=True,
-                shell=True,
-                encoding='utf-8',
-                errors='replace',
-                timeout=timeout_seconds,
-                env=subprocess_env
-            )
+            # Use subprocess.Popen for better process control on Windows with Node.js
+            if sys.platform == "win32" and service == "frontend":
+                # Special handling for Node.js processes on Windows
+                process = subprocess.Popen(
+                    cmd,
+                    cwd=config["path"],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    shell=True,
+                    text=True,
+                    encoding='utf-8',
+                    errors='replace',
+                    env=subprocess_env,
+                    # Use CREATE_NEW_PROCESS_GROUP on Windows to isolate process tree
+                    creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0
+                )
+                
+                try:
+                    stdout, stderr = process.communicate(timeout=timeout_seconds)
+                    returncode = process.returncode
+                except subprocess.TimeoutExpired:
+                    # Clean up hanging process on timeout
+                    if sys.platform == "win32" and cleanup_subprocess:
+                        cleanup_subprocess(process, timeout=5)
+                    else:
+                        process.terminate()
+                        try:
+                            process.wait(timeout=5)
+                        except subprocess.TimeoutExpired:
+                            process.kill()
+                            process.wait()
+                    raise
+                finally:
+                    # Ensure process is cleaned up on Windows
+                    if sys.platform == "win32" and cleanup_subprocess:
+                        cleanup_subprocess(process, timeout=2)
+                
+                result = subprocess.CompletedProcess(
+                    args=cmd,
+                    returncode=returncode,
+                    stdout=stdout,
+                    stderr=stderr
+                )
+            else:
+                # Use standard subprocess.run for other cases
+                result = subprocess.run(
+                    cmd,
+                    cwd=config["path"],
+                    capture_output=True,
+                    text=True,
+                    shell=True,
+                    encoding='utf-8',
+                    errors='replace',
+                    timeout=timeout_seconds,
+                    env=subprocess_env
+                )
             # Handle unicode encoding issues by cleaning the output
             if result.stdout:
                 result.stdout = result.stdout.encode('utf-8', errors='replace').decode('utf-8', errors='replace')
@@ -733,6 +786,14 @@ class UnifiedTestRunner:
         except subprocess.TimeoutExpired:
             print(f"[ERROR] {service} tests timed out after {timeout_seconds} seconds")
             print(f"[ERROR] Command: {cmd}")
+            
+            # Clean up any hanging Node.js processes on Windows
+            if sys.platform == "win32" and service == "frontend" and WindowsProcessCleanup:
+                cleanup_instance = WindowsProcessCleanup()
+                cleaned = cleanup_instance.cleanup_node_processes()
+                if cleaned > 0:
+                    print(f"[INFO] Cleaned up {cleaned} hanging Node.js processes after timeout")
+            
             success = False
             result = subprocess.CompletedProcess(
                 args=cmd, 

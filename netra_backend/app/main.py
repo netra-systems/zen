@@ -115,8 +115,12 @@ app = create_app()
 
 def _get_uvicorn_config() -> dict:
     """Get uvicorn server configuration."""
+    env_manager = get_env()
+    host = env_manager.get("HOST", "0.0.0.0")
+    port = int(env_manager.get("PORT", "8000"))
+    
     return {
-        "host": "0.0.0.0", "port": 8000, "reload": True,
+        "host": host, "port": port, "reload": True,
         "reload_dirs": ["app"], "reload_excludes": ["*/tests/*", "*/.pytest_cache/*"]
     }
 

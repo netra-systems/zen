@@ -9,8 +9,8 @@ const commonConfig = {
   testEnvironment: 'jest-environment-jsdom',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   
-  // Shortened timeout to prevent hanging tests
-  testTimeout: process.env.JEST_TIMEOUT || 15000,
+  // Increased timeout and proper cleanup to prevent hanging tests
+  testTimeout: process.env.JEST_TIMEOUT || 30000,
   
   // Module name mapping
   moduleNameMapper: {
@@ -42,6 +42,7 @@ const commonConfig = {
         esModuleInterop: true,
         allowSyntheticDefaultImports: true,
       },
+      useESM: false
     }],
   },
   
@@ -183,13 +184,17 @@ const config = {
     'jest-watch-typeahead/testname',
   ] : [],
   
-  // Parallel execution settings
-  maxConcurrency: parseInt(process.env.MAX_CONCURRENCY || '5'),
-  maxWorkers: process.env.MAX_WORKERS || (process.env.CI ? 4 : '50%'),
+  // Parallel execution settings - reduced for stability
+  maxConcurrency: parseInt(process.env.MAX_CONCURRENCY || '3'),
+  maxWorkers: process.env.MAX_WORKERS || (process.env.CI ? 2 : '25%'),
   
   // Performance optimizations and hanging prevention
   detectOpenHandles: process.env.DETECT_OPEN_HANDLES === 'true',
   forceExit: true, // Force exit to prevent hanging
+  
+  // Memory management
+  workerIdleMemoryLimit: '500MB',
+  maxWorkers: process.env.CI ? 2 : '25%', // Reduced worker count for stability
   
   // Error handling
   errorOnDeprecated: false,

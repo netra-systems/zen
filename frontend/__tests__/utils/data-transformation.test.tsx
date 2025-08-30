@@ -37,7 +37,7 @@ describe('Data Transformation Utilities', () => {
       };
       
       const testDates = [
-        new Date('2023-12-25'),
+        new Date('2023-12-25T12:00:00Z'), // Use explicit UTC time to avoid timezone issues
         '2023-06-15T10:30:00Z',
         1640995200000, // Unix timestamp
         'invalid-date'
