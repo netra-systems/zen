@@ -1,0 +1,95 @@
+{
+  "service_name": "backend",
+  "severity": "medium",
+  "crash_time": 1756522953.2354453,
+  "crash_time_readable": "2025-08-29 20:02:33",
+  "detection_results": [
+    {
+      "method": "process_monitoring",
+      "is_crashed": true,
+      "error_message": "Manual recovery triggered",
+      "details": {},
+      "timestamp": 1756522953.2354453
+    }
+  ],
+  "last_logs": [
+    "NODE_ENV: not set",
+    "NETRA_ENV: e2e_testing",
+    "PORT: not set",
+    "CPU usage: 16.5%",
+    "Memory usage: 51.5%"
+  ],
+  "diagnosis": {
+    "service_name": "backend",
+    "timestamp": 1756522953.2354453,
+    "issues_found": [],
+    "recommended_actions": [
+      "restart_service_on_port_8080",
+      "kill_duplicate_processes"
+    ],
+    "system_health": {
+      "ports": {
+        "8000": "in_use",
+        "8001": "in_use",
+        "8080": "available"
+      },
+      "processes": {
+        "processes": [
+          {
+            "pid": 40256,
+            "name": "com.docker.backend.exe",
+            "status": "running"
+          },
+          {
+            "pid": 63200,
+            "name": "com.docker.backend.exe",
+            "status": "running"
+          }
+        ],
+        "count": 2
+      },
+      "disk": {
+        "total": 2022081294336,
+        "used": 1513016934400,
+        "free": 509064359936,
+        "percent_used": 74.82473324084808
+      }
+    },
+    "dependencies": {
+      "database_connected": true,
+      "redis_connected": true,
+      "external_apis": {
+        "openai": true,
+        "anthropic": true
+      }
+    }
+  },
+  "recovery_attempts": [
+    {
+      "attempt_number": 1,
+      "stage": "fallback",
+      "start_time": 1756522953.2354453,
+      "end_time": null,
+      "duration": null,
+      "success": true,
+      "actions_taken": [
+        "Captured error context and logs",
+        "Completed system diagnosis",
+        "Successfully executed: restart_service_on_port_8080",
+        "Successfully executed: kill_duplicate_processes",
+        "Force kill service: success",
+        "Cleanup files: success",
+        "Reset configuration: success",
+        "Emergency restart: success"
+      ],
+      "error_message": "",
+      "stage_results": {}
+    }
+  ],
+  "recovery_successful": false,
+  "total_recovery_time": null,
+  "total_attempts": 1,
+  "current_stage": "fallback",
+  "system_state": {},
+  "environment_info": {}
+}

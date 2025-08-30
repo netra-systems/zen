@@ -145,6 +145,14 @@
             <critical-takeaway>Use storage event listeners in AuthContext for real-time token detection across components.</critical-takeaway>
             <critical-takeaway>Test OAuth flows with fresh browser sessions to catch first-login timing issues.</critical-takeaway>
         </category>
+        
+        <category name="Staging Environment Configuration" path="SPEC/learnings/staging_environment_configuration.xml" keywords="Environment Variables, Staging, .env File, IsolatedEnvironment, Configuration Management, Deployment, Cloud Run, Docker, Environment Precedence, SECRET_KEY, SERVICE_SECRET">
+            <critical-takeaway>CRITICAL: .env file must NOT override system environment variables - use load_from_file(override_existing=False) (staging_environment_configuration.xml).</critical-takeaway>
+            <critical-takeaway>Environment variable precedence: System vars > .env file > defaults - deployment vars must win (staging_environment_configuration.xml).</critical-takeaway>
+            <critical-takeaway>NEVER use os.getenv() directly - always use IsolatedEnvironment's get_env().get() for consistency (staging_environment_configuration.xml).</critical-takeaway>
+            <critical-takeaway>Validate staging config with StagingConfigurationValidator before deployment to catch placeholders and localhost refs (staging_environment_configuration.xml).</critical-takeaway>
+            <critical-takeaway>SERVICE_SECRET must be set and different from JWT_SECRET_KEY in staging/production (staging_environment_configuration.xml).</critical-takeaway>
+        </category>
 
         <category name="Redis Service Independence" path="SPEC/learnings/redis_service_independence.xml" keywords="Redis, Microservices, Circular Dependencies, Service Independence, Shared Components, Infrastructure">
             <critical-takeaway>CRITICAL: Each microservice MUST have its own Redis manager - this duplication is intentional and correct.</critical-takeaway>
@@ -945,6 +953,14 @@
             <critical-takeaway>Integration tests importing deleted clients fail with ModuleNotFoundError - update to canonical imports</critical-takeaway>
             <critical-takeaway>Canonical client must include ALL features from deleted implementations: SSL/TLS support, circuit breakers, retry logic</critical-takeaway>
             <critical-takeaway>Post-remediation verification: grep -r "from.*clickhouse_client\|from.*client_clickhouse" should return NO results</critical-takeaway>
+        </category>
+        
+        <category name="ClickHouse Connection Parameters Fix [RESOLVED 2025-08-30]" path="SPEC/learnings/clickhouse_connection_parameters_fix.xml" keywords="ClickHouse, clickhouse_connect, Connection Parameters, pool_size, pool_mgr, username, HttpClient, get_client">
+            <critical-takeaway>clickhouse_connect.get_client() does NOT accept pool_size, retries, or retry_delay parameters - these cause HttpClient.__init__() errors</critical-takeaway>
+            <critical-takeaway>Use 'username' not 'user' as the parameter name for clickhouse_connect.get_client()</critical-takeaway>
+            <critical-takeaway>pool_mgr parameter expects a PoolManager object, not a boolean - for connection pooling pass an actual urllib3 PoolManager</critical-takeaway>
+            <critical-takeaway>Always verify library parameters with inspect.signature() before use - don't assume parameter names</critical-takeaway>
+            <critical-takeaway>Retry logic should be implemented at application level, not through non-existent client parameters</critical-takeaway>
         </category>
         
         <category name="Circular Import Detection" path="SPEC/learnings/circular_import_detection.xml" keywords="Circular Import, Import Error, Initialization, WebSocket, Synthetic Data">
