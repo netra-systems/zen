@@ -10,3 +10,7 @@
 - USING UNIFIED TEST RUNNER: Run integration tests related to agents. spawn a new sub agent. Run the test. Fix the system under test for failures. focus on tests MOST LIKELY TO FAIL first. 
 - USING UNIFIED TEST RUNNER: One at a time, step through each e2e real llm agent tests. spawn a new sub agent. Run the test. Fix the SUT.  MOST LIKELY TO FAIL first. 
 - USING UNIFIED TEST RUNNER: One at a time, step through each cypress real llm agent tests. spawn a new sub agent. Run the test. Fix the SUT.  MOST LIKELY TO FAIL first. 
+
+
+- USING UNIFIED TEST RUNNER: One at a time, step through each e2e real llm agent tests. spawn a new sub agent. Run the test. Fix the SUT.  MOST LIKELY TO FAIL first. 
+ Fix all errors especially Attribute errors when accessing result objects

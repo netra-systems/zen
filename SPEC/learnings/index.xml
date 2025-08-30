@@ -1782,4 +1782,18 @@
             <critical-takeaway>Unregistered routers (example_messages.py, synthetic_data_corpus.py) should be reviewed and properly registered</critical-takeaway>
         </category>
     </routing_architecture>
+    
+    <environment_security>
+        <category name="Environment Pollution Prevention" path="SPEC/learnings/env_pollution_remediation.xml" keywords="Environment Variables, Test Flags, Security, Authentication Bypass, Rate Limiting, Staging, Production, Environment Validation, TESTING, E2E_TESTING, AUTH_FAST_TEST_MODE, localhost, Environment Pollution">
+            <critical-takeaway>CRITICAL: Test environment variables (TESTING, E2E_TESTING, etc.) MUST NEVER be checked in production code - isolate all test logic in tests/ directory</critical-takeaway>
+            <critical-takeaway>Environment validator MUST run FIRST at startup and fail fast on critical violations in staging/production</critical-takeaway>
+            <critical-takeaway>NEVER use localhost references in staging/production configurations - always use proper service endpoints</critical-takeaway>
+            <critical-takeaway>Authentication and rate limiting bypasses MUST only exist in test-only helper modules, never in production code</critical-takeaway>
+            <critical-takeaway>Use netra_backend/tests/helpers/auth_test_helper.py for test authentication, not production auth.py</critical-takeaway>
+            <critical-takeaway>Run test_env_validation.py to verify environment configurations before deployment</critical-takeaway>
+            <critical-takeaway>Forbidden variables list: TESTING, E2E_TESTING, AUTH_FAST_TEST_MODE, PYTEST_CURRENT_TEST, ALLOW_DEV_AUTH_BYPASS, WEBSOCKET_AUTH_BYPASS</critical-takeaway>
+            <critical-takeaway>All secrets in staging/production MUST be loaded from Google Secrets Manager, never hardcoded</critical-takeaway>
+            <critical-takeaway>Use .env.staging.example as template - actual .env.staging should never contain localhost or test flags</critical-takeaway>
+        </category>
+    </environment_security>
 </specification>
