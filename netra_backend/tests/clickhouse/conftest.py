@@ -61,9 +61,12 @@ def _check_clickhouse_availability():
         return False
     
     try:
-        config = _get_clickhouse_config()
-        # Basic configuration check - actual connection will be tested by the fixture
-        return config.host and config.port and config.user
+        # Don't try to get actual config if it's disabled - this can cause connection attempts
+        # Just check if basic environment variables are set
+        clickhouse_host = env.get("CLICKHOUSE_HOST", "localhost")
+        clickhouse_port = env.get("CLICKHOUSE_HTTP_PORT", "8123")
+        clickhouse_user = env.get("CLICKHOUSE_USER", "default")
+        return bool(clickhouse_host and clickhouse_port and clickhouse_user)
     except Exception:
         return False
 
@@ -96,12 +99,12 @@ def real_clickhouse_client():
     if clickhouse_disabled_by_framework:
         pytest.skip("ClickHouse disabled by test framework (DEV_MODE_DISABLE_CLICKHOUSE=true or CLICKHOUSE_ENABLED=false)")
     
-    # Check basic availability
+    # Check basic availability BEFORE trying to get config or create client
     if not _check_clickhouse_availability():
         pytest.skip("ClickHouse server not available - skipping real database test")
     
-    config = _get_clickhouse_config()
     try:
+        config = _get_clickhouse_config()
         client = _create_clickhouse_client(config)
         yield client
     except Exception as e:
@@ -135,8 +138,8 @@ async def async_real_clickhouse_client():
     if not _check_clickhouse_availability():
         pytest.skip("ClickHouse server not available - skipping real database test")
     
-    config = _get_clickhouse_config()
     try:
+        config = _get_clickhouse_config()
         client = _create_clickhouse_client(config)
         # Test basic connection
         await client.execute_query("SELECT 1")
@@ -171,8 +174,8 @@ def real_clickhouse_client_with_interceptor():
     if not _check_clickhouse_availability():
         pytest.skip("ClickHouse server not available - skipping real database test")
     
-    config = _get_clickhouse_config()
     try:
+        config = _get_clickhouse_config()
         client = _create_clickhouse_client(config)
         interceptor = ClickHouseQueryInterceptor(client)
         yield interceptor
