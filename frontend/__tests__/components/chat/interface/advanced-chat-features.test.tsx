@@ -70,9 +70,15 @@ jest.mock('@/components/chat/MainChat', () => {
           }
         };
 
+        // Add event listener to both document and window for better compatibility
         document.addEventListener('keydown', handleKeydown);
-        return () => document.removeEventListener('keydown', handleKeydown);
+        window.addEventListener('keydown', handleKeydown);
+        return () => {
+          document.removeEventListener('keydown', handleKeydown);
+          window.removeEventListener('keydown', handleKeydown);
+        };
       }, []);
+
 
       const handleTextareaKeydown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -577,7 +583,18 @@ describe('Advanced Chat Features', () => {
         </TestProviders>
       );
 
-      await user.keyboard('{Control>}k');
+      // Simulate Ctrl+K keyboard event
+      const keyDownEvent = new KeyboardEvent('keydown', { 
+        key: 'k', 
+        code: 'KeyK', 
+        ctrlKey: true, 
+        bubbles: true,
+        cancelable: true 
+      });
+
+      act(() => {
+        document.dispatchEvent(keyDownEvent);
+      });
       
       await waitFor(() => {
         expect(screen.getByTestId('command-palette')).toBeInTheDocument();
@@ -591,7 +608,18 @@ describe('Advanced Chat Features', () => {
         </TestProviders>
       );
 
-      await user.keyboard('{Control>}?');
+      // Simulate Ctrl+? with proper KeyboardEvent
+      const keyDownEvent = new KeyboardEvent('keydown', { 
+        key: '?', 
+        code: 'Slash', 
+        ctrlKey: true, 
+        bubbles: true,
+        cancelable: true 
+      });
+
+      act(() => {
+        document.dispatchEvent(keyDownEvent);
+      });
       
       await waitFor(() => {
         expect(screen.getByText(/keyboard shortcuts/i)).toBeInTheDocument();

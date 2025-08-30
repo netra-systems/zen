@@ -815,6 +815,7 @@ export const TestChatSidebar: React.FC = () => {
   
   // Custom ThreadList for tests with preloading and virtual scrolling
   const TestThreadList = ({ threads, onThreadClick, onRetryLoad, ...props }: any) => {
+    console.log('🎯 TestThreadList rendering with threads:', threads?.map((t: any) => ({ id: t.id, title: t.title })));
       // Virtual scrolling: limit to 50 visible threads for large lists
     const visibleThreads = threads.length > 100 ? threads.slice(0, 50) : threads;
     
