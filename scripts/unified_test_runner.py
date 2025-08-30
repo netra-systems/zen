@@ -470,6 +470,13 @@ class UnifiedTestRunner:
     
     def _check_service_availability(self, args: argparse.Namespace):
         """Check availability of required real services before running tests."""
+        
+        # Skip service availability check for tests that specifically test service startup/resilience
+        test_pattern = getattr(args, 'pattern', '')
+        if 'dev_launcher_critical_path' in test_pattern or 'startup' in test_pattern:
+            print("[INFO] Skipping service availability check for dev launcher/startup resilience test")
+            return
+            
         print("Checking real service availability...")
         
         # Determine categories to check for LLM requirements

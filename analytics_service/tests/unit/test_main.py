@@ -449,6 +449,9 @@ class TestApplicationConfiguration:
         # Test production environment
         env = get_env()
         env.set("ENVIRONMENT", "production")
+        # Set proper production URLs to pass validation
+        env.set("CLICKHOUSE_ANALYTICS_URL", "clickhouse://prod-clickhouse:8123/analytics")
+        env.set("REDIS_ANALYTICS_URL", "redis://prod-redis:6379/2")
         
         app = create_app()
         

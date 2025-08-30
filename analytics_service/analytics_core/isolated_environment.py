@@ -216,6 +216,15 @@ class IsolatedEnvironment:
     def is_test(self) -> bool:
         """Check if running in test environment."""
         return self.get_environment_name() == "test"
+    
+    def reset_to_original(self) -> None:
+        """
+        Reset environment to original state.
+        
+        This method disables isolation mode and clears any test overrides,
+        returning the environment to its original state.
+        """
+        self.disable_isolation()
 
 
 # Global singleton instance
