@@ -209,9 +209,9 @@ class ConfigurationExtractor:
     
     async def _parse_json(self, content: str) -> Dict[str, Any]:
         """Parse JSON configuration."""
-        return self._llm_parser.safe_json_parse(content)
+        return self._safe_json_parse(content)
     
-    def _llm_parser.safe_json_parse(self, content: str) -> Dict[str, Any]:
+    def _safe_json_parse(self, content: str) -> Dict[str, Any]:
         """Safely parse JSON content."""
         try:
             data = json.loads(content)

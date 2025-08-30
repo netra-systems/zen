@@ -822,6 +822,35 @@ def parse_list_field(value: Any) -> List[Any]:
         return parsed if isinstance(parsed, list) else []
     return []
 
+
+def parse_string_list_field(value: Any) -> List[str]:
+    """Parse a field that should be a list of strings - for LLM response parsing."""
+    if isinstance(value, list):
+        return [str(item) for item in value]
+    if isinstance(value, str):
+        parsed = llm_parser.safe_json_parse(value, [])
+        if isinstance(parsed, list):
+            return [str(item) for item in parsed]
+    return []
+
+
+def ensure_agent_response_is_json(response: Any) -> Dict[str, Any]:
+    """Ensure agent response is a proper JSON object."""
+    return llm_parser.ensure_agent_response_is_json(response)
+
+
+def comprehensive_json_fix(data: Any) -> Any:
+    """Comprehensive JSON fixing using error fixer."""
+    error_fixer = JSONErrorFixer()
+    if isinstance(data, str):
+        fixed_str = error_fixer.fix_common_json_errors(data)
+        try:
+            return json.loads(fixed_str)
+        except json.JSONDecodeError:
+            recovered = error_fixer.recover_truncated_json(fixed_str)
+            return recovered if recovered is not None else data
+    return data
+
 def fix_tool_parameters(data: Dict[str, Any]) -> Dict[str, Any]:
     """Fix tool recommendation parameters that come as JSON strings."""
     if not isinstance(data, dict):

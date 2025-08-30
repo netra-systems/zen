@@ -31,7 +31,7 @@ class DataProcessor:
         result = self._create_base_transform_result(data)
         
         if self._should_parse_json_content(data):
-            result["parsed"] = self._llm_parser.safe_json_parse(data["content"])
+            result["parsed"] = self._safe_json_parse(data["content"])
         
         return result
     
@@ -48,7 +48,7 @@ class DataProcessor:
         """Check if data should be parsed as JSON."""
         return data.get("type") == "json" and "content" in data
     
-    def _llm_parser.safe_json_parse(self, content: str) -> Dict[str, Any]:
+    def _safe_json_parse(self, content: str) -> Dict[str, Any]:
         """Safely parse JSON content with error handling."""
         try:
             return json.loads(content)

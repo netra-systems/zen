@@ -12,14 +12,38 @@
 
 from typing import Any, Dict, Optional
 
-# Import all JSON extraction functions from refactored module
-from netra_backend.app.agents.utils_json_extraction import (
-    extract_json_from_response,
-    extract_partial_json,
-    fix_common_json_errors,
-    preprocess_llm_response,
-    recover_truncated_json,
+# Import all JSON extraction functions from unified JSON handler
+from netra_backend.app.core.serialization.unified_json_handler import (
+    UnifiedJSONHandler, 
+    LLMResponseParser,
+    JSONErrorFixer,
+    backend_json_handler as json_handler,
+    llm_parser,
 )
+
+# Create error fixer instance
+error_fixer = JSONErrorFixer()
+
+# Create convenience functions for backward compatibility
+def extract_json_from_response(response: str):
+    """Extract JSON from LLM response."""
+    return llm_parser.extract_json_from_response(response)
+
+def extract_partial_json(response: str):
+    """Extract partial JSON from incomplete response."""
+    return llm_parser.extract_json_fragments(response)
+
+def fix_common_json_errors(json_str: str):
+    """Fix common JSON formatting errors."""
+    return error_fixer.fix_common_json_errors(json_str)
+
+def preprocess_llm_response(response: str):
+    """Preprocess LLM response for JSON extraction."""
+    return llm_parser._preprocess_response(response)
+
+def recover_truncated_json(json_str: str):
+    """Recover truncated JSON."""
+    return error_fixer.recover_truncated_json(json_str)
 
 # Re-export for backward compatibility
 __all__ = [
