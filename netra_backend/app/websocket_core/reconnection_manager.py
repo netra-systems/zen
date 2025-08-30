@@ -106,8 +106,9 @@ class ReconnectionManager:
             )
     
     async def _reconnection_loop(self, connection_id: str) -> None:
-        """Main reconnection loop with exponential backoff."""
+        """Main reconnection loop with exponential backoff and staging optimizations."""
         attempt_number = 0
+        consecutive_failures = 0
         
         try:
             while (attempt_number < self.config.max_attempts and 
@@ -115,6 +116,17 @@ class ReconnectionManager:
                 
                 attempt_number += 1
                 delay = self.config.calculate_delay(attempt_number)
+                
+                # CRITICAL FIX: Add circuit breaker pattern for staging environments
+                from netra_backend.app.core.isolated_environment import get_env
+                env = get_env()
+                environment = env.get("ENVIRONMENT", "development").lower()
+                
+                if environment in ["staging", "production"] and consecutive_failures >= 3:
+                    # Implement circuit breaker - longer delay after multiple failures
+                    circuit_breaker_delay = min(delay * 2, 120.0)  # Max 2 minutes
+                    logger.warning(f"Circuit breaker active for {connection_id}, waiting {circuit_breaker_delay:.1f}s")
+                    await asyncio.sleep(circuit_breaker_delay - delay)  # Additional delay
                 
                 # Create attempt record
                 attempt = ReconnectionAttempt(
@@ -124,29 +136,35 @@ class ReconnectionManager:
                 )
                 
                 logger.info(f"Reconnection attempt {attempt_number}/{self.config.max_attempts} "
-                          f"for {connection_id} in {delay:.2f}s")
+                          f"for {connection_id} in {delay:.2f}s (consecutive_failures: {consecutive_failures})")
                 
                 # Wait before attempting
                 await asyncio.sleep(delay)
                 
                 # Attempt reconnection
                 if await self._attempt_reconnection(connection_id, attempt):
-                    # Success
+                    # Success - reset consecutive failures
+                    consecutive_failures = 0
                     self.connection_states[connection_id] = ReconnectionState.CONNECTED
                     self.stats["successful_reconnections"] += 1
                     logger.info(f"Successfully reconnected {connection_id} on attempt {attempt_number}")
                     break
                 else:
                     # Failed attempt
+                    consecutive_failures += 1
                     self.stats["failed_reconnections"] += 1
-                    logger.warning(f"Reconnection attempt {attempt_number} failed for {connection_id}")
+                    logger.warning(f"Reconnection attempt {attempt_number} failed for {connection_id} (consecutive: {consecutive_failures})")
+                    
+                    # CRITICAL FIX: For staging, add health check after failed attempts
+                    if environment in ["staging", "production"] and attempt_number < self.config.max_attempts:
+                        await self._perform_connection_health_check(connection_id)
             
             # Check if all attempts exhausted
             if (attempt_number >= self.config.max_attempts and 
                 self.connection_states.get(connection_id) == ReconnectionState.ATTEMPTING):
                 
                 self.connection_states[connection_id] = ReconnectionState.FAILED
-                logger.error(f"All reconnection attempts exhausted for {connection_id}")
+                logger.error(f"All reconnection attempts exhausted for {connection_id} after {consecutive_failures} consecutive failures")
                 
         except asyncio.CancelledError:
             logger.info(f"Reconnection task cancelled for {connection_id}")
@@ -274,15 +292,52 @@ class ReconnectionManager:
         self.attempt_history.clear()
         
         logger.info("Reconnection manager cleaned up")
+    
+    async def _perform_connection_health_check(self, connection_id: str) -> None:
+        """Perform connection health check for staging environments."""
+        try:
+            # Simple health check - just log for now, can be extended with actual health checks
+            logger.info(f"Performing connection health check for {connection_id}")
+            # Add small delay to avoid overwhelming the system
+            await asyncio.sleep(1.0)
+        except Exception as e:
+            logger.warning(f"Connection health check failed for {connection_id}: {e}")
 
 
 # Global reconnection manager instance
 _reconnection_manager: Optional[ReconnectionManager] = None
 
 def get_reconnection_manager(config: Optional[ReconnectionConfig] = None) -> ReconnectionManager:
-    """Get global reconnection manager instance."""
+    """Get global reconnection manager instance with environment-aware configuration."""
     global _reconnection_manager
     if _reconnection_manager is None:
+        # CRITICAL FIX: Use environment-specific reconnection configuration
+        if config is None:
+            from netra_backend.app.core.isolated_environment import get_env
+            env = get_env()
+            environment = env.get("ENVIRONMENT", "development").lower()
+            
+            # Create staging-optimized reconnection config
+            if environment == "staging":
+                config = ReconnectionConfig(
+                    enabled=True,
+                    max_attempts=5,                    # More attempts for staging
+                    base_delay_seconds=2.0,           # Longer initial delay
+                    max_delay_seconds=60.0,           # Longer max delay
+                    jitter_factor=0.3,                # More jitter for staging
+                    connection_timeout_seconds=30.0    # Longer connection timeout
+                )
+            elif environment == "production":
+                config = ReconnectionConfig(
+                    enabled=True,
+                    max_attempts=3,                    # Conservative attempts
+                    base_delay_seconds=1.5,           # Balanced delay
+                    max_delay_seconds=45.0,           # Reasonable max delay
+                    jitter_factor=0.2,                # Less jitter for production
+                    connection_timeout_seconds=25.0    # Production timeout
+                )
+            # Development uses default config
+        
         _reconnection_manager = ReconnectionManager(config)
     return _reconnection_manager
 

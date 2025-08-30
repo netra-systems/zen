@@ -56,6 +56,9 @@ ENV NO_COLOR=1
 ENV FORCE_COLOR=0
 ENV PY_COLORS=0
 
+# Docker environment indicator
+ENV RUNNING_IN_DOCKER=true
+
 # Switch to non-root user
 USER netra
 

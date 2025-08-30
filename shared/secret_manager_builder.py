@@ -254,6 +254,7 @@ class SecretManagerBuilder:
         
         def __init__(self, parent):
             self.parent = parent
+            self._project_id = "GCP_DISABLED"
         
         def get_secret(self, secret_name: str, environment: str = None) -> Optional[str]:
             """Return None since GCP is disabled."""
@@ -303,13 +304,32 @@ class SecretManagerBuilder:
             return self.parent.env.get('GCP_PROJECT_ID_NUMERICAL_PRODUCTION', '304612253870')
         
         def get_secret(self, secret_name: str, environment: str = None) -> Optional[str]:
-            """Get secret from GCP Secret Manager with environment-specific naming."""
+            """Get secret from GCP Secret Manager with environment-specific naming and robust error handling."""
             try:
                 client = self._get_secret_client()
                 actual_name = self._determine_actual_secret_name(secret_name, environment)
-                return self._fetch_secret(client, actual_name)
+                secret_value = self._fetch_secret(client, actual_name)
+                
+                if secret_value:
+                    logger.debug(f"Successfully fetched secret {actual_name} from GCP")
+                    return secret_value
+                else:
+                    # Try fallback without environment suffix if the environment-specific one failed
+                    if actual_name != secret_name:
+                        logger.debug(f"Trying fallback secret name {secret_name}")
+                        fallback_value = self._fetch_secret(client, secret_name)
+                        if fallback_value:
+                            logger.debug(f"Successfully fetched fallback secret {secret_name} from GCP")
+                            return fallback_value
+                
+                logger.debug(f"Secret {secret_name} not found in GCP Secret Manager")
+                return None
+                
+            except ImportError as e:
+                logger.debug(f"GCP Secret Manager client not available for {secret_name}: {e}")
+                return None
             except Exception as e:
-                logger.debug(f"Failed to fetch {secret_name} from GCP: {e}")
+                logger.warning(f"Failed to fetch {secret_name} from GCP Secret Manager: {e}")
                 return None
         
         def get_database_password(self) -> Optional[str]:
@@ -357,11 +377,29 @@ class SecretManagerBuilder:
                 return False, f"GCP connectivity failed: {str(e)}"
         
         def _get_secret_client(self):
-            """Get or create a Secret Manager client."""
+            """Get or create a Secret Manager client with enhanced error handling."""
             if self._client is None:
                 try:
                     from google.cloud import secretmanager
+                    from google.api_core import exceptions as api_exceptions
+                    
+                    # Initialize client with timeout settings for better reliability
                     self._client = secretmanager.SecretManagerServiceClient()
+                    
+                    # Test basic connectivity
+                    try:
+                        # Simple connectivity test - list secrets with page size 1
+                        parent = f"projects/{self._project_id}"
+                        request = {"parent": parent, "page_size": 1}
+                        next(iter(self._client.list_secrets(request=request)), None)
+                        logger.debug(f"GCP Secret Manager connectivity verified for project {self._project_id}")
+                    except (api_exceptions.PermissionDenied, api_exceptions.NotFound) as e:
+                        logger.error(f"GCP Secret Manager access denied or project not found: {e}")
+                    except (api_exceptions.ServiceUnavailable, api_exceptions.DeadlineExceeded) as e:
+                        logger.error(f"GCP Secret Manager network connectivity issue: {e}")
+                    except Exception as e:
+                        logger.warning(f"GCP Secret Manager connectivity test failed (may be transient): {e}")
+                        
                 except ImportError as e:
                     # Only warn once and reduce noise in development
                     if not hasattr(self, '_gcp_import_error_logged'):
@@ -369,7 +407,8 @@ class SecretManagerBuilder:
                         if self.parent._environment == "development":
                             logger.debug(f"Google Cloud Secret Manager not available in development: {e}")
                         else:
-                            logger.warning(f"Google Cloud Secret Manager not available: {e}")
+                            logger.error(f"Google Cloud Secret Manager library not installed in {self.parent._environment}: {e}")
+                            logger.info("Install with: pip install google-cloud-secret-manager")
                         self._gcp_import_error_logged = True
                     raise
             return self._client
@@ -1072,14 +1111,33 @@ class SecretManagerBuilder:
         """Check if GCP Secret Manager should be used based on environment and configuration."""
         # Check if explicitly disabled in environment
         if self.env.get("DISABLE_GCP_SECRET_MANAGER", "false").lower() == "true":
+            logger.debug("GCP Secret Manager explicitly disabled via DISABLE_GCP_SECRET_MANAGER")
             return False
         
         # Check if load secrets is disabled
         if self.env.get("LOAD_SECRETS", "true").lower() == "false":
+            logger.debug("Secret loading disabled via LOAD_SECRETS=false")
             return False
         
         # Only enable for staging and production environments
-        return self._environment in ["staging", "production"]
+        if self._environment not in ["staging", "production"]:
+            logger.debug(f"GCP Secret Manager disabled for {self._environment} environment")
+            return False
+        
+        # Check if project ID is configured
+        project_id = self.env.get("GCP_PROJECT_ID")
+        if not project_id:
+            logger.warning("GCP_PROJECT_ID not configured - GCP Secret Manager disabled")
+            return False
+        
+        # Quick check if library is available
+        try:
+            import google.cloud.secretmanager
+            logger.debug("GCP Secret Manager enabled")
+            return True
+        except ImportError:
+            logger.error(f"google-cloud-secret-manager library not available in {self._environment}")
+            return False
     
     def get_secret(self, secret_name: str, use_cache: bool = True) -> Optional[str]:
         """Get individual secret with caching and fallback chain."""

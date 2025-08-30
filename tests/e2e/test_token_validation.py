@@ -14,7 +14,7 @@ import jwt
 import pytest
 import websockets
 
-from tests.e2e.harness_complete import UnifiedTestHarnessComplete
+from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
 
 @pytest.mark.e2e

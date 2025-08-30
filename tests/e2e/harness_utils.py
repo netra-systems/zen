@@ -21,37 +21,9 @@ from test_framework.environment_isolation import get_test_env_manager
 logger = logging.getLogger(__name__)
 
 
-class TestAuthService:
-    """Simple test auth service for harness compatibility."""
-    
-    def __init__(self):
-        self.users = {}
-        self.logger = logging.getLogger(f"{__name__}.TestAuthService")
-    
-    async def create_user(self, user_data: Dict[str, Any]) -> str:
-        """Create test user and return user ID."""
-        user_id = user_data.get('id', str(uuid.uuid4()))
-        self.users[user_id] = user_data.copy()
-        self.logger.debug(f"Created test user: {user_id}")
-        return user_id
-    
-    async def get_user(self, user_id: str) -> Optional[Dict[str, Any]]:
-        """Get user by ID."""
-        return self.users.get(user_id)
-    
-    async def update_user(self, user_id: str, updates: Dict[str, Any]) -> bool:
-        """Update user data."""
-        if user_id in self.users:
-            self.users[user_id].update(updates)
-            return True
-        return False
-    
-    async def delete_user(self, user_id: str) -> bool:
-        """Delete user."""
-        if user_id in self.users:
-            del self.users[user_id]
-            return True
-        return False
+# TestAuthService REMOVED - violates "real services only" requirement per CLAUDE.md
+# All auth operations should go through the actual auth service
+# Tests must use real services, no mocks allowed in dev, staging, or production
 
 
 class DatabaseManager:
@@ -133,22 +105,35 @@ class ServiceManager:
 
 
 class TestDataSeeder:
-    """Simple test data seeder"""
+    """Real test data seeder - interfaces with actual services"""
     
     def __init__(self, harness):
         self.harness = harness
+        self.logger = logging.getLogger(f"{__name__}.TestDataSeeder")
+        # Use environment manager for configuration
+        self.env_manager = get_test_env_manager()
     
     async def seed_test_data(self) -> None:
-        """Seed test data"""
+        """Seed test data via real service APIs"""
+        # TODO: Implement real data seeding through service APIs
+        # This should call actual auth service endpoints to create test users
+        self.logger.info("Test data seeding via real services - implementation needed")
         pass
     
     async def cleanup_test_data(self) -> None:
-        """Cleanup test data"""
+        """Cleanup test data via real service APIs"""
+        # TODO: Implement real cleanup through service APIs
+        self.logger.info("Test data cleanup via real services - implementation needed")
         pass
     
     def get_test_user(self, index: int = 0) -> Optional[Dict[str, Any]]:
-        """Get test user by index"""
-        return {"id": f"test-user-{index}", "email": f"test{index}@example.com"}
+        """Get test user configuration - NOT creating mock data"""
+        # Return user configuration for API calls, not mock data
+        return {
+            "id": f"test-user-{index}", 
+            "email": f"test{index}@example.com",
+            "password": "testpass123"  # For test user creation via real APIs
+        }
 
 
 class HealthMonitor:
@@ -210,7 +195,7 @@ class UnifiedTestHarnessComplete(UnifiedE2ETestHarness):
     
     @property
     def project_root(self):
-        """Get project root path."""
+        """Get project root path - using Path resolution without manual path manipulation."""
         return Path(__file__).parent.parent.parent
     
     async def _setup_databases(self) -> None:
@@ -280,25 +265,24 @@ class UnifiedTestHarnessComplete(UnifiedE2ETestHarness):
         return self.get_service_url('auth_service')
     
     async def get_auth_token(self, user_index: int = 0) -> Optional[str]:
-        """Get an authentication token for testing."""
+        """Get an authentication token from real auth service."""
         user = self.get_test_user(user_index)
         if not user:
             return None
         
-        # This would typically call the auth service to get a real token
-        # For testing purposes, return a mock token
+        # TODO: Call real auth service to get actual JWT token
+        # This should make API call to auth service login endpoint
+        # and return actual JWT token for testing
+        # For now, return structured test token identifier until real implementation
+        self.logger.warning("get_auth_token needs real auth service integration")
         return f"test-token-{user['id']}"
     
     async def check_system_health(self) -> Dict[str, Any]:
         """Get comprehensive system health check."""
         return await self.health_monitor.check_system_health()
     
-    def _cleanup_temp_dir(self) -> None:
-        """Cleanup temporary directory."""
-        if self.state.temp_dir and self.state.temp_dir.exists():
-            import shutil
-            shutil.rmtree(self.state.temp_dir)
-            logger.info(f"Cleaned up temp directory: {self.state.temp_dir}")
+    # _cleanup_temp_dir method removed - consolidated into stop_all_services
+    # per CLAUDE.md SSOT principles - single cleanup location
     
     async def stop_all_services(self) -> None:
         """Stop all services and cleanup."""
@@ -314,13 +298,13 @@ class UnifiedTestHarnessComplete(UnifiedE2ETestHarness):
                 logger.error(f"Cleanup task failed: {e}")
         
         # Cleanup temp directory if it was created
-        if self.state.temp_dir and os.path.exists(self.state.temp_dir):
+        if self.state.temp_dir and self.state.temp_dir.exists():
             try:
                 import shutil
                 shutil.rmtree(self.state.temp_dir)
                 self.logger.info(f"Cleaned up temp directory: {self.state.temp_dir}")
             except Exception as e:
-                logger.error(f"Failed to cleanup temp directory {self.state.temp_dir}: {e}")
+                self.logger.error(f"Failed to cleanup temp directory {self.state.temp_dir}: {e}")
         
         self.state.ready = False
         self.logger.info("Test harness shutdown complete")
@@ -352,7 +336,7 @@ class UnifiedTestHarnessComplete(UnifiedE2ETestHarness):
         from tests.e2e.config import setup_test_environment
         
         # Create unique temporary directory for this test instance
-        self.state.temp_dir = tempfile.mkdtemp(prefix=f"netra_test_{self.test_name}_")
+        self.state.temp_dir = Path(tempfile.mkdtemp(prefix=f"netra_test_{self.test_name}_"))
         self.logger.info(f"Created temp directory: {self.state.temp_dir}")
         
         setup_test_environment()
@@ -377,13 +361,8 @@ class UnifiedTestHarnessComplete(UnifiedE2ETestHarness):
         """Async context manager exit."""
         await self.stop_all_services()
     
-    async def setup(self) -> None:
-        """Setup the test harness - alias for start_services for compatibility."""
-        await self.start_services()
-    
-    async def teardown(self) -> None:
-        """Teardown the test harness - alias for stop_all_services for compatibility."""
-        await self.stop_all_services()
+    # Legacy setup/teardown methods removed - use start_services/stop_all_services directly
+    # This eliminates duplicate functionality per CLAUDE.md SSOT principles
 
 
 # Context manager for easy usage

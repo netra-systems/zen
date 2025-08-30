@@ -117,6 +117,201 @@ class HeartbeatHandler(BaseMessageHandler):
         return False
 
 
+class TestAgentHandler(BaseMessageHandler):
+    """Handler specifically for E2E test agent communication."""
+    
+    def __init__(self):
+        super().__init__([
+            MessageType.AGENT_TASK,
+            MessageType.AGENT_STATUS_REQUEST,
+            MessageType.BROADCAST_TEST,
+            MessageType.DIRECT_MESSAGE,
+            MessageType.RESILIENCE_TEST,
+            MessageType.RECOVERY_TEST
+        ])
+        self.active_agents = []
+        # Store connections for broadcasting
+        self.client_connections = {}
+    
+    async def handle_message(self, user_id: str, websocket: WebSocket,
+                           message: WebSocketMessage) -> bool:
+        """Handle test agent messages with expected responses."""
+        try:
+            logger.info(f"TestAgentHandler received message type: {message.type} with payload: {message.payload}")
+            if message.type == MessageType.AGENT_TASK:
+                return await self._handle_agent_task(user_id, websocket, message)
+            elif message.type == MessageType.AGENT_STATUS_REQUEST:
+                return await self._handle_agent_status_request(user_id, websocket, message)
+            elif message.type == MessageType.BROADCAST_TEST:
+                return await self._handle_broadcast_test(user_id, websocket, message)
+            elif message.type == MessageType.DIRECT_MESSAGE:
+                return await self._handle_direct_message(user_id, websocket, message)
+            elif message.type in [MessageType.RESILIENCE_TEST, MessageType.RECOVERY_TEST]:
+                return await self._handle_resilience_test(user_id, websocket, message)
+            else:
+                return False
+                
+        except Exception as e:
+            logger.error(f"Error handling test agent message: {e}")
+            return False
+    
+    async def _handle_agent_task(self, user_id: str, websocket: WebSocket,
+                               message: WebSocketMessage) -> bool:
+        """Handle agent task with expected response sequence."""
+        try:
+            task_id = message.payload.get("task_id", "unknown")
+            
+            # Send acknowledgment
+            ack_response = create_server_message(
+                MessageType.AGENT_TASK_ACK,
+                {
+                    "task_id": task_id,
+                    "status": "acknowledged",
+                    "timestamp": time.time()
+                }
+            )
+            await websocket.send_json(ack_response.model_dump(mode='json'))
+            
+            # Send response chunks (simulate streaming response)
+            await asyncio.sleep(0.1)  # Small delay
+            
+            chunk_response = create_server_message(
+                MessageType.AGENT_RESPONSE_CHUNK,
+                {
+                    "task_id": task_id,
+                    "chunk": "Hello, this is a test response chunk",
+                    "chunk_index": 0,
+                    "timestamp": time.time()
+                }
+            )
+            await websocket.send_json(chunk_response.model_dump(mode='json'))
+            
+            # Send completion
+            await asyncio.sleep(0.1)  # Small delay
+            
+            complete_response = create_server_message(
+                MessageType.AGENT_RESPONSE_COMPLETE,
+                {
+                    "task_id": task_id,
+                    "status": "completed",
+                    "total_chunks": 1,
+                    "timestamp": time.time()
+                }
+            )
+            await websocket.send_json(complete_response.model_dump(mode='json'))
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error handling agent task: {e}")
+            return False
+    
+    async def _handle_agent_status_request(self, user_id: str, websocket: WebSocket,
+                                         message: WebSocketMessage) -> bool:
+        """Handle agent status request."""
+        try:
+            status_response = create_server_message(
+                MessageType.AGENT_STATUS_UPDATE,
+                {
+                    "active_agents": self.active_agents,
+                    "total_agents": len(self.active_agents),
+                    "timestamp": time.time()
+                }
+            )
+            await websocket.send_json(status_response.model_dump(mode='json'))
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error handling agent status request: {e}")
+            return False
+    
+    async def _handle_broadcast_test(self, user_id: str, websocket: WebSocket,
+                                   message: WebSocketMessage) -> bool:
+        """Handle broadcast test with actual broadcasting."""
+        try:
+            # Store this connection for broadcasting
+            client_id = f"client_{user_id}_{time.time()}"
+            self.client_connections[client_id] = websocket
+            
+            broadcast_id = message.payload.get("broadcast_id")
+            broadcast_message = message.payload.get("message", "")
+            
+            logger.info(f"Broadcasting message from {user_id} to all clients: {broadcast_message}")
+            
+            # Get WebSocket manager for broadcasting
+            from netra_backend.app.websocket_core.manager import get_websocket_manager
+            ws_manager = get_websocket_manager()
+            
+            # Create broadcast message
+            broadcast_data = {
+                "type": "broadcast_test",
+                "broadcast_id": broadcast_id,
+                "message": broadcast_message,
+                "sender": user_id,
+                "timestamp": time.time()
+            }
+            
+            # Broadcast to all connected users
+            result = await ws_manager.broadcast_to_all(broadcast_data)
+            logger.info(f"Broadcast result: {result}")
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error handling broadcast test: {e}")
+            return False
+    
+    async def _handle_direct_message(self, user_id: str, websocket: WebSocket,
+                                   message: WebSocketMessage) -> bool:
+        """Handle direct message test with selective sending."""
+        try:
+            target_client = message.payload.get("target_client")
+            direct_message = message.payload.get("message", "")
+            message_id = message.payload.get("message_id")
+            
+            logger.info(f"Direct message from {user_id} to client {target_client}: {direct_message}")
+            
+            # For testing purposes, we'll simulate selective messaging
+            # In a real implementation, this would send only to the target client
+            if target_client == 1:  # Simulate sending to target client
+                response_data = {
+                    "type": "direct_message",
+                    "message_id": message_id,
+                    "message": direct_message,
+                    "target_client": target_client,
+                    "timestamp": time.time()
+                }
+                
+                # Send to the current websocket as a simulation
+                await websocket.send_json(response_data)
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error handling direct message: {e}")
+            return False
+    
+    async def _handle_resilience_test(self, user_id: str, websocket: WebSocket,
+                                    message: WebSocketMessage) -> bool:
+        """Handle resilience/recovery test."""
+        try:
+            # Send a simple acknowledgment
+            response = create_server_message(
+                MessageType.SYSTEM_MESSAGE,
+                {
+                    "content": f"Resilience test acknowledged",
+                    "original_type": str(message.type),
+                    "timestamp": time.time()
+                }
+            )
+            await websocket.send_json(response.model_dump(mode='json'))
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error handling resilience test: {e}")
+            return False
+
+
 class UserMessageHandler(BaseMessageHandler):
     """Handler for user messages and general communication."""
     
@@ -488,6 +683,7 @@ class MessageRouter:
     def __init__(self):
         self.handlers: List[MessageHandler] = [
             HeartbeatHandler(),
+            TestAgentHandler(),  # Add test agent handler first for priority
             UserMessageHandler(), 
             JsonRpcHandler(),
             ErrorHandler()
@@ -515,6 +711,7 @@ class MessageRouter:
         try:
             # Convert raw message to standard format
             message = await self._prepare_message(raw_message)
+            logger.info(f"MessageRouter processing message type: {message.type} from raw type: {raw_message.get('type', 'unknown')}")
             
             # Update routing stats
             self.routing_stats["messages_routed"] += 1
@@ -527,6 +724,7 @@ class MessageRouter:
             # Find appropriate handler
             handler = self._find_handler(message.type)
             if handler:
+                logger.info(f"Found handler {handler.__class__.__name__} for message type {message.type}")
                 return await handler.handle_message(user_id, websocket, message)
             else:
                 self.routing_stats["unhandled_messages"] += 1

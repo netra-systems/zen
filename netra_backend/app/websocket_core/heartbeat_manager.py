@@ -25,10 +25,38 @@ logger = central_logger.get_logger(__name__)
 class HeartbeatConfig:
     """Configuration for heartbeat management."""
     heartbeat_interval_seconds: int = 30
-    heartbeat_timeout_seconds: int = 60
-    max_missed_heartbeats: int = 3
-    cleanup_interval_seconds: int = 60
-    ping_payload_size_limit: int = 125  # WebSocket control frame limit
+    heartbeat_timeout_seconds: int = 90  # CRITICAL FIX: Increased from 60 to handle staging latency
+    max_missed_heartbeats: int = 2       # CRITICAL FIX: Reduced from 3 for faster detection
+    cleanup_interval_seconds: int = 120  # CRITICAL FIX: Increased cleanup interval for staging
+    ping_payload_size_limit: int = 125   # WebSocket control frame limit
+    
+    @classmethod
+    def for_environment(cls, environment: str = "development") -> "HeartbeatConfig":
+        """Create environment-specific heartbeat configuration."""
+        if environment == "staging":
+            return cls(
+                heartbeat_interval_seconds=30,
+                heartbeat_timeout_seconds=90,   # Longer timeout for GCP staging
+                max_missed_heartbeats=2,        # Faster detection
+                cleanup_interval_seconds=120,   # Less aggressive cleanup
+                ping_payload_size_limit=125
+            )
+        elif environment == "production":
+            return cls(
+                heartbeat_interval_seconds=25,
+                heartbeat_timeout_seconds=75,   # Conservative production timeout
+                max_missed_heartbeats=2,        # Quick detection
+                cleanup_interval_seconds=180,   # Conservative cleanup
+                ping_payload_size_limit=125
+            )
+        else:  # development/testing
+            return cls(
+                heartbeat_interval_seconds=45,
+                heartbeat_timeout_seconds=60,   # Standard dev timeout
+                max_missed_heartbeats=3,        # More permissive for dev
+                cleanup_interval_seconds=60,    # Standard cleanup
+                ping_payload_size_limit=125
+            )
 
 
 @dataclass
@@ -335,9 +363,15 @@ _heartbeat_manager: Optional[WebSocketHeartbeatManager] = None
 
 
 def get_heartbeat_manager(config: Optional[HeartbeatConfig] = None) -> WebSocketHeartbeatManager:
-    """Get global heartbeat manager instance."""
+    """Get global heartbeat manager instance with environment-aware configuration."""
     global _heartbeat_manager
     if _heartbeat_manager is None:
+        # CRITICAL FIX: Use environment-specific configuration if none provided
+        if config is None:
+            from netra_backend.app.core.isolated_environment import get_env
+            env = get_env()
+            environment = env.get("ENVIRONMENT", "development").lower()
+            config = HeartbeatConfig.for_environment(environment)
         _heartbeat_manager = WebSocketHeartbeatManager(config)
     return _heartbeat_manager
 

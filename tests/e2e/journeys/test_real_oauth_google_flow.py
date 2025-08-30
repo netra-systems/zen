@@ -43,7 +43,7 @@ from tests.e2e.oauth_test_providers import (
     get_enterprise_config,
 )
 from tests.e2e.service_manager import ServiceManager
-from tests.e2e.harness_complete import UnifiedTestHarnessComplete
+from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
 
 class TestRealOAuthFlower:

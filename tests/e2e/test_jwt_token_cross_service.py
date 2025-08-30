@@ -19,7 +19,7 @@ from tests.e2e.jwt_token_helpers import (
     JWTTestFixtures,
     JWTTestHelper,
 )
-from tests.e2e.harness_complete import UnifiedTestHarnessComplete
+from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
 
 @pytest.mark.e2e

@@ -51,7 +51,7 @@ from tests.e2e.helpers.core.unified_flow_helpers import (
 )
 
 from tests.e2e.database_test_connections import DatabaseConnectionManager
-from tests.e2e.harness_complete import UnifiedTestHarnessComplete
+from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
 
 class TestRealUnifiedFlower:

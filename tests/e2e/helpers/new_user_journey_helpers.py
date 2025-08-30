@@ -14,7 +14,7 @@ from typing import Any, Dict, Optional
 import aiosqlite
 
 from netra_backend.app.clients.auth_client_core import auth_client
-from tests.e2e.harness_complete import UnifiedTestHarnessComplete
+from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 from tests.e2e.database_test_connections import DatabaseTestConnections
 
 

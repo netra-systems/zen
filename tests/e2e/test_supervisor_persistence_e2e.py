@@ -35,7 +35,7 @@ from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from netra_backend.app.services.state_persistence import state_persistence_service
 from netra_backend.app.logging_config import central_logger
 from tests.e2e.config import TEST_USERS, TestDataFactory
-from tests.e2e.harness_complete import UnifiedE2ETestHarness
+from tests.e2e.harness_utils import UnifiedE2ETestHarness
 from test_framework.mock_utils import mock_justified
 
 logger = central_logger.get_logger(__name__)

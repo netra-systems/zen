@@ -53,6 +53,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Docker environment indicator
+ENV RUNNING_IN_DOCKER=true
+
 # Switch to non-root user
 USER nextjs
 

@@ -54,7 +54,7 @@ except ImportError:
         ENTERPRISE = "enterprise"
 
 from tests.e2e.service_manager import ServiceManager
-from tests.e2e.harness_complete import UnifiedTestHarnessComplete, create_test_harness
+from tests.e2e.harness_utils import UnifiedTestHarnessComplete, create_test_harness
 
 
 class TestRateLimitFlower:

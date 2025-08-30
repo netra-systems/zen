@@ -43,7 +43,7 @@ os.environ["NETRA_ENVIRONMENT"] = "development"
 
 # Use absolute imports or handle missing dependencies gracefully
 try:
-    from tests.e2e.harness_complete import (
+    from tests.e2e.harness_utils import (
         TestClient,
         TestHarnessContext,
     )

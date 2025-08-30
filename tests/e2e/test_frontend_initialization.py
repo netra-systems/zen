@@ -9,6 +9,14 @@ Business Value Justification (BVJ):
 - Strategic Impact: Broken frontend = 100% user loss
 """
 
+# Setup test path for absolute imports following CLAUDE.md standards
+import sys
+from pathlib import Path
+project_root = Path(__file__).parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+# Absolute imports following CLAUDE.md standards
 import asyncio
 import pytest
 import aiohttp
@@ -18,18 +26,14 @@ from typing import Dict, List, Optional
 import time
 import platform
 import socket
-from test_framework.service_availability import check_service_availability, ServiceUnavailableError
+import logging
 
-# Configure Windows event loop policy at module level
-if platform.system() == "Windows":
-    try:
-        asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
-    except Exception:
-        # Fallback to the selector policy if proactor fails
-        try:
-            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-        except Exception:
-            pass  # Use default if all else fails
+# Import IsolatedEnvironment for proper environment management as required by CLAUDE.md
+from netra_backend.app.core.isolated_environment import get_env
+from test_framework.service_availability import ServiceUnavailableError
+
+# Initialize logger for proper logging as per CLAUDE.md standards
+logger = logging.getLogger(__name__)
 
 
 @pytest.mark.e2e
@@ -38,14 +42,10 @@ class TestFrontendInitialization:
     """Test suite for frontend loading and initialization."""
 
     def setup_method(self):
-        """Set proper event loop policy for Windows to fix playwright subprocess issues."""
-        if platform.system() == "Windows":
-            try:
-                # Set WindowsProactorEventLoopPolicy to fix subprocess issues on Windows
-                asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
-            except Exception:
-                # If that fails, fall back to the selector policy
-                asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+        """Initialize test environment using IsolatedEnvironment for proper configuration management."""
+        # Initialize IsolatedEnvironment as required by CLAUDE.md
+        self.env = get_env()
+        logger.debug("Frontend initialization test setup completed")
         
     def _check_frontend_server_available(self, url: str) -> bool:
         """Check if frontend server is running by attempting TCP connection."""
@@ -62,10 +62,6 @@ class TestFrontendInitialization:
         except (socket.timeout, socket.error, ConnectionRefusedError, OSError):
             return False
     
-    @pytest.mark.skipif(
-        platform.system() == "Windows",
-        reason="Playwright may have Windows subprocess issues (NotImplementedError). This is a known compatibility issue."
-    )
     @pytest.mark.asyncio
     async def test_frontend_loads_without_errors(self):
         """
@@ -80,7 +76,8 @@ class TestFrontendInitialization:
         Expected Failure: Build errors, missing dependencies
         Business Impact: Frontend completely unusable
         """
-        frontend_url = "http://localhost:3000"
+        # Get frontend URL from environment using IsolatedEnvironment as required by CLAUDE.md
+        frontend_url = self.env.get("FRONTEND_URL", "http://localhost:3000")
         
         # First check if frontend server is running
         if not self._check_frontend_server_available(frontend_url):
@@ -148,10 +145,8 @@ class TestFrontendInitialization:
             
             
         except Exception as e:
-            if "NotImplementedError" in str(e) and platform.system() == "Windows":
-                pytest.skip(f"Playwright has Windows subprocess issues: {str(e)}. This is a known Windows compatibility issue.")
-            else:
-                raise
+            logger.error(f"Test failed with error: {e}")
+            raise
         finally:
             # Clean up Playwright resources
             try:
@@ -162,10 +157,6 @@ class TestFrontendInitialization:
             except Exception:
                 pass
 
-    @pytest.mark.skipif(
-        platform.system() == "Windows",
-        reason="Playwright may have Windows subprocess issues (NotImplementedError). This is a known compatibility issue."
-    )
     @pytest.mark.asyncio
     async def test_all_routes_accessible(self):
         """
@@ -181,7 +172,8 @@ class TestFrontendInitialization:
         Expected Failure: Router misconfiguration, missing routes
         Business Impact: Users can't navigate, features inaccessible
         """
-        frontend_url = "http://localhost:3000"
+        # Get frontend URL from environment using IsolatedEnvironment as required by CLAUDE.md
+        frontend_url = self.env.get("FRONTEND_URL", "http://localhost:3000")
         
         # Check if frontend server is running
         if not self._check_frontend_server_available(frontend_url):
@@ -253,15 +245,9 @@ class TestFrontendInitialization:
                 
                 await browser.close()
         except Exception as e:
-            if "NotImplementedError" in str(e) and platform.system() == "Windows":
-                pytest.skip(f"Playwright has Windows subprocess issues: {str(e)}. This is a known Windows compatibility issue.")
-            else:
-                raise
+            logger.error(f"Test failed with error: {e}")
+            raise
 
-    @pytest.mark.skipif(
-        platform.system() == "Windows",
-        reason="Playwright may have Windows subprocess issues (NotImplementedError). This is a known compatibility issue."
-    )
     @pytest.mark.asyncio
     async def test_component_hydration(self):
         """
@@ -276,7 +262,8 @@ class TestFrontendInitialization:
         Expected Failure: SSR/hydration mismatch, event handlers not attached
         Business Impact: UI non-functional, users can't interact
         """
-        frontend_url = "http://localhost:3000"
+        # Get frontend URL from environment using IsolatedEnvironment as required by CLAUDE.md
+        frontend_url = self.env.get("FRONTEND_URL", "http://localhost:3000")
         
         # Check if frontend server is running
         if not self._check_frontend_server_available(frontend_url):
@@ -374,15 +361,9 @@ class TestFrontendInitialization:
                 
                 await browser.close()
         except Exception as e:
-            if "NotImplementedError" in str(e) and platform.system() == "Windows":
-                pytest.skip(f"Playwright has Windows subprocess issues: {str(e)}. This is a known Windows compatibility issue.")
-            else:
-                raise
+            logger.error(f"Test failed with error: {e}")
+            raise
 
-    @pytest.mark.skipif(
-        platform.system() == "Windows",
-        reason="Playwright may have Windows subprocess issues (NotImplementedError). This is a known compatibility issue."
-    )
     @pytest.mark.asyncio
     async def test_api_connections_established(self):
         """
@@ -397,8 +378,10 @@ class TestFrontendInitialization:
         Expected Failure: API URL misconfigured, CORS issues
         Business Impact: Frontend can't communicate with backend
         """
-        frontend_url = "http://localhost:3000"
-        backend_url = "http://localhost:8000"
+        # Get frontend URL from environment using IsolatedEnvironment as required by CLAUDE.md
+        frontend_url = self.env.get("FRONTEND_URL", "http://localhost:3000")
+        # Get backend URL from environment using IsolatedEnvironment as required by CLAUDE.md
+        backend_url = self.env.get("BACKEND_URL", "http://localhost:8000")
         
         # Check if frontend server is running
         if not self._check_frontend_server_available(frontend_url):
@@ -535,7 +518,5 @@ class TestFrontendInitialization:
                 
                 await browser.close()
         except Exception as e:
-            if "NotImplementedError" in str(e) and platform.system() == "Windows":
-                pytest.skip(f"Playwright has Windows subprocess issues: {str(e)}. This is a known Windows compatibility issue.")
-            else:
-                raise
+            logger.error(f"Test failed with error: {e}")
+            raise

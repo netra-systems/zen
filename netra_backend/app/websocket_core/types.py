@@ -53,7 +53,13 @@ class MessageType(str, Enum):
     
     # Agent communication
     START_AGENT = "start_agent"
+    AGENT_TASK = "agent_task"
+    AGENT_TASK_ACK = "agent_task_ack"
     AGENT_RESPONSE = "agent_response"
+    AGENT_RESPONSE_CHUNK = "agent_response_chunk"
+    AGENT_RESPONSE_COMPLETE = "agent_response_complete"
+    AGENT_STATUS_REQUEST = "agent_status_request"
+    AGENT_STATUS_UPDATE = "agent_status_update"
     AGENT_PROGRESS = "agent_progress"
     AGENT_ERROR = "agent_error"
     
@@ -63,12 +69,18 @@ class MessageType(str, Enum):
     
     # Broadcasting
     BROADCAST = "broadcast"
+    BROADCAST_TEST = "broadcast_test"
+    DIRECT_MESSAGE = "direct_message"
     ROOM_MESSAGE = "room_message"
     
     # JSON-RPC (MCP compatibility)
     JSONRPC_REQUEST = "jsonrpc_request"
     JSONRPC_RESPONSE = "jsonrpc_response"
     JSONRPC_NOTIFICATION = "jsonrpc_notification"
+    
+    # Testing/Resilience
+    RESILIENCE_TEST = "resilience_test"
+    RECOVERY_TEST = "recovery_test"
 
 
 class ConnectionInfo(BaseModel):
@@ -257,6 +269,16 @@ LEGACY_MESSAGE_TYPE_MAP = {
     "heartbeat": MessageType.HEARTBEAT,
     "user_input": MessageType.USER_MESSAGE,
     "agent_response": MessageType.AGENT_RESPONSE,
+    "agent_task": MessageType.AGENT_TASK,
+    "agent_task_ack": MessageType.AGENT_TASK_ACK,
+    "agent_response_chunk": MessageType.AGENT_RESPONSE_CHUNK,
+    "agent_response_complete": MessageType.AGENT_RESPONSE_COMPLETE,
+    "agent_status_request": MessageType.AGENT_STATUS_REQUEST,
+    "agent_status_update": MessageType.AGENT_STATUS_UPDATE,
+    "broadcast_test": MessageType.BROADCAST_TEST,
+    "direct_message": MessageType.DIRECT_MESSAGE,
+    "resilience_test": MessageType.RESILIENCE_TEST,
+    "recovery_test": MessageType.RECOVERY_TEST,
     "error": MessageType.ERROR_MESSAGE,
     "system": MessageType.SYSTEM_MESSAGE,
     "broadcast": MessageType.BROADCAST

@@ -13,7 +13,7 @@ from netra_backend.app.schemas.core_enums import WebSocketMessageType
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from tests.e2e.config import TEST_ENDPOINTS, TEST_USERS, TestDataFactory
 from tests.e2e.unified_e2e_harness import UnifiedE2ETestHarness
-from tests.e2e.harness_complete import UnifiedTestHarnessComplete
+from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 from typing import Any, Dict, List, Optional
 import asyncio
 import json

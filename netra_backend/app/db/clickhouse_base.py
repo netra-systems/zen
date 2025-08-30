@@ -4,6 +4,9 @@ from typing import Any, Dict, Iterable, List
 
 import clickhouse_connect
 from clickhouse_connect.driver.client import Client
+from netra_backend.app.logging_config import central_logger
+
+logger = central_logger.get_logger(__name__)
 
 
 class ClickHouseDatabase:
@@ -64,18 +67,26 @@ class ClickHouseDatabase:
         
         environment = get_env().get("ENVIRONMENT", "development").lower()
         
-        # CRITICAL FIX: Use faster timeouts for optional environments to fail quickly
-        if environment in ["staging", "development"]:
-            connect_timeout = 3  # Fast connection timeout
-            receive_timeout = 5  # Fast receive timeout
+        # CRITICAL FIX: Increase timeouts for staging to prevent connection failures
+        if environment == "staging":
+            connect_timeout = 15   # Increased from 3 to 15 seconds for staging
+            receive_timeout = 30   # Increased from 5 to 30 seconds for staging
+        elif environment == "production":
+            connect_timeout = 20   # Increased timeout for production
+            receive_timeout = 45   # Increased timeout for production
         else:
-            connect_timeout = 10  # Standard timeout for production
-            receive_timeout = 30  # Standard timeout for production
+            connect_timeout = 3    # Fast timeout for development
+            receive_timeout = 5    # Fast timeout for development
         
         return clickhouse_connect.get_client(
             host=self.host, port=self.port, database=self.database,
             user=self.user, password=self.password, secure=self.secure,
-            connect_timeout=connect_timeout, send_receive_timeout=receive_timeout
+            connect_timeout=connect_timeout, send_receive_timeout=receive_timeout,
+            # CRITICAL FIX: Add connection pool and retry settings
+            pool_mgr=True,          # Enable connection pooling
+            pool_size=5,            # Connection pool size
+            retries=2,              # Number of retries on connection failure
+            retry_delay=1.0         # Delay between retries
         )
     
     def _establish_connection(self):
@@ -131,12 +142,29 @@ class ClickHouseDatabase:
         return True
 
     async def test_connection(self) -> bool:
-        """Test if the ClickHouse connection is working."""
+        """Test if the ClickHouse connection is working with environment-aware timeout."""
+        import asyncio
+        from netra_backend.app.core.isolated_environment import get_env
+        
         try:
             if not self.client:
                 return False
-            return await self._execute_connection_test_query()
-        except Exception:
+                
+            # CRITICAL FIX: Environment-aware test timeout
+            environment = get_env().get("ENVIRONMENT", "development").lower()
+            if environment == "staging":
+                timeout = 10.0  # Longer timeout for staging
+            elif environment == "production":
+                timeout = 15.0  # Longest timeout for production
+            else:
+                timeout = 5.0   # Standard timeout for development
+                
+            return await asyncio.wait_for(self._execute_connection_test_query(), timeout=timeout)
+        except asyncio.TimeoutError:
+            logger.error(f"ClickHouse connection test timeout after {timeout}s")
+            return False
+        except Exception as e:
+            logger.warning(f"ClickHouse connection test failed: {e}")
             return False
 
     async def command(self, cmd: str, parameters: Dict[str, Any] | None = None, settings: Dict[str, Any] | None = None):

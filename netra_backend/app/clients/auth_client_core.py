@@ -211,6 +211,17 @@ class AuthServiceClient:
     
     async def _execute_token_validation(self, token: str) -> Optional[Dict]:
         """Execute token validation with error handling."""
+        # PERFORMANCE FIX: Try local JWT validation first for efficiency and reliability
+        # This reduces latency and eliminates dependency on auth service HTTP calls
+        try:
+            local_result = await self._local_validate(token)
+            if local_result and local_result.get("valid", False):
+                logger.debug("Using local JWT validation (primary)")
+                return local_result
+        except Exception as e:
+            logger.debug(f"Local validation failed, falling back to remote: {e}")
+        
+        # Fallback to remote validation if local validation fails
         try:
             result = await self._try_validation_steps(token)
             if result is None:

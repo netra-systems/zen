@@ -53,7 +53,7 @@ from tests.e2e.helpers.journey.new_user_journey_helpers import (
 
 # Handle missing imports with fallbacks
 try:
-    from tests.e2e.harness_complete import UnifiedTestHarnessComplete
+    from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 except ImportError:
     class TestUnifiedE2EHarness:
         def __init__(self):

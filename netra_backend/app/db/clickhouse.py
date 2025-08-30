@@ -297,9 +297,9 @@ def _create_base_client(config, use_secure: bool):
     return ClickHouseDatabase(**params)
 
 async def _test_and_yield_client(client):
-    """Test connection and yield client with timeout handling.
+    """Test connection and yield client with enhanced timeout handling and retry logic.
     
-    Enhanced with async generator protection against corruption.
+    Enhanced with async generator protection against corruption and staging-specific timeouts.
     """
     import asyncio
     from netra_backend.app.core.isolated_environment import get_env
@@ -308,11 +308,17 @@ async def _test_and_yield_client(client):
     client_yielded = False
     
     try:
-        # CRITICAL FIX: Reduce timeout in staging/development to fail fast
-        timeout = 5.0 if environment in ["staging", "development"] else 15.0
+        # CRITICAL FIX: Increase timeouts for staging to prevent connection failures
+        if environment == "staging":
+            timeout = 15.0  # Increased from 5 to 15 seconds for staging
+        elif environment == "production":
+            timeout = 20.0  # Longer timeout for production
+        else:
+            timeout = 5.0   # Standard timeout for development
+            
         # Shield connection test from cancellation
         await asyncio.shield(asyncio.wait_for(client.test_connection(), timeout=timeout))
-        logger.info("[ClickHouse] REAL connection established")
+        logger.info(f"[ClickHouse] REAL connection established in {environment} environment")
         client_yielded = True
         yield client
     except asyncio.CancelledError:
@@ -324,11 +330,11 @@ async def _test_and_yield_client(client):
         # Otherwise, re-raise after potential cleanup
         raise
     except asyncio.TimeoutError as e:
-        logger.error(f"[ClickHouse] Connection test timeout after {timeout} seconds")
+        logger.error(f"[ClickHouse] Connection test timeout after {timeout} seconds in {environment}")
         # In staging/development, this is expected - don't raise, let graceful degradation handle it
         if environment in ["staging", "development"]:
-            logger.warning("[ClickHouse] Connection timeout in optional environment - graceful degradation")
-            raise ConnectionError(f"ClickHouse connection timeout after {timeout}s") from e
+            logger.warning(f"[ClickHouse] Connection timeout in {environment} environment - graceful degradation")
+            raise ConnectionError(f"ClickHouse connection timeout after {timeout}s in {environment}") from e
         raise asyncio.TimeoutError("ClickHouse connection timeout") from e
     except GeneratorExit:
         # Handle generator cleanup silently
@@ -460,7 +466,7 @@ class ClickHouseService:
         return ClickHouseDatabase(**params)
     
     async def _initialize_real_client(self):
-        """Initialize real ClickHouse client with retry logic and graceful failure."""
+        """Initialize real ClickHouse client with enhanced retry logic and graceful failure."""
         import asyncio
         from netra_backend.app.core.isolated_environment import get_env
         
@@ -469,13 +475,16 @@ class ClickHouseService:
         logger.info("[ClickHouse Service] Initializing with REAL client")
         config = get_clickhouse_config()
         
-        # CRITICAL FIX: Reduce retries and timeouts for optional environments to fail fast
-        if environment in ["staging", "development"]:
-            max_retries = 1  # Single attempt in optional environments
-            timeout = 5.0    # Fast timeout
+        # CRITICAL FIX: Increase retries and timeouts for staging to prevent connection failures
+        if environment == "staging":
+            max_retries = 3   # Increased retries for staging
+            timeout = 15.0    # Longer timeout for staging
+        elif environment == "production":
+            max_retries = 3   # Full retries in production
+            timeout = 20.0    # Longer timeout for production
         else:
-            max_retries = 3  # Full retries in production
-            timeout = 15.0   # Longer timeout for production
+            max_retries = 1   # Single attempt in development
+            timeout = 5.0     # Fast timeout for development
         
         base_delay = 1.0
         
@@ -485,22 +494,24 @@ class ClickHouseService:
                 self._client = ClickHouseQueryInterceptor(base_client)
                 # Test connection with environment-appropriate timeout
                 await asyncio.wait_for(self._client.test_connection(), timeout=timeout)
-                logger.info(f"[ClickHouse Service] Connection established on attempt {attempt + 1}")
+                logger.info(f"[ClickHouse Service] Connection established on attempt {attempt + 1} in {environment} environment")
                 return
             except Exception as e:
                 if attempt < max_retries - 1:
-                    delay = base_delay * (2 ** attempt)
-                    logger.warning(f"[ClickHouse Service] Connection attempt {attempt + 1} failed: {e}. Retrying in {delay}s...")
+                    # Exponential backoff with jitter
+                    import random
+                    delay = base_delay * (2 ** attempt) + random.uniform(0, 0.5)
+                    logger.warning(f"[ClickHouse Service] Connection attempt {attempt + 1} failed: {e}. Retrying in {delay:.2f}s...")
                     await asyncio.sleep(delay)
                 else:
-                    logger.error(f"[ClickHouse Service] All {max_retries} connection attempts failed: {e}")
+                    logger.error(f"[ClickHouse Service] All {max_retries} connection attempts failed in {environment}: {e}")
                     
-                    # CRITICAL FIX: In optional environments, fallback to mock instead of raising
+                    # CRITICAL FIX: Enhanced fallback logic for optional environments
                     if environment in ["staging", "development"]:
                         clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
                         if not clickhouse_required:
-                            logger.warning(f"[ClickHouse Service] Using mock client as fallback in {environment}")
-                            self._initialize_mock_client()
+                            logger.warning(f"[ClickHouse Service] ClickHouse optional in {environment}, continuing without it")
+                            # Don't initialize mock - let service handle graceful degradation
                             return
                     
                     raise

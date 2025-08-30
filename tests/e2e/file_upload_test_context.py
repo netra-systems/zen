@@ -14,7 +14,7 @@ from typing import Any, Dict
 import aiofiles
 
 from tests.e2e.unified_e2e_harness import UnifiedE2ETestHarness
-from tests.e2e.harness_complete import UnifiedTestHarnessComplete
+from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
 
 class FileUploadTestContext:

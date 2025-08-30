@@ -11,7 +11,7 @@ Business Value Justification (BVJ):
 
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from tests.e2e.config import TEST_USERS
-from tests.e2e.harness_complete import UnifiedTestHarnessComplete
+from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 from typing import Dict, List, Any
 import asyncio
 import pytest

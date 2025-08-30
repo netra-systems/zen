@@ -27,7 +27,7 @@ import websockets
 from websockets.exceptions import ConnectionClosed
 
 from netra_backend.app.logging_config import central_logger
-from tests.e2e.harness_complete import UnifiedTestHarnessComplete
+from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 from tests.e2e.unified_e2e_harness import UnifiedE2ETestHarness
 
 logger = central_logger.get_logger(__name__)

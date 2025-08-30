@@ -191,10 +191,36 @@ class AuthConfig:
         """Get database URL for auth service using comprehensive URL builder."""
         env_manager = get_env()
         
+        # Get the base host configuration
+        postgres_host = env_manager.get("POSTGRES_HOST")
+        
+        # Only apply Docker hostname resolution in dev/test environments
+        current_env = AuthConfig.get_environment()
+        if current_env in ["development", "test"]:
+            # Detect if running in Docker container
+            # Check common Docker environment indicators
+            import os
+            is_docker = (
+                env_manager.get("RUNNING_IN_DOCKER") == "true" or
+                env_manager.get("IS_DOCKER") == "true" or
+                env_manager.get("DOCKER_CONTAINER") == "true" or
+                # Check for Docker-specific file that exists in containers
+                os.path.exists("/.dockerenv") or
+                # Check if we're in a container by looking for docker in cgroup
+                (os.path.exists("/proc/self/cgroup") and 
+                 any("docker" in line for line in open("/proc/self/cgroup").readlines()))
+            )
+            
+            # Override host for Docker context if needed
+            if is_docker and postgres_host in ["localhost", "127.0.0.1"]:
+                # In Docker, use the service name from docker-compose
+                postgres_host = "postgres"
+                logger.info(f"Detected Docker environment in {current_env}, using 'postgres' as database host")
+        
         # Build all environment variables dict
         env_vars = {
             "ENVIRONMENT": AuthConfig.get_environment(),
-            "POSTGRES_HOST": env_manager.get("POSTGRES_HOST"),
+            "POSTGRES_HOST": postgres_host,
             "POSTGRES_PORT": env_manager.get("POSTGRES_PORT"),
             "POSTGRES_DB": env_manager.get("POSTGRES_DB"),
             "POSTGRES_USER": env_manager.get("POSTGRES_USER"),

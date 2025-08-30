@@ -6,6 +6,7 @@
 import { authService as authServiceClient } from '@/lib/auth-service-config';
 import { authService } from '@/auth';
 import { logger } from '@/lib/logger';
+import { unifiedApiConfig } from '@/lib/unified-api-config';
 
 export interface RequestConfig extends RequestInit {
   headers?: Record<string, string>;
@@ -23,6 +24,26 @@ export interface AuthResponse {
 class AuthInterceptor {
   private refreshTokenPromise: Promise<string | null> | null = null;
   private maxRetries = 1;
+  private environment: string;
+
+  constructor() {
+    this.environment = unifiedApiConfig.environment;
+  }
+
+  /**
+   * Get environment-specific request timeout
+   */
+  private getRequestTimeout(): number {
+    switch (this.environment) {
+      case 'staging':
+        return 30000; // 30s for staging (higher latency)
+      case 'production':
+        return 20000; // 20s for production
+      case 'development':
+      default:
+        return 10000; // 10s for development
+    }
+  }
 
   /**
    * Apply authentication headers to request
@@ -177,22 +198,47 @@ class AuthInterceptor {
     // Apply auth headers
     const authConfig = this.applyAuthHeaders(config);
     
+    // Add timeout if not already set
+    if (!authConfig.signal) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => {
+        controller.abort();
+        logger.warn('Auth request timed out', {
+          url,
+          timeout: this.getRequestTimeout(),
+          environment: this.environment
+        });
+      }, this.getRequestTimeout());
+      
+      authConfig.signal = controller.signal;
+      
+      // Clean up timeout
+      authConfig.signal.addEventListener('abort', () => {
+        clearTimeout(timeout);
+      });
+    }
+    
     try {
       // Make the request
       const response = await fetch(url, authConfig);
       
       // Handle 401 Unauthorized
       if (response.status === 401 && !config.skipAuth) {
-        logger.warn('Received 401, attempting token refresh');
+        logger.warn('Received 401, attempting token refresh', {
+          environment: this.environment
+        });
         return this.handle401Response(url, authConfig);
       }
       
       return response;
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Request failed', error as Error, {
         component: 'AuthInterceptor',
         url,
-        method: config.method || 'GET'
+        method: config.method || 'GET',
+        environment: this.environment,
+        isTimeout: errorMessage.includes('abort') || errorMessage.includes('timeout')
       });
       throw error;
     }

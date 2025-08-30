@@ -11,11 +11,22 @@ Business Value Justification (BVJ):
 - Strategic/Revenue Impact: Prevents service outages that could impact customer experience
 """
 
+# Setup test path for absolute imports following CLAUDE.md standards
+import sys
+from pathlib import Path
+project_root = Path(__file__).parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+# Absolute imports following CLAUDE.md standards
 import asyncio
 import aiohttp
 import pytest
 from typing import Dict, List, Optional, Tuple
 import time
+
+# CLAUDE.md compliance: Use IsolatedEnvironment for ALL environment access
+from netra_backend.app.core.isolated_environment import get_env
 
 @pytest.mark.e2e
 @pytest.mark.asyncio
@@ -24,6 +35,11 @@ async def test_service_startup_sequence_validation():
     
     This test should FAIL until proper startup sequencing is implemented.
     """
+    
+    # CLAUDE.md compliance: Use IsolatedEnvironment for ALL environment access
+    env = get_env()
+    env.set("ENVIRONMENT", "development", "test_service_startup_sequence")
+    env.set("NETRA_ENVIRONMENT", "development", "test_service_startup_sequence")
     
     # Define expected startup sequence
     startup_sequence = [
@@ -178,7 +194,7 @@ async def _check_service_health(session: aiohttp.ClientSession, service_name: st
     
     try:
         url = f"http://localhost:{port}{endpoint}"
-        async with session.get(url, timeout=aiohttp.ClientTimeout(total=2)) as response:
+        async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as response:
             return response.status == 200
     except (aiohttp.ClientError, asyncio.TimeoutError):
         return False

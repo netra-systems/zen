@@ -11,6 +11,14 @@ Business Value Justification (BVJ):
 - Strategic/Revenue Impact: Authentication failures block user engagement and conversion
 """
 
+# Setup test path for absolute imports following CLAUDE.md standards
+import sys
+from pathlib import Path
+project_root = Path(__file__).parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+# Absolute imports following CLAUDE.md standards
 import asyncio
 import aiohttp
 import pytest
@@ -19,6 +27,10 @@ import time
 from typing import Dict, Any, Optional
 import uuid
 import logging
+
+# Import IsolatedEnvironment for proper environment management as required by CLAUDE.md
+from netra_backend.app.core.isolated_environment import get_env
+from tests.e2e.test_harness import UnifiedE2ETestHarness
 
 logger = logging.getLogger(__name__)
 
@@ -53,10 +65,30 @@ async def test_cross_service_authentication_flow():
     This test should FAIL until cross-service authentication is properly implemented.
     """
     
-    # Test configuration - use correct default ports
-    auth_service_url = "http://localhost:8081"  # Auth service runs on 8081 by default
-    backend_service_url = "http://localhost:8000"
+    # Use IsolatedEnvironment for environment management as required by CLAUDE.md
+    env = get_env()
+    env.set("ENVIRONMENT", "test", "test_cross_service_authentication_flow")
+    env.set("NETRA_ENVIRONMENT", "test", "test_cross_service_authentication_flow")
+    
+    # Set correct service ports for real running services BEFORE harness initialization
+    import os
+    os.environ["TEST_AUTH_PORT"] = "8082"
+    os.environ["TEST_BACKEND_PORT"] = "8002"
+    env.set("TEST_AUTH_PORT", "8082", "test_cross_service_authentication_flow")
+    env.set("TEST_BACKEND_PORT", "8002", "test_cross_service_authentication_flow")
+    
+    # Initialize test harness for real service integration
+    harness = UnifiedE2ETestHarness()
+    
+    # Use properly running dev services on standard ports
+    auth_service_url = "http://localhost:8081"  # Dev auth service on standard port
+    backend_service_url = "http://localhost:8000"  # Dev backend service on standard port  
     frontend_service_url = "http://localhost:3000"
+    
+    # Debug: print actual URLs being used
+    print(f"[FIXED] Auth service URL: {auth_service_url}")
+    print(f"[FIXED] Backend service URL: {backend_service_url}")
+    print(f"[FIXED] Frontend service URL: {frontend_service_url}")
     
     # Test user credentials
     test_user = {
@@ -336,6 +368,9 @@ async def test_cross_service_authentication_flow():
             print(f"[CORS-WARNING] {warning_msg}")
             logger.warning(warning_msg)
     
+    # Cleanup test harness
+    await harness.cleanup()
+    
     # Analyze authentication flow results
     critical_failures = []
     warning_failures = []
@@ -374,7 +409,23 @@ async def test_authentication_rate_limiting():
     
     This test will WARN if rate limiting is not implemented but won't fail the test completely.
     """
-    auth_service_url = "http://localhost:8081"  # Auth service runs on 8081 by default
+    # Use IsolatedEnvironment for environment management as required by CLAUDE.md
+    env = get_env()
+    env.set("ENVIRONMENT", "test", "test_authentication_rate_limiting")
+    env.set("NETRA_ENVIRONMENT", "test", "test_authentication_rate_limiting")
+    
+    # Set correct service ports for real running services BEFORE harness initialization
+    import os
+    os.environ["TEST_AUTH_PORT"] = "8082"
+    os.environ["TEST_BACKEND_PORT"] = "8002"
+    env.set("TEST_AUTH_PORT", "8082", "test_authentication_rate_limiting")
+    env.set("TEST_BACKEND_PORT", "8002", "test_authentication_rate_limiting")
+    
+    # Initialize test harness for real service integration
+    harness = UnifiedE2ETestHarness()
+    
+    # Use properly running dev service on standard port  
+    auth_service_url = "http://localhost:8081"  # Dev auth service on standard port
     
     # Test rapid login attempts
     rate_limit_warnings = []
@@ -455,6 +506,9 @@ async def test_authentication_rate_limiting():
         print("\n".join(warning_report))
     else:
         print("[SUCCESS] Authentication rate limiting working correctly")
+    
+    # Cleanup test harness
+    await harness.cleanup()
 
 
 if __name__ == "__main__":

@@ -24,11 +24,11 @@ import pytest
 import pytest_asyncio
 
 from tests.e2e.database_sync_fixtures import create_test_user_data
-from tests.e2e.harness_complete import (
+from tests.e2e.harness_utils import (
     UnifiedTestHarnessComplete as TestHarness,
 )
 from tests.e2e.jwt_token_helpers import JWTTestHelper
-from tests.e2e.harness_complete import UnifiedTestHarnessComplete
+from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
 
 class TestAuthenticationE2Eer:

@@ -197,11 +197,22 @@ class RedisConfigurationBuilder(ConfigBuilderBase, ConfigLoggingMixin):
             )
         
         def _get_default_connection_params(self) -> Dict[str, Any]:
-            """Get default connection parameters."""
+            """Get default connection parameters with environment-aware timeouts."""
+            # CRITICAL FIX: Increase timeouts for staging environment to prevent timeout errors
+            if self.parent.environment == "staging":
+                socket_timeout = int(self.parent.env.get("REDIS_SOCKET_TIMEOUT", "30"))  # Increased from 5 to 30
+                connect_timeout = int(self.parent.env.get("REDIS_CONNECT_TIMEOUT", "20"))  # Increased from 10 to 20
+            elif self.parent.environment == "production":
+                socket_timeout = int(self.parent.env.get("REDIS_SOCKET_TIMEOUT", "15"))
+                connect_timeout = int(self.parent.env.get("REDIS_CONNECT_TIMEOUT", "20"))
+            else:
+                socket_timeout = int(self.parent.env.get("REDIS_SOCKET_TIMEOUT", "5"))
+                connect_timeout = int(self.parent.env.get("REDIS_CONNECT_TIMEOUT", "10"))
+                
             return {
                 "connection_pool_size": int(self.parent.env.get("REDIS_POOL_SIZE", "10")),
-                "socket_timeout": int(self.parent.env.get("REDIS_SOCKET_TIMEOUT", "5")),
-                "socket_connect_timeout": int(self.parent.env.get("REDIS_CONNECT_TIMEOUT", "10")),
+                "socket_timeout": socket_timeout,
+                "socket_connect_timeout": connect_timeout,
                 "decode_responses": self.parent.env.get("REDIS_DECODE_RESPONSES", "true").lower() == "true",
                 # Note: retry_on_timeout removed due to deprecation in redis-py 6.0+
                 "health_check_interval": int(self.parent.env.get("REDIS_HEALTH_CHECK_INTERVAL", "30"))
@@ -330,9 +341,20 @@ class RedisConfigurationBuilder(ConfigBuilderBase, ConfigLoggingMixin):
             self.parent = parent
         
         def get_pool_config(self) -> Dict[str, Any]:
-            """Get connection pool configuration."""
+            """Get connection pool configuration with environment-aware settings."""
+            # CRITICAL FIX: Adjust pool sizes for staging environment to handle more concurrent connections
+            if self.parent.environment == "staging":
+                max_connections = int(self.parent.env.get("REDIS_MAX_CONNECTIONS", "30"))  # Increased from 20 to 30
+            elif self.parent.environment == "production":
+                max_connections = int(self.parent.env.get("REDIS_MAX_CONNECTIONS", "50"))
+            else:
+                max_connections = int(self.parent.env.get("REDIS_MAX_CONNECTIONS", "20"))
+                
             config = {
-                "max_connections": int(self.parent.env.get("REDIS_MAX_CONNECTIONS", "20"))
+                "max_connections": max_connections,
+                "connection_pool_class_kwargs": {
+                    "retry_on_error": [ConnectionError, TimeoutError],  # Add retry on connection/timeout errors
+                }
                 # Note: retry_on_timeout removed due to deprecation in redis-py 6.0+
             }
             
@@ -594,15 +616,20 @@ class RedisConfigurationBuilder(ConfigBuilderBase, ConfigLoggingMixin):
             self.parent = parent
         
         def get_staging_config(self) -> Dict[str, Any]:
-            """Get Redis configuration for staging environment."""
+            """Get Redis configuration for staging environment with enhanced timeouts."""
             base_config = self.parent.connection.get_client_config()
             
-            # Staging-specific overrides
+            # CRITICAL FIX: Staging-specific overrides with much longer timeouts to prevent connection issues
             staging_overrides = {
-                "socket_timeout": 10,  # Longer timeout for staging
-                "socket_connect_timeout": 15,
+                "socket_timeout": 30,  # Increased from 10 to 30 seconds
+                "socket_connect_timeout": 20,  # Increased from 15 to 20 seconds
+                "max_connections": 25,  # Increased connection pool
                 # Note: retry_on_timeout removed due to deprecation in redis-py 6.0+
-                "health_check_interval": 60  # Less frequent health checks
+                "health_check_interval": 60,  # Less frequent health checks
+                "retry_on_error": [ConnectionError, TimeoutError],  # Retry on connection/timeout errors
+                "retry_delay": 1.0,  # Base retry delay in seconds
+                "retry_backoff": 1.5,  # Exponential backoff multiplier
+                "retry_jitter": 0.1  # Add jitter to prevent thundering herd
             }
             
             base_config.update(staging_overrides)

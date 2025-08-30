@@ -37,7 +37,7 @@ os.environ["ENVIRONMENT"] = "test"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
 from tests.e2e.config import TEST_CONFIG, setup_test_environment
-from tests.e2e.harness_complete import UnifiedTestHarnessComplete
+from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
 class StreamingAuthManager:
     # """Manages streaming operations with authentication validation."""

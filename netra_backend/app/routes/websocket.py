@@ -74,15 +74,55 @@ def _get_rate_limit_for_environment() -> int:
     else:  # production
         return 30    # Conservative limit for production
 
+def _get_staging_optimized_timeouts():
+    """Get staging-optimized timeout configuration to prevent disconnections."""
+    from netra_backend.app.core.isolated_environment import get_env
+    
+    env = get_env()
+    environment = env.get("ENVIRONMENT", "development").lower()
+    
+    if environment == "staging":
+        # CRITICAL FIX: Use environment variables with staging defaults
+        # Staging environment needs longer timeouts to handle network latency
+        # and GCP load balancer keepalive requirements
+        return {
+            "connection_timeout_seconds": int(env.get("WEBSOCKET_CONNECTION_TIMEOUT", "600")),
+            "heartbeat_interval_seconds": int(env.get("WEBSOCKET_HEARTBEAT_INTERVAL", "30")),
+            "heartbeat_timeout_seconds": int(env.get("WEBSOCKET_HEARTBEAT_TIMEOUT", "90")),
+            "cleanup_interval_seconds": int(env.get("WEBSOCKET_CLEANUP_INTERVAL", "120"))
+        }
+    elif environment == "production":
+        # Production values - conservative but reliable with environment variables
+        return {
+            "connection_timeout_seconds": int(env.get("WEBSOCKET_CONNECTION_TIMEOUT", "900")),
+            "heartbeat_interval_seconds": int(env.get("WEBSOCKET_HEARTBEAT_INTERVAL", "25")),
+            "heartbeat_timeout_seconds": int(env.get("WEBSOCKET_HEARTBEAT_TIMEOUT", "75")),
+            "cleanup_interval_seconds": int(env.get("WEBSOCKET_CLEANUP_INTERVAL", "180"))
+        }
+    else:
+        # Development/testing - more permissive with environment variables
+        return {
+            "connection_timeout_seconds": int(env.get("WEBSOCKET_CONNECTION_TIMEOUT", "300")),
+            "heartbeat_interval_seconds": int(env.get("WEBSOCKET_HEARTBEAT_INTERVAL", "45")),
+            "heartbeat_timeout_seconds": int(env.get("WEBSOCKET_HEARTBEAT_TIMEOUT", "60")),
+            "cleanup_interval_seconds": int(env.get("WEBSOCKET_CLEANUP_INTERVAL", "60"))
+        }
+
+# Get environment-specific timeout configuration
+_timeout_config = _get_staging_optimized_timeouts()
+
 WEBSOCKET_CONFIG = WebSocketConfig(
     max_connections_per_user=3,
     max_message_rate_per_minute=_get_rate_limit_for_environment(),
     max_message_size_bytes=8192,
-    connection_timeout_seconds=300,
-    heartbeat_interval_seconds=45,
-    cleanup_interval_seconds=60,
+    connection_timeout_seconds=_timeout_config["connection_timeout_seconds"],
+    heartbeat_interval_seconds=_timeout_config["heartbeat_interval_seconds"],
+    cleanup_interval_seconds=_timeout_config["cleanup_interval_seconds"],
     enable_compression=False
 )
+
+# CRITICAL FIX: Export heartbeat timeout for heartbeat manager configuration
+HEARTBEAT_TIMEOUT_SECONDS = _timeout_config["heartbeat_timeout_seconds"]
 
 
 @router.websocket("/ws")
@@ -167,10 +207,10 @@ async def websocket_endpoint(websocket: WebSocket):
                 # Register with connection monitor
                 connection_monitor.register_connection(connection_id, user_id, websocket)
                 
-                # Start heartbeat monitoring
+                # Start heartbeat monitoring with staging-optimized timeout
                 heartbeat = WebSocketHeartbeat(
                     interval=WEBSOCKET_CONFIG.heartbeat_interval_seconds,
-                    timeout=10.0
+                    timeout=HEARTBEAT_TIMEOUT_SECONDS
                 )
                 await heartbeat.start(websocket)
                 

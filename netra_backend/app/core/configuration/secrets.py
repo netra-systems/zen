@@ -374,23 +374,65 @@ class SecretManager:
         }
     
     def _is_gcp_available(self) -> bool:
-        """Check if GCP Secret Manager is available.
+        """Check if GCP Secret Manager is available and properly configured.
         
         Uses IsolatedEnvironment for GCP availability check.
         """
-        # Use IsolatedEnvironment for GCP availability detection
-        return (self._environment in ["staging", "production"] and 
-                self._env.get("GCP_PROJECT_ID") is not None)
-    
-    def _fetch_gcp_secrets(self) -> Dict[str, str]:
-        """Fetch secrets from GCP Secret Manager."""
+        # Only enable GCP in staging/production environments
+        if self._environment not in ["staging", "production"]:
+            return False
+        
+        # Check for GCP project ID configuration
+        project_id = self._env.get("GCP_PROJECT_ID")
+        if not project_id:
+            self._logger.debug("GCP_PROJECT_ID not configured, disabling GCP Secret Manager")
+            return False
+        
+        # Check if GCP Secret Manager is explicitly disabled
+        if self._env.get("DISABLE_GCP_SECRET_MANAGER", "false").lower() == "true":
+            self._logger.info("GCP Secret Manager explicitly disabled via DISABLE_GCP_SECRET_MANAGER")
+            return False
+        
+        # Quick check if client library is available
         try:
             from google.cloud import secretmanager
+            return True
+        except ImportError:
+            if self._environment in ["staging", "production"]:
+                self._logger.error("google-cloud-secret-manager library not available in production environment")
+            else:
+                self._logger.debug("google-cloud-secret-manager library not available")
+            return False
+    
+    def _fetch_gcp_secrets(self) -> Dict[str, str]:
+        """Fetch secrets from GCP Secret Manager with enhanced error handling."""
+        try:
+            from google.cloud import secretmanager
+            from google.cloud.exceptions import NotFound, PermissionDenied
+            from google.api_core import exceptions as api_exceptions
+            
             client = secretmanager.SecretManagerServiceClient()
             project_id = self._get_gcp_project_id()
             return self._retrieve_gcp_secrets(client, project_id)
-        except ImportError:
-            self._logger.warning("GCP Secret Manager client not available")
+        except ImportError as e:
+            if self._environment in ["staging", "production"]:
+                self._logger.error(f"GCP Secret Manager client library not installed in {self._environment}: {e}")
+                # In staging/production, this is a critical configuration issue
+                return {}
+            else:
+                self._logger.debug(f"GCP Secret Manager client not available in {self._environment}: {e}")
+                return {}
+        except (PermissionDenied, api_exceptions.PermissionDenied) as e:
+            self._logger.error(f"GCP Secret Manager permission denied - check service account IAM roles: {e}")
+            return {}
+        except (NotFound, api_exceptions.NotFound) as e:
+            self._logger.error(f"GCP project or secrets not found - check project ID: {e}")
+            return {}
+        except (api_exceptions.ServiceUnavailable, api_exceptions.DeadlineExceeded) as e:
+            self._logger.error(f"GCP Secret Manager network error (retryable): {e}")
+            return {}
+        except Exception as e:
+            self._logger.error(f"Unexpected GCP Secret Manager error: {e}")
             return {}
     
     def _get_gcp_project_id(self) -> str:
@@ -417,10 +459,32 @@ class SecretManager:
         return secrets
     
     def _handle_gcp_secret_error(self, error: Exception) -> None:
-        """Handle GCP secret loading errors."""
-        self._logger.error(f"GCP Secret Manager error: {error}")
-        if self._environment == "production":
+        """Handle GCP secret loading errors with graceful degradation."""
+        error_msg = f"GCP Secret Manager error: {error}"
+        self._logger.error(error_msg)
+        
+        # Check if this is a critical failure that should stop the service
+        is_critical = (
+            isinstance(error, (ImportError,)) and 
+            self._environment in ["staging", "production"] and
+            len(self._secret_cache) == 0  # No fallback secrets loaded
+        )
+        
+        if is_critical:
+            self._logger.error("CRITICAL: No secrets available and GCP Secret Manager failed")
             raise ConfigurationError(f"Critical secret loading failure: {error}")
+        else:
+            # Log but continue - fallback to environment variables or cached secrets
+            fallback_count = len(self._secret_cache)
+            self._logger.warning(f"Continuing with {fallback_count} fallback secrets from environment variables")
+            
+            # For staging, also log remediation steps
+            if self._environment == "staging":
+                self._logger.info("Remediation steps:")
+                self._logger.info("1. Check Cloud Run service account has Secret Manager Secret Accessor role")
+                self._logger.info("2. Verify GCP_PROJECT_ID environment variable is correct")
+                self._logger.info("3. Ensure google-cloud-secret-manager package is installed")
+                self._logger.info("4. Check network connectivity to GCP APIs")
     
     def _read_local_secret_files(self) -> Dict[str, str]:
         """Read secrets from local development files."""
@@ -530,15 +594,35 @@ class SecretManager:
         return len(self._secret_cache)
     
     def get_secret_summary(self) -> Dict[str, Any]:
-        """Get secret management summary for monitoring."""
-        return {
+        """Get secret management summary for monitoring and debugging."""
+        gcp_available = self._is_gcp_available()
+        project_id = self._get_gcp_project_id() if gcp_available else None
+        
+        summary = {
             "environment": self._environment,
             "secrets_loaded": len(self._secret_cache),
             "required_secrets": len([s for s, m in self._secret_mappings.items() if m.get("required")]),
             "rotation_enabled_count": len([s for s, m in self._secret_mappings.items() if m.get("rotation_enabled")]),
-            "gcp_available": self._is_gcp_available(),
-            "cache_valid": self._is_cache_valid()
+            "gcp_available": gcp_available,
+            "cache_valid": self._is_cache_valid(),
+            "gcp_project_id": project_id,
+            "gcp_disabled": self._env.get("DISABLE_GCP_SECRET_MANAGER", "false").lower() == "true"
         }
+        
+        # Add detailed GCP status for debugging
+        if self._environment in ["staging", "production"]:
+            try:
+                from google.cloud import secretmanager
+                summary["gcp_library_available"] = True
+            except ImportError:
+                summary["gcp_library_available"] = False
+            
+            summary["env_variables"] = {
+                "GCP_PROJECT_ID": self._env.get("GCP_PROJECT_ID", "NOT_SET"),
+                "DISABLE_GCP_SECRET_MANAGER": self._env.get("DISABLE_GCP_SECRET_MANAGER", "false")
+            }
+        
+        return summary
     
     def load_all_secrets(self) -> Dict[str, Any]:
         """Load all secrets from configured sources.

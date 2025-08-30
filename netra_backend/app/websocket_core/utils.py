@@ -63,7 +63,8 @@ def is_websocket_connected(websocket: WebSocket) -> bool:
     """
     Check if WebSocket is connected.
     
-    CRITICAL FIX: Enhanced state checking to prevent "Need to call accept first" errors.
+    CRITICAL FIX: Enhanced state checking to prevent "Need to call accept first" errors
+    with staging-optimized connection validation.
     """
     try:
         # Check multiple conditions to determine if WebSocket is connected
@@ -71,24 +72,28 @@ def is_websocket_connected(websocket: WebSocket) -> bool:
         if hasattr(websocket, 'client_state'):
             client_state = websocket.client_state
             is_connected = client_state == WebSocketState.CONNECTED
-            logger.debug(f"WebSocket state check: client_state={client_state}, connected={is_connected}")
             
             # CRITICAL FIX: If client state indicates disconnected or not yet connected, return False
             if client_state in [WebSocketState.DISCONNECTED, WebSocketState.CONNECTING]:
+                logger.debug(f"WebSocket client_state not connected: {client_state}")
                 return False
             
+            if is_connected:
+                logger.debug(f"WebSocket connected via client_state: {client_state}")
             return is_connected
         
         # 2. Fallback to application_state if available
         if hasattr(websocket, 'application_state'):
             app_state = websocket.application_state
             is_connected = app_state == WebSocketState.CONNECTED
-            logger.debug(f"WebSocket state check: application_state={app_state}, connected={is_connected}")
             
             # CRITICAL FIX: If application state indicates disconnected or not yet connected, return False
             if app_state in [WebSocketState.DISCONNECTED, WebSocketState.CONNECTING]:
+                logger.debug(f"WebSocket application_state not connected: {app_state}")
                 return False
                 
+            if is_connected:
+                logger.debug(f"WebSocket connected via application_state: {app_state}")
             return is_connected
         
         # 3. Check if the websocket has been properly initialized
@@ -96,9 +101,19 @@ def is_websocket_connected(websocket: WebSocket) -> bool:
             logger.debug("WebSocket state check: WebSocket not properly initialized")
             return False
         
-        # 4. Default to True if we can't determine state (let the receive() call handle disconnection)
-        logger.debug("WebSocket state check: No state attributes found, defaulting to connected=True")
-        return True
+        # 4. CRITICAL FIX: For staging, be more conservative - if we can't determine state, assume disconnected
+        # This prevents sending to potentially dead connections in cloud environments
+        from netra_backend.app.core.isolated_environment import get_env
+        env = get_env()
+        environment = env.get("ENVIRONMENT", "development").lower()
+        
+        if environment in ["staging", "production"]:
+            logger.debug(f"WebSocket state check: No state attributes found in {environment}, assuming disconnected for safety")
+            return False
+        else:
+            # Development - more permissive
+            logger.debug("WebSocket state check: No state attributes found in development, defaulting to connected=True")
+            return True
         
     except Exception as e:
         # CRITICAL FIX: If we can't check the state due to an error, assume disconnected
@@ -111,11 +126,24 @@ async def safe_websocket_send(websocket: WebSocket, data: Union[Dict[str, Any], 
     """
     Safely send data to WebSocket with retry logic.
     
-    CRITICAL FIX: Enhanced error handling for connection state issues.
+    CRITICAL FIX: Enhanced error handling for connection state issues with
+    staging-optimized retry logic and exponential backoff.
     """
     if not is_websocket_connected(websocket):
         logger.debug("WebSocket not connected, skipping send")
         return False
+    
+    # CRITICAL FIX: Environment-aware retry configuration
+    from netra_backend.app.core.isolated_environment import get_env
+    env = get_env()
+    environment = env.get("ENVIRONMENT", "development").lower()
+    
+    # Staging/production needs more aggressive retry logic due to network latency
+    if environment in ["staging", "production"]:
+        retry_count = max(retry_count, 3)  # At least 3 retries for cloud environments
+        max_backoff = 2.0  # Longer max backoff for staging
+    else:
+        max_backoff = 1.0  # Shorter backoff for development
     
     for attempt in range(retry_count + 1):
         try:
@@ -123,6 +151,9 @@ async def safe_websocket_send(websocket: WebSocket, data: Union[Dict[str, Any], 
                 await websocket.send_text(data)
             else:
                 await websocket.send_json(data)
+            
+            if attempt > 0:
+                logger.info(f"WebSocket send succeeded on attempt {attempt + 1}")
             return True
             
         except WebSocketDisconnect:
@@ -135,16 +166,19 @@ async def safe_websocket_send(websocket: WebSocket, data: Union[Dict[str, Any], 
                 logger.error(f"WebSocket connection state error during send: {error_message}")
                 return False
             else:
-                logger.warning(f"WebSocket send runtime error attempt {attempt + 1}: {e}")
+                logger.warning(f"WebSocket send runtime error attempt {attempt + 1}/{retry_count + 1}: {e}")
                 if attempt < retry_count:
-                    await asyncio.sleep(0.1 * (attempt + 1))  # Exponential backoff
+                    backoff_delay = min(0.1 * (2 ** attempt), max_backoff)  # Exponential backoff with cap
+                    await asyncio.sleep(backoff_delay)
                 else:
                     logger.error(f"WebSocket send failed after {retry_count + 1} attempts")
                     return False
         except Exception as e:
-            logger.warning(f"WebSocket send attempt {attempt + 1} failed: {e}")
+            logger.warning(f"WebSocket send attempt {attempt + 1}/{retry_count + 1} failed: {e}")
             if attempt < retry_count:
-                await asyncio.sleep(0.1 * (attempt + 1))  # Exponential backoff
+                backoff_delay = min(0.1 * (2 ** attempt), max_backoff)  # Exponential backoff with cap
+                logger.debug(f"Retrying WebSocket send in {backoff_delay:.2f}s")
+                await asyncio.sleep(backoff_delay)
             else:
                 logger.error(f"WebSocket send failed after {retry_count + 1} attempts")
                 return False

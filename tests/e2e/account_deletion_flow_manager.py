@@ -20,7 +20,7 @@ os.environ["TESTING"] = "1"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
 from tests.e2e.account_deletion_helpers import AccountDeletionE2ETester
-from tests.e2e.harness_complete import UnifiedE2ETestHarness
+from tests.e2e.harness_utils import UnifiedE2ETestHarness
 
 
 class AccountDeletionFlowManager:
