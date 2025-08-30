@@ -102,12 +102,25 @@ class EnvironmentValidator:
     
     def _get_current_environment(self) -> str:
         """Get the current environment name."""
-        # Check multiple possible environment indicators
-        environment = os.getenv("ENVIRONMENT", "").lower()
-        if not environment:
-            environment = os.getenv("NETRA_ENV", "").lower()
-        if not environment:
-            environment = "development"  # Default to development
+        # Use unified environment management
+        try:
+            from netra_backend.app.core.isolated_environment import get_env
+            env = get_env()
+            
+            # Check multiple possible environment indicators
+            environment = env.get("ENVIRONMENT", "").lower()
+            if not environment:
+                environment = env.get("NETRA_ENV", "").lower()
+            if not environment:
+                environment = "development"  # Default to development
+        except ImportError:
+            # Fallback to direct OS access only if unified environment is not available
+            import os
+            environment = os.getenv("ENVIRONMENT", "").lower()
+            if not environment:
+                environment = os.getenv("NETRA_ENV", "").lower()
+            if not environment:
+                environment = "development"  # Default to development
         
         # Normalize environment names
         if environment in ["prod", "production"]:

@@ -46,9 +46,9 @@ except ImportError:
     # Fallback for standalone execution
     class FallbackEnv:
         def get(self, key, default=None):
-            return os.getenv(key, default)
+            return os.getenv(key, default)  # @marked: Fallback environment wrapper
         def set(self, key, value, source="test_framework"):
-            os.environ[key] = value
+            os.environ[key] = value  # @marked: Fallback environment wrapper
         def enable_isolation(self):
             pass
     
@@ -116,7 +116,7 @@ if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
     # CRITICAL: Also set TEST_DISABLE_REDIS in real os.environ so auth_service can see it
     # This ensures cross-service test configuration consistency
     import os
-    os.environ["TEST_DISABLE_REDIS"] = "true"
+    os.environ["TEST_DISABLE_REDIS"] = "true"  # @marked: Cross-service test config
 
 # =============================================================================
 # COMMON FIXTURES
@@ -384,14 +384,16 @@ def mock_database_factory():
 @pytest.fixture
 def e2e_test_config():
     """Common E2E test configuration"""
+    # Get environment through isolated environment
+    env = get_env()
     return {
-        "websocket_url": os.getenv("E2E_WEBSOCKET_URL", "ws://localhost:8765"),
-        "backend_url": os.getenv("E2E_BACKEND_URL", "http://localhost:8000"),
-        "auth_service_url": os.getenv("E2E_AUTH_SERVICE_URL", "http://localhost:8081"),
-        "skip_real_services": os.getenv("SKIP_REAL_SERVICES", "true").lower() == "true",
-        "test_mode": os.getenv("HIGH_VOLUME_TEST_MODE", "mock"),
-        "timeout": int(os.getenv("E2E_TEST_TIMEOUT", "300")),
-        "performance_mode": os.getenv("E2E_PERFORMANCE_MODE", "true").lower() == "true"
+        "websocket_url": env.get("E2E_WEBSOCKET_URL", "ws://localhost:8765"),
+        "backend_url": env.get("E2E_BACKEND_URL", "http://localhost:8000"),
+        "auth_service_url": env.get("E2E_AUTH_SERVICE_URL", "http://localhost:8081"),
+        "skip_real_services": env.get("SKIP_REAL_SERVICES", "true").lower() == "true",
+        "test_mode": env.get("HIGH_VOLUME_TEST_MODE", "mock"),
+        "timeout": int(env.get("E2E_TEST_TIMEOUT", "300")),
+        "performance_mode": env.get("E2E_PERFORMANCE_MODE", "true").lower() == "true"
     }
 
 # =============================================================================
@@ -603,8 +605,10 @@ def service_urls(test_services):
 @pytest.fixture
 def real_llm_config():
     """Configuration for real LLM testing"""
+    # Get environment through isolated environment
+    env = get_env()
     return {
-        "enabled": os.environ.get("ENABLE_REAL_LLM_TESTING") == "true",
-        "timeout": float(os.environ.get("LLM_TEST_TIMEOUT", "30.0")),
-        "max_retries": int(os.environ.get("LLM_TEST_RETRIES", "3"))
+        "enabled": env.get("ENABLE_REAL_LLM_TESTING") == "true",
+        "timeout": float(env.get("LLM_TEST_TIMEOUT", "30.0")),
+        "max_retries": int(env.get("LLM_TEST_RETRIES", "3"))
     }

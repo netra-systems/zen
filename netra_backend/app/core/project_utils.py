@@ -34,16 +34,14 @@ def is_test_environment() -> bool:
     
     SINGLE SOURCE OF TRUTH for test environment detection.
     Combines multiple detection methods for comprehensive coverage.
-    Uses centralized environment management when available.
+    Uses service-local IsolatedEnvironment for unified environment management.
     
     Returns:
         bool: True if running in a test environment.
     """
-    import os
-    
-    # Try to use centralized environment management first
+    # Use service-local isolated environment management
     try:
-        from dev_launcher.isolated_environment import get_env
+        from netra_backend.app.core.isolated_environment import get_env
         env = get_env()
         
         # Method 1: Check pytest-specific environment variables
@@ -68,28 +66,46 @@ def is_test_environment() -> bool:
         if netra_env in ['test', 'testing']:
             return True
             
+        return False
+        
     except ImportError:
-        # Fallback to os.environ if centralized environment not available
-        # Method 1: Check pytest-specific environment variables
-        if os.environ.get('PYTEST_CURRENT_TEST') is not None:
-            return True
-        
-        # Method 2: Check explicit testing flag
-        if os.environ.get('TESTING') == '1':
-            return True
+        # This should not happen within the same service, but provide fallback
+        # Try dev_launcher environment management as secondary fallback
+        try:
+            from dev_launcher.isolated_environment import get_env
+            env = get_env()
             
-        # Method 3: Check if pytest is in the command line  
-        if 'pytest' in os.environ.get('_', ''):
-            return True
-        
-        # Method 4: Check environment name
-        env_name = os.environ.get('ENVIRONMENT', '').lower()
-        if env_name in ['test', 'testing']:
-            return True
+            # Method 1: Check pytest-specific environment variables
+            if env.get('PYTEST_CURRENT_TEST') is not None:
+                return True
             
-        # Method 5: Check NETRA_ENV
-        netra_env = os.environ.get('NETRA_ENV', '').lower()
-        if netra_env in ['test', 'testing']:
-            return True
-    
-    return False
+            # Method 2: Check explicit testing flag
+            if env.get('TESTING') == '1':
+                return True
+                
+            # Method 3: Check if pytest is in the command line  
+            if 'pytest' in env.get('_', ''):
+                return True
+            
+            # Method 4: Check environment name
+            env_name = env.get('ENVIRONMENT', '').lower()
+            if env_name in ['test', 'testing']:
+                return True
+                
+            # Method 5: Check NETRA_ENV
+            netra_env = env.get('NETRA_ENV', '').lower()
+            if netra_env in ['test', 'testing']:
+                return True
+                
+            return False
+            
+        except ImportError:
+            # Final fallback - should only occur in emergency situations
+            # This violates the unified environment principle but prevents system breakage
+            import os
+            return (
+                os.environ.get('PYTEST_CURRENT_TEST') is not None or
+                os.environ.get('TESTING') == '1' or
+                os.environ.get('ENVIRONMENT', '').lower() in ['test', 'testing'] or
+                os.environ.get('NETRA_ENV', '').lower() in ['test', 'testing']
+            )

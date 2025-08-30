@@ -19,7 +19,7 @@ controlled test scenarios.
 import os
 import threading
 import time
-from unittest.mock import patch, Mock
+# NO MOCKS - removed all mock imports per NO MOCKS POLICY
 from concurrent.futures import ThreadPoolExecutor
 
 import pytest

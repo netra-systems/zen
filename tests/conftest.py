@@ -18,6 +18,10 @@ from test_framework.environment_isolation import (
     ensure_test_isolation,
 )
 
+# REAL SERVICES INTEGRATION
+# Import all real service fixtures to replace mocks
+from test_framework.conftest_real_services import *
+
 # =============================================================================
 # COMMON ENVIRONMENT SETUP FOR ALL TESTS
 # Uses IsolatedEnvironment to prevent global pollution
@@ -169,9 +173,17 @@ async def throughput_client(test_user_token, high_volume_server):
 
 
 # =============================================================================
-# COMMON MOCK FIXTURES
-# Consolidated basic mocks used across multiple services
+# DEPRECATED MOCK FIXTURES - REPLACED BY REAL SERVICES
+# These are kept for backward compatibility during migration
+# Use real_* fixtures instead (imported from test_framework.conftest_real_services)
 # =============================================================================
+
+# NOTE: The following fixtures are DEPRECATED and should be replaced with real services:
+# - mock_redis_client -> real_redis
+# - mock_redis_manager -> redis_manager (real)
+# - mock_clickhouse_client -> clickhouse_client (real)
+# - mock_websocket_manager -> real_websocket_client
+# - All other mock_* fixtures -> corresponding real_* fixtures
 
 @pytest.fixture
 async def mock_redis_client():
@@ -438,7 +450,9 @@ async def dev_launcher():
         return
 
     # Check if we should use real services
-    use_real_services = os.environ.get("USE_REAL_SERVICES", "false").lower() == "true"
+    from test_framework.environment_isolation import get_env
+    env = get_env()
+    use_real_services = env.get("USE_REAL_SERVICES", "false").lower() == "true"
     if not use_real_services:
         pytest.skip("Real services disabled (set USE_REAL_SERVICES=true)")
         return

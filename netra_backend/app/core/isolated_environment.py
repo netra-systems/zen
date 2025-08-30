@@ -126,19 +126,23 @@ class IsolatedEnvironment:
         if 'pytest' in sys.modules:
             return True
         
-        # Check for test environment variables
+        # Check for test environment variables using internal access to avoid recursion
         test_indicators = [
             'PYTEST_CURRENT_TEST',
             'TESTING',
             'TEST_MODE'
         ]
         
+        # Use internal state or fallback to os.environ for test detection only
+        # This is necessary to avoid recursion since get() calls _is_test_context()
+        env_dict = self._isolated_vars if self._isolation_enabled else os.environ
+        
         for indicator in test_indicators:
-            if os.environ.get(indicator):
+            if env_dict.get(indicator):
                 return True
         
         # Check if ENVIRONMENT is set to testing
-        env_value = os.environ.get('ENVIRONMENT', '').lower()
+        env_value = env_dict.get('ENVIRONMENT', '').lower()
         if env_value in ['test', 'testing']:
             return True
         

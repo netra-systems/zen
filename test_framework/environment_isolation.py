@@ -19,13 +19,23 @@ import sys
 def get_env():
     """Get appropriate environment manager based on context."""
     # Check if we're in pytest environment
-    if 'pytest' in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
+    if 'pytest' in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):  # @marked: Test framework detection
         # During pytest, use a minimal environment wrapper that doesn't trigger dev setup
         class TestEnvironmentWrapper:
             def get(self, key: str, default=None):
-                return os.environ.get(key, default)
+                return os.environ.get(key, default)  # @marked: Test wrapper for isolated access
             def set(self, key: str, value: str, source: str = "test"):
-                os.environ[key] = value
+                os.environ[key] = value  # @marked: Test wrapper for isolated access
+            def get_all(self):
+                return dict(os.environ)  # @marked: Test wrapper for isolated access
+            def delete(self, key: str, source: str = "test"):
+                if key in os.environ:  # @marked: Test wrapper for isolated access
+                    del os.environ[key]  # @marked: Test wrapper for isolated access
+            def get_subprocess_env(self, additional_vars=None):
+                env = dict(os.environ)  # @marked: Test wrapper for isolated access
+                if additional_vars:
+                    env.update(additional_vars)
+                return env
             def is_isolation_enabled(self):
                 # Always return True for test environment wrapper
                 return True
@@ -46,7 +56,7 @@ def get_env():
 
 # Import IsolatedEnvironment only when not in pytest to avoid triggering dev setup
 try:
-    if 'pytest' not in sys.modules and not os.environ.get("PYTEST_CURRENT_TEST"):
+    if 'pytest' not in sys.modules and not os.environ.get("PYTEST_CURRENT_TEST"):  # @marked: Test framework detection
         from dev_launcher.isolated_environment import IsolatedEnvironment
     else:
         # Define a minimal IsolatedEnvironment for tests
