@@ -17,7 +17,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.chat_orchestrator.model_cascade import ModelCascade
-from netra_backend.app.agents.chat_orchestrator.model_selector import ModelSelector
+from netra_backend.app.services.llm.model_selector import ModelSelector
 from netra_backend.app.agents.chat_orchestrator.quality_evaluator import QualityEvaluator
 from netra_backend.app.agents.chat_orchestrator.cost_tracker import CostTracker
 from netra_backend.app.core.isolated_environment import IsolatedEnvironment

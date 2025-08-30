@@ -31,6 +31,7 @@ from netra_backend.app.schemas import User
 
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
+from test_framework.test_patterns import L3IntegrationTest
 
 class HandshakeState(Enum):
 

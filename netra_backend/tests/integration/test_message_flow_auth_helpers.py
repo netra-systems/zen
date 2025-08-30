@@ -17,8 +17,7 @@ import pytest
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.routes.utils.websocket_helpers import validate_websocket_token
 
-from netra_backend.tests.integration.test_unified_message_flow import MessageFlowTracker
-from netra_backend.tests.integration.test_ws_connection_mocks import MockWebSocket
+from netra_backend.tests.services.test_ws_connection_mocks import MockWebSocket
 
 from netra_backend.tests.integration.jwt_token_helpers import JWTTestHelper
 

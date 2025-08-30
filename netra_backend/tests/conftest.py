@@ -17,7 +17,57 @@ except ImportError:
 
 # REAL SERVICES INTEGRATION
 # Import all real service fixtures to replace backend mocks
-from test_framework.conftest_real_services import *
+# Skip real services for smoke tests to ensure they work without external dependencies
+import sys
+import os
+
+def _is_smoke_test_run():
+    """Check if we're running smoke tests specifically."""
+    
+    # Check environment variable set by unified test runner or other callers
+    if os.environ.get("PYTEST_CURRENT_CATEGORY") == "smoke":
+        return True
+    
+    # Check command line args for smoke test patterns
+    if hasattr(sys, 'argv'):
+        cmd_args = ' '.join(sys.argv)
+        
+        # Be more aggressive in smoke detection - if any smoke reference exists, treat as smoke test
+        smoke_patterns = [
+            '-m smoke',
+            '--markers smoke', 
+            'test_dev_smoke_test.py',
+            '--category smoke'
+        ]
+        
+        # Check for exact patterns
+        for pattern in smoke_patterns:
+            if pattern in cmd_args:
+                return True
+        
+        # Check for adjacent -m and smoke args (unified test runner pattern)
+        for i in range(len(sys.argv) - 1):
+            if sys.argv[i] == '-m' and sys.argv[i+1] == 'smoke':
+                return True
+                
+        # Check if any argument contains "smoke"
+        if any('smoke' in str(arg).lower() for arg in sys.argv):
+            return True
+            
+    return False
+
+# Only import real services if not running smoke tests
+if not _is_smoke_test_run():
+    from test_framework.conftest_real_services import *
+else:
+    # For smoke tests, skip real services and use lightweight setup
+    env = get_env()
+    env.set("USE_REAL_SERVICES", "false", source="smoke_test_conftest")
+    env.set("SKIP_SERVICE_HEALTH_CHECK", "true", source="smoke_test_conftest")
+    env.set("TEST_DISABLE_CLICKHOUSE", "true", source="smoke_test_conftest")
+    env.set("TEST_DISABLE_REDIS", "true", source="smoke_test_conftest")
+    env.set("TEST_DISABLE_POSTGRES", "true", source="smoke_test_conftest")
+    print("Smoke test mode: Real services disabled for lightweight testing")
 
 def pytest_addoption(parser):
     """Add command line options for backend tests."""
