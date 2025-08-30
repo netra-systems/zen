@@ -15,17 +15,14 @@ import os
 from contextlib import asynccontextmanager
 
 from analytics_service.analytics_core.models.events import (
-    FrontendEvent,
+    AnalyticsEvent,
     EventType,
     EventCategory,
-    ChatInteractionEvent,
-    ThreadLifecycleEvent,
-    FeatureUsageEvent,
     PromptAnalytics,
     EventBatch,
     ProcessingResult
 )
-from analytics_service.analytics_core.database.clickhouse import ClickHouseManager
+from analytics_service.analytics_core.database.clickhouse_manager import ClickHouseManager
 from analytics_service.analytics_core.database.redis import RedisManager
 
 logger = logging.getLogger(__name__)
@@ -57,7 +54,7 @@ class EventProcessor:
         
         # Processing state
         self._processing_queue: asyncio.Queue = asyncio.Queue()
-        self._batch_buffer: List[FrontendEvent] = []
+        self._batch_buffer: List[AnalyticsEvent] = []
         self._processing_tasks: List[asyncio.Task] = []
         self._running = False
         self._last_flush_time = datetime.utcnow()
@@ -154,7 +151,7 @@ class EventProcessor:
     
     # Event Processing Methods
     
-    async def process_event(self, event: FrontendEvent) -> bool:
+    async def process_event(self, event: AnalyticsEvent) -> bool:
         """Process a single event"""
         try:
             # Validate event
@@ -295,7 +292,7 @@ class EventProcessor:
     
     # Event Processing Logic
     
-    def _validate_event(self, event: FrontendEvent) -> bool:
+    def _validate_event(self, event: AnalyticsEvent) -> bool:
         """Validate event data"""
         try:
             # Required fields check
@@ -317,7 +314,7 @@ class EventProcessor:
             logger.error(f"Event validation error: {e}")
             return False
     
-    def _apply_privacy_filters(self, event: FrontendEvent) -> FrontendEvent:
+    def _apply_privacy_filters(self, event: AnalyticsEvent) -> AnalyticsEvent:
         """Apply privacy filters to event data"""
         try:
             # Hash IP address if present
@@ -420,12 +417,38 @@ class EventProcessor:
             self._failed_count += len(batch)
             logger.error(f"Failed to flush {len(batch)} events")
     
-    async def _store_events_with_retry(self, events: List[FrontendEvent]) -> bool:
+    async def _store_events_with_retry(self, events: List[AnalyticsEvent]) -> bool:
         """Store events with retry logic"""
         for attempt in range(self.config.max_retries):
             try:
                 if self.clickhouse:
-                    count = await self.clickhouse.insert_events(events)
+                    # Convert AnalyticsEvent objects to dictionaries for insertion
+                    events_data = []
+                    for event in events:
+                        event_dict = {
+                            'event_id': str(event.event_id),
+                            'timestamp': event.timestamp,
+                            'event_type': event.event_type.value,
+                            'event_category': event.event_category,
+                            'event_action': event.event_action,
+                            'event_label': event.event_label or '',
+                            'event_value': event.event_value or 0.0,
+                            'properties': json.dumps(event.properties),
+                            'user_id': event.context.user_id,
+                            'session_id': event.context.session_id,
+                            'page_path': event.context.page_path,
+                            'page_title': event.context.page_title or '',
+                            'referrer': event.context.referrer or '',
+                            'user_agent': event.context.user_agent or '',
+                            'ip_address': event.context.ip_address or '',
+                            'country_code': event.context.country_code or '',
+                            'gtm_container_id': event.context.gtm_container_id or '',
+                            'environment': event.context.environment,
+                            'app_version': event.context.app_version or ''
+                        }
+                        events_data.append(event_dict)
+                    
+                    count = await self.clickhouse.insert_data('analytics_events', events_data)
                     if count > 0:
                         return True
                 
@@ -444,7 +467,7 @@ class EventProcessor:
         
         return False
     
-    async def _update_hot_prompts(self, events: List[FrontendEvent]):
+    async def _update_hot_prompts(self, events: List[AnalyticsEvent]):
         """Update hot prompts cache with chat interactions"""
         if not self.redis:
             return

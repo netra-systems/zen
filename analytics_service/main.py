@@ -44,8 +44,56 @@ async def lifespan(app: FastAPI):
     
     # Initialize services (database connections, etc.)
     try:
-        # TODO: Add service initialization (ClickHouse, Redis, etc.)
-        logger.info("Service initialization completed")
+        from analytics_service.analytics_core.database.clickhouse_manager import ClickHouseManager
+        from analytics_service.analytics_core.database.redis_manager import RedisManager
+        from analytics_service.analytics_core.services.event_processor import EventProcessor, ProcessorConfig
+        
+        # Initialize ClickHouse manager
+        clickhouse_params = config.get_clickhouse_connection_params()
+        clickhouse_manager = ClickHouseManager(
+            host=clickhouse_params["host"],
+            port=clickhouse_params["port"],
+            database=clickhouse_params["database"],
+            user=clickhouse_params["user"],
+            password=clickhouse_params["password"],
+            max_connections=config.connection_pool_size,
+            query_timeout=config.query_timeout_seconds
+        )
+        await clickhouse_manager.initialize()
+        
+        # Initialize Redis manager
+        redis_params = config.get_redis_connection_params()
+        redis_manager = RedisManager(
+            host=redis_params["host"],
+            port=redis_params["port"],
+            db=redis_params["db"],
+            password=redis_params.get("password"),
+            max_connections=config.connection_pool_size
+        )
+        await redis_manager.initialize()
+        
+        # Initialize event processor
+        processor_config = ProcessorConfig(
+            batch_size=config.event_batch_size,
+            flush_interval_seconds=config.event_flush_interval_ms // 1000,
+            max_events_per_user_per_minute=config.max_events_per_user_per_minute
+        )
+        event_processor = EventProcessor(
+            clickhouse_manager=clickhouse_manager,
+            redis_manager=redis_manager,
+            config=processor_config
+        )
+        await event_processor.initialize()
+        
+        # Store managers in app state for access by routes
+        app.state.clickhouse_manager = clickhouse_manager
+        app.state.redis_manager = redis_manager  
+        app.state.event_processor = event_processor
+        
+        logger.info("Service initialization completed successfully")
+        logger.info(f"ClickHouse: {clickhouse_params['host']}:{clickhouse_params['port']}")
+        logger.info(f"Redis: {redis_params['host']}:{redis_params['port']}")
+        
     except Exception as e:
         logger.error(f"Service initialization failed: {e}")
         raise
@@ -54,6 +102,18 @@ async def lifespan(app: FastAPI):
     
     # Shutdown
     logger.info("Shutting down analytics service")
+    
+    # Clean shutdown of services
+    try:
+        if hasattr(app.state, 'event_processor'):
+            await app.state.event_processor.stop()
+        if hasattr(app.state, 'clickhouse_manager'):
+            await app.state.clickhouse_manager.close()
+        if hasattr(app.state, 'redis_manager'):
+            await app.state.redis_manager.close()
+        logger.info("Service shutdown completed successfully")
+    except Exception as e:
+        logger.error(f"Error during service shutdown: {e}")
 
 
 def create_app() -> FastAPI:
@@ -131,11 +191,14 @@ def create_app() -> FastAPI:
     
     # Placeholder endpoints for analytics
     @app.post("/api/analytics/events")
-    async def ingest_events(request: dict):
+    async def ingest_events(request: dict = None):
         """Placeholder for event ingestion endpoint."""
+        if request is None:
+            request = {}
+        events = request.get("events", []) if request else []
         return {
             "success": True,
-            "events_processed": len(request.get("events", [])),
+            "events_processed": len(events),
             "message": "Event ingestion endpoint (placeholder)"
         }
     

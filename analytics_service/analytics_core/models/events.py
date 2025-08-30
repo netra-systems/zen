@@ -282,26 +282,29 @@ class EventQueryResponse(BaseModel):
     query_time_ms: float = Field(..., description="Query execution time in milliseconds")
 
 
-# Legacy models for backward compatibility (kept to avoid breaking existing code)
-# These will be deprecated in favor of the new models above
-class FrontendEvent(AnalyticsEvent):
-    """Legacy frontend event model - use AnalyticsEvent instead."""
-    pass
+class EventBatch(BaseModel):
+    """Batch of events for bulk processing."""
+    events: List[AnalyticsEvent] = Field(..., min_items=1, description="List of events in the batch")
+    batch_id: Optional[str] = Field(None, description="Optional batch identifier")
 
 
-class ChatInteractionEvent(ChatInteractionProperties):
-    """Legacy chat interaction model - use ChatInteractionProperties instead."""
-    pass
+class ProcessingResult(BaseModel):
+    """Result of event processing operation."""
+    processed_count: int = Field(..., description="Number of events successfully processed")
+    failed_count: int = Field(default=0, description="Number of events that failed processing")
+    errors: List[str] = Field(default_factory=list, description="List of error messages")
+    processing_time_ms: float = Field(..., description="Processing time in milliseconds")
+    success: bool = Field(default=True, description="Overall processing success status")
+    
+    @validator('success', always=True)
+    def validate_success(cls, v, values):
+        """Auto-calculate success based on failed count."""
+        failed_count = values.get('failed_count', 0)
+        return failed_count == 0
 
 
-class ThreadLifecycleEvent(ThreadLifecycleProperties):
-    """Legacy thread lifecycle model - use ThreadLifecycleProperties instead."""
-    pass
-
-
-class FeatureUsageEvent(FeatureUsageProperties):
-    """Legacy feature usage model - use FeatureUsageProperties instead."""
-    pass
+# REMOVED: Legacy models have been deprecated and removed to achieve SSOT compliance.
+# Use AnalyticsEvent with appropriate properties for all event types.
 
 
 # Export all models
@@ -334,10 +337,8 @@ __all__ = [
     "EventIngestionResponse", 
     "EventQueryRequest",
     "EventQueryResponse",
+    "EventBatch",
+    "ProcessingResult",
     
-    # Legacy Models (deprecated)
-    "FrontendEvent",
-    "ChatInteractionEvent",
-    "ThreadLifecycleEvent",
-    "FeatureUsageEvent"
+    # Legacy Models (REMOVED - see comment above for migration guidance)
 ]
