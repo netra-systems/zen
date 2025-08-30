@@ -179,7 +179,7 @@ class TestServiceAuthValidator:
 @pytest.mark.e2e
 async def test_service_token_generation_valid_credentials():
     """Test service token generation with valid service credentials"""
-    validator = ServiceAuthTestValidator()
+    validator = TestServiceAuthValidator()
     service_creds = create_test_service_credentials("backend")
     
     token_data = await validator.validate_service_token_generation(
@@ -196,7 +196,7 @@ async def test_service_token_generation_valid_credentials():
 @pytest.mark.e2e
 async def test_service_token_structure_validation():
     """Test service token has correct JWT structure and claims"""
-    validator = ServiceAuthTestValidator()
+    validator = TestServiceAuthValidator()
     service_creds = create_test_service_credentials("backend")
     
     token_data = await validator.validate_service_token_generation(
@@ -215,7 +215,7 @@ async def test_service_token_structure_validation():
 @pytest.mark.e2e
 async def test_backend_auth_with_service_token():
     """Test backend authenticating with auth service using service tokens"""
-    validator = ServiceAuthTestValidator()
+    validator = TestServiceAuthValidator()
     service_creds = create_test_service_credentials("backend")
     
     # Generate service token
@@ -242,7 +242,7 @@ async def test_backend_auth_with_service_token():
 @pytest.mark.e2e
 async def test_service_vs_user_token_validation_differences():
     """Test service token validation differs from user token validation"""
-    validator = ServiceAuthTestValidator()
+    validator = TestServiceAuthValidator()
     helper = JWTTokenTestHelper()
     
     # Generate service token
@@ -265,7 +265,7 @@ async def test_service_vs_user_token_validation_differences():
 @pytest.mark.e2e
 async def test_service_token_refresh_mechanism():
     """Test token refresh for service accounts"""
-    validator = ServiceAuthTestValidator()
+    validator = TestServiceAuthValidator()
     service_creds = create_test_service_credentials("backend")
     
     await validator.validate_service_token_refresh(
@@ -278,7 +278,7 @@ async def test_service_token_refresh_mechanism():
 @pytest.mark.e2e
 async def test_invalid_service_credentials_rejection():
     """Test rejection of invalid service credentials"""
-    validator = ServiceAuthTestValidator()
+    validator = TestServiceAuthValidator()
     
     await validator.validate_invalid_service_credentials()
 
@@ -287,7 +287,7 @@ async def test_invalid_service_credentials_rejection():
 @pytest.mark.e2e
 async def test_expired_service_token_handling():
     """Test handling of expired service tokens"""
-    validator = ServiceAuthTestValidator()
+    validator = TestServiceAuthValidator()
     
     await validator.validate_expired_service_token()
 
@@ -296,7 +296,7 @@ async def test_expired_service_token_handling():
 @pytest.mark.e2e
 async def test_service_token_performance():
     """Test service token operations complete within performance requirements"""
-    validator = ServiceAuthTestValidator()
+    validator = TestServiceAuthValidator()
     service_creds = create_test_service_credentials("backend")
     
     # Test token generation performance (should be < 1 second)
@@ -321,7 +321,7 @@ async def test_service_token_performance():
 @pytest.mark.e2e
 async def test_multiple_service_tokens_isolation():
     """Test multiple services can have independent tokens"""
-    validator = ServiceAuthTestValidator()
+    validator = TestServiceAuthValidator()
     
     # Generate tokens for different services
     backend_creds = create_test_service_credentials("backend")

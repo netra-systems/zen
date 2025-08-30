@@ -150,7 +150,7 @@ describe('Message Exchange', () => {
         </TestProviders>
       );
       
-      const messageInput = screen.getByPlaceholderText(/Type your message/i);
+      const messageInput = screen.getByPlaceholderText(/start typing your ai optimization request/i);
       await userEvent.type(messageInput, 'Test message');
       
       const sendButton = screen.getByRole('button', { name: /send/i });
@@ -170,7 +170,7 @@ describe('Message Exchange', () => {
         </TestProviders>
       );
       
-      const messageInput = screen.getByPlaceholderText(/Type your message/i);
+      const messageInput = screen.getByPlaceholderText(/start typing your ai optimization request/i);
       await userEvent.type(messageInput, 'Test message to clear');
       
       const sendButton = screen.getByRole('button', { name: /send/i });
@@ -207,7 +207,7 @@ describe('Message Exchange', () => {
         </TestProviders>
       );
       
-      const messageInput = screen.getByPlaceholderText(/Type your message/i);
+      const messageInput = screen.getByPlaceholderText(/start typing your ai optimization request/i);
       await userEvent.type(messageInput, 'Message sent with Enter');
       
       // Use onKeyDown event instead of onKeyPress for better compatibility
@@ -227,7 +227,7 @@ describe('Message Exchange', () => {
         </TestProviders>
       );
       
-      const messageInput = screen.getByPlaceholderText(/Type your message/i);
+      const messageInput = screen.getByPlaceholderText(/start typing your ai optimization request/i);
       await userEvent.type(messageInput, 'Line 1');
       
       // Shift+Enter should add new line, not send
@@ -549,7 +549,7 @@ describe('Message Exchange', () => {
       );
       
       await waitFor(() => {
-        const messageInput = screen.getByPlaceholderText(/Type your message/i);
+        const messageInput = screen.getByPlaceholderText(/start typing your ai optimization request/i);
         const sendButton = screen.getByRole('button', { name: /send/i });
         
         // Input should be disabled during processing
@@ -580,7 +580,7 @@ describe('Message Exchange', () => {
       );
       
       // Add some text to enable the button
-      const messageInput = screen.getByPlaceholderText(/Type your message/i);
+      const messageInput = screen.getByPlaceholderText(/start typing your ai optimization request/i);
       await userEvent.type(messageInput, 'Test message');
       
       const sendButton = screen.getByRole('button', { name: /send/i });
@@ -631,7 +631,7 @@ describe('Message Exchange', () => {
         </TestProviders>
       );
       
-      const messageInput = screen.getByPlaceholderText(/Type your message/i);
+      const messageInput = screen.getByPlaceholderText(/start typing your ai optimization request/i);
       await userEvent.type(messageInput, 'Test message');
       
       const sendButton = screen.getByRole('button', { name: /send/i });

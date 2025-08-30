@@ -109,7 +109,12 @@ export default function DemoChat({ industry, onInteraction, useWebSocket = false
   const handleMessageError = async (error: unknown, userMessage: string): Promise<void> => {
     logger.error('Demo chat API error:', error)
     await simulateAgentProgression(setActiveAgent)
-    await createFallbackResponseMessage(userMessage)
+    
+    // Create an error message instead of a fallback success response
+    const errorMessage = createResponseMessage(
+      "I'm sorry, but the optimization service is currently unavailable. Please try again in a few moments. If the issue persists, our team has been notified and will resolve it shortly."
+    )
+    setMessages(prev => [...prev, errorMessage])
   }
 
   const createFallbackResponseMessage = async (userMessage: string): Promise<void> => {

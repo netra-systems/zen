@@ -71,11 +71,26 @@ class TestEnvironmentManager:
         "LOG_LEVEL": "ERROR",
         "TEST_COLLECTION_MODE": "0",
         
-        # Database configuration
+        # Database configuration - Using DATABASE_URL only to avoid conflicts
         "DATABASE_URL": "sqlite+aiosqlite:///:memory:",
+        # Explicitly clear individual database variables to prevent conflicts
+        "DATABASE_HOST": "",
+        "DATABASE_USER": "",
+        "DATABASE_PASSWORD": "",
+        "DATABASE_NAME": "",
+        "DATABASE_PORT": "",
+        "POSTGRES_HOST": "",
+        "POSTGRES_USER": "",
+        "POSTGRES_PASSWORD": "",
+        "POSTGRES_DB": "",
+        "POSTGRES_PORT": "",
+        
+        # Redis configuration
         "REDIS_URL": "redis://localhost:6379/1",
         "REDIS_HOST": "localhost",
         "REDIS_PORT": "6379",
+        
+        # ClickHouse configuration
         "CLICKHOUSE_HOST": "localhost",
         
         # Authentication secrets
@@ -97,7 +112,7 @@ class TestEnvironmentManager:
         # LLM test keys
         "GEMINI_API_KEY": "test-gemini-api-key",
         "GOOGLE_API_KEY": "test-gemini-api-key",
-        "GOOGLE_API_KEY": "test-openai-api-key",
+        "OPENAI_API_KEY": "test-openai-api-key",
         "ANTHROPIC_API_KEY": "test-anthropic-api-key",
     }
     
@@ -128,16 +143,61 @@ class TestEnvironmentManager:
         for key, value in self.BASE_TEST_ENV.items():
             self.env.set(key, value, source="test_environment_manager")
         
-        # Handle real LLM testing
-        if enable_real_llm:
-            self._configure_real_llm()
-        
-        # Apply additional variables
+        # Apply additional variables before database conflict check
         if additional_vars:
             for key, value in additional_vars.items():
                 self.env.set(key, value, source="test_additional_vars")
         
+        # Ensure database configuration consistency 
+        self._ensure_database_config_consistency()
+        
+        # Handle real LLM testing
+        if enable_real_llm:
+            self._configure_real_llm()
+        
         return self.env
+    
+    def _ensure_database_config_consistency(self) -> None:
+        """
+        Ensure database configuration consistency by preventing multiple sources.
+        
+        This method enforces that only one database configuration method is used:
+        - Either DATABASE_URL is set (for test environments)
+        - Or individual components are set (DATABASE_HOST, DATABASE_USER, etc.)
+        But not both, which causes configuration conflicts.
+        """
+        database_url = self.env.get("DATABASE_URL")
+        
+        # List of individual database configuration variables that conflict with DATABASE_URL
+        individual_db_vars = [
+            "DATABASE_HOST", "DATABASE_USER", "DATABASE_PASSWORD", 
+            "DATABASE_NAME", "DATABASE_PORT",
+            "POSTGRES_HOST", "POSTGRES_USER", "POSTGRES_PASSWORD", 
+            "POSTGRES_DB", "POSTGRES_PORT"
+        ]
+        
+        if database_url and database_url.strip():
+            # DATABASE_URL is set, ensure individual components are cleared to prevent conflicts
+            conflicts_cleared = []
+            for var in individual_db_vars:
+                existing_value = self.env.get(var)
+                if existing_value and existing_value.strip():
+                    # Clear conflicting individual database variables
+                    self.env.set(var, "", source="database_config_consistency_clear")
+                    conflicts_cleared.append(var)
+            
+            if conflicts_cleared:
+                print(f"[INFO] Cleared database configuration conflicts: {', '.join(conflicts_cleared)}")
+        else:
+            # DATABASE_URL is not set, check if we have individual components
+            has_individual_config = any(
+                self.env.get(var) and self.env.get(var).strip() 
+                for var in individual_db_vars
+            )
+            if not has_individual_config:
+                # No database configuration at all, use default test DATABASE_URL
+                self.env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", source="database_config_fallback")
+                print("[INFO] Set fallback DATABASE_URL for test environment")
     
     def _configure_real_llm(self) -> None:
         """Configure environment for real LLM testing.
@@ -225,6 +285,22 @@ def isolated_test_env():
     manager = get_test_env_manager()
     for key, value in manager.BASE_TEST_ENV.items():
         env.set(key, value, source="isolated_test_env_fixture")
+    
+    # Ensure database configuration consistency
+    # Use the env instance directly for consistency check
+    database_url = env.get("DATABASE_URL")
+    individual_db_vars = [
+        "DATABASE_HOST", "DATABASE_USER", "DATABASE_PASSWORD", 
+        "DATABASE_NAME", "DATABASE_PORT",
+        "POSTGRES_HOST", "POSTGRES_USER", "POSTGRES_PASSWORD", 
+        "POSTGRES_DB", "POSTGRES_PORT"
+    ]
+    
+    if database_url:
+        # DATABASE_URL is set, ensure individual components are cleared
+        for var in individual_db_vars:
+            if env.get(var):
+                env.set(var, "", source="isolated_test_env_consistency_clear")
     
     yield env
     

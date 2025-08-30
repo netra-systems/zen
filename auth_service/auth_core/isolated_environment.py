@@ -56,6 +56,7 @@ class IsolatedEnvironment:
             self._isolated_vars: Dict[str, str] = {}
             self._isolation_enabled = False
             self._protected_vars: Set[str] = set()
+            self._original_state: Optional[Dict[str, str]] = None
             
             # Automatically load .env file if it exists
             self._auto_load_env_file()
@@ -201,6 +202,8 @@ class IsolatedEnvironment:
         with self._lock:
             self._isolation_enabled = True
             if backup_original:
+                # Save original state for reset_to_original()
+                self._original_state = dict(os.environ)
                 # Copy current environment to isolated storage
                 self._isolated_vars = dict(os.environ)
             logger.debug("Isolation mode enabled")
@@ -363,6 +366,10 @@ class IsolatedEnvironment:
                 return self._isolated_vars.copy()
             return dict(os.environ)
     
+    def get_all_variables(self) -> Dict[str, str]:
+        """Get all environment variables - alias for get_all() for test compatibility."""
+        return self.get_all()
+    
     def reset(self) -> None:
         """Reset the environment to initial state."""
         with self._lock:
@@ -370,6 +377,26 @@ class IsolatedEnvironment:
             self._protected_vars.clear()
             self._isolation_enabled = False
             logger.debug("Environment reset to initial state")
+    
+    def reset_to_original(self) -> None:
+        """Reset the environment to the original state captured during enable_isolation."""
+        with self._lock:
+            if self._original_state is not None:
+                if self._isolation_enabled:
+                    # In isolation mode, restore to isolated vars
+                    self._isolated_vars = self._original_state.copy()
+                else:
+                    # Not in isolation mode, restore to os.environ
+                    # Clear all current environment variables that weren't in original
+                    for key in list(os.environ.keys()):
+                        if key not in self._original_state:
+                            del os.environ[key]
+                    # Restore original variables
+                    for key, value in self._original_state.items():
+                        os.environ[key] = value
+                logger.debug("Environment reset to original state")
+            else:
+                logger.warning("No original state saved - cannot reset to original")
 
 
 # Singleton instance getter for convenience

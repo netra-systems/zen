@@ -61,6 +61,32 @@ describe('Comprehensive Chat Interface Tests', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+    
+    // Restore default global mock state
+    global.mockAuthState = {
+      user: {
+        id: 'test-user',
+        email: 'test@example.com',
+        full_name: 'Test User'
+      },
+      loading: false,
+      error: null,
+      authConfig: {
+        development_mode: true,
+        google_client_id: 'mock-google-client-id',
+        endpoints: {
+          login: 'http://localhost:8081/auth/login',
+          logout: 'http://localhost:8081/auth/logout',
+          callback: 'http://localhost:8081/auth/callback',
+          token: 'http://localhost:8081/auth/token',
+          user: 'http://localhost:8081/auth/me',
+          dev_login: 'http://localhost:8081/auth/dev/login'
+        }
+      },
+      token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGVzdC11c2VyLTEyMyIsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsImV4cCI6OTk5OTk5OTk5OX0.test-signature',
+      isAuthenticated: true,
+      initialized: true
+    };
   });
 
   describe('1. Message Input Field Interactions', () => {
@@ -71,7 +97,7 @@ describe('Comprehensive Chat Interface Tests', () => {
         </TestProviders>
       );
 
-      const input = screen.getByPlaceholderText(/type your message/i);
+      const input = screen.getByPlaceholderText(/start typing your ai optimization request/i);
       expect(input).toBeInTheDocument();
       
       await user.type(input, 'Hello, AI assistant!');
@@ -79,7 +105,13 @@ describe('Comprehensive Chat Interface Tests', () => {
     });
 
     it('should disable input when not authenticated', () => {
-      mockStore.isAuthenticated = false;
+      // Update global mock state for useAuthStore
+      global.mockAuthState = {
+        ...global.mockAuthState,
+        isAuthenticated: false,
+        user: null,
+        token: null
+      };
       
       render(
         <TestProviders>
@@ -87,7 +119,7 @@ describe('Comprehensive Chat Interface Tests', () => {
         </TestProviders>
       );
 
-      const input = screen.getByPlaceholderText(/sign in to start chatting/i);
+      const input = screen.getByPlaceholderText(/please sign in to send messages/i);
       expect(input).toBeDisabled();
     });
 

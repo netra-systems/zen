@@ -227,7 +227,7 @@ class CoreDatabaseManager:
         elif environment == "staging":
             return "postgresql://netra:password@/netra?host=/cloudsql/netra-staging:us-central1:netra-db"
         else:  # development
-            return "postgresql://postgres:password@localhost:5432/netra"
+            return "postgresql://netra:netra123@localhost:5433/netra_dev"
     
     @staticmethod
     def convert_ssl_params_for_asyncpg(url: str) -> str:

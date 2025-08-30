@@ -372,6 +372,7 @@ class UnifiedConfigManager:
         # Also refresh all component environments
         self._validator.refresh_environment()
         self._database_manager.refresh_environment()
+        self._secrets_manager.refresh_environment()
     
     def get_config_summary(self) -> Dict[str, Any]:
         """Get configuration summary for monitoring."""

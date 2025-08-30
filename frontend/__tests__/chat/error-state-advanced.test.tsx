@@ -151,7 +151,7 @@ describe('Error Handling, State Management & Advanced UI Tests', () => {
       jest.mocked(useChatStore).mockReturnValueOnce(mockChatStore);
       render(<MessageInput />);
       
-      const input = screen.getByPlaceholderText(/Type your message/i);
+      const input = screen.getByPlaceholderText(/start typing your ai optimization request/i);
       fireEvent.change(input, { target: { value: 'Optimistic message' } });
       
       const sendButton = expectElementByRole('button', { name: /send/i });
@@ -212,7 +212,7 @@ describe('Error Handling, State Management & Advanced UI Tests', () => {
       jest.mocked(useChatStore).mockReturnValueOnce(mockChatStore);
       render(<MessageInput />);
       
-      const input = screen.getByPlaceholderText(/Type your message/i);
+      const input = screen.getByPlaceholderText(/start typing your ai optimization request/i);
       await userEvent.type(input, 'Shortcut test');
       
       // Simulate Cmd/Ctrl+Enter

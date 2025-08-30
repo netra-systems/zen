@@ -57,11 +57,11 @@ class TestAgentOrchestrationRealLLMIntegration:
         """Ensure real LLM is available and configured.
         
         Per CLAUDE.md: MOCKS ARE FORBIDDEN. This test MUST use real LLM APIs.
-        If real LLM is not available, the test MUST fail explicitly.
+        If real LLM is not available, the test Must fail explicitly.
         """
-        from netra_backend.app.schemas.config import AppConfig
+        from netra_backend.app.core.configuration.loader import get_configuration
         
-        config = AppConfig()
+        config = get_configuration()
         api_key = config.llm_configs.get("default", {}).api_key
         
         if not api_key or not api_key.strip():
@@ -361,8 +361,8 @@ class TestAgentOrchestrationRealLLMIntegration:
                                      timeout: int) -> Dict[str, Any]:
         """Execute agent with real LLM only. MOCKS ARE FORBIDDEN per CLAUDE.md."""
         from netra_backend.app.llm.llm_manager import LLMManager
-        from netra_backend.app.schemas.config import AppConfig
-        config = AppConfig()
+        from netra_backend.app.core.configuration.loader import get_configuration
+        config = get_configuration()
         llm_manager = LLMManager(config)
         
         start_time = time.time()
@@ -532,10 +532,10 @@ class TestAgentOrchestrationPerformanceIntegration:
         
         Per CLAUDE.md: MOCKS ARE FORBIDDEN. This test MUST use real LLM APIs.
         """
-        from netra_backend.app.schemas.config import AppConfig
+        from netra_backend.app.core.configuration.loader import get_configuration
         
         # Ensure real LLM is configured - fail if not available
-        config = AppConfig()
+        config = get_configuration()
         api_key = config.llm_configs.get("default", {}).api_key
         if not api_key or not api_key.strip():
             pytest.fail("Real LLM API key not configured. MOCKS ARE FORBIDDEN per CLAUDE.md.")

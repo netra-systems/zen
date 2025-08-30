@@ -170,7 +170,7 @@ describe('Message Display & Input Tests', () => {
       const user = userEvent.setup();
       render(<MessageInput />);
       
-      const input = screen.getByPlaceholderText(/Type your message/i);
+      const input = screen.getByPlaceholderText(/start typing your ai optimization request/i);
       await user.type(input, 'Test message');
       expect(input).toHaveValue('Test message');
     });
@@ -184,7 +184,7 @@ describe('Message Display & Input Tests', () => {
       jest.mocked(useChatStore).mockReturnValueOnce(mockChatStore);
       render(<MessageInput />);
       
-      const input = screen.getByPlaceholderText(/Type your message/i);
+      const input = screen.getByPlaceholderText(/start typing your ai optimization request/i);
       await userEvent.type(input, 'Send this message');
       
       const sendButton = expectElementByRole('button', { name: /send/i });
@@ -201,7 +201,7 @@ describe('Message Display & Input Tests', () => {
       jest.mocked(useChatStore).mockReturnValueOnce(mockChatStore);
       render(<MessageInput />);
       
-      const input = screen.getByPlaceholderText(/Type your message/i);
+      const input = screen.getByPlaceholderText(/start typing your ai optimization request/i);
       await userEvent.type(input, 'Message to clear');
       
       const sendButton = expectElementByRole('button', { name: /send/i });
@@ -217,7 +217,7 @@ describe('Message Display & Input Tests', () => {
       jest.mocked(useChatStore).mockReturnValueOnce(mockChatStore);
       render(<MessageInput />);
       
-      const input = screen.getByPlaceholderText(/Type your message/i);
+      const input = screen.getByPlaceholderText(/start typing your ai optimization request/i);
       expect(input).toBeDisabled();
     });
   });
@@ -275,7 +275,7 @@ describe('Message Display & Input Tests', () => {
       jest.mocked(useChatStore).mockReturnValueOnce(mockChatStore);
       render(<MessageInput />);
       
-      const input = screen.getByPlaceholderText(/Type your message/i);
+      const input = screen.getByPlaceholderText(/start typing your ai optimization request/i);
       fireEvent.change(input, { target: { value: 'Optimistic message' } });
       
       const sendButton = expectElementByRole('button', { name: /send/i });

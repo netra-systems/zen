@@ -46,9 +46,14 @@ class SecretManager:
         """Get current environment for secret management.
         
         Uses IsolatedEnvironment for secure environment detection.
+        Must match UnifiedConfigManager environment detection logic.
         """
-        # Use IsolatedEnvironment for secure environment detection
-        return self._env.get("ENVIRONMENT", "development").lower()
+        # Match UnifiedConfigManager environment detection logic exactly
+        if self._env.get("TESTING"):
+            return "testing"
+        env = self._env.get("ENVIRONMENT", "development").lower()
+        # Handle empty string case - default to development
+        return env if env else "development"
     
     def _load_secret_mappings(self) -> Dict[str, dict]:
         """Load secret to configuration field mappings."""
@@ -58,6 +63,23 @@ class SecretManager:
         mappings.update(self._get_auth_secret_mappings())
         mappings.update(self._get_database_secret_mappings())
         return mappings
+    
+    def refresh_environment(self) -> None:
+        """Refresh environment detection for testing scenarios.
+        
+        Called when environment changes during testing to ensure
+        secrets are loaded for the correct environment.
+        """
+        old_env = self._environment
+        self._environment = self._get_environment()
+        if old_env != self._environment:
+            # Clear caches when environment changes
+            self._secret_cache = {}
+            self._cache_timestamp = None
+            self._initialized = False
+            self._logger.debug(f"SecretManager environment changed from {old_env} to {self._environment}")
+            # Reload secret mappings for new environment
+            self._secret_mappings = self._load_secret_mappings()
     
     def _get_llm_secret_mappings(self) -> Dict[str, dict]:
         """Get LLM-related secret mappings."""
@@ -323,12 +345,19 @@ class SecretManager:
             setattr(config, field, value)
     
     def _navigate_to_target_object(self, config: AppConfig, path: str) -> Optional[object]:
-        """Navigate to target object using dot notation path."""
+        """Navigate to target object using dot notation path.
+        
+        Supports both attribute access (obj.attr) and dictionary access (dict[key]).
+        """
         parts = path.split('.')
         obj = config
         for part in parts:
             if hasattr(obj, part):
+                # Attribute access
                 obj = getattr(obj, part)
+            elif isinstance(obj, dict) and part in obj:
+                # Dictionary access
+                obj = obj[part]
             else:
                 return None
         return obj

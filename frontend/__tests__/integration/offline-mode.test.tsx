@@ -260,7 +260,7 @@ const OfflineModeComponent: React.FC = () => {
         <textarea
           value={currentDraft}
           onChange={(e) => saveDraft(e.target.value)}
-          placeholder="Type your message..."
+          placeholder="Start typing your AI optimization request..."
           data-testid="message-input"
         />
         <button 

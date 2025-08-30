@@ -21,7 +21,7 @@ const MessageInputWithValidation: React.FC = () => {
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         maxLength={MAX_LENGTH * 2} // Allow typing beyond limit for testing
-        placeholder="Type your message..."
+        placeholder="Start typing your AI optimization request..."
       />
       <div data-testid="char-count" style={{ color: isOverLimit ? 'red' : 'gray' }}>
         {message.length}/{MAX_LENGTH}

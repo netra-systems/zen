@@ -94,7 +94,7 @@ export default function IndustrySelector({ onSelect }: IndustrySelectorProps) {
           className="relative overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer group"
           onClick={() => onSelect(industry.name)}
         >
-          <div className={`absolute inset-0 bg-gradient-to-br ${industry.color} opacity-5 group-hover:opacity-10 transition-opacity`} />
+          <div className={`absolute inset-0 bg-gradient-to-br ${industry.color} opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none`} />
           
           <CardContent className="p-6">
             <div className="flex items-start justify-between mb-4">

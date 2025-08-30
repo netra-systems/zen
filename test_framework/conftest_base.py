@@ -104,6 +104,7 @@ if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
             os.makedirs(test_home, exist_ok=True)
             env.set("HOME", test_home, "test_framework_fastmcp_fallback")
     env.set("SERVICE_SECRET", "test-service-secret-for-cross-service-auth-32-chars-minimum-length", "test_framework_base")
+    env.set("SERVICE_ID", "test-service-auth", "test_framework_base")
     env.set("FERNET_KEY", "cYpHdJm0e-zt3SWz-9h0gC_kh0Z7c3H6mRQPbPLFdao=", "test_framework_base")
     env.set("ENCRYPTION_KEY", "test-encryption-key-32-chars-long", "test_framework_base")
     
