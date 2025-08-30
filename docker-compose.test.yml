@@ -1,0 +1,238 @@
+# Netra Real Services Test Infrastructure
+# Optimized for fast, reliable real service testing
+# Usage: docker-compose -f docker-compose.test.yml up
+
+version: '3.8'
+
+services:
+  # ============================================
+  # CORE TEST SERVICES
+  # ============================================
+  
+  # Test PostgreSQL Database - Optimized for fast testing
+  test-postgres:
+    image: postgres:15-alpine
+    container_name: netra-test-postgres
+    environment:
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_pass
+      POSTGRES_DB: netra_test
+      POSTGRES_HOST_AUTH_METHOD: trust
+      # Performance optimizations for testing
+      POSTGRES_INITDB_ARGS: "--data-checksums --wal-level=minimal --max-wal-senders=0"
+    ports:
+      - "${TEST_POSTGRES_PORT:-5434}:5432"
+    volumes:
+      # Use tmpfs for ultra-fast test database (data is lost on restart - perfect for tests)
+      - type: tmpfs
+        target: /var/lib/postgresql/data
+        tmpfs:
+          size: 1G
+      # Initialize test schema
+      - ./scripts/test_init_db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    command: |
+      postgres
+        -c shared_buffers=256MB
+        -c effective_cache_size=1GB
+        -c maintenance_work_mem=64MB
+        -c checkpoint_completion_target=0.9
+        -c wal_buffers=16MB
+        -c default_statistics_target=100
+        -c random_page_cost=1.1
+        -c effective_io_concurrency=200
+        -c work_mem=4MB
+        -c min_wal_size=1GB
+        -c max_wal_size=4GB
+        -c max_connections=200
+        -c log_statement=none
+        -c log_min_duration_statement=-1
+        -c fsync=off
+        -c synchronous_commit=off
+        -c full_page_writes=off
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d netra_test"]
+      interval: 2s
+      timeout: 1s
+      retries: 10
+      start_period: 10s
+    networks:
+      - test-network
+    restart: unless-stopped
+
+  # Test Redis Cache - Optimized for testing
+  test-redis:
+    image: redis:7-alpine
+    container_name: netra-test-redis
+    command: |
+      redis-server
+        --appendonly no
+        --save ""
+        --maxmemory 512mb
+        --maxmemory-policy allkeys-lru
+        --tcp-keepalive 60
+        --timeout 300
+    ports:
+      - "${TEST_REDIS_PORT:-6381}:6379"
+    volumes:
+      # Use tmpfs for ultra-fast test cache
+      - type: tmpfs
+        target: /data
+        tmpfs:
+          size: 512M
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 1s
+      retries: 5
+      start_period: 5s
+    networks:
+      - test-network
+    restart: unless-stopped
+
+  # Test ClickHouse Analytics - Optimized for testing
+  test-clickhouse:
+    image: clickhouse/clickhouse-server:23-alpine
+    container_name: netra-test-clickhouse
+    environment:
+      CLICKHOUSE_DB: netra_test_analytics
+      CLICKHOUSE_USER: test_user
+      CLICKHOUSE_PASSWORD: test_pass
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    ports:
+      - "${TEST_CLICKHOUSE_HTTP_PORT:-8125}:8123"
+      - "${TEST_CLICKHOUSE_TCP_PORT:-9002}:9000"
+    volumes:
+      # Use tmpfs for ultra-fast test analytics
+      - type: tmpfs
+        target: /var/lib/clickhouse
+        tmpfs:
+          size: 1G
+      # Initialize test schema
+      - ./scripts/test_init_clickhouse.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    # Performance optimizations for testing
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8123/ping"]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+      start_period: 15s
+    networks:
+      - test-network
+    restart: unless-stopped
+
+  # ============================================
+  # SUPPORTING TEST SERVICES
+  # ============================================
+
+  # Test Message Queue (RabbitMQ) - If needed for async testing
+  test-rabbitmq:
+    image: rabbitmq:3-alpine
+    container_name: netra-test-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: test_user
+      RABBITMQ_DEFAULT_PASS: test_pass
+    ports:
+      - "${TEST_RABBITMQ_PORT:-5673}:5672"
+      - "${TEST_RABBITMQ_MGMT_PORT:-15673}:15672"
+    volumes:
+      - type: tmpfs
+        target: /var/lib/rabbitmq
+        tmpfs:
+          size: 256M
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    networks:
+      - test-network
+    restart: unless-stopped
+
+  # Test SMTP Server - For email testing
+  test-mailhog:
+    image: mailhog/mailhog:latest
+    container_name: netra-test-mailhog
+    ports:
+      - "${TEST_SMTP_PORT:-1026}:1025"
+      - "${TEST_SMTP_WEB_PORT:-8026}:8025"
+    networks:
+      - test-network
+    restart: unless-stopped
+
+  # ============================================
+  # TEST UTILITIES
+  # ============================================
+
+  # Test data seeder - Loads test fixtures
+  test-seeder:
+    build:
+      context: .
+      dockerfile: ./docker/test-seeder.Dockerfile
+    container_name: netra-test-seeder
+    environment:
+      POSTGRES_HOST: test-postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_pass
+      POSTGRES_DB: netra_test
+      REDIS_HOST: test-redis
+      REDIS_PORT: 6379
+      CLICKHOUSE_HOST: test-clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USER: test_user
+      CLICKHOUSE_PASSWORD: test_pass
+      CLICKHOUSE_DB: netra_test_analytics
+    volumes:
+      - ./test_framework/fixtures:/app/fixtures:ro
+      - ./scripts/test_seed_data.py:/app/seed_data.py:ro
+    depends_on:
+      test-postgres:
+        condition: service_healthy
+      test-redis:
+        condition: service_healthy
+      test-clickhouse:
+        condition: service_healthy
+    networks:
+      - test-network
+    command: python seed_data.py
+
+  # Test health monitor - Monitors service health during tests
+  test-monitor:
+    build:
+      context: .
+      dockerfile: ./docker/test-monitor.Dockerfile
+    container_name: netra-test-monitor
+    environment:
+      SERVICES_TO_MONITOR: "test-postgres,test-redis,test-clickhouse"
+      CHECK_INTERVAL: 5
+      HEALTH_ENDPOINT: /health-status
+    ports:
+      - "${TEST_MONITOR_PORT:-9090}:8080"
+    depends_on:
+      - test-postgres
+      - test-redis
+      - test-clickhouse
+    networks:
+      - test-network
+    restart: unless-stopped
+
+# Optimized test network
+networks:
+  test-network:
+    driver: bridge
+    name: netra-test-network
+    driver_opts:
+      com.docker.network.bridge.name: netra-test-br0
+      com.docker.network.driver.mtu: 1500
+
+# Test volumes (mostly tmpfs for speed)
+volumes:
+  test_postgres_logs:
+    driver: local
+  test_clickhouse_logs:
+    driver: local
