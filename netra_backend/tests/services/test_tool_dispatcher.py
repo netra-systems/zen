@@ -9,30 +9,32 @@ from netra_backend.app.services.apex_optimizer_agent.tools.tool_dispatcher impor
     ApexToolSelector,
 )
 
-# Mock class for testing
-class ToolDispatcher:
-    def __init__(self, tools):
-        self.tools = tools
+# Mock fixture for testing - avoid duplicating production ToolDispatcher
+@pytest.fixture
+def mock_tool_dispatcher():
+    """Create a mock ToolDispatcher for testing without duplicating production code."""
+    mock_dispatcher = Mock()
+    mock_dispatcher.tools = {}
     
-    def register_tool(self, tool):
-        self.tools[tool.name] = tool
+    def register_tool(tool):
+        mock_dispatcher.tools[tool.name] = tool
     
-    async def execute_tool(self, tool_name, params):
-        if tool_name not in self.tools:
+    async def execute_tool(tool_name, params):
+        if tool_name not in mock_dispatcher.tools:
             raise ValueError(f"Unknown tool: {tool_name}")
-        return await self.tools[tool_name].execute(params)
+        return await mock_dispatcher.tools[tool_name].execute(params)
     
-    async def execute_chain(self, chain):
+    async def execute_chain(chain):
         results = []
         for tool_name, params in chain:
-            result = await self.execute_tool(tool_name, params)
+            result = await execute_tool(tool_name, params)
             results.append(result)
         return results
     
-    async def execute_tool_with_metadata(self, tool_name, params):
+    async def execute_tool_with_metadata(tool_name, params):
         import time
         start_time = time.time()
-        result = await self.execute_tool(tool_name, params)
+        result = await execute_tool(tool_name, params)
         execution_time = time.time() - start_time
         
         return {
@@ -43,26 +45,31 @@ class ToolDispatcher:
                 "timestamp": time.time()
             }
         }
+    
+    mock_dispatcher.register_tool = register_tool
+    mock_dispatcher.execute_tool = execute_tool
+    mock_dispatcher.execute_chain = execute_chain
+    mock_dispatcher.execute_tool_with_metadata = execute_tool_with_metadata
+    
+    return mock_dispatcher
 class TestToolDispatcher:
     
     @pytest.mark.asyncio
-    async def test_tool_registration(self):
+    async def test_tool_registration(self, mock_tool_dispatcher):
         """Test dynamic tool registration in dispatcher"""
-        tool_dispatcher = ToolDispatcher({})
-        
         # Mock: Generic component isolation for controlled unit testing
         mock_tool = MagicMock()
         mock_tool.name = "custom_analyzer"
         # Mock: Async component isolation for testing without real async operations
         mock_tool.execute = AsyncMock(return_value={"result": "success"})
         
-        tool_dispatcher.register_tool(mock_tool)
+        mock_tool_dispatcher.register_tool(mock_tool)
         
-        assert "custom_analyzer" in tool_dispatcher.tools
-        assert tool_dispatcher.tools["custom_analyzer"] == mock_tool
+        assert "custom_analyzer" in mock_tool_dispatcher.tools
+        assert mock_tool_dispatcher.tools["custom_analyzer"] == mock_tool
     
     @pytest.mark.asyncio
-    async def test_tool_execution_with_validation(self):
+    async def test_tool_execution_with_validation(self, mock_tool_dispatcher):
         """Test tool execution with parameter validation"""
         # Mock: Generic component isolation for controlled unit testing
         mock_log_fetcher = AsyncMock()
@@ -71,11 +78,11 @@ class TestToolDispatcher:
             "logs": ["log1", "log2"],
             "count": 2
         })
+        mock_log_fetcher.name = "log_fetcher"
         
-        tools = {"log_fetcher": mock_log_fetcher}
-        tool_dispatcher = ToolDispatcher(tools)
+        mock_tool_dispatcher.register_tool(mock_log_fetcher)
         
-        result = await tool_dispatcher.execute_tool(
+        result = await mock_tool_dispatcher.execute_tool(
             "log_fetcher",
             {"start_time": "2024-01-01", "end_time": "2024-01-02"}
         )
@@ -84,23 +91,24 @@ class TestToolDispatcher:
         mock_log_fetcher.execute.assert_called_once()
     
     @pytest.mark.asyncio
-    async def test_tool_chain_execution(self):
+    async def test_tool_chain_execution(self, mock_tool_dispatcher):
         """Test executing multiple tools in sequence"""
         # Mock: Async component isolation for testing without real async operations
         mock_analyzer = AsyncMock(return_value={"patterns": ["pattern1"]})
         # Mock: Async component isolation for testing without real async operations
         mock_optimizer = AsyncMock(return_value={"optimizations": ["opt1"]})
         
-        tools = {
-            # Mock: Service component isolation for predictable testing behavior
-            "pattern_analyzer": MagicMock(execute=mock_analyzer),
-            # Mock: Service component isolation for predictable testing behavior
-            "optimizer": MagicMock(execute=mock_optimizer)
-        }
+        # Mock: Service component isolation for predictable testing behavior
+        pattern_analyzer = MagicMock(execute=mock_analyzer)
+        pattern_analyzer.name = "pattern_analyzer"
+        # Mock: Service component isolation for predictable testing behavior
+        optimizer = MagicMock(execute=mock_optimizer)
+        optimizer.name = "optimizer"
         
-        tool_dispatcher = ToolDispatcher(tools)
+        mock_tool_dispatcher.register_tool(pattern_analyzer)
+        mock_tool_dispatcher.register_tool(optimizer)
         
-        chain_result = await tool_dispatcher.execute_chain([
+        chain_result = await mock_tool_dispatcher.execute_chain([
             ("pattern_analyzer", {"data": "test"}),
             ("optimizer", {"patterns": ["pattern1"]})
         ])
@@ -110,7 +118,7 @@ class TestToolDispatcher:
         assert chain_result[1]["optimizations"] == ["opt1"]
     
     @pytest.mark.asyncio
-    async def test_tool_error_handling(self):
+    async def test_tool_error_handling(self, mock_tool_dispatcher):
         """Test error handling when tool execution fails"""
         # Mock: Generic component isolation for controlled unit testing
         mock_failing_tool = AsyncMock()
@@ -118,27 +126,26 @@ class TestToolDispatcher:
         mock_failing_tool.execute = AsyncMock(
             side_effect=Exception("Tool execution failed")
         )
+        mock_failing_tool.name = "failing_tool"
         
-        tools = {"failing_tool": mock_failing_tool}
-        tool_dispatcher = ToolDispatcher(tools)
+        mock_tool_dispatcher.register_tool(mock_failing_tool)
         
         with pytest.raises(Exception) as exc_info:
-            await tool_dispatcher.execute_tool("failing_tool", {})
+            await mock_tool_dispatcher.execute_tool("failing_tool", {})
         
         assert "Tool execution failed" in str(exc_info.value)
     
     @pytest.mark.asyncio
-    async def test_unknown_tool_handling(self):
+    async def test_unknown_tool_handling(self, mock_tool_dispatcher):
         """Test handling of unknown tool requests"""
-        tool_dispatcher = ToolDispatcher({})
         
         with pytest.raises(ValueError) as exc_info:
-            await tool_dispatcher.execute_tool("non_existent_tool", {})
+            await mock_tool_dispatcher.execute_tool("non_existent_tool", {})
         
         assert "Unknown tool" in str(exc_info.value)
     
     @pytest.mark.asyncio
-    async def test_concurrent_tool_execution(self):
+    async def test_concurrent_tool_execution(self, mock_tool_dispatcher):
         """Test concurrent execution of multiple tools"""
         import asyncio
         
@@ -151,23 +158,22 @@ class TestToolDispatcher:
         
         # Mock: Async component isolation for testing without real async operations
         mock_tool_1.execute = AsyncMock(return_value={"result": "tool1"})
+        mock_tool_1.name = "tool1"
         # Mock: Async component isolation for testing without real async operations
         mock_tool_2.execute = AsyncMock(return_value={"result": "tool2"})
+        mock_tool_2.name = "tool2"
         # Mock: Async component isolation for testing without real async operations
         mock_tool_3.execute = AsyncMock(return_value={"result": "tool3"})
+        mock_tool_3.name = "tool3"
         
-        tools = {
-            "tool1": mock_tool_1,
-            "tool2": mock_tool_2,
-            "tool3": mock_tool_3
-        }
-        
-        tool_dispatcher = ToolDispatcher(tools)
+        mock_tool_dispatcher.register_tool(mock_tool_1)
+        mock_tool_dispatcher.register_tool(mock_tool_2)
+        mock_tool_dispatcher.register_tool(mock_tool_3)
         
         tasks = [
-            tool_dispatcher.execute_tool("tool1", {}),
-            tool_dispatcher.execute_tool("tool2", {}),
-            tool_dispatcher.execute_tool("tool3", {})
+            mock_tool_dispatcher.execute_tool("tool1", {}),
+            mock_tool_dispatcher.execute_tool("tool2", {}),
+            mock_tool_dispatcher.execute_tool("tool3", {})
         ]
         
         results = await asyncio.gather(*tasks)
@@ -178,17 +184,17 @@ class TestToolDispatcher:
         assert results[2]["result"] == "tool3"
     
     @pytest.mark.asyncio
-    async def test_tool_metadata_tracking(self):
+    async def test_tool_metadata_tracking(self, mock_tool_dispatcher):
         """Test tracking tool execution metadata"""
         # Mock: Generic component isolation for controlled unit testing
         mock_tool = AsyncMock()
         # Mock: Async component isolation for testing without real async operations
         mock_tool.execute = AsyncMock(return_value={"data": "test_result"})
+        mock_tool.name = "test_tool"
         
-        tools = {"test_tool": mock_tool}
-        tool_dispatcher = ToolDispatcher(tools)
+        mock_tool_dispatcher.register_tool(mock_tool)
         
-        result = await tool_dispatcher.execute_tool_with_metadata(
+        result = await mock_tool_dispatcher.execute_tool_with_metadata(
             "test_tool", 
             {"param": "value"}
         )

@@ -19,7 +19,7 @@ services:
       POSTGRES_DB: netra_test
       POSTGRES_HOST_AUTH_METHOD: trust
       # Performance optimizations for testing
-      POSTGRES_INITDB_ARGS: "--data-checksums --wal-level=minimal --max-wal-senders=0"
+      POSTGRES_INITDB_ARGS: "--data-checksums"
     ports:
       - "${TEST_POSTGRES_PORT:-5434}:5432"
     volumes:
