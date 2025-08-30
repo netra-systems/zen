@@ -15,6 +15,7 @@ import subprocess
 import os
 import json
 from typing import Dict, Optional
+from shared.port_discovery import PortDiscovery
 
 
 class TestDevLoginDockerCompose:
@@ -23,8 +24,9 @@ class TestDevLoginDockerCompose:
     @classmethod
     def setup_class(cls):
         """Ensure Docker Compose services are running."""
-        cls.auth_url = "http://localhost:8081"
-        cls.backend_url = "http://localhost:8001"
+        # Use dynamic port discovery based on environment
+        cls.auth_url = PortDiscovery.get_service_url("auth")
+        cls.backend_url = PortDiscovery.get_service_url("backend")
         cls.ensure_docker_services_running()
         
     @classmethod

@@ -12,6 +12,7 @@ import logging
 from auth_service.auth_core.isolated_environment import get_env
 from auth_service.auth_core.secret_loader import AuthSecretLoader
 from shared.database_url_builder import DatabaseURLBuilder
+from shared.port_discovery import PortDiscovery
 
 logger = logging.getLogger(__name__)
 
@@ -174,18 +175,16 @@ class AuthConfig:
     
     @staticmethod
     def get_auth_service_url() -> str:
-        """Get auth service URL based on environment"""
+        """Get auth service URL based on environment with dynamic port discovery"""
         env = AuthConfig.get_environment()
         
-        if env == "staging":
-            return "https://auth.staging.netrasystems.ai"
-        elif env == "production":
-            return "https://auth.netrasystems.ai"
+        # Check for explicit override first
+        override_url = get_env().get("AUTH_SERVICE_URL")
+        if override_url:
+            return override_url
         
-        # Force localhost in development for proper hostname resolution in tests
-        if env == "development":
-            return "http://localhost:8081"
-        return get_env().get("AUTH_SERVICE_URL", "http://localhost:8081")
+        # Use dynamic port discovery
+        return PortDiscovery.get_service_url("auth", environment=env)
     
     @staticmethod
     def get_database_url() -> str:

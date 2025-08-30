@@ -34,11 +34,48 @@ import pytest
 from tests.clients import TestClientFactory
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 
-# Enable real services for this test module
-pytestmark = pytest.mark.skipif(
-    os.environ.get("USE_REAL_SERVICES", "false").lower() != "true",
-    reason="Real services disabled (set USE_REAL_SERVICES=true)"
-)
+# CRITICAL: This test REQUIRES real services - NO MOCKS ALLOWED per CLAUDE.md
+# Import E2E enforcement to ensure real services
+from tests.e2e.enforce_real_services import E2EServiceValidator
+
+# Enforce real services immediately on import
+E2EServiceValidator.enforce_real_services()
+
+# Validate critical dependencies at module level
+def _validate_real_service_requirements():
+    """Validate real service requirements and fail fast if missing."""
+    missing_deps = []
+    
+    # Check for real LLM capability
+    if not any([
+        os.environ.get("OPENAI_API_KEY"),
+        os.environ.get("ANTHROPIC_API_KEY"), 
+        os.environ.get("GEMINI_API_KEY"),
+        os.environ.get("GOOGLE_API_KEY")
+    ]):
+        missing_deps.append("LLM API keys (OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY, or GOOGLE_API_KEY)")
+    
+    # Ensure real LLM is enabled
+    if os.environ.get("USE_REAL_LLM", "false").lower() != "true":
+        os.environ["USE_REAL_LLM"] = "true"
+        os.environ["TEST_USE_REAL_LLM"] = "true"
+    
+    # Check critical environment variables
+    if not os.environ.get("JWT_SECRET_KEY"):
+        missing_deps.append("JWT_SECRET_KEY for authentication")
+    
+    if missing_deps:
+        error_msg = (
+            "CRITICAL: Real Agent Pipeline test requires real services but dependencies are missing:\n"
+            + "\n".join(f"  - {dep}" for dep in missing_deps) +
+            "\n\nThis test validates the complete agent pipeline with real LLM APIs."
+            "\nPer CLAUDE.md: MOCKS ARE FORBIDDEN in E2E tests."
+            "\nEither provide the required dependencies or fix the underlying service configuration."
+        )
+        raise RuntimeError(error_msg)
+
+# Validate requirements on import
+_validate_real_service_requirements()
 
 
 @pytest.fixture

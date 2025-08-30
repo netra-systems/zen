@@ -50,10 +50,14 @@ class TestClickHouseServiceConnection:
             mock_init.assert_called_once()
     
     @mock_justified("L1 Unit Test: Testing that service can be initialized with NoOp client in testing environment.", "L1")
-    def test_service_can_use_mock(self, clickhouse_client):
+    @pytest.mark.asyncio
+    async def test_service_can_use_mock(self, clickhouse_client):
         """Test that service can be initialized with NoOp client in testing environment."""
         # In testing environment with CLICKHOUSE_ENABLED=false, the service should use NoOp client
-        # The service auto-initializes with NoOp client when ClickHouse is disabled
+        # Initialize the service if not already done
+        if not clickhouse_client._client:
+            await clickhouse_client.initialize()
+        
         # Check that the client is properly configured for testing
         assert clickhouse_client._client is not None
         
@@ -246,8 +250,7 @@ class TestClickHouseServiceCostBreakdown:
     def clickhouse_client(self):
         """Create ClickHouse client for testing."""
         client = get_clickhouse_service()
-        # Initialize with mock client for testing
-        client._initialize_mock_client()
+        # Client will auto-initialize with NoOp client in testing environment
         return client
     
     @mock_justified("L1 Unit Test: Testing cost breakdown query construction.", "L1")
@@ -315,9 +318,10 @@ class TestClickHouseServiceConnectionManagement:
     @mock_justified("L1 Unit Test: Testing batch insert functionality.", "L1")
     @pytest.mark.asyncio
     async def test_batch_insert_mock(self, clickhouse_client):
-        """Test batch insert with mock client."""
-        # Initialize with mock client
-        clickhouse_client._initialize_mock_client()
+        """Test batch insert with NoOp client."""
+        # Initialize with NoOp client
+        if not clickhouse_client._client:
+            await clickhouse_client.initialize()
         
         test_data = [
             {"id": 1, "name": "test1"},
@@ -330,8 +334,9 @@ class TestClickHouseServiceConnectionManagement:
     @pytest.mark.asyncio
     async def test_close_connection(self, clickhouse_client):
         """Test connection cleanup."""
-        # Initialize with mock client first
-        clickhouse_client._initialize_mock_client()
+        # Initialize with NoOp client first
+        if not clickhouse_client._client:
+            await clickhouse_client.initialize()
         
         # Should not raise any exception
         await clickhouse_client.close()
@@ -352,8 +357,9 @@ class TestClickHouseServiceErrorHandling:
     @pytest.mark.asyncio
     async def test_query_execution_logs_error_details(self, clickhouse_client):
         """Test that query execution errors are logged with details."""
-        # Initialize with mock client
-        clickhouse_client._initialize_mock_client()
+        # Initialize with NoOp client
+        if not clickhouse_client._client:
+            await clickhouse_client.initialize()
         
         error_message = "Table 'test_table' doesn't exist"
         
