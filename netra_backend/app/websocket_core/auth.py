@@ -24,6 +24,7 @@ from starlette.websockets import WebSocketState
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from netra_backend.app.core.tracing import TracingManager
 from netra_backend.app.core.websocket_cors import check_websocket_cors
+from netra_backend.app.core.security_monitoring import check_and_alert_mock_token, log_security_event
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket_core.types import AuthInfo, WebSocketConfig
 from netra_backend.app.websocket_core.utils import is_websocket_connected
@@ -165,6 +166,22 @@ class WebSocketAuthenticator:
             raise HTTPException(
                 status_code=1008,
                 detail="Authentication required: Use Authorization header or Sec-WebSocket-Protocol"
+            )
+        
+        # Check for mock token usage and alert if detected
+        if check_and_alert_mock_token(token, "websocket_auth"):
+            self.auth_stats["security_violations"] += 1
+            log_security_event("mock_token_detected", {
+                "message": "Mock token detected in WebSocket authentication",
+                "auth_method": auth_method,
+                "client_ip": self._get_client_ip(websocket),
+                "user_agent": websocket.headers.get("user-agent", "unknown"),
+                "context": "websocket_authentication"
+            }, "critical")
+            logger.error(f"SECURITY ALERT: Mock token detected in WebSocket auth via {auth_method}")
+            raise HTTPException(
+                status_code=1008,
+                detail="Authentication failed: Invalid token format"
             )
         
         # Validate token with auth service

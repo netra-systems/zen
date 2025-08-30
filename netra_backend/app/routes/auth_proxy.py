@@ -205,3 +205,16 @@ async def logout_user(request: Request):
         if isinstance(e, HTTPException):
             raise
         raise HTTPException(status_code=500, detail="Logout failed")
+
+
+@router.get("/config")
+async def get_auth_config():
+    """Get authentication configuration by delegating to auth service."""
+    try:
+        result = await _delegate_to_auth_service("/config", "GET")
+        return result
+    except Exception as e:
+        logger.error(f"Auth config proxy failed: {e}")
+        if isinstance(e, HTTPException):
+            raise
+        raise HTTPException(status_code=500, detail="Auth config retrieval failed")

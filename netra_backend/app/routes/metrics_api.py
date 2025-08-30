@@ -11,6 +11,7 @@ from fastapi import APIRouter, Depends
 
 from netra_backend.app.auth_integration import get_current_user, get_current_user_optional
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.security_monitoring import get_security_metrics
 
 logger = central_logger.get_logger(__name__)
 router = APIRouter()
@@ -220,3 +221,37 @@ def _generate_mock_raw_metrics() -> Dict[str, Any]:
             }
         }
     }
+
+
+@router.get("/security")
+async def get_security_metrics_endpoint(
+    user: Optional[Dict] = Depends(get_current_user_optional)
+) -> Dict[str, Any]:
+    """Get security monitoring metrics."""
+    try:
+        security_metrics = get_security_metrics()
+        
+        # Add endpoint-specific metadata
+        security_metrics.update({
+            "endpoint_timestamp": datetime.now(timezone.utc).isoformat(),
+            "metrics_source": "security_monitoring_module"
+        })
+        
+        logger.info("Security metrics retrieved successfully", extra={
+            "total_events": security_metrics.get("total_events", 0),
+            "mock_token_detections": security_metrics.get("mock_token_detections", 0)
+        })
+        
+        return security_metrics
+        
+    except Exception as e:
+        logger.error(f"Failed to get security metrics: {e}", exc_info=True)
+        return {
+            "error": str(e),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "total_events": 0,
+            "mock_token_detections": 0,
+            "events_by_type": {},
+            "events_by_severity": {},
+            "alerting_enabled": False
+        }

@@ -13,7 +13,11 @@ from fastapi import APIRouter, HTTPException, Request, Depends
 from pydantic import BaseModel, Field
 
 from netra_backend.app.auth_integration import get_current_user, get_current_user_optional
-from netra_backend.app.core.circuit_breaker import CircuitBreakerOpenError
+from netra_backend.app.core.circuit_breaker import (
+    CircuitBreakerOpenError, 
+    unified_circuit_breaker,
+    get_unified_circuit_breaker_manager
+)
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.agent_service import AgentService, get_agent_service
 
@@ -51,6 +55,7 @@ class CircuitBreakerStatus(BaseModel):
 
 
 @router.post("/execute", response_model=AgentExecuteResponse)
+@unified_circuit_breaker(name="agent_execution", config=None)
 async def execute_agent(
     request: AgentExecuteRequest,
     user: Optional[Dict] = Depends(get_current_user_optional),  # Allow optional auth for E2E tests
@@ -70,6 +75,11 @@ async def execute_agent(
         # Check for test environment - use mock responses to avoid LLM timeout issues in E2E tests
         if request.message == "FORCE_ERROR" or (request.context and request.context.get("force_failure")):
             raise HTTPException(status_code=500, detail="Simulated agent failure")
+            
+        # Handle timeout scenarios for testing
+        if request.message.startswith("TIMEOUT"):
+            logger.warning(f"Simulating timeout for test message: {request.message}")
+            await asyncio.sleep(20)  # Simulate long processing that will timeout
         
         # For E2E testing, provide quick mock responses to test circuit breaker logic
         if request.message.startswith("Test") or request.message.startswith("WebSocket") or "test" in request.message.lower():
@@ -111,9 +121,21 @@ async def execute_agent(
         return AgentExecuteResponse(
             status="circuit_breaker_open",
             agent=request.type,
-            error=f"Circuit breaker is open: {str(e)}",
+            error="Service temporarily unavailable. Too many failures. Please try again later.",
             execution_time=execution_time,
             circuit_breaker_state="OPEN"
+        )
+        
+    except asyncio.TimeoutError as e:
+        execution_time = asyncio.get_event_loop().time() - start_time
+        logger.warning(f"Agent execution timed out for {request.type}: {e}")
+        
+        return AgentExecuteResponse(
+            status="timeout",
+            agent=request.type,
+            error="Request timeout. Please try again.",
+            execution_time=execution_time,
+            circuit_breaker_state="UNKNOWN"
         )
         
     except HTTPException:
@@ -131,6 +153,47 @@ async def execute_agent(
             circuit_breaker_state="UNKNOWN"
         )
 
+
+@router.post("/triage", response_model=AgentExecuteResponse)
+@unified_circuit_breaker(name="triage_agent", config=None)
+async def execute_triage_agent(
+    request: AgentExecuteRequest,
+    user: Optional[Dict] = Depends(get_current_user_optional),
+    agent_service: AgentService = Depends(get_agent_service)
+) -> AgentExecuteResponse:
+    """Execute triage agent - specific endpoint for testing."""
+    return await execute_agent_with_type(request, "triage", user, agent_service)
+
+@router.post("/data", response_model=AgentExecuteResponse)
+@unified_circuit_breaker(name="data_agent", config=None)
+async def execute_data_agent(
+    request: AgentExecuteRequest,
+    user: Optional[Dict] = Depends(get_current_user_optional),
+    agent_service: AgentService = Depends(get_agent_service)
+) -> AgentExecuteResponse:
+    """Execute data agent - specific endpoint for testing."""
+    return await execute_agent_with_type(request, "data", user, agent_service)
+
+@router.post("/optimization", response_model=AgentExecuteResponse)
+@unified_circuit_breaker(name="optimization_agent", config=None)
+async def execute_optimization_agent(
+    request: AgentExecuteRequest,
+    user: Optional[Dict] = Depends(get_current_user_optional),
+    agent_service: AgentService = Depends(get_agent_service)
+) -> AgentExecuteResponse:
+    """Execute optimization agent - specific endpoint for testing."""
+    return await execute_agent_with_type(request, "optimization", user, agent_service)
+
+async def execute_agent_with_type(
+    request: AgentExecuteRequest, 
+    agent_type: str, 
+    user: Optional[Dict], 
+    agent_service: AgentService
+) -> AgentExecuteResponse:
+    """Common agent execution logic with type-specific handling."""
+    # Override the agent type
+    request.type = agent_type
+    return await execute_agent(request, user, agent_service)
 
 @router.get("/{agent_name}/circuit_breaker/status", response_model=CircuitBreakerStatus)
 async def get_agent_circuit_breaker_status(

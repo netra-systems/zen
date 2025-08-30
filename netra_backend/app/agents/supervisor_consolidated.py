@@ -59,6 +59,9 @@ from netra_backend.app.agents.supervisor.supervisor_utilities import SupervisorU
 from netra_backend.app.agents.supervisor.workflow_execution import (
     SupervisorWorkflowExecutor,
 )
+from netra_backend.app.agents.supervisor.lifecycle_manager import (
+    SupervisorLifecycleManager,
+)
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
@@ -164,6 +167,8 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
         self.utilities = SupervisorInitializationHelpers.init_utilities_for_supervisor(self)
         helpers = SupervisorInitializationHelpers.init_helper_components(self)
         self.execution_helpers, self.workflow_executor, self.agent_router, self.completion_helpers = helpers
+        # Add lifecycle manager for compatibility
+        self.lifecycle_manager = SupervisorLifecycleManager()
 
     @asynccontextmanager
     async def _create_db_session_factory(self):
@@ -267,6 +272,9 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
 
     async def _execute_with_modern_reliability_pattern(self, context: ExecutionContext) -> None:
         """Execute with modern reliability pattern."""
+        # Validate preconditions first - critical errors should propagate
+        await self.validate_preconditions(context)
+        
         result = await self.reliability_manager.execute_with_reliability(
             context, lambda: self.execution_engine.execute(self, context)
         )
