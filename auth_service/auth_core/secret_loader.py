@@ -288,3 +288,36 @@ class AuthSecretLoader:
         # Ensure async format for auth service
         from shared.database_url_builder import DatabaseURLBuilder
         return DatabaseURLBuilder.format_url_for_driver(database_url, 'asyncpg')
+    
+    @staticmethod
+    def get_e2e_bypass_key() -> Optional[str]:
+        """Get E2E test bypass key for staging environment.
+        
+        This key is used to authenticate E2E tests on staging without OAuth.
+        Only available in staging environment for security.
+        
+        Returns:
+            The E2E bypass key from Google Secret Manager or None if not configured
+        """
+        env_manager = get_env()
+        env = env_manager.get("ENVIRONMENT", "development").lower()
+        
+        # Only allow loading bypass key in staging
+        if env != "staging":
+            logger.warning(f"E2E bypass key requested in {env} environment - not allowed")
+            return None
+        
+        # Try environment variable first (for local testing)
+        bypass_key = env_manager.get("E2E_BYPASS_KEY")
+        if bypass_key:
+            logger.info("Using E2E_BYPASS_KEY from environment variable")
+            return bypass_key
+        
+        # Try to load from Google Secret Manager
+        bypass_key = AuthSecretLoader._load_from_secret_manager("e2e-bypass-key")
+        if bypass_key:
+            logger.info("Using e2e-bypass-key from Google Secret Manager")
+            return bypass_key
+        
+        logger.warning("E2E bypass key not configured in staging environment")
+        return None

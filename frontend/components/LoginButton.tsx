@@ -23,5 +23,5 @@ export default function LoginButton() {
     );
   }
 
-  return <Button onClick={login} size="lg" data-testid="login-button">Access Beta</Button>;
+  return <Button onClick={login} size="lg" data-testid="login-button">Login with Google</Button>;
 }

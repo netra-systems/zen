@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.isolated_environment import get_env
+from auth_service.auth_core.secret_loader import AuthSecretLoader
 from auth_service.auth_core.security.oauth_security import (
     OAuthSecurityManager, 
     OAuthStateCleanupManager,
@@ -582,8 +583,8 @@ async def logout(
 
 @router.post("/validate", response_model=TokenResponse)
 async def validate_token(request: TokenRequest):
-    """Validate access token"""
-    response = await auth_service.validate_token(request.token)
+    """Validate token of specified type"""
+    response = await auth_service.validate_token(request.token, request.token_type.value)
     
     if not response.valid:
         raise HTTPException(status_code=401, detail="Invalid token")
@@ -852,6 +853,150 @@ class DBManagerWrapper:
 # Provide db_manager attribute for test compatibility
 db_manager = DBManagerWrapper(auth_service)
 
+
+@router.post("/e2e/test-auth")
+async def e2e_test_auth(
+    request: Request,
+    x_e2e_bypass_key: Optional[str] = Header(None),
+    client_info: dict = Depends(get_client_info)
+):
+    """E2E test authentication endpoint for staging environment only.
+    
+    This endpoint allows automated E2E tests to authenticate directly on staging
+    without going through the OAuth flow. It requires a secure bypass key that
+    must match the one stored in Google Secrets Manager.
+    
+    Security measures:
+    - Only works in staging environment
+    - Requires valid E2E bypass key from secrets
+    - Creates temporary test user with limited permissions
+    - All actions are logged for security audit
+    """
+    env = _detect_environment()
+    
+    # CRITICAL: Only allow in staging environment
+    if env != "staging":
+        logger.error(f"SECURITY: E2E test auth attempted in {env} environment")
+        raise HTTPException(
+            status_code=403,
+            detail=f"E2E test authentication is only available in staging environment, not {env}"
+        )
+    
+    # Validate E2E bypass key
+    if not x_e2e_bypass_key:
+        logger.error("E2E test auth attempted without bypass key")
+        raise HTTPException(
+            status_code=401,
+            detail="X-E2E-Bypass-Key header is required for test authentication"
+        )
+    
+    # Get expected bypass key from secrets
+    expected_key = AuthSecretLoader.get_e2e_bypass_key()
+    if not expected_key:
+        logger.error("E2E bypass key not configured in Google Secrets Manager")
+        raise HTTPException(
+            status_code=503,
+            detail="E2E test authentication is not configured. Please set e2e-bypass-key in Google Secrets Manager."
+        )
+    
+    # Validate bypass key
+    import hmac
+    if not hmac.compare_digest(x_e2e_bypass_key, expected_key):
+        logger.error(f"Invalid E2E bypass key from IP: {client_info.get('ip')}")
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid E2E bypass key"
+        )
+    
+    # Log successful E2E auth for security audit
+    logger.info(f"E2E test authentication initiated from IP: {client_info.get('ip')}, User-Agent: {client_info.get('user_agent')}")
+    
+    # Parse request body for test user configuration
+    try:
+        body = await request.json()
+        test_email = body.get("email", "e2e-test@staging.netrasystems.ai")
+        test_name = body.get("name", "E2E Test User")
+        test_permissions = body.get("permissions", ["read", "write"])
+    except:
+        # Default test user if no body provided
+        test_email = "e2e-test@staging.netrasystems.ai"
+        test_name = "E2E Test User"
+        test_permissions = ["read", "write"]
+    
+    import uuid
+    from auth_service.auth_core.database.connection import auth_db
+    from auth_service.auth_core.database.repository import AuthUserRepository
+    
+    try:
+        # Ensure database tables exist
+        await auth_db.create_tables()
+        
+        # Create or get test user in database
+        async with auth_db.get_session() as session:
+            repo = AuthUserRepository(session)
+            
+            # Check if test user exists
+            test_user = await repo.get_by_email(test_email)
+            
+            if test_user:
+                user_id = test_user.id
+            else:
+                # Create new test user
+                from auth_service.auth_core.database.models import AuthUser
+                test_user = AuthUser(
+                    id=f"e2e-test-{uuid.uuid4().hex[:8]}",
+                    email=test_email,
+                    full_name=test_name,
+                    auth_provider="e2e-test",
+                    is_active=True,
+                    is_verified=True
+                )
+                session.add(test_user)
+                await session.flush()
+                user_id = test_user.id
+                logger.info(f"Created E2E test user: {test_email} with ID: {user_id}")
+        
+        # Generate JWT tokens for test user
+        access_token = auth_service.jwt_handler.create_access_token(
+            user_id=user_id,
+            email=test_email,
+            permissions=test_permissions
+        )
+        
+        refresh_token = auth_service.jwt_handler.create_refresh_token(
+            user_id=user_id
+        )
+        
+        # Create session
+        session_id = auth_service.session_manager.create_session(
+            user_id=user_id,
+            user_data={
+                "email": test_email,
+                "ip_address": client_info.get("ip"),
+                "user_agent": client_info.get("user_agent"),
+                "auth_type": "e2e-test"
+            }
+        )
+        
+        logger.info(f"E2E test authentication successful for {test_email} with user ID {user_id}")
+        
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "Bearer",
+            "expires_in": 900,  # 15 minutes
+            "user": {
+                "id": user_id,
+                "email": test_email,
+                "name": test_name,
+                "session_id": session_id,
+                "auth_type": "e2e-test"
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"E2E test authentication error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"E2E test authentication failed: {str(e)}")
 
 @router.post("/dev/login")
 async def dev_login(

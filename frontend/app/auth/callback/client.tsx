@@ -48,7 +48,10 @@ export default function AuthCallbackClient() {
           userFriendlyError = 'Authentication code exchange failed. Please try logging in again.';
         }
         
-        router.push('/login?error=' + encodeURIComponent(userFriendlyError));
+        // Add a delay to prevent immediate redirect loops
+        setTimeout(() => {
+          router.push('/login?error=' + encodeURIComponent(userFriendlyError));
+        }, 500);
         return;
       }
 

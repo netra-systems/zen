@@ -965,6 +965,20 @@ jest.mock('@/store/unified-chat', () => {
     completeThreadLoading: jest.fn(),
     clearMessages: jest.fn(),
     loadMessages: jest.fn(),
+    handleWebSocketEvent: jest.fn((event) => {
+      // Mock implementation that processes WebSocket events
+      if (event.type === 'agent_started') {
+        storeState.isProcessing = true;
+        storeState.currentRunId = event.payload?.run_id || 'mock-run-id';
+      } else if (event.type === 'agent_completed') {
+        storeState.isProcessing = false;
+        storeState.currentRunId = null;
+      } else if (event.type === 'error') {
+        storeState.isProcessing = false;
+        // Could add error state if needed
+      }
+      return Promise.resolve();
+    }),
     resetState: jest.fn(() => {
       // Reset to initial state
       storeState.isProcessing = false;
@@ -1085,30 +1099,59 @@ jest.mock('@/hooks/useAgentUpdates', () => ({
   }))
 }));
 
-jest.mock('@/hooks/usePerformanceMetrics', () => ({
-  usePerformanceMetrics: jest.fn(() => ({
-    metrics: {
-      renderCount: 1,
-      lastRenderTime: Date.now(),
-      averageResponseTime: 100,
-      wsLatency: 50,
-      memoryUsage: 1024,
-      fps: 60,
-      componentRenderTimes: new Map()
-    },
-    startTracking: jest.fn(),
-    stopTracking: jest.fn(),
-    reset: jest.fn()
-  }))
-}));
+// usePerformanceMetrics is not globally mocked to allow its own tests to work
 
 // Mock additional missing hooks
 jest.mock('@/hooks/useKeyboardShortcuts', () => ({
-  useKeyboardShortcuts: jest.fn(() => ({
-    shortcuts: {},
-    registerShortcut: jest.fn(),
-    unregisterShortcut: jest.fn(),
-    isEnabled: true
+  useKeyboardShortcuts: jest.fn(() => {
+    const eventHandlers = new Map();
+    
+    // Mock event listener registration that actually responds to test events
+    const addEventListener = jest.fn((event, handler) => {
+      eventHandlers.set(event, handler);
+    });
+    
+    const removeEventListener = jest.fn((event, handler) => {
+      eventHandlers.delete(event);
+    });
+    
+    // Attach to global document mock
+    Object.defineProperty(document, 'addEventListener', {
+      value: addEventListener,
+      writable: true
+    });
+    Object.defineProperty(document, 'removeEventListener', {
+      value: removeEventListener,
+      writable: true
+    });
+    
+    return {
+      shortcuts: {},
+      registerShortcut: jest.fn(),
+      unregisterShortcut: jest.fn(),
+      isEnabled: true,
+      // Expose handlers for testing
+      _mockEventHandlers: eventHandlers,
+      _mockAddEventListener: addEventListener,
+      _mockRemoveEventListener: removeEventListener
+    };
+  })
+}));
+
+// useInitializationCoordinator is not globally mocked to allow its own tests to work
+
+jest.mock('@/hooks/useThreads', () => ({
+  useThreads: jest.fn(() => ({
+    threads: [],
+    currentThreadId: 'test-thread-123',
+    createThread: jest.fn().mockResolvedValue({ id: 'new-thread', title: 'New Thread' }),
+    selectThread: jest.fn(),
+    deleteThread: jest.fn(),
+    updateThread: jest.fn(),
+    fetchThreads: jest.fn().mockResolvedValue([]),
+    setThreads: jest.fn(),
+    loading: false,
+    error: null
   }))
 }));
 
@@ -1126,16 +1169,7 @@ jest.mock('framer-motion', () => {
   };
 });
 
-// Note: useLoadingState is not globally mocked to allow individual tests to test the actual implementation
-
-jest.mock('@/hooks/useError', () => ({
-  useError: jest.fn(() => ({
-    error: null,
-    setError: jest.fn(),
-    clearError: jest.fn(),
-    hasError: false
-  }))
-}));
+// Note: useLoadingState, useError, and usePerformanceMetrics are not globally mocked to allow individual tests to test the actual implementation
 
 // Mock event processor hook to prevent timer leaks
 jest.mock('@/hooks/useEventProcessor', () => ({
@@ -1503,10 +1537,9 @@ jest.mock('@/components/chat/MessageInput', () => {
       
       const handleChange = (e) => {
         const newValue = e.target.value;
-        if (newValue.length <= CHAR_LIMIT) {
-          setValue(newValue);
-          setCharCount(newValue.length);
-        }
+        // Allow input even over limit to test validation behavior
+        setValue(newValue);
+        setCharCount(newValue.length);
       };
       
       const handlePaste = (e) => {
@@ -1572,7 +1605,7 @@ jest.mock('@/components/chat/MessageInput', () => {
         ? 'Please sign in to send messages'
         : (isProcessing || isSending)
         ? 'Agent is thinking...'
-        : 'Start typing your AI optimization request...';
+        : 'Type a message or use @ for commands';
       
       // Determine if textarea should be disabled
       const isDisabled = !isAuthenticated || isProcessing || isSending;
@@ -1610,17 +1643,21 @@ jest.mock('@/components/chat/MessageInput', () => {
           
           React.createElement('button', {
             'aria-label': 'Attach file',
-            'data-testid': 'attach-button'
+            'data-testid': 'attach-button',
+            disabled: isDisabled,
+            title: 'Attach file (coming soon)'
           }, React.createElement('div', { 'data-testid': 'paperclip-icon' }, '📎')),
           React.createElement('button', {
             'aria-label': 'Voice input',
-            'data-testid': 'voice-button'
+            'data-testid': 'voice-button',
+            disabled: isDisabled,
+            title: 'Voice input (coming soon)'
           }, React.createElement('div', { 'data-testid': 'mic-icon' }, '🎤')),
           React.createElement('button', {
             'aria-label': 'Send message',
             'data-testid': 'send-button',
-            disabled: !value.trim() || charCount > CHAR_LIMIT || !isAuthenticated
-          }, 'Send'),
+            disabled: !value.trim() || charCount > CHAR_LIMIT || isDisabled
+          }, isSending ? 'Sending...' : 'Send'),
           
           // Show selected file name
           selectedFile && React.createElement('div', { 'data-testid': 'selected-file' },
@@ -1677,6 +1714,35 @@ jest.mock('@/components/chat/ThinkingIndicator', () => {
         'data-testid': 'thinking-indicator',
         className: 'thinking-indicator'
       }, React.createElement('div', null, 'AI is thinking...'));
+    })
+  };
+});
+
+// Mock MessageActionButtons component for proper disabled state testing
+jest.mock('@/components/chat/components/MessageActionButtons', () => {
+  const React = require('react');
+  return {
+    MessageActionButtons: jest.fn().mockImplementation(({ isDisabled, canSend, isSending, onSend }) => {
+      return React.createElement('div', { 'data-testid': 'message-action-buttons' },
+        React.createElement('button', {
+          'aria-label': 'Attach file',
+          'data-testid': 'attach-button',
+          disabled: isDisabled,
+          title: 'Attach file (coming soon)'
+        }, React.createElement('div', { 'data-testid': 'paperclip-icon' }, '📎')),
+        React.createElement('button', {
+          'aria-label': 'Voice input',
+          'data-testid': 'voice-button',
+          disabled: isDisabled,
+          title: 'Voice input (coming soon)'
+        }, React.createElement('div', { 'data-testid': 'mic-icon' }, '🎤')),
+        React.createElement('button', {
+          'aria-label': 'Send message',
+          'data-testid': 'send-button',
+          disabled: !canSend || isSending,
+          onClick: onSend
+        }, isSending ? 'Sending...' : 'Send')
+      );
     })
   };
 });

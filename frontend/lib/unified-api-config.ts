@@ -249,12 +249,54 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
 }
 
 /**
+ * Validate configuration to prevent environment mismatches
+ */
+function validateConfig(config: UnifiedApiConfig): void {
+  const { environment, urls } = config;
+  
+  // Critical: Staging/Production should NEVER use localhost
+  if ((environment === 'staging' || environment === 'production')) {
+    const hasLocalhost = Object.values(urls).some(url => 
+      url.includes('localhost') || url.includes('127.0.0.1')
+    );
+    
+    if (hasLocalhost) {
+      logger.error('CRITICAL: Non-development environment using localhost URLs!', {
+        environment,
+        urls
+      });
+      throw new Error(`Invalid configuration: ${environment} environment cannot use localhost URLs`);
+    }
+  }
+  
+  // Validate auth service URL is accessible
+  if (environment === 'staging') {
+    if (!urls.auth.includes('staging')) {
+      logger.warn('Staging environment auth URL missing "staging" subdomain', {
+        authUrl: urls.auth
+      });
+    }
+  }
+}
+
+/**
  * Get the unified API configuration
  * This is the single source of truth for all API URLs
  */
 export function getUnifiedApiConfig(): UnifiedApiConfig {
   const environment = detectEnvironment();
   const config = getEnvironmentConfig(environment);
+  
+  // Validate configuration before using
+  try {
+    validateConfig(config);
+  } catch (error) {
+    logger.error('Configuration validation failed', error as Error);
+    // In staging/production, this is critical
+    if (environment === 'staging' || environment === 'production') {
+      throw error;
+    }
+  }
   
   // Log configuration for debugging
   logger.info('Unified API Configuration:', {

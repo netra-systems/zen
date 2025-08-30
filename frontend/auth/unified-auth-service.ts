@@ -80,6 +80,61 @@ export class UnifiedAuthService {
   }
 
   /**
+   * Handle E2E test authentication for staging environment
+   * This method bypasses OAuth for automated testing on staging
+   */
+  async handleE2ETestAuth(bypassKey: string, testUser?: { email?: string; name?: string; permissions?: string[] }): Promise<{ access_token: string; token_type: string } | null> {
+    if (this.environment !== 'staging') {
+      logger.warn('E2E test auth attempted in non-staging environment', {
+        environment: this.environment
+      });
+      return null;
+    }
+
+    logger.info('Attempting E2E test authentication', {
+      component: 'UnifiedAuthService',
+      environment: this.environment
+    });
+
+    try {
+      const response = await fetch(`${unifiedApiConfig.urls.auth}/auth/e2e/test-auth`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-E2E-Bypass-Key': bypassKey
+        },
+        body: JSON.stringify(testUser || {
+          email: 'e2e-test@staging.netrasystems.ai',
+          name: 'E2E Test User',
+          permissions: ['read', 'write']
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        logger.info('E2E test authentication successful');
+        this.setToken(data.access_token);
+        if (data.refresh_token) {
+          localStorage.setItem('refresh_token', data.refresh_token);
+        }
+        return data;
+      } else {
+        const errorText = await response.text();
+        logger.error('E2E test authentication failed', {
+          status: response.status,
+          error: errorText
+        });
+        return null;
+      }
+    } catch (error) {
+      logger.error('E2E test authentication error', {
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+      return null;
+    }
+  }
+
+  /**
    * Handle development login (only available in dev/test environments)
    * Uses exponential backoff for retries to handle backend startup delays
    */
