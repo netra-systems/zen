@@ -15,8 +15,17 @@ describe('useKeyboardShortcuts', () => {
   let mockRouter: any;
   let mockChatStore: any;
   let mockThreadStore: any;
+  let addEventListenerSpy: jest.SpyInstance;
+  let removeEventListenerSpy: jest.SpyInstance;
 
   beforeEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+    
+    // Setup spies before other mocks
+    addEventListenerSpy = jest.spyOn(window, 'addEventListener');
+    removeEventListenerSpy = jest.spyOn(window, 'removeEventListener');
+    
     // Setup mocks
     mockRouter = {
       push: jest.fn(),
@@ -30,7 +39,7 @@ describe('useKeyboardShortcuts', () => {
       isProcessing: false,
       setProcessing: jest.fn(),
     };
-    jest.mocked(useChatStore).mockReturnValue(mockChatStore);
+    (useChatStore as jest.Mock).mockReturnValue(mockChatStore);
 
     mockThreadStore = {
       threads: [
@@ -41,7 +50,7 @@ describe('useKeyboardShortcuts', () => {
       currentThreadId: '2',
       setCurrentThread: jest.fn(),
     };
-    jest.mocked(useThreadStore).mockReturnValue(mockThreadStore);
+    (useThreadStore as jest.Mock).mockReturnValue(mockThreadStore);
 
     // Mock DOM elements
     document.querySelector = jest.fn((selector) => {
@@ -66,17 +75,12 @@ describe('useKeyboardShortcuts', () => {
     });
 
     it('should register keyboard event listeners on mount', () => {
-      const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
-      
-      act(() => {
-        renderHook(() => useKeyboardShortcuts());
-      });
+      renderHook(() => useKeyboardShortcuts());
       
       expect(addEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
     });
 
     it('should cleanup event listeners on unmount', () => {
-      const removeEventListenerSpy = jest.spyOn(window, 'removeEventListener');
       const { unmount } = renderHook(() => useKeyboardShortcuts());
       
       unmount();
@@ -220,11 +224,12 @@ describe('useKeyboardShortcuts', () => {
 
   describe('Scroll Navigation', () => {
     it('should scroll to top with g key', () => {
-      const scrollToMock = jest.fn();
+      let scrollTop = 500;
       const scrollAreaMock = {
-        scrollTo: scrollToMock,
-        scrollTop: 500,
-        scrollHeight: 1000
+        scrollTop: scrollTop,
+        scrollHeight: 1000,
+        get scrollTop() { return scrollTop; },
+        set scrollTop(value) { scrollTop = value; }
       };
       document.querySelector = jest.fn().mockReturnValue(scrollAreaMock);
 
@@ -238,16 +243,16 @@ describe('useKeyboardShortcuts', () => {
         window.dispatchEvent(event);
       });
 
-      // The implementation directly sets scrollTop instead of using scrollTo
-      expect(scrollAreaMock.scrollTop).toBe(0);
+      expect(scrollTop).toBe(0);
     });
 
     it('should scroll to bottom with Shift+G', () => {
-      const scrollToMock = jest.fn();
+      let scrollTop = 0;
       const scrollAreaMock = {
-        scrollTo: scrollToMock,
-        scrollTop: 0,
-        scrollHeight: 1000
+        scrollTop: scrollTop,
+        scrollHeight: 1000,
+        get scrollTop() { return scrollTop; },
+        set scrollTop(value) { scrollTop = value; }
       };
       document.querySelector = jest.fn().mockReturnValue(scrollAreaMock);
 
@@ -262,8 +267,7 @@ describe('useKeyboardShortcuts', () => {
         window.dispatchEvent(event);
       });
 
-      // The implementation directly sets scrollTop instead of using scrollTo
-      expect(scrollAreaMock.scrollTop).toBe(1000);
+      expect(scrollTop).toBe(1000);
     });
   });
 
