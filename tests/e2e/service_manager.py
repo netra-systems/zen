@@ -523,6 +523,10 @@ class RealServicesManager:
             'auth_service': f'http://localhost:{self.service_ports["auth_service"]}',
             'backend_service': f'http://localhost:{self.service_ports["backend"]}' 
         }
+    
+    def get_websocket_url(self) -> str:
+        """Get WebSocket URL for the backend service."""
+        return f'ws://localhost:{self.service_ports["backend"]}/ws'
 
 # Factory function for backward compatibility with existing imports
 def create_real_services_manager(project_root: Optional[Path] = None) -> RealServicesManager:

@@ -258,6 +258,14 @@ class TestDataFactory:
             "auto_renew": True,
             "payment_status": "active"
         }
+    
+    @staticmethod
+    def create_jwt_token(user_id: str, email: str = None) -> str:
+        """Create JWT token for testing"""
+        from tests.e2e.jwt_token_helpers import JWTTestHelper
+        jwt_helper = JWTTestHelper()
+        email = email or f"{user_id}@test.com"
+        return jwt_helper.create_access_token(user_id, email)
 
 
 class TestTokenManager:
