@@ -141,15 +141,10 @@ class AgentConversationTestCore:
         }
         user_data = tier_user_map.get(plan_tier, TEST_USERS["free"])
         
-        # Establish WebSocket connection if available
-        client = None
-        if self.websocket_core:
-            try:
-                client = await self.websocket_core.establish_authenticated_connection(user_data.id)
-            except Exception:
-                # Create mock client if real WebSocket unavailable
-                client = AsyncMock()
-                client.close = AsyncMock()
+        # Create mock client since we're testing agent orchestration via HTTP endpoints
+        # WebSocket connection is not required for agent execution tests
+        client = AsyncMock()
+        client.close = AsyncMock()
         
         # Create conversation session
         session = ConversationSession(

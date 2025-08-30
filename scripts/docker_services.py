@@ -75,16 +75,37 @@ class DockerServicesManager:
             'description': 'Auth service with dependencies',
             'services': ['postgres', 'redis', 'auth'],
             'profiles': ['auth']
+        },
+        # Test environment profiles
+        'test': {
+            'description': 'Test backend and database services',
+            'services': ['postgres-test', 'redis-test', 'backend-test', 'auth-test'],
+            'profiles': [],  # No profiles needed for test compose
+            'compose_file': 'docker-compose.test.yml'
+        },
+        'test-db': {
+            'description': 'Test database services only',
+            'services': ['postgres-test', 'redis-test'],
+            'profiles': [],
+            'compose_file': 'docker-compose.test.yml'
+        },
+        'test-full': {
+            'description': 'All test services including frontend',
+            'services': ['postgres-test', 'redis-test', 'clickhouse-test', 'backend-test', 'auth-test', 'frontend-test'],
+            'profiles': [],
+            'compose_file': 'docker-compose.test.yml'
         }
     }
     
-    def __init__(self):
+    def __init__(self, environment='dev'):
         self.project_root = Path.cwd()
-        self.compose_file = "docker-compose.dev.yml"
+        self.environment = environment
+        self.compose_file = "docker-compose.test.yml" if environment == 'test' else "docker-compose.dev.yml"
         
-    def run_docker_compose(self, args: List[str], capture_output: bool = False):
+    def run_docker_compose(self, args: List[str], capture_output: bool = False, compose_file: Optional[str] = None):
         """Run a docker-compose command."""
-        cmd = ["docker", "compose", "-f", self.compose_file] + args
+        file_to_use = compose_file or self.compose_file
+        cmd = ["docker", "compose", "-f", file_to_use] + args
         
         if capture_output:
             result = subprocess.run(
@@ -259,6 +280,7 @@ class DockerServicesManager:
         print("  python scripts/docker_services.py start netra     # Start just Netra backend")
         print("  python scripts/docker_services.py start frontend  # Start just frontend")
         print("  python scripts/docker_services.py start full      # Start everything")
+        print("  python scripts/docker_services.py start test      # Start test environment")
         print("  python scripts/docker_services.py logs netra      # View Netra logs")
         print("  python scripts/docker_services.py stop            # Stop all services")
 
@@ -278,11 +300,15 @@ PROFILES:
   cache     - Cache services only
   analytics - Analytics services (ClickHouse)
   auth      - Auth service with dependencies
+  test      - Test backend and database services
+  test-db   - Test database services only
+  test-full - All test services including frontend
 
 EXAMPLES:
   python scripts/docker_services.py start netra          # Start Netra backend only
   python scripts/docker_services.py start frontend       # Start frontend only
   python scripts/docker_services.py start full           # Start everything
+  python scripts/docker_services.py start test           # Start test environment
   python scripts/docker_services.py logs netra --tail 50 # View last 50 lines of Netra logs
   python scripts/docker_services.py restart backend      # Restart backend services
   python scripts/docker_services.py stop                 # Stop all services

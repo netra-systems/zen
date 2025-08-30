@@ -952,14 +952,16 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
     """
     # SECURITY FIX: Convert 404/405 to 401 for API endpoints when user is not authenticated
     if exc.status_code in [404, 405] and _is_api_endpoint(request.url.path):
-        # Check if request has valid authentication
-        if not _has_valid_auth(request):
-            logger.warning(f"Converting HTTP {exc.status_code} to 401 for protected endpoint: {request.url.path}")
-            return JSONResponse(
-                status_code=401,
-                content={"error": "authentication_failed", "message": "Authentication required"},
-                headers={"WWW-Authenticate": "Bearer"}
-            )
+        # Check if path is excluded from authentication requirements
+        if not _is_excluded_from_auth(request.url.path):
+            # Check if request has valid authentication
+            if not _has_valid_auth(request):
+                logger.warning(f"Converting HTTP {exc.status_code} to 401 for protected endpoint: {request.url.path}")
+                return JSONResponse(
+                    status_code=401,
+                    content={"error": "authentication_failed", "message": "Authentication required"},
+                    headers={"WWW-Authenticate": "Bearer"}
+                )
     
     return await api_error_handler.handle_exception(exc, request)
 
@@ -974,6 +976,21 @@ def _has_valid_auth(request: Request) -> bool:
     # Check if request state indicates successful authentication
     # This will be set by the auth middleware if authentication was successful
     return getattr(request.state, 'authenticated', False)
+
+
+def _is_excluded_from_auth(path: str) -> bool:
+    """Check if path is excluded from authentication requirements.
+    
+    This should match the same exclusion logic used in FastAPIAuthMiddleware
+    to ensure consistency between auth middleware and error handling.
+    """
+    # Default excluded paths that match FastAPIAuthMiddleware configuration
+    excluded_paths = [
+        "/health", "/metrics", "/", "/docs", "/openapi.json", "/redoc",
+        "/ws", "/websocket", "/ws/test", "/ws/config", "/ws/health", "/ws/stats",
+        "/api/v1/auth"
+    ]
+    return any(excluded in path for excluded in excluded_paths)
 
 
 async def netra_exception_handler(request: Request, exc: NetraException) -> JSONResponse:

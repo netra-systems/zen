@@ -621,7 +621,8 @@ class SSOTestComponents:
 
 
 def create_real_jwt_token(user_id: str, permissions: List[str] = None, 
-                         token_type: str = "access", expires_in: int = 3600) -> str:
+                         token_type: str = "access", expires_in: int = 3600, 
+                         email: str = None) -> str:
     """Create a real JWT token for integration/e2e tests.
     
     Args:
@@ -629,6 +630,7 @@ def create_real_jwt_token(user_id: str, permissions: List[str] = None,
         permissions: List of user permissions
         token_type: Type of token ('access' or 'refresh')
         expires_in: Token expiration time in seconds
+        email: User email address
         
     Returns:
         Real JWT token string
@@ -652,6 +654,11 @@ def create_real_jwt_token(user_id: str, permissions: List[str] = None,
         "iat": datetime.utcnow(),
         "jti": str(uuid.uuid4())
     }
+    
+    # Include email if provided
+    if email:
+        payload["email"] = email
+    
     return jwt.encode(payload, secret, algorithm="HS256")
 
 

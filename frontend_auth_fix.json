@@ -1,0 +1,12 @@
+{
+  "timestamp": "2025-08-29T22:10:36.850595",
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZXYtdGVtcC0yZjhlOTUyOSIsImlhdCI6MTc1NjUzMDYzNiwiZXhwIjoxNzU2NTMyNDM2LCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwidHlwZSI6ImFjY2VzcyIsImlzcyI6Im5ldHJhLWF1dGgtc2VydmljZSIsImF1ZCI6Im5ldHJhLXBsYXRmb3JtIiwianRpIjoiZGI5MjVmNzYtYzU5OS00OThiLWI2YWItNDg1OGFkNTNmMzhiIiwiZW52IjoiZGV2ZWxvcG1lbnQiLCJzdmNfaWQiOiJhdXRoIiwiZW1haWwiOiJkZXZAZXhhbXBsZS5jb20iLCJwZXJtaXNzaW9ucyI6WyJyZWFkIiwid3JpdGUiLCJhZG1pbiJdfQ.canoqLIpf1gRPGHW7fdm7fXx59GcBf0Y0GZBalaBkh4",
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZXYtdGVtcC0yZjhlOTUyOSIsImlhdCI6MTc1NjUzMDYzNiwiZXhwIjoxNzU3MTM1NDM2LCJ0b2tlbl90eXBlIjoicmVmcmVzaCIsInR5cGUiOiJyZWZyZXNoIiwiaXNzIjoibmV0cmEtYXV0aC1zZXJ2aWNlIiwiYXVkIjoibmV0cmEtcGxhdGZvcm0iLCJqdGkiOiIwNjkyMGVjZS1iMTFhLTRhZWUtOGZmNi1kOWJhMWJmNmRiMzgiLCJlbnYiOiJkZXZlbG9wbWVudCIsInN2Y19pZCI6ImF1dGgifQ.bMCsnhzlQPP6AkFlze4Zuip0WJ5Q-0WoOFNNfmi9uAc",
+  "user": {
+    "id": "dev-temp-2f8e9529",
+    "email": "dev@example.com",
+    "name": "Development User",
+    "session_id": "d5a71e1a-ed95-441c-824c-60312c46c977"
+  },
+  "instructions": "Copy the access_token and use it in the browser console as shown above"
+}

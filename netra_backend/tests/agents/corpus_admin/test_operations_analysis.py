@@ -6,38 +6,61 @@ Business Value: Revenue-critical component
 
 import pytest
 from unittest.mock import Mock, patch, MagicMock
-from netra_backend.app.agents.corpus_admin.operations_analysis import OperationsAnalysis
+from netra_backend.app.agents.corpus_admin.operations_analysis import CorpusAnalysisOperations
 
 class TestOperationsAnalysis:
-    """Test suite for OperationsAnalysis"""
+    """Test suite for CorpusAnalysisOperations"""
     
     @pytest.fixture
-    def instance(self):
+    def mock_tool_dispatcher(self):
+        """Create mock tool dispatcher"""
+        return Mock()
+    
+    @pytest.fixture 
+    def instance(self, mock_tool_dispatcher):
         """Create test instance"""
-        return OperationsAnalysis()
+        return CorpusAnalysisOperations(mock_tool_dispatcher)
     
     def test_initialization(self, instance):
         """Test proper initialization"""
         assert instance is not None
-        # Add initialization assertions
+        assert instance.tool_dispatcher is not None
+        assert instance.execution_helper is not None
     
-    def test_core_functionality(self, instance):
-        """Test core business logic"""
-        # Test happy path
-        result = instance.process()
-        assert result is not None
+    def test_analysis_operation_mapping(self, instance):
+        """Test analysis operation mapping"""
+        mapping = instance._get_analysis_operation_mapping()
+        assert "analyze" in mapping
+        assert "export" in mapping
+        assert "import" in mapping
+        assert "validate" in mapping
     
-    def test_error_handling(self, instance):
-        """Test error scenarios"""
-        with pytest.raises(Exception):
-            instance.process_invalid()
+    def test_export_path_generation(self, instance):
+        """Test export path generation"""
+        corpus_name = "test_corpus"
+        path = instance._generate_export_path(corpus_name)
+        assert corpus_name in path
+        assert path.startswith("/exports/")
+        assert path.endswith(".json")
     
-    def test_edge_cases(self, instance):
-        """Test boundary conditions"""
-        # Test with None, empty, extreme values
-        pass
+    def test_validation_warnings_builder(self, instance):
+        """Test validation warnings builder"""
+        # Test with no issues
+        validation_results = {"valid": 100, "invalid": 0}
+        warnings = instance._build_validation_warnings(validation_results)
+        assert warnings == []
+        
+        # Test with issues
+        validation_results = {"valid": 90, "invalid": 10}
+        warnings = instance._build_validation_warnings(validation_results)
+        assert len(warnings) == 1
+        assert "10" in warnings[0]
     
-    def test_validation(self, instance):
-        """Test input validation"""
-        # Test validation logic
-        pass
+    def test_error_analysis_builder(self, instance):
+        """Test error analysis builder"""
+        error = Exception("Test error")
+        analysis = instance._build_error_analysis(error)
+        assert "error" in analysis
+        assert "Test error" in analysis["error"]
+        assert analysis["total_documents"] == 0
+        assert "recommendations" in analysis

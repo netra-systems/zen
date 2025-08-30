@@ -43,7 +43,7 @@ services:
           --reload-include '*.json' \
           --reload-include '*.yaml' \
           --reload-include '*.yml' \
-          --reload-delay 0.25 \
+          --reload-delay 60 \
           --log-level debug
       "
 
@@ -72,7 +72,7 @@ services:
           --reload-dir /app/shared \
           --reload-include '*.py' \
           --reload-include '*.json' \
-          --reload-delay 0.25 \
+          --reload-delay 60 \
           --log-level debug
       "
 

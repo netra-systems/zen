@@ -598,6 +598,21 @@ class AuthServiceClient:
                 
                 if self._is_valid_test_token(jwt_token):
                     logger.warning("Using emergency test token fallback due to auth service unavailability")
+                    
+                    # Try to decode JWT token to extract user data
+                    jwt_data = self._decode_test_jwt(jwt_token)
+                    if jwt_data:
+                        return {
+                            "valid": True,
+                            "user_id": jwt_data.get("sub", "test_user"),
+                            "email": jwt_data.get("email", "test@example.com"),
+                            "permissions": jwt_data.get("permissions", ["user"]),
+                            "fallback_used": True,
+                            "source": "emergency_test_fallback",
+                            "warning": "Emergency fallback validation - limited functionality"
+                        }
+                    
+                    # Fallback to default values if JWT decode fails
                     return {
                         "valid": True,
                         "user_id": "test_user",
@@ -665,6 +680,22 @@ class AuthServiceClient:
             return any(pattern in jwt_token for pattern in test_patterns)
         except Exception:
             return False
+    
+    def _decode_test_jwt(self, jwt_token: str) -> Optional[Dict[str, Any]]:
+        """Decode test JWT token to extract user data."""
+        try:
+            import jwt
+            import os
+            
+            # Use same secret as test JWT creation
+            secret = os.getenv("JWT_SECRET", "test_secret_key")
+            
+            # Decode the JWT token
+            decoded = jwt.decode(jwt_token, secret, algorithms=["HS256"], options={"verify_exp": False})
+            return decoded
+        except Exception as e:
+            logger.debug(f"Failed to decode test JWT token: {e}")
+            return None
 
     async def close(self):
         """Close HTTP client."""

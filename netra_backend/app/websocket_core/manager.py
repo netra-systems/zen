@@ -686,6 +686,26 @@ class WebSocketManager:
         }
         return await self.send_to_user(user_id, error_msg)
     
+    async def send_agent_update(self, run_id: str, agent_name: str, update: Dict[str, Any]) -> None:
+        """Send agent update via WebSocket - implements WebSocketManagerProtocol."""
+        # Create agent update message
+        agent_update_msg = {
+            "type": "agent_update",
+            "payload": {
+                "run_id": run_id,
+                "agent_name": agent_name,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "update": update
+            }
+        }
+        
+        # For now, we'll broadcast to all connections since we don't have user context
+        # In a real implementation, this would route to specific users based on run_id
+        await self.broadcast_to_all(agent_update_msg)
+        
+        # Update stats
+        self.connection_stats["messages_sent"] += 1
+    
     async def initiate_recovery(self, connection_id: str, user_id: str, error: Any, strategies: Optional[List] = None) -> bool:
         """Initiate connection recovery - consolidated recovery functionality."""
         try:

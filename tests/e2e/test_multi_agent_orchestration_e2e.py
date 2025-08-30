@@ -28,6 +28,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 import pytest
+from unittest.mock import AsyncMock, Mock
 
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
 from netra_backend.app.agents.corpus_admin.agent import CorpusAdminSubAgent
@@ -76,15 +77,15 @@ class MultiAgentOrchestrationSuite:
             self.websocket_manager = AsyncMock(spec=UnifiedWebSocketManager)
         
         # Configure WebSocket mock behavior
-        self.websocket_manager.send_message = AsyncNone  # TODO: Use real service instead of Mock
-        self.websocket_manager.send_agent_update = AsyncNone  # TODO: Use real service instead of Mock
-        self.websocket_manager.send_agent_log = AsyncNone  # TODO: Use real service instead of Mock
-        self.websocket_manager.send_error = AsyncNone  # TODO: Use real service instead of Mock
+        self.websocket_manager.send_message = AsyncMock()  # TODO: Use real service instead of Mock
+        self.websocket_manager.send_agent_update = AsyncMock()  # TODO: Use real service instead of Mock
+        self.websocket_manager.send_agent_log = AsyncMock()  # TODO: Use real service instead of Mock
+        self.websocket_manager.send_error = AsyncMock()  # TODO: Use real service instead of Mock
     
     async def _initialize_agents(self) -> None:
         """Initialize all sub-agents with proper dependencies."""
-        mock_tool_dispatcher = AsyncNone  # TODO: Use real service instead of Mock
-        mock_db_session = AsyncNone  # TODO: Use real service instead of Mock
+        mock_tool_dispatcher = AsyncMock()  # TODO: Use real service instead of Mock
+        mock_db_session = AsyncMock()  # TODO: Use real service instead of Mock
         
         self.agents = {
             'triage': TriageSubAgent(
@@ -125,8 +126,8 @@ class MultiAgentOrchestrationSuite:
     
     async def _initialize_supervisor(self) -> None:
         """Initialize supervisor agent with all sub-agents."""
-        mock_db_session = AsyncNone  # TODO: Use real service instead of Mock
-        mock_tool_dispatcher = AsyncNone  # TODO: Use real service instead of Mock
+        mock_db_session = AsyncMock()  # TODO: Use real service instead of Mock
+        mock_tool_dispatcher = AsyncMock()  # TODO: Use real service instead of Mock
         
         self.supervisor = SupervisorAgent(
             db_session=mock_db_session,

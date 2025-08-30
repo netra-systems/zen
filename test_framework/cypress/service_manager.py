@@ -20,6 +20,7 @@ import redis
 from dev_launcher.docker_services import DockerServiceManager, check_docker_availability
 from dev_launcher.service_availability_checker import ServiceAvailabilityChecker
 from dev_launcher.isolated_environment import get_env
+from test_framework.docker_port_discovery import DockerPortDiscovery, ServicePortMapping
 
 logger = logging.getLogger(__name__)
 
@@ -69,55 +70,79 @@ class ServiceDependencyManager:
         self.docker_manager = DockerServiceManager() if self.docker_available else None
         self.availability_checker = ServiceAvailabilityChecker()
         
-        # Service configuration
+        # Initialize port discovery
+        self.port_discovery = DockerPortDiscovery()
+        
+        # Service configuration - will be updated with discovered ports
         self.required_services = self._get_required_services()
         
     def _get_required_services(self) -> Dict[str, Dict[str, Any]]:
         """
-        Get configuration for all required services.
+        Get configuration for all required services with discovered ports.
         
         Returns:
             Service configuration dictionary
         """
-        return {
-            "backend": {
-                "name": "Netra Backend",
-                "type": "http",
-                "host": "localhost",
-                "port": 8000,
-                "health_endpoint": "/api/health",
-                "timeout": 30,
-                "required": True
-            },
-            "frontend": {
-                "name": "Frontend Dev Server",
-                "type": "http", 
-                "host": "localhost",
-                "port": 3000,
-                "health_endpoint": "/",
-                "timeout": 30,
-                "required": True
-            },
-            "postgres": {
-                "name": "PostgreSQL Database",
-                "type": "database",
-                "host": "localhost",
-                "port": 5432,
-                "database": "netra_dev",
-                "timeout": 30,
-                "required": True,
-                "docker_fallback": True
-            },
-            "redis": {
-                "name": "Redis Cache",
-                "type": "cache",
-                "host": "localhost",
-                "port": 6379,
-                "timeout": 15,
-                "required": True,
-                "docker_fallback": True
-            }
+        # Get discovered port mappings
+        port_mappings = self.port_discovery.discover_all_ports()
+        
+        # Build service configuration with actual ports
+        services = {}
+        
+        # Backend service
+        backend_mapping = port_mappings.get("backend")
+        services["backend"] = {
+            "name": "Netra Backend",
+            "type": "http",
+            "host": "localhost",
+            "port": backend_mapping.external_port if backend_mapping else 8000,
+            "health_endpoint": "/api/health",
+            "timeout": 30,
+            "required": True,
+            "discovered": backend_mapping is not None
         }
+        
+        # Frontend service
+        frontend_mapping = port_mappings.get("frontend")
+        services["frontend"] = {
+            "name": "Frontend Dev Server",
+            "type": "http", 
+            "host": "localhost",
+            "port": frontend_mapping.external_port if frontend_mapping else 3000,
+            "health_endpoint": "/",
+            "timeout": 30,
+            "required": True,
+            "discovered": frontend_mapping is not None
+        }
+        
+        # PostgreSQL service
+        postgres_mapping = port_mappings.get("postgres")
+        services["postgres"] = {
+            "name": "PostgreSQL Database",
+            "type": "database",
+            "host": "localhost",
+            "port": postgres_mapping.external_port if postgres_mapping else 5432,
+            "database": "netra_dev",
+            "timeout": 30,
+            "required": True,
+            "docker_fallback": True,
+            "discovered": postgres_mapping is not None
+        }
+        
+        # Redis service
+        redis_mapping = port_mappings.get("redis")
+        services["redis"] = {
+            "name": "Redis Cache",
+            "type": "cache",
+            "host": "localhost",
+            "port": redis_mapping.external_port if redis_mapping else 6379,
+            "timeout": 15,
+            "required": True,
+            "docker_fallback": True,
+            "discovered": redis_mapping is not None
+        }
+        
+        return services
         
     async def ensure_all_services_ready(self, timeout: int = 300) -> Dict[str, Dict[str, Any]]:
         """
@@ -134,19 +159,40 @@ class ServiceDependencyManager:
         start_time = time.time()
         service_statuses = {}
         
-        # Start Docker services if needed
-        await self._start_docker_services_if_needed()
+        # Try to start missing services via docker-compose if needed
+        required_service_names = list(self.required_services.keys())
+        services_available, missing = self.port_discovery.ensure_services_available(required_service_names)
+        
+        if not services_available and missing:
+            logger.info(f"Missing services detected: {list(missing.keys())}")
+            
+            # Try to start missing services
+            success, started = self.port_discovery.start_missing_services(required_service_names)
+            if success:
+                logger.info(f"Started missing services: {started}")
+                # Give services time to initialize
+                await asyncio.sleep(5)
+                # Refresh service configuration with new ports
+                self.required_services = self._get_required_services()
+            else:
+                # Fall back to manual Docker container startup
+                await self._start_docker_services_if_needed()
+                # Refresh service configuration after startup
+                self.required_services = self._get_required_services()
         
         # Check each service
         for service_name, config in self.required_services.items():
-            logger.info(f"Checking service: {service_name}")
+            logger.info(f"Checking service: {service_name} on port {config['port']}")
             
             remaining_timeout = max(0, timeout - int(time.time() - start_time))
             status = await self._ensure_service_ready(service_name, config, remaining_timeout)
             service_statuses[service_name] = status
             
             if config.get("required", True) and not status["healthy"]:
-                logger.error(f"Required service {service_name} is not healthy")
+                logger.error(f"Required service {service_name} is not healthy on port {config['port']}")
+                
+        # Save discovered ports for Cypress to use
+        self._save_port_config_for_cypress(service_statuses)
                 
         return service_statuses
         
@@ -461,3 +507,31 @@ class ServiceDependencyManager:
                 urls[service_name] = f"redis://{host}:{port}"
                 
         return urls
+    
+    def _save_port_config_for_cypress(self, service_statuses: Dict[str, Dict[str, Any]]):
+        """
+        Save discovered port configuration for Cypress to use.
+        
+        Args:
+            service_statuses: Current service status information
+        """
+        try:
+            # Get Cypress configuration from port discovery
+            cypress_config = self.port_discovery.get_cypress_config()
+            
+            # Add service health status
+            for service, status in service_statuses.items():
+                cypress_config["env"][f"{service.upper()}_HEALTHY"] = status.get("healthy", False)
+            
+            # Save to .netra directory for Cypress to read
+            config_dir = self.project_root / ".netra"
+            config_dir.mkdir(exist_ok=True)
+            
+            config_file = config_dir / "cypress-ports.json"
+            with open(config_file, 'w') as f:
+                json.dump(cypress_config, f, indent=2)
+                
+            logger.info(f"Saved Cypress port configuration to {config_file}")
+            
+        except Exception as e:
+            logger.warning(f"Failed to save Cypress port configuration: {e}")

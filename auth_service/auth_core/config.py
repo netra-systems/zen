@@ -184,6 +184,9 @@ class AuthConfig:
         elif env == "production":
             return "https://auth.netrasystems.ai"
         
+        # Force localhost in development for proper hostname resolution in tests
+        if env == "development":
+            return "http://localhost:8081"
         return get_env().get("AUTH_SERVICE_URL", "http://localhost:8081")
     
     @staticmethod

@@ -96,7 +96,7 @@ class TestAuthFlower:
 @pytest.fixture
 async def auth_tester():
     """Async fixture for auth flow tester"""
-    tester = AuthFlowTester()
+    tester = TestAuthFlower()
     try:
         yield tester
     finally:

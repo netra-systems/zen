@@ -443,7 +443,7 @@ class TestConcurrentOrchestrator:
 
     # """Orchestrates concurrent agent startup testing."""
     
-    def __init__(self, test_env: ConcurrentTestEnvironment):
+    def __init__(self, test_env: TestConcurrentEnvironment):
 
         self.test_env = test_env
 

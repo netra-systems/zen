@@ -119,7 +119,8 @@ class TestAuthAgentFlow:
             real_jwt = create_real_jwt_token(
                 user_id=self.harness.test_user['user_id'],
                 permissions=["read", "write", "agent_execute"],
-                token_type="access"
+                token_type="access",
+                email=self.harness.test_user['email']
             )
             access_token = real_jwt
         except (ImportError, ValueError):
@@ -306,7 +307,8 @@ class TestAuthAgentFlow:
         """
         # Mock justification: Simulating auth service downtime to test error handling paths
         # External auth service cannot be reliably made unavailable in test environment
-        with patch.object(auth_client, 'validate_token', side_effect=Exception("Service unavailable")):
+        with patch.object(auth_client, '_execute_token_validation', side_effect=Exception("Service unavailable")), \
+             patch.object(auth_client, '_local_validate', return_value={"valid": False, "error": "Auth service unavailable"}):
             validation_result = await self._handle_auth_service_down()
         assert validation_result.get("valid") is False
         assert "unavailable" in validation_result.get("error", "").lower()

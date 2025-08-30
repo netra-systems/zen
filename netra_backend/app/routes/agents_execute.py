@@ -35,6 +35,15 @@ class AgentExecuteRequest(BaseModel):
     force_retry: Optional[bool] = Field(False, description="Force retry scenario (for testing)")
 
 
+class AgentSpecificRequest(BaseModel):
+    """Request model for agent-specific endpoints where type is inferred."""
+    message: str = Field(..., description="Message to process")
+    context: Optional[Dict[str, Any]] = Field(None, description="Additional context")
+    simulate_delay: Optional[float] = Field(None, description="Simulate processing delay (for testing)")
+    force_failure: Optional[bool] = Field(False, description="Force failure (for testing)")
+    force_retry: Optional[bool] = Field(False, description="Force retry scenario (for testing)")
+
+
 class AgentExecuteResponse(BaseModel):
     """Response model for agent execution."""
     status: str = Field(..., description="Execution status")
@@ -157,7 +166,7 @@ async def execute_agent(
 @router.post("/triage", response_model=AgentExecuteResponse)
 @unified_circuit_breaker(name="triage_agent", config=None)
 async def execute_triage_agent(
-    request: AgentExecuteRequest,
+    request: AgentSpecificRequest,
     user: Optional[Dict] = Depends(get_current_user_optional),
     agent_service: AgentService = Depends(get_agent_service)
 ) -> AgentExecuteResponse:
@@ -167,7 +176,7 @@ async def execute_triage_agent(
 @router.post("/data", response_model=AgentExecuteResponse)
 @unified_circuit_breaker(name="data_agent", config=None)
 async def execute_data_agent(
-    request: AgentExecuteRequest,
+    request: AgentSpecificRequest,
     user: Optional[Dict] = Depends(get_current_user_optional),
     agent_service: AgentService = Depends(get_agent_service)
 ) -> AgentExecuteResponse:
@@ -177,7 +186,7 @@ async def execute_data_agent(
 @router.post("/optimization", response_model=AgentExecuteResponse)
 @unified_circuit_breaker(name="optimization_agent", config=None)
 async def execute_optimization_agent(
-    request: AgentExecuteRequest,
+    request: AgentSpecificRequest,
     user: Optional[Dict] = Depends(get_current_user_optional),
     agent_service: AgentService = Depends(get_agent_service)
 ) -> AgentExecuteResponse:
@@ -185,15 +194,22 @@ async def execute_optimization_agent(
     return await execute_agent_with_type(request, "optimization", user, agent_service)
 
 async def execute_agent_with_type(
-    request: AgentExecuteRequest, 
+    request: AgentSpecificRequest, 
     agent_type: str, 
     user: Optional[Dict], 
     agent_service: AgentService
 ) -> AgentExecuteResponse:
     """Common agent execution logic with type-specific handling."""
-    # Override the agent type
-    request.type = agent_type
-    return await execute_agent(request, user, agent_service)
+    # Create a new request with the correct agent type
+    typed_request = AgentExecuteRequest(
+        type=agent_type,
+        message=request.message,
+        context=request.context,
+        simulate_delay=request.simulate_delay,
+        force_failure=request.force_failure,
+        force_retry=request.force_retry
+    )
+    return await execute_agent(typed_request, user, agent_service)
 
 @router.get("/{agent_name}/circuit_breaker/status", response_model=CircuitBreakerStatus)
 async def get_agent_circuit_breaker_status(

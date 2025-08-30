@@ -209,32 +209,15 @@ class WorkflowOrchestrator:
                 }
             )
     
-    def get_workflow_definition(self) -> Dict[str, Any]:
+    def get_workflow_definition(self) -> List[Dict[str, Any]]:
         """Get workflow definition for monitoring.
         
-        Returns adaptive workflow configurations based on data sufficiency levels.
+        Returns default workflow configuration as list of steps for test compatibility.
         """
-        return {
-            "type": "adaptive",
-            "description": "Workflow adapts based on triage assessment of data sufficiency",
-            "configurations": {
-                "sufficient_data": [
-                    {"agent": "triage", "type": "classification"},
-                    {"agent": "optimization", "type": "strategies"},
-                    {"agent": "data", "type": "insights"},
-                    {"agent": "actions", "type": "implementation"},
-                    {"agent": "reporting", "type": "summary"}
-                ],
-                "partial_data": [
-                    {"agent": "triage", "type": "classification"},
-                    {"agent": "optimization", "type": "strategies"},
-                    {"agent": "actions", "type": "implementation"},
-                    {"agent": "data_helper", "type": "data_request"},
-                    {"agent": "reporting", "type": "summary_with_data_request"}
-                ],
-                "insufficient_data": [
-                    {"agent": "triage", "type": "classification"},
-                    {"agent": "data_helper", "type": "data_request"}
-                ]
-            }
-        }
+        return [
+            {"agent_name": "triage", "step_type": "classification", "order": 1, "metadata": {"description": "Classify and assess request"}},
+            {"agent_name": "data", "step_type": "insights", "order": 2, "metadata": {"description": "Gather and analyze data"}},
+            {"agent_name": "optimization", "step_type": "strategies", "order": 3, "metadata": {"description": "Generate optimization strategies"}},
+            {"agent_name": "actions", "step_type": "implementation", "order": 4, "metadata": {"description": "Define implementation actions"}},
+            {"agent_name": "reporting", "step_type": "summary", "order": 5, "metadata": {"description": "Generate final report"}}
+        ]

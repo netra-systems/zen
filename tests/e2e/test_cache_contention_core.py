@@ -255,7 +255,7 @@ class TestCacheContentionSuite:
     @pytest.fixture(autouse=True)
     async def setup_suite(self):
         """Setup test suite."""
-        self.suite = CacheContentionTestSuite()
+        self.suite = TestCacheContentionSuite()
         await self.suite.setup_test_environment()
         yield
         await self.suite.teardown_test_environment()
@@ -926,7 +926,7 @@ async def test_comprehensive_cache_contention_validation():
     """
     logger.info("Starting comprehensive cache contention validation")
     
-    suite = CacheContentionTestSuite()
+    suite = TestCacheContentionSuite()
     await suite.setup_test_environment()
     
     try:

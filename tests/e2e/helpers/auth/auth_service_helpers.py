@@ -959,6 +959,39 @@ async def test_error_scenario_handling():
         await validator.cleanup()
 
 
+class AuthServiceHelper:
+    """Helper class for auth service operations in tests."""
+    
+    def __init__(self):
+        self.base_url = "http://localhost:8001"
+    
+    async def get_auth_token(self, username: str, password: str) -> Optional[str]:
+        """Get auth token for user."""
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"{self.base_url}/auth/login",
+                    json={"username": username, "password": password}
+                )
+                if response.status_code == 200:
+                    return response.json().get("access_token")
+        except Exception:
+            pass
+        return None
+    
+    async def validate_token(self, token: str) -> bool:
+        """Validate auth token."""
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(
+                    f"{self.base_url}/auth/validate",
+                    headers={"Authorization": f"Bearer {token}"}
+                )
+                return response.status_code == 200
+        except Exception:
+            return False
+
+
 if __name__ == "__main__":
     # Run tests directly for development
     asyncio.run(test_auth_service_complete_independence())

@@ -20,6 +20,7 @@ def _get_auth_route_configs(modules: dict) -> dict:
     return {
         "agent": (modules["agent_router"], "/api/agent", ["agent"]),
         "auth_proxy": (modules["auth_proxy_router"], "", ["auth"]),
+        "auth_compat": (modules["auth_compat_router"], "", ["auth-compat"]),
         "agents_execute": (modules["agents_execute_router"], "/api/agents", ["agents"]),
         "metrics_api": (modules["metrics_api_router"], "/api/metrics", ["metrics"]),
         "health_check": (modules["health_check_router"], "/api/health", ["health-check"]),

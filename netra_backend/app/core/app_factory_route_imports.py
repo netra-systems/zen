@@ -79,6 +79,7 @@ def _import_auth_routers() -> dict:
     """Import authentication-related routers"""
     from netra_backend.app.routes.agent_route import router as agent_router
     from netra_backend.app.routes.auth_proxy import router as auth_proxy_router
+    from netra_backend.app.routes.auth_proxy import compat_router as auth_compat_router
     from netra_backend.app.routes.agents_execute import router as agents_execute_router
     from netra_backend.app.routes.metrics_api import router as metrics_api_router
     from netra_backend.app.routes.health_check import router as health_check_router
@@ -90,6 +91,7 @@ def _import_auth_routers() -> dict:
     return {
         "agent_router": agent_router, 
         "auth_proxy_router": auth_proxy_router,
+        "auth_compat_router": auth_compat_router,
         "agents_execute_router": agents_execute_router,
         "metrics_api_router": metrics_api_router,
         "health_check_router": health_check_router,

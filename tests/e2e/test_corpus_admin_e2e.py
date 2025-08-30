@@ -1248,7 +1248,7 @@ class TestCorpusAdminE2E:
         
         # Reconnect and verify operation completed
         # Mock websocket client for now
-                ws_client = AsyncNone  # TODO: Use real service instead of Mock
+        ws_client = AsyncNone  # TODO: Use real service instead of Mock
         
         # Verify corpus was created despite network interruption
         corpus_id = response["corpus_id"]

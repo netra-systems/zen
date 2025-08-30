@@ -196,6 +196,14 @@
             <critical-takeaway>Restore authentication state from storage synchronously before making API calls.</critical-takeaway>
         </category>
 
+        <category name="SQLAlchemy Import Requirements" path="SPEC/learnings/sqlalchemy_func_import.xml" keywords="SQLAlchemy, func, Import Error, Database Functions, func.now(), NameError">
+            <critical-takeaway>CRITICAL: SQLAlchemy's func must be explicitly imported from sqlalchemy to use database functions like func.now().</critical-takeaway>
+            <critical-takeaway>Import pattern: from sqlalchemy import func - required for func.now(), func.count(), func.sum() and other SQL functions.</critical-takeaway>
+            <critical-takeaway>Common error: "name 'func' is not defined" when using func.now() without importing func from sqlalchemy.</critical-takeaway>
+            <critical-takeaway>Always verify SQLAlchemy imports include all needed components: select, update, delete, func, desc, asc.</critical-takeaway>
+            <critical-takeaway>Test imports at module level with simple import test to catch missing imports early.</critical-takeaway>
+        </category>
+
         <category name="Auth Service Integration" path="SPEC/learnings/auth_service_integration.xml" keywords="Auth Service, Dev Login, JWT, OAuth Flow">
             <critical-takeaway>Auth service is OAuth-first with NO /register endpoint - use OAuth or dev login.</critical-takeaway>
             <critical-takeaway>Dev login endpoint (/auth/dev/login) creates fixed dev@example.com user automatically.</critical-takeaway>

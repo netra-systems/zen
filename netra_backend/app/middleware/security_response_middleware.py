@@ -63,6 +63,7 @@ class SecurityResponseMiddleware(BaseHTTPMiddleware):
             # Security check: convert 404/405 to 401 for unauthenticated API requests
             if (response.status_code in [404, 405] and 
                 self._is_api_endpoint(request.url.path) and 
+                not self._is_excluded_from_auth(request.url.path) and
                 not self._has_valid_auth(request)):
                 
                 logger.warning(f"Converting HTTP {response.status_code} to 401 for protected endpoint: {request.url.path}")
@@ -113,3 +114,17 @@ class SecurityResponseMiddleware(BaseHTTPMiddleware):
         # Check if request state indicates successful authentication
         # This will be set by the auth middleware if authentication was successful
         return getattr(request.state, 'authenticated', False)
+    
+    def _is_excluded_from_auth(self, path: str) -> bool:
+        """Check if path is excluded from authentication requirements.
+        
+        This should match the same exclusion logic used in FastAPIAuthMiddleware
+        to ensure consistency between auth middleware and security middleware.
+        """
+        # Default excluded paths that match FastAPIAuthMiddleware configuration
+        excluded_paths = [
+            "/health", "/metrics", "/", "/docs", "/openapi.json", "/redoc",
+            "/ws", "/websocket", "/ws/test", "/ws/config", "/ws/health", "/ws/stats",
+            "/api/v1/auth"
+        ]
+        return any(excluded in path for excluded in excluded_paths)

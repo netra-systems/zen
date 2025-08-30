@@ -65,7 +65,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class TestResilienceMetrics:
+class ResilienceTestMetrics:
     """Comprehensive metrics for system resilience and recovery testing."""
     test_name: str
     start_time: float = field(default_factory=time.time)
@@ -171,7 +171,7 @@ class TestResilienceMetrics:
 
 
 @dataclass
-class TestResilienceConfig:
+class ResilienceTestConfig:
     """Configuration for comprehensive resilience testing."""
     # Failure simulation
     test_service_failures: bool = True

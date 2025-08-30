@@ -358,7 +358,9 @@ class TestAgentOrchestrationRealLLMIntegration:
         if use_real_llm:
             # Real LLM execution
             from netra_backend.app.llm.llm_manager import LLMManager
-            llm_manager = LLMManager()
+            from netra_backend.app.schemas.config import AppConfig
+            config = AppConfig()
+            llm_manager = LLMManager(config)
             
             start_time = time.time()
             try:

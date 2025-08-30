@@ -145,6 +145,8 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
         self.registry = AgentRegistry(llm_manager, tool_dispatcher)
         self.registry.set_websocket_manager(websocket_manager)
         self.registry.register_default_agents()
+        # Add alias for test compatibility
+        self.agent_registry = self.registry
 
     def _init_execution_components(self, websocket_manager: 'WebSocketManager') -> None:
         """Initialize execution components."""
@@ -169,6 +171,9 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
         self.execution_helpers, self.workflow_executor, self.agent_router, self.completion_helpers = helpers
         # Add lifecycle manager for compatibility
         self.lifecycle_manager = SupervisorLifecycleManager()
+        # Add workflow orchestrator for test compatibility
+        from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
+        self.workflow_orchestrator = WorkflowOrchestrator(self.registry, self.engine, self.websocket_manager)
 
     @asynccontextmanager
     async def _create_db_session_factory(self):
@@ -275,9 +280,16 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
         # Validate preconditions first - critical errors should propagate
         await self.validate_preconditions(context)
         
+        # Track execution start for performance monitoring
+        self.monitor.start_execution(context)
+        
         result = await self.reliability_manager.execute_with_reliability(
             context, lambda: self.execution_engine.execute(self, context)
         )
+        
+        # Track execution completion
+        self.monitor.complete_execution(context, result)
+        
         await self._handle_execution_result(result, context)
 
     async def _handle_execution_result(self, result, context: ExecutionContext) -> None:
@@ -303,7 +315,32 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
     async def _execute_legacy_workflow(self, state: DeepAgentState, 
                                      run_id: str, stream_updates: bool) -> None:
         """Legacy execution workflow for backward compatibility."""
-        await self.execution_helpers.execute_legacy_workflow(state, run_id, stream_updates)
+        # Track legacy execution for performance monitoring
+        context = self._create_supervisor_execution_context(state, run_id, stream_updates)
+        self.monitor.start_execution(context)
+        
+        try:
+            await self.execution_helpers.execute_legacy_workflow(state, run_id, stream_updates)
+            # Create successful result for completion tracking
+            from netra_backend.app.agents.base.interface import ExecutionResult, ExecutionStatus
+            result = ExecutionResult(
+                success=True,
+                status=ExecutionStatus.COMPLETED,
+                result={"legacy_execution": "completed"},
+                execution_time_ms=0.0
+            )
+            self.monitor.complete_execution(context, result)
+        except Exception as e:
+            # Track error for monitoring
+            from netra_backend.app.agents.base.interface import ExecutionResult, ExecutionStatus
+            result = ExecutionResult(
+                success=False,
+                status=ExecutionStatus.FAILED,
+                error=str(e),
+                execution_time_ms=0.0
+            )
+            self.monitor.complete_execution(context, result)
+            raise
 
     
     async def run(self, user_prompt: str, thread_id: str, 

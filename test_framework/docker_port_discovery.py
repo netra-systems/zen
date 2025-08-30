@@ -45,20 +45,35 @@ class DockerPortDiscovery:
         "clickhouse": 8123,
     }
     
-    # Alternative container name patterns
-    CONTAINER_PATTERNS = {
-        "backend": ["netra-backend", "netra_backend", "backend"],
-        "auth": ["netra-auth", "auth-service", "auth"],
-        "frontend": ["netra-frontend", "frontend"],
-        "postgres": ["netra-postgres", "netra-dev-postgres", "postgres"],
-        "redis": ["netra-redis", "netra-dev-redis", "redis"],
-        "clickhouse": ["netra-clickhouse", "netra-dev-clickhouse", "clickhouse"],
+    # Test-specific service ports (external mappings for test environment)
+    TEST_SERVICE_PORTS = {
+        "backend": 8001,
+        "auth": 8082,
+        "frontend": 3001,
+        "postgres": 5434,
+        "redis": 6381,
+        "clickhouse": 8123,
     }
     
-    def __init__(self):
-        """Initialize Docker port discovery."""
+    # Alternative container name patterns
+    CONTAINER_PATTERNS = {
+        "backend": ["netra-test-backend", "netra-backend", "netra_backend", "backend"],
+        "auth": ["netra-test-auth", "netra-auth", "auth-service", "auth"],
+        "frontend": ["netra-test-frontend", "netra-frontend", "frontend"],
+        "postgres": ["netra-test-postgres", "netra-postgres", "netra-dev-postgres", "postgres"],
+        "redis": ["netra-test-redis", "netra-redis", "netra-dev-redis", "redis"],
+        "clickhouse": ["netra-test-clickhouse", "netra-clickhouse", "netra-dev-clickhouse", "clickhouse"],
+    }
+    
+    def __init__(self, use_test_services: bool = True):
+        """Initialize Docker port discovery.
+        
+        Args:
+            use_test_services: If True, default to test-specific services and ports
+        """
         self.docker_available = self._check_docker_available()
         self.compose_project = self._detect_compose_project()
+        self.use_test_services = use_test_services
         
     def _check_docker_available(self) -> bool:
         """Check if Docker is available."""
@@ -257,15 +272,18 @@ class DockerPortDiscovery:
         
     def _get_default_mappings(self) -> Dict[str, ServicePortMapping]:
         """Get default port mappings when Docker discovery fails."""
+        # Use test-specific ports when in test mode
+        port_map = self.TEST_SERVICE_PORTS if self.use_test_services else self.SERVICE_PORTS
+        
         return {
             service: ServicePortMapping(
                 service_name=service,
-                container_name=f"local-{service}",
-                internal_port=port,
-                external_port=port,
+                container_name=f"{'test' if self.use_test_services else 'local'}-{service}",
+                internal_port=self.SERVICE_PORTS[service],
+                external_port=port_map[service],
                 is_available=False
             )
-            for service, port in self.SERVICE_PORTS.items()
+            for service in self.SERVICE_PORTS.keys()
         }
         
     def get_service_url(self, service: str) -> Optional[str]:
@@ -367,19 +385,27 @@ class DockerPortDiscovery:
         if not missing:
             return True, []
             
-        # Try docker-compose up for missing services
-        if self.compose_project or self._has_compose_file():
+        # Determine which compose file to use
+        compose_file = self._get_compose_file()
+        
+        if compose_file:
             try:
-                services_to_start = list(missing.keys())
+                # Map service names to test-specific names if using test services
+                if self.use_test_services and "test" in compose_file:
+                    services_to_start = [f"{svc}-test" for svc in missing.keys()]
+                else:
+                    services_to_start = list(missing.keys())
+                
+                cmd = ["docker", "compose", "-f", compose_file, "up", "-d"] + services_to_start
                 result = subprocess.run(
-                    ["docker", "compose", "up", "-d"] + services_to_start,
+                    cmd,
                     capture_output=True,
                     timeout=60
                 )
                 
                 if result.returncode == 0:
-                    started_services.extend(services_to_start)
-                    logger.info(f"Started services via docker-compose: {services_to_start}")
+                    started_services.extend(list(missing.keys()))
+                    logger.info(f"Started services via {compose_file}: {services_to_start}")
                     return True, started_services
                     
             except Exception as e:
@@ -389,15 +415,29 @@ class DockerPortDiscovery:
         
     def _has_compose_file(self) -> bool:
         """Check if docker-compose file exists."""
+        return self._get_compose_file() is not None
+    
+    def _get_compose_file(self) -> Optional[str]:
+        """Get the appropriate docker-compose file to use."""
         from pathlib import Path
-        compose_files = [
-            "docker-compose.yml",
-            "docker-compose.yaml",
-            "docker-compose.dev.yml",
-            "docker-compose.dev.yaml"
-        ]
+        
+        # Prioritize test compose file when in test mode
+        if self.use_test_services:
+            compose_files = [
+                "docker-compose.test.yml",
+                "docker-compose.test.yaml",
+                "docker-compose.yml",
+                "docker-compose.yaml"
+            ]
+        else:
+            compose_files = [
+                "docker-compose.dev.yml",
+                "docker-compose.dev.yaml",
+                "docker-compose.yml",
+                "docker-compose.yaml"
+            ]
         
         for file in compose_files:
             if Path(file).exists():
-                return True
-        return False
+                return file
+        return None

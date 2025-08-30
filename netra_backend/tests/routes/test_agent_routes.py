@@ -79,7 +79,7 @@ class TestAgentRoute:
         
         # Mock the dependencies
         # Mock: Agent service isolation for testing without LLM agent execution
-        with patch('app.routes.agent_route.get_agent_service', return_value=mock_agent_service):
+        with patch('netra_backend.app.routes.agent_route.get_agent_service', return_value=mock_agent_service):
             chunks = await self._collect_stream_chunks("test message", mock_agent_service)
             
             assert len(chunks) == 4  # 3 content chunks + 1 completion chunk
@@ -179,7 +179,7 @@ class TestAgentRoute:
         })
         
         # Mock: Agent service isolation for testing without LLM agent execution
-        with patch('app.routes.agent_route.get_agent_service', return_value=mock_agent_service):
+        with patch('netra_backend.app.routes.agent_route.get_agent_service', return_value=mock_agent_service):
             result = await process_with_context(
                 message="Test with context",
                 thread_id="thread123",
@@ -237,7 +237,7 @@ class TestAgentRoute:
         }
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.services.agent_service.process_multimodal') as mock_process:
+        with patch('netra_backend.app.services.agent_service.process_multimodal') as mock_process:
             mock_process.return_value = {
                 "response": "Analysis complete",
                 "processed_attachments": 2
@@ -302,9 +302,9 @@ class TestAgentRoute:
         })
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.services.agent_service.get_primary_agent', return_value=primary_agent):
+        with patch('netra_backend.app.services.agent_service.get_primary_agent', return_value=primary_agent):
             # Mock: Component isolation for testing without external dependencies
-            with patch('app.services.agent_service.get_fallback_agent', return_value=fallback_agent):
+            with patch('netra_backend.app.services.agent_service.get_fallback_agent', return_value=fallback_agent):
                 result = await process_with_fallback("Test fallback")
                 
                 assert result["agent"] == "fallback"

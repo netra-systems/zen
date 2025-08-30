@@ -46,6 +46,7 @@ class AgentRegistry:
         self._register_core_agents()
         self._register_auxiliary_agents()
         self._agents_registered = True
+        logger.info(f"Successfully registered {len(self.agents)} agents")
     
     def _register_core_agents(self) -> None:
         """Register core workflow agents."""
@@ -89,7 +90,7 @@ class AgentRegistry:
         if self.websocket_manager:
             agent.websocket_manager = self.websocket_manager
         self.agents[name] = agent
-        logger.info(f"Registered agent: {name}")
+        logger.debug(f"Registered agent: {name}")
     
     def get(self, name: str) -> BaseSubAgent:
         """Get agent by name"""

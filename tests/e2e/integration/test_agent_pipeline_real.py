@@ -246,7 +246,7 @@ class TestAgentPipelineExecutioner:
 class TestAgentPipelinePerformanceer:
     """Tests agent pipeline performance characteristics."""
     
-    def __init__(self, pipeline_tester: AgentPipelineExecutionTester):
+    def __init__(self, pipeline_tester: TestAgentPipelineExecutioner):
         """Initialize performance tester."""
         self.pipeline_tester = pipeline_tester
     
