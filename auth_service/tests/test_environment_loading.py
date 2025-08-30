@@ -39,13 +39,13 @@ POSTGRES_PASSWORD=test_password
     def test_service_secret_required_no_mocks(self):
         """Test that SERVICE_SECRET is required with no mock fallbacks."""
         # Create a test script that tries to import auth config without SERVICE_SECRET
-        test_script = '''
+        test_script = f'''
 import os
 import sys
 from pathlib import Path
 
 # Add auth service to path
-auth_service_path = Path(__file__).parent.parent
+auth_service_path = Path("{Path(__file__).parent.parent}")
 sys.path.insert(0, str(auth_service_path.parent))
 
 # Clear SERVICE_SECRET to simulate missing variable
@@ -83,13 +83,13 @@ except Exception as e:
     
     def test_service_id_required(self):
         """Test that SERVICE_ID is required for auth service."""
-        test_script = '''
+        test_script = f'''
 import os
 import sys
 from pathlib import Path
 
 # Add auth service to path
-auth_service_path = Path(__file__).parent.parent
+auth_service_path = Path("{Path(__file__).parent.parent}")
 sys.path.insert(0, str(auth_service_path.parent))
 
 # Set SERVICE_SECRET but clear SERVICE_ID
@@ -231,13 +231,13 @@ except ValueError as e:
     
     def test_service_id_must_be_auth_service(self):
         """Test that SERVICE_ID should be 'auth-service' not 'netra-backend'."""
-        test_script = '''
+        test_script = f'''
 import os
 import sys
 from pathlib import Path
 
 # Add auth service to path
-auth_service_path = Path(__file__).parent.parent
+auth_service_path = Path("{Path(__file__).parent.parent}")
 sys.path.insert(0, str(auth_service_path.parent))
 
 # Set variables but with wrong SERVICE_ID
@@ -273,13 +273,13 @@ except Exception as e:
     
     def test_isolated_environment_reads_os_environ(self):
         """Test that IsolatedEnvironment reads from os.environ correctly."""
-        test_script = '''
+        test_script = f'''
 import os
 import sys
 from pathlib import Path
 
 # Add auth service to path
-auth_service_path = Path(__file__).parent.parent
+auth_service_path = Path("{Path(__file__).parent.parent}")
 sys.path.insert(0, str(auth_service_path.parent))
 
 # Set variables directly in os.environ

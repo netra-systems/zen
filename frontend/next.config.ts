@@ -156,7 +156,20 @@ const nextConfig: NextConfig = {
   images: {
     domains: ['localhost', 'staging.netrasystems.ai']
   },
-  webpack: (config, { isServer, isProduction }) => {
+  webpack: (config, { isServer, isProduction, dev }) => {
+    // Configure hot reload polling interval for development
+    if (dev && !isProduction) {
+      config.watchOptions = {
+        ...config.watchOptions,
+        // Poll for changes every 5 minutes (300000 ms)
+        poll: 300000,
+        // Aggregate changes for 5 minutes before rebuilding
+        aggregateTimeout: 300000,
+        // Ignore node_modules to reduce file watching overhead
+        ignored: /node_modules/,
+      };
+    }
+    
     // Exclude test files and mocks from production builds
     if (isProduction) {
       config.module.rules.push({

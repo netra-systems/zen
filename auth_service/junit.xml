@@ -1,7 +1,1 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.592" timestamp="2025-08-30T05:57:27.361356-07:00" hostname="Anthony"><testcase classname="tests.test_environment_loading.TestMainEntrypoint" name="test_main_loads_env_before_imports" time="0.325"><failure message="UnicodeDecodeError: 'charmap' codec can't decode byte 0x90 in position 4876: character maps to &lt;undefined&gt;">tests\test_environment_loading.py:328: in test_main_loads_env_before_imports
-    content = f.read()
-              ^^^^^^^^
-C:\Users\antho\miniconda3\Lib\encodings\cp1252.py:23: in decode
-    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E   UnicodeDecodeError: 'charmap' codec can't decode byte 0x90 in position 4876: character maps to &lt;undefined&gt;</failure></testcase></testsuite></testsuites>
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="5.395" timestamp="2025-08-30T05:58:38.317422-07:00" hostname="Anthony"><testcase classname="tests.test_environment_loading.TestMainEntrypoint" name="test_main_loads_env_before_imports" time="0.309" /></testsuite></testsuites>
