@@ -39,16 +39,22 @@ jest.mock('@/store/chat', () => ({
 }));
 
 // AuthGate mock - always render children
-jest.mock('@/components/auth/AuthGate', () => ({
-  AuthGate: ({ children }: { children: React.ReactNode }) => children
-}));
+jest.mock('@/components/auth/AuthGate', () => {
+  const React = require('react');
+  return {
+    AuthGate: ({ children }: { children: React.ReactNode }) => children
+  };
+});
 
-jest.mock('framer-motion', () => ({
-  motion: {
-    div: ({ children, ...props }: any) => React.createElement('div', props, children),
-  },
-  AnimatePresence: ({ children }: any) => children,
-}));
+jest.mock('framer-motion', () => {
+  const React = require('react');
+  return {
+    motion: {
+      div: ({ children, ...props }: any) => React.createElement('div', props, children),
+    },
+    AnimatePresence: ({ children }: any) => children,
+  };
+});
 
 // Import all test modules
 import './basic.test';

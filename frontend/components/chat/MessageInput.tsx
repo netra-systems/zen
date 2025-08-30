@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, KeyboardEvent } from 'react';
+import React, { useState, useRef, useEffect, KeyboardEvent, forwardRef, useImperativeHandle } from 'react';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useThreadStore } from '@/store/threadStore';
 import { useAuthStore } from '@/store/authStore';
@@ -19,7 +19,11 @@ import { MESSAGE_INPUT_CONSTANTS } from './types';
 
 const { MAX_ROWS, CHAR_LIMIT, LINE_HEIGHT } = MESSAGE_INPUT_CONSTANTS;
 
-export const MessageInput: React.FC = () => {
+export interface MessageInputRef {
+  focus: () => void;
+}
+
+export const MessageInput = forwardRef<MessageInputRef>((props, ref) => {
   const [message, setMessage] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
@@ -45,6 +49,11 @@ export const MessageInput: React.FC = () => {
       textareaRef.current.focus();
     }
   };
+
+  // Expose focus method via ref
+  useImperativeHandle(ref, () => ({
+    focus: focusTextarea
+  }), [isAuthenticated]);
 
   useEffect(() => {
     focusTextarea();
@@ -195,4 +204,6 @@ export const MessageInput: React.FC = () => {
       />
     </div>
   );
-};
+});
+
+MessageInput.displayName = 'MessageInput';

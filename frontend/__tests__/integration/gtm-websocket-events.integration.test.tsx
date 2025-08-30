@@ -324,16 +324,25 @@ describe('GTM WebSocket Events Integration', () => {
 
   beforeEach(() => {
     mockDataLayer = [];
-    Object.defineProperty(global, 'window', {
-      value: {
+    
+    // Safely set window properties without redefining the window object
+    if (typeof window === 'undefined') {
+      // If window doesn't exist, create it
+      (global as any).window = {
         dataLayer: mockDataLayer,
         location: {
           pathname: '/chat',
           origin: 'https://app.netra.com'
         }
-      },
-      writable: true
-    });
+      };
+    } else {
+      // If window exists, just set the properties we need
+      (window as any).dataLayer = mockDataLayer;
+      (window as any).location = {
+        pathname: '/chat',
+        origin: 'https://app.netra.com'
+      };
+    }
 
     jest.clearAllMocks();
   });

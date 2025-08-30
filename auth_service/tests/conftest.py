@@ -41,8 +41,8 @@ if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
     # DEPRECATED: Remove old variables to ensure tests use new environment-specific variables
     # env.set("GOOGLE_CLIENT_ID", "123456789-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com", "auth_conftest")
     # env.set("GOOGLE_CLIENT_SECRET", "GOCSPX-1234567890123456789012345678901", "auth_conftest")
-    env.set("DATABASE_URL", "sqlite+aiosqlite:///test_auth.db", "auth_conftest")
-    env.set("AUTH_USE_FILE_DB", "true", "auth_conftest")  # Force file-based DB for tests
+    env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "auth_conftest")
+    env.set("AUTH_USE_FILE_DB", "false", "auth_conftest")  # Use in-memory DB for tests
     env.set("REDIS_URL", "redis://localhost:6379/1", "auth_conftest")
 
 @pytest.fixture(scope="session")

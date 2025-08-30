@@ -12,40 +12,46 @@ const mockUseThreadNavigation = jest.fn();
 const mockUseAuthStore = jest.fn();
 
 jest.mock('@/store/unified-chat', () => ({
-  useUnifiedChatStore: mockUseUnifiedChatStore
+  useUnifiedChatStore: () => mockUseUnifiedChatStore()
 }));
 
 jest.mock('@/hooks/useLoadingState', () => ({
-  useLoadingState: mockUseLoadingState
+  useLoadingState: () => mockUseLoadingState()
 }));
 
 jest.mock('@/hooks/useThreadNavigation', () => ({
-  useThreadNavigation: mockUseThreadNavigation
+  useThreadNavigation: () => mockUseThreadNavigation()
 }));
 
 jest.mock('@/store/authStore', () => ({
-  useAuthStore: mockUseAuthStore
+  useAuthStore: () => mockUseAuthStore()
 }));
 
 jest.mock('@/store/threadStore', () => ({
-  useThreadStore: mockUseThreadStore
+  useThreadStore: () => mockUseThreadStore()
 }));
 
 jest.mock('@/store/chat', () => ({
-  useChatStore: mockUseChatStore
+  useChatStore: () => mockUseChatStore()
 }));
 
 // AuthGate mock - always render children
-jest.mock('@/components/auth/AuthGate', () => ({
-  AuthGate: ({ children }: { children: React.ReactNode }) => children
-}));
+jest.mock('@/components/auth/AuthGate', () => {
+  const React = require('react');
+  return {
+    AuthGate: ({ children }: { children: React.ReactNode }) => children
+  };
+});
 
-jest.mock('framer-motion', () => ({
-  motion: {
-    div: ({ children, ...props }: any) => React.createElement('div', props, children),
-  },
-  AnimatePresence: ({ children }: any) => children,
-}));
+jest.mock('framer-motion', () => {
+  const React = require('react');
+  return {
+    motion: {
+      div: ({ children, ...props }: any) => React.createElement('div', props, children),
+    },
+    AnimatePresence: ({ children }: any) => children,
+  };
+});
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';

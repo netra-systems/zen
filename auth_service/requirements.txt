@@ -23,3 +23,9 @@ prometheus-client
 langchain-core
 langchain-community
 loguru==0.7.2
+# OpenTelemetry for distributed tracing
+opentelemetry-api>=1.28.0
+opentelemetry-sdk>=1.28.0
+opentelemetry-instrumentation-fastapi>=0.49b0
+opentelemetry-exporter-otlp>=1.28.0
+opentelemetry-exporter-jaeger>=1.28.0

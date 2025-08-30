@@ -43,16 +43,14 @@ describe('User Profile Form Tests', () => {
   });
 
   it('should enforce minimum name length', async () => {
-    const user = userEvent.setup();
-
     render(<UserProfileForm />);
 
     const nameInput = screen.getByTestId('name-input');
     const submitButton = screen.getByTestId('submit-button');
 
-    // Enter single character name
-    await user.type(nameInput, 'A');
-    await user.click(submitButton);
+    // Enter single character name using fireEvent
+    fireEvent.change(nameInput, { target: { value: 'A' } });
+    fireEvent.click(submitButton);
 
     await waitFor(() => {
       expect(screen.getByTestId('name-error')).toHaveTextContent('Name must be at least 2 characters');
@@ -60,21 +58,20 @@ describe('User Profile Form Tests', () => {
   });
 
   it('should enforce bio character limit', async () => {
-    const user = userEvent.setup();
-
     render(<UserProfileForm />);
 
-    const bioInput = screen.getByTestId('bio-input');
+    const bioInput = screen.getByTestId('bio-input') as HTMLTextAreaElement;
     const submitButton = screen.getByTestId('submit-button');
 
-    // Enter bio that exceeds limit (501 characters)
+    // Enter bio that exceeds limit (501 characters) - use fireEvent for direct manipulation
     const longBio = 'A'.repeat(501);
-    await user.type(bioInput, longBio);
+    fireEvent.change(bioInput, { target: { value: longBio } });
 
-    // Check character counter
+    // Check character counter updates immediately
     expect(screen.getByTestId('bio-counter')).toHaveTextContent('501/500');
 
-    await user.click(submitButton);
+    // Submit form to trigger validation
+    fireEvent.click(submitButton);
 
     await waitFor(() => {
       expect(screen.getByTestId('bio-error')).toHaveTextContent('Bio must be 500 characters or less');
@@ -83,16 +80,15 @@ describe('User Profile Form Tests', () => {
 
   it('should submit valid form data', async () => {
     const mockSubmit = jest.fn();
-    const user = userEvent.setup();
 
     render(<UserProfileForm onSubmit={mockSubmit} />);
 
-    // Fill out form with valid data
-    await user.type(screen.getByTestId('name-input'), 'John Doe');
-    await user.type(screen.getByTestId('email-input'), 'john@example.com');
-    await user.type(screen.getByTestId('bio-input'), 'Software developer');
+    // Fill out form with valid data using fireEvent
+    fireEvent.change(screen.getByTestId('name-input'), { target: { value: 'John Doe' } });
+    fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'john@example.com' } });
+    fireEvent.change(screen.getByTestId('bio-input'), { target: { value: 'Software developer' } });
 
-    await user.click(screen.getByTestId('submit-button'));
+    fireEvent.click(screen.getByTestId('submit-button'));
 
     await waitFor(() => {
       expect(mockSubmit).toHaveBeenCalledWith({
@@ -109,22 +105,20 @@ describe('User Profile Form Tests', () => {
   });
 
   it('should clear errors when user starts typing', async () => {
-    const user = userEvent.setup();
-
     render(<UserProfileForm />);
 
     const nameInput = screen.getByTestId('name-input');
     const submitButton = screen.getByTestId('submit-button');
 
-    // Trigger validation error
-    await user.click(submitButton);
+    // Trigger validation error by submitting empty form
+    fireEvent.click(submitButton);
 
     await waitFor(() => {
       expect(screen.getByTestId('name-error')).toBeInTheDocument();
     });
 
-    // Start typing in name field
-    await user.type(nameInput, 'John');
+    // Start typing in name field to clear the error
+    fireEvent.change(nameInput, { target: { value: 'John' } });
 
     // Error should be cleared
     await waitFor(() => {

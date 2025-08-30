@@ -19,27 +19,27 @@ const mockThreadService = {
 };
 
 jest.mock('@/store/unified-chat', () => ({
-  useUnifiedChatStore: mockUseUnifiedChatStore
+  useUnifiedChatStore: () => mockUseUnifiedChatStore()
 }));
 
 jest.mock('@/hooks/useLoadingState', () => ({
-  useLoadingState: mockUseLoadingState
+  useLoadingState: () => mockUseLoadingState()
 }));
 
 jest.mock('@/hooks/useThreadNavigation', () => ({
-  useThreadNavigation: mockUseThreadNavigation
+  useThreadNavigation: () => mockUseThreadNavigation()
 }));
 
 jest.mock('@/store/authStore', () => ({
-  useAuthStore: mockUseAuthStore
+  useAuthStore: () => mockUseAuthStore()
 }));
 
 jest.mock('@/store/threadStore', () => ({
-  useThreadStore: mockUseThreadStore
+  useThreadStore: () => mockUseThreadStore()
 }));
 
 jest.mock('@/store/chat', () => ({
-  useChatStore: mockUseChatStore
+  useChatStore: () => mockUseChatStore()
 }));
 
 jest.mock('@/services/threadService', () => ({
@@ -63,6 +63,7 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event';
 import { ChatHistorySection } from '@/components/ChatHistorySection';
 import { mockThreads } from './setup';
+import { createTestSetup } from './shared-setup';
 
 const mockStore = {
   isProcessing: false,
@@ -89,6 +90,8 @@ const createMockThread = (overrides: any = {}) => ({
 });
 
 describe('ChatHistorySection - Edge Cases', () => {
+  const testSetup = createTestSetup();
+
   beforeEach(() => {
     jest.clearAllMocks();
     
