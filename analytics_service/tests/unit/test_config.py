@@ -61,7 +61,11 @@ class TestAnalyticsConfig:
             "CLICKHOUSE_PORT", "CLICKHOUSE_PASSWORD", "ANALYTICS_SERVICE_PORT",
             "CLICKHOUSE_HOST", "CLICKHOUSE_DATABASE", "CLICKHOUSE_USERNAME",
             "CLICKHOUSE_ANALYTICS_URL", "REDIS_HOST", "REDIS_PORT", "REDIS_ANALYTICS_DB",
-            "REDIS_PASSWORD", "REDIS_ANALYTICS_URL"
+            "REDIS_PASSWORD", "REDIS_ANALYTICS_URL", "CLICKHOUSE_USER", "EVENT_FLUSH_INTERVAL_MS",
+            "EVENT_BATCH_SIZE", "MAX_EVENTS_PER_USER_PER_MINUTE", "ANALYTICS_WORKERS",
+            "CONNECTION_POOL_SIZE", "QUERY_TIMEOUT_SECONDS", "EVENT_RETENTION_DAYS",
+            "ANALYTICS_RETENTION_DAYS", "ANALYTICS_LOG_LEVEL", "ENABLE_REQUEST_LOGGING",
+            "ANALYTICS_API_KEY", "ANALYTICS_CORS_ORIGINS", "GRAFANA_API_URL", "GRAFANA_API_KEY"
         ]
         for var in vars_to_clear:
             env.unset(var)
@@ -144,15 +148,19 @@ class TestAnalyticsConfig:
         assert config.is_staging is False
         assert config.is_production is False
         
-        # Test staging environment
+        # Test staging environment with proper URLs to avoid validation errors
         env.set("ENVIRONMENT", "staging")
+        env.set("CLICKHOUSE_ANALYTICS_URL", "clickhouse://staging-clickhouse:8123/analytics")
+        env.set("REDIS_ANALYTICS_URL", "redis://staging-redis:6379/2")
         config = AnalyticsConfig()
         assert config.is_development is False
         assert config.is_staging is True
         assert config.is_production is False
         
-        # Test production environment
+        # Test production environment with proper URLs to avoid validation errors
         env.set("ENVIRONMENT", "production")
+        env.set("CLICKHOUSE_ANALYTICS_URL", "clickhouse://prod-clickhouse:8123/analytics")
+        env.set("REDIS_ANALYTICS_URL", "redis://prod-redis:6379/2")
         config = AnalyticsConfig()
         assert config.is_development is False
         assert config.is_staging is False
@@ -404,12 +412,19 @@ class TestGlobalConfigFunctions:
     def test_is_production(self):
         """Test is_production convenience function."""
         env = get_env()
+        
+        # Reset global config before each test
+        import analytics_service.analytics_core.config as config_module
+        config_module._config = None
+        
         env.set("ENVIRONMENT", "production")
         env.set("CLICKHOUSE_ANALYTICS_URL", "clickhouse://prod-clickhouse:8123/analytics")
         env.set("REDIS_ANALYTICS_URL", "redis://prod-redis:6379/2")
         
         assert is_production() is True
         
+        # Reset config to test development
+        config_module._config = None
         env.set("ENVIRONMENT", "development")
         assert is_production() is False
 
