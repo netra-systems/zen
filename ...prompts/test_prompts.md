@@ -35,3 +35,13 @@ REPEAT each STEP at least 100 times or untill all tests pass.
 # 2
 USING UNIFIED TEST RUNNER:  STEP: Run tests most likely to fail and fail the fastest first.  One at a time, step  through each failure. spawn a new sub agent. Run the test. Fix the SUT.
   REPEAT each STEP at least 100 times or untill all tests pass.
+
+
+  USING UNIFIED TEST RUNNER: Run REGRESSION tests most likely to fail and fail the fastest first.  One at a time, step through each failure. spawn a new sub agent. Run the test. Fix the SUT. 
+
+    USING UNIFIED TEST RUNNER: Run unit and integration tests most likely to fail and fail the fastest first.  One at a time, step through each failure. spawn a new sub agent. Run the test. Fix the SUT. 
+
+    
+    USING UNIFIED TEST RUNNER: Run most likely to fail and fail the fastest first AND be the most useful. Use test discovery. One at a time, step through each failure. spawn a new sub agent. Run the test. Fix the SUT. 
+
+    AUDIT e2e tests most badly using mocks One at a time, step through each failure. spawn a new sub agent. Make the test more realistic and much tougher. Focus on the BASICS, the most expected critical paths. Run it. Fix the system under test.
