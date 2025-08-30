@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Environment Loading Race Condition Fix</name>
+        <type>Critical Bug Fix</type>
+        <version>1.0</version>
+        <date>2025-08-30</date>
+        <severity>CRITICAL</severity>
+        <description>Auth service startup failure due to environment variable loading race condition</description>
+    </metadata>
+
+    <problem>
+        <title>SERVICE_SECRET Configuration Race Condition</title>
+        <impact>Auth service completely fails to start with ValueError</impact>
+        <error-message>
+            ValueError: SERVICE_SECRET must be set in development environment - no mock fallbacks allowed per CLAUDE.md
+        </error-message>
+        <root-cause>
+            Environment variables from .env file were loaded AFTER auth service modules were imported,
+            causing configuration validation to fail during module initialization.
+        </root-cause>
+        <affected-files>
+            <file>auth_service/main.py</file>
+            <file>.env</file>
+        </affected-files>
+    </problem>
+
+    <symptoms>
+        <symptom>Auth service fails at startup with SERVICE_SECRET not found error</symptom>
+        <symptom>SERVICE_ID validation also fails if not set correctly</symptom>
+        <symptom>Error occurs during module import, before FastAPI app initialization</symptom>
+        <symptom>Environment variables ARE present in .env but not accessible during import</symptom>
+    </symptoms>
+
+    <solution>
+        <step number="1">
+            <action>Move dotenv loading BEFORE any auth service module imports</action>
+            <file>auth_service/main.py</file>
+            <code-change>
+                <!-- Move load_dotenv() before any auth_service imports -->
+                <!-- Use override=True to ensure variables are set -->
+                load_dotenv(env_path, override=True)
+            </code-change>
+        </step>
+        <step number="2">
+            <action>Ensure SERVICE_ID is set correctly for auth service</action>
+            <file>.env</file>
+            <code-change>
+                SERVICE_ID=auth-service  # Not netra-backend
+            </code-change>
+        </step>
+        <step number="3">
+            <action>Add verification logging after loading .env</action>
+            <code-change>
+                if os.environ.get('SERVICE_SECRET'):
+                    print("SERVICE_SECRET successfully loaded from .env")
+            </code-change>
+        </step>
+    </solution>
+
+    <prevention>
+        <rule>ALWAYS load environment variables BEFORE importing modules that use them</rule>
+        <rule>Use os.environ directly for critical early checks, not isolated environment wrappers</rule>
+        <rule>Add explicit verification that required variables are loaded</rule>
+        <rule>Each service should have its own SERVICE_ID value</rule>
+        <pattern>
+            # CORRECT ORDER:
+            1. Import standard libraries
+            2. Load environment variables from .env
+            3. Verify critical variables are set
+            4. Import application modules that use config
+        </pattern>
+    </prevention>
+
+    <testing-requirements>
+        <test>Verify auth service can start with only .env file configuration</test>
+        <test>Test that missing SERVICE_SECRET causes clear error message</test>
+        <test>Test that wrong SERVICE_ID causes appropriate validation error</test>
+        <test>Ensure environment loading works in all modes: dev, test, staging</test>
+    </testing-requirements>
+
+    <similar-patterns-to-check>
+        <pattern>Backend service main.py - check for similar race conditions</pattern>
+        <pattern>Any service that uses IsolatedEnvironment class</pattern>
+        <pattern>Test fixtures that need environment variables</pattern>
+        <pattern>Docker entrypoints that load configuration</pattern>
+    </similar-patterns-to-check>
+
+    <keywords>
+        Environment Variables, Race Condition, SERVICE_SECRET, SERVICE_ID, Auth Service,
+        Startup Failure, dotenv, Configuration Loading, Import Order, Module Initialization
+    </keywords>
+</specification>

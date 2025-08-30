@@ -38,7 +38,7 @@ from test_framework.test_helpers import (
 )
 
 
-class TestSystemInitializationBase:
+class SystemInitializationTestBase:
     """Base class for system initialization tests with comprehensive helpers."""
     
     @classmethod

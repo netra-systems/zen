@@ -128,7 +128,8 @@ class JWTTestHelper:
             JWTConstants.ISSUED_AT: datetime.now(timezone.utc),
             JWTConstants.EXPIRES_AT: datetime.now(timezone.utc) + timedelta(minutes=15),
             JWTConstants.TOKEN_TYPE: JWTConstants.ACCESS_TOKEN_TYPE,
-            JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE
+            JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE,
+            "jti": str(uuid.uuid4())  # Required JWT ID for replay protection
         }
     
     def create_expired_payload(self) -> Dict:
@@ -164,7 +165,8 @@ class JWTTestHelper:
             JWTConstants.ISSUED_AT: datetime.now(timezone.utc),
             JWTConstants.EXPIRES_AT: datetime.now(timezone.utc) + timedelta(minutes=15),
             JWTConstants.TOKEN_TYPE: JWTConstants.ACCESS_TOKEN_TYPE,
-            JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE
+            JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE,
+            "jti": str(uuid.uuid4())  # Required JWT ID for replay protection
         }
         return self.create_token(payload)
     
@@ -401,7 +403,8 @@ class JWTTokenTestHelper:
             JWTConstants.TOKEN_TYPE: JWTConstants.SERVICE_TOKEN_TYPE,
             JWTConstants.ISSUED_AT: int((datetime.now(timezone.utc) - timedelta(minutes=10)).timestamp()),
             JWTConstants.EXPIRES_AT: int((datetime.now(timezone.utc) - timedelta(minutes=5)).timestamp()),
-            JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE
+            JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE,
+            "jti": str(uuid.uuid4())  # Required JWT ID for replay protection
         }
         return jwt.encode(payload, self.test_secret, algorithm=JWTConstants.HS256_ALGORITHM)
     
@@ -414,7 +417,8 @@ class JWTTokenTestHelper:
             JWTConstants.TOKEN_TYPE: JWTConstants.ACCESS_TOKEN_TYPE,
             JWTConstants.ISSUED_AT: int(datetime.now(timezone.utc).timestamp()),
             JWTConstants.EXPIRES_AT: int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp()),
-            JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE
+            JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE,
+            "jti": str(uuid.uuid4())  # Required JWT ID for replay protection
         }
         return jwt.encode(payload, self.test_secret, algorithm=JWTConstants.HS256_ALGORITHM)
 

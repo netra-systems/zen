@@ -77,8 +77,11 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
   }, []);
 
   useEffect(() => {
-    // Guard: Skip connection if no token is available
-    if (!token) {
+    // In development mode, allow connection without token
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    
+    // Guard: Skip connection if no token is available (unless in development mode)
+    if (!token && !isDevelopment) {
       debugLogger.debug('[WebSocketProvider] WebSocket connection skipped - no token available');
       return;
     }
@@ -86,7 +89,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     // Add a small delay to ensure auth context is fully initialized after OAuth redirect
     // This prevents race conditions when navigating from /auth/callback to /chat
     const connectWithDelay = () => {
-      if (token && !isConnectingRef.current) {
+      if ((token || isDevelopment) && !isConnectingRef.current) {
         isConnectingRef.current = true;
         
         const connectToWebSocket = async () => {
@@ -104,14 +107,15 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
             finalWsUrl: wsUrl.replace(/jwt\.[^&]+/, 'jwt.***'), // Hide token in logs
             hasToken: !!token,
             tokenLength: token ? token.length : 0,
-            isSecure: true,
-            authMethod: 'subprotocol',
+            isSecure: !isDevelopment || !!token,
+            isDevelopment,
+            authMethod: token ? 'subprotocol' : 'none',
             configWsUrl: appConfig.wsUrl,
             configApiUrl: appConfig.apiUrl
           });
           
           webSocketService.connect(wsUrl, {
-            token,
+            token: token || undefined,
             refreshToken: async () => {
               try {
                 // Use the unified auth service for token refresh

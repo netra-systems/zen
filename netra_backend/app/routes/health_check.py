@@ -35,6 +35,8 @@ class HealthStatus(BaseModel):
 
 
 @router.get("/ready", response_model=HealthStatus)
+@router.head("/ready", response_model=HealthStatus)
+@router.options("/ready")
 async def readiness_probe(
     user: Optional[Dict] = Depends(get_current_user_optional)
 ) -> HealthStatus:
@@ -109,6 +111,8 @@ async def readiness_probe(
 
 
 @router.get("/live", response_model=HealthStatus)
+@router.head("/live", response_model=HealthStatus)
+@router.options("/live")
 async def liveness_probe(
     user: Optional[Dict] = Depends(get_current_user_optional)
 ) -> HealthStatus:
@@ -180,6 +184,8 @@ async def liveness_probe(
 
 
 @router.get("/startup", response_model=HealthStatus)
+@router.head("/startup", response_model=HealthStatus)
+@router.options("/startup")
 async def startup_probe(
     user: Optional[Dict] = Depends(get_current_user_optional)
 ) -> HealthStatus:

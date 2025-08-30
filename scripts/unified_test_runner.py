@@ -162,8 +162,12 @@ class UnifiedTestRunner:
         # Configure environment
         self._configure_environment(args)
         
-        # Check service availability if real services are requested
-        if args.real_services or args.real_llm or args.env in ['dev', 'staging']:
+        # Check service availability if real services or E2E tests are requested
+        categories_to_run = self._determine_categories_to_run(args)
+        e2e_categories = {'e2e', 'e2e_critical', 'cypress'}
+        running_e2e = bool(set(categories_to_run) & e2e_categories)
+        
+        if args.real_services or args.real_llm or args.env in ['dev', 'staging'] or running_e2e:
             self._check_service_availability(args)
         
         # Start test tracking session
@@ -237,6 +241,67 @@ class UnifiedTestRunner:
         # Load test environment secrets first to prevent validation errors
         self._load_test_environment_secrets()
         
+        # Determine categories to run early to check for E2E categories
+        categories_to_run = self._determine_categories_to_run(args)
+        
+        # Check if running E2E categories - if so, enable real LLM by default per CLAUDE.md
+        e2e_categories = {'e2e', 'e2e_critical', 'cypress'}
+        running_e2e = bool(set(categories_to_run) & e2e_categories)
+        
+        # Real LLM should be enabled if:
+        # 1. Explicitly requested with --real-llm flag
+        # 2. Running E2E categories (real LLM is DEFAULT per CLAUDE.md)
+        # 3. Running in dev/staging environments (no mocks allowed per CLAUDE.md)
+        use_real_llm = args.real_llm or running_e2e or args.env in ['dev', 'staging']
+        
+        # Configure LLM testing with proper environment variables
+        if use_real_llm:
+            # Set primary control variable (NETRA_REAL_LLM_ENABLED)
+            env = get_env()
+            env.set('NETRA_REAL_LLM_ENABLED', 'true', 'test_runner_llm')
+            
+            # Set all legacy variables for backward compatibility
+            env.set('ENABLE_REAL_LLM_TESTING', 'true', 'test_runner_llm')
+            env.set('USE_REAL_LLM', 'true', 'test_runner_llm')
+            env.set('TEST_USE_REAL_LLM', 'true', 'test_runner_llm')
+            env.set('TEST_LLM_MODE', 'real', 'test_runner_llm')
+            
+            # Configure LLM testing framework
+            configure_llm_testing(
+                mode=LLMTestMode.REAL,
+                model="gemini-2.5-pro",
+                timeout=60,
+                parallel="auto",
+                use_dedicated_env=True
+            )
+        else:
+            # Only allow mock mode for unit tests in test environment per CLAUDE.md
+            if args.env == 'test' and not running_e2e:
+                env = get_env()
+                env.set('NETRA_REAL_LLM_ENABLED', 'false', 'test_runner_llm')
+                env.set('ENABLE_REAL_LLM_TESTING', 'false', 'test_runner_llm')
+                env.set('USE_REAL_LLM', 'false', 'test_runner_llm')
+                env.set('TEST_USE_REAL_LLM', 'false', 'test_runner_llm')
+                env.set('TEST_LLM_MODE', 'mock', 'test_runner_llm')
+                configure_llm_testing(mode=LLMTestMode.MOCK)
+            else:
+                # Force real LLM for non-unit tests - mocks forbidden per CLAUDE.md
+                use_real_llm = True
+                env = get_env()
+                env.set('NETRA_REAL_LLM_ENABLED', 'true', 'test_runner_llm')
+                env.set('ENABLE_REAL_LLM_TESTING', 'true', 'test_runner_llm')
+                env.set('USE_REAL_LLM', 'true', 'test_runner_llm')
+                env.set('TEST_USE_REAL_LLM', 'true', 'test_runner_llm')
+                env.set('TEST_LLM_MODE', 'real', 'test_runner_llm')
+                configure_llm_testing(
+                    mode=LLMTestMode.REAL,
+                    model="gemini-2.5-pro",
+                    timeout=60,
+                    parallel="auto",
+                    use_dedicated_env=True
+                )
+        
+        # Configure services
         if args.env == "dev":
             configure_dev_environment()
             # Use DEV services for dev environment
@@ -246,7 +311,7 @@ class UnifiedTestRunner:
             env.set('BACKEND_URL', env.get('BACKEND_URL', 'http://localhost:8000'), 'test_runner')
             env.set('AUTH_SERVICE_URL', env.get('AUTH_SERVICE_URL', 'http://localhost:8081'), 'test_runner')
             env.set('WEBSOCKET_URL', env.get('WEBSOCKET_URL', 'ws://localhost:8000'), 'test_runner')
-        elif args.real_services:
+        elif args.real_services or running_e2e:
             configure_test_environment()
             # Use TEST services for real service testing by default
             env = get_env()
@@ -256,21 +321,15 @@ class UnifiedTestRunner:
             env.set('AUTH_SERVICE_URL', env.get('AUTH_SERVICE_URL', 'http://localhost:8082'), 'test_runner')
             env.set('WEBSOCKET_URL', env.get('WEBSOCKET_URL', 'ws://localhost:8001'), 'test_runner')
         else:
-            # Default: Configure testing environment for unit/integration tests
-            configure_mock_environment()
-        
-        if args.real_llm:
-            configure_llm_testing(
-                mode=LLMTestMode.REAL,
-                model="gemini-2.5-pro",
-                timeout=60,
-                parallel="auto",
-                use_dedicated_env=True
-            )
+            # Only allow mock environment for pure unit tests in test environment
+            configure_test_environment()
         
         # Set environment variables using IsolatedEnvironment
         env = get_env()
         env.set("TEST_ENV", args.env, "test_runner")
+        
+        # Log LLM configuration for debugging
+        print(f"[INFO] LLM Configuration: real_llm={use_real_llm}, running_e2e={running_e2e}, env={args.env}")
         
         if args.no_coverage:
             env.set("COVERAGE_ENABLED", "false", "test_runner")
@@ -313,13 +372,18 @@ class UnifiedTestRunner:
         """Check availability of required real services before running tests."""
         print("Checking real service availability...")
         
+        # Determine categories to check for LLM requirements
+        categories_to_run = self._determine_categories_to_run(args)
+        e2e_categories = {'e2e', 'e2e_critical', 'cypress'}
+        running_e2e = bool(set(categories_to_run) & e2e_categories)
+        
         # Determine which services to check based on arguments and environment
         required_services = []
         
-        if args.real_services or args.env in ['dev', 'staging']:
+        if args.real_services or args.env in ['dev', 'staging'] or running_e2e:
             required_services.extend(['postgresql', 'redis'])
             
-        if args.real_llm:
+        if args.real_llm or running_e2e or args.env in ['dev', 'staging']:
             required_services.append('llm')
             
         # Always check Docker for dev/staging environments as most tests use it
@@ -889,24 +953,36 @@ class UnifiedTestRunner:
     
     def _build_frontend_command(self, category_name: str, args: argparse.Namespace) -> str:
         """Build test command for frontend."""
-        # Determine which Jest setup to use
-        if args.real_services or args.env in ['dev', 'staging']:
+        # Determine categories and check for E2E testing
+        categories_to_run = self._determine_categories_to_run(args)
+        e2e_categories = {'e2e', 'e2e_critical', 'cypress'}
+        running_e2e = bool(set(categories_to_run) & e2e_categories)
+        
+        # Real LLM is DEFAULT for all frontend tests per CLAUDE.md (mocks forbidden)
+        # Only exception: pure unit tests in test environment
+        use_real_llm = True  # Default to real LLM
+        use_real_services = args.real_services or args.env in ['dev', 'staging'] or running_e2e
+        
+        # Set environment variables using IsolatedEnvironment
+        env = get_env()
+        
+        # CRITICAL: Real LLM is DEFAULT per CLAUDE.md - mocks forbidden except for unit tests
+        env.set('USE_REAL_LLM', 'true', 'test_runner_frontend')
+        env.set('NETRA_REAL_LLM_ENABLED', 'true', 'test_runner_frontend')
+        env.set('ENABLE_REAL_LLM_TESTING', 'true', 'test_runner_frontend')
+        env.set('TEST_USE_REAL_LLM', 'true', 'test_runner_frontend')
+        env.set('TEST_LLM_MODE', 'real', 'test_runner_frontend')
+        
+        # Configure services
+        if use_real_services:
             setup_file = "jest.setup.real.js"
-            # Set environment variables for real service testing using IsolatedEnvironment
-            env = get_env()
             env.set('USE_REAL_SERVICES', 'true', 'test_runner_frontend')
             if args.env == 'dev':
                 env.set('USE_DOCKER_SERVICES', 'true', 'test_runner_frontend')
-            if args.real_llm:
-                env.set('USE_REAL_LLM', 'true', 'test_runner_frontend')
         else:
             setup_file = "jest.setup.js"
-            # Note: Cannot unset in IsolatedEnvironment, set to false instead
-            env = get_env()
             env.set('USE_REAL_SERVICES', 'false', 'test_runner_frontend')
             env.set('USE_DOCKER_SERVICES', 'false', 'test_runner_frontend')
-            # CRITICAL: Real LLM enabled by default per CLAUDE.md - mocks forbidden
-            env.set('USE_REAL_LLM', 'true', 'test_runner_frontend')
         
         category_commands = {
             "unit": f"npm run test:unit -- --setupFilesAfterEnv='<rootDir>/{setup_file}'",
@@ -1173,7 +1249,7 @@ def main():
     parser.add_argument(
         "--real-llm",
         action="store_true",
-        help="Use real LLM instead of mocks"
+        help="Force real LLM for all tests (E2E tests use real LLM by default per CLAUDE.md)"
     )
     
     parser.add_argument(

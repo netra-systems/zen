@@ -176,7 +176,7 @@ async def concurrent_test_environment():
     # Cleanup
     await env.cleanup_user_data()
     await env.cleanup()
-    await env.redis_client.close()
+    await env.redis_client.aclose()
 
 @pytest.fixture
 def isolated_test_users():

@@ -100,11 +100,11 @@ class SecurityHeadersConfig:
         """Get base production CSP directives."""
         return [
             "default-src 'self'",
-            "script-src 'self' https://apis.google.com",
+            "script-src 'self' https://apis.google.com https://www.googletagmanager.com https://tagmanager.google.com https://www.clarity.ms https://scripts.clarity.ms",
             "style-src 'self' https://fonts.googleapis.com",
             "font-src 'self' https://fonts.gstatic.com",
-            "img-src 'self' data: https:",
-            "connect-src 'self' https://api.netrasystems.ai wss://api.netrasystems.ai"
+            "img-src 'self' data: https: https://www.googletagmanager.com https://*.clarity.ms https://c.bing.com",
+            "connect-src 'self' https://api.netrasystems.ai wss://api.netrasystems.ai https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://*.clarity.ms"
         ]
     
     @staticmethod
@@ -127,10 +127,10 @@ class SecurityHeadersConfig:
         """Get base staging CSP directives."""
         return [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: https://scripts.clarity.ms",
             "style-src 'self' 'unsafe-inline' https:",
             "font-src 'self' https: data:",
-            "img-src 'self' data: https:",
+            "img-src 'self' data: https: https://c.bing.com",
             "connect-src 'self' https: wss:"
         ]
     
@@ -151,10 +151,10 @@ class SecurityHeadersConfig:
         """Get base development CSP directives."""
         return [
             "default-src 'self' 'unsafe-inline' 'unsafe-eval'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' http: https:",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' http: https: https://scripts.clarity.ms",
             "style-src 'self' 'unsafe-inline' http: https:",
             "font-src 'self' http: https: data:",
-            "img-src 'self' data: http: https:",
+            "img-src 'self' data: http: https: https://c.bing.com",
             "connect-src 'self' http: https: ws: wss:"
         ]
     

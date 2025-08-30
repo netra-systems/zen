@@ -546,6 +546,8 @@ async def get_websocket_config():
 
 
 @router.get("/ws/health")
+@router.head("/ws/health")
+@router.options("/ws/health")
 async def websocket_health_check():
     """WebSocket service health check with resilient error handling."""
     errors = []

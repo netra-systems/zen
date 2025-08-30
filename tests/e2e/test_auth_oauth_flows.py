@@ -40,7 +40,7 @@ from tests.e2e.real_services_manager import create_real_services_manager
 logger = central_logger.get_logger(__name__)
 
 
-class TestOAuthFlowRunner:
+class OAuthFlowTestRunner:
     """OAuth flow test execution manager for testing complete OAuth integration"""
     
     def __init__(self):
@@ -341,7 +341,7 @@ class TestOAuthFlowRunner:
             await self.services_manager.stop_all_services()
 
 
-class TestOAuthIntegrationValidator:
+class OAuthIntegrationTestValidator:
     """Validator for OAuth integration test results"""
     
     @staticmethod

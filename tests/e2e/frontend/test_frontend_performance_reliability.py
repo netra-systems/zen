@@ -32,7 +32,7 @@ class PerformanceReliabilityTester:
     
     def __init__(self):
         self.base_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
-        self.api_url = os.getenv("API_URL", "http://localhost:8001")
+        self.api_url = os.getenv("API_URL", "http://localhost:8002")
         self.metrics = {
             "response_times": [],
             "error_rates": [],

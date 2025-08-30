@@ -32,6 +32,13 @@
             <critical-takeaway>Configure pyproject.toml with optimized pytest settings for faster collection (test_collection_optimization.xml).</critical-takeaway>
         </category>
         
+        <category name="Environment Configuration" path="SPEC/learnings/environment_loading_race_condition.xml" keywords="Environment Variables, Race Condition, SERVICE_SECRET, SERVICE_ID, Auth Service, Startup Failure, dotenv, Configuration Loading, Import Order, Module Initialization">
+            <critical-takeaway>CRITICAL: Load environment variables BEFORE importing modules that use them - auth service fails if .env loaded after module imports (environment_loading_race_condition.xml).</critical-takeaway>
+            <critical-takeaway>SERVICE_SECRET and SERVICE_ID must be set for auth service - no mock fallbacks allowed per CLAUDE.md (environment_loading_race_condition.xml).</critical-takeaway>
+            <critical-takeaway>Use load_dotenv(override=True) to ensure variables are properly set in os.environ (environment_loading_race_condition.xml).</critical-takeaway>
+            <critical-takeaway>Each service needs its own SERVICE_ID - auth-service not netra-backend (environment_loading_race_condition.xml).</critical-takeaway>
+        </category>
+        
         <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session, OAuth, Token, CORS, OAUTH_ENV, OAuth Environment Variables, OAuth Validation, OAuth Startup, OAuth Secrets, Secret Naming, Service Independence, Logout, JWT_SECRET_KEY, Docker Compose, Dev Login, Development Mode, Auto-Login, Dev Auto-Login, Token Persistence, Token Initialization">
             <critical-takeaway>MANDATORY: All services must integrate with the shared auth service (SPEC/shared_auth_integration.xml).</critical-takeaway>
             <critical-takeaway>CRITICAL: Use JWT_SECRET_KEY exclusively - JWT_SECRET is deprecated (jwt_secret_standardization.xml).</critical-takeaway>

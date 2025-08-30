@@ -1,0 +1,862 @@
+{
+  "summary": {
+    "total_tests": 21,
+    "passed": 16,
+    "failed": 4,
+    "errors": 0,
+    "skipped": 1,
+    "success_rate": 76.19047619047619,
+    "average_response_time_ms": 137
+  },
+  "by_service": {
+    "frontend": {
+      "PASS": 5,
+      "FAIL": 0,
+      "ERROR": 0,
+      "SKIP": 0
+    },
+    "backend": {
+      "PASS": 6,
+      "FAIL": 3,
+      "ERROR": 0,
+      "SKIP": 1
+    },
+    "auth": {
+      "PASS": 4,
+      "FAIL": 1,
+      "ERROR": 0,
+      "SKIP": 0
+    },
+    "integration": {
+      "PASS": 1,
+      "FAIL": 0,
+      "ERROR": 0,
+      "SKIP": 0
+    }
+  },
+  "staging_urls": {
+    "frontend": "https://netra-frontend-staging-pnovr5vsba-uc.a.run.app",
+    "backend": "https://netra-backend-staging-pnovr5vsba-uc.a.run.app",
+    "auth": "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
+  },
+  "detailed_results": [
+    {
+      "test_name": "health_endpoint_get_method",
+      "service": "frontend",
+      "status": "PASS",
+      "duration_ms": 185,
+      "error_message": null,
+      "details": {
+        "method": "GET",
+        "url": "https://netra-frontend-staging-pnovr5vsba-uc.a.run.app/health",
+        "status_code": 200,
+        "headers": {
+          "content-security-policy": "default-src 'self' https://*.staging.netrasystems.ai; script-src 'self' 'unsafe-inline' https://*.staging.netrasystems.ai https://www.googletagmanager.com https://tagmanager.google.com https://www.clarity.ms; style-src 'self' 'unsafe-inline' https://*.staging.netrasystems.ai; img-src 'self' data: blob: https://*.staging.netrasystems.ai https://www.googletagmanager.com https://*.clarity.ms; connect-src 'self' https://*.staging.netrasystems.ai wss://*.staging.netrasystems.ai https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://*.clarity.ms; font-src 'self' data: https://*.staging.netrasystems.ai; media-src 'self' https://*.staging.netrasystems.ai; frame-src 'self' https://*.staging.netrasystems.ai https://accounts.google.com https://www.googletagmanager.com",
+          "x-frame-options": "DENY",
+          "x-content-type-options": "nosniff",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "strict-transport-security": "max-age=31536000; includeSubDomains",
+          "x-xss-protection": "1; mode=block",
+          "Vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Content-Type": "application/json",
+          "Expires": "0",
+          "Pragma": "no-cache",
+          "Date": "Sat, 30 Aug 2025 06:24:33 GMT",
+          "Server": "Google Frontend",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+          "Transfer-Encoding": "chunked"
+        },
+        "response_time_ms": 185,
+        "response_data": {
+          "status": "healthy",
+          "service": "frontend",
+          "version": "1.0.0",
+          "environment": "staging",
+          "timestamp": "2025-08-30T06:24:33.536Z",
+          "uptime": 2137.2079241,
+          "memory": {
+            "used": 54,
+            "total": 56,
+            "rss": 112
+          },
+          "dependencies": {
+            "backend": {
+              "status": "healthy",
+              "details": {
+                "status": "healthy",
+                "service": "netra-ai-platform",
+                "version": "1.0.0",
+                "timestamp": 1756535073.5202603
+              }
+            },
+            "auth": {
+              "status": "healthy",
+              "details": {
+                "status": "healthy",
+                "service": "auth-service",
+                "version": "1.0.0",
+                "timestamp": "2025-08-30T06:24:33.521707+00:00",
+                "uptime_seconds": 2975.828489,
+                "database_status": "connected",
+                "environment": "staging"
+              }
+            }
+          },
+          "checks": {
+            "response_time_ms": 46,
+            "environment_config": "ok",
+            "memory_usage": "ok"
+          },
+          "urls": {
+            "api": "https://api.staging.netrasystems.ai",
+            "websocket": "wss://api.staging.netrasystems.ai",
+            "auth": "https://auth.staging.netrasystems.ai",
+            "frontend": "https://app.staging.netrasystems.ai"
+          }
+        }
+      }
+    },
+    {
+      "test_name": "health_endpoint_head_method",
+      "service": "frontend",
+      "status": "PASS",
+      "duration_ms": 82,
+      "error_message": null,
+      "details": {
+        "method": "HEAD",
+        "url": "https://netra-frontend-staging-pnovr5vsba-uc.a.run.app/health",
+        "status_code": 200,
+        "headers": {
+          "content-security-policy": "default-src 'self' https://*.staging.netrasystems.ai; script-src 'self' 'unsafe-inline' https://*.staging.netrasystems.ai https://www.googletagmanager.com https://tagmanager.google.com https://www.clarity.ms; style-src 'self' 'unsafe-inline' https://*.staging.netrasystems.ai; img-src 'self' data: blob: https://*.staging.netrasystems.ai https://www.googletagmanager.com https://*.clarity.ms; connect-src 'self' https://*.staging.netrasystems.ai wss://*.staging.netrasystems.ai https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://*.clarity.ms; font-src 'self' data: https://*.staging.netrasystems.ai; media-src 'self' https://*.staging.netrasystems.ai; frame-src 'self' https://*.staging.netrasystems.ai https://accounts.google.com https://www.googletagmanager.com",
+          "x-frame-options": "DENY",
+          "x-content-type-options": "nosniff",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "strict-transport-security": "max-age=31536000; includeSubDomains",
+          "x-xss-protection": "1; mode=block",
+          "Vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Expires": "0",
+          "Pragma": "no-cache",
+          "Date": "Sat, 30 Aug 2025 06:24:33 GMT",
+          "Content-Type": "text/html",
+          "Server": "Google Frontend",
+          "Transfer-Encoding": "chunked",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 82
+      }
+    },
+    {
+      "test_name": "health_endpoint_options_method",
+      "service": "frontend",
+      "status": "PASS",
+      "duration_ms": 98,
+      "error_message": null,
+      "details": {
+        "method": "OPTIONS",
+        "url": "https://netra-frontend-staging-pnovr5vsba-uc.a.run.app/health",
+        "status_code": 200,
+        "headers": {
+          "content-security-policy": "default-src 'self' https://*.staging.netrasystems.ai; script-src 'self' 'unsafe-inline' https://*.staging.netrasystems.ai https://www.googletagmanager.com https://tagmanager.google.com https://www.clarity.ms; style-src 'self' 'unsafe-inline' https://*.staging.netrasystems.ai; img-src 'self' data: blob: https://*.staging.netrasystems.ai https://www.googletagmanager.com https://*.clarity.ms; connect-src 'self' https://*.staging.netrasystems.ai wss://*.staging.netrasystems.ai https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://*.clarity.ms; font-src 'self' data: https://*.staging.netrasystems.ai; media-src 'self' https://*.staging.netrasystems.ai; frame-src 'self' https://*.staging.netrasystems.ai https://accounts.google.com https://www.googletagmanager.com",
+          "x-frame-options": "DENY",
+          "x-content-type-options": "nosniff",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "strict-transport-security": "max-age=31536000; includeSubDomains",
+          "x-xss-protection": "1; mode=block",
+          "Vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization, X-API-Key",
+          "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Max-Age": "86400",
+          "Date": "Sat, 30 Aug 2025 06:24:33 GMT",
+          "Content-Type": "text/html",
+          "Server": "Google Frontend",
+          "Content-Length": "0",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 98
+      }
+    },
+    {
+      "test_name": "health_endpoint_get_method",
+      "service": "backend",
+      "status": "PASS",
+      "duration_ms": 139,
+      "error_message": null,
+      "details": {
+        "method": "GET",
+        "url": "https://netra-backend-staging-pnovr5vsba-uc.a.run.app/health",
+        "status_code": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "api-version": "current",
+          "x-trace-id": "trace_6a1aa1eb55bc44af",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "x-xss-protection": "1; mode=block",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "permissions-policy": "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), ambient-light-sensor=(), autoplay=(), encrypted-media=(), fullscreen=(), picture-in-picture=()",
+          "x-robots-tag": "noindex, nofollow, noarchive, nosnippet",
+          "Cache-Control": "no-store, no-cache, must-revalidate, private",
+          "Pragma": "no-cache",
+          "Expires": "0",
+          "strict-transport-security": "max-age=86400; includeSubDomains",
+          "content-security-policy": "default-src 'self'; script-src 'nonce-XWCun_WHKc8GOjPpKWkOYQ' 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'nonce-XWCun_WHKc8GOjPpKWkOYQ' 'self' 'unsafe-inline' https:; font-src 'self' https: data:; img-src 'self' data: https:; connect-src 'self' https: wss:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+          "x-request-start": "1756535073860",
+          "x-environment": "staging",
+          "x-security-fingerprint": "b15706f814a5f0fa",
+          "x-cloud-trace-context": "88e0eb0b767a095d735ee490f99e3612",
+          "Date": "Sat, 30 Aug 2025 06:24:33 GMT",
+          "Server": "Google Frontend",
+          "Content-Length": "99",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 139,
+        "response_data": {
+          "status": "healthy",
+          "service": "netra-ai-platform",
+          "version": "1.0.0",
+          "timestamp": 1756535073.8600664
+        }
+      }
+    },
+    {
+      "test_name": "health_endpoint_head_method",
+      "service": "backend",
+      "status": "FAIL",
+      "duration_ms": 94,
+      "error_message": null,
+      "details": {
+        "method": "HEAD",
+        "url": "https://netra-backend-staging-pnovr5vsba-uc.a.run.app/health",
+        "status_code": 405,
+        "headers": {
+          "Allow": "GET",
+          "Content-Type": "application/json",
+          "x-trace-id": "trace_0f9b4be3b5ca44f2",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "x-xss-protection": "1; mode=block",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "permissions-policy": "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), ambient-light-sensor=(), autoplay=(), encrypted-media=(), fullscreen=(), picture-in-picture=()",
+          "x-robots-tag": "noindex, nofollow, noarchive, nosnippet",
+          "Cache-Control": "no-store, no-cache, must-revalidate, private",
+          "Pragma": "no-cache",
+          "Expires": "0",
+          "strict-transport-security": "max-age=86400; includeSubDomains",
+          "content-security-policy": "default-src 'self'; script-src 'nonce-CCy5ostu731AFg44E8D2kw' 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'nonce-CCy5ostu731AFg44E8D2kw' 'self' 'unsafe-inline' https:; font-src 'self' https: data:; img-src 'self' data: https:; connect-src 'self' https: wss:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+          "x-request-start": "1756535073952",
+          "x-environment": "staging",
+          "x-security-fingerprint": "b94f70c1109dde3a",
+          "x-cloud-trace-context": "85047935b1772bc6735ee490f99e33da",
+          "Content-Length": "31",
+          "Date": "Sat, 30 Aug 2025 06:24:33 GMT",
+          "Server": "Google Frontend",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 94,
+        "expected_support": "HEAD should be supported for health endpoints"
+      }
+    },
+    {
+      "test_name": "health_endpoint_options_method",
+      "service": "backend",
+      "status": "FAIL",
+      "duration_ms": 71,
+      "error_message": null,
+      "details": {
+        "method": "OPTIONS",
+        "url": "https://netra-backend-staging-pnovr5vsba-uc.a.run.app/health",
+        "status_code": 405,
+        "headers": {
+          "Allow": "GET",
+          "Content-Type": "application/json",
+          "x-trace-id": "trace_90b235214bd647dd",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "x-xss-protection": "1; mode=block",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "permissions-policy": "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), ambient-light-sensor=(), autoplay=(), encrypted-media=(), fullscreen=(), picture-in-picture=()",
+          "x-robots-tag": "noindex, nofollow, noarchive, nosnippet",
+          "Cache-Control": "no-store, no-cache, must-revalidate, private",
+          "Pragma": "no-cache",
+          "Expires": "0",
+          "strict-transport-security": "max-age=86400; includeSubDomains",
+          "content-security-policy": "default-src 'self'; script-src 'nonce-0rL8f0R5HB4HxKXhJ9ilVA' 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'nonce-0rL8f0R5HB4HxKXhJ9ilVA' 'self' 'unsafe-inline' https:; font-src 'self' https: data:; img-src 'self' data: https:; connect-src 'self' https: wss:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+          "x-request-start": "1756535074026",
+          "x-environment": "staging",
+          "x-security-fingerprint": "3df7101a49c3bbe2",
+          "x-cloud-trace-context": "e9fd6a0f0e082903735ee490f99e3c35",
+          "Date": "Sat, 30 Aug 2025 06:24:34 GMT",
+          "Server": "Google Frontend",
+          "Content-Length": "31",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 71,
+        "expected_support": "OPTIONS should be supported for health endpoints"
+      }
+    },
+    {
+      "test_name": "health_endpoint_get_method",
+      "service": "auth",
+      "status": "PASS",
+      "duration_ms": 132,
+      "error_message": null,
+      "details": {
+        "method": "GET",
+        "url": "https://netra-auth-service-pnovr5vsba-uc.a.run.app/health",
+        "status_code": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "x-service-name": "auth-service",
+          "x-service-version": "1.0.0",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "x-xss-protection": "1; mode=block",
+          "x-cloud-trace-context": "bc602c6652746b23065709df0d6a5e08",
+          "Date": "Sat, 30 Aug 2025 06:24:34 GMT",
+          "Server": "Google Frontend",
+          "Content-Length": "193",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 132,
+        "response_data": {
+          "status": "healthy",
+          "service": "auth-service",
+          "version": "1.0.0",
+          "timestamp": "2025-08-30T06:24:34.150847+00:00",
+          "uptime_seconds": 2976.457638,
+          "database_status": "connected",
+          "environment": "staging"
+        }
+      }
+    },
+    {
+      "test_name": "health_endpoint_head_method",
+      "service": "auth",
+      "status": "PASS",
+      "duration_ms": 92,
+      "error_message": null,
+      "details": {
+        "method": "HEAD",
+        "url": "https://netra-auth-service-pnovr5vsba-uc.a.run.app/health",
+        "status_code": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "x-service-name": "auth-service",
+          "x-service-version": "1.0.0",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "x-xss-protection": "1; mode=block",
+          "x-cloud-trace-context": "1ab15bc6286eba4f065709df0d6a5d32",
+          "Content-Length": "193",
+          "Date": "Sat, 30 Aug 2025 06:24:34 GMT",
+          "Server": "Google Frontend",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 92
+      }
+    },
+    {
+      "test_name": "health_endpoint_options_method",
+      "service": "auth",
+      "status": "FAIL",
+      "duration_ms": 73,
+      "error_message": null,
+      "details": {
+        "method": "OPTIONS",
+        "url": "https://netra-auth-service-pnovr5vsba-uc.a.run.app/health",
+        "status_code": 405,
+        "headers": {
+          "Allow": "HEAD",
+          "Content-Type": "application/json",
+          "x-service-name": "auth-service",
+          "x-service-version": "1.0.0",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "x-xss-protection": "1; mode=block",
+          "x-cloud-trace-context": "36fc0535629f2793065709df0d6a5aad",
+          "Date": "Sat, 30 Aug 2025 06:24:34 GMT",
+          "Server": "Google Frontend",
+          "Content-Length": "31",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 73,
+        "expected_support": "OPTIONS should be supported for health endpoints"
+      }
+    },
+    {
+      "test_name": "frontend_service_dependencies",
+      "service": "integration",
+      "status": "PASS",
+      "duration_ms": 166,
+      "error_message": null,
+      "details": {
+        "frontend_response": {
+          "status": "healthy",
+          "service": "frontend",
+          "version": "1.0.0",
+          "environment": "staging",
+          "timestamp": "2025-08-30T06:24:34.489Z",
+          "uptime": 2138.160417615,
+          "memory": {
+            "used": 54,
+            "total": 56,
+            "rss": 112
+          },
+          "dependencies": {
+            "backend": {
+              "status": "healthy",
+              "details": {
+                "status": "healthy",
+                "service": "netra-ai-platform",
+                "version": "1.0.0",
+                "timestamp": 1756535074.4698796
+              }
+            },
+            "auth": {
+              "status": "healthy",
+              "details": {
+                "status": "healthy",
+                "service": "auth-service",
+                "version": "1.0.0",
+                "timestamp": "2025-08-30T06:24:34.470214+00:00",
+                "uptime_seconds": 2976.77701,
+                "database_status": "connected",
+                "environment": "staging"
+              }
+            }
+          },
+          "checks": {
+            "response_time_ms": 38,
+            "environment_config": "ok",
+            "memory_usage": "ok"
+          },
+          "urls": {
+            "api": "https://api.staging.netrasystems.ai",
+            "websocket": "wss://api.staging.netrasystems.ai",
+            "auth": "https://auth.staging.netrasystems.ai",
+            "frontend": "https://app.staging.netrasystems.ai"
+          }
+        },
+        "backend_status": "healthy",
+        "auth_status": "healthy"
+      }
+    },
+    {
+      "test_name": "api_endpoint_api_health",
+      "service": "backend",
+      "status": "PASS",
+      "duration_ms": 130,
+      "error_message": null,
+      "details": {
+        "endpoint": "/api/health",
+        "url": "https://netra-backend-staging-pnovr5vsba-uc.a.run.app/api/health",
+        "status_code": 200,
+        "response_time_ms": 130,
+        "response_data": {
+          "status": "healthy",
+          "service": "netra-ai-platform",
+          "version": "1.0.0",
+          "timestamp": 1756535074.6235518
+        }
+      }
+    },
+    {
+      "test_name": "api_endpoint_api_v1_status",
+      "service": "backend",
+      "status": "SKIP",
+      "duration_ms": 102,
+      "error_message": null,
+      "details": {
+        "endpoint": "/api/v1/status",
+        "url": "https://netra-backend-staging-pnovr5vsba-uc.a.run.app/api/v1/status",
+        "status_code": 404,
+        "response_time_ms": 102
+      }
+    },
+    {
+      "test_name": "api_endpoint_health",
+      "service": "backend",
+      "status": "PASS",
+      "duration_ms": 132,
+      "error_message": null,
+      "details": {
+        "endpoint": "/health",
+        "url": "https://netra-backend-staging-pnovr5vsba-uc.a.run.app/health",
+        "status_code": 200,
+        "response_time_ms": 132,
+        "response_data": {
+          "status": "healthy",
+          "service": "netra-ai-platform",
+          "version": "1.0.0",
+          "timestamp": 1756535074.8561888
+        }
+      }
+    },
+    {
+      "test_name": "api_endpoint_root",
+      "service": "backend",
+      "status": "PASS",
+      "duration_ms": 86,
+      "error_message": null,
+      "details": {
+        "endpoint": "/",
+        "url": "https://netra-backend-staging-pnovr5vsba-uc.a.run.app/",
+        "status_code": 200,
+        "response_time_ms": 86,
+        "response_data": {
+          "message": "Welcome to Netra API"
+        }
+      }
+    },
+    {
+      "test_name": "cors_configuration",
+      "service": "backend",
+      "status": "FAIL",
+      "duration_ms": 128,
+      "error_message": null,
+      "details": {
+        "status_code": 400,
+        "cors_headers": {
+          "access-control-allow-origin": "https://app.netra.ai",
+          "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD",
+          "access-control-allow-headers": "Accept, Accept-Language, Authorization, Content-Language, Content-Type, Origin, Referer, X-Request-ID, X-Requested-With, X-Service-Name, X-Trace-ID",
+          "access-control-max-age": "3600"
+        },
+        "response_headers": {
+          "Vary": "Origin",
+          "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD",
+          "Access-Control-Max-Age": "3600",
+          "Access-Control-Allow-Headers": "Accept, Accept-Language, Authorization, Content-Language, Content-Type, Origin, Referer, X-Request-ID, X-Requested-With, X-Service-Name, X-Trace-ID",
+          "Access-Control-Allow-Credentials": "true",
+          "Content-Type": "text/plain; charset=utf-8",
+          "x-trace-id": "trace_6e4d0d332ff24633",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "x-xss-protection": "1; mode=block",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "permissions-policy": "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), ambient-light-sensor=(), autoplay=(), encrypted-media=(), fullscreen=(), picture-in-picture=()",
+          "x-robots-tag": "noindex, nofollow, noarchive, nosnippet",
+          "Cache-Control": "no-store, no-cache, must-revalidate, private",
+          "Pragma": "no-cache",
+          "Expires": "0",
+          "strict-transport-security": "max-age=86400; includeSubDomains",
+          "content-security-policy": "default-src 'self'; script-src 'nonce-uyL7WWh9F82Y4Zu-zlj9Ng' 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'nonce-uyL7WWh9F82Y4Zu-zlj9Ng' 'self' 'unsafe-inline' https:; font-src 'self' https: data:; img-src 'self' data: https:; connect-src 'self' https: wss:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+          "x-request-start": "1756535075076",
+          "x-environment": "staging",
+          "x-security-fingerprint": "2f27ca46126b6960",
+          "Access-Control-Allow-Origin": "https://app.netra.ai",
+          "x-cloud-trace-context": "977e0b784a608dddf9e3ba4e2f19ba5a",
+          "Date": "Sat, 30 Aug 2025 06:24:35 GMT",
+          "Server": "Google Frontend",
+          "Content-Length": "22",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        }
+      }
+    },
+    {
+      "test_name": "single_request_performance",
+      "service": "frontend",
+      "status": "PASS",
+      "duration_ms": 163,
+      "error_message": null,
+      "details": {
+        "response_time_ms": 163,
+        "threshold_ms": 2000,
+        "status_code": 200
+      }
+    },
+    {
+      "test_name": "concurrent_requests_performance",
+      "service": "frontend",
+      "status": "PASS",
+      "duration_ms": 392,
+      "error_message": null,
+      "details": {
+        "concurrent_requests": 5,
+        "successful_requests": 5,
+        "failed_requests": 0,
+        "total_time_ms": 392,
+        "average_response_time_ms": 285,
+        "results": [
+          {
+            "request_id": 0,
+            "status_code": 200,
+            "response_time_ms": 391
+          },
+          {
+            "request_id": 1,
+            "status_code": 200,
+            "response_time_ms": 312
+          },
+          {
+            "request_id": 2,
+            "status_code": 200,
+            "response_time_ms": 284
+          },
+          {
+            "request_id": 3,
+            "status_code": 200,
+            "response_time_ms": 163
+          },
+          {
+            "request_id": 4,
+            "status_code": 200,
+            "response_time_ms": 278
+          }
+        ]
+      }
+    },
+    {
+      "test_name": "single_request_performance",
+      "service": "backend",
+      "status": "PASS",
+      "duration_ms": 147,
+      "error_message": null,
+      "details": {
+        "response_time_ms": 147,
+        "threshold_ms": 2000,
+        "status_code": 200
+      }
+    },
+    {
+      "test_name": "concurrent_requests_performance",
+      "service": "backend",
+      "status": "PASS",
+      "duration_ms": 160,
+      "error_message": null,
+      "details": {
+        "concurrent_requests": 5,
+        "successful_requests": 5,
+        "failed_requests": 0,
+        "total_time_ms": 160,
+        "average_response_time_ms": 142,
+        "results": [
+          {
+            "request_id": 0,
+            "status_code": 200,
+            "response_time_ms": 160
+          },
+          {
+            "request_id": 1,
+            "status_code": 200,
+            "response_time_ms": 138
+          },
+          {
+            "request_id": 2,
+            "status_code": 200,
+            "response_time_ms": 141
+          },
+          {
+            "request_id": 3,
+            "status_code": 200,
+            "response_time_ms": 142
+          },
+          {
+            "request_id": 4,
+            "status_code": 200,
+            "response_time_ms": 130
+          }
+        ]
+      }
+    },
+    {
+      "test_name": "single_request_performance",
+      "service": "auth",
+      "status": "PASS",
+      "duration_ms": 138,
+      "error_message": null,
+      "details": {
+        "response_time_ms": 138,
+        "threshold_ms": 2000,
+        "status_code": 200
+      }
+    },
+    {
+      "test_name": "concurrent_requests_performance",
+      "service": "auth",
+      "status": "PASS",
+      "duration_ms": 172,
+      "error_message": null,
+      "details": {
+        "concurrent_requests": 5,
+        "successful_requests": 5,
+        "failed_requests": 0,
+        "total_time_ms": 172,
+        "average_response_time_ms": 156,
+        "results": [
+          {
+            "request_id": 0,
+            "status_code": 200,
+            "response_time_ms": 137
+          },
+          {
+            "request_id": 1,
+            "status_code": 200,
+            "response_time_ms": 151
+          },
+          {
+            "request_id": 2,
+            "status_code": 200,
+            "response_time_ms": 172
+          },
+          {
+            "request_id": 3,
+            "status_code": 200,
+            "response_time_ms": 168
+          },
+          {
+            "request_id": 4,
+            "status_code": 200,
+            "response_time_ms": 156
+          }
+        ]
+      }
+    }
+  ],
+  "critical_issues": [
+    {
+      "test_name": "health_endpoint_head_method",
+      "service": "backend",
+      "error": null,
+      "details": {
+        "method": "HEAD",
+        "url": "https://netra-backend-staging-pnovr5vsba-uc.a.run.app/health",
+        "status_code": 405,
+        "headers": {
+          "Allow": "GET",
+          "Content-Type": "application/json",
+          "x-trace-id": "trace_0f9b4be3b5ca44f2",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "x-xss-protection": "1; mode=block",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "permissions-policy": "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), ambient-light-sensor=(), autoplay=(), encrypted-media=(), fullscreen=(), picture-in-picture=()",
+          "x-robots-tag": "noindex, nofollow, noarchive, nosnippet",
+          "Cache-Control": "no-store, no-cache, must-revalidate, private",
+          "Pragma": "no-cache",
+          "Expires": "0",
+          "strict-transport-security": "max-age=86400; includeSubDomains",
+          "content-security-policy": "default-src 'self'; script-src 'nonce-CCy5ostu731AFg44E8D2kw' 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'nonce-CCy5ostu731AFg44E8D2kw' 'self' 'unsafe-inline' https:; font-src 'self' https: data:; img-src 'self' data: https:; connect-src 'self' https: wss:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+          "x-request-start": "1756535073952",
+          "x-environment": "staging",
+          "x-security-fingerprint": "b94f70c1109dde3a",
+          "x-cloud-trace-context": "85047935b1772bc6735ee490f99e33da",
+          "Content-Length": "31",
+          "Date": "Sat, 30 Aug 2025 06:24:33 GMT",
+          "Server": "Google Frontend",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 94,
+        "expected_support": "HEAD should be supported for health endpoints"
+      }
+    },
+    {
+      "test_name": "health_endpoint_options_method",
+      "service": "backend",
+      "error": null,
+      "details": {
+        "method": "OPTIONS",
+        "url": "https://netra-backend-staging-pnovr5vsba-uc.a.run.app/health",
+        "status_code": 405,
+        "headers": {
+          "Allow": "GET",
+          "Content-Type": "application/json",
+          "x-trace-id": "trace_90b235214bd647dd",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "x-xss-protection": "1; mode=block",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "permissions-policy": "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), ambient-light-sensor=(), autoplay=(), encrypted-media=(), fullscreen=(), picture-in-picture=()",
+          "x-robots-tag": "noindex, nofollow, noarchive, nosnippet",
+          "Cache-Control": "no-store, no-cache, must-revalidate, private",
+          "Pragma": "no-cache",
+          "Expires": "0",
+          "strict-transport-security": "max-age=86400; includeSubDomains",
+          "content-security-policy": "default-src 'self'; script-src 'nonce-0rL8f0R5HB4HxKXhJ9ilVA' 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'nonce-0rL8f0R5HB4HxKXhJ9ilVA' 'self' 'unsafe-inline' https:; font-src 'self' https: data:; img-src 'self' data: https:; connect-src 'self' https: wss:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+          "x-request-start": "1756535074026",
+          "x-environment": "staging",
+          "x-security-fingerprint": "3df7101a49c3bbe2",
+          "x-cloud-trace-context": "e9fd6a0f0e082903735ee490f99e3c35",
+          "Date": "Sat, 30 Aug 2025 06:24:34 GMT",
+          "Server": "Google Frontend",
+          "Content-Length": "31",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 71,
+        "expected_support": "OPTIONS should be supported for health endpoints"
+      }
+    },
+    {
+      "test_name": "health_endpoint_options_method",
+      "service": "auth",
+      "error": null,
+      "details": {
+        "method": "OPTIONS",
+        "url": "https://netra-auth-service-pnovr5vsba-uc.a.run.app/health",
+        "status_code": 405,
+        "headers": {
+          "Allow": "HEAD",
+          "Content-Type": "application/json",
+          "x-service-name": "auth-service",
+          "x-service-version": "1.0.0",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "x-xss-protection": "1; mode=block",
+          "x-cloud-trace-context": "36fc0535629f2793065709df0d6a5aad",
+          "Date": "Sat, 30 Aug 2025 06:24:34 GMT",
+          "Server": "Google Frontend",
+          "Content-Length": "31",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 73,
+        "expected_support": "OPTIONS should be supported for health endpoints"
+      }
+    },
+    {
+      "test_name": "cors_configuration",
+      "service": "backend",
+      "error": null,
+      "details": {
+        "status_code": 400,
+        "cors_headers": {
+          "access-control-allow-origin": "https://app.netra.ai",
+          "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD",
+          "access-control-allow-headers": "Accept, Accept-Language, Authorization, Content-Language, Content-Type, Origin, Referer, X-Request-ID, X-Requested-With, X-Service-Name, X-Trace-ID",
+          "access-control-max-age": "3600"
+        },
+        "response_headers": {
+          "Vary": "Origin",
+          "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD",
+          "Access-Control-Max-Age": "3600",
+          "Access-Control-Allow-Headers": "Accept, Accept-Language, Authorization, Content-Language, Content-Type, Origin, Referer, X-Request-ID, X-Requested-With, X-Service-Name, X-Trace-ID",
+          "Access-Control-Allow-Credentials": "true",
+          "Content-Type": "text/plain; charset=utf-8",
+          "x-trace-id": "trace_6e4d0d332ff24633",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "x-xss-protection": "1; mode=block",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "permissions-policy": "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), ambient-light-sensor=(), autoplay=(), encrypted-media=(), fullscreen=(), picture-in-picture=()",
+          "x-robots-tag": "noindex, nofollow, noarchive, nosnippet",
+          "Cache-Control": "no-store, no-cache, must-revalidate, private",
+          "Pragma": "no-cache",
+          "Expires": "0",
+          "strict-transport-security": "max-age=86400; includeSubDomains",
+          "content-security-policy": "default-src 'self'; script-src 'nonce-uyL7WWh9F82Y4Zu-zlj9Ng' 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'nonce-uyL7WWh9F82Y4Zu-zlj9Ng' 'self' 'unsafe-inline' https:; font-src 'self' https: data:; img-src 'self' data: https:; connect-src 'self' https: wss:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+          "x-request-start": "1756535075076",
+          "x-environment": "staging",
+          "x-security-fingerprint": "2f27ca46126b6960",
+          "Access-Control-Allow-Origin": "https://app.netra.ai",
+          "x-cloud-trace-context": "977e0b784a608dddf9e3ba4e2f19ba5a",
+          "Date": "Sat, 30 Aug 2025 06:24:35 GMT",
+          "Server": "Google Frontend",
+          "Content-Length": "22",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        }
+      }
+    }
+  ]
+}

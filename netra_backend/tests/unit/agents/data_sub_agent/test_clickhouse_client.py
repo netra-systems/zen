@@ -34,7 +34,9 @@ class TestClickHouseServiceConnection:
     @pytest.fixture
     def clickhouse_client(self):
         """Create ClickHouse client for testing."""
-        return get_clickhouse_service()
+        from netra_backend.app.db.clickhouse import ClickHouseService
+        # Create a fresh service instance for testing instead of using global singleton
+        return ClickHouseService()
     
     @mock_justified("L1 Unit Test: Mocking ClickHouse client to test initialization logic without external dependencies.", "L1")
     @pytest.mark.asyncio
@@ -118,7 +120,9 @@ class TestClickHouseServiceQueryExecution:
     @pytest.fixture
     def clickhouse_client(self):
         """Create ClickHouse client for testing."""
-        return get_clickhouse_service()
+        from netra_backend.app.db.clickhouse import ClickHouseService
+        # Create a fresh service instance for testing instead of using global singleton
+        return ClickHouseService()
     
     @mock_justified("L1 Unit Test: Mocking ClickHouse client to test query execution without external dependencies.", "L1")
     @pytest.mark.asyncio
@@ -186,9 +190,9 @@ class TestClickHouseServiceWorkloadMetrics:
     @pytest.fixture
     def clickhouse_client(self):
         """Create ClickHouse client for testing."""
-        client = get_clickhouse_service()
-        # Client will auto-initialize with NoOp client in testing environment
-        return client
+        from netra_backend.app.db.clickhouse import ClickHouseService
+        # Create a fresh service instance for testing instead of using global singleton
+        return ClickHouseService()
     
     @mock_justified("L1 Unit Test: Testing workload metrics query without user filter.", "L1")
     @pytest.mark.asyncio
@@ -249,9 +253,9 @@ class TestClickHouseServiceCostBreakdown:
     @pytest.fixture
     def clickhouse_client(self):
         """Create ClickHouse client for testing."""
-        client = get_clickhouse_service()
-        # Client will auto-initialize with NoOp client in testing environment
-        return client
+        from netra_backend.app.db.clickhouse import ClickHouseService
+        # Create a fresh service instance for testing instead of using global singleton
+        return ClickHouseService()
     
     @mock_justified("L1 Unit Test: Testing cost breakdown query construction.", "L1")
     @pytest.mark.asyncio
@@ -289,7 +293,9 @@ class TestClickHouseServiceMockData:
     @pytest.fixture
     def clickhouse_client(self):
         """Create ClickHouse client for testing."""
-        return get_clickhouse_service()
+        from netra_backend.app.db.clickhouse import ClickHouseService
+        # Create a fresh service instance for testing instead of using global singleton
+        return ClickHouseService()
     
     @pytest.mark.asyncio
     async def test_mock_client_execute_returns_empty(self, clickhouse_client):
@@ -313,7 +319,9 @@ class TestClickHouseServiceConnectionManagement:
     @pytest.fixture
     def clickhouse_client(self):
         """Create ClickHouse client for testing."""
-        return get_clickhouse_service()
+        from netra_backend.app.db.clickhouse import ClickHouseService
+        # Create a fresh service instance for testing instead of using global singleton
+        return ClickHouseService()
     
     @mock_justified("L1 Unit Test: Testing batch insert functionality.", "L1")
     @pytest.mark.asyncio
@@ -351,7 +359,9 @@ class TestClickHouseServiceErrorHandling:
     @pytest.fixture
     def clickhouse_client(self):
         """Create ClickHouse client for testing."""
-        return get_clickhouse_service()
+        from netra_backend.app.db.clickhouse import ClickHouseService
+        # Create a fresh service instance for testing instead of using global singleton
+        return ClickHouseService()
     
     @mock_justified("L1 Unit Test: Testing error handling and logging in query execution.", "L1")
     @pytest.mark.asyncio

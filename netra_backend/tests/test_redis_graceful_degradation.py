@@ -36,11 +36,8 @@ from unittest.mock import patch, MagicMock
 from typing import Dict, Any
 
 # ABSOLUTE IMPORTS - Following SPEC/import_management_architecture.xml
-from test_framework.setup_test_path import setup_test_path
-setup_test_path()
-
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.startup_module import initialize_application_components
+from netra_backend.app.startup_module import initialize_logging
 from netra_backend.app.routes.health_check import readiness_probe, liveness_probe
 from netra_backend.app.core.isolated_environment import get_env
 from netra_backend.app.core.configuration.base import get_unified_config

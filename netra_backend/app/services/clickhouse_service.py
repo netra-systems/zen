@@ -38,6 +38,7 @@ class ClickHouseService:
     async def execute_health_check(self) -> bool:
         """Execute ClickHouse health check."""
         try:
+            # get_clickhouse_client returns an async context manager
             async with get_clickhouse_client() as client:
                 await client.execute("SELECT 1")
                 return True

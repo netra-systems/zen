@@ -152,8 +152,8 @@ class AuthTestClient:
             Dict with user info and token
         """
         # Generate test user data
+        import uuid
         if not email:
-            import uuid
             email = f"test_{uuid.uuid4().hex[:8]}@example.com"
         
         # Use mock token that's signed with the test JWT secret
@@ -163,7 +163,8 @@ class AuthTestClient:
         import jwt
         
         # Get JWT secret from environment (set by test config)
-        jwt_secret = "test-jwt-secret-key-unified-testing-32chars"
+        import os
+        jwt_secret = os.environ.get("JWT_SECRET_KEY", "test-jwt-secret-key-unified-testing-32chars")
         
         # Create a valid JWT token for testing
         payload = {
@@ -172,7 +173,9 @@ class AuthTestClient:
             "permissions": ["read", "write"],
             "iat": int(time.time()),
             "exp": int(time.time()) + 900,  # 15 minutes
-            "token_type": "access"
+            "token_type": "access",
+            "iss": "netra-auth-service",  # Required issuer claim
+            "jti": str(uuid.uuid4())      # Required JWT ID for replay protection
         }
         
         token = jwt.encode(payload, jwt_secret, algorithm="HS256")

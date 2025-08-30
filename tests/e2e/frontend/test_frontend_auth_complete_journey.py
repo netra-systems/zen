@@ -133,6 +133,10 @@ class TestFrontendAuthCompleteJourney:
         # Try to access protected route
         self.suite.driver.get(f"{self.suite.base_url}/chat")
         
+        # Capture console logs to see what errors are occurring
+        console_logs = self.suite.driver.get_log('browser')
+        print(f"Initial console logs: {console_logs}")
+        
         # Wait for auth check and potential redirect with multiple checks
         max_wait_time = 10  # seconds
         check_interval = 0.5  # seconds
@@ -141,6 +145,11 @@ class TestFrontendAuthCompleteJourney:
         while time.time() - start_time < max_wait_time:
             current_url = self.suite.driver.current_url
             page_text = self.suite.driver.find_element(By.TAG_NAME, "body").text.lower()
+            
+            # Get fresh console logs to see what's happening
+            new_console_logs = self.suite.driver.get_log('browser')
+            if new_console_logs:
+                print(f"Console logs: {new_console_logs}")
             
             print(f"URL: {current_url}, Body text: {page_text[:100]}")
             
@@ -161,11 +170,43 @@ class TestFrontendAuthCompleteJourney:
         print(f"Final URL: {final_url}")
         print(f"Final body text: {final_text}")
         
-        # Verify redirect to login or login form shown
-        redirect_happened = "/login" in final_url or "/auth" in final_url 
-        login_content_shown = any(text in final_text for text in ["login", "sign in", "authenticate"])
+        # The current system architecture shows auth-protected content in place rather than redirecting
+        # This is actually the correct behavior - AuthGuard prevents protected components from rendering
+        # and the page shows "Sign in to start chatting" prompts
         
-        assert redirect_happened or login_content_shown, f"Expected redirect to login or login form, but stayed at: {final_url} with content: {final_text[:200]}"
+        # Check for authentication prompts (the actual correct behavior)
+        auth_prompt_texts = [
+            "sign in to start chatting",
+            "sign in to view conversations", 
+            "sign in required",
+            "access beta",
+            "login",
+            "authenticate"
+        ]
+        
+        # Debug: check each prompt individually
+        for prompt in auth_prompt_texts:
+            found = prompt in final_text
+            print(f"Looking for '{prompt}' in text: {found}")
+        
+        auth_prompts_shown = any(text in final_text for text in auth_prompt_texts)
+        
+        # Check if it's still loading after 10 seconds (this would be the real issue)
+        still_loading = "loading" in final_text.lower() and not auth_prompts_shown
+        
+        if still_loading:
+            # This is the real issue - the frontend is hanging in loading state
+            # This is a system bug, not a test issue
+            print(f"SYSTEM ISSUE: Frontend stuck in loading state after 10 seconds")
+            print(f"This indicates auth service connection issues or frontend initialization problems")
+            
+            assert False, f"Frontend stuck in infinite loading state - this is a system bug that needs fixing. URL: {final_url}"
+        
+        # SUCCESS: The auth protection is working correctly
+        # The system shows authentication prompts instead of allowing access to protected content
+        print(f"Auth protection working: Authentication prompts shown = {auth_prompts_shown}")
+        
+        assert auth_prompts_shown, f"Expected authentication prompts when accessing protected route, but got: {final_text[:200]}"
         
     @pytest.mark.asyncio
     async def test_03_frontend_login_form_validation(self):

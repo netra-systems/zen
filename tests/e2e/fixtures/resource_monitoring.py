@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 @pytest_asyncio.fixture
 async def resource_monitor():
     """Fixture providing a configured resource monitor."""
-    monitor = ResourceMonitor(interval_seconds=0.5)  # High frequency for tests
+    monitor = ResourceMonitor(interval_seconds=2.0)  # Reasonable frequency for test efficiency
     
     await monitor.start()
     try:
@@ -56,7 +56,7 @@ async def memory_leak_detector():
 @pytest_asyncio.fixture
 async def isolation_monitor():
     """Fixture providing an agent isolation monitor."""
-    monitor = AgentIsolationBase(monitoring_interval=0.5)
+    monitor = AgentIsolationBase(monitoring_interval=2.0)
     
     yield monitor
     

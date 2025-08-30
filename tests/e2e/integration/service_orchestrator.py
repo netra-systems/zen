@@ -142,10 +142,10 @@ class E2EServiceOrchestrator:
         except Exception:
             pass
             
-        # Default fallback URLs
+        # Default fallback URLs - use 127.0.0.1 and port 8200 for backend to match RealServicesManager
         default_urls = {
-            "backend": "http://localhost:8000",
-            "auth": "http://localhost:8081",
+            "backend": "http://127.0.0.1:8200",
+            "auth": "http://localhost:8081", 
             "auth_service": "http://localhost:8081",
             "frontend": "http://localhost:3000"
         }

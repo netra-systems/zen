@@ -30,32 +30,39 @@ class WebSocketTestClient:
         """Connect to the WebSocket server.
         
         Args:
-            token: Optional auth token
+            token: Optional JWT token for authentication (will be sent in Authorization header)
             timeout: Connection timeout in seconds
             
         Returns:
             True if connected successfully
         """
         try:
-            # Add token to URL if provided
-            url = self.url
+            # Create additional headers for authentication
+            additional_headers = {}
             if token:
-                separator = "&" if "?" in url else "?"
-                url = f"{url}{separator}token={token}"
+                # Use Authorization header for JWT token (proper WebSocket auth)
+                additional_headers["Authorization"] = f"Bearer {token}"
+            
+            # Clean URL - remove token parameter if it exists
+            url = self.url
+            if "?token=" in url:
+                url = url.split("?token=")[0]
+            elif "&token=" in url:
+                url = url.split("&token=")[0]
                 
             self._websocket = await asyncio.wait_for(
-                websockets.connect(url),
+                websockets.connect(url, additional_headers=additional_headers),
                 timeout=timeout
             )
             
             # Start background task to receive messages
             self._receive_task = asyncio.create_task(self._receive_messages())
             
-            logger.info(f"Connected to WebSocket: {self.url}")
+            logger.info(f"Connected to WebSocket: {url}")
             return True
             
         except asyncio.TimeoutError:
-            logger.error(f"WebSocket connection timeout: {self.url}")
+            logger.error(f"WebSocket connection timeout: {url}")
             return False
         except Exception as e:
             logger.error(f"WebSocket connection failed: {e}")

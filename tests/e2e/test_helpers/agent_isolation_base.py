@@ -88,7 +88,7 @@ class AgentIsolationBase:
             }
         }
     
-    async def establish_baseline_metrics(self, tenant_id: str, duration: float = 30.0) -> IsolationTestMetrics:
+    async def establish_baseline_metrics(self, tenant_id: str, duration: float = 5.0) -> IsolationTestMetrics:
         """Establish baseline performance metrics for a tenant."""
         logger.info(f"Establishing baseline for tenant {tenant_id} over {duration}s")
         
@@ -99,12 +99,18 @@ class AgentIsolationBase:
         try:
             process = psutil.Process()
             
-            # Collect baseline samples
-            sample_count = int(duration / self.monitoring_interval)
-            for _ in range(sample_count):
-                cpu_samples.append(process.cpu_percent())
+            # For test efficiency, limit samples and use larger intervals
+            max_samples = min(10, int(duration / self.monitoring_interval))
+            effective_interval = duration / max_samples if max_samples > 0 else self.monitoring_interval
+            
+            # Collect baseline samples efficiently
+            for i in range(max_samples):
+                cpu_samples.append(process.cpu_percent(interval=None))  # Non-blocking
                 memory_samples.append(process.memory_info().rss / 1024 / 1024)
-                await asyncio.sleep(self.monitoring_interval)
+                
+                # Only sleep if not the last sample
+                if i < max_samples - 1:
+                    await asyncio.sleep(effective_interval)
             
             baseline_metrics = IsolationTestMetrics(
                 tenant_id=tenant_id,

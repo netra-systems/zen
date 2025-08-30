@@ -13,6 +13,7 @@ import pytest
 import os
 import asyncio
 from typing import Dict, Optional
+from unittest.mock import patch
 from test_framework.environment_markers import staging_only, env_requires
 
 

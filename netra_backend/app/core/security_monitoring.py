@@ -90,15 +90,7 @@ class SecurityMonitoringManager:
         self._alert_callbacks: List[Callable] = []
         self._lock = threading.RLock()
         
-        # Mock token patterns for detection
-        self._mock_token_patterns = [
-            re.compile(r'^mock_[a-zA-Z0-9_-]+$'),
-            re.compile(r'^test_token_[a-zA-Z0-9_-]+$'),
-            re.compile(r'^fake_[a-zA-Z0-9_-]+$'),
-            re.compile(r'^dummy_[a-zA-Z0-9_-]+$'),
-            re.compile(r'^dev_[a-zA-Z0-9_-]+$'),
-            re.compile(r'^local_[a-zA-Z0-9_-]+$'),
-        ]
+        # Note: Mock token detection patterns are now handled in detect_mock_token method
         
         # Rate limiting for security events (events per minute)
         self._rate_limits = {
@@ -110,37 +102,81 @@ class SecurityMonitoringManager:
         
         self.logger.info("SecurityMonitoringManager initialized", extra={
             "alerting_enabled": self._alerting_enabled,
-            "mock_patterns_count": len(self._mock_token_patterns)
+            "mock_detection": "enhanced_context_aware"
         })
 
     def detect_mock_token(self, token: str) -> bool:
         """
         Detect if a token appears to be a mock/test token.
         
+        This function distinguishes between:
+        - Legitimate test tokens (properly formatted for test environments)
+        - Actual mock tokens (simple placeholders that shouldn't be used)
+        
         Args:
             token: The token string to analyze
             
         Returns:
-            bool: True if token appears to be a mock token
+            bool: True if token appears to be a mock token that should be blocked
         """
         if not token or not isinstance(token, str):
             return False
             
-        # Strip common prefixes for analysis
-        token_to_check = token.strip().lower()
+        token_stripped = token.strip()
+        token_lower = token_stripped.lower()
         
-        # Check against known mock patterns
-        for pattern in self._mock_token_patterns:
-            if pattern.match(token_to_check):
-                return True
+        # Get current environment
+        current_env = get_env().get('ENVIRONMENT', '').lower()
+        is_test_env = current_env in ['test', 'testing', 'development', 'dev', 'local']
         
-        # Additional heuristics for mock detection
-        mock_indicators = [
-            'mock', 'test', 'fake', 'dummy', 'dev', 'local',
-            'example', 'placeholder', 'sample'
+        # Allow JWT-structured tokens even if they contain test keywords
+        # JWTs have 3 base64-encoded parts separated by dots
+        if token_stripped.count('.') == 2:
+            parts = token_stripped.split('.')
+            # Basic check for JWT structure (each part should be base64-like)
+            if all(len(part) > 10 and part.replace('-', '').replace('_', '').replace('=', '').isalnum() 
+                   for part in parts):
+                return False  # This looks like a real JWT, even if it has test data
+        
+        # Allow properly formatted test tokens in test environments
+        if is_test_env:
+            # Allow tokens that follow secure patterns even with test prefixes
+            if re.match(r'^test-jwt-[A-Za-z0-9_-]{32,}$', token_stripped):
+                return False  # This is a properly generated test token
+            if re.match(r'^[A-Za-z0-9_-]{32,}$', token_stripped):
+                return False  # This looks like a proper random token
+        
+        # Check for obvious mock/placeholder patterns (short, simple tokens)
+        obvious_mock_patterns = [
+            re.compile(r'^mock_?token_?[a-zA-Z0-9_-]*$'),
+            re.compile(r'^test_?token_?[a-zA-Z0-9_-]*$'),
+            re.compile(r'^fake_?[a-zA-Z0-9_-]*$'),
+            re.compile(r'^dummy_?[a-zA-Z0-9_-]*$'),
+            re.compile(r'^placeholder_?[a-zA-Z0-9_-]*$'),
+            re.compile(r'^example_?[a-zA-Z0-9_-]*$'),
         ]
         
-        return any(indicator in token_to_check for indicator in mock_indicators)
+        for pattern in obvious_mock_patterns:
+            if pattern.match(token_lower):
+                return True
+        
+        # Check for tokens that are clearly placeholders (very short or simple)
+        if len(token_stripped) < 16:
+            simple_mock_indicators = ['mock', 'test', 'fake', 'dummy', 'placeholder', 'example']
+            if any(indicator in token_lower for indicator in simple_mock_indicators):
+                return True
+        
+        # Check for hardcoded test values that shouldn't be in production
+        if not is_test_env:
+            production_forbidden = [
+                'mock_token', 'test_token', 'fake_token', 'dummy_token',
+                'placeholder', 'example_token', '123456', 'token123',
+                'default_token', 'sample_token'
+            ]
+            if token_lower in production_forbidden:
+                return True
+        
+        return False
 
     def log_security_event(self, event_type: str, details: Dict[str, Any],
                           severity: str = "medium", context: Optional[str] = None) -> None:
@@ -279,7 +315,7 @@ class SecurityMonitoringManager:
                     "token_prefix": token[:12] + "..." if len(token) > 12 else token,
                     "context": context,
                     "environment": get_env().get('ENVIRONMENT', 'unknown'),
-                    "detected_patterns": [pattern.pattern for pattern in self._mock_token_patterns if pattern.match(token.lower())],
+                    "detection_method": "enhanced_context_aware",
                     "detection_time": datetime.now(timezone.utc).isoformat()
                 }
             )
@@ -429,7 +465,7 @@ class SecurityMonitoringManager:
                     "total_events_processed": self._metrics.total_events,
                     "alerting_enabled": self._alerting_enabled,
                     "alert_callbacks_registered": len(self._alert_callbacks),
-                    "mock_patterns_active": len(self._mock_token_patterns),
+                    "mock_detection_method": "enhanced_context_aware",
                     "last_activity": self._metrics.last_event_time.isoformat() if self._metrics.last_event_time else None,
                     "timestamp": datetime.now(timezone.utc).isoformat()
                 }

@@ -14,7 +14,7 @@ import json
 from datetime import datetime, timedelta, UTC
 from httpx import AsyncClient
 import logging
-from test_framework.setup_test_path import setup_test_path
+from test_framework import setup_test_path
 
 # CRITICAL: setup_test_path() MUST be called before any project imports per CLAUDE.md
 setup_test_path()

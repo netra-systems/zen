@@ -4,7 +4,7 @@ from typing import AsyncIterator, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.db.postgres import get_async_db
+from netra_backend.app.database import get_async_db
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

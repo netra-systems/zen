@@ -63,14 +63,27 @@ export class AuthServiceClient {
     try {
       logger.debug(`Fetching auth config from: ${this.endpoints.authConfig}`);
       
-      const response = await fetch(this.endpoints.authConfig, {
-        signal: AbortSignal.timeout(5000), // Increased timeout for staging
-        // No credentials needed for public config endpoint
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-      });
+      // Create AbortController for better browser compatibility instead of AbortSignal.timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        controller.abort();
+      }, 5000); // 5 second timeout
+      
+      let response: Response;
+      try {
+        response = await fetch(this.endpoints.authConfig, {
+          signal: controller.signal,
+          // No credentials needed for public config endpoint
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+        });
+        clearTimeout(timeoutId);
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        throw fetchError;
+      }
       
       if (!response.ok) {
         // Check for OAuth configuration errors

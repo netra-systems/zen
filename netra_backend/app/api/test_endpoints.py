@@ -53,6 +53,8 @@ async def create_test_thread(request: Dict[str, Any]) -> Dict[str, Any]:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/health")
+@router.head("/health")
+@router.options("/health")
 async def test_health():
     """Test endpoint health check."""
     return {

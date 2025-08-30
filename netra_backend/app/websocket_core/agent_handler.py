@@ -33,13 +33,15 @@ class AgentMessageHandler(BaseMessageHandler):
         """Initialize with message handler service dependency."""
         super().__init__([
             MessageType.START_AGENT,
-            MessageType.USER_MESSAGE
+            MessageType.USER_MESSAGE,
+            MessageType.CHAT
         ])
         self.message_handler_service = message_handler_service
         self.processing_stats = {
             "messages_processed": 0,
             "start_agent_requests": 0,
             "user_messages": 0,
+            "chat_messages": 0,
             "errors": 0,
             "last_processed_time": None
         }
@@ -92,7 +94,7 @@ class AgentMessageHandler(BaseMessageHandler):
         try:
             if message.type == MessageType.START_AGENT:
                 return await self._handle_start_agent(user_id, message, db_session)
-            elif message.type == MessageType.USER_MESSAGE:
+            elif message.type in [MessageType.USER_MESSAGE, MessageType.CHAT]:
                 return await self._handle_user_message(user_id, message, db_session)
             else:
                 logger.warning(f"Unsupported message type: {message.type}")
@@ -164,6 +166,8 @@ class AgentMessageHandler(BaseMessageHandler):
             self.processing_stats["start_agent_requests"] += 1
         elif message_type == MessageType.USER_MESSAGE:
             self.processing_stats["user_messages"] += 1
+        elif message_type == MessageType.CHAT:
+            self.processing_stats["chat_messages"] += 1
     
     def get_stats(self) -> Dict[str, Any]:
         """Get handler statistics."""

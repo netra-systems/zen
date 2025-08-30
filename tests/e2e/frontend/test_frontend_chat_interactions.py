@@ -69,7 +69,7 @@ class ChatInteractionTestHarness:
             "content": content,
             "thread_id": thread_id or str(uuid.uuid4()),
             "type": "user",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now().replace(tzinfo=None).isoformat() + "Z"
         }
         
         headers = {"Authorization": f"Bearer {self.access_token}"}

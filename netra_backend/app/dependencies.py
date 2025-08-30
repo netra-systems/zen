@@ -48,7 +48,7 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     This function is deprecated. Use get_db_dependency() or DbDep type annotation instead.
     Kept for backward compatibility with existing routes.
     """
-    async for session in get_db_dependency():
+    async for session in get_db():
         yield session
 
 def get_security_service(request: Request) -> SecurityService:

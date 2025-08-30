@@ -138,6 +138,12 @@ def get_database_session():
     """Compatibility function - delegates to primary implementation."""
     return get_db()
 
+@asynccontextmanager
+async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
+    """Compatibility alias for get_async_db imports - delegates to primary implementation."""
+    async with DatabaseManager.get_async_session() as session:
+        yield session
+
 class DatabaseConfigManager:
     """Database configuration manager for unified config system."""
     
@@ -180,6 +186,7 @@ except ImportError:
 
 __all__ = [
     'get_db',
+    'get_async_db',
     'get_postgres_db',
     'get_clickhouse_client',
     'get_clickhouse_config', 

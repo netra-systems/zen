@@ -48,6 +48,7 @@ class MessageType(str, Enum):
     
     # User messages
     USER_MESSAGE = "user_message"
+    CHAT = "chat"
     SYSTEM_MESSAGE = "system_message"
     ERROR_MESSAGE = "error_message"
     
@@ -269,6 +270,7 @@ LEGACY_MESSAGE_TYPE_MAP = {
     "pong": MessageType.PONG,
     "heartbeat": MessageType.HEARTBEAT,
     "user_input": MessageType.USER_MESSAGE,
+    "chat": MessageType.CHAT,
     "agent_response": MessageType.AGENT_RESPONSE,
     "agent_task": MessageType.AGENT_TASK,
     "agent_task_ack": MessageType.AGENT_TASK_ACK,
