@@ -80,13 +80,8 @@ class ClickHouseDatabase:
         
         return clickhouse_connect.get_client(
             host=self.host, port=self.port, database=self.database,
-            user=self.user, password=self.password, secure=self.secure,
-            connect_timeout=connect_timeout, send_receive_timeout=receive_timeout,
-            # CRITICAL FIX: Add connection pool and retry settings
-            pool_mgr=True,          # Enable connection pooling
-            pool_size=5,            # Connection pool size
-            retries=2,              # Number of retries on connection failure
-            retry_delay=1.0         # Delay between retries
+            username=self.user, password=self.password, secure=self.secure,
+            connect_timeout=connect_timeout, send_receive_timeout=receive_timeout
         )
     
     def _establish_connection(self):
