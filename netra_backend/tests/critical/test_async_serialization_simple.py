@@ -71,15 +71,16 @@ async def test_send_to_thread_uses_async_serialization():
         conn_id = await manager.connect_user(f"user-{i}", ws, "test-thread")
         mock_websockets.append(ws)
     
-    # Create a complex message
+    # Create a complex message with proper fields
     state = DeepAgentState(
         user_request="test",
         chat_thread_id="test-thread",
-        user_id="test-user"
+        user_id="test-user",
+        messages=[
+            {"role": "user", "content": "test " * 100} for _ in range(10)
+        ],
+        metadata={"timestamp": str(time.time()), "data": "x" * 1000}
     )
-    state.conversation_history = [
-        {"role": "user", "content": "test " * 100} for _ in range(10)
-    ]
     
     # Send to thread - should use async serialization
     start = time.perf_counter()
