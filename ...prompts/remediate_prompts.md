@@ -17,3 +17,23 @@ Notes:
 1) don't believe the report - check latest system and think about it yourself
 2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
 3) failing tests and test suite must be complete, comphrensive, and difficult
+
+
+CRITICAL: Action and remediate #1 fix in CHAT_WEAKEST_LINK_REMEDIATION_PLAN.md
+Notes:
+1) don't believe the report fully - check latest system and think about it yourself
+2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+3) failing tests and test suite must be complete, comphrensive, and difficult
+
+CRITICAL: Action and remediate #2 fix in CHAT_WEAKEST_LINK_REMEDIATION_PLAN.md
+Notes:
+1) don't believe the report fully - check latest system and think about it yourself
+2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+3) failing tests and test suite must be complete, comphrensive, and difficult
+
+CRITICAL: Action and remediate #4 fix in CHAT_WEAKEST_LINK_REMEDIATION_PLAN.md
+Notes:
+1) don't believe the report fully - check latest system and think about it yourself
+2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+3) failing tests and test suite must be complete, comphrensive, and difficult
+

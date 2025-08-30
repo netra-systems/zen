@@ -96,6 +96,8 @@ google-cloud-secret-manager>=2.20.0
 # --- Utilities ---
 # General-purpose retrying library.
 tenacity>=9.1.2
+# Caching library with TTL (Time-To-Live) support for memory leak prevention
+cachetools==5.5.0
 # High-performance runtime type-checker.
 beartype>=0.21.0
 # Powerful extensions for Python's standard datetime module.

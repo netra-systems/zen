@@ -21,6 +21,7 @@ from netra_backend.app.agents.prompts.supervisor_prompts import (
     supervisor_system_prompt,
 )
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.utils import extract_thread_id
 
 # Import modular components
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -181,7 +182,7 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
             agent_name=self.name,
             state=state,
             stream_updates=stream_updates,
-            thread_id=getattr(state, 'chat_thread_id', run_id),
+            thread_id=extract_thread_id(state, run_id),
             user_id=getattr(state, 'user_id', 'default_user'),
             start_time=datetime.now(timezone.utc),
             metadata={"description": self.description}

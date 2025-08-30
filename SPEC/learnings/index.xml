@@ -47,6 +47,14 @@
             <critical-takeaway>Create regression tests IMMEDIATELY when fixing critical bugs to ensure they never resurface (websocket_routing_regression.xml).</critical-takeaway>
         </category>
         
+        <category name="WebSocket/TimeoutRetry" path="SPEC/learnings/websocket_timeout_retry_implementation.xml" keywords="WebSocket, Timeout, Retry, Exponential Backoff, Reliability, Message Delivery, Silent Failures, Performance, Circuit Breaker, Monitoring">
+            <critical-takeaway>CRITICAL: WebSocket sends MUST have timeouts (5 seconds default) to prevent indefinite hanging - affects 90% of value delivery (websocket_timeout_retry_implementation.xml).</critical-takeaway>
+            <critical-takeaway>Exponential backoff retry (1s, 2s, 4s) with max 3 attempts prevents cascade failures from retry storms (websocket_timeout_retry_implementation.xml).</critical-takeaway>
+            <critical-takeaway>asyncio.wait_for provides deterministic timeout behavior for WebSocket operations (websocket_timeout_retry_implementation.xml).</critical-takeaway>
+            <critical-takeaway>Track send_timeouts, timeout_retries, and timeout_failures metrics for monitoring WebSocket health (websocket_timeout_retry_implementation.xml).</critical-takeaway>
+            <critical-takeaway>Timeout implementation MUST maintain backward compatibility with existing WebSocket API (websocket_timeout_retry_implementation.xml).</critical-takeaway>
+        </category>
+        
         <category name="Authentication/MultiSystem" path="SPEC/multi_system_authentication_architecture.xml" keywords="Authentication, SSOT, JWT, OAuth, Multi-System, Auth Service, Token Management, Service-to-Service, Architecture">
             <critical-takeaway>CRITICAL: auth_service is the SOLE authentication authority - all JWT validation must go through auth_service (multi_system_authentication_architecture.xml).</critical-takeaway>
             <critical-takeaway>Multiple authentication patterns violate SSOT - 3x maintenance burden and security risk (multi_system_authentication_architecture.xml).</critical-takeaway>
