@@ -807,7 +807,7 @@ class WebSocketManager:
         
         try:
             # Convert message to dict if needed with robust serialization
-            message_dict = self._serialize_message_safely(message)
+            message_dict = await self._serialize_message_safely_async(message)
                 
             await websocket.send_json(message_dict)
             
@@ -1393,7 +1393,7 @@ async def _send_with_timeout_retry_method(self, websocket, message, conn_id, max
         
     for attempt in range(max_retries):
         try:
-            message_dict = self._serialize_message_safely(message)
+            message_dict = await self._serialize_message_safely_async(message)
             # Pass timeout parameter directly to send_json for test compatibility
             # Set timeout_used attribute on websocket for test verification
             if not hasattr(websocket, 'timeout_used'):

@@ -55,7 +55,7 @@ class CorpusRequestParser:
     
     def _process_llm_response(self, response: str) -> CorpusOperationRequest:
         """Process LLM response and create operation request"""
-        params = extract_json_from_response(response)
+        params = llm_parser.extract_json_from_response(response)
         
         if params:
             return self._create_operation_request(params)

@@ -28,7 +28,7 @@ class ActionPlanBuilder:
         llm_response: str, run_id: str
     ) -> ActionPlanResult:
         """Process LLM response to ActionPlanResult."""
-        action_plan_dict = extract_json_from_response(llm_response, max_retries=5)
+        action_plan_dict = llm_parser.extract_json_from_response(llm_response, max_retries=5)
         if not action_plan_dict:
             action_plan_dict = await ActionPlanBuilder._handle_extraction_failure(
                 llm_response, run_id
@@ -72,7 +72,7 @@ class ActionPlanBuilder:
     ) -> dict:
         """Handle JSON extraction failure."""
         logger.debug(f"JSON extraction failed for {run_id}")
-        partial = extract_partial_json(llm_response, required_fields=None)
+        partial = llm_parser.extract_partial_json(llm_response, required_fields=None)
         if partial:
             return ActionPlanBuilder._build_from_partial(partial).model_dump()
         return ActionPlanBuilder.get_default_action_plan().model_dump()

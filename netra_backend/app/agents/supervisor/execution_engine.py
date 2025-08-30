@@ -58,9 +58,13 @@ class ExecutionEngine:
         
         result = await self._execute_with_error_handling(context, state)
         
-        # Send final report if successful
+        # CRITICAL: Always send completion events, regardless of success/failure
+        # This ensures WebSocket clients know when agent execution is complete
         if result.success:
             await self._send_final_execution_report(context, result, state)
+        else:
+            # Send completion event for failed/fallback cases
+            await self._send_completion_for_failed_execution(context, result, state)
         
         self._update_history(result)
         return result
@@ -380,6 +384,34 @@ class ExecutionEngine:
             )
         except Exception as e:
             logger.warning(f"Failed to send final execution report: {e}")
+    
+    async def _send_completion_for_failed_execution(self, context: AgentExecutionContext,
+                                                   result: AgentExecutionResult,
+                                                   state: DeepAgentState) -> None:
+        """Send completion event for failed/fallback execution scenarios."""
+        try:
+            # Build error/fallback completion report
+            report = {
+                "agent_name": context.agent_name,
+                "success": False,  # Explicitly mark as failed
+                "duration_ms": result.duration * 1000 if result.duration else 0,
+                "error": getattr(result, 'error', 'Execution failed'),
+                "fallback_used": result.metadata.get('fallback_used', False) if result.metadata else False,
+                "status": "failed_with_fallback" if (result.metadata and result.metadata.get('fallback_used')) else "failed"
+            }
+            
+            # Send completion notification for failed execution
+            # This is CRITICAL for WebSocket clients to know execution finished
+            await self.websocket_notifier.send_agent_completed(
+                context,
+                report,
+                result.duration * 1000 if result.duration else 0
+            )
+            
+            logger.info(f"Sent completion event for failed {context.agent_name} execution")
+            
+        except Exception as e:
+            logger.warning(f"Failed to send completion event for failed execution: {e}")
     
     def _log_fallback_trigger(self, context: AgentExecutionContext) -> None:
         """Log fallback trigger if flow_id is available."""

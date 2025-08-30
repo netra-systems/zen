@@ -208,7 +208,7 @@ class TriageCore:
 
     def _try_standard_extraction(self, response: str) -> Optional[Dict[str, Any]]:
         """Try standard JSON extraction method."""
-        result = extract_json_from_response(response)
+        result = llm_parser.extract_json_from_response(response)
         return result if result and isinstance(result, dict) else None
     
     def _extract_with_regex(self, response: str) -> Optional[Dict[str, Any]]:

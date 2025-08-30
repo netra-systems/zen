@@ -205,7 +205,7 @@ class ReportingSubAgent(BaseSubAgent, BaseExecutionInterface):
     
     def _extract_and_validate_report(self, llm_response_str: str, run_id: str) -> dict:
         """Extract and validate JSON result from LLM response."""
-        report_result = extract_json_from_response(llm_response_str)
+        report_result = llm_parser.extract_json_from_response(llm_response_str)
         if not report_result:
             self.logger.warning(f"Could not extract JSON from LLM response for run_id: {run_id}. Using default report.")
             report_result = {"report": "No report could be generated."}

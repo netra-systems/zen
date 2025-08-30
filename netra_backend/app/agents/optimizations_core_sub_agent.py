@@ -198,7 +198,7 @@ class OptimizationsCoreSubAgent(BaseExecutionInterface, AgentExecutionMixin, Bas
     
     def _extract_and_validate_result(self, llm_response_str: str, run_id: str) -> Dict[str, Any]:
         """Extract and validate JSON result from LLM response."""
-        optimizations_result = extract_json_from_response(llm_response_str)
+        optimizations_result = llm_parser.extract_json_from_response(llm_response_str)
         if not optimizations_result:
             logger.warning(f"Could not extract JSON from LLM response for run_id: {run_id}. Using default optimizations.")
             optimizations_result = {"optimizations": []}

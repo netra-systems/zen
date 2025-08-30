@@ -125,7 +125,7 @@ class ExecutionManager:
             return self._convert_dict_to_result(result)
         else:
             # Fix non-JSON responses before processing
-            fixed_result = ensure_agent_response_is_json(result)
+            fixed_result = llm_parser.ensure_agent_response_is_json(result)
             return self._convert_dict_to_result(fixed_result)
     
     def _convert_dict_to_result(self, result_dict: dict) -> Union[DataAnalysisResponse, AnomalyDetectionResponse]:

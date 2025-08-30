@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field, field_validator
 
 # Import actual types needed at runtime
 from netra_backend.app.agents.triage_sub_agent.models import TriageResult
-from netra_backend.app.core.json_parsing_utils import parse_string_list_field
+from netra_backend.app.core.serialization.unified_json_handler import parse_list_field
 from netra_backend.app.schemas.agent_models import AgentMetadata
 from netra_backend.app.schemas.shared_types import (
     AnomalyDetectionResponse,
@@ -53,7 +53,7 @@ class OptimizationsResult(BaseModel):
     @classmethod
     def parse_recommendations(cls, v: Any) -> List[str]:
         """Parse recommendations field, converting dicts to strings"""
-        return parse_string_list_field(v)
+        return parse_list_field(v)
     
     @field_validator('cost_savings')
     @classmethod
@@ -111,13 +111,13 @@ class ActionPlanResult(BaseModel):
     @classmethod
     def parse_required_resources(cls, v: Any) -> List[str]:
         """Parse required_resources field, converting dicts to strings"""
-        return parse_string_list_field(v)
+        return parse_list_field(v)
     
     @field_validator('success_metrics', mode='before')
     @classmethod
     def parse_success_metrics(cls, v: Any) -> List[str]:
         """Parse success_metrics field, converting dicts to strings"""
-        return parse_string_list_field(v)
+        return parse_list_field(v)
 
 
 class ReportResult(BaseModel):
@@ -133,7 +133,7 @@ class ReportResult(BaseModel):
     @classmethod
     def parse_attachments(cls, v: Any) -> List[str]:
         """Parse attachments field, converting dicts to strings"""
-        return parse_string_list_field(v)
+        return parse_list_field(v)
 
 
 class SyntheticDataResult(BaseModel):
