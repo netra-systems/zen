@@ -28,7 +28,6 @@ Your primary mission is to get existing systems fully operational. **Maintain th
 
 CRUCIAL: ULTRA THINK DEEPLY.
 
-
 -----
 
 ## 1\. The Business Mandate: Value Capture and Growth

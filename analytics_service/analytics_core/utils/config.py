@@ -4,7 +4,7 @@ Configuration management for analytics service.
 """
 
 import os
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
 import logging
 

@@ -333,7 +333,7 @@ class TestUnitWebSocketComponents:
         conn_id = "test-enhanced"
         mock_ws = MagicMock()
         
-        async def capture(message):
+        async def capture(message, timeout=None):
             if isinstance(message, str):
                 data = json.loads(message)
             else:
@@ -356,15 +356,18 @@ class TestUnitWebSocketComponents:
             max_retries=1
         )
         
-        # Mock tool
-        async def test_tool():
+        # Mock tool that accepts arguments
+        async def test_tool(*args, **kwargs):
             return {"result": "success"}
         
         # Execute with context
-        state = DeepAgentState()
-        state.chat_thread_id = conn_id
+        state = DeepAgentState(
+            chat_thread_id=conn_id,
+            user_id=conn_id,
+            run_id="run-123"
+        )
         
-        await executor.execute_with_state(
+        result = await executor.execute_with_state(
             test_tool, "test_tool", {}, state, "run-123"
         )
         
@@ -394,7 +397,7 @@ class TestIntegrationWebSocketFlow:
         conn_id = "integration-test"
         mock_ws = MagicMock()
         
-        async def capture(message):
+        async def capture(message, timeout=None):
             if isinstance(message, str):
                 data = json.loads(message)
             else:
@@ -412,15 +415,44 @@ class TestIntegrationWebSocketFlow:
         llm = MockLLM()
         tool_dispatcher = ToolDispatcher()
         
-        # Register a test tool
-        async def test_tool(data: str) -> Dict:
-            return {"processed": data}
+        # Register a test tool - create a proper mock tool
+        from langchain_core.tools import BaseTool
         
-        tool_dispatcher.register_tool("test_tool", test_tool, "Test tool")
+        class MockTool(BaseTool):
+            name: str = "test_tool"
+            description: str = "Test tool"
+            
+            async def _arun(self, *args, **kwargs):
+                return {"processed": "test_data"}
+            
+            def _run(self, *args, **kwargs):
+                return {"processed": "test_data"}
+        
+        mock_tool = MockTool()
+        
+        # Register the tool with the dispatcher's registry
+        tool_dispatcher.registry.register_tool(mock_tool)
         
         # Create registry with WebSocket
         registry = AgentRegistry(llm, tool_dispatcher)
         registry.set_websocket_manager(ws_manager)
+        
+        # Create and register a mock agent that will use the tool
+        class TestAgent:
+            async def execute(self, state, run_id, return_direct=True):
+                # Simulate agent invoking a tool
+                if hasattr(tool_dispatcher, 'executor'):
+                    # Use execute_with_state for WebSocket notifications
+                    if hasattr(tool_dispatcher.executor, 'execute_with_state'):
+                        await tool_dispatcher.executor.execute_with_state(
+                            mock_tool, "test_tool", {}, state, state.run_id
+                        )
+                # Use the correct field for DeepAgentState
+                state.final_report = "Test completed"
+                return state
+        
+        test_agent = TestAgent()
+        registry.register("test_agent", test_agent)
         
         # Create execution engine
         engine = ExecutionEngine(registry, ws_manager)
@@ -439,6 +471,8 @@ class TestIntegrationWebSocketFlow:
         state = DeepAgentState()
         state.user_request = "Test request"
         state.chat_thread_id = conn_id
+        state.run_id = "req-456"
+        state.user_id = conn_id
         
         # Execute
         result = await engine.execute_agent(context, state)
@@ -473,7 +507,7 @@ class TestIntegrationWebSocketFlow:
             
             mock_ws = MagicMock()
             
-            async def capture(message, v=validator):
+            async def capture(message, timeout=None, v=validator):
                 if isinstance(message, str):
                     data = json.loads(message)
                 else:
@@ -527,7 +561,7 @@ class TestIntegrationWebSocketFlow:
         conn_id = "error-test"
         mock_ws = MagicMock()
         
-        async def capture(message):
+        async def capture(message, timeout=None):
             if isinstance(message, str):
                 data = json.loads(message)
             else:
@@ -593,7 +627,7 @@ class TestE2EWebSocketChatFlow:
         
         received_events = []
         
-        async def capture(message):
+        async def capture(message, timeout=None):
             if isinstance(message, str):
                 data = json.loads(message)
             else:
@@ -826,7 +860,7 @@ class TestRegressionPrevention:
         conn_id = "regression-error"
         mock_ws = MagicMock()
         
-        async def capture(message):
+        async def capture(message, timeout=None):
             if isinstance(message, str):
                 data = json.loads(message)
             else:
@@ -877,7 +911,7 @@ class TestRegressionPrevention:
         conn_id = "regression-tools"
         mock_ws = MagicMock()
         
-        async def capture(message):
+        async def capture(message, timeout=None):
             if isinstance(message, str):
                 data = json.loads(message)
             else:

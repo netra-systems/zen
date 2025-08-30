@@ -47,7 +47,7 @@ class AnalyticsConfig:
         """Load all configuration values with defaults."""
         # Service Identity
         self.service_name = "analytics_service"
-        self.service_version = "1.0.0"
+        self.service_version = self.env.get("ANALYTICS_SERVICE_VERSION", "1.0.0")
         self.service_port = int(self.env.get("ANALYTICS_SERVICE_PORT", "8090"))
         self.environment = self.env.get("ENVIRONMENT", "development")
         

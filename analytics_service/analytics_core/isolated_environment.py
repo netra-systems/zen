@@ -41,7 +41,7 @@ class IsolatedEnvironment:
                 
             self._env_cache: Dict[str, Any] = {}
             self._isolation_enabled = False
-            self._overrides: Dict[str, str] = {}
+            self._overrides: Dict[str, Optional[str]] = {}
             self._initialized = True
     
     def get(self, key: str, default: Optional[str] = None) -> Optional[str]:
@@ -57,19 +57,28 @@ class IsolatedEnvironment:
         """
         # Check overrides first
         if self._isolation_enabled and key in self._overrides:
-            return self._overrides[key]
+            override_value = self._overrides[key]
+            if override_value == "__UNSET__":
+                return default  # Variable was explicitly unset
+            return override_value
         
         # Check cache
         if key in self._env_cache:
-            return self._env_cache[key]
+            cached_value = self._env_cache[key]
+            if cached_value is None:
+                return default
+            return cached_value
         
-        # Get from environment
-        value = os.environ.get(key, default)
-        
-        # Cache the value
-        self._env_cache[key] = value
-        
-        return value
+        # Get from environment - check if actually exists first
+        if key in os.environ:
+            value = os.environ[key]
+            # Cache the actual value
+            self._env_cache[key] = value
+            return value
+        else:
+            # Cache that it doesn't exist (using None as marker)
+            self._env_cache[key] = None
+            return default
     
     def set(self, key: str, value: str, category: Optional[str] = None) -> None:
         """
@@ -104,6 +113,10 @@ class IsolatedEnvironment:
         Returns to normal operation where set() affects the actual environment.
         """
         self._isolation_enabled = False
+        # Clear cache for all overridden keys since they may not exist in real environment
+        override_keys = list(self._overrides.keys())
+        for key in override_keys:
+            self._env_cache.pop(key, None)
         self._overrides.clear()
     
     def clear_cache(self) -> None:
@@ -126,13 +139,15 @@ class IsolatedEnvironment:
         # Check overrides if isolation is enabled
         if self._isolation_enabled:
             for key, value in self._overrides.items():
-                if key.startswith(prefix):
+                if key.startswith(prefix) and value != "__UNSET__":
                     result[key] = value
         
         # Check actual environment
         for key, value in os.environ.items():
             if key.startswith(prefix) and key not in result:
-                result[key] = value
+                # Only include if not explicitly unset in isolation mode
+                if not (self._isolation_enabled and key in self._overrides and self._overrides[key] == "__UNSET__"):
+                    result[key] = value
         
         return result
     
@@ -147,7 +162,8 @@ class IsolatedEnvironment:
             True if the variable is set, False otherwise
         """
         if self._isolation_enabled and key in self._overrides:
-            return True
+            override_value = self._overrides[key]
+            return override_value != "__UNSET__"
         return key in os.environ
     
     def unset(self, key: str) -> None:
@@ -158,7 +174,9 @@ class IsolatedEnvironment:
             key: Environment variable name to unset
         """
         if self._isolation_enabled:
-            self._overrides.pop(key, None)
+            # In isolation mode, we need to track that this variable was unset
+            # by storing a special marker to distinguish from "not set"
+            self._overrides[key] = "__UNSET__"
         else:
             os.environ.pop(key, None)
         
@@ -198,6 +216,15 @@ class IsolatedEnvironment:
     def is_test(self) -> bool:
         """Check if running in test environment."""
         return self.get_environment_name() == "test"
+    
+    def reset_to_original(self) -> None:
+        """
+        Reset environment to original state.
+        
+        This method disables isolation mode and clears any test overrides,
+        returning the environment to its original state.
+        """
+        self.disable_isolation()
 
 
 # Global singleton instance
