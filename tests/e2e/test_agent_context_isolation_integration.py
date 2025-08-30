@@ -26,6 +26,18 @@ from tests.e2e.agent_response_test_utilities import (
 )
 
 
+class TestContextAgent(BaseSubAgent):
+    """Simple test agent for context isolation testing."""
+    
+    def __init__(self, llm_manager, name="TestAgent", description="Test agent", **kwargs):
+        super().__init__(llm_manager, name, description, **kwargs)
+        self.context = {}
+        
+    async def execute(self, input_data=None):
+        """Execute the test agent."""
+        return {"success": True, "name": self.name, "context_id": id(self.context)}
+
+
 @pytest.mark.integration
 @pytest.mark.e2e
 class TestAgentContextIsolation:
@@ -37,12 +49,12 @@ class TestAgentContextIsolation:
         config = get_config()
         llm_manager = LLMManager(config)
         # Mock: WebSocket connection isolation for testing without network overhead
-        websocket_manager = AsyncNone  # TODO: Use real service instead of Mock
+        websocket_manager = None  # TODO: Use real service instead of Mock
         
                 
         # Create required dependencies
-        db_session = AsyncNone  # TODO: Use real service instead of Mock
-        tool_dispatcher = MagicNone  # TODO: Use real service instead of Mock
+        db_session = None  # TODO: Use real service instead of Mock
+        tool_dispatcher = None  # TODO: Use real service instead of Mock
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         supervisor.websocket_manager = websocket_manager
@@ -63,7 +75,7 @@ class TestAgentContextIsolation:
         # Create multiple agents
         agents = []
         for i in range(3):
-            agent = BaseSubAgent(
+            agent = TestContextAgent(
                 llm_manager=context_setup["llm_manager"],
                 name=f"ContextAgent_{i}",
                 description=f"Context isolation test agent {i}"
@@ -95,7 +107,7 @@ class TestAgentContextIsolation:
         supervisor = context_setup["supervisor"]
         
         # Create agent with context
-        agent = BaseSubAgent(
+        agent = TestContextAgent(
             llm_manager=context_setup["llm_manager"],
             name="CleanupTestAgent",
             description="Context cleanup test agent"
@@ -123,7 +135,7 @@ class TestAgentContextIsolation:
         # Create concurrent agents with different contexts
         concurrent_agents = []
         for i in range(5):
-            agent = BaseSubAgent(
+            agent = TestContextAgent(
                 llm_manager=context_setup["llm_manager"],
                 name=f"ConcurrentAgent_{i}",
                 description=f"Concurrent context agent {i}"
@@ -150,7 +162,7 @@ class TestAgentContextIsolation:
         supervisor = context_setup["supervisor"]
         
         # Create agent with large context
-        agent = BaseSubAgent(
+        agent = TestContextAgent(
             llm_manager=context_setup["llm_manager"],
             name="LargeContextAgent",
             description="Large context test agent"
@@ -176,7 +188,7 @@ class TestAgentContextIsolation:
         supervisor = context_setup["supervisor"]
         
         # Create agent with persistent context
-        agent = BaseSubAgent(
+        agent = TestContextAgent(
             llm_manager=context_setup["llm_manager"],
             name="PersistentAgent",
             description="Context persistence test agent"
@@ -196,7 +208,7 @@ class TestAgentContextIsolation:
         assert persistence_result["context_maintained"] is True
         assert persistence_result["data_accumulated"] is True
     
-    async def _validate_context_isolation(self, agents: List[BaseSubAgent], 
+    async def _validate_context_isolation(self, agents: List[TestContextAgent], 
                                         contexts: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Validate context isolation between agents."""
         # Check uniqueness
@@ -220,7 +232,7 @@ class TestAgentContextIsolation:
             "fresh_window_count": fresh_count
         }
     
-    async def _test_context_cleanup(self, agent: BaseSubAgent) -> Dict[str, Any]:
+    async def _test_context_cleanup(self, agent: TestContextAgent) -> Dict[str, Any]:
         """Test context cleanup functionality."""
         # Simulate context usage
         await agent.execute()
@@ -234,7 +246,7 @@ class TestAgentContextIsolation:
             "memory_released": agent.context != original_context
         }
     
-    async def _execute_concurrent_context_test(self, agents: List[BaseSubAgent]) -> Dict[str, Any]:
+    async def _execute_concurrent_context_test(self, agents: List[TestContextAgent]) -> Dict[str, Any]:
         """Execute concurrent context isolation test."""
         # Store original contexts
         original_contexts = [agent.context.copy() for agent in agents]
@@ -262,7 +274,7 @@ class TestAgentContextIsolation:
             "no_cross_contamination": no_contamination
         }
     
-    async def _test_context_size_limits(self, agent: BaseSubAgent) -> Dict[str, Any]:
+    async def _test_context_size_limits(self, agent: TestContextAgent) -> Dict[str, Any]:
         """Test context size limit handling."""
         context_size = len(str(agent.context))
         memory_usage = context_size * 2  # Estimate memory usage
@@ -277,7 +289,7 @@ class TestAgentContextIsolation:
             "context_size": context_size
         }
     
-    async def _test_context_persistence(self, agent: BaseSubAgent) -> Dict[str, Any]:
+    async def _test_context_persistence(self, agent: TestContextAgent) -> Dict[str, Any]:
         """Test context persistence across multiple tasks."""
         initial_id = agent.context.get("persistent_id")
         
@@ -305,8 +317,8 @@ async def test_memory_isolation_validation():
     llm_manager = LLMManager(config)
     
     # Create two agents with separate memory spaces
-    agent1 = BaseSubAgent(llm_manager=llm_manager, name="MemoryAgent1")
-    agent2 = BaseSubAgent(llm_manager=llm_manager, name="MemoryAgent2")
+    agent1 = TestContextAgent(llm_manager=llm_manager, name="MemoryAgent1")
+    agent2 = TestContextAgent(llm_manager=llm_manager, name="MemoryAgent2")
     
     # Set distinct memory contexts
     agent1.context = {"memory_id": "mem_1", "data": [1, 2, 3]}
@@ -324,7 +336,7 @@ async def test_context_window_refresh():
     config = get_config()
     llm_manager = LLMManager(config)
     
-    agent = BaseSubAgent(llm_manager=llm_manager, name="RefreshAgent")
+    agent = TestContextAgent(llm_manager=llm_manager, name="RefreshAgent")
     original_context = {"refresh_id": str(uuid.uuid4()), "state": "original"}
     agent.context = original_context
     

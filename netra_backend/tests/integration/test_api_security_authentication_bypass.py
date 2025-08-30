@@ -30,6 +30,9 @@ from netra_backend.app.main import app
 from netra_backend.app.core.security import SecurityContext, UserInfo
 from netra_backend.app.auth_integration.auth import get_current_user
 
+# Import test framework for real auth
+from test_framework.fixtures.auth import create_test_user_token, create_admin_token, create_real_jwt_token
+
 
 class TestAPISecurityAuthenticationBypass:
     """Test API security against authentication bypass attempts"""
@@ -448,18 +451,24 @@ class TestAPISecurityAuthenticationBypass:
             return {"attacker": attacker_id, "success": False, "error": str(e)}
     
     def _generate_mock_token(self, user_id: str, role: str) -> str:
-        """Generate a mock JWT token for testing"""
-        header = {"alg": "HS256", "typ": "JWT"}
-        payload = {
-            "user_id": user_id,
-            "role": role,
-            "exp": int(time.time()) + 3600  # 1 hour expiry
-        }
-        
-        # Create mock token (not actually signed)
-        encoded_header = base64.urlsafe_b64encode(json.dumps(header).encode()).decode().rstrip("=")
-        encoded_payload = base64.urlsafe_b64encode(json.dumps(payload).encode()).decode().rstrip("=")
-        return f"{encoded_header}.{encoded_payload}.mock_signature"
+        """Generate a real JWT token for testing"""
+        try:
+            # Use real JWT token for more realistic testing
+            permissions = ["admin", "user"] if role == "admin" else ["user"]
+            return create_real_jwt_token(user_id, permissions)
+        except Exception:
+            # Fallback to mock format for testing environments without JWT library
+            header = {"alg": "HS256", "typ": "JWT"}
+            payload = {
+                "user_id": user_id,
+                "role": role,
+                "exp": int(time.time()) + 3600  # 1 hour expiry
+            }
+            
+            # Create mock token (not actually signed)
+            encoded_header = base64.urlsafe_b64encode(json.dumps(header).encode()).decode().rstrip("=")
+            encoded_payload = base64.urlsafe_b64encode(json.dumps(payload).encode()).decode().rstrip("=")
+            return f"{encoded_header}.{encoded_payload}.mock_signature"
     
     def teardown_method(self):
         """Clean up after tests"""

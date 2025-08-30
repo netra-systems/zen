@@ -96,23 +96,30 @@ class E2EServiceValidator:
     @staticmethod
     def validate_llm_configuration() -> bool:
         """Validate LLM configuration for E2E testing"""
+        real_llm_requested = (os.environ.get("USE_REAL_LLM") == "true" or os.environ.get("TEST_USE_REAL_LLM") == "true")
+        logger.debug(f"LLM validation: USE_REAL_LLM={os.environ.get('USE_REAL_LLM')}, TEST_USE_REAL_LLM={os.environ.get('TEST_USE_REAL_LLM')}, real_llm_requested={real_llm_requested}")
+        
         # Check that real LLM testing is enabled
-        if not (os.environ.get("USE_REAL_LLM") == "true" or os.environ.get("TEST_USE_REAL_LLM") == "true"):
+        if not real_llm_requested:
             logger.error("Real LLM testing not enabled for E2E tests")
             return False
         
         # Check for at least one LLM API key
-        has_llm_key = any([
-            os.environ.get("OPENAI_API_KEY"),
-            os.environ.get("ANTHROPIC_API_KEY"),
-            os.environ.get("GEMINI_API_KEY"),
-        ])
+        openai_key = os.environ.get("OPENAI_API_KEY")
+        anthropic_key = os.environ.get("ANTHROPIC_API_KEY")
+        gemini_key = os.environ.get("GEMINI_API_KEY")
+        has_llm_key = any([openai_key, anthropic_key, gemini_key])
+        logger.debug(f"API key check: OPENAI={bool(openai_key)}, ANTHROPIC={bool(anthropic_key)}, GEMINI={bool(gemini_key)}, has_any={has_llm_key}")
         
         if not has_llm_key:
-            logger.warning("No LLM API keys found - using test keys")
-            # Set test API keys for E2E testing
-            os.environ["GEMINI_API_KEY"] = "test-gemini-api-key"
-            os.environ["TEST_LLM_MODE"] = "simulate"
+            # Only set test keys if real LLM testing is not specifically requested
+            if not os.environ.get("TEST_USE_REAL_LLM", "").lower() == "true":
+                logger.warning("No LLM API keys found - using test keys")
+                # Set test API keys for E2E testing
+                os.environ["GEMINI_API_KEY"] = "test-gemini-api-key"
+                os.environ["TEST_LLM_MODE"] = "simulate"
+            else:
+                logger.info("Real LLM testing requested - API keys will be loaded from secret manager")
         
         return True
     

@@ -39,6 +39,9 @@ from netra_backend.app.main import app
 from netra_backend.app.services.user_auth_service import UserAuthService as AuthService
 from netra_backend.app.services.session_service import SessionService
 
+# Import test framework for real auth
+from test_framework.fixtures.auth import create_test_user_token, create_admin_token, create_real_jwt_token
+
 class TestExistingUserLoginFlow:
     """Test existing user login flow from authentication to logout."""
     
@@ -218,9 +221,10 @@ class TestExistingUserLoginFlow:
         """Test 5: Token refresh should return new access token."""
         refresh_token = "valid_refresh_token_123"
         
-        # Mock new tokens
+        # Generate real tokens for integration testing
+        test_token = create_test_user_token("refreshed_user", use_real_jwt=True)
         new_tokens = {
-            "access_token": "new_access_token_456",
+            "access_token": test_token.token,
             "refresh_token": refresh_token,  # Same refresh token
             "token_type": "bearer",
             "expires_in": 3600

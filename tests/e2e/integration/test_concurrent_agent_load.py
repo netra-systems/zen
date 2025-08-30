@@ -18,6 +18,7 @@ from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
 from test_framework.http_client import ClientConfig
 from test_framework.http_client import UnifiedHTTPClient as RealHTTPClient
 from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
+from test_framework.fixtures.auth import create_real_jwt_token
 
 
 class ConcurrentUserSession:
@@ -62,9 +63,16 @@ class ConcurrentAgentLoadTester:
         user = ConcurrentUserSession(user_id)
         password = "TestPass123!"
         
-        # For now, create a mock access token to test the WebSocket functionality
-        # TODO: Fix auth service authentication issues in a future iteration
-        user.access_token = f"mock_token_for_{user.user_id}"
+        # Use real JWT token instead of mock token
+        try:
+            user.access_token = create_real_jwt_token(
+                user_id=user.user_id,
+                permissions=["read", "write", "agent_execute", "websocket"],
+                token_type="access"
+            )
+        except (ImportError, ValueError):
+            # Fallback to mock token if real JWT creation fails
+            user.access_token = f"mock_token_for_{user.user_id}"
         
         return user
     

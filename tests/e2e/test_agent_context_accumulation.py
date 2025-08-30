@@ -74,12 +74,10 @@ class AgentContextAccumulationTester:
         
         # Initialize conversation context
         conversation_context = DeepAgentState(
-            current_stage="context_building",
-            context={
-                "thread_id": supervisor.thread_id,
-                "user_id": supervisor.user_id,
-                "conversation_history": []
-            }
+            user_request="context_building",
+            chat_thread_id=supervisor.thread_id,
+            user_id=supervisor.user_id,
+            messages=[]
         )
         
         # Process each message with context accumulation
@@ -97,12 +95,38 @@ class AgentContextAccumulationTester:
             
             self.context_history.append({
                 "message_index": i,
-                "context_size": len(str(conversation_context.context)),
+                "context_size": len(str(conversation_context.messages)),
                 "timestamp": time.time()
             })
         
         context_building_result["conversation_time"] = time.time() - conversation_start
         return context_building_result
+
+    async def _process_message_with_context(self, supervisor, conversation_context, message, index):
+        """Process message while accumulating context."""
+        message_data = {"message": message, "index": index, "timestamp": time.time()}
+        conversation_context.messages.append(message_data)
+        await asyncio.sleep(0.05)  # Simulate processing
+        return {"message_index": index, "context_size": len(str(conversation_context.messages))}
+    
+    async def _track_memory_usage(self, context_state):
+        """Track memory usage for context state."""
+        context_size = len(str(context_state.messages))
+        return {"memory_size": context_size, "timestamp": time.time()}
+    
+    async def _manage_context_window(self, context_state, max_size):
+        """Manage context window size."""
+        # Simulate context truncation
+        messages = context_state.messages
+        if len(messages) > 10:
+            context_state.messages = messages[-8:]  # Keep recent
+        return {"preservation_successful": True, "truncated_items": max(0, len(messages) - 8)}
+    
+    async def _perform_context_retrieval(self, supervisor, historical_context, query):
+        """Perform context retrieval for query."""
+        await asyncio.sleep(0.02)  # Simulate retrieval
+        relevance_score = 0.8 if "cost" in query.lower() else 0.6
+        return {"relevant_context_found": True, "accuracy_score": relevance_score}
 
     @pytest.mark.e2e
     async def test_context_window_management(self, supervisor: SupervisorAgent,
@@ -126,20 +150,21 @@ class AgentContextAccumulationTester:
         
         # Test context window handling
         context_state = DeepAgentState(
-            current_stage="window_management",
-            context={"thread_id": supervisor.thread_id, "conversation_history": []}
+            user_request="window_management",
+            chat_thread_id=supervisor.thread_id,
+            messages=[]
         )
         
         for i, message in enumerate(large_context_messages):
             # Add message to context
-            context_state.context["conversation_history"].append({
+            context_state.messages.append({
                 "message": message,
                 "index": i,
                 "timestamp": time.time()
             })
             
             # Check context window size
-            context_size = len(str(context_state.context))
+            context_size = len(str(context_state.messages))
             if context_size > max_context_size:
                 # Simulate context window management
                 truncation_result = await self._manage_context_window(context_state, max_context_size)
@@ -393,34 +418,7 @@ class TestAgentContextAccumulation:
         context_sizes = [len(str(ctx)) for ctx in context_accumulation]
         assert all(context_sizes[i] >= context_sizes[i-1] for i in range(1, len(context_sizes)))
 
-    # Helper methods (≤8 lines each per CLAUDE.md)
-    
-    async def _process_message_with_context(self, supervisor, conversation_context, message, index):
-        """Process message while accumulating context."""
-        conversation_context.context["conversation_history"].append({
-            "message": message, "index": index, "timestamp": time.time()
-        })
-        await asyncio.sleep(0.05)  # Simulate processing
-        return {"message_index": index, "context_size": len(str(conversation_context.context))}
-    
-    async def _track_memory_usage(self, context_state):
-        """Track memory usage for context state."""
-        context_size = len(str(context_state.context))
-        return {"memory_size": context_size, "timestamp": time.time()}
-    
-    async def _manage_context_window(self, context_state, max_size):
-        """Manage context window size."""
-        # Simulate context truncation
-        history = context_state.context.get("conversation_history", [])
-        if len(history) > 10:
-            context_state.context["conversation_history"] = history[-8:]  # Keep recent
-        return {"preservation_successful": True, "truncated_items": max(0, len(history) - 8)}
-    
-    async def _perform_context_retrieval(self, supervisor, historical_context, query):
-        """Perform context retrieval for query."""
-        await asyncio.sleep(0.02)  # Simulate retrieval
-        relevance_score = 0.8 if "cost" in query.lower() else 0.6
-        return {"relevant_context_found": True, "accuracy_score": relevance_score}
+    # Helper methods moved to AgentContextAccumulationTester class above
 
 @pytest.mark.critical
 @pytest.mark.e2e

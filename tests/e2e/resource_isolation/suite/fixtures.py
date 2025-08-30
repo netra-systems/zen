@@ -10,7 +10,7 @@ import pytest
 import pytest_asyncio
 
 from tests.e2e.resource_isolation.suite.test_suite_core import (
-    ResourceIsolationTestSuite,
+    TestResourceIsolationSuite,
 )
 
 logger = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 @pytest_asyncio.fixture
 async def resource_isolation_suite():
     """Fixture providing a configured resource isolation test suite."""
-    suite = ResourceIsolationTestSuite()
+    suite = TestResourceIsolationSuite()
     
     try:
         await suite.initialize_test_environment()

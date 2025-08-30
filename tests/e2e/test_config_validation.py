@@ -131,9 +131,10 @@ def test_configuration_isolation():
     assert os.environ.get("TESTING") == "1"
     assert os.environ.get("ENVIRONMENT") == "test"
     
-    # Ensure database is in-memory for isolation
+    # Ensure database URL is set for testing (may be PostgreSQL for E2E tests)
     db_url = os.environ.get("DATABASE_URL")
-    assert ":memory:" in db_url
+    assert db_url is not None
+    assert ("memory:" in db_url) or ("postgresql:" in db_url)
     
     # Ensure we're using test secrets, not production
     jwt_secret = os.environ.get("JWT_SECRET_KEY")

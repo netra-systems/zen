@@ -38,6 +38,9 @@ from netra_backend.app.main import app
 from netra_backend.app.services.user_auth_service import UserAuthService as AuthService
 from netra_backend.app.services.user_service import UserService
 
+# Import test framework for real auth
+from test_framework.fixtures.auth import create_test_user_token, create_admin_token, create_real_jwt_token
+
 class TestNewUserRegistrationFlow:
     """Test new user registration flow from signup to first login."""
     
@@ -73,8 +76,8 @@ class TestNewUserRegistrationFlow:
         service.create_user = AsyncMock()
         # Mock: Generic component isolation for controlled unit testing
         service.verify_email = AsyncMock()
-        # Mock: Async component isolation for testing without real async operations
-        service.generate_token = AsyncMock(return_value="test_token_123")
+        # Use real JWT token generation for integration tests
+        service.generate_token = AsyncMock(return_value=create_test_user_token("test_user", use_real_jwt=True).token)
         # Mock: Async component isolation for testing without real async operations
         service.validate_token = AsyncMock(return_value=True)
         yield service
@@ -248,10 +251,11 @@ class TestNewUserRegistrationFlow:
         # Mock: Service component isolation for predictable testing behavior
         mock_user.check_password = MagicMock(return_value=True)
         
-        # Mock token generation
+        # Generate real tokens for integration testing
+        test_token = create_test_user_token("verified@example.com", use_real_jwt=True)
         mock_token = {
-            "access_token": "access_token_123",
-            "refresh_token": "refresh_token_123",
+            "access_token": test_token.token,
+            "refresh_token": f"refresh_{test_token.token}",
             "token_type": "bearer",
             "expires_in": 3600
         }

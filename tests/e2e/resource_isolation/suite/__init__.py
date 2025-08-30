@@ -11,11 +11,11 @@ from tests.e2e.resource_isolation.suite.fixtures import (
 )
 from tests.e2e.resource_isolation.suite.test_suite_core import (
     TEST_CONFIG,
-    ResourceIsolationTestSuite,
+    TestResourceIsolationSuite,
 )
 from tests.e2e.resource_isolation.suite.workload_generator import WorkloadGenerator
 
 __all__ = [
-    'ResourceIsolationTestSuite', 'TEST_CONFIG', 'TenantAgentManager',
+    'TestResourceIsolationSuite', 'TEST_CONFIG', 'TenantAgentManager',
     'WorkloadGenerator', 'resource_isolation_suite', 'tenant_agents'
 ]

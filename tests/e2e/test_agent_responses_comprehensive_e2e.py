@@ -28,7 +28,7 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 
-class TestAgentResponseer:
+class AgentResponseTester:
     """Helper class for agent response testing."""
     
     def __init__(self):

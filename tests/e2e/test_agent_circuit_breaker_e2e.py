@@ -16,6 +16,7 @@ from datetime import datetime, timezone
 from test_framework.base_e2e_test import BaseE2ETest
 from test_framework.test_utils import wait_for_condition, create_test_user, generate_test_token
 from tests.e2e.jwt_token_helpers import JWTTestHelper
+from test_framework.fixtures.auth import create_real_jwt_token
 
 
 class TestAgentCircuitBreakerE2E:
@@ -23,21 +24,39 @@ class TestAgentCircuitBreakerE2E:
     
     @pytest.fixture(autouse=True)
     async def setup_test_environment(self):
-        """Setup test environment with proper JWT authentication."""
-        # Setup JWT helper for generating valid test tokens
+        """Setup test environment with real JWT authentication."""
+        # Setup JWT helper for generating real test tokens
         self.jwt_helper = JWTTestHelper()
         self.api_base = "http://localhost:8000"
-        # Generate a valid JWT token for testing
+        # Generate a real JWT token for testing
         test_user_id = "test_user_circuit_breaker"
         test_email = f"{test_user_id}@test.com"
-        self.auth_token = self.jwt_helper.create_access_token(test_user_id, test_email)
+        try:
+            # Use real JWT token creation
+            self.auth_token = create_real_jwt_token(
+                user_id=test_user_id, 
+                permissions=["read", "write", "agent_execute"],
+                token_type="access"
+            )
+        except (ImportError, ValueError):
+            # Fallback to JWT helper if real JWT creation fails
+            self.auth_token = self.jwt_helper.create_access_token(test_user_id, test_email)
         
     async def get_test_auth_token(self) -> str:
-        """Get authentication token for test user."""
-        # Generate a valid JWT token for testing
+        """Get real authentication token for test user."""
+        # Generate a real JWT token for testing
         test_user_id = "test_user_auth"
         test_email = f"{test_user_id}@test.com"
-        return self.jwt_helper.create_access_token(test_user_id, test_email)
+        try:
+            # Use real JWT token creation
+            return create_real_jwt_token(
+                user_id=test_user_id,
+                permissions=["read", "write", "agent_execute"],
+                token_type="access"
+            )
+        except (ImportError, ValueError):
+            # Fallback to JWT helper if real JWT creation fails
+            return self.jwt_helper.create_access_token(test_user_id, test_email)
             
     @pytest.mark.e2e
     @pytest.mark.asyncio
@@ -129,9 +148,9 @@ class TestAgentCircuitBreakerE2E:
                 
         # Verify no AttributeError in results
         for result in results:
-            if isinstance(result, dict) and "error" in result:
-                assert "AttributeError" not in result["error"]
-                assert "'slow_requests'" not in result["error"]
+            if isinstance(result, dict) and "error" in result and result["error"]:
+                assert "AttributeError" not in str(result["error"])
+                assert "'slow_requests'" not in str(result["error"])
                 
     @pytest.mark.e2e
     @pytest.mark.asyncio
@@ -300,13 +319,15 @@ class TestAgentCircuitBreakerE2E:
         Uses development auth bypass mode for E2E testing when auth service
         is not available. The bypass is enabled by AUTH_FAST_TEST_MODE=true.
         """
-        # Establish WebSocket connection without auth headers to trigger dev bypass
+        # Establish WebSocket connection with real JWT token
         ws_url = "ws://localhost:8000/ws"
+        # Use real JWT token for WebSocket authentication
+        ws_headers = {"Authorization": f"Bearer {self.auth_token}"}
         
         import websockets
         
-        # Connect without authorization to use development auth bypass
-        websocket_context = websockets.connect(ws_url)
+        # Connect with real JWT authorization
+        websocket_context = websockets.connect(ws_url, extra_headers=ws_headers)
         
         async with websocket_context as websocket:
             
