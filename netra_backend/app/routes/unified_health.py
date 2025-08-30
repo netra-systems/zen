@@ -15,6 +15,8 @@ router = APIRouter(tags=["Health"])
 
 
 @router.get("/health")
+@router.head("/health")
+@router.options("/health")
 async def get_health(
     service: Optional[str] = Query(None, description="Specific service to check"),
     details: bool = Query(True, description="Include detailed information")
@@ -100,6 +102,8 @@ async def get_health(
 
 
 @router.get("/health/live")
+@router.head("/health/live")
+@router.options("/health/live")
 async def get_liveness(
     response: Response,
     service: Optional[str] = Query(None, description="Specific service to check")
@@ -138,6 +142,8 @@ async def get_liveness(
 
 
 @router.get("/health/ready")
+@router.head("/health/ready")
+@router.options("/health/ready")
 async def get_readiness(
     response: Response,
     service: Optional[str] = Query(None, description="Specific service to check")
@@ -179,6 +185,8 @@ async def get_readiness(
 
 
 @router.get("/health/component/{component_name}")
+@router.head("/health/component/{component_name}")
+@router.options("/health/component/{component_name}")
 async def get_component_health(
     component_name: str,
     response: Response,

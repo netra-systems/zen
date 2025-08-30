@@ -34,17 +34,92 @@ import pytest
 from tests.clients import TestClientFactory
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 
-# Enable real services for this test module
-pytestmark = pytest.mark.skipif(
-    os.environ.get("USE_REAL_SERVICES", "false").lower() != "true",
-    reason="Real services disabled (set USE_REAL_SERVICES=true)"
-)
+# CRITICAL: This test REQUIRES real services - NO MOCKS ALLOWED per CLAUDE.md
+# Import E2E enforcement to ensure real services
+from tests.e2e.enforce_real_services import E2EServiceValidator
+
+# Enforce real services immediately on import
+E2EServiceValidator.enforce_real_services()
+
+# Validate critical dependencies at module level
+def _validate_real_service_requirements():
+    """Validate real service requirements and fail fast if missing."""
+    missing_deps = []
+    
+    # Check for real LLM capability
+    if not any([
+        os.environ.get("OPENAI_API_KEY"),
+        os.environ.get("ANTHROPIC_API_KEY"), 
+        os.environ.get("GEMINI_API_KEY"),
+        os.environ.get("GOOGLE_API_KEY")
+    ]):
+        missing_deps.append("LLM API keys (OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY, or GOOGLE_API_KEY)")
+    
+    # Ensure real LLM is enabled
+    if os.environ.get("USE_REAL_LLM", "false").lower() != "true":
+        os.environ["USE_REAL_LLM"] = "true"
+        os.environ["TEST_USE_REAL_LLM"] = "true"
+    
+    # Set the JWT secret for backend compatibility
+    os.environ["JWT_SECRET_KEY"] = "rsWwwvq8X6mCSuNv-TMXHDCfb96Xc-Dbay9MZy6EDCU"
+    
+    # Check critical environment variables
+    if not os.environ.get("JWT_SECRET_KEY"):
+        missing_deps.append("JWT_SECRET_KEY for authentication")
+    
+    if missing_deps:
+        error_msg = (
+            "CRITICAL: Real Agent Pipeline test requires real services but dependencies are missing:\n"
+            + "\n".join(f"  - {dep}" for dep in missing_deps) +
+            "\n\nThis test validates the complete agent pipeline with real LLM APIs."
+            "\nPer CLAUDE.md: MOCKS ARE FORBIDDEN in E2E tests."
+            "\nEither provide the required dependencies or fix the underlying service configuration."
+        )
+        raise RuntimeError(error_msg)
+
+# Validate requirements on import
+_validate_real_service_requirements()
 
 
 @pytest.fixture
-async def pipeline_tester(real_services):
-    """Create agent pipeline tester with real services."""
-    return AgentPipelineExecutioner(real_services)
+async def pipeline_tester():
+    """Create agent pipeline tester with real services (no dev_launcher dependency)."""
+    from tests.clients import TestClientFactory
+    from tests.e2e.jwt_token_helpers import JWTTestHelper
+    
+    # Force factory to use fallback URLs by bypassing discovery
+    factory = TestClientFactory()
+    factory.discovery = None  # Force None to use fallback URLs
+    
+    # Create clients directly
+    auth_client = await factory.create_auth_client()
+    
+    # Create test user and get token
+    test_user_data = await auth_client.create_test_user()
+    token = test_user_data["token"]
+    
+    # Create authenticated clients
+    backend_client = await factory.create_backend_client(token=token)
+    
+    class DirectRealServiceContext:
+        def __init__(self):
+            self.auth_client = auth_client
+            self.backend_client = backend_client
+            self.factory = factory
+            self.test_user = test_user_data
+        
+        async def create_websocket_client(self, token: Optional[str] = None):
+            """Create WebSocket client with optional custom token."""
+            ws_token = token or self.test_user["token"]
+            return await self.factory.create_websocket_client(ws_token)
+    
+    context = DirectRealServiceContext()
+    
+    try:
+        yield AgentPipelineExecutioner(context)
+    finally:
+        # Cleanup
+        await factory.cleanup()
 
 
 @pytest.fixture
@@ -82,7 +157,7 @@ class AgentPipelineExecutioner:
             if not ws_client:
                 raise ValueError("Failed to create WebSocket client")
             
-            connected = await ws_client.connect()
+            connected = await ws_client.connect(token=token)
             
             setup_time = time.time() - start_time
             

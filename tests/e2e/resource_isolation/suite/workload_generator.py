@@ -22,6 +22,13 @@ class WorkloadGenerator:
     async def generate_workload(self, agent: TenantAgent, workload_type: str, 
                               duration: float, intensity: str = "normal") -> Dict[str, Any]:
         """Generate workload for a tenant agent."""
+        # Check if we're in offline mode
+        import os
+        offline_mode = os.getenv("CPU_ISOLATION_OFFLINE_MODE", "false").lower() == "true"
+        
+        if offline_mode:
+            return await self._generate_offline_workload(agent, workload_type, duration, intensity)
+        
         if not agent.connection:
             raise RuntimeError(f"No connection for agent {agent.tenant_id}")
         
@@ -35,6 +42,109 @@ class WorkloadGenerator:
             return await self._generate_mixed_workload(agent, duration)
         else:
             raise ValueError(f"Unknown workload type: {workload_type}")
+
+    async def _generate_offline_workload(self, agent: TenantAgent, workload_type: str, 
+                                       duration: float, intensity: str = "normal") -> Dict[str, Any]:
+        """Generate CPU workload without WebSocket connections for offline testing."""
+        import threading
+        import math
+        
+        logger.info(f"Generating offline {workload_type} workload for {agent.tenant_id} (duration: {duration}s, intensity: {intensity})")
+        
+        # Configure CPU workload based on type and intensity
+        workload_config = self._get_offline_workload_config(workload_type, intensity)
+        
+        start_time = time.time()
+        operations_performed = 0
+        
+        # Create CPU-intensive work in separate thread to simulate agent processing
+        def cpu_intensive_work():
+            nonlocal operations_performed
+            end_time = start_time + duration
+            
+            while time.time() < end_time:
+                # Perform CPU-intensive operations based on configuration
+                for _ in range(workload_config["operations_per_cycle"]):
+                    # Simulate different types of CPU work
+                    if workload_type == "heavy" or workload_type == "noisy":
+                        # Heavy mathematical operations
+                        result = sum(math.sqrt(i) for i in range(workload_config["compute_size"]))
+                        operations_performed += workload_config["compute_size"]
+                    else:
+                        # Normal workload - lighter operations
+                        result = sum(i * 2 for i in range(workload_config["compute_size"]))
+                        operations_performed += workload_config["compute_size"]
+                
+                # Control CPU usage intensity
+                time.sleep(workload_config["sleep_between_cycles"])
+        
+        # Run workload in thread to avoid blocking the event loop
+        workload_thread = threading.Thread(target=cpu_intensive_work, daemon=True)
+        workload_thread.start()
+        
+        # Monitor workload progress with timeout
+        timeout_time = start_time + duration + 5  # 5 second grace period
+        while workload_thread.is_alive() and time.time() < timeout_time:
+            await asyncio.sleep(0.5)  # Less frequent checks to reduce CPU overhead
+            
+        # If thread is still running after timeout, continue anyway
+        if workload_thread.is_alive():
+            logger.warning(f"Workload thread for {agent.tenant_id} still running after timeout, continuing with test")
+        
+        actual_duration = time.time() - start_time
+        
+        return {
+            "workload_type": f"{workload_type}_offline",
+            "intensity": intensity,
+            "duration": actual_duration,
+            "operations_performed": operations_performed,
+            "operations_per_second": operations_performed / actual_duration if actual_duration > 0 else 0,
+            "mode": "offline_cpu_simulation",
+            "tenant_id": agent.tenant_id
+        }
+    
+    def _get_offline_workload_config(self, workload_type: str, intensity: str) -> Dict[str, Any]:
+        """Get configuration for offline workload generation."""
+        base_configs = {
+            "normal": {
+                "operations_per_cycle": 100,
+                "compute_size": 1000,
+                "sleep_between_cycles": 0.01
+            },
+            "heavy": {
+                "operations_per_cycle": 1000,
+                "compute_size": 5000,
+                "sleep_between_cycles": 0.001
+            },
+            "noisy": {
+                "operations_per_cycle": 2000,
+                "compute_size": 10000,
+                "sleep_between_cycles": 0.0001
+            },
+            "mixed": {
+                "operations_per_cycle": 500,
+                "compute_size": 2500,
+                "sleep_between_cycles": 0.005
+            }
+        }
+        
+        # Intensity multipliers
+        intensity_multipliers = {
+            "low": 0.5,
+            "normal": 1.0,
+            "high": 2.0,
+            "extreme": 4.0
+        }
+        
+        config = base_configs.get(workload_type, base_configs["normal"]).copy()
+        multiplier = intensity_multipliers.get(intensity, 1.0)
+        
+        # Apply intensity scaling
+        config["operations_per_cycle"] = int(config["operations_per_cycle"] * multiplier)
+        config["compute_size"] = int(config["compute_size"] * multiplier)
+        config["sleep_between_cycles"] = max(0.0001, config["sleep_between_cycles"] / multiplier)
+        
+        return config
 
     async def _generate_normal_workload(self, agent: TenantAgent, duration: float) -> Dict[str, Any]:
         """Generate normal workload pattern."""

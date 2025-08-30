@@ -89,21 +89,18 @@ async def get_current_user(
     user = result.scalar_one_or_none()
     
     if not user:
-        # In development mode, create and persist a dev user
+        # Auto-create users from JWT claims in all environments
+        from netra_backend.app.services.user_service import user_service
+        
+        # Extract user info from JWT claims
+        email = validation_result.get("email", f"user_{user_id}@example.com")
+        
+        # Create user from JWT claims
+        user = await user_service.get_or_create_dev_user(db, email=email, user_id=user_id)
+        
         from netra_backend.app.config import get_config
         config = get_config()
-        if config.environment == "development":
-            from netra_backend.app.services.user_service import user_service
-            
-            # Use centralized dev user creation
-            email = validation_result.get("email", "dev@example.com")
-            user = await user_service.get_or_create_dev_user(db, email=email, user_id=user_id)
-            logger.warning(f"Using dev user: {user.email}")
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found",
-            )
+        logger.info(f"Auto-created user from JWT: {user.email} (env: {config.environment})")
     
     return user
 

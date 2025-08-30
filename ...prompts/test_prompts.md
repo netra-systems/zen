@@ -29,11 +29,9 @@ REPEAT each step at least 100 times or still all tests pass.
 for each item, one at a time, spawn a new sub agent team
 do not bulk edit files, do one file at a time, run the tests , fix system under test
 
-- USING UNIFIED TEST RUNNER: TODO LIst track all tests in e2e\frontend\FRONTEND_TEST_COVERAGE_REPORT.md  STEP: One at a time: spawn a new sub agent: run the test and fix the system under test
-REPEAT each STEP at least 100 times or still all tests pass.
+#1 USING UNIFIED TEST RUNNER: TODO List track all tests in e2e\frontend\FRONTEND_TEST_COVERAGE_REPORT.md  STEP: One at a time: spawn a new sub agent: run the test and fix the system under test
+REPEAT each STEP at least 100 times or untill all tests pass.
 
-
-USING UNIFIED TEST RUNNER:  STEP: Run tests most likely to fail and fail the fastest first.  One at a time, step
-  through
-      each failure. spawn a new sub agent. Run the test. Fix the SUT.
-  REPEAT each STEP at least 100 times or still all tests pass.
+# 2
+USING UNIFIED TEST RUNNER:  STEP: Run tests most likely to fail and fail the fastest first.  One at a time, step  through each failure. spawn a new sub agent. Run the test. Fix the SUT.
+  REPEAT each STEP at least 100 times or untill all tests pass.

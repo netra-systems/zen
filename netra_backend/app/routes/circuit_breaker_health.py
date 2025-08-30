@@ -136,6 +136,8 @@ async def _get_llm_health_safe() -> Dict[str, Any]:
         handle_circuit_breaker_error(e, "LLM health")
 
 @router.get("/health/llm")
+@router.head("/health/llm")
+@router.options("/health/llm")
 async def get_llm_health(current_user: Dict = Depends(get_current_user)) -> Dict[str, Any]:
     """Get LLM circuit breaker health (Authenticated)."""
     return await _get_llm_health_safe()
@@ -156,6 +158,8 @@ async def _get_database_health_safe() -> Dict[str, Any]:
         handle_circuit_breaker_error(e, "database health")
 
 @router.get("/health/database")
+@router.head("/health/database")
+@router.options("/health/database")
 async def get_database_health(current_user: Dict = Depends(get_current_user)) -> Dict[str, Any]:
     """Get database circuit breaker health (Authenticated)."""
     return await _get_database_health_safe()
@@ -176,6 +180,8 @@ async def _get_external_api_health_safe() -> Dict[str, Any]:
         handle_circuit_breaker_error(e, "external API health")
 
 @router.get("/health/external-apis")
+@router.head("/health/external-apis")
+@router.options("/health/external-apis")
 async def get_external_api_health(current_user: Dict = Depends(get_current_user)) -> Dict[str, Any]:
     """Get external API circuit breaker health (Authenticated)."""
     return await _get_external_api_health_safe()
@@ -198,6 +204,8 @@ async def _get_health_summary_safe() -> Dict[str, Any]:
         handle_circuit_breaker_error(e, "health summary")
 
 @router.get("/health/summary")
+@router.head("/health/summary")
+@router.options("/health/summary")
 async def get_health_summary(current_user: Dict = Depends(get_current_user)) -> Dict[str, Any]:
     """Get overall circuit breaker health summary (Authenticated)."""
     return await _get_health_summary_safe()

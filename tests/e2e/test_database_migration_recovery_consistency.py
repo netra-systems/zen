@@ -151,7 +151,7 @@ class TestDatabaseConfig:
 class TestDatabaseMigrationConsistencyer:
     """Comprehensive database migration and consistency tester."""
     
-    def __init__(self, config: DatabaseTestConfig):
+    def __init__(self, config: TestDatabaseConfig):
         self.config = config
         self.project_root = config.project_root or self._detect_project_root()
         self.metrics = MigrationTestMetrics(test_name="database_migration_consistency")
@@ -957,7 +957,7 @@ class TestDatabaseMigrationRecoveryConsistency:
     @pytest.fixture
     def database_config(self):
         """Create database test configuration."""
-        return DatabaseTestConfig(
+        return TestDatabaseConfig(
             test_postgresql=True,
             test_redis=True,
             test_clickhouse=False,  # Skip ClickHouse by default
@@ -1024,7 +1024,7 @@ class TestDatabaseMigrationRecoveryConsistency:
 
 async def run_database_migration_test():
     """Standalone function to run database migration test.""" 
-    config = DatabaseTestConfig()
+    config = TestDatabaseConfig()
     tester = DatabaseMigrationConsistencyTester(config)
     return await tester.run_comprehensive_migration_test()
 

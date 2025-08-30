@@ -9,6 +9,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 # from netra_backend.app.monitoring.metrics_collector import PerformanceMetric # Possibly broken comprehension
 from typing import Any, Dict, List, Optional, Set, Union
+from unittest.mock import MagicMock
 import asyncio
 import asyncpg
 import httpx
@@ -510,7 +511,7 @@ class TestConcurrentOrchestrator:
         for user in users:
             # For testing, just mock the websocket connection
             # Mock: Generic component isolation for controlled unit testing
-            user.websocket_client = MagicNone  # TODO: Use real service instead of Mock
+            user.websocket_client = MagicMock()  # TODO: Use real service instead of Mock
             user.startup_metrics['websocket_connection_time'] = 0.1
             successful_connections += 1
         
@@ -764,7 +765,7 @@ async def test_cross_contamination_detection(
 
     logger.info("Starting Test Case 2: Cross-Contamination Detection")
     
-    orchestrator = ConcurrentTestOrchestrator(concurrent_test_environment)
+    orchestrator = TestConcurrentOrchestrator(concurrent_test_environment)
     
     # Inject contamination markers and establish connections
 
@@ -819,7 +820,7 @@ async def test_state_persistence_isolation(
 
     logger.info("Starting Test Case 5: State Persistence Isolation")
     
-    orchestrator = ConcurrentTestOrchestrator(concurrent_test_environment)
+    orchestrator = TestConcurrentOrchestrator(concurrent_test_environment)
     
     # Establish connections and create persistent states
 

@@ -16,14 +16,18 @@ import '@testing-library/jest-dom';
 
 // Mock Next.js navigation
 const mockPush = jest.fn();
-const mockSearchParams = new Map();
+let mockSearchParams = new Map();
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
     push: mockPush,
   }),
   useSearchParams: () => ({
-    get: (key: string) => mockSearchParams.get(key) || null,
+    get: (key: string) => {
+      const value = mockSearchParams.get(key) || null;
+      console.log(`useSearchParams mock called for key '${key}', returning:`, value);
+      return value;
+    },
   }),
 }));
 
@@ -73,13 +77,10 @@ const mockSetTimeout = jest.fn((callback: () => void, delay: number) => {
   const timeoutInfo = { callback, delay, id };
   timeoutCallbacks.push(timeoutInfo);
   
-  // Execute with real timeout but track it
-  const realTimeout = originalSetTimeout(() => {
-    callback();
-    timeoutCallbacks = timeoutCallbacks.filter(t => t.id !== id);
-  }, delay);
+  console.log(`setTimeout called with delay: ${delay}ms, id: ${id}`);
   
-  return realTimeout;
+  // Use fake timer compatible approach
+  return id;
 });
 
 describe('OAuth Callback Timing - Focused Challenges', () => {
@@ -99,7 +100,7 @@ describe('OAuth Callback Timing - Focused Challenges', () => {
     // Reset all mocks and state
     jest.clearAllMocks();
     mockLocalStorage.clear();
-    mockSearchParams.clear();
+    mockSearchParams = new Map(); // Create fresh Map
     mockPush.mockReset();
     mockDispatchEvent.mockClear();
     timeoutCallbacks = [];
@@ -138,8 +139,14 @@ describe('OAuth Callback Timing - Focused Challenges', () => {
     const testToken = 'test_jwt_token_12345';
     const testRefreshToken = 'test_refresh_token_67890';
     
+    // CRITICAL: Set tokens BEFORE rendering
     mockSearchParams.set('token', testToken);
     mockSearchParams.set('refresh', testRefreshToken);
+    
+    console.log('TEST DEBUG: searchParams after setting:', {
+      token: mockSearchParams.get('token'),
+      refresh: mockSearchParams.get('refresh')
+    });
 
     // Track storage events specifically
     const storageEvents: StorageEvent[] = [];

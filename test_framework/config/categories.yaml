@@ -130,6 +130,7 @@ categories:
     - api
     - frontend
     requires_real_services: true
+    requires_real_llm: true
     parallel_safe: false
     max_parallel_instances: 2
     conflicts:
@@ -147,6 +148,7 @@ categories:
     dependencies:
     - unit
     requires_real_services: false
+    requires_real_llm: true
     parallel_safe: true
     max_parallel_instances: 4
     tags:
@@ -164,6 +166,7 @@ categories:
     - integration
     - api
     requires_real_services: true
+    requires_real_llm: true
     requires_frontend: true
     requires_backend: true
     requires_database: true

@@ -417,8 +417,9 @@ class TestAgentLifecycleEventCore:
     async def _create_test_token(self, user_id: str) -> str:
         """Create test JWT token."""
         try:
-            from netra_backend.app.auth_integration.auth import create_access_token
-            return await create_access_token(data={"sub": f"test-{user_id}"})
+            from tests.e2e.jwt_token_helpers import JWTTestHelper
+            jwt_helper = JWTTestHelper()
+            return jwt_helper.create_access_token(user_id, f"{user_id}@test.com")
         except ImportError:
             return f"mock-token-{user_id}"
     

@@ -12,11 +12,14 @@ class DatabaseError(NetraException):
         self.query = query
         self._category = ErrorCategory.DATABASE
         
+        # Remove any conflicting parameters from kwargs
+        filtered_kwargs = {k: v for k, v in kwargs.items() if k not in ['code', 'severity']}
+        
         super().__init__(
             message=message or "Database operation failed",
             code=ErrorCode.DATABASE_QUERY_FAILED,
             severity=ErrorSeverity.HIGH,
-            **kwargs
+            **filtered_kwargs
         )
     
     @property
@@ -34,11 +37,13 @@ class DatabaseConnectionError(DatabaseError):
     """Raised when database connection fails."""
     
     def __init__(self, message: str = None, **kwargs):
+        # Remove any conflicting parameters from kwargs
+        filtered_kwargs = {k: v for k, v in kwargs.items() if k not in ['code', 'severity']}
         super().__init__(
             message=message or "Failed to connect to database",
             code=ErrorCode.DATABASE_CONNECTION_FAILED,
             severity=ErrorSeverity.CRITICAL,
-            **kwargs
+            **filtered_kwargs
         )
 
 
@@ -47,10 +52,15 @@ class RecordNotFoundError(DatabaseError):
     
     def __init__(self, resource: str = None, identifier: str = None, message: str = None, **kwargs):
         formatted_message, details = self._build_record_info(resource, identifier, message)
-        NetraException.__init__(
-            self, message=formatted_message, code=ErrorCode.RECORD_NOT_FOUND,
-            severity=ErrorSeverity.MEDIUM, user_message="The requested item was not found",
-            details=details, **kwargs
+        # Remove any conflicting parameters from kwargs
+        filtered_kwargs = {k: v for k, v in kwargs.items() if k not in ['code', 'severity', 'user_message', 'details']}
+        super().__init__(
+            message=formatted_message, 
+            code=ErrorCode.RECORD_NOT_FOUND,
+            severity=ErrorSeverity.MEDIUM, 
+            user_message="The requested item was not found",
+            details=details, 
+            **filtered_kwargs
         )
     
     def _build_record_info(self, resource: str, identifier: str, message: str) -> tuple:
@@ -64,12 +74,14 @@ class RecordAlreadyExistsError(DatabaseError):
     """Raised when attempting to create a duplicate record."""
     
     def __init__(self, message: str = None, **kwargs):
+        # Remove any conflicting parameters from kwargs
+        filtered_kwargs = {k: v for k, v in kwargs.items() if k not in ['code', 'severity', 'user_message']}
         super().__init__(
             message=message or "Record already exists",
             code=ErrorCode.RECORD_ALREADY_EXISTS,
             severity=ErrorSeverity.MEDIUM,
             user_message="This item already exists",
-            **kwargs
+            **filtered_kwargs
         )
 
 
@@ -77,9 +89,11 @@ class DatabaseConstraintError(DatabaseError):
     """Raised when a database constraint is violated."""
     
     def __init__(self, message: str = None, **kwargs):
+        # Remove any conflicting parameters from kwargs
+        filtered_kwargs = {k: v for k, v in kwargs.items() if k not in ['code', 'severity']}
         super().__init__(
             message=message or "Database constraint violation",
             code=ErrorCode.DATABASE_CONSTRAINT_VIOLATION,
             severity=ErrorSeverity.HIGH,
-            **kwargs
+            **filtered_kwargs
         )

@@ -32,8 +32,8 @@ class WebSocketReliabilityTester:
     
     def __init__(self):
         self.base_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
-        self.api_url = os.getenv("API_URL", "http://localhost:8001")
-        self.ws_url = os.getenv("WS_URL", "ws://localhost:8001")
+        self.api_url = os.getenv("API_URL", "http://localhost:8000")
+        self.ws_url = os.getenv("WS_URL", "ws://localhost:8000")
         self.connections = []
         self.received_messages = []
         self.connection_states = {}
@@ -43,9 +43,16 @@ class WebSocketReliabilityTester:
         connection_id = connection_id or str(uuid.uuid4())
         
         try:
-            ws_endpoint = f"{self.ws_url}/ws?token={token}"
+            ws_endpoint = f"{self.ws_url}/ws"
+            
+            # Use subprotocol authentication method - encode token as base64url
+            import base64
+            token_b64 = base64.urlsafe_b64encode(f"Bearer {token}".encode()).decode().rstrip('=')
+            subprotocol = f"jwt.{token_b64}"
+            
             connection = await websockets.connect(
                 ws_endpoint,
+                subprotocols=[subprotocol],
                 ping_interval=20,
                 ping_timeout=10
             )
@@ -107,7 +114,8 @@ class TestFrontendWebSocketReliability:
     async def setup_tester(self):
         """Setup test harness"""
         self.tester = WebSocketReliabilityTester()
-        self.test_token = create_real_jwt_token("ws-test-user", ["user"])
+        # Create token with extended expiration for longer tests (2 hours)
+        self.test_token = create_real_jwt_token("ws-test-user", ["user"], expires_in=7200)
         yield
         await self.tester.cleanup()
         
@@ -117,7 +125,8 @@ class TestFrontendWebSocketReliability:
         connection = await self.tester.create_ws_connection(self.test_token, "test-46")
         
         assert connection is not None
-        assert connection.open
+        # Check if connection is open (websockets library API change)
+        assert connection.state.name == "OPEN"
         
         # Send a test message
         await connection.send(json.dumps({
@@ -151,7 +160,7 @@ class TestFrontendWebSocketReliability:
             new_connection = await self.tester.create_ws_connection(self.test_token, f"{connection_id}-reconnect")
             
             assert new_connection is not None
-            assert new_connection.open
+            assert new_connection.state.name == "OPEN"
             
             monitor_task.cancel()
             
@@ -194,7 +203,7 @@ class TestFrontendWebSocketReliability:
                 await asyncio.sleep(10)
                 
                 # Connection should still be open
-                assert connection.open
+                assert connection.state.name == "OPEN"
                 
     @pytest.mark.asyncio
     async def test_50_websocket_concurrent_connections(self):
@@ -210,7 +219,7 @@ class TestFrontendWebSocketReliability:
                 
         # All connections should be open
         assert len(connections) >= 2
-        assert all(conn.open for conn in connections)
+        assert all(conn.state.name == "OPEN" for conn in connections)
         
         # Send message on each connection
         for i, conn in enumerate(connections):
@@ -233,7 +242,7 @@ class TestFrontendWebSocketReliability:
             start_time = time.time()
             
             while time.time() - start_time < 30:
-                if not connection.open:
+                if not connection.state.name == "OPEN":
                     break
                     
                 # Send keepalive every 10 seconds
@@ -250,7 +259,7 @@ class TestFrontendWebSocketReliability:
                 
             # Connection should still be open with keepalives
             # or closed gracefully
-            assert connection.open or connection.closed
+            assert connection.state.name == "OPEN" or connection.closed
             
     @pytest.mark.asyncio
     async def test_52_websocket_backpressure_handling(self):
@@ -435,7 +444,7 @@ class TestFrontendWebSocketReliability:
                         await connection.send(json.dumps(scenario))
                         
                     # Connection should survive
-                    assert connection.open
+                    assert connection.state.name == "OPEN"
                     
                 except Exception:
                     # Should handle gracefully
@@ -488,7 +497,7 @@ class TestFrontendWebSocketReliability:
             )
             
             # Should either accept or reject based on CORS policy
-            if connection.open:
+            if connection.state.name == "OPEN":
                 await connection.close()
                 assert True  # CORS allows
             else:

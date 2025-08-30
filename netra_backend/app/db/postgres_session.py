@@ -165,7 +165,7 @@ async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
     
     # Delegate to DatabaseManager via the single source of truth
     from netra_backend.app.database import get_db
-    async for session in get_db():
+    async with get_db() as session:
         try:
             # Mark connection as healthy on successful completion
             try:

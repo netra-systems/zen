@@ -442,10 +442,11 @@ class RealServicesManager:
                 "email": f"{user_id}@test.example.com",
                 "iat": int(now.timestamp()),
                 "exp": int((now + timedelta(seconds=expiry_seconds)).timestamp()),
-                "iss": "netra-test-auth",
+                "iss": "netra-auth-service",  # Required issuer claim for auth service
                 "aud": "netra-backend",
                 "permissions": ["read", "write"],
-                "token_type": "access"
+                "token_type": "access",
+                "jti": str(uuid.uuid4())  # Required JWT ID for replay protection
             }
             
             token = jwt.encode(payload, jwt_secret, algorithm="HS256")

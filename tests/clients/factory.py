@@ -90,10 +90,12 @@ class TestClientFactory:
             WebSocketTestClient configured for real WebSocket connection
         """
         if self.discovery is not None:
-            ws_url = await self.discovery.get_websocket_url("backend", token=token)
+            # Use discovery to get WebSocket URL without token parameter
+            info = await self.discovery.get_service_info("backend")
+            ws_url = info.base_url.replace("http://", "ws://").replace("https://", "wss://") + "/websocket"
         else:
-            # Fallback URL when discovery is unavailable
-            ws_url = f"ws://localhost:8000/websocket?token={token}"
+            # Fallback URL when discovery is unavailable - no token in URL
+            ws_url = "ws://localhost:8000/websocket"
             logger.warning("Using fallback WebSocket URL - dev_launcher discovery unavailable")
             
         client = WebSocketTestClient(url=ws_url)
@@ -129,7 +131,7 @@ class TestClientFactory:
         auth_client = await self.create_auth_client()
         token = await auth_client.login(email, password)
         ws_client = await self.create_websocket_client(token)
-        await ws_client.connect()
+        await ws_client.connect(token=token)  # Pass token to connect method
         return ws_client
         
     async def cleanup(self) -> None:

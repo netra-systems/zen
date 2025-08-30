@@ -63,7 +63,11 @@ export const setupMinimalMocks = () => {
       isTimeout: false,
       retryCount: 0,
       isCircuitOpen: false,
-      handleSend: jest.fn().mockResolvedValue(undefined),
+      handleSend: jest.fn().mockImplementation((params) => {
+        // Call mockSendMessage when handleSend is called
+        mockSendMessage(params);
+        return Promise.resolve(undefined);
+      }),
       retry: jest.fn(),
       reset: jest.fn()
     })

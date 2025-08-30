@@ -63,7 +63,7 @@ from netra_backend.app.schemas.user_plan import PlanTier
 # E2E test helpers
 from tests.e2e.helpers.auth.auth_service_helpers import AuthServiceHelper
 from tests.e2e.helpers.core.unified_flow_helpers import UnifiedFlowHelper
-from tests.e2e.helpers.websocket.websocket_test_helpers import WebSocketTestHelper
+from tests.e2e.helpers.websocket.websocket_test_helpers import WebSocketTestManager
 from tests.e2e.real_services_manager import RealServicesManager
 from tests.e2e.agent_conversation_helpers import (
     AgentConversationTestCore,

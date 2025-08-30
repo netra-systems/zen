@@ -40,70 +40,39 @@ class SecurityResponseMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Process request and secure responses.
         
-        Enhanced with async generator protection to prevent
-        'aclose(): asynchronous generator is already running' errors.
+        Completely rewritten to avoid async generator protocol issues.
+        Uses a defensive approach with minimal exception handling.
         """
-        import asyncio
         
+        # CRITICAL FIX: Skip middleware for health checks to prevent startup blocking
+        if request.url.path in ["/health", "/health/live", "/health/ready"]:
+            return await call_next(request)
+        
+        # For all other paths, use a simplified approach that avoids async generator issues
         try:
-            # CRITICAL FIX: Skip middleware for health checks to prevent startup blocking
-            if request.url.path in ["/health", "/health/live", "/health/ready"]:
-                return await call_next(request)
-                
-            # Debug logging to see if middleware is being called
-            logger.debug(f"SecurityResponseMiddleware processing: {request.url.path}")
-            
-            # CRITICAL FIX: Use shield to protect response handling from cancellation
-            # This prevents async generator corruption during response processing
-            response = await asyncio.shield(call_next(request))
-            
-            # Debug logging for response
-            logger.debug(f"Response for {request.url.path}: status={response.status_code}, is_api={self._is_api_endpoint(request.url.path)}, has_auth={self._has_valid_auth(request)}")
-            
-            # Security check: convert 404/405 to 401 for unauthenticated API requests
-            if (response.status_code in [404, 405] and 
-                self._is_api_endpoint(request.url.path) and 
-                not self._is_excluded_from_auth(request.url.path) and
-                not self._has_valid_auth(request)):
-                
-                logger.warning(f"Converting HTTP {response.status_code} to 401 for protected endpoint: {request.url.path}")
-                
-                # CRITICAL FIX: Ensure proper response cleanup for streaming responses
-                # Close any potential async generators in the original response
-                if hasattr(response, 'body_iterator') and hasattr(response.body_iterator, 'aclose'):
-                    try:
-                        await response.body_iterator.aclose()
-                    except RuntimeError:
-                        # Generator already closed, ignore
-                        pass
-                
-                return JSONResponse(
-                    status_code=401,
-                    content={"error": "authentication_failed", "message": "Authentication required"},
-                    headers={"WWW-Authenticate": "Bearer"}
-                )
-            
-            return response
-            
-        except asyncio.CancelledError:
-            # CRITICAL FIX: Handle task cancellation gracefully
-            logger.warning(f"SecurityResponseMiddleware cancelled for {request.url.path}")
-            
-            # Return a basic response to prevent generator corruption
-            return JSONResponse(
-                status_code=503,
-                content={"error": "service_unavailable", "message": "Request cancelled"}
-            )
-            
+            response = await call_next(request)
         except Exception as e:
-            # CRITICAL FIX: Handle middleware exceptions gracefully to prevent async generator issues
-            logger.error(f"SecurityResponseMiddleware error for {request.url.path}: {e}")
+            # Log the exception but don't try to handle it - let it propagate
+            # This avoids async generator context manager issues
+            logger.warning(f"SecurityResponseMiddleware bypassed due to exception: {e}")
+            raise
             
-            # Return a basic error response instead of letting the exception propagate
+        # Only apply security transformation for successful responses  
+        # Avoid any complex exception handling that could interfere with async generators
+        if (response.status_code in [404, 405] and 
+            self._is_api_endpoint(request.url.path) and 
+            not self._is_excluded_from_auth(request.url.path) and
+            not self._has_valid_auth(request)):
+            
+            logger.info(f"Converting HTTP {response.status_code} to 401 for protected endpoint: {request.url.path}")
+            
             return JSONResponse(
-                status_code=500,
-                content={"error": "internal_error", "message": "Security middleware error"}
+                status_code=401,
+                content={"error": "authentication_failed", "message": "Authentication required"},
+                headers={"WWW-Authenticate": "Bearer"}
             )
+        
+        return response
     
     def _is_api_endpoint(self, path: str) -> bool:
         """Check if path is an API endpoint that should be protected."""

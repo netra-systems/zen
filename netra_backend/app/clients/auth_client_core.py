@@ -687,8 +687,9 @@ class AuthServiceClient:
             import jwt
             import os
             
-            # Use same secret as test JWT creation
-            secret = os.getenv("JWT_SECRET", "test_secret_key")
+            # Use same secret loading logic as backend middleware for consistency
+            from netra_backend.app.core.configuration.unified_secrets import get_jwt_secret
+            secret = get_jwt_secret()
             
             # Decode the JWT token
             decoded = jwt.decode(jwt_token, secret, algorithms=["HS256"], options={"verify_exp": False})

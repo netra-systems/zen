@@ -28,6 +28,7 @@ from netra_backend.app.core.security_monitoring import check_and_alert_mock_toke
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket_core.types import AuthInfo, WebSocketConfig
 from netra_backend.app.websocket_core.utils import is_websocket_connected
+from netra_backend.app.core.isolated_environment import get_env
 
 logger = central_logger.get_logger(__name__)
 tracing_manager = TracingManager()
@@ -158,7 +159,22 @@ class WebSocketAuthenticator:
     
     async def _authenticate_jwt(self, websocket: WebSocket) -> AuthInfo:
         """Authenticate JWT token from WebSocket."""
+        # Check if we're in development mode
+        env = get_env()
+        environment = env.get("ENVIRONMENT", "development").lower()
+        
         token, auth_method = self._extract_jwt_token(websocket)
+        
+        # In development mode, allow unauthenticated connections
+        if not token and environment == "development":
+            logger.info("WebSocket connection in development mode - no authentication required")
+            return AuthInfo(
+                user_id="dev_user",
+                email="dev@localhost",
+                permissions=["*"],
+                auth_method="development",
+                authenticated_at=datetime.now(timezone.utc).isoformat()
+            )
         
         if not token:
             self.auth_stats["security_violations"] += 1

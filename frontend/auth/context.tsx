@@ -241,17 +241,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             component: 'AuthContext',
             action: 'auto_dev_login_attempt'
           });
-          const devLoginResponse = await unifiedAuthService.handleDevLogin(data);
-          if (devLoginResponse) {
-            setToken(devLoginResponse.access_token);
-            const decodedUser = jwtDecode(devLoginResponse.access_token) as User;
-            setUser(decodedUser);
-            // Sync with Zustand store
-            syncAuthStore(decodedUser, devLoginResponse.access_token);
-            // Start automatic token refresh cycle
-            scheduleTokenRefreshCheck(devLoginResponse.access_token);
-            // Track successful auto-login
-            trackLogin('email', false);
+          
+          try {
+            // Wrap dev login with timeout to prevent hanging
+            const devLoginPromise = unifiedAuthService.handleDevLogin(data);
+            const timeoutPromise = new Promise<null>((_, reject) => {
+              setTimeout(() => reject(new Error('Dev login timeout')), 8000); // 8 second timeout
+            });
+            
+            const devLoginResponse = await Promise.race([devLoginPromise, timeoutPromise]);
+            if (devLoginResponse) {
+              setToken(devLoginResponse.access_token);
+              const decodedUser = jwtDecode(devLoginResponse.access_token) as User;
+              setUser(decodedUser);
+              // Sync with Zustand store
+              syncAuthStore(decodedUser, devLoginResponse.access_token);
+              // Start automatic token refresh cycle
+              scheduleTokenRefreshCheck(devLoginResponse.access_token);
+              // Track successful auto-login
+              trackLogin('email', false);
+            }
+          } catch (devLoginError) {
+            logger.warn('Auto dev login failed or timed out', devLoginError as Error, {
+              component: 'AuthContext',
+              action: 'auto_dev_login_timeout'
+            });
+            // Continue with initialization even if dev login fails
           }
         } else {
           logger.info('Skipping auto dev login - user has logged out', {

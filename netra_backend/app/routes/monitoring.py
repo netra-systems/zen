@@ -66,6 +66,8 @@ def _handle_health_check_error(e: Exception) -> None:
     )
 
 @router.get("/health", response_model=HealthCheckResponse)
+@router.head("/health", response_model=HealthCheckResponse)
+@router.options("/health")
 async def get_database_health(current_user: Dict[str, Any] = Depends(get_current_user)) -> HealthCheckResponse:
     """Get comprehensive database health status."""
     try:

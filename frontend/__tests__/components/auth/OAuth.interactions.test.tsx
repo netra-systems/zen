@@ -23,13 +23,17 @@ const mockLocation = {
   replace: jest.fn()
 };
 
-// Only mock if not already mocked
-if (!window.location.hasOwnProperty('mockClear')) {
+// Safe location mock - try different approaches to avoid redefinition errors
+try {
+  delete (window as any).location;
   Object.defineProperty(window, 'location', {
     value: mockLocation,
     writable: true,
     configurable: true
   });
+} catch (error) {
+  // Fallback if location cannot be redefined
+  (window as any).location = mockLocation;
 }
 
 describe('OAuth Button Interaction Tests', () => {

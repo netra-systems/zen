@@ -76,8 +76,9 @@ class MockAuthToken:
             "sub": self.user_id,
             "permissions": self.permissions,
             "type": "access",
-            "exp": datetime.utcnow() + timedelta(seconds=self.expires_in),
-            "iat": datetime.utcnow(),
+            "exp": datetime.now(timezone.utc) + timedelta(seconds=self.expires_in),
+            "iat": datetime.now(timezone.utc),
+            "iss": "netra-auth-service",  # Required issuer claim
             "jti": str(uuid.uuid4())
         }
         return jwt.encode(payload, secret, algorithm="HS256")
@@ -215,8 +216,8 @@ class MockJWTManager:
                 "sub": user_id,
                 "permissions": permissions or [],
                 "type": "access",
-                "exp": datetime.utcnow() + timedelta(seconds=expires_in),
-                "iat": datetime.utcnow(),
+                "exp": datetime.now(timezone.utc) + timedelta(seconds=expires_in),
+                "iat": datetime.now(timezone.utc),
                 "jti": token_id
             }
             real_jwt = jwt.encode(payload, self.secret_key, algorithm="HS256")

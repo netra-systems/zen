@@ -49,9 +49,19 @@ def add_context_headers(response: Any, trace_id: str, request_id: Optional[str])
 def create_error_context_middleware() -> Callable:
     """Create error context middleware."""
     async def error_context_middleware(request: Request, call_next: Callable) -> Any:
-        """Middleware to set up error context for each request."""
+        """Middleware to set up error context for each request.
+        
+        Fixed to avoid async generator context manager protocol issues.
+        """
         trace_id, request_id = setup_request_context(request)
-        response = await call_next(request)
+        
+        try:
+            response = await call_next(request)
+        except Exception:
+            # Don't try to handle exceptions that might involve async generators
+            # Let them propagate naturally to avoid context manager protocol issues
+            raise
+            
         add_context_headers(response, trace_id, request_id)
         return response
     return error_context_middleware

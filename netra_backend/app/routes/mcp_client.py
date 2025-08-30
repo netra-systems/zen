@@ -481,12 +481,16 @@ async def clear_cache_post(
 
 
 @router.get("/health")
+@router.head("/health")
+@router.options("/health")
 async def mcp_health_check(token: str = Depends(security)):
     """MCP service health check."""
     return {"status": "healthy", "message": "MCP service is running"}
 
 
 @router.get("/servers/{server_name}/health")
+@router.head("/servers/{server_name}/health")
+@router.options("/servers/{server_name}/health")
 async def server_health_check(
     server_name: str,
     mcp_service: IMCPClientService = Depends(get_mcp_client_service),

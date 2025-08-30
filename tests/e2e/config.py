@@ -154,7 +154,8 @@ class UnifiedTestConfig:
     
     def _create_test_secrets(self) -> TestSecrets:
         """Create test JWT and encryption secrets"""
-        jwt_secret = "test-jwt-secret-key-unified-testing-32chars"
+        # Use the backend JWT secret if set, otherwise use test default
+        jwt_secret = os.environ.get("JWT_SECRET_KEY", "rsWwwvq8X6mCSuNv-TMXHDCfb96Xc-Dbay9MZy6EDCU")
         fernet_key = "cYpHdJm0e-zt3SWz-9h0gC_kh0Z7c3H6mRQPbPLFdao="
         encryption_key = "test-encryption-key-32-chars-long"
         self._set_secret_env_vars(jwt_secret, fernet_key, encryption_key)

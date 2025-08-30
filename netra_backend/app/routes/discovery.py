@@ -185,6 +185,8 @@ async def get_service_info(service_name: str):
 
 
 @router.get("/health")
+@router.head("/health")
+@router.options("/health")
 async def discovery_health():
     """Health check for discovery service."""
     discovery_dir = get_service_discovery_dir()

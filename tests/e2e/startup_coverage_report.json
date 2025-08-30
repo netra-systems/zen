@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-08-30T04:30:20.461255+00:00",
+  "generated_at": "2025-08-30T07:23:40.542222+00:00",
   "summary": {
     "total_tests": 23,
     "critical_coverage": "10/10",
@@ -11,17 +11,17 @@
     "total_test_functions": 270,
     "files_by_area": {
       "cold_start": 254,
-      "resilience": 4,
-      "performance": 12
+      "performance": 12,
+      "resilience": 4
     }
   },
   "missing_coverage": [
-    "edge_cases",
     "concurrent_users",
+    "reconnection",
+    "load_testing",
     "context_preservation",
     "service_integration",
-    "load_testing",
-    "reconnection",
+    "edge_cases",
     "multi_tier"
   ],
   "performance_coverage": {

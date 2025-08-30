@@ -2,11 +2,35 @@ import { renderHook } from '@testing-library/react';
 import { useThreadSidebarActions } from '@/components/chat/ThreadSidebarActions';
 
 // Mock dependencies
-jest.mock('@/store/threadStore');
-jest.mock('@/store/unified-chat');
-jest.mock('@/hooks/useThreadSwitching');
-jest.mock('@/hooks/useThreadCreation');
-jest.mock('@/hooks/useAuth');
+jest.mock('@/store/threadStore', () => ({
+  useThreadStore: jest.fn(() => ({}))
+}));
+
+jest.mock('@/store/unified-chat', () => ({
+  useUnifiedChatStore: jest.fn(() => ({
+    clearMessages: jest.fn()
+  }))
+}));
+
+jest.mock('@/hooks/useThreadSwitching', () => ({
+  useThreadSwitching: jest.fn(() => ({
+    state: { isLoading: false },
+    switchToThread: jest.fn()
+  }))
+}));
+
+jest.mock('@/hooks/useThreadCreation', () => ({
+  useThreadCreation: jest.fn(() => ({
+    state: { isCreating: false },
+    createAndNavigate: jest.fn()
+  }))
+}));
+
+jest.mock('@/hooks/useAuthState', () => ({
+  useAuthState: jest.fn(() => ({
+    isAuthenticated: true
+  }))
+}));
 
 describe('ThreadSidebarActions - Timestamp Handling', () => {
   describe('formatDate function', () => {

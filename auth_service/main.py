@@ -24,24 +24,29 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 
-from auth_service.auth_core.isolated_environment import get_env
-
-# Load environment variables from .env file ONLY in development
-# In staging/production, all config comes from Cloud Run env vars and Google Secret Manager
-environment = get_env().get('ENVIRONMENT', '').lower()
+# CRITICAL: Load environment variables BEFORE importing any auth service modules
+# This ensures SERVICE_SECRET and other env vars are available when auth service initializes
+environment = os.environ.get('ENVIRONMENT', '').lower()
 if environment in ['staging', 'production', 'prod']:
     print(f"Running in {environment} - skipping .env file loading (using GSM)")
 else:
     # Try parent directory first (where main .env is located)
     env_path = Path(__file__).parent.parent / ".env"
     if env_path.exists():
-        load_dotenv(env_path)
+        load_dotenv(env_path, override=True)  # override=True ensures env vars are set
         print(f"Loaded environment from: {env_path}")
+        # Verify critical variables are loaded
+        if os.environ.get('SERVICE_SECRET'):
+            print("SERVICE_SECRET successfully loaded from .env")
+        else:
+            print("WARNING: SERVICE_SECRET not found in .env file")
     else:
         # Fallback to current directory
-        load_dotenv()
+        load_dotenv(override=True)
         print("Loaded environment from current directory or system")
 
+# NOW import auth service modules after environment is fully loaded
+from auth_service.auth_core.isolated_environment import get_env
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.routes.auth_routes import router as auth_router, oauth_router
 from shared.logging import get_logger, configure_service_logging

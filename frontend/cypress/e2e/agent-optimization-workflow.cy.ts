@@ -1,3 +1,5 @@
+import { getAuthConfigUrl, getDevLoginUrl } from '../support/port-config';
+
 describe('Agent Optimization Workflow - Real Services', () => {
   beforeEach(() => {
     // Clear state for clean test environment
@@ -12,7 +14,7 @@ describe('Agent Optimization Workflow - Real Services', () => {
     // Get real auth configuration and setup authentication
     cy.request({
       method: 'GET',
-      url: 'http://localhost:8081/auth/config',
+      url: getAuthConfigUrl(),
       failOnStatusCode: false
     }).then((configResponse) => {
       if (configResponse.status === 200 && configResponse.body.development_mode) {

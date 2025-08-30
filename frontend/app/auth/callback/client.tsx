@@ -63,12 +63,24 @@ export default function AuthCallbackClient() {
         
         // Dispatch a storage event to notify other components immediately
         // This helps AuthContext detect the token faster
-        window.dispatchEvent(new StorageEvent('storage', {
-          key: 'jwt_token',
-          newValue: token,
-          url: window.location.href,
-          storageArea: localStorage
-        }));
+        try {
+          window.dispatchEvent(new StorageEvent('storage', {
+            key: 'jwt_token',
+            newValue: token,
+            url: window.location.href,
+            storageArea: typeof window !== 'undefined' ? localStorage : null
+          }));
+        } catch (error) {
+          // Fallback for test environments where StorageEvent constructor may not work
+          const event = new Event('storage') as StorageEvent;
+          Object.defineProperties(event, {
+            key: { value: 'jwt_token', writable: false },
+            newValue: { value: token, writable: false },
+            url: { value: window.location.href, writable: false },
+            storageArea: { value: localStorage, writable: false }
+          });
+          window.dispatchEvent(event);
+        }
         
         // Small delay to ensure storage event is processed
         setTimeout(() => {

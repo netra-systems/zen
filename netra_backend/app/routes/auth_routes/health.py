@@ -50,6 +50,8 @@ async def _build_health_status() -> dict:
     return health_status
 
 @router.get("/health")
+@router.head("/health")
+@router.options("/health")
 async def auth_health():
     """Check auth service health and configuration."""
     try:
