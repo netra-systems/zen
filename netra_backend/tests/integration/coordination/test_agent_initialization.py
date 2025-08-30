@@ -26,7 +26,7 @@ from datetime import datetime, timezone
 import pytest
 
 from netra_backend.tests.integration.coordination.shared_fixtures import (
-    MockCoordinationAgent,
+    CoordinationTestAgent,
     coordination_agents,
     coordination_infrastructure,
 )
@@ -50,7 +50,7 @@ class TestAgentInitialization:
     @pytest.mark.asyncio
     async def test_agent_registration_process(self, coordination_infrastructure):
         """BVJ: Validates agent registration in coordination system."""
-        agent = MockCoordinationAgent("test_agent")
+        agent = CoordinationTestAgent("test_agent")
         
         await coordination_infrastructure.agent_registry.register_agent("test_agent", agent)
         
@@ -76,7 +76,7 @@ class TestAgentInitialization:
         agent_names = ["first_agent", "second_agent", "third_agent"]
         
         for name in agent_names:
-            agent = MockCoordinationAgent(name)
+            agent = CoordinationTestAgent(name)
             await coordination_infrastructure.agent_registry.register_agent(name, agent)
         
         initialization_order = coordination_infrastructure.agent_registry.initialization_order
@@ -104,7 +104,7 @@ class TestAgentInitialization:
     @pytest.mark.asyncio
     async def test_agent_coordination_status_tracking(self, coordination_infrastructure):
         """BVJ: Validates agent coordination status is properly tracked."""
-        agent = MockCoordinationAgent("status_test_agent")
+        agent = CoordinationTestAgent("status_test_agent")
         
         assert agent.coordination_status == "initializing"
         

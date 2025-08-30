@@ -178,6 +178,14 @@ async def websocket_endpoint(websocket: WebSocket):
         supervisor = getattr(websocket.app.state, 'agent_supervisor', None)
         thread_service = getattr(websocket.app.state, 'thread_service', None)
         
+        # CRITICAL FIX: If thread_service is missing but supervisor exists, create it
+        if supervisor is not None and thread_service is None:
+            logger.warning("thread_service missing but supervisor available - creating thread_service")
+            from netra_backend.app.services.thread_service import ThreadService
+            thread_service = ThreadService()
+            websocket.app.state.thread_service = thread_service
+            logger.info("Created missing thread_service for WebSocket handler")
+        
         # Create MessageHandlerService and AgentMessageHandler if dependencies exist
         if supervisor is not None and thread_service is not None:
             try:

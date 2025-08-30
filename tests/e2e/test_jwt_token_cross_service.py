@@ -23,17 +23,27 @@ from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
 
 @pytest.mark.e2e
-class TestRealTokenGeneration(JWTTestFixtures):
+class TestRealTokenGeneration:
     """Test real JWT token generation via auth service."""
+    
+    @pytest.fixture
+    def jwt_helper(self):
+        """Provide JWT test helper instance configured for dev environment."""
+        return JWTTestHelper(environment="dev")
+    
+    @pytest.fixture
+    def valid_token_payload(self):
+        """Provide valid token payload."""
+        return JWTTestHelper().create_valid_payload()
     
     @pytest.fixture
     @pytest.mark.e2e
     async def test_harness(self):
         """Setup test harness."""
-        harness = UnifiedE2ETestHarness()
-        await harness.setup()
+        harness = UnifiedTestHarnessComplete()
+        await harness.start_services()
         yield harness
-        await harness.cleanup()
+        await harness.stop_all_services()
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -58,17 +68,27 @@ class TestRealTokenGeneration(JWTTestFixtures):
 
 
 @pytest.mark.e2e
-class TestCrossServiceTokenValidation(JWTTestFixtures):
+class TestCrossServiceTokenValidation:
     """Test token validation across auth service and backend."""
+    
+    @pytest.fixture
+    def jwt_helper(self):
+        """Provide JWT test helper instance configured for dev environment."""
+        return JWTTestHelper(environment="dev")
+    
+    @pytest.fixture
+    def valid_token_payload(self):
+        """Provide valid token payload."""
+        return JWTTestHelper().create_valid_payload()
     
     @pytest.fixture
     @pytest.mark.e2e
     async def test_harness(self):
         """Setup test harness."""
-        harness = UnifiedE2ETestHarness()
-        await harness.setup()
+        harness = UnifiedTestHarnessComplete()
+        await harness.start_services()
         yield harness
-        await harness.cleanup()
+        await harness.stop_all_services()
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -95,17 +115,27 @@ class TestCrossServiceTokenValidation(JWTTestFixtures):
 
 
 @pytest.mark.e2e
-class TestTokenExpiryAndRefresh(JWTTestFixtures):
+class TestTokenExpiryAndRefresh:
     """Test token expiration and refresh mechanisms."""
+    
+    @pytest.fixture
+    def jwt_helper(self):
+        """Provide JWT test helper instance configured for dev environment."""
+        return JWTTestHelper(environment="dev")
+    
+    @pytest.fixture
+    def valid_token_payload(self):
+        """Provide valid token payload."""
+        return JWTTestHelper().create_valid_payload()
     
     @pytest.fixture
     @pytest.mark.e2e
     async def test_harness(self):
         """Setup test harness."""
-        harness = UnifiedE2ETestHarness()
-        await harness.setup()
+        harness = UnifiedTestHarnessComplete()
+        await harness.start_services()
         yield harness
-        await harness.cleanup()
+        await harness.stop_all_services()
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -114,7 +144,7 @@ class TestTokenExpiryAndRefresh(JWTTestFixtures):
         expired_payload = jwt_helper.create_expired_payload()
         expired_token = await jwt_helper.create_jwt_token(expired_payload)
         
-        security_tester = JWTSecurityTester()
+        security_tester = JWTSecurityTester(environment="dev")
         is_rejected = await security_tester.verify_all_services_reject_token(expired_token)
         assert is_rejected
     
@@ -140,17 +170,27 @@ class TestTokenExpiryAndRefresh(JWTTestFixtures):
 
 
 @pytest.mark.e2e
-class TestWebSocketAuthentication(JWTTestFixtures):
+class TestWebSocketAuthentication:
     """Test WebSocket authentication with JWT tokens."""
+    
+    @pytest.fixture
+    def jwt_helper(self):
+        """Provide JWT test helper instance configured for dev environment."""
+        return JWTTestHelper(environment="dev")
+    
+    @pytest.fixture
+    def valid_token_payload(self):
+        """Provide valid token payload."""
+        return JWTTestHelper().create_valid_payload()
     
     @pytest.fixture
     @pytest.mark.e2e
     async def test_harness(self):
         """Setup test harness."""
-        harness = UnifiedE2ETestHarness()
-        await harness.setup()
+        harness = UnifiedTestHarnessComplete()
+        await harness.start_services()
         yield harness
-        await harness.cleanup()
+        await harness.stop_all_services()
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -184,17 +224,27 @@ class TestWebSocketAuthentication(JWTTestFixtures):
 
 
 @pytest.mark.e2e
-class TestTokenSecurity(JWTTestFixtures):
+class TestTokenSecurity:
     """Test token security and tampering prevention."""
+    
+    @pytest.fixture
+    def jwt_helper(self):
+        """Provide JWT test helper instance configured for dev environment."""
+        return JWTTestHelper(environment="dev")
+    
+    @pytest.fixture
+    def valid_token_payload(self):
+        """Provide valid token payload."""
+        return JWTTestHelper().create_valid_payload()
     
     @pytest.fixture
     @pytest.mark.e2e
     async def test_harness(self):
         """Setup test harness."""
-        harness = UnifiedE2ETestHarness()
-        await harness.setup()
+        harness = UnifiedTestHarnessComplete()
+        await harness.start_services()
         yield harness
-        await harness.cleanup()
+        await harness.stop_all_services()
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -202,7 +252,7 @@ class TestTokenSecurity(JWTTestFixtures):
         """Test tampered tokens are rejected by all services."""
         tampered_token = await jwt_helper.create_tampered_token(valid_token_payload)
         
-        security_tester = JWTSecurityTester()
+        security_tester = JWTSecurityTester(environment="dev")
         is_rejected = await security_tester.verify_all_services_reject_token(tampered_token)
         assert is_rejected
     
@@ -212,23 +262,33 @@ class TestTokenSecurity(JWTTestFixtures):
         """Test prevention of 'none' algorithm JWT attack."""
         malicious_token = jwt_helper.create_none_algorithm_token()
         
-        security_tester = JWTSecurityTester()
+        security_tester = JWTSecurityTester(environment="dev")
         is_rejected = await security_tester.verify_all_services_reject_token(malicious_token)
         assert is_rejected
 
 
 @pytest.mark.e2e
-class TestAgentContextExtraction(JWTTestFixtures):
+class TestAgentContextExtraction:
     """Test agent context extraction from JWT tokens."""
+    
+    @pytest.fixture
+    def jwt_helper(self):
+        """Provide JWT test helper instance configured for dev environment."""
+        return JWTTestHelper(environment="dev")
+    
+    @pytest.fixture
+    def valid_token_payload(self):
+        """Provide valid token payload."""
+        return JWTTestHelper().create_valid_payload()
     
     @pytest.fixture
     @pytest.mark.e2e
     async def test_harness(self):
         """Setup test harness."""
-        harness = UnifiedE2ETestHarness()
-        await harness.setup()
+        harness = UnifiedTestHarnessComplete()
+        await harness.start_services()
         yield harness
-        await harness.cleanup()
+        await harness.stop_all_services()
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -272,17 +332,27 @@ class TestAgentContextExtraction(JWTTestFixtures):
 
 
 @pytest.mark.e2e
-class TestCrossServiceConsistency(JWTTestFixtures):
+class TestCrossServiceConsistency:
     """Test cross-service token handling consistency."""
+    
+    @pytest.fixture
+    def jwt_helper(self):
+        """Provide JWT test helper instance configured for dev environment."""
+        return JWTTestHelper(environment="dev")
+    
+    @pytest.fixture
+    def valid_token_payload(self):
+        """Provide valid token payload."""
+        return JWTTestHelper().create_valid_payload()
     
     @pytest.fixture
     @pytest.mark.e2e
     async def test_harness(self):
         """Setup test harness."""
-        harness = UnifiedE2ETestHarness()
-        await harness.setup()
+        harness = UnifiedTestHarnessComplete()
+        await harness.start_services()
         yield harness
-        await harness.cleanup()
+        await harness.stop_all_services()
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -290,7 +360,7 @@ class TestCrossServiceConsistency(JWTTestFixtures):
         """Test all services handle valid tokens consistently."""
         token = await jwt_helper.get_real_token_from_auth()
         if token:
-            security_tester = JWTSecurityTester()
+            security_tester = JWTSecurityTester(environment="dev")
             is_consistent = await security_tester.verify_consistent_token_handling(token)
             assert is_consistent
     
@@ -300,7 +370,7 @@ class TestCrossServiceConsistency(JWTTestFixtures):
         """Test all services handle invalid tokens consistently."""
         invalid_token = "invalid.token.signature"
         
-        security_tester = JWTSecurityTester()
+        security_tester = JWTSecurityTester(environment="dev")
         results = await security_tester.test_token_against_all_services(invalid_token)
         
         # All services should reject invalid tokens
