@@ -10,7 +10,7 @@ from netra_backend.app.agents.triage_sub_agent.models import (
     ExtractedEntities,
     TriageResult,
 )
-from netra_backend.app.core.json_parsing_utils import (
+from netra_backend.app.core.serialization.unified_json_handler import (
     comprehensive_json_fix,
     ensure_agent_response_is_json,
 )

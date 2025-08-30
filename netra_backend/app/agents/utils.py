@@ -12,14 +12,34 @@
 
 from typing import Any, Dict, Optional
 
-# Import all JSON extraction functions from refactored module
-from netra_backend.app.agents.utils_json_extraction import (
-    extract_json_from_response,
-    extract_partial_json,
-    fix_common_json_errors,
-    preprocess_llm_response,
-    recover_truncated_json,
+# Import JSON utilities from unified handler
+from netra_backend.app.core.serialization.unified_json_handler import (
+    comprehensive_json_fix,
+    safe_json_loads,
+    safe_json_dumps,
 )
+
+# Create compatibility shims for old function names
+def extract_json_from_response(response: str) -> Optional[Dict[str, Any]]:
+    """Extract JSON from LLM response."""
+    return safe_json_loads(response)
+
+def extract_partial_json(response: str) -> Optional[Dict[str, Any]]:
+    """Extract partial JSON from response."""
+    return safe_json_loads(response)
+
+def fix_common_json_errors(json_str: str) -> str:
+    """Fix common JSON errors."""
+    fixed = comprehensive_json_fix(json_str)
+    return safe_json_dumps(fixed) if fixed else json_str
+
+def preprocess_llm_response(response: str) -> str:
+    """Preprocess LLM response for JSON extraction."""
+    return response.strip()
+
+def recover_truncated_json(json_str: str) -> Optional[Dict[str, Any]]:
+    """Attempt to recover truncated JSON."""
+    return safe_json_loads(json_str)
 
 # Re-export for backward compatibility
 __all__ = [

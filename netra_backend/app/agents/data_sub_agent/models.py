@@ -6,9 +6,9 @@ from typing import Any, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field, field_validator
 
-from netra_backend.app.core.json_parsing_utils import (
+from netra_backend.app.core.serialization.unified_json_handler import (
     parse_dict_field,
-    parse_string_list_field,
+    parse_list_field as parse_string_list_field,
 )
 
 # Import shared models to avoid duplication

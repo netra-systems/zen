@@ -7,7 +7,7 @@ from netra_backend.app.agents.data_sub_agent.data_operations import DataOperatio
 from netra_backend.app.agents.data_sub_agent.execution_engine import ExecutionEngine
 from netra_backend.app.agents.data_sub_agent.metrics_analyzer import MetricsAnalyzer
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.core.json_parsing_utils import (
+from netra_backend.app.core.serialization.unified_json_handler import (
     comprehensive_json_fix,
     ensure_agent_response_is_json,
 )
