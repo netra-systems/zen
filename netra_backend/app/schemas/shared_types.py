@@ -403,7 +403,7 @@ class DataAnalysisResponse(BaseModel):
     @classmethod
     def parse_recommendations(cls, v: Any) -> List[str]:
         """Parse recommendations field, converting dicts to strings"""
-        return parse_string_list_field(v)
+        return parse_list_field(v)
     
     # Enhanced structured fields
     performance_metrics: Optional[PerformanceMetrics] = None

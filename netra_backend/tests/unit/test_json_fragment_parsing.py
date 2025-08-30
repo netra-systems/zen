@@ -1,7 +1,7 @@
 """Test JSON fragment parsing improvements."""
 
 import pytest
-from netra_backend.app.core.json_parsing_utils import safe_json_parse, _is_json_fragment, _handle_json_fragment
+from netra_backend.app.core.serialization.unified_json_handler import llm_parser, _is_json_fragment, _handle_json_fragment
 
 
 class TestJSONFragmentParsing:
@@ -28,12 +28,12 @@ class TestJSONFragmentParsing:
         """Test that JSON fragments are handled without warnings."""
         # Single key-value pair fragment
         fragment1 = '"model_name": "chatbot"'
-        result1 = safe_json_parse(fragment1, fallback={})
+        result1 = llm_parser.safe_json_parse(fragment1, fallback={})
         assert result1 == {"model_name": "chatbot"}
         
         # Multiple key-value pairs fragment
         fragment2 = '"target_metric": "response_time", "constraint": "cost"'
-        result2 = safe_json_parse(fragment2, fallback={})
+        result2 = llm_parser.safe_json_parse(fragment2, fallback={})
         assert result2 == {"target_metric": "response_time", "constraint": "cost"}
     
     def test_json_fragment_wrapping(self):
@@ -56,27 +56,27 @@ class TestJSONFragmentParsing:
     def test_preserves_valid_json(self):
         """Test that valid JSON is still parsed correctly."""
         valid_json = '{"model_name": "chatbot", "version": 1}'
-        result = safe_json_parse(valid_json)
+        result = llm_parser.safe_json_parse(valid_json)
         assert result == {"model_name": "chatbot", "version": 1}
         
         valid_array = '["item1", "item2"]'
-        result = safe_json_parse(valid_array)
+        result = llm_parser.safe_json_parse(valid_array)
         assert result == ["item1", "item2"]
     
     def test_fallback_behavior(self):
         """Test fallback behavior for unparseable strings."""
         # Completely invalid JSON
         invalid = "not json at all"
-        result = safe_json_parse(invalid, fallback={"error": "invalid"})
+        result = llm_parser.safe_json_parse(invalid, fallback={"error": "invalid"})
         assert result == {"error": "invalid"}
         
         # Empty string with explicit None fallback returns empty string
         # (because fallback=None means "use default behavior")
         empty = ""
-        result = safe_json_parse(empty, fallback=None)
+        result = llm_parser.safe_json_parse(empty, fallback=None)
         assert result == ""
         
         # Empty string with dict fallback
         empty = ""
-        result = safe_json_parse(empty, fallback={})
+        result = llm_parser.safe_json_parse(empty, fallback={})
         assert result == {}

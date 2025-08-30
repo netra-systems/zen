@@ -7,7 +7,7 @@ from typing import Any, Dict, ForwardRef, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field, field_validator
 
-from netra_backend.app.core.json_parsing_utils import parse_dict_field
+from netra_backend.app.core.serialization.unified_json_handler import parse_dict_field
 from netra_backend.app.schemas.llm_base_types import LLMMessage
 
 # Forward reference for LLMConfig to avoid circular imports

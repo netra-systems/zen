@@ -7,7 +7,7 @@ from typing import Any, Optional, Type, TypeVar
 
 from pydantic import BaseModel
 
-from netra_backend.app.core.json_parsing_utils import ensure_agent_response_is_json
+from netra_backend.app.core.serialization.unified_json_handler import llm_parser
 from netra_backend.app.llm.llm_response_processing import (
     attempt_json_fallback_parse,
     cache_structured_response,
@@ -110,7 +110,7 @@ class LLMStructuredOperations:
                                schema: Type[T], use_cache: bool) -> T:
         """Try text generation fallback."""
         text_response = await self.core.ask_llm(prompt, llm_config_name, use_cache)
-        json_response = ensure_agent_response_is_json(text_response)
+        json_response = llm_parser.ensure_agent_response_is_json(text_response)
         return schema(**json_response)
     
     def _handle_fallback_failure(self, parse_error: Exception, 
