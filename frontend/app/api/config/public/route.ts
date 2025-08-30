@@ -75,7 +75,7 @@ async function fetchFreshConfig(config: any): Promise<any> {
   
   while (attempt < maxRetries) {
     try {
-      const backendUrl = `${config.urls.api}/api/config/public`;
+      const backendUrl = `${config.urls.auth}/auth/config`;
       
       const response = await fetch(backendUrl, {
         method: 'GET',
