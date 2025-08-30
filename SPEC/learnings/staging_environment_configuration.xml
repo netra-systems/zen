@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>StagingEnvironmentConfiguration</name>
+        <type>Critical.Configuration.EnvironmentManagement</type>
+        <version>1.0</version>
+        <description>Critical learnings from staging configuration issues where .env file was overriding deployment environment variables</description>
+        <created>2025-08-29</created>
+        <severity>CRITICAL</severity>
+        <cross_references>
+            <ref>unified_environment_management.xml</ref>
+            <ref>database_connectivity_architecture.xml</ref>
+            <ref>oauth_environment_naming_convention.xml</ref>
+            <ref>oauth_staging_issues.xml</ref>
+        </cross_references>
+    </metadata>
+
+    <problem_statement>
+        <title>Environment Variables Being Overridden by .env File</title>
+        <description>
+            Staging deployments were incorrectly detecting as "development" environment despite
+            ENVIRONMENT=staging being set in Cloud Run/Docker. This caused wrong secrets to load,
+            incorrect database connections, and complete configuration failure.
+        </description>
+        <impact>
+            - Services in staging thought they were in development
+            - GCP secrets not loading (wrong project ID)
+            - Database connections using localhost instead of Cloud SQL
+            - JWT/OAuth secrets using development placeholders
+            - Complete staging deployment failure
+        </impact>
+        <root_cause>
+            IsolatedEnvironment was auto-loading .env file with override_existing=True,
+            which overwrote environment variables set by the deployment system.
+        </root_cause>
+    </problem_statement>
+
+    <solution>
+        <principle>Deployment environment variables MUST take precedence over .env file</principle>
+        
+        <fixes_applied>
+            <fix priority="CRITICAL">
+                <file>netra_backend/app/core/isolated_environment.py</file>
+                <change>Modified _auto_load_env_file() to use override_existing=False</change>
+                <rationale>
+                    Ensures environment variables set by Docker/Cloud Run are not overwritten
+                    by development .env file values
+                </rationale>
+            </fix>
+            
+            <fix priority="HIGH">
+                <file>netra_backend/app/core/secret_manager.py</file>
+                <change>Replaced all os.getenv() calls with get_env().get()</change>
+                <rationale>
+                    Ensures consistent environment variable access through IsolatedEnvironment
+                </rationale>
+            </fix>
+            
+            <fix priority="HIGH">
+                <file>netra_backend/app/core/configuration/staging_validator.py</file>
+                <change>Created comprehensive staging configuration validator</change>
+                <rationale>
+                    Validates all required variables are present and detects placeholder values
+                    before deployment
+                </rationale>
+            </fix>
+        </fixes_applied>
+    </solution>
+
+    <environment_loading_order>
+        <priority level="1">System environment variables (Docker, Cloud Run, OS)</priority>
+        <priority level="2">.env file (only fills missing variables)</priority>
+        <priority level="3">Default values in code</priority>
+        
+        <explanation>
+            This hierarchy ensures production/staging deployments can override local
+            development settings while still allowing .env file for local development
+            convenience.
+        </explanation>
+    </environment_loading_order>
+
+    <critical_staging_variables>
+        <variable name="ENVIRONMENT" required="true">Must be "staging"</variable>
+        <variable name="GCP_PROJECT_ID" required="true">netra-staging or numerical ID</variable>
+        <variable name="DATABASE_URL" required="true">Must include SSL and staging host</variable>
+        <variable name="JWT_SECRET_KEY" required="true">Min 32 characters, no placeholders</variable>
+        <variable name="SERVICE_SECRET" required="true">Different from JWT_SECRET_KEY</variable>
+        <variable name="FERNET_KEY" required="true">Valid base64 encoded key</variable>
+        <variable name="SERVICE_ID" required="true">Service identifier</variable>
+        
+        <validation_rules>
+            <rule>No localhost references in staging URLs</rule>
+            <rule>No placeholder values in critical secrets</rule>
+            <rule>JWT_SECRET_KEY and SERVICE_SECRET must be different</rule>
+            <rule>All secrets must be at least 32 characters</rule>
+        </validation_rules>
+    </critical_staging_variables>
+
+    <testing_requirements>
+        <test name="Environment Detection Test">
+            <description>Verify IsolatedEnvironment respects system environment variables</description>
+            <location>netra_backend/tests/critical/test_staging_config_loading.py</location>
+        </test>
+        
+        <test name="Staging Validator Test">
+            <description>Verify staging validator catches missing/invalid configuration</description>
+            <location>netra_backend/tests/critical/test_staging_config_loading.py</location>
+        </test>
+        
+        <validation_command>
+            <code>
+from netra_backend.app.core.configuration.staging_validator import ensure_staging_ready
+ensure_staging_ready()  # Raises exception if not ready
+            </code>
+        </validation_command>
+    </testing_requirements>
+
+    <deployment_checklist>
+        <step>Set all required environment variables in Cloud Run/Docker</step>
+        <step>Verify SERVICE_SECRET is set and different from JWT_SECRET_KEY</step>
+        <step>Run staging validator before deployment</step>
+        <step>Check no localhost references in configuration</step>
+        <step>Verify GCP secrets are accessible</step>
+    </deployment_checklist>
+
+    <lessons_learned>
+        <lesson priority="CRITICAL">
+            NEVER allow .env file to override system environment variables in production/staging
+        </lesson>
+        <lesson priority="HIGH">
+            Always use IsolatedEnvironment for environment access, never os.getenv() directly
+        </lesson>
+        <lesson priority="HIGH">
+            Validate staging configuration before deployment to catch issues early
+        </lesson>
+        <lesson priority="MEDIUM">
+            Maintain clear environment variable precedence documentation
+        </lesson>
+    </lessons_learned>
+
+    <prevention_measures>
+        <measure>Always load .env with override_existing=False in production code</measure>
+        <measure>Use staging validator in deployment pipeline</measure>
+        <measure>Enforce IsolatedEnvironment usage via linting rules</measure>
+        <measure>Test environment detection in CI/CD pipeline</measure>
+    </prevention_measures>
+</specification>

@@ -64,13 +64,30 @@ class IsolatedEnvironment:
             logger.debug("IsolatedEnvironment (netra_backend) initialized")
     
     def _auto_load_env_file(self) -> None:
-        """Automatically load .env file if it exists."""
+        """Automatically load .env file if it exists.
+        
+        IMPORTANT: Does NOT override existing environment variables.
+        This ensures that environment variables set by Docker, Cloud Run,
+        or the deployment system take precedence over .env file values.
+        
+        CRITICAL: .env files are NEVER loaded in staging or production environments
+        to ensure secrets come only from the deployment system.
+        """
+        # Check current environment - never load .env in staging/production
+        environment = os.environ.get('ENVIRONMENT', '').lower()
+        if environment in ['staging', 'production']:
+            logger.debug(f"Skipping .env file loading in {environment} environment")
+            return
+            
         try:
             env_file = Path.cwd() / ".env"
             if env_file.exists():
-                loaded_count = self.load_from_file(env_file)
+                # Load .env file but DO NOT override existing variables
+                # This is critical for staging/production where environment
+                # variables are set by the deployment system
+                loaded_count = self.load_from_file(env_file, override_existing=False)
                 if loaded_count > 0:
-                    logger.debug(f"Auto-loaded {loaded_count} variables from .env")
+                    logger.debug(f"Auto-loaded {loaded_count} variables from .env (without overriding existing)")
         except Exception as e:
             logger.warning(f"Failed to auto-load .env file: {e}")
     

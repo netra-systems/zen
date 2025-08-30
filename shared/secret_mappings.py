@@ -27,10 +27,10 @@ STAGING_SECRET_MAPPINGS = {
     "clickhouse-user-staging": "CLICKHOUSE_USER",
     "clickhouse-db-staging": "CLICKHOUSE_DB",
     
-    # Authentication Secrets
-    "jwt-secret-key": "JWT_SECRET_KEY",
-    "jwt-secret": "JWT_SECRET",  # Duplicate for compatibility
-    "fernet-key": "FERNET_KEY",
+    # Authentication Secrets (environment-specific)
+    "jwt-secret-key-staging": "JWT_SECRET_KEY",
+    "jwt-secret-staging": "JWT_SECRET",  # Auth service uses JWT_SECRET
+    "fernet-key-staging": "FERNET_KEY",
     
     # OAuth Secrets
     "google-client-id": "GOOGLE_CLIENT_ID",
@@ -44,6 +44,28 @@ STAGING_SECRET_MAPPINGS = {
     # Monitoring
     "langfuse-public-key": "LANGFUSE_PUBLIC_KEY",
     "langfuse-secret-key": "LANGFUSE_SECRET_KEY",
+}
+
+# Test environment secret mappings
+TEST_SECRET_MAPPINGS = {
+    # Authentication Secrets (environment-specific)
+    "jwt-secret-key-test": "JWT_SECRET_KEY",
+    "jwt-secret-test": "JWT_SECRET",  # Auth service uses JWT_SECRET
+    "fernet-key-test": "FERNET_KEY",
+    
+    # For test environments, most other secrets can use default/local values
+    # Add other test-specific secrets here if needed
+}
+
+# Development environment secret mappings
+DEV_SECRET_MAPPINGS = {
+    # Authentication Secrets (environment-specific)
+    "jwt-secret-key-dev": "JWT_SECRET_KEY",
+    "jwt-secret-dev": "JWT_SECRET",  # Auth service uses JWT_SECRET
+    "fernet-key-dev": "FERNET_KEY",
+    
+    # For dev environments, most other secrets can use default/local values
+    # Add other dev-specific secrets here if needed
 }
 
 # Production environment secret mappings
@@ -67,10 +89,10 @@ PRODUCTION_SECRET_MAPPINGS = {
     "clickhouse-user-prod": "CLICKHOUSE_USER",
     "clickhouse-db-prod": "CLICKHOUSE_DB",
     
-    # Authentication Secrets (shared across environments)
-    "jwt-secret-key": "JWT_SECRET_KEY",
-    "jwt-secret": "JWT_SECRET",
-    "fernet-key": "FERNET_KEY",
+    # Authentication Secrets (environment-specific)
+    "jwt-secret-key-production": "JWT_SECRET_KEY",
+    "jwt-secret-production": "JWT_SECRET",  # Auth service uses JWT_SECRET
+    "fernet-key-production": "FERNET_KEY",
     
     # OAuth Secrets
     "google-client-id": "GOOGLE_CLIENT_ID",
@@ -91,19 +113,23 @@ def get_secret_mappings(environment: str) -> dict:
     Get secret mappings for a specific environment.
     
     Args:
-        environment: The environment name ('staging', 'production', etc.)
+        environment: The environment name ('test', 'dev', 'staging', 'production', etc.)
         
     Returns:
         Dictionary mapping Google Secret names to environment variable names
     """
     environment = environment.lower()
     
-    if environment == "staging":
+    if environment == "test":
+        return TEST_SECRET_MAPPINGS.copy()
+    elif environment in ["dev", "development"]:
+        return DEV_SECRET_MAPPINGS.copy()
+    elif environment == "staging":
         return STAGING_SECRET_MAPPINGS.copy()
     elif environment in ["production", "prod"]:
         return PRODUCTION_SECRET_MAPPINGS.copy()
     else:
-        # Development/local environments don't use Google Secrets Manager
+        # Local environments don't use Google Secrets Manager
         return {}
 
 
