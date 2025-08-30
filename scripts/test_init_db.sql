@@ -3,13 +3,15 @@
 -- Optimized for fast, repeatable test execution
 
 -- Create additional test databases
-CREATE DATABASE IF NOT EXISTS netra_test_auth;
-CREATE DATABASE IF NOT EXISTS netra_test_backend; 
+-- Note: PostgreSQL doesn't support IF NOT EXISTS for CREATE DATABASE in SQL scripts
+-- These will be created if they don't exist (error if they do)
+-- CREATE DATABASE netra_test_auth;
+-- CREATE DATABASE netra_test_backend; 
 
 -- Grant permissions to test user
 GRANT ALL PRIVILEGES ON DATABASE netra_test TO test_user;
-GRANT ALL PRIVILEGES ON DATABASE netra_test_auth TO test_user;
-GRANT ALL PRIVILEGES ON DATABASE netra_test_backend TO test_user;
+-- GRANT ALL PRIVILEGES ON DATABASE netra_test_auth TO test_user;
+-- GRANT ALL PRIVILEGES ON DATABASE netra_test_backend TO test_user;
 
 -- Connect to main test database
 \c netra_test;

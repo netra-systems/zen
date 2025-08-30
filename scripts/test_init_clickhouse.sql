@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS user_events (
 ) ENGINE = MergeTree()
 PARTITION BY toYYYYMM(event_timestamp)
 ORDER BY (event_type, user_id, event_timestamp)
-TTL event_timestamp + INTERVAL 90 DAY;
+TTL toDateTime(event_timestamp) + INTERVAL 90 DAY;
 
 -- Agent conversation analytics
 CREATE TABLE IF NOT EXISTS conversation_events (
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS conversation_events (
 ) ENGINE = MergeTree()
 PARTITION BY (toYYYYMM(event_timestamp), organization_id)
 ORDER BY (organization_id, agent_id, event_timestamp)
-TTL event_timestamp + INTERVAL 180 DAY;
+TTL toDateTime(event_timestamp) + INTERVAL 180 DAY;
 
 -- Tool execution analytics
 CREATE TABLE IF NOT EXISTS tool_executions (
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS tool_executions (
 ) ENGINE = MergeTree()
 PARTITION BY toYYYYMM(event_timestamp)
 ORDER BY (tool_name, execution_status, event_timestamp)
-TTL event_timestamp + INTERVAL 30 DAY;
+TTL toDateTime(event_timestamp) + INTERVAL 30 DAY;
 
 -- WebSocket connection analytics
 CREATE TABLE IF NOT EXISTS websocket_events (
@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS websocket_events (
 ) ENGINE = MergeTree()
 PARTITION BY toYYYYMM(event_timestamp)
 ORDER BY (event_type, connection_id, event_timestamp)
-TTL event_timestamp + INTERVAL 7 DAY;
+TTL toDateTime(event_timestamp) + INTERVAL 7 DAY;
 
 -- Usage metrics aggregation table
 CREATE TABLE IF NOT EXISTS usage_metrics (
@@ -120,7 +120,7 @@ CREATE TABLE IF NOT EXISTS performance_metrics (
 ) ENGINE = MergeTree()
 PARTITION BY (toYYYYMM(event_timestamp), service_name)
 ORDER BY (service_name, endpoint, event_timestamp)
-TTL event_timestamp + INTERVAL 30 DAY;
+TTL toDateTime(event_timestamp) + INTERVAL 30 DAY;
 
 -- Billing and costs tracking
 CREATE TABLE IF NOT EXISTS billing_events (
@@ -139,13 +139,13 @@ CREATE TABLE IF NOT EXISTS billing_events (
 ) ENGINE = MergeTree()
 PARTITION BY (toYYYYMM(event_timestamp), organization_id)
 ORDER BY (organization_id, billing_type, event_timestamp)
-TTL event_timestamp + INTERVAL 1095 DAY; -- 3 years for billing
+TTL toDateTime(event_timestamp) + INTERVAL 1095 DAY; -- 3 years for billing
 
 -- Create materialized views for real-time aggregations
 CREATE MATERIALIZED VIEW IF NOT EXISTS user_activity_hourly
 TO usage_metrics AS
 SELECT
-    '' as organization_id, -- Will be populated by actual events
+    generateUUIDv4() as organization_id, -- Placeholder UUID for events without organization
     'user_activity' as metric_type,
     toDate(event_timestamp) as metric_date,
     toHour(event_timestamp) as metric_hour,
@@ -177,75 +177,10 @@ FROM conversation_events
 WHERE tokens_used > 0
 GROUP BY organization_id, metric_date, metric_hour;
 
--- Test data insertion function (simulate via INSERT statements)
--- Insert sample test data for immediate testing
+-- Test data will be inserted by seed scripts, not in init script
 
--- Sample user events
-INSERT INTO user_events (user_id, event_type, session_id, properties) VALUES
-('550e8400-e29b-41d4-a716-446655440001', 'login', 'session_1', map('source', 'web', 'device', 'desktop')),
-('550e8400-e29b-41d4-a716-446655440001', 'page_view', 'session_1', map('page', '/dashboard', 'referrer', 'direct')),
-('550e8400-e29b-41d4-a716-446655440002', 'login', 'session_2', map('source', 'mobile', 'device', 'phone')),
-('550e8400-e29b-41d4-a716-446655440002', 'agent_create', 'session_2', map('agent_type', 'chat', 'model', 'gpt-4'));
+-- Test helper functions would be implemented in application code
 
--- Sample conversation events  
-INSERT INTO conversation_events (
-    conversation_id, agent_id, user_id, organization_id, 
-    event_type, message_count, tokens_used, model_used, tool_calls
-) VALUES
-('660e8400-e29b-41d4-a716-446655440001', '770e8400-e29b-41d4-a716-446655440001', 
- '550e8400-e29b-41d4-a716-446655440001', '880e8400-e29b-41d4-a716-446655440001',
- 'conversation_start', 1, 150, 'gpt-4', []),
-('660e8400-e29b-41d4-a716-446655440001', '770e8400-e29b-41d4-a716-446655440001',
- '550e8400-e29b-41d4-a716-446655440001', '880e8400-e29b-41d4-a716-446655440001', 
- 'message_sent', 5, 750, 'gpt-4', ['web_search', 'code_execution']);
-
--- Sample tool executions
-INSERT INTO tool_executions (
-    conversation_id, agent_id, tool_name, execution_status, 
-    execution_time_ms, parameters_size, result_size
-) VALUES
-('660e8400-e29b-41d4-a716-446655440001', '770e8400-e29b-41d4-a716-446655440001',
- 'web_search', 'success', 1250, 512, 2048),
-('660e8400-e29b-41d4-a716-446655440001', '770e8400-e29b-41d4-a716-446655440001',
- 'code_execution', 'success', 890, 1024, 256);
-
--- Sample WebSocket events
-INSERT INTO websocket_events (connection_id, user_id, event_type, message_type, message_size) VALUES
-('ws_conn_1', '550e8400-e29b-41d4-a716-446655440001', 'connect', null, 0),
-('ws_conn_1', '550e8400-e29b-41d4-a716-446655440001', 'message', 'agent_message', 512),
-('ws_conn_1', '550e8400-e29b-41d4-a716-446655440001', 'message', 'user_message', 256),
-('ws_conn_1', '550e8400-e29b-41d4-a716-446655440001', 'disconnect', null, 0);
-
--- Sample performance metrics
-INSERT INTO performance_metrics (service_name, endpoint, method, status_code, response_time_ms, user_id) VALUES
-('auth-service', '/api/v1/auth/login', 'POST', 200, 145, '550e8400-e29b-41d4-a716-446655440001'),
-('backend-service', '/api/v1/agents', 'GET', 200, 89, '550e8400-e29b-41d4-a716-446655440001'),
-('backend-service', '/api/v1/conversations', 'POST', 201, 234, '550e8400-e29b-41d4-a716-446655440001'),
-('websocket-service', '/ws', 'CONNECT', 101, 12, '550e8400-e29b-41d4-a716-446655440001');
-
--- Sample billing events
-INSERT INTO billing_events (organization_id, user_id, billing_type, quantity, unit_cost, resource_id) VALUES
-('880e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440001', 'token_usage', 750, 0.002, 'gpt-4'),
-('880e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440001', 'api_call', 1, 0.01, 'conversation_api'),
-('880e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440001', 'tool_execution', 2, 0.05, 'web_search');
-
--- Create test helper functions
-CREATE OR REPLACE FUNCTION reset_test_analytics() AS $$
-BEGIN
-    -- Note: ClickHouse doesn't have stored procedures, so this would be done via DELETE statements
-    -- DELETE FROM user_events WHERE user_id LIKE '550e8400%';
-    -- DELETE FROM conversation_events WHERE user_id LIKE '550e8400%';
-    -- etc.
-    SELECT 'Test analytics data reset' as status;
-END;
-$$;
-
--- Optimize tables for test performance
-OPTIMIZE TABLE user_events FINAL;
-OPTIMIZE TABLE conversation_events FINAL;  
-OPTIMIZE TABLE tool_executions FINAL;
-OPTIMIZE TABLE websocket_events FINAL;
-OPTIMIZE TABLE performance_metrics FINAL;
-OPTIMIZE TABLE billing_events FINAL;
+-- Tables will be optimized after data insertion
 
 SELECT 'ClickHouse test database initialized successfully' as status;
