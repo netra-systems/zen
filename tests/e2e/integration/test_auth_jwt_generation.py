@@ -47,7 +47,7 @@ class ExtendedJWTGenerationTestManager(JWTGenerationTestManager):
             return {
                 "user_id": payload.get("sub"),
                 "email": payload.get("email"),
-                "token_type": payload.get("token_type"),
+                "token_type": payload.get("type"),  # Note: type not token_type
                 "permissions": payload.get("permissions", []),
                 "issued_at": payload.get("iat"),
                 "expires_at": payload.get("exp"),
@@ -78,7 +78,7 @@ class ExtendedJWTGenerationTestManager(JWTGenerationTestManager):
             result["token_info"] = payload
             
             # Check required fields
-            required_fields = ["sub", "exp", "iat", "token_type"]
+            required_fields = ["sub", "exp", "iat", "type"]  # Note: type not token_type
             if all(field in payload for field in required_fields):
                 result["has_required_fields"] = True
             

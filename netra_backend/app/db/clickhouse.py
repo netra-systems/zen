@@ -522,8 +522,10 @@ class ClickHouseService:
         from netra_backend.app.core.isolated_environment import get_env
         
         if self.force_mock or use_mock_clickhouse():
-            # NO MOCKS IN DEV MODE
-            raise RuntimeError("Mock ClickHouse client removed - use real ClickHouse in development mode")
+            # In testing environment with ClickHouse disabled, use NoOp client
+            self._client = NoOpClickHouseClient()
+            logger.info("[ClickHouse Service] Initialized with NoOp client for testing environment")
+            return
         
         # ALWAYS use real client in development and production
         environment = get_env().get("ENVIRONMENT", "development").lower()
@@ -586,8 +588,14 @@ class ClickHouseService:
         """Test ClickHouse connection availability."""
         if not self._client:
             await self.initialize()
-        if isinstance(self._client, MockClickHouseDatabase):
-            return True
+        # Check for mock/NoOp clients
+        try:
+            from test_framework.fixtures.clickhouse_fixtures import MockClickHouseDatabase
+            if isinstance(self._client, (MockClickHouseDatabase, NoOpClickHouseClient)):
+                return True
+        except ImportError:
+            if isinstance(self._client, NoOpClickHouseClient):
+                return True
         try:
             await self._client.test_connection()
             return True
@@ -630,10 +638,18 @@ class ClickHouseService:
         if not self._client:
             await self.initialize()
         
-        if isinstance(self._client, MockClickHouseDatabase):
-            # Mock implementation - just log the operation
-            logger.info(f"[MOCK ClickHouse] Batch insert to {table_name}: {len(data)} rows")
-            return
+        # Check for mock/NoOp clients
+        try:
+            from test_framework.fixtures.clickhouse_fixtures import MockClickHouseDatabase
+            if isinstance(self._client, (MockClickHouseDatabase, NoOpClickHouseClient)):
+                # Mock implementation - just log the operation
+                logger.info(f"[MOCK ClickHouse] Batch insert to {table_name}: {len(data)} rows")
+                return
+        except ImportError:
+            if isinstance(self._client, NoOpClickHouseClient):
+                # NoOp implementation - just log the operation
+                logger.info(f"[NoOp ClickHouse] Batch insert to {table_name}: {len(data)} rows")
+                return
         
         # For real implementation, we'll use a simple INSERT query
         # This is a basic implementation - could be enhanced with proper bulk insert
@@ -659,7 +675,13 @@ class ClickHouseService:
     @property
     def is_mock(self) -> bool:
         """Check if using mock client."""
-        return isinstance(self._client, MockClickHouseDatabase)
+        # Import here to avoid circular imports and maintain clean separation
+        try:
+            from test_framework.fixtures.clickhouse_fixtures import MockClickHouseDatabase
+            return isinstance(self._client, (MockClickHouseDatabase, NoOpClickHouseClient))
+        except ImportError:
+            # If test fixtures not available, check for NoOp client only
+            return isinstance(self._client, NoOpClickHouseClient)
     
     @property
     def is_real(self) -> bool:

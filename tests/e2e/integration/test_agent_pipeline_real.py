@@ -41,7 +41,19 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-class TestAgentPipelineExecutioner:
+@pytest.fixture
+async def pipeline_tester(real_services):
+    """Create agent pipeline tester with real services."""
+    return AgentPipelineExecutioner(real_services)
+
+
+@pytest.fixture
+async def performance_tester(pipeline_tester):
+    """Create agent pipeline performance tester."""
+    return AgentPipelinePerformanceer(pipeline_tester)
+
+
+class AgentPipelineExecutioner:
     """Comprehensive agent pipeline execution tester with real services."""
     
     def __init__(self, real_services):
@@ -298,14 +310,13 @@ class TestAgentPipelineExecutioner:
             }
 
 
-class TestAgentPipelinePerformanceer:
+class AgentPipelinePerformanceer:
     """Tests agent pipeline performance characteristics."""
     
-    def __init__(self, pipeline_tester: TestAgentPipelineExecutioner):
+    def __init__(self, pipeline_tester: AgentPipelineExecutioner):
         """Initialize performance tester."""
         self.pipeline_tester = pipeline_tester
     
-    @pytest.mark.e2e
     async def test_pipeline_performance_requirements(self, ws_client) -> Dict[str, Any]:
         """Test that agent pipeline meets performance requirements."""
         performance_results = {}
@@ -349,12 +360,12 @@ class TestAgentPipelinePerformanceer:
 @pytest.mark.critical
 @pytest.mark.asyncio
 @pytest.mark.e2e
-async def test_complete_agent_pipeline_execution(real_services):
+async def test_complete_agent_pipeline_execution(pipeline_tester):
     """
     BVJ: Segment: ALL | Goal: Core Agent Value Delivery | Impact: $120K+ MRR
     Test: Complete agent pipeline from WebSocket message to agent response
     """
-    pipeline_tester = TestAgentPipelineExecutioner(real_services)
+    # Use the fixture parameter directly
     
     # Phase 1: Setup authenticated WebSocket connection
     print("Phase 1: Setting up authenticated WebSocket connection...")
@@ -479,10 +490,10 @@ async def test_complete_agent_pipeline_execution(real_services):
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-async def test_agent_pipeline_performance_requirements(real_services):
+async def test_agent_pipeline_performance_requirements(performance_tester):
     """Test that agent pipeline meets performance requirements for different request types."""
-    pipeline_tester = TestAgentPipelineExecutioner(real_services)
-    performance_tester = TestAgentPipelinePerformanceer(pipeline_tester)
+    # Use the fixture parameters directly
+    pipeline_tester = performance_tester.pipeline_tester
     
     # Setup WebSocket
     ws_setup = await pipeline_tester.setup_authenticated_websocket()
@@ -519,9 +530,9 @@ async def test_agent_pipeline_performance_requirements(real_services):
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-async def test_concurrent_agent_pipeline_execution(real_services):
+async def test_concurrent_agent_pipeline_execution(pipeline_tester):
     """Test multiple concurrent agent pipeline executions."""
-    pipeline_tester = TestAgentPipelineExecutioner(real_services)
+    # Use the fixture parameter directly
     
     # Setup multiple WebSocket connections
     websockets = []
@@ -581,9 +592,9 @@ async def test_concurrent_agent_pipeline_execution(real_services):
 
 @pytest.mark.asyncio 
 @pytest.mark.e2e
-async def test_agent_pipeline_error_handling(real_services):
+async def test_agent_pipeline_error_handling(pipeline_tester):
     """Test agent pipeline error handling and recovery."""
-    pipeline_tester = TestAgentPipelineExecutioner(real_services)
+    # Use the fixture parameter directly
     
     # Setup WebSocket
     ws_setup = await pipeline_tester.setup_authenticated_websocket()

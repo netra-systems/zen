@@ -72,8 +72,11 @@ class MultiAgentOrchestrationSuite:
             await config_manager.initialize()
             app_config = config_manager.get_app_config()
             
+            # Force LLM mode to be enabled for real service testing
+            app_config.llm_mode = "shared"  # Ensure LLMs are enabled
+            app_config.dev_mode_llm_enabled = True  # Ensure dev mode allows LLMs
+            
             self.llm_manager = LLMManager(app_config)
-            await self.llm_manager.initialize()
             
             # Mock WebSocket for E2E tests to avoid network complexity
             self.websocket_manager = AsyncMock(spec=UnifiedWebSocketManager)
@@ -92,6 +95,10 @@ class MultiAgentOrchestrationSuite:
         """Initialize all sub-agents with proper dependencies."""
         mock_tool_dispatcher = AsyncMock()  # TODO: Use real service instead of Mock
         mock_db_session = AsyncMock()  # TODO: Use real service instead of Mock
+        
+        # Configure mock_tool_dispatcher to avoid unawaited coroutine issues
+        mock_tool_dispatcher.dispatch_tool = AsyncMock(return_value={"status": "success"})
+        mock_tool_dispatcher.get_available_tools = AsyncMock(return_value=[])
         
         self.agents = {
             'triage': TriageSubAgent(

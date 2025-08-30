@@ -12,7 +12,7 @@ describe('Agent Optimization Workflow - Real Services', () => {
     // Get real auth configuration and setup authentication
     cy.request({
       method: 'GET',
-      url: 'http://localhost:8002/auth/config',
+      url: 'http://localhost:8081/auth/config',
       failOnStatusCode: false
     }).then((configResponse) => {
       if (configResponse.status === 200 && configResponse.body.development_mode) {
