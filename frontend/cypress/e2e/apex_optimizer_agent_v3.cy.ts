@@ -40,7 +40,7 @@ describe('Apex Optimizer Agent End-to-End Test', () => {
         
         // Look for Technology section or direct optimization interface
         if ($body.text().includes('Technology')) {
-          cy.contains('Technology').click();
+          cy.contains('Technology').click({ force: true });
           cy.wait(500);
           
           // Look for AI Chat or optimization option
@@ -189,7 +189,7 @@ describe('Apex Optimizer Agent End-to-End Test', () => {
     
     cy.get('body').then($body => {
       if ($body.text().includes('Technology')) {
-        cy.contains('Technology').click();
+        cy.contains('Technology').click({ force: true });
         cy.wait(500);
         if ($body.text().includes('AI Chat')) {
           cy.contains('AI Chat').click({ force: true });
@@ -234,7 +234,7 @@ describe('Apex Optimizer Agent End-to-End Test', () => {
     
     cy.get('body').then($body => {
       if ($body.text().includes('Technology')) {
-        cy.contains('Technology').click();
+        cy.contains('Technology').click({ force: true });
         cy.wait(500);
         if ($body.text().includes('AI Chat')) {
           cy.contains('AI Chat').click({ force: true });

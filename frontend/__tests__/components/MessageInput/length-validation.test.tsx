@@ -58,7 +58,7 @@ const MockMessageInput: React.FC<{
           data-testid="message-input"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="Type your message..."
+          placeholder="Start typing your AI optimization request..."
           disabled={disabled}
           maxLength={maxLength + 100} // Allow typing beyond limit to show error
         />

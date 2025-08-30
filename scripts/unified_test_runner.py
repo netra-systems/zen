@@ -314,6 +314,7 @@ class UnifiedTestRunner:
         elif args.real_services or running_e2e:
             configure_test_environment()
             # Use TEST services for real service testing by default
+            self.port_discovery = DockerPortDiscovery(use_test_services=True)
             env = get_env()
             env.set('USE_REAL_SERVICES', 'true', 'test_runner')
             # Use test-specific ports
@@ -323,6 +324,50 @@ class UnifiedTestRunner:
         else:
             # Only allow mock environment for pure unit tests in test environment
             configure_test_environment()
+            # Create port discovery even for mock environment to enable port discovery if Docker is available
+            self.port_discovery = DockerPortDiscovery(use_test_services=True)
+        
+        # Update service URLs with discovered Docker container ports
+        # This fixes the hardcoded port issues by using actual Docker container ports
+        if hasattr(self, 'port_discovery') and self.port_discovery:
+            port_mappings = self.port_discovery.discover_all_ports()
+            env = get_env()
+            
+            # Update PostgreSQL DATABASE_URL
+            if 'postgres' in port_mappings and port_mappings['postgres'].is_available:
+                postgres_port = port_mappings['postgres'].external_port
+                
+                # Construct DATABASE_URL with discovered port and correct user/password for each environment
+                if args.env == "dev":
+                    # Dev environment uses "netra" user with password "netra123"
+                    discovered_db_url = f"postgresql://netra:netra123@localhost:{postgres_port}/netra_dev"
+                else:
+                    # Test environment uses "test" user with password "test"
+                    discovered_db_url = f"postgresql://test:test@localhost:{postgres_port}/netra_test"
+                    
+                env.set('DATABASE_URL', discovered_db_url, 'test_runner_port_discovery')
+                print(f"[INFO] Updated DATABASE_URL with discovered PostgreSQL port: {postgres_port}")
+            else:
+                print(f"[WARNING] PostgreSQL service not found via port discovery, using configured defaults")
+            
+            # Update Redis URL
+            if 'redis' in port_mappings and port_mappings['redis'].is_available:
+                redis_port = port_mappings['redis'].external_port
+                
+                if args.env == "dev":
+                    discovered_redis_url = f"redis://localhost:{redis_port}"
+                else:
+                    discovered_redis_url = f"redis://localhost:{redis_port}/1"  # Use DB 1 for tests
+                    
+                env.set('REDIS_URL', discovered_redis_url, 'test_runner_port_discovery')
+                print(f"[INFO] Updated REDIS_URL with discovered Redis port: {redis_port}")
+            
+            # Update ClickHouse URL
+            if 'clickhouse' in port_mappings and port_mappings['clickhouse'].is_available:
+                clickhouse_port = port_mappings['clickhouse'].external_port
+                discovered_clickhouse_url = f"http://localhost:{clickhouse_port}"
+                env.set('CLICKHOUSE_URL', discovered_clickhouse_url, 'test_runner_port_discovery')
+                print(f"[INFO] Updated CLICKHOUSE_URL with discovered ClickHouse port: {clickhouse_port}")
         
         # Set environment variables using IsolatedEnvironment
         env = get_env()

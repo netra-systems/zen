@@ -703,13 +703,13 @@ class DatabaseManager:
         # NO pytest bypass - tests and production use identical code paths
         
         if current_env in ["testing", "test"]:
-            return "postgresql://test:test@localhost:5432/netra_test?options=-c%20search_path%3Dnetra_test,public"
+            return "postgresql://test:test@localhost:5434/netra_test?options=-c%20search_path%3Dnetra_test,public"
         elif current_env == "development":
-            return "postgresql://postgres:password@localhost:5432/netra_dev?options=-c%20search_path%3Dnetra_dev,public"
+            return "postgresql://netra:netra123@localhost:5433/netra_dev?options=-c%20search_path%3Dnetra_dev,public"
         else:
             # Staging/production should always have DATABASE_URL set
             logger.warning(f"No DATABASE_URL found for {current_env} environment")
-            return "postgresql://postgres:password@localhost:5432/netra_dev?options=-c%20search_path%3Dpublic"
+            return "postgresql://netra:netra123@localhost:5433/netra_dev?options=-c%20search_path%3Dpublic"
     
     # AUTH SERVICE COMPATIBILITY METHODS
     # These methods provide auth service compatibility while using CoreDatabaseManager

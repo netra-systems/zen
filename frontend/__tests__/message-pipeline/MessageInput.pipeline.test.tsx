@@ -60,7 +60,7 @@ jest.mock('@/components/chat/utils/messageInputUtils', () => ({
   getPlaceholder: (isAuth: boolean, isProcessing: boolean, messageLength: number) => {
     if (!isAuth) return 'Please log in to chat';
     if (isProcessing) return 'AI is thinking...';
-    return 'Type your message...';
+    return 'Start typing your AI optimization request...';
   },
   getTextareaClassName: () => 'textarea-class',
   getCharCountClassName: () => 'char-count-class',
@@ -209,7 +209,7 @@ describe('MessageInput Pipeline Tests', () => {
       
       const textarea = screen.getByRole('textbox', { name: /message input/i });
       expect(textarea).not.toBeDisabled();
-      expect(textarea).toHaveAttribute('placeholder', 'Type your message...');
+      expect(textarea).toHaveAttribute('placeholder', 'Start typing your AI optimization request...');
     });
   });
 

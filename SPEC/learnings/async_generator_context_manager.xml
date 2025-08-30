@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Async Generator Context Manager Protocol Issue</name>
+        <type>Learning.DatabaseConnectivity</type>
+        <version>1.0</version>
+        <description>Critical learning about async generator vs async context manager protocol in database dependencies</description>
+        <created>2025-08-30</created>
+        <issue_date>2025-08-30</issue_date>
+        <resolution_date>2025-08-30</resolution_date>
+    </metadata>
+
+    <problem_statement>
+        <title>TypeError: 'async_generator' object does not support the asynchronous context manager protocol</title>
+        <description>
+            The database dependency functions in netra_backend/app/dependencies.py were incorrectly
+            using "async with get_db()" when get_db() returns an async generator, not an async context manager.
+            This caused immediate failures when trying to access database sessions through FastAPI dependencies.
+        </description>
+        <error_trace>
+            File "/app/netra_backend/app/dependencies.py", line 35, in get_db_dependency
+                async with get_db() as session:
+            TypeError: 'async_generator' object does not support the asynchronous context manager protocol
+        </error_trace>
+    </problem_statement>
+
+    <root_cause>
+        <title>Misunderstanding of get_db() return type</title>
+        <description>
+            The get_db() function in netra_backend/app/database/__init__.py is an async generator function
+            that yields sessions. It uses "async with DatabaseManager.get_async_session()" internally,
+            but the function itself returns an AsyncGenerator, not an async context manager.
+        </description>
+        <code_analysis>
+            <!-- Incorrect usage -->
+            async def get_db_dependency() -> AsyncGenerator[AsyncSession, None]:
+                async with get_db() as session:  # WRONG - get_db() is a generator
+                    yield session
+            
+            <!-- What get_db() actually does -->
+            async def get_db() -> AsyncGenerator[AsyncSession, None]:
+                async with DatabaseManager.get_async_session() as session:
+                    yield session  # This makes get_db() a generator function
+        </code_analysis>
+    </root_cause>
+
+    <solution>
+        <title>Use async for to iterate over the generator</title>
+        <description>
+            Since get_db() returns an async generator, we must use "async for" to iterate over it,
+            not "async with" which expects an async context manager.
+        </description>
+        <implementation>
+            <!-- Correct usage -->
+            async def get_db_dependency() -> AsyncGenerator[AsyncSession, None]:
+                async for session in get_db():  # CORRECT - iterate over generator
+                    _validate_session_type(session)
+                    yield session
+            
+            # Also fixed the legacy compatibility function
+            async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
+                async for session in get_db():
+                    yield session
+        </implementation>
+    </solution>
+
+    <critical_takeaways>
+        <takeaway priority="CRITICAL">
+            When a function uses "yield", it becomes a generator function, even if it uses
+            "async with" internally. You cannot use "async with" on a generator - use "async for" instead.
+        </takeaway>
+        <takeaway priority="HIGH">
+            Always check the return type annotation - AsyncGenerator indicates you need "async for",
+            while AsyncContextManager indicates you need "async with".
+        </takeaway>
+        <takeaway priority="HIGH">
+            The pattern "async with get_db() as session" only works if get_db() is decorated
+            with @asynccontextmanager or implements __aenter__/__aexit__ methods.
+        </takeaway>
+        <takeaway priority="MEDIUM">
+            Database session dependencies in FastAPI should consistently use async generators
+            to properly manage session lifecycle and cleanup.
+        </takeaway>
+    </critical_takeaways>
+
+    <prevention_measures>
+        <measure>
+            Always verify the actual return type of async functions before using them -
+            generators and context managers have different protocols.
+        </measure>
+        <measure>
+            Add type hints consistently and use mypy to catch these protocol mismatches
+            at static analysis time rather than runtime.
+        </measure>
+        <measure>
+            Create unit tests for all database dependency functions to catch these issues
+            before deployment.
+        </measure>
+    </prevention_measures>
+
+    <affected_files>
+        <file>netra_backend/app/dependencies.py</file>
+        <file>netra_backend/app/database/__init__.py</file>
+    </affected_files>
+
+    <test_coverage>
+        <test_file>netra_backend/tests/unit/test_database_dependencies.py</test_file>
+        <test_scenarios>
+            <scenario>Test that get_db_dependency returns valid AsyncSession</scenario>
+            <scenario>Test that get_db_session legacy function works correctly</scenario>
+            <scenario>Test proper cleanup when generator is exhausted</scenario>
+            <scenario>Test error handling in database dependencies</scenario>
+        </test_scenarios>
+    </test_coverage>
+</specification>

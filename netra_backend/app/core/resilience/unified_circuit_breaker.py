@@ -300,7 +300,9 @@ class UnifiedCircuitBreaker:
     def _start_health_monitoring(self) -> None:
         """Start background health monitoring task."""
         try:
-            self._health_check_task = asyncio.create_task(self._health_check_loop())
+            # Only create task if we can get an event loop
+            loop = asyncio.get_running_loop()
+            self._health_check_task = loop.create_task(self._health_check_loop())
         except RuntimeError:
             # No event loop running - health monitoring will be started lazily
             self._health_check_task = None
@@ -311,7 +313,9 @@ class UnifiedCircuitBreaker:
             self.config.health_check_interval > 0 and 
             self._health_check_task is None):
             try:
-                self._health_check_task = asyncio.create_task(self._health_check_loop())
+                # Only create task if we can get an event loop
+                loop = asyncio.get_running_loop()
+                self._health_check_task = loop.create_task(self._health_check_loop())
             except RuntimeError:
                 # Still no event loop - skip for now
                 pass

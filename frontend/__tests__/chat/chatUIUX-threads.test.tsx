@@ -198,7 +198,7 @@ const setupThreadDeletion = (threads: any[]) => {
 };
 
 const sendTestMessage = async (message: string, mockFn: jest.Mock) => {
-  const messageInput = screen.getByPlaceholderText(/Type your message/i);
+  const messageInput = screen.getByPlaceholderText(/start typing your ai optimization request/i);
   await userEvent.type(messageInput, message);
   
   const sendButton = screen.getByRole('button', { name: /send/i });

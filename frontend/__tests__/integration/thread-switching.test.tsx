@@ -225,7 +225,7 @@ const ThreadSwitchingTestComponent: React.FC = () => {
                 data-testid="message-input"
                 value={currentDraft}
                 onChange={(e) => handleDraftChange(activeThread.id, e.target.value)}
-                placeholder="Type your message..."
+                placeholder="Start typing your AI optimization request..."
                 disabled={state.isLoading}
               />
               <button

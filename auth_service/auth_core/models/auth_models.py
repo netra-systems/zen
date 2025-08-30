@@ -198,7 +198,7 @@ class User(BaseModel):
     name: Optional[str] = None
     picture: Optional[str] = None
     verified_email: Optional[bool] = True
-    provider: Optional[str] = None
+    provider: Optional[str] = None    # Additional fields for internal user management and test compatibility    role: Optional[str] = "user"    is_active: Optional[bool] = True    created_at: Optional[datetime] = Field(default_factory=lambda: datetime.now(UTC))    updated_at: Optional[datetime] = Field(default_factory=lambda: datetime.now(UTC))
 
 class OAuthState(BaseModel):
     """OAuth state parameter model"""

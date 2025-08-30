@@ -44,9 +44,10 @@ export default defineConfig({
     screenshotOnRunFailure: false,
     // Run in headless mode by default
     chromeWebSecurity: false,
-    defaultCommandTimeout: 10000,
-    requestTimeout: 10000,
-    responseTimeout: 10000,
+    defaultCommandTimeout: 45000,  // Increased for slow Next.js dev server
+    requestTimeout: 45000,
+    responseTimeout: 45000,
+    pageLoadTimeout: 120000,  // Extended for very slow Next.js compilation (2 minutes)
   },
   component: {
     devServer: {

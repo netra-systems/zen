@@ -76,7 +76,7 @@ class TestHealthEndpointRoutingIssue:
         # EXPECTED: 200 with health data
         # ACTUAL: Will likely be 404 (route not found) -> 401 (security middleware conversion)
         assert response.status_code == 200, (
-            f"❌ ROUTING ISSUE CONFIRMED: Expected 200, got {response.status_code}. "
+            f"ROUTING ISSUE CONFIRMED: Expected 200, got {response.status_code}. "
             f"Response: {response.text}. "
             f"This indicates the /api/health route is not properly configured. "
             f"When a route returns 404, security middleware converts it to 401, "
@@ -101,7 +101,7 @@ class TestHealthEndpointRoutingIssue:
         
         # This will fail if route returns 404
         assert response.status_code == 200, (
-            f"❌ Cannot test JSON structure because route returns {response.status_code} instead of 200. "
+            f"Cannot test JSON structure because route returns {response.status_code} instead of 200. "
             f"This confirms the routing issue - /api/health is not properly registered."
         )
         
@@ -144,20 +144,20 @@ class TestHealthEndpointRoutingIssue:
         
         # Should not return 401/403 (authentication/authorization errors)
         assert response.status_code != 401, (
-            f"❌ SECURITY MIDDLEWARE ISSUE CONFIRMED: Health endpoint returned 401 (Unauthorized). "
+            f"SECURITY MIDDLEWARE ISSUE CONFIRMED: Health endpoint returned 401 (Unauthorized). "
             f"This indicates that security middleware is converting 404 (route not found) to 401. "
             f"The real issue is that /api/health route is not registered, so it returns 404, "
             f"then security middleware converts 404 to 401, causing false authentication failures "
             f"in health monitoring systems."
         )
         assert response.status_code != 403, (
-            f"❌ Health endpoint returned 403 (Forbidden). "
+            f"Health endpoint returned 403 (Forbidden). "
             f"Health endpoints should be publicly accessible."
         )
         
         # Should return 200 (healthy) or 503 (unhealthy service), NOT 404
         assert response.status_code in [200, 503], (
-            f"❌ ROUTING ISSUE: Expected 200 or 503, got {response.status_code}. "
+            f"ROUTING ISSUE: Expected 200 or 503, got {response.status_code}. "
             f"Response: {response.text}. "
             f"A 404 response indicates the route is not registered at /api/health."
         )
@@ -175,7 +175,7 @@ class TestHealthEndpointRoutingIssue:
         
         # Should work regardless of environment
         assert response.status_code in [200, 503], (
-            f"❌ Health endpoint failed in test environment: {response.status_code}. "
+            f"Health endpoint failed in test environment: {response.status_code}. "
             f"If this fails in test, it will also fail in staging and production."
         )
         
@@ -214,24 +214,24 @@ class TestAlternativeHealthEndpointPaths:
     @pytest.mark.health
     def test_map_available_health_endpoints(self, client, mock_app_state):
         """
-        Map all possible health endpoint variations to understand current routing.
+        Map all health endpoint variations to verify they work correctly.
         
-        This test helps diagnose the routing configuration and will show which paths work.
+        Verifies that both /health and /api/health endpoints are properly configured.
         """
         test_paths = [
-            "/health",           # Current configured path (prefix="/health", route="/")
+            "/health",           # Health router at /health prefix
             "/health/",          # With trailing slash
-            "/api/health",       # Expected path that should work but doesn't
+            "/api/health",       # Health router at /api/health prefix
             "/api/health/",      # With trailing slash
             "/health/live",      # Liveness probe
             "/health/ready",     # Readiness probe  
-            "/api/health/live",  # Expected but probably not working
-            "/api/health/ready", # Expected but probably not working
+            "/api/health/live",  # Liveness probe via API prefix
+            "/api/health/ready", # Readiness probe via API prefix
         ]
         
         results = {}
         
-        print(f"\n=== HEALTH ENDPOINT ROUTING DIAGNOSIS ===")
+        print(f"\n=== HEALTH ENDPOINT ROUTING VERIFICATION ===")
         
         for path in test_paths:
             try:
@@ -242,82 +242,59 @@ class TestAlternativeHealthEndpointPaths:
                     "response_preview": response.text[:100] if response.text else ""
                 }
                 
-                status_emoji = "✅" if response.status_code == 200 else "❌"
+                status_emoji = "PASS" if response.status_code == 200 else "FAIL"
                 print(f"{status_emoji} {path}: {response.status_code}")
                 
             except Exception as e:
                 results[path] = {"error": str(e)}
-                print(f"💥 {path}: ERROR - {e}")
+                print(f"ERROR {path}: ERROR - {e}")
         
         print(f"==========================================\n")
         
-        # Analysis: /api/health should work but probably doesn't
-        api_health_result = results.get("/api/health", {})
-        if "status_code" in api_health_result:
-            api_health_status = api_health_result["status_code"]
-            
-            # Document the expected vs actual behavior
-            print(f"🔍 ANALYSIS:")
-            print(f"   /health status: {results.get('/health', {}).get('status_code', 'N/A')}")
-            print(f"   /api/health status: {api_health_status}")
-            
-            if results.get('/health', {}).get('status_code') == 200 and api_health_status != 200:
-                print(f"   ❌ ISSUE CONFIRMED: /health works but /api/health doesn't")
-                print(f"   📝 ROOT CAUSE: Health router is mounted at '/health' prefix")
-                print(f"   📝 EXPECTED: Should also be available at '/api/health' for monitoring")
-                
-            # Document the routing issue without failing the test
-            if api_health_status != 200:
-                print(f"❌ ROUTING ISSUE CONFIRMED: /api/health returned {api_health_status}, expected 200.")
-                print(f"The health router is configured with prefix='/health' in the route config,")
-                print(f"making it accessible at /health but NOT at /api/health.")
-                print(f"Health monitoring systems expect /api/health to work.")
-                print(f"This is a known configuration issue that needs to be addressed.")
-            
-            # For now, just verify that at least /health works
-            health_status = results.get('/health', {}).get('status_code', 0)
-            assert health_status == 200, f"Basic health endpoint /health should work, got {health_status}"
-        else:
-            pytest.fail("Could not test /api/health endpoint due to errors")
+        # Verify both main health endpoints work
+        health_status = results.get('/health', {}).get('status_code', 0)
+        api_health_status = results.get('/api/health', {}).get('status_code', 0)
+        
+        print(f"ANALYSIS:")
+        print(f"   /health status: {health_status}")
+        print(f"   /api/health status: {api_health_status}")
+        
+        # Both endpoints should work (200 status)
+        assert health_status == 200, f"Health endpoint /health should return 200, got {health_status}"
+        assert api_health_status == 200, f"API health endpoint /api/health should return 200, got {api_health_status}"
 
     @pytest.mark.unit  
     @pytest.mark.api
     @pytest.mark.health
     def test_current_health_configuration_analysis(self, client, mock_app_state):
         """
-        Analyze the current health endpoint configuration.
+        Verify the current health endpoint configuration works as expected.
         
-        This test documents what currently works vs. what should work.
+        Both /health and /api/health endpoints should be properly configured and working.
         """
-        # Test current working path
+        # Test both configured paths
         health_response = client.get("/health")
         api_health_response = client.get("/api/health") 
         
-        print(f"\n=== CURRENT vs EXPECTED CONFIGURATION ===")
-        print(f"Current configuration (/health): {health_response.status_code}")
-        print(f"Expected configuration (/api/health): {api_health_response.status_code}")
+        print(f"\n=== HEALTH CONFIGURATION VERIFICATION ===")
+        print(f"/health endpoint status: {health_response.status_code}")
+        print(f"/api/health endpoint status: {api_health_response.status_code}")
         
-        if health_response.status_code == 200 and api_health_response.status_code != 200:
-            print(f"❌ MISMATCH: Health works at /health but not /api/health")
-            print(f"📋 REQUIRED FIX: Add routing for /api/health")
-            print(f"🔧 SOLUTION: Either add /api prefix to health router or create additional route")
-        
-        # This will help document the issue for fixing
+        # Both endpoints should work
         working_paths = []
         if health_response.status_code == 200:
             working_paths.append("/health")
         if api_health_response.status_code == 200:
             working_paths.append("/api/health")
             
-        print(f"✅ Working paths: {working_paths}")
-        print(f"❌ Broken paths: {[p for p in ['/health', '/api/health'] if p not in working_paths]}")
+        print(f"Working paths: {working_paths}")
+        if len(working_paths) < 2:
+            print(f"Non-working paths: {[p for p in ['/health', '/api/health'] if p not in working_paths]}")
         print(f"=========================================\n")
         
-        # Assert that at least one health endpoint works
-        assert len(working_paths) > 0, "At least one health endpoint should be working"
-        
-        # Assert that the basic /health endpoint works (this is the current configuration)
-        assert "/health" in working_paths, f"Basic /health endpoint should work, got status {health_response.status_code}"
+        # Both health endpoints should work
+        assert health_response.status_code == 200, f"/health endpoint should work, got status {health_response.status_code}"
+        assert api_health_response.status_code == 200, f"/api/health endpoint should work, got status {api_health_response.status_code}"
 
 
 class TestHealthEndpointCurrentConfiguration:
@@ -338,9 +315,9 @@ class TestHealthEndpointCurrentConfiguration:
     @pytest.mark.health
     def test_inspect_current_routes(self, app):
         """
-        Inspect the current route configuration to understand the issue.
+        Inspect the current route configuration to verify both health endpoints are registered.
         
-        This test examines the actual registered routes to diagnose the problem.
+        This test examines the actual registered routes to confirm proper configuration.
         """
         print(f"\n=== REGISTERED ROUTES ANALYSIS ===")
         
@@ -356,16 +333,17 @@ class TestHealthEndpointCurrentConfiguration:
                         all_routes.append(route_info)
                         if 'health' in route.path.lower():
                             health_routes.append(route_info)
-                            print(f"🏥 HEALTH ROUTE: {route_info}")
+                            print(f"HEALTH ROUTE: {route_info}")
                     elif hasattr(route, 'path'):
                         route_info = f"MOUNT {route.path}"
                         all_routes.append(route_info)
-                        print(f"📁 MOUNT: {route_info}")
+                        if 'health' in route.path.lower():
+                            print(f"HEALTH MOUNT: {route_info}")
                 except Exception as e:
-                    print(f"⚠️  Error processing route: {e}")
+                    print(f"WARNING Error processing route: {e}")
                     continue
         except Exception as e:
-            print(f"❌ Error accessing app routes: {e}")
+            print(f"ERROR Error accessing app routes: {e}")
             all_routes = []
             health_routes = []
         
@@ -373,37 +351,23 @@ class TestHealthEndpointCurrentConfiguration:
         api_health_found = any('/api/health' in route for route in all_routes)
         health_found = any('/health' in route for route in all_routes)
         
-        print(f"\n🔍 ROUTE ANALYSIS:")
+        print(f"\nROUTE ANALYSIS:")
         print(f"   Total routes registered: {len(all_routes)}")
         print(f"   Health-related routes: {len(health_routes)}")
         print(f"   /health route found: {health_found}")
         print(f"   /api/health route found: {api_health_found}")
         
         if health_routes:
-            print(f"\n📋 ALL HEALTH ROUTES:")
+            print(f"\nALL HEALTH ROUTES:")
             for route in health_routes:
                 print(f"     {route}")
         
-        if not api_health_found and health_found:
-            print(f"\n❌ ISSUE CONFIRMED:")
-            print(f"   - /health routes exist but /api/health routes do not")
-            print(f"   - Health router is mounted with '/health' prefix only")
-            print(f"   - Monitoring systems expect /api/health to work")
-            print(f"   - Need to add /api/health routing configuration")
-            
         print(f"===============================\n")
         
-        # This assertion documents the current state
-        if not api_health_found:
-            print(f"📝 DIAGNOSIS: /api/health route is not registered!")
-            print(f"📝 CAUSE: Health router mounted at '/health' prefix only") 
-            print(f"📝 IMPACT: 404 errors converted to 401 by security middleware")
-            print(f"📝 RESULT: False authentication failures in health monitoring")
-            
-            # This test passes - it's for diagnosis only, not to fail
-            assert True, "Route inspection complete - issue documented"
-        else:
-            print(f"✅ /api/health route is properly registered")
+        # Both routes should be properly registered
+        assert health_found, "Health routes should be found in route registry"
+        # Note: /api/health might be mounted as a separate mount point, so we verify via functional test
+        print(f"Health route configuration verified")
 
 
 class TestHealthEndpointSecurityBypass:
@@ -450,7 +414,7 @@ class TestHealthEndpointSecurityBypass:
         
         # Should ignore invalid auth and still return health status (not 401)
         assert response.status_code != 401, (
-            f"❌ AUTH ISSUE: Health endpoint returned 401 with invalid auth. "
+            f"AUTH ISSUE: Health endpoint returned 401 with invalid auth. "
             f"This could mean: 1) Route doesn't exist (404->401 conversion), "
             f"or 2) Auth middleware is incorrectly applied to health endpoints. "
             f"Health endpoints should ignore auth headers completely."
@@ -491,66 +455,60 @@ class TestExpectedHealthEndpointBehavior:
     @pytest.mark.health
     def test_expected_api_health_response_format(self, client, mock_app_state):
         """
-        Test expected health response format using the working endpoint.
+        Test expected health response format for /api/health endpoint.
         
-        This tests the current working /health endpoint format.
+        Verifies the API health endpoint returns the expected JSON structure.
         """
-        # Use the working endpoint for now
-        response = client.get("/health")
+        # Test the API health endpoint specifically
+        response = client.get("/api/health")
         
-        # Document the issue but don't fail the test
-        if response.status_code != 200:
-            print(f"⚠️  Health endpoint returned {response.status_code}, skipping format validation")
-            return
-            
         # Verify the endpoint is working
         assert response.status_code == 200, (
-            f"Health endpoint should return 200, got {response.status_code}"
+            f"API health endpoint should return 200, got {response.status_code}"
         )
         
         data = response.json()
         
-        # Expected format based on health.py implementation
-        expected_structure = {
-            "status": "healthy",  # or "unhealthy" 
-            "service": "netra-ai-platform",
-            "timestamp": "number",
-            "uptime_seconds": "number",
-            "checks": "object"  # Database, Redis, etc.
-        }
+        # Expected format based on actual API health response
+        required_fields = ["status", "service", "timestamp"]
+        optional_fields = ["version", "uptime_seconds", "checks"]
         
-        for field, expected_type in expected_structure.items():
-            assert field in data, f"Expected field '{field}' missing from health response"
+        # Check required fields
+        for field in required_fields:
+            assert field in data, f"Required field '{field}' missing from health response"
             
         # Validate specific field types
-        assert data["status"] in ["healthy", "unhealthy"]
-        assert isinstance(data["timestamp"], (int, float))
-        assert data["timestamp"] > 0
+        assert data["status"] in ["healthy", "unhealthy"], f"Status should be healthy/unhealthy, got {data['status']}"
+        assert data["service"] == "netra-ai-platform", f"Service should be netra-ai-platform, got {data['service']}"
+        assert isinstance(data["timestamp"], (int, float)), f"Timestamp should be a number, got {type(data['timestamp'])}"
+        assert data["timestamp"] > 0, f"Timestamp should be positive, got {data['timestamp']}"
+        
+        print(f"Health response validation passed - all required fields present")
 
     @pytest.mark.unit
     @pytest.mark.api
     @pytest.mark.health  
     def test_api_health_response_time_requirement(self, client, mock_app_state):
         """
-        Health endpoint should respond quickly for monitoring.
+        API health endpoint should respond quickly for monitoring.
         
         Health endpoints must be fast for monitoring systems.
         """
         start_time = time.time()
-        response = client.get("/health")  # Use working endpoint
+        response = client.get("/api/health")  # Test the API endpoint specifically
         end_time = time.time()
         
         response_time = end_time - start_time
         
         # Should respond quickly (under 5 seconds for health check)
         assert response_time < 5.0, (
-            f"Health endpoint took {response_time:.2f}s to respond. "
+            f"API health endpoint took {response_time:.2f}s to respond. "
             f"Health checks should be fast for monitoring."
         )
         
-        # Should also actually work (return 200/503)
+        # Should actually work (return 200/503)
         assert response.status_code in [200, 503], (
-            f"Health endpoint returned {response.status_code} instead of health status"
+            f"API health endpoint returned {response.status_code} instead of health status"
         )
         
-        print(f"✅ Health endpoint response time: {response_time:.3f}s")
+        print(f"API health endpoint response time: {response_time:.3f}s")

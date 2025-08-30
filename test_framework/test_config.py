@@ -106,9 +106,9 @@ def configure_dev_environment():
     os.environ["FRONTEND_URL"] = "http://localhost:3000"
     
     # Database and service URLs for dev environment
-    os.environ["DATABASE_URL"] = "postgresql://postgres:password@localhost:5432/netra_dev"
-    os.environ["REDIS_URL"] = "redis://localhost:6379"
-    os.environ["CLICKHOUSE_URL"] = "http://localhost:8123"
+    os.environ["DATABASE_URL"] = "postgresql://netra:netra123@localhost:5433/netra_dev"
+    os.environ["REDIS_URL"] = "redis://localhost:6380"
+    os.environ["CLICKHOUSE_URL"] = "http://localhost:8124"
 
 def configure_mock_environment():
     """Configure environment variables for mock/test services mode.
@@ -134,8 +134,8 @@ def configure_mock_environment():
     
     # Database and service URLs for test environment
     # Use test-specific database to avoid conflicts with dev data
-    os.environ["DATABASE_URL"] = "postgresql://postgres:password@localhost:5432/netra_test"
-    os.environ["REDIS_URL"] = "redis://localhost:6379/1"  # Use DB 1 for tests
+    os.environ["DATABASE_URL"] = "postgresql://test:test@localhost:5434/netra_test"
+    os.environ["REDIS_URL"] = "redis://localhost:6381/1"  # Use DB 1 for tests
     os.environ["CLICKHOUSE_URL"] = "http://localhost:8123"
 
 def configure_test_environment():

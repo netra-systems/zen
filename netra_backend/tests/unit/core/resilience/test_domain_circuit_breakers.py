@@ -192,8 +192,8 @@ class TestLLMCircuitBreakerConfig:
         """Test default LLM configuration values."""
         config = LLMCircuitBreakerConfig()
         
-        assert config.failure_threshold == 3
-        assert config.recovery_timeout_seconds == 120.0
+        assert config.failure_threshold == 10  # Updated for Gemini 2.0 Flash stability
+        assert config.recovery_timeout_seconds == 10.0  # Updated for faster recovery
         assert config.request_timeout_seconds == 60.0
         assert config.token_rate_limit_per_minute == 50000
         assert config.cost_threshold_dollars == 100.0

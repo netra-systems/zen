@@ -125,7 +125,7 @@ jest.mock('@/components/chat/ChatHeader', () => ({
 }));
 
 jest.mock('@/components/chat/MessageInput', () => ({
-  MessageInput: () => React.createElement('textarea', { role: 'textbox', 'data-testid': 'message-input', placeholder: 'Type your message...' }),
+  MessageInput: () => React.createElement('textarea', { role: 'textbox', 'data-testid': 'message-input', placeholder: 'Start typing your AI optimization request...' }),
 }));
 
 jest.mock('@/components/chat/MessageList', () => ({

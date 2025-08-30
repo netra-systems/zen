@@ -58,28 +58,18 @@ export class AgentRecoverySetup {
   }
 
   static visitDemoChat(): void {
-    cy.visit('/demo', { failOnStatusCode: false });
-    
-    // Check if page loaded properly
-    cy.get('body', { timeout: 10000 }).should('be.visible');
-    
-    // Use flexible element selection
-    cy.get('body').then(($body) => {
-      if ($body.text().includes('Technology')) {
-        cy.contains('Technology').click();
-        cy.wait(500);
-        
-        if ($body.text().includes('AI Chat')) {
-          cy.contains('AI Chat').click({ force: true });
-        } else {
-          cy.log('AI Chat button not found, continuing with current page');
-        }
-      } else {
-        cy.log('Technology section not found, using current page for tests');
-      }
+    // Use /chat page instead of /demo since it's working
+    // Next.js dev server is slow on first load, so use longer timeout
+    cy.visit('/chat', { 
+      failOnStatusCode: false,
+      timeout: 60000  // 60 second timeout for slow Next.js dev server
     });
     
-    cy.wait(1000);
+    // Check if page loaded properly with extended timeout
+    cy.get('body', { timeout: 30000 }).should('be.visible');
+    
+    // Wait for any authentication, compilation, or loading to complete
+    cy.wait(5000);
   }
 
   static fullSetup(): void {

@@ -147,6 +147,13 @@
             <critical-takeaway>ROOT CAUSE: Auth service tells Google to redirect to https://app.staging.netrasystems.ai/auth/callback instead of https://auth.staging.netrasystems.ai/auth/callback.</critical-takeaway>
             <critical-takeaway>FIX REQUIRED: Change redirect_uri = _determine_urls()[1] + "/auth/callback" to redirect_uri = _determine_urls()[0] + "/auth/callback" in all OAuth routes.</critical-takeaway>
             <critical-takeaway>PREVENTION: Run python scripts/validate_oauth_configuration.py before every deployment to catch OAuth redirect URI misconfigurations.</critical-takeaway>
+        </category>
+        
+        <category name="Database/AsyncGenerator" path="SPEC/learnings/async_generator_context_manager.xml" keywords="Database, Async Generator, Context Manager, TypeError, get_db, Dependencies, FastAPI, AsyncSession, Session Management">
+            <critical-takeaway>CRITICAL: get_db() returns AsyncGenerator, not async context manager - use "async for" not "async with" (async_generator_context_manager.xml).</critical-takeaway>
+            <critical-takeaway>Functions using "yield" become generators even if they use "async with" internally - check return type annotations (async_generator_context_manager.xml).</critical-takeaway>
+            <critical-takeaway>AsyncGenerator requires "async for", AsyncContextManager requires "async with" - these protocols are not interchangeable (async_generator_context_manager.xml).</critical-takeaway>
+            <critical-takeaway>Database dependencies in FastAPI should consistently use async generators for proper session lifecycle management (async_generator_context_manager.xml).</critical-takeaway>
             <critical-takeaway>TESTING: Use @pytest.mark.env("staging") tests to validate OAuth redirect URIs point to auth service URLs in staging environment.</critical-takeaway>
             <critical-takeaway>GOOGLE CONSOLE: Only auth service URLs should be authorized redirect URIs - never add frontend URLs to Google OAuth Console.</critical-takeaway>
         </category>

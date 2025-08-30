@@ -165,7 +165,7 @@ describe('Touch Interactions - Mobile Test Suite', () => {
     it('handles touch focus on input fields', async () => {
       render(
         <input 
-          placeholder="Type your message"
+          placeholder="Start typing your AI optimization request"
           data-testid="touch-input"
         />
       );
@@ -181,7 +181,7 @@ describe('Touch Interactions - Mobile Test Suite', () => {
       
       render(
         <input 
-          placeholder="Type your message"
+          placeholder="Start typing your AI optimization request"
           onFocus={mockViewport}
           data-testid="keyboard-input"
         />

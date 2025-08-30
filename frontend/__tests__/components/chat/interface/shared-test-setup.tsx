@@ -53,28 +53,33 @@ export const mockWebSocketProvider = () => ({
   simulateRawMessage: jest.fn()
 });
 
-// Mock Unified Chat Store
-export const mockUnifiedChatStore = () => ({
-  // State
-  messages: [],
-  threads: [],
-  activeThreadId: 'thread1',
-  activeThread: null,
-  isProcessing: false,
-  isAuthenticated: true,
+// Mock Unified Chat Store - returns the global mock store so components and tests use same data
+export const mockUnifiedChatStore = () => {
+  // Make sure global mockStore exists
+  if (!(global as any).mockStore) {
+    (global as any).mockStore = {
+      messages: [],
+      threads: [],
+      activeThreadId: 'thread1',
+      activeThread: null,
+      isProcessing: false,
+      isAuthenticated: true,
+      sendMessage: jest.fn(),
+      addMessage: jest.fn(),
+      updateMessage: jest.fn(),
+      deleteMessage: jest.fn(),
+      createThread: jest.fn(),
+      addThread: jest.fn(),
+      setActiveThread: jest.fn(),
+      deleteThread: jest.fn(),
+      queueMessage: jest.fn(),
+      exportConversation: jest.fn()
+    };
+  }
   
-  // Actions
-  sendMessage: jest.fn(),
-  addMessage: jest.fn(),
-  updateMessage: jest.fn(),
-  deleteMessage: jest.fn(),
-  createThread: jest.fn(),
-  addThread: jest.fn(),
-  setActiveThread: jest.fn(),
-  deleteThread: jest.fn(),
-  queueMessage: jest.fn(),
-  exportConversation: jest.fn()
-});
+  // Return the same global mock store object
+  return (global as any).mockStore;
+};
 
 // Mock Auth Store
 export const mockAuthStore = () => ({

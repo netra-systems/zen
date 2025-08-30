@@ -111,7 +111,8 @@ class TestUnifiedCircuitBreaker:
         
     def test_initialization(self, circuit_breaker):
         """Test circuit breaker initialization."""
-        assert circuit_breaker.state == UnifiedCircuitBreakerState.CLOSED
+        # Test using internal state for more precise checking
+        assert circuit_breaker.internal_state == UnifiedCircuitBreakerState.CLOSED
         assert circuit_breaker.is_closed
         assert not circuit_breaker.is_open
         assert not circuit_breaker.is_half_open
@@ -524,7 +525,10 @@ class TestHealthCheckIntegration:
     @pytest.fixture
     def circuit_breaker(self, config, mock_health_checker):
         """Create circuit breaker with health checker."""
-        return UnifiedCircuitBreaker(config, health_checker=mock_health_checker)
+        breaker = UnifiedCircuitBreaker(config, health_checker=mock_health_checker)
+        yield breaker
+        # Cleanup to prevent unawaited coroutine warnings
+        breaker.cleanup()
         
     @pytest.mark.asyncio
     async def test_health_check_integration(self, circuit_breaker, mock_health_checker):
@@ -878,7 +882,7 @@ class TestPreConfiguredCircuitBreakers:
         cb = UnifiedServiceCircuitBreakers.get_llm_service_circuit_breaker()
         
         assert cb.config.name == "llm_service"
-        assert cb.config.recovery_timeout == 120.0  # Longer recovery
+        assert cb.config.recovery_timeout == 10.0   # Updated for Gemini 2.0 Flash faster recovery
         assert cb.config.timeout_seconds == 60.0    # Longer timeout
         assert cb.config.slow_call_threshold == 30.0
         assert "RateLimitError" in cb.config.expected_exception_types

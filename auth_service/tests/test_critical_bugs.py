@@ -24,19 +24,24 @@ class TestAuthRefreshEndpointBug:
     @pytest.mark.asyncio
     async def test_refresh_endpoint_body_await_bug(self):
         """
-        This test demonstrates the bug where request.body() is being awaited
-        but it's not an awaitable method.
+        Test that refresh endpoint correctly handles async request.body() method.
+        This test verifies the bytes await bug is fixed.
         """
-        # Create a mock request with body() that returns bytes (not awaitable)
+        # Create a mock request with async body() method (correct behavior)
         request = MagicMock(spec=Request)
-        request.body = MagicMock(return_value=b'{"refresh_token": "test_token"}')
+        request.body = AsyncMock(return_value=b'{"refresh_token": "test_token"}')
         
-        # This should fail because body() is not awaitable
-        with pytest.raises((TypeError, AttributeError)) as exc_info:
-            await refresh_tokens(request)
-        
-        # The error should indicate that body() is not awaitable
-        assert "await" in str(exc_info.value).lower() or "coroutine" in str(exc_info.value).lower()
+        # Mock the auth service to return valid tokens
+        with patch('auth_core.routes.auth_routes.auth_service') as mock_auth_service:
+            mock_auth_service.refresh_tokens = AsyncMock(return_value=("new_access_token", "new_refresh_token"))
+            
+            # Should successfully handle the request without bytes await error
+            result = await refresh_tokens(request)
+            
+            # Verify it worked
+            assert result["access_token"] == "new_access_token"
+            assert result["refresh_token"] == "new_refresh_token"
+            mock_auth_service.refresh_tokens.assert_called_once_with("test_token")
     
     @pytest.mark.asyncio
     async def test_refresh_endpoint_should_use_json_method(self):

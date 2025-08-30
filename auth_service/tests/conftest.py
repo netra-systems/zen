@@ -33,6 +33,8 @@ if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
     env.set("ENVIRONMENT", "test", "auth_conftest")  # Use test environment for proper test setup
     env.set("AUTH_FAST_TEST_MODE", "false", "auth_conftest")  # Disable fast test mode for integration tests
     env.set("JWT_SECRET_KEY", "test_jwt_secret_key_that_is_long_enough_for_testing_purposes", "auth_conftest")
+    env.set("SERVICE_SECRET", "test-service-secret-for-auth-service-32-chars-minimum-required-length", "auth_conftest")
+    env.set("SERVICE_ID", "auth-service-test", "auth_conftest")
     # Set test-specific OAuth credentials (environment-specific)
     env.set("GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT", "123456789-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com", "auth_conftest")
     env.set("GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT", "GOCSPX-1234567890123456789012345678901", "auth_conftest")

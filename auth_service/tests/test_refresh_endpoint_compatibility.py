@@ -24,7 +24,7 @@ class TestRefreshEndpointCompatibility:
     @pytest.fixture
     def valid_refresh_token(self):
         """Generate a valid refresh token for testing"""
-        secret = AuthConfig.get_jwt_secret_key() or "test_secret"
+        secret = AuthConfig.get_jwt_secret() or "test_secret"
         payload = {
             "sub": "test_user_id",
             "type": "refresh",
@@ -36,7 +36,7 @@ class TestRefreshEndpointCompatibility:
     @pytest.fixture
     def expired_refresh_token(self):
         """Generate an expired refresh token"""
-        secret = AuthConfig.get_jwt_secret_key() or "test_secret"
+        secret = AuthConfig.get_jwt_secret() or "test_secret"
         payload = {
             "sub": "test_user_id",
             "type": "refresh",
@@ -47,7 +47,7 @@ class TestRefreshEndpointCompatibility:
     
     def test_refresh_with_snake_case_field(self, client, valid_refresh_token):
         """Test refresh endpoint with snake_case field name (original format)"""
-        with patch('auth_service.auth_core.services.auth_service.auth_service.refresh_tokens') as mock_refresh:
+        with patch('auth_service.auth_core.routes.auth_routes.auth_service.refresh_tokens') as mock_refresh:
             mock_refresh.return_value = ("new_access_token", "new_refresh_token")
             
             response = client.post(
@@ -64,7 +64,7 @@ class TestRefreshEndpointCompatibility:
     
     def test_refresh_with_camel_case_field(self, client, valid_refresh_token):
         """Test refresh endpoint with camelCase field name (frontend format)"""
-        with patch('auth_service.auth_core.services.auth_service.auth_service.refresh_tokens') as mock_refresh:
+        with patch('auth_service.auth_core.routes.auth_routes.auth_service.refresh_tokens') as mock_refresh:
             mock_refresh.return_value = ("new_access_token", "new_refresh_token")
             
             response = client.post(
@@ -79,7 +79,7 @@ class TestRefreshEndpointCompatibility:
     
     def test_refresh_with_simple_token_field(self, client, valid_refresh_token):
         """Test refresh endpoint with simple 'token' field name"""
-        with patch('auth_service.auth_core.services.auth_service.auth_service.refresh_tokens') as mock_refresh:
+        with patch('auth_service.auth_core.routes.auth_routes.auth_service.refresh_tokens') as mock_refresh:
             mock_refresh.return_value = ("new_access_token", "new_refresh_token")
             
             response = client.post(
@@ -116,7 +116,7 @@ class TestRefreshEndpointCompatibility:
     
     def test_refresh_with_invalid_token(self, client):
         """Test refresh endpoint with invalid token format"""
-        with patch('auth_service.auth_core.services.auth_service.auth_service.refresh_tokens') as mock_refresh:
+        with patch('auth_service.auth_core.routes.auth_routes.auth_service.refresh_tokens') as mock_refresh:
             mock_refresh.return_value = None
             
             response = client.post(
@@ -130,7 +130,7 @@ class TestRefreshEndpointCompatibility:
     
     def test_refresh_with_expired_token(self, client, expired_refresh_token):
         """Test refresh endpoint with expired token"""
-        with patch('auth_service.auth_core.services.auth_service.auth_service.refresh_tokens') as mock_refresh:
+        with patch('auth_service.auth_core.routes.auth_routes.auth_service.refresh_tokens') as mock_refresh:
             mock_refresh.return_value = None
             
             response = client.post(
@@ -178,7 +178,7 @@ class TestRefreshEndpointCompatibility:
     
     def test_refresh_preserves_backwards_compatibility(self, client, valid_refresh_token):
         """Test that old clients using snake_case still work"""
-        with patch('auth_service.auth_core.services.auth_service.auth_service.refresh_tokens') as mock_refresh:
+        with patch('auth_service.auth_core.routes.auth_routes.auth_service.refresh_tokens') as mock_refresh:
             mock_refresh.return_value = ("new_access_token", "new_refresh_token")
             
             # Old client format
@@ -205,7 +205,7 @@ class TestRefreshEndpointCompatibility:
     ])
     def test_refresh_field_variations(self, client, field_name, token_value, expected_status):
         """Parameterized test for various field name and value combinations"""
-        with patch('auth_service.auth_core.services.auth_service.auth_service.refresh_tokens') as mock_refresh:
+        with patch('auth_service.auth_core.routes.auth_routes.auth_service.refresh_tokens') as mock_refresh:
             if expected_status == 200:
                 mock_refresh.return_value = ("new_access_token", "new_refresh_token")
             else:
@@ -294,7 +294,7 @@ class TestRefreshEndpointStagingCompatibility:
             "refreshToken": "staging_refresh_token_format"
         }
         
-        with patch('auth_service.auth_core.services.auth_service.auth_service.refresh_tokens') as mock_refresh:
+        with patch('auth_service.auth_core.routes.auth_routes.auth_service.refresh_tokens') as mock_refresh:
             mock_refresh.return_value = ("access", "refresh")
             
             response = client.post(

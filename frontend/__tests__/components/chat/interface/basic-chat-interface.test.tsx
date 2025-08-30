@@ -18,7 +18,7 @@ const MockMessageInput = () => (
   <div data-testid="message-input-container">
     <textarea 
       data-testid="message-input" 
-      placeholder="Type your message..." 
+      placeholder="Start typing your AI optimization request..." 
       role="textbox"
     />
     <button data-testid="send-button">Send</button>
@@ -66,7 +66,7 @@ describe('Basic Chat Interface Tests', () => {
       
       const input = screen.getByTestId('message-input');
       expect(input).toBeInTheDocument();
-      expect(input).toHaveAttribute('placeholder', 'Type your message...');
+      expect(input).toHaveAttribute('placeholder', 'Start typing your AI optimization request...');
     });
 
     it('should handle text input correctly', () => {
