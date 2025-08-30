@@ -74,7 +74,7 @@ export function LoginButton() {
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <Button onClick={handleLogin} size="lg">Access Beta</Button>
+      <Button onClick={handleLogin} size="lg">Login with Google</Button>
       {error && (
         <div className="text-red-500 text-sm" role="alert" aria-live="polite">
           {error}

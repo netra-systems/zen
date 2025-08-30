@@ -76,13 +76,20 @@ class JWTHandler:
         )
         return self._encode_token(payload)
     
-    def create_refresh_token(self, user_id: str) -> str:
-        """Create refresh token for token renewal"""
+    def create_refresh_token(self, user_id: str, email: str = None, permissions: list = None) -> str:
+        """Create refresh token for token renewal with optional user data"""
         payload = self._build_payload(
             sub=user_id,
             token_type="refresh",
             exp_minutes=self.refresh_expiry * 24 * 60
         )
+        
+        # Include user data in refresh token for proper token refresh
+        if email:
+            payload["email"] = email
+        if permissions:
+            payload["permissions"] = permissions
+            
         return self._encode_token(payload)
     
     def create_service_token(self, service_id: str, 
@@ -285,14 +292,16 @@ class JWTHandler:
         if not payload:
             return None
             
-        # Get user details from database (placeholder)
+        # CRITICAL FIX: Get real user details from token payload instead of hardcoded values
         user_id = payload["sub"]
-        # In real implementation, fetch from DB
-        email = "user@example.com"
-        permissions = []
+        email = payload.get("email", "user@example.com")  # Extract from token payload
+        permissions = payload.get("permissions", [])  # Extract from token payload
+        
+        # Log the refresh operation for debugging
+        logger.info(f"JWT refresh: Generating new tokens for user {user_id} with email {email}")
         
         new_access = self.create_access_token(user_id, email, permissions)
-        new_refresh = self.create_refresh_token(user_id)
+        new_refresh = self.create_refresh_token(user_id, email, permissions)
         
         return new_access, new_refresh
     

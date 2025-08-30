@@ -13,7 +13,7 @@ export const getPlaceholder = (
   if (messageLength > CHAR_LIMIT * 0.9) {
     return `${CHAR_LIMIT - messageLength} characters remaining`;
   }
-  return 'Start typing your AI optimization request... (Shift+Enter for new line)';
+  return 'Type a message... (Shift+Enter for new line)';
 };
 
 export const getTextareaClassName = (messageLength: number): string => {

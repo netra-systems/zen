@@ -59,6 +59,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const authStore = useAuthStore();
   const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isRefreshingRef = useRef(false);
+  const lastRefreshAttemptRef = useRef<number>(0);
+  const refreshFailureCountRef = useRef<number>(0);
+  const MAX_REFRESH_FAILURES = 3;
+  const REFRESH_COOLDOWN_MS = 30000; // 30 seconds cooldown between refresh attempts
 
   const syncAuthStore = useCallback((userData: User | null, tokenData: string | null) => {
     if (userData && tokenData) {
@@ -74,13 +78,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [authStore]);
 
   /**
-   * Automatically refresh token if needed
+   * Automatically refresh token if needed with loop prevention
    */
   const handleTokenRefresh = useCallback(async (currentToken: string) => {
+    // Check if we're already refreshing
     if (isRefreshingRef.current) {
       logger.debug('Token refresh already in progress, skipping', {
         component: 'AuthContext',
         action: 'refresh_skipped'
+      });
+      return;
+    }
+
+    // Check if we've hit the max failure limit
+    if (refreshFailureCountRef.current >= MAX_REFRESH_FAILURES) {
+      logger.error('Max refresh failures reached, stopping refresh attempts', {
+        component: 'AuthContext',
+        failures: refreshFailureCountRef.current
+      });
+      // Clear token and redirect to login
+      unifiedAuthService.removeToken();
+      setToken(null);
+      setUser(null);
+      syncAuthStore(null, null);
+      return;
+    }
+
+    // Check cooldown period
+    const now = Date.now();
+    const timeSinceLastAttempt = now - lastRefreshAttemptRef.current;
+    if (timeSinceLastAttempt < REFRESH_COOLDOWN_MS) {
+      logger.debug('Refresh cooldown active, skipping', {
+        component: 'AuthContext',
+        cooldownRemaining: REFRESH_COOLDOWN_MS - timeSinceLastAttempt
       });
       return;
     }
@@ -90,36 +120,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     isRefreshingRef.current = true;
+    lastRefreshAttemptRef.current = now;
     logger.info('Attempting automatic token refresh', {
       component: 'AuthContext',
-      action: 'auto_refresh_start'
+      action: 'auto_refresh_start',
+      attempt: refreshFailureCountRef.current + 1
     });
 
     try {
       const refreshResult = await unifiedAuthService.refreshToken();
       if (refreshResult) {
         const newToken = refreshResult.access_token;
-        setToken(newToken);
         
-        const decodedUser = jwtDecode(newToken) as User;
-        setUser(decodedUser);
-        syncAuthStore(decodedUser, newToken);
-        
-        logger.info('Automatic token refresh successful', {
-          component: 'AuthContext',
-          action: 'auto_refresh_success'
-        });
+        // Check if we got a different token (prevent same-token loop)
+        if (newToken === currentToken) {
+          logger.warn('Refresh returned same token, potential loop detected', {
+            component: 'AuthContext',
+            action: 'same_token_refresh'
+          });
+          refreshFailureCountRef.current++;
+        } else {
+          // Reset failure count on successful refresh with new token
+          refreshFailureCountRef.current = 0;
+          setToken(newToken);
+          
+          const decodedUser = jwtDecode(newToken) as User;
+          setUser(decodedUser);
+          syncAuthStore(decodedUser, newToken);
+          
+          logger.info('Automatic token refresh successful', {
+            component: 'AuthContext',
+            action: 'auto_refresh_success'
+          });
+        }
       } else {
         logger.warn('Token refresh returned null response', {
           component: 'AuthContext',
           action: 'auto_refresh_null_response'
         });
+        refreshFailureCountRef.current++;
       }
     } catch (error) {
       logger.error('Automatic token refresh failed', error as Error, {
         component: 'AuthContext',
         action: 'auto_refresh_failed'
       });
+      refreshFailureCountRef.current++;
       // Don't logout immediately - let the user continue with potentially expired token
     } finally {
       isRefreshingRef.current = false;

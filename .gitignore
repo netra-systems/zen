@@ -48,6 +48,9 @@ out/
 # GCP Service Account Keys - NEVER COMMIT
 *-sa-key.json
 gcp-*.json
+
+# E2E Test Bypass Key - NEVER COMMIT
+.e2e-bypass-key
 *service-account*.json
 *credentials*.json
 

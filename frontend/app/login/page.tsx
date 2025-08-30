@@ -6,23 +6,31 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
-  const { login, loading, user, authConfig } = authService.useAuth();
+  const { login, loading, user, authConfig, initialized } = authService.useAuth();
   const router = useRouter();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [email, setEmail] = useState('dev@example.com');
   const [password, setPassword] = useState('dev');
   const [error, setError] = useState('');
+  const hasRedirectedRef = useRef(false);
 
-  // Redirect if already logged in
+  // Redirect if already logged in with loop prevention
   useEffect(() => {
-    if (user && !loading) {
+    // Prevent redirect loops
+    if (hasRedirectedRef.current) {
+      return;
+    }
+    
+    // Only check after auth is initialized
+    if (initialized && !loading && user) {
+      hasRedirectedRef.current = true;
       router.push('/chat');
     }
-  }, [user, loading, router]);
+  }, [user, loading, initialized, router]);
 
   // Development mode - use dev login directly
   const handleDevLogin = async () => {

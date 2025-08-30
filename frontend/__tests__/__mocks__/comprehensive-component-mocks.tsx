@@ -157,7 +157,7 @@ export const MessageInput = jest.fn().mockImplementation(() => {
     ? 'Please sign in to send messages'
     : isProcessing 
     ? 'Agent is thinking...'
-    : 'Start typing your AI optimization request...';
+    : 'Type a message or use @ for commands';
   
   return (
     <div data-testid="message-input-container">

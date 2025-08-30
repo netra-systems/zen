@@ -89,7 +89,9 @@ class AuthService:
             )
             
             refresh_token = self.jwt_handler.create_refresh_token(
-                user_id=user["id"]
+                user_id=user["id"],
+                email=user["email"],
+                permissions=user.get("permissions", [])
             )
             
             # Create session
@@ -271,9 +273,9 @@ class AuthService:
                 await self.db_session.rollback()
             raise RuntimeError(f"Registration failed: {str(e)}")
     
-    async def validate_token(self, token: str) -> TokenResponse:
-        """Validate access token"""
-        payload = self.jwt_handler.validate_token(token, "access")
+    async def validate_token(self, token: str, token_type: str = "access") -> TokenResponse:
+        """Validate token of specified type"""
+        payload = self.jwt_handler.validate_token(token, token_type)
         
         if not payload:
             return TokenResponse(valid=False)
@@ -321,14 +323,33 @@ class AuthService:
                 # Initialize used tokens set if not exists
                 self.session_manager.used_refresh_tokens = {refresh_token}
             
-            # Get user details (in real implementation, from database)
-            email = "user@example.com"  # Placeholder
-            permissions = []
+            # CRITICAL FIX: Get real user details from database or existing token payload
+            email = payload.get("email", "user@example.com")  # Try to get from token first
+            permissions = payload.get("permissions", [])  # Try to get from token first
             
-            # Generate new tokens
+            # If we have a database session, fetch real user data
+            if self.db_session:
+                try:
+                    user_repo = AuthUserRepository(self.db_session)
+                    user = await user_repo.get_by_id(user_id)
+                    if user:
+                        email = user.email
+                        # For now, use default permissions (in future this could come from user roles)
+                        permissions = ["read", "write"]
+                        logger.info(f"Refresh token: Retrieved user data from database for {email}")
+                    else:
+                        logger.warning(f"Refresh token: User {user_id} not found in database, using token payload")
+                except Exception as db_error:
+                    logger.warning(f"Refresh token: Database lookup failed for user {user_id}: {db_error}, using token payload")
+                    # Fallback to token payload or defaults
+            else:
+                logger.info(f"Refresh token: No database session, using token payload for user {user_id}")
+            
+            # Generate new tokens with proper user data and unique timestamps
             new_access = self.jwt_handler.create_access_token(user_id, email, permissions)
-            new_refresh = self.jwt_handler.create_refresh_token(user_id)
+            new_refresh = self.jwt_handler.create_refresh_token(user_id, email, permissions)
             
+            logger.info(f"Refresh token: Generated new tokens for user {user_id} with email {email}")
             return new_access, new_refresh
             
         except Exception as e:

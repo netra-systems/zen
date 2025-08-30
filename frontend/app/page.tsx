@@ -3,20 +3,33 @@
 import { NextPage } from 'next';
 import { useAuth } from '@/auth/context';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 const HomePage: NextPage = () => {
   const { user, loading, initialized } = useAuth();
   const router = useRouter();
+  const hasRedirectedRef = useRef(false);
 
   useEffect(() => {
-    // Only redirect after auth is fully initialized
+    // Prevent multiple redirects
+    if (hasRedirectedRef.current) {
+      return;
+    }
+
+    // Only redirect after auth is fully initialized and not loading
     if (initialized && !loading) {
-      if (!user) {
-        router.push('/login');
-      } else {
-        router.push('/chat');
-      }
+      hasRedirectedRef.current = true;
+      
+      // Add small delay to ensure auth state is stable
+      const redirectTimer = setTimeout(() => {
+        if (!user) {
+          router.push('/login');
+        } else {
+          router.push('/chat');
+        }
+      }, 100);
+
+      return () => clearTimeout(redirectTimer);
     }
   }, [initialized, loading, user, router]);
 
