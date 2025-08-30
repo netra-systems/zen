@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>WebSocket Agent Event Integration - MISSION CRITICAL</title>
+    <date>2025-08-30</date>
+    <severity>CRITICAL</severity>
+    <business_value>$500K+ ARR - Core chat functionality</business_value>
+    <tags>websocket, agent, chat, frontend, real-time, mission-critical</tags>
+  </metadata>
+
+  <problem_statement>
+    <description>
+      Agent execution was not sending WebSocket events to the frontend, making the chat UI appear broken.
+      Users could not see:
+      - When agents started processing
+      - Agent thinking/reasoning in real-time
+      - Tool execution status
+      - Streaming responses
+      - Completion notifications
+    </description>
+    <root_cause>
+      The tool dispatcher was NOT being enhanced with WebSocket notifications when the WebSocket manager
+      was set in the agent registry. This meant tool_executing and tool_completed events were never sent.
+    </root_cause>
+  </problem_statement>
+
+  <solution>
+    <critical_fix file="netra_backend/app/agents/supervisor/agent_registry.py">
+      <description>
+        Modified set_websocket_manager() to automatically enhance the tool dispatcher with WebSocket
+        notifications. This ensures ALL agent events are properly sent to the frontend.
+      </description>
+      <code><![CDATA[
+def set_websocket_manager(self, manager: 'WebSocketManager') -> None:
+    """Set websocket manager for all agents and enhance tool dispatcher"""
+    self.websocket_manager = manager
+    
+    # CRITICAL: Enhance tool dispatcher with WebSocket notifications
+    # This enables real-time tool execution events
+    if self.tool_dispatcher and manager:
+        from netra_backend.app.agents.enhanced_tool_execution import (
+            enhance_tool_dispatcher_with_notifications
+        )
+        logger.info("Enhancing tool dispatcher with WebSocket notifications")
+        enhance_tool_dispatcher_with_notifications(self.tool_dispatcher, manager)
+    
+    # Set WebSocket manager for all registered agents
+    for agent in self.agents.values():
+        agent.websocket_manager = manager
+      ]]></code>
+    </critical_fix>
+
+    <enhancement file="netra_backend/app/agents/enhanced_tool_execution.py">
+      <description>
+        Improved enhancement function to properly mark enhanced dispatchers and check for
+        prior enhancement to avoid double-wrapping.
+      </description>
+      <key_changes>
+        - Added check for already enhanced dispatchers
+        - Store original executor for testing
+        - Mark dispatcher as enhanced with _websocket_enhanced flag
+      </key_changes>
+    </enhancement>
+  </solution>
+
+  <required_events>
+    <event name="agent_started" critical="true">User must know agent is processing</event>
+    <event name="agent_thinking" critical="true">Real-time reasoning visibility</event>
+    <event name="tool_executing" critical="true">Tool usage transparency</event>
+    <event name="tool_completed" critical="true">Tool results display</event>
+    <event name="partial_result" critical="false">Streaming response UX</event>
+    <event name="final_report" critical="false">Comprehensive summary</event>
+    <event name="agent_completed" critical="true">User must know when done</event>
+  </required_events>
+
+  <testing_requirements>
+    <critical>
+      THIS CANNOT REGRESS. Basic chat is the core product functionality.
+      Any PR that touches these files MUST run the mission-critical test suite:
+      - tests/mission_critical/test_websocket_agent_events_suite.py
+    </critical>
+    
+    <test_layers>
+      <unit>Test each component in isolation</unit>
+      <integration>Test component interactions</integration>
+      <e2e>Test complete user flow with real services</e2e>
+    </test_layers>
+  </testing_requirements>
+
+  <architectural_notes>
+    <websocket_flow>
+      1. User sends message via WebSocket
+      2. Supervisor processes with agent registry
+      3. Agent registry has WebSocket-enhanced tool dispatcher
+      4. Execution engine sends events via WebSocketNotifier
+      5. Tool dispatcher sends tool events via enhanced executor
+      6. Frontend receives all events and updates UI
+    </websocket_flow>
+    
+    <key_components>
+      - WebSocketManager: Central connection management
+      - WebSocketNotifier: Event sending abstraction
+      - ExecutionEngine: Orchestrates agent execution with notifications
+      - AgentRegistry: Manages agents and enhances tool dispatcher
+      - EnhancedToolExecutionEngine: Wraps tool execution with events
+    </key_components>
+  </architectural_notes>
+
+  <validation_checklist>
+    <item>Tool dispatcher has _websocket_enhanced flag after enhancement</item>
+    <item>Tool dispatcher executor is instance of EnhancedToolExecutionEngine</item>
+    <item>WebSocket notifier has all 7 required event methods</item>
+    <item>Execution engine has websocket_notifier initialized</item>
+    <item>Agent registry enhances tool dispatcher on set_websocket_manager</item>
+  </validation_checklist>
+
+  <regression_prevention>
+    <rule>
+      ANY changes to agent execution, tool dispatching, or WebSocket handling MUST:
+      1. Run the mission-critical test suite
+      2. Verify all 7 event types are sent
+      3. Test with real WebSocket connections
+      4. Validate frontend receives events
+    </rule>
+    
+    <monitoring>
+      In production, monitor for:
+      - Missing agent_started events (indicates broken flow)
+      - Tool events without pairs (executing without completed)
+      - WebSocket connections without any events
+      - Agent execution without completion events
+    </monitoring>
+  </regression_prevention>
+</learning>

@@ -266,6 +266,18 @@ class GCPDeployer:
         
         checks = [
             {
+                "name": "MISSION CRITICAL: WebSocket Event Tests",
+                "command": [sys.executable, "-m", "pytest", "tests/mission_critical/test_final_validation.py", "-v"],
+                "required": True,
+                "critical": True  # This MUST pass or deployment is blocked
+            },
+            {
+                "name": "WebSocket Regression Prevention",
+                "command": [sys.executable, "-m", "pytest", "tests/mission_critical/test_websocket_agent_events_suite.py::TestRegressionPrevention", "-v"],
+                "required": True,
+                "critical": True
+            },
+            {
                 "name": "Architecture Compliance",
                 "command": [sys.executable, "scripts/check_architecture_compliance.py"],
                 "required": True
@@ -283,6 +295,8 @@ class GCPDeployer:
         ]
         
         all_passed = True
+        critical_failed = False
+        
         for check in checks:
             print(f"\n  Running {check['name']}...")
             try:
@@ -298,6 +312,16 @@ class GCPDeployer:
                     print(f"  ✅ {check['name']} passed")
                 else:
                     print(f"  ❌ {check['name']} failed")
+                    
+                    # Check if this is a critical failure
+                    if check.get("critical", False):
+                        print("\n" + "🚨" * 10)
+                        print("  CRITICAL FAILURE: WebSocket agent events not working!")
+                        print("  Basic chat functionality will be BROKEN in production!")
+                        print("  This MUST be fixed before ANY deployment!")
+                        print("🚨" * 10 + "\n")
+                        critical_failed = True
+                        
                     if check["required"]:
                         print(f"     Error: {result.stderr[:500]}")
                         all_passed = False
@@ -309,6 +333,13 @@ class GCPDeployer:
                 if check["required"]:
                     all_passed = False
                     
+        if critical_failed:
+            print("\n❌ MISSION CRITICAL tests failed!")
+            print("   WebSocket agent events are NOT working!")
+            print("   See DEPLOYMENT_CHECKLIST.md for troubleshooting.")
+            print("   See SPEC/learnings/websocket_agent_integration_critical.xml for fix details.")
+            return False
+            
         if not all_passed:
             print("\n❌ Required checks failed. Please fix issues before deploying.")
             print("   See SPEC/gcp_deployment.xml for deployment guidelines.")

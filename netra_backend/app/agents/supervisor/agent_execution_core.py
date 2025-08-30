@@ -1,10 +1,11 @@
 """Core agent execution functionality."""
 
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+    from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.execution_context import (
@@ -19,16 +20,41 @@ logger = central_logger.get_logger(__name__)
 class AgentExecutionCore:
     """Handles core agent execution logic."""
     
-    def __init__(self, registry: 'AgentRegistry'):
+    def __init__(self, registry: 'AgentRegistry', websocket_notifier: Optional['WebSocketNotifier'] = None):
         self.registry = registry
+        self.websocket_notifier = websocket_notifier
     
     async def execute_agent(self, context: AgentExecutionContext,
                            state: DeepAgentState) -> AgentExecutionResult:
         """Execute a single agent with retry logic."""
+        # Send agent started notification
+        if self.websocket_notifier:
+            await self.websocket_notifier.send_agent_started(context)
+        
         agent = self._get_agent_or_error(context.agent_name)
         if isinstance(agent, AgentExecutionResult):
+            # Send error notification for agent not found
+            if self.websocket_notifier:
+                await self.websocket_notifier.send_agent_error(
+                    context, agent.error, "agent_not_found"
+                )
             return agent
+            
         result = await self._run_agent_with_timing(agent, context, state)
+        
+        # Send completion or error notification based on result
+        if self.websocket_notifier:
+            if result.success:
+                await self.websocket_notifier.send_agent_completed(
+                    context, 
+                    {"success": True, "agent_name": context.agent_name},
+                    (result.duration * 1000) if result.duration else 0
+                )
+            else:
+                await self.websocket_notifier.send_agent_error(
+                    context, result.error or "Unknown error", "execution_failure"
+                )
+        
         return result
     
     def _get_agent_or_error(self, agent_name: str):

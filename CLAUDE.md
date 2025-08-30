@@ -216,29 +216,60 @@ All microservices MUST be 100% independent. See [`SPEC/independent_services.xml`
 
 -----
 
-## 6\. Project Tooling
+## 6\. MISSION CRITICAL: WebSocket Agent Events
 
-### 6.1. Quick Start
+**CRITICAL: Basic chat functionality depends on WebSocket events. This CANNOT regress.**
+
+### 6.1. Required WebSocket Events for Chat
+
+The following events MUST be sent during agent execution or the chat UI will appear broken:
+
+1. **agent_started** - User must see agent began processing
+2. **agent_thinking** - Real-time reasoning visibility
+3. **tool_executing** - Tool usage transparency  
+4. **tool_completed** - Tool results display
+5. **agent_completed** - User must know when done
+
+### 6.2. WebSocket Integration Requirements
+
+**CRITICAL: When modifying ANY of these components, you MUST:**
+- Run `python tests/mission_critical/test_websocket_agent_events_suite.py`
+- Verify ALL event types are sent
+- Test with real WebSocket connections
+- Never remove or bypass WebSocket notifications
+
+**Key Integration Points:**
+- `AgentRegistry.set_websocket_manager()` MUST enhance tool dispatcher
+- `ExecutionEngine` MUST have WebSocketNotifier initialized
+- `EnhancedToolExecutionEngine` MUST wrap tool execution
+- See [`SPEC/learnings/websocket_agent_integration_critical.xml`](SPEC/learnings/websocket_agent_integration_critical.xml)
+
+-----
+
+## 7\. Project Tooling
+
+### 7.1. Quick Start
 
 ```bash
 python unified_test_runner.py
 ```
 
-### 6.2. Unified Test Runner
+### 7.2. Unified Test Runner
 
 IMPORTANT: Use real services, real llm, docker compose etc. whenever possible for testing.
 MOCKS are FORBIDDEN in dev, staging or production.
 
   * **Default (Fast Feedback):** `python unified_test_runner.py --category integration --no-coverage --fast-fail`
   * **Before Release:** `python unified_test_runner.py --categories smoke unit integration api --real-llm --env staging`
+  * **Mission Critical Tests:** `python tests/mission_critical/test_websocket_agent_events_suite.py`
 
-### 6.3. Deployment (GCP)
+### 7.3. Deployment (GCP)
 
 **Use ONLY the official deployment script.**
   * **Default:** `python scripts/deploy_to_gcp.py --project netra-staging --build-local`
 -----
 
-## 7\. Detailed Specifications Reference
+## 8\. Detailed Specifications Reference
 
 This is a non-exhaustive list of mission-critical specs.
 | Spec | Purpose |

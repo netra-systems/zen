@@ -213,6 +213,7 @@ python unified_test_runner.py --coverage
 
 | Level | Duration | Purpose | Command |
 |-------|----------|---------|---------|
+| **mission_critical** | <2min | WebSocket events (DEPLOYMENT BLOCKER) | `--category mission_critical` |
 | **smoke** | <30s | Pre-commit validation | `--level smoke` |
 | **unit** | 1-2min | Component testing | `--level unit` |
 | **integration** | 3-5min | Feature validation | `--level integration` |
@@ -424,6 +425,25 @@ python -m test_framework.failing_tests_manager --reset
 4. **Performance Changes:** Run performance baseline tests
 
 **Reference:** [SPEC/test_runner_guide.xml](SPEC/test_runner_guide.xml)
+
+## 🚨 MISSION CRITICAL: Pre-Deployment Requirements
+
+**MUST PASS before ANY deployment to staging or production:**
+
+```bash
+# Run mission critical WebSocket tests (MANDATORY)
+python -m pytest tests/mission_critical/test_final_validation.py -v
+
+# Or via unified test runner
+python unified_test_runner.py --category mission_critical
+```
+
+**Why This Matters:**
+- Without WebSocket events, the chat UI appears "frozen" 
+- Users cannot see agent thinking, tool execution, or results
+- **Business Impact:** $500K+ ARR at risk if basic chat is broken
+
+**See:** [Mission Critical Tests Documentation](tests/mission_critical/README.md)
 
 ## 🚀 Deployment
 

@@ -128,14 +128,14 @@ export const MessageInput: React.FC = () => {
             style={{...textareaStyle, height: `${rows * LINE_HEIGHT}px`}}
             aria-label="Message input"
             aria-describedby="char-count"
-            data-testid="message-textarea"
+            data-testid="message-input"
           />
           
           {shouldShowCharCount(message.length) && (
             <div 
               id="char-count"
               className={charCountClassName}
-              data-testid="char-count"
+              data-testid="character-count"
             >
               {message.length}/{CHAR_LIMIT}
             </div>

@@ -412,12 +412,15 @@ describe('Textarea Component - Comprehensive Tests', () => {
 
   describe('Event Handling', () => {
     it('calls onChange handler on input', async () => {
-      const user = setupUser();
       const handleChange = jest.fn();
       renderTextarea({ onChange: handleChange });
       const textarea = screen.getByTestId('test-textarea');
       
-      await user.type(textarea, 'Test');
+      // Simulate typing "Test" character by character using fireEvent
+      fireEvent.change(textarea, { target: { value: 'T' } });
+      fireEvent.change(textarea, { target: { value: 'Te' } });
+      fireEvent.change(textarea, { target: { value: 'Tes' } });
+      fireEvent.change(textarea, { target: { value: 'Test' } });
       expect(handleChange).toHaveBeenCalledTimes(4);
     });
 
@@ -550,12 +553,15 @@ describe('Textarea Component - Comprehensive Tests', () => {
     });
 
     it('manages multiple rapid changes', async () => {
-      const user = setupUser();
       const handleChange = jest.fn();
       renderTextarea({ onChange: handleChange });
       const textarea = screen.getByTestId('test-textarea');
       
-      await user.type(textarea, 'Rapid typing test');
+      // Simulate rapid changes using fireEvent
+      fireEvent.change(textarea, { target: { value: 'Rapid' } });
+      fireEvent.change(textarea, { target: { value: 'Rapid typing' } });
+      fireEvent.change(textarea, { target: { value: 'Rapid typing test' } });
+      
       expect(handleChange).toHaveBeenCalled();
       expect(textarea).toHaveValue('Rapid typing test');
     });

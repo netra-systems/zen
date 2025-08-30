@@ -19,6 +19,13 @@
     </retrieval-protocol>
 
     <categories>
+        <category name="WebSocket/AgentEvents" path="SPEC/learnings/websocket_agent_integration_critical.xml" keywords="WebSocket, Agent Events, Chat UI, Tool Execution, Frontend, Real-time, Mission Critical, Tool Dispatcher, Enhancement, Agent Registry">
+            <critical-takeaway>MISSION CRITICAL: AgentRegistry.set_websocket_manager() MUST enhance tool dispatcher or chat UI breaks - $500K+ ARR impact (websocket_agent_integration_critical.xml).</critical-takeaway>
+            <critical-takeaway>Tool dispatcher MUST be wrapped with EnhancedToolExecutionEngine to send tool_executing/tool_completed events (websocket_agent_integration_critical.xml).</critical-takeaway>
+            <critical-takeaway>5 required events for chat: agent_started, agent_thinking, tool_executing, tool_completed, agent_completed (websocket_agent_integration_critical.xml).</critical-takeaway>
+            <critical-takeaway>Run tests/mission_critical/test_websocket_agent_events_suite.py before ANY deployment (websocket_agent_integration_critical.xml).</critical-takeaway>
+        </category>
+        
         <category name="WebSocket/Routing" path="SPEC/learnings/websocket_routing_regression.xml" keywords="WebSocket, Message Routing, Run ID, Agent Updates, Privacy, Security, Regression, Broadcasting, Connection Management">
             <critical-takeaway>CRITICAL: WebSocket send_agent_update MUST route by run_id, NEVER broadcast to all users - severe privacy/security issue (websocket_routing_regression.xml).</critical-takeaway>
             <critical-takeaway>Always implement proper message routing from the start - broadcasting is almost never correct for user-specific data (websocket_routing_regression.xml).</critical-takeaway>

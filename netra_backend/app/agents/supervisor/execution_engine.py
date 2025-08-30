@@ -39,8 +39,8 @@ class ExecutionEngine:
         
     def _init_components(self) -> None:
         """Initialize execution components."""
-        self.agent_core = AgentExecutionCore(self.registry)
         self.websocket_notifier = WebSocketNotifier(self.websocket_manager)
+        self.agent_core = AgentExecutionCore(self.registry, self.websocket_notifier)
         self.fallback_manager = FallbackManager(self.websocket_notifier)
         self.flow_logger = get_supervisor_flow_logger()
         

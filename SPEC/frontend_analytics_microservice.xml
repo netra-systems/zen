@@ -1,0 +1,584 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <metadata>
+    <title>Frontend Analytics and Event Capture Microservice</title>
+    <version>1.0.0</version>
+    <description>Comprehensive specification for frontend event capture, processing, and analytics microservice extending GTM capabilities</description>
+    <created>2025-08-30</created>
+    <business_value>
+      <segment>Early, Mid, Enterprise</segment>
+      <goal>Customer Insights, Product Optimization, Retention</goal>
+      <impact>Provides deep visibility into user behavior and AI usage patterns for product optimization and customer success</impact>
+      <revenue_impact>Enables data-driven product improvements leading to 20% reduction in churn and 15% increase in feature adoption</revenue_impact>
+    </business_value>
+  </metadata>
+
+  <overview>
+    <purpose>
+      Capture, process, and analyze frontend user events to provide actionable insights on AI optimization platform usage, user behavior patterns, and product engagement metrics.
+    </purpose>
+    <key_capabilities>
+      <capability>Real-time event capture from frontend via extended GTM integration</capability>
+      <capability>Event storage in ClickHouse for analytics and Redis for real-time processing</capability>
+      <capability>Automated rollup reports and analytics dashboards via Grafana</capability>
+      <capability>User journey tracking and conversion funnel analysis</capability>
+      <capability>AI interaction pattern analysis and cost optimization insights</capability>
+    </key_capabilities>
+    <architecture_principles>
+      <principle>Extend existing GTM infrastructure for seamless integration</principle>
+      <principle>Leverage ClickHouse for time-series analytics and Redis for real-time caching</principle>
+      <principle>Microservice independence with clear API boundaries</principle>
+      <principle>Privacy-first design with configurable data retention</principle>
+    </architecture_principles>
+  </overview>
+
+  <event_taxonomy>
+    <category name="User Interaction Events">
+      <event name="chat_interaction">
+        <description>Captures all chat-related user interactions</description>
+        <properties>
+          <property name="thread_id" type="string" required="true">Unique chat thread identifier</property>
+          <property name="message_id" type="string" required="true">Individual message identifier</property>
+          <property name="message_type" type="enum" values="user_prompt|ai_response|system_message" required="true"/>
+          <property name="prompt_text" type="string" required="false">User's prompt text (sanitized)</property>
+          <property name="prompt_length" type="integer" required="true">Character count of prompt</property>
+          <property name="response_length" type="integer" required="false">Character count of AI response</property>
+          <property name="response_time_ms" type="float" required="false">Time to receive response</property>
+          <property name="model_used" type="string" required="false">AI model identifier</property>
+          <property name="tokens_consumed" type="integer" required="false">Token count for request</property>
+          <property name="is_follow_up" type="boolean" required="true">Whether this is a follow-up question</property>
+        </properties>
+      </event>
+      
+      <event name="thread_lifecycle">
+        <description>Thread creation, continuation, and completion events</description>
+        <properties>
+          <property name="thread_id" type="string" required="true"/>
+          <property name="action" type="enum" values="created|continued|completed|abandoned" required="true"/>
+          <property name="message_count" type="integer" required="false">Total messages in thread</property>
+          <property name="duration_seconds" type="float" required="false">Thread duration</property>
+        </properties>
+      </event>
+      
+      <event name="feature_usage">
+        <description>Track feature adoption and usage patterns</description>
+        <properties>
+          <property name="feature_name" type="string" required="true">Feature identifier</property>
+          <property name="action" type="string" required="true">Specific action taken</property>
+          <property name="success" type="boolean" required="true">Whether action succeeded</property>
+          <property name="error_code" type="string" required="false">Error code if failed</property>
+          <property name="duration_ms" type="float" required="false">Action duration</property>
+        </properties>
+      </event>
+    </category>
+
+    <category name="Survey and Feedback Events">
+      <event name="survey_response">
+        <description>Captures user survey responses and feedback</description>
+        <properties>
+          <property name="survey_id" type="string" required="true">Survey campaign identifier</property>
+          <property name="question_id" type="string" required="true">Individual question identifier</property>
+          <property name="question_type" type="enum" values="pain_perception|magic_wand|spending|planning" required="true"/>
+          <property name="response_value" type="string" required="false">Response text or value</property>
+          <property name="response_scale" type="integer" required="false">Numeric scale response (1-10)</property>
+          <property name="ai_spend_last_month" type="float" required="false">Reported AI spending</property>
+          <property name="ai_spend_next_quarter" type="float" required="false">Planned AI spending</property>
+        </properties>
+      </event>
+      
+      <event name="feedback_submission">
+        <description>General feedback and satisfaction metrics</description>
+        <properties>
+          <property name="feedback_type" type="enum" values="nps|csat|feature_request|bug_report" required="true"/>
+          <property name="score" type="integer" required="false">Numeric score if applicable</property>
+          <property name="comment" type="string" required="false">Free text feedback</property>
+          <property name="context_thread_id" type="string" required="false">Related thread if applicable</property>
+        </properties>
+      </event>
+    </category>
+
+    <category name="Technical Events">
+      <event name="performance_metric">
+        <description>Frontend performance and technical metrics</description>
+        <properties>
+          <property name="metric_type" type="enum" values="page_load|api_call|websocket|render" required="true"/>
+          <property name="duration_ms" type="float" required="true">Operation duration</property>
+          <property name="success" type="boolean" required="true">Whether operation succeeded</property>
+          <property name="error_details" type="string" required="false">Error information if failed</property>
+        </properties>
+      </event>
+      
+      <event name="error_tracking">
+        <description>Frontend errors and exceptions</description>
+        <properties>
+          <property name="error_type" type="string" required="true">Error classification</property>
+          <property name="error_message" type="string" required="true">Error message</property>
+          <property name="stack_trace" type="string" required="false">Stack trace if available</property>
+          <property name="user_impact" type="enum" values="critical|high|medium|low" required="true"/>
+        </properties>
+      </event>
+    </category>
+  </event_taxonomy>
+
+  <data_architecture>
+    <storage_layer>
+      <clickhouse>
+        <table name="frontend_events">
+          <description>Primary event storage for all frontend analytics events</description>
+          <schema>
+            <![CDATA[
+            CREATE TABLE IF NOT EXISTS frontend_events (
+              event_id UUID DEFAULT generateUUIDv4(),
+              timestamp DateTime64(3) DEFAULT now(),
+              user_id String,
+              session_id String,
+              event_type String,
+              event_category String,
+              event_action String,
+              event_label String,
+              event_value Float64,
+              
+              -- Event-specific properties as JSON
+              properties String, -- JSON string with event-specific data
+              
+              -- User context
+              user_agent String,
+              ip_address String, -- Hashed for privacy
+              country_code String,
+              
+              -- Page context  
+              page_path String,
+              page_title String,
+              referrer String,
+              
+              -- Technical metadata
+              gtm_container_id String,
+              environment String,
+              app_version String,
+              
+              -- Computed fields
+              date Date DEFAULT toDate(timestamp),
+              hour UInt8 DEFAULT toHour(timestamp)
+            )
+            ENGINE = MergeTree()
+            PARTITION BY toYYYYMM(timestamp)
+            ORDER BY (user_id, timestamp, event_id)
+            TTL timestamp + INTERVAL 90 DAY
+            SETTINGS index_granularity = 8192;
+            ]]>
+          </schema>
+        </table>
+        
+        <table name="user_analytics_summary">
+          <description>Materialized view for user-level analytics</description>
+          <schema>
+            <![CDATA[
+            CREATE MATERIALIZED VIEW IF NOT EXISTS user_analytics_summary
+            ENGINE = SummingMergeTree()
+            PARTITION BY toYYYYMM(date)
+            ORDER BY (user_id, date)
+            AS SELECT
+              user_id,
+              toDate(timestamp) as date,
+              count() as total_events,
+              countIf(event_type = 'chat_interaction') as chat_interactions,
+              countIf(event_type = 'thread_lifecycle' AND event_action = 'created') as threads_created,
+              countIf(event_type = 'feature_usage') as feature_interactions,
+              sumIf(event_value, event_type = 'chat_interaction') as total_tokens_consumed,
+              avgIf(event_value, event_type = 'performance_metric') as avg_response_time
+            FROM frontend_events
+            GROUP BY user_id, date;
+            ]]>
+          </schema>
+        </table>
+        
+        <table name="prompt_analytics">
+          <description>Specialized table for prompt and response analysis</description>
+          <schema>
+            <![CDATA[
+            CREATE TABLE IF NOT EXISTS prompt_analytics (
+              prompt_id UUID DEFAULT generateUUIDv4(),
+              timestamp DateTime64(3) DEFAULT now(),
+              user_id String,
+              thread_id String,
+              
+              -- Prompt details
+              prompt_hash String, -- Hash for deduplication
+              prompt_category String, -- ML-classified category
+              prompt_intent String, -- Detected user intent
+              prompt_complexity_score Float32,
+              
+              -- Response metrics
+              response_quality_score Float32,
+              response_relevance_score Float32,
+              follow_up_generated Boolean,
+              
+              -- Usage patterns
+              is_repeat_question Boolean,
+              similar_prompts Array(String), -- IDs of similar prompts
+              
+              -- Cost tracking
+              estimated_cost_cents Float32,
+              actual_cost_cents Float32
+            )
+            ENGINE = MergeTree()
+            PARTITION BY toYYYYMM(timestamp)
+            ORDER BY (user_id, timestamp, prompt_id)
+            TTL timestamp + INTERVAL 180 DAY;
+            ]]>
+          </schema>
+        </table>
+      </clickhouse>
+      
+      <redis>
+        <purpose>Real-time caching and rate limiting</purpose>
+        <data_structures>
+          <structure name="user_session_cache">
+            <type>Hash</type>
+            <ttl>3600</ttl>
+            <description>Active user session data for real-time personalization</description>
+          </structure>
+          
+          <structure name="event_rate_limiter">
+            <type>Sorted Set</type>
+            <ttl>60</ttl>
+            <description>Rate limiting for event ingestion per user</description>
+          </structure>
+          
+          <structure name="real_time_metrics">
+            <type>Time Series</type>
+            <ttl>86400</ttl>
+            <description>Real-time metrics for dashboard updates</description>
+          </structure>
+          
+          <structure name="hot_prompts_cache">
+            <type>List</type>
+            <ttl>1800</ttl>
+            <description>Recently popular prompts for trend analysis</description>
+          </structure>
+        </data_structures>
+      </redis>
+    </storage_layer>
+  </data_architecture>
+
+  <integration_architecture>
+    <gtm_extension>
+      <description>Extend existing GTM implementation with custom tags and triggers</description>
+      <custom_tags>
+        <tag name="NetraAnalyticsTag">
+          <trigger>All Pages</trigger>
+          <configuration>
+            <![CDATA[
+            // Custom JavaScript tag for enhanced event capture
+            (function() {
+              window.netraAnalytics = window.netraAnalytics || {};
+              
+              // Enhanced event push function
+              window.netraAnalytics.push = function(eventData) {
+                // Enrich with session context
+                eventData.session_id = window.netraAnalytics.sessionId || generateSessionId();
+                eventData.timestamp = new Date().toISOString();
+                
+                // Push to dataLayer for GTM
+                window.dataLayer.push({
+                  event: 'netra_analytics_event',
+                  ...eventData
+                });
+                
+                // Also send to analytics service
+                sendToAnalyticsService(eventData);
+              };
+              
+              // Auto-capture chat interactions
+              document.addEventListener('netra_chat_message', function(e) {
+                window.netraAnalytics.push({
+                  event_type: 'chat_interaction',
+                  ...e.detail
+                });
+              });
+            })();
+            ]]>
+          </configuration>
+        </tag>
+      </custom_tags>
+      
+      <variables>
+        <variable name="netra_user_id" type="custom_javascript">
+          <description>Extract user ID from auth context</description>
+        </variable>
+        <variable name="netra_thread_id" type="data_layer">
+          <description>Current chat thread ID</description>
+        </variable>
+      </variables>
+    </gtm_extension>
+    
+    <api_endpoints>
+      <endpoint method="POST" path="/api/analytics/events">
+        <description>Ingest events from frontend</description>
+        <request_schema>
+          <![CDATA[
+          {
+            "events": [
+              {
+                "event_type": "string",
+                "timestamp": "ISO8601",
+                "properties": {}
+              }
+            ],
+            "context": {
+              "user_id": "string",
+              "session_id": "string",
+              "page_path": "string"
+            }
+          }
+          ]]>
+        </request_schema>
+        <rate_limit>1000 events per minute per user</rate_limit>
+      </endpoint>
+      
+      <endpoint method="GET" path="/api/analytics/reports/user-activity">
+        <description>Get user activity summary</description>
+        <parameters>
+          <parameter name="user_id" type="string" required="false"/>
+          <parameter name="start_date" type="date" required="true"/>
+          <parameter name="end_date" type="date" required="true"/>
+          <parameter name="granularity" type="enum" values="hour|day|week|month"/>
+        </parameters>
+      </endpoint>
+      
+      <endpoint method="GET" path="/api/analytics/reports/prompts">
+        <description>Analyze prompt patterns and trends</description>
+        <parameters>
+          <parameter name="category" type="string" required="false"/>
+          <parameter name="min_frequency" type="integer" default="5"/>
+          <parameter name="time_range" type="enum" values="1h|24h|7d|30d"/>
+        </parameters>
+      </endpoint>
+    </api_endpoints>
+  </integration_architecture>
+
+  <analytics_reports>
+    <report name="User Engagement Dashboard">
+      <description>Real-time user engagement metrics</description>
+      <metrics>
+        <metric name="active_users">Count of users with events in last 5 minutes</metric>
+        <metric name="chat_sessions">Active chat threads</metric>
+        <metric name="avg_response_time">Average AI response time</metric>
+        <metric name="error_rate">Percentage of failed interactions</metric>
+      </metrics>
+      <visualization>Grafana dashboard with real-time updates</visualization>
+    </report>
+    
+    <report name="Prompt Intelligence Report">
+      <description>Analysis of user prompts and AI interactions</description>
+      <insights>
+        <insight name="common_questions">Most frequently asked questions</insight>
+        <insight name="follow_up_rate">Percentage of interactions with follow-up questions</insight>
+        <insight name="prompt_categories">Distribution of prompt types</insight>
+        <insight name="complexity_trends">Trend in prompt complexity over time</insight>
+      </insights>
+      <update_frequency>Hourly</update_frequency>
+    </report>
+    
+    <report name="User Journey Analysis">
+      <description>Track user progression through the platform</description>
+      <funnels>
+        <funnel name="onboarding">Sign up → First chat → Feature discovery → Regular usage</funnel>
+        <funnel name="value_realization">First interaction → Complex query → Cost savings identified</funnel>
+      </funnels>
+      <cohort_analysis>Weekly cohort retention and engagement</cohort_analysis>
+    </report>
+    
+    <report name="AI Spend Analytics">
+      <description>Track and analyze AI spending patterns</description>
+      <metrics>
+        <metric name="total_spend">Aggregate AI spend across users</metric>
+        <metric name="spend_per_user">Average spend per active user</metric>
+        <metric name="spend_efficiency">Cost per successful outcome</metric>
+        <metric name="spend_forecast">Projected spend based on usage trends</metric>
+      </metrics>
+    </report>
+  </analytics_reports>
+
+  <grafana_integration>
+    <datasources>
+      <datasource name="clickhouse_analytics" type="clickhouse">
+        <connection>clickhouse://analytics:8123/frontend_events</connection>
+      </datasource>
+      <datasource name="redis_realtime" type="redis">
+        <connection>redis://redis:6379/2</connection>
+      </datasource>
+    </datasources>
+    
+    <dashboards>
+      <dashboard name="Executive Overview">
+        <panels>
+          <panel type="stat" title="Active Users (Real-time)"/>
+          <panel type="graph" title="Chat Volume (24h)"/>
+          <panel type="table" title="Top Features by Usage"/>
+          <panel type="gauge" title="System Health Score"/>
+        </panels>
+      </dashboard>
+      
+      <dashboard name="Prompt Analytics">
+        <panels>
+          <panel type="wordcloud" title="Common Terms in Prompts"/>
+          <panel type="heatmap" title="Usage Patterns by Hour"/>
+          <panel type="graph" title="Follow-up Question Rate"/>
+          <panel type="table" title="Unanswered Questions"/>
+        </panels>
+      </dashboard>
+      
+      <dashboard name="User Behavior">
+        <panels>
+          <panel type="sankey" title="User Journey Flow"/>
+          <panel type="graph" title="Cohort Retention"/>
+          <panel type="pie" title="User Segments"/>
+          <panel type="stat" title="Avg Session Duration"/>
+        </panels>
+      </dashboard>
+    </dashboards>
+    
+    <alerts>
+      <alert name="high_error_rate">
+        <condition>error_rate > 5%</condition>
+        <severity>critical</severity>
+        <notification>slack, pagerduty</notification>
+      </alert>
+      
+      <alert name="unusual_traffic">
+        <condition>event_volume > 3 * avg_volume</condition>
+        <severity>warning</severity>
+        <notification>slack</notification>
+      </alert>
+    </alerts>
+  </grafana_integration>
+
+  <privacy_compliance>
+    <data_handling>
+      <principle>Minimize PII collection</principle>
+      <principle>Hash sensitive identifiers</principle>
+      <principle>Implement data retention policies</principle>
+      <principle>Support user data export and deletion</principle>
+    </data_handling>
+    
+    <retention_policies>
+      <policy name="event_data" duration="90 days"/>
+      <policy name="aggregated_metrics" duration="2 years"/>
+      <policy name="user_identifiers" duration="Until account deletion"/>
+    </retention_policies>
+    
+    <anonymization>
+      <field name="ip_address">Hash with daily salt rotation</field>
+      <field name="email">Store only domain for analytics</field>
+      <field name="prompt_text">Remove PII before storage</field>
+    </anonymization>
+  </privacy_compliance>
+
+  <implementation_plan>
+    <phase number="1" name="Foundation">
+      <tasks>
+        <task>Set up analytics microservice structure</task>
+        <task>Create ClickHouse tables and Redis structures</task>
+        <task>Implement basic event ingestion API</task>
+        <task>Extend GTM configuration</task>
+      </tasks>
+      <duration>1 week</duration>
+    </phase>
+    
+    <phase number="2" name="Integration">
+      <tasks>
+        <task>Integrate with frontend event capture</task>
+        <task>Implement event processing pipeline</task>
+        <task>Create materialized views for analytics</task>
+        <task>Set up Grafana datasources</task>
+      </tasks>
+      <duration>1 week</duration>
+    </phase>
+    
+    <phase number="3" name="Analytics">
+      <tasks>
+        <task>Build Grafana dashboards</task>
+        <task>Implement report generation APIs</task>
+        <task>Create prompt intelligence analysis</task>
+        <task>Set up alerting rules</task>
+      </tasks>
+      <duration>2 weeks</duration>
+    </phase>
+    
+    <phase number="4" name="Optimization">
+      <tasks>
+        <task>Performance tuning and caching</task>
+        <task>Implement advanced analytics features</task>
+        <task>Add survey and feedback capture</task>
+        <task>Complete privacy compliance features</task>
+      </tasks>
+      <duration>1 week</duration>
+    </phase>
+  </implementation_plan>
+
+  <testing_strategy>
+    <test_categories>
+      <category name="Event Capture">
+        <test>Verify all event types are captured correctly</test>
+        <test>Test rate limiting and throttling</test>
+        <test>Validate event enrichment logic</test>
+      </category>
+      
+      <category name="Data Processing">
+        <test>Test event processing pipeline</test>
+        <test>Verify data storage in ClickHouse</test>
+        <test>Test Redis caching mechanisms</test>
+      </category>
+      
+      <category name="Analytics">
+        <test>Validate report generation accuracy</test>
+        <test>Test materialized view updates</test>
+        <test>Verify dashboard data freshness</test>
+      </category>
+      
+      <category name="Performance">
+        <test>Load test with 10,000 events/second</test>
+        <test>Test query performance on large datasets</test>
+        <test>Verify real-time update latency < 1s</test>
+      </category>
+    </test_categories>
+  </testing_strategy>
+
+  <monitoring>
+    <metrics>
+      <metric name="event_ingestion_rate">Events processed per second</metric>
+      <metric name="processing_latency">Time from event capture to storage</metric>
+      <metric name="query_performance">P95 query response time</metric>
+      <metric name="storage_usage">ClickHouse and Redis storage consumption</metric>
+      <metric name="api_availability">Uptime percentage of analytics API</metric>
+    </metrics>
+    
+    <health_checks>
+      <check name="clickhouse_connection">Verify ClickHouse connectivity</check>
+      <check name="redis_connection">Verify Redis connectivity</check>
+      <check name="gtm_integration">Verify GTM tag firing</check>
+      <check name="data_freshness">Check latest event timestamp</check>
+    </health_checks>
+  </monitoring>
+
+  <dependencies>
+    <service name="GTM Provider">Frontend GTM integration</service>
+    <service name="ClickHouse">Time-series data storage</service>
+    <service name="Redis">Real-time caching</service>
+    <service name="Grafana">Visualization and dashboards</service>
+    <service name="Auth Service">User authentication and identification</service>
+  </dependencies>
+
+  <configuration>
+    <environment_variables>
+      <variable name="ANALYTICS_SERVICE_PORT" default="8090"/>
+      <variable name="CLICKHOUSE_ANALYTICS_URL" default="clickhouse://localhost:8123/analytics"/>
+      <variable name="REDIS_ANALYTICS_URL" default="redis://localhost:6379/2"/>
+      <variable name="GRAFANA_API_URL" default="http://localhost:3000"/>
+      <variable name="EVENT_BATCH_SIZE" default="100"/>
+      <variable name="EVENT_FLUSH_INTERVAL_MS" default="5000"/>
+      <variable name="MAX_EVENTS_PER_USER_PER_MINUTE" default="1000"/>
+    </environment_variables>
+  </configuration>
+</specification>

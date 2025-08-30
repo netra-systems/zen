@@ -447,8 +447,9 @@ class TestFrontendLoginJourneys:
             
             # Simulate login with different email cases
             test_token_obj = create_test_user_token(email.lower(), use_real_jwt=True)
+            test_token = test_token_obj.token if hasattr(test_token_obj, 'token') else test_token_obj
             self.tester.set_auth_tokens(
-                access_token=test_token_obj.token,  # Extract the actual token string
+                access_token=test_token,
                 user_data={"id": "test-user", "email": email}
             )
             

@@ -71,19 +71,23 @@ class TestEnvironmentManager:
         "LOG_LEVEL": "ERROR",
         "TEST_COLLECTION_MODE": "0",
         
-        # Database configuration - Using DATABASE_URL only to avoid conflicts
-        "DATABASE_URL": "sqlite+aiosqlite:///:memory:",
-        # Explicitly clear individual database variables to prevent conflicts
-        "DATABASE_HOST": "",
-        "DATABASE_USER": "",
-        "DATABASE_PASSWORD": "",
-        "DATABASE_NAME": "",
-        "DATABASE_PORT": "",
+        # Database configuration - Using separate components per database_connectivity_architecture.xml
+        # For test environment, DatabaseURLBuilder's TestBuilder will use SQLite memory by default
+        # We set USE_MEMORY_DB to ensure SQLite is used for tests
+        "USE_MEMORY_DB": "true",
+        # Clear all database config to let TestBuilder use memory database
         "POSTGRES_HOST": "",
         "POSTGRES_USER": "",
         "POSTGRES_PASSWORD": "",
         "POSTGRES_DB": "",
         "POSTGRES_PORT": "",
+        # Clear legacy DATABASE_URL to ensure central config manager is used
+        "DATABASE_URL": "",
+        "DATABASE_HOST": "",
+        "DATABASE_USER": "",
+        "DATABASE_PASSWORD": "",
+        "DATABASE_NAME": "",
+        "DATABASE_PORT": "",
         
         # Redis configuration
         "REDIS_URL": "redis://localhost:6379/1",
@@ -159,45 +163,34 @@ class TestEnvironmentManager:
     
     def _ensure_database_config_consistency(self) -> None:
         """
-        Ensure database configuration consistency by preventing multiple sources.
+        Ensure database configuration consistency per database_connectivity_architecture.xml.
         
-        This method enforces that only one database configuration method is used:
-        - Either DATABASE_URL is set (for test environments)
-        - Or individual components are set (DATABASE_HOST, DATABASE_USER, etc.)
-        But not both, which causes configuration conflicts.
+        For test environments:
+        - Clear any legacy DATABASE_URL to ensure central config manager is used
+        - DatabaseURLBuilder's TestBuilder will handle SQLite memory database
+        - USE_MEMORY_DB=true ensures tests use SQLite in-memory
         """
+        # Clear any legacy DATABASE_URL to prevent conflicts
         database_url = self.env.get("DATABASE_URL")
-        
-        # List of individual database configuration variables that conflict with DATABASE_URL
-        individual_db_vars = [
-            "DATABASE_HOST", "DATABASE_USER", "DATABASE_PASSWORD", 
-            "DATABASE_NAME", "DATABASE_PORT",
-            "POSTGRES_HOST", "POSTGRES_USER", "POSTGRES_PASSWORD", 
-            "POSTGRES_DB", "POSTGRES_PORT"
-        ]
-        
         if database_url and database_url.strip():
-            # DATABASE_URL is set, ensure individual components are cleared to prevent conflicts
-            conflicts_cleared = []
-            for var in individual_db_vars:
-                existing_value = self.env.get(var)
-                if existing_value and existing_value.strip():
-                    # Clear conflicting individual database variables
-                    self.env.set(var, "", source="database_config_consistency_clear")
-                    conflicts_cleared.append(var)
+            self.env.set("DATABASE_URL", "", source="database_config_consistency_clear")
+            print("[INFO] Cleared legacy DATABASE_URL to use central config manager")
+        
+        # Ensure test environment uses memory database
+        environment = self.env.get("ENVIRONMENT", "").lower()
+        if environment in ["test", "testing"]:
+            # Ensure USE_MEMORY_DB is set for test environment
+            if not self.env.get("USE_MEMORY_DB"):
+                self.env.set("USE_MEMORY_DB", "true", source="test_memory_db_config")
             
-            if conflicts_cleared:
-                print(f"[INFO] Cleared database configuration conflicts: {', '.join(conflicts_cleared)}")
-        else:
-            # DATABASE_URL is not set, check if we have individual components
-            has_individual_config = any(
-                self.env.get(var) and self.env.get(var).strip() 
-                for var in individual_db_vars
-            )
-            if not has_individual_config:
-                # No database configuration at all, use default test DATABASE_URL
-                self.env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", source="database_config_fallback")
-                print("[INFO] Set fallback DATABASE_URL for test environment")
+            # Clear all PostgreSQL config to ensure memory database is used
+            postgres_vars = [
+                "POSTGRES_HOST", "POSTGRES_USER", "POSTGRES_PASSWORD", 
+                "POSTGRES_DB", "POSTGRES_PORT"
+            ]
+            for var in postgres_vars:
+                if self.env.get(var):
+                    self.env.set(var, "", source="test_clear_postgres_config")
     
     def _configure_real_llm(self) -> None:
         """Configure environment for real LLM testing.

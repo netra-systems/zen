@@ -45,14 +45,31 @@ except ImportError:
     # Hard failure - IsolatedEnvironment is required for test runner
     raise RuntimeError("IsolatedEnvironment required for test runner. Cannot import from dev_launcher.isolated_environment")
 
-# Import Windows process cleanup utilities if on Windows
-if sys.platform == "win32":
+# Import enhanced process cleanup utilities
+try:
+    from shared.enhanced_process_cleanup import (
+        EnhancedProcessCleanup, 
+        cleanup_subprocess,
+        track_subprocess,
+        managed_subprocess,
+        get_cleanup_instance
+    )
+    # Initialize cleanup instance early to register atexit handlers
+    cleanup_manager = get_cleanup_instance()
+except ImportError:
     try:
+        # Fall back to basic Windows cleanup if enhanced not available
         from shared.windows_process_cleanup import WindowsProcessCleanup, cleanup_subprocess
+        cleanup_manager = None
+        track_subprocess = lambda p: None
+        managed_subprocess = None
     except ImportError:
         # Create dummy functions if import fails
         WindowsProcessCleanup = None
         cleanup_subprocess = lambda p, t=10: True
+        cleanup_manager = None
+        track_subprocess = lambda p: None
+        managed_subprocess = None
 
 # Import test framework - using absolute imports from project root
 from test_framework.runner import UnifiedTestRunner as FrameworkRunner
@@ -738,25 +755,19 @@ class UnifiedTestRunner:
                     creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0
                 )
                 
+                # Track the process for automatic cleanup
+                track_subprocess(process)
+                
                 try:
                     stdout, stderr = process.communicate(timeout=timeout_seconds)
                     returncode = process.returncode
                 except subprocess.TimeoutExpired:
                     # Clean up hanging process on timeout
-                    if sys.platform == "win32" and cleanup_subprocess:
-                        cleanup_subprocess(process, timeout=5)
-                    else:
-                        process.terminate()
-                        try:
-                            process.wait(timeout=5)
-                        except subprocess.TimeoutExpired:
-                            process.kill()
-                            process.wait()
+                    cleanup_subprocess(process, timeout=5, force=True)
                     raise
                 finally:
-                    # Ensure process is cleaned up on Windows
-                    if sys.platform == "win32" and cleanup_subprocess:
-                        cleanup_subprocess(process, timeout=2)
+                    # Always ensure process is cleaned up
+                    cleanup_subprocess(process, timeout=2)
                 
                 result = subprocess.CompletedProcess(
                     args=cmd,
@@ -787,12 +798,11 @@ class UnifiedTestRunner:
             print(f"[ERROR] {service} tests timed out after {timeout_seconds} seconds")
             print(f"[ERROR] Command: {cmd}")
             
-            # Clean up any hanging Node.js processes on Windows
-            if sys.platform == "win32" and service == "frontend" and WindowsProcessCleanup:
-                cleanup_instance = WindowsProcessCleanup()
-                cleaned = cleanup_instance.cleanup_node_processes()
-                if cleaned > 0:
-                    print(f"[INFO] Cleaned up {cleaned} hanging Node.js processes after timeout")
+            # Clean up any hanging processes after timeout
+            if cleanup_manager:
+                stats = cleanup_manager.cleanup_all()
+                if stats["total_cleaned"] > 0:
+                    print(f"[INFO] Cleaned up {stats['total_cleaned']} hanging processes after timeout")
             
             success = False
             result = subprocess.CompletedProcess(

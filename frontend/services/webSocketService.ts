@@ -239,16 +239,10 @@ class WebSocketService {
     // Use immediate status change for connection open
     clearTimeout(this.statusChangeTimer);
     this.onStatusChange?.(this.status);
-    this.sendAuthToken();
+    // Authentication is handled via subprotocol during connection establishment
     this.processQueuedMessages();
     this.startHeartbeatIfConfigured(options);
     options.onOpen?.();
-  }
-
-  private sendAuthToken(): void {
-    // Token authentication is handled securely via subprotocol during connection
-    // No additional auth message needed - security vulnerability prevented
-    logger.debug('Token authentication handled via secure subprotocol method');
   }
 
   private processQueuedMessages(): void {
@@ -796,37 +790,19 @@ class WebSocketService {
       this.ws = this.createSecureWebSocket(url, options);
 
       this.ws.onopen = () => {
-        debugLogger.debug('[WebSocketService] Connection opened to:', url);
-        this.state = 'connected';
-        this.status = 'OPEN';
-        // Immediate status change on successful connection
-        clearTimeout(this.statusChangeTimer);
-        this.onStatusChange?.(this.status);
+        this.handleConnectionOpen(url, options);
         
-        // CRITICAL FIX: Handle both authenticated and development mode connections
+        // Handle both authenticated and development mode connections
         if (options.token) {
           logger.debug('WebSocket connected with token authentication');
         } else {
           logger.debug('WebSocket connected in development mode (no authentication required)');
         }
-        
-        // Send queued messages
-        while (this.messageQueue.length > 0) {
-          const msg = this.messageQueue.shift();
-          this.send(msg);
-        }
-        
-        // Start heartbeat if configured
-        if (options.heartbeatInterval) {
-          this.startHeartbeat(options.heartbeatInterval);
-        }
 
-        // CRITICAL FIX: Only setup token refresh if we have a token
+        // Only setup token refresh if we have a token
         if (options.token) {
           this.setupTokenRefresh();
         }
-        
-        options.onOpen?.();
       };
 
       this.ws.onmessage = (event) => {
@@ -881,7 +857,7 @@ class WebSocketService {
         this.onStatusChange?.(this.status);
         this.stopHeartbeat();
         
-        // CRITICAL FIX: Handle authentication errors, but ignore them in development mode
+        // Handle authentication errors appropriately based on environment
         if (event.code === 1008) {
           logger.error('WebSocket authentication failed', undefined, {
             component: 'WebSocketService',
@@ -889,7 +865,7 @@ class WebSocketService {
             metadata: { code: event.code, reason: event.reason }
           });
           
-          // CRITICAL FIX: In development mode without token, don't treat auth errors as fatal
+          // In development mode without token, don't treat auth errors as fatal
           if (!this.currentToken) {
             logger.debug('WebSocket auth error in development mode (no token), ignoring');
           } else {
@@ -923,18 +899,33 @@ class WebSocketService {
       };
 
       this.ws.onerror = (error) => {
-        logger.error('WebSocket error occurred', undefined, {
-          component: 'WebSocketService',
-          action: 'websocket_error',
-          metadata: { error }
-        });
+        // Only log as error if we're not in a known disconnection state
+        const isExpectedError = this.state === 'disconnecting' || this.state === 'disconnected';
+        if (!isExpectedError) {
+          logger.error('WebSocket error occurred', undefined, {
+            component: 'WebSocketService',
+            action: 'websocket_error',
+            metadata: { error, state: this.state, hasToken: !!this.currentToken }
+          });
+        }
+        
         this.status = 'CLOSED';
         this.state = 'disconnected';
         clearTimeout(this.statusChangeTimer);
         this.onStatusChange?.(this.status);
         
-        // Determine error type based on readyState and context
+        // Better error type detection:
+        // - If we have a token but still got an error, it's likely an auth issue
+        // - If we don't have a token, it's expected in production (not an error)
+        // - Connection errors happen regardless of token status
         const errorType = this.currentToken ? 'auth' : 'connection';
+        const isDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+        
+        // Don't report auth errors in production when there's no token (expected behavior)
+        if (!this.currentToken && !isDevelopment) {
+          logger.debug('WebSocket connection requires authentication');
+          return;
+        }
         
         options.onError?.({
           code: 1006,
@@ -1101,15 +1092,20 @@ class WebSocketService {
 
   /**
    * Creates a secure WebSocket connection using proper authentication methods.
-   * Uses subprotocol for JWT authentication (browser-compatible method)
-   * CRITICAL FIX: Handle development mode without token authentication
+   * Uses subprotocol for JWT authentication (browser-compatible method).
+   * Supports both authenticated and development mode connections.
    */
   private createSecureWebSocket(url: string, options: WebSocketOptions): WebSocket {
     const token = options.token;
     
-    // CRITICAL FIX: In development mode, allow connections without authentication
+    // In development mode, allow connections without authentication
     if (!token) {
-      logger.debug('Creating WebSocket without authentication (development mode)');
+      const isDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+      if (isDevelopment) {
+        logger.debug('Creating WebSocket without authentication (development mode)');
+      } else {
+        logger.debug('Creating WebSocket without authentication (waiting for token)');
+      }
       return new WebSocket(url);
     }
 
@@ -1147,7 +1143,7 @@ class WebSocketService {
       return new WebSocket(url, protocols);
     } catch (error) {
       logger.error('Failed to encode token for WebSocket authentication, falling back to unauthenticated connection', error as Error);
-      // CRITICAL FIX: Fallback to unauthenticated connection for development mode
+      // Fallback to unauthenticated connection
       return new WebSocket(url);
     }
   }

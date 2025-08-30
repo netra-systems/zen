@@ -32,6 +32,7 @@
 | **Claude Log Analyzer** | `/scripts/claude_log_analyzer.py` | Get logs to Claude for analysis | [`SPEC/intelligent_remediation_architecture.xml`](SPEC/intelligent_remediation_architecture.xml) |
 | **🔴 Docker Hot Reload** | `/docker-compose.override.yml` | **10x faster development** | [`SPEC/docker_hot_reload.xml`](SPEC/docker_hot_reload.xml) |
 | **🔴 Adaptive Workflow** | `/netra_backend/app/agents/supervisor/workflow_orchestrator.py` | **Dynamic workflow based on data sufficiency** | [`SPEC/supervisor_adaptive_workflow.xml`](SPEC/supervisor_adaptive_workflow.xml) |
+| **🔴 Test Criticality Analysis** | `/docs/TEST_CRITICALITY_ANALYSIS.md` | **Top 100 critical tests protecting $10M+ revenue** | [`SPEC/learnings/test_criticality_analysis.xml`](SPEC/learnings/test_criticality_analysis.xml) |
 
 ### Configuration Files (Unified System - CRITICAL CHANGE)
 | File | Location | Purpose | Common Confusion |

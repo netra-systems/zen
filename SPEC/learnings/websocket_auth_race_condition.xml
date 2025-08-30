@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>WebSocket Authentication Race Condition at Startup</title>
+    <date>2025-08-30</date>
+    <severity>CRITICAL</severity>
+    <components>
+      <component>frontend/providers/WebSocketProvider.tsx</component>
+      <component>frontend/services/webSocketService.ts</component>
+      <component>frontend/auth/context.tsx</component>
+    </components>
+    <tags>
+      <tag>websocket</tag>
+      <tag>authentication</tag>
+      <tag>race-condition</tag>
+      <tag>startup</tag>
+      <tag>initialization</tag>
+    </tags>
+  </metadata>
+
+  <problem>
+    <description>
+      WebSocket connection attempts immediately on app startup cause spurious authentication
+      errors due to a race condition between AuthProvider initialization and WebSocketProvider
+      connection attempts.
+    </description>
+    
+    <symptoms>
+      <symptom>ERROR: WebSocket error occurred [WebSocketService] on every startup</symptom>
+      <symptom>ERROR: Authentication failure [WebSocketProvider] immediately after page load</symptom>
+      <symptom>WebSocket attempts connection before auth token is available</symptom>
+      <symptom>Errors logged even when authentication eventually succeeds</symptom>
+    </symptoms>
+    
+    <root_cause>
+      <issue>
+        WebSocketProvider's useEffect runs immediately on mount, attempting connection
+        before AuthProvider has completed initialization. The auth token is null initially,
+        causing connection failures that are incorrectly classified as errors.
+      </issue>
+      <timing>
+        1. AuthProvider initializes with loading=true, initialized=false
+        2. WebSocketProvider mounts and immediately attempts connection
+        3. Connection fails because token is null
+        4. Error is logged as authentication failure
+        5. AuthProvider completes initialization with token
+        6. WebSocket reconnects successfully but error already logged
+      </timing>
+    </root_cause>
+  </problem>
+
+  <solution>
+    <approach>
+      Add initialization synchronization between AuthProvider and WebSocketProvider
+      to prevent premature connection attempts. Improve error classification to
+      distinguish between expected states and actual errors.
+    </approach>
+    
+    <implementation>
+      <change file="frontend/auth/context.tsx">
+        <description>Export initialized flag from AuthContext</description>
+        <code><![CDATA[
+export interface AuthContextType {
+  // ... existing fields ...
+  initialized: boolean; // Track if auth initialization is complete
+}
+        ]]></code>
+      </change>
+      
+      <change file="frontend/providers/WebSocketProvider.tsx">
+        <description>Wait for auth initialization before connecting</description>
+        <code><![CDATA[
+const { token, initialized: authInitialized } = useAuth();
+
+useEffect(() => {
+  // Wait for auth to initialize before attempting connection
+  if (!authInitialized) {
+    debugLogger.debug('[WebSocketProvider] Waiting for auth initialization');
+    return;
+  }
+  
+  // Guard: Skip connection if no token is available (unless in development mode)
+  if (!token && !isDevelopment) {
+    debugLogger.debug('[WebSocketProvider] WebSocket connection skipped - no token available');
+    return;
+  }
+  // ... rest of connection logic
+}, [token, authInitialized, handleMessage, handleStatusChange]);
+        ]]></code>
+      </change>
+      
+      <change file="frontend/services/webSocketService.ts">
+        <description>Improve error handling and classification</description>
+        <code><![CDATA[
+this.ws.onerror = (error) => {
+  // Only log as error if we're not in a known disconnection state
+  const isExpectedError = this.state === 'disconnecting' || this.state === 'disconnected';
+  if (!isExpectedError) {
+    logger.error('WebSocket error occurred', undefined, {
+      component: 'WebSocketService',
+      action: 'websocket_error',
+      metadata: { error, state: this.state, hasToken: !!this.currentToken }
+    });
+  }
+  
+  // Don't report auth errors in production when there's no token (expected behavior)
+  if (!this.currentToken && !isDevelopment) {
+    logger.debug('WebSocket connection requires authentication');
+    return;
+  }
+  // ... rest of error handling
+};
+        ]]></code>
+      </change>
+    </implementation>
+  </solution>
+
+  <testing>
+    <test_case>
+      <name>WebSocket waits for auth initialization</name>
+      <description>Verify WebSocket doesn't attempt connection until auth is initialized</description>
+    </test_case>
+    <test_case>
+      <name>No spurious errors on startup</name>
+      <description>Verify no authentication errors logged during normal startup flow</description>
+    </test_case>
+    <test_case>
+      <name>Proper error classification</name>
+      <description>Verify errors are only logged for actual failures, not expected states</description>
+    </test_case>
+  </testing>
+
+  <prevention>
+    <guideline>
+      Always synchronize initialization between dependent providers using explicit
+      initialization flags rather than relying on timing or null checks alone.
+    </guideline>
+    <guideline>
+      Distinguish between expected transient states (no token yet) and actual
+      error conditions (auth failed) in error handling logic.
+    </guideline>
+    <guideline>
+      Use graduated logging levels: debug for expected states, warn for recoverable
+      errors, error only for critical failures requiring intervention.
+    </guideline>
+  </prevention>
+
+  <related_issues>
+    <issue>WebSocket reconnection logic may also need initialization checks</issue>
+    <issue>Other providers may have similar race conditions with AuthProvider</issue>
+    <issue>Token refresh during active WebSocket connections needs careful handling</issue>
+  </related_issues>
+</learning>

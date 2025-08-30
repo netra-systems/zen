@@ -3,6 +3,18 @@
 
 categories:
   # Critical categories - must run first
+  mission_critical:
+    description: "MISSION CRITICAL WebSocket agent event tests - MUST PASS before ANY deployment"
+    priority: "CRITICAL"
+    category_type: "quality"
+    timeout_seconds: 120
+    estimated_duration_minutes: 2.0
+    max_parallel_instances: 1
+    parallel_safe: false
+    tags: ["mission-critical", "websocket", "agent-events", "deployment-blocker"]
+    auto_split:
+      enabled: false
+    
   smoke:
     description: "Quick validation tests for pre-commit checks"
     priority: "CRITICAL"
@@ -316,14 +328,14 @@ environment_overrides:
 # Legacy level mapping for backward compatibility
 legacy_mapping:
   smoke: ["smoke"]
-  critical: ["smoke", "startup", "security"]
+  critical: ["mission_critical", "smoke", "startup", "security"]
   agents: ["agent"]
   real_e2e: ["real_e2e"]
   real_services: ["real_services"]
-  staging: ["integration", "api", "e2e"]
+  staging: ["mission_critical", "integration", "api", "e2e"]
   staging-real: ["real_e2e", "real_services"]
-  staging-quick: ["smoke", "unit", "integration"]
-  comprehensive: ["smoke", "unit", "integration", "api", "database", "websocket", "agent", "frontend", "e2e"]
+  staging-quick: ["mission_critical", "smoke", "unit", "integration"]
+  comprehensive: ["mission_critical", "smoke", "unit", "integration", "api", "database", "websocket", "agent", "frontend", "e2e"]
 
 # Execution configuration
 execution:

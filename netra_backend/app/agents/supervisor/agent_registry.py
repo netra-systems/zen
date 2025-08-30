@@ -124,7 +124,18 @@ class AgentRegistry:
             self.llm_manager, self.tool_dispatcher))
 
     def set_websocket_manager(self, manager: 'WebSocketManager') -> None:
-        """Set websocket manager for all agents"""
+        """Set websocket manager for all agents and enhance tool dispatcher"""
         self.websocket_manager = manager
+        
+        # CRITICAL: Enhance tool dispatcher with WebSocket notifications
+        # This enables real-time tool execution events
+        if self.tool_dispatcher and manager:
+            from netra_backend.app.agents.enhanced_tool_execution import (
+                enhance_tool_dispatcher_with_notifications
+            )
+            logger.info("Enhancing tool dispatcher with WebSocket notifications")
+            enhance_tool_dispatcher_with_notifications(self.tool_dispatcher, manager)
+        
+        # Set WebSocket manager for all registered agents
         for agent in self.agents.values():
             agent.websocket_manager = manager

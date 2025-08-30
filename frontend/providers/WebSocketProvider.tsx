@@ -19,10 +19,11 @@ export const useWebSocketContext = () => {
 };
 
 import { AuthContext } from '@/auth/context';
+import { useAuth } from '@/auth/context';
 import { unifiedAuthService } from '@/lib/unified-auth-service';
 
 export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
-  const { token } = useContext(AuthContext)!;
+  const { token, initialized: authInitialized } = useAuth();
   const [status, setStatus] = useState<WebSocketStatus>('CLOSED');
   const [messages, setMessages] = useState<WebSocketMessage[]>([]);
   const isConnectingRef = useRef(false);
@@ -79,6 +80,13 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
   useEffect(() => {
     // In development mode, allow connection without token
     const isDevelopment = process.env.NODE_ENV === 'development';
+    
+    // Wait for auth to initialize before attempting connection
+    // This prevents race conditions and spurious authentication errors
+    if (!authInitialized) {
+      debugLogger.debug('[WebSocketProvider] Waiting for auth initialization');
+      return;
+    }
     
     // Guard: Skip connection if no token is available (unless in development mode)
     if (!token && !isDevelopment) {
@@ -141,7 +149,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
               debugLogger.debug('[WebSocketProvider] Secure WebSocket connection established');
             },
             onError: (error) => {
-              // Log auth errors as authentication failures, not WebSocket errors
+              // Log auth errors appropriately based on context
               const errorMessage = error.type === 'auth' 
                 ? 'Authentication failure' 
                 : 'WebSocket connection error';
@@ -150,7 +158,11 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
                 ? 'authentication_error'
                 : 'connection_error';
               
-              logger.error(errorMessage, undefined, {
+              // Use warning level for recoverable errors, error level for critical ones
+              const logLevel = error.recoverable ? 'warn' : 'error';
+              const logFn = error.recoverable ? logger.warn : logger.error;
+              
+              logFn(errorMessage, undefined, {
                 component: 'WebSocketProvider',
                 action: errorAction,
                 metadata: { 
@@ -221,7 +233,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
       }
       isConnectingRef.current = false;
     };
-  }, [token, handleMessage, handleStatusChange]);
+  }, [token, authInitialized, handleMessage, handleStatusChange]);
 
   // Token synchronization effect - update WebSocket when token changes
   useEffect(() => {

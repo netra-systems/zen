@@ -19,6 +19,11 @@ from typing import Any, Dict, List, Optional, Set
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.logging_config import central_logger
 
+# Import with TYPE_CHECKING to avoid circular imports
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+
 logger = central_logger.get_logger(__name__)
 
 
@@ -76,13 +81,19 @@ class AgentInfo:
 class AgentManager:
     """Manages lifecycle and coordination of multiple agents."""
     
-    def __init__(self, max_concurrent_agents: int = 10):
+    def __init__(self, max_concurrent_agents: int = 10, 
+                 websocket_notifier: Optional['WebSocketNotifier'] = None):
         """Initialize the agent manager."""
         self.max_concurrent_agents = max_concurrent_agents
+        self.websocket_notifier = websocket_notifier
         self._agents: Dict[str, AgentInfo] = {}
         self._agent_instances: Dict[str, Any] = {}
         self._running_tasks: Dict[str, asyncio.Task] = {}
         self._lock = asyncio.Lock()
+    
+    def set_websocket_notifier(self, notifier: 'WebSocketNotifier') -> None:
+        """Set the websocket notifier for real-time event emissions."""
+        self.websocket_notifier = notifier
     
     async def register_agent(self, agent_type: str, agent_instance: Any, 
                            metadata: Optional[Dict[str, Any]] = None) -> str:
@@ -103,6 +114,23 @@ class AgentManager:
             self._agents[agent_id] = agent_info
             self._agent_instances[agent_id] = agent_instance
             
+            # Send WebSocket notification for agent registration
+            try:
+                if self.websocket_notifier:
+                    thread_id = metadata.get('thread_id') if metadata else None
+                    logger.info(f"Sending websocket notification for agent registration: {agent_id}")
+                    await self.websocket_notifier.send_agent_registered(
+                        agent_id=agent_id,
+                        agent_type=agent_type,
+                        thread_id=thread_id,
+                        agent_metadata=metadata
+                    )
+                    logger.info(f"WebSocket notification sent successfully for agent: {agent_id}")
+                else:
+                    logger.info("No websocket notifier available")
+            except Exception as e:
+                logger.error(f"Failed to send agent registration websocket notification: {e}", exc_info=True)
+            
             logger.info(f"Registered agent {agent_id} of type {agent_type}")
             return agent_id
     
@@ -111,6 +139,22 @@ class AgentManager:
         async with self._lock:
             if agent_id not in self._agents:
                 return False
+            
+            # Get thread_id from metadata before removing agent
+            thread_id = None
+            agent_info = self._agents[agent_id]
+            if agent_info.metadata:
+                thread_id = agent_info.metadata.get('thread_id')
+            
+            # Send WebSocket notification before removal
+            try:
+                if self.websocket_notifier:
+                    await self.websocket_notifier.send_agent_unregistered(
+                        agent_id=agent_id,
+                        thread_id=thread_id
+                    )
+            except Exception as e:
+                logger.debug(f"Failed to send agent unregistration websocket notification: {e}")
             
             # Cancel running task if exists
             if agent_id in self._running_tasks:
@@ -143,9 +187,26 @@ class AgentManager:
             if len(self._running_tasks) >= self.max_concurrent_agents:
                 raise NetraException("Maximum concurrent agents reached")
             
+            # Get old status for notification
+            old_status = agent_info.status.value
+            
             # Update agent status
             agent_info.status = AgentStatus.RUNNING
             agent_info.last_updated = datetime.now(timezone.utc)
+            
+            # Send status change notification
+            try:
+                if self.websocket_notifier:
+                    thread_id = agent_info.metadata.get('thread_id') if agent_info.metadata else None
+                    await self.websocket_notifier.send_agent_status_changed(
+                        agent_id=agent_id,
+                        old_status=old_status,
+                        new_status=agent_info.status.value,
+                        thread_id=thread_id,
+                        metadata=agent_info.metadata
+                    )
+            except Exception as e:
+                logger.debug(f"Failed to send agent status change websocket notification: {e}")
             
             # Start the task
             agent_instance = self._agent_instances[agent_id]
@@ -169,10 +230,42 @@ class AgentManager:
                 except asyncio.CancelledError:
                     pass
             
-            # Update agent status
+            # Update agent status and send notification
             if agent_id in self._agents:
-                self._agents[agent_id].status = AgentStatus.CANCELLED
-                self._agents[agent_id].last_updated = datetime.now(timezone.utc)
+                agent_info = self._agents[agent_id]
+                old_status = agent_info.status.value
+                agent_info.status = AgentStatus.CANCELLED
+                agent_info.last_updated = datetime.now(timezone.utc)
+                
+                # Send cancellation and stopped notifications
+                try:
+                    if self.websocket_notifier:
+                        thread_id = agent_info.metadata.get('thread_id') if agent_info.metadata else None
+                        
+                        # Send cancelled notification
+                        await self.websocket_notifier.send_agent_cancelled(
+                            agent_id=agent_id,
+                            thread_id=thread_id
+                        )
+                        
+                        # Create context for stopped notification
+                        from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+                        context = AgentExecutionContext(
+                            agent_name=f"agent_{agent_id}",
+                            run_id=agent_info.metadata.get('run_id', agent_id),
+                            thread_id=thread_id or agent_id,
+                            user_id=agent_info.metadata.get('user_id', 'system'),
+                            retry_count=0,
+                            max_retries=0
+                        )
+                        
+                        # Send stopped notification
+                        await self.websocket_notifier.send_agent_stopped(
+                            context, "Agent task cancelled by user/system"
+                        )
+                        
+                except Exception as e:
+                    logger.debug(f"Failed to send agent cancellation/stopped websocket notification: {e}")
             
             del self._running_tasks[agent_id]
             logger.info(f"Stopped task on agent {agent_id}")
@@ -207,7 +300,7 @@ class AgentManager:
             total_completed = sum(a.metrics.tasks_completed for a in self._agents.values())
             total_failed = sum(a.metrics.tasks_failed for a in self._agents.values())
             
-            return {
+            metrics = {
                 "total_agents": total_agents,
                 "running_agents": running_agents,
                 "idle_agents": idle_agents,
@@ -215,6 +308,25 @@ class AgentManager:
                 "total_tasks_failed": total_failed,
                 "success_rate": total_completed / (total_completed + total_failed) if (total_completed + total_failed) > 0 else 0.0
             }
+            
+            # Send metrics update notification
+            try:
+                if self.websocket_notifier:
+                    # Try to find a thread_id from any agent's metadata
+                    thread_id = None
+                    for agent_info in self._agents.values():
+                        if agent_info.metadata and 'thread_id' in agent_info.metadata:
+                            thread_id = agent_info.metadata['thread_id']
+                            break
+                    
+                    await self.websocket_notifier.send_agent_metrics_updated(
+                        system_metrics=metrics,
+                        thread_id=thread_id
+                    )
+            except Exception as e:
+                logger.debug(f"Failed to send agent metrics update websocket notification: {e}")
+            
+            return metrics
     
     async def cleanup_completed_tasks(self) -> int:
         """Clean up completed tasks and return count cleaned."""
@@ -247,18 +359,69 @@ class AgentManager:
             # Update metrics on success
             execution_time = (datetime.now(timezone.utc) - start_time).total_seconds()
             if agent_id in self._agents:
-                self._agents[agent_id].metrics.update_completion(execution_time)
-                self._agents[agent_id].status = AgentStatus.COMPLETED
-                self._agents[agent_id].last_updated = datetime.now(timezone.utc)
+                agent_info = self._agents[agent_id]
+                old_status = agent_info.status.value
+                agent_info.metrics.update_completion(execution_time)
+                agent_info.status = AgentStatus.COMPLETED
+                agent_info.last_updated = datetime.now(timezone.utc)
+                
+                # Send status change notification for completion
+                try:
+                    if self.websocket_notifier:
+                        thread_id = agent_info.metadata.get('thread_id') if agent_info.metadata else None
+                        await self.websocket_notifier.send_agent_status_changed(
+                            agent_id=agent_id,
+                            old_status=old_status,
+                            new_status=agent_info.status.value,
+                            thread_id=thread_id,
+                            metadata=agent_info.metadata
+                        )
+                except Exception as ws_e:
+                    logger.debug(f"Failed to send agent completion websocket notification: {ws_e}")
             
             return result
             
         except Exception as e:
             # Update metrics on failure
             if agent_id in self._agents:
-                self._agents[agent_id].metrics.update_failure()
-                self._agents[agent_id].status = AgentStatus.FAILED
-                self._agents[agent_id].last_updated = datetime.now(timezone.utc)
+                agent_info = self._agents[agent_id]
+                agent_info.metrics.update_failure()
+                agent_info.status = AgentStatus.FAILED
+                agent_info.last_updated = datetime.now(timezone.utc)
+                
+                # Send comprehensive failure notifications
+                try:
+                    if self.websocket_notifier:
+                        thread_id = agent_info.metadata.get('thread_id') if agent_info.metadata else None
+                        
+                        # Send failed notification (for agent manager)
+                        await self.websocket_notifier.send_agent_failed(
+                            agent_id=agent_id,
+                            error=str(e),
+                            thread_id=thread_id
+                        )
+                        
+                        # Create context for error notification
+                        from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+                        context = AgentExecutionContext(
+                            agent_name=f"agent_{agent_id}",
+                            run_id=agent_info.metadata.get('run_id', agent_id),
+                            thread_id=thread_id or agent_id,
+                            user_id=agent_info.metadata.get('user_id', 'system'),
+                            retry_count=0,
+                            max_retries=0
+                        )
+                        
+                        # Send detailed error notification
+                        await self.websocket_notifier.send_agent_error(
+                            context,
+                            str(e),
+                            error_type=type(e).__name__,
+                            error_details={"agent_id": agent_id, "execution_time": (datetime.now(timezone.utc) - start_time).total_seconds()}
+                        )
+                        
+                except Exception as ws_e:
+                    logger.debug(f"Failed to send agent failure/error websocket notifications: {ws_e}")
             
             logger.error(f"Agent {agent_id} task failed: {e}")
             raise
@@ -266,6 +429,25 @@ class AgentManager:
     async def shutdown(self) -> None:
         """Shutdown the agent manager and cancel all running tasks."""
         async with self._lock:
+            agents_affected = len(self._agents)
+            
+            # Send shutdown notification before clearing data
+            try:
+                if self.websocket_notifier and agents_affected > 0:
+                    # Try to find a thread_id from any agent's metadata
+                    thread_id = None
+                    for agent_info in self._agents.values():
+                        if agent_info.metadata and 'thread_id' in agent_info.metadata:
+                            thread_id = agent_info.metadata['thread_id']
+                            break
+                    
+                    await self.websocket_notifier.send_agent_manager_shutdown(
+                        agents_affected=agents_affected,
+                        thread_id=thread_id
+                    )
+            except Exception as e:
+                logger.debug(f"Failed to send agent manager shutdown websocket notification: {e}")
+            
             # Cancel all running tasks
             for task in self._running_tasks.values():
                 if not task.done():

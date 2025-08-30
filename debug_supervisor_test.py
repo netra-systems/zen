@@ -8,7 +8,8 @@ import sys
 # Set up environment before any imports
 os.environ["TESTING"] = "1"
 os.environ["ENVIRONMENT"] = "testing"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+# Use central config manager per database_connectivity_architecture.xml
+os.environ["USE_MEMORY_DB"] = "true"  # Tell DatabaseURLBuilder to use SQLite memory
 os.environ["CLICKHOUSE_URL"] = "http://localhost:8123/test"
 os.environ["CLICKHOUSE_HOST"] = "localhost"
 os.environ["CLICKHOUSE_ENABLED"] = "false"

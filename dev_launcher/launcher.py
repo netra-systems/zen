@@ -44,14 +44,32 @@ from dev_launcher.utils import check_emoji_support, print_with_emoji
 from dev_launcher.websocket_validator import WebSocketValidator
 from dev_launcher.windows_process_manager import WindowsProcessManager
 
-# Import Windows cleanup utilities
-if sys.platform == "win32":
-    try:
-        from shared.windows_process_cleanup import WindowsProcessCleanup
-    except ImportError:
+# Import enhanced process cleanup utilities
+try:
+    from shared.enhanced_process_cleanup import (
+        EnhancedProcessCleanup,
+        cleanup_subprocess,
+        track_subprocess,
+        get_cleanup_instance
+    )
+    cleanup_manager = get_cleanup_instance()
+    WindowsProcessCleanup = EnhancedProcessCleanup  # Compatibility alias
+except ImportError:
+    # Fall back to basic Windows cleanup
+    if sys.platform == "win32":
+        try:
+            from shared.windows_process_cleanup import WindowsProcessCleanup
+            cleanup_manager = None
+            cleanup_subprocess = lambda p, t=10: True
+            track_subprocess = lambda p: None
+        except ImportError:
+            WindowsProcessCleanup = None
+            cleanup_manager = None
+    else:
         WindowsProcessCleanup = None
-else:
-    WindowsProcessCleanup = None
+        cleanup_manager = None
+        cleanup_subprocess = lambda p, t=10: True
+        track_subprocess = lambda p: None
 
 # Configure unified logging for dev launcher
 configure_service_logging({

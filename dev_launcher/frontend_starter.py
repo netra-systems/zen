@@ -20,6 +20,12 @@ from dev_launcher.utils import (
     print_with_emoji,
 )
 
+# Import process tracking for cleanup
+try:
+    from shared.enhanced_process_cleanup import track_subprocess
+except ImportError:
+    track_subprocess = lambda p: None
+
 logger = logging.getLogger(__name__)
 
 
@@ -291,6 +297,8 @@ class FrontendStarter:
                                            port: int) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
         """Create and verify frontend process."""
         process = create_subprocess(cmd, cwd=frontend_path, env=env)
+        # Track the process for automatic cleanup
+        track_subprocess(process)
         log_streamer = self._create_frontend_log_streamer(process)
         return self._verify_frontend_startup(process, port, log_streamer)
     

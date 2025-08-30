@@ -305,12 +305,15 @@ describe('Input Component - Comprehensive Tests', () => {
 
   describe('Event Handling', () => {
     it('calls onChange handler on input', async () => {
-      const user = setupUser();
       const handleChange = jest.fn();
       renderInput({ onChange: handleChange });
       const input = screen.getByTestId('test-input');
       
-      await user.type(input, 'Test');
+      // Simulate typing "Test" character by character using fireEvent
+      fireEvent.change(input, { target: { value: 'T' } });
+      fireEvent.change(input, { target: { value: 'Te' } });
+      fireEvent.change(input, { target: { value: 'Tes' } });
+      fireEvent.change(input, { target: { value: 'Test' } });
       expect(handleChange).toHaveBeenCalledTimes(4);
     });
 

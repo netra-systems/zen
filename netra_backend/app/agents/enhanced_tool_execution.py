@@ -119,12 +119,24 @@ def enhance_tool_dispatcher_with_notifications(tool_dispatcher, websocket_manage
     This function wraps the tool dispatcher's executor with enhanced notifications.
     """
     if hasattr(tool_dispatcher, 'executor'):
+        # Check if already enhanced
+        if isinstance(tool_dispatcher.executor, EnhancedToolExecutionEngine):
+            logger.debug("Tool dispatcher already enhanced with WebSocket notifications")
+            return tool_dispatcher
+            
         # Replace executor with enhanced version
         enhanced_executor = EnhancedToolExecutionEngine(websocket_manager)
         # Preserve any existing state
         if hasattr(tool_dispatcher.executor, '_core_engine'):
             enhanced_executor._core_engine = tool_dispatcher.executor._core_engine
+        
+        # Store original executor for testing/validation
+        tool_dispatcher._original_executor = tool_dispatcher.executor
         tool_dispatcher.executor = enhanced_executor
+        
+        # Mark as enhanced for validation
+        tool_dispatcher._websocket_enhanced = True
+        
         logger.info("Enhanced tool dispatcher with WebSocket notifications")
     else:
         logger.warning("Tool dispatcher does not have executor attribute")
