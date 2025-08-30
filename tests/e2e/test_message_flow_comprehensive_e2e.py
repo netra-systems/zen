@@ -25,14 +25,13 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import aiohttp
 import pytest
 import websockets
 
 
-class MessageFlowTester:
+class TestMessageFlower:
     """Helper class for message flow testing."""
     
     def __init__(self):

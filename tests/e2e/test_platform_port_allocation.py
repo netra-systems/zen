@@ -9,7 +9,6 @@ import pytest
 import socket
 import sys
 from typing import List, Set
-from unittest.mock import MagicMock, patch
 
 from dev_launcher.service_coordination import (
     PlatformAwarePortAllocator,
@@ -49,7 +48,7 @@ class TestWindowsPlatformPortAllocation:
         # Mock: Component isolation for testing without external dependencies
         with patch('socket.socket') as mock_socket:
             # Mock: Generic component isolation for controlled unit testing
-            mock_sock = MagicMock()
+            mock_sock = MagicNone  # TODO: Use real service instead of Mock
             mock_socket.return_value = mock_sock
             mock_sock.bind.return_value = None
             
@@ -95,7 +94,7 @@ class TestLinuxPlatformPortAllocation:
         # Mock: Component isolation for testing without external dependencies
         with patch('socket.socket') as mock_socket:
             # Mock: Generic component isolation for controlled unit testing
-            mock_sock = MagicMock()
+            mock_sock = MagicNone  # TODO: Use real service instead of Mock
             mock_socket.return_value = mock_sock
             mock_sock.bind.return_value = None
             
@@ -141,7 +140,7 @@ class TestMacOSPlatformPortAllocation:
         # Mock: Component isolation for testing without external dependencies
         with patch('socket.socket') as mock_socket:
             # Mock: Generic component isolation for controlled unit testing
-            mock_sock = MagicMock()
+            mock_sock = MagicNone  # TODO: Use real service instead of Mock
             mock_socket.return_value = mock_sock
             mock_sock.bind.return_value = None
             

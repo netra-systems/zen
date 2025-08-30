@@ -239,6 +239,11 @@ class AgentCollaborationTestUtils:
         
         response_time = time.time() - start_time
         response = json.loads(response_data) if isinstance(response_data, str) else response_data
+        
+        # Handle cases where response might be None
+        if response is None:
+            response = {"status": "error", "content": "No response received", "agents_involved": []}
+        
         response["response_time"] = response_time
         
         return response

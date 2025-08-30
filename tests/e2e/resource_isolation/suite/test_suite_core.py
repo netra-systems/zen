@@ -30,7 +30,7 @@ TEST_CONFIG = {
     "monitoring_interval": 0.5,  # 500ms for fine-grained monitoring
 }
 
-class ResourceIsolationTestSuite:
+class TestResourceIsolationSuite:
     """Main test suite for resource isolation testing."""
     
     def __init__(self):

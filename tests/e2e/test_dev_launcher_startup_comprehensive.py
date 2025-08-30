@@ -37,7 +37,6 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
-from unittest.mock import Mock, patch
 
 import pytest
 import requests
@@ -58,7 +57,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class StartupTestResult:
+class TestStartupResult:
     """Results from startup testing."""
     success: bool
     startup_time: float
@@ -82,7 +81,7 @@ class ServiceConnectivityResult:
     errors: List[str]
 
 
-class DevLauncherStartupTester:
+class TestDevLauncherStartuper:
     """
     Comprehensive dev launcher startup tester.
     

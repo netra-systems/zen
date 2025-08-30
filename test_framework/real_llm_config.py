@@ -133,107 +133,51 @@ class RealLLMConfig:
 
 
 class RealLLMConfigManager:
-    """Manager for real LLM testing configuration."""
+    """Manager for real LLM testing configuration.
+    
+    UPDATED: Now uses the canonical llm_config_manager for configuration.
+    This maintains backward compatibility while using the consolidated system.
+    """
     
     def __init__(self):
+        # Use the canonical configuration manager
+        from test_framework.llm_config_manager import get_llm_config_manager
+        self._canonical_manager = get_llm_config_manager()
+        
+        # Load configuration using canonical system
         self.config = self._load_configuration()
         self.cost_tracker = CostTracker(self.config.cost_budget_per_run)
         self.response_cache = ResponseCache() if self.config.cache_responses else None
-        self.api_keys = self._load_api_keys()
+        self.api_keys = self._canonical_manager._api_keys
         self.rate_limiter = RateLimiter(self.config.rate_limit_per_minute)
         self.circuit_breaker = CircuitBreaker(self.config.circuit_breaker_threshold)
         
     def _load_configuration(self) -> RealLLMConfig:
-        """Load configuration from environment variables."""
-        enabled = os.getenv("ENABLE_REAL_LLM_TESTING", "false").lower() == "true"
+        """Load configuration from canonical manager."""
+        canonical_config = self._canonical_manager.config
         
-        # Alternative environment variable names for compatibility
-        if not enabled:
-            enabled = os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true"
+        # Convert canonical config to legacy format for backward compatibility
+        enabled = self._canonical_manager.is_real_llm_enabled()
         
         config = RealLLMConfig(
             enabled=enabled,
-            timeout_seconds=int(os.getenv("LLM_TIMEOUT_SECONDS", "30")),
-            max_retries=int(os.getenv("LLM_MAX_RETRIES", "3")),
-            cache_responses=os.getenv("LLM_CACHE_RESPONSES", "true").lower() == "true",
-            cost_tracking=os.getenv("LLM_COST_TRACKING", "true").lower() == "true",
-            cost_budget_per_run=float(os.getenv("LLM_COST_BUDGET", "50.0")),
-            testing_mode=TestingMode(os.getenv("LLM_TESTING_MODE", "development"))
+            timeout_seconds=canonical_config.timeout_seconds,
+            max_retries=canonical_config.max_retries,
+            cache_responses=True,  # Always enable caching
+            cost_tracking=True,   # Always enable cost tracking
+            cost_budget_per_run=canonical_config.cost_budget_per_run,
+            testing_mode=TestingMode.DEVELOPMENT  # Default for legacy compatibility
         )
-        
-        # Validate API keys if real LLM is enabled
-        if enabled:
-            self._validate_api_keys()
         
         return config
     
-    def _load_api_keys(self) -> Dict[str, str]:
-        """Load API keys, preferring TEST_* variants."""
-        api_keys = {}
-        
-        # OpenAI API key
-        openai_key = os.getenv('TEST_OPENAI_API_KEY') or os.getenv('GOOGLE_API_KEY')
-        if openai_key:
-            api_keys['openai'] = openai_key
-        
-        # Anthropic API key
-        anthropic_key = os.getenv('TEST_ANTHROPIC_API_KEY') or os.getenv('ANTHROPIC_API_KEY')
-        if anthropic_key:
-            api_keys['anthropic'] = anthropic_key
-        
-        # Google API key
-        google_key = os.getenv('TEST_GOOGLE_API_KEY') or os.getenv('GOOGLE_API_KEY')
-        if google_key:
-            api_keys['google'] = google_key
-        
-        return api_keys
-    
     def get_api_key(self, provider: str) -> Optional[str]:
         """Get API key for specific provider."""
-        return self.api_keys.get(provider.lower())
+        return self._canonical_manager.get_api_key(provider)
     
     def has_provider(self, provider: str) -> bool:
         """Check if provider is available."""
-        return provider.lower() in self.api_keys
-    
-    def _validate_api_keys(self):
-        """Validate required API keys are present, preferring TEST_* variants."""
-        required_providers = {
-            "openai": ["TEST_OPENAI_API_KEY", "GOOGLE_API_KEY"],
-            "anthropic": ["TEST_ANTHROPIC_API_KEY", "ANTHROPIC_API_KEY"],
-            "google": ["TEST_GOOGLE_API_KEY", "GOOGLE_API_KEY"]
-        }
-        
-        available_providers = []
-        warnings = []
-        missing_providers = []
-        
-        for provider, key_options in required_providers.items():
-            found_key = None
-            for key in key_options:
-                if os.getenv(key):
-                    found_key = key
-                    break
-            
-            if found_key:
-                available_providers.append(provider)
-                if not found_key.startswith('TEST_'):
-                    warnings.append(f"Using production {provider.upper()} API key - consider using TEST_{found_key}")
-            else:
-                missing_providers.append(provider)
-        
-        # Log warnings about production keys
-        for warning in warnings:
-            logger.warning(warning)
-        
-        # Require at least one provider to be available
-        if not available_providers:
-            raise ValueError(f"No API keys found for real LLM testing. Need at least one of: {list(required_providers.keys())}")
-        
-        if missing_providers:
-            logger.info(f"Optional providers not configured: {missing_providers}")
-        
-        logger.info(f"Real LLM testing configured with providers: {available_providers}")
+        return self._canonical_manager.has_api_key(provider)
     
     def is_enabled(self) -> bool:
         """Check if real LLM testing is enabled."""
@@ -664,8 +608,9 @@ async def execute_test_with_real_llm(prompt: str, model: str = LLMModel.GEMINI_2
 
 def is_real_llm_enabled() -> bool:
     """Check if real LLM testing is currently enabled."""
-    manager = get_real_llm_manager()
-    return manager.config_manager.is_enabled()
+    # Use canonical manager for consistency
+    from test_framework.llm_config_manager import is_real_llm_enabled as canonical_is_enabled
+    return canonical_is_enabled()
 
 
 def get_llm_cost_summary() -> Dict[str, Any]:

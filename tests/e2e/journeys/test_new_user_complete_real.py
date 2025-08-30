@@ -53,9 +53,9 @@ from tests.e2e.helpers.journey.new_user_journey_helpers import (
 
 # Handle missing imports with fallbacks
 try:
-    from tests.e2e.harness_complete import UnifiedTestHarnessComplete
+    from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 except ImportError:
-    class UnifiedE2ETestHarness:
+    class TestUnifiedE2EHarness:
         def __init__(self):
             self.state = type('State', (), {'databases': self})()
         
@@ -68,7 +68,7 @@ except ImportError:
 try:
     from tests.e2e.database_test_connections import DatabaseTestConnections
 except ImportError:
-    class DatabaseTestConnections:
+    class TestDatabaseConnections:
         def __init__(self):
             pass
         
@@ -79,7 +79,7 @@ except ImportError:
             pass
 
 
-class CompleteNewUserJourneyTester:
+class TestCompleteNewUserJourneyer:
     """Tests complete new user journey with real services integration."""
     
     def __init__(self):

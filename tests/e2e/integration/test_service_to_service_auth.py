@@ -27,7 +27,7 @@ from tests.e2e.test_data_factory import (
 
 logger = logging.getLogger(__name__)
 
-class ServiceAuthTestValidator:
+class TestServiceAuthValidator:
     """Validates service-to-service authentication patterns"""
     
     def __init__(self):

@@ -28,7 +28,6 @@ Expected Test Behavior:
 
 import asyncio
 import pytest
-from unittest.mock import patch, Mock, AsyncMock, MagicMock
 from typing import Optional, Dict, Any, List
 import aiohttp
 import logging
@@ -578,6 +577,8 @@ class TestExternalServiceFallbackPatterns(BaseIntegrationTest):
         else:
             return "unknown_fallback_needed"
     
+    @pytest.mark.resilience
+    @pytest.mark.e2e
     def test_external_service_dependency_mapping(self):
         """
         Test external service dependency mapping for proper isolation.

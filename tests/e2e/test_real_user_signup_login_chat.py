@@ -24,7 +24,7 @@ import pytest
 import websockets
 
 from tests.e2e.service_manager import ServiceManager
-from tests.e2e.harness_complete import UnifiedTestHarnessComplete
+from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
 
 # Enable development auth bypass for WebSocket connections in e2e tests
@@ -32,7 +32,7 @@ os.environ["WEBSOCKET_AUTH_BYPASS"] = "true"
 os.environ["ALLOW_DEV_AUTH_BYPASS"] = "true"
 
 
-class RealUserFlowTester:
+class TestRealUserFlower:
     """Executes real user flow without mocking - all network calls."""
     
     def __init__(self, harness: UnifiedTestHarnessComplete):
@@ -223,7 +223,7 @@ class RealUserFlowTester:
         return isinstance(content, str) and len(content.strip()) > 0
 
 
-class E2ETestManager:
+class TestE2EManager:
     """Manages E2E test execution and cleanup."""
     
     def __init__(self):

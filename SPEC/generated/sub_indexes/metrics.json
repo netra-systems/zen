@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "metrics",
-    "generated_at": "2025-08-28T22:39:27.338502",
+    "generated_at": "2025-08-29T11:57:38.155753",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 180
   },
@@ -752,13 +752,13 @@
         "netra_backend/app/routes/agent_route_processors.py:49",
         "netra_backend/app/routes/utils/thread_builders.py:25",
         "netra_backend/app/services/demo/session_manager.py:81",
-        "netra_backend/app/websocket_core/manager.py:181",
-        "netra_backend/app/websocket_core/manager.py:371",
-        "netra_backend/app/websocket_core/manager.py:371",
-        "netra_backend/app/websocket_core/manager.py:442",
-        "netra_backend/app/websocket_core/manager.py:701",
-        "netra_backend/app/websocket_core/manager.py:701",
-        "netra_backend/app/websocket_core/manager.py:728"
+        "netra_backend/app/websocket_core/manager.py:201",
+        "netra_backend/app/websocket_core/manager.py:391",
+        "netra_backend/app/websocket_core/manager.py:391",
+        "netra_backend/app/websocket_core/manager.py:462",
+        "netra_backend/app/websocket_core/manager.py:721",
+        "netra_backend/app/websocket_core/manager.py:721",
+        "netra_backend/app/websocket_core/manager.py:748"
       ]
     },
     "metric_name": {
@@ -969,7 +969,7 @@
       "value": "operation_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/services/state/state_manager.py:407"
+        "netra_backend/app/services/state/state_manager.py:451"
       ]
     },
     "origins_count": {
@@ -999,7 +999,7 @@
       "value": "placeholder_count",
       "category": "metrics",
       "locations": [
-        "shared/secret_manager_builder.py:1043"
+        "shared/secret_manager_builder.py:1138"
       ]
     },
     "postgres_operations_count": {
@@ -1151,15 +1151,15 @@
         "netra_backend/app/agents/quality_fallback.py:119",
         "netra_backend/app/agents/quality_fallback.py:274",
         "netra_backend/app/agents/triage_sub_agent/agent.py:209",
-        "netra_backend/app/agents/triage_sub_agent/llm_processor.py:300",
-        "netra_backend/app/agents/triage_sub_agent/llm_processor.py:320"
+        "netra_backend/app/agents/triage_sub_agent/llm_processor.py:312",
+        "netra_backend/app/agents/triage_sub_agent/llm_processor.py:332"
       ]
     },
     "rotation_enabled_count": {
       "value": "rotation_enabled_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/core/configuration/secrets.py:534"
+        "netra_backend/app/core/configuration/secrets.py:538"
       ]
     },
     "routes_count": {
@@ -1236,7 +1236,7 @@
       "value": "step_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/agents/state.py:267",
+        "netra_backend/app/agents/state.py:274",
         "netra_backend/app/agents/supervisor/flow_logger.py:67",
         "netra_backend/app/agents/supervisor/state_checkpoint_manager.py:133",
         "netra_backend/app/agents/supervisor/state_manager_core.py:47",
@@ -1244,8 +1244,8 @@
         "netra_backend/app/agents/triage_sub_agent/agent.py:196",
         "netra_backend/app/alembic/versions/66e0e5d9662d_add_missing_tables_and_columns_complete.py:214",
         "netra_backend/app/core/interfaces_observability.py:194",
-        "netra_backend/app/db/clickhouse.py:890",
-        "netra_backend/app/db/clickhouse.py:890"
+        "netra_backend/app/db/clickhouse.py:784",
+        "netra_backend/app/db/clickhouse.py:784"
       ]
     },
     "subscription_count": {
@@ -1445,7 +1445,8 @@
       "category": "metrics",
       "locations": [
         "netra_backend/app/agents/corpus_admin/operations_crud.py:248",
-        "netra_backend/app/agents/corpus_admin/operations_execution.py:83",
+        "netra_backend/app/agents/corpus_admin/operations_execution.py:109",
+        "netra_backend/app/agents/corpus_admin/operations_execution.py:212",
         "netra_backend/app/routes/factory_compliance_handlers.py:98",
         "netra_backend/app/services/unified_tool_registry/system_handlers.py:164",
         "netra_backend/app/services/unified_tool_registry/tool_handlers.py:54",
@@ -1536,7 +1537,7 @@
       "locations": [
         "netra_backend/app/services/unified_tool_registry/system_handlers.py:164",
         "netra_backend/app/services/unified_tool_registry/system_handlers.py:164",
-        "shared/secret_manager_builder.py:1042"
+        "shared/secret_manager_builder.py:1137"
       ]
     },
     "weak_refs_count": {

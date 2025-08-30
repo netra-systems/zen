@@ -31,7 +31,6 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 import websockets
@@ -56,7 +55,7 @@ except ImportError:
 # ============================================================================
 
 @dataclass
-class WebSocketAuthTestResult:
+class TestWebSocketAuthResult:
     """Container for WebSocket authentication test results."""
     connection_attempted: bool = False
     connection_successful: bool = False
@@ -69,7 +68,7 @@ class WebSocketAuthTestResult:
 
 
 @dataclass  
-class WebSocketTimingTestSuite:
+class TestWebSocketTimingSuite:
     """Container for complete timing test suite results."""
     no_token_test: Optional[WebSocketAuthTestResult] = None
     null_token_test: Optional[WebSocketAuthTestResult] = None
@@ -84,7 +83,7 @@ class WebSocketTimingTestSuite:
 # WEBSOCKET AUTH TIMING TESTER
 # ============================================================================
 
-class WebSocketAuthTimingTester:
+class TestWebSocketAuthTiminger:
     """Reproduces WebSocket authentication timing issues during DevLauncher startup."""
     
     def __init__(self):
@@ -95,6 +94,8 @@ class WebSocketAuthTimingTester:
         self.connection_timeout = 5.0
         self.auth_timeout = 3.0
         
+    @pytest.mark.websocket
+    @pytest.mark.auth
     async def test_websocket_connection_without_token(self) -> WebSocketAuthTestResult:
         """Test #1: WebSocket connection without token fails with error 1008."""
         result = WebSocketAuthTestResult()
@@ -152,6 +153,8 @@ class WebSocketAuthTimingTester:
         result.response_time_ms = (time.time() - start_time) * 1000
         return result
     
+    @pytest.mark.websocket
+    @pytest.mark.auth
     async def test_websocket_connection_with_null_token(self) -> WebSocketAuthTestResult:
         """Test #2: WebSocket connection with null token handling.""" 
         result = WebSocketAuthTestResult()
@@ -194,6 +197,8 @@ class WebSocketAuthTimingTester:
         result.response_time_ms = (time.time() - start_time) * 1000
         return result
     
+    @pytest.mark.websocket
+    @pytest.mark.auth
     async def test_websocket_connection_timing_race(self) -> WebSocketAuthTestResult:
         """Test #3: Race condition where token becomes available after connection attempt."""
         result = WebSocketAuthTestResult()
@@ -267,6 +272,8 @@ class WebSocketAuthTimingTester:
         except Exception as e:
             return {"successful": False, "error": str(e)}
     
+    @pytest.mark.websocket
+    @pytest.mark.auth
     async def test_websocket_origin_none_handling(self) -> WebSocketAuthTestResult:
         """Test #4: CORS handling when origin header is None."""
         result = WebSocketAuthTestResult()
@@ -316,6 +323,8 @@ class WebSocketAuthTimingTester:
         result.response_time_ms = (time.time() - start_time) * 1000
         return result
     
+    @pytest.mark.websocket
+    @pytest.mark.auth
     async def test_websocket_auth_recovery(self) -> WebSocketAuthTestResult:
         """Test #5: WebSocket recovery after initial auth failure."""
         result = WebSocketAuthTestResult()

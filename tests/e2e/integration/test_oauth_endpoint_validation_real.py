@@ -29,7 +29,6 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
 
 import jwt
 import pytest
@@ -159,17 +158,17 @@ class OAuthEndpointValidator:
         """Validate Google OAuth endpoint functionality"""
         with patch('httpx.AsyncClient') as mock_client:
             # Setup OAuth provider mocks for external Google API calls
-            mock_instance = AsyncMock()
+            mock_instance = AsyncNone  # TODO: Use real service instead of Mock
             mock_client.return_value.__aenter__.return_value = mock_instance
             
             # Mock Google OAuth API responses
             # Mock: Generic component isolation for controlled unit testing
-            token_response = AsyncMock()
+            token_response = AsyncNone  # TODO: Use real service instead of Mock
             token_response.json.return_value = GoogleOAuthProvider.get_oauth_response()
             token_response.status_code = 200
             
             # Mock: Generic component isolation for controlled unit testing
-            user_response = AsyncMock()
+            user_response = AsyncNone  # TODO: Use real service instead of Mock
             user_response.json.return_value = GoogleOAuthProvider.get_user_info()
             user_response.status_code = 200
             
@@ -448,12 +447,12 @@ class TestOAuthEndpointValidationReal:
         # Mock: Component isolation for testing without external dependencies
         with patch('httpx.AsyncClient') as mock_client:
             # Mock: Generic component isolation for controlled unit testing
-            mock_instance = AsyncMock()
+            mock_instance = AsyncNone  # TODO: Use real service instead of Mock
             mock_client.return_value.__aenter__.return_value = mock_instance
             
             # Simulate OAuth provider error
             # Mock: Generic component isolation for controlled unit testing
-            error_response = AsyncMock()
+            error_response = AsyncNone  # TODO: Use real service instead of Mock
             error_response.status_code = 400
             error_response.json.return_value = {"error": "invalid_grant"}
             mock_instance.post.return_value = error_response

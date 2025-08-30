@@ -19,7 +19,6 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from typing import Any, AsyncGenerator, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import aiohttp
 import httpx

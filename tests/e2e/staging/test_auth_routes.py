@@ -23,6 +23,8 @@ class TestAuthRoutes:
 
     @staging_only
     @env_requires(services=["auth_service"])
+    @pytest.mark.auth
+    @pytest.mark.e2e
     async def test_auth_google_login_route_returns_404(self):
         """Test that /auth/google/login route returns 404 Not Found.
         
@@ -106,6 +108,8 @@ class TestAuthRoutes:
 
     @staging_only
     @env_requires(services=["auth_service"])
+    @pytest.mark.auth
+    @pytest.mark.e2e
     async def test_multiple_oauth_routes_missing_404_pattern(self):
         """Test multiple OAuth-related routes return 404 errors.
         
@@ -191,6 +195,8 @@ class TestAuthRoutes:
 
     @staging_only
     @env_requires(services=["auth_service"])
+    @pytest.mark.auth
+    @pytest.mark.e2e
     def test_auth_service_route_registration_incomplete(self):
         """Test that auth service route registration is incomplete.
         
@@ -289,6 +295,8 @@ class TestAuthRoutes:
 
     @staging_only
     @env_requires(services=["auth_service"])
+    @pytest.mark.auth
+    @pytest.mark.e2e
     async def test_auth_service_route_mapping_configuration_error(self):
         """Test auth service route mapping configuration errors.
         
@@ -394,6 +402,8 @@ class TestAuthRoutes:
 
     @staging_only
     @env_requires(services=["auth_service"])
+    @pytest.mark.auth
+    @pytest.mark.e2e
     def test_auth_service_oauth_blueprint_not_registered(self):
         """Test that OAuth blueprint/router is not registered in auth service.
         
@@ -500,6 +510,8 @@ class TestAuthRoutes:
 
     @staging_only
     @env_requires(services=["auth_service"])
+    @pytest.mark.auth
+    @pytest.mark.e2e
     async def test_oauth_route_handler_import_or_dependency_missing(self):
         """Test that OAuth route handlers have missing imports or dependencies.
         

@@ -34,7 +34,6 @@ import time
 import uuid
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
 
 import httpx
 import pytest
@@ -45,7 +44,7 @@ from tests.e2e.integration.user_journey_executor import TestUser
 
 
 @dataclass
-class DesynchronizationTestResult:
+class TestDesynchronizationResult:
     """Result container for auth backend desynchronization test."""
     auth_user_created: bool = False
     backend_sync_failed: bool = False
@@ -65,7 +64,7 @@ class DesynchronizationTestResult:
             self.errors = []
 
 
-class AuthBackendDesynchronizationTester:
+class TestAuthBackendDesynchronizationer:
     """Tests auth backend user desynchronization scenarios."""
     
     def __init__(self, harness):

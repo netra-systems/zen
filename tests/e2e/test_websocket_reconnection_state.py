@@ -62,7 +62,7 @@ class WebSocketStateManager:
         return count
 
 
-class WebSocketReconnectionStateTester:
+class TestWebSocketReconnectionStateer:
     """Core tester for WebSocket reconnection state management."""
     
     def __init__(self):

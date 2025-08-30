@@ -19,7 +19,6 @@ import subprocess
 import signal
 from typing import Dict, Any, Optional, List
 from pathlib import Path
-from unittest.mock import patch
 from contextlib import asynccontextmanager
 
 # Add project root to path
@@ -509,16 +508,15 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
             del os.environ["GEMINI_API_KEY"]
             
         from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-        from unittest.mock import AsyncMock, MagicMock
-        from netra_backend.app.llm.llm_manager import LLMManager
+                from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.config import get_config
         
         # Create required dependencies
-        db_session = AsyncMock()
+        db_session = AsyncNone  # TODO: Use real service instead of Mock
         config = get_config()
         llm_manager = LLMManager(config)
-        websocket_manager = AsyncMock()
-        tool_dispatcher = MagicMock()
+        websocket_manager = AsyncNone  # TODO: Use real service instead of Mock
+        tool_dispatcher = MagicNone  # TODO: Use real service instead of Mock
         
         agent = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
@@ -554,16 +552,15 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         Database.execute = failing_execute
         
         from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-        from unittest.mock import AsyncMock, MagicMock
-        from netra_backend.app.llm.llm_manager import LLMManager
+                from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.config import get_config
         
         # Create required dependencies
-        db_session = AsyncMock()
+        db_session = AsyncNone  # TODO: Use real service instead of Mock
         config = get_config()
         llm_manager = LLMManager(config)
-        websocket_manager = AsyncMock()
-        tool_dispatcher = MagicMock()
+        websocket_manager = AsyncNone  # TODO: Use real service instead of Mock
+        tool_dispatcher = MagicNone  # TODO: Use real service instead of Mock
         
         agent = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         

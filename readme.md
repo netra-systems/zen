@@ -462,7 +462,7 @@ Required for production:
 - `DATABASE_URL`: PostgreSQL connection string
 - `REDIS_URL`: Redis connection string
 - `CLICKHOUSE_URL`: ClickHouse connection
-- `JWT_SECRET`: JWT signing key
+- `JWT_SECRET_KEY`: JWT signing key
 - `OPENAI_API_KEY`: OpenAI API key
 - `ANTHROPIC_API_KEY`: Anthropic API key
 

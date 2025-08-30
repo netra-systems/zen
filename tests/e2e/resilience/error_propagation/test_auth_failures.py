@@ -30,6 +30,8 @@ from tests.e2e.fixtures.error_propagation_fixtures import (
 class TestAuthServiceFailures:
     """Test auth service failure propagation."""
     
+    @pytest.mark.resilience
+    @pytest.mark.auth
     async def test_invalid_token_propagation(self, service_orchestrator, real_websocket_client:
                                            error_correlation_context):
         """Test invalid token error propagates correctly."""
@@ -44,6 +46,8 @@ class TestAuthServiceFailures:
         assert "authentication" in connection_result.error.lower()
         assert real_websocket_client.state == ConnectionState.DISCONNECTED
         
+    @pytest.mark.resilience
+    @pytest.mark.auth
     async def test_expired_token_handling(self, service_orchestrator, real_websocket_client:
                                         error_correlation_context):
         """Test expired token error handling."""
@@ -57,6 +61,8 @@ class TestAuthServiceFailures:
         assert not connection_result.success
         assert "expired" in connection_result.error.lower() or "invalid" in connection_result.error.lower()
         
+    @pytest.mark.resilience
+    @pytest.mark.auth
     async def test_auth_service_unavailable(self, service_orchestrator, real_http_client:
                                           error_correlation_context):
         """Test auth service unavailability handling."""
@@ -74,6 +80,8 @@ class TestAuthServiceFailures:
         assert not response.success
         assert response.error is not None
         
+    @pytest.mark.resilience
+    @pytest.mark.auth
     async def test_token_validation_failure(self, service_orchestrator, real_websocket_client:
                                           error_correlation_context):
         """Test token validation failure handling."""
@@ -87,6 +95,8 @@ class TestAuthServiceFailures:
         assert not connection_result.success
         assert connection_result.error is not None
         
+    @pytest.mark.resilience
+    @pytest.mark.auth
     async def test_permission_denied_propagation(self, service_orchestrator, real_websocket_client:
                                                 error_correlation_context):
         """Test permission denied error propagation."""
@@ -106,6 +116,8 @@ class TestAuthServiceFailures:
             # Should be denied
             assert not message_result.success or "permission" in str(message_result.response).lower()
             
+    @pytest.mark.resilience
+    @pytest.mark.auth
     async def test_concurrent_auth_failures(self, service_orchestrator, real_websocket_client:
                                           error_correlation_context):
         """Test handling of concurrent auth failures."""

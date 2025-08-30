@@ -49,7 +49,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class UserTestData:
+class TestUserData:
     """User data structure for cross-database testing."""
     id: str
     email: str
@@ -58,7 +58,7 @@ class UserTestData:
     is_active: bool = True
 
 
-class DatabaseUserSyncTester:
+class TestDatabaseUserSyncer:
     """Manages cross-database user synchronization testing with real services."""
     
     def __init__(self):

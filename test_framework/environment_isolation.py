@@ -29,8 +29,14 @@ def get_env():
             def is_isolation_enabled(self):
                 # Always return True for test environment wrapper
                 return True
-            def enable_isolation(self):
+            def enable_isolation(self, backup_original=False):
                 # No-op for test environment wrapper since isolation is already enabled
+                pass
+            def reset_to_original(self):
+                # No-op for test environment wrapper
+                pass
+            def disable_isolation(self, restore_original=False):
+                # No-op for test environment wrapper
                 pass
         return TestEnvironmentWrapper()
     else:
@@ -134,21 +140,23 @@ class TestEnvironmentManager:
         return self.env
     
     def _configure_real_llm(self) -> None:
-        """Configure environment for real LLM testing."""
-        self.env.set("ENABLE_REAL_LLM_TESTING", "true", source="test_environment_manager")
+        """Configure environment for real LLM testing.
         
-        # Check for real API keys
-        gemini_key = self.env.get("GEMINI_API_KEY")
-        if gemini_key and not gemini_key.startswith("test-"):
-            # Real key available, mirror to GOOGLE_API_KEY
-            self.env.set("GOOGLE_API_KEY", gemini_key, source="test_environment_manager")
-        else:
-            import warnings
-            warnings.warn(
-                "ENABLE_REAL_LLM_TESTING=true but no valid API keys found. "
-                "Real LLM tests will fail.",
-                stacklevel=2
-            )
+        DEPRECATED: LLM configuration has been consolidated into llm_config_manager.py
+        This method is maintained for backward compatibility only.
+        """
+        from test_framework.llm_config_manager import configure_llm_testing, LLMTestMode
+        
+        import warnings
+        warnings.warn(
+            "_configure_real_llm in environment_isolation.py is deprecated. "
+            "Use test_framework.llm_config_manager.configure_llm_testing instead",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
+        # Use the canonical configuration system
+        configure_llm_testing(mode=LLMTestMode.REAL)
     
     def teardown_test_environment(self) -> None:
         """Clean up test environment and restore original state."""

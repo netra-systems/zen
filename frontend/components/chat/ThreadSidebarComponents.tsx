@@ -119,7 +119,7 @@ export const ThreadEditingInput: React.FC<ThreadEditingInputProps> = ({
 
 interface ThreadDisplayInfoProps {
   thread: Thread;
-  formatDate: (timestamp: number) => string;
+  formatDate: (timestamp: number | string) => string;
 }
 
 /**
@@ -197,7 +197,7 @@ interface ThreadItemProps {
   onTitleChange: (title: string) => void;
   onSaveTitle: () => void;
   onCancelEdit: () => void;
-  formatDate: (timestamp: number) => string;
+  formatDate: (timestamp: number | string) => string;
 }
 
 /**

@@ -922,8 +922,8 @@ jest.mock('@/store/authStore', () => ({
   })
 }));
 
-jest.mock('@/store/unified-chat', () => ({
-  useUnifiedChatStore: jest.fn(() => ({
+jest.mock('@/store/unified-chat', () => {
+  const storeState = {
     isAuthenticated: true,
     activeThreadId: 'test-thread-123',
     isProcessing: false,
@@ -945,9 +945,22 @@ jest.mock('@/store/unified-chat', () => ({
     startThreadLoading: jest.fn(),
     completeThreadLoading: jest.fn(),
     clearMessages: jest.fn(),
-    loadMessages: jest.fn()
-  }))
-}));
+    loadMessages: jest.fn(),
+    resetState: jest.fn(() => {
+      // Reset to initial state
+      storeState.isProcessing = false;
+      storeState.isThreadLoading = false;
+      storeState.messages = [];
+      storeState.currentRunId = null;
+      storeState.fastLayerData = null;
+    })
+  };
+  
+  const useUnifiedChatStore = jest.fn(() => storeState);
+  useUnifiedChatStore.getState = jest.fn(() => storeState);
+  
+  return { useUnifiedChatStore };
+});
 
 jest.mock('@/store/threadStore', () => ({
   useThreadStore: jest.fn(() => ({

@@ -46,7 +46,8 @@ class E2EServiceValidator:
         os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
         
         # Enable real LLM testing for agent E2E tests
-        os.environ["TEST_USE_REAL_LLM"] = "true"
+        os.environ["USE_REAL_LLM"] = "true"
+        os.environ["TEST_USE_REAL_LLM"] = "true"  # Legacy compatibility
         os.environ["ENABLE_REAL_LLM_TESTING"] = "true"
         
         # Disable Docker dependency - use lightweight services
@@ -96,7 +97,7 @@ class E2EServiceValidator:
     def validate_llm_configuration() -> bool:
         """Validate LLM configuration for E2E testing"""
         # Check that real LLM testing is enabled
-        if os.environ.get("TEST_USE_REAL_LLM") != "true":
+        if not (os.environ.get("USE_REAL_LLM") == "true" or os.environ.get("TEST_USE_REAL_LLM") == "true"):
             logger.error("Real LLM testing not enabled for E2E tests")
             return False
         

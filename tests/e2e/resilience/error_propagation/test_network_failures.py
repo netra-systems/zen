@@ -29,6 +29,7 @@ from tests.e2e.fixtures.error_propagation_fixtures import (
 class TestNetworkFailureSimulation:
     """Test network failure simulation and recovery."""
     
+    @pytest.mark.resilience
     async def test_connection_timeout(self, service_orchestrator, real_http_client:
                                     error_correlation_context):
         """Test connection timeout handling."""
@@ -43,6 +44,7 @@ class TestNetworkFailureSimulation:
         if not response.success:
             assert "timeout" in response.error.lower()
             
+    @pytest.mark.resilience
     async def test_intermittent_connectivity(self, service_orchestrator, real_websocket_client:
                                            error_correlation_context):
         """Test handling of intermittent connectivity."""
@@ -60,6 +62,7 @@ class TestNetworkFailureSimulation:
             # Connection should remain stable
             assert real_websocket_client.state != ConnectionState.DISCONNECTED
             
+    @pytest.mark.resilience
     async def test_dns_resolution_failure(self, real_http_client, error_correlation_context):
         """Test DNS resolution failure handling."""
         # Create client with invalid hostname
@@ -75,6 +78,7 @@ class TestNetworkFailureSimulation:
         finally:
             await invalid_client.close()
             
+    @pytest.mark.resilience
     async def test_retry_mechanism(self, service_orchestrator, real_http_client:
                                  error_correlation_context):
         """Test automatic retry mechanism."""
@@ -92,6 +96,7 @@ class TestNetworkFailureSimulation:
         else:
             assert response.error is not None
             
+    @pytest.mark.resilience
     async def test_circuit_breaker_behavior(self, service_orchestrator, real_http_client:
                                           error_correlation_context):
         """Test circuit breaker behavior."""
@@ -110,6 +115,7 @@ class TestNetworkFailureSimulation:
         # Some failures are expected when circuit opens
         assert successful_count >= 0  # System should remain responsive
         
+    @pytest.mark.resilience
     async def test_websocket_reconnection(self, service_orchestrator, real_websocket_client:
                                         error_correlation_context):
         """Test WebSocket reconnection after network failure."""
@@ -130,6 +136,7 @@ class TestNetworkFailureSimulation:
                 # Reconnection failure is acceptable in test environment
                 assert reconnection_result.error is not None
                 
+    @pytest.mark.resilience
     async def test_partial_service_failure(self, service_orchestrator, real_http_client:
                                          error_correlation_context):
         """Test handling of partial service failures."""

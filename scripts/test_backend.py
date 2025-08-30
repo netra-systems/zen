@@ -57,8 +57,10 @@ def _configure_windows_asyncio():
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 def _setup_dotenv_test_config():
-    """Setup test configuration from .env.test file"""
-    env_test_file = PROJECT_ROOT / ".env.test"
+    """Setup test configuration from .env.mock file (or legacy .env.test)"""
+    env_test_file = PROJECT_ROOT / ".env.mock"
+    if not env_test_file.exists():
+        env_test_file = PROJECT_ROOT / ".env.test"  # Legacy fallback
     if not env_test_file.exists():
         return
     _load_dotenv_file(env_test_file)

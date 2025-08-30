@@ -6,12 +6,19 @@
     <subcategory>architecture</subcategory>
     <severity>high</severity>
     <date>2025-08-26</date>
+    <last_updated>2025-01-29</last_updated>
     <affected_components>
       <component>Application Bootstrap</component>
       <component>Configuration Loading</component>
       <component>Authentication Context</component>
       <component>Service Discovery</component>
+      <component>Dev Auto-Login System</component>
     </affected_components>
+    <cross_references>
+      <ref critical="true">SPEC/learnings/frontend_dev_autologin.xml</ref>
+      <ref>auth/context.tsx</ref>
+      <ref>auth/unified-auth-service.ts</ref>
+    </cross_references>
   </metadata>
 
   <concepts>
@@ -104,6 +111,11 @@ async function getService(serviceName) {
       <description>
         Restore authentication state from storage before making API calls
       </description>
+      <critical_warning>
+        ANY changes to token initialization or processing MUST be tested with
+        the dev auto-login system. The auth context processes tokens whether 
+        storedToken === currentToken or not. See frontend_dev_autologin.xml
+      </critical_warning>
       <implementation><![CDATA[
 const [token, setToken] = useState(() => {
   // Initialize from storage synchronously
@@ -188,6 +200,9 @@ useEffect(() => {
   </best_practices>
 
   <testing_strategies>
+    <strategy critical="true">
+      Run __tests__/auth/dev-auto-login.test.tsx after ANY auth/loading/init changes
+    </strategy>
     <strategy>
       Test initialization with all backend services unavailable
     </strategy>
@@ -205,6 +220,12 @@ useEffect(() => {
     </strategy>
     <strategy>
       Verify no duplicate initialization requests
+    </strategy>
+    <strategy critical="true">
+      Test dev auto-login with backend startup delays (5+ seconds)
+    </strategy>
+    <strategy critical="true">
+      Verify dev_logout_flag is respected across initialization changes
     </strategy>
   </testing_strategies>
 

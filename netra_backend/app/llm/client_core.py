@@ -142,14 +142,8 @@ class LLMCoreClient:
         return await self._execute_structured_request(circuit, request_fn, llm_config_name)
     
     async def _get_fallback_response(self, prompt: str, config_name: str) -> str:
-        """Provide fallback response when circuit is open."""
-        fallback_msg = self._build_fallback_message(prompt, config_name)
-        logger.info(f"Providing fallback response for {config_name}")
-        return fallback_msg
-    
-    def _build_fallback_message(self, prompt: str, config_name: str) -> str:
-        """Build fallback message from prompt and config."""
-        return (
-            f"[Service temporarily unavailable - {config_name}] "
-            f"Request: {prompt[:50]}..."
-        )
+        """Raise exception instead of providing fallback response when circuit is open."""
+        logger.error(f"LLM service circuit breaker is open for {config_name}")
+        # Import here to avoid circular imports
+        from netra_backend.app.services.external_api_client import HTTPError
+        raise HTTPError(503, f"LLM service {config_name} temporarily unavailable - circuit breaker open")

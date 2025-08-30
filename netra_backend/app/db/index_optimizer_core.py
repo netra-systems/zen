@@ -49,7 +49,15 @@ class DatabaseValidation:
     @staticmethod
     def log_engine_unavailable(operation: str) -> None:
         """Log engine unavailable error."""
-        logger.warning(f"Async engine not available, skipping {operation}")
+        # Check if we're in development - this is often expected during startup
+        from netra_backend.app.core.isolated_environment import get_env
+        env = get_env()
+        environment = env.get('ENVIRONMENT', 'development')
+        
+        if environment == 'development':
+            logger.debug(f"Async engine not available during startup, skipping {operation}")
+        else:
+            logger.warning(f"Async engine not available, skipping {operation}")
 
 
 class IndexNameGenerator:

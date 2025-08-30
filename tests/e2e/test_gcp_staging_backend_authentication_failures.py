@@ -30,7 +30,6 @@ Root Causes to Investigate:
 import asyncio
 import time
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock
 
 import pytest
 from httpx import AsyncClient
@@ -102,7 +101,7 @@ class TestBackendAuthenticationFailures:
             # This should succeed but WILL FAIL with 403
             # Simulating the actual staging behavior
             with pytest.raises(AssertionError, match="Expected 200 but got 403"):
-                response = AsyncMock()
+                response = AsyncNone  # TODO: Use real service instead of Mock
                 response.status_code = 403
                 response.json.return_value = response_data
                 

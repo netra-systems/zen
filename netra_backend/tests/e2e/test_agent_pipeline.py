@@ -34,7 +34,6 @@ import asyncio
 import json
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -46,14 +45,6 @@ from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.websocket_message_types import WebSocketMessage
 from netra_backend.app.services.agent_service import AgentService
-
-class MockLLMResponse:
-    """Mock LLM response for testing."""
-    
-    def __init__(self, content: str, tool_calls: Optional[List] = None):
-        self.content = content
-        self.tool_calls = tool_calls or []
-        self.usage = {"tokens": 100}
 
 class TestAgentMessageProcessing:
     """Agent message reception and routing tests."""

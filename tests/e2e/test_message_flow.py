@@ -28,7 +28,7 @@ from tests.e2e.config import (
     TestUser,
     UnifiedTestConfig,
 )
-from tests.e2e.harness_complete import TestHarnessContext
+from tests.e2e.harness_utils import TestHarnessContext
 from tests.e2e.message_flow_helpers import (
     create_concurrent_messages,
     send_concurrent_message,

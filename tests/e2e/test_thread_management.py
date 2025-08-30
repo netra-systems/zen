@@ -21,7 +21,6 @@ import json
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
@@ -36,12 +35,12 @@ from tests.e2e.config import (
     TEST_USERS,
     TestDataFactory,
 )
-from tests.e2e.harness_complete import UnifiedTestHarnessComplete
+from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
 logger = central_logger.get_logger(__name__)
 
 
-class ThreadManagementTester:
+class TestThreadManagementer:
     """Core thread management testing infrastructure with engagement focus."""
     
     def __init__(self):

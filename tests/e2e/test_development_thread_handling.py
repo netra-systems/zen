@@ -8,7 +8,6 @@ import asyncio
 import json
 import pytest
 from typing import Optional
-from unittest.mock import patch, AsyncMock
 
 import websockets
 from fastapi import FastAPI

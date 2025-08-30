@@ -33,17 +33,30 @@ class CorpusExecutionHelper:
         result_key: str
     ) -> CorpusOperationResult:
         """Execute operation via tool dispatcher"""
-        tool_result = await self._dispatch_tool_with_params(tool_name, request, run_id)
-        return self._build_tool_result(tool_result, request, result_key)
+        try:
+            tool_result = await self._dispatch_tool_with_params(tool_name, request, run_id)
+            return self._build_tool_result(tool_result, request, result_key)
+        except Exception as e:
+            # Return failed result for error handling
+            return CorpusOperationResult(
+                success=False,
+                operation=request.operation,
+                corpus_metadata=request.corpus_metadata,
+                errors=[str(e)]
+            )
     
     async def _dispatch_tool_with_params(self, tool_name: str, request: CorpusOperationRequest, run_id: str):
         """Dispatch tool with built parameters."""
-        return await self.tool_dispatcher.dispatch_tool(
-            tool_name=tool_name,
-            parameters=self._build_tool_parameters(request),
-            state=DeepAgentState(),
-            run_id=run_id
-        )
+        try:
+            return await self.tool_dispatcher.execute_tool(
+                tool_name=tool_name,
+                parameters=self._build_tool_parameters(request),
+                state=DeepAgentState(),
+                run_id=run_id
+            )
+        except Exception as e:
+            # Re-raise to allow proper error handling in tests
+            raise e
     
     async def execute_search_via_tool(
         self, 
@@ -52,18 +65,31 @@ class CorpusExecutionHelper:
         run_id: str
     ) -> CorpusOperationResult:
         """Execute search via tool dispatcher"""
-        tool_result = await self._dispatch_search_tool(tool_name, request, run_id)
-        return self._build_search_result(tool_result, request)
+        try:
+            tool_result = await self._dispatch_search_tool(tool_name, request, run_id)
+            return self._build_search_result(tool_result, request)
+        except Exception as e:
+            # Return failed result for error handling
+            return CorpusOperationResult(
+                success=False,
+                operation=request.operation,
+                corpus_metadata=request.corpus_metadata,
+                errors=[str(e)]
+            )
     
     async def _dispatch_search_tool(self, tool_name: str, request: CorpusOperationRequest, run_id: str):
         """Dispatch search tool with parameters."""
-        parameters = self._build_search_parameters(request)
-        return await self.tool_dispatcher.dispatch_tool(
-            tool_name=tool_name,
-            parameters=parameters,
-            state=DeepAgentState(),
-            run_id=run_id
-        )
+        try:
+            parameters = self._build_search_parameters(request)
+            return await self.tool_dispatcher.execute_tool(
+                tool_name=tool_name,
+                parameters=parameters,
+                state=DeepAgentState(),
+                run_id=run_id
+            )
+        except Exception as e:
+            # Re-raise to allow proper error handling in tests
+            raise e
     
     async def execute_corpus_search(
         self, 
@@ -151,11 +177,20 @@ class CorpusExecutionHelper:
     def _create_tool_result_params(self, tool_result: Dict[str, Any], 
                                   request: CorpusOperationRequest, result_key: str) -> Dict[str, Any]:
         """Create parameters for tool result."""
+        # Update corpus metadata with tool result information
+        updated_metadata = request.corpus_metadata.model_copy()
+        if tool_result.get("success", False):
+            if result_key == "corpus_id" and tool_result.get(result_key):
+                updated_metadata.corpus_id = tool_result[result_key]
+            if not updated_metadata.created_at:
+                from datetime import datetime, timezone
+                updated_metadata.created_at = datetime.now(timezone.utc)
+                
         return {
             "success": tool_result.get("success", False),
             "operation": request.operation,
-            "corpus_metadata": request.corpus_metadata,
-            "affected_documents": 0,
+            "corpus_metadata": updated_metadata,
+            "affected_documents": tool_result.get("documents_indexed", 0),
             "result_data": tool_result.get(result_key),
             "metadata": {result_key: tool_result.get(result_key)}
         }
@@ -174,11 +209,18 @@ class CorpusExecutionHelper:
     def _create_search_result_params(self, request: CorpusOperationRequest, 
                                     results: list, tool_result: Dict[str, Any]) -> Dict[str, Any]:
         """Create parameters for search result."""
+        total_count = tool_result.get("total_count", len(results))
+        metadata = {"total_matches": total_count}
+        
+        # Add filters_applied if present in tool result
+        if "filters_applied" in tool_result:
+            metadata["filters_applied"] = tool_result["filters_applied"]
+        
         return {
-            "success": True,
+            "success": tool_result.get("success", True),
             "operation": request.operation,
             "corpus_metadata": request.corpus_metadata,
             "affected_documents": len(results),
             "result_data": results,
-            "metadata": {"total_matches": tool_result.get("total_matches", 0)}
+            "metadata": metadata
         }

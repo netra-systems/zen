@@ -210,6 +210,13 @@ def _setup_optimization_components(app: FastAPI) -> None:
 
 async def _schedule_background_optimizations(app: FastAPI, logger: logging.Logger) -> None:
     """Schedule index optimization as background task."""
+    from netra_backend.app.core.isolated_environment import get_env
+    
+    # Check if background tasks are disabled for testing
+    if get_env().get("DISABLE_BACKGROUND_TASKS", "false").lower() == "true":
+        logger.info("Background tasks disabled for testing environment")
+        return
+    
     if hasattr(app.state, 'background_task_manager'):
         # Use partial to bind the logger argument to the coroutine function
         from functools import partial
@@ -550,11 +557,13 @@ async def initialize_clickhouse(logger: logging.Logger) -> None:
     from netra_backend.app.core.isolated_environment import get_env
     clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
     
-    # Skip ClickHouse in staging and development unless explicitly required
-    if config.environment in ["staging", "development"] and not clickhouse_required:
-        logger.info(f"Skipping ClickHouse initialization in {config.environment} environment (optional service - may not be available)")
-        config.clickhouse_mode = "mock"  # Ensure mock mode is set
+    # CRITICAL FIX: Make ClickHouse optional in development when not explicitly required
+    if config.environment == "development" and not clickhouse_required:
+        logger.info(f"ClickHouse not required in {config.environment} environment - skipping initialization")
         return
+    elif config.environment == "staging":
+        logger.info(f"ClickHouse initialization required in {config.environment} environment")
+        # Proceed with real connection for staging
     
     if 'pytest' not in sys.modules and clickhouse_mode not in ['disabled', 'mock']:
         try:
@@ -569,10 +578,14 @@ async def initialize_clickhouse(logger: logging.Logger) -> None:
             timeout_msg = f"ClickHouse initialization timed out after {timeout} seconds"
             logger.error(timeout_msg)
             
-            # CRITICAL FIX: Always use graceful startup for optional services
-            if graceful_startup or not clickhouse_required:
+            # NO MOCKS IN DEV/STAGING - fail fast
+            if config.environment in ["development", "staging"]:
+                raise RuntimeError(f"{timeout_msg}. ClickHouse is required in {config.environment} mode.")
+            elif graceful_startup or not clickhouse_required:
                 logger.warning(f"{timeout_msg} - continuing without ClickHouse (optional service)")
-                config.clickhouse_mode = "mock"
+                # Only allow mock in test environment, not dev
+                if config.environment == "testing":
+                    config.clickhouse_mode = "mock"
             else:
                 raise RuntimeError(timeout_msg)
                 
@@ -583,13 +596,19 @@ async def initialize_clickhouse(logger: logging.Logger) -> None:
                 'connection', 'refused', 'timeout', 'unreachable', 'network', 'dns', 'httpsconnectionpool'
             ])
             
-            # CRITICAL FIX: Always use graceful degradation unless explicitly required
-            if (is_connection_error or graceful_startup) and not clickhouse_required:
+            # NO MOCKS IN DEV/STAGING - fail fast
+            if config.environment in ["development", "staging"]:
+                raise RuntimeError(f"ClickHouse initialization failed in {config.environment}: {e}. ClickHouse is required in {config.environment} mode.") from e
+            elif (is_connection_error or graceful_startup) and not clickhouse_required:
                 logger.warning(f"ClickHouse connection/initialization failed but continuing (optional service): {e}")
-                config.clickhouse_mode = "mock"
+                # Only allow mock in test environment, not dev
+                if config.environment == "testing":
+                    config.clickhouse_mode = "mock"
             elif graceful_startup and not clickhouse_required:
                 logger.warning(f"ClickHouse initialization failed but continuing (optional service): {e}")
-                config.clickhouse_mode = "mock"
+                # Only allow mock in test environment, not dev
+                if config.environment == "testing":
+                    config.clickhouse_mode = "mock"
             else:
                 raise RuntimeError(f"ClickHouse initialization failed: {e}") from e
     else:
@@ -854,6 +873,13 @@ async def start_monitoring(app: FastAPI, logger: logging.Logger) -> None:
 
 async def _create_monitoring_task(app: FastAPI, logger: logging.Logger) -> None:
     """Create comprehensive monitoring tasks."""
+    from netra_backend.app.core.isolated_environment import get_env
+    
+    # Check if monitoring is disabled for testing
+    if get_env().get("DISABLE_MONITORING", "false").lower() == "true":
+        logger.info("Monitoring disabled for testing environment")
+        return
+    
     await _start_connection_monitoring(app)
     await _start_performance_monitoring(app)
     logger.info("Comprehensive monitoring started")

@@ -283,7 +283,7 @@ class CorpusAdminSubAgent(BaseExecutionInterface, BaseSubAgent):
     
     def _has_valid_result(self, state: DeepAgentState) -> bool:
         """Check if state has valid corpus admin result."""
-        return hasattr(state, 'corpus_admin_result') and state.corpus_admin_result
+        return hasattr(state, 'corpus_admin_result') and bool(state.corpus_admin_result)
     
     def _build_metrics_message(self, result: dict) -> str:
         """Build metrics message for logging."""

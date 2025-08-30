@@ -825,8 +825,22 @@ def setup_e2e_test_environment():
     env = get_env()
     env.set("TESTING", "1", source="e2e_test_setup")
     env.set("NETRA_ENV", "e2e_testing", source="e2e_test_setup")
+    env.set("ENVIRONMENT", "test", source="e2e_test_setup")
     env.set("USE_REAL_SERVICES", "true", source="e2e_test_setup")
     env.set("AUTH_FAST_TEST_MODE", "true", source="e2e_test_setup")
+    
+    # Set Redis to use TEST environment port (6380)
+    env.set("REDIS_HOST", "localhost", source="e2e_test_setup")
+    env.set("REDIS_PORT", "6380", source="e2e_test_setup")
+    env.set("REDIS_URL", "redis://localhost:6380/0", source="e2e_test_setup")
+    
+    # Set PostgreSQL to use TEST environment port (5433)
+    env.set("DATABASE_URL", "postgresql://postgres:postgres@localhost:5433/netra_test", source="e2e_test_setup")
+    
+    # Set ClickHouse to use TEST environment ports
+    env.set("CLICKHOUSE_HOST", "localhost", source="e2e_test_setup")
+    env.set("CLICKHOUSE_HTTP_PORT", "8124", source="e2e_test_setup")
+    env.set("CLICKHOUSE_TCP_PORT", "9001", source="e2e_test_setup")
     
     # Set longer timeouts for E2E tests
     env.set("HTTP_TIMEOUT", "30", source="e2e_test_setup")

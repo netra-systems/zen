@@ -27,23 +27,26 @@ class SecretManager:
     
     def _initialize_project_id(self) -> str:
         """Initialize project ID based on environment."""
-        # Check environment variable directly for proper test support
-        environment = os.getenv('ENVIRONMENT', getattr(self._config, 'environment', 'development')).lower()
+        # Use IsolatedEnvironment for consistent environment detection
+        from netra_backend.app.core.isolated_environment import get_env
+        environment = get_env().get('ENVIRONMENT', getattr(self._config, 'environment', 'development')).lower()
         if environment == "staging":
             return self._get_staging_project_id()
         return self._get_production_project_id()
     
     def _get_staging_project_id(self) -> str:
         """Get staging project ID with fallbacks."""
-        # Check environment variable first, then config attributes, then default
-        return os.getenv('GCP_PROJECT_ID_NUMERICAL_STAGING', 
+        # Use IsolatedEnvironment for consistent environment access
+        from netra_backend.app.core.isolated_environment import get_env
+        return get_env().get('GCP_PROJECT_ID_NUMERICAL_STAGING', 
                          getattr(self._config, 'gcp_project_id_numerical_staging', 
                                 getattr(self._config, 'secret_manager_project_id', "701982941522")))
     
     def _get_production_project_id(self) -> str:
         """Get production project ID with fallbacks."""
-        # Check environment variable first, then config attributes, then default
-        return os.getenv('GCP_PROJECT_ID_NUMERICAL_PRODUCTION', 
+        # Use IsolatedEnvironment for consistent environment access
+        from netra_backend.app.core.isolated_environment import get_env
+        return get_env().get('GCP_PROJECT_ID_NUMERICAL_PRODUCTION', 
                          getattr(self._config, 'gcp_project_id_numerical_production', 
                                 getattr(self._config, 'secret_manager_project_id', "304612253870")))
     
@@ -516,8 +519,9 @@ class SecretManager:
                     if self._is_placeholder_value(jwt_secret):
                         raise SecretManagerError(f"SECRET_KEY contains placeholder value: '{jwt_secret}'")
                     return jwt_secret
-                # Fallback to direct environment check
-                env_secret = os.getenv("SECRET_KEY") or os.getenv("JWT_SECRET_KEY")
+                # Fallback to IsolatedEnvironment check
+                from netra_backend.app.core.isolated_environment import get_env
+                env_secret = get_env().get("SECRET_KEY") or get_env().get("JWT_SECRET_KEY")
                 if env_secret and not self._is_placeholder_value(env_secret):
                     return env_secret
                 
@@ -534,8 +538,9 @@ class SecretManager:
             if secret_value and not self._is_placeholder_value(secret_value):
                 return secret_value
                 
-            # Also check environment directly as fallback
-            env_value = os.getenv(secret_name)
+            # Also check IsolatedEnvironment as fallback
+            from netra_backend.app.core.isolated_environment import get_env
+            env_value = get_env().get(secret_name)
             if env_value and not self._is_placeholder_value(env_value):
                 return env_value
             

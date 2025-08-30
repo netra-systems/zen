@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/auth/context';
 import { Loader2 } from 'lucide-react';
 import { useGTMEvent } from '@/hooks/useGTMEvent';
+import { logger } from '@/lib/logger';
 
 /**
  * SSOT Authentication Guard Component
@@ -37,43 +38,59 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
   const { user, loading, initialized } = useAuth();
   const { trackError, trackPageView } = useGTMEvent();
   
-  // Track if we've already reported auth failure for this mount
-  const hasReportedAuthFailure = useRef(false);
-  const hasReportedPageView = useRef(false);
-  const lastPathname = useRef<string>();
+  // Track if we've already performed auth check and navigation
+  const hasPerformedAuthCheck = useRef(false);
+  const isMounted = useRef(true);
 
   useEffect(() => {
-    // Only proceed with auth checks after initialization is complete
-    if (!loading && initialized) {
-      const isAuthenticated = !!user;
-      const currentPath = window.location.pathname;
-      
-      if (!isAuthenticated) {
-        // Only track auth failure once per mount and path
-        if (!hasReportedAuthFailure.current || lastPathname.current !== currentPath) {
-          trackError('auth_required', 'User not authenticated', currentPath, false);
-          hasReportedAuthFailure.current = true;
-          lastPathname.current = currentPath;
-        }
+    // Cleanup on unmount
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    // Only check auth once when fully initialized with minimal dependencies
+    if (!isMounted.current || hasPerformedAuthCheck.current) return;
+    if (loading || !initialized) return;
+    
+    hasPerformedAuthCheck.current = true;
+    const isAuthenticated = !!user;
+    const currentPath = window.location.pathname;
+    
+    if (!isAuthenticated) {
+      // Double-check localStorage for token before redirecting
+      // This helps with race conditions during initialization
+      const storedToken = typeof window !== 'undefined' ? localStorage.getItem('jwt_token') : null;
+      if (!storedToken) {
+        trackError('auth_required', 'User not authenticated', currentPath, false);
         router.push(redirectTo);
       } else {
-        // Only track page view once per mount and path
-        if (!hasReportedPageView.current || lastPathname.current !== currentPath) {
-          trackPageView(currentPath, 'Protected Page Access');
-          hasReportedPageView.current = true;
-          lastPathname.current = currentPath;
-        }
+        // Token exists but user not set yet - wait for auth context to process it
+        logger.debug('Token exists but user not set - waiting for auth processing', {
+          component: 'AuthGuard',
+          currentPath
+        });
+        hasPerformedAuthCheck.current = false; // Reset to allow re-check
       }
-      
-      onAuthCheckComplete?.(isAuthenticated);
+    } else {
+      trackPageView(currentPath, 'Protected Page Access');
     }
-  }, [loading, initialized, user, router, redirectTo, onAuthCheckComplete, trackError, trackPageView]);
+    
+    onAuthCheckComplete?.(isAuthenticated);
+  }, [initialized, user]); // Include user to properly react to auth changes
 
-  // Show loading state while checking auth or during initialization
-  if (loading || !initialized || !user) {
+  // Only show loading during initial auth check to reduce flicker
+  if (!initialized) {
     if (showLoading) {
       return <LoadingScreen />;
     }
+    return null;
+  }
+
+  // After initialization, check user authentication
+  if (!user) {
+    // User not authenticated, router.push will handle redirect
     return null;
   }
 
@@ -88,7 +105,7 @@ const LoadingScreen: React.FC = () => {
   return (
     <div className="flex h-screen items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50" data-testid="loading">
       <div className="flex flex-col items-center gap-4">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
         <div className="text-sm text-gray-600">Verifying authentication...</div>
       </div>
     </div>

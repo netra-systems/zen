@@ -86,7 +86,7 @@ def analyze_test_structure() -> Dict:
             structure["test_runners"].append(str(path.relative_to(PROJECT_ROOT)))
     
     # Find test configs
-    for pattern in ["pytest.ini", "pyproject.toml", "jest.config.*", ".env.test*"]:
+    for pattern in ["pytest.ini", "pyproject.toml", "jest.config.*", ".env.test*", ".env.mock*"]:
         for path in PROJECT_ROOT.rglob(pattern):
             if not is_excluded_path(path):
                 structure["test_configs"].append(str(path.relative_to(PROJECT_ROOT)))

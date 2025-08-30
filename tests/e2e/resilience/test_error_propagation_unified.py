@@ -45,7 +45,7 @@ from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 logger = logging.getLogger(__name__)
 
 
-class ErrorPropagationTester:
+class TestErrorPropagationer:
     """Comprehensive error propagation testing across all service boundaries."""
     
     def __init__(self):

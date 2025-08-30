@@ -66,7 +66,7 @@ class MockClient:
         await self.disconnect()
 
 
-class FrontendBackendStateSyncTester:
+class TestFrontendBackendStateSyncer:
     """Core state synchronization tester for frontend-backend consistency."""
     
     def __init__(self):

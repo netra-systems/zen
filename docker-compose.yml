@@ -75,14 +75,14 @@ services:
       CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
       CLICKHOUSE_MAX_MEMORY_USAGE: 2000000000
     ports:
-      - "${CLICKHOUSE_HTTP_PORT:-8123}:8123"
-      - "${CLICKHOUSE_TCP_PORT:-9000}:9000"
+      - "${CLICKHOUSE_HTTP_PORT:-8125}:8123"
+      - "${CLICKHOUSE_TCP_PORT:-9002}:9000"
     volumes:
       - clickhouse_data:/var/lib/clickhouse
       - clickhouse_logs:/var/log/clickhouse-server
       - ./scripts/init_clickhouse.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8123/ping"]
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8123/ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -105,8 +105,6 @@ services:
     build:
       context: .
       dockerfile: ./docker/backend.Dockerfile
-      args:
-        BUILD_ENV: production
     container_name: netra-backend
     restart: unless-stopped
     environment:
@@ -128,7 +126,7 @@ services:
       # Server Config
       PORT: 8000
       HOST: 0.0.0.0
-      ENVIRONMENT: ${ENVIRONMENT:-production}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
       WORKERS: ${BACKEND_WORKERS:-4}
       
       # Security
@@ -144,11 +142,17 @@ services:
       GEMINI_API_KEY: ${GEMINI_API_KEY}
       
       # Frontend URL
-      FRONTEND_URL: ${FRONTEND_URL:-https://app.netra.io}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
       
       # Monitoring
       ENABLE_METRICS: true
       ENABLE_TRACING: ${ENABLE_TRACING:-false}
+      
+      # WebSocket Configuration (staging-optimized)
+      WEBSOCKET_HEARTBEAT_INTERVAL: ${WEBSOCKET_HEARTBEAT_INTERVAL:-30}
+      WEBSOCKET_HEARTBEAT_TIMEOUT: ${WEBSOCKET_HEARTBEAT_TIMEOUT:-90}
+      WEBSOCKET_CONNECTION_TIMEOUT: ${WEBSOCKET_CONNECTION_TIMEOUT:-600}
+      WEBSOCKET_MAX_RECONNECT_ATTEMPTS: ${WEBSOCKET_MAX_RECONNECT_ATTEMPTS:-5}
       
     ports:
       - "${BACKEND_PORT:-8000}:8000"
@@ -161,7 +165,7 @@ services:
       redis:
         condition: service_healthy
       clickhouse:
-        condition: service_healthy
+        condition: service_started
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -188,8 +192,6 @@ services:
     build:
       context: .
       dockerfile: ./docker/auth.Dockerfile
-      args:
-        BUILD_ENV: production
     container_name: netra-auth
     restart: unless-stopped
     environment:
@@ -202,7 +204,7 @@ services:
       # Server Config
       PORT: 8081
       HOST: 0.0.0.0
-      ENVIRONMENT: ${ENVIRONMENT:-production}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
       WORKERS: ${AUTH_WORKERS:-2}
       
       # Auth Config
@@ -259,29 +261,28 @@ services:
       context: ./frontend
       dockerfile: ../docker/frontend.Dockerfile
       args:
-        BUILD_ENV: production
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.netra.io}
-        NEXT_PUBLIC_AUTH_URL: ${NEXT_PUBLIC_AUTH_URL:-https://auth.netra.io}
-        NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-wss://api.netra.io}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+        NEXT_PUBLIC_AUTH_URL: ${NEXT_PUBLIC_AUTH_URL:-http://localhost:8081}
+        NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-ws://localhost:8000}
     container_name: netra-frontend
     restart: unless-stopped
     environment:
       # API URLs
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.netra.io}
-      NEXT_PUBLIC_AUTH_URL: ${NEXT_PUBLIC_AUTH_URL:-https://auth.netra.io}
-      NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-wss://api.netra.io}
-      NEXT_PUBLIC_WEBSOCKET_URL: ${NEXT_PUBLIC_WEBSOCKET_URL:-wss://api.netra.io/ws}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      NEXT_PUBLIC_AUTH_URL: ${NEXT_PUBLIC_AUTH_URL:-http://localhost:8081}
+      NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-ws://localhost:8000}
+      NEXT_PUBLIC_WEBSOCKET_URL: ${NEXT_PUBLIC_WEBSOCKET_URL:-ws://localhost:8000/ws}
       
       # Internal API URLs (for SSR)
-      API_URL: http://backend:8000
-      AUTH_URL: http://auth:8081
+      API_URL: ${API_URL:-http://backend:8000}
+      AUTH_URL: ${AUTH_URL:-http://auth:8081}
       
       # Next.js Config
-      NODE_ENV: production
+      NODE_ENV: development
       NEXT_TELEMETRY_DISABLED: 1
       
       # Feature Flags
-      NEXT_PUBLIC_ENVIRONMENT: ${ENVIRONMENT:-production}
+      NEXT_PUBLIC_ENVIRONMENT: ${ENVIRONMENT:-development}
       NEXT_PUBLIC_ENABLE_ANALYTICS: ${ENABLE_ANALYTICS:-true}
       NEXT_PUBLIC_GTM_ID: ${GTM_ID}
       NEXT_PUBLIC_GA_MEASUREMENT_ID: ${GA_MEASUREMENT_ID}
@@ -311,7 +312,7 @@ services:
         max-size: "50m"
         max-file: "3"
 
-  # Nginx Reverse Proxy (Optional - for production)
+  # Nginx Reverse Proxy (Optional)
   nginx:
     image: nginx:alpine
     container_name: netra-nginx

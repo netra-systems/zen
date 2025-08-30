@@ -226,23 +226,13 @@ class UnifiedHTTPClient:
                     self._websocket_state = ConnectionState.CONNECTED
                     return True
                 else:
-                    # Debug logging for connection verification failure
-                    attrs = {
-                        'closed': getattr(self._websocket, 'closed', 'no_attr'),
-                        'state': getattr(self._websocket, 'state', 'no_attr'),
-                        'open': getattr(self._websocket, 'open', 'no_attr')
-                    }
-                    print(f"DEBUG: WebSocket connection verification failed. attrs={attrs}")
+                    # Connection verification failed
                     self._websocket_state = ConnectionState.FAILED
                     if attempt == self.config.max_retries:
                         return False
                     
             except Exception as e:
-                # CRITICAL FIX: Improve timeout handling for WebSocket connections
-                if "timeout" in str(e).lower() or "timed out" in str(e).lower():
-                    print(f"DEBUG: WebSocket connection timeout on attempt {attempt + 1}: {e}")
-                else:
-                    print(f"DEBUG: WebSocket connection attempt {attempt + 1} failed: {e}")
+                # Connection failed
                 if attempt == self.config.max_retries:
                     self._handle_websocket_error(str(e))
                     return False

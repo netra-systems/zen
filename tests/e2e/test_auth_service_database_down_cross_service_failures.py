@@ -22,7 +22,6 @@ import sys
 import pytest
 import asyncio
 import logging
-from unittest.mock import patch, MagicMock, AsyncMock
 import aiohttp
 import json
 from datetime import datetime, timezone

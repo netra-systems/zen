@@ -14,7 +14,6 @@ from netra_backend.app.db.models_postgres import Message, Thread
 from netra_backend.app.db.session import get_db_session
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock
 import asyncio
 import pytest
 import time
@@ -198,7 +197,7 @@ class ThreadOperationExecutor:
         # Mock thread for testing without database dependency
         thread_id = f"thread_{self.user_id}_{int(time.time())}"
 
-        mock_thread = MagicMock()
+        mock_thread = MagicNone  # TODO: Use real service instead of Mock
 
         mock_thread.id = thread_id
 
@@ -236,7 +235,7 @@ class ThreadOperationExecutor:
         # Mock thread verification
 
         # Mock: Generic component isolation for controlled unit testing
-        mock_thread = MagicMock()
+        mock_thread = MagicNone  # TODO: Use real service instead of Mock
 
         mock_thread.id = thread_id
 
@@ -285,7 +284,7 @@ class ThreadOperationExecutor:
         # Mock message creation
 
         # Mock: Generic component isolation for controlled unit testing
-        mock_message = MagicMock()
+        mock_message = MagicNone  # TODO: Use real service instead of Mock
 
         mock_message.id = f"msg_{int(time.time())}"
 

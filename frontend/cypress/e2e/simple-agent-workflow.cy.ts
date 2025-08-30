@@ -1,20 +1,51 @@
 describe('Simple Agent Workflow', () => {
   beforeEach(() => {
-    // Setup auth
+    // Directly set up valid JWT token for testing
     cy.window().then((win) => {
-      win.localStorage.setItem('jwt_token', 'test-jwt-token');
+      const futureTimestamp = Math.floor(Date.now() / 1000) + (24 * 60 * 60); // 24 hours from now
+      const mockPayload = btoa(JSON.stringify({
+        sub: 'test-user-id',
+        email: 'test@example.com',
+        full_name: 'Test User',
+        role: 'user',
+        iat: Math.floor(Date.now() / 1000),
+        exp: futureTimestamp
+      }));
+      const mockToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${mockPayload}.mock-signature-for-testing`;
+      win.localStorage.setItem('jwt_token', mockToken);
     });
+    
+    // Navigate to chat page
     cy.visit('/chat');
+    
+    // Wait for the page to finish initializing
+    cy.wait(3000);
   });
 
   it('should send optimization request and receive agent response', () => {
-    // Wait for chat to load
-    cy.get('input[placeholder*="message"]', { timeout: 10000 }).should('be.visible');
+    // Debug what's actually on the page
+    cy.get('body').then(($body) => {
+      cy.log('Page loaded. Checking for auth state...');
+      cy.log('JWT Token:', localStorage.getItem('jwt_token'));
+      cy.log('Body classes:', $body.attr('class'));
+      cy.log('Looking for any textarea elements...');
+    });
+    
+    // Check if we can find any textarea elements at all
+    cy.get('textarea').then($textareas => {
+      cy.log(`Found ${$textareas.length} textarea elements`);
+      $textareas.each((i, el) => {
+        cy.log(`Textarea ${i}: placeholder="${el.placeholder}", id="${el.id}", data-testid="${el.getAttribute('data-testid')}"`);
+      });
+    });
+    
+    // Wait for chat to load - use textarea instead of input and data-testid
+    cy.get('textarea[data-testid="message-textarea"]', { timeout: 15000 }).should('be.visible');
     
     // Send optimization request
     const request = 'Optimize my LLM costs';
-    cy.get('input[placeholder*="message"]').type(request);
-    cy.get('button[aria-label="Send"]').click();
+    cy.get('textarea[data-testid="message-textarea"]').type(request);
+    cy.get('button[data-testid="send-button"]').click();
     
     // Verify request is displayed
     cy.contains(request).should('be.visible');
@@ -49,8 +80,8 @@ describe('Simple Agent Workflow', () => {
 
   it('should handle stop processing button', () => {
     // Send a message
-    cy.get('input[placeholder*="message"]', { timeout: 10000 }).type('Start processing');
-    cy.get('button[aria-label="Send"]').click();
+    cy.get('textarea[data-testid="message-textarea"]', { timeout: 10000 }).type('Start processing');
+    cy.get('button[data-testid="send-button"]').click();
     
     // Check if stop button appears
     cy.get('body').then(($body) => {

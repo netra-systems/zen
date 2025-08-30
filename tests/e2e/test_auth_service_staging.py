@@ -36,7 +36,6 @@ import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock, patch
 
 import httpx
 import pytest
@@ -49,7 +48,7 @@ from tests.e2e.real_services_manager import create_real_services_manager
 logger = central_logger.get_logger(__name__)
 
 
-class OAuthProxyStagingTester:
+class TestOAuthProxyStaginger:
     """OAuth proxy staging environment test execution manager"""
     
     def __init__(self):

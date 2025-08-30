@@ -33,7 +33,6 @@ import sys
 import time
 from pathlib import Path
 from typing import Any, Dict, Optional
-from unittest.mock import patch
 
 import httpx
 import pytest
@@ -54,7 +53,7 @@ from tests.e2e.test_websocket_real_connection import WebSocketRealConnectionTest
 logger = logging.getLogger(__name__)
 
 
-class AuthServiceRecoveryTester:
+class TestAuthServiceRecoveryer:
     """Core tester for Auth service failure and recovery scenarios."""
     
     def __init__(self):
@@ -254,6 +253,8 @@ class AuthServiceRecoveryTester:
             # Expected - Auth service is down
             pass
     
+    @pytest.mark.resilience
+    @pytest.mark.auth
     async def test_existing_sessions_during_outage(self, sessions: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
         """Test that existing sessions continue working during Auth outage."""
         results = {"sessions_working": 0, "total_sessions": len(sessions), "failures": []}
@@ -320,6 +321,8 @@ class AuthServiceRecoveryTester:
         except Exception as e:
             return {"working": False, "error": str(e)}
     
+    @pytest.mark.resilience
+    @pytest.mark.auth
     async def test_new_login_fails_gracefully(self) -> Dict[str, Any]:
         """Test that new login attempts fail gracefully during Auth outage."""
         try:
@@ -432,6 +435,8 @@ class AuthServiceRecoveryTester:
         
         raise RuntimeError(f"Auth service failed to restore within timeout on port {auth_port}")
     
+    @pytest.mark.resilience
+    @pytest.mark.auth
     async def test_seamless_recovery(self, sessions: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
         """Test that recovery is seamless for existing sessions."""
         results = {"sessions_recovered": 0, "total_sessions": len(sessions), "new_login_works": False}
@@ -455,6 +460,8 @@ class AuthServiceRecoveryTester:
         results["recovery_rate"] = results["sessions_recovered"] / results["total_sessions"]
         return results
     
+    @pytest.mark.resilience
+    @pytest.mark.auth
     async def test_circuit_breaker_activation(self) -> Dict[str, Any]:
         """Test circuit breaker activation during Auth degradation."""
         try:

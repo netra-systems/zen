@@ -11,7 +11,6 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Literal, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import websockets
@@ -57,7 +56,7 @@ class WebSocketReconnectClient:
         try:
             # Mock connection for testing
             # Mock: Generic component isolation for controlled unit testing
-            self.websocket = AsyncMock()
+            self.websocket = AsyncNone  # TODO: Use real service instead of Mock
             self.is_connected = True
             self.last_connection_time = datetime.now(timezone.utc)
             self.connection_metrics["successful_connections"] += 1

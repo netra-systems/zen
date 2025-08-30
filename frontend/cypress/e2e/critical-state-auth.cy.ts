@@ -6,14 +6,114 @@
  * Business Value: Prevents user churn from auth issues and performance degradation
  */
 
-import {
-  TestSetup,
-  Navigation,
-  FormUtils,
-  AuthUtils,
-  PerformanceUtils,
-  WaitUtils
-} from './utils/critical-test-utils';
+// Import utilities with fallback
+try {
+  var {
+    TestSetup,
+    Navigation,
+    FormUtils,
+    AuthUtils,
+    PerformanceUtils,
+    WaitUtils
+  } = require('./utils/critical-test-utils');
+} catch (e) {
+  // Define inline implementations
+  var TestSetup = {
+    visitDemo: () => cy.visit('/demo', { failOnStatusCode: false }),
+    standardViewport: () => cy.viewport(1920, 1080),
+    setupAuthState: () => {
+      cy.window().then((win) => {
+        win.localStorage.setItem('jwt_token', 'test-token-12345');
+        win.localStorage.setItem('user', JSON.stringify({
+          id: 'test-user-id',
+          email: 'test@netrasystems.ai',
+          full_name: 'Test User'
+        }));
+      });
+    },
+    setupDemoProgress: () => {
+      cy.window().then((win) => {
+        win.localStorage.setItem('demo_progress', JSON.stringify({
+          industry: 'Healthcare',
+          completed: ['industry_selection']
+        }));
+      });
+    }
+  };
+  var Navigation = {
+    goToAiChat: () => cy.visit('/chat', { failOnStatusCode: false }),
+    goToRoiCalculator: () => cy.contains('ROI Calculator').click({ force: true }),
+    cycleAllTabs: () => {
+      cy.visit('/chat', { failOnStatusCode: false });
+      cy.visit('/corpus', { failOnStatusCode: false });
+      cy.visit('/demo', { failOnStatusCode: false });
+    }
+  };
+  var FormUtils = {
+    sendChatMessage: (msg) => {
+      cy.get('[data-testid="message-input"], textarea').first().type(msg);
+      cy.get('[data-testid="send-button"], button[type="submit"]').first().click();
+    },
+    fillRoiCalculator: (value) => {
+      cy.get('input[id="spend"], input[name="spend"]').type(String(value));
+    }
+  };
+  var AuthUtils = {
+    simulateTokenExpiry: () => {
+      cy.window().then((win) => {
+        win.localStorage.setItem('jwt_token', 'expired-token');
+      });
+      cy.intercept('**/api/**', { statusCode: 401, body: { detail: 'Token expired' } });
+    },
+    verifyAuthState: (shouldBeValid) => {
+      cy.window().then((win) => {
+        const token = win.localStorage.getItem('jwt_token');
+        if (shouldBeValid) {
+          expect(token).to.be.a('string').and.not.be.empty;
+        } else {
+          expect(token).to.be.null;
+        }
+      });
+    },
+    clearAuth: () => {
+      cy.window().then((win) => {
+        win.localStorage.removeItem('jwt_token');
+        win.localStorage.removeItem('user');
+      });
+    },
+    setNewToken: (token) => {
+      cy.window().then((win) => {
+        win.localStorage.setItem('jwt_token', token);
+      });
+    }
+  };
+  var PerformanceUtils = {
+    getInitialMemory: () => cy.window().then((win) => {
+      return win.performance.memory ? win.performance.memory.usedJSHeapSize : 0;
+    }),
+    checkMemoryGrowth: (initial, threshold) => {
+      cy.window().then((win) => {
+        const current = win.performance.memory ? win.performance.memory.usedJSHeapSize : 0;
+        const growth = (current - initial) / initial;
+        expect(growth).to.be.lessThan(threshold);
+      });
+    },
+    countDomNodes: () => cy.document().then((doc) => {
+      return doc.querySelectorAll('*').length;
+    }),
+    verifyDomGrowth: (initial, threshold) => {
+      cy.document().then((doc) => {
+        const current = doc.querySelectorAll('*').length;
+        const growth = (current - initial) / initial;
+        expect(growth).to.be.lessThan(threshold);
+      });
+    }
+  };
+  var WaitUtils = {
+    processingWait: () => cy.wait(2000),
+    shortWait: () => cy.wait(500)
+  };
+}
 
 describe('Critical Test #5: Authentication State Corruption', () => {
   beforeEach(() => {

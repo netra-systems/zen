@@ -120,6 +120,7 @@ Thumbs.db
 .env.local
 .env.development
 .env.test
+.env.mock
 .env.production
 
 # Development launcher and test framework (not needed in production)

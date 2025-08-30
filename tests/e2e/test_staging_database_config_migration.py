@@ -10,7 +10,6 @@ import os
 import sys
 import pytest
 import asyncio
-from unittest.mock import patch, MagicMock, AsyncMock
 from typing import Optional
 
 # Setup path for imports
@@ -89,7 +88,7 @@ class TestDatabaseConfigMigration:
             
             # Mock the create_async_engine to prevent actual engine creation
             with patch('netra_backend.app.db.postgres_core.create_async_engine') as mock_create_engine:
-                mock_engine = AsyncMock()
+                mock_engine = AsyncNone  # TODO: Use real service instead of Mock
                 mock_create_engine.return_value = mock_engine
                 
                 # This should not raise "DatabaseConfig is not defined" error
@@ -213,7 +212,7 @@ class TestStagingDeploymentValidation:
             
             with patch.object(postgres_core, 'create_async_engine') as mock_create_engine:
                 # Mock: Generic component isolation for controlled unit testing
-                mock_engine = AsyncMock()
+                mock_engine = AsyncNone  # TODO: Use real service instead of Mock
                 mock_create_engine.return_value = mock_engine
                 
                 # Simulate the initialization sequence

@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <metadata>
+    <title>Chat First-Load Glitch Prevention</title>
+    <description>
+      Critical learnings from addressing the chat first-time page load glitch.
+      These patterns prevent multiple re-renders and container reloads during initialization.
+    </description>
+    <category>Performance</category>
+    <subcategory>Frontend Optimization</subcategory>
+    <priority>HIGH</priority>
+    <last_updated>2025-08-29</last_updated>
+    <business_impact>
+      Prevents 5-10% bounce rate from poor first impressions.
+      Improves perceived performance and platform stability.
+    </business_impact>
+  </metadata>
+
+  <problem_statement>
+    <issue>
+      Frontend chat interface experienced multiple container reloads and re-renders during 
+      first-time page load, causing visible glitches.
+    </issue>
+    <root_causes>
+      <cause id="1">Uncoordinated initialization of auth, WebSocket, and store systems</cause>
+      <cause id="2">Multiple React effects with excessive dependencies</cause>
+      <cause id="3">Missing render batching for related state updates</cause>
+      <cause id="4">Lack of initialization orchestration</cause>
+      <cause id="5">Components mounting/unmounting multiple times</cause>
+    </root_causes>
+    <impact>
+      - 3-4 component remounts on first load
+      - 10-15 unnecessary re-renders
+      - 500-800ms delay in First Contentful Paint
+      - Visual container "flicker" affecting user experience
+    </impact>
+  </problem_statement>
+
+  <solution>
+    <principle id="1">
+      <name>Initialization Coordination</name>
+      <description>
+        Create a central coordinator for multi-system initialization sequences.
+        Systems should not initialize independently but follow a coordinated flow.
+      </description>
+      <implementation>
+        Use an InitializationCoordinator hook that manages phases:
+        auth → websocket → store → ready
+      </implementation>
+      <pattern>
+        ```typescript
+        const useInitializationCoordinator = () => {
+          const [phase, setPhase] = useState('auth');
+          // Coordinate sequential initialization
+          // Prevent multiple initialization runs
+          // Provide unified ready state
+        };
+        ```
+      </pattern>
+    </principle>
+
+    <principle id="2">
+      <name>Minimal Effect Dependencies</name>
+      <description>
+        React useEffect hooks should have minimal dependencies to prevent re-execution.
+        Use mount guards and single-execution patterns.
+      </description>
+      <implementation>
+        - Use single dependency (e.g., 'initialized') instead of multiple
+        - Add hasPerformed flags to prevent re-execution
+        - Use isMounted refs for cleanup safety
+      </implementation>
+      <antipattern>
+        ```typescript
+        // BAD: Multiple dependencies cause re-renders
+        useEffect(() => {
+          // auth check
+        }, [loading, initialized, user, router, redirectTo, callback, tracker1, tracker2]);
+        ```
+      </antipattern>
+      <pattern>
+        ```typescript
+        // GOOD: Minimal dependencies, single execution
+        useEffect(() => {
+          if (!isMounted.current || hasPerformed.current) return;
+          if (!initialized) return;
+          hasPerformed.current = true;
+          // auth check
+        }, [initialized]);
+        ```
+      </pattern>
+    </principle>
+
+    <principle id="3">
+      <name>Batched State Updates</name>
+      <description>
+        Use React's unstable_batchedUpdates to group related state changes and
+        prevent cascading re-renders.
+      </description>
+      <implementation>
+        Wrap store update functions and event handlers in batchedUpdates
+      </implementation>
+      <pattern>
+        ```typescript
+        import { unstable_batchedUpdates } from 'react-dom';
+        
+        handleWebSocketEvent: (event) => {
+          unstable_batchedUpdates(() => {
+            // Multiple state updates batched together
+          });
+        }
+        ```
+      </pattern>
+    </principle>
+
+    <principle id="4">
+      <name>Render Prevention During Init</name>
+      <description>
+        Components should not render their main content until initialization is complete.
+        Show loading states instead of partial renders.
+      </description>
+      <implementation>
+        Check initialization state before rendering main content
+      </implementation>
+      <pattern>
+        ```typescript
+        if (!isInitialized || shouldShowLoading) {
+          return <LoadingScreen />;
+        }
+        return <MainContent />;
+        ```
+      </pattern>
+    </principle>
+
+    <principle id="5">
+      <name>Store Initialization State</name>
+      <description>
+        Stores should track their own initialization state to coordinate with
+        other systems.
+      </description>
+      <implementation>
+        Add 'initialized' field to store state
+      </implementation>
+    </principle>
+  </solution>
+
+  <testing_strategy>
+    <approach>
+      Create regression tests that fail when the glitch is present and pass when fixed.
+    </approach>
+    <test_categories>
+      <category>Component mount/unmount tracking</category>
+      <category>Loading state transitions</category>
+      <category>Re-render counting</category>
+      <category>Performance timing</category>
+      <category>Memory leak detection</category>
+      <category>Race condition detection</category>
+    </test_categories>
+    <coverage_requirements>
+      - 100% line coverage for initialization logic
+      - Edge case testing for rapid state changes
+      - Integration tests for multi-hook coordination
+    </coverage_requirements>
+  </testing_strategy>
+
+  <prevention_checklist>
+    <item>Always coordinate multi-system initialization</item>
+    <item>Minimize React effect dependencies</item>
+    <item>Use mount guards and single-execution patterns</item>
+    <item>Batch related state updates</item>
+    <item>Prevent renders during initialization</item>
+    <item>Track initialization state explicitly</item>
+    <item>Test for re-render and remount issues</item>
+    <item>Monitor First Contentful Paint metrics</item>
+  </prevention_checklist>
+
+  <performance_metrics>
+    <metric name="Component Mounts" target="1" critical="true"/>
+    <metric name="Re-renders During Init" target="&lt;5" critical="true"/>
+    <metric name="First Contentful Paint" target="&lt;500ms" critical="false"/>
+    <metric name="Time to Interactive" target="&lt;1s" critical="false"/>
+    <metric name="Memory Leaks" target="0" critical="true"/>
+  </performance_metrics>
+
+  <related_specs>
+    <spec>type_safety.xml</spec>
+    <spec>conventions.xml</spec>
+    <spec>testing.xml</spec>
+    <spec>anti_regression.xml</spec>
+  </related_specs>
+
+  <implementation_files>
+    <file>frontend/hooks/useInitializationCoordinator.ts</file>
+    <file>frontend/components/AuthGuard.tsx</file>
+    <file>frontend/store/unified-chat.ts</file>
+    <file>frontend/components/chat/MainChat.tsx</file>
+  </implementation_files>
+
+  <test_files>
+    <file>frontend/__tests__/hooks/useInitializationCoordinator.test.tsx</file>
+    <file>frontend/__tests__/components/AuthGuard.test.tsx</file>
+    <file>frontend/__tests__/store/unified-chat-batching.test.tsx</file>
+    <file>frontend/__tests__/components/chat/MainChat-integration.test.tsx</file>
+    <file>frontend/__tests__/regression/chat-first-load-glitch.test.tsx</file>
+  </test_files>
+</spec>

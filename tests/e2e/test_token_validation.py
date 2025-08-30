@@ -8,14 +8,13 @@ import asyncio
 import json
 import os
 from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import jwt
 import pytest
 import websockets
 
-from tests.e2e.harness_complete import UnifiedTestHarnessComplete
+from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
 
 @pytest.mark.e2e
@@ -256,7 +255,7 @@ class TestAgentContextExtraction(TestTokenValidationFlow):
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.services.agent_service.process_message') as mock_process:
             # Mock: Generic component isolation for controlled unit testing
-            mock_process.return_value = AsyncMock()
+            mock_process.return_value = AsyncNone  # TODO: Use real service instead of Mock
             
             async with httpx.AsyncClient(follow_redirects=True) as client:
                 headers = {"Authorization": f"Bearer {token}"}

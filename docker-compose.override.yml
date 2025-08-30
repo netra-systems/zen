@@ -94,6 +94,16 @@ services:
       CHOKIDAR_USEPOLLING: "true"
       CHOKIDAR_INTERVAL: 1000
 
+  # Redis configuration override for development
+  redis:
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+    ports:
+      - "${REDIS_PORT:-6382}:6379"  # Use environment variable for port
+
   # ClickHouse performance optimizations
   clickhouse:
     volumes:

@@ -53,7 +53,7 @@ class ServiceStatus:
 
 
 @dataclass
-class LauncherTestResult:
+class TestLauncherResult:
     """Result of launcher independence test."""
     launcher_pid: Optional[int]
     launcher_terminated: bool

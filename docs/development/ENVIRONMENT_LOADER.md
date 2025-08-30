@@ -108,7 +108,7 @@ REDIS_PORT=6379
 REDIS_PASSWORD=your-redis-password
 
 # Security
-JWT_SECRET_KEY=your-jwt-secret
+JWT_SECRET_KEY=your-jwt-secret-key
 FERNET_KEY=your-fernet-key
 
 # Monitoring

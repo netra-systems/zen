@@ -40,7 +40,7 @@ class CoverageLevel(str, Enum):
     MEDIUM = "medium"
     COMPLETE = "complete"
 
-class StartupTestArea(str, Enum):
+class TestStartupArea(str, Enum):
     """Agent startup test areas"""
     COLD_START = "cold_start"
     PERFORMANCE = "performance"
@@ -76,7 +76,7 @@ class TestValidationResult:
     edge_cases: List[str] = field(default_factory=list)
     performance_metrics: Dict[str, Any] = field(default_factory=dict)
 
-class StartupTestDiscoverer:
+class TestStartupDiscoverer:
     """Discovers and analyzes agent startup tests"""
     
     def __init__(self):

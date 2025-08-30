@@ -20,14 +20,13 @@ import json
 import os
 from datetime import datetime
 from typing import Dict, List, Optional
-from unittest.mock import AsyncMock, patch
 
 import aiohttp
 import pytest
 import websockets
 
 
-class CORSValidationTester:
+class TestCORSValidationer:
     """Helper class for CORS validation testing."""
     
     def __init__(self):

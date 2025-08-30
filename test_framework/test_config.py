@@ -110,8 +110,12 @@ def configure_dev_environment():
     os.environ["REDIS_URL"] = "redis://localhost:6379"
     os.environ["CLICKHOUSE_URL"] = "http://localhost:8123"
 
-def configure_test_environment():
-    """Configure environment variables for testing mode."""
+def configure_mock_environment():
+    """Configure environment variables for mock/test services mode.
+    
+    This function configures mock/test services and sets TESTING=true.
+    Use this when you want to use mock services instead of real ones.
+    """
     # Set environment to testing  
     os.environ["ENVIRONMENT"] = "testing"
     os.environ["TESTING"] = "true"
@@ -134,48 +138,58 @@ def configure_test_environment():
     os.environ["REDIS_URL"] = "redis://localhost:6379/1"  # Use DB 1 for tests
     os.environ["CLICKHOUSE_URL"] = "http://localhost:8123"
 
+def configure_test_environment():
+    """DEPRECATED: Use configure_mock_environment() instead.
+    
+    This function is maintained for backward compatibility only.
+    """
+    import warnings
+    warnings.warn(
+        "configure_test_environment() is deprecated. Use configure_mock_environment() instead",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    return configure_mock_environment()
+
+# Helper function for checking real LLM usage with backward compatibility
+def should_use_real_llm() -> bool:
+    """Check if real LLM should be used, supporting both new and legacy variable names.
+    
+    Returns:
+        bool: True if real LLM should be used, False otherwise
+    """
+    return (os.getenv("USE_REAL_LLM", "false").lower() == "true" or
+            os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true")
+
+# LLM configuration functions moved to test_framework.llm_config_manager
+# Import the canonical function for backward compatibility
+from test_framework.llm_config_manager import configure_llm_testing, LLMTestMode
+
 def configure_real_llm(model: str = "gemini-2.5-flash", 
                        timeout: int = 60, 
                        parallel: str = "auto", 
                        test_level: str = None, 
                        use_dedicated_env: bool = True):
-    """Configure environment for real LLM testing with smart defaults and dedicated test environment."""
-    # Handle special parallel values
-    if parallel == "max":
-        parallel_value = str(OPTIMAL_WORKERS)
-    elif parallel == "auto":
-        # For real LLM tests, limit parallelism to avoid rate limits
-        max_llm_parallel = 3
-        parallel_value = str(min(max_llm_parallel, OPTIMAL_WORKERS))
-    else:
-        parallel_value = str(parallel)
+    """DEPRECATED: Use test_framework.llm_config_manager.configure_llm_testing instead.
     
-    config = {
-        "model": model,
-        "timeout": timeout,
-        "parallel": parallel_value,
-        "rate_limit_delay": 1 if int(parallel_value) > 2 else 0,  # Add delay for high parallelism
-        "dedicated_environment": use_dedicated_env
-    }
+    This function is maintained for backward compatibility only.
+    All LLM configuration has been consolidated into llm_config_manager.py.
+    """
+    import warnings
+    warnings.warn(
+        "configure_real_llm in test_config.py is deprecated. "
+        "Use test_framework.llm_config_manager.configure_llm_testing instead",
+        DeprecationWarning,
+        stacklevel=2
+    )
     
-    # Set basic LLM environment variables
-    os.environ["TEST_USE_REAL_LLM"] = "true"
-    os.environ["ENABLE_REAL_LLM_TESTING"] = "true"
-    os.environ["TEST_LLM_TIMEOUT"] = str(timeout)
-    os.environ["TEST_LLM_MODEL"] = model
-    
-    if parallel_value != "auto":
-        os.environ["TEST_PARALLEL"] = parallel_value
-    
-    # Add rate limit delay if needed
-    if config["rate_limit_delay"] > 0:
-        os.environ["TEST_LLM_RATE_LIMIT_DELAY"] = str(config["rate_limit_delay"])
-    
-    # Configure dedicated test environment if requested
-    if use_dedicated_env:
-        configure_dedicated_test_environment()
-    
-    return config
+    return configure_llm_testing(
+        mode=LLMTestMode.REAL,
+        model=model,
+        timeout=timeout,
+        parallel=parallel,
+        use_dedicated_env=use_dedicated_env
+    )
 
 
 def configure_dedicated_test_environment():

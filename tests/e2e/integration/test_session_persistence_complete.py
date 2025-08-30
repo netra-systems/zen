@@ -47,7 +47,7 @@ from tests.clients.factory import TestClientFactory
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 
 
-class SessionPersistenceTestManager:
+class TestSessionPersistenceManager:
     """Manages complete session persistence testing across service restarts."""
     
     def __init__(self):

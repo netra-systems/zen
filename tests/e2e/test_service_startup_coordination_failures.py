@@ -24,7 +24,6 @@ import os
 import time
 import unittest
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, Mock, call, patch
 
 import pytest
 import requests

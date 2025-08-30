@@ -11,7 +11,6 @@ Ensures system continues functioning when caching layer fails.
 import pytest
 import asyncio
 import time
-from unittest.mock import patch, AsyncMock, MagicMock
 from typing import Dict, Any, Optional
 
 from netra_backend.app.services.cache.semantic_cache import SemanticCache

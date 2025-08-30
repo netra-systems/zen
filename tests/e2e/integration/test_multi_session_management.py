@@ -145,7 +145,7 @@ class SessionIsolationValidator:
         return False
 
 
-class ConflictResolutionTester:
+class TestConflictResolutioner:
     """Tests conflict resolution for concurrent updates."""
     
     def __init__(self, manager: MultiSessionManager):

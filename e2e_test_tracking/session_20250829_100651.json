@@ -1,0 +1,18 @@
+[
+  {
+    "iteration": 1,
+    "timestamp": "2025-08-29T10:07:09.727533",
+    "duration": 18.26930284500122,
+    "return_code": 1,
+    "statistics": {
+      "passed": 0,
+      "failed": 0,
+      "errors": 0,
+      "total": 0
+    },
+    "new_failures": [],
+    "newly_fixed": [],
+    "total_failures": 0,
+    "skipped_count": 0
+  }
+]

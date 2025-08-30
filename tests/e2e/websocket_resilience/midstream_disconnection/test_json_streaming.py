@@ -35,6 +35,8 @@ from tests.e2e.websocket_resilience.utils.streaming_response_generator import (
 class TestJSONStreamingDisconnection:
     """Test JSON streaming disconnection and recovery."""
     
+    @pytest.mark.resilience
+    @pytest.mark.websocket
     async def test_json_stream_interruption(self, network_condition, stream_buffer:
                                           test_user_id, response_configs):
         """Test JSON streaming interruption and recovery."""
@@ -71,6 +73,8 @@ class TestJSONStreamingDisconnection:
         assert stream_buffer.chunks_received > 0
         assert valid_json_chunks > 0
         
+    @pytest.mark.resilience
+    @pytest.mark.websocket
     async def test_json_structure_preservation(self, network_condition, stream_buffer:
                                              test_user_id, response_configs):
         """Test JSON structure is preserved across disconnections."""
@@ -110,6 +114,8 @@ class TestJSONStreamingDisconnection:
             assert "timestamp" in obj
             assert "data" in obj
             
+    @pytest.mark.resilience
+    @pytest.mark.websocket
     async def test_large_json_streaming(self, network_condition, stream_buffer:
                                       test_user_id, response_configs):
         """Test large JSON streaming with disconnections."""
@@ -145,6 +151,8 @@ class TestJSONStreamingDisconnection:
         assert disconnections > 0
         assert stream_buffer.total_size > 1000  # Significant data received
         
+    @pytest.mark.resilience
+    @pytest.mark.websocket
     async def test_malformed_json_during_disconnection(self, network_condition, stream_buffer:
                                                      test_user_id, response_configs):
         """Test handling of malformed JSON during disconnection."""
@@ -178,6 +186,8 @@ class TestJSONStreamingDisconnection:
         assert stream_buffer.chunks_received > 0
         # Some JSON errors are expected due to partial chunks
         
+    @pytest.mark.resilience
+    @pytest.mark.websocket
     async def test_json_array_streaming(self, network_condition, stream_buffer:
                                       test_user_id, response_configs):
         """Test JSON array streaming with disconnections."""

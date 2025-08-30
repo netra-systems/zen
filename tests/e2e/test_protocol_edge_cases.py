@@ -24,7 +24,6 @@ import time
 import urllib.parse
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Tuple
-from unittest.mock import patch, MagicMock, AsyncMock
 import pytest
 import websockets
 from test_framework.base_integration_test import BaseIntegrationTest

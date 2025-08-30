@@ -1,0 +1,75 @@
+{
+  "timestamp": 1756505421.0548642,
+  "services": {
+    "backend": {
+      "total_tests": 0,
+      "collection_time": 0.0,
+      "errors": 1,
+      "duplicates": 0,
+      "missing_markers": 0,
+      "orphaned": 0,
+      "test_distribution": {},
+      "marker_distribution": {}
+    },
+    "auth": {
+      "total_tests": 0,
+      "collection_time": 19.02295756340027,
+      "errors": 2,
+      "duplicates": 0,
+      "missing_markers": 0,
+      "orphaned": 0,
+      "test_distribution": {},
+      "marker_distribution": {}
+    },
+    "frontend": {
+      "total_tests": 0,
+      "collection_time": 0.0,
+      "errors": 1,
+      "duplicates": 0,
+      "missing_markers": 0,
+      "orphaned": 0,
+      "test_distribution": {
+        "cypress": 5
+      },
+      "marker_distribution": {}
+    },
+    "e2e": {
+      "total_tests": 715,
+      "collection_time": 0.0,
+      "errors": 0,
+      "duplicates": 0,
+      "missing_markers": 0,
+      "orphaned": 0,
+      "test_distribution": {
+        "root": 3,
+        "agents": 2,
+        "audit": 1,
+        "chat_system": 5,
+        "critical": 13,
+        "database": 1,
+        "deployment": 1,
+        "e2e": 323,
+        "integration": 206,
+        "load": 1,
+        "performance": 30,
+        "post_deployment": 1,
+        "security": 8,
+        "staging_errors": 3,
+        "unit": 11,
+        "websocket": 5,
+        "agent_isolation": 5,
+        "journeys": 28,
+        "rapid_message": 5,
+        "resilience": 24,
+        "resource_isolation": 6,
+        "staging": 7,
+        "websocket_resilience": 14,
+        "error_propagation": 6,
+        "suite": 1,
+        "midstream_disconnection": 4,
+        "scripts": 1
+      },
+      "marker_distribution": {}
+    }
+  }
+}

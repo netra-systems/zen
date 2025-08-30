@@ -18,10 +18,10 @@ from netra_backend.app.agents.triage_sub_agent.llm_processor import TriageLLMPro
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerState
 from netra_backend.app.core.exceptions_service import (
-    LLMError, 
-    RateLimitError, 
+    LLMRequestError as LLMError, 
+    LLMRateLimitError as RateLimitError, 
     ServiceUnavailableError,
-    TimeoutError
+    ServiceTimeoutError as TimeoutError
 )
 
 
@@ -37,10 +37,32 @@ def mock_agent():
     agent = MagicMock()
     agent.llm_manager = MagicMock()
     agent.llm_fallback_handler = MagicMock()
+    
+    # Default fallback result
+    default_result = {
+        "category": "General Inquiry",
+        "confidence_score": 0.3,
+        "priority": "medium",
+        "extracted_entities": {},
+        "tool_recommendations": [],
+        "metadata": {"fallback_used": True}
+    }
+    agent.llm_fallback_handler.execute_structured_with_fallback = AsyncMock(return_value=default_result)
+    
     agent.triage_core = MagicMock()
     agent.triage_core.max_retries = 2
+    agent.triage_core.get_cached_result = AsyncMock(return_value=None)  # Async mock for cache check
+    agent.triage_core.cache_result = AsyncMock(return_value=None)  # Async mock for cache set
+    agent.triage_core.generate_request_hash = MagicMock(return_value="test-hash")
+    
     agent.prompt_builder = MagicMock()
+    agent.prompt_builder.build_triage_prompt = MagicMock(return_value="Test prompt")
+    agent.prompt_builder.build_enhanced_prompt = MagicMock(return_value="Enhanced prompt")
+    
     agent.result_processor = MagicMock()
+    agent.result_processor.process_llm_response = MagicMock(return_value=default_result)
+    agent.result_processor.enrich_triage_result = MagicMock(side_effect=lambda x: x)  # Return input as-is
+    
     agent._send_update = AsyncMock()
     
     # Mock circuit breaker
@@ -99,10 +121,7 @@ class TestTriageCircuitBreakerFailureScenarios:
         failure_threshold = TriageConfig.CIRCUIT_BREAKER_CONFIG["failure_threshold"]
         
         # Setup consecutive failures
-        llm_processor.agent.prompt_builder.build_enhanced_prompt.return_value = "Enhanced prompt"
-        llm_processor.agent.llm_manager.ask_structured_llm.side_effect = LLMError("Model unavailable")
-        llm_processor.agent.triage_core.generate_request_hash.return_value = "hash123"
-        llm_processor.agent.triage_core.get_cached_result.return_value = None
+        llm_processor.agent.llm_fallback_handler.execute_structured_with_fallback.side_effect = LLMError("Model unavailable")
         
         # Mock circuit breaker state tracking
         failure_count = 0

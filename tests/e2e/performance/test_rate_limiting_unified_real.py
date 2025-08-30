@@ -44,10 +44,10 @@ from tests.e2e.rate_limiting_core import (
     UserManager,
 )
 from tests.e2e.service_manager import ServiceManager
-from tests.e2e.harness_complete import UnifiedTestHarnessComplete
+from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
 
-class UnifiedRateLimitTester:
+class TestUnifiedRateLimiter:
     """Tests rate limiting across all service boundaries."""
     
     def __init__(self, harness: UnifiedTestHarnessComplete):

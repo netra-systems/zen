@@ -35,7 +35,7 @@ from test_framework import setup_test_path
 setup_test_path()
 
 from tests.e2e.service_manager import ServiceManager
-from tests.e2e.harness_complete import UnifiedTestHarnessComplete, create_test_harness
+from tests.e2e.harness_utils import UnifiedTestHarnessComplete, create_test_harness
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 from test_framework.http_client import ClientConfig
@@ -67,7 +67,7 @@ E2E_TEST_CONFIG = {
 
 
 @dataclass
-class LoadTestResults:
+class TestLoadResults:
     """Results from load testing."""
     test_name: str
     start_time: float
@@ -234,6 +234,7 @@ async def unified_test_harness():
 
 
 @pytest.fixture
+@pytest.mark.performance
 async def test_user_token():
     """Test user authentication token"""
     return "mock-test-token-" + str(int(time.time()))

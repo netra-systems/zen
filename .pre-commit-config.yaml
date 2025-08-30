@@ -110,6 +110,17 @@ repos:
         stages: [commit]
         pass_filenames: true
         description: 'Prevents direct os.environ access in test files - use IsolatedEnvironment instead'
+        
+      # STAGING CONFIG PROTECTION: Prevent localhost defaults in ClickHouse configs
+      - id: protect-staging-config
+        name: Staging Configuration Protection
+        entry: python scripts/protect_staging_config.py
+        language: system
+        files: 'netra_backend/app/schemas/config\.py$'
+        stages: [commit]
+        pass_filenames: false
+        always_run: false
+        description: 'Prevents ClickHouse configs from defaulting to localhost which breaks staging'
 
 # Configuration for different severity levels
 # These can be toggled based on development phase

@@ -6,12 +6,15 @@ import asyncio
 import hashlib
 import logging
 import os
+import re
 import secrets
 import time
 from datetime import datetime, timedelta, UTC
 from typing import Dict, Optional, Tuple
 
 import httpx
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
 
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 from auth_service.auth_core.isolated_environment import get_env
@@ -43,6 +46,7 @@ class AuthService:
     def __init__(self):
         self.jwt_handler = JWTHandler()
         self.session_manager = SessionManager()
+        self.password_hasher = PasswordHasher()
         self.max_login_attempts = int(get_env().get("MAX_LOGIN_ATTEMPTS", "5"))
         self.lockout_duration = int(get_env().get("LOCKOUT_DURATION_MINUTES", "15"))
         self.db_session = None  # Initialize as None, set later if database available
@@ -171,6 +175,91 @@ class AuthService:
             "email": email,
             "message": "User registered successfully"
         }
+    
+    def validate_email(self, email: str) -> bool:
+        """Validate email format"""
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        return bool(re.match(email_pattern, email))
+    
+    def validate_password(self, password: str) -> tuple[bool, str]:
+        """Validate password strength
+        
+        Requirements:
+        - Minimum 8 characters
+        - At least one uppercase letter
+        - At least one lowercase letter
+        - At least one number
+        - At least one special character
+        """
+        if len(password) < 8:
+            return False, "Password must be at least 8 characters long"
+        
+        if not re.search(r'[A-Z]', password):
+            return False, "Password must contain at least one uppercase letter"
+        
+        if not re.search(r'[a-z]', password):
+            return False, "Password must contain at least one lowercase letter"
+        
+        if not re.search(r'\d', password):
+            return False, "Password must contain at least one number"
+        
+        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+            return False, "Password must contain at least one special character"
+        
+        return True, "Password is valid"
+    
+    async def register_user(self, email: str, password: str, full_name: Optional[str] = None) -> Dict:
+        """Register a new user with database persistence"""
+        # Validate email format
+        if not self.validate_email(email):
+            raise ValueError("Invalid email format")
+        
+        # Validate password strength
+        is_valid, message = self.validate_password(password)
+        if not is_valid:
+            raise ValueError(message)
+        
+        # Hash the password
+        password_hash = self.password_hasher.hash(password)
+        
+        # Create user in database
+        if not self.db_session:
+            # Fallback to test registration if no database
+            logger.warning("No database session available, falling back to test registration")
+            return self.register_test_user(email, password)
+        
+        try:
+            user_repo = AuthUserRepository(self.db_session)
+            
+            # Check if user already exists
+            existing_user = await user_repo.get_by_email(email)
+            if existing_user:
+                raise ValueError("User with this email already exists")
+            
+            # Create the user
+            new_user = await user_repo.create_local_user(
+                email=email,
+                password_hash=password_hash,
+                full_name=full_name
+            )
+            
+            await self.db_session.commit()
+            
+            return {
+                "user_id": new_user.id,
+                "email": new_user.email,
+                "message": "User registered successfully",
+                "requires_verification": not new_user.is_verified
+            }
+            
+        except ValueError as e:
+            # Re-raise validation errors
+            raise e
+        except Exception as e:
+            logger.error(f"Failed to register user: {e}")
+            if self.db_session:
+                await self.db_session.rollback()
+            raise RuntimeError(f"Registration failed: {str(e)}")
     
     async def validate_token(self, token: str) -> TokenResponse:
         """Validate access token"""
@@ -346,9 +435,10 @@ class AuthService:
             await user_repo.increment_failed_attempts(email)
             return None
         
-        # Verify password (would use proper hashing in production)
-        # For now, simple comparison
-        if user.hashed_password != hashlib.sha256(password.encode()).hexdigest():
+        # Verify password using argon2
+        try:
+            self.password_hasher.verify(user.hashed_password, password)
+        except VerifyMismatchError:
             await user_repo.increment_failed_attempts(email)
             return None
         

@@ -62,7 +62,7 @@ class FeatureFlag:
         }
 
 
-class TDDWorkflowTester:
+class TestTDDWorkflower:
     """Tester for TDD workflow integration."""
 
     def __init__(self):

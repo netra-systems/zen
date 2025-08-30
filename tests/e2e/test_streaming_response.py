@@ -18,7 +18,6 @@ import os
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -36,7 +35,7 @@ from netra_backend.tests.helpers.websocket_test_helpers import (
 )
 
 
-class StreamingTestData:
+class TestStreamingData:
     """Test data factory for streaming scenarios."""
     
     @staticmethod
@@ -54,9 +53,9 @@ class StreamingTestData:
 def streaming_websocket():
     """Create mock WebSocket connection for streaming tests."""
     # Mock: WebSocket infrastructure isolation for unit tests without real connections
-    mock_websocket = AsyncMock()
+    mock_websocket = AsyncNone  # TODO: Use real service instead of Mock
     # Mock: WebSocket infrastructure isolation for unit tests without real connections
-    mock_websocket.application_state = MagicMock()
+    mock_websocket.application_state = MagicNone  # TODO: Use real service instead of Mock
     mock_websocket.application_state.CONNECTED = True
     
     # Track sent messages for validation
@@ -83,7 +82,7 @@ def streaming_harness():
 def mock_unified_manager():
     """Create mock unified WebSocket manager for testing."""
     # Mock: Generic component isolation for controlled unit testing
-    mock_manager = MagicMock()
+    mock_manager = MagicNone  # TODO: Use real service instead of Mock
     
     # Mock connection methods
     # Mock: Async component isolation for testing without real async operations
@@ -91,7 +90,7 @@ def mock_unified_manager():
     # Mock: Async component isolation for testing without real async operations
     mock_manager.disconnect_user = AsyncMock(return_value=None)
     # Mock: Async component isolation for testing without real async operations
-    mock_manager.send_message_to_user = AsyncMock(return_value=True)
+    mock_manager.send_message = AsyncMock(return_value=True)
     # Mock: Service component isolation for predictable testing behavior
     mock_manager.validate_message = MagicMock(return_value=True)
     
@@ -173,7 +172,7 @@ class TestStreamingInterruption:
         
         # Validate no data loss and graceful handling
         recovery_msg = {"type": "recovery_test", "data": "System responsive"}
-        result = await mock_unified_manager.send_message_to_user(user_id, recovery_msg)
+        result = await mock_unified_manager.send_message(user_id, recovery_msg)
         assert result is True
     
     async def _start_streaming_task(self, websocket):

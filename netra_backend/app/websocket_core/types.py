@@ -53,7 +53,13 @@ class MessageType(str, Enum):
     
     # Agent communication
     START_AGENT = "start_agent"
+    AGENT_TASK = "agent_task"
+    AGENT_TASK_ACK = "agent_task_ack"
     AGENT_RESPONSE = "agent_response"
+    AGENT_RESPONSE_CHUNK = "agent_response_chunk"
+    AGENT_RESPONSE_COMPLETE = "agent_response_complete"
+    AGENT_STATUS_REQUEST = "agent_status_request"
+    AGENT_STATUS_UPDATE = "agent_status_update"
     AGENT_PROGRESS = "agent_progress"
     AGENT_ERROR = "agent_error"
     
@@ -63,12 +69,18 @@ class MessageType(str, Enum):
     
     # Broadcasting
     BROADCAST = "broadcast"
+    BROADCAST_TEST = "broadcast_test"
+    DIRECT_MESSAGE = "direct_message"
     ROOM_MESSAGE = "room_message"
     
     # JSON-RPC (MCP compatibility)
     JSONRPC_REQUEST = "jsonrpc_request"
     JSONRPC_RESPONSE = "jsonrpc_response"
     JSONRPC_NOTIFICATION = "jsonrpc_notification"
+    
+    # Testing/Resilience
+    RESILIENCE_TEST = "resilience_test"
+    RECOVERY_TEST = "recovery_test"
 
 
 class ConnectionInfo(BaseModel):
@@ -257,9 +269,28 @@ LEGACY_MESSAGE_TYPE_MAP = {
     "heartbeat": MessageType.HEARTBEAT,
     "user_input": MessageType.USER_MESSAGE,
     "agent_response": MessageType.AGENT_RESPONSE,
+    "agent_task": MessageType.AGENT_TASK,
+    "agent_task_ack": MessageType.AGENT_TASK_ACK,
+    "agent_response_chunk": MessageType.AGENT_RESPONSE_CHUNK,
+    "agent_response_complete": MessageType.AGENT_RESPONSE_COMPLETE,
+    "agent_status_request": MessageType.AGENT_STATUS_REQUEST,
+    "agent_status_update": MessageType.AGENT_STATUS_UPDATE,
+    "broadcast_test": MessageType.BROADCAST_TEST,
+    "direct_message": MessageType.DIRECT_MESSAGE,
+    "resilience_test": MessageType.RESILIENCE_TEST,
+    "recovery_test": MessageType.RECOVERY_TEST,
     "error": MessageType.ERROR_MESSAGE,
     "system": MessageType.SYSTEM_MESSAGE,
     "broadcast": MessageType.BROADCAST
+}
+
+# Frontend compatibility mapping - maps backend types to frontend-expected types
+FRONTEND_MESSAGE_TYPE_MAP = {
+    MessageType.AGENT_RESPONSE: "agent_completed",
+    MessageType.AGENT_PROGRESS: "agent_update",
+    MessageType.THREAD_UPDATE: "thread_updated",
+    MessageType.ERROR_MESSAGE: "error",
+    # Keep others as-is
 }
 
 
@@ -278,6 +309,19 @@ def normalize_message_type(message_type: Union[str, MessageType]) -> MessageType
     except ValueError:
         # Default to user message for unknown types
         return MessageType.USER_MESSAGE
+
+
+def get_frontend_message_type(message_type: Union[str, MessageType]) -> str:
+    """Get frontend-compatible message type string."""
+    # First normalize to MessageType enum
+    normalized = normalize_message_type(message_type)
+    
+    # Check if we have a frontend mapping
+    if normalized in FRONTEND_MESSAGE_TYPE_MAP:
+        return FRONTEND_MESSAGE_TYPE_MAP[normalized]
+    
+    # Otherwise return the enum value as string
+    return normalized.value
 
 
 def create_standard_message(msg_type: Union[str, MessageType], 

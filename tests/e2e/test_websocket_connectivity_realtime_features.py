@@ -44,7 +44,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Set, Deque
 from urllib.parse import urljoin, urlparse
-from unittest.mock import patch
 
 import pytest
 import websockets
@@ -60,7 +59,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class WebSocketTestMetrics:
+class TestWebSocketMetrics:
     """Comprehensive metrics for WebSocket connectivity and real-time features testing."""
     test_name: str
     start_time: float = field(default_factory=time.time)
@@ -135,7 +134,7 @@ class WebSocketTestMetrics:
 
 
 @dataclass
-class WebSocketTestConfig:
+class TestWebSocketConfig:
     """Configuration for WebSocket connectivity and real-time testing."""
     # Connection testing
     test_basic_connectivity: bool = True
@@ -184,7 +183,7 @@ class WebSocketConnection:
     is_authenticated: bool = False
 
 
-class WebSocketConnectivityTester:
+class TestWebSocketConnectivityer:
     """Comprehensive WebSocket connectivity and real-time features tester."""
     
     def __init__(self, config: WebSocketTestConfig):
@@ -1398,6 +1397,7 @@ class TestWebSocketConnectivityRealtimeFeatures:
             stress_test_duration=10
         )
     
+    @pytest.mark.websocket
     async def test_comprehensive_websocket_connectivity_and_realtime(self, websocket_config):
         """Test comprehensive WebSocket connectivity and real-time features."""
         logger.info("=== COMPREHENSIVE WEBSOCKET CONNECTIVITY AND REAL-TIME TEST ===")

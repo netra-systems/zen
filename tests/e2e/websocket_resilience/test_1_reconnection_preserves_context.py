@@ -14,7 +14,6 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import websockets
@@ -24,7 +23,7 @@ from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
-class WebSocketTestClient:
+class TestWebSocketClient:
     """WebSocket test client with session management and reconnection capabilities."""
     
     def __init__(self, uri: str, session_token: str):
@@ -45,7 +44,7 @@ class WebSocketTestClient:
             if "mock" in self.uri or not hasattr(self, '_real_connection'):
                 # Mock connection for unit testing
                 # Mock: Generic component isolation for controlled unit testing
-                self.websocket = AsyncMock()
+                self.websocket = AsyncNone  # TODO: Use real service instead of Mock
                 self.is_connected = True
                 logger.info(f"WebSocket mock connected successfully with token: {self.session_token[:8]}...")
                 return True
@@ -253,7 +252,7 @@ async def websocket_test_client(session_token):
     
     # Mock the WebSocket connection for testing
     # Mock: Generic component isolation for controlled unit testing
-    client.websocket = AsyncMock()
+    client.websocket = AsyncNone  # TODO: Use real service instead of Mock
     client.is_connected = True
     
     yield client
@@ -725,7 +724,7 @@ async def test_websocket_client_error_handling(session_token):
     
     # Test message send failure handling
     # Mock: Generic component isolation for controlled unit testing
-    client.websocket = AsyncMock()
+    client.websocket = AsyncNone  # TODO: Use real service instead of Mock
     # Mock: Async component isolation for testing without real async operations
     client.websocket.send = AsyncMock(side_effect=ConnectionClosed(None, None))
     client.is_connected = True

@@ -178,6 +178,7 @@ class UnifiedConfigManager:
             return True
         
         # Check for test environment variables using IsolatedEnvironment
+        # These should be explicitly true, not just present
         test_indicators = [
             'PYTEST_CURRENT_TEST',
             'TESTING',
@@ -185,7 +186,9 @@ class UnifiedConfigManager:
         ]
         
         for indicator in test_indicators:
-            if get_env().get(indicator):
+            value = get_env().get(indicator, '').lower()
+            # Only consider it a test context if the value is explicitly true
+            if value in ['true', '1', 'yes', 'on']:
                 return True
         
         # Check if ENVIRONMENT is set to testing

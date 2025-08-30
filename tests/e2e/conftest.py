@@ -35,10 +35,11 @@ E2EServiceValidator.enforce_real_services()
 
 def pytest_configure(config):
     """Configure pytest for E2E tests with real LLM support."""
-    # Ensure that if TEST_USE_REAL_LLM is set, it persists throughout the test session
-    if os.getenv("TEST_USE_REAL_LLM") == "true":
-        # Re-set to ensure it's available throughout the session
-        os.environ["TEST_USE_REAL_LLM"] = "true"
+    # Ensure that if USE_REAL_LLM (or legacy TEST_USE_REAL_LLM) is set, it persists throughout the test session
+    if (os.getenv("USE_REAL_LLM") == "true" or os.getenv("TEST_USE_REAL_LLM") == "true"):
+        # Re-set both for compatibility
+        os.environ["USE_REAL_LLM"] = "true"
+        os.environ["TEST_USE_REAL_LLM"] = "true"  # Legacy compatibility
         os.environ["ENABLE_REAL_LLM_TESTING"] = "true"
 
 # CRITICAL: Override any PostgreSQL configuration for E2E tests to use SQLite
@@ -127,7 +128,9 @@ async def model_selection_setup():
 def real_llm_config():
     """Configuration for real LLM testing."""
     # Check environment variable to determine if real LLM should be enabled
-    use_real_llm = os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true"
+    # Check both new and legacy variable names
+    use_real_llm = (os.getenv("USE_REAL_LLM", "false").lower() == "true" or
+                    os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true")
     return {
         "enabled": use_real_llm,
         "timeout": 30.0,

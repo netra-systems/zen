@@ -39,24 +39,22 @@ async def _ensure_workload_table():
 class TestWorkloadEventsTable:
     """Test workload_events table operations with real data"""
     
-    @pytest.fixture
-    def setup_workload_table(self, event_loop):
+    @pytest.fixture(autouse=True)
+    async def setup_workload_table(self):
         """Ensure workload_events table exists"""
-        async def _setup_table():
-            # Initialize ClickHouse tables including workload_events
-            await initialize_clickhouse_tables()
-            
-            # Verify the table exists
-            exists = await verify_workload_events_table()
-            if not exists:
-                pytest.skip("workload_events table could not be created or verified")
+        # Initialize ClickHouse tables including workload_events
+        await initialize_clickhouse_tables()
         
-        event_loop.run_until_complete(_setup_table())
+        # Verify the table exists
+        exists = await verify_workload_events_table()
+        if not exists:
+            pytest.skip("workload_events table could not be created or verified")
+        
         yield
         # Cleanup test data (optional) - kept for analysis
 
     @pytest.mark.asyncio
-    async def test_insert_workload_events(self, setup_workload_table):
+    async def test_insert_workload_events(self):
         """Test inserting real workload events"""
         async with get_clickhouse_client() as client:
             await self._debug_database_state(client)
@@ -143,7 +141,7 @@ class TestWorkloadEventsTable:
         logger.info(f"Successfully inserted {count} test events")
 
     @pytest.mark.asyncio
-    async def test_query_with_array_syntax_fix(self, setup_workload_table):
+    async def test_query_with_array_syntax_fix(self):
         """Test querying with array syntax that needs fixing"""
         async with get_clickhouse_client() as client:
             # This query has incorrect syntax that should be fixed
@@ -176,7 +174,7 @@ class TestWorkloadEventsTable:
                 logger.info(f"Metric: {row['first_metric_name']} = {row['first_metric_value']} {row['first_metric_unit']}")
 
     @pytest.mark.asyncio
-    async def test_complex_aggregation_queries(self, setup_workload_table):
+    async def test_complex_aggregation_queries(self):
         """Test complex aggregation queries with nested arrays"""
         async with get_clickhouse_client() as client:
             # Query with proper array functions
@@ -221,7 +219,7 @@ class TestWorkloadEventsTable:
                       f"total cost ${row['total_cost_cents']/100:.2f}")
 
     @pytest.mark.asyncio
-    async def test_time_series_analysis(self, setup_workload_table):
+    async def test_time_series_analysis(self):
         """Test time-series analysis queries"""
         async with get_clickhouse_client() as client:
             time_series_query = self._build_time_series_query()

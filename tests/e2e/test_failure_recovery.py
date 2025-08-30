@@ -18,7 +18,6 @@ import time
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -38,7 +37,7 @@ class FailureScenario(Enum):
 
 
 @dataclass
-class FailureTestResult:
+class TestFailureResult:
     """Result of failure recovery test"""
     scenario: str
     cascade_prevented: bool

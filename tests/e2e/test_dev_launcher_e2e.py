@@ -72,7 +72,7 @@ class StartupValidationResult:
 
 
 @dataclass 
-class DevLauncherTestConfig:
+class TestDevLauncherConfig:
     """Configuration for dev launcher E2E testing."""
     use_dynamic_ports: bool = True
     enable_secrets: bool = False
@@ -83,7 +83,7 @@ class DevLauncherTestConfig:
     temp_dir: Optional[Path] = None
 
 
-class DevLauncherE2ETester:
+class TestDevLauncherE2Eer:
     """Comprehensive E2E tester for dev launcher startup sequence."""
     
     def __init__(self, config: DevLauncherTestConfig):

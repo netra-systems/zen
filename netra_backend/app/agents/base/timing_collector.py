@@ -192,6 +192,10 @@ class ExecutionTimingCollector:
         Returns:
             Timing entry for the operation
         """
+        # Auto-create execution context if none exists
+        if not self.current_tree and not self._entry_stack:
+            self.start_execution(f"auto-{self.agent_name}-{int(time.perf_counter() * 1000)}")
+        
         parent_id = self._entry_stack[-1] if self._entry_stack else None
         
         entry = TimingEntry(
@@ -260,6 +264,30 @@ class ExecutionTimingCollector:
         return tree
         
     @contextmanager
+    def measure(self, operation: str, category: TimingCategory = TimingCategory.UNKNOWN,
+               metadata: Optional[Dict[str, Any]] = None):
+        """Context manager for measuring an operation (alias for time_operation).
+        
+        Args:
+            operation: Name of the operation
+            category: Category of the operation
+            metadata: Additional metadata
+            
+        Example:
+            with collector.measure("llm_operation"):
+                result = await llm_call()
+        """
+        entry = self.start_timing(operation, category, metadata)
+        error = None
+        try:
+            yield entry
+        except Exception as e:
+            error = str(e)
+            raise
+        finally:
+            self.end_timing(entry, error)
+
+    @contextmanager
     def time_operation(self, operation: str, category: TimingCategory = TimingCategory.UNKNOWN,
                       metadata: Optional[Dict[str, Any]] = None):
         """Context manager for timing an operation.
@@ -303,6 +331,62 @@ class ExecutionTimingCollector:
                 stats_by_category[category_name].add_entry(entry)
                 
         return stats_by_category
+        
+    def get_timing_summary(self) -> Dict[str, Dict[str, Any]]:
+        """Get timing summary in a format expected by tests.
+        
+        Returns:
+            Dictionary with operation names as keys and timing stats as values
+        """
+        # Auto-complete execution if there's an active tree with uncompleted entries
+        if self.current_tree and self.active_entries:
+            self.complete_execution()
+        
+        timing_summary = {}
+        
+        # Include current tree entries
+        all_entries = []
+        if self.current_tree:
+            all_entries.extend([e for e in self.current_tree.entries.values() if e.is_complete])
+        
+        # Include completed trees
+        for tree in self.completed_trees:
+            all_entries.extend([e for e in tree.entries.values() if e.is_complete])
+        
+        # Group by operation name
+        operation_stats = {}
+        for entry in all_entries:
+            op_name = entry.operation
+            if op_name not in operation_stats:
+                operation_stats[op_name] = {
+                    "count": 0,
+                    "total": 0.0,
+                    "min": float('inf'),
+                    "max": 0.0,
+                    "avg": 0.0
+                }
+            
+            stats = operation_stats[op_name]
+            duration_sec = (entry.duration_ms or 0) / 1000.0  # Convert ms to seconds
+            stats["count"] += 1
+            stats["total"] += duration_sec
+            stats["min"] = min(stats["min"], duration_sec)
+            stats["max"] = max(stats["max"], duration_sec)
+            stats["avg"] = stats["total"] / stats["count"]
+        
+        return operation_stats
+        
+    def get_critical_path(self) -> List[TimingEntry]:
+        """Get the critical path from the most recent execution.
+        
+        Returns:
+            List of timing entries representing the critical path
+        """
+        if self.current_tree:
+            return self.current_tree.get_critical_path()
+        elif self.completed_trees:
+            return self.completed_trees[-1].get_critical_path()
+        return []
         
     def get_slowest_operations(self, limit: int = 10) -> List[TimingEntry]:
         """Get the slowest operations across all executions.

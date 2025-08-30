@@ -233,12 +233,30 @@ class LogHandlerConfig:
     
     def _add_readable_console_handler(self, should_log_func):
         """Add human-readable console handler with proper color mapping."""
+        from netra_backend.app.core.isolated_environment import get_env
+        
+        # Disable colors in staging/production to prevent ANSI codes in logs
+        environment = get_env().get('ENVIRONMENT', 'development').lower()
+        should_colorize = environment not in ['staging', 'production', 'prod']
+        
+        # Use simpler format without color tags for staging/production
+        if should_colorize:
+            format_string = self.formatter.get_console_format()
+        else:
+            # Plain format without color tags for staging/production
+            format_string = (
+                "{time:YYYY-MM-DD HH:mm:ss.SSS} | "
+                "{level: <8} | "
+                "{name}:{function}:{line} | "
+                "{message}"
+            )
+        
         logger.add(
             sys.stderr,
-            format=self.formatter.get_console_format(),
+            format=format_string,
             level=self.level,
             filter=should_log_func,
-            colorize=True,  # Enable color processing
+            colorize=should_colorize,  # Disable colors in staging/production
             enqueue=True,
             backtrace=True,
             diagnose=False,

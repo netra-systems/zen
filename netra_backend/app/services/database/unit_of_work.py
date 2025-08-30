@@ -14,6 +14,7 @@ from netra_backend.app.db.postgres import (
     validate_session,
 )
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.database.assistant_repository import AssistantRepository
 from netra_backend.app.services.database.message_repository import MessageRepository
 from netra_backend.app.services.database.reference_repository import ReferenceRepository
 from netra_backend.app.services.database.run_repository import RunRepository
@@ -28,6 +29,7 @@ class UnitOfWork:
         self._session = session
         self._session_context = None
         self._external_session = session is not None
+        self.assistants: Optional[AssistantRepository] = None
         self.threads: Optional[ThreadRepository] = None
         self.messages: Optional[MessageRepository] = None
         self.runs: Optional[RunRepository] = None
@@ -51,12 +53,14 @@ class UnitOfWork:
     
     def _init_repositories(self):
         """Initialize repositories and inject session."""
+        self.assistants = AssistantRepository()
         self.threads = ThreadRepository()
         self.messages = MessageRepository()
         self.runs = RunRepository()
         self.references = ReferenceRepository()
         
         # Inject session into repositories
+        self.assistants._session = self._session
         self.threads._session = self._session
         self.messages._session = self._session
         self.runs._session = self._session

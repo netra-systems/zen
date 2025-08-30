@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Docker File Consolidation and Organization</title>
+    <date>2025-08-29</date>
+    <category>infrastructure</category>
+    <tags>docker, organization, dev-environment</tags>
+  </metadata>
+
+  <problem>
+    <description>Docker files were duplicated across multiple locations causing confusion and maintenance issues</description>
+    <symptoms>
+      - Docker files in service roots (netra_backend/, auth_service/, frontend/)
+      - Docker files in docker/ directory
+      - Docker files in deployment/docker/ directory
+      - docker-compose files referencing non-existent or wrong Docker files
+      - No clear guidance on which Docker file to use when
+    </symptoms>
+  </problem>
+
+  <root-cause>
+    <issue>Lack of centralized Docker file management and clear organization structure</issue>
+    <details>
+      - Multiple developers creating Docker files in different locations
+      - No validation to prevent duplicate Docker files
+      - docker-compose files not updated when Docker files moved
+    </details>
+  </root-cause>
+
+  <solution>
+    <approach>Centralized Docker file organization with strict location rules</approach>
+    <implementation>
+      <step>Remove all Docker files from service root directories</step>
+      <step>Consolidate development/test Docker files in docker/ directory</step>
+      <step>Keep GCP/production Docker files in deployment/docker/ directory</step>
+      <step>Update all docker-compose files to reference correct locations</step>
+      <step>Create validation script to enforce organization</step>
+    </implementation>
+  </solution>
+
+  <docker-structure>
+    <directory path="docker/">
+      <purpose>Development and test environment Docker files</purpose>
+      <files>
+        <file>backend.Dockerfile - Production-ready backend</file>
+        <file>backend.development.Dockerfile - Dev backend with hot reload</file>
+        <file>auth.Dockerfile - Production-ready auth</file>
+        <file>auth.development.Dockerfile - Dev auth with hot reload</file>
+        <file>auth.test.Dockerfile - Test environment auth</file>
+        <file>frontend.Dockerfile - Production-ready frontend</file>
+        <file>frontend.development.Dockerfile - Dev frontend with hot reload</file>
+        <file>frontend.test.Dockerfile - Test environment frontend</file>
+      </files>
+    </directory>
+    
+    <directory path="deployment/docker/">
+      <purpose>GCP/Cloud deployment specific Docker files</purpose>
+      <files>
+        <file>backend.gcp.Dockerfile - GCP optimized backend</file>
+        <file>auth.gcp.Dockerfile - GCP optimized auth</file>
+        <file>frontend.gcp.Dockerfile - GCP staging frontend</file>
+        <file>frontend.prod.Dockerfile - Production frontend</file>
+      </files>
+    </directory>
+  </docker-structure>
+
+  <compose-files>
+    <file name="docker-compose.yml">
+      <purpose>Base production configuration</purpose>
+      <dockerfiles>Uses docker/*.Dockerfile</dockerfiles>
+    </file>
+    <file name="docker-compose.dev.yml">
+      <purpose>Development environment with hot reload</purpose>
+      <dockerfiles>Uses docker/*.development.Dockerfile</dockerfiles>
+      <services>6 dev services (postgres, redis, clickhouse, backend, auth, frontend)</services>
+    </file>
+    <file name="docker-compose.test.yml">
+      <purpose>Test environment for running tests</purpose>
+      <dockerfiles>Uses docker/*.test.Dockerfile or development alternatives</dockerfiles>
+      <services>6 test services with separate ports</services>
+    </file>
+    <file name="docker-compose.all.yml">
+      <purpose>All 12 services (dev + test) for complete environment</purpose>
+      <dockerfiles>Uses appropriate docker/*.Dockerfile files</dockerfiles>
+      <services>12 services total (6 dev + 6 test)</services>
+    </file>
+  </compose-files>
+
+  <port-mapping>
+    <dev-environment>
+      <service name="postgres" port="5432"/>
+      <service name="redis" port="6379"/>
+      <service name="clickhouse" port="8123"/>
+      <service name="backend" port="8000"/>
+      <service name="auth" port="8081"/>
+      <service name="frontend" port="3000"/>
+    </dev-environment>
+    <test-environment>
+      <service name="postgres" port="5433"/>
+      <service name="redis" port="6380"/>
+      <service name="clickhouse" port="8124"/>
+      <service name="backend" port="8001"/>
+      <service name="auth" port="8082"/>
+      <service name="frontend" port="3001"/>
+    </test-environment>
+  </port-mapping>
+
+  <validation>
+    <script>scripts/check_docker_files.py</script>
+    <checks>
+      - No Docker files in service roots
+      - All docker-compose references valid
+      - Production Docker files follow best practices
+    </checks>
+  </validation>
+
+  <best-practices>
+    <rule>NEVER create Docker files in service root directories</rule>
+    <rule>Always use docker/ for local development Docker files</rule>
+    <rule>Always use deployment/docker/ for cloud deployment Docker files</rule>
+    <rule>Run validation script after Docker file changes</rule>
+    <rule>Update docker-compose files when Docker file paths change</rule>
+  </best-practices>
+
+  <commands>
+    <command purpose="Start all dev services">docker-compose -f docker-compose.dev.yml --profile full up -d</command>
+    <command purpose="Start all test services">docker-compose -f docker-compose.test.yml up -d</command>
+    <command purpose="Start all 12 services">docker-compose -f docker-compose.all.yml up -d</command>
+    <command purpose="Stop all services">docker-compose -f docker-compose.all.yml down</command>
+    <command purpose="Validate Docker files">python scripts/check_docker_files.py</command>
+  </commands>
+</learning>

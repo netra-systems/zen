@@ -1,4 +1,9 @@
-"""Route configuration utilities for FastAPI application factory."""
+"""Route configuration utilities for FastAPI application factory.
+
+CRITICAL: All route prefixes MUST be managed here centrally.
+Individual routers should NOT define their own prefixes in APIRouter() initialization.
+See SPEC/learnings/router_double_prefix_pattern.xml for details.
+"""
 
 
 def get_core_route_configs(modules: dict) -> dict:
@@ -126,9 +131,17 @@ def _get_factory_analyzer_configs(modules: dict) -> dict:
             "github_analyzer": (modules["github_analyzer_router"], "", ["github-analyzer"])}
 
 
+def get_test_route_configs(modules: dict) -> dict:
+    """Get test route configurations for development environment."""
+    if "test_router" in modules:
+        return {"test": (modules["test_router"], "", ["test"])}
+    return {}
+
+
 def get_all_route_configurations(modules: dict) -> dict:
     """Get complete route configuration mapping."""
     core_configs = get_core_route_configs(modules)
     business_configs = get_business_route_configs(modules)
     utility_configs = get_utility_route_configs(modules)
-    return {**core_configs, **business_configs, **utility_configs}
+    test_configs = get_test_route_configs(modules)
+    return {**core_configs, **business_configs, **utility_configs, **test_configs}

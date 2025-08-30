@@ -2,6 +2,7 @@
 # Provides Redis connectivity and operations for the backend service
 # UPDATED: Now uses RedisConfigurationBuilder for unified configuration
 
+import asyncio
 import redis.asyncio as redis
 from typing import Dict, Optional
 
@@ -18,6 +19,21 @@ class RedisManager:
         self.test_mode = test_mode
         self.test_locks: Dict[str, str] = {}  # For test mode leader locks
         self._redis_builder = self._create_redis_builder()
+
+    def reinitialize_configuration(self):
+        """Reinitialize Redis configuration for environment changes (test support)."""
+        # Clear existing client connection
+        if self.redis_client:
+            # Don't await here since this is not async - client will be recreated on next use
+            self.redis_client = None
+        
+        # Recreate configuration builder with current environment
+        self._redis_builder = self._create_redis_builder()
+        
+        # Re-check if Redis should be enabled
+        self.enabled = self._check_if_enabled()
+        
+        logger.debug("Redis configuration reinitialized for environment changes")
 
     def _is_redis_disabled_by_flag(self) -> bool:
         """Check if Redis is disabled by operational flag."""
@@ -109,9 +125,25 @@ class RedisManager:
             raise
 
     async def _test_redis_connection(self):
-        """Test Redis connection."""
-        await self.redis_client.ping()
-        logger.info("Redis connected successfully")
+        """Test Redis connection with timeout protection."""
+        import asyncio
+        from netra_backend.app.core.isolated_environment import get_env
+        
+        environment = get_env().get("ENVIRONMENT", "development").lower()
+        
+        # CRITICAL FIX: Environment-aware connection test timeouts
+        if environment == "staging":
+            timeout = 10.0  # Longer timeout for staging
+        elif environment == "production":
+            timeout = 15.0  # Longest timeout for production
+        else:
+            timeout = 5.0   # Standard timeout for development
+            
+        try:
+            await asyncio.wait_for(self.redis_client.ping(), timeout=timeout)
+            logger.info(f"Redis connected successfully in {environment} environment")
+        except asyncio.TimeoutError as e:
+            raise ConnectionError(f"Redis ping timeout after {timeout}s in {environment} environment") from e
 
     def _handle_connection_error(self, error: Exception):
         """Handle Redis connection errors."""
@@ -124,7 +156,7 @@ class RedisManager:
         return await self.connect()
 
     async def connect(self):
-        """Connect to Redis if enabled with local fallback."""
+        """Connect to Redis if enabled with retry logic and exponential backoff."""
         # Reset enabled status for reconnection attempts (allows recovery after failures)
         if not hasattr(self, '_initial_enabled_check_done') or not self._initial_enabled_check_done:
             self._initial_enabled_check_done = True
@@ -137,61 +169,115 @@ class RedisManager:
             if not self.enabled:
                 logger.info("Redis connection skipped - service is disabled in development mode")
                 return
+                
+        # CRITICAL FIX: Implement retry logic with exponential backoff for staging reliability
+        environment = self._redis_builder.environment
+        if environment == "staging":
+            max_retries = 3
+            base_delay = 1.0
+        elif environment == "production":
+            max_retries = 2  
+            base_delay = 0.5
+        else:
+            max_retries = 1  # Single attempt for development
+            base_delay = 0.2
             
-        try:
-            self.redis_client = self._create_redis_client()
-            await self._test_redis_connection()
-        except Exception as e:
-            # Check if this is a fallback test (test_mode=True specifically set)
-            if self.test_mode:
-                logger.debug(f"Test mode fallback - graceful handling of Redis connection error: {e}")
-                self._handle_connection_error(e)
+        last_error = None
+        
+        for attempt in range(max_retries + 1):
+            try:
+                if attempt > 0:
+                    # Exponential backoff with jitter
+                    import random
+                    delay = base_delay * (2 ** (attempt - 1)) + random.uniform(0, 0.1)
+                    logger.info(f"Redis connection retry {attempt}/{max_retries} after {delay:.2f}s delay")
+                    await asyncio.sleep(delay)
+                    
+                self.redis_client = self._create_redis_client()
+                await self._test_redis_connection()
+                
+                if attempt > 0:
+                    logger.info(f"Redis connection successful after {attempt} retries")
                 return
-            
-            # In pytest environment (but not test_mode fallback), re-raise exceptions for test validation
-            env = get_env()
-            if env.get("PYTEST_CURRENT_TEST"):
-                logger.debug(f"Pytest detected - disabling Redis manager and re-raising connection exception: {e}")
-                self._handle_connection_error(e)  # Disable manager before re-raising
-                raise
-            
-            # Handle connection failure based on environment policy
-            environment = self._redis_builder.environment
-            
-            # In staging/production, fail fast if required
-            if environment == "staging" and self._redis_builder.staging.should_fail_fast():
-                logger.error(f"Redis connection failed in staging environment: {e}. Fail-fast mode enabled.")
-                self._handle_connection_error(e)
-                raise
-            elif environment == "production":
-                logger.error(f"Redis connection failed in production environment: {e}")
-                self._handle_connection_error(e)
-                raise
-            
-            # Development fallback logic
-            if environment == "development" and self._redis_builder.development.should_allow_fallback():
-                logger.warning(f"Remote Redis failed: {e}. Attempting local fallback...")
-                try:
-                    fallback_config = self._redis_builder.development.get_fallback_config()
-                    if fallback_config:
-                        self.redis_client = redis.Redis(**fallback_config)
-                        await self._test_redis_connection()
-                        logger.info("Successfully connected to local Redis fallback")
-                        return
-                except Exception as fallback_error:
-                    logger.error(f"Local Redis fallback also failed: {fallback_error}")
-            
-            # If no fallback worked or not allowed, handle as error
-            self._handle_connection_error(e)
+                
+            except Exception as e:
+                last_error = e
+                logger.warning(f"Redis connection attempt {attempt + 1} failed: {e}")
+                
+                # For the last attempt, handle differently
+                if attempt == max_retries:
+                    break
+                    
+        # All retry attempts failed - handle based on environment and test mode
+        if self.test_mode:
+            logger.debug(f"Test mode fallback - graceful handling of Redis connection error: {last_error}")
+            self._handle_connection_error(last_error)
+            return
+        
+        # In pytest environment (but not test_mode fallback), re-raise exceptions for test validation
+        env = get_env()
+        if env.get("PYTEST_CURRENT_TEST"):
+            logger.debug(f"Pytest detected - disabling Redis manager and re-raising connection exception: {last_error}")
+            self._handle_connection_error(last_error)  # Disable manager before re-raising
+            raise
+        
+        # Handle connection failure based on environment policy
+        if environment == "staging" and self._redis_builder.staging.should_fail_fast():
+            logger.error(f"Redis connection failed in staging environment after {max_retries + 1} attempts: {last_error}. Fail-fast mode enabled.")
+            self._handle_connection_error(last_error)
+            raise
+        elif environment == "production":
+            logger.error(f"Redis connection failed in production environment after {max_retries + 1} attempts: {last_error}")
+            self._handle_connection_error(last_error)
+            raise
+        
+        # Development fallback logic
+        if environment == "development" and self._redis_builder.development.should_allow_fallback():
+            logger.warning(f"Remote Redis failed after retries: {last_error}. Attempting local fallback...")
+            try:
+                fallback_config = self._redis_builder.development.get_fallback_config()
+                if fallback_config:
+                    self.redis_client = redis.Redis(**fallback_config)
+                    await self._test_redis_connection()
+                    logger.info("Successfully connected to local Redis fallback")
+                    return
+            except Exception as fallback_error:
+                logger.error(f"Local Redis fallback also failed: {fallback_error}")
+        
+        # If no fallback worked or not allowed, handle as error
+        self._handle_connection_error(last_error)
 
     async def disconnect(self):
         if self.redis_client:
             await self.redis_client.aclose()
 
     async def get_client(self):
-        """Get the Redis client instance. Returns None if not connected or disabled."""
-        # Ensure we never return self, only the actual redis client or None
+        """Get the Redis client instance with health check. Returns None if not connected or disabled."""
+        # Try to connect if not connected yet and Redis is enabled
+        if self.redis_client is None and self.enabled:
+            try:
+                await self.connect()
+            except Exception as e:
+                logger.debug(f"Failed to connect to Redis: {e}")
+                return None
+        
+        # CRITICAL FIX: Health check before returning client
         if self.redis_client and hasattr(self.redis_client, 'get'):
+            # Perform quick health check for staging/production
+            environment = self._redis_builder.environment
+            if environment in ["staging", "production"]:
+                try:
+                    # Quick ping with short timeout
+                    await asyncio.wait_for(self.redis_client.ping(), timeout=2.0)
+                except Exception as e:
+                    logger.warning(f"Redis client failed health check: {e}. Attempting reconnection...")
+                    self.redis_client = None
+                    try:
+                        await self.connect()
+                        return self.redis_client if self.redis_client else None
+                    except Exception as reconnect_error:
+                        logger.error(f"Redis reconnection failed: {reconnect_error}")
+                        return None
             return self.redis_client
         return None
     
@@ -555,6 +641,12 @@ class RedisManager:
             return True
         except Exception:
             return False
+
+    def pipeline(self):
+        """Create Redis pipeline for batch operations."""
+        if self.redis_client:
+            return self.redis_client.pipeline()
+        return None
 
 # Main instance for netra_backend service
 redis_manager = RedisManager()

@@ -5,7 +5,6 @@ This test verifies that the auth service uses the correct redirect URI for OAuth
 import os
 import sys
 import pytest
-from unittest.mock import Mock, patch
 
 # Setup test path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))

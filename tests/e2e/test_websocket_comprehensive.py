@@ -35,7 +35,6 @@ import json
 import os
 import time
 from typing import Dict, List, Optional
-from unittest.mock import AsyncMock, Mock, patch
 import uuid
 
 import pytest
@@ -121,7 +120,7 @@ async def get_auth_token(user_email: str, password: str) -> Optional[str]:
         return None
 
 
-class WebSocketTestClient:
+class TestWebSocketClient:
     """Enhanced WebSocket test client with realistic connection patterns."""
     
     def __init__(self, base_url: str, token: str, user_id: str):

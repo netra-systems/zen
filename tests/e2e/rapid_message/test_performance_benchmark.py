@@ -30,6 +30,7 @@ from tests.e2e.utils.rapid_message_sender import RapidMessageSender
 class TestRapidMessagePerformance:
     """Performance benchmark tests for rapid message processing."""
     
+    @pytest.mark.performance
     async def test_throughput_benchmark(self, user_token, message_validator, test_config):
         """Benchmark message throughput under various conditions."""
         user_id = f"test_user_{uuid.uuid4().hex[:8]}"
@@ -74,6 +75,7 @@ class TestRapidMessagePerformance:
         finally:
             await sender.disconnect()
     
+    @pytest.mark.performance
     async def test_latency_distribution(self, user_token, message_validator, test_config):
         """Test latency distribution under rapid message load."""
         user_id = f"test_user_{uuid.uuid4().hex[:8]}"
@@ -100,6 +102,7 @@ class TestRapidMessagePerformance:
         finally:
             await sender.disconnect()
     
+    @pytest.mark.performance
     async def test_concurrent_user_performance(self, user_token, message_validator, test_config):
         """Test performance with multiple concurrent users."""
         user_base = f"test_user_{uuid.uuid4().hex[:8]}"

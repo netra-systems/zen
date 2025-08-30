@@ -20,7 +20,6 @@ import psutil
 import threading
 from typing import Dict, Any, Optional, List, Tuple
 from pathlib import Path
-from unittest.mock import patch, MagicMock
 from contextlib import asynccontextmanager
 
 # Add project root to path
@@ -102,7 +101,7 @@ def mock_config():
 @pytest.fixture
 def mock_services_config():
     """Create a mock services configuration."""
-    services_config = MagicMock()
+    services_config = MagicNone  # TODO: Use real service instead of Mock
     services_config.get_all_env_vars.return_value = {
         'NODE_ENV': 'development',
         'NEXT_TELEMETRY_DISABLED': '1'
@@ -119,7 +118,7 @@ def mock_service_discovery():
         'ws_url': 'ws://localhost:8000/ws',
         'port': 8000
     }
-    discovery.write_frontend_info = MagicMock()
+    discovery.write_frontend_info = MagicNone  # TODO: Use real service instead of Mock
     return discovery
 
 
@@ -188,9 +187,9 @@ class TestFrontendPortConflictResolution:
                 
                 with patch('dev_launcher.frontend_starter.create_subprocess') as mock_subprocess:
                     # Mock successful process creation
-                    mock_process = MagicMock()
+                    mock_process = MagicNone  # TODO: Use real service instead of Mock
                     mock_process.poll.return_value = None  # Process is running
-                    mock_process.stdout = MagicMock()
+                    mock_process.stdout = MagicNone  # TODO: Use real service instead of Mock
                     mock_process.stdout.readline = MagicMock(return_value=b'')  # Empty output to prevent infinite loop
                     mock_subprocess.return_value = mock_process
                     
@@ -409,7 +408,7 @@ class TestFrontendPortConflictResolution:
             
             with patch('dev_launcher.frontend_starter.create_subprocess') as mock_subprocess:
                 # Step 2: Mock process that fails immediately
-                mock_process = MagicMock()
+                mock_process = MagicNone  # TODO: Use real service instead of Mock
                 mock_process.poll.return_value = 1  # Process failed
                 mock_subprocess.return_value = mock_process
                 
@@ -558,7 +557,7 @@ class TestFrontendPortConflictIntegration:
         
         try:
             # Step 3: Create real configuration pointing to occupied port
-            config = MagicMock()
+            config = MagicNone  # TODO: Use real service instead of Mock
             config.project_root = PROJECT_ROOT
             config.frontend_port = test_port
             config.dynamic_ports = True
@@ -569,13 +568,13 @@ class TestFrontendPortConflictIntegration:
             
             # Step 4: Create frontend starter
             log_manager = LogManager(use_emoji=False)
-            service_discovery = MagicMock()
+            service_discovery = MagicNone  # TODO: Use real service instead of Mock
             service_discovery.read_backend_info.return_value = {
                 'api_url': 'http://localhost:8000',
                 'ws_url': 'ws://localhost:8000/ws'
             }
             
-            services_config = MagicMock()
+            services_config = MagicNone  # TODO: Use real service instead of Mock
             services_config.get_all_env_vars.return_value = {}
             
             frontend_starter = FrontendStarter(

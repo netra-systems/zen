@@ -12,6 +12,7 @@ This ensures 100% microservice independence as required by architecture principl
 """
 import os
 import logging
+import asyncio
 import redis.asyncio as redis
 from typing import Optional, Any
 from auth_service.auth_core.isolated_environment import get_env
@@ -24,32 +25,61 @@ class AuthRedisManager:
     
     def __init__(self):
         self.redis_client: Optional[redis.Redis] = None
-        self.enabled = self._check_if_enabled()
+        self.enabled = True  # Will be set properly in initialize()
         
     def _check_if_enabled(self) -> bool:
         """Check if Redis is enabled for auth service"""
-        redis_url = get_env().get("REDIS_URL")
-        if not redis_url or redis_url == "disabled":
-            return False
-        
-        # Check for explicit disable flags
+        # Check for explicit disable flags first
         if get_env().get("DISABLE_REDIS", "false").lower() == "true":
             return False
         
         # Check for test disable flags (for consistent test behavior)
         if get_env().get("TEST_DISABLE_REDIS", "false").lower() == "true":
             return False
+        
+        redis_url = get_env().get("REDIS_URL")
+        if redis_url == "disabled":
+            return False
             
+        # For staging/production, we need more validation in initialize()
+        # Just return True here to allow initialize() to do full checks
         return True
     
     async def initialize(self) -> None:
         """Initialize Redis connection for auth service"""
+        # Re-check if Redis should be enabled
+        self.enabled = self._check_if_enabled()
         if not self.enabled:
             logger.info("Redis disabled for auth service")
             return
             
         try:
-            redis_url = get_env().get("REDIS_URL", "redis://localhost:6379")
+            env = get_env().get("ENVIRONMENT", "development").lower()
+            redis_url = get_env().get("REDIS_URL")
+            
+            # CRITICAL: Prevent localhost fallback in staging/production
+            if not redis_url:
+                if env in ["staging", "production"]:
+                    # Check if Redis is required
+                    redis_required = get_env().get("REDIS_REQUIRED", "false").lower() == "true"
+                    if redis_required:
+                        raise ValueError(f"REDIS_URL must be configured in {env} environment (REDIS_REQUIRED=true)")
+                    else:
+                        logger.warning(f"Redis not configured in {env} environment, disabling Redis support")
+                        self.enabled = False
+                        return
+                else:
+                    # Only allow localhost fallback in development
+                    redis_url = "redis://localhost:6379"
+                    logger.info("Using localhost Redis fallback for development environment")
+            
+            # Validate Redis URL doesn't contain localhost in staging/production
+            if env in ["staging", "production"] and "localhost" in redis_url.lower():
+                redis_fallback_enabled = get_env().get("REDIS_FALLBACK_ENABLED", "false").lower() == "true"
+                if not redis_fallback_enabled:
+                    raise ValueError(f"Localhost Redis URL not allowed in {env} environment (REDIS_FALLBACK_ENABLED=false)")
+                logger.warning(f"Using localhost Redis in {env} - this should only be for testing!")
+            
             self.redis_client = redis.from_url(
                 redis_url,
                 decode_responses=True,
@@ -59,14 +89,27 @@ class AuthRedisManager:
                 health_check_interval=30
             )
             
-            # Test connection
-            await self.redis_client.ping()
-            logger.info("Auth service Redis connection initialized successfully")
+            # Test connection with timeout
+            try:
+                await asyncio.wait_for(self.redis_client.ping(), timeout=10)
+                logger.info(f"Auth service Redis connection initialized successfully to {redis_url.split('@')[-1] if '@' in redis_url else redis_url}")
+            except asyncio.TimeoutError:
+                raise TimeoutError(f"Redis connection timeout after 10 seconds to {redis_url.split('@')[-1] if '@' in redis_url else redis_url}")
             
         except Exception as e:
-            logger.warning(f"Failed to initialize Redis for auth service: {e}")
-            self.enabled = False
-            self.redis_client = None
+            env = get_env().get("ENVIRONMENT", "development").lower()
+            redis_required = get_env().get("REDIS_REQUIRED", "false").lower() == "true"
+            
+            if env in ["staging", "production"] and redis_required:
+                # In staging/production with REDIS_REQUIRED=true, fail hard
+                logger.error(f"Critical: Failed to initialize Redis in {env} environment: {e}")
+                raise
+            else:
+                # In development or when Redis not required, allow graceful degradation
+                logger.warning(f"Failed to initialize Redis for auth service: {e}")
+                logger.warning(f"Redis disabled - running without Redis support (environment={env}, required={redis_required})")
+                self.enabled = False
+                self.redis_client = None
     
     def connect(self) -> bool:
         """Synchronous connect method for compatibility with session manager"""

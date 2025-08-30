@@ -11,7 +11,6 @@ Prevents cascading failures and ensures system stability during outages.
 import pytest
 import asyncio
 import time
-from unittest.mock import patch, AsyncMock
 
 from netra_backend.app.db.database_manager import DatabaseManager as ConnectionManager, DatabaseType, ConnectionMetrics
 from netra_backend.app.core.database_types import DatabaseConfig

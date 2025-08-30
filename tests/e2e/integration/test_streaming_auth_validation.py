@@ -28,7 +28,6 @@ import time
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import jwt
 import pytest
@@ -38,7 +37,7 @@ os.environ["ENVIRONMENT"] = "test"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
 from tests.e2e.config import TEST_CONFIG, setup_test_environment
-from tests.e2e.harness_complete import UnifiedTestHarnessComplete
+from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
 class StreamingAuthManager:
     # """Manages streaming operations with authentication validation."""
@@ -194,7 +193,7 @@ class AuthenticatedWebSocketStreamer:
     def __init__(self, auth_manager: StreamingAuthManager):
         self.auth_manager = auth_manager
         # Mock: Generic component isolation for controlled unit testing
-        self.websocket_mock = AsyncMock()
+        self.websocket_mock = AsyncNone  # TODO: Use real service instead of Mock
         self.sent_messages = []
         self.stream_errors = []
         

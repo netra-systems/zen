@@ -129,7 +129,10 @@ class JWTConfigBuilder(ConfigBuilderBase):
             legacy_value = self.parent.secret_builder.env.get("JWT_ACCESS_EXPIRY_MINUTES")
             if legacy_value:
                 try:
-                    logger.warning("Using JWT_ACCESS_EXPIRY_MINUTES (DEPRECATED - use JWT_ACCESS_TOKEN_EXPIRE_MINUTES)")
+                    # Only warn once about deprecated variable usage
+                    if not hasattr(self.parent, '_jwt_access_deprecation_warned'):
+                        logger.warning("Using JWT_ACCESS_EXPIRY_MINUTES (DEPRECATED - use JWT_ACCESS_TOKEN_EXPIRE_MINUTES)")
+                        self.parent._jwt_access_deprecation_warned = True
                     return int(legacy_value)
                 except ValueError:
                     logger.warning(f"Invalid JWT_ACCESS_EXPIRY_MINUTES: {legacy_value}, using default")
@@ -156,7 +159,10 @@ class JWTConfigBuilder(ConfigBuilderBase):
             legacy_value = self.parent.secret_builder.env.get("JWT_REFRESH_EXPIRY_DAYS")
             if legacy_value:
                 try:
-                    logger.warning("Using JWT_REFRESH_EXPIRY_DAYS (DEPRECATED - use JWT_REFRESH_TOKEN_EXPIRE_DAYS)")
+                    # Only warn once about deprecated variable usage
+                    if not hasattr(self.parent, '_jwt_refresh_deprecation_warned'):
+                        logger.warning("Using JWT_REFRESH_EXPIRY_DAYS (DEPRECATED - use JWT_REFRESH_TOKEN_EXPIRE_DAYS)")
+                        self.parent._jwt_refresh_deprecation_warned = True
                     return int(legacy_value)
                 except ValueError:
                     logger.warning(f"Invalid JWT_REFRESH_EXPIRY_DAYS: {legacy_value}, using default")

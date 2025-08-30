@@ -163,7 +163,7 @@ SERVICE_CONFIGS = {
         "test_dir": BACKEND_DIR / "tests",
         "config_file": "pytest.ini",
         "runner": "pytest",
-        "env_file": ".env.test",
+        "env_file": ".env.mock",  # Updated from .env.test for clarity
         "coverage_source": "netra_backend/app",
         "required_services": ["postgres", "redis", "clickhouse"]
     },
@@ -172,7 +172,7 @@ SERVICE_CONFIGS = {
         "test_dir": AUTH_DIR / "tests",
         "config_file": "pytest.ini",
         "runner": "pytest",
-        "env_file": ".env.test",
+        "env_file": ".env.mock",  # Updated from .env.test for clarity
         "coverage_source": "auth_service/app",
         "required_services": ["postgres", "redis"]
     },
@@ -181,7 +181,7 @@ SERVICE_CONFIGS = {
         "test_dir": FRONTEND_DIR / "__tests__",
         "config_file": "jest.config.cjs",
         "runner": "jest",
-        "env_file": ".env.test",
+        "env_file": ".env.mock",  # Updated from .env.test for clarity
         "coverage_source": "src",
         "required_services": []
     }
@@ -294,8 +294,8 @@ def get_coverage_requirement(service: str, level: str) -> int:
     return service_reqs.get(level, 0)
 
 
-def configure_test_environment(env: str, service: Optional[str] = None):
-    """Configure environment variables for testing."""
+def configure_environment_for_testing(env: str, service: Optional[str] = None):
+    """Configure environment variables for specific testing environment (local, staging, dev)."""
     env_config = get_environment_config(env)
     
     # Set common environment variables
@@ -320,6 +320,20 @@ def configure_test_environment(env: str, service: Optional[str] = None):
             if env_file.exists():
                 from dotenv import load_dotenv
                 load_dotenv(env_file)
+
+
+def configure_test_environment(env: str, service: Optional[str] = None):
+    """DEPRECATED: Use configure_environment_for_testing() instead.
+    
+    This function is maintained for backward compatibility only.
+    """
+    import warnings
+    warnings.warn(
+        "configure_test_environment() is deprecated. Use configure_environment_for_testing() instead",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    return configure_environment_for_testing(env, service)
 
 
 def get_pytest_args(

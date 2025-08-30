@@ -1,7 +1,7 @@
 # Frontend Test Dockerfile
 # Optimized for E2E testing with minimal build time
 
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Set working directory
 WORKDIR /app
@@ -19,8 +19,8 @@ RUN apk add --no-cache \
 # Copy package files
 COPY frontend/package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production && \
+# Install dependencies (use npm install for test environment)
+RUN npm install && \
     npm install --save-dev \
     @testing-library/react \
     @testing-library/jest-dom \
@@ -29,13 +29,26 @@ RUN npm ci --only=production && \
     jest-environment-jsdom
 
 # Copy application code
-COPY frontend/src ./src
+COPY frontend/app ./app
+COPY frontend/components ./components
+COPY frontend/config ./config
+COPY frontend/hooks ./hooks
+COPY frontend/lib ./lib
+COPY frontend/providers ./providers
+COPY frontend/services ./services
+COPY frontend/store ./store
+COPY frontend/styles ./styles
+COPY frontend/types ./types
+COPY frontend/utils ./utils
+COPY frontend/auth ./auth
 COPY frontend/public ./public
-COPY frontend/__tests__ ./__tests__
+# Test files are optional for now
+COPY frontend/__tests__* ./__tests__/
 COPY frontend/next.config.ts ./
 COPY frontend/tsconfig.json ./
 COPY frontend/tailwind.config.ts ./
 COPY frontend/postcss.config.mjs ./
+COPY frontend/middleware.ts* ./
 
 # Build the application
 RUN npm run build

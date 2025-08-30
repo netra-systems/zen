@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <metadata>
+    <name>3-Tier Agent Persistence Architecture</name>
+    <category>Architecture</category>
+    <priority>P0</priority>
+    <status>active</status>
+    <created>2025-08-29</created>
+    <updated>2025-08-29</updated>
+    <business_value>Enterprise</business_value>
+    <protection_value>9.4M</protection_value>
+  </metadata>
+
+  <purpose>
+    Define the enterprise-grade 3-tier persistence architecture for agent state management,
+    ensuring zero data loss, sub-100ms performance, and comprehensive disaster recovery
+    capabilities for mission-critical AI workloads.
+  </purpose>
+
+  <business_context>
+    <segment>Enterprise ($25K+ MRR)</segment>
+    <requirement>Zero data loss for mission-critical operations</requirement>
+    <requirement>Sub-100ms state access for real-time agent execution</requirement>
+    <requirement>Disaster recovery with RTO &lt; 5 minutes</requirement>
+    <requirement>Analytics and cost optimization insights</requirement>
+  </business_context>
+
+  <architecture>
+    <tier name="Redis" level="PRIMARY">
+      <purpose>High-performance storage for active agent states</purpose>
+      <performance>Sub-100ms read/write operations</performance>
+      <features>
+        <feature>Optimistic locking with version tracking</feature>
+        <feature>TTL management for memory optimization</feature>
+        <feature>Thread context tracking</feature>
+        <feature>Atomic state updates</feature>
+      </features>
+      <implementation>
+        <file>netra_backend/app/redis_manager.py</file>
+        <file>netra_backend/app/services/state_cache_manager.py</file>
+      </implementation>
+    </tier>
+
+    <tier name="PostgreSQL" level="SECONDARY">
+      <purpose>Durable storage for disaster recovery</purpose>
+      <performance>Sub-second writes with ACID guarantees</performance>
+      <features>
+        <feature>Critical checkpoint creation</feature>
+        <feature>Recovery point management</feature>
+        <feature>Long-term audit trails</feature>
+        <feature>Transaction atomicity</feature>
+      </features>
+      <implementation>
+        <file>netra_backend/app/db/database_manager.py</file>
+        <file>netra_backend/app/schemas/agent_state.py</file>
+      </implementation>
+    </tier>
+
+    <tier name="ClickHouse" level="TERTIARY">
+      <purpose>Cost-effective storage for completed runs</purpose>
+      <performance>Optimized for batch writes and analytics</performance>
+      <features>
+        <feature>Automatic migration of completed states</feature>
+        <feature>Analytics query optimization</feature>
+        <feature>Cost optimization insights</feature>
+        <feature>Data compression</feature>
+      </features>
+      <implementation>
+        <file>netra_backend/app/db/clickhouse.py</file>
+      </implementation>
+    </tier>
+  </architecture>
+
+  <failover_chain>
+    <step order="1">
+      <from>Redis</from>
+      <to>PostgreSQL</to>
+      <trigger>Redis connection failure or data not found</trigger>
+      <recovery_time>&lt; 1 second</recovery_time>
+    </step>
+    <step order="2">
+      <from>PostgreSQL</from>
+      <to>ClickHouse</to>
+      <trigger>PostgreSQL unavailable or checkpoint not found</trigger>
+      <recovery_time>&lt; 2 seconds</recovery_time>
+    </step>
+    <step order="3">
+      <from>ClickHouse</from>
+      <to>Legacy Storage</to>
+      <trigger>ClickHouse unavailable</trigger>
+      <recovery_time>&lt; 5 seconds</recovery_time>
+    </step>
+  </failover_chain>
+
+  <checkpoint_types>
+    <type name="AUTO">
+      <description>Automatic checkpoints during execution</description>
+      <frequency>Configurable, default every 100 steps</frequency>
+      <persistence>Redis primary, PostgreSQL if critical</persistence>
+    </type>
+    <type name="CRITICAL">
+      <description>Forced checkpoints at critical points</description>
+      <frequency>On major state transitions</frequency>
+      <persistence>Redis + PostgreSQL always</persistence>
+    </type>
+    <type name="FULL">
+      <description>Complete state snapshots</description>
+      <frequency>On completion or manual trigger</frequency>
+      <persistence>All tiers for maximum durability</persistence>
+    </type>
+  </checkpoint_types>
+
+  <performance_targets>
+    <metric name="Redis Write Latency" target="&lt; 50ms" critical="&lt; 100ms"/>
+    <metric name="Redis Read Latency" target="&lt; 20ms" critical="&lt; 50ms"/>
+    <metric name="PostgreSQL Checkpoint" target="&lt; 500ms" critical="&lt; 1000ms"/>
+    <metric name="ClickHouse Migration" target="&lt; 2s batch" critical="&lt; 5s batch"/>
+    <metric name="Failover Recovery Time" target="&lt; 5s" critical="&lt; 30s"/>
+    <metric name="Data Integrity Score" target="100%" critical=">= 99.9%"/>
+  </performance_targets>
+
+  <configuration>
+    <environment_variables>
+      <variable name="REDIS_HOST" default="localhost"/>
+      <variable name="REDIS_PORT" default="6379"/>
+      <variable name="DATABASE_URL" required="true"/>
+      <variable name="CLICKHOUSE_HOST" default="localhost"/>
+      <variable name="CLICKHOUSE_PORT" default="9000"/>
+      <variable name="ENABLE_OPTIMIZED_PERSISTENCE" default="false"/>
+      <variable name="OPTIMIZED_PERSISTENCE_MONITORING" default="true"/>
+    </environment_variables>
+
+    <connection_pools>
+      <pool service="Redis" development="5" staging="10" production="20"/>
+      <pool service="PostgreSQL" development="10" staging="15" production="25"/>
+      <pool service="ClickHouse" development="5" staging="10" production="15"/>
+    </connection_pools>
+  </configuration>
+
+  <testing>
+    <test_file>tests/integration/test_3tier_persistence_integration.py</test_file>
+    <test_coverage>
+      <scenario>Primary Redis storage operations</scenario>
+      <scenario>PostgreSQL checkpoint creation</scenario>
+      <scenario>ClickHouse migration scheduling</scenario>
+      <scenario>Failover chain validation</scenario>
+      <scenario>Cross-database consistency</scenario>
+      <scenario>Atomic transaction guarantees</scenario>
+      <scenario>Concurrent agent persistence</scenario>
+      <scenario>24-hour lifecycle validation</scenario>
+      <scenario>Enterprise workload scenarios</scenario>
+    </test_coverage>
+    <golden_datasets>
+      <dataset>GOLDEN_SIMPLE_FLOW</dataset>
+      <dataset>GOLDEN_MULTI_AGENT_FLOW</dataset>
+      <dataset>GOLDEN_LONG_RUNNING_FLOW</dataset>
+      <dataset>GOLDEN_HIGH_CONCURRENCY_FLOW</dataset>
+      <dataset>GOLDEN_RECOVERY_FLOW</dataset>
+    </golden_datasets>
+  </testing>
+
+  <monitoring>
+    <health_check endpoint="/health/persistence" frequency="30s"/>
+    <metrics>
+      <metric>persistence_success_rate</metric>
+      <metric>persistence_latency_p95</metric>
+      <metric>failover_frequency</metric>
+      <metric>data_consistency_score</metric>
+    </metrics>
+    <alerts>
+      <alert priority="P0" condition="persistence_success_rate &lt; 99.9%"/>
+      <alert priority="P1" condition="persistence_latency_p95 > 100ms"/>
+      <alert priority="P1" condition="failover_frequency > 0.1%"/>
+      <alert priority="P0" condition="data_consistency_score &lt; 100%"/>
+    </alerts>
+  </monitoring>
+
+  <related_specs>
+    <spec>database_connectivity_architecture.xml</spec>
+    <spec>unified_environment_management.xml</spec>
+    <spec>learnings/state_persistence_optimization.xml</spec>
+    <spec>learnings/state_persistence_foreign_key.xml</spec>
+    <spec>auth_persistence_requirements.xml</spec>
+  </related_specs>
+
+  <documentation>
+    <doc>docs/3tier_persistence_architecture.md</doc>
+    <doc>docs/optimized_state_persistence.md</doc>
+  </documentation>
+
+  <compliance_requirements>
+    <requirement>All tiers must support encryption at rest</requirement>
+    <requirement>All connections must use TLS/SSL</requirement>
+    <requirement>Complete audit trail for all operations</requirement>
+    <requirement>GDPR-compliant data retention policies</requirement>
+    <requirement>Role-based access control per tier</requirement>
+  </compliance_requirements>
+
+  <maintenance>
+    <task frequency="daily">
+      <description>Monitor Redis memory usage</description>
+      <alert_threshold>80%</alert_threshold>
+    </task>
+    <task frequency="weekly">
+      <description>Verify TTL cleanup in Redis</description>
+    </task>
+    <task frequency="monthly">
+      <description>Archive PostgreSQL checkpoints older than 30 days</description>
+    </task>
+    <task frequency="monthly">
+      <description>Optimize ClickHouse partitions</description>
+    </task>
+  </maintenance>
+
+  <future_enhancements>
+    <enhancement>Global distribution with multi-region Redis replication</enhancement>
+    <enhancement>ML-based intelligent cache warming</enhancement>
+    <enhancement>State compression for large payloads</enhancement>
+    <enhancement>Real-time streaming analytics on state changes</enhancement>
+    <enhancement>Batch persistence for grouped updates</enhancement>
+    <enhancement>Write-behind caching for async persistence</enhancement>
+  </future_enhancements>
+</spec>

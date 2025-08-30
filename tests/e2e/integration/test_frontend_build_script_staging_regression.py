@@ -22,7 +22,6 @@ import os
 import subprocess
 import pytest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
 from typing import Dict, List, Any
 
 # Get the project root directory
@@ -34,6 +33,7 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
 class TestFrontendBuildScriptRegression:
     """Tests that replicate frontend build script issues from staging audit"""
 
+    @pytest.mark.e2e
     def test_frontend_build_script_exists_regression(self):
         """
         REGRESSION TEST: Frontend build script missing or not executable
@@ -70,6 +70,7 @@ class TestFrontendBuildScriptRegression:
         if non_executable_scripts:
             pytest.fail(f"Build scripts not executable: {non_executable_scripts}")
 
+    @pytest.mark.e2e
     def test_frontend_build_dependencies_missing_regression(self):
         """
         REGRESSION TEST: Frontend build dependencies not properly configured
@@ -112,6 +113,7 @@ class TestFrontendBuildScriptRegression:
         if missing_deps:
             pytest.fail(f"Missing critical frontend dependencies: {missing_deps}")
 
+    @pytest.mark.e2e
     def test_frontend_build_script_execution_regression(self):
         """
         REGRESSION TEST: Frontend build script fails during execution
@@ -164,6 +166,7 @@ class TestFrontendBuildScriptRegression:
             except FileNotFoundError:
                 pytest.fail(f"Build command not found: {' '.join(cmd)} - npm may not be installed")
 
+    @pytest.mark.e2e
     def test_frontend_build_output_validation_regression(self):
         """
         REGRESSION TEST: Frontend build doesn't generate required output files
@@ -207,6 +210,7 @@ class TestFrontendBuildScriptRegression:
         if missing_outputs:
             pytest.fail(f"Missing frontend build outputs: {missing_outputs}")
 
+    @pytest.mark.e2e
     def test_frontend_dockerfile_build_regression(self):
         """
         REGRESSION TEST: Frontend Dockerfile build fails in staging environment
@@ -246,6 +250,7 @@ class TestFrontendBuildScriptRegression:
         if missing_elements:
             pytest.fail(f"Dockerfile missing required elements: {missing_elements}")
 
+    @pytest.mark.e2e
     def test_frontend_staging_deployment_script_regression(self):
         """
         REGRESSION TEST: Deployment script fails to deploy frontend to staging
@@ -288,6 +293,7 @@ class TestFrontendBuildScriptRegression:
 class TestFrontendBuildEnvironmentRegression:
     """Tests frontend build environment configuration issues"""
 
+    @pytest.mark.e2e
     def test_frontend_build_environment_variables_regression(self):
         """
         REGRESSION TEST: Frontend build missing required environment variables
@@ -329,6 +335,7 @@ class TestFrontendBuildEnvironmentRegression:
         if error_messages:
             pytest.fail("; ".join(error_messages))
 
+    @pytest.mark.e2e
     def test_frontend_build_asset_optimization_regression(self):
         """
         REGRESSION TEST: Frontend build doesn't optimize assets for production

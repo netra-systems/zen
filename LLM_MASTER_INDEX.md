@@ -21,14 +21,17 @@
 | **CORS Configuration** | `/shared/cors_config.py` | **Unified CORS configuration for all services** | [`SPEC/cors_configuration.xml`](SPEC/cors_configuration.xml) |
 | **Shared Component Library** | `/shared/` | Universal utilities & schemas | [`SPEC/shared_component_architecture.xml`](SPEC/shared_component_architecture.xml) |
 | **Test Infrastructure** | `/test_framework/` | Unified test utilities | [`SPEC/test_infrastructure_architecture.xml`](SPEC/test_infrastructure_architecture.xml) |
+| **Test Runner Real Services** | `/test_framework/service_availability.py` | Real service validation | [`SPEC/test_runner_real_services.xml`](SPEC/test_runner_real_services.xml) |
 | **Test Execution Tracker** | `/scripts/test_execution_tracker.py` | Test history & metrics tracking | [`SPEC/learnings/test_system_improvements.xml`](SPEC/learnings/test_system_improvements.xml) |
 | **Test Dashboard** | `/scripts/test_dashboard.py` | Interactive test health monitoring | [`SPEC/learnings/test_system_improvements.xml`](SPEC/learnings/test_system_improvements.xml) |
+| **Test Collection Auditor** | `/scripts/test_collection_audit.py` | Test collection health analysis | [`SPEC/learnings/test_collection_optimization.xml`](SPEC/learnings/test_collection_optimization.xml) |
 | **Import Management** | Various scripts | Absolute imports enforcement | [`SPEC/import_management_architecture.xml`](SPEC/import_management_architecture.xml) |
 | **Deployment System** | `/scripts/deploy_to_gcp.py` | Official deployment script | [`SPEC/deployment_architecture.xml`](SPEC/deployment_architecture.xml) |
 | **Root Folder Organization** | `/` root directory | Clean root structure enforcement | [`SPEC/root_folder_organization.xml`](SPEC/root_folder_organization.xml) |
 | **Intelligent Remediation** | `/scripts/intelligent_remediation_orchestrator.py` | Multi-agent Docker remediation | [`SPEC/intelligent_remediation_architecture.xml`](SPEC/intelligent_remediation_architecture.xml) |
 | **Claude Log Analyzer** | `/scripts/claude_log_analyzer.py` | Get logs to Claude for analysis | [`SPEC/intelligent_remediation_architecture.xml`](SPEC/intelligent_remediation_architecture.xml) |
 | **🔴 Docker Hot Reload** | `/docker-compose.override.yml` | **10x faster development** | [`SPEC/docker_hot_reload.xml`](SPEC/docker_hot_reload.xml) |
+| **🔴 Adaptive Workflow** | `/netra_backend/app/agents/supervisor/workflow_orchestrator.py` | **Dynamic workflow based on data sufficiency** | [`SPEC/supervisor_adaptive_workflow.xml`](SPEC/supervisor_adaptive_workflow.xml) |
 
 ### Configuration Files (Unified System - CRITICAL CHANGE)
 | File | Location | Purpose | Common Confusion |
@@ -39,6 +42,7 @@
 | `database.py` | `/netra_backend/app/core/configuration/database.py` | Database configs | All DB settings unified |
 | `services.py` | `/netra_backend/app/core/configuration/services.py` | External services | API endpoints, OAuth, etc |
 | `secrets.py` | `/netra_backend/app/core/configuration/secrets.py` | Secret management | GCP Secret Manager integration |
+| **🔴 JWT CONFIG STANDARD** | `/SPEC/jwt_configuration_standard.xml` | **JWT_SECRET_KEY configuration** | **CRITICAL: Use JWT_SECRET_KEY only - JWT_SECRET is deprecated** |
 | **🔴 CORS CONFIG** | `/shared/cors_config.py` | **UNIFIED CORS for ALL services** | **CRITICAL: Single source for CORS - consolidated from 5 implementations** |
 
 ### Database Files (SSOT Compliant - 2025-08-27)
@@ -98,9 +102,15 @@
 | `scan_string_literals.py` | `/scripts/scan_string_literals.py` | Scanner to generate index | Run to update index |
 | `query_string_literals.py` | `/scripts/query_string_literals.py` | Query tool for string validation | Use to validate/search literals |
 
-### Agent Files (Multi-Agent System)
+### Agent Files (Multi-Agent System) - UPDATED 2025-08-29
 | Agent Type | Location | Main File | Purpose |
 |------------|----------|-----------|---------|
+| **🔴 Supervisor Agent** | `/netra_backend/app/agents/` | `supervisor_agent_modern.py` | **Central orchestrator with adaptive workflow based on data sufficiency** |
+| **🔴 Data Helper Agent** | `/netra_backend/app/agents/` | `data_helper_agent.py` | **NEW: Data requirement analysis for insufficient data scenarios** |
+| **Agent System Prompts** | `/netra_backend/app/agents/prompts/` | `supervisor_prompts.py`, `*_prompts.py` | **System prompts integrated into all agent templates** |
+| **Workflow Orchestrator** | `/netra_backend/app/agents/supervisor/` | `workflow_orchestrator.py` | **Adaptive workflow: sufficient → full, partial → with data_helper, insufficient → data_helper only** |
+| **Data Helper Tool** | `/netra_backend/app/tools/` | `data_helper.py` | **Generates comprehensive data request prompts** |
+| **Triage Agent** | `/netra_backend/app/agents/` | `triage_agent.py` | **Enhanced with data_sufficiency assessment** |
 | **APEX Optimizer Agent** | `/netra_backend/app/services/apex_optimizer_agent/` | Multiple tool files | AI optimization agent system |
 | - Cost Analysis Tools | `/netra_backend/app/services/apex_optimizer_agent/tools/` | `cost_*.py` | Cost analysis and optimization |
 | - Performance Tools | `/netra_backend/app/services/apex_optimizer_agent/tools/` | `performance_*.py`, `latency_*.py` | Performance optimization |
@@ -113,10 +123,13 @@
 | **🔴 EXECUTION ENGINE** | `/netra_backend/app/agents/supervisor/execution_engine.py` | **Parallel pipeline execution** | asyncio.gather() parallelization, automatic fallback to sequential |
 | **🔴 CLICKHOUSE ASYNC** | `/netra_backend/app/db/clickhouse_client.py` | **Async-safe database operations** | connect_async(), execute_async(), health_check_async() |
 | **🔴 STATE PERSISTENCE** | `/netra_backend/app/services/state_persistence_optimized.py` | **Optimized state management** | Delegation pattern, feature flag controlled |
+| **🔴 3-TIER PERSISTENCE** | [`docs/3tier_persistence_architecture.md`](docs/3tier_persistence_architecture.md) | **Enterprise persistence architecture** | Redis → PostgreSQL → ClickHouse failover chain |
 | **🔴 PIPELINE EXECUTOR** | `/netra_backend/app/agents/supervisor/pipeline_executor.py` | **State batching and optimization** | Feature flag integration, optimized service selection |
 | **🔴 FEATURE FLAGS** | `/netra_backend/app/core/isolated_environment.py` | **Performance configuration** | ENABLE_OPTIMIZED_PERSISTENCE, cache size, compression settings |
 | **🔴 INTEGRATION TESTS** | `/netra_backend/tests/services/test_optimized_persistence_integration.py` | **Performance optimization testing** | Feature flag testing, delegation pattern validation |
+| **3-Tier Integration Tests** | `/tests/integration/test_3tier_persistence_integration.py` | **3-tier persistence validation** | Failover chain, consistency, 24-hour lifecycle |
 | **Performance Learnings** | [`SPEC/learnings/state_persistence_optimization.xml`](SPEC/learnings/state_persistence_optimization.xml) | **Optimization best practices** | 35-45% performance improvement, async safety patterns |
+| **Persistence Documentation** | [`docs/optimized_state_persistence.md`](docs/optimized_state_persistence.md) | **Optimization feature guide** | Configuration, monitoring, troubleshooting |
 
 ### Go to Symbol & Code Navigation (NEW - 2025-08-28)
 | Component | Location | Purpose | Key Features |
@@ -135,6 +148,11 @@
 | **Test Framework** | `/test_framework/` | Enhanced test framework | Core runner and configuration |
 | **Test Runner** | `/test_framework/runner.py` | Main test runner | Unified test execution |
 | **Test Config** | `/test_framework/test_config.py` | Test configuration | Test levels, environments |
+| **Test Discovery** | `/test_framework/test_discovery.py` | Test discovery and analysis | Coverage gaps, untested modules |
+| **Service Availability** | `/test_framework/service_availability.py` | Service availability checker | Hard failures when real services unavailable |
+| **LLM Config Manager** | `/test_framework/llm_config_manager.py` | Single source of truth for LLM config | Replaces multiple duplicate systems |
+| **PyTest Config** | `/pyproject.toml` | Optimized pytest configuration | Collection optimization, markers |
+| **Test Collection Report** | `/TEST_COLLECTION_IMPROVEMENTS.md` | Test collection improvements doc | Audit results and recommendations |
 
 #### Test Locations by Service
 | Test Type | Location | Pattern | Run Command |
@@ -263,24 +281,47 @@ python scripts/deploy_to_gcp.py --project netra-production --run-checks
 ```
 
 ### Docker Configuration & Service Management
-**IMPORTANT: Two distinct Docker configuration sets exist**
-- **Development:** `/docker/*.development.Dockerfile` - Local dev with hot-reload
-- **Production/GCP:** `/deployment/docker/*.gcp.Dockerfile` - Optimized for Cloud Run
-- **Index:** [`docs/DOCKER_CONFIGURATION_INDEX.md`](docs/DOCKER_CONFIGURATION_INDEX.md) - Complete Docker configuration mapping
 
-#### 🐳 Docker Service Management (Selective Service Control)
-- **Service Guide:** [`docs/docker-services-guide.md`](docs/docker-services-guide.md) - Complete guide for selective service management
-- **Service Manager:** `/scripts/docker_services.py` - CLI tool for selective service control
-- **Docker Launcher:** `/scripts/docker_dev_launcher.py` - Full development environment launcher
-- **Docker Compose:** `/docker-compose.dev.yml` - Development compose with profile support
+#### 🔴 DUAL ENVIRONMENT SYSTEM (NEW - 2025-08-29)
+**We now maintain TWO separate Docker environments that run simultaneously:**
+- **TEST Environment (Port 8001):** Automated testing with real services (no mocks)
+- **DEV Environment (Port 8000):** Local development with hot reload
+
+**Quick Reference:**
+- **Master Control:** `python scripts/docker_env_manager.py status` - Check both environments
+- **Quick Start:** `python scripts/docker_env_manager.py start both` - Launch both environments
+- **Documentation:** [`DOCKER_ENVIRONMENTS.md`](DOCKER_ENVIRONMENTS.md) - Quick reference guide
+- **Complete Guide:** [`docs/docker-dual-environment-setup.md`](docs/docker-dual-environment-setup.md) - Full documentation
+
+#### 🐳 Environment-Specific Launchers
+- **TEST Launcher:** `/scripts/launch_test_env.py` - TEST environment for automated testing
+- **DEV Launcher:** `/scripts/launch_dev_env.py` - DEV environment with hot reload
+- **Master Manager:** `/scripts/docker_env_manager.py` - Control both environments
+
+#### Docker Files & Configuration
+- **TEST Compose:** `/docker-compose.test.yml` - TEST environment stack
+- **DEV Compose:** `/docker-compose.dev.yml` - DEV environment stack  
+- **Hot Reload:** `/docker-compose.override.yml` - DEV hot reload configuration
+- **TEST Config:** `/.env.test` - TEST environment variables (ports 5433, 6380, 8124, 8001, 8082, 3001)
+- **DEV Config:** `/.env.dev` - DEV environment variables (ports 5432, 6379, 8123, 8000, 8081, 3000)
+- **Dockerfiles:** `/docker/*.test.Dockerfile` (TEST), `/docker/*.development.Dockerfile` (DEV)
 
 #### Quick Docker Commands
 ```bash
-# Refresh/Restart Netra backend only
-python scripts/docker_services.py restart netra
+# Check status of both environments
+python scripts/docker_env_manager.py status
 
-# Start just Netra backend (with dependencies)
-python scripts/docker_services.py start netra
+# Start both TEST and DEV environments
+python scripts/docker_env_manager.py start both
+
+# Start DEV only with hot reload
+python scripts/launch_dev_env.py -d --open
+
+# Start TEST only for automated testing  
+python scripts/launch_test_env.py
+
+# Stop all environments
+python scripts/docker_env_manager.py stop all
 
 # Start everything
 python scripts/docker_services.py start full
@@ -322,6 +363,8 @@ python scripts/docker_services.py stop
 - **🔴 TEST EXECUTION TRACKER** | `/scripts/test_execution_tracker.py` | Test history, flaky detection, prioritization
 - **🔴 TEST DASHBOARD** | `/scripts/test_dashboard.py` | Interactive metrics, HTML reports, recommendations  
 - **🔴 UNIFIED TEST RUNNER** | `/scripts/unified_test_runner.py` | **FIXED E2E categories**, integrated tracking
+- **🔴 PRE-DEPLOYMENT AUDIT** | `/scripts/pre_deployment_audit.py` | **Catch LLM coding errors before deploy**
+- [`SPEC/pre_deployment_audit.xml`](SPEC/pre_deployment_audit.xml) - **Pre-deployment audit specification**
 - [`SPEC/learnings/test_system_improvements.xml`](SPEC/learnings/test_system_improvements.xml) - **E2E fix & test tracking learnings**
 - [`SPEC/test_infrastructure_architecture.xml`](SPEC/test_infrastructure_architecture.xml) - Test architecture patterns
 - [`E2E_TEST_BLOCKING_AUDIT.md`](E2E_TEST_BLOCKING_AUDIT.md) - E2E test issues documentation

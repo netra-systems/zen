@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Docker Hostname Resolution for Database Connections</title>
+    <date>2025-08-29</date>
+    <category>Infrastructure</category>
+    <services>auth_service, netra_backend</services>
+    <importance>HIGH</importance>
+  </metadata>
+
+  <problem>
+    <description>
+      Auth service fails to connect to PostgreSQL database when running in Docker containers
+      with the error "Name or service not known". This occurs because the service uses
+      'localhost' from the .env file, which doesn't resolve to the PostgreSQL container
+      within the Docker network.
+    </description>
+    
+    <error_signature>
+      socket.gaierror: [Errno -2] Name or service not known
+      RuntimeError: Database connection failed: [Errno -2] Name or service not known
+    </error_signature>
+    
+    <root_cause>
+      When services run inside Docker containers, they must use Docker service names
+      (e.g., 'postgres') instead of 'localhost' to communicate with other containers
+      in the same Docker network. The .env file is configured for local development
+      with localhost, causing hostname resolution failures in Docker context.
+    </root_cause>
+  </problem>
+
+  <solution>
+    <approach>
+      Implement automatic Docker environment detection that overrides localhost
+      hostnames with Docker service names when running inside containers.
+      This only applies in development and test environments for safety.
+    </approach>
+    
+    <implementation>
+      <location>auth_service/auth_core/config.py::get_database_url()</location>
+      <detection_methods>
+        <method>Check RUNNING_IN_DOCKER environment variable</method>
+        <method>Check IS_DOCKER environment variable</method>
+        <method>Check DOCKER_CONTAINER environment variable</method>
+        <method>Check for /.dockerenv file existence</method>
+        <method>Check /proc/self/cgroup for docker references</method>
+      </detection_methods>
+      
+      <logic>
+        1. Check if environment is 'development' or 'test'
+        2. Only in dev/test: Detect if running in Docker using multiple indicators
+        3. If in Docker and host is 'localhost' or '127.0.0.1':
+           - Override with Docker service name ('postgres')
+        4. Keep custom hostnames unchanged
+        5. DATABASE_URL takes precedence if set
+        6. Production/staging environments use explicit configuration only
+      </logic>
+    </implementation>
+    
+    <code_example><![CDATA[
+# Only apply Docker hostname resolution in dev/test environments
+current_env = AuthConfig.get_environment()
+if current_env in ["development", "test"]:
+    # Detect if running in Docker container
+    is_docker = (
+        env_manager.get("RUNNING_IN_DOCKER") == "true" or
+        env_manager.get("IS_DOCKER") == "true" or
+        env_manager.get("DOCKER_CONTAINER") == "true" or
+        os.path.exists("/.dockerenv") or
+        (os.path.exists("/proc/self/cgroup") and 
+         any("docker" in line for line in open("/proc/self/cgroup").readlines()))
+    )
+    
+    # Override host for Docker context if needed
+    if is_docker and postgres_host in ["localhost", "127.0.0.1"]:
+        postgres_host = "postgres"  # Use Docker service name
+        logger.info(f"Detected Docker environment in {current_env}, using 'postgres' as database host")
+    ]]></code_example>
+  </solution>
+
+  <testing>
+    <test_file>auth_service/tests/unit/test_docker_hostname_resolution.py</test_file>
+    <test_cases>
+      <case>Docker detection via environment variables</case>
+      <case>Docker detection via .dockerenv file</case>
+      <case>Docker detection via /proc/self/cgroup</case>
+      <case>Non-Docker environment keeps original hostname</case>
+      <case>Custom hostnames not overridden in Docker</case>
+      <case>DATABASE_URL precedence when set</case>
+      <case>Docker hostname NOT applied in production environment</case>
+      <case>Docker hostname NOT applied in staging environment</case>
+    </test_cases>
+  </testing>
+
+  <best_practices>
+    <practice>
+      Always use service names (not localhost) in docker-compose.yml environment variables
+    </practice>
+    <practice>
+      Implement multiple Docker detection methods for robustness
+    </practice>
+    <practice>
+      Only override localhost/127.0.0.1; preserve custom hostnames
+    </practice>
+    <practice>
+      Log hostname resolution decisions for debugging
+    </practice>
+    <practice>
+      Provide DATABASE_URL override for special cases
+    </practice>
+  </best_practices>
+
+  <related_issues>
+    <issue>
+      Similar hostname resolution needed for Redis and ClickHouse connections
+    </issue>
+    <issue>
+      Consider adding RUNNING_IN_DOCKER to Dockerfile ENV for explicit detection
+    </issue>
+    <issue>
+      May need similar logic in netra_backend service
+    </issue>
+  </related_issues>
+
+  <future_improvements>
+    <improvement>
+      Create shared utility for Docker environment detection across all services
+    </improvement>
+    <improvement>
+      Add docker-compose override file for development with proper hostnames
+    </improvement>
+    <improvement>
+      Consider using environment-specific .env files (.env.docker, .env.local)
+    </improvement>
+  </future_improvements>
+</learning>

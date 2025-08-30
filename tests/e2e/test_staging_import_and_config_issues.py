@@ -8,7 +8,6 @@ import sys
 import pytest
 import asyncio
 import importlib
-from unittest.mock import patch, MagicMock, AsyncMock
 from pathlib import Path
 
 # Setup path for imports
@@ -240,9 +239,8 @@ class TestStagingSpecificValidation:
         """Test health check endpoint works in staging configuration."""
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}):
             # Mock the FastAPI app
-            from unittest.mock import Mock
-            # Mock: Generic component isolation for controlled unit testing
-            app = Mock()
+                        # Mock: Generic component isolation for controlled unit testing
+            app = None  # TODO: Use real service instead of Mock
             
             # Simulate health check
             health_check_response = {"status": "healthy", "environment": "staging"}

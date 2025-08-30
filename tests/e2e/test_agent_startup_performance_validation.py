@@ -30,7 +30,7 @@ import pytest
 
 # Test infrastructure
 from tests.e2e.config import TEST_CONFIG, CustomerTier, get_test_user
-from tests.e2e.harness_complete import (
+from tests.e2e.harness_utils import (
     TestHarnessContext,
     UnifiedTestHarnessComplete,
 )

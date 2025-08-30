@@ -25,7 +25,6 @@ import statistics
 import time
 import uuid
 import websockets
-from unittest.mock import MagicMock
 
 # Test configuration and missing variables
 CONCURRENT_TEST_CONFIG = {
@@ -145,7 +144,7 @@ class ContaminationReport:
 class TestSyntaxFix:
     """Generated test class"""
 
-class ConcurrentTestReport:
+class TestConcurrentReport:
     pass
 
 @pytest.mark.e2e
@@ -173,7 +172,7 @@ class TestSyntaxFix:
 
         return end_time - self.test_start_time
 
-class ConcurrentTestEnvironment:
+class TestConcurrentEnvironment:
 
     # """Manages test environment for concurrent agent startup testing."""
     
@@ -440,7 +439,7 @@ class CrossContaminationDetector:
         
         return contamination_report
 
-class ConcurrentTestOrchestrator:
+class TestConcurrentOrchestrator:
 
     # """Orchestrates concurrent agent startup testing."""
     
@@ -511,7 +510,7 @@ class ConcurrentTestOrchestrator:
         for user in users:
             # For testing, just mock the websocket connection
             # Mock: Generic component isolation for controlled unit testing
-            user.websocket_client = MagicMock()
+            user.websocket_client = MagicNone  # TODO: Use real service instead of Mock
             user.startup_metrics['websocket_connection_time'] = 0.1
             successful_connections += 1
         

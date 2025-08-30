@@ -472,10 +472,11 @@ def pytest_collection_modifyitems(config, items):
             needs_clickhouse = True
             break
     
-    # Enable ClickHouse if needed
+    # Enable ClickHouse if needed and set marker for runtime detection
     if needs_clickhouse:
         env.set("CLICKHOUSE_ENABLED", "true", "test_framework_real_database")
         env.set("DEV_MODE_DISABLE_CLICKHOUSE", "false", "test_framework_real_database")
+        env.set("PYTEST_REAL_DATABASE_TEST", "true", "test_framework_real_database")
 
 # =============================================================================
 # ASYNC UTILITIES
@@ -536,7 +537,7 @@ async def docker_test_manager():
     Automatically starts and stops test services for the entire test session.
     """
     manager = get_test_manager()
-    manager.configure_test_environment()
+    manager.configure_mock_environment()
     
     # Start core services (postgres, redis) by default
     # Tests requiring additional services can start them separately

@@ -25,7 +25,6 @@ SUCCESS CRITERIA:
 import asyncio
 import time
 from typing import Dict, List, Any
-from unittest.mock import patch
 import pytest
 import pytest_asyncio
 
@@ -37,7 +36,7 @@ from tests.e2e.load_test_utilities import (
 )
 
 
-class ConcurrentLoadTester:
+class TestConcurrentLoader:
     """Tests system with 100 concurrent users"""
     
     def __init__(self, simulator: LoadTestSimulator):
@@ -76,7 +75,7 @@ class ConcurrentLoadTester:
         }
 
 
-class SustainedLoadTester:
+class TestSustainedLoader:
     """Tests system for memory leaks over 24 hours"""
     
     def __init__(self, simulator: LoadTestSimulator):
@@ -109,7 +108,7 @@ class SustainedLoadTester:
         return analysis
 
 
-class BurstTrafficTester:
+class TestBurstTrafficer:
     """Tests system handling of traffic spikes"""
     
     def __init__(self, simulator: LoadTestSimulator):
@@ -155,7 +154,7 @@ class BurstTrafficTester:
         }
 
 
-class GracefulDegradationTester:
+class TestGracefulDegradationer:
     """Tests system graceful degradation under extreme load"""
     
     def __init__(self, simulator: LoadTestSimulator):

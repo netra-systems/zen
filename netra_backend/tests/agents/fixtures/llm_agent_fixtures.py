@@ -20,6 +20,30 @@ from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_service import AgentService
 
+def create_mock_llm_client():
+    """Create a mock LLM client for testing agents."""
+    mock_client = MagicMock()
+    
+    # Setup base async call methods
+    mock_client.call_llm = AsyncMock(return_value={
+        "content": "Mock LLM response",
+        "tool_calls": []
+    })
+    
+    mock_client.ask_llm = AsyncMock(return_value=json.dumps({
+        "analysis": "Mock analysis",
+        "confidence": 0.95,
+        "recommendations": []
+    }))
+    
+    # Setup structured response methods
+    mock_client.get_structured_response = AsyncMock(return_value={
+        "result": "success",
+        "data": {}
+    })
+    
+    return mock_client
+
 @pytest.fixture
 def mock_llm_manager():
     """Create properly mocked LLM manager"""

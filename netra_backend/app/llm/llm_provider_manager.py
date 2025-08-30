@@ -130,34 +130,21 @@ class LLMProviderManager:
             raise HTTPError(500, f"Internal error: {str(e)}")
     
     async def get_fallback_response(self, error_context: str, request_type: str) -> Dict[str, Any]:
-        """Get fallback response when all providers fail."""
-        fallback_responses = {
-            "all_providers_quota_exceeded": {
-                "choices": [{"message": {"content": "Service temporarily unavailable due to high demand. Please try again later."}}],
-                "model": "fallback",
-                "usage": {"total_tokens": 0},
-                "fallback": True,
-                "error_context": error_context
-            },
-            "quota_cascade_detected": {
-                "choices": [{"message": {"content": "Multiple services experiencing high load. Using cached response."}}],
-                "model": "fallback-cache", 
-                "usage": {"total_tokens": 0},
-                "fallback": True,
-                "error_context": error_context
-            }
+        """Raise exception instead of providing fallback response when all providers fail."""
+        logger.error(f"All LLM providers failed for context: {error_context}, request_type: {request_type}")
+        
+        # Define error codes based on context
+        error_codes = {
+            "all_providers_quota_exceeded": 429,
+            "quota_cascade_detected": 429,
+            "provider_unavailable": 503,
+            "authentication_failed": 401
         }
         
-        response = fallback_responses.get(error_context, {
-            "choices": [{"message": {"content": "Service temporarily unavailable."}}],
-            "model": "fallback-generic",
-            "usage": {"total_tokens": 0},
-            "fallback": True,
-            "error_context": error_context
-        })
+        error_code = error_codes.get(error_context, 503)
+        error_message = f"LLM service unavailable: {error_context}"
         
-        logger.info(f"Providing fallback response for context: {error_context}")
-        return response
+        raise HTTPError(error_code, error_message)
     
     def _get_openai_client(self):
         """Get OpenAI client - for test compatibility."""

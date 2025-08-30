@@ -7,6 +7,7 @@
     "Corpus operation completed for run_id",
     "DELETE FROM auth_users WHERE id = :old_id",
     "Data analysis execution failed for run_id",
+    "Error in DataHelperAgent for run_id",
     "From",
     "Invalid request for run_id",
     "Starting synthetic data generation for run_id",

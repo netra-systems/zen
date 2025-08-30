@@ -63,7 +63,7 @@ class ServiceStatus:
     error: Optional[str] = None
 
 
-class RealDevLauncherTester:
+class TestRealDevLauncherer:
     """Real dev launcher system tester using actual DevLauncher module."""
     
     def __init__(self):

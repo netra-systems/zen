@@ -83,10 +83,12 @@ class SecretManagerBuilder:
             self.env_manager = self._get_environment_manager()
             self.env = self.env_manager.get_all().copy()
         else:
-            # Filter out None values from env_vars and merge with os.environ as fallback
+            # Filter out None values from env_vars and merge with environment manager as fallback
             self.env = {}
-            # Start with os.environ as base
-            self.env.update(os.environ)
+            # Get environment manager for fallback values
+            self.env_manager = self._get_environment_manager()
+            # Start with environment manager as base
+            self.env.update(self.env_manager.get_all())
             # Overlay with non-None values from env_vars
             for key, value in env_vars.items():
                 if value is not None:
@@ -117,20 +119,32 @@ class SecretManagerBuilder:
                 from netra_backend.app.core.isolated_environment import get_env
                 return get_env()
             else:
-                # Shared/default environment management
-                from dev_launcher.isolated_environment import get_env
-                return get_env()
+                # Try dev_launcher for local development contexts
+                try:
+                    from dev_launcher.isolated_environment import get_env
+                    return get_env()
+                except ImportError:
+                    # Dev launcher not available (e.g., in Docker containers)
+                    # Fall through to basic environment manager
+                    pass
         except ImportError as e:
-            logger.warning(f"Failed to import service-specific environment manager: {e}. Using basic env access.")
-            # Fallback to basic environment access
-            class BasicEnvManager:
-                @staticmethod
-                def get(key, default=None):
-                    return os.environ.get(key, default)
-                @staticmethod
-                def get_all():
-                    return dict(os.environ)
-            return BasicEnvManager()
+            logger.debug(f"Service-specific environment manager not available: {e}. Using fallback.")
+        
+        # Fallback to a minimal isolated environment implementation
+        # This ensures we never directly access os.environ
+        class BasicEnvManager:
+            def __init__(self):
+                # Create a minimal implementation that wraps os.environ
+                # but still follows the interface pattern
+                self._env_copy = dict(os.environ)
+            
+            def get(self, key, default=None):
+                return self._env_copy.get(key, default)
+            
+            def get_all(self):
+                return dict(self._env_copy)
+        
+        return BasicEnvManager()
     
     def _detect_environment(self) -> str:
         """
@@ -171,7 +185,10 @@ class SecretManagerBuilder:
     def gcp(self):
         """GCP Secret Manager integration."""
         if self._gcp is None:
-            self._gcp = self.GCPSecretBuilder(self)
+            if self._is_gcp_enabled():
+                self._gcp = self.GCPSecretBuilder(self)
+            else:
+                self._gcp = self.DisabledGCPBuilder(self)
         return self._gcp
     
     @property
@@ -232,6 +249,37 @@ class SecretManagerBuilder:
     
     # Main sub-builder classes
     
+    class DisabledGCPBuilder:
+        """Dummy GCP builder that returns None for all secret requests when GCP is disabled."""
+        
+        def __init__(self, parent):
+            self.parent = parent
+            self._project_id = "GCP_DISABLED"
+        
+        def get_secret(self, secret_name: str, environment: str = None) -> Optional[str]:
+            """Return None since GCP is disabled."""
+            return None
+        
+        def get_database_password(self) -> Optional[str]:
+            """Return None since GCP is disabled."""
+            return None
+        
+        def get_redis_password(self) -> Optional[str]:
+            """Return None since GCP is disabled."""
+            return None
+        
+        def get_jwt_secret(self) -> Optional[str]:
+            """Return None since GCP is disabled."""
+            return None
+        
+        def validate_gcp_connectivity(self) -> Tuple[bool, str]:
+            """Return disabled status."""
+            return False, "GCP Secret Manager is disabled in this environment"
+        
+        def list_available_secrets(self) -> List[str]:
+            """Return empty list since GCP is disabled."""
+            return []
+    
     class GCPSecretBuilder:
         """Manages Google Cloud Secret Manager integration."""
         
@@ -256,13 +304,32 @@ class SecretManagerBuilder:
             return self.parent.env.get('GCP_PROJECT_ID_NUMERICAL_PRODUCTION', '304612253870')
         
         def get_secret(self, secret_name: str, environment: str = None) -> Optional[str]:
-            """Get secret from GCP Secret Manager with environment-specific naming."""
+            """Get secret from GCP Secret Manager with environment-specific naming and robust error handling."""
             try:
                 client = self._get_secret_client()
                 actual_name = self._determine_actual_secret_name(secret_name, environment)
-                return self._fetch_secret(client, actual_name)
+                secret_value = self._fetch_secret(client, actual_name)
+                
+                if secret_value:
+                    logger.debug(f"Successfully fetched secret {actual_name} from GCP")
+                    return secret_value
+                else:
+                    # Try fallback without environment suffix if the environment-specific one failed
+                    if actual_name != secret_name:
+                        logger.debug(f"Trying fallback secret name {secret_name}")
+                        fallback_value = self._fetch_secret(client, secret_name)
+                        if fallback_value:
+                            logger.debug(f"Successfully fetched fallback secret {secret_name} from GCP")
+                            return fallback_value
+                
+                logger.debug(f"Secret {secret_name} not found in GCP Secret Manager")
+                return None
+                
+            except ImportError as e:
+                logger.debug(f"GCP Secret Manager client not available for {secret_name}: {e}")
+                return None
             except Exception as e:
-                logger.debug(f"Failed to fetch {secret_name} from GCP: {e}")
+                logger.warning(f"Failed to fetch {secret_name} from GCP Secret Manager: {e}")
                 return None
         
         def get_database_password(self) -> Optional[str]:
@@ -276,9 +343,10 @@ class SecretManagerBuilder:
         def get_redis_password(self) -> Optional[str]:
             """Get Redis password with environment-specific fallback."""
             if self.parent._environment == "staging":
-                return self.get_secret("redis-password-staging") or self.get_secret("redis-default")
+                # Use the Terraform-managed staging-redis-url secret
+                return self.get_secret("staging-redis-url")
             elif self.parent._environment == "production":
-                return self.get_secret("redis-password-production") or self.get_secret("redis-default")
+                return self.get_secret("production-redis-url") or self.get_secret("redis-password-production")
             return None
         
         def get_jwt_secret(self) -> Optional[str]:
@@ -309,13 +377,39 @@ class SecretManagerBuilder:
                 return False, f"GCP connectivity failed: {str(e)}"
         
         def _get_secret_client(self):
-            """Get or create a Secret Manager client."""
+            """Get or create a Secret Manager client with enhanced error handling."""
             if self._client is None:
                 try:
                     from google.cloud import secretmanager
+                    from google.api_core import exceptions as api_exceptions
+                    
+                    # Initialize client with timeout settings for better reliability
                     self._client = secretmanager.SecretManagerServiceClient()
+                    
+                    # Test basic connectivity
+                    try:
+                        # Simple connectivity test - list secrets with page size 1
+                        parent = f"projects/{self._project_id}"
+                        request = {"parent": parent, "page_size": 1}
+                        next(iter(self._client.list_secrets(request=request)), None)
+                        logger.debug(f"GCP Secret Manager connectivity verified for project {self._project_id}")
+                    except (api_exceptions.PermissionDenied, api_exceptions.NotFound) as e:
+                        logger.error(f"GCP Secret Manager access denied or project not found: {e}")
+                    except (api_exceptions.ServiceUnavailable, api_exceptions.DeadlineExceeded) as e:
+                        logger.error(f"GCP Secret Manager network connectivity issue: {e}")
+                    except Exception as e:
+                        logger.warning(f"GCP Secret Manager connectivity test failed (may be transient): {e}")
+                        
                 except ImportError as e:
-                    logger.warning(f"Google Cloud Secret Manager not available: {e}")
+                    # Only warn once and reduce noise in development
+                    if not hasattr(self, '_gcp_import_error_logged'):
+                        # In development, this is expected - just log as debug
+                        if self.parent._environment == "development":
+                            logger.debug(f"Google Cloud Secret Manager not available in development: {e}")
+                        else:
+                            logger.error(f"Google Cloud Secret Manager library not installed in {self.parent._environment}: {e}")
+                            logger.info("Install with: pip install google-cloud-secret-manager")
+                        self._gcp_import_error_logged = True
                     raise
             return self._client
         
@@ -459,17 +553,43 @@ class SecretManagerBuilder:
         
         def _get_secret_names_to_fetch(self) -> List[str]:
             """Get list of secret names to fetch from GCP."""
-            base_secrets = [
-                "jwt-secret-key",
-                "fernet-key", 
-                "postgres-password",
-                "redis-default",
-                "clickhouse-password",
-                "gemini-api-key",
-                "google-client-id",
-                "google-client-secret"
-            ]
-            return base_secrets
+            env = self.parent._environment
+            
+            if env == "staging":
+                # Use Terraform-managed secret names for staging
+                return [
+                    "jwt-secret-key-staging",
+                    "fernet-key-staging", 
+                    "postgres-password-staging",
+                    "staging-redis-url",  # Terraform-managed Redis URL
+                    "clickhouse-password-staging",
+                    "gemini-api-key-staging",
+                    "google-oauth-client-id-staging",
+                    "google-oauth-client-secret-staging"
+                ]
+            elif env == "production":
+                return [
+                    "jwt-secret-key-production",
+                    "fernet-key-production", 
+                    "postgres-password-production",
+                    "production-redis-url",  # Terraform-managed Redis URL
+                    "clickhouse-password-production",
+                    "gemini-api-key-production",
+                    "google-client-id-production",
+                    "google-client-secret-production"
+                ]
+            else:
+                # Development/default secrets
+                return [
+                    "jwt-secret-key",
+                    "fernet-key", 
+                    "postgres-password",
+                    "redis-url",
+                    "clickhouse-password",
+                    "gemini-api-key",
+                    "google-client-id",
+                    "google-client-secret"
+                ]
         
         def _merge_with_gcp_secrets(self, env_secrets: Dict[str, str], gcp_secrets: Dict[str, str]) -> Dict[str, str]:
             """Merge GCP secrets with environment secrets."""
@@ -987,6 +1107,38 @@ class SecretManagerBuilder:
         """Load all secrets for current environment with comprehensive fallback."""
         return self.environment.load_all_secrets()
     
+    def _is_gcp_enabled(self) -> bool:
+        """Check if GCP Secret Manager should be used based on environment and configuration."""
+        # Check if explicitly disabled in environment
+        if self.env.get("DISABLE_GCP_SECRET_MANAGER", "false").lower() == "true":
+            logger.debug("GCP Secret Manager explicitly disabled via DISABLE_GCP_SECRET_MANAGER")
+            return False
+        
+        # Check if load secrets is disabled
+        if self.env.get("LOAD_SECRETS", "true").lower() == "false":
+            logger.debug("Secret loading disabled via LOAD_SECRETS=false")
+            return False
+        
+        # Only enable for staging and production environments
+        if self._environment not in ["staging", "production"]:
+            logger.debug(f"GCP Secret Manager disabled for {self._environment} environment")
+            return False
+        
+        # Check if project ID is configured
+        project_id = self.env.get("GCP_PROJECT_ID")
+        if not project_id:
+            logger.warning("GCP_PROJECT_ID not configured - GCP Secret Manager disabled")
+            return False
+        
+        # Quick check if library is available
+        try:
+            import google.cloud.secretmanager
+            logger.debug("GCP Secret Manager enabled")
+            return True
+        except ImportError:
+            logger.error(f"google-cloud-secret-manager library not available in {self._environment}")
+            return False
+    
     def get_secret(self, secret_name: str, use_cache: bool = True) -> Optional[str]:
         """Get individual secret with caching and fallback chain."""
         # Try cache first if enabled
@@ -995,12 +1147,13 @@ class SecretManagerBuilder:
             if cached:
                 return cached
         
-        # Try GCP Secret Manager
-        gcp_secret = self.gcp.get_secret(secret_name)
-        if gcp_secret:
-            if use_cache:
-                self.cache.cache_secret(secret_name, gcp_secret)
-            return gcp_secret
+        # Try GCP Secret Manager only if enabled
+        if self._is_gcp_enabled():
+            gcp_secret = self.gcp.get_secret(secret_name)
+            if gcp_secret:
+                if use_cache:
+                    self.cache.cache_secret(secret_name, gcp_secret)
+                return gcp_secret
         
         # Try environment variable
         env_secret = self.env.get(secret_name)
@@ -1013,7 +1166,7 @@ class SecretManagerBuilder:
         if self._environment == "development":
             dev_fallback = self.development.get_development_fallback(secret_name)
             if dev_fallback:
-                logger.warning(f"Using development fallback for {secret_name}")
+                logger.debug(f"Using development fallback for {secret_name}")
                 return dev_fallback
         
         return None

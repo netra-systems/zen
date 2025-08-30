@@ -69,6 +69,7 @@ class TestErrorCascadePrevention:
         """Initialize auto-recovery verifier."""
         return create_recovery_verifier()
     
+    @pytest.mark.resilience
     async def test_backend_failure_isolation(self, orchestrator, failure_simulator, degradation_validator):
         """Test that backend failure doesn't crash auth service."""
         # Verify all services initially healthy
@@ -84,6 +85,7 @@ class TestErrorCascadePrevention:
         assert auth_status["auth_responsive"], "Auth service not responsive after backend failure"
         assert auth_status["isolation_maintained"], "Service isolation not maintained"
     
+    @pytest.mark.resilience
     async def test_graceful_frontend_degradation(self, orchestrator, failure_simulator, degradation_validator):
         """Test frontend shows graceful error during backend failure."""
         # Establish WebSocket connection
@@ -118,6 +120,7 @@ class TestErrorCascadePrevention:
         """Validate graceful error handling."""
         return await validator.validate_frontend_error_handling(ws_client)
     
+    @pytest.mark.resilience
     async def test_system_auto_recovery(self, orchestrator, failure_simulator, recovery_verifier):
         """Test complete system recovery after service restart."""
         # Kill and restart backend service
@@ -149,6 +152,7 @@ class TestErrorCascadePrevention:
         finally:
             await ws_client.close()
     
+    @pytest.mark.resilience
     async def test_complete_error_cascade_prevention_flow(self, orchestrator, failure_simulator, degradation_validator, recovery_verifier):
         """Complete error cascade prevention test within time limit."""
         start_time = time.time()

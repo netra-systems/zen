@@ -55,8 +55,8 @@ class TestAuthConfiguration:
         env_vars = get_env()
         
         assert env_vars.get("ENVIRONMENT") == "test"
-        assert env_vars.get("JWT_SECRET") is not None
-        assert len(env_vars.get("JWT_SECRET", "")) > 10
+        assert env_vars.get("JWT_SECRET_KEY") is not None
+        assert len(env_vars.get("JWT_SECRET_KEY", "")) > 10
     
     def test_auth_config_initialization(self):
         """Test AuthConfig initialization."""
@@ -121,7 +121,7 @@ class TestJWTTokenHandling:
     def test_jwt_secret_configuration(self):
         """Test JWT secret is properly configured."""
         env_vars = get_env()
-        jwt_secret = env_vars.get("JWT_SECRET")
+        jwt_secret = env_vars.get("JWT_SECRET_KEY")
         
         assert jwt_secret is not None
         assert len(jwt_secret) >= 32  # Minimum secure length

@@ -424,7 +424,9 @@ class TestPydanticValidationCritical:
 
             DataAnalysisResponse(**invalid_response)
 
-        assert "Input should be a valid dictionary" in str(exc_info.value)
+        # Updated assertion to match Pydantic 2.x error message format
+        error_str = str(exc_info.value)
+        assert "Input should be a dictionary" in error_str or "Input should be a valid dictionary" in error_str
 
     @pytest.mark.asyncio
     async def test_action_plan_nested_validation_error(self):
@@ -481,7 +483,7 @@ class TestPydanticValidationCritical:
 
             "query": "test",
 
-            "performance_metrics": '{"latency_p50": 10.5, "latency_p95": 15.0, "latency_p99": 20.0, "throughput_avg": 100.0, "throughput_peak": 150.0, "error_rate": 0.1}'
+            "performance_metrics": '{"latency_p50": 10.5, "latency_p95": 15.0, "latency_p99": 20.0, "throughput_rps": 100.0, "throughput_ops_per_second": 150.0, "error_rate": 0.1}'
 
         }
 
@@ -491,7 +493,7 @@ class TestPydanticValidationCritical:
 
         assert result.performance_metrics.latency_p50 == 10.5
 
-        assert result.performance_metrics.throughput_avg == 100.0
+        assert result.performance_metrics.throughput_rps == 100.0
 
         assert result.performance_metrics.error_rate == 0.1
 

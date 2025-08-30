@@ -19,7 +19,6 @@ import uuid
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import websockets
@@ -50,7 +49,7 @@ class RecoveryScenario(Enum):
 
 
 @dataclass
-class RecoveryTestResult:
+class TestRecoveryResult:
     """Result of error recovery test execution"""
     scenario: str
     recovery_successful: bool
@@ -149,7 +148,7 @@ class MockDatabasePool:
             raise Exception("Connection pool exhausted")
         self.active_connections += 1
         # Mock: Generic component isolation for controlled unit testing
-        return MagicMock()
+        return MagicNone  # TODO: Use real service instead of Mock
     
     async def release_connection(self, connection: Any) -> None:
         """Release connection back to pool"""

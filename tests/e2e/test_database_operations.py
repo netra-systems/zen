@@ -40,7 +40,7 @@ from tests.e2e.database_test_operations import (
 logger = central_logger.get_logger(__name__)
 
 
-class DatabaseOperationsTest:
+class TestDatabaseOperations:
     """Real database operations test with comprehensive cross-service validation."""
     
     def __init__(self):

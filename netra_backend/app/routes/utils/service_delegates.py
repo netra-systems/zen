@@ -2,7 +2,7 @@
 
 from typing import Any, Dict, List, Optional
 
-from netra_backend.app.core.error_handlers import (
+from netra_backend.app.routes.utils.error_handlers import (
     handle_circuit_breaker_error,
     handle_service_error,
 )

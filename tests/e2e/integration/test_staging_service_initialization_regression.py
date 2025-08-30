@@ -24,7 +24,6 @@ import os
 import pytest
 import asyncio
 import requests
-from unittest.mock import patch, MagicMock, AsyncMock
 from typing import Dict, Any, List
 
 from netra_backend.app.services.health_checker import HealthChecker
@@ -35,6 +34,7 @@ from netra_backend.app.services.health_checker import HealthChecker
 class TestStagingServiceInitializationRegression:
     """Tests that replicate service initialization issues from staging audit"""
 
+    @pytest.mark.e2e
     def test_backend_service_database_component_missing_regression(self):
         """
         REGRESSION TEST: Backend health endpoint missing database component status
@@ -74,6 +74,7 @@ class TestStagingServiceInitializationRegression:
                 # Expected failure - health checker methods don't exist
                 pytest.fail("Backend health checker missing or database component not implemented")
 
+    @pytest.mark.e2e
     def test_auth_service_oauth_providers_empty_regression(self):
         """
         REGRESSION TEST: Auth service OAuth providers list empty
@@ -114,6 +115,7 @@ class TestStagingServiceInitializationRegression:
                 # Expected failure - auth service health checker missing
                 pytest.fail("Auth service health checker missing or OAuth provider status not implemented")
 
+    @pytest.mark.e2e
     def test_database_migration_api_keys_table_missing_regression(self):
         """
         REGRESSION TEST: Critical table 'api_keys' does not exist
@@ -151,6 +153,7 @@ class TestStagingServiceInitializationRegression:
                 # Expected failure - database manager or table_exists method missing
                 pytest.fail("Database manager missing or table existence check not implemented")
 
+    @pytest.mark.e2e
     def test_service_startup_sequence_dependency_failures_regression(self):
         """
         REGRESSION TEST: Service initialization order causing dependency failures
@@ -196,6 +199,7 @@ class TestStagingServiceInitializationRegression:
                 # Expected failure - startup manager doesn't exist
                 pytest.fail("Service startup sequence management not implemented")
 
+    @pytest.mark.e2e
     def test_health_check_timeout_configuration_regression(self):
         """
         REGRESSION TEST: Health check timeouts not configured for staging
@@ -241,6 +245,7 @@ class TestStagingServiceInitializationRegression:
                 # Expected failure - timeout configuration methods don't exist
                 pytest.fail("Health check timeout configuration not implemented")
 
+    @pytest.mark.e2e
     def test_service_dependency_validation_missing_regression(self):
         """
         REGRESSION TEST: Service dependency validation not implemented
@@ -308,7 +313,7 @@ class TestStagingServiceHealthEndpointsRegression:
             try:
                 # Mock the health check request
                 with patch('requests.get') as mock_get:
-                    mock_response = MagicMock()
+                    mock_response = MagicNone  # TODO: Use real service instead of Mock
                     mock_response.status_code = 500  # Simulate error
                     mock_response.json.return_value = {'status': 'error', 'message': 'Service unavailable'}
                     mock_get.return_value = mock_response
@@ -330,6 +335,7 @@ class TestStagingServiceHealthEndpointsRegression:
         if endpoint_issues:
             pytest.fail(f"Staging health endpoints have issues: {endpoint_issues}")
 
+    @pytest.mark.e2e
     def test_health_endpoint_response_format_inconsistency_regression(self):
         """
         REGRESSION TEST: Health endpoint response formats inconsistent across services
@@ -378,6 +384,7 @@ class TestStagingServiceHealthEndpointsRegression:
         if format_issues:
             pytest.fail(f"Health endpoint response format inconsistencies: {format_issues}")
 
+    @pytest.mark.e2e
     def test_database_connection_status_missing_regression(self):
         """
         REGRESSION TEST: Database connection status not reported in health checks
@@ -413,6 +420,7 @@ class TestStagingServiceHealthEndpointsRegression:
         if missing_db_fields:
             pytest.fail(f"Database health check missing fields: {missing_db_fields}")
 
+    @pytest.mark.e2e
     def test_service_readiness_vs_liveness_confusion_regression(self):
         """
         REGRESSION TEST: Service readiness and liveness checks not properly distinguished
@@ -446,6 +454,7 @@ class TestStagingServiceHealthEndpointsRegression:
         if missing_endpoints:
             pytest.fail(f"Missing health check endpoint types: {missing_endpoints}")
 
+    @pytest.mark.e2e
     def test_staging_specific_health_checks_missing_regression(self):
         """
         REGRESSION TEST: Staging-specific health checks not implemented

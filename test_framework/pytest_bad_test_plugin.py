@@ -217,7 +217,8 @@ def pytest_configure(config):
         import os
         
         # Set environment variables for real LLM testing
-        os.environ["TEST_USE_REAL_LLM"] = "true"
+        os.environ["USE_REAL_LLM"] = "true"
+        os.environ["TEST_USE_REAL_LLM"] = "true"  # Legacy compatibility
         os.environ["ENABLE_REAL_LLM_TESTING"] = "true"
         
         # Set model if provided

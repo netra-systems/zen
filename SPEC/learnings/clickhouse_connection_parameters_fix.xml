@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>ClickHouse Connection Parameters Fix</name>
+        <type>Critical Learning</type>
+        <version>1.0</version>
+        <date>2025-08-30</date>
+        <description>Resolution of ClickHouse connection failure due to incorrect clickhouse_connect parameters</description>
+    </metadata>
+
+    <problem>
+        <symptom>ConnectionError: Could not connect to ClickHouse - HttpClient.__init__() got an unexpected keyword argument 'pool_size'</symptom>
+        <root-cause>The clickhouse_connect.get_client() function was being called with unsupported parameters</root-cause>
+        <location>netra_backend/app/db/clickhouse_base.py:81-90</location>
+    </problem>
+
+    <incorrect-implementation>
+        <code>
+        return clickhouse_connect.get_client(
+            host=self.host, port=self.port, database=self.database,
+            user=self.user, password=self.password, secure=self.secure,
+            connect_timeout=connect_timeout, send_receive_timeout=receive_timeout,
+            # CRITICAL FIX: Add connection pool and retry settings
+            pool_mgr=True,          # Enable connection pooling
+            pool_size=5,            # Connection pool size
+            retries=2,              # Number of retries on connection failure
+            retry_delay=1.0         # Delay between retries
+        )
+        </code>
+        <issues>
+            <issue>pool_size is not a valid parameter for clickhouse_connect.get_client()</issue>
+            <issue>pool_mgr expects a PoolManager object, not a boolean</issue>
+            <issue>retries is not a valid parameter</issue>
+            <issue>retry_delay is not a valid parameter</issue>
+            <issue>user should be username</issue>
+        </issues>
+    </incorrect-implementation>
+
+    <correct-implementation>
+        <code>
+        return clickhouse_connect.get_client(
+            host=self.host, port=self.port, database=self.database,
+            username=self.user, password=self.password, secure=self.secure,
+            connect_timeout=connect_timeout, send_receive_timeout=receive_timeout
+        )
+        </code>
+        <changes>
+            <change>Removed all unsupported parameters (pool_size, pool_mgr, retries, retry_delay)</change>
+            <change>Changed 'user' parameter to 'username' (correct parameter name)</change>
+        </changes>
+    </correct-implementation>
+
+    <valid-parameters>
+        <description>Valid parameters for clickhouse_connect.get_client() as of clickhouse-connect library</description>
+        <parameter name="host">The hostname or IP address of the ClickHouse server</parameter>
+        <parameter name="username">The ClickHouse username (NOT 'user')</parameter>
+        <parameter name="password">The password for username</parameter>
+        <parameter name="database">The default database for the connection</parameter>
+        <parameter name="interface">Must be http or https</parameter>
+        <parameter name="port">The ClickHouse HTTP or HTTPS port</parameter>
+        <parameter name="secure">Use https/TLS</parameter>
+        <parameter name="connect_timeout">Timeout in seconds for the http connection</parameter>
+        <parameter name="send_receive_timeout">Read timeout in seconds for http connection</parameter>
+        <parameter name="compress">Enable compression for ClickHouse HTTP inserts and query results</parameter>
+        <parameter name="query_limit">Default LIMIT on returned rows</parameter>
+        <parameter name="client_name">client_name prepended to the HTTP User Agent header</parameter>
+        <parameter name="verify">Verify the server certificate in secure/https mode</parameter>
+        <parameter name="ca_cert">File path to Certificate Authority root</parameter>
+        <parameter name="client_cert">File path to a TLS Client certificate</parameter>
+        <parameter name="client_cert_key">File path to the private key for the Client Certificate</parameter>
+        <parameter name="session_id">ClickHouse session id</parameter>
+        <parameter name="pool_mgr">Optional urllib3 PoolManager object (NOT a boolean)</parameter>
+        <parameter name="http_proxy">http proxy address</parameter>
+        <parameter name="https_proxy">https proxy address</parameter>
+        <parameter name="server_host_name">Server host name for TLS certificate validation</parameter>
+        <parameter name="autogenerate_session_id">Override the 'autogenerate_session_id' common setting</parameter>
+    </valid-parameters>
+
+    <critical-takeaways>
+        <takeaway>Always check the actual library documentation or use inspect.signature() to verify valid parameters</takeaway>
+        <takeaway>clickhouse_connect uses 'username' not 'user' as the parameter name</takeaway>
+        <takeaway>Connection pooling in clickhouse_connect requires passing a PoolManager object, not configuration parameters</takeaway>
+        <takeaway>Retry logic should be implemented at the application level, not through client parameters</takeaway>
+    </critical-takeaways>
+
+    <verification>
+        <command>python -c "import clickhouse_connect; import inspect; print(inspect.signature(clickhouse_connect.get_client))"</command>
+        <description>Use this to verify the current valid parameters for clickhouse_connect.get_client()</description>
+    </verification>
+</specification>

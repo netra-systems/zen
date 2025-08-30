@@ -54,7 +54,6 @@ import time
 import pytest
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import patch, AsyncMock
 from urllib.parse import urlparse
 
 import httpx

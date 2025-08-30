@@ -94,12 +94,80 @@ Cypress.Commands.add('mockLegacyWebSocket', () => {
   });
 });
 
+// Custom login command for authentication in tests
+Cypress.Commands.add('login', (email?: string, password?: string) => {
+  const testEmail = email || Cypress.env('CYPRESS_TEST_USER') || 'dev@example.com';
+  const testPassword = password || Cypress.env('CYPRESS_TEST_PASSWORD') || 'dev';
+  
+  // Visit login page
+  cy.visit('/login');
+  
+  // Wait for page to load
+  cy.get('body', { timeout: 10000 }).should('be.visible');
+  
+  // Check if we're in development mode by looking for auth config
+  cy.request({
+    url: 'http://localhost:8081/auth/config',
+    failOnStatusCode: false,
+    timeout: 3000
+  }).then((response) => {
+    if (response.status === 200 && response.body?.development_mode) {
+      // Development mode login
+      cy.get('body').then(($body) => {
+        // Try quick dev login first
+        if ($body.find('[data-testid="login-button"]').length > 0) {
+          cy.get('[data-testid="login-button"]')
+            .should('be.visible')
+            .and('contain.text', 'Quick Dev Login')
+            .click();
+        } else {
+          // Fallback to custom credentials form
+          cy.get('input[type="email"]').clear().type(testEmail);
+          cy.get('input[type="password"]').clear().type(testPassword);
+          cy.get('button').contains('Login with Custom Credentials').click();
+        }
+      });
+      
+      // Wait for successful login
+      cy.url({ timeout: 15000 }).should('not.include', '/login');
+      
+      // Verify JWT token is stored
+      cy.window().then((win) => {
+        expect(win.localStorage.getItem('jwt_token')).to.be.a('string').and.not.be.empty;
+      });
+    } else {
+      // Production/OAuth mode - skip actual login for these tests
+      cy.log('OAuth mode detected - mocking authentication for security tests');
+      
+      // Mock a valid JWT token in localStorage for testing purposes
+      // This creates a token that expires in the far future for testing stability
+      const futureTimestamp = Math.floor(Date.now() / 1000) + (24 * 60 * 60); // 24 hours from now
+      const mockPayload = btoa(JSON.stringify({
+        sub: 'test-user-id',
+        email: 'test@example.com',
+        full_name: 'Test User',
+        role: 'user',
+        iat: Math.floor(Date.now() / 1000),
+        exp: futureTimestamp
+      }));
+      const mockToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${mockPayload}.mock-signature-for-testing`;
+      cy.window().then((win) => {
+        win.localStorage.setItem('jwt_token', mockToken);
+      });
+      
+      // Navigate away from login page
+      cy.visit('/chat');
+    }
+  });
+});
+
 declare global {
   namespace Cypress {
     interface Chainable {
       mockWebSocket(): Chainable<void>
       sendWebSocketMessage(message: any): Chainable<void>
       mockLegacyWebSocket(): Chainable<void>
+      login(email?: string, password?: string): Chainable<void>
     }
   }
 }

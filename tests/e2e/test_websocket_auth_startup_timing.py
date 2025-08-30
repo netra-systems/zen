@@ -20,7 +20,7 @@ from datetime import timezone
 from typing import Dict, Any, Optional
 
 
-class WebSocketAuthStartupTester:
+class TestWebSocketAuthStartuper:
     """Tests WebSocket authentication timing during startup."""
     
     def __init__(self):

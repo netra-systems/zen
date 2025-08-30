@@ -42,7 +42,6 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Set
-from unittest.mock import AsyncMock, patch
 
 import pytest
 import asyncpg
@@ -59,7 +58,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class MigrationTestMetrics:
+class TestMigrationMetrics:
     """Comprehensive migration and consistency test metrics."""
     test_name: str
     start_time: float = field(default_factory=time.time)
@@ -121,7 +120,7 @@ class MigrationTestMetrics:
 
 
 @dataclass
-class DatabaseTestConfig:
+class TestDatabaseConfig:
     """Configuration for comprehensive database testing."""
     test_postgresql: bool = True
     test_redis: bool = True  
@@ -149,7 +148,7 @@ class DatabaseTestConfig:
     project_root: Optional[Path] = None
 
 
-class DatabaseMigrationConsistencyTester:
+class TestDatabaseMigrationConsistencyer:
     """Comprehensive database migration and consistency tester."""
     
     def __init__(self, config: DatabaseTestConfig):
@@ -970,6 +969,7 @@ class TestDatabaseMigrationRecoveryConsistency:
             cleanup_test_data=True
         )
     
+    @pytest.mark.resilience
     async def test_comprehensive_database_migration_consistency(self, database_config):
         """Test comprehensive database migration recovery and consistency."""
         logger.info("=== COMPREHENSIVE DATABASE MIGRATION CONSISTENCY TEST ===")

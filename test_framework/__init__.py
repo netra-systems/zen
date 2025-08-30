@@ -60,6 +60,14 @@ from test_framework.helpers.api_helpers import APITestHelpers
 # Import base test classes
 from test_framework.base_e2e_test import BaseE2ETest
 
+# Import service availability checking
+from test_framework.service_availability import (
+    require_real_services,
+    check_service_availability,
+    ServiceUnavailableError,
+    ServiceAvailabilityChecker
+)
+
 
 def setup_test_path():
     """Set up the project root in sys.path for test imports.
@@ -145,4 +153,10 @@ __all__ = [
     
     # Base test classes
     'BaseE2ETest',
+    
+    # Service availability checking
+    'require_real_services',
+    'check_service_availability',
+    'ServiceUnavailableError',
+    'ServiceAvailabilityChecker',
 ]

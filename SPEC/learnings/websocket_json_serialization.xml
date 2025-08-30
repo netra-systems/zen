@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>WebSocket JSON Serialization with Pydantic Models</title>
+    <category>websocket</category>
+    <subcategory>serialization</subcategory>
+    <date>2025-08-29</date>
+    <severity>critical</severity>
+    <impact>production-breaking</impact>
+  </metadata>
+
+  <problem>
+    <description>
+      WebSocket messages containing Pydantic models with datetime fields fail to serialize,
+      resulting in "Object of type [ModelName] is not JSON serializable" errors.
+    </description>
+    <error_message>
+      Error sending to connection conn_dev-temp-a7108989_c427ade4: Object of type DeepAgentState is not JSON serializable
+    </error_message>
+    <root_cause>
+      When Pydantic models are serialized using model_dump() without mode='json',
+      datetime objects remain as Python datetime instances which are not JSON serializable.
+    </root_cause>
+    <affected_components>
+      <component>netra_backend.app.agents.supervisor.pipeline_executor</component>
+      <component>netra_backend.app.websocket_core.handlers</component>
+      <component>netra_backend.app.websocket_core.manager</component>
+    </affected_components>
+  </problem>
+
+  <solution>
+    <principle>
+      ALWAYS use mode='json' when calling model_dump() on Pydantic models
+      that will be sent through WebSocket or any JSON serialization.
+    </principle>
+    <implementation>
+      <step>Replace all model_dump() calls with model_dump(mode='json')</step>
+      <step>Ensure WebSocketManager._serialize_message_safely handles all model types</step>
+      <step>Use to_dict() methods that internally use mode='json' when available</step>
+    </implementation>
+    <code_examples>
+      <example context="WebSocket message creation">
+        <!-- WRONG -->
+        return WebSocketMessage(
+            type="agent_completed", 
+            payload=content.model_dump()  # Will fail if content has datetime
+        )
+        
+        <!-- CORRECT -->
+        return WebSocketMessage(
+            type="agent_completed", 
+            payload=content.model_dump(mode='json')  # Converts datetime to strings
+        )
+      </example>
+      <example context="Sending through WebSocket">
+        <!-- WRONG -->
+        await websocket.send_json(response.model_dump())
+        
+        <!-- CORRECT -->
+        await websocket.send_json(response.model_dump(mode='json'))
+      </example>
+    </code_examples>
+  </solution>
+
+  <testing_strategy>
+    <test_category name="Direct Serialization">
+      <description>Test that models with datetime serialize correctly</description>
+      <coverage>All Pydantic models used in WebSocket communication</coverage>
+    </test_category>
+    <test_category name="WebSocket Flow">
+      <description>Test complete WebSocket message flow with complex models</description>
+      <coverage>Pipeline executor, handlers, manager send methods</coverage>
+    </test_category>
+    <test_category name="Edge Cases">
+      <description>Test nested models, None values, empty states</description>
+      <coverage>Complex nested structures, optional fields</coverage>
+    </test_category>
+  </testing_strategy>
+
+  <prevention>
+    <guideline>Create a WebSocket message factory that enforces mode='json'</guideline>
+    <guideline>Add linting rule to flag model_dump() without mode parameter</guideline>
+    <guideline>Use type hints to indicate JSON-serializable return types</guideline>
+    <guideline>Implement pre-send validation in WebSocket manager</guideline>
+  </prevention>
+
+  <related_specs>
+    <spec>websockets.xml</spec>
+    <spec>websocket_communication.xml</spec>
+    <spec>type_safety.xml</spec>
+  </related_specs>
+</learning>

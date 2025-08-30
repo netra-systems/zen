@@ -84,24 +84,17 @@ class AuthSecretLoader:
                 logger.info("Using prod-jwt-secret from Secret Manager")
                 return secret
         
-        # CRITICAL: Check JWT_SECRET_KEY as primary fallback for consistency with backend service
+        # CRITICAL: Check JWT_SECRET_KEY as primary secret for consistency with backend service
         # This ensures both services use the same secret when environment-specific secrets are not available
         secret = env_manager.get("JWT_SECRET_KEY")
         if secret:
             logger.info("Using JWT_SECRET_KEY from environment (shared with backend)")
             return secret
-            
-        # DEPRECATED: Check JWT_SECRET for backward compatibility only
-        # This should only be used when JWT_SECRET_KEY is not available
-        secret = env_manager.get("JWT_SECRET")
-        if secret:
-            logger.warning("Using JWT_SECRET from environment (DEPRECATED - use JWT_SECRET_KEY instead)")
-            return secret
         
         # No fallback in any environment - require explicit JWT secret configuration
         raise ValueError(
             f"JWT secret not configured for {env} environment. "
-            "Set JWT_SECRET_KEY (recommended) or JWT_SECRET environment variable."
+            "Set JWT_SECRET_KEY environment variable."
         )
     
     @staticmethod
@@ -282,9 +275,9 @@ class AuthSecretLoader:
             secret_url = AuthSecretLoader._load_from_secret_manager(secret_name)
             if secret_url:
                 logger.info(f"Using {secret_name} from Secret Manager")
-                # Import here to avoid circular imports
-                from auth_service.auth_core.database.database_manager import AuthDatabaseManager
-                return AuthDatabaseManager._normalize_database_url(secret_url)
+                # Ensure async format for auth service
+                from shared.database_url_builder import DatabaseURLBuilder
+                return DatabaseURLBuilder.format_url_for_driver(secret_url, 'asyncpg')
         
         # Fall back to DATABASE_URL environment variable
         database_url = env_manager.get("DATABASE_URL", "")
@@ -292,6 +285,6 @@ class AuthSecretLoader:
             logger.warning("No database configuration found in secrets or environment")
             return ""
         
-        # Import here to avoid circular imports
-        from auth_service.auth_core.database.database_manager import AuthDatabaseManager
-        return AuthDatabaseManager._normalize_database_url(database_url)
+        # Ensure async format for auth service
+        from shared.database_url_builder import DatabaseURLBuilder
+        return DatabaseURLBuilder.format_url_for_driver(database_url, 'asyncpg')

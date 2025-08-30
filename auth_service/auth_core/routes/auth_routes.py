@@ -11,6 +11,7 @@ from typing import Optional
 import httpx
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from fastapi.responses import JSONResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.isolated_environment import get_env
@@ -38,6 +39,7 @@ from auth_service.auth_core.models.auth_models import (
     TokenResponse,
 )
 from auth_service.auth_core.services.auth_service import AuthService
+from auth_service.auth_core.database.connection import get_db_session as get_db
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auth", tags=["authentication"])
@@ -429,8 +431,9 @@ Users will see 'OAuth Configuration Broken' errors.
             logger.error("Failed to store OAuth state parameter")
             raise HTTPException(status_code=500, detail="Authentication state storage failed")
         
-        # Build OAuth URL
-        redirect_uri = _determine_urls()[0] + "/auth/callback"
+        # Build OAuth URL - OAuth provider redirects to auth service callback
+        auth_url, _ = _determine_urls()
+        redirect_uri = auth_url + "/auth/callback"
         
         if provider == "google":
             google_client_id = AuthConfig.get_google_client_id()
@@ -478,12 +481,14 @@ Users will see 'OAuth Configuration Broken' errors.
 
 @router.post("/register", status_code=201)
 async def register_user(
-    request: dict
+    request: dict,
+    db: AsyncSession = Depends(get_db)
 ):
-    """Register a new user"""
+    """Register a new user with database persistence"""
     email = request.get("email")
     password = request.get("password")
     confirm_password = request.get("confirm_password")
+    full_name = request.get("full_name")
     
     if not email or not password:
         raise HTTPException(status_code=400, detail="Email and password required")
@@ -491,13 +496,18 @@ async def register_user(
     if password != confirm_password:
         raise HTTPException(status_code=400, detail="Passwords do not match")
     
-    # Register user using auth service
+    # Register user using auth service with database
     try:
-        result = auth_service.register_test_user(email, password)
+        # Set database session for the service
+        auth_service.db_session = db
+        result = await auth_service.register_user(email, password, full_name)
         return result
+    except ValueError as e:
+        # User-facing validation errors
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Registration failed: {e}")
-        raise HTTPException(status_code=500, detail="Registration failed")
+        raise HTTPException(status_code=500, detail="Registration failed. Please try again.")
 
 @router.post("/login", response_model=LoginResponse)
 async def login(

@@ -13,7 +13,6 @@ import asyncio
 import json
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -23,7 +22,7 @@ from tests.clients.websocket_client import WebSocketTestClient
 from tests.e2e.config import UnifiedTestConfig
 
 
-class JWTPermissionPropagationTester:
+class TestJWTPermissionPropagationer:
     """Tests JWT permission propagation across Auth, Backend, and WebSocket services."""
     
     def __init__(self):

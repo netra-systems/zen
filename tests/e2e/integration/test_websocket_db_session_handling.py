@@ -27,7 +27,6 @@ import inspect
 import json
 import time
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
@@ -42,7 +41,7 @@ except ImportError:
         def __init__(self):
             pass
 
-class WebSocketDatabaseSessionTester:
+class TestWebSocketDatabaseSessioner:
     """Tests WebSocket database session handling patterns."""
     
     def __init__(self):
@@ -253,6 +252,7 @@ class WebSocketDatabaseSessionTester:
                 "missing_patterns": []
             }
     
+    @pytest.mark.websocket
     async def test_database_session_context_manager(self) -> Dict[str, Any]:
         """Test that database sessions work correctly with context manager pattern."""
         start_time = time.time()
@@ -299,6 +299,7 @@ class WebSocketDatabaseSessionTester:
                 "session_closed": False
             }
     
+    @pytest.mark.websocket
     async def test_incorrect_depends_pattern_simulation(self) -> Dict[str, Any]:
         """Simulate the incorrect Depends() pattern to demonstrate the issue."""
         start_time = time.time()

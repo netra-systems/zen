@@ -16,7 +16,6 @@ REQUIREMENTS:
 """
 import json
 import uuid
-from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -32,7 +31,7 @@ from tests.e2e.integration.unified_e2e_harness import create_e2e_harness
 from tests.e2e.test_environment_config import TestEnvironmentType
 
 
-class StagingOAuthTestHelper:
+class TestStagingOAuthHelper:
     """Helper class for staging OAuth authentication tests."""
     
     def __init__(self, harness):

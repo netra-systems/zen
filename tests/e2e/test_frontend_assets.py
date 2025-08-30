@@ -70,6 +70,7 @@ class TestFrontendAssetAvailability:
     
     @pytest.mark.asyncio
     @staging_only
+    @pytest.mark.e2e
     async def test_missing_lkk_ch_js_current_staging_issue(self):
         """
         Test lkk_ch.js availability - CURRENT STAGING ISSUE.
@@ -114,6 +115,7 @@ class TestFrontendAssetAvailability:
     
     @pytest.mark.asyncio
     @staging_only
+    @pytest.mark.e2e
     async def test_missing_twint_ch_js_current_staging_issue(self):
         """
         Test twint_ch.js availability - CURRENT STAGING ISSUE.
@@ -158,6 +160,7 @@ class TestFrontendAssetAvailability:
     
     @pytest.mark.asyncio
     @staging_only 
+    @pytest.mark.e2e
     async def test_all_missing_assets_comprehensive_check(self):
         """
         Comprehensive check of all known missing assets from staging.
@@ -234,6 +237,7 @@ class TestFrontendAssetAvailability:
             assert isinstance(status_code, int), "Status code should be integer"
             assert isinstance(url, str), "URL should be string"
     
+    @pytest.mark.e2e
     def test_asset_path_validation(self):
         """Test asset path validation and sanitization."""
         
@@ -279,6 +283,7 @@ class TestFrontendAssetAvailability:
                 f"expected {expected_valid}, got {is_valid}, reason: {reason}"
             )
     
+    @pytest.mark.e2e
     def test_asset_content_type_validation(self):
         """Test asset content type validation."""
         
@@ -398,6 +403,7 @@ class TestFrontendAssetPerformance:
             "Status code should return integer values"
         )
     
+    @pytest.mark.e2e
     def test_asset_caching_configuration(self):
         """Test asset caching headers and configuration."""
         
@@ -445,6 +451,7 @@ class TestFrontendAssetPerformance:
                 f"type={asset_type}, expected {expected_valid}, reason: {reason}"
             )
     
+    @pytest.mark.e2e
     def test_asset_compression_configuration(self):
         """Test asset compression and optimization."""
         

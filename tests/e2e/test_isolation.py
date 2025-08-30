@@ -20,7 +20,6 @@ import os
 import uuid
 from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
@@ -57,7 +56,7 @@ except ImportError:
         AGENT_ERROR = "AGENT_ERROR"
     
     # Mock: Generic component isolation for controlled unit testing
-    logger = Mock()
+    logger = None  # TODO: Use real service instead of Mock
     IMPORTS_AVAILABLE = False
 
 
@@ -245,7 +244,7 @@ async def test_resource_isolation():
     
     # Use direct mocking instead of patching non-existent module
     # Mock: Generic component isolation for controlled unit testing
-    mock_resource_manager = Mock()
+    mock_resource_manager = None  # TODO: Use real service instead of Mock
     await _test_connection_limits(mock_resource_manager, validator)
     await _test_memory_limits(mock_resource_manager, validator)  
     await _test_compute_limits(mock_resource_manager, validator)

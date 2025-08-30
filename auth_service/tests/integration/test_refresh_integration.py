@@ -1,6 +1,12 @@
 """
 Integration tests for auth service refresh token flow.
 Tests the complete refresh flow with real database and Redis connections.
+
+Business Value Justification (BVJ):
+- Segment: Platform/Internal  
+- Business Goal: System Stability - Auth token refresh reliability
+- Value Impact: Ensures secure, uninterrupted user sessions across all customer tiers
+- Strategic Impact: Prevents authentication failures that would block AI operations
 """
 import pytest
 import asyncio
@@ -8,6 +14,12 @@ import json
 from datetime import datetime, timedelta, UTC
 from httpx import AsyncClient
 import logging
+from test_framework.setup_test_path import setup_test_path
+
+# CRITICAL: setup_test_path() MUST be called before any project imports per CLAUDE.md
+setup_test_path()
+
+from auth_service.auth_core.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +29,20 @@ logger = logging.getLogger(__name__)
 @pytest.mark.asyncio
 class TestRefreshTokenIntegration:
     """Integration tests for refresh token functionality"""
+    
+    @pytest.fixture(autouse=True)
+    def isolated_test_env(self):
+        """Ensure test environment isolation per CLAUDE.md requirements."""
+        env = get_env()
+        env.enable_isolation()
+        # Set up basic test environment
+        env.set("ENVIRONMENT", "test", "test_refresh_integration")
+        env.set("AUTH_FAST_TEST_MODE", "true", "test_refresh_integration")
+        env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test_refresh_integration")
+        
+        original_state = env.get_all_variables()
+        yield env
+        env.reset_to_original()
     
     @pytest.fixture
     async def auth_client(self):

@@ -12,7 +12,7 @@ ARG NEXT_PUBLIC_GTM_ID
 ARG NEXT_PUBLIC_GA_MEASUREMENT_ID
 
 # Install dependencies for building
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat python3 make g++
 
 # Set working directory
 WORKDIR /app
@@ -20,8 +20,9 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production && \
+# Install dependencies with native rebuild
+RUN npm ci && \
+    npm rebuild --update-binary && \
     npm cache clean --force
 
 # Copy application code
@@ -51,6 +52,9 @@ WORKDIR /app
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Docker environment indicator
+ENV RUNNING_IN_DOCKER=true
 
 # Switch to non-root user
 USER nextjs

@@ -27,7 +27,6 @@ import asyncio
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -84,7 +83,7 @@ class MockWebSocketReconnectionManager:
         })
 
 
-class WebSocketReconnectionAuthTester:
+class TestWebSocketReconnectionAuther:
     """Core tester for WebSocket reconnection with auth state."""
     
     def __init__(self):

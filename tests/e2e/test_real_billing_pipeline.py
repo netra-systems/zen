@@ -24,7 +24,6 @@ import uuid
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from typing import Any, Dict, List
-from unittest.mock import patch
 
 import pytest
 import pytest_asyncio
@@ -40,7 +39,7 @@ from netra_backend.app.services.cost_calculator import (
 from netra_backend.app.services.metrics.agent_metrics import AgentMetricsCollector
 
 
-class BillingPipelineTestCore:
+class TestBillingPipelineCore:
     """Core test infrastructure for billing pipeline validation."""
     
     def __init__(self):

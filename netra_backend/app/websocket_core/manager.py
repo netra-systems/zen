@@ -40,6 +40,7 @@ from netra_backend.app.websocket_core.rate_limiter import get_rate_limiter, chec
 from netra_backend.app.websocket_core.heartbeat_manager import get_heartbeat_manager, register_connection_heartbeat
 from netra_backend.app.websocket_core.message_buffer import get_message_buffer, buffer_user_message, BufferPriority
 from netra_backend.app.websocket_core.utils import is_websocket_connected
+from netra_backend.app.websocket_core.types import get_frontend_message_type
 from netra_backend.app.services.external_api_client import HTTPError
 
 logger = central_logger.get_logger(__name__)
@@ -95,6 +96,9 @@ class WebSocketManager:
         
         # Handle already-dict case
         if isinstance(message, dict):
+            # Convert message type to frontend-compatible format if present
+            if "type" in message:
+                message["type"] = get_frontend_message_type(message["type"])
             return message
         
         # Handle DeepAgentState specifically 
@@ -122,25 +126,41 @@ class WebSocketManager:
         # Handle other Pydantic models
         if hasattr(message, 'model_dump'):
             try:
-                return message.model_dump(mode='json', exclude_none=True)
+                result = message.model_dump(mode='json', exclude_none=True)
+                # Convert message type to frontend-compatible format if present
+                if isinstance(result, dict) and "type" in result:
+                    result["type"] = get_frontend_message_type(result["type"])
+                return result
             except Exception as e:
                 logger.warning(f"model_dump(mode='json') failed: {e}, trying basic model_dump")
                 try:
-                    return message.model_dump(exclude_none=True)
+                    result = message.model_dump(exclude_none=True)
+                    # Convert message type to frontend-compatible format if present
+                    if isinstance(result, dict) and "type" in result:
+                        result["type"] = get_frontend_message_type(result["type"])
+                    return result
                 except Exception as e2:
                     logger.warning(f"Basic model_dump failed: {e2}, trying dict()")
         
         # Handle objects with to_dict method
         if hasattr(message, 'to_dict'):
             try:
-                return message.to_dict()
+                result = message.to_dict()
+                # Convert message type to frontend-compatible format if present
+                if isinstance(result, dict) and "type" in result:
+                    result["type"] = get_frontend_message_type(result["type"])
+                return result
             except Exception as e:
                 logger.warning(f"to_dict() failed: {e}, trying dict() method")
         
         # Handle objects with dict method (older Pydantic)
         if hasattr(message, 'dict'):
             try:
-                return message.dict()
+                result = message.dict()
+                # Convert message type to frontend-compatible format if present
+                if isinstance(result, dict) and "type" in result:
+                    result["type"] = get_frontend_message_type(result["type"])
+                return result
             except Exception as e:
                 logger.warning(f"dict() method failed: {e}, using fallback")
         
@@ -153,7 +173,7 @@ class WebSocketManager:
             # Not JSON-serializable, convert to string representation
             logger.warning(f"Object {type(message).__name__} not JSON-serializable, converting to string")
             return {
-                "data": str(message),
+                "payload": str(message),
                 "type": type(message).__name__,
                 "serialization_error": "Object not JSON-serializable, converted to string"
             }
@@ -658,9 +678,9 @@ class WebSocketManager:
         """Send error message to user - consolidated error handling."""
         error_msg = {
             "type": "error",
-            "error": {
-                "code": error_code,
-                "message": error_message,
+            "payload": {
+                "error_message": error_message,
+                "error_code": error_code,
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }
         }

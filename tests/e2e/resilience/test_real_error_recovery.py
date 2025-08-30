@@ -89,7 +89,7 @@ class NetworkFailureSimulator:
         client.config.timeout = original_timeout
         self.failure_active = False
 
-class CircuitBreakerTester:
+class TestCircuitBreakerer:
     """Tests circuit breaker behavior during service failures."""
     
     def __init__(self):
@@ -98,6 +98,7 @@ class CircuitBreakerTester:
         self.circuit_open = False
         self.recovery_attempts = 0
     
+    @pytest.mark.resilience
     async def test_circuit_breaker_activation(self, client: RealWebSocketClient,
                                             failure_threshold: int = 3) -> Dict[str, Any]:
         """Test circuit breaker opens after threshold failures."""
@@ -129,6 +130,7 @@ class CircuitBreakerTester:
             "attempts": attempts
         }
     
+    @pytest.mark.resilience
     async def test_circuit_breaker_half_open(self, client: RealWebSocketClient) -> Dict[str, Any]:
         """Test circuit breaker transitions to half-open state."""
         if not self.circuit_open:
@@ -320,6 +322,7 @@ class TestRealErrorRecovery:
         """Initialize recovery coordinator."""
         return ServiceRecoveryCoordinator(orchestrator)
     
+    @pytest.mark.resilience
     async def test_backend_service_failure_recovery(self, orchestrator, failure_simulator, recovery_coordinator, data_validator):
         """Test complete backend service failure and recovery cycle."""
         # Establish connection and capture initial state
@@ -360,6 +363,7 @@ class TestRealErrorRecovery:
         finally:
             await ws_client.close()
     
+    @pytest.mark.resilience
     async def test_network_failure_with_timeouts(self, orchestrator, network_simulator, circuit_breaker_tester):
         """Test network failure handling with timeout and retry logic."""
         ws_client = await self._setup_test_connection(orchestrator)
@@ -387,6 +391,7 @@ class TestRealErrorRecovery:
         finally:
             await ws_client.close()
     
+    @pytest.mark.resilience
     async def test_cascading_service_failures(self, failure_simulator, recovery_coordinator):
         """Test handling of cascading failures across multiple services."""
         # Test the logic without requiring real services to be running
@@ -417,6 +422,7 @@ class TestRealErrorRecovery:
         # Should handle missing service gracefully
         assert not recovery_result.get("recovery_initiated", True), "Should handle missing service"
     
+    @pytest.mark.resilience
     async def test_error_message_validation_at_layers(self, failure_simulator):
         """Test error messages are properly formatted at each layer."""
         # Test error message validation logic without requiring live services
@@ -447,6 +453,7 @@ class TestRealErrorRecovery:
             error_str = str(e)
             assert len(error_str) > 0, "Error message should not be empty"
     
+    @pytest.mark.resilience
     async def test_complete_error_recovery_flow(self, network_simulator, circuit_breaker_tester, data_validator):
         """Test complete error recovery flow logic validation."""
         start_time = time.time()
@@ -508,6 +515,7 @@ class TestRealErrorRecovery:
         
         logger.info(f"Error recovery logic validated in {total_time:.2f}s")
     
+    @pytest.mark.resilience
     async def test_unit_data_integrity_validation(self, data_validator):
         """Unit test for data integrity validation logic."""
         # Test pre-failure data capture
@@ -532,6 +540,7 @@ class TestRealErrorRecovery:
         assert result["integrity_validated"], "Integrity validation failed"
         assert not result["data_loss"], "Data loss incorrectly detected"
     
+    @pytest.mark.resilience
     async def test_unit_circuit_breaker_logic(self, circuit_breaker_tester):
         """Unit test for circuit breaker logic."""
         # Test failure count tracking

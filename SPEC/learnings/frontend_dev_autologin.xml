@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Frontend Dev Auto-Login System</title>
+    <category>Authentication</category>
+    <priority>CRITICAL</priority>
+    <created>2025-01-29</created>
+    <last_updated>2025-01-29</last_updated>
+    <cross_references>
+      <ref>auth/context.tsx</ref>
+      <ref>auth/unified-auth-service.ts</ref>
+      <ref>__tests__/auth/dev-auto-login.test.tsx</ref>
+      <ref>SPEC/unified_environment_management.xml</ref>
+      <ref critical="true">SPEC/learnings/frontend_initialization_patterns.xml</ref>
+      <ref critical="true">SPEC/learnings/frontend_loading_states.xml</ref>
+    </cross_references>
+  </metadata>
+
+  <problem_statement>
+    Dev auto-login was failing in local development, forcing developers to manually login each time
+    they started the frontend. This created friction in the development experience.
+  </problem_statement>
+
+  <root_causes>
+    <cause id="1">
+      <description>Token processing logic skipped when storedToken === currentToken</description>
+      <location>auth/context.tsx:182</location>
+      <impact>Prevented token from being decoded and user from being set on initial load</impact>
+    </cause>
+    <cause id="2">
+      <description>Insufficient retry logic for backend startup delays</description>
+      <location>auth/unified-auth-service.ts:handleDevLogin</location>
+      <impact>Failed to auto-login when backend was still starting up</impact>
+    </cause>
+    <cause id="3">
+      <description>Mock AuthContext was overriding real implementation in tests</description>
+      <location>__mocks__/contexts/AuthContext.tsx</location>
+      <impact>Tests were not testing real auto-login behavior</impact>
+    </cause>
+  </root_causes>
+
+  <solution>
+    <step>Fixed token processing to handle both new and existing tokens</step>
+    <step>Implemented exponential backoff with 5 retries for dev login</step>
+    <step>Added timeout handling (10s per attempt) to prevent hanging</step>
+    <step>Unmocked auth context in tests to test real implementation</step>
+    <step>Created comprehensive test suite for auto-login scenarios</step>
+  </solution>
+
+  <critical_dependencies>
+    <dependency>
+      <file>auth/context.tsx</file>
+      <function>fetchAuthConfig</function>
+      <lines>177-225</lines>
+      <description>
+        Token processing logic - MUST process token whether it's new or existing.
+        Changes here directly affect auto-login behavior.
+      </description>
+    </dependency>
+    <dependency>
+      <file>auth/unified-auth-service.ts</file>
+      <function>handleDevLogin</function>
+      <lines>86-175</lines>
+      <description>
+        Dev login implementation with retry logic. MUST have sufficient retries
+        and exponential backoff to handle backend startup delays.
+      </description>
+    </dependency>
+    <dependency>
+      <file>auth/context.tsx</file>
+      <lines>45-58</lines>
+      <description>
+        Initial token state from localStorage. Changes to initialization
+        affect whether stored tokens are recognized on page load.
+      </description>
+    </dependency>
+  </critical_dependencies>
+
+  <update_checklist>
+    <item priority="CRITICAL">
+      When modifying auth/context.tsx initialization flow, ensure existing tokens 
+      in localStorage are still processed correctly
+    </item>
+    <item priority="CRITICAL">
+      When changing token validation logic, test with both fresh login and
+      page refresh scenarios
+    </item>
+    <item priority="HIGH">
+      When updating loading states, ensure auto-login doesn't block UI rendering
+    </item>
+    <item priority="HIGH">
+      Run dev-auto-login.test.tsx after any auth-related changes
+    </item>
+    <item priority="MEDIUM">
+      Check dev_logout_flag handling remains intact - users who explicitly
+      logout should not be auto-logged in
+    </item>
+  </update_checklist>
+
+  <test_coverage>
+    <test_file>__tests__/auth/dev-auto-login.test.tsx</test_file>
+    <scenarios>
+      <scenario>Auto-login on first load in dev mode</scenario>
+      <scenario>Auto-login with retry on network failure</scenario>
+      <scenario>Respecting dev_logout_flag after explicit logout</scenario>
+      <scenario>Token persistence across page refreshes</scenario>
+      <scenario>Graceful handling when backend is offline</scenario>
+      <scenario>Non-blocking UI during auto-login</scenario>
+      <scenario>No auto-login in production environment</scenario>
+    </scenarios>
+  </test_coverage>
+
+  <configuration>
+    <setting>
+      <name>Retry attempts</name>
+      <value>5</value>
+      <location>unified-auth-service.ts:86</location>
+      <reason>Allows up to ~63 seconds total with exponential backoff</reason>
+    </setting>
+    <setting>
+      <name>Initial delay</name>
+      <value>1000ms</value>
+      <location>unified-auth-service.ts:86</location>
+      <reason>Base delay for exponential backoff calculation</reason>
+    </setting>
+    <setting>
+      <name>Timeout per attempt</name>
+      <value>10000ms</value>
+      <location>unified-auth-service.ts:102</location>
+      <reason>Prevents hanging on unresponsive backend</reason>
+    </setting>
+  </configuration>
+
+  <common_issues>
+    <issue>
+      <symptom>Auto-login not working after auth context changes</symptom>
+      <check>Verify token processing logic handles storedToken correctly</check>
+      <check>Ensure hasMountedRef prevents multiple initializations</check>
+    </issue>
+    <issue>
+      <symptom>Auto-login fails when backend is slow to start</symptom>
+      <check>Increase retry count or initial delay in handleDevLogin</check>
+      <check>Check backend startup logs for actual startup time</check>
+    </issue>
+    <issue>
+      <symptom>Tests passing but real auto-login failing</symptom>
+      <check>Ensure tests are not using mocked AuthContext</check>
+      <check>Verify jwt-decode mock matches real token structure</check>
+    </issue>
+  </common_issues>
+
+  <future_improvements>
+    <improvement>
+      Add configuration for max retry attempts via environment variable
+    </improvement>
+    <improvement>
+      Implement circuit breaker pattern for repeated failures
+    </improvement>
+    <improvement>
+      Add telemetry for auto-login success/failure rates
+    </improvement>
+  </future_improvements>
+</learning>

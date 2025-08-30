@@ -359,7 +359,7 @@ class ConfigurationLoader:
 
 | Variable | Description | Default | Required | Example |
 |----------|-------------|---------|----------|---------|
-| **`JWT_SECRET_KEY`** | JWT signing secret | None | ✅ | Generate with `secrets.token_urlsafe(32)` |
+| **`JWT_SECRET_KEY`** | JWT signing secret (see [JWT Standard](../../SPEC/jwt_configuration_standard.xml)) | None | ✅ | Generate with `secrets.token_urlsafe(32)` |
 | **`FERNET_KEY`** | Encryption key for sensitive data | None | ✅ | Generate with `Fernet.generate_key()` |
 | **`SECRET_KEY`** | General application secret | None | ✅ | Generate with `secrets.token_urlsafe(64)` |
 | **`JWT_ACCESS_TOKEN_EXPIRE_MINUTES`** | JWT token expiry (minutes) | `30` | ❌ | `60`, `120` |

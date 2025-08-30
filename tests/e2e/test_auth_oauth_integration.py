@@ -24,7 +24,6 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
@@ -38,7 +37,7 @@ from tests.e2e.oauth_test_providers import OAuthUserFactory
 logger = central_logger.get_logger(__name__)
 
 
-class OAuthIntegrationTestRunner(OAuthFlowTestRunner):
+class TestOAuthIntegrationRunner(OAuthFlowTestRunner):
     """Extended OAuth test runner for integration scenarios"""
     
     def __init__(self):
@@ -194,7 +193,7 @@ class OAuthIntegrationTestRunner(OAuthFlowTestRunner):
             with patch('httpx.AsyncClient.post') as mock_post:
                 # Mock failed token exchange
                 # Mock: Generic component isolation for controlled unit testing
-                mock_response = AsyncMock()
+                mock_response = AsyncNone  # TODO: Use real service instead of Mock
                 mock_response.status_code = 400
                 mock_response.json.return_value = {
                     "error": "invalid_grant",

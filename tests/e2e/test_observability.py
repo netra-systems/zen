@@ -19,7 +19,6 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import aiohttp
 import pytest
@@ -34,7 +33,7 @@ os.environ["ENABLE_JSON_LOGGING"] = "true"
 from tests.e2e.config import TestDataFactory, create_unified_config
 
 
-class ObservabilityTestHarness:
+class TestObservabilityHarness:
     """Test harness for observability validation"""
     
     def __init__(self):

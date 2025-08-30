@@ -27,15 +27,14 @@ TECHNICAL DETAILS:
 import asyncio
 import time
 from typing import Dict, Any
-from unittest.mock import patch
 import pytest
 import pytest_asyncio
+from unittest.mock import patch
 
 from tests.e2e.agent_billing_test_helpers import (
-    AgentBillingTestCore, AgentRequestSimulator, BillingFlowValidator, AgentBillingTestUtils,
-    AgentBillingTestCore,
-    AgentRequestSimulator,
-    BillingFlowValidator,
+    AgentBillingTestCore, 
+    AgentRequestSimulator, 
+    BillingFlowValidator, 
     AgentBillingTestUtils
 )
 from netra_backend.app.schemas.user_plan import PlanTier
@@ -203,7 +202,7 @@ class TestAgentBillingFlow:
         expected_tokens = request["expected_cost"]["tokens"]
         
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        with patch('netra_backend.app.llm.llm_manager.LLMManager.call_llm') as mock_llm:
+        with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
             mock_llm.return_value = AgentBillingTestUtils.create_mock_llm_response(expected_tokens)
             
             response = await AgentBillingTestUtils.send_agent_request(

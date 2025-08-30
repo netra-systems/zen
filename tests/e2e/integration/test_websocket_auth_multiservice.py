@@ -33,7 +33,7 @@ pytestmark = pytest.mark.skipif(
     reason="Real services disabled (set USE_REAL_SERVICES=true)"
 )
 
-class MultiServiceWebSocketAuthTester:
+class TestMultiServiceWebSocketAuther:
     """Tests WebSocket authentication flow across Auth, Backend, and Database services."""
     
     def __init__(self, real_services):

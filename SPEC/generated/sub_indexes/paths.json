@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "paths",
-    "generated_at": "2025-08-28T22:39:27.341498",
+    "generated_at": "2025-08-29T11:57:38.157734",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 1047
+    "total_literals": 1061
   },
   "literals": {
     "\"\n\n# Default to local build with checks\ncommand = [\n    sys.executable,\n    \"scripts/deploy_to_gcp.py\",\n    \"--project\", \"netra-staging\",\n    \"--build-local\",\n    \"--service-account\", SERVICE_ACCOUNT_KEY\n]\n\n# Add any additional arguments passed to this script\nif len(sys.argv) > 1:\n    command.extend(sys.argv[1:])\nelse:\n    # Default to running checks\n    command.append(\"--run-checks\")\n\n# Execute deployment\nsys.exit(subprocess.call(command))": {
@@ -373,8 +373,16 @@
         "scripts/autonomous_review/main.py:109",
         "scripts/autonomous_review/main.py:128",
         "scripts/benchmark_optimization.py:369",
+        "scripts/pre_deployment_audit.py:539",
         "scripts/status_renderer.py:57",
         "scripts/validate_deployment_performance.py:389"
+      ]
+    },
+    "/100\n- **Recommendation**: **": {
+      "value": "/100\n- **Recommendation**: **",
+      "category": "paths",
+      "locations": [
+        "scripts/pre_deployment_audit.py:418"
       ]
     },
     "/100\n- **Technical Debt**:": {
@@ -407,6 +415,13 @@
         "scripts/fast_100_iterations.py:53"
       ]
     },
+    "/12": {
+      "value": "/12",
+      "category": "paths",
+      "locations": [
+        "scripts/check_docker_services.py:138"
+      ]
+    },
     "/1k tokens)": {
       "value": "/1k tokens)",
       "category": "paths",
@@ -432,7 +447,7 @@
       "value": "/5 fixes",
       "category": "paths",
       "locations": [
-        "netra_backend/app/startup_module.py:909"
+        "netra_backend/app/startup_module.py:918"
       ]
     },
     "/5 fixes applied": {
@@ -851,13 +866,7 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/core/app_factory_route_configs.py:26",
-        "netra_backend/app/routes/mcp/config.py:84"
-      ]
-    },
-    "/api/mcp-client": {
-      "value": "/api/mcp-client",
-      "category": "paths",
-      "locations": [
+        "netra_backend/app/routes/mcp/config.py:84",
         "netra_backend/app/routes/mcp_client.py:35"
       ]
     },
@@ -1075,7 +1084,7 @@
       "locations": [
         "netra_backend/app/routes/auth_proxy.py:17",
         "netra_backend/app/routes/auth_proxy.py:90",
-        "auth_service/auth_core/routes/auth_routes.py:43"
+        "auth_service/auth_core/routes/auth_routes.py:45"
       ]
     },
     "/auth/agents/": {
@@ -1174,7 +1183,7 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/routes/auth_routes/dev_login.py:43",
-        "auth_service/auth_core/routes/auth_routes.py:253"
+        "auth_service/auth_core/routes/auth_routes.py:255"
       ]
     },
     "/auth/dev_login": {
@@ -1228,7 +1237,7 @@
       "value": "/auth/health",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:256",
+        "auth_service/auth_core/routes/auth_routes.py:258",
         "scripts/gcp_health_diagnostics.py:40",
         "scripts/gcp_health_monitor.py:107",
         "scripts/monitor_oauth_flow.py:26"
@@ -1254,7 +1263,7 @@
         "netra_backend/app/routes/auth_routes/config_handler.py:31",
         "netra_backend/app/routes/auth_routes/config_handler.py:87",
         "netra_backend/app/routes/auth_routes/config_handler.py:126",
-        "auth_service/auth_core/routes/auth_routes.py:248"
+        "auth_service/auth_core/routes/auth_routes.py:250"
       ]
     },
     "/auth/login/google": {
@@ -1285,7 +1294,7 @@
         "netra_backend/app/routes/auth_routes/config_handler.py:31",
         "netra_backend/app/routes/auth_routes/config_handler.py:87",
         "netra_backend/app/routes/auth_routes/config_handler.py:126",
-        "auth_service/auth_core/routes/auth_routes.py:249"
+        "auth_service/auth_core/routes/auth_routes.py:251"
       ]
     },
     "/auth/me": {
@@ -1311,7 +1320,7 @@
         "netra_backend/app/clients/auth_client_core.py:394",
         "netra_backend/app/middleware/fastapi_auth_middleware.py:272",
         "netra_backend/app/middleware/security_middleware.py:160",
-        "auth_service/auth_core/routes/auth_routes.py:255",
+        "auth_service/auth_core/routes/auth_routes.py:257",
         "scripts/audit_staging_auth_issues.py:161",
         "scripts/audit_staging_auth_issues.py:246"
       ]
@@ -1332,7 +1341,7 @@
         "netra_backend/app/routes/auth_routes/config_handler.py:32",
         "netra_backend/app/routes/auth_routes/config_handler.py:88",
         "netra_backend/app/routes/auth_routes/config_handler.py:127",
-        "auth_service/auth_core/routes/auth_routes.py:251",
+        "auth_service/auth_core/routes/auth_routes.py:253",
         "scripts/audit_oauth_gcp_logs.py:77",
         "scripts/verify_auth_config.py:31"
       ]
@@ -1353,7 +1362,7 @@
       "locations": [
         "netra_backend/app/clients/auth_client_core.py:237",
         "netra_backend/app/core/cross_service_validators/contract_validators.py:127",
-        "auth_service/auth_core/routes/auth_routes.py:254",
+        "auth_service/auth_core/routes/auth_routes.py:256",
         "scripts/audit_oauth_gcp_logs.py:78",
         "scripts/audit_staging_auth_issues.py:247",
         "scripts/gcp_health_diagnostics.py:42"
@@ -1370,7 +1379,7 @@
       "value": "/auth/verify",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:252"
+        "auth_service/auth_core/routes/auth_routes.py:254"
       ]
     },
     "/auth/verify-password": {
@@ -1428,7 +1437,8 @@
       "value": "/cache/clear",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/database_monitoring/router.py:97"
+        "netra_backend/app/routes/database_monitoring/router.py:97",
+        "netra_backend/app/routes/mcp_client.py:466"
       ]
     },
     "/cache/invalidate/pattern": {
@@ -1459,7 +1469,7 @@
         "netra_backend/app/clients/auth_client_config.py:327",
         "netra_backend/app/routes/auth_routes/router.py:73",
         "netra_backend/app/services/oauth_manager.py:185",
-        "auth_service/auth_core/routes/auth_routes.py:887",
+        "auth_service/auth_core/routes/auth_routes.py:896",
         "scripts/validate_oauth_configuration.py:412"
       ]
     },
@@ -1467,8 +1477,8 @@
       "value": "/callback/google",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:1045",
-        "auth_service/auth_core/routes/auth_routes.py:1055",
+        "auth_service/auth_core/routes/auth_routes.py:1054",
+        "auth_service/auth_core/routes/auth_routes.py:1064",
         "scripts/validate_oauth_configuration.py:412"
       ]
     },
@@ -1509,7 +1519,7 @@
       "value": "/check-blacklist",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:547"
+        "auth_service/auth_core/routes/auth_routes.py:556"
       ]
     },
     "/circuit-breakers": {
@@ -1559,9 +1569,9 @@
       "value": "/cloudsql/",
       "category": "paths",
       "locations": [
-        "netra_backend/app/core/configuration/database.py:204",
-        "netra_backend/app/core/configuration/database.py:220",
-        "netra_backend/app/core/configuration/database.py:532",
+        "netra_backend/app/core/configuration/database.py:207",
+        "netra_backend/app/core/configuration/database.py:223",
+        "netra_backend/app/core/configuration/database.py:561",
         "netra_backend/app/core/configuration/validator_database.py:98",
         "netra_backend/app/core/network_constants.py:148",
         "netra_backend/app/core/network_constants.py:364",
@@ -1632,8 +1642,8 @@
         "netra_backend/app/routes/config.py:50",
         "netra_backend/app/routes/config.py:62",
         "netra_backend/app/routes/mcp/main.py:235",
-        "auth_service/auth_core/routes/auth_routes.py:166",
-        "auth_service/auth_core/routes/auth_routes.py:202",
+        "auth_service/auth_core/routes/auth_routes.py:168",
+        "auth_service/auth_core/routes/auth_routes.py:204",
         "frontend/components/chat/constants.tsx:27",
         "scripts/staging_validation_part2_user_flows.py:786"
       ]
@@ -1672,6 +1682,20 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/routes/config.py:19"
+      ]
+    },
+    "/connections": {
+      "value": "/connections",
+      "category": "paths",
+      "locations": [
+        "netra_backend/app/routes/mcp_client.py:502"
+      ]
+    },
+    "/connections/refresh": {
+      "value": "/connections/refresh",
+      "category": "paths",
+      "locations": [
+        "netra_backend/app/routes/mcp_client.py:516"
       ]
     },
     "/connections/status": {
@@ -1799,7 +1823,7 @@
       "locations": [
         "netra_backend/app/routes/auth_proxy.py:59",
         "netra_backend/app/routes/auth_proxy.py:161",
-        "auth_service/auth_core/routes/auth_routes.py:750"
+        "auth_service/auth_core/routes/auth_routes.py:759"
       ]
     },
     "/dev_login": {
@@ -1814,7 +1838,7 @@
       "value": "/diagnostics/database",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:1655"
+        "auth_service/auth_core/routes/auth_routes.py:1664"
       ]
     },
     "/docs": {
@@ -2016,14 +2040,14 @@
       "value": "/github",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:304"
+        "auth_service/auth_core/routes/auth_routes.py:306"
       ]
     },
     "/google": {
       "value": "/google",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:296"
+        "auth_service/auth_core/routes/auth_routes.py:298"
       ]
     },
     "/groups/": {
@@ -2234,9 +2258,9 @@
         "netra_backend/app/routes/auth_proxy.py:147",
         "netra_backend/app/routes/auth_proxy.py:142",
         "netra_backend/app/routes/auth_routes/router.py:67",
-        "auth_service/auth_core/routes/auth_routes.py:312",
-        "auth_service/auth_core/routes/auth_routes.py:313",
-        "auth_service/auth_core/routes/auth_routes.py:502",
+        "auth_service/auth_core/routes/auth_routes.py:314",
+        "auth_service/auth_core/routes/auth_routes.py:315",
+        "auth_service/auth_core/routes/auth_routes.py:511",
         "frontend/components/AuthGuard.tsx:23",
         "frontend/components/NavLinks.tsx:51",
         "scripts/audit_staging_auth_issues.py:52"
@@ -2263,7 +2287,7 @@
         "netra_backend/app/routes/auth_proxy.py:71",
         "netra_backend/app/routes/auth_proxy.py:170",
         "netra_backend/app/routes/auth_routes/router.py:83",
-        "auth_service/auth_core/routes/auth_routes.py:523"
+        "auth_service/auth_core/routes/auth_routes.py:532"
       ]
     },
     "/logs": {
@@ -2301,8 +2325,8 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/routes/auth_routes/router.py:29",
-        "auth_service/auth_core/routes/auth_routes.py:694",
-        "auth_service/auth_core/routes/auth_routes.py:695"
+        "auth_service/auth_core/routes/auth_routes.py:703",
+        "auth_service/auth_core/routes/auth_routes.py:704"
       ]
     },
     "/message": {
@@ -2513,7 +2537,7 @@
       "value": "/oauth",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:46"
+        "auth_service/auth_core/routes/auth_routes.py:48"
       ]
     },
     "/oauth/google/config": {
@@ -2567,14 +2591,14 @@
       "value": "/password-reset/confirm",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:1533"
+        "auth_service/auth_core/routes/auth_routes.py:1542"
       ]
     },
     "/password-reset/request": {
       "value": "/password-reset/request",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:1523"
+        "auth_service/auth_core/routes/auth_routes.py:1532"
       ]
     },
     "/pattern/{pattern}": {
@@ -2616,9 +2640,11 @@
       "value": "/ping",
       "category": "paths",
       "locations": [
+        "netra_backend/app/core/clickhouse_port_discovery.py:376",
         "netra_backend/app/core/network_constants.py:310",
         "netra_backend/app/routes/monitoring.py:242",
-        "scripts/docker_health_check.py:23"
+        "scripts/docker_health_check.py:23",
+        "scripts/wait_for_db.py:102"
       ]
     },
     "/pool-metrics": {
@@ -2683,8 +2709,8 @@
       "value": "/providers",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:114",
-        "auth_service/auth_core/routes/auth_routes.py:1646"
+        "auth_service/auth_core/routes/auth_routes.py:116",
+        "auth_service/auth_core/routes/auth_routes.py:1655"
       ]
     },
     "/public": {
@@ -2766,7 +2792,7 @@
       "value": "/refresh",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:568"
+        "auth_service/auth_core/routes/auth_routes.py:577"
       ]
     },
     "/register": {
@@ -2776,7 +2802,7 @@
         "netra_backend/app/routes/auth_proxy.py:39",
         "netra_backend/app/routes/auth_proxy.py:133",
         "netra_backend/app/routes/auth_proxy.py:122",
-        "auth_service/auth_core/routes/auth_routes.py:479"
+        "auth_service/auth_core/routes/auth_routes.py:481"
       ]
     },
     "/remediation/{module_name}": {
@@ -2811,7 +2837,15 @@
       "value": "/resources",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/mcp/main.py:196"
+        "netra_backend/app/routes/mcp/main.py:196",
+        "netra_backend/app/routes/mcp_client.py:436"
+      ]
+    },
+    "/resources/fetch": {
+      "value": "/resources/fetch",
+      "category": "paths",
+      "locations": [
+        "netra_backend/app/routes/mcp_client.py:451"
       ]
     },
     "/resources/read": {
@@ -2920,7 +2954,7 @@
       "value": "/secrets/",
       "category": "paths",
       "locations": [
-        "netra_backend/app/core/configuration/secrets.py:408",
+        "netra_backend/app/core/configuration/secrets.py:412",
         "netra_backend/app/core/secret_manager.py:392",
         "auth_service/auth_core/secret_loader.py:124",
         "scripts/fetch_secrets_to_env.py:17",
@@ -2928,7 +2962,7 @@
         "scripts/update_staging_clickhouse_secrets.py:57",
         "scripts/update_staging_clickhouse_secrets.py:187",
         "scripts/validate_oauth_deployment.py:133",
-        "shared/secret_manager_builder.py:333"
+        "shared/secret_manager_builder.py:388"
       ]
     },
     "/sentiment": {
@@ -2954,6 +2988,20 @@
         "netra_backend/app/routes/mcp_client.py:114"
       ]
     },
+    "/servers/{server_name}/disconnect": {
+      "value": "/servers/{server_name}/disconnect",
+      "category": "paths",
+      "locations": [
+        "netra_backend/app/routes/mcp_client.py:390"
+      ]
+    },
+    "/servers/{server_name}/health": {
+      "value": "/servers/{server_name}/health",
+      "category": "paths",
+      "locations": [
+        "netra_backend/app/routes/mcp_client.py:487"
+      ]
+    },
     "/servers/{server_name}/resources": {
       "value": "/servers/{server_name}/resources",
       "category": "paths",
@@ -2965,7 +3013,8 @@
       "value": "/servers/{server_name}/status",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/mcp/main.py:86"
+        "netra_backend/app/routes/mcp/main.py:86",
+        "netra_backend/app/routes/mcp_client.py:368"
       ]
     },
     "/servers/{server_name}/tools": {
@@ -2979,7 +3028,7 @@
       "value": "/service-token",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:618"
+        "auth_service/auth_core/routes/auth_routes.py:627"
       ]
     },
     "/services": {
@@ -3000,7 +3049,7 @@
       "value": "/session",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:719"
+        "auth_service/auth_core/routes/auth_routes.py:728"
       ]
     },
     "/session/{session_id}/feedback": {
@@ -3414,7 +3463,8 @@
       "value": "/tools",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/mcp/main.py:159"
+        "netra_backend/app/routes/mcp/main.py:159",
+        "netra_backend/app/routes/mcp_client.py:405"
       ]
     },
     "/tools/call": {
@@ -3471,6 +3521,13 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/services/fallback_response/diagnostics.py:100"
+      ]
+    },
+    "/tools/{server_name}/{tool_name}/schema": {
+      "value": "/tools/{server_name}/{tool_name}/schema",
+      "category": "paths",
+      "locations": [
+        "netra_backend/app/routes/mcp_client.py:420"
       ]
     },
     "/transactions/active": {
@@ -3577,7 +3634,7 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/routes/quality.py:58",
-        "auth_service/auth_core/routes/auth_routes.py:537"
+        "auth_service/auth_core/routes/auth_routes.py:546"
       ]
     },
     "/var/lib/postgresql/data": {
@@ -3598,9 +3655,9 @@
       "value": "/verify",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:628",
-        "auth_service/auth_core/routes/auth_routes.py:675",
-        "auth_service/auth_core/routes/auth_routes.py:676"
+        "auth_service/auth_core/routes/auth_routes.py:637",
+        "auth_service/auth_core/routes/auth_routes.py:684",
+        "auth_service/auth_core/routes/auth_routes.py:685"
       ]
     },
     "/version": {
@@ -3625,14 +3682,14 @@
         "netra_backend/app/core/secret_manager.py:392",
         "scripts/fetch_secrets_to_env.py:17",
         "scripts/gtm_api_setup.py:1090",
-        "shared/secret_manager_builder.py:333"
+        "shared/secret_manager_builder.py:388"
       ]
     },
     "/versions/latest": {
       "value": "/versions/latest",
       "category": "paths",
       "locations": [
-        "netra_backend/app/core/configuration/secrets.py:408",
+        "netra_backend/app/core/configuration/secrets.py:412",
         "auth_service/auth_core/secret_loader.py:124",
         "scripts/update_staging_clickhouse_secrets.py:187",
         "scripts/validate_oauth_deployment.py:133"
@@ -3665,14 +3722,14 @@
       "value": "/websocket/auth",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:1543"
+        "auth_service/auth_core/routes/auth_routes.py:1552"
       ]
     },
     "/websocket/validate": {
       "value": "/websocket/validate",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:1619"
+        "auth_service/auth_core/routes/auth_routes.py:1628"
       ]
     },
     "/windows/system32": {
@@ -3924,6 +3981,13 @@
         "scripts/import_management.py:244"
       ]
     },
+    "2. Verify _is_test_context() logic in configuration/base.py": {
+      "value": "2. Verify _is_test_context() logic in configuration/base.py",
+      "category": "paths",
+      "locations": [
+        "scripts/monitor_configuration_loops.py:250"
+      ]
+    },
     "2. Verify connectivity: python scripts/validate_staging_db_connection.py": {
       "value": "2. Verify connectivity: python scripts/validate_staging_db_connection.py",
       "category": "paths",
@@ -3992,6 +4056,13 @@
       "category": "paths",
       "locations": [
         "scripts/metadata_tracking/enabler.py:95"
+      ]
+    },
+    "4. Run: python netra_backend/tests/core/test_configuration_regression.py": {
+      "value": "4. Run: python netra_backend/tests/core/test_configuration_regression.py",
+      "category": "paths",
+      "locations": [
+        "scripts/monitor_configuration_loops.py:252"
       ]
     },
     "4. See SPEC/independent_services.xml for details": {
@@ -4113,6 +4184,13 @@
         "scripts/manage_precommit.py:104"
       ]
     },
+    "Docker File Organization Compliance Checker\n\nValidates that Docker files are properly organized according to SPEC/docker_file_organization.xml": {
+      "value": "Docker File Organization Compliance Checker\n\nValidates that Docker files are properly organized according to SPEC/docker_file_organization.xml",
+      "category": "paths",
+      "locations": [
+        "scripts/check_docker_files.py:2"
+      ]
+    },
     "Duplicate Code Detection Script\nPrevents regression of duplicate code patterns identified in WebSocket consolidation\n\nUsage:\n    python scripts/detect_duplicate_code.py [--threshold 0.8] [--report-only]\n    \nThis script detects:\n- Duplicate class names across files\n- Similar function implementations\n- Multiple wrappers for same functionality\n- Parallel implementations of same feature": {
       "value": "Duplicate Code Detection Script\nPrevents regression of duplicate code patterns identified in WebSocket consolidation\n\nUsage:\n    python scripts/detect_duplicate_code.py [--threshold 0.8] [--report-only]\n    \nThis script detects:\n- Duplicate class names across files\n- Similar function implementations\n- Multiple wrappers for same functionality\n- Parallel implementations of same feature",
       "category": "paths",
@@ -4145,7 +4223,7 @@
       "value": "Example: python scripts/deploy_to_gcp.py --project {} --build-local",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:1109"
+        "scripts/deploy_to_gcp.py:1178"
       ]
     },
     "Examples:\n    python scripts/staging_validation_e2e.py --all\n    python scripts/staging_validation_e2e.py --health-only\n    python scripts/staging_validation_e2e.py --auth-flow --websocket-test\n    python scripts/staging_validation_e2e.py --export results.json": {
@@ -4180,7 +4258,7 @@
       "value": "Examples:\n  Default deployment (fast, no checks):\n    python scripts/deploy_to_gcp.py --project netra-staging --build-local\n    \n  With pre-deployment checks:\n    python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks\n    \n  Cloud Build (slower):\n    python scripts/deploy_to_gcp.py --project netra-staging\n    \nSee SPEC/gcp_deployment.xml for detailed guidelines.",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:1075"
+        "scripts/deploy_to_gcp.py:1142"
       ]
     },
     "Examples:\n  Default deployment (with checks):\n    python scripts/deploy_staging_with_sa.py\n    \n  Quick deployment (no checks):\n    python scripts/deploy_staging_with_sa.py --no-checks\n    \n  Specify service account key:\n    python scripts/deploy_staging_with_sa.py --key path/to/key.json": {
@@ -4341,7 +4419,14 @@
       "value": "Path to service account JSON key file (default: config/netra-staging-7a1059b7cf26.json)",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:1100"
+        "scripts/deploy_to_gcp.py:1167"
+      ]
+    },
+    "Pre-Deployment Audit Script\nImplements SPEC/pre_deployment_audit.xml to catch LLM coding errors before deployment\nFocuses on RECENT changes and NEW issues, not pre-existing violations": {
+      "value": "Pre-Deployment Audit Script\nImplements SPEC/pre_deployment_audit.xml to catch LLM coding errors before deployment\nFocuses on RECENT changes and NEW issues, not pre-existing violations",
+      "category": "paths",
+      "locations": [
+        "scripts/pre_deployment_audit.py:2"
       ]
     },
     "Pre-commit hook for duplicate code detection.\nIntegrates with existing detect_duplicate_code.py for fast incremental checks.\n\nUsage:\n    python scripts/precommit_duplicate_detector.py [files...]\n    \nThis script:\n1. Performs fast duplicate detection on changed files\n2. Checks against known duplicate patterns\n3. Integrates with existing architecture compliance": {
@@ -6557,6 +6642,20 @@
         "scripts/docker_log_issue_creator.py:313"
       ]
     },
+    "python scripts/docker_env_manager.py start": {
+      "value": "python scripts/docker_env_manager.py start",
+      "category": "paths",
+      "locations": [
+        "scripts/docker_log_monitor.py:434"
+      ]
+    },
+    "python scripts/docker_env_manager.py stop all": {
+      "value": "python scripts/docker_env_manager.py stop all",
+      "category": "paths",
+      "locations": [
+        "scripts/docker_log_monitor.py:433"
+      ]
+    },
     "python scripts/docker_services.py logs netra      # View Netra logs": {
       "value": "python scripts/docker_services.py logs netra      # View Netra logs",
       "category": "paths",
@@ -6684,6 +6783,13 @@
       "category": "paths",
       "locations": [
         "scripts/unified_import_manager.py:577"
+      ]
+    },
+    "python tests/post_deployment/test_auth_integration.py --environment": {
+      "value": "python tests/post_deployment/test_auth_integration.py --environment",
+      "category": "paths",
+      "locations": [
+        "scripts/deploy_to_gcp.py:1030"
       ]
     },
     "quality_gate/__init__.py": {

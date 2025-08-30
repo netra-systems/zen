@@ -107,7 +107,7 @@ except ImportError:
 logger = central_logger.get_logger(__name__)
 
 
-class CompleteOAuthChatJourneyTester:
+class TestCompleteOAuthChatJourneyer:
     """Tests complete OAuth to chat journey with real services only."""
     
     def __init__(self):

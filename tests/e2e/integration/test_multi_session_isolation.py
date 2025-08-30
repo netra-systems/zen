@@ -48,7 +48,7 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-class SessionIsolationTester:
+class TestSessionIsolationer:
     """Comprehensive session isolation tester with real services."""
     
     def __init__(self, real_services):

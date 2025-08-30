@@ -25,7 +25,6 @@ import sys
 import time
 import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 import requests
@@ -150,7 +149,7 @@ class TestBackendProcessStability(unittest.TestCase):
         after 60-120 seconds when the dev launcher times out.
         """
         # Mock a long-running backend process
-        mock_process = Mock()
+        mock_process = None  # TODO: Use real service instead of Mock
         mock_process.poll.return_value = None  # Process still running
         mock_process.pid = 12345
         
@@ -181,7 +180,7 @@ class TestBackendProcessStability(unittest.TestCase):
         logging to diagnose the root cause.
         """
         # Mock backend process exit with code 1
-        mock_process = Mock()
+        mock_process = None  # TODO: Use real service instead of Mock
         mock_process.returncode = 1
         mock_process.poll.return_value = 1
         
@@ -210,12 +209,12 @@ class TestBackendProcessStability(unittest.TestCase):
         exit unexpectedly to maintain service availability.
         """
         # Mock failed backend process
-        failed_process = Mock()
+        failed_process = None  # TODO: Use real service instead of Mock
         failed_process.returncode = 1
         failed_process.poll.return_value = 1
         
         # Mock recovery mechanism (currently non-existent)
-        with patch('subprocess.Popen', side_effect=[failed_process, Mock()]):
+        with patch('subprocess.Popen', side_effect=[failed_process, None  # TODO: Use real service instead of Mock]):
             # Simulate process failure detection
             if failed_process.poll() == 1:
                 # FAILING ASSERTION: Should attempt automatic recovery

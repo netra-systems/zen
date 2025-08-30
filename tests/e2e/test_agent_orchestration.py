@@ -14,7 +14,7 @@ COMPLIANCE: File size <300 lines, Functions <8 lines, Real agent testing
 import asyncio
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -29,8 +29,7 @@ from netra_backend.app.websocket_core.manager import WebSocketManager
 UnifiedWebSocketManager = WebSocketManager  # Alias for backward compatibility
 
 
-@pytest.mark.e2e
-class TestSubAgent(BaseSubAgent):
+class MockTestSubAgent(BaseSubAgent):
     """Concrete test implementation of BaseSubAgent for testing."""
     
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool = True) -> None:
@@ -47,7 +46,7 @@ class TestSubAgent(BaseSubAgent):
 
 
 class AgentOrchestrationTester:
-    """Tests multi-agent orchestration and coordination."""
+    """Helper class for testing multi-agent orchestration and coordination."""
     
     def __init__(self, use_mock_llm: bool = True):
         self.config = get_config()
@@ -58,9 +57,9 @@ class AgentOrchestrationTester:
         self.orchestration_metrics = {}
         
         # Create mocked dependencies for SupervisorAgent
-        self.db_session = AsyncMock()
-        self.websocket_manager = AsyncMock()
-        self.tool_dispatcher = AsyncMock()
+        self.db_session = AsyncMock()  # TODO: Use real service instead of Mock
+        self.websocket_manager = AsyncMock()  # TODO: Use real service instead of Mock
+        self.tool_dispatcher = AsyncMock()  # TODO: Use real service instead of Mock
     
     async def create_supervisor_agent(self, name: str) -> SupervisorAgent:
         """Create supervisor agent for orchestration."""
@@ -76,9 +75,9 @@ class AgentOrchestrationTester:
         self.active_agents[name] = supervisor
         return supervisor
     
-    async def create_sub_agent(self, agent_type: str, name: str) -> TestSubAgent:
+    async def create_sub_agent(self, agent_type: str, name: str) -> MockTestSubAgent:
         """Create sub-agent for coordination testing."""
-        sub_agent = TestSubAgent(
+        sub_agent = MockTestSubAgent(
             llm_manager=self.llm_manager, name=name, description=f"Test {agent_type} sub-agent"
         )
         sub_agent.user_id = "test_user_orchestration_001"
@@ -87,7 +86,7 @@ class AgentOrchestrationTester:
     
     @pytest.mark.e2e
     async def test_agent_coordination(self, supervisor: SupervisorAgent,
-                                    sub_agents: List[TestSubAgent], task: str) -> Dict[str, Any]:
+                                    sub_agents: List[MockTestSubAgent], task: str) -> Dict[str, Any]:
         """Test multi-agent coordination workflow."""
         start_time = time.time()
         result = await self._execute_coordination_workflow(supervisor, sub_agents, task)
@@ -136,7 +135,7 @@ class AgentOrchestrationTester:
         return error_test_result
     
     async def _execute_coordination_workflow(self, supervisor: SupervisorAgent, 
-                                           sub_agents: List[TestSubAgent], task: str) -> Dict[str, Any]:
+                                           sub_agents: List[MockTestSubAgent], task: str) -> Dict[str, Any]:
         """Execute coordination workflow between supervisor and sub-agents."""
         # Create a test state for the workflow
         test_state = DeepAgentState(

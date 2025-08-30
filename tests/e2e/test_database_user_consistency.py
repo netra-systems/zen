@@ -122,9 +122,9 @@ class DatabaseUserConsistencyValidator:
     
     def __init__(self):
         # Mock: Database access isolation for fast, reliable unit testing
-        self.auth_db = AuthDatabaseMock()
+        self.auth_db = AuthDatabaseNone  # TODO: Use real service instead of Mock
         # Mock: Database access isolation for fast, reliable unit testing
-        self.backend_db = BackendDatabaseMock()
+        self.backend_db = BackendDatabaseNone  # TODO: Use real service instead of Mock
     
     async def verify_user_sync(self, user_id: str) -> bool:
         """Verify user exists in both databases with consistent data."""

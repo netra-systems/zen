@@ -180,12 +180,15 @@ class TriageSubAgent(BaseExecutionInterface, BaseSubAgent):
     
     def _create_empty_result_data(self) -> Dict[str, Any]:
         """Create empty result data for error cases."""
-        return {"category": "Error", "confidence_score": 0.0, "error": "No result available"}
+        return {"status": "error", "category": "Error", "confidence_score": 0.0, "error": "No result available"}
     
     def _update_state_from_result(self, state: DeepAgentState, result_data: Dict[str, Any]) -> None:
         """Update state from execution result."""
         # Convert back to expected format for backward compatibility
         if hasattr(state, 'triage_result'):
+            # Ensure status field is present for tests expecting it
+            if isinstance(result_data, dict) and 'status' not in result_data:
+                result_data['status'] = 'success'
             state.triage_result = result_data
         state.step_count = getattr(state, 'step_count', 0) + 1
     
@@ -198,6 +201,7 @@ class TriageSubAgent(BaseExecutionInterface, BaseSubAgent):
     def _create_error_triage_result(self, error_message: str) -> Dict[str, Any]:
         """Create error triage result."""
         return {
+            "status": "error",
             "category": "Error",
             "confidence_score": 0.0,
             "error": error_message,

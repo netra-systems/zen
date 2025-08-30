@@ -54,6 +54,7 @@ class TestRealErrorPropagation:
         # Cleanup all resources
         await tester.cleanup_test_environment()
     
+    @pytest.mark.resilience
     async def test_auth_service_failure_propagation(self, error_tester):
         """
         BVJ: Platform/Internal | Goal: Support Cost Reduction | Impact: $45K+ MRR
@@ -91,6 +92,7 @@ class TestRealErrorPropagation:
         logger.info(f"  Invalid Token Chain: {json.dumps(invalid_token_result, indent=2)}")
         logger.info(f"  Expired Token Recovery: {json.dumps(expired_token_result, indent=2)}")
     
+    @pytest.mark.resilience
     async def test_database_error_handling_recovery(self, error_tester):
         """
         BVJ: Platform/Internal | Goal: System Reliability | Impact: Operational scaling
@@ -125,6 +127,7 @@ class TestRealErrorPropagation:
         logger.info(f"Database Error Handling Results:")
         logger.info(f"  System Stability: {json.dumps(system_stability, indent=2)}")
     
+    @pytest.mark.resilience
     async def test_network_failure_retry_logic(self, error_tester):
         """
         BVJ: Platform/Internal | Goal: Reliability | Impact: Automatic error recovery
@@ -155,6 +158,7 @@ class TestRealErrorPropagation:
         logger.info(f"Network Failure Retry Logic Results:")
         logger.info(f"  Retry Logic Effectiveness: {json.dumps(retry_result.get('retry_logic_effective', {}), indent=2)}")
     
+    @pytest.mark.resilience
     async def test_error_correlation_across_services(self, error_tester):
         """
         BVJ: Platform/Internal | Goal: Debugging Efficiency | Impact: Support cost reduction
@@ -186,6 +190,7 @@ class TestRealErrorPropagation:
         logger.info(f"Error Correlation Results:")
         logger.info(f"  Correlation Success: {json.dumps(correlation_result.get('overall_correlation_success', {}), indent=2)}")
     
+    @pytest.mark.resilience
     async def test_user_friendly_error_messages(self, error_tester):
         """
         BVJ: Platform/Internal | Goal: User Experience | Impact: Support cost reduction
@@ -217,6 +222,7 @@ class TestRealErrorPropagation:
         logger.info(f"User-Friendly Message Results:")
         logger.info(f"  Overall Quality: {json.dumps(overall_quality, indent=2)}")
     
+    @pytest.mark.resilience
     async def test_complete_error_propagation_chain_performance(self, error_tester):
         """
         BVJ: Platform/Internal | Goal: System Performance | Impact: <30s execution time

@@ -27,7 +27,6 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -147,7 +146,7 @@ class BackendServiceSimulator:
         })
 
 
-class DatabaseConsistencyTester:
+class TestDatabaseConsistencyer:
     """Orchestrates consistency testing between Auth and Backend services."""
     
     def __init__(self):

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <metadata>
+    <title>Windows Unicode and Emoji Handling</title>
+    <version>1.0.0</version>
+    <created>2025-08-29</created>
+    <purpose>Canonical solutions for Windows Unicode/emoji encoding issues</purpose>
+  </metadata>
+
+  <problem>
+    <description>
+      Windows bash/terminal environments have encoding issues with Unicode characters
+      and emojis, causing failures in git commits, file operations, and console output.
+    </description>
+    <symptoms>
+      - Git commit messages with emojis fail with encoding errors
+      - Python scripts crash when printing Unicode
+      - File operations fail with non-ASCII characters
+      - Terminal displays mojibake or question marks
+    </symptoms>
+  </problem>
+
+  <solutions>
+    <git_commits>
+      <method>HEREDOC with UTF-8</method>
+      <implementation>
+        <!-- Use HEREDOC to avoid shell encoding issues -->
+        git commit -m "$(cat &lt;&lt;'EOF'
+        fix: resolve authentication flow
+
+        Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;
+        EOF
+        )"
+      </implementation>
+      <note>Avoid emojis in git commits on Windows unless explicitly requested</note>
+    </git_commits>
+
+    <python_scripts>
+      <method>Force UTF-8 encoding</method>
+      <implementation>
+        # At script start
+        import sys
+        import io
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+        
+        # For file operations
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+      </implementation>
+    </python_scripts>
+
+    <bash_commands>
+      <method>Set environment variables</method>
+      <implementation>
+        # Before operations
+        export PYTHONIOENCODING=utf-8
+        export LANG=C.UTF-8
+        export LC_ALL=C.UTF-8
+        
+        # For git specifically
+        git config --global core.quotepath false
+        git config --global i18n.commitencoding utf-8
+      </implementation>
+    </bash_commands>
+
+    <file_paths>
+      <method>Quote paths with spaces</method>
+      <implementation>
+        # Always use double quotes for paths with spaces
+        cd "C:/Users/name/My Documents"
+        python "path with spaces/script.py"
+        
+        # Avoid special characters in new file names
+        # Use underscores instead of spaces in created files
+      </implementation>
+    </file_paths>
+  </solutions>
+
+  <best_practices>
+    <rule>Never use emojis in Windows environments unless explicitly requested</rule>
+    <rule>Always specify encoding='utf-8' in Python file operations</rule>
+    <rule>Use HEREDOC for multi-line strings in bash</rule>
+    <rule>Quote all file paths that may contain spaces</rule>
+    <rule>Set PYTHONIOENCODING=utf-8 before running Python scripts</rule>
+  </best_practices>
+
+  <quick_reference>
+    <!-- Most common fix -->
+    <python_unicode_fix>
+      import sys, io
+      sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    </python_unicode_fix>
+    
+    <git_commit_safe>
+      git commit -m "$(cat &lt;&lt;'EOF'
+      Your message here
+      EOF
+      )"
+    </git_commit_safe>
+  </quick_reference>
+</spec>

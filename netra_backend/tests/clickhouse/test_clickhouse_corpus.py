@@ -13,24 +13,24 @@ import uuid
 import pytest
 from netra_backend.app.logging_config import central_logger as logger
 
-from netra_backend.app.database import get_clickhouse_client
 from netra_backend.tests.clickhouse.test_clickhouse_permissions import (
     _check_table_create_permission,
 )
 
+@pytest.mark.real_database
 class TestCorpusTableOperations:
     """Test corpus table creation and management"""
     
     @pytest.mark.asyncio
-    async def test_create_dynamic_corpus_table(self):
+    async def test_create_dynamic_corpus_table(self, async_real_clickhouse_client):
         """Test creating a dynamic corpus table"""
-        async with get_clickhouse_client() as client:
-            # Check CREATE TABLE permission
-            has_create_permission = await _check_table_create_permission(client)
-            if not has_create_permission:
-                pytest.skip("development_user lacks CREATE TABLE privileges")
-            
-            await self._execute_corpus_table_test(client)
+        client = async_real_clickhouse_client
+        # Check CREATE TABLE permission
+        has_create_permission = await _check_table_create_permission(client)
+        if not has_create_permission:
+            pytest.skip("development_user lacks CREATE TABLE privileges")
+        
+        await self._execute_corpus_table_test(client)
 
     async def _execute_corpus_table_test(self, client):
         """Execute corpus table creation and testing"""

@@ -441,6 +441,24 @@ class MockRedisClient:
         
         return True
     
+    async def setex(self, key: str, time: int, value: str):
+        """Mock setex operation - set key with expiration time."""
+        self.command_history.append(('setex', key, time, value))
+        self.operation_count += 1
+        
+        if self.should_fail and self.failure_type == "operation":
+            import redis.asyncio as redis
+            raise redis.RedisError("Mock setex operation failed")
+        
+        self.data[key] = str(value)
+        
+        # Set TTL
+        from datetime import datetime, UTC, timedelta
+        self.ttls[key] = datetime.now(UTC) + timedelta(seconds=time)
+        self.expires[key] = datetime.now(UTC) + timedelta(seconds=time)
+        
+        return True
+    
     async def delete(self, *keys):
         """Mock delete operation supporting multiple keys."""
         self.command_history.append(('delete', *keys))

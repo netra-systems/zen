@@ -90,39 +90,66 @@ class WebSocketService {
   }
 
     private validateAgentMessage(obj: any): WebSocketMessage | UnifiedWebSocketEvent | null {
-    const agentTypes = ['agent_started', 'tool_executing', 'agent_thinking', 'partial_result', 'agent_completed'];
+    const agentTypes = [
+      'agent_started', 'tool_executing', 'agent_thinking', 'partial_result', 'agent_completed',
+      // Additional backend agent types
+      'start_agent', 'agent_response', 'agent_progress', 'agent_error'
+    ];
     if (!agentTypes.includes(obj.type)) return null;
-    // Agent messages require payload
-    if (!obj.payload || typeof obj.payload !== 'object') {
-      logger.warn('Agent message missing payload', undefined, {
-        component: 'WebSocketService',
-        action: 'validate_agent_message',
-        metadata: { type: obj.type }
-      });
-      return null;
+    
+    // Backend messages use 'data' field, frontend expects 'payload'
+    if (!obj.payload && obj.data) {
+      obj.payload = obj.data;
     }
+    
+    // Agent messages should have payload, but allow empty objects
+    if (!obj.payload) {
+      obj.payload = {};
+    }
+    
     return obj;
   }
 
   private validateThreadMessage(obj: any): WebSocketMessage | UnifiedWebSocketEvent | null {
-    const threadTypes = ['thread_created', 'thread_loading', 'thread_loaded', 'thread_renamed'];
+    const threadTypes = [
+      'thread_created', 'thread_loading', 'thread_loaded', 'thread_renamed',
+      // Additional backend thread types
+      'thread_update', 'thread_message'
+    ];
     if (!threadTypes.includes(obj.type)) return null;
-    // Thread messages require payload
-    if (!obj.payload || typeof obj.payload !== 'object') {
-      logger.warn('Thread message missing payload', undefined, {
-        component: 'WebSocketService',
-        action: 'validate_thread_message',
-        metadata: { type: obj.type }
-      });
-      return null;
+    
+    // Backend messages use 'data' field, frontend expects 'payload'
+    if (!obj.payload && obj.data) {
+      obj.payload = obj.data;
     }
+    
+    // Thread messages should have payload, but allow empty objects
+    if (!obj.payload) {
+      obj.payload = {};
+    }
+    
     return obj;
   }
 
   private validateSystemMessage(obj: any): WebSocketMessage | UnifiedWebSocketEvent | null {
-    const systemTypes = ['auth', 'ping', 'pong', 'server_shutdown'];
+    const systemTypes = [
+      'auth', 'ping', 'pong', 'server_shutdown', 'system_message', 'error_message',
+      // Additional backend connection lifecycle types
+      'connect', 'disconnect', 'heartbeat', 'heartbeat_ack',
+      // Backend user message types
+      'user_message',
+      // Broadcasting types
+      'broadcast', 'room_message',
+      // JSON-RPC types for MCP compatibility
+      'jsonrpc_request', 'jsonrpc_response', 'jsonrpc_notification'
+    ];
     if (!systemTypes.includes(obj.type)) return null;
-    // System messages don't require payload but may have metadata
+    
+    // Backend messages use 'data' field, frontend expects 'payload'
+    if (obj.data && !obj.payload) {
+      obj.payload = obj.data;
+    }
+    
     return obj;
   }
 
@@ -193,14 +220,24 @@ class WebSocketService {
     if (this.state === 'connected' || this.state === 'connecting') return false;
     this.state = 'connecting';
     this.status = 'CONNECTING';
-    this.onStatusChange?.(this.status);
+    // Debounce status changes to prevent UI flicker
+    if (this.onStatusChange) {
+      clearTimeout(this.statusChangeTimer);
+      this.statusChangeTimer = setTimeout(() => {
+        this.onStatusChange?.(this.status);
+      }, 10);
+    }
     return true;
   }
+  
+  private statusChangeTimer: NodeJS.Timeout | null = null;
 
   private handleConnectionOpen(url: string, options: WebSocketOptions): void {
     debugLogger.debug('[WebSocketService] Connection opened to:', url);
     this.state = 'connected';
     this.status = 'OPEN';
+    // Use immediate status change for connection open
+    clearTimeout(this.statusChangeTimer);
     this.onStatusChange?.(this.status);
     this.sendAuthToken();
     this.processQueuedMessages();
@@ -267,9 +304,22 @@ class WebSocketService {
       case 'pong':
         this.handleServerPong(message);
         return true;
+      case 'heartbeat':
+        // Respond to heartbeat with heartbeat_ack
+        this.send({ type: 'heartbeat_ack', timestamp: Date.now() });
+        logger.debug('Responded to server heartbeat');
+        return true;
+      case 'heartbeat_ack':
+        // Server acknowledged our heartbeat
+        logger.debug('Heartbeat acknowledged by server');
+        return true;
       case 'server_shutdown':
         this.handleServerShutdown(message);
         return true;
+      case 'connect':
+      case 'system_message':
+        // Connection-related messages, pass through to application
+        return false;
       default:
         return false;
     }
@@ -379,6 +429,7 @@ class WebSocketService {
   private handleConnectionClose(options: WebSocketOptions): void {
     this.state = 'disconnected';
     this.status = 'CLOSED';
+    clearTimeout(this.statusChangeTimer);
     this.onStatusChange?.(this.status);
     this.stopHeartbeat();
     options.onClose?.();
@@ -395,6 +446,7 @@ class WebSocketService {
     });
     this.status = 'CLOSED';
     this.state = 'disconnected';
+    clearTimeout(this.statusChangeTimer);
     this.onStatusChange?.(this.status);
     options.onError?.({
       code: 1006,
@@ -412,6 +464,7 @@ class WebSocketService {
     });
     this.status = 'CLOSED';
     this.state = 'disconnected';
+    clearTimeout(this.statusChangeTimer);
     this.onStatusChange?.(this.status);
     options.onError?.({
       code: 1000,
@@ -731,7 +784,13 @@ class WebSocketService {
 
     this.state = 'connecting';
     this.status = 'CONNECTING';
-    this.onStatusChange?.(this.status);
+    // Use debounced status change to prevent flicker
+    if (this.onStatusChange) {
+      clearTimeout(this.statusChangeTimer);
+      this.statusChangeTimer = setTimeout(() => {
+        this.onStatusChange?.(this.status);
+      }, 10);
+    }
 
     try {
       this.ws = this.createSecureWebSocket(url, options);
@@ -740,6 +799,8 @@ class WebSocketService {
         debugLogger.debug('[WebSocketService] Connection opened to:', url);
         this.state = 'connected';
         this.status = 'OPEN';
+        // Immediate status change on successful connection
+        clearTimeout(this.statusChangeTimer);
         this.onStatusChange?.(this.status);
         
         // CRITICAL FIX: Handle both authenticated and development mode connections
@@ -816,6 +877,7 @@ class WebSocketService {
       this.ws.onclose = (event) => {
         this.state = 'disconnected';
         this.status = 'CLOSED';
+        clearTimeout(this.statusChangeTimer);
         this.onStatusChange?.(this.status);
         this.stopHeartbeat();
         
@@ -868,6 +930,7 @@ class WebSocketService {
         });
         this.status = 'CLOSED';
         this.state = 'disconnected';
+        clearTimeout(this.statusChangeTimer);
         this.onStatusChange?.(this.status);
         
         // Determine error type based on readyState and context
@@ -982,6 +1045,12 @@ class WebSocketService {
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
+    }
+    
+    // Clear status change timer
+    if (this.statusChangeTimer) {
+      clearTimeout(this.statusChangeTimer);
+      this.statusChangeTimer = null;
     }
     
     this.clearTokenRefreshTimers();

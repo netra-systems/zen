@@ -9,7 +9,6 @@ import json
 import os
 import pytest
 import logging
-from unittest.mock import patch, MagicMock
 from unittest import mock
 from typing import Dict, Any
 

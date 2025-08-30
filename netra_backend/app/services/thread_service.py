@@ -133,6 +133,10 @@ class ThreadService(IThreadService):
     
     async def _create_run_with_uow(self, uow, run_data: Dict[str, Any], thread_id: str, assistant_id: str, run_id: str) -> Run:
         """Create run using unit of work"""
+        # Ensure the assistant exists before creating the run
+        if assistant_id == "netra-assistant":
+            await uow.assistants.ensure_netra_assistant(uow.session)
+        
         run = await uow.runs.create(**run_data)
         if not run:
             raise DatabaseError(message=f"Failed to create run for thread {thread_id}", context={"thread_id": thread_id, "assistant_id": assistant_id})

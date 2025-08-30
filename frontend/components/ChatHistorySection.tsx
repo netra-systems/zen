@@ -137,10 +137,13 @@ export const ChatHistorySection: React.FC = () => {
     }
   };
 
-  const formatDate = (timestamp: number | null | undefined) => {
-    if (!timestamp || isNaN(timestamp)) return 'Unknown date';
+  const formatDate = (timestamp: string | number | null | undefined) => {
+    if (!timestamp) return 'Unknown date';
     
-    const date = new Date(timestamp * 1000);
+    // Unix timestamps from backend are in seconds, need to convert to milliseconds
+    const date = typeof timestamp === 'string' 
+      ? new Date(timestamp) 
+      : new Date(timestamp * 1000);
     if (isNaN(date.getTime())) return 'Unknown date';
     
     const now = new Date();

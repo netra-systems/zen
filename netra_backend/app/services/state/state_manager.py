@@ -67,7 +67,13 @@ class StateManager:
         self.snapshot_interval = snapshot_interval
         self._init_storage_components()
         self._init_state_tracking()
-        self._lock = asyncio.Lock()
+        self._lock = None  # Defer lock creation until needed
+
+    def _get_lock(self) -> asyncio.Lock:
+        """Get or create the asyncio lock in the current event loop."""
+        if self._lock is None:
+            self._lock = asyncio.Lock()
+        return self._lock
 
     def _init_storage_components(self) -> None:
         """Initialize storage-related components"""
@@ -93,8 +99,17 @@ class StateManager:
 
     async def _get_from_redis(self, key: str, default: Any) -> Any:
         """Get value from Redis storage"""
-        value = await self._redis.get(f"state:{key}")
-        return json.loads(value) if value else default
+        if (not self._redis or 
+            not getattr(self._redis, 'enabled', True) or
+            not getattr(self._redis, 'redis_client', None)):
+            return default
+        
+        try:
+            value = await self._redis.get(f"state:{key}")
+            return json.loads(value) if value else default
+        except Exception as e:
+            logger.debug(f"Redis get operation failed for key {key}: {e}")
+            return default
 
     async def _get_from_hybrid(self, key: str, default: Any) -> Any:
         """Get value from hybrid storage"""
@@ -105,16 +120,27 @@ class StateManager:
 
     async def _check_redis_fallback(self, key: str) -> Any:
         """Check Redis as fallback for hybrid storage"""
-        redis_value = await self._redis.get(f"state:{key}")
-        if redis_value:
-            value = json.loads(redis_value)
-            self._memory_store[key] = value
-            return value
+        # Skip Redis fallback if Redis is disabled, unavailable, or not connected
+        if (not self._redis or 
+            not getattr(self._redis, 'enabled', True) or
+            not getattr(self._redis, 'redis_client', None)):
+            return None
+        
+        try:
+            redis_value = await self._redis.get(f"state:{key}")
+            if redis_value:
+                value = json.loads(redis_value)
+                self._memory_store[key] = value
+                return value
+        except Exception as e:
+            # If Redis operation fails, silently fallback to memory-only
+            logger.debug(f"Redis fallback failed for key {key}: {e}")
+            return None
         return None
     
     async def set(self, key: str, value: Any, transaction_id: Optional[str] = None) -> None:
         """Set state value"""
-        async with self._lock:
+        async with self._get_lock():
             if transaction_id:
                 await self._handle_transactional_set(transaction_id, key, value)
             else:
@@ -128,7 +154,7 @@ class StateManager:
     
     async def delete(self, key: str, transaction_id: Optional[str] = None) -> None:
         """Delete state value"""
-        async with self._lock:
+        async with self._get_lock():
             if transaction_id:
                 await self._handle_transactional_delete(transaction_id, key)
             else:
@@ -228,7 +254,15 @@ class StateManager:
             self._memory_store[key] = value
         
         if self.storage in [StateStorage.REDIS, StateStorage.HYBRID]:
-            await self._redis.set(f"state:{key}", json.dumps(value), ex=3600)
+            # Only use Redis if it's available, enabled, and connected
+            if (self._redis and 
+                getattr(self._redis, 'enabled', True) and
+                getattr(self._redis, 'redis_client', None)):
+                try:
+                    await self._redis.set(f"state:{key}", json.dumps(value), ex=3600)
+                except Exception as e:
+                    # If Redis operation fails, log debug message and continue with memory storage
+                    logger.debug(f"Redis store operation failed for key {key}: {e}")
     
     async def _apply_delete(self, key: str) -> None:
         """Apply a state deletion"""
@@ -242,7 +276,15 @@ class StateManager:
             self._memory_store.pop(key, None)
         
         if self.storage in [StateStorage.REDIS, StateStorage.HYBRID]:
-            await self._redis.delete(f"state:{key}")
+            # Only use Redis if it's available, enabled, and connected
+            if (self._redis and 
+                getattr(self._redis, 'enabled', True) and
+                getattr(self._redis, 'redis_client', None)):
+                try:
+                    await self._redis.delete(f"state:{key}")
+                except Exception as e:
+                    # If Redis operation fails, log debug message and continue
+                    logger.debug(f"Redis delete operation failed for key {key}: {e}")
     
     def subscribe(self, key: str, listener: Callable) -> None:
         """Subscribe to state changes"""
@@ -379,7 +421,7 @@ class StateManager:
     
     async def clear(self) -> None:
         """Clear all state"""
-        async with self._lock:
+        async with self._get_lock():
             await self._clear_memory_storage()
             await self._clear_redis_storage()
             logger.info("Cleared all state")
@@ -392,9 +434,11 @@ class StateManager:
     async def _clear_redis_storage(self):
         """Clear Redis storage"""
         if self.storage in [StateStorage.REDIS, StateStorage.HYBRID]:
-            keys = await self._redis.keys("state:*")
-            if keys:
-                await self._redis.delete(*keys)
+            # Only use Redis if it's available and enabled
+            if self._redis and getattr(self._redis, 'enabled', True):
+                keys = await self._redis.keys("state:*")
+                if keys:
+                    await self._redis.delete(*keys)
     
     def get_stats(self) -> Dict[str, Any]:
         """Get state manager statistics"""

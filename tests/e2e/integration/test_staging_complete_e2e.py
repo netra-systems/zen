@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class StagingTestResult:
+class TestStagingResult:
     """Container for staging test results."""
     test_name: str
     status: str  # passed, failed, skipped
@@ -39,7 +39,7 @@ class StagingTestResult:
     details: Optional[Dict] = None
 
 
-class StagingE2ETestSuite:
+class TestStagingE2ESuite:
     """Complete staging environment E2E test suite."""
     
     def __init__(self):

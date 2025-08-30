@@ -8,6 +8,7 @@ from typing import Dict, List, Optional
 
 from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.app.core.error_codes import ErrorSeverity
+from netra_backend.app.core.exceptions_agent import AgentError
 
 
 class CorpusAdminError(AgentError):

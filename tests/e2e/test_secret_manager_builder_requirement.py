@@ -42,7 +42,6 @@ different patterns, creating maintenance burden and drift risk.
 import os
 import pytest
 from typing import Dict, Any, Optional, Set
-from unittest.mock import Mock, patch
 
 from test_framework.environment_markers import env
 from netra_backend.app.core.isolated_environment import get_env
@@ -408,6 +407,7 @@ class TestSecretManagerBuilderRequirement:
 
     @pytest.mark.xfail(reason="Expected failure: Documents gaps in production validation capabilities")
     @env("staging") 
+    @pytest.mark.e2e
     def test_production_readiness_validation(self):
         """
         Test production readiness of current secret management.

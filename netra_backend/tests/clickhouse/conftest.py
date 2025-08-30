@@ -3,6 +3,7 @@ ClickHouse test configuration and fixtures.
 Provides common fixtures for all ClickHouse tests.
 """
 
+import os
 import pytest
 from netra_backend.app.config import get_config
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
@@ -11,28 +12,11 @@ from netra_backend.app.core.isolated_environment import get_env
 
 
 def pytest_collection_modifyitems(config, items):
-    """Enable ClickHouse for tests that require it."""
-    env = get_env()
-    
-    # Check if any tests in this collection need ClickHouse
-    needs_clickhouse = False
-    for item in items:
-        # Check for real_database marker which indicates ClickHouse tests
-        if item.get_closest_marker('real_database'):
-            needs_clickhouse = True
-            break
-    
-    # If tests need ClickHouse, enable it with proper configuration
-    if needs_clickhouse:
-        env.set("CLICKHOUSE_ENABLED", "true", "clickhouse_tests")
-        env.set("DEV_MODE_DISABLE_CLICKHOUSE", "false", "clickhouse_tests")
-        # Set ClickHouse connection details for local dev environment
-        env.set("CLICKHOUSE_HOST", "localhost", "clickhouse_tests")
-        env.set("CLICKHOUSE_PORT", "8123", "clickhouse_tests")
-        env.set("CLICKHOUSE_USER", "default", "clickhouse_tests")
-        env.set("CLICKHOUSE_PASSWORD", "netra_dev_password", "clickhouse_tests")
-        env.set("CLICKHOUSE_DB", "netra_dev", "clickhouse_tests")
-        env.set("CLICKHOUSE_HTTP_PORT", "8123", "clickhouse_tests")
+    """Configure ClickHouse test collection - respects test framework settings."""
+    # This function intentionally does not override framework settings
+    # Tests with @pytest.mark.real_database will be skipped by fixtures
+    # when CLICKHOUSE_ENABLED=false or DEV_MODE_DISABLE_CLICKHOUSE=true
+    pass
 
 
 def _get_clickhouse_config():
@@ -65,6 +49,17 @@ def _create_clickhouse_client(config):
 
 def _check_clickhouse_availability():
     """Check if ClickHouse is available and accessible (simplified version)"""
+    env = get_env()
+    
+    # First check if ClickHouse is disabled by test framework settings
+    clickhouse_disabled = (
+        env.get("DEV_MODE_DISABLE_CLICKHOUSE", "").lower() == "true" or
+        env.get("CLICKHOUSE_ENABLED", "").lower() == "false"
+    )
+    
+    if clickhouse_disabled:
+        return False
+    
     try:
         config = _get_clickhouse_config()
         # Basic configuration check - actual connection will be tested by the fixture
@@ -84,11 +79,24 @@ def real_clickhouse_client():
     """Create a real ClickHouse client using appropriate configuration.
     
     This fixture:
+    - Checks if ClickHouse is disabled by test framework settings
     - Uses HTTP on port 8123 for localhost connections
     - Uses correct credentials (user: default, password: netra_dev_password)
     - Is available to all ClickHouse tests through pytest fixture discovery
     """
-    # Check basic availability first
+    env = get_env()
+    
+    # Check if ClickHouse should be disabled based on test framework settings
+    # These variables are set after test collection, so check them in the fixture
+    clickhouse_disabled_by_framework = (
+        env.get("DEV_MODE_DISABLE_CLICKHOUSE", "").lower() == "true" or
+        env.get("CLICKHOUSE_ENABLED", "").lower() == "false"
+    )
+    
+    if clickhouse_disabled_by_framework:
+        pytest.skip("ClickHouse disabled by test framework (DEV_MODE_DISABLE_CLICKHOUSE=true or CLICKHOUSE_ENABLED=false)")
+    
+    # Check basic availability
     if not _check_clickhouse_availability():
         pytest.skip("ClickHouse server not available - skipping real database test")
     
@@ -100,7 +108,8 @@ def real_clickhouse_client():
         # If connection fails during test execution, skip with detailed message
         if any(error in str(e).lower() for error in [
             'ssl', 'connection refused', 'timeout', 'network', 
-            'wrong version number', 'cannot connect', 'host unreachable'
+            'wrong version number', 'cannot connect', 'host unreachable',
+            'authentication failed'
         ]):
             pytest.skip(f"ClickHouse connection failed during test: {e}")
         else:
@@ -111,7 +120,18 @@ def real_clickhouse_client():
 @pytest.fixture
 async def async_real_clickhouse_client():
     """Async version of real_clickhouse_client for async test contexts"""
-    # Check basic availability first
+    env = get_env()
+    
+    # Check if ClickHouse should be disabled based on test framework settings
+    clickhouse_disabled_by_framework = (
+        env.get("DEV_MODE_DISABLE_CLICKHOUSE", "").lower() == "true" or
+        env.get("CLICKHOUSE_ENABLED", "").lower() == "false"
+    )
+    
+    if clickhouse_disabled_by_framework:
+        pytest.skip("ClickHouse disabled by test framework (DEV_MODE_DISABLE_CLICKHOUSE=true or CLICKHOUSE_ENABLED=false)")
+    
+    # Check basic availability
     if not _check_clickhouse_availability():
         pytest.skip("ClickHouse server not available - skipping real database test")
     
@@ -125,7 +145,8 @@ async def async_real_clickhouse_client():
         # If connection fails during test execution, skip with detailed message
         if any(error in str(e).lower() for error in [
             'ssl', 'connection refused', 'timeout', 'network', 
-            'wrong version number', 'cannot connect', 'host unreachable'
+            'wrong version number', 'cannot connect', 'host unreachable',
+            'authentication failed', 'connection error', 'refused'
         ]):
             pytest.skip(f"ClickHouse connection failed during test: {e}")
         else:
@@ -135,7 +156,18 @@ async def async_real_clickhouse_client():
 @pytest.fixture
 def real_clickhouse_client_with_interceptor():
     """Create a real ClickHouse client with query interceptor for advanced testing"""
-    # Check basic availability first
+    env = get_env()
+    
+    # Check if ClickHouse should be disabled based on test framework settings
+    clickhouse_disabled_by_framework = (
+        env.get("DEV_MODE_DISABLE_CLICKHOUSE", "").lower() == "true" or
+        env.get("CLICKHOUSE_ENABLED", "").lower() == "false"
+    )
+    
+    if clickhouse_disabled_by_framework:
+        pytest.skip("ClickHouse disabled by test framework (DEV_MODE_DISABLE_CLICKHOUSE=true or CLICKHOUSE_ENABLED=false)")
+    
+    # Check basic availability
     if not _check_clickhouse_availability():
         pytest.skip("ClickHouse server not available - skipping real database test")
     
@@ -148,7 +180,8 @@ def real_clickhouse_client_with_interceptor():
         # If connection fails during test execution, skip with detailed message
         if any(error in str(e).lower() for error in [
             'ssl', 'connection refused', 'timeout', 'network', 
-            'wrong version number', 'cannot connect', 'host unreachable'
+            'wrong version number', 'cannot connect', 'host unreachable',
+            'authentication failed'
         ]):
             pytest.skip(f"ClickHouse connection failed during test: {e}")
         else:

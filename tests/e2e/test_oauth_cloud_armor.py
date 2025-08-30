@@ -25,7 +25,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 
-class OAuthCloudArmorTest:
+class TestOAuthCloudArmor:
     """Test OAuth flow and Cloud Armor integration."""
     
     def __init__(self, environment: str = "staging"):
@@ -61,6 +61,8 @@ class OAuthCloudArmorTest:
         }
         return urls.get(env, urls["staging"])
     
+    @pytest.mark.auth
+    @pytest.mark.e2e
     async def test_oauth_callback_not_blocked(self) -> Dict:
         """Test that OAuth callback with encoded parameters is not blocked."""
         print("\n🔍 Testing OAuth callback endpoint...")
@@ -191,6 +193,8 @@ class OAuthCloudArmorTest:
                 "error": str(e)
             }
     
+    @pytest.mark.auth
+    @pytest.mark.e2e
     async def test_sql_injection_still_blocked(self) -> Dict:
         """Ensure SQL injection attempts are still blocked on other paths."""
         print("\n🛡️  Testing SQL injection protection...")

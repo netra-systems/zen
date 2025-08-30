@@ -8,7 +8,6 @@ import asyncio
 import time
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
 
@@ -125,7 +124,7 @@ class RealTokenUsage:
         return 0.003
 
 
-class LLMIntegrationTester:
+class TestLLMIntegrationer:
     """Core LLM integration testing class"""
     
     def __init__(self):
@@ -155,7 +154,7 @@ def sample_token_usage():
     """Fixture providing sample token usage for cost testing"""
     return RealTokenUsage(prompt_tokens=1000, completion_tokens=500, total_tokens=1500)
 
-class NetraTestException(Exception):
+class TestNetraException(Exception):
     """Test exception for E2E testing"""
     pass
 

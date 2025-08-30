@@ -121,3 +121,13 @@ class CorpusApprovalValidator:
     def _get_approval_prompt(self) -> str:
         """Get approval prompt text"""
         return "\n**Do you approve this operation?**\nReply with 'approve' to proceed or 'cancel' to abort."
+    
+    async def validate_approval_required(
+        self, 
+        request: CorpusOperationRequest, 
+        state: DeepAgentState, 
+        run_id: str, 
+        stream_updates: bool
+    ) -> bool:
+        """Validate if approval is required for the operation."""
+        return await self.check_approval_requirements(request, state)

@@ -32,7 +32,6 @@ import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import Any, AsyncIterator, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
 
@@ -126,11 +125,11 @@ async def mock_db_session():
     # Mock: Database session isolation for transaction testing without real database dependency
     session = AsyncMock(spec=AsyncSession)
     # Mock: Session isolation for controlled testing without external state
-    session.commit = AsyncMock()
+    session.commit = AsyncNone  # TODO: Use real service instead of Mock
     # Mock: Session isolation for controlled testing without external state
-    session.rollback = AsyncMock()
+    session.rollback = AsyncNone  # TODO: Use real service instead of Mock
     # Mock: Session isolation for controlled testing without external state
-    session.close = AsyncMock()
+    session.close = AsyncNone  # TODO: Use real service instead of Mock
     return session
 
 
@@ -177,7 +176,7 @@ async def failing_websocket_manager():
     
     manager.send_message = mock_send_message
     # Mock: Generic component isolation for controlled unit testing
-    manager.broadcast = AsyncMock()
+    manager.broadcast = AsyncNone  # TODO: Use real service instead of Mock
     # Mock: Async component isolation for testing without real async operations
     manager.is_connected = AsyncMock(return_value=True)
     
@@ -209,7 +208,7 @@ async def chat_orchestrator_with_failures(
     """Chat orchestrator configured to expose various failure modes"""
     # Mock orchestrator instead of using real one due to circular import
     # Mock: Generic component isolation for controlled unit testing
-    orchestrator = AsyncMock()
+    orchestrator = AsyncNone  # TODO: Use real service instead of Mock
     orchestrator.db_session = mock_db_session
     orchestrator.llm_manager = failing_llm_manager
     orchestrator.websocket_manager = failing_websocket_manager
@@ -816,7 +815,7 @@ class TestMultiTurnConversationFlow:
             
             # Simulate interruption (recreate orchestrator)
             # Mock: Generic component isolation for controlled unit testing
-            new_orchestrator = AsyncMock()
+            new_orchestrator = AsyncNone  # TODO: Use real service instead of Mock
             new_orchestrator.db_session = mock_db_session
             new_orchestrator.llm_manager = failing_llm_manager
             new_orchestrator.websocket_manager = failing_websocket_manager

@@ -18,7 +18,6 @@ import json
 import subprocess
 from pathlib import Path
 from typing import Dict, List, Tuple, Any
-from unittest.mock import patch, MagicMock
 import pytest
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.environment_markers import env, env_requires, dev_and_staging
@@ -154,7 +153,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
             with patch.dict('os.environ', scenario['env']):
                 # Mock client-side window object
                 # Mock: Generic component isolation for controlled unit testing
-                mock_window = MagicMock()
+                mock_window = MagicNone  # TODO: Use real service instead of Mock
                 mock_window.location.protocol = scenario['client_protocol']
                 
                 # Mock: Component isolation for testing without external dependencies
@@ -266,7 +265,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         for scenario in edge_case_scenarios:
             with patch.dict('os.environ', scenario['env'], clear=True):
                 # Mock: Generic component isolation for controlled unit testing
-                mock_window = MagicMock()
+                mock_window = MagicNone  # TODO: Use real service instead of Mock
                 mock_window.location.protocol = 'https:'
                 mock_window.location.host = scenario['client_host']
                 
@@ -394,7 +393,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         """Simulate client-side API config generation (hydration)."""
         # Mock window object for client-side detection
         # Mock: Generic component isolation for controlled unit testing
-        mock_window = MagicMock()
+        mock_window = MagicNone  # TODO: Use real service instead of Mock
         mock_window.location.protocol = protocol
         mock_window.location.host = host
         

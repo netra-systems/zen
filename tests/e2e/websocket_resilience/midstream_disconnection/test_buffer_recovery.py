@@ -35,6 +35,8 @@ from tests.e2e.websocket_resilience.utils.streaming_response_generator import (
 class TestBufferRecovery:
     """Test buffer recovery during midstream disconnections."""
     
+    @pytest.mark.resilience
+    @pytest.mark.websocket
     async def test_partial_buffer_preservation(self, network_condition, test_user_id:
                                              response_configs):
         """Test partial buffer preservation during disconnection."""
@@ -84,6 +86,8 @@ class TestBufferRecovery:
         combined_size = buffer1.total_size + buffer2.total_size
         assert combined_size >= config["size"] * 0.8  # Allow some loss
         
+    @pytest.mark.resilience
+    @pytest.mark.websocket
     async def test_checksum_validation(self, network_condition, test_user_id:
                                      response_configs):
         """Test checksum validation during buffer recovery."""
@@ -115,6 +119,8 @@ class TestBufferRecovery:
         assert received_checksum is not None
         assert len(received_checksum) == 32  # MD5 hash length
         
+    @pytest.mark.resilience
+    @pytest.mark.websocket
     async def test_large_buffer_handling(self, network_condition, test_user_id:
                                        response_configs):
         """Test large buffer handling during disconnections."""
@@ -149,6 +155,8 @@ class TestBufferRecovery:
         assert buffer.total_size > 4096  # At least half received
         assert buffer.chunks_received > 8
         
+    @pytest.mark.resilience
+    @pytest.mark.websocket
     async def test_concurrent_buffer_recovery(self, network_condition, test_user_id:
                                             response_configs):
         """Test concurrent buffer recovery scenarios."""
@@ -187,6 +195,8 @@ class TestBufferRecovery:
             assert buffer.chunks_received > 0, f"Buffer {i} received no chunks"
             assert buffer.total_size > 0, f"Buffer {i} has no data"
             
+    @pytest.mark.resilience
+    @pytest.mark.websocket
     async def test_memory_efficient_buffering(self, network_condition, test_user_id:
                                             response_configs):
         """Test memory-efficient buffering during long disconnections."""

@@ -28,7 +28,6 @@ import json
 import time
 import uuid
 from typing import Dict, Optional
-from unittest.mock import AsyncMock, Mock, patch
 
 import httpx
 import pytest

@@ -42,7 +42,7 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-class CompleteJWTAuthTester:
+class TestCompleteJWTAuther:
     """Complete JWT authentication flow tester with performance tracking."""
     
     def __init__(self, real_services):

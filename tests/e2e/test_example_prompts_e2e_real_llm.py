@@ -29,7 +29,6 @@ import os
 import time
 from dataclasses import dataclass
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, patch
 
 import pytest
 import pytest_asyncio
@@ -43,7 +42,7 @@ from netra_backend.app.schemas.user_plan import PlanTier
 
 
 @dataclass
-class ExamplePromptTestCase:
+class ExamplePromptCase:
     """Test case structure for example prompts."""
     prompt_id: str
     category: str
@@ -55,14 +54,14 @@ class ExamplePromptTestCase:
     timeout_seconds: int = 30
 
 
-class ExamplePromptsTestData:
+class TestExamplePromptsData:
     """Test data for all 9 example prompts."""
     
     @staticmethod
-    def get_all_test_cases() -> List[ExamplePromptTestCase]:
+    def get_all_test_cases() -> List[ExamplePromptCase]:
         """Get all 9 example prompt test cases."""
         return [
-            ExamplePromptTestCase(
+            ExamplePromptCase(
                 prompt_id="EP-001",
                 category="cost-quality",
                 prompt_text="I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms.",
@@ -71,7 +70,7 @@ class ExamplePromptsTestData:
                 complexity_score=8,
                 plan_tier=PlanTier.PRO
             ),
-            ExamplePromptTestCase(
+            ExamplePromptCase(
                 prompt_id="EP-002",
                 category="latency-cost", 
                 prompt_text="My tools are too slow. I need to reduce the latency by 3x, but I can't spend more money.",
@@ -80,7 +79,7 @@ class ExamplePromptsTestData:
                 complexity_score=7,
                 plan_tier=PlanTier.ENTERPRISE
             ),
-            ExamplePromptTestCase(
+            ExamplePromptCase(
                 prompt_id="EP-003",
                 category="capacity-planning",
                 prompt_text="I'm expecting a 50% increase in agent usage next month. How will this impact my costs and rate limits?",
@@ -89,7 +88,7 @@ class ExamplePromptsTestData:
                 complexity_score=6,
                 plan_tier=PlanTier.ENTERPRISE
             ),
-            ExamplePromptTestCase(
+            ExamplePromptCase(
                 prompt_id="EP-004",
                 category="function-optimization",
                 prompt_text="I need to optimize the 'user_authentication' function. What advanced methods can I use?",
@@ -98,7 +97,7 @@ class ExamplePromptsTestData:
                 complexity_score=5,
                 plan_tier=PlanTier.PRO
             ),
-            ExamplePromptTestCase(
+            ExamplePromptCase(
                 prompt_id="EP-005", 
                 category="model-selection",
                 prompt_text="I'm considering using the new 'gpt-4o' and LLMModel.GEMINI_2_5_FLASH.value models. How effective would they be in my current setup?",
@@ -107,7 +106,7 @@ class ExamplePromptsTestData:
                 complexity_score=9,
                 plan_tier=PlanTier.ENTERPRISE
             ),
-            ExamplePromptTestCase(
+            ExamplePromptCase(
                 prompt_id="EP-006",
                 category="kv-cache-audit", 
                 prompt_text="I want to audit all uses of KV caching in my system to find optimization opportunities.",
@@ -116,7 +115,7 @@ class ExamplePromptsTestData:
                 complexity_score=7,
                 plan_tier=PlanTier.PRO
             ),
-            ExamplePromptTestCase(
+            ExamplePromptCase(
                 prompt_id="EP-007",
                 category="multi-constraint",
                 prompt_text="I need to reduce costs by 20% and improve latency by 2x. I'm also expecting a 30% increase in usage. What should I do?",
@@ -125,7 +124,7 @@ class ExamplePromptsTestData:
                 complexity_score=10,
                 plan_tier=PlanTier.ENTERPRISE
             ),
-            ExamplePromptTestCase(
+            ExamplePromptCase(
                 prompt_id="EP-008",
                 category="tool-upgrade",
                 prompt_text="@Netra which of our Agent tools should switch to GPT-5? Which versions? What to set the verbosity to?",
@@ -134,7 +133,7 @@ class ExamplePromptsTestData:
                 complexity_score=8,
                 plan_tier=PlanTier.ENTERPRISE
             ),
-            ExamplePromptTestCase(
+            ExamplePromptCase(
                 prompt_id="EP-009",
                 category="rollback-analysis",
                 prompt_text="@Netra was the upgrade yesterday to GPT-5 worth it? Rollback anything where quality didn't improve much but cost was higher",

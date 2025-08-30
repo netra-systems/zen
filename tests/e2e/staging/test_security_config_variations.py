@@ -16,6 +16,7 @@ class TestSecurityConfigVariations:
     """Additional test variations for security and configuration issues."""
 
     @staging_only
+    @pytest.mark.e2e
     def test_multiple_secret_keys_all_too_short(self):
         """Test that multiple secret/key environment variables are all too short.
         
@@ -81,6 +82,7 @@ class TestSecurityConfigVariations:
         )
 
     @staging_only
+    @pytest.mark.e2e
     def test_secret_key_entropy_quality_insufficient(self):
         """Test secret key entropy quality is insufficient for security.
         
@@ -149,6 +151,7 @@ class TestSecurityConfigVariations:
         )
 
     @staging_only
+    @pytest.mark.e2e
     def test_oauth_credential_format_validation_failures(self):
         """Test OAuth credentials have incorrect formats or are malformed.
         
@@ -236,6 +239,7 @@ class TestSecurityConfigVariations:
         )
 
     @staging_only 
+    @pytest.mark.e2e
     def test_environment_configuration_cross_validation_failures(self):
         """Test environment configuration cross-validation failures.
         
@@ -327,6 +331,7 @@ class TestSecurityConfigVariations:
         )
 
     @staging_only
+    @pytest.mark.e2e
     def test_security_headers_configuration_missing(self):
         """Test security headers configuration is missing or incorrect.
         

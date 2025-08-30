@@ -22,7 +22,6 @@ import json
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -39,12 +38,12 @@ from netra_backend.tests.helpers.websocket_test_helpers import (
     create_mock_websocket,
 )
 from tests.e2e.config import TEST_USERS, TestDataFactory
-from tests.e2e.harness_complete import UnifiedTestHarnessComplete
+from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 from test_framework.mock_utils import mock_justified
 
 logger = central_logger.get_logger(__name__)
 
-class StatePersistenceTester:
+class TestStatePersistenceer:
     """Core state persistence testing with conversation continuity focus."""
     
     def __init__(self):
@@ -207,11 +206,11 @@ def reconnection_manager(persistence_tester):
 def mock_db_session():
     """Mock database session for state operations."""
     # Mock: Session isolation for controlled testing without external state
-    session = AsyncMock()
+    session = AsyncNone  # TODO: Use real service instead of Mock
     # Mock: Session isolation for controlled testing without external state
-    session.begin.return_value.__aenter__ = AsyncMock()
+    session.begin.return_value.__aenter__ = AsyncNone  # TODO: Use real service instead of Mock
     # Mock: Session isolation for controlled testing without external state
-    session.begin.return_value.__aexit__ = AsyncMock()
+    session.begin.return_value.__aexit__ = AsyncNone  # TODO: Use real service instead of Mock
     return session
 
 @pytest.mark.asyncio

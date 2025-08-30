@@ -16,6 +16,7 @@ class TestNetworkConnectivityVariations:
     """Additional test variations for network connectivity issues."""
 
     @staging_only
+    @pytest.mark.e2e
     async def test_backend_port_sequence_all_unavailable(self):
         """Test that a sequence of backend ports are all unavailable.
         
@@ -56,6 +57,7 @@ class TestNetworkConnectivityVariations:
         )
 
     @staging_only  
+    @pytest.mark.e2e
     async def test_intermittent_connection_failures_pattern(self):
         """Test intermittent connection failures showing unstable network.
         
@@ -107,6 +109,7 @@ class TestNetworkConnectivityVariations:
         )
 
     @staging_only
+    @pytest.mark.e2e
     def test_proxy_configuration_multiple_backends_fail(self):
         """Test that proxy fails to connect to multiple backend variations.
         
@@ -152,6 +155,7 @@ class TestNetworkConnectivityVariations:
         )
 
     @staging_only
+    @pytest.mark.e2e
     async def test_websocket_connection_also_fails(self):
         """Test that WebSocket connections also fail with similar issues.
         

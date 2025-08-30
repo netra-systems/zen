@@ -16,7 +16,6 @@ import asyncio
 import pytest
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import MagicMock, patch
 
 from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
@@ -30,7 +29,7 @@ UnifiedWebSocketManager = WebSocketManager  # Alias for backward compatibility
 from tests.e2e.helpers.llm_config_detector import llm_detector, get_llm_config_for_test
 
 
-class UserMessagePipelineTester:
+class TestUserMessagePipelineer:
     """Tests user message to agent pipeline integration."""
     
     def __init__(self, use_mock_llm: Optional[bool] = None):
@@ -48,11 +47,11 @@ class UserMessagePipelineTester:
     async def create_test_supervisor(self) -> SupervisorAgent:
         """Create supervisor agent for pipeline testing."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_db = MagicMock()
+        mock_db = MagicNone  # TODO: Use real service instead of Mock
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket = MagicMock()
+        mock_websocket = MagicNone  # TODO: Use real service instead of Mock
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = MagicMock()
+        mock_tool_dispatcher = MagicNone  # TODO: Use real service instead of Mock
         
         supervisor = SupervisorAgent(
             db_session=mock_db,

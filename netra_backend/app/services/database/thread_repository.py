@@ -4,6 +4,7 @@ Handles all thread-related database operations.
 """
 
 import time
+import uuid
 from typing import List, Optional
 
 from sqlalchemy import and_, select
@@ -35,12 +36,18 @@ class ThreadRepository(BaseRepository[Thread]):
             return []
     
     async def get_or_create_for_user(self, db: AsyncSession, user_id: str) -> Optional[Thread]:
-        """Get existing thread for user or create new one"""
-        thread_id = f"thread_{user_id}"
+        """Get existing thread for user or create new one
         
-        thread = await self.get_by_id(db, thread_id)
-        if thread:
-            return thread
+        First checks for existing active threads for the user.
+        If none exist, creates a new thread with a unique UUID-based ID.
+        """
+        # First check if user has any existing active threads
+        existing_thread = await self.get_active_thread(db, user_id)
+        if existing_thread:
+            return existing_thread
+        
+        # Create new thread with unique ID
+        thread_id = f"thread_{uuid.uuid4().hex[:16]}"
         
         return await self.create(
             db=db,

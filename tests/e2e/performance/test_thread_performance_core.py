@@ -30,7 +30,7 @@ from tests.e2e.fixtures.core.thread_test_fixtures_core import (
 
 logger = central_logger.get_logger(__name__)
 
-class ThreadPerformanceTester:
+class TestThreadPerformanceer:
     """Comprehensive thread performance testing."""
     
     def __init__(self, ws_fixtures: ThreadWebSocketFixtures, 

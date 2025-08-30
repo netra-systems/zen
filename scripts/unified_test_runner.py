@@ -42,19 +42,13 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 try:
     from dev_launcher.isolated_environment import get_env
 except ImportError:
-    # Fallback for standalone execution
-    class FallbackEnv:
-        def get(self, key, default=None):
-            return os.getenv(key, default)
-        def set(self, key, value, source="test_runner"):
-            os.environ[key] = value
-    
-    def get_env():
-        return FallbackEnv()
+    # Hard failure - IsolatedEnvironment is required for test runner
+    raise RuntimeError("IsolatedEnvironment required for test runner. Cannot import from dev_launcher.isolated_environment")
 
 # Import test framework - using absolute imports from project root
 from test_framework.runner import UnifiedTestRunner as FrameworkRunner
-from test_framework.test_config import configure_dev_environment, configure_test_environment, configure_real_llm
+from test_framework.test_config import configure_dev_environment, configure_mock_environment, configure_test_environment
+from test_framework.llm_config_manager import configure_llm_testing, LLMTestMode
 from test_framework.test_discovery import TestDiscovery
 from test_framework.test_validation import TestValidation
 
@@ -77,6 +71,9 @@ try:
 except ImportError:
     TestExecutionTracker = None
     TestRunRecord = None
+
+# Service availability checking
+from test_framework.service_availability import require_real_services, ServiceUnavailableError
 
 
 class UnifiedTestRunner:
@@ -106,7 +103,8 @@ class UnifiedTestRunner:
         self.cypress_runner = None
         
         # Test execution timeout fix for iterations 41-60
-        self.max_collection_size = int(os.getenv("MAX_TEST_COLLECTION_SIZE", "1000"))
+        env = get_env()
+        self.max_collection_size = int(env.get("MAX_TEST_COLLECTION_SIZE", "1000"))
         
         # Test configurations - Use project root as working directory to fix import issues
         self.test_configs = {
@@ -157,6 +155,10 @@ class UnifiedTestRunner:
         
         # Configure environment
         self._configure_environment(args)
+        
+        # Check service availability if real services are requested
+        if args.real_services or args.real_llm or args.env in ['dev', 'staging']:
+            self._check_service_availability(args)
         
         # Start test tracking session
         if self.test_tracker:
@@ -240,14 +242,14 @@ class UnifiedTestRunner:
                 env.set('WEBSOCKET_URL', env.get('WEBSOCKET_URL', 'ws://localhost:8000'), 'test_runner')
         else:
             # Default: Configure testing environment for unit/integration tests
-            configure_test_environment()
+            configure_mock_environment()
         
         if args.real_llm:
-            configure_real_llm(
-                model="gemini-2.5-flash",
+            configure_llm_testing(
+                mode=LLMTestMode.REAL,
+                model="gemini-2.5-pro",
                 timeout=60,
                 parallel="auto",
-                test_level="category",
                 use_dedicated_env=True
             )
         
@@ -278,8 +280,10 @@ class UnifiedTestRunner:
             if not env.get(key):
                 env.set(key, value, "test_runner_secrets")
         
-        # Try to load .env.test file if it exists
-        test_env_file = self.project_root / ".env.test"
+        # Try to load .env.mock file (or legacy .env.test) if it exists
+        test_env_file = self.project_root / ".env.mock"
+        if not test_env_file.exists():
+            test_env_file = self.project_root / ".env.test"  # Legacy fallback
         if test_env_file.exists():
             try:
                 from dotenv import load_dotenv
@@ -288,7 +292,53 @@ class UnifiedTestRunner:
                 # dotenv not available, use manual loading
                 pass
             except Exception as e:
-                print(f"Warning: Could not load .env.test file: {e}")
+                print(f"Warning: Could not load {test_env_file.name} file: {e}")
+    
+    def _check_service_availability(self, args: argparse.Namespace):
+        """Check availability of required real services before running tests."""
+        print("Checking real service availability...")
+        
+        # Determine which services to check based on arguments and environment
+        required_services = []
+        
+        if args.real_services or args.env in ['dev', 'staging']:
+            required_services.extend(['postgresql', 'redis'])
+            
+        if args.real_llm:
+            required_services.append('llm')
+            
+        # Always check Docker for dev/staging environments as most tests use it
+        if args.env in ['dev', 'staging']:
+            required_services.append('docker')
+        
+        if not required_services:
+            return
+        
+        # Remove duplicates while preserving order
+        required_services = list(dict.fromkeys(required_services))
+        
+        try:
+            # Check services with appropriate timeout
+            timeout = 10.0 if args.env == 'staging' else 5.0
+            require_real_services(
+                services=required_services,
+                timeout=timeout
+            )
+            print(f"[OK] All required services are available: {', '.join(required_services)}")
+            
+        except ServiceUnavailableError as e:
+            print(f"\n[FAIL] SERVICE AVAILABILITY CHECK FAILED\n")
+            print(str(e))
+            print(f"\nTIP: For mock testing, remove --real-services or --real-llm flags")
+            print(f"TIP: For quick development setup, run: python scripts/dev_launcher.py\n")
+            
+            # Exit immediately - don't waste time on tests that will fail
+            import sys
+            sys.exit(1)
+        
+        except Exception as e:
+            print(f"⚠️  Unexpected error during service availability check: {e}")
+            print("Continuing with tests, but failures may occur if services are unavailable...")
     
     def _determine_categories_to_run(self, args: argparse.Namespace) -> List[str]:
         """Determine which categories to run based on arguments."""
@@ -476,6 +526,7 @@ class UnifiedTestRunner:
             "integration": ["backend"],
             "api": ["backend"],
             "database": ["backend"],
+            "post_deployment": ["backend"],  # Post-deployment tests run from backend
             "websocket": ["backend"],
             "agent": ["backend"],
             "security": ["auth"],
@@ -532,6 +583,11 @@ class UnifiedTestRunner:
             sys.stdout.flush()
             sys.stderr.flush()
             
+            # Prepare environment for subprocess with proper isolation
+            env_manager = get_env()
+            subprocess_env = env_manager.get_subprocess_env()
+            subprocess_env.update({'PYTHONUNBUFFERED': '1', 'PYTHONUTF8': '1'})
+            
             # Use subprocess.run with proper buffering for Windows
             result = subprocess.run(
                 cmd,
@@ -542,8 +598,7 @@ class UnifiedTestRunner:
                 encoding='utf-8',
                 errors='replace',
                 timeout=timeout_seconds,
-                # Force immediate output on Windows
-                env={**os.environ, 'PYTHONUNBUFFERED': '1', 'PYTHONUTF8': '1'}
+                env=subprocess_env
             )
             # Handle unicode encoding issues by cleaning the output
             if result.stdout:
@@ -597,7 +652,7 @@ class UnifiedTestRunner:
         local_backend = quick_service_check("localhost", 8000)
         
         if not docker_available and not (local_postgres and local_redis):
-            return False, (
+            raise RuntimeError(
                 "Cannot run Cypress tests: Docker Desktop not running and "
                 "required local services not available. "
                 "Either start Docker Desktop or run local PostgreSQL (port 5432) "
@@ -605,7 +660,7 @@ class UnifiedTestRunner:
             )
         
         if not local_backend:
-            return False, (
+            raise RuntimeError(
                 "Cannot run Cypress tests: Backend service not running on port 8000. "
                 "Start the backend service first."
             )
@@ -622,19 +677,12 @@ class UnifiedTestRunner:
         """Run Cypress E2E tests using the CypressTestRunner."""
         print(f"Running Cypress tests for category: {category_name}")
         
-        # Early check for service availability
-        can_run, message = self._can_run_cypress_tests()
-        if not can_run:
-            print(f"SKIPPING Cypress tests: {message}")
-            return {
-                "success": False,
-                "duration": 0,
-                "output": "",
-                "errors": message,
-                "category": "cypress",
-                "skipped": True,
-                "skip_reason": "service_unavailable"
-            }
+        # Early check for service availability - will raise exception if services unavailable
+        try:
+            can_run, message = self._can_run_cypress_tests()
+        except RuntimeError as e:
+            # Hard failure - let the exception propagate
+            raise RuntimeError(f"Cypress test prerequisites not met: {str(e)}")
         
         try:
             # Create Cypress execution options
@@ -730,6 +778,7 @@ class UnifiedTestRunner:
             "integration": ["netra_backend/tests/integration", "netra_backend/tests/startup"],
             "api": ["netra_backend/tests/test_api_core_critical.py", "netra_backend/tests/test_api_error_handling_critical.py", "netra_backend/tests/test_api_threads_messages_critical.py", "netra_backend/tests/test_api_agent_generation_critical.py", "netra_backend/tests/test_api_endpoints_critical.py"],
             "database": ["netra_backend/tests/test_database_connections.py", "netra_backend/tests/test_database_manager_managers.py", "netra_backend/tests/clickhouse"],
+            "post_deployment": ["tests/post_deployment"],
             "websocket": [str(config["test_dir"]), "-k", '"websocket or ws"'],
             "agent": ["netra_backend/tests/agents"],
             "security": [str(config["test_dir"]), "-k", '"auth or security"'],
@@ -802,9 +851,11 @@ class UnifiedTestRunner:
                 env.set('USE_REAL_LLM', 'true', 'test_runner_frontend')
         else:
             setup_file = "jest.setup.js"
-            os.environ.pop('USE_REAL_SERVICES', None)
-            os.environ.pop('USE_DOCKER_SERVICES', None)
-            os.environ.pop('USE_REAL_LLM', None)
+            # Note: Cannot unset in IsolatedEnvironment, set to false instead
+            env = get_env()
+            env.set('USE_REAL_SERVICES', 'false', 'test_runner_frontend')
+            env.set('USE_DOCKER_SERVICES', 'false', 'test_runner_frontend')
+            env.set('USE_REAL_LLM', 'false', 'test_runner_frontend')
         
         category_commands = {
             "unit": f"npm run test:unit -- --setupFilesAfterEnv='<rootDir>/{setup_file}'",

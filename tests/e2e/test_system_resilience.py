@@ -21,7 +21,6 @@ import time
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock, patch
 
 import httpx
 import pytest
@@ -41,7 +40,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 @dataclass
-class ResilienceTestMetrics:
+class TestResilienceMetrics:
     """Metrics collected during resilience testing."""
     test_name: str
     start_time: float
@@ -273,7 +272,7 @@ class TestSystemResilience:
                     error = httpx.HTTPStatusError(
                         "Rate limited",
                         # Mock: Generic component isolation for controlled unit testing
-                        request=Mock(),
+                        request=None  # TODO: Use real service instead of Mock,
                         # Mock: Component isolation for controlled unit testing
                         response=Mock(status_code=429, headers={"retry-after": "1"})
                     )
@@ -359,7 +358,7 @@ class TestSystemResilience:
                 
                 # Register database with degradation manager
                 # Mock: Generic component isolation for controlled unit testing
-                mock_db_manager = Mock()
+                mock_db_manager = None  # TODO: Use real service instead of Mock
                 mock_db_manager.is_available.return_value = False
                 degradation_manager.register_database_manager("postgres", mock_db_manager)
                 

@@ -29,7 +29,6 @@ import asyncio
 import time
 from typing import Dict, Any
 from decimal import Decimal
-from unittest.mock import patch, AsyncMock
 import pytest
 import pytest_asyncio
 
@@ -218,7 +217,7 @@ class TestCostTrackingAccuracyE2E:
         """Execute complete cost tracking flow."""
         # Mock LLM for deterministic costs
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        with patch('netra_backend.app.llm.llm_manager.LLMManager.call_llm') as mock_llm:
+        with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
             mock_llm.return_value = self._create_mock_llm_response(operation["expected_tokens"])
             
             # Execute through all layers
@@ -241,7 +240,7 @@ class TestCostTrackingAccuracyE2E:
                                            test_core, cost_validator, billing_validator) -> Dict:
         """Execute cost calculation and billing flow."""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        with patch('netra_backend.app.llm.llm_manager.LLMManager.call_llm') as mock_llm:
+        with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
             mock_llm.return_value = self._create_mock_llm_response(operation["expected_tokens"])
             
             cost_result = await cost_validator.validate_operation_cost_calculation(operation)
@@ -254,7 +253,7 @@ class TestCostTrackingAccuracyE2E:
     async def _execute_timed_cost_tracking(self, session: Dict, operation: Dict, test_core) -> Dict:
         """Execute cost tracking with timing measurement."""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        with patch('netra_backend.app.llm.llm_manager.LLMManager.call_llm') as mock_llm:
+        with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
             mock_llm.return_value = self._create_mock_llm_response(operation["expected_tokens"])
             
             return await test_core.execute_operation_with_cost_tracking(session, operation)

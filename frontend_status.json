@@ -1,0 +1,153 @@
+{
+  "apiVersion": "serving.knative.dev/v1",
+  "kind": "Service",
+  "metadata": {
+    "annotations": {
+      "run.googleapis.com/client-name": "gcloud",
+      "run.googleapis.com/client-version": "534.0.0",
+      "run.googleapis.com/ingress": "all",
+      "run.googleapis.com/ingress-status": "all",
+      "run.googleapis.com/invoker-iam-disabled": "true",
+      "run.googleapis.com/operation-id": "278cf94d-6e8e-45af-b214-d569f5d9abdf",
+      "run.googleapis.com/urls": "[\"https://netra-frontend-staging-701982941522.us-central1.run.app\",\"https://netra-frontend-staging-pnovr5vsba-uc.a.run.app\"]",
+      "serving.knative.dev/creator": "netra-staging-deploy@netra-staging.iam.gserviceaccount.com",
+      "serving.knative.dev/lastModifier": "netra-staging-deploy@netra-staging.iam.gserviceaccount.com"
+    },
+    "creationTimestamp": "2025-08-26T19:38:22.340962Z",
+    "generation": 34,
+    "labels": {
+      "cloud.googleapis.com/location": "us-central1"
+    },
+    "name": "netra-frontend-staging",
+    "namespace": "701982941522",
+    "resourceVersion": "AAY9hhv2FpY",
+    "selfLink": "/apis/serving.knative.dev/v1/namespaces/701982941522/services/netra-frontend-staging",
+    "uid": "3899546c-6b79-483c-b4a4-c7a608f11fba"
+  },
+  "spec": {
+    "template": {
+      "metadata": {
+        "annotations": {
+          "autoscaling.knative.dev/maxScale": "10",
+          "autoscaling.knative.dev/minScale": "1",
+          "run.googleapis.com/client-name": "gcloud",
+          "run.googleapis.com/client-version": "534.0.0",
+          "run.googleapis.com/cpu-throttling": "false",
+          "run.googleapis.com/execution-environment": "gen2",
+          "run.googleapis.com/startup-cpu-boost": "true"
+        },
+        "labels": {
+          "client.knative.dev/nonce": "mvcczjduuu",
+          "run.googleapis.com/startupProbeType": "Default"
+        }
+      },
+      "spec": {
+        "containerConcurrency": 80,
+        "containers": [
+          {
+            "env": [
+              {
+                "name": "NODE_ENV",
+                "value": "production"
+              },
+              {
+                "name": "NEXT_PUBLIC_API_URL",
+                "value": "https://api.staging.netrasystems.ai"
+              },
+              {
+                "name": "FORCE_HTTPS",
+                "value": "true"
+              },
+              {
+                "name": "NEXT_PUBLIC_AUTH_URL",
+                "value": "https://auth.staging.netrasystems.ai"
+              },
+              {
+                "name": "NEXT_PUBLIC_WS_URL",
+                "value": "wss://api.staging.netrasystems.ai/ws"
+              },
+              {
+                "name": "NEXT_PUBLIC_GTM_CONTAINER_ID",
+                "value": "GTM-WKP28PNQ"
+              },
+              {
+                "name": "NEXT_PUBLIC_GTM_ENABLED",
+                "value": "true"
+              },
+              {
+                "name": "NEXT_PUBLIC_GTM_DEBUG",
+                "value": "false"
+              },
+              {
+                "name": "NEXT_PUBLIC_ENVIRONMENT",
+                "value": "staging"
+              }
+            ],
+            "image": "gcr.io/netra-staging/netra-frontend-staging:latest",
+            "ports": [
+              {
+                "containerPort": 3000,
+                "name": "http1"
+              }
+            ],
+            "resources": {
+              "limits": {
+                "cpu": "1",
+                "memory": "2Gi"
+              }
+            },
+            "startupProbe": {
+              "failureThreshold": 1,
+              "periodSeconds": 240,
+              "tcpSocket": {
+                "port": 3000
+              },
+              "timeoutSeconds": 240
+            }
+          }
+        ],
+        "serviceAccountName": "701982941522-compute@developer.gserviceaccount.com",
+        "timeoutSeconds": 300
+      }
+    },
+    "traffic": [
+      {
+        "latestRevision": true,
+        "percent": 100
+      }
+    ]
+  },
+  "status": {
+    "address": {
+      "url": "https://netra-frontend-staging-pnovr5vsba-uc.a.run.app"
+    },
+    "conditions": [
+      {
+        "lastTransitionTime": "2025-08-29T19:34:24.288406Z",
+        "status": "True",
+        "type": "Ready"
+      },
+      {
+        "lastTransitionTime": "2025-08-29T19:34:22.970895Z",
+        "status": "True",
+        "type": "ConfigurationsReady"
+      },
+      {
+        "lastTransitionTime": "2025-08-29T19:34:24.248085Z",
+        "status": "True",
+        "type": "RoutesReady"
+      }
+    ],
+    "latestCreatedRevisionName": "netra-frontend-staging-00029-rn9",
+    "latestReadyRevisionName": "netra-frontend-staging-00029-rn9",
+    "observedGeneration": 34,
+    "traffic": [
+      {
+        "latestRevision": true,
+        "percent": 100,
+        "revisionName": "netra-frontend-staging-00029-rn9"
+      }
+    ],
+    "url": "https://netra-frontend-staging-pnovr5vsba-uc.a.run.app"
+  }
+}

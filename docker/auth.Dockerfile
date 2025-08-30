@@ -46,6 +46,9 @@ COPY --chown=netra:netra ./shared /app/shared
 ENV PATH=/home/netra/.local/bin:$PATH
 ENV PYTHONPATH=/app:$PYTHONPATH
 
+# Docker environment indicator
+ENV RUNNING_IN_DOCKER=true
+
 # Switch to non-root user
 USER netra
 

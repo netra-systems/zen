@@ -34,7 +34,7 @@ from netra_backend.app.websocket_core.reconnection_types import (
     ReconnectionConfig,
     ReconnectionState,
 )
-from netra_backend.app.websocket_core.manager import WebSocketManager as UnifiedWebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -174,7 +174,7 @@ class StateRecoveryTestHelper:
 
         return base_data
     
-    def capture_state_snapshot(self, manager: UnifiedWebSocketManager, user_id: str) -> Dict[str, Any]:
+    def capture_state_snapshot(self, manager: WebSocketManager, user_id: str) -> Dict[str, Any]:
 
         """Capture comprehensive state snapshot for recovery verification."""
 
@@ -194,7 +194,7 @@ class StateRecoveryTestHelper:
 
         return snapshot
     
-    def _assess_connection_quality(self, manager: UnifiedWebSocketManager) -> Dict[str, Any]:
+    def _assess_connection_quality(self, manager: WebSocketManager) -> Dict[str, Any]:
 
         """Assess connection quality metrics."""
 
@@ -351,7 +351,7 @@ async def setup_test_manager_with_helper():
 
     """Setup unified WebSocket manager for state recovery testing."""
 
-    manager = UnifiedWebSocketManager()
+    manager = WebSocketManager()
 
     helper = StateRecoveryTestHelper()
 

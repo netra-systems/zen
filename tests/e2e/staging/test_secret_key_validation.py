@@ -13,7 +13,6 @@ import pytest
 import os
 import asyncio
 from typing import Dict, Optional
-from unittest.mock import patch
 from test_framework.environment_markers import staging_only, env_requires
 
 
@@ -22,6 +21,7 @@ class TestSecretKeyValidation:
 
     @staging_only
     @env_requires(services=["backend_service"])
+    @pytest.mark.e2e
     def test_secret_key_too_short_validation_failure(self):
         """Test that SECRET_KEY fails validation when shorter than 32 characters.
         
@@ -70,6 +70,7 @@ class TestSecretKeyValidation:
         )
 
     @staging_only
+    @pytest.mark.e2e
     def test_staging_secret_key_environment_variable_too_short(self):
         """Test that staging SECRET_KEY environment variable is too short.
         
@@ -99,6 +100,7 @@ class TestSecretKeyValidation:
 
     @staging_only
     @env_requires(services=["backend_service", "auth_service"])
+    @pytest.mark.e2e
     def test_secret_key_consistency_across_services(self):
         """Test SECRET_KEY consistency between backend and auth services.
         
@@ -175,6 +177,7 @@ class TestSecretKeyValidation:
         )
 
     @staging_only
+    @pytest.mark.e2e
     def test_secret_key_entropy_insufficient_for_production(self):
         """Test that SECRET_KEY has insufficient entropy for production security.
         
@@ -239,6 +242,7 @@ class TestSecretKeyValidation:
 
     @staging_only  
     @patch.dict(os.environ, {}, clear=False)  # Don't clear all env vars
+    @pytest.mark.e2e
     def test_missing_secret_key_environment_variable(self):
         """Test behavior when SECRET_KEY environment variable is completely missing.
         
@@ -293,6 +297,7 @@ class TestSecretKeyValidation:
                 os.environ["SECRET_KEY"] = original_secret
 
     @staging_only
+    @pytest.mark.e2e
     def test_secret_key_staging_vs_production_security_requirements(self):
         """Test SECRET_KEY meets different security levels for staging vs production.
         

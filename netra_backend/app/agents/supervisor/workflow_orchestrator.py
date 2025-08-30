@@ -1,7 +1,7 @@
 """Supervisor Workflow Orchestrator.
 
 Orchestrates the complete agent workflow according to unified spec.
-Business Value: Implements the 12-step workflow for AI optimization value creation.
+Business Value: Implements the adaptive workflow for AI optimization value creation.
 """
 
 import time
@@ -17,31 +17,65 @@ logger = central_logger.get_logger(__name__)
 
 
 class WorkflowOrchestrator:
-    """Orchestrates supervisor workflow according to unified spec."""
+    """Orchestrates supervisor workflow according to unified spec with adaptive logic."""
     
     def __init__(self, agent_registry, execution_engine, websocket_manager):
         self.agent_registry = agent_registry
         self.execution_engine = execution_engine
         self.websocket_manager = websocket_manager
-        self._workflow_steps = self._define_standard_workflow()
+        # No longer define static workflow - it will be determined dynamically
     
-    def _define_standard_workflow(self) -> List[PipelineStep]:
-        """Define standard 12-step workflow from unified spec.
+    def _define_workflow_based_on_triage(self, triage_result: Dict[str, Any]) -> List[PipelineStep]:
+        """Define adaptive workflow based on triage results and data sufficiency.
         
-        These steps must execute sequentially as each depends on the previous:
-        1. Triage - Categorizes the request
-        2. Data - Gathers insights based on triage category
-        3. Optimization - Creates strategies based on data insights
-        4. Actions - Implements based on optimization strategies
-        5. Reporting - Summarizes all previous steps
+        The workflow adapts based on the TriageSubAgent's assessment:
+        a. If sufficient data is available: Full workflow
+        b. If some data but more needed: Partial workflow with data_helper
+        c. If no data available: Only data_helper
+        
+        Args:
+            triage_result: Results from the triage agent including data sufficiency assessment
+            
+        Returns:
+            List of pipeline steps tailored to the situation
         """
-        return [
-            self._create_pipeline_step("triage", "classification", 1, dependencies=[]),
-            self._create_pipeline_step("data", "insights", 2, dependencies=["triage"]),
-            self._create_pipeline_step("optimization", "strategies", 3, dependencies=["data"]),
-            self._create_pipeline_step("actions", "implementation", 4, dependencies=["optimization"]),
-            self._create_pipeline_step("reporting", "summary", 5, dependencies=["actions"])
-        ]
+        # Extract data sufficiency from triage result
+        data_sufficiency = triage_result.get("data_sufficiency", "unknown")
+        
+        if data_sufficiency == "sufficient":
+            # Full workflow when sufficient data is available
+            return [
+                self._create_pipeline_step("triage", "classification", 1, dependencies=[]),
+                self._create_pipeline_step("optimization", "strategies", 2, dependencies=["triage"]),
+                self._create_pipeline_step("data", "insights", 3, dependencies=["optimization"]),
+                self._create_pipeline_step("actions", "implementation", 4, dependencies=["data"]),
+                self._create_pipeline_step("reporting", "summary", 5, dependencies=["actions"])
+            ]
+        elif data_sufficiency == "partial":
+            # Partial workflow with data_helper for additional data needs
+            return [
+                self._create_pipeline_step("triage", "classification", 1, dependencies=[]),
+                self._create_pipeline_step("optimization", "strategies", 2, dependencies=["triage"]),
+                self._create_pipeline_step("actions", "implementation", 3, dependencies=["optimization"]),
+                self._create_pipeline_step("data_helper", "data_request", 4, dependencies=["actions"]),
+                self._create_pipeline_step("reporting", "summary_with_data_request", 5, dependencies=["data_helper"])
+            ]
+        elif data_sufficiency == "insufficient":
+            # Minimal workflow - only request data
+            return [
+                self._create_pipeline_step("triage", "classification", 1, dependencies=[]),
+                self._create_pipeline_step("data_helper", "data_request", 2, dependencies=["triage"])
+            ]
+        else:
+            # Default fallback to standard workflow
+            logger.warning(f"Unknown data sufficiency level: {data_sufficiency}, using default workflow")
+            return [
+                self._create_pipeline_step("triage", "classification", 1, dependencies=[]),
+                self._create_pipeline_step("data", "insights", 2, dependencies=["triage"]),
+                self._create_pipeline_step("optimization", "strategies", 3, dependencies=["data"]),
+                self._create_pipeline_step("actions", "implementation", 4, dependencies=["optimization"]),
+                self._create_pipeline_step("reporting", "summary", 5, dependencies=["actions"])
+            ]
     
     def _create_pipeline_step(self, agent_name: str, 
                              step_type: str, order: int,
@@ -62,21 +96,45 @@ class WorkflowOrchestrator:
         )
     
     async def execute_standard_workflow(self, context: ExecutionContext) -> List[ExecutionResult]:
-        """Execute the standard 12-step workflow."""
+        """Execute the adaptive workflow based on triage results."""
+        # First, always execute triage to determine workflow
+        triage_step = self._create_pipeline_step("triage", "classification", 1, dependencies=[])
+        
+        # Create initial workflow with just triage to send notification
+        self._workflow_steps = [triage_step]
         await self._send_workflow_started(context)
-        results = await self._execute_workflow_steps(context)
-        await self._send_workflow_completed(context, results)
-        return results
-    
-    async def _execute_workflow_steps(self, context: ExecutionContext) -> List[ExecutionResult]:
-        """Execute all workflow steps with monitoring."""
-        results = []
-        for step in self._workflow_steps:
+        
+        triage_result = await self._execute_workflow_step(context, triage_step)
+        
+        # Store triage result in context for downstream agents
+        if hasattr(context.state, 'triage_result'):
+            context.state.triage_result = triage_result.result
+        
+        # Determine workflow based on triage result
+        workflow_steps = self._define_workflow_based_on_triage(
+            triage_result.result if triage_result.success else {}
+        )
+        
+        # Update workflow steps with full workflow
+        self._workflow_steps = workflow_steps
+        
+        # Execute the determined workflow (skip first triage since already done)
+        results = [triage_result]
+        for step in workflow_steps[1:]:  # Skip first triage step
             result = await self._execute_workflow_step(context, step)
             results.append(result)
             if not result.success and not step.metadata.get("continue_on_error"):
                 break
+        
+        await self._send_workflow_completed(context, results)
         return results
+    
+    async def _execute_workflow_steps(self, context: ExecutionContext) -> List[ExecutionResult]:
+        """Execute all workflow steps with monitoring.
+        
+        This method is kept for backward compatibility but delegates to execute_standard_workflow.
+        """
+        return await self.execute_standard_workflow(context)
     
     async def _execute_workflow_step(self, context: ExecutionContext, 
                                     step: PipelineStep) -> ExecutionResult:
@@ -151,13 +209,32 @@ class WorkflowOrchestrator:
                 }
             )
     
-    def get_workflow_definition(self) -> List[Dict[str, Any]]:
-        """Get workflow definition for monitoring."""
-        return [
-            {
-                "agent_name": step.agent_name,
-                "step_type": step.metadata.get("step_type"),
-                "order": step.metadata.get("order"),
-                "metadata": step.metadata
-            } for step in self._workflow_steps
-        ]
+    def get_workflow_definition(self) -> Dict[str, Any]:
+        """Get workflow definition for monitoring.
+        
+        Returns adaptive workflow configurations based on data sufficiency levels.
+        """
+        return {
+            "type": "adaptive",
+            "description": "Workflow adapts based on triage assessment of data sufficiency",
+            "configurations": {
+                "sufficient_data": [
+                    {"agent": "triage", "type": "classification"},
+                    {"agent": "optimization", "type": "strategies"},
+                    {"agent": "data", "type": "insights"},
+                    {"agent": "actions", "type": "implementation"},
+                    {"agent": "reporting", "type": "summary"}
+                ],
+                "partial_data": [
+                    {"agent": "triage", "type": "classification"},
+                    {"agent": "optimization", "type": "strategies"},
+                    {"agent": "actions", "type": "implementation"},
+                    {"agent": "data_helper", "type": "data_request"},
+                    {"agent": "reporting", "type": "summary_with_data_request"}
+                ],
+                "insufficient_data": [
+                    {"agent": "triage", "type": "classification"},
+                    {"agent": "data_helper", "type": "data_request"}
+                ]
+            }
+        }

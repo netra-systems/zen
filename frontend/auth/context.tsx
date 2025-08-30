@@ -179,9 +179,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const currentToken = token;
       const storedToken = currentToken || unifiedAuthService.getToken();
       
-      if (storedToken && storedToken !== currentToken) {
+      if (storedToken) {
+        // Process the token if we have one
         // Update token if different from state
-        setToken(storedToken);
+        if (storedToken !== currentToken) {
+          setToken(storedToken);
+        }
+        
+        // CRITICAL FIX: Always process the token to restore user state
+        // This ensures user is set on page refresh when token exists in localStorage
         try {
           const decodedUser = jwtDecode(storedToken) as User;
           
@@ -204,6 +210,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               syncAuthStore(null, null);
             }
           } else {
+            // CRITICAL: Always set user even if token was already in state
+            // This fixes the page refresh logout issue
             setUser(decodedUser);
             // Sync with Zustand store
             syncAuthStore(decodedUser, storedToken);
@@ -339,9 +347,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (authConfig) {
         // Clear dev logout flag when user manually logs in
         unifiedAuthService.clearDevLogoutFlag();
-        unifiedAuthService.handleLogin(authConfig);
-        // Track login attempt (OAuth flow will be tracked separately)
-        trackLogin('oauth', false);
+        
+        // In development mode, use dev login instead of OAuth
+        if (authConfig.development_mode) {
+          logger.info('Using dev login in development mode');
+          const result = await unifiedAuthService.handleDevLogin(authConfig);
+          if (result) {
+            // Dev login successful, token is already set by handleDevLogin
+            // Trigger a re-fetch of user data
+            const userResponse = await fetch(authConfig.endpoints.user, {
+              headers: {
+                'Authorization': `Bearer ${result.access_token}`,
+                'Accept': 'application/json',
+              },
+            });
+            
+            if (userResponse.ok) {
+              const userData = await userResponse.json();
+              setUser(userData);
+              syncAuthStore(userData, result.access_token);
+              trackLogin('dev', true);
+              // Force a re-initialization to ensure all components get updated
+              setInitialized(true);
+            }
+          } else {
+            logger.error('Dev login failed');
+            trackError('auth_dev_login_error', 'Dev login failed', 'AuthContext', false);
+          }
+        } else {
+          // Production/staging mode - use OAuth
+          unifiedAuthService.handleLogin(authConfig);
+          // Track login attempt (OAuth flow will be tracked separately)
+          trackLogin('oauth', false);
+        }
       }
     } catch (error) {
       logger.error('Login error in AuthContext', error as Error, {

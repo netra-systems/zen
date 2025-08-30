@@ -15,7 +15,6 @@ COMPLIANCE: File size <300 lines, Functions <8 lines, Real components, No mock i
 import asyncio
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import MagicMock
 
 import pytest
 
@@ -43,11 +42,11 @@ class AgentContextAccumulationTester:
     async def create_test_supervisor_with_context(self, thread_id: str) -> SupervisorAgent:
         """Create supervisor agent with context tracking enabled."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_db = MagicMock()
+        mock_db = None  # TODO: Use real service instead of Mock
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket = MagicMock()
+        mock_websocket = None  # TODO: Use real service instead of Mock
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = MagicMock()
+        mock_tool_dispatcher = None  # TODO: Use real service instead of Mock
         
         supervisor = SupervisorAgent(
             db_session=mock_db,

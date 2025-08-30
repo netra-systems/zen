@@ -10,7 +10,7 @@ from auth_service.auth_core.isolated_environment import get_env
 env = get_env()
 env.set("ENVIRONMENT", "test", "debug_script")
 env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "debug_script")
-env.set("JWT_SECRET", "test_jwt_secret_key_that_is_long_enough_for_testing_purposes", "debug_script")
+env.set("JWT_SECRET_KEY", "test_jwt_secret_key_that_is_long_enough_for_testing_purposes", "debug_script")
 
 # Add current directory to path
 

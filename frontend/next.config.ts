@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
   // Optimize based on environment
   experimental: {
     optimizeCss: process.env.NODE_ENV === 'production',
-    optimizePackageImports: ['lucide-react', '@radix-ui/*', 'framer-motion', 'react-markdown'],
+    optimizePackageImports: ['@radix-ui/*', 'framer-motion', 'react-markdown'],
   },
   async headers() {
     const isDevelopment = process.env.NODE_ENV === 'development';

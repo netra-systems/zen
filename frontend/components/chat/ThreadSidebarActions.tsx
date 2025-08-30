@@ -24,7 +24,7 @@ export interface ThreadSidebarActionsResult {
   handleSelectThread: (threadId: string) => Promise<void>;
   handleUpdateTitle: (threadId: string, editingTitle: string, setEditingThreadId: (id: string | null) => void, setEditingTitle: (title: string) => void) => Promise<void>;
   handleDeleteThread: (threadId: string) => Promise<void>;
-  formatDate: (timestamp: number) => string;
+  formatDate: (timestamp: number | string) => string;
   handleThreadError: (error: unknown, threadId: string) => Promise<void>;
   handleErrorBoundaryError: (error: Error, errorInfo: any, threadId?: string) => void;
   handleErrorBoundaryRetry: (threadId?: string, loadThreads?: () => Promise<void>, handleSelectThread?: (threadId: string) => Promise<void>) => void;
@@ -84,9 +84,13 @@ export const useThreadSidebarActions = (): ThreadSidebarActionsResult => {
     await executeThreadDeletion(threadId, deleteThread, currentThreadId, clearMessages, setError);
   };
 
-  const formatDate = (timestamp: number) => {
-    const date = new Date(timestamp * 1000);
-    const days = calculateDateDifference(timestamp);
+  const formatDate = (timestamp: number | string) => {
+    // Unix timestamps from backend are in seconds, need to convert to milliseconds
+    const date = typeof timestamp === 'string' 
+      ? new Date(timestamp) 
+      : new Date(timestamp * 1000);
+    const timestampMs = date.getTime();
+    const days = calculateDateDifference(timestampMs / 1000);
     return formatDateDisplay(days, date);
   };
 

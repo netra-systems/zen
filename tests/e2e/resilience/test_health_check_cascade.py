@@ -258,6 +258,7 @@ class TestHealthCheckCascade:
         """Initialize recovery validator."""
         return RecoveryValidator()
     
+    @pytest.mark.resilience
     async def test_clickhouse_failure_triggers_degraded_mode(self, orchestrator, clickhouse_simulator:
                                                            health_cascade_validator):
         """Test that ClickHouse failure triggers degraded mode."""
@@ -281,6 +282,7 @@ class TestHealthCheckCascade:
         except Exception as e:
             pytest.skip(f"Service orchestrator not available: {e}")
     
+    @pytest.mark.resilience
     async def test_core_functions_work_in_degraded_mode(self, orchestrator, clickhouse_simulator:
                                                       degraded_validator):
         """Test core functions still work when ClickHouse is unavailable."""
@@ -305,6 +307,7 @@ class TestHealthCheckCascade:
         finally:
             await ws_client.close()
     
+    @pytest.mark.resilience
     async def test_system_recovery_when_service_returns(self, orchestrator, clickhouse_simulator:
                                                       recovery_validator):
         """Test system recovery when ClickHouse comes back online."""
@@ -321,6 +324,7 @@ class TestHealthCheckCascade:
         assert recovery_result["fast_recovery"], "Recovery took too long"
         assert recovery_result["no_data_loss"], "Data loss detected during degradation"
     
+    @pytest.mark.resilience
     async def test_complete_health_cascade_flow(self, orchestrator, clickhouse_simulator:
                                               degraded_validator, health_cascade_validator,
                                               recovery_validator):

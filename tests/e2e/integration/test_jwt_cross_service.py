@@ -31,7 +31,7 @@ from tests.e2e.jwt_token_helpers import (
 from tests.e2e.test_data_factory import (
     create_test_service_credentials,
 )
-from tests.e2e.harness_complete import UnifiedTestHarnessComplete
+from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
 
 class CrossServiceJWTValidator:

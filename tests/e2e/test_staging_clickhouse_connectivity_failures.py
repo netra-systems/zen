@@ -43,7 +43,6 @@ import time
 import pytest
 from dataclasses import dataclass
 from typing import Any, Dict, Optional, Tuple
-from unittest.mock import patch, AsyncMock
 
 import httpx
 

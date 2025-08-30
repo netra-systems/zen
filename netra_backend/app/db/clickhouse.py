@@ -92,60 +92,14 @@ class ClickHouseCache:
 _clickhouse_cache = ClickHouseCache()
 
 
-class MockClickHouseDatabase:
-    """Mock ClickHouse client for testing and local development.
-    
-    Returns empty results without connecting to real database.
-    ONLY used when explicitly configured for testing.
-    """
-    
-    async def execute(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
-        """Execute query - returns empty results in mock mode."""
-        logger.debug(f"[MOCK ClickHouse] Query: {query[:100]}...")
-        return []
-    
-    async def execute_query(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
-        """Execute parameterized query - returns empty results in mock mode."""
-        logger.debug(f"[MOCK ClickHouse] Parameterized: {query[:100]}...")
-        return []
-    
-    async def fetch(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
-        """Fetch data - returns empty results in mock mode."""
-        logger.debug(f"[MOCK ClickHouse] Fetch: {query[:100]}...")
-        return []
-    
-    async def disconnect(self):
-        """Disconnect - no-op for mock client."""
-        logger.debug("[MOCK ClickHouse] Disconnect called")
-    
-    async def test_connection(self) -> bool:
-        """Test connection - always succeeds for mock client."""
-        logger.debug("[MOCK ClickHouse] Connection test (mock)")
-        return True
-    
-    def ping(self) -> bool:
-        """Ping - always succeeds for mock client."""
-        logger.debug("[MOCK ClickHouse] Ping (mock)")
-        return True
-    
-    async def command(self, cmd: str, parameters: Optional[Dict[str, Any]] = None, 
-                     settings: Optional[Dict[str, Any]] = None) -> Any:
-        """Execute command - no-op for mock client."""
-        logger.debug(f"[MOCK ClickHouse] Command: {cmd[:100]}...")
-        return None
-    
-    async def batch_insert(self, table_name: str, data: List[Dict[str, Any]]) -> None:
-        """Mock batch insert - logs operation."""
-        logger.debug(f"[MOCK ClickHouse] Batch insert to {table_name}: {len(data)} rows")
-    
-    async def cleanup(self) -> None:
-        """Mock cleanup (alias for disconnect)."""
-        await self.disconnect()
+# Mock client removed - NO MOCKS IN DEV MODE
+# Real services only per CLAUDE.md section 2.4
 
 
 def _is_testing_environment() -> bool:
     """Check if running in testing environment."""
     from netra_backend.app.core.isolated_environment import get_env
+    
     # Check TESTING environment variable directly for pytest compatibility
     if get_env().get("TESTING"):
         return True
@@ -153,27 +107,52 @@ def _is_testing_environment() -> bool:
     config = get_configuration()
     return config.environment == "testing"
 
-def _is_development_with_mock() -> bool:
-    """Check if development environment with mock enabled."""
-    config = get_configuration()
-    if config.environment == "development":
-        return config.clickhouse_mode == "mock"
+def _is_real_database_test() -> bool:
+    """Check if this is a test that explicitly requires real database connections."""
+    import sys
+    from netra_backend.app.core.isolated_environment import get_env
+    
+    # Check if we're running under pytest
+    if 'pytest' not in sys.modules:
+        return False
+    
+    # Check for environment variable that indicates real database test
+    # This will be set by the pytest collection hook for real_database marked tests
+    if get_env().get("PYTEST_REAL_DATABASE_TEST", "").lower() == "true":
+        return True
+    
+    # Alternative approach: check the test name from PYTEST_CURRENT_TEST
+    current_test = get_env().get("PYTEST_CURRENT_TEST", "")
+    if "real_database" in current_test.lower():
+        return True
+    
     return False
 
-def _should_use_mock_clickhouse() -> bool:
-    """Check conditions for using mock ClickHouse."""
-    return _is_testing_environment() or _is_development_with_mock()
-
-def _get_mock_usage_conditions() -> str:
-    """Get description of when mock ClickHouse is used."""
-    return "Returns True ONLY when: testing OR development+mock enabled. Default: REAL"
+def _should_disable_clickhouse_for_tests() -> bool:
+    """Check if ClickHouse should be disabled for the current test context."""
+    from netra_backend.app.core.isolated_environment import get_env
+    
+    # Always check if we're in a real database test first
+    if _is_real_database_test():
+        return False  # Allow real ClickHouse for @pytest.mark.real_database tests
+    
+    # Check test framework ClickHouse disable settings for regular tests
+    clickhouse_disabled_by_framework = (
+        get_env().get("DEV_MODE_DISABLE_CLICKHOUSE", "").lower() == "true" or
+        get_env().get("CLICKHOUSE_ENABLED", "").lower() == "false"
+    )
+    
+    return clickhouse_disabled_by_framework
 
 def use_mock_clickhouse() -> bool:
     """Determine if mock ClickHouse should be used.
     
-    Returns True based on environment conditions described in _get_mock_usage_conditions().
+    NO MOCKS IN DEV MODE - only in testing environment.
+    Development MUST use real ClickHouse connections.
+    Tests marked with @pytest.mark.real_database should attempt real connections.
     """
-    return _should_use_mock_clickhouse()
+    # Check if we're in a testing environment AND ClickHouse is disabled for this context
+    return _is_testing_environment() and _should_disable_clickhouse_for_tests()
 
 
 def _get_unified_config():
@@ -200,43 +179,53 @@ def get_clickhouse_config():
     return _extract_clickhouse_config(config)
 
 
-async def _create_mock_client():
-    """Create and manage mock ClickHouse client.
+# No-op test client for testing environments where ClickHouse is disabled
+
+class NoOpClickHouseClient:
+    """No-op ClickHouse client for testing environments.
     
-    Enhanced with async generator protection against corruption.
+    This provides the same interface as a real ClickHouse client but performs no operations.
+    Allows unit tests to run without external dependencies while maintaining interface compatibility.
     """
-    import asyncio
     
-    config = get_configuration()
-    logger.info(f"[ClickHouse] Using MOCK client for {config.environment}")
-    client = MockClickHouseDatabase()
-    client_yielded = False
+    async def execute(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+        """Execute no-op query - returns empty result for testing."""
+        logger.debug(f"[ClickHouse NoOp] Simulated query execution: {query[:50]}...")
+        return []
     
-    try:
-        client_yielded = True
-        yield client
-    except asyncio.CancelledError:
-        # Handle task cancellation gracefully
-        logger.warning("[ClickHouse Mock] Client cancelled, performing cleanup")
-        # Re-raise after cleanup is shielded
-        raise
-    except GeneratorExit:
-        # Handle generator cleanup silently
+    async def execute_query(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+        """Execute no-op query (alias for execute)."""
+        return await self.execute(query, params)
+    
+    async def test_connection(self) -> bool:
+        """Simulate successful connection test."""
+        return True
+    
+    async def disconnect(self) -> None:
+        """No-op disconnect."""
         pass
+
+@asynccontextmanager
+async def _create_test_noop_client():
+    """Create a no-op ClickHouse client for testing environments.
+    
+    This client provides the same interface as real ClickHouse clients but performs no operations,
+    allowing unit tests to run without external dependencies.
+    """
+    client = NoOpClickHouseClient()
+    logger.debug("[ClickHouse] Using no-op client for testing environment")
+    try:
+        yield client
     finally:
-        # CRITICAL FIX: Shield cleanup from cancellation
-        try:
-            await asyncio.shield(client.disconnect())
-        except asyncio.CancelledError:
-            logger.warning("[ClickHouse Mock] Cleanup cancelled, resources may leak")
+        await client.disconnect()
 
 @asynccontextmanager
 async def get_clickhouse_client():
-    """Get ClickHouse client - REAL by default with graceful degradation.
+    """Get ClickHouse client - REAL connections only in dev/prod.
     
-    Returns:
-        - Real ClickHouse client (default)
-        - Mock client when explicitly configured for testing or when real connection fails in optional environments
+    NO MOCKS IN DEV MODE - development must use real ClickHouse.
+    Tests marked with @pytest.mark.real_database will attempt real connections
+    and raise connection errors that can be handled gracefully by the test.
     
     Usage:
         async with get_clickhouse_client() as client:
@@ -245,30 +234,30 @@ async def get_clickhouse_client():
     from netra_backend.app.core.isolated_environment import get_env
     
     if use_mock_clickhouse():
-        async for client in _create_mock_client():
+        # Only for regular testing environment where ClickHouse is explicitly disabled
+        # Provide a no-op client that allows tests to run without external dependencies
+        async with _create_test_noop_client() as client:
             yield client
-    else:
-        # CRITICAL FIX: Add timeout protection for the entire client creation process
-        environment = get_env().get("ENVIRONMENT", "development").lower()
-        client_timeout = 10.0 if environment in ["staging", "development"] else 30.0
-        
-        try:
-            # Create real client with timeout protection handled at a lower level
-            async for client in _create_real_client():
-                yield client
-                
-        except (asyncio.TimeoutError, ConnectionError) as e:
-            # If connection fails or times out in optional environments, use mock client
-            if environment in ["staging", "development"]:
-                clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
-                if not clickhouse_required:
-                    logger.warning(f"[ClickHouse] Connection failed/timeout in {environment}, using mock client: {e}")
-                    async for client in _create_mock_client():
-                        yield client
-                    return
+            return
+    
+    # Use real client in development, production, and real database tests
+    environment = get_env().get("ENVIRONMENT", "development").lower()
+    client_timeout = 10.0 if environment in ["staging", "development"] else 30.0
+    
+    try:
+        # Create real client with timeout protection handled at a lower level
+        async for client in _create_real_client():
+            yield client
             
-            # Re-raise for production or when explicitly required
-            raise
+    except (asyncio.TimeoutError, ConnectionError) as e:
+        # In test environment with real_database mark, let the test handle the connection failure
+        if _is_testing_environment() and _is_real_database_test():
+            logger.debug(f"[ClickHouse] Real database test connection failed: {e}")
+            raise  # Let the test handle this gracefully
+        
+        # NO MOCK FALLBACK for dev/prod - fail fast
+        logger.error(f"[ClickHouse] Connection failed in {environment}: {e}")
+        raise RuntimeError(f"ClickHouse connection required in {environment} mode. Please ensure ClickHouse is running.") from e
 
 
 def _get_connection_config():
@@ -308,9 +297,9 @@ def _create_base_client(config, use_secure: bool):
     return ClickHouseDatabase(**params)
 
 async def _test_and_yield_client(client):
-    """Test connection and yield client with timeout handling.
+    """Test connection and yield client with enhanced timeout handling and retry logic.
     
-    Enhanced with async generator protection against corruption.
+    Enhanced with async generator protection against corruption and staging-specific timeouts.
     """
     import asyncio
     from netra_backend.app.core.isolated_environment import get_env
@@ -319,11 +308,17 @@ async def _test_and_yield_client(client):
     client_yielded = False
     
     try:
-        # CRITICAL FIX: Reduce timeout in staging/development to fail fast
-        timeout = 5.0 if environment in ["staging", "development"] else 15.0
+        # CRITICAL FIX: Increase timeouts for staging to prevent connection failures
+        if environment == "staging":
+            timeout = 15.0  # Increased from 5 to 15 seconds for staging
+        elif environment == "production":
+            timeout = 20.0  # Longer timeout for production
+        else:
+            timeout = 5.0   # Standard timeout for development
+            
         # Shield connection test from cancellation
         await asyncio.shield(asyncio.wait_for(client.test_connection(), timeout=timeout))
-        logger.info("[ClickHouse] REAL connection established")
+        logger.info(f"[ClickHouse] REAL connection established in {environment} environment")
         client_yielded = True
         yield client
     except asyncio.CancelledError:
@@ -335,11 +330,11 @@ async def _test_and_yield_client(client):
         # Otherwise, re-raise after potential cleanup
         raise
     except asyncio.TimeoutError as e:
-        logger.error(f"[ClickHouse] Connection test timeout after {timeout} seconds")
+        logger.error(f"[ClickHouse] Connection test timeout after {timeout} seconds in {environment}")
         # In staging/development, this is expected - don't raise, let graceful degradation handle it
         if environment in ["staging", "development"]:
-            logger.warning("[ClickHouse] Connection timeout in optional environment - graceful degradation")
-            raise ConnectionError(f"ClickHouse connection timeout after {timeout}s") from e
+            logger.warning(f"[ClickHouse] Connection timeout in {environment} environment - graceful degradation")
+            raise ConnectionError(f"ClickHouse connection timeout after {timeout}s in {environment}") from e
         raise asyncio.TimeoutError("ClickHouse connection timeout") from e
     except GeneratorExit:
         # Handle generator cleanup silently
@@ -413,17 +408,9 @@ async def _create_real_client():
             yield c
     except Exception as e:
         _handle_connection_error(e)
-        # CRITICAL FIX: Graceful degradation - use mock client if connection fails in optional environments
-        if environment in ["staging", "development"]:
-            clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
-            if not clickhouse_required:
-                logger.info(f"[ClickHouse] Using mock client as fallback in {environment} (optional service)")
-                async for c in _create_mock_client():
-                    yield c
-                return
-        
-        # If we reach here, it means the error was not handled gracefully - re-raise
-        raise e
+        # NO MOCK FALLBACK - fail fast in dev/staging mode
+        logger.error(f"[ClickHouse] Connection failed in {environment}: {e}")
+        raise RuntimeError(f"ClickHouse connection required in {environment} mode. Please ensure ClickHouse is running.") from e
 
 
 class ClickHouseService:
@@ -448,10 +435,7 @@ class ClickHouseService:
         )
         self._metrics = {"queries": 0, "failures": 0, "timeouts": 0}
     
-    def _initialize_mock_client(self):
-        """Initialize mock ClickHouse client."""
-        logger.info("[ClickHouse Service] Initializing with MOCK client")
-        self._client = MockClickHouseDatabase()
+    # Mock client initialization removed - NO MOCKS IN DEV MODE
 
     def _get_base_connection_params(self, config) -> dict:
         """Get base connection parameters from config."""
@@ -482,7 +466,7 @@ class ClickHouseService:
         return ClickHouseDatabase(**params)
     
     async def _initialize_real_client(self):
-        """Initialize real ClickHouse client with retry logic and graceful failure."""
+        """Initialize real ClickHouse client with enhanced retry logic and graceful failure."""
         import asyncio
         from netra_backend.app.core.isolated_environment import get_env
         
@@ -491,13 +475,16 @@ class ClickHouseService:
         logger.info("[ClickHouse Service] Initializing with REAL client")
         config = get_clickhouse_config()
         
-        # CRITICAL FIX: Reduce retries and timeouts for optional environments to fail fast
-        if environment in ["staging", "development"]:
-            max_retries = 1  # Single attempt in optional environments
-            timeout = 5.0    # Fast timeout
+        # CRITICAL FIX: Increase retries and timeouts for staging to prevent connection failures
+        if environment == "staging":
+            max_retries = 3   # Increased retries for staging
+            timeout = 15.0    # Longer timeout for staging
+        elif environment == "production":
+            max_retries = 3   # Full retries in production
+            timeout = 20.0    # Longer timeout for production
         else:
-            max_retries = 3  # Full retries in production
-            timeout = 15.0   # Longer timeout for production
+            max_retries = 1   # Single attempt in development
+            timeout = 5.0     # Fast timeout for development
         
         base_delay = 1.0
         
@@ -507,22 +494,24 @@ class ClickHouseService:
                 self._client = ClickHouseQueryInterceptor(base_client)
                 # Test connection with environment-appropriate timeout
                 await asyncio.wait_for(self._client.test_connection(), timeout=timeout)
-                logger.info(f"[ClickHouse Service] Connection established on attempt {attempt + 1}")
+                logger.info(f"[ClickHouse Service] Connection established on attempt {attempt + 1} in {environment} environment")
                 return
             except Exception as e:
                 if attempt < max_retries - 1:
-                    delay = base_delay * (2 ** attempt)
-                    logger.warning(f"[ClickHouse Service] Connection attempt {attempt + 1} failed: {e}. Retrying in {delay}s...")
+                    # Exponential backoff with jitter
+                    import random
+                    delay = base_delay * (2 ** attempt) + random.uniform(0, 0.5)
+                    logger.warning(f"[ClickHouse Service] Connection attempt {attempt + 1} failed: {e}. Retrying in {delay:.2f}s...")
                     await asyncio.sleep(delay)
                 else:
-                    logger.error(f"[ClickHouse Service] All {max_retries} connection attempts failed: {e}")
+                    logger.error(f"[ClickHouse Service] All {max_retries} connection attempts failed in {environment}: {e}")
                     
-                    # CRITICAL FIX: In optional environments, fallback to mock instead of raising
+                    # CRITICAL FIX: Enhanced fallback logic for optional environments
                     if environment in ["staging", "development"]:
                         clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
                         if not clickhouse_required:
-                            logger.warning(f"[ClickHouse Service] Using mock client as fallback in {environment}")
-                            self._initialize_mock_client()
+                            logger.warning(f"[ClickHouse Service] ClickHouse optional in {environment}, continuing without it")
+                            # Don't initialize mock - let service handle graceful degradation
                             return
                     
                     raise
@@ -533,26 +522,19 @@ class ClickHouseService:
         from netra_backend.app.core.isolated_environment import get_env
         
         if self.force_mock or use_mock_clickhouse():
-            self._initialize_mock_client()
-        else:
-            # CRITICAL FIX: Add timeout protection to prevent hanging during initialization
-            environment = get_env().get("ENVIRONMENT", "development").lower()
-            init_timeout = 10.0 if environment in ["staging", "development"] else 30.0
-            
-            try:
-                await asyncio.wait_for(self._initialize_real_client(), timeout=init_timeout)
-            except asyncio.TimeoutError as e:
-                logger.error(f"[ClickHouse Service] Initialization timeout after {init_timeout}s")
-                
-                # In optional environments, fall back to mock
-                if environment in ["staging", "development"]:
-                    clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
-                    if not clickhouse_required:
-                        logger.warning(f"[ClickHouse Service] Using mock client due to timeout in {environment}")
-                        self._initialize_mock_client()
-                        return
-                
-                raise ConnectionError(f"ClickHouse initialization timeout after {init_timeout}s") from e
+            # NO MOCKS IN DEV MODE
+            raise RuntimeError("Mock ClickHouse client removed - use real ClickHouse in development mode")
+        
+        # ALWAYS use real client in development and production
+        environment = get_env().get("ENVIRONMENT", "development").lower()
+        init_timeout = 10.0 if environment in ["staging", "development"] else 30.0
+        
+        try:
+            await asyncio.wait_for(self._initialize_real_client(), timeout=init_timeout)
+        except asyncio.TimeoutError as e:
+            # NO MOCK FALLBACK - fail fast in dev mode
+            logger.error(f"[ClickHouse Service] Initialization timeout after {init_timeout}s")
+            raise ConnectionError(f"ClickHouse initialization timeout after {init_timeout}s. Please ensure ClickHouse is running.") from e
     
     async def execute(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         """Execute query with circuit breaker protection and caching."""

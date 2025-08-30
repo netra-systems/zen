@@ -17,7 +17,7 @@ from typing import Any, Dict, List, Optional, Protocol
 
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.interface import BaseExecutionInterface, ExecutionContext, ExecutionResult, WebSocketManagerProtocol
-from netra_backend.app.agents.base.execution_engine import BaseExecutionEngine
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager

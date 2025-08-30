@@ -1,0 +1,20 @@
+[
+  {
+    "iteration": 1,
+    "timestamp": "2025-08-29T09:00:06.271334",
+    "duration": 25.99444842338562,
+    "return_code": 1,
+    "new_failures": [],
+    "total_known_failures": [],
+    "skipped_count": 0
+  },
+  {
+    "iteration": 2,
+    "timestamp": "2025-08-29T09:00:30.176428",
+    "duration": 21.9029278755188,
+    "return_code": 1,
+    "new_failures": [],
+    "total_known_failures": [],
+    "skipped_count": 0
+  }
+]

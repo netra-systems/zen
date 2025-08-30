@@ -19,9 +19,16 @@
     </retrieval-protocol>
 
     <categories>
-        <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session, OAuth, Token, CORS, OAUTH_ENV, OAuth Environment Variables, OAuth Validation, OAuth Startup, OAuth Secrets, Secret Naming, Service Independence, Logout">
+        <category name="Testing/Performance" path="SPEC/learnings/test_collection_optimization.xml" keywords="Test Collection, PyTest, Test Discovery, Test Performance, Test Audit, Test Markers, Test Organization, Collection Optimization">
+            <critical-takeaway>Test collection optimized from 60+ seconds to ~21 seconds using importlib mode and ignore patterns (test_collection_optimization.xml).</critical-takeaway>
+            <critical-takeaway>Use scripts/test_collection_audit.py to identify duplicate tests, orphaned files, and missing markers (test_collection_optimization.xml).</critical-takeaway>
+            <critical-takeaway>Configure pyproject.toml with optimized pytest settings for faster collection (test_collection_optimization.xml).</critical-takeaway>
+        </category>
+        
+        <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session, OAuth, Token, CORS, OAUTH_ENV, OAuth Environment Variables, OAuth Validation, OAuth Startup, OAuth Secrets, Secret Naming, Service Independence, Logout, JWT_SECRET_KEY, Docker Compose, Dev Login, Development Mode, Auto-Login, Dev Auto-Login, Token Persistence, Token Initialization">
             <critical-takeaway>MANDATORY: All services must integrate with the shared auth service (SPEC/shared_auth_integration.xml).</critical-takeaway>
-            <critical-takeaway>Ensure consistent JWT secret configuration across services (jwt-secret-mismatch).</critical-takeaway>
+            <critical-takeaway>CRITICAL: Use JWT_SECRET_KEY exclusively - JWT_SECRET is deprecated (jwt_secret_standardization.xml).</critical-takeaway>
+            <critical-takeaway>Ensure consistent JWT secret configuration across services - both auth and backend MUST use JWT_SECRET_KEY (jwt_secret_standardization.xml).</critical-takeaway>
             <critical-takeaway>CRITICAL: OAuth redirect URIs must use _determine_urls()[0] (auth service), NEVER _determine_urls()[1] (frontend) - causes "No token received" error.</critical-takeaway>
             <critical-takeaway>OAuth redirect URIs must point to auth service (auth.staging.netrasystems.ai), not frontend (oauth_redirect_configuration.xml).</critical-takeaway>
             <critical-takeaway>Frontend pages receiving OAuth tokens via URL must handle token extraction and storage (oauth_token_persistence.xml).</critical-takeaway>
@@ -42,6 +49,11 @@
             <critical-takeaway>ALWAYS use echo -n when creating secrets to avoid line endings that break validation (oauth_secret_naming_fix.xml).</critical-takeaway>
             <critical-takeaway>CATASTROPHIC: Auth service MUST NEVER import from netra_backend - causes complete auth failure in staging/production (oauth_service_independence_violation.xml).</critical-takeaway>
             <critical-takeaway>Service independence violations cause immediate logout after OAuth - auth service cannot access database/sessions (oauth_service_independence_violation.xml).</critical-takeaway>
+            <critical-takeaway>Frontend login must check development_mode flag from auth config and use dev login in Docker Compose environments (docker-compose-login-fix.xml).</critical-takeaway>
+            <critical-takeaway>Dev login requires both email and password in request body - password field was missing causing login failures (docker-compose-login-fix.xml).</critical-takeaway>
+            <critical-takeaway>CRITICAL: Dev auto-login MUST process tokens whether storedToken === currentToken or not - initialization flow depends on it (frontend_dev_autologin.xml).</critical-takeaway>
+            <critical-takeaway>Dev auto-login requires exponential backoff with 5+ retries to handle backend startup delays - simple retries insufficient (frontend_dev_autologin.xml).</critical-takeaway>
+            <critical-takeaway>ANY changes to auth/context.tsx initialization or token processing MUST be tested with dev-auto-login.test.tsx (frontend_dev_autologin.xml).</critical-takeaway>
         </category>
         
         <category name="Auth Backend Desynchronization Critical Testing" path="SPEC/learnings/auth_backend_desynchronization_critical_testing.xml" keywords="Auth Backend, Desynchronization, Cross-Service, Rollback, Vulnerability, Security Testing, State Consistency, Orphaned Records">
@@ -96,6 +108,17 @@
             <critical-takeaway>HEAD method support is essential for authentication endpoints to support CORS preflight and health checks.</critical-takeaway>
         </category>
         
+        <category name="Test Coverage Import Gap" path="SPEC/learnings/test_coverage_import_gap.xml" keywords="Test Coverage, Import Errors, NameError, Runtime Errors, Mock Overuse, Integration Testing, CI/CD, Python Imports, Module Testing, Production Failures">
+            <critical-takeaway>CRITICAL: Import errors can pass all tests but fail in production if modules aren't directly tested</critical-takeaway>
+            <critical-takeaway>Python's import system allows broken code if the broken parts aren't executed during import</critical-takeaway>
+            <critical-takeaway>Every internal module MUST have at least one direct test that imports and exercises it</critical-takeaway>
+            <critical-takeaway>Mock scope must be minimized to external services only - mocking internal components hides runtime errors</critical-takeaway>
+            <critical-takeaway>Tests were testing the "idea" of code working, not actual execution paths</critical-takeaway>
+            <critical-takeaway>Import validation test suite must run as first test in CI/CD pipeline</critical-takeaway>
+            <critical-takeaway>E2E tests must use real services (docker-compose) not mocks</critical-takeaway>
+            <critical-takeaway>Type checking must be enforced in CI/CD to catch annotation issues before runtime</critical-takeaway>
+        </category>
+        
         <category name="API Dual-Channel Architecture" path="SPEC/api_dual_channel_architecture.xml" keywords="REST API, WebSocket, Agent Routes, Dual Channel, API Architecture, Streaming, Real-time">
             <critical-takeaway>REST API endpoints (/api/agent/*) and WebSocket (/ws) are BOTH production features, NOT legacy vs new.</critical-takeaway>
             <critical-takeaway>Both channels use the SAME backend services (SupervisorAgent, ThreadService, MessageHandlerService) ensuring functional parity.</critical-takeaway>
@@ -121,6 +144,14 @@
             <critical-takeaway>Add 50ms delay in OAuth callback before redirecting to ensure storage event processing.</critical-takeaway>
             <critical-takeaway>Use storage event listeners in AuthContext for real-time token detection across components.</critical-takeaway>
             <critical-takeaway>Test OAuth flows with fresh browser sessions to catch first-login timing issues.</critical-takeaway>
+        </category>
+        
+        <category name="Staging Environment Configuration" path="SPEC/learnings/staging_environment_configuration.xml" keywords="Environment Variables, Staging, .env File, IsolatedEnvironment, Configuration Management, Deployment, Cloud Run, Docker, Environment Precedence, SECRET_KEY, SERVICE_SECRET">
+            <critical-takeaway>CRITICAL: .env file must NOT override system environment variables - use load_from_file(override_existing=False) (staging_environment_configuration.xml).</critical-takeaway>
+            <critical-takeaway>Environment variable precedence: System vars > .env file > defaults - deployment vars must win (staging_environment_configuration.xml).</critical-takeaway>
+            <critical-takeaway>NEVER use os.getenv() directly - always use IsolatedEnvironment's get_env().get() for consistency (staging_environment_configuration.xml).</critical-takeaway>
+            <critical-takeaway>Validate staging config with StagingConfigurationValidator before deployment to catch placeholders and localhost refs (staging_environment_configuration.xml).</critical-takeaway>
+            <critical-takeaway>SERVICE_SECRET must be set and different from JWT_SECRET_KEY in staging/production (staging_environment_configuration.xml).</critical-takeaway>
         </category>
 
         <category name="Redis Service Independence" path="SPEC/learnings/redis_service_independence.xml" keywords="Redis, Microservices, Circular Dependencies, Service Independence, Shared Components, Infrastructure">
@@ -197,8 +228,16 @@
             <critical-takeaway>Database initialization must be idempotent - UniqueViolationError warnings indicate potential startup fragility.</critical-takeaway>
             <critical-takeaway>All monitoring endpoints (/health, /auth/health, /readiness, /docs) must support HEAD method for monitoring compatibility.</critical-takeaway>
             <critical-takeaway>HEAD responses must have same headers as GET but empty body per HTTP specification.</critical-takeaway>
-            <critical-takeaway>Database initialization should use IF NOT EXISTS patterns and handle concurrent initialization gracefully.</critical-takeaway>
-            <critical-takeaway>Test HTTP method compatibility with common monitoring system user agents (Kubernetes, GCP Load Balancer, AWS ALB, Datadog).</critical-takeaway>
+        </category>
+        
+        <category name="SQLAlchemy Session Management [CRITICAL]" path="SPEC/learnings/sqlalchemy_session_management.xml" keywords="SQLAlchemy, AsyncSession, WebSocket, IllegalStateChangeError, Session Management, Concurrent Access, Docker, Agent Hanging">
+            <critical-takeaway>NEVER pass database sessions by reference to async workers that outlive the session scope - causes IllegalStateChangeError.</critical-takeaway>
+            <critical-takeaway>Supervisor agents must have db_session=None, not a reference to handler's session which gets closed.</critical-takeaway>
+            <critical-takeaway>Session lifecycle must be managed at request/handler level, not passed to long-running async tasks.</critical-takeaway>
+            <critical-takeaway>Agents hanging for 20+ seconds in Docker often indicates session management issues - check for concurrent session access.</critical-takeaway>
+            <critical-takeaway>Each async worker should create its own database session using get_db() context manager when needed.</critical-takeaway>
+            <critical-takeaway>WebSocket handlers must close sessions in finally blocks but ensure no async tasks still reference them.</critical-takeaway>
+            <critical-takeaway>Test with real database sessions in Docker-like environments - mock tests won't catch these concurrency issues.</critical-takeaway>
         </category>
 
         <category name="GCP Staging Critical Issues [CURRENT]" path="SPEC/learnings/gcp_staging_critical_issues.xml" keywords="GCP Staging, Authentication 403, Health Endpoint Timeout, Static Assets 404, Service Availability, Load Balancer">
@@ -330,6 +369,15 @@
             <critical-takeaway>Pattern match on user_id to distinguish dev/test users from production users for special handling.</critical-takeaway>
             <critical-takeaway>The _ensure_user_exists_for_snapshot method in state_persistence.py prevents FK violations proactively.</critical-takeaway>
             <critical-takeaway>Dev users should be created with minimal permissions and default passwords for security.</critical-takeaway>
+        </category>
+        
+        <category name="3-Tier Persistence Architecture" path="SPEC/3tier_persistence_architecture.xml" keywords="3-Tier, Three-Tier, Persistence, Redis, PostgreSQL, ClickHouse, Failover, Enterprise, Disaster Recovery, State Management">
+            <critical-takeaway>CRITICAL: 3-tier persistence architecture provides enterprise-grade reliability with Redis → PostgreSQL → ClickHouse failover chain.</critical-takeaway>
+            <critical-takeaway>Redis PRIMARY tier must maintain sub-100ms performance for active agent states with version tracking and TTL management.</critical-takeaway>
+            <critical-takeaway>PostgreSQL checkpoints required for CRITICAL checkpoint types to ensure disaster recovery capability.</critical-takeaway>
+            <critical-takeaway>ClickHouse migration scheduled automatically for completed runs to enable cost optimization analytics.</critical-takeaway>
+            <critical-takeaway>Cross-database consistency validation must achieve 100% data integrity score for enterprise compliance.</critical-takeaway>
+            <critical-takeaway>Documentation: docs/3tier_persistence_architecture.md provides comprehensive operational procedures.</critical-takeaway>
         </category>
         
         <category name="State Persistence Performance Optimization" path="SPEC/learnings/state_persistence_optimization.xml" keywords="Performance Optimization, State Persistence, Async Database, Parallel Execution, Feature Flags, ClickHouse Async, Pipeline Optimization, Delegation Pattern">
@@ -697,8 +745,20 @@
             <critical-takeaway>Test logging output with real console, not just StringIO, to verify color rendering.</critical-takeaway>
         </category>
 
-        <category name="Frontend" path="SPEC/learnings/frontend.xml" keywords="Zustand, React, TypeScript">
+        <category name="Frontend" path="SPEC/learnings/frontend.xml" keywords="Zustand, React, TypeScript, Loading States, Initialization, UX, UI, Auth Context, Dev Auto-Login">
             <critical-takeaway context="Zustand">Use individual selectors to prevent infinite loops. See SPEC/conventions.xml#zustand-selectors.</critical-takeaway>
+            <critical-takeaway context="Initialization">CRITICAL: ANY changes to loading states, initialization flows, or auth context MUST be tested with dev-auto-login.test.tsx (frontend_loading_states.xml).</critical-takeaway>
+            <critical-takeaway context="UX">Loading states must NOT block UI rendering - use skeleton screens or partial content (frontend_loading_states.xml).</critical-takeaway>
+            <critical-takeaway context="Auth">Token processing MUST handle storedToken === currentToken case for dev auto-login to work (frontend_dev_autologin.xml).</critical-takeaway>
+            <critical-takeaway context="Initialization">Use hasMountedRef pattern to prevent multiple initialization calls in auth context (frontend_initialization_patterns.xml).</critical-takeaway>
+        </category>
+        
+        <category name="Frontend Loading States & UX" path="SPEC/learnings/frontend_loading_states.xml" keywords="Loading, Spinner, Skeleton, UX, UI, User Experience, Initialization, Bootstrap, Auth Loading, Dev Experience">
+            <critical-takeaway>MANDATORY: Test ALL loading/init changes with __tests__/auth/dev-auto-login.test.tsx - breaking auto-login severely impacts dev productivity.</critical-takeaway>
+            <critical-takeaway>Loading states hierarchy: AuthProvider Loading → Token Processing → Dev Auto-Login - each phase has specific requirements.</critical-takeaway>
+            <critical-takeaway>Never block UI completely for >3 seconds - use progressive enhancement and skeleton screens.</critical-takeaway>
+            <critical-takeaway>Auth context token processing MUST handle existing tokens correctly or dev auto-login breaks on page refresh.</critical-takeaway>
+            <critical-takeaway>Dev auto-login requires 5+ retries with exponential backoff to handle backend startup delays.</critical-takeaway>
         </category>
 
         <category name="Microservice Independence" path="SPEC/independent_services.xml" keywords="Microservice, Docker, Service">
@@ -893,6 +953,14 @@
             <critical-takeaway>Integration tests importing deleted clients fail with ModuleNotFoundError - update to canonical imports</critical-takeaway>
             <critical-takeaway>Canonical client must include ALL features from deleted implementations: SSL/TLS support, circuit breakers, retry logic</critical-takeaway>
             <critical-takeaway>Post-remediation verification: grep -r "from.*clickhouse_client\|from.*client_clickhouse" should return NO results</critical-takeaway>
+        </category>
+        
+        <category name="ClickHouse Connection Parameters Fix [RESOLVED 2025-08-30]" path="SPEC/learnings/clickhouse_connection_parameters_fix.xml" keywords="ClickHouse, clickhouse_connect, Connection Parameters, pool_size, pool_mgr, username, HttpClient, get_client">
+            <critical-takeaway>clickhouse_connect.get_client() does NOT accept pool_size, retries, or retry_delay parameters - these cause HttpClient.__init__() errors</critical-takeaway>
+            <critical-takeaway>Use 'username' not 'user' as the parameter name for clickhouse_connect.get_client()</critical-takeaway>
+            <critical-takeaway>pool_mgr parameter expects a PoolManager object, not a boolean - for connection pooling pass an actual urllib3 PoolManager</critical-takeaway>
+            <critical-takeaway>Always verify library parameters with inspect.signature() before use - don't assume parameter names</critical-takeaway>
+            <critical-takeaway>Retry logic should be implemented at application level, not through non-existent client parameters</critical-takeaway>
         </category>
         
         <category name="Circular Import Detection" path="SPEC/learnings/circular_import_detection.xml" keywords="Circular Import, Import Error, Initialization, WebSocket, Synthetic Data">
@@ -1158,6 +1226,15 @@
             <critical-takeaway>TEST ISOLATION IS CRITICAL - All tests MUST use isolation mode to prevent pollution. Reset to original after each test.</critical-takeaway>
             <critical-takeaway>Use get_subprocess_env() for external process calls to maintain isolation boundaries</critical-takeaway>
             <critical-takeaway>Thread-safe operations with RLock for concurrent access. Variable protection prevents accidental overrides.</critical-takeaway>
+        </category>
+        
+        <category name="Environment Access Regression Prevention" path="SPEC/learnings/environment_access_regression_prevention.xml" keywords="Environment, Regression, os.getenv, os.environ, IsolatedEnvironment, Compliance, Testing, Subprocess">
+            <critical-takeaway>ZERO TOLERANCE: Never use os.getenv() or os.environ directly - ALWAYS use IsolatedEnvironment via get_env().</critical-takeaway>
+            <critical-takeaway>TEST MARKERS: Environment-aware test markers must use IsolatedEnvironment, not os.getenv().</critical-takeaway>
+            <critical-takeaway>SUBPROCESS LAUNCHES: Always use get_subprocess_env() for subprocess.run() env parameter.</critical-takeaway>
+            <critical-takeaway>FALLBACK PATTERNS: Even BasicEnvManager fallbacks must avoid direct os.environ access after initialization.</critical-takeaway>
+            <critical-takeaway>ENFORCEMENT: Run scripts/check_environment_isolation.py before commits and in CI/CD.</critical-takeaway>
+            <critical-takeaway>COMMON VIOLATIONS: index_optimizer_core.py, secret_manager_builder.py, unified_test_runner.py, E2E test files.</critical-takeaway>
         </category>
         
         <category name="Port Binding Race Condition" path="SPEC/learnings/port_binding_race_condition.xml" keywords="Port Binding, Race Condition, Windows, Dev Launcher, Socket, Interface, localhost, 0.0.0.0, SO_REUSEADDR">
@@ -1554,7 +1631,16 @@
             <documentation>SPEC/learnings/staging_secrets_fix.xml</documentation>
         </fix>
     </recent_major_fixes>
-    <frontend_stability>        <category name="Frontend Authentication Configuration" path="SPEC/learnings/frontend_config_loop_prevention.xml" keywords="React, useEffect, Authentication, Configuration Loop, Frontend, Mount Guard">            <critical-takeaway>Use mount guards (useRef) to prevent multiple authentication initialization calls in React components.</critical-takeaway>            <critical-takeaway>Remove function dependencies from useEffect arrays to prevent infinite re-render loops in authentication contexts.</critical-takeaway>            <critical-takeaway>Authentication initialization should use empty dependency arrays [] for mount-only execution.</critical-takeaway>            <critical-takeaway>Always reset mount guards in useEffect cleanup functions for proper component lifecycle management.</critical-takeaway>        </category>                <category name="OAuth First Login Timing" path="SPEC/learnings/oauth_first_login_timing.xml" keywords="OAuth, Authentication Timing, Exponential Backoff, Timeout, Auth Service">            <critical-takeaway>Implement 5-second timeouts for authentication service configuration calls to prevent infinite waits.</critical-takeaway>            <critical-takeaway>Use exponential backoff with jitter (delay * 2^i + random) for authentication retry scenarios to reduce server load.</critical-takeaway>            <critical-takeaway>Add request cancellation with AbortController to prevent resource leaks during authentication timeouts.</critical-takeaway>            <critical-takeaway>Enhanced retry logging with timing information improves authentication debugging and monitoring.</critical-takeaway>        </category>                <category name="React useEffect Dependency Management" path="SPEC/learnings/react_useeffect_dependency_management.xml" keywords="React, useEffect, Dependencies, Performance, Re-render Loops">            <critical-takeaway>Functions recreated on every render cause useEffect dependency changes and infinite loops - use useCallback or remove from dependencies.</critical-takeaway>            <critical-takeaway>Mount guards with useRef prevent race conditions and ensure single-run initialization in complex components.</critical-takeaway>            <critical-takeaway>Empty dependency arrays [] should be used for mount-only effects that run initialization code.</critical-takeaway>            <critical-takeaway>Cleanup functions must reset mount guards and component state to prevent memory leaks and state inconsistencies.</critical-takeaway>        </category>    </frontend_stability>
+    <frontend_stability>        <category name="Frontend Authentication Configuration" path="SPEC/learnings/frontend_config_loop_prevention.xml" keywords="React, useEffect, Authentication, Configuration Loop, Frontend, Mount Guard">            <critical-takeaway>Use mount guards (useRef) to prevent multiple authentication initialization calls in React components.</critical-takeaway>            <critical-takeaway>Remove function dependencies from useEffect arrays to prevent infinite re-render loops in authentication contexts.</critical-takeaway>            <critical-takeaway>Authentication initialization should use empty dependency arrays [] for mount-only execution.</critical-takeaway>            <critical-takeaway>Always reset mount guards in useEffect cleanup functions for proper component lifecycle management.</critical-takeaway>        </category>                <category name="OAuth First Login Timing" path="SPEC/learnings/oauth_first_login_timing.xml" keywords="OAuth, Authentication Timing, Exponential Backoff, Timeout, Auth Service">            <critical-takeaway>Implement 5-second timeouts for authentication service configuration calls to prevent infinite waits.</critical-takeaway>            <critical-takeaway>Use exponential backoff with jitter (delay * 2^i + random) for authentication retry scenarios to reduce server load.</critical-takeaway>            <critical-takeaway>Add request cancellation with AbortController to prevent resource leaks during authentication timeouts.</critical-takeaway>            <critical-takeaway>Enhanced retry logging with timing information improves authentication debugging and monitoring.</critical-takeaway>        </category>                <category name="React useEffect Dependency Management" path="SPEC/learnings/react_useeffect_dependency_management.xml" keywords="React, useEffect, Dependencies, Performance, Re-render Loops">            <critical-takeaway>Functions recreated on every render cause useEffect dependency changes and infinite loops - use useCallback or remove from dependencies.</critical-takeaway>            <critical-takeaway>Mount guards with useRef prevent race conditions and ensure single-run initialization in complex components.</critical-takeaway>            <critical-takeaway>Empty dependency arrays [] should be used for mount-only effects that run initialization code.</critical-takeaway>            <critical-takeaway>Cleanup functions must reset mount guards and component state to prevent memory leaks and state inconsistencies.</critical-takeaway>        </category>
+        
+        <category name="Chat First-Load Glitch Prevention" path="SPEC/learnings/chat_first_load_glitch_prevention.xml" keywords="Chat, First Load, Glitch, Re-render, Performance, Initialization, Coordinator, Batching, React">
+            <critical-takeaway>Create centralized InitializationCoordinator to manage auth → websocket → store initialization sequence and prevent race conditions.</critical-takeaway>
+            <critical-takeaway>Minimize React useEffect dependencies to single values (e.g., [initialized]) to prevent cascading re-renders and multiple executions.</critical-takeaway>
+            <critical-takeaway>Use React's unstable_batchedUpdates for all store updates and WebSocket events to prevent cascading re-renders.</critical-takeaway>
+            <critical-takeaway>Components must check isInitialized before rendering main content - show loading state instead of partial renders.</critical-takeaway>
+            <critical-takeaway>Add mount guards (hasPerformed refs) to prevent multiple auth checks and state updates during component lifecycle.</critical-takeaway>
+            <critical-takeaway>Track initialization state explicitly in stores to coordinate with other systems and prevent premature operations.</critical-takeaway>
+        </category>    </frontend_stability>
     
     <websocket_security>
         <category name="WebSocket Middleware Patterns and Anti-Patterns" path="SPEC/learnings/websocket_middleware_patterns.xml" keywords="WebSocket, Security, CORS, Authentication, SSOT, Middleware, Race Conditions">
@@ -1683,4 +1769,16 @@
             <critical-takeaway>Test all public methods with undefined, null, and malformed inputs to ensure graceful handling</critical-takeaway>
         </category>
     </frontend_defensive_programming>
+    
+    <routing_architecture>
+        <category name="Router Double Prefix Pattern" path="SPEC/learnings/router_double_prefix_pattern.xml" keywords="Routing, APIRouter, Prefix, Double Prefix, 404, FastAPI, app_factory_route_configs, Centralized Routing">
+            <critical-takeaway>CRITICAL: Route prefixes MUST be managed centrally in app_factory_route_configs.py - individual routers should NOT define their own prefixes</critical-takeaway>
+            <critical-takeaway>Double prefix errors (e.g., /api/api/mcp-client) occur when routers define prefixes in APIRouter() AND app_factory adds prefixes</critical-takeaway>
+            <critical-takeaway>Always use empty prefix="" or no prefix parameter in router files - let app_factory_route_configs.py manage all prefixes</critical-takeaway>
+            <critical-takeaway>Check app_factory_route_configs.py before adding any prefix to a router to avoid duplication</critical-takeaway>
+            <critical-takeaway>Run route accessibility tests after any router modification to detect prefix conflicts early</critical-takeaway>
+            <critical-takeaway>Use scripts/check_architecture_compliance.py to detect prefix conflicts programmatically</critical-takeaway>
+            <critical-takeaway>Unregistered routers (example_messages.py, synthetic_data_corpus.py) should be reviewed and properly registered</critical-takeaway>
+        </category>
+    </routing_architecture>
 </specification>

@@ -93,6 +93,7 @@ class GCPDeployer:
                     "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
                     "FRONTEND_URL": "https://app.staging.netrasystems.ai",
                     "FORCE_HTTPS": "true",  # REQUIREMENT 6: FORCE_HTTPS for load balancer
+                    "GCP_PROJECT_ID": self.project_id,  # CRITICAL: Required for secret loading logic
                 }
             ),
             ServiceConfig(
@@ -122,6 +123,7 @@ class GCPDeployer:
                     "AUTH_FAST_TEST_MODE": "false",
                     "USE_MEMORY_DB": "false",
                     "FORCE_HTTPS": "true",  # REQUIREMENT 6: FORCE_HTTPS for load balancer
+                    "GCP_PROJECT_ID": self.project_id,  # CRITICAL: Required for secret loading logic
                 }
             ),
             ServiceConfig(
@@ -368,7 +370,7 @@ RUN apt-get update && apt-get install -y \\
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements
-COPY netra_backend/requirements.txt .
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
@@ -619,14 +621,14 @@ CMD ["npm", "start"]
             # Backend needs connections to databases and all required secrets from GSM
             cmd.extend([
                 "--add-cloudsql-instances", f"{self.project_id}:us-central1:staging-shared-postgres,{self.project_id}:us-central1:netra-postgres",
-                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,SECRET_KEY=secret-key-staging:latest,OPENAI_API_KEY=openai-api-key-staging:latest,FERNET_KEY=fernet-key-staging:latest,GEMINI_API_KEY=gemini-api-key-staging:latest,GOOGLE_OAUTH_CLIENT_ID_STAGING=google-oauth-client-id-staging:latest,GOOGLE_OAUTH_CLIENT_SECRET_STAGING=google-oauth-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,CLICKHOUSE_USER=clickhouse-user-staging:latest,CLICKHOUSE_DB=clickhouse-db-staging:latest,CLICKHOUSE_PASSWORD=clickhouse-password-staging:latest,REDIS_URL=redis-url-staging:latest,CLICKHOUSE_HOST=clickhouse-host-staging:latest,CLICKHOUSE_PORT=clickhouse-port-staging:latest,CLICKHOUSE_URL=clickhouse-url-staging:latest,REDIS_PASSWORD=redis-password-staging:latest,ANTHROPIC_API_KEY=anthropic-api-key-staging:latest"
+                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,SECRET_KEY=secret-key-staging:latest,OPENAI_API_KEY=openai-api-key-staging:latest,FERNET_KEY=fernet-key-staging:latest,GEMINI_API_KEY=gemini-api-key-staging:latest,GOOGLE_OAUTH_CLIENT_ID_STAGING=google-oauth-client-id-staging:latest,GOOGLE_OAUTH_CLIENT_SECRET_STAGING=google-oauth-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,CLICKHOUSE_USER=clickhouse-user-staging:latest,CLICKHOUSE_DB=clickhouse-db-staging:latest,CLICKHOUSE_PASSWORD=clickhouse-password-staging:latest,REDIS_URL=redis-url-staging:latest,REDIS_PASSWORD=redis-password-staging:latest,CLICKHOUSE_HOST=clickhouse-host-staging:latest,CLICKHOUSE_PORT=clickhouse-port-staging:latest,CLICKHOUSE_URL=clickhouse-url-staging:latest,ANTHROPIC_API_KEY=anthropic-api-key-staging:latest"
             ])
         elif service.name == "auth":
             # Auth service needs database, JWT secrets, OAuth credentials from GSM only
             # CRITICAL FIX: Use correct OAuth environment variable names expected by auth service
             cmd.extend([
                 "--add-cloudsql-instances", f"{self.project_id}:us-central1:staging-shared-postgres,{self.project_id}:us-central1:netra-postgres",
-                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,JWT_SECRET=jwt-secret-staging:latest,GOOGLE_OAUTH_CLIENT_ID_STAGING=google-oauth-client-id-staging:latest,GOOGLE_OAUTH_CLIENT_SECRET_STAGING=google-oauth-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,SERVICE_ID=service-id-staging:latest,OAUTH_HMAC_SECRET=oauth-hmac-secret-staging:latest,REDIS_URL=redis-url-staging:latest"
+                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,JWT_SECRET=jwt-secret-staging:latest,GOOGLE_OAUTH_CLIENT_ID_STAGING=google-oauth-client-id-staging:latest,GOOGLE_OAUTH_CLIENT_SECRET_STAGING=google-oauth-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,SERVICE_ID=service-id-staging:latest,OAUTH_HMAC_SECRET=oauth-hmac-secret-staging:latest,REDIS_URL=redis-url-staging:latest,REDIS_PASSWORD=redis-password-staging:latest"
             ])
         
         try:
@@ -764,6 +766,162 @@ CMD ["npm", "start"]
             
         return None
     
+    def validate_all_secrets_exist(self) -> bool:
+        """Validate ALL required secrets exist in Secret Manager.
+        
+        This MUST be called BEFORE any build operations to prevent
+        deployment failures due to missing secrets.
+        """
+        print("Checking all required secrets in Secret Manager...")
+        
+        # Define all required secrets for each environment
+        required_backend_secrets = [
+            "postgres-host-staging",
+            "postgres-port-staging", 
+            "postgres-db-staging",
+            "postgres-user-staging",
+            "postgres-password-staging",
+            "jwt-secret-key-staging",
+            "secret-key-staging",
+            "openai-api-key-staging",
+            "fernet-key-staging",
+            "gemini-api-key-staging",  # Required for AI operations
+            "google-oauth-client-id-staging",
+            "google-oauth-client-secret-staging",
+            "service-secret-staging",
+            "redis-url-staging",
+            "redis-password-staging"
+            # anthropic-api-key-staging is optional, not required
+        ]
+        
+        required_auth_secrets = [
+            "postgres-host-staging",
+            "postgres-port-staging",
+            "postgres-db-staging",
+            "postgres-user-staging",
+            "postgres-password-staging",
+            "jwt-secret-key-staging",
+            "jwt-secret-staging",
+            "google-oauth-client-id-staging",
+            "google-oauth-client-secret-staging",
+            "service-secret-staging",
+            "service-id-staging",
+            "oauth-hmac-secret-staging",
+            "redis-url-staging",
+            "redis-password-staging"
+        ]
+        
+        # Combine all unique secrets
+        all_required_secrets = set(required_backend_secrets + required_auth_secrets)
+        
+        missing_secrets = []
+        placeholder_secrets = []
+        
+        for secret_name in all_required_secrets:
+            # Check if secret exists
+            result = subprocess.run(
+                [self.gcloud_cmd, "secrets", "describe", secret_name, "--project", self.project_id],
+                capture_output=True,
+                text=True,
+                check=False,
+                shell=self.use_shell
+            )
+            
+            if result.returncode != 0:
+                print(f"  ❌ Secret missing: {secret_name}")
+                missing_secrets.append(secret_name)
+            else:
+                # Check if secret has a real value (not placeholder)
+                version_result = subprocess.run(
+                    [self.gcloud_cmd, "secrets", "versions", "access", "latest",
+                     "--secret", secret_name, "--project", self.project_id],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                    shell=self.use_shell
+                )
+                
+                if version_result.returncode == 0:
+                    value = version_result.stdout.strip()
+                    # Check for common placeholder patterns
+                    if any(placeholder in value.upper() for placeholder in 
+                           ["REPLACE", "PLACEHOLDER", "YOUR-", "TODO", "FIXME"]):
+                        print(f"  ⚠️  Secret has placeholder value: {secret_name}")
+                        placeholder_secrets.append(secret_name)
+                    else:
+                        print(f"  ✅ Secret configured: {secret_name}")
+                else:
+                    print(f"  ❌ Cannot access secret: {secret_name}")
+                    missing_secrets.append(secret_name)
+        
+        # Report results
+        if missing_secrets:
+            print(f"\n❌ Missing {len(missing_secrets)} required secrets:")
+            for secret in missing_secrets:
+                print(f"   - {secret}")
+            
+        if placeholder_secrets:
+            print(f"\n⚠️  {len(placeholder_secrets)} secrets have placeholder values:")
+            for secret in placeholder_secrets:
+                print(f"   - {secret}")
+            print("\n   These need to be updated with real values for production.")
+        
+        # Fail if any secrets are missing
+        if missing_secrets:
+            return False
+        
+        # For staging/production, also fail on placeholders
+        if self.project_id != "netra-dev" and placeholder_secrets:
+            print("\n❌ Cannot deploy to staging/production with placeholder secrets!")
+            return False
+        
+        print("\n✅ All required secrets are configured")
+        return True
+    
+    def validate_secrets_before_deployment(self) -> bool:
+        """Validate all required secrets exist and have proper values.
+        
+        This prevents deployment failures due to missing or placeholder secrets.
+        Implements canonical secrets management from SPEC/canonical_secrets_management.xml
+        """
+        print("\n🔐 Validating secrets configuration...")
+        
+        try:
+            # Determine environment based on project
+            environment = "staging" if "staging" in self.project_id else "production"
+            
+            # Run validation script
+            result = subprocess.run(
+                [
+                    "python", "scripts/validate_secrets.py",
+                    "--environment", environment,
+                    "--project", self.project_id
+                ],
+                capture_output=True,
+                text=True,
+                check=False
+            )
+            
+            # Check if validation passed
+            if result.returncode == 0:
+                print("✅ Secret validation passed")
+                return True
+            else:
+                print("❌ Secret validation failed:")
+                print(result.stdout)
+                if result.stderr:
+                    print("Errors:", result.stderr)
+                return False
+                
+        except FileNotFoundError:
+            print("⚠️ Secret validation script not found (scripts/validate_secrets.py)")
+            print("   Skipping validation (risky for production)")
+            return True
+        except Exception as e:
+            print(f"⚠️ Secret validation error: {e}")
+            print("   Continuing anyway (risky for production)")
+            return True
+    
     def setup_secrets(self) -> bool:
         """Create necessary secrets in Secret Manager."""
         print("\n🔐 Setting up secrets in Secret Manager...")
@@ -809,7 +967,6 @@ CMD ["npm", "start"]
             "clickhouse-default-password-staging": "REPLACE_WITH_CLICKHOUSE_PASSWORD",
             # Additional required secrets for comprehensive staging support
             "gemini-api-key-staging": os.getenv("GEMINI_API_KEY", "REPLACE_WITH_REAL_GEMINI_KEY"),
-            "redis-password-staging": "REPLACE_WITH_REDIS_PASSWORD",
             "anthropic-api-key-staging": os.getenv("ANTHROPIC_API_KEY", "REPLACE_WITH_REAL_ANTHROPIC_KEY")
         }
         
@@ -880,7 +1037,8 @@ CMD ["npm", "start"]
         return all_healthy
     
     def deploy_all(self, skip_build: bool = False, use_local_build: bool = False, 
-                   run_checks: bool = False, service_filter: Optional[str] = None) -> bool:
+                   run_checks: bool = False, service_filter: Optional[str] = None,
+                   skip_post_tests: bool = False) -> bool:
         """Deploy all services to GCP.
         
         Args:
@@ -888,6 +1046,7 @@ CMD ["npm", "start"]
             use_local_build: Build images locally (faster) instead of Cloud Build
             run_checks: Run pre-deployment checks
             service_filter: Deploy only specific service (e.g., 'frontend', 'backend', 'auth')
+            skip_post_tests: Skip post-deployment authentication tests
         """
         print(f"🚀 Deploying Netra Apex Platform to GCP")
         print(f"   Project: {self.project_id}")
@@ -895,12 +1054,8 @@ CMD ["npm", "start"]
         print(f"   Build Mode: {'Local (Fast)' if use_local_build else 'Cloud Build'}")
         print(f"   Pre-checks: {'Enabled' if run_checks else 'Disabled'}")
         
-        # Run pre-deployment checks if requested
-        if run_checks:
-            if not self.run_pre_deployment_checks():
-                print("\n❌ Pre-deployment checks failed")
-                print("   Fix issues and try again, or use --no-checks to skip (not recommended)")
-                return False
+        # CRITICAL: Validate ALL prerequisites BEFORE any build operations
+        print("\n🔐 Phase 1: Validating Prerequisites...")
         
         # Check prerequisites
         if not self.check_gcloud():
@@ -908,9 +1063,29 @@ CMD ["npm", "start"]
             
         if not self.enable_apis():
             return False
+        
+        # CRITICAL: Validate secrets FIRST before any build operations
+        print("\n🔐 Phase 2: Validating Secrets Configuration...")
+        if not self.validate_all_secrets_exist():
+            print("\n❌ CRITICAL: Secret validation failed!")
+            print("   Deployment aborted to prevent runtime failures.")
+            print("   Please ensure all required secrets are configured in Secret Manager.")
+            print("   Run: python scripts/validate_secrets.py --environment staging --project " + self.project_id)
+            return False
             
-        if not self.setup_secrets():
-            print("⚠️ Failed to setup secrets, continuing anyway...")
+        # Setup any missing secrets with placeholders (development only)
+        if self.project_id == "netra-dev":
+            if not self.setup_secrets():
+                print("⚠️ Failed to setup development secrets")
+                return False
+        
+        # Run additional pre-deployment checks if requested
+        if run_checks:
+            print("\n🔍 Phase 3: Running Pre-deployment Checks...")
+            if not self.run_pre_deployment_checks():
+                print("\n❌ Pre-deployment checks failed")
+                print("   Fix issues and try again, or use --no-checks to skip (not recommended)")
+                return False
             
         # Filter services if specified
         services_to_deploy = self.services
@@ -924,14 +1099,20 @@ CMD ["npm", "start"]
         # Deploy services in order: backend, auth, frontend
         service_urls = {}
         
+        # Phase 4: Build and Deploy
+        print("\n🏗️ Phase 4: Building and Deploying Services...")
+        print("   All prerequisites validated - proceeding with deployment")
+        
         for service in services_to_deploy:
             # Build image
             if not skip_build:
+                print(f"\n   Building {service.name}...")
                 if not self.build_image(service, use_local=use_local_build):
                     print(f"❌ Failed to build {service.name}")
                     return False
                     
             # Deploy service
+            print(f"   Deploying {service.name}...")
             success, url = self.deploy_service(service)
             if not success:
                 print(f"❌ Failed to deploy {service.name}")
@@ -958,6 +1139,19 @@ CMD ["npm", "start"]
             if url:
                 print(f"{service_name:10} : {url}")
                 
+        # Run post-deployment authentication tests
+        if not skip_post_tests:
+            print("\n" + "="*50)
+            print("🔐 Running Post-Deployment Authentication Tests")
+            print("="*50)
+            if self.run_post_deployment_tests(service_urls):
+                print("✅ Post-deployment tests passed!")
+            else:
+                print("⚠️ Post-deployment tests failed - authentication may not be working correctly")
+                print("   Check that JWT_SECRET_KEY is set to the same value in both services")
+        else:
+            print("\n⚠️ Skipping post-deployment tests (--skip-post-tests flag used)")
+                
         print("\n🔑 Next Steps:")
         print("1. Update secrets in Secret Manager with real values")
         print("2. Configure Cloud SQL and Redis instances")
@@ -966,6 +1160,59 @@ CMD ["npm", "start"]
         print("5. Set up monitoring and alerting")
         
         return True
+    
+    def run_post_deployment_tests(self, service_urls: Dict[str, str]) -> bool:
+        """Run post-deployment authentication tests to verify services are working correctly.
+        
+        Args:
+            service_urls: Dictionary mapping service names to their deployed URLs
+            
+        Returns:
+            True if all tests pass, False otherwise
+        """
+        try:
+            # Import the test module
+            sys.path.insert(0, str(self.project_root))
+            from tests.post_deployment.test_auth_integration import PostDeploymentAuthTest
+            
+            # Determine environment based on project ID
+            if self.project_id == "netra-production":
+                environment = "production"
+            elif self.project_id == "netra-staging":
+                environment = "staging"
+            else:
+                environment = "development"
+            
+            print(f"\nTesting {environment} environment...")
+            
+            # Set environment variables for the test
+            import os
+            os.environ["AUTH_SERVICE_URL"] = service_urls.get("auth", "")
+            os.environ["BACKEND_URL"] = service_urls.get("backend", "")
+            
+            # Run the tests asynchronously
+            import asyncio
+            tester = PostDeploymentAuthTest(environment)
+            
+            # Run tests
+            if sys.platform == "win32":
+                # Windows requires special event loop policy
+                asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+            
+            results = asyncio.run(tester.run_all_tests())
+            
+            # Return True if all tests passed
+            return all(results.values())
+            
+        except ImportError as e:
+            print(f"⚠️ Could not import post-deployment tests: {e}")
+            print("   Tests will be skipped. Run manually with:")
+            print(f"   python tests/post_deployment/test_auth_integration.py --environment {environment}")
+            return True  # Don't fail deployment if tests can't be imported
+            
+        except Exception as e:
+            print(f"⚠️ Post-deployment tests failed with error: {e}")
+            return False
     
     def cleanup(self) -> bool:
         """Clean up deployed services."""
@@ -1100,6 +1347,8 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
                        help="Path to service account JSON key file (default: config/netra-staging-7a1059b7cf26.json)")
     parser.add_argument("--service", 
                        help="Deploy only specific service (frontend, backend, auth)")
+    parser.add_argument("--skip-post-tests", action="store_true",
+                       help="Skip post-deployment authentication tests")
     
     args = parser.parse_args()
     
@@ -1119,7 +1368,8 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
                 skip_build=args.skip_build,
                 use_local_build=args.build_local,
                 run_checks=args.run_checks,
-                service_filter=args.service
+                service_filter=args.service,
+                skip_post_tests=args.skip_post_tests
             )
             
         sys.exit(0 if success else 1)

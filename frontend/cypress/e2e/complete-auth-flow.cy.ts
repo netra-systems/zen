@@ -9,13 +9,13 @@ describe('Complete Authentication Flow', () => {
     cy.visit('/login');
     
     // Mock the login API endpoint
-    cy.intercept('POST', '/auth/login', {
+    cy.intercept('POST', 'http://localhost:8001/auth/dev/login', {
       statusCode: 200,
       body: {
         access_token: 'test-jwt-token',
         token_type: 'bearer',
         user: {
-          id: 1,
+          id: 'test-user-id',
           email: 'test@netrasystems.ai',
           full_name: 'Test User'
         }
@@ -23,19 +23,27 @@ describe('Complete Authentication Flow', () => {
     }).as('loginRequest');
 
     // Mock the user endpoint
-    cy.intercept('GET', '/api/me', {
+    cy.intercept('GET', 'http://localhost:8001/api/me', {
       statusCode: 200,
       body: {
-        id: 1,
+        id: 'test-user-id',
         email: 'test@netrasystems.ai',
         full_name: 'Test User'
       }
     }).as('userRequest');
 
-    // Fill in login form (assuming there's an email/password form option)
-    cy.get('input[type="email"]').type('test@netrasystems.ai');
-    cy.get('input[type="password"]').type('SecurePassword123!');
-    cy.get('button[type="submit"]').contains('Sign In').click();
+    // Fill in login form - development mode uses different login flow
+    cy.get('body').then(($body) => {
+      if ($body.find('[data-testid="login-button"]').length > 0) {
+        // Quick dev login available
+        cy.get('[data-testid="login-button"]').click();
+      } else {
+        // Use form login
+        cy.get('input[type="email"]').type('test@netrasystems.ai');
+        cy.get('input[type="password"]').type('SecurePassword123!');
+        cy.get('button').contains(/sign in|login|submit/i).click();
+      }
+    });
 
     // Wait for login to complete
     cy.wait('@loginRequest');
@@ -43,8 +51,8 @@ describe('Complete Authentication Flow', () => {
     // Should redirect to main app
     cy.url().should('include', '/chat');
     
-    // Verify token is stored
-    cy.window().its('localStorage.authToken').should('equal', 'test-jwt-token');
+    // Verify token is stored with correct key
+    cy.window().its('localStorage.jwt_token').should('equal', 'test-jwt-token');
     
     // Verify user info is visible
     cy.contains('Test User').should('be.visible');
@@ -67,7 +75,7 @@ describe('Complete Authentication Flow', () => {
     cy.url().should('include', '/login');
     
     // Token should be cleared
-    cy.window().its('localStorage.authToken').should('be.undefined');
+    cy.window().its('localStorage.jwt_token').should('be.null');
     
     // Protected route should redirect to login
     cy.visit('/corpus');
@@ -78,7 +86,7 @@ describe('Complete Authentication Flow', () => {
     cy.visit('/login');
     
     // Mock failed login
-    cy.intercept('POST', '/auth/login', {
+    cy.intercept('POST', 'http://localhost:8001/auth/dev/login', {
       statusCode: 401,
       body: {
         detail: 'Invalid credentials'
@@ -102,11 +110,11 @@ describe('Complete Authentication Flow', () => {
   it('should handle token expiration and refresh', () => {
     // Setup initial authenticated state
     cy.window().then((win) => {
-      win.localStorage.setItem('authToken', 'expired-token');
+      win.localStorage.setItem('jwt_token', 'expired-token');
     });
 
     // Mock expired token response
-    cy.intercept('GET', '/api/me', {
+    cy.intercept('GET', 'http://localhost:8001/api/me', {
       statusCode: 401,
       body: {
         detail: 'Token expired'
@@ -122,6 +130,6 @@ describe('Complete Authentication Flow', () => {
     cy.url().should('include', '/login');
     
     // Token should be cleared
-    cy.window().its('localStorage.authToken').should('be.undefined');
+    cy.window().its('localStorage.jwt_token').should('be.null');
   });
 });

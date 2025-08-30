@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Auth Persistence and Token Propagation Regression Fix</title>
+    <category>Authentication</category>
+    <subcategory>Critical Bug Fix</subcategory>
+    <priority>CRITICAL</priority>
+    <created>2025-01-29</created>
+    <last_updated>2025-01-29</last_updated>
+    <cross_references>
+      <ref critical="true">auth/context.tsx:182-220</ref>
+      <ref critical="true">components/AuthGuard.tsx:51-80</ref>
+      <ref>auth/unified-auth-service.ts</ref>
+      <ref>lib/auth-interceptor.ts</ref>
+      <ref>SPEC/learnings/frontend_dev_autologin.xml</ref>
+      <ref>SPEC/learnings/frontend_loading_states.xml</ref>
+    </cross_references>
+  </metadata>
+
+  <problem_statement>
+    Users were being logged out on page refresh despite having a valid token in localStorage.
+    Additionally, AuthGuard was not properly propagating tokens to threads and other components.
+  </problem_statement>
+
+  <root_causes>
+    <cause id="1" severity="CRITICAL">
+      <description>Token processing logic was skipped when token already existed in state</description>
+      <location>auth/context.tsx:185</location>
+      <details>
+        The condition `if (storedToken !== currentToken)` prevented processing the token
+        to decode and set the user when the token was already in state from initialization.
+        This meant that on page refresh, the token existed but the user object was never set.
+      </details>
+    </cause>
+    <cause id="2" severity="HIGH">
+      <description>AuthGuard was redirecting too quickly without checking localStorage</description>
+      <location>components/AuthGuard.tsx:60-66</location>
+      <details>
+        AuthGuard was immediately redirecting to login when user was null, without
+        checking if a token existed in localStorage that was still being processed.
+      </details>
+    </cause>
+  </root_causes>
+
+  <solution_implemented>
+    <fix id="1">
+      <description>Always process token to restore user state</description>
+      <location>auth/context.tsx:189-220</location>
+      <code><![CDATA[
+        // CRITICAL FIX: Always process the token to restore user state
+        // This ensures user is set on page refresh when token exists in localStorage
+        try {
+          const decodedUser = jwtDecode(storedToken) as User;
+          // ... expiry checking ...
+          // CRITICAL: Always set user even if token was already in state
+          // This fixes the page refresh logout issue
+          setUser(decodedUser);
+          syncAuthStore(decodedUser, storedToken);
+          scheduleTokenRefreshCheck(storedToken);
+      ]]></code>
+    </fix>
+    <fix id="2">
+      <description>Add localStorage check before redirecting in AuthGuard</description>
+      <location>components/AuthGuard.tsx:61-74</location>
+      <code><![CDATA[
+        if (!isAuthenticated) {
+          // Double-check localStorage for token before redirecting
+          // This helps with race conditions during initialization
+          const storedToken = typeof window !== 'undefined' ? localStorage.getItem('jwt_token') : null;
+          if (!storedToken) {
+            trackError('auth_required', 'User not authenticated', currentPath, false);
+            router.push(redirectTo);
+          } else {
+            // Token exists but user not set yet - wait for auth context to process it
+            logger.debug('Token exists but user not set - waiting for auth processing', {
+              component: 'AuthGuard',
+              currentPath
+            });
+            hasPerformedAuthCheck.current = false; // Reset to allow re-check
+          }
+        }
+      ]]></code>
+    </fix>
+  </solution_implemented>
+
+  <impact>
+    <issue>Users logged out on page refresh</issue>
+    <resolution>Token now properly restores user state on mount</resolution>
+    <issue>API calls failing due to missing auth headers</issue>
+    <resolution>Auth interceptor properly gets token from authService</resolution>
+    <issue>AuthGuard redirecting prematurely</issue>
+    <resolution>AuthGuard now waits for token processing before redirecting</resolution>
+  </impact>
+
+  <testing>
+    <test_file>frontend/cypress/e2e/critical-auth-persistence-regression.cy.ts</test_file>
+    <scenarios>
+      <scenario>Token persists across page refresh</scenario>
+      <scenario>User data restored from localStorage token</scenario>
+      <scenario>Token refresh during page lifecycle</scenario>
+      <scenario>Auth headers included in API calls</scenario>
+      <scenario>Navigation between protected routes maintains auth</scenario>
+      <scenario>Dev auto-login persistence</scenario>
+      <scenario>Auth state sync between Context and Zustand</scenario>
+    </scenarios>
+  </testing>
+
+  <critical_learnings>
+    <learning priority="CRITICAL">
+      Always process tokens to restore user state, regardless of whether the token 
+      is already in React state. The user object must be decoded from the token.
+    </learning>
+    <learning priority="CRITICAL">
+      AuthGuard must check localStorage for tokens before redirecting to login,
+      as there may be a race condition during initialization where the token exists
+      but hasn't been processed yet.
+    </learning>
+    <learning priority="HIGH">
+      Token processing, user setting, and store synchronization must happen as an
+      atomic operation to prevent inconsistent state.
+    </learning>
+    <learning priority="HIGH">
+      The auth context initialization flow is:
+      1. Check localStorage for token (lines 45-58)
+      2. Fetch auth config (lines 172-294)
+      3. Process stored token if exists (lines 182-224)
+      4. Handle dev auto-login if no token (lines 225-258)
+    </learning>
+  </critical_learnings>
+
+  <prevention_guidelines>
+    <guideline>
+      Never skip token processing based on React state equality checks.
+      Always decode and set user from token.
+    </guideline>
+    <guideline>
+      Components that check authentication should always verify localStorage
+      as a fallback before taking action (redirect, error, etc).
+    </guideline>
+    <guideline>
+      Test auth flows with both fresh login AND page refresh scenarios.
+    </guideline>
+    <guideline>
+      Use comprehensive E2E tests that simulate real user behavior including
+      page refreshes, navigation, and API calls.
+    </guideline>
+  </prevention_guidelines>
+
+  <related_issues>
+    <issue>Dev auto-login failures</issue>
+    <issue>Token refresh timing issues</issue>
+    <issue>Multi-tab auth synchronization</issue>
+  </related_issues>
+
+  <monitoring_recommendations>
+    <metric>Page refresh logout rate</metric>
+    <metric>Auth initialization time</metric>
+    <metric>Token refresh success rate</metric>
+    <metric>API call auth header presence</metric>
+  </monitoring_recommendations>
+</learning>

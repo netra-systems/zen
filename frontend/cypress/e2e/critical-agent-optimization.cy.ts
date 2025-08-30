@@ -5,11 +5,11 @@ describe('Critical Agent Optimization Workflow', () => {
     cy.clearCookies();
     
     cy.window().then((win) => {
-      win.localStorage.setItem('auth_token', 'mock-jwt-token-for-testing');
+      win.localStorage.setItem('jwt_token', 'mock-jwt-token-for-testing');
       win.localStorage.setItem('user', JSON.stringify({
         id: 'test-user-id',
         email: 'test@netrasystems.ai',
-        name: 'Test User'
+        full_name: 'Test User'
       }));
     });
     
@@ -23,8 +23,8 @@ describe('Critical Agent Optimization Workflow', () => {
         // 1. Send optimization request
         const optimizationRequest = 'Help me optimize my LLM deployment for better performance and lower costs';
         
-        cy.get('textarea, input[type="text"]').first().type(optimizationRequest);
-        cy.get('button').contains(/send|submit|→|⏎|optimize/i).click();
+        cy.get('[data-testid="message-input"], textarea, input[type="text"]').first().type(optimizationRequest);
+        cy.get('[data-testid="send-button"], button').contains(/send|submit|→|⏎|optimize/i).click();
         
         // 2. Verify request is sent
         cy.contains(optimizationRequest, { timeout: 10000 }).should('be.visible');
@@ -43,8 +43,8 @@ describe('Critical Agent Optimization Workflow', () => {
       if (!url.includes('/login')) {
         // 1. Initial request
         const request = 'Analyze my current AI infrastructure and suggest improvements';
-        cy.get('textarea, input[type="text"]').first().type(request);
-        cy.get('button').contains(/send|submit|→|⏎/i).click();
+        cy.get('[data-testid="message-input"], textarea, input[type="text"]').first().type(request);
+        cy.get('[data-testid="send-button"], button').contains(/send|submit|→|⏎/i).click();
         
         // 2. Wait for initial response
         cy.contains(request, { timeout: 10000 }).should('be.visible');
@@ -52,8 +52,8 @@ describe('Critical Agent Optimization Workflow', () => {
         
         // 3. Follow-up question
         const followUp = 'What specific caching strategies do you recommend?';
-        cy.get('textarea, input[type="text"]').first().clear().type(followUp);
-        cy.get('button').contains(/send|submit|→|⏎/i).click();
+        cy.get('[data-testid="message-input"], textarea, input[type="text"]').first().clear().type(followUp);
+        cy.get('[data-testid="send-button"], button').contains(/send|submit|→|⏎/i).click();
         
         // 4. Verify contextual response
         cy.contains(followUp, { timeout: 10000 }).should('be.visible');
@@ -67,8 +67,8 @@ describe('Critical Agent Optimization Workflow', () => {
       if (!url.includes('/login')) {
         // Send a complex request that triggers multiple agents
         const complexRequest = 'Perform a comprehensive analysis of my AI workload and provide optimization strategies';
-        cy.get('textarea, input[type="text"]').first().type(complexRequest);
-        cy.get('button').contains(/send|submit|→|⏎/i).click();
+        cy.get('[data-testid="message-input"], textarea, input[type="text"]').first().type(complexRequest);
+        cy.get('[data-testid="send-button"], button').contains(/send|submit|→|⏎/i).click();
         
         // Look for agent activity indicators
         cy.get('body').then(($body) => {
@@ -104,8 +104,8 @@ describe('Critical Agent Optimization Workflow', () => {
     cy.url().then((url) => {
       if (!url.includes('/login')) {
         const modelRequest = 'Compare optimization strategies for GPT-4 vs Claude vs Llama models';
-        cy.get('textarea, input[type="text"]').first().type(modelRequest);
-        cy.get('button').contains(/send|submit|→|⏎/i).click();
+        cy.get('[data-testid="message-input"], textarea, input[type="text"]').first().type(modelRequest);
+        cy.get('[data-testid="send-button"], button').contains(/send|submit|→|⏎/i).click();
         
         // Verify request is sent
         cy.contains(modelRequest, { timeout: 10000 }).should('be.visible');
@@ -121,8 +121,8 @@ describe('Critical Agent Optimization Workflow', () => {
     cy.url().then((url) => {
       if (!url.includes('/login')) {
         const actionRequest = 'Give me specific steps to reduce my AI costs by 30%';
-        cy.get('textarea, input[type="text"]').first().type(actionRequest);
-        cy.get('button').contains(/send|submit|→|⏎/i).click();
+        cy.get('[data-testid="message-input"], textarea, input[type="text"]').first().type(actionRequest);
+        cy.get('[data-testid="send-button"], button').contains(/send|submit|→|⏎/i).click();
         
         // Verify request
         cy.contains(actionRequest, { timeout: 10000 }).should('be.visible');
@@ -137,8 +137,8 @@ describe('Critical Agent Optimization Workflow', () => {
     cy.url().then((url) => {
       if (!url.includes('/login')) {
         const metricsRequest = 'My current setup: 1000 req/s, 500ms latency, $100/hour. How can I improve?';
-        cy.get('textarea, input[type="text"]').first().type(metricsRequest);
-        cy.get('button').contains(/send|submit|→|⏎/i).click();
+        cy.get('[data-testid="message-input"], textarea, input[type="text"]').first().type(metricsRequest);
+        cy.get('[data-testid="send-button"], button').contains(/send|submit|→|⏎/i).click();
         
         // Verify request
         cy.contains(metricsRequest, { timeout: 10000 }).should('be.visible');

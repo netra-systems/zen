@@ -12,7 +12,7 @@ export default defineConfig({
         },
       });
     },
-    baseUrl: 'http://localhost:3003',
+    baseUrl: 'http://localhost:3009',
     supportFile: 'cypress/support/e2e.ts',
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}',
     watchForFileChanges: false,

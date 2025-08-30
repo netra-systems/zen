@@ -17,7 +17,6 @@ import time
 import json
 from pathlib import Path
 from typing import Dict, Any, Optional
-from unittest.mock import patch, MagicMock
 import pytest
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.websocket_helpers import MockWebSocket

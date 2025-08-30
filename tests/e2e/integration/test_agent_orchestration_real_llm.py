@@ -22,7 +22,6 @@ import asyncio
 import os
 import time
 from typing import Dict, Any, List
-from unittest.mock import patch, AsyncMock
 
 import pytest
 import pytest_asyncio
@@ -364,7 +363,7 @@ class TestAgentOrchestrationRealLLMIntegration:
             start_time = time.time()
             try:
                 llm_response = await asyncio.wait_for(
-                    llm_manager.call_llm(
+                    llm_manager.ask_llm(
                         model="gpt-4-turbo-preview",
                         messages=[{"role": "user", "content": request["message"]}],
                         temperature=0.7
@@ -393,7 +392,7 @@ class TestAgentOrchestrationRealLLMIntegration:
         else:
             # Mocked LLM execution
             # Mock: LLM service isolation for fast testing without API calls or rate limits
-            with patch('netra_backend.app.llm.llm_manager.LLMManager.call_llm') as mock_llm:
+            with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
                 mock_llm.return_value = {
                     "content": f"Mock {agent_type} response for: {request['message']}",
                     "tokens_used": 150,

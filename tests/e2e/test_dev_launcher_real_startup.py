@@ -44,7 +44,7 @@ from dev_launcher.config import LauncherConfig
 from dev_launcher.launcher import DevLauncher
 
 
-class RealDevLauncherTester:
+class TestRealDevLauncherer:
     """
     Real dev launcher testing utility - Uses actual processes and HTTP calls.
     

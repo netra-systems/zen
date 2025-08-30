@@ -24,7 +24,6 @@ import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Tuple
-from unittest.mock import patch, MagicMock, AsyncMock
 import pytest
 import jwt
 import requests

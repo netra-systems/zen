@@ -21,7 +21,7 @@ import asyncio
 import pytest
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
 from test_framework.environment_markers import env, env_requires, dev_and_staging
 from netra_backend.app.agents.base_agent import BaseSubAgent
@@ -36,8 +36,7 @@ from netra_backend.app.websocket_core.manager import WebSocketManager
 UnifiedWebSocketManager = WebSocketManager  # Alias for backward compatibility
 
 
-@pytest.mark.e2e
-class TestResponseAgent(BaseSubAgent):
+class MockResponseAgent(BaseSubAgent):
     """Test implementation of BaseSubAgent for response flow testing."""
     
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool = True) -> None:
@@ -54,7 +53,7 @@ class TestResponseAgent(BaseSubAgent):
 
 
 class AgentResponseFlowTester:
-    """Tests complete agent response generation flow."""
+    """Helper class for testing complete agent response generation flow."""
     
     def __init__(self, use_mock_llm: bool = True):
         self.config = get_config()
@@ -65,9 +64,9 @@ class AgentResponseFlowTester:
         self.streaming_events = []
         self.websocket_messages = []
     
-    async def create_test_agent(self, agent_type: str, name: str) -> TestResponseAgent:
+    async def create_test_agent(self, agent_type: str, name: str) -> MockResponseAgent:
         """Create test agent instance."""
-        agent = TestResponseAgent(
+        agent = MockResponseAgent(
             llm_manager=self.llm_manager,
             name=name,
             description=f"Test {agent_type} agent for response flow testing"

@@ -81,12 +81,15 @@ class ValidationResult:
     missing_optional: List[str]
     fallback_applied: List[str] = None  # Track variables that used fallbacks
     suggestions: List[str] = None  # Automated suggestions for fixes
+    missing_optional_by_category: Dict[str, List[str]] = None  # Categorized missing optional vars
     
     def __post_init__(self):
         if self.fallback_applied is None:
             self.fallback_applied = []
         if self.suggestions is None:
             self.suggestions = []
+        if self.missing_optional_by_category is None:
+            self.missing_optional_by_category = {}
 
 
 class IsolatedEnvironment:
@@ -583,14 +586,47 @@ class IsolatedEnvironment:
     def _get_optional_variables(self) -> Dict[str, str]:
         """Get optional environment variables with descriptions."""
         return {
+            # Database connections (optional for some environments)
             DatabaseConstants.REDIS_URL: "Redis connection string",
             DatabaseConstants.CLICKHOUSE_URL: "ClickHouse connection string",
+            
+            # LLM API Keys (optional for basic functionality)
             "ANTHROPIC_API_KEY": "Anthropic API key for LLM services",
             "OPENAI_API_KEY": "OpenAI API key for LLM services",
+            "GEMINI_API_KEY": "Google Gemini API key for LLM services",
+            
+            # OAuth Configuration (environment-specific)
             "GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT": "Google OAuth client ID for development",
             "GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT": "Google OAuth client secret for development",
             "GOOGLE_OAUTH_CLIENT_ID_STAGING": "Google OAuth client ID for staging",
-            "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": "Google OAuth client secret for staging"
+            "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": "Google OAuth client secret for staging",
+            "GITHUB_OAUTH_CLIENT_ID": "GitHub OAuth client ID for authentication",
+            "GITHUB_OAUTH_CLIENT_SECRET": "GitHub OAuth client secret for authentication",
+            
+            # API Keys for third-party integrations
+            "NETRA_API_KEY": "Netra API key for service-to-service authentication",
+            "LANGFUSE_PUBLIC_KEY": "Langfuse public key for observability",
+            "LANGFUSE_SECRET_KEY": "Langfuse secret key for observability",
+            
+            # Monitoring and observability
+            "GRAFANA_ADMIN_PASSWORD": "Grafana admin password for monitoring dashboards",
+            "PROMETHEUS_ENABLED": "Enable Prometheus metrics collection",
+            
+            # Feature flags and optional configurations
+            "ENABLE_WEBSOCKET_METRICS": "Enable WebSocket metrics collection",
+            "WEBSOCKET_DEBUG_LOGGING": "Enable debug logging for WebSocket connections",
+            "DISABLE_AUTH": "Disable authentication for testing (development only)",
+            "TEST_MODE": "Enable test mode with relaxed validations",
+            
+            # Cloud and deployment specific
+            "GCP_PROJECT_ID": "Google Cloud Project ID",
+            "K_SERVICE": "Cloud Run service name (set automatically)",
+            "K_REVISION": "Cloud Run revision (set automatically)",
+            "PR_NUMBER": "Pull request number for staging environments",
+            
+            # Legacy OAuth fallbacks
+            "GOOGLE_CLIENT_ID": "Legacy Google OAuth client ID (use environment-specific versions instead)",
+            "GOOGLE_OAUTH_CLIENT_ID": "Legacy Google OAuth client ID (use environment-specific versions instead)"
         }
     
     def _get_validation_rules(self) -> Dict[str, callable]:
@@ -607,16 +643,26 @@ class IsolatedEnvironment:
         }
     
     def validate_all(self) -> ValidationResult:
-        """Validate all environment variables."""
+        """Validate all environment variables with enhanced categorization."""
         errors = []
         warnings = []
         missing_optional = []
+        current_environment = self.get("ENVIRONMENT", "development")
         
         # Check required variables
         errors.extend(self._check_required_variables())
         
-        # Check optional variables  
-        missing_optional.extend(self._check_optional_variables())
+        # Check optional variables with context-aware warnings
+        all_missing_optional = self._check_optional_variables()
+        missing_optional_by_category = self._categorize_missing_optional_variables()
+        
+        # Convert warnings for critical missing optionals based on environment
+        for var_info in all_missing_optional:
+            var_name = var_info.split(' (')[0]  # Extract variable name
+            if self._should_warn_about_missing_optional(var_name, current_environment):
+                warnings.append(f"Missing important optional variable: {var_info}")
+            else:
+                missing_optional.append(var_info)
         
         # Validate variable formats
         format_errors, format_warnings = self._validate_variable_formats()
@@ -628,7 +674,9 @@ class IsolatedEnvironment:
         errors.extend(consistency_errors)
         
         is_valid = len(errors) == 0
-        return ValidationResult(is_valid, errors, warnings, missing_optional)
+        result = ValidationResult(is_valid, errors, warnings, missing_optional)
+        result.missing_optional_by_category = missing_optional_by_category
+        return result
     
     def _check_required_variables(self) -> List[str]:
         """Check that all required variables are present."""
@@ -647,6 +695,81 @@ class IsolatedEnvironment:
             if not self.get(var_name):
                 missing.append(f"{var_name} ({description})")
         return missing
+    
+    def _categorize_missing_optional_variables(self) -> Dict[str, List[str]]:
+        """Categorize missing optional variables by type for better reporting."""
+        missing_by_category = {
+            "OAuth Configuration": [],
+            "LLM API Keys": [],
+            "Database Connections": [],
+            "Monitoring & Observability": [],
+            "Feature Flags": [],
+            "Cloud & Deployment": [],
+            "Third-party Integrations": [],
+            "Legacy/Deprecated": []
+        }
+        
+        optional_vars = self._get_optional_variables()
+        
+        # Define category mappings
+        category_patterns = {
+            "OAuth Configuration": ["OAUTH", "CLIENT_ID", "CLIENT_SECRET", "GITHUB_OAUTH"],
+            "LLM API Keys": ["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GEMINI_API_KEY", "LLM_API_KEY"],
+            "Database Connections": ["REDIS_URL", "CLICKHOUSE_URL"],
+            "Monitoring & Observability": ["GRAFANA", "PROMETHEUS", "LANGFUSE", "WEBSOCKET_DEBUG", "WEBSOCKET_METRICS"],
+            "Feature Flags": ["DISABLE_AUTH", "TEST_MODE", "ENABLE_", "_ENABLED"],
+            "Cloud & Deployment": ["GCP_PROJECT", "K_SERVICE", "K_REVISION", "PR_NUMBER"],
+            "Third-party Integrations": ["NETRA_API_KEY", "API_KEY"],
+            "Legacy/Deprecated": ["GOOGLE_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_ID"]  # Non-environment-specific ones
+        }
+        
+        for var_name, description in optional_vars.items():
+            if not self.get(var_name):
+                categorized = False
+                for category, patterns in category_patterns.items():
+                    if any(pattern in var_name for pattern in patterns):
+                        missing_by_category[category].append(f"{var_name} ({description})")
+                        categorized = True
+                        break
+                
+                if not categorized:
+                    missing_by_category["Third-party Integrations"].append(f"{var_name} ({description})")
+        
+        # Remove empty categories
+        return {k: v for k, v in missing_by_category.items() if v}
+    
+    def _should_warn_about_missing_optional(self, var_name: str, environment: str = None) -> bool:
+        """Determine if we should warn about missing optional variable based on context."""
+        if environment is None:
+            environment = self.get("ENVIRONMENT", "development")
+        
+        # Critical optional variables that should be warned about in staging/production
+        critical_optional_in_staging = [
+            "GOOGLE_OAUTH_CLIENT_ID_STAGING", "GOOGLE_OAUTH_CLIENT_SECRET_STAGING",
+            "ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GEMINI_API_KEY"
+        ]
+        
+        # Variables that are only relevant in certain environments
+        environment_specific = {
+            "development": ["GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT", "GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT"],
+            "staging": ["GOOGLE_OAUTH_CLIENT_ID_STAGING", "GOOGLE_OAUTH_CLIENT_SECRET_STAGING", "GCP_PROJECT_ID"],
+            "production": ["GOOGLE_OAUTH_CLIENT_ID_PRODUCTION", "GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION", "GCP_PROJECT_ID"]
+        }
+        
+        # Don't warn about environment-specific variables in wrong environment
+        for env, vars_for_env in environment_specific.items():
+            if env != environment and var_name in vars_for_env:
+                return False
+        
+        # Warn about critical variables in staging/production
+        if environment in ["staging", "production"] and var_name in critical_optional_in_staging:
+            return True
+            
+        # For development, only warn about development-specific OAuth
+        if environment == "development" and var_name in environment_specific["development"]:
+            return True
+            
+        return False
     
     def _validate_variable_formats(self) -> Tuple[List[str], List[str]]:
         """Validate format of environment variables."""
@@ -866,26 +989,36 @@ class IsolatedEnvironment:
         return ValidationResult(len(errors) == 0, errors, warnings, [])
     
     def print_validation_summary(self, result: ValidationResult) -> None:
-        """Print validation summary with colors and formatting."""
+        """Print validation summary with formatting."""
         if result.is_valid:
-            print("✅ ENVIRONMENT | All required variables validated successfully")
+            print("ENVIRONMENT | All required variables validated successfully")
         else:
-            print("❌ ENVIRONMENT | Validation failed")
+            print("ENVIRONMENT | Validation failed")
             
         if result.errors:
-            print(f"\n🚨 ERRORS ({len(result.errors)}):")
+            print(f"\nERRORS ({len(result.errors)}):")
             for error in result.errors:
-                print(f"  • {error}")
+                print(f"  - {error}")
                 
         if result.warnings:
-            print(f"\n⚠️  WARNINGS ({len(result.warnings)}):")
+            print(f"\nWARNINGS ({len(result.warnings)}):")
             for warning in result.warnings:
-                print(f"  • {warning}")
-                
-        if result.missing_optional:
-            print(f"\nℹ️  OPTIONAL MISSING ({len(result.missing_optional)}):")
+                print(f"  - {warning}")
+        
+        # Print categorized optional variables
+        if result.missing_optional_by_category:
+            print(f"\nOPTIONAL VARIABLES BY CATEGORY:")
+            for category, vars_in_category in result.missing_optional_by_category.items():
+                if vars_in_category:  # Only show categories that have missing vars
+                    print(f"\n  {category} ({len(vars_in_category)} missing):")
+                    for missing in vars_in_category:
+                        print(f"    - {missing}")
+                        
+        elif result.missing_optional:
+            # Fallback to old format if categorization failed
+            print(f"\nOPTIONAL MISSING ({len(result.missing_optional)}):")
             for missing in result.missing_optional:
-                print(f"  • {missing}")
+                print(f"  - {missing}")
     
     def get_fix_suggestions(self, result: ValidationResult) -> List[str]:
         """Get suggestions for fixing validation issues."""
@@ -948,11 +1081,12 @@ class IsolatedEnvironment:
         return secrets.token_urlsafe(32)
     
     def validate_with_fallbacks(self, enable_fallbacks: bool = True, development_mode: bool = True) -> ValidationResult:
-        """Enhanced validation with fallback application."""
+        """Enhanced validation with fallback application and categorization."""
         errors = []
         warnings = []
         missing_optional = []
         fallback_applied = []
+        current_environment = self.get("ENVIRONMENT", "development")
         
         required_vars = self._get_required_variables()
         fallback_values = self._get_fallback_values()
@@ -975,8 +1109,17 @@ class IsolatedEnvironment:
                 else:
                     errors.append(f"Missing required environment variable: {var_name} ({description})")
         
-        # Check optional variables
-        missing_optional.extend(self._check_optional_variables())
+        # Check optional variables with context-aware warnings
+        all_missing_optional = self._check_optional_variables()
+        missing_optional_by_category = self._categorize_missing_optional_variables()
+        
+        # Convert warnings for critical missing optionals based on environment
+        for var_info in all_missing_optional:
+            var_name = var_info.split(' (')[0]  # Extract variable name
+            if self._should_warn_about_missing_optional(var_name, current_environment):
+                warnings.append(f"Missing important optional variable: {var_info}")
+            else:
+                missing_optional.append(var_info)
         
         # Validate formats
         format_errors, format_warnings = self._validate_variable_formats()
@@ -990,7 +1133,9 @@ class IsolatedEnvironment:
         is_valid = len(errors) == 0
         suggestions = self.get_fix_suggestions(ValidationResult(is_valid, errors, warnings, missing_optional))
         
-        return ValidationResult(is_valid, errors, warnings, missing_optional, fallback_applied, suggestions)
+        result = ValidationResult(is_valid, errors, warnings, missing_optional, fallback_applied, suggestions)
+        result.missing_optional_by_category = missing_optional_by_category
+        return result
     
     def get_debug_info(self) -> Dict[str, Any]:
         """Get debug information about the environment manager."""

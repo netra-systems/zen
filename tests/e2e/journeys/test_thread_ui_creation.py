@@ -12,7 +12,6 @@ import asyncio
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import MagicMock
 
 import pytest
 
@@ -77,7 +76,7 @@ class ThreadCreationExecutor:
         """Create thread and update UI state."""
         # Mock thread for testing without database dependency
         thread_id = f"thread_{self.user_id}_{int(time.time())}_{len(self.created_threads)}"
-        mock_thread = MagicMock()
+        mock_thread = MagicNone  # TODO: Use real service instead of Mock
         mock_thread.id = thread_id
         mock_thread.created_at = datetime.now(timezone.utc)
         

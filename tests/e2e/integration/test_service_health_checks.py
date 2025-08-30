@@ -105,7 +105,7 @@ class ServiceHealthChecker:
         )
 
 
-class DevHealthTestFixture:
+class TestDevHealthFixture:
     """Test fixture for dev environment health monitoring."""
     
     def __init__(self):
