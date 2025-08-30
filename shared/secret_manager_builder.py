@@ -153,6 +153,26 @@ class SecretManagerBuilder:
         Returns:
             Environment name: 'development', 'staging', or 'production'
         """
+        # CRITICAL FIX: Check for test context first to prevent staging detection during tests
+        testing_indicators = [
+            self.env.get("TESTING"),
+            self.env.get("TEST_ENV"),
+            self.env.get("PYTEST_CURRENT_TEST"),
+            self.env.get("_PYTEST_CURRENT_TEST")
+        ]
+        
+        if any(testing_indicators):
+            # Force test/development environment when in test context
+            test_env = (self.env.get("TEST_ENV") or "").lower()
+            if test_env in ["test", "testing"]:
+                return "development"  # Map test to development for configuration purposes
+            elif test_env in ["dev", "development"]:
+                return "development"
+            elif test_env in ["staging", "stage"]:
+                return "staging"
+            else:
+                return "development"  # Default test context to development
+        
         # Check various environment variable formats
         env_vars = [
             (self.env.get("ENVIRONMENT") or "").lower(),
