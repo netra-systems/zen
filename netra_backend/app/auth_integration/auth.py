@@ -118,41 +118,8 @@ async def get_current_user_optional(
         return None
     
     try:
-        # Manually validate token since we can't reuse get_current_user
-        # (it expects credentials from a different security instance)
-        token = credentials.credentials
-        
-        # Validate token with auth service
-        validation_result = await auth_client.validate_token_jwt(token)
-        
-        if not validation_result or not validation_result.get("valid"):
-            return None
-        
-        # Get user from database
-        user_id = validation_result.get("user_id")
-        if not user_id:
-            return None
-        
-        from sqlalchemy import select
-        
-        result = await db.execute(select(User).where(User.id == user_id))
-        user = result.scalar_one_or_none()
-        
-        if not user:
-            # In development mode, create and persist a dev user
-            from netra_backend.app.config import get_config
-            config = get_config()
-            if config.environment == "development":
-                from netra_backend.app.services.user_service import user_service
-                
-                # Use centralized dev user creation
-                email = validation_result.get("email", "dev@example.com")
-                user = await user_service.get_or_create_dev_user(db, email=email, user_id=user_id)
-                logger.warning(f"Using dev user: {user.email}")
-            else:
-                return None
-        
-        return user
+        # Reuse get_current_user logic by calling it directly
+        return await get_current_user(credentials, db)
     except Exception as e:
         logger.debug(f"Optional auth failed: {e}")
         return None

@@ -71,8 +71,9 @@ TEST_CONFIG = {
     }
 }
 
-# Test secrets
+# Test secrets - REMOVED mock API key fallbacks per CLAUDE.md
+# Configuration must require real API keys from environment
 TEST_SECRETS = {
     "jwt_secret": "test_jwt_secret_key_for_testing_only",
-    "api_key": "test_api_key_for_testing_only"
+    # API keys must come from environment variables - no mock fallbacks allowed
 }

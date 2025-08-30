@@ -67,10 +67,9 @@ class AuthConfig:
             fast_test_mode = env_manager.get("AUTH_FAST_TEST_MODE", "false").lower() == "true"
             if env in ["staging", "production"] and not (env == "test" or fast_test_mode):
                 raise ValueError("SERVICE_SECRET must be set in production/staging")
-            # For test/development environments, allow empty but warn
+            # For test/development environments, fail explicitly - no mock fallbacks allowed
             if env in ["test", "development"] or fast_test_mode:
-                logger.warning(f"SERVICE_SECRET not configured for {env} environment")
-                return ""  # Return empty string for test/dev
+                raise ValueError(f"SERVICE_SECRET must be set in {env} environment - no mock fallbacks allowed per CLAUDE.md")
             # For any other environment, fail loudly
             raise ValueError(
                 f"SERVICE_SECRET is not configured for {env} environment. "
@@ -102,10 +101,9 @@ class AuthConfig:
             fast_test_mode = env_manager.get("AUTH_FAST_TEST_MODE", "false").lower() == "true"
             if env in ["staging", "production"] and not (env == "test" or fast_test_mode):
                 raise ValueError("SERVICE_ID must be set in production/staging")
-            # For test/development environments, allow empty but warn
+            # For test/development environments, fail explicitly - no mock fallbacks allowed
             if env in ["test", "development"] or fast_test_mode:
-                logger.warning(f"SERVICE_ID not configured for {env} environment")
-                return "test-service-id"  # Return test ID for test/dev
+                raise ValueError(f"SERVICE_ID must be set in {env} environment - no mock fallbacks allowed per CLAUDE.md")
             # For any other environment, fail loudly
             raise ValueError(
                 f"SERVICE_ID is not configured for {env} environment. "

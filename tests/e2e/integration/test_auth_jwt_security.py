@@ -36,7 +36,7 @@ from test_framework.auth_jwt_test_manager import (
 logger = logging.getLogger(__name__)
 
 
-class TestJWTSecurityManager(JWTGenerationTestManager):
+class JWTSecurityTestManager(JWTGenerationTestManager):
 
     """
 

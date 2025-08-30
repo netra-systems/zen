@@ -27,16 +27,13 @@ import logging
 import pytest
 import time
 
-from tests.e2e.integration.test_auth_jwt_generation import (
-    JWTGenerationTestManager,
-    TokenSet,
-)
+from test_framework.auth_jwt_test_manager import JWTGenerationTestManager, TokenSet
 
 
 logger = logging.getLogger(__name__)
 
 
-class TestJWTRefreshManager(JWTGenerationTestManager):
+class JWTRefreshTestManager(JWTGenerationTestManager):
 
     """
 

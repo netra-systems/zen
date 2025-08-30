@@ -23,7 +23,7 @@ import httpx
 
 from test_framework.http_client import UnifiedHTTPClient
 from test_framework.fixtures.auth import create_test_user_token, create_real_jwt_token
-from tests.e2e.helpers.auth.auth_service_helpers import AuthServiceTestHelper
+from tests.e2e.helpers.auth.auth_service_helpers import AuthServiceHelper
 
 
 class FirstTimeUserTestHarness:
@@ -34,7 +34,7 @@ class FirstTimeUserTestHarness:
         self.api_url = os.getenv("API_URL", "http://localhost:8001")
         self.auth_url = os.getenv("AUTH_SERVICE_URL", "http://localhost:8002")
         self.http_client = UnifiedHTTPClient(base_url=self.api_url)
-        self.auth_helper = AuthServiceTestHelper()
+        self.auth_helper = AuthServiceHelper()
         
     async def create_new_user(self) -> Dict[str, Any]:
         """Create a brand new user for testing"""

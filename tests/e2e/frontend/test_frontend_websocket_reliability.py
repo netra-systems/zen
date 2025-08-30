@@ -24,7 +24,7 @@ import websockets
 import httpx
 
 from test_framework.fixtures.auth import create_test_user_token, create_real_jwt_token
-from tests.e2e.helpers.auth.auth_service_helpers import AuthServiceTestHelper
+from tests.e2e.helpers.auth.auth_service_helpers import AuthServiceHelper
 
 
 class WebSocketReliabilityTester:

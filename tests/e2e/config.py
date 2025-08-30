@@ -169,9 +169,9 @@ class UnifiedTestConfig:
         os.environ["GOOGLE_CLIENT_ID"] = "test-google-client-id"
         os.environ["GOOGLE_CLIENT_SECRET"] = "test-google-client-secret"
         
-        # Only set mock API key if real LLM testing is not enabled
-        if not os.environ.get("TEST_USE_REAL_LLM", "").lower() == "true":
-            os.environ["GEMINI_API_KEY"] = "test-gemini-api-key"
+        # REMOVED: Mock API key fallbacks are forbidden per CLAUDE.md
+        # Configuration must require real API keys from environment
+        # If GEMINI_API_KEY is missing, system should fail explicitly
     
     def _create_test_endpoints(self) -> TestEndpoints:
         """Create test endpoint configuration"""

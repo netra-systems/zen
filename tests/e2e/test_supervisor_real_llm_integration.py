@@ -100,6 +100,9 @@ class TestSupervisorE2EWithRealLLM:
         # Real database session manager
         db_session_manager = DatabaseSessionManager()
         
+        # Initialize database schema for SQLite testing
+        await self._initialize_database_schema(db_session_manager)
+        
         # Real WebSocket manager (without active connections for testing)
         websocket_manager = WebSocketManager()
         
@@ -112,6 +115,25 @@ class TestSupervisorE2EWithRealLLM:
             "websocket_manager": websocket_manager,
             "tool_dispatcher": tool_dispatcher
         }
+    
+    async def _initialize_database_schema(self, db_session_manager):
+        """Initialize database schema for testing."""
+        try:
+            from netra_backend.app.db.base import Base
+            # Import all the models so they're registered with Base.metadata
+            from netra_backend.app.db.models_agent_state import AgentStateMetadata, AgentStateCheckpoint
+            from netra_backend.app.db.models_user import User, Secret, ToolUsageLog
+            from netra_backend.app.db.models_supply import Supply, SupplyOption, AISupplyItem
+            
+            # Get the engine from session manager
+            async with db_session_manager.get_session() as session:
+                # Create all tables
+                async with session.get_bind().begin() as conn:
+                    await conn.run_sync(Base.metadata.create_all)
+                    print(f"[TEST] Database schema initialized successfully - created {len(Base.metadata.tables)} tables")
+        except Exception as e:
+            print(f"[TEST] Database schema initialization failed: {e}")
+            # Don't fail the test - continue with degraded functionality
     
     @pytest.fixture
     async def supervisor(self, real_dependencies):

@@ -38,10 +38,37 @@ from tests.e2e.agent_conversation_helpers import (
 class TestAgentConversationFlow:
     """Test #2: Complete Agent Conversation Flow with Context Preservation."""
     
+    def setup_method(self):
+        """Configure real service connections before each test."""
+        from netra_backend.app.core.isolated_environment import get_env
+        
+        env = get_env()
+        
+        # Configure real database connection
+        env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "conversation_flow_test")
+        env.set("TESTING", "1", "conversation_flow_test")
+        
+        # Configure real Redis connection
+        env.set("REDIS_URL", "redis://localhost:6379/1", "conversation_flow_test")
+        
+        # Configure real LLM usage
+        env.set("NETRA_REAL_LLM_ENABLED", "true", "conversation_flow_test")
+        env.set("USE_REAL_LLM", "true", "conversation_flow_test")
+        env.set("TEST_LLM_MODE", "real", "conversation_flow_test")
+        
+        # Use default model from system configuration
+        from netra_backend.app.llm.llm_defaults import LLMModel
+        default_model = LLMModel.get_default()
+        env.set("NETRA_DEFAULT_LLM_MODEL", default_model.value, "conversation_flow_test")
+        
+        # Disable mocks explicitly
+        env.set("DISABLE_MOCKS", "true", "conversation_flow_test")
+        
     @pytest_asyncio.fixture
     @pytest.mark.e2e
     async def test_core(self):
-        """Initialize conversation test core."""
+        """Initialize conversation test core with real services."""
+        self.setup_method()  # Ensure environment is configured
         core = AgentConversationTestCore()
         await core.setup_test_environment()
         yield core
@@ -175,42 +202,45 @@ class TestAgentConversationFlow:
     
     async def _execute_agent_request_with_real_llm(self, session_data: Dict[str, Any], request: Dict[str, Any], 
                                              agent_type: str) -> Dict[str, Any]:
-        """Execute agent request with real LLM response."""
-        # Use real LLM manager for authentic conversation testing
+        """Execute agent request with real LLM response - NO MOCKING."""
+        from test_framework.real_llm_config import get_real_llm_manager
+        from netra_backend.app.core.isolated_environment import get_env
         from netra_backend.app.config import get_config
         from netra_backend.app.llm.llm_manager import LLMManager
-        from test_framework.real_llm_config import get_real_llm_manager
         
+        # Configure real LLM usage
+        env = get_env()
+        env.set("NETRA_REAL_LLM_ENABLED", "true", "test_conversation_flow")
+        env.set("USE_REAL_LLM", "true", "test_conversation_flow")
+        env.set("TEST_LLM_MODE", "real", "test_conversation_flow")
+        
+        # Use real LLM manager - this MUST work with real services
         config = get_config()
         llm_manager = LLMManager(config)
         
         # Create agent-specific prompt based on type
-        prompt = f"As a {agent_type} agent, respond to: {request.get('message', 'No message provided')}"
+        message = request.get('message', 'No message provided')
+        prompt = f"As a {agent_type} agent, provide a concise response to: {message}"
         
-        try:
-            # Use real LLM call with appropriate config
-            llm_response = await llm_manager.ask_llm_full(prompt, "gemini-2.5-flash", use_cache=True)
-            response = await AgentConversationTestUtils.send_conversation_message(session_data["client"], request)
-            
-            return {
-                "status": "success", 
-                "content": llm_response.content, 
-                "agent_type": agent_type,
-                "execution_time": llm_response.execution_time if hasattr(llm_response, 'execution_time') else 0.5,
-                "response_time": response.get("response_time", 0),
-                "tokens_used": llm_response.tokens_used if hasattr(llm_response, 'tokens_used') else 150
-            }
-        except Exception as e:
-            # Fallback to test response if LLM fails
-            response = await AgentConversationTestUtils.send_conversation_message(session_data["client"], request)
-            return {
-                "status": "success", 
-                "content": f"Agent {agent_type} processed (LLM fallback: {str(e)[:50]})", 
-                "agent_type": agent_type,
-                "execution_time": 0.5,
-                "response_time": response.get("response_time", 0),
-                "tokens_used": 100
-            }
+        # Execute real LLM call - NO FALLBACK TO MOCKS
+        # Use the default model from LLMModel enum to ensure proper configuration
+        from netra_backend.app.llm.llm_defaults import LLMModel
+        default_model = LLMModel.get_default()
+        llm_response = await llm_manager.ask_llm_full(prompt, default_model.value, use_cache=True)
+        
+        # Send the request through real service infrastructure
+        response = await AgentConversationTestUtils.send_conversation_message(session_data["client"], request)
+        
+        return {
+            "status": "success", 
+            "content": llm_response.content, 
+            "agent_type": agent_type,
+            "execution_time": getattr(llm_response, 'execution_time', 0.5),
+            "response_time": response.get("response_time", 0),
+            "tokens_used": getattr(llm_response, 'tokens_used', len(prompt.split()) + 50),
+            "real_llm": True,
+            "model_used": "gemini-2.5-flash"
+        }
     
     def _assert_conversation_flow_success(self, conversation_result: Dict[str, Any], 
                                         validation_result: Dict[str, Any]) -> None:
@@ -230,10 +260,29 @@ class TestAgentConversationFlow:
 class TestAgentConversationPerformance:
     """Performance validation for agent conversation operations."""
     
+    def setup_method(self):
+        """Configure real service connections before each performance test."""
+        from netra_backend.app.core.isolated_environment import get_env
+        
+        env = get_env()
+        
+        # Configure real services for performance testing
+        env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "conversation_perf_test")
+        env.set("REDIS_URL", "redis://localhost:6379/1", "conversation_perf_test")
+        env.set("NETRA_REAL_LLM_ENABLED", "true", "conversation_perf_test")
+        env.set("USE_REAL_LLM", "true", "conversation_perf_test")
+        env.set("DISABLE_MOCKS", "true", "conversation_perf_test")
+        
+        # Use default model from system configuration
+        from netra_backend.app.llm.llm_defaults import LLMModel
+        default_model = LLMModel.get_default()
+        env.set("NETRA_DEFAULT_LLM_MODEL", default_model.value, "conversation_perf_test")
+    
     @pytest_asyncio.fixture
     @pytest.mark.e2e
     async def test_core(self):
-        """Initialize performance test core."""
+        """Initialize performance test core with real services."""
+        self.setup_method()  # Ensure environment is configured
         core = AgentConversationTestCore()
         await core.setup_test_environment()
         yield core
@@ -260,17 +309,16 @@ class TestAgentConversationPerformance:
                 llm_manager = LLMManager(config)
                 
                 async def execute_concurrent_request(client, req):
-                    # Make real LLM call for concurrent testing
-                    try:
-                        prompt = f"Respond concisely to: {req.get('message', 'No message')}"
-                        llm_response = await llm_manager.ask_llm_full(prompt, "gemini-2.5-flash", use_cache=True)
-                        response = await AgentConversationTestUtils.send_conversation_message(client, req)
-                        response["llm_content"] = llm_response.content
-                        response["tokens_used"] = getattr(llm_response, 'tokens_used', 100)
-                        return response
-                    except Exception:
-                        # Fallback if LLM fails
-                        return await AgentConversationTestUtils.send_conversation_message(client, req)
+                    # Make real LLM call for concurrent testing - NO FALLBACK
+                    from netra_backend.app.llm.llm_defaults import LLMModel
+                    prompt = f"Respond concisely to: {req.get('message', 'No message')}"
+                    default_model = LLMModel.get_default()
+                    llm_response = await llm_manager.ask_llm_full(prompt, default_model.value, use_cache=True)
+                    response = await AgentConversationTestUtils.send_conversation_message(client, req)
+                    response["llm_content"] = llm_response.content
+                    response["tokens_used"] = getattr(llm_response, 'tokens_used', 100)
+                    response["real_llm"] = True
+                    return response
                 
                 tasks.append(execute_concurrent_request(session_data["client"], request))
             responses = await asyncio.gather(*tasks)

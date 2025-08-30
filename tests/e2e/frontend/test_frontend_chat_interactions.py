@@ -25,7 +25,7 @@ from unittest.mock import MagicMock, AsyncMock
 
 from test_framework.http_client import UnifiedHTTPClient
 from test_framework.fixtures.auth import create_test_user_token, create_real_jwt_token
-from tests.e2e.helpers.auth.auth_service_helpers import AuthServiceTestHelper
+from tests.e2e.helpers.auth.auth_service_helpers import AuthServiceHelper
 
 
 class ChatInteractionTestHarness:
@@ -36,7 +36,7 @@ class ChatInteractionTestHarness:
         self.api_url = os.getenv("API_URL", "http://localhost:8001")
         self.ws_url = os.getenv("WS_URL", "ws://localhost:8001")
         self.http_client = UnifiedHTTPClient(base_url=self.api_url)
-        self.auth_helper = AuthServiceTestHelper()
+        self.auth_helper = AuthServiceHelper()
         self.ws_connection = None
         self.test_user = None
         self.access_token = None

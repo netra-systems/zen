@@ -629,7 +629,7 @@ class RealServicesManager:
         """Async implementation of WebSocket connection with token."""
         try:
             backend_port = self.services["backend"].port
-            ws_url = f"ws://localhost:{backend_port}/websocket"
+            ws_url = f"ws://localhost:{backend_port}/ws"
             
             # Use Authorization header as expected by backend
             headers = {"Authorization": f"Bearer {token}"}
@@ -684,9 +684,41 @@ class RealServicesManager:
                     "error": f"WebSocket connection failed and token invalid: {str(e)}"
                 }
     
-    def send_websocket_message(self, message: str) -> Dict[str, Any]:
-        """Send message through authenticated WebSocket connection."""
-        return asyncio.run(self._async_send_websocket_message(message))
+    def send_websocket_message(self, message):
+        """Send message through authenticated WebSocket connection.
+        
+        This method supports both sync and async usage patterns:
+        - For sync: message_result = services_manager.send_websocket_message("hello") 
+        - For async: message_result = await services_manager.send_websocket_message("hello")
+        """
+        # Detect if we're being called in async context
+        try:
+            asyncio.get_running_loop()
+            # We're in an async context, return a coroutine
+            return self._async_send_websocket_message_unified(message)
+        except RuntimeError:
+            # No running loop, use sync version
+            return asyncio.run(self._async_send_websocket_message_unified(message))
+    
+    async def _async_send_websocket_message_unified(self, message) -> Dict[str, Any]:
+        """Unified async implementation that handles both str and dict messages."""
+        try:
+            if isinstance(message, dict):
+                message_str = json.dumps(message)
+            else:
+                message_str = str(message)
+                
+            result = await self._async_send_websocket_message(message_str)
+            # Ensure both 'success' and 'sent' keys are present for compatibility
+            if 'sent' not in result:
+                result['sent'] = result.get('success', False)
+            return result
+        except Exception as e:
+            return {
+                "success": False,
+                "sent": False,
+                "error": f"Message processing failed: {str(e)}"
+            }
     
     async def _async_send_websocket_message(self, message: str) -> Dict[str, Any]:
         """Async implementation of WebSocket message sending."""
@@ -1048,8 +1080,8 @@ class RealServicesManager:
                 "error": f"Authenticated WebSocket setup failed: {str(e)}"
             }
     
-    async def send_websocket_message(self, message: Any) -> Dict[str, Any]:
-        """Send message through WebSocket connection."""
+    async def send_websocket_message_async(self, message: Any) -> Dict[str, Any]:
+        """Send message through WebSocket connection (async version)."""
         try:
             if isinstance(message, dict):
                 message_str = json.dumps(message)
@@ -1182,7 +1214,7 @@ class RealServicesManager:
     async def send_client_message(self, message: str) -> Dict[str, Any]:
         """Send message from client to server."""
         try:
-            result = await self.send_websocket_message({"type": "client_message", "content": message})
+            result = await self.send_websocket_message_async({"type": "client_message", "content": message})
             return {"sent": result.get("sent", False)}
         except Exception as e:
             return {

@@ -66,7 +66,13 @@ class MultiAgentOrchestrationSuite:
         """Initialize core services for orchestration."""
         # Use real services when available, mocks for testing
         if get_env().get('USE_REAL_SERVICES') == '1':
-            self.llm_manager = LLMManager()
+            # Initialize LLM manager with proper app config
+            from netra_backend.app.core.configuration import AppConfigurationManager
+            config_manager = AppConfigurationManager()
+            await config_manager.initialize()
+            app_config = config_manager.get_app_config()
+            
+            self.llm_manager = LLMManager(app_config)
             await self.llm_manager.initialize()
             
             # Mock WebSocket for E2E tests to avoid network complexity

@@ -650,8 +650,8 @@ def create_real_jwt_token(user_id: str, permissions: List[str] = None,
         "sub": user_id,
         "permissions": permissions or [],
         "type": token_type,
-        "exp": datetime.utcnow() + timedelta(seconds=expires_in),
-        "iat": datetime.utcnow(),
+        "exp": datetime.now(timezone.utc) + timedelta(seconds=expires_in),
+        "iat": datetime.now(timezone.utc),
         "jti": str(uuid.uuid4())
     }
     
