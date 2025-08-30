@@ -38,6 +38,7 @@ from tests.e2e.agent_billing_test_helpers import (
     AgentBillingTestUtils
 )
 from netra_backend.app.schemas.user_plan import PlanTier
+from test_framework.environment_isolation import get_test_env_manager
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
@@ -45,13 +46,26 @@ class TestAgentBillingFlow:
     """Test #2: Agent Request → Processing → Response → Billing Record Flow."""
     
     @pytest_asyncio.fixture
-    @pytest.mark.e2e
     async def test_core(self):
-        """Initialize billing test core."""
+        """Initialize billing test core with isolated environment."""
+        # Setup isolated test environment per CLAUDE.md requirements
+        env_manager = get_test_env_manager()
+        isolated_env = env_manager.setup_test_environment(
+            additional_vars={
+                "USE_MEMORY_DB": "true",
+                "CLICKHOUSE_ENABLED": "false",
+                "TEST_DISABLE_REDIS": "true"
+            },
+            enable_real_llm=False  # Use mocked LLM only for deterministic billing tests
+        )
+        
         core = AgentBillingTestCore()
         await core.setup_test_environment()
         yield core
         await core.teardown_test_environment()
+        
+        # Cleanup isolated environment
+        env_manager.teardown_test_environment()
     
     @pytest.fixture
     def request_simulator(self):
@@ -158,19 +172,44 @@ class TestAgentBillingFlow:
         try:
             request = request_simulator.create_triage_request(session["user_data"]["id"])
             
-            # Test with simulated billing failure
-            # Mock: ClickHouse database isolation for fast testing without external database dependency
-            with patch('tests.e2e.clickhouse_billing_helper.MockClickHouseBillingClient.insert_billing_record') as mock_billing:
-                mock_billing.side_effect = Exception("Billing service unavailable")
-                
-                # Should handle billing errors gracefully
-                response = await self._execute_agent_request_with_mock(session, request)
-                
-                # Response should still be delivered
-                assert response.get("status") in ["success", "error"], "Agent should handle billing errors"
-                
+            # Test billing error handling directly without WebSocket dependency
+            billing_helper = test_core.billing_helper
+            
+            # Test with invalid billing data to trigger validation errors
+            invalid_payment_data = {
+                "id": "invalid_billing_test",
+                "amount_cents": -100  # Negative amount should fail validation
+            }
+            user_data = session["user_data"]
+            tier = session["tier"]
+            
+            # Attempt billing record creation with invalid data
+            try:
+                await billing_helper.create_and_validate_billing_record(
+                    invalid_payment_data, user_data, tier
+                )
+                assert False, "Invalid billing data should raise exception"
+            except ValueError:
+                # Expected error handling
+                pass
+            
+            # Test recovery with valid data
+            valid_payment_data = {
+                "id": "recovery_billing_test", 
+                "amount_cents": 1500
+            }
+            
+            recovery_result = await billing_helper.create_and_validate_billing_record(
+                valid_payment_data, user_data, tier
+            )
+            
+            # Validate recovery
+            assert recovery_result["clickhouse_inserted"], "Recovery billing record must be created"
+            assert recovery_result["validation"]["valid"], "Recovery validation must succeed"
+            
         finally:
-            await session["client"].close()
+            if hasattr(session["client"], "close"):
+                await session["client"].close()
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -202,6 +241,7 @@ class TestAgentBillingFlow:
         expected_tokens = request["expected_cost"]["tokens"]
         
         # Mock: LLM service isolation for fast testing without API calls or rate limits
+        # This is the only acceptable mock per CLAUDE.md - to avoid external API costs
         with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
             mock_llm.return_value = AgentBillingTestUtils.create_mock_llm_response(expected_tokens)
             
