@@ -1,6 +1,9 @@
 """
 Analytics Core Module
-Core functionality for the analytics service including configuration, event processing, and storage
+
+Core functionality for the analytics microservice.
 """
 
-__version__ = "1.0.0"
+from analytics_service.analytics_core.config import AnalyticsConfig, get_config
+
+__all__ = ['AnalyticsConfig', 'get_config']

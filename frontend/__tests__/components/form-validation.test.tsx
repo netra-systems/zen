@@ -26,7 +26,9 @@ describe('Form Validation', () => {
       
       const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        console.log('Submitting with email state:', email);
         const emailError = validateEmail(email);
+        console.log('Validation result:', emailError);
         
         if (emailError) {
           setErrors({ email: emailError });
@@ -36,12 +38,17 @@ describe('Form Validation', () => {
         setErrors({});
       };
       
+      const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        console.log('Email onChange called with:', e.target.value);
+        setEmail(e.target.value);
+      };
+      
       return (
         <form onSubmit={handleSubmit}>
           <input
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={handleEmailChange}
             data-testid="email-input"
             placeholder="Enter email"
           />
@@ -67,9 +74,23 @@ describe('Form Validation', () => {
       expect(screen.getByTestId('email-error')).toHaveTextContent('Email is required');
     });
     
-    // Test invalid email validation
-    await user.type(screen.getByTestId('email-input'), 'invalid-email');
+    // Clear error first, then test invalid email validation  
+    const emailInput = screen.getByTestId('email-input');
+    
+    // Use fireEvent.change instead of userEvent.type to properly trigger React onChange
+    fireEvent.change(emailInput, { target: { value: 'invalid-email' } });
+    
+    // Debug: log the current value
+    console.log('Email input value before submit:', (emailInput as HTMLInputElement).value);
+    
     await user.click(screen.getByTestId('submit-button'));
+    
+    // Debug: check what the error shows after submit
+    await waitFor(() => {
+      const errorElement = screen.getByTestId('email-error');
+      console.log('Email error after submit:', errorElement.textContent);
+      console.log('Email input value after submit:', (emailInput as HTMLInputElement).value);
+    });
     
     await waitFor(() => {
       expect(screen.getByTestId('email-error')).toHaveTextContent('Please enter a valid email address');
@@ -96,7 +117,9 @@ describe('Form Validation', () => {
       
       const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        console.log('Submitting with password state:', password);
         const passwordError = validatePassword(password);
+        console.log('Password validation result:', passwordError);
         
         if (passwordError) {
           setErrors({ password: passwordError });
@@ -106,12 +129,17 @@ describe('Form Validation', () => {
         setErrors({});
       };
       
+      const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        console.log('Password onChange called with:', e.target.value);
+        setPassword(e.target.value);
+      };
+      
       return (
         <form onSubmit={handleSubmit}>
           <input
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={handlePasswordChange}
             data-testid="password-input"
             placeholder="Enter password"
           />
@@ -131,7 +159,12 @@ describe('Form Validation', () => {
     render(<PasswordValidationForm />);
     
     // Test weak password
-    await user.type(screen.getByTestId('password-input'), 'weak');
+    const passwordInput = screen.getByTestId('password-input');
+    fireEvent.change(passwordInput, { target: { value: 'weak' } });
+    
+    // Debug: log the current value
+    console.log('Password input value:', (passwordInput as HTMLInputElement).value);
+    
     await user.click(screen.getByTestId('submit-button'));
     
     await waitFor(() => {

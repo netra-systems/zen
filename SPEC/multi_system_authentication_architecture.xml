@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <metadata>
+    <title>Multi-System Authentication Architecture - SSOT</title>
+    <version>1.0.0</version>
+    <description>Single Source of Truth for authentication across all Netra services</description>
+    <created>2025-08-30</created>
+    <last_edited>2025-08-30</last_edited>
+    <priority>CRITICAL</priority>
+    <bvj>
+      <segment>Platform/Internal</segment>
+      <business_goal>Security Consolidation and Maintenance Reduction</business_goal>
+      <value_impact>Unified authentication reduces security gaps and maintenance burden by 70%</value_impact>
+      <strategic_impact>Enterprise-grade security foundation for all customer tiers</strategic_impact>
+    </bvj>
+  </metadata>
+
+  <executive_summary>
+    <problem>
+      Multiple authentication patterns exist across services violating SSOT principle:
+      - auth_service: JWT validation via middleware
+      - netra_backend: OAuth flow and JWT handling
+      - frontend: Token management and storage
+      Each service has different patterns for the same authentication needs.
+    </problem>
+    <solution>
+      Establish clear authentication boundaries and responsibilities per service,
+      with auth_service as the canonical authentication authority.
+    </solution>
+  </executive_summary>
+
+  <authentication_layers>
+    <layer id="1" name="Frontend Client Layer">
+      <responsibility>Token storage, refresh management, UI guards</responsibility>
+      <canonical_implementation>
+        <location>frontend/store/authStore.ts</location>
+        <location>frontend/auth/unified-auth-service.ts</location>
+        <patterns>
+          - Zustand store for auth state management
+          - UnifiedAuthService as SSOT for token operations
+          - AuthGuard component for route protection
+        </patterns>
+      </canonical_implementation>
+      <prohibited_patterns>
+        - Direct localStorage manipulation outside UnifiedAuthService
+        - Duplicate auth checking in individual pages
+        - Multiple token storage mechanisms
+      </prohibited_patterns>
+    </layer>
+
+    <layer id="2" name="API Gateway Layer">
+      <responsibility>Request authentication, token forwarding</responsibility>
+      <canonical_implementation>
+        <location>frontend/app/api/*/route.ts</location>
+        <patterns>
+          - Forward client Bearer token if present
+          - Use service account token as fallback
+          - Add service identification headers
+        </patterns>
+      </canonical_implementation>
+      <prohibited_patterns>
+        - Creating new tokens at gateway level
+        - Modifying token content
+        - Storing tokens in gateway
+      </prohibited_patterns>
+    </layer>
+
+    <layer id="3" name="Backend Service Layer">
+      <responsibility>Token validation, permission enforcement</responsibility>
+      <canonical_implementation>
+        <location>netra_backend/app/middleware/auth_middleware.py</location>
+        <patterns>
+          - AuthMiddleware class for JWT validation
+          - Delegate complex auth to auth_service
+          - Cache validation results
+        </patterns>
+      </canonical_implementation>
+      <prohibited_patterns>
+        - Creating new authentication schemes
+        - Direct database user lookups
+        - Implementing OAuth flows
+      </prohibited_patterns>
+    </layer>
+
+    <layer id="4" name="Auth Service Layer">
+      <responsibility>Authentication authority, token lifecycle, user management</responsibility>
+      <canonical_implementation>
+        <location>auth_service/auth_core/</location>
+        <patterns>
+          - OAuth integration (Google)
+          - JWT creation and validation
+          - Token refresh and blacklisting
+          - User session management
+          - Database persistence
+        </patterns>
+      </canonical_implementation>
+      <prohibited_patterns>
+        - Delegating auth decisions to other services
+        - Storing auth state outside database/Redis
+        - Multiple JWT signing keys
+      </prohibited_patterns>
+    </layer>
+
+    <layer id="5" name="WebSocket Layer">
+      <responsibility>Real-time connection authentication</responsibility>
+      <canonical_implementation>
+        <location>netra_backend/app/websocket_core/auth.py</location>
+        <patterns>
+          - Extract JWT from Sec-WebSocket-Protocol header
+          - Validate token via auth service
+          - Maintain authenticated connection state
+        </patterns>
+      </canonical_implementation>
+      <prohibited_patterns>
+        - Creating new tokens for WebSocket
+        - Bypassing auth service validation
+        - Storing credentials in WebSocket state
+      </prohibited_patterns>
+    </layer>
+  </authentication_layers>
+
+  <authentication_flows>
+    <flow name="Initial Login">
+      <sequence>
+        1. User clicks login button (Frontend)
+        2. Redirect to auth_service OAuth endpoint
+        3. auth_service handles Google OAuth flow
+        4. auth_service creates JWT and refresh token
+        5. Redirect back to frontend with tokens
+        6. Frontend stores tokens via UnifiedAuthService
+        7. AuthStore updates authenticated state
+      </sequence>
+      <critical_paths>
+        <path>auth_service/auth_core/oauth/google_oauth.py</path>
+        <path>auth_service/auth_core/core/jwt_handler.py</path>
+        <path>frontend/auth/unified-auth-service.ts</path>
+      </critical_paths>
+    </flow>
+
+    <flow name="Token Refresh">
+      <sequence>
+        1. Frontend detects token near expiry
+        2. Call auth_service /refresh endpoint
+        3. auth_service validates refresh token
+        4. auth_service issues new access token
+        5. Frontend updates stored token
+        6. All API calls use new token
+      </sequence>
+      <critical_paths>
+        <path>auth_service/auth_core/routes/auth_routes.py:refresh_token</path>
+        <path>frontend/auth/context.tsx:refreshAccessToken</path>
+      </critical_paths>
+    </flow>
+
+    <flow name="API Request Authentication">
+      <sequence>
+        1. Frontend adds Bearer token to request
+        2. API gateway forwards token to backend
+        3. Backend middleware validates token
+        4. Backend may verify with auth_service
+        5. Request proceeds with user context
+      </sequence>
+      <critical_paths>
+        <path>frontend/lib/auth-interceptor.ts</path>
+        <path>netra_backend/app/middleware/auth_middleware.py</path>
+        <path>auth_service/auth_core/services/auth_service.py</path>
+      </critical_paths>
+    </flow>
+
+    <flow name="WebSocket Authentication">
+      <sequence>
+        1. Frontend encodes JWT for WebSocket protocol
+        2. WebSocket connection includes JWT in protocol header
+        3. Backend extracts JWT from protocol
+        4. Backend validates JWT with auth_service
+        5. WebSocket connection established with user context
+      </sequence>
+      <critical_paths>
+        <path>frontend/services/webSocketService.ts:createSecureWebSocket</path>
+        <path>netra_backend/app/websocket_core/auth.py</path>
+      </critical_paths>
+    </flow>
+  </authentication_flows>
+
+  <ssot_violations_identified>
+    <violation id="1" severity="HIGH">
+      <description>Multiple JWT validation implementations</description>
+      <locations>
+        - auth_service/auth_core/core/jwt_handler.py
+        - netra_backend/app/middleware/auth_middleware.py
+        - frontend token validation logic
+      </locations>
+      <resolution>
+        All services must delegate JWT validation to auth_service.
+        Local validation only for performance with auth_service as fallback.
+      </resolution>
+    </violation>
+
+    <violation id="2" severity="MEDIUM">
+      <description>Inconsistent token storage patterns</description>
+      <locations>
+        - Frontend: localStorage, sessionStorage, memory
+        - Backend: Redis, in-memory cache
+        - Auth service: Database, Redis
+      </locations>
+      <resolution>
+        Frontend: UnifiedAuthService handles all storage
+        Backend: Redis cache with TTL
+        Auth service: Database as source of truth, Redis as cache
+      </resolution>
+    </violation>
+
+    <violation id="3" severity="HIGH">
+      <description>OAuth flow implementation outside auth_service</description>
+      <locations>
+        - netra_backend/app/services/oauth_manager.py
+        - netra_backend/app/routes/auth_routes/oauth_validation.py
+      </locations>
+      <resolution>
+        Remove OAuth implementations from netra_backend.
+        All OAuth flows must go through auth_service only.
+      </resolution>
+    </violation>
+
+    <violation id="4" severity="MEDIUM">
+      <description>Service-to-service authentication inconsistency</description>
+      <locations>
+        - Some services use API keys
+        - Some use service account tokens
+        - Some use JWT forwarding
+      </locations>
+      <resolution>
+        Standardize on service account tokens with JWT forwarding
+        as primary mechanism, API keys as emergency fallback only.
+      </resolution>
+    </violation>
+  </ssot_violations_identified>
+
+  <implementation_requirements>
+    <requirement id="1" priority="CRITICAL">
+      <title>Centralize JWT Validation</title>
+      <description>
+        All JWT validation must go through auth_service.
+        Other services may cache results but not implement validation.
+      </description>
+      <implementation_steps>
+        1. Create auth_service /validate endpoint
+        2. Update backend middleware to use auth_service
+        3. Remove local JWT validation logic
+        4. Implement caching strategy
+      </implementation_steps>
+    </requirement>
+
+    <requirement id="2" priority="HIGH">
+      <title>Consolidate OAuth Flows</title>
+      <description>
+        Remove all OAuth implementations outside auth_service.
+      </description>
+      <implementation_steps>
+        1. Audit all OAuth code in netra_backend
+        2. Remove oauth_manager.py and related files
+        3. Update all OAuth references to use auth_service
+        4. Test OAuth flow end-to-end
+      </implementation_steps>
+    </requirement>
+
+    <requirement id="3" priority="MEDIUM">
+      <title>Standardize Token Storage</title>
+      <description>
+        Each layer has one canonical token storage mechanism.
+      </description>
+      <implementation_steps>
+        1. Frontend: Enforce UnifiedAuthService usage
+        2. Backend: Implement Redis caching consistently
+        3. Auth service: Ensure database is source of truth
+        4. Add monitoring for storage patterns
+      </implementation_steps>
+    </requirement>
+
+    <requirement id="4" priority="HIGH">
+      <title>Service Account Authentication</title>
+      <description>
+        Standardize service-to-service authentication.
+      </description>
+      <implementation_steps>
+        1. Define service account token format
+        2. Implement service identification headers
+        3. Create service registry in auth_service
+        4. Update all inter-service calls
+      </implementation_steps>
+    </requirement>
+  </implementation_requirements>
+
+  <security_considerations>
+    <consideration type="token_security">
+      - JWTs must have short expiry (15 minutes)
+      - Refresh tokens must be rotated on use
+      - All tokens must be transmitted over HTTPS
+      - Implement token blacklisting for logout
+    </consideration>
+    
+    <consideration type="service_isolation">
+      - Each service validates tokens independently
+      - No service trusts another service's validation
+      - Service accounts have minimal permissions
+      - Audit all authentication attempts
+    </consideration>
+    
+    <consideration type="error_handling">
+      - Never expose token validation errors
+      - Log authentication failures for monitoring
+      - Implement rate limiting on auth endpoints
+      - Use circuit breakers for auth service calls
+    </consideration>
+  </security_considerations>
+
+  <monitoring_requirements>
+    <metric name="auth_latency">
+      <description>Time to validate authentication</description>
+      <target>&lt;50ms for cached, &lt;200ms for auth_service call</target>
+    </metric>
+    
+    <metric name="token_refresh_rate">
+      <description>Number of token refreshes per minute</description>
+      <alert_threshold>&gt;100/min indicates potential issues</alert_threshold>
+    </metric>
+    
+    <metric name="auth_failure_rate">
+      <description>Percentage of failed authentication attempts</description>
+      <alert_threshold>&gt;5% requires investigation</alert_threshold>
+    </metric>
+    
+    <metric name="service_auth_errors">
+      <description>Service-to-service authentication failures</description>
+      <alert_threshold>Any failure requires immediate investigation</alert_threshold>
+    </metric>
+  </monitoring_requirements>
+
+  <testing_strategy>
+    <test_type name="Unit Tests">
+      <scope>Individual authentication components</scope>
+      <coverage_target>90% for auth-related code</coverage_target>
+      <key_tests>
+        - JWT validation logic
+        - Token refresh mechanism
+        - Permission checking
+      </key_tests>
+    </test_type>
+    
+    <test_type name="Integration Tests">
+      <scope>Service-to-service authentication</scope>
+      <coverage_target>100% of auth flows</coverage_target>
+      <key_tests>
+        - Login flow end-to-end
+        - Token refresh across services
+        - WebSocket authentication
+        - Service account authentication
+      </key_tests>
+    </test_type>
+    
+    <test_type name="Security Tests">
+      <scope>Authentication vulnerabilities</scope>
+      <frequency>Weekly automated, monthly manual</frequency>
+      <key_tests>
+        - Token expiry enforcement
+        - Invalid token rejection
+        - Rate limiting effectiveness
+        - Session fixation prevention
+      </key_tests>
+    </test_type>
+  </testing_strategy>
+
+  <migration_plan>
+    <phase number="1" name="Audit and Document">
+      <duration>1 week</duration>
+      <tasks>
+        - Complete audit of all auth implementations
+        - Document current vs desired state
+        - Identify breaking changes
+        - Create rollback plan
+      </tasks>
+    </phase>
+    
+    <phase number="2" name="Auth Service Hardening">
+      <duration>1 week</duration>
+      <tasks>
+        - Implement /validate endpoint
+        - Add service registry
+        - Improve monitoring
+        - Load test auth service
+      </tasks>
+    </phase>
+    
+    <phase number="3" name="Backend Migration">
+      <duration>2 weeks</duration>
+      <tasks>
+        - Update auth middleware
+        - Remove OAuth implementations
+        - Implement caching
+        - Update tests
+      </tasks>
+    </phase>
+    
+    <phase number="4" name="Frontend Consolidation">
+      <duration>1 week</duration>
+      <tasks>
+        - Enforce UnifiedAuthService
+        - Remove duplicate auth logic
+        - Update all components
+        - Test all flows
+      </tasks>
+    </phase>
+    
+    <phase number="5" name="Validation and Monitoring">
+      <duration>1 week</duration>
+      <tasks>
+        - End-to-end testing
+        - Performance validation
+        - Security audit
+        - Deploy monitoring
+      </tasks>
+    </phase>
+  </migration_plan>
+
+  <compliance_checklist>
+    <item>All services use auth_service for JWT validation</item>
+    <item>No OAuth implementation outside auth_service</item>
+    <item>Frontend uses UnifiedAuthService exclusively</item>
+    <item>Service accounts implemented and documented</item>
+    <item>Token storage follows defined patterns</item>
+    <item>All auth endpoints have rate limiting</item>
+    <item>Monitoring dashboards deployed</item>
+    <item>Security tests passing</item>
+    <item>Documentation updated</item>
+    <item>Rollback plan tested</item>
+  </compliance_checklist>
+</specification>

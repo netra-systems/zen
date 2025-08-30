@@ -47,6 +47,14 @@
             <critical-takeaway>Create regression tests IMMEDIATELY when fixing critical bugs to ensure they never resurface (websocket_routing_regression.xml).</critical-takeaway>
         </category>
         
+        <category name="Authentication/MultiSystem" path="SPEC/multi_system_authentication_architecture.xml" keywords="Authentication, SSOT, JWT, OAuth, Multi-System, Auth Service, Token Management, Service-to-Service, Architecture">
+            <critical-takeaway>CRITICAL: auth_service is the SOLE authentication authority - all JWT validation must go through auth_service (multi_system_authentication_architecture.xml).</critical-takeaway>
+            <critical-takeaway>Multiple authentication patterns violate SSOT - 3x maintenance burden and security risk (multi_system_authentication_architecture.xml).</critical-takeaway>
+            <critical-takeaway>Frontend must use UnifiedAuthService exclusively for token management (multi_system_authentication_architecture.xml).</critical-takeaway>
+            <critical-takeaway>Remove ALL OAuth implementations from netra_backend - auth_service handles all OAuth flows (multi_system_authentication_architecture.xml).</critical-takeaway>
+            <critical-takeaway>Service-to-service auth standardized on service account tokens with API keys as emergency fallback only (multi_system_authentication_architecture.xml).</critical-takeaway>
+        </category>
+        
         <category name="Testing/Performance" path="SPEC/learnings/test_collection_optimization.xml" keywords="Test Collection, PyTest, Test Discovery, Test Performance, Test Audit, Test Markers, Test Organization, Collection Optimization">
             <critical-takeaway>Test collection optimized from 60+ seconds to ~21 seconds using importlib mode and ignore patterns (test_collection_optimization.xml).</critical-takeaway>
             <critical-takeaway>Use scripts/test_collection_audit.py to identify duplicate tests, orphaned files, and missing markers (test_collection_optimization.xml).</critical-takeaway>

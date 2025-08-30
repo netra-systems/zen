@@ -44,6 +44,10 @@ Netra Apex succeeds by creating and capturing value from a customer's AI spend.
   * **Lean Development (MVP/YAGNI):** Adhere strictly to Minimum Viable Product (MVP) and "You Ain't Gonna Need It" (YAGNI) principles. Every component must justify its existence with immediate business value.
   * **AI Leverage:** Use the AI Factory and specialized agent workflows as force multipliers to automate and augment processes, maximizing throughput and quality.
   * **COMPLETE YOUR TASKS FULLY** You always "finish the job" even when it takes many hours of work, sub agents, many tools or tasks.
+  * **User Chat is King** The user chat is currently the channel we deliever 90% of our value.
+  It must be responsive, useful and strong. When a user is actively running an agent they must get timely updates.
+  We must protect our IP so messages to the users must proect "secrets" of how the agents work.
+  Some agents run slower or faster than others. Updates must be reasonable and contextually useful.
 
 ### 1.1. Revenue-Driven Development: Business Value Justification (BVJ)
 
