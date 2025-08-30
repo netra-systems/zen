@@ -75,6 +75,9 @@ class TestAppFactory:
         env = get_env()
         env.set("ANALYTICS_SERVICE_VERSION", "2.0.0")
         env.set("ENVIRONMENT", "production")
+        # Set proper production URLs to pass validation
+        env.set("CLICKHOUSE_ANALYTICS_URL", "clickhouse://prod-clickhouse:8123/analytics")
+        env.set("REDIS_ANALYTICS_URL", "redis://prod-redis:6379/2")
         
         app = create_app()
         
@@ -102,11 +105,12 @@ class TestAppFactory:
         app = create_app()
         
         # Verify CORS middleware is added (check middleware stack)
-        middleware_types = [type(middleware) for middleware in app.user_middleware]
         from starlette.middleware.cors import CORSMiddleware
-        assert any(mw for mw in middleware_types if issubclass(mw, type) and 
-                  issubclass(mw, CORSMiddleware)) or \
-               any("CORSMiddleware" in str(mw) for mw in middleware_types)
+        cors_middleware_found = any(
+            hasattr(middleware, 'cls') and middleware.cls == CORSMiddleware 
+            for middleware in app.user_middleware
+        )
+        assert cors_middleware_found, f"CORSMiddleware not found in middleware stack: {[str(mw) for mw in app.user_middleware]}"
 
     @patch('analytics_service.main.logger')
     def test_request_logging_middleware_enabled(self, mock_logger):
