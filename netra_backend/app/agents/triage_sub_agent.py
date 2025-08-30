@@ -18,6 +18,7 @@ from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.base.circuit_breaker import (
     CircuitBreakerConfig as ModernCircuitConfig,
 )
+from netra_backend.app.agents.utils import extract_thread_id
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 
@@ -205,7 +206,7 @@ class TriageSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin
         """Execute using modern BaseExecutionEngine patterns."""
         context = ExecutionContext(
             run_id=run_id, agent_name="TriageSubAgent", state=state, stream_updates=stream_updates,
-            thread_id=getattr(state, 'chat_thread_id', None), user_id=getattr(state, 'user_id', None),
+            thread_id=extract_thread_id(state), user_id=getattr(state, 'user_id', None),
             start_time=time.time(), correlation_id=getattr(self, 'correlation_id', None)
         )
         return await self.execution_engine.execute(self, context)
@@ -308,7 +309,7 @@ class TriageSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin
                 ws_context = AgentExecutionContext(
                     run_id=context.run_id,
                     agent_name="TriageSubAgent",
-                    thread_id=getattr(context.state, 'chat_thread_id', context.run_id),
+                    thread_id=extract_thread_id(context.state, context.run_id),
                     user_id=getattr(context.state, 'user_id', None),
                     start_time=time.time()
                 )

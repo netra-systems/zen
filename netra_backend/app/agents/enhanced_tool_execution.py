@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from netra_backend.app.agents.tool_dispatcher_execution import ToolExecutionEngine
+from netra_backend.app.agents.utils import extract_thread_id
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.tool import ToolInput, ToolResult
 
@@ -72,12 +73,8 @@ class EnhancedToolExecutionEngine(ToolExecutionEngine):
         # Create context for notifications
         context = None
         if self.websocket_notifier:
-            # Extract thread_id from state - check multiple possible attributes
-            thread_id = (
-                getattr(state, 'chat_thread_id', None) or 
-                getattr(state, 'thread_id', None) or 
-                run_id
-            )
+            # Extract thread_id using unified utility
+            thread_id = extract_thread_id(state, run_id)
             
             context = AgentExecutionContext(
                 agent_name="ToolExecutor",

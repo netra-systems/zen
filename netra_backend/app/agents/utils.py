@@ -27,5 +27,28 @@ __all__ = [
     'extract_json_from_response', 
     'fix_common_json_errors',
     'recover_truncated_json',
-    'extract_partial_json'
+    'extract_partial_json',
+    'extract_thread_id'
 ]
+
+
+def extract_thread_id(state: Any, run_id: Optional[str] = None) -> Optional[str]:
+    """Extract thread ID from state object with fallback priority.
+    
+    Checks in priority order:
+    1. chat_thread_id attribute
+    2. thread_id attribute  
+    3. run_id parameter as fallback
+    
+    Args:
+        state: State object that may contain thread ID attributes
+        run_id: Optional fallback run ID
+        
+    Returns:
+        Thread ID string or None if not found
+    """
+    return (
+        getattr(state, 'chat_thread_id', None) or 
+        getattr(state, 'thread_id', None) or 
+        run_id
+    )

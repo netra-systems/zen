@@ -15,6 +15,7 @@ from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.errors import ValidationError
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.utils import extract_thread_id
 
 # Modern execution pattern imports
 from netra_backend.app.agents.base.interface import (
@@ -120,7 +121,7 @@ class CorpusAdminSubAgent(BaseExecutionInterface, BaseSubAgent):
         """Create execution context for modern pattern."""
         return ExecutionContext(
             run_id=run_id, agent_name=self.name, state=state,
-            stream_updates=stream_updates, thread_id=getattr(state, 'chat_thread_id', run_id),
+            stream_updates=stream_updates, thread_id=extract_thread_id(state, run_id),
             user_id=getattr(state, 'user_id', 'default_user')
         )
     
