@@ -115,7 +115,7 @@ class AgentRegistry:
     
     def _register_data_helper_agent(self) -> None:
         """Register data helper agent."""
-        self.register("data_helper", DataHelperAgent(self.llm_manager))
+        self.register("data_helper", DataHelperAgent(self.llm_manager, self.tool_dispatcher))
     
     def _register_corpus_admin_agent(self) -> None:
         """Register corpus admin agent."""

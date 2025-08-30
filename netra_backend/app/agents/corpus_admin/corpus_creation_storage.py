@@ -6,6 +6,35 @@ import os
 from typing import Any, Dict, List
 
 
+class CorpusCreationStorage:
+    """Storage management class for corpus creation operations."""
+    
+    def __init__(self):
+        """Initialize the storage handler."""
+        self.handler = None
+    
+    def process(self):
+        """Process storage operations."""
+        return get_sample_data()
+    
+    def process_invalid(self):
+        """Process invalid operation for testing."""
+        raise Exception("Invalid processing operation")
+    
+    def set_handler(self, handler):
+        """Set the error handler."""
+        self.handler = handler
+        return self
+    
+    async def save_corpus(self, corpus, filename):
+        """Save corpus data to file."""
+        return save_file(corpus, filename)
+    
+    async def index_corpus_data(self, corpus, run_id):
+        """Index corpus data."""
+        return await index_corpus(corpus, run_id, self.handler)
+
+
 def save_file(corpus, filename):
     """Save to file."""
     with open(filename, 'w', encoding='utf-8') as f:

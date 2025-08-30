@@ -1,10 +1,39 @@
 """
 Authentication Test Fixtures
 
-Provides comprehensive authentication fixtures for testing.
+Provides comprehensive authentication fixtures for testing with support for both
+mock tokens (unit tests) and real JWT tokens (integration/e2e tests).
+
+Key Features:
+- Environment guards prevent usage in production
+- Configurable real JWT token generation for integration tests
+- Backward compatibility with existing mock token tests
+- Comprehensive SSO/SAML testing components
+
+Usage Examples:
+
+    # Unit tests - use mock tokens (default)
+    token = create_test_user_token("user123")
+    
+    # Integration tests - use real JWTs
+    token = create_test_user_token("user123", use_real_jwt=True)
+    
+    # Create real JWT directly
+    jwt_token = create_real_jwt_token("user123", ["user", "admin"])
+    
+    # JWT manager with real tokens
+    jwt_manager = create_mock_jwt_manager(use_real_jwt=True)
+    
+Environment Variables:
+- NETRA_ENV: Environment name (prevents usage in production)
+- JWT_SECRET: Secret key for JWT signing (defaults to test_secret_key)
+
+Requirements:
+- PyJWT library required for real JWT tokens: pip install pyjwt
 """
 
 import asyncio
+import os
 import time
 from typing import Dict, Any, Optional, List
 from unittest.mock import Mock, AsyncMock
@@ -12,17 +41,46 @@ import json
 import uuid
 from datetime import datetime, timezone, timedelta
 
+try:
+    import jwt
+    JWT_AVAILABLE = True
+except ImportError:
+    JWT_AVAILABLE = False
+    jwt = None
+
 
 class MockAuthToken:
     """Mock authentication token."""
     
     def __init__(self, user_id: str, permissions: List[str] = None,
-                 expires_in: int = 3600):
+                 expires_in: int = 3600, use_real_jwt: bool = False):
+        # Environment guard - prevent mock tokens in production
+        current_env = os.getenv("NETRA_ENV", "development")
+        if current_env == "production":
+            raise ValueError("Mock tokens are not allowed in production environment")
+            
         self.user_id = user_id
         self.permissions = permissions or []
         self.expires_in = expires_in
         self.created_at = time.time()
-        self.token = f"mock_token_{uuid.uuid4().hex[:16]}"
+        
+        if use_real_jwt and JWT_AVAILABLE:
+            self.token = self._create_real_jwt_token()
+        else:
+            self.token = f"mock_token_{uuid.uuid4().hex[:16]}"
+    
+    def _create_real_jwt_token(self) -> str:
+        """Create a real JWT token for integration/e2e tests."""
+        secret = os.getenv("JWT_SECRET", "test_secret_key")
+        payload = {
+            "sub": self.user_id,
+            "permissions": self.permissions,
+            "type": "access",
+            "exp": datetime.utcnow() + timedelta(seconds=self.expires_in),
+            "iat": datetime.utcnow(),
+            "jti": str(uuid.uuid4())
+        }
+        return jwt.encode(payload, secret, algorithm="HS256")
     
     def is_expired(self) -> bool:
         """Check if token is expired."""
@@ -129,13 +187,19 @@ class MockAuthService:
 class MockJWTManager:
     """Mock JWT token manager."""
     
-    def __init__(self, secret_key: str = "test_secret"):
+    def __init__(self, secret_key: str = "test_secret", use_real_jwt: bool = False):
+        # Environment guard - prevent usage in production
+        current_env = os.getenv("NETRA_ENV", "development")
+        if current_env == "production":
+            raise ValueError("Mock JWT manager is not allowed in production environment")
+            
         self.secret_key = secret_key
         self.issued_tokens: Dict[str, Dict[str, Any]] = {}
+        self.use_real_jwt = use_real_jwt and JWT_AVAILABLE
     
     def generate_token(self, user_id: str, permissions: List[str] = None,
                       expires_in: int = 3600) -> str:
-        """Generate a mock JWT token."""
+        """Generate a JWT token (real or mock based on configuration)."""
         token_id = str(uuid.uuid4())
         token_data = {
             "sub": user_id,
@@ -145,18 +209,47 @@ class MockJWTManager:
             "jti": token_id
         }
         
-        # Simulate JWT encoding (simplified)
-        mock_jwt = f"mock.jwt.{token_id}"
-        self.issued_tokens[mock_jwt] = token_data
-        
-        return mock_jwt
+        if self.use_real_jwt:
+            # Generate real JWT token
+            payload = {
+                "sub": user_id,
+                "permissions": permissions or [],
+                "type": "access",
+                "exp": datetime.utcnow() + timedelta(seconds=expires_in),
+                "iat": datetime.utcnow(),
+                "jti": token_id
+            }
+            real_jwt = jwt.encode(payload, self.secret_key, algorithm="HS256")
+            self.issued_tokens[real_jwt] = token_data
+            return real_jwt
+        else:
+            # Simulate JWT encoding (simplified)
+            mock_jwt = f"mock.jwt.{token_id}"
+            self.issued_tokens[mock_jwt] = token_data
+            return mock_jwt
     
     def decode_token(self, token: str) -> Optional[Dict[str, Any]]:
-        """Decode a mock JWT token."""
-        token_data = self.issued_tokens.get(token)
-        if token_data and token_data["exp"] > int(time.time()):
-            return token_data
-        return None
+        """Decode a JWT token (real or mock)."""
+        if self.use_real_jwt and not token.startswith("mock.jwt."):
+            try:
+                # Decode real JWT token
+                decoded = jwt.decode(token, self.secret_key, algorithms=["HS256"])
+                # Convert to our internal format
+                return {
+                    "sub": decoded.get("sub"),
+                    "permissions": decoded.get("permissions", []),
+                    "iat": decoded.get("iat"),
+                    "exp": decoded.get("exp"),
+                    "jti": decoded.get("jti")
+                }
+            except jwt.InvalidTokenError:
+                return None
+        else:
+            # Handle mock tokens
+            token_data = self.issued_tokens.get(token)
+            if token_data and token_data["exp"] > int(time.time()):
+                return token_data
+            return None
     
     def validate_token(self, token: str) -> bool:
         """Validate a JWT token."""
@@ -263,9 +356,9 @@ def create_mock_auth_service() -> MockAuthService:
     """Create a mock authentication service."""
     return MockAuthService()
 
-def create_mock_jwt_manager() -> MockJWTManager:
+def create_mock_jwt_manager(use_real_jwt: bool = False) -> MockJWTManager:
     """Create a mock JWT manager."""
-    return MockJWTManager()
+    return MockJWTManager(use_real_jwt=use_real_jwt)
 
 def create_mock_oauth_provider() -> MockOAuthProvider:
     """Create a mock OAuth provider."""
@@ -418,17 +511,18 @@ class SSOTestComponents:
 
 
 def create_test_user_token(user_id: str = "test_user", 
-                          permissions: List[str] = None) -> MockAuthToken:
+                          permissions: List[str] = None,
+                          use_real_jwt: bool = False) -> MockAuthToken:
     """Create a test user token."""
-    return MockAuthToken(user_id, permissions or ["user"])
+    return MockAuthToken(user_id, permissions or ["user"], use_real_jwt=use_real_jwt)
 
-def create_admin_token(user_id: str = "admin_user") -> MockAuthToken:
+def create_admin_token(user_id: str = "admin_user", use_real_jwt: bool = False) -> MockAuthToken:
     """Create an admin token."""
-    return MockAuthToken(user_id, ["admin", "user"])
+    return MockAuthToken(user_id, ["admin", "user"], use_real_jwt=use_real_jwt)
 
-def create_enterprise_token(user_id: str = "enterprise_user") -> MockAuthToken:
+def create_enterprise_token(user_id: str = "enterprise_user", use_real_jwt: bool = False) -> MockAuthToken:
     """Create an enterprise token."""
-    return MockAuthToken(user_id, ["enterprise", "user"])
+    return MockAuthToken(user_id, ["enterprise", "user"], use_real_jwt=use_real_jwt)
 
 async def authenticate_test_user(auth_service: MockAuthService,
                                username: str = "test_user",
@@ -456,7 +550,7 @@ class SSOTestComponents:
         self.oauth_provider = MockOAuthProvider()
         self.saml_provider = MockSAMLProvider()
         self.auth_service = MockAuthService()
-        self.jwt_manager = MockJWTManager()
+        self.jwt_manager = MockJWTManager(use_real_jwt=False)
         self._setup_test_data()
     
     def _setup_test_data(self):
@@ -524,6 +618,41 @@ class SSOTestComponents:
             "valid_oauth_code": self.create_oauth_code({"email": "oauth@example.com"}),
             "invalid_oauth_code": "invalid_code_12345"
         }
+
+
+def create_real_jwt_token(user_id: str, permissions: List[str] = None, 
+                         token_type: str = "access", expires_in: int = 3600) -> str:
+    """Create a real JWT token for integration/e2e tests.
+    
+    Args:
+        user_id: User identifier
+        permissions: List of user permissions
+        token_type: Type of token ('access' or 'refresh')
+        expires_in: Token expiration time in seconds
+        
+    Returns:
+        Real JWT token string
+        
+    Raises:
+        ValueError: If JWT library is not available or in production environment
+    """
+    current_env = os.getenv("NETRA_ENV", "development")
+    if current_env == "production":
+        raise ValueError("Real JWT creation is not allowed in production environment")
+        
+    if not JWT_AVAILABLE:
+        raise ValueError("JWT library not available. Install with: pip install pyjwt")
+    
+    secret = os.getenv("JWT_SECRET", "test_secret_key")
+    payload = {
+        "sub": user_id,
+        "permissions": permissions or [],
+        "type": token_type,
+        "exp": datetime.utcnow() + timedelta(seconds=expires_in),
+        "iat": datetime.utcnow(),
+        "jti": str(uuid.uuid4())
+    }
+    return jwt.encode(payload, secret, algorithm="HS256")
 
 
 def create_auth_test_data() -> Dict[str, Any]:

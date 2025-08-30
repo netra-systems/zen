@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Prevent .env File Loading in Staging/Production</title>
+    <category>security</category>
+    <subcategory>environment-configuration</subcategory>
+    <severity>critical</severity>
+    <date>2025-08-30</date>
+    <related_files>
+      <file>netra_backend/app/core/isolated_environment.py</file>
+      <file>tests/unit/test_env_file_staging_protection.py</file>
+    </related_files>
+  </metadata>
+
+  <problem>
+    <description>
+      The IsolatedEnvironment class was automatically loading .env files in ALL environments,
+      including staging and production. This creates a security risk where development secrets
+      could accidentally be deployed or override production secrets from the deployment system.
+    </description>
+    <root_cause>
+      The _auto_load_env_file() method in IsolatedEnvironment.__init__ was loading .env files
+      without checking the current environment. This happens at singleton initialization,
+      affecting all subsequent environment variable access.
+    </root_cause>
+    <impact>
+      - Development secrets could leak to production
+      - Production secrets could be overridden by .env files
+      - Configuration inconsistencies between expected and actual values
+      - Security vulnerabilities from exposed development credentials
+    </impact>
+  </problem>
+
+  <solution>
+    <approach>
+      Modified _auto_load_env_file() to check the ENVIRONMENT variable and skip loading
+      .env files when running in staging or production environments.
+    </approach>
+    <implementation>
+      <code_change file="netra_backend/app/core/isolated_environment.py">
+        Added environment check at the beginning of _auto_load_env_file():
+        ```python
+        # Check current environment - never load .env in staging/production
+        environment = os.environ.get('ENVIRONMENT', '').lower()
+        if environment in ['staging', 'production']:
+            logger.debug(f"Skipping .env file loading in {environment} environment")
+            return
+        ```
+      </code_change>
+    </implementation>
+    <validation>
+      Created comprehensive test suite (test_env_file_staging_protection.py) that verifies:
+      - .env files are NOT loaded in staging environment
+      - .env files are NOT loaded in production environment  
+      - .env files ARE loaded in development environment
+      - .env files do not override existing environment variables
+    </validation>
+  </solution>
+
+  <best_practices>
+    <practice>
+      NEVER load .env files in staging or production environments.
+      These environments should only use environment variables set by the deployment system.
+    </practice>
+    <practice>
+      Always check the environment before loading configuration files.
+      Development conveniences should not affect production security.
+    </practice>
+    <practice>
+      When loading .env files in development, never override existing environment variables.
+      This ensures deployment system values take precedence.
+    </practice>
+  </best_practices>
+
+  <prevention>
+    <recommendation>
+      Add environment checks to ALL configuration loading code.
+      Any convenience features for development should be explicitly disabled in production.
+    </recommendation>
+    <recommendation>
+      Consider using separate configuration classes for different environments
+      rather than conditional logic within a single class.
+    </recommendation>
+    <recommendation>
+      Add CI/CD checks that verify .env files are not present in production deployments.
+    </recommendation>
+  </prevention>
+
+  <testing_requirements>
+    <test>Verify .env files are ignored in staging/production</test>
+    <test>Verify .env files are loaded in development</test>
+    <test>Verify existing environment variables are not overridden</test>
+    <test>Test with various ENVIRONMENT values (staging, production, development, test, empty)</test>
+  </testing_requirements>
+</learning>

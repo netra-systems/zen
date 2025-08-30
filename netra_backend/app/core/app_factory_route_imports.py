@@ -79,9 +79,22 @@ def _import_auth_routers() -> dict:
     """Import authentication-related routers"""
     from netra_backend.app.routes.agent_route import router as agent_router
     from netra_backend.app.routes.auth_proxy import router as auth_proxy_router
+    from netra_backend.app.routes.agents_execute import router as agents_execute_router
+    from netra_backend.app.routes.metrics_api import router as metrics_api_router
+    from netra_backend.app.routes.health_check import router as health_check_router
+    from netra_backend.app.routes.system_info import router as system_info_router
     # Auth resilience router removed - functionality consolidated into auth_client_core
     # Auth proxy router added - provides backward compatibility for tests
-    return {"agent_router": agent_router, "auth_proxy_router": auth_proxy_router}
+    # Agent execution router added - provides E2E test endpoints
+    # Health check and system info routers added - provides system introspection
+    return {
+        "agent_router": agent_router, 
+        "auth_proxy_router": auth_proxy_router,
+        "agents_execute_router": agents_execute_router,
+        "metrics_api_router": metrics_api_router,
+        "health_check_router": health_check_router,
+        "system_info_router": system_info_router
+    }
 
 
 def _import_core_routers() -> dict:

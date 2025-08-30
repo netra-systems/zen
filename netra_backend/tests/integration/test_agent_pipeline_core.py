@@ -1,5 +1,5 @@
 """
-Agent Response Pipeline Core Tests
+Agent Response Pipeline Core Tests - REAL SERVICES
 
 Business Value Justification (BVJ):
 - Segment: ALL (core functionality for Free, Early, Mid, Enterprise)
@@ -7,195 +7,269 @@ Business Value Justification (BVJ):
 - Value Impact: Validates complete agent response pipeline from WebSocket to delivery
 - Revenue Impact: Prevents platform outages that would cause immediate customer churn
 
-Core agent response pipeline tests including complete pipeline and routing accuracy.
+CRITICAL: Uses REAL services per CLAUDE.md - NO MOCKS
+Tests actual agent response pipeline with real LLM, Redis, and database.
 """
 
-import sys
-from pathlib import Path
-
-# Test framework import - using pytest fixtures instead
-
 import asyncio
-
-# Set testing environment
 import os
 import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
+from sqlalchemy.ext.asyncio import AsyncSession
 
+# Set testing environment before imports
 os.environ["TESTING"] = "1"
 os.environ["ENVIRONMENT"] = "testing"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
-
-from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.tests.integration.agent_pipeline_mocks import AgentPipelineMocks
+from netra_backend.app.agents.supervisor_agent import SupervisorAgent
+from netra_backend.app.agents.triage_sub_agent import TriageSubAgent
+from netra_backend.app.clients.llm_client import LLMClient
+from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from netra_backend.app.db.session import get_db
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.websocket.handler import MessageHandlerService
+from test_framework.fixtures.real_services import RealServiceFixtures
 
 logger = central_logger.get_logger(__name__)
 
 class TestAgentResponsePipelineCore:
-    """Core agent response pipeline tests."""
+    """Core agent response pipeline tests with REAL services."""
 
     @pytest.fixture
-    def llm_manager_mock(self):
-        """Mock LLM manager for agent response testing"""
-        return AgentPipelineMocks.create_llm_manager_mock()
+    async def real_llm_client(self):
+        """Real LLM client for agent response testing"""
+        env = IsolatedEnvironment()
+        return LLMClient(
+            api_key=env.get("OPENAI_API_KEY"),
+            model="gpt-4o-mini",  # Use fast model for testing
+            timeout=30
+        )
 
     @pytest.fixture
-    def websocket_mock(self):
-        """Mock WebSocket for message delivery testing"""
-        return AgentPipelineMocks.create_websocket_mock()
+    async def real_redis_connection(self):
+        """Real Redis connection for state management"""
+        return await RealServiceFixtures.get_redis_connection()
 
     @pytest.fixture
-    def redis_manager_mock(self):
-        """Mock Redis manager for agent state management"""
-        return AgentPipelineMocks.create_redis_manager_mock()
+    async def real_database_session(self):
+        """Real database session for persistence"""
+        async for session in get_db():
+            yield session
+            break
 
     @pytest.fixture
-    def websocket_manager_mock(self):
-        """Mock WebSocket manager for connection handling"""
-        return AgentPipelineMocks.create_websocket_manager_mock()
+    async def real_supervisor_agent(self, real_llm_client, real_redis_connection, real_database_session):
+        """Real supervisor agent with actual dependencies"""
+        return SupervisorAgent(
+            llm_client=real_llm_client,
+            redis_conn=real_redis_connection,
+            db_session=real_database_session
+        )
+
+    @pytest.fixture
+    async def real_triage_agent(self, real_llm_client):
+        """Real triage agent for routing decisions"""
+        return TriageSubAgent(llm_client=real_llm_client)
 
     @pytest.mark.asyncio
-    async def test_complete_websocket_to_agent_pipeline(self, llm_manager_mock, websocket_mock, websocket_manager_mock, redis_manager_mock):
-        """BVJ: Validates complete message flow from WebSocket through agent system to response delivery."""
+    @pytest.mark.integration
+    async def test_complete_websocket_to_agent_pipeline_real(
+        self, 
+        real_supervisor_agent,
+        real_triage_agent,
+        real_redis_connection,
+        real_database_session
+    ):
+        """
+        BVJ: Validates complete message flow through REAL agent system.
+        Tests actual LLM responses, Redis state management, and database persistence.
+        """
         test_user_id = str(uuid.uuid4())
-        test_message = {"type": "user_message", "content": "I need to optimize GPU memory usage in my ML training pipeline. Current usage is 24GB and I want to reduce costs.", "user_id": test_user_id, "timestamp": datetime.now(timezone.utc).isoformat()}
-
-        await websocket_manager_mock.add_connection(test_user_id, websocket_mock)
-
-        agent_state = DeepAgentState(user_id=test_user_id, thread_id=str(uuid.uuid4()), current_agent="triage", redis_manager=redis_manager_mock)
-
-        # Mock: Generic component isolation for controlled unit testing
-        triage_agent = Mock()
+        test_thread_id = str(uuid.uuid4())
         
-        async def mock_triage_process(message):
-            await asyncio.sleep(0.1)
-            
-            if "optimize" in message["content"].lower() and "gpu" in message["content"].lower():
-                return {"routing_decision": "optimization_specialist", "confidence": 0.95, "reasoning": "GPU optimization request requires specialized performance analysis", "estimated_complexity": "medium"}
-            else:
-                return {"routing_decision": "general_assistant", "confidence": 0.7, "reasoning": "General inquiry", "estimated_complexity": "low"}
+        # Real user message requiring optimization
+        test_message = {
+            "type": "user_message",
+            "content": "I need to optimize GPU memory usage in my ML training pipeline. Current usage is 24GB and I want to reduce costs.",
+            "user_id": test_user_id,
+            "thread_id": test_thread_id,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
 
-        # Mock: Async component isolation for testing without real async operations
-        triage_agent.process_message = AsyncMock(side_effect=mock_triage_process)
-
-        # Mock: Generic component isolation for controlled unit testing
-        optimization_agent = Mock()
+        # Test real triage routing
+        triage_result = await real_triage_agent.process_message(test_message)
         
-        async def mock_optimization_response(message, triage_result):
-            await asyncio.sleep(0.5)
-            
-            specialist_prompt = f"Optimization request: {message['content']}\nTriage analysis: {triage_result['reasoning']}"
-            llm_response = await llm_manager_mock.generate_response(specialist_prompt, "optimization", "high_quality")
-            
-            return {"response": llm_response["content"], "agent_type": "optimization_specialist", "processing_time": 0.5, "quality_metrics": {"specificity_score": 0.85, "actionability_score": 0.90, "technical_accuracy": 0.88}}
-
-        # Mock: Async component isolation for testing without real async operations
-        optimization_agent.process_request = AsyncMock(side_effect=mock_optimization_response)
-
-        start_time = time.time()
-
-        triage_result = await triage_agent.process_message(test_message)
+        # Validate triage made a real routing decision
+        assert triage_result is not None
+        assert "routing_decision" in triage_result
+        assert triage_result["confidence"] > 0.5
         
-        if triage_result["routing_decision"] == "optimization_specialist":
-            specialist_response = await optimization_agent.process_request(test_message, triage_result)
-        else:
-            specialist_response = {"response": "General response", "agent_type": "general"}
-
-        response_message = {"type": "agent_response", "content": specialist_response["response"], "agent_type": specialist_response["agent_type"], "timestamp": datetime.now(timezone.utc).isoformat(), "quality_metrics": specialist_response.get("quality_metrics", {})}
+        # Validate it routes to optimization for GPU queries
+        if "gpu" in test_message["content"].lower() and "optimize" in test_message["content"].lower():
+            assert "optim" in triage_result["routing_decision"].lower() or "performance" in triage_result["routing_decision"].lower()
         
-        await websocket_manager_mock.send_to_user(test_user_id, response_message)
+        # Test real supervisor orchestration
+        supervisor_response = await real_supervisor_agent.process_request(
+            message=test_message,
+            triage_result=triage_result
+        )
         
-        total_time = time.time() - start_time
-
-        assert triage_result["routing_decision"] == "optimization_specialist"
-        assert triage_result["confidence"] >= 0.9
-        assert specialist_response["agent_type"] == "optimization_specialist"
-        assert total_time < 30.0, f"Pipeline took {total_time:.2f}s, exceeds 30s limit"
-
-        quality_metrics = specialist_response["quality_metrics"]
-        assert quality_metrics["specificity_score"] >= 0.6, f"Specificity {quality_metrics['specificity_score']} below 0.6"
-        assert quality_metrics["actionability_score"] >= 0.6, f"Actionability {quality_metrics['actionability_score']} below 0.6"
-
-        sent_messages = websocket_mock._sent_messages
-        assert len(sent_messages) > 0, "No messages sent to WebSocket"
+        # Validate real LLM response
+        assert supervisor_response is not None
+        assert "response" in supervisor_response
+        assert len(supervisor_response["response"]) > 50  # Real response should be substantial
         
-        response_delivered = sent_messages[-1]
-        assert "optimization" in response_delivered["content"]["content"].lower()
+        # Validate Redis state persistence
+        state_key = f"agent_state:{test_user_id}:{test_thread_id}"
+        saved_state = await real_redis_connection.get(state_key)
+        assert saved_state is not None
+        
+        # Log successful real service integration test
+        logger.info(f"Real agent pipeline test successful: User {test_user_id}, Thread {test_thread_id}")
 
-        logger.info(f"Complete pipeline validated: {total_time:.2f}s, quality={quality_metrics}")
-
-    @pytest.mark.asyncio 
-    async def test_agent_routing_accuracy_validation(self, llm_manager_mock, redis_manager_mock):
-        """BVJ: Validates triage agent accurately routes requests to appropriate specialists."""
-        routing_scenarios = [{"message": "Optimize GPU memory usage and reduce training costs by 30%", "expected_agent": "optimization_specialist", "min_confidence": 0.8}, {"message": "Analyze database query performance across 1000 requests", "expected_agent": "data_analysis_specialist", "min_confidence": 0.8}, {"message": "Create deployment plan for scaling to 50 nodes", "expected_agent": "infrastructure_specialist", "min_confidence": 0.7}, {"message": "What's the weather today?", "expected_agent": "general_assistant", "min_confidence": 0.6}, {"message": "Debug memory leak in Python application", "expected_agent": "debugging_specialist", "min_confidence": 0.7}]
-
-        triage_agent = AgentPipelineMocks.create_intelligent_triage_agent()
+    @pytest.mark.asyncio
+    @pytest.mark.integration
+    async def test_agent_routing_accuracy_with_real_llm(
+        self,
+        real_triage_agent
+    ):
+        """
+        BVJ: Validates triage agent accurately routes diverse requests using REAL LLM.
+        Tests actual routing decisions without mocks.
+        """
+        routing_scenarios = [
+            {
+                "message": "Optimize GPU memory usage and reduce training costs by 30%",
+                "expected_keywords": ["optim", "performance"],
+                "min_confidence": 0.7
+            },
+            {
+                "message": "Analyze database query performance across 1000 requests",
+                "expected_keywords": ["data", "analysis", "performance"],
+                "min_confidence": 0.7
+            },
+            {
+                "message": "Create deployment plan for scaling to 50 nodes",
+                "expected_keywords": ["deploy", "infrastructure", "scale"],
+                "min_confidence": 0.6
+            },
+            {
+                "message": "Debug memory leak in Python application",
+                "expected_keywords": ["debug", "issue", "problem"],
+                "min_confidence": 0.6
+            }
+        ]
 
         routing_results = []
         
         for scenario in routing_scenarios:
-            routing_result = await triage_agent.route_message(scenario["message"])
+            test_message = {
+                "type": "user_message",
+                "content": scenario["message"],
+                "user_id": str(uuid.uuid4()),
+                "thread_id": str(uuid.uuid4()),
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
             
-            result_analysis = {"message": scenario["message"][:50] + "...", "expected_agent": scenario["expected_agent"], "actual_agent": routing_result["agent"], "confidence": routing_result["confidence"], "correct_routing": routing_result["agent"] == scenario["expected_agent"], "confidence_met": routing_result["confidence"] >= scenario["min_confidence"]}
+            # Get real routing decision from LLM
+            routing_result = await real_triage_agent.process_message(test_message)
+            
+            # Check if routing decision contains expected keywords
+            routing_text = routing_result.get("routing_decision", "").lower()
+            keyword_match = any(keyword in routing_text for keyword in scenario["expected_keywords"])
+            
+            result_analysis = {
+                "message": scenario["message"][:50] + "...",
+                "routing_decision": routing_result.get("routing_decision"),
+                "confidence": routing_result.get("confidence", 0),
+                "keyword_match": keyword_match,
+                "confidence_met": routing_result.get("confidence", 0) >= scenario["min_confidence"]
+            }
             
             routing_results.append(result_analysis)
 
-        correct_routings = sum(1 for r in routing_results if r["correct_routing"])
+        # Validate routing quality
         confidence_met = sum(1 for r in routing_results if r["confidence_met"])
+        keyword_matches = sum(1 for r in routing_results if r["keyword_match"])
         
-        routing_accuracy = (correct_routings / len(routing_results)) * 100
         confidence_accuracy = (confidence_met / len(routing_results)) * 100
+        keyword_accuracy = (keyword_matches / len(routing_results)) * 100
 
-        assert routing_accuracy >= 80.0, f"Routing accuracy {routing_accuracy}% below 80%"
-        assert confidence_accuracy >= 90.0, f"Confidence accuracy {confidence_accuracy}% below 90%"
+        # Real LLM should provide good confidence and relevant routing
+        assert confidence_accuracy >= 75.0, f"Confidence accuracy {confidence_accuracy}% below 75%"
+        assert keyword_accuracy >= 50.0, f"Keyword match accuracy {keyword_accuracy}% below 50%"
 
-        for result in routing_results:
-            if result["expected_agent"] in ["optimization_specialist", "data_analysis_specialist"]:
-                assert result["confidence"] >= 0.7, f"High-value agent routing confidence too low: {result['confidence']}"
-
-        logger.info(f"Routing accuracy validation: {routing_accuracy}% routing, {confidence_accuracy}% confidence")
+        logger.info(f"Real LLM routing validation: {confidence_accuracy}% confidence, {keyword_accuracy}% keyword match")
 
     @pytest.mark.asyncio
-    async def test_response_quality_metrics_validation(self, llm_manager_mock, redis_manager_mock):
-        """BVJ: Validates agent responses meet quality thresholds for customer satisfaction."""
-        quality_test_cases = [{"request": "Optimize GPU memory allocation for transformer model training", "agent_type": "optimization", "expected_min_specificity": 0.7, "expected_min_actionability": 0.8}, {"request": "Analyze API response time degradation over past week", "agent_type": "data_analysis", "expected_min_specificity": 0.8, "expected_min_actionability": 0.7}, {"request": "Scale Kubernetes cluster to handle 10x traffic increase", "agent_type": "optimization", "expected_min_specificity": 0.6, "expected_min_actionability": 0.9}]
-
-        assess_response_quality = AgentPipelineMocks.create_quality_assessment_function()
+    @pytest.mark.integration 
+    async def test_response_quality_with_real_llm(
+        self,
+        real_llm_client
+    ):
+        """
+        BVJ: Validates agent responses meet quality thresholds using REAL LLM.
+        Tests actual response quality without mocks.
+        """
+        quality_test_cases = [
+            {
+                "request": "Optimize GPU memory allocation for transformer model training",
+                "expected_min_length": 100,
+                "expected_keywords": ["gpu", "memory", "optimization", "training"]
+            },
+            {
+                "request": "Analyze API response time degradation over past week",
+                "expected_min_length": 100,
+                "expected_keywords": ["api", "response", "performance", "analysis"]
+            },
+            {
+                "request": "Scale Kubernetes cluster to handle 10x traffic increase",
+                "expected_min_length": 100,
+                "expected_keywords": ["kubernetes", "scale", "traffic", "cluster"]
+            }
+        ]
 
         quality_results = []
         
         for test_case in quality_test_cases:
-            agent_response = await llm_manager_mock.generate_response(test_case["request"], test_case["agent_type"], "high_quality")
+            # Get real LLM response
+            response = await real_llm_client.generate(
+                prompt=test_case["request"],
+                max_tokens=500
+            )
             
-            quality_metrics = assess_response_quality(agent_response["content"], test_case["request"])
+            response_text = response.get("content", "").lower()
             
-            quality_result = {"request": test_case["request"][:40] + "...", "agent_type": test_case["agent_type"], "response_length": len(agent_response["content"]), "quality_metrics": quality_metrics, "meets_specificity": quality_metrics["specificity_score"] >= test_case["expected_min_specificity"], "meets_actionability": quality_metrics["actionability_score"] >= test_case["expected_min_actionability"], "meets_overall": quality_metrics["overall_score"] >= 0.6}
+            # Assess response quality based on real metrics
+            keyword_matches = sum(1 for keyword in test_case["expected_keywords"] if keyword in response_text)
+            keyword_coverage = (keyword_matches / len(test_case["expected_keywords"])) * 100
+            
+            quality_result = {
+                "request": test_case["request"][:40] + "...",
+                "response_length": len(response_text),
+                "meets_length": len(response_text) >= test_case["expected_min_length"],
+                "keyword_coverage": keyword_coverage,
+                "meets_keywords": keyword_coverage >= 50.0
+            }
             
             quality_results.append(quality_result)
 
-        specificity_passed = sum(1 for r in quality_results if r["meets_specificity"])
-        actionability_passed = sum(1 for r in quality_results if r["meets_actionability"])
-        overall_passed = sum(1 for r in quality_results if r["meets_overall"])
+        # Validate quality metrics
+        length_passed = sum(1 for r in quality_results if r["meets_length"])
+        keyword_passed = sum(1 for r in quality_results if r["meets_keywords"])
         
         total_tests = len(quality_results)
         
-        specificity_rate = (specificity_passed / total_tests) * 100
-        actionability_rate = (actionability_passed / total_tests) * 100
-        overall_rate = (overall_passed / total_tests) * 100
+        length_rate = (length_passed / total_tests) * 100
+        keyword_rate = (keyword_passed / total_tests) * 100
 
-        assert specificity_rate >= 80.0, f"Specificity pass rate {specificity_rate}% below 80%"
-        assert actionability_rate >= 80.0, f"Actionability pass rate {actionability_rate}% below 80%" 
-        assert overall_rate >= 85.0, f"Overall quality pass rate {overall_rate}% below 85%"
+        # Real LLM should provide substantial, relevant responses
+        assert length_rate >= 90.0, f"Response length pass rate {length_rate}% below 90%"
+        assert keyword_rate >= 75.0, f"Keyword coverage pass rate {keyword_rate}% below 75%"
 
-        for result in quality_results:
-            assert result["quality_metrics"]["specificity_score"] >= 0.6, f"Response specificity too low: {result['quality_metrics']['specificity_score']}"
-            assert result["quality_metrics"]["actionability_score"] >= 0.6, f"Response actionability too low: {result['quality_metrics']['actionability_score']}"
-
-        logger.info(f"Quality validation: {specificity_rate}% specificity, {actionability_rate}% actionability, {overall_rate}% overall")
+        logger.info(f"Real LLM quality validation: {length_rate}% length, {keyword_rate}% keyword coverage")

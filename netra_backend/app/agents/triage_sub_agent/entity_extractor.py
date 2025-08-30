@@ -24,7 +24,7 @@ class EntityExtractor:
             r'claude-?[0-9]+(?:-[a-z]+)?',
             r'llama-?[0-9]+(?:b)?(?:-[a-z]+)?',
             r'mistral',
-            r'gemini(?:-[a-z]+)?',
+            r'gemini(?:-[0-9]+\.?[0-9]*)?(?:-[a-z]+)?',
             r'anthropic',
             r'openai',
             r'palm-?[0-9]*'

@@ -19,8 +19,13 @@ def _get_auth_route_configs(modules: dict) -> dict:
     # Auth proxy router added for backward compatibility with tests
     return {
         "agent": (modules["agent_router"], "/api/agent", ["agent"]),
-        "auth_proxy": (modules["auth_proxy_router"], "", ["auth"])
+        "auth_proxy": (modules["auth_proxy_router"], "", ["auth"]),
+        "agents_execute": (modules["agents_execute_router"], "/api/agents", ["agents"]),
+        "metrics_api": (modules["metrics_api_router"], "/api/metrics", ["metrics"]),
+        "health_check": (modules["health_check_router"], "/api/health", ["health-check"]),
+        "system_info": (modules["system_info_router"], "/api/system", ["system-info"])
         # auth_resilience router removed - functionality consolidated into auth_client_core
+        # health_check and system_info routers added - provides system introspection
     }
 
 

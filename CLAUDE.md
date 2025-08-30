@@ -139,6 +139,7 @@ Before coding, conduct a rigorous analysis.
   * **Modular Implementation:** Delegate tasks to Implementation Agents one module at a time.
   * **Isolation (The "Firewall" Technique):** **CRITICAL:** When delegating, provide agents ONLY with the necessary interfaces of dependencies, not their full implementation context. This enforces contracts and prevents context bleed.
   * **Testing Focus:** Prefer real tests over mocks. **E2E \> Integration \> Unit.**
+  CRITICAL: Mocks = Abomination
   * **Integration and Reporting:** You are responsible for integrating all artifacts and reporting on overall success.
 
 ### 3.4. Multi-Environment Validation

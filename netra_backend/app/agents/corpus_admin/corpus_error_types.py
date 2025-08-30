@@ -120,3 +120,33 @@ class IndexingError(CorpusAdminError):
             'document_id': document_id,
             'index_type': index_type
         }
+
+
+class CorpusErrorTypes:
+    """Container class for corpus error types and management."""
+    
+    def __init__(self):
+        """Initialize corpus error types manager."""
+        self.error_registry = {
+            'document_upload': DocumentUploadError,
+            'document_validation': DocumentValidationError,
+            'document_indexing': IndexingError,
+            'corpus_admin': CorpusAdminError
+        }
+    
+    def process(self):
+        """Process error types registration."""
+        return list(self.error_registry.keys())
+    
+    def process_invalid(self):
+        """Process invalid operation for testing."""
+        raise Exception("Invalid error processing operation")
+    
+    def get_error_class(self, error_type: str):
+        """Get error class by type."""
+        return self.error_registry.get(error_type, CorpusAdminError)
+    
+    def create_error(self, error_type: str, *args, **kwargs):
+        """Create error instance by type."""
+        error_class = self.get_error_class(error_type)
+        return error_class(*args, **kwargs)

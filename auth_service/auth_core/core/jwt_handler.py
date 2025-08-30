@@ -100,6 +100,13 @@ class JWTHandler:
                       token_type: str = "access") -> Optional[Dict]:
         """CANONICAL JWT validation - Single Source of Truth for all JWT validation operations"""
         try:
+            # Early rejection of mock tokens for security
+            if token and token.startswith("mock_"):
+                logger.error(f"Mock token detected in JWT validation: {token[:20]}...")
+                environment = os.getenv("ENVIRONMENT", "production").lower()
+                if environment not in ["test", "development"]:
+                    raise ValueError("Mock tokens cannot be used outside test environment")
+                return None  # Reject mock tokens even in test env for JWT handler
             # Check if token is blacklisted first - critical security check
             if self.is_token_blacklisted(token):
                 logger.debug("Token is blacklisted")
@@ -265,6 +272,14 @@ class JWTHandler:
     
     def refresh_access_token(self, refresh_token: str) -> Optional[tuple]:
         """Generate new access token from refresh token"""
+        # Early rejection of mock tokens for security
+        if refresh_token and refresh_token.startswith("mock_"):
+            logger.error(f"Mock token detected in refresh operation: {refresh_token[:20]}...")
+            environment = os.getenv("ENVIRONMENT", "production").lower()
+            if environment not in ["test", "development"]:
+                raise ValueError("Mock tokens cannot be used outside test environment")
+            return None  # Reject mock tokens even in test env for JWT handler
+        
         # For token consumption operations, we DO need replay protection
         payload = self.validate_token_for_consumption(refresh_token, "refresh")
         if not payload:

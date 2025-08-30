@@ -152,6 +152,7 @@
             <critical-takeaway>NEVER use os.getenv() directly - always use IsolatedEnvironment's get_env().get() for consistency (staging_environment_configuration.xml).</critical-takeaway>
             <critical-takeaway>Validate staging config with StagingConfigurationValidator before deployment to catch placeholders and localhost refs (staging_environment_configuration.xml).</critical-takeaway>
             <critical-takeaway>SERVICE_SECRET must be set and different from JWT_SECRET_KEY in staging/production (staging_environment_configuration.xml).</critical-takeaway>
+            <critical-takeaway>CRITICAL: .env files must NEVER be loaded in staging/production - check ENVIRONMENT variable and skip loading (env_file_staging_protection.xml).</critical-takeaway>
         </category>
 
         <category name="Redis Service Independence" path="SPEC/learnings/redis_service_independence.xml" keywords="Redis, Microservices, Circular Dependencies, Service Independence, Shared Components, Infrastructure">

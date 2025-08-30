@@ -261,3 +261,53 @@ class AgentService(IAgentService):
         """Create response processor for streaming."""
         from netra_backend.app.services.agent_service_streaming import AgentResponseProcessor
         return AgentResponseProcessor(self.supervisor, message, thread_id)
+    
+    async def execute_agent(
+        self, 
+        agent_type: str, 
+        message: str, 
+        context: Optional[Dict[str, Any]] = None,
+        user_id: str = "default_user"
+    ) -> Dict[str, Any]:
+        """Execute an agent task with the specified type and message.
+        
+        Args:
+            agent_type: Type of agent to execute (e.g., 'triage', 'data', 'optimization')
+            message: Message to process
+            context: Additional context for the agent
+            user_id: User ID for tracking and permissions
+            
+        Returns:
+            Dict containing agent response and metadata
+        """
+        logger.info(f"Executing {agent_type} agent for user {user_id}: {message[:100]}...")
+        
+        try:
+            # For now, route all agent types through the supervisor
+            # Future enhancement: could route to specific agents based on agent_type
+            context_str = f" (Context: {context})" if context else ""
+            full_message = f"[Agent Type: {agent_type}] {message}{context_str}"
+            
+            result = await self.supervisor.run(
+                full_message, 
+                f"{agent_type}_{user_id}",  # Use agent_type in thread_id
+                user_id,
+                f"{agent_type}_run_{user_id}"
+            )
+            
+            return {
+                "response": str(result),
+                "agent": agent_type,
+                "status": "success",
+                "user_id": user_id
+            }
+            
+        except Exception as e:
+            logger.error(f"Error executing {agent_type} agent: {e}", exc_info=True)
+            return {
+                "response": f"Error executing {agent_type} agent: {str(e)}",
+                "agent": agent_type,
+                "status": "error",
+                "user_id": user_id,
+                "error": str(e)
+            }

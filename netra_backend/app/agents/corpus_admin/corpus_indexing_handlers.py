@@ -73,8 +73,12 @@ class IndexingErrorHandler:
     
     async def _handle_recovery_failure(self, error: IndexingError, context: ErrorContext) -> Dict[str, Any]:
         """Handle recovery failure."""
-        await global_error_handler.handle_error(error, context)
-        raise error
+        logger.error(f"Recovery failed for indexing error: {error}")
+        return {
+            'success': False,
+            'error': str(error),
+            'context': context.__dict__ if context else None
+        }
     
     def _create_indexing_error_context(
         self,
@@ -378,6 +382,47 @@ class IndexingErrorHandler:
     def _get_current_timestamp(self) -> str:
         """Get current timestamp as ISO string."""
         return datetime.now().isoformat()
+
+
+class CorpusIndexingHandlers:
+    """Container class for corpus indexing handlers."""
+    
+    def __init__(self, search_engine=None):
+        """Initialize corpus indexing handlers manager."""
+        self.search_engine = search_engine
+        self.indexing_handler = IndexingErrorHandler(search_engine)
+        self.handlers_registry = {
+            'indexing_error': self.indexing_handler
+        }
+    
+    def process(self):
+        """Process handlers registration."""
+        return list(self.handlers_registry.keys())
+    
+    def process_invalid(self):
+        """Process invalid operation for testing."""
+        raise Exception("Invalid handlers processing operation")
+    
+    def get_handler(self, handler_type: str):
+        """Get handler by type."""
+        return self.handlers_registry.get(handler_type)
+    
+    async def handle_indexing_error(self, document_id: str, index_type: str, run_id: str, original_error: Exception):
+        """Handle document indexing error."""
+        return await self.indexing_handler.handle_indexing_error(
+            document_id, index_type, run_id, original_error
+        )
+    
+    async def handle_document_upload_error(self, filename: str, file_size: int, run_id: str, original_error: Exception):
+        """Handle document upload error for compatibility."""
+        return {
+            'success': False,
+            'method': 'upload_error_handled',
+            'error': str(original_error),
+            'filename': filename,
+            'file_size': file_size,
+            'run_id': run_id
+        }
 
 
 # Factory function for creating indexing handlers

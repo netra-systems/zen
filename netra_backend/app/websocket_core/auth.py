@@ -267,29 +267,44 @@ class WebSocketAuthenticator:
             env = get_env()
             auth_bypass = env.get("ALLOW_DEV_AUTH_BYPASS", "false").lower() == "true"
             websocket_bypass = env.get("WEBSOCKET_AUTH_BYPASS", "false").lower() == "true"
+            fast_test_mode = env.get("AUTH_FAST_TEST_MODE", "false").lower() == "true"
             
-            # Only allow bypass in development environment
-            is_development = getattr(config, 'environment', 'production').lower() == 'development'
+            # Allow bypass in development and test environments
+            config_environment = getattr(config, 'environment', 'production').lower()
+            is_development_or_test = config_environment in ['development', 'test', 'testing']
             
-            # CRITICAL FIX: Enable development auth bypass only when explicitly configured
-            # This allows WebSocket connections to work in development when bypass is explicitly enabled
-            bypass_enabled = is_development and (auth_bypass or websocket_bypass)
+            # Also check environment variables for test environment indicators
+            env = get_env()
+            is_test_env = (
+                env.get("TESTING", "0") == "1" or 
+                env.get("TESTING", "").lower() == "true" or
+                env.get("NETRA_ENV", "").lower() in ["e2e_testing", "testing"] or
+                env.get("ENVIRONMENT", "").lower() in ["test", "testing"]
+            )
             
-            if bypass_enabled and is_development:
-                logger.warning("WebSocket development auth bypass is ENABLED for development environment - NEVER use in production!")
-            elif is_development:
-                logger.debug("Development environment detected, auth bypass enabled automatically")
+            # CRITICAL FIX: Enable auth bypass in development, test, and E2E environments
+            # This allows WebSocket connections to work in test environments
+            bypass_enabled = (is_development_or_test or is_test_env) and (auth_bypass or websocket_bypass or fast_test_mode)
+            
+            if bypass_enabled:
+                if is_test_env:
+                    logger.warning("WebSocket auth bypass is ENABLED for E2E/test environment - NEVER use in production!")
+                elif is_development_or_test:
+                    logger.warning(f"WebSocket auth bypass is ENABLED for {config_environment} environment - NEVER use in production!")
+            elif is_development_or_test or is_test_env:
+                logger.debug(f"Test/development environment detected: config={config_environment}, test_env={is_test_env}")
             
             return bypass_enabled
         except Exception as e:
             logger.error(f"Error checking development auth bypass: {e}")
-            # FALLBACK: In case of error, check if we're in development and allow bypass
+            # FALLBACK: In case of error, check if we're in development/test and allow bypass
             try:
                 from netra_backend.app.core.configuration.base import get_unified_config
                 config = get_unified_config()
-                is_dev = getattr(config, 'environment', 'production').lower() == 'development'
-                if is_dev:
-                    logger.warning("Fallback: Enabling development auth bypass due to configuration error")
+                fallback_env = getattr(config, 'environment', 'production').lower()
+                is_dev_or_test = fallback_env in ['development', 'test', 'testing']
+                if is_dev_or_test:
+                    logger.warning(f"Fallback: Enabling auth bypass for {fallback_env} environment due to configuration error")
                     return True
             except:
                 pass
