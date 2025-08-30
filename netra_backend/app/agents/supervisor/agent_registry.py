@@ -124,7 +124,7 @@ class AgentRegistry:
             self.llm_manager, self.tool_dispatcher))
 
     def set_websocket_manager(self, manager: 'WebSocketManager') -> None:
-        """Set websocket manager for all agents and enhance tool dispatcher"""
+        """Set websocket manager for all agents and enhance tool dispatcher with concurrency optimization."""
         self.websocket_manager = manager
         
         # CRITICAL: Enhance tool dispatcher with WebSocket notifications
@@ -135,7 +135,21 @@ class AgentRegistry:
             )
             logger.info("Enhancing tool dispatcher with WebSocket notifications")
             enhance_tool_dispatcher_with_notifications(self.tool_dispatcher, manager)
+            
+            # CONCURRENCY OPTIMIZATION: Verify enhancement succeeded
+            if not getattr(self.tool_dispatcher, '_websocket_enhanced', False):
+                logger.error("CRITICAL: Tool dispatcher enhancement failed - WebSocket events will not work")
+                raise RuntimeError("Tool dispatcher WebSocket enhancement failed")
+            else:
+                logger.info("✅ Tool dispatcher WebSocket enhancement verified")
         
-        # Set WebSocket manager for all registered agents
-        for agent in self.agents.values():
-            agent.websocket_manager = manager
+        # Set WebSocket manager for all registered agents with verification
+        agent_count = 0
+        for agent_name, agent in self.agents.items():
+            try:
+                agent.websocket_manager = manager
+                agent_count += 1
+            except Exception as e:
+                logger.warning(f"Failed to set WebSocket manager for agent {agent_name}: {e}")
+        
+        logger.info(f"✅ WebSocket manager set for {agent_count}/{len(self.agents)} agents")

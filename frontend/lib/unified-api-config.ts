@@ -4,7 +4,7 @@
  * No localhost references in production/staging
  */
 
-import { logger } from '@/lib/logger';
+// Removed logger import to prevent circular dependency - using console.log directly
 
 export type Environment = 'development' | 'test' | 'staging' | 'production';
 
@@ -53,7 +53,7 @@ function detectEnvironment(): Environment {
   // Explicit environment variable takes precedence
   const explicitEnv = process.env.NEXT_PUBLIC_ENVIRONMENT;
   if (explicitEnv === 'production' || explicitEnv === 'staging' || explicitEnv === 'test' || explicitEnv === 'development') {
-    logger.info(`Environment detected from NEXT_PUBLIC_ENVIRONMENT: ${explicitEnv}`);
+    console.log(`[2025-08-30T${new Date().toISOString().split('T')[1]}] INFO: Environment detected from NEXT_PUBLIC_ENVIRONMENT: ${explicitEnv}`);
     return explicitEnv as Environment;
   }
   
@@ -61,11 +61,11 @@ function detectEnvironment(): Environment {
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
     if (hostname.includes('staging.netrasystems.ai')) {
-      logger.info('Environment detected from hostname as staging');
+      console.log('[2025-08-30T' + new Date().toISOString().split('T')[1] + '] INFO: Environment detected from hostname as staging');
       return 'staging';
     }
     if (hostname.includes('netrasystems.ai') && !hostname.includes('staging')) {
-      logger.info('Environment detected from hostname as production');
+      console.log('[2025-08-30T' + new Date().toISOString().split('T')[1] + '] INFO: Environment detected from hostname as production');
       return 'production';
     }
   }
@@ -74,7 +74,7 @@ function detectEnvironment(): Environment {
   const nodeEnv = process.env.NODE_ENV;
   if (nodeEnv === 'production') {
     // Production NODE_ENV without explicit environment defaults to staging for safety
-    logger.warn('NODE_ENV=production but NEXT_PUBLIC_ENVIRONMENT not set, defaulting to staging');
+    console.warn('[2025-08-30T' + new Date().toISOString().split('T')[1] + '] WARN: NODE_ENV=production but NEXT_PUBLIC_ENVIRONMENT not set, defaulting to staging');
     return 'staging';
   }
   
@@ -111,7 +111,7 @@ function validateUrlsForEnvironment(environment: Environment, urls: any): void {
                    localhostUrls.map(url => `  - ${url}`).join('\n') + '\n' +
                    `Fix: Set proper environment variables for ${environment}`;
       
-      logger.error(error);
+      console.error(error);
       throw new Error(error);
     }
   }
@@ -283,7 +283,7 @@ function validateConfig(config: UnifiedApiConfig): void {
     );
     
     if (hasLocalhost) {
-      logger.error('CRITICAL: Non-development environment using localhost URLs!', {
+      console.error('[2025-08-30T' + new Date().toISOString().split('T')[1] + '] ERROR: CRITICAL: Non-development environment using localhost URLs!', {
         environment,
         urls
       });
@@ -294,7 +294,7 @@ function validateConfig(config: UnifiedApiConfig): void {
   // Validate auth service URL is accessible
   if (environment === 'staging') {
     if (!urls.auth.includes('staging')) {
-      logger.warn('Staging environment auth URL missing "staging" subdomain', {
+      console.warn('[2025-08-30T' + new Date().toISOString().split('T')[1] + '] WARN: Staging environment auth URL missing "staging" subdomain', {
         authUrl: urls.auth
       });
     }
@@ -313,7 +313,7 @@ export function getUnifiedApiConfig(): UnifiedApiConfig {
   try {
     validateConfig(config);
   } catch (error) {
-    logger.error('Configuration validation failed', error as Error);
+    console.error('[2025-08-30T' + new Date().toISOString().split('T')[1] + '] ERROR: Configuration validation failed', error);
     // In staging/production, this is critical
     if (environment === 'staging' || environment === 'production') {
       throw error;
@@ -321,7 +321,7 @@ export function getUnifiedApiConfig(): UnifiedApiConfig {
   }
   
   // Log configuration for debugging
-  logger.info('Unified API Configuration:', {
+  console.log('[2025-08-30T' + new Date().toISOString().split('T')[1] + '] INFO: Unified API Configuration:', {
     environment: config.environment,
     urls: config.urls,
     features: config.features,

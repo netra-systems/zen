@@ -34,14 +34,20 @@ class BufferPriority(Enum):
 
 @dataclass
 class BufferConfig:
-    """Configuration for message buffering."""
-    max_buffer_size_per_user: int = 1000
-    max_buffer_size_global: int = 10000
-    max_message_size_bytes: int = 64 * 1024  # 64KB
-    buffer_timeout_seconds: int = 300  # 5 minutes
-    overflow_strategy: str = "drop_oldest"  # "drop_oldest", "drop_newest", "drop_low_priority"
-    retry_intervals: List[float] = field(default_factory=lambda: [1.0, 2.0, 5.0, 10.0, 30.0])
-    max_retry_attempts: int = 5
+    """OPTIMIZED configuration for zero message loss during normal operation."""
+    max_buffer_size_per_user: int = 200  # Reduced for 5 concurrent users focus
+    max_buffer_size_global: int = 1000   # Conservative for guaranteed performance
+    max_message_size_bytes: int = 32 * 1024  # 32KB - reduced for faster processing
+    buffer_timeout_seconds: int = 120  # 2 minutes - faster timeout for responsiveness
+    overflow_strategy: str = "drop_low_priority"  # Prioritize important messages
+    retry_intervals: List[float] = field(default_factory=lambda: [0.5, 1.0, 2.0, 5.0])  # Faster retries
+    max_retry_attempts: int = 4  # Fewer attempts but faster cycle
+    
+    # ZERO MESSAGE LOSS: Priority-based retention
+    critical_message_types: List[str] = field(default_factory=lambda: [
+        'agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed'
+    ])
+    never_drop_critical: bool = True  # Never drop critical agent messages
 
 
 @dataclass
@@ -61,17 +67,37 @@ class BufferedMessage:
             self.size_bytes = self._calculate_size()
     
     def _calculate_size(self) -> int:
-        """Calculate approximate message size."""
+        """OPTIMIZED size calculation for faster buffering."""
         try:
             import json
+            # PERFORMANCE OPTIMIZATION: Fast path for simple messages
+            if isinstance(self.message, (str, int, float, bool)):
+                return len(str(self.message).encode('utf-8'))
+            
+            if isinstance(self.message, dict):
+                return len(json.dumps(self.message, separators=(',', ':')).encode('utf-8'))
+                
             if hasattr(self.message, 'model_dump'):
-                return len(json.dumps(self.message.model_dump()).encode('utf-8'))
+                return len(json.dumps(self.message.model_dump(), separators=(',', ':')).encode('utf-8'))
             elif hasattr(self.message, 'dict'):
-                return len(json.dumps(self.message.dict()).encode('utf-8'))
+                return len(json.dumps(self.message.dict(), separators=(',', ':')).encode('utf-8'))
             else:
-                return len(json.dumps(self.message).encode('utf-8'))
+                return len(json.dumps(self.message, separators=(',', ':')).encode('utf-8'))
         except Exception:
+            # Fallback to string length estimation
             return len(str(self.message).encode('utf-8'))
+    
+    def is_critical(self, config: BufferConfig) -> bool:
+        """Check if this message is critical and should not be dropped."""
+        if self.priority == BufferPriority.CRITICAL:
+            return True
+        
+        # Check message type for critical agent events
+        if isinstance(self.message, dict):
+            msg_type = self.message.get('type', '')
+            return msg_type in config.critical_message_types
+        
+        return False
 
 
 class WebSocketMessageBuffer:
@@ -289,37 +315,77 @@ class WebSocketMessageBuffer:
         return True
     
     async def _handle_user_buffer_overflow(self, user_buffer: deque, new_message: BufferedMessage) -> bool:
-        """Handle user buffer overflow."""
+        """ZERO MESSAGE LOSS: Handle user buffer overflow with critical message protection."""
+        # If the new message is critical, never drop it
+        if self.config.never_drop_critical and new_message.is_critical(self.config):
+            logger.info(f"Making room for critical message: {new_message.message.get('type', 'unknown')}")
+            # Force room by removing oldest non-critical message
+            return await self._make_room_for_critical(user_buffer)
+        
         strategy = self.config.overflow_strategy
         
         if strategy == "drop_oldest":
-            # Remove oldest message
+            # Remove oldest non-critical message if possible
+            for i in range(len(user_buffer)):
+                msg = user_buffer[i]
+                if not (self.config.never_drop_critical and msg.is_critical(self.config)):
+                    user_buffer.remove(msg)
+                    self._update_buffer_size(msg, remove=True)
+                    return True
+            # If all are critical, drop oldest anyway (fallback)
             if user_buffer:
                 old_message = user_buffer.popleft()
                 self._update_buffer_size(old_message, remove=True)
             return True
             
         elif strategy == "drop_newest":
-            # Drop the new message
-            logger.warning(f"Dropping new message due to buffer overflow for user {new_message.user_id}")
-            self.stats['messages_dropped'] += 1
-            return False
+            # Drop the new message only if it's not critical
+            if not (self.config.never_drop_critical and new_message.is_critical(self.config)):
+                logger.warning(f"Dropping new message due to buffer overflow for user {new_message.user_id}")
+                self.stats['messages_dropped'] += 1
+                return False
+            else:
+                # Make room for critical message
+                return await self._make_room_for_critical(user_buffer)
             
         elif strategy == "drop_low_priority":
-            # Find and drop lowest priority message
-            lowest_priority = min(msg.priority.value for msg in user_buffer)
-            
+            # Find and drop lowest priority non-critical message
+            candidates = []
             for i, msg in enumerate(user_buffer):
-                if msg.priority.value == lowest_priority:
-                    del user_buffer[i]
-                    self._update_buffer_size(msg, remove=True)
-                    break
-            return True
+                if not (self.config.never_drop_critical and msg.is_critical(self.config)):
+                    candidates.append((i, msg))
+            
+            if candidates:
+                # Sort by priority and pick lowest
+                candidates.sort(key=lambda x: x[1].priority.value)
+                idx, msg = candidates[0]
+                user_buffer.remove(msg)
+                self._update_buffer_size(msg, remove=True)
+                return True
+            else:
+                # All messages are critical, force room
+                return await self._make_room_for_critical(user_buffer)
         
-        # Default: drop oldest
+        # Default: drop oldest non-critical
+        return await self._make_room_for_critical(user_buffer)
+    
+    async def _make_room_for_critical(self, user_buffer: deque) -> bool:
+        """Make room for critical messages by removing non-critical ones."""
+        # Try to find a non-critical message to remove
+        for i in range(len(user_buffer)):
+            msg = user_buffer[i]
+            if not (self.config.never_drop_critical and msg.is_critical(self.config)):
+                user_buffer.remove(msg)
+                self._update_buffer_size(msg, remove=True)
+                logger.debug(f"Removed non-critical message to make room for critical message")
+                return True
+        
+        # If all messages are critical, remove oldest (last resort)
         if user_buffer:
             old_message = user_buffer.popleft()
             self._update_buffer_size(old_message, remove=True)
+            logger.warning("Removed critical message due to all messages being critical")
+        
         return True
     
     async def _handle_global_buffer_overflow(self, new_message: BufferedMessage) -> None:

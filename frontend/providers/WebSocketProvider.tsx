@@ -160,9 +160,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
               
               // Use warning level for recoverable errors, error level for critical ones
               const logLevel = error.recoverable ? 'warn' : 'error';
-              const logFn = error.recoverable ? logger.warn : logger.error;
-              
-              logFn(errorMessage, undefined, {
+              const logContext = {
                 component: 'WebSocketProvider',
                 action: errorAction,
                 metadata: { 
@@ -171,7 +169,14 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
                   recoverable: error.recoverable,
                   code: error.code
                 }
-              });
+              };
+              
+              // Call logger methods directly to maintain proper 'this' context
+              if (error.recoverable) {
+                logger.warn(errorMessage, logContext);
+              } else {
+                logger.error(errorMessage, undefined, logContext);
+              }
               
               // Handle different error types
               if (error.type === 'auth') {

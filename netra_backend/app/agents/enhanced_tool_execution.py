@@ -146,3 +146,100 @@ def enhance_tool_dispatcher_with_notifications(tool_dispatcher, websocket_manage
         logger.warning("Tool dispatcher does not have executor attribute")
     
     return tool_dispatcher
+
+
+class ContextualToolExecutor(EnhancedToolExecutionEngine):
+    """Tool executor with enhanced contextual WebSocket events."""
+    
+    def _get_tool_purpose(self, tool_name: str, tool_input) -> str:
+        """Generate contextual purpose description for tools."""
+        # Extract meaningful purpose from tool name and parameters
+        purpose_mappings = {
+            "search": "Finding relevant information",
+            "query": "Retrieving data from database",
+            "analyze": "Performing data analysis",
+            "generate": "Creating content or reports",
+            "validate": "Checking data integrity",
+            "optimize": "Improving performance",
+            "export": "Exporting results",
+            "import": "Loading external data",
+            "llm": "Processing with AI model",
+            "calculation": "Computing metrics",
+            "transformation": "Converting data format"
+        }
+        
+        # Check for patterns in tool name
+        for pattern, purpose in purpose_mappings.items():
+            if pattern.lower() in tool_name.lower():
+                return purpose
+                
+        return f"Executing {tool_name} operation"
+    
+    def _estimate_tool_duration(self, tool_name: str, tool_input) -> int:
+        """Estimate tool execution duration in milliseconds."""
+        # Duration estimates based on tool patterns
+        duration_estimates = {
+            "search": 3000,     # 3 seconds
+            "query": 2000,      # 2 seconds  
+            "analyze": 15000,   # 15 seconds
+            "generate": 8000,   # 8 seconds
+            "validate": 2000,   # 2 seconds
+            "optimize": 30000,  # 30 seconds
+            "export": 5000,     # 5 seconds
+            "import": 10000,    # 10 seconds
+            "llm": 12000,       # 12 seconds
+            "calculation": 5000, # 5 seconds
+            "transformation": 3000  # 3 seconds
+        }
+        
+        # Check for patterns in tool name
+        for pattern, duration in duration_estimates.items():
+            if pattern.lower() in tool_name.lower():
+                return duration
+                
+        return 5000  # Default 5 seconds
+    
+    def _create_parameters_summary(self, tool_input) -> str:
+        """Create user-friendly summary of tool parameters."""
+        if not tool_input:
+            return "No parameters"
+            
+        try:
+            # Handle different tool input formats
+            if hasattr(tool_input, "model_dump"):
+                params = tool_input.model_dump()
+            elif hasattr(tool_input, "__dict__"):
+                params = tool_input.__dict__
+            elif isinstance(tool_input, dict):
+                params = tool_input
+            else:
+                return str(tool_input)[:100]
+            
+            # Extract key information
+            summary_parts = []
+            
+            # Common parameter patterns
+            if "query" in params:
+                summary_parts.append(f"Query: {str(params['query'])[:50]}")
+            if "table_name" in params:
+                summary_parts.append(f"Table: {params['table_name']}")
+            if "limit" in params:
+                summary_parts.append(f"Limit: {params['limit']}")
+            if "filters" in params and params["filters"]:
+                summary_parts.append(f"Filters: {len(params['filters'])} applied")
+            
+            if summary_parts:
+                return "; ".join(summary_parts)
+            else:
+                # Fallback: show first few key-value pairs
+                key_items = list(params.items())[:3]
+                return "; ".join([f"{k}: {str(v)[:30]}" for k, v in key_items])
+                
+        except Exception:
+            return "Complex parameters"
+
+
+def create_contextual_tool_executor(websocket_manager) -> ContextualToolExecutor:
+    """Create enhanced tool executor with contextual events."""
+    return ContextualToolExecutor(websocket_manager)
+

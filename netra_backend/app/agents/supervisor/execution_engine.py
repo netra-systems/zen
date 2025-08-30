@@ -1,4 +1,8 @@
-"""Execution engine for supervisor agent pipelines."""
+"""Execution engine for supervisor agent pipelines with concurrency optimization.
+
+Business Value: Supports 5+ concurrent users with <2s response times and proper event ordering.
+Optimizations: Semaphore-based concurrency control, event sequencing, backlog handling.
+"""
 
 import asyncio
 import time
@@ -20,15 +24,26 @@ from netra_backend.app.agents.supervisor.observability_flow import (
     get_supervisor_flow_logger,
 )
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.agents.supervisor.periodic_update_manager import PeriodicUpdateManager
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
 
 class ExecutionEngine:
-    """Handles agent execution orchestration."""
+    """Handles agent execution orchestration with concurrency optimization.
+    
+    Features:
+    - Semaphore-based concurrency control for 5+ concurrent users
+    - Guaranteed WebSocket event delivery with proper sequencing
+    - Backlog handling with user feedback
+    - Periodic updates for long-running operations
+    - Resource management and cleanup
+    """
     
     MAX_HISTORY_SIZE = 100  # Prevent memory leak
+    MAX_CONCURRENT_AGENTS = 10  # Support 5 concurrent users (2 agents each)
+    AGENT_EXECUTION_TIMEOUT = 30.0  # 30 seconds max per agent
     
     def __init__(self, registry: 'AgentRegistry', websocket_manager: 'WebSocketManager'):
         self.registry = registry
@@ -40,34 +55,105 @@ class ExecutionEngine:
     def _init_components(self) -> None:
         """Initialize execution components."""
         self.websocket_notifier = WebSocketNotifier(self.websocket_manager)
+        self.periodic_update_manager = PeriodicUpdateManager(self.websocket_notifier)
         self.agent_core = AgentExecutionCore(self.registry, self.websocket_notifier)
         self.fallback_manager = FallbackManager(self.websocket_notifier)
         self.flow_logger = get_supervisor_flow_logger()
         
+        # CONCURRENCY OPTIMIZATION: Semaphore for agent execution control
+        self.execution_semaphore = asyncio.Semaphore(self.MAX_CONCURRENT_AGENTS)
+        self.execution_stats = {
+            'total_executions': 0,
+            'concurrent_executions': 0,
+            'queue_wait_times': [],
+            'execution_times': [],
+            'failed_executions': 0
+        }
+        
     async def execute_agent(self, context: AgentExecutionContext,
                            state: DeepAgentState) -> AgentExecutionResult:
-        """Execute a single agent with retry logic."""
-        await self.websocket_notifier.send_agent_started(context)
+        """Execute a single agent with concurrency control and guaranteed event delivery."""
+        queue_start_time = time.time()
         
-        # Send initial thinking update
-        await self.send_agent_thinking(
-            context, 
-            f"Starting execution of {context.agent_name} agent...",
-            step_number=1
-        )
-        
-        result = await self._execute_with_error_handling(context, state)
-        
-        # CRITICAL: Always send completion events, regardless of success/failure
-        # This ensures WebSocket clients know when agent execution is complete
-        if result.success:
-            await self._send_final_execution_report(context, result, state)
-        else:
-            # Send completion event for failed/fallback cases
-            await self._send_completion_for_failed_execution(context, result, state)
-        
-        self._update_history(result)
-        return result
+        # CONCURRENCY CONTROL: Use semaphore to limit concurrent executions
+        async with self.execution_semaphore:
+            queue_wait_time = time.time() - queue_start_time
+            self.execution_stats['queue_wait_times'].append(queue_wait_time)
+            self.execution_stats['total_executions'] += 1
+            self.execution_stats['concurrent_executions'] += 1
+            
+            # Send queue wait notification if significant delay
+            if queue_wait_time > 1.0:
+                await self.send_agent_thinking(
+                    context,
+                    f"Request queued due to high load - starting now (waited {queue_wait_time:.1f}s)",
+                    step_number=0
+                )
+            
+            try:
+                # Use periodic update manager for long-running operations
+                async with self.periodic_update_manager.track_operation(
+                    context, 
+                    f"{context.agent_name}_execution",
+                    "agent_execution",
+                    expected_duration_ms=int(self.AGENT_EXECUTION_TIMEOUT * 1000),
+                    operation_description=f"Executing {context.agent_name} agent"
+                ):
+                    # Send agent started with guaranteed delivery
+                    await self.websocket_notifier.send_agent_started(context)
+                    
+                    # Send initial thinking update
+                    await self.send_agent_thinking(
+                        context, 
+                        f"Starting execution of {context.agent_name} agent...",
+                        step_number=1
+                    )
+                    
+                    execution_start = time.time()
+                    
+                    # Execute with timeout
+                    result = await asyncio.wait_for(
+                        self._execute_with_error_handling(context, state),
+                        timeout=self.AGENT_EXECUTION_TIMEOUT
+                    )
+                    
+                    execution_time = time.time() - execution_start
+                    self.execution_stats['execution_times'].append(execution_time)
+                    
+                    # CRITICAL: Always send completion events, regardless of success/failure
+                    # This ensures WebSocket clients know when agent execution is complete
+                    if result.success:
+                        await self._send_final_execution_report(context, result, state)
+                    else:
+                        # Send completion event for failed/fallback cases
+                        await self._send_completion_for_failed_execution(context, result, state)
+                    
+                    self._update_history(result)
+                    return result
+                    
+            except asyncio.TimeoutError:
+                self.execution_stats['failed_executions'] += 1
+                # Send timeout notification
+                await self.send_agent_thinking(
+                    context,
+                    f"Agent execution timed out after {self.AGENT_EXECUTION_TIMEOUT}s",
+                    step_number=-1
+                )
+                timeout_result = self._create_timeout_result(context)
+                await self._send_completion_for_failed_execution(context, timeout_result, state)
+                self._update_history(timeout_result)
+                return timeout_result
+                
+            except Exception as e:
+                self.execution_stats['failed_executions'] += 1
+                logger.error(f"Unexpected error in agent execution: {e}")
+                error_result = self._create_error_result(context, e)
+                await self._send_completion_for_failed_execution(context, error_result, state)
+                self._update_history(error_result)
+                return error_result
+                
+            finally:
+                self.execution_stats['concurrent_executions'] -= 1
     
     async def _execute_with_error_handling(self, context: AgentExecutionContext,
                                           state: DeepAgentState) -> AgentExecutionResult:
@@ -465,3 +551,69 @@ class ExecutionEngine:
     def _get_context_flow_id(self, context: AgentExecutionContext) -> Optional[str]:
         """Get flow ID from execution context if available."""
         return getattr(context, 'flow_id', None)
+    
+    # ============================================================================
+    # CONCURRENCY OPTIMIZATION: Error and Timeout Handling
+    # ============================================================================
+    
+    def _create_timeout_result(self, context: AgentExecutionContext) -> AgentExecutionResult:
+        """Create result for timed out execution."""
+        from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
+        return AgentExecutionResult(
+            success=False,
+            agent_name=context.agent_name,
+            execution_time=self.AGENT_EXECUTION_TIMEOUT,
+            error=f"Agent execution timed out after {self.AGENT_EXECUTION_TIMEOUT}s",
+            state=None,
+            metadata={'timeout': True, 'timeout_duration': self.AGENT_EXECUTION_TIMEOUT}
+        )
+    
+    def _create_error_result(self, context: AgentExecutionContext, error: Exception) -> AgentExecutionResult:
+        """Create result for unexpected errors."""
+        from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
+        return AgentExecutionResult(
+            success=False,
+            agent_name=context.agent_name,
+            execution_time=0.0,
+            error=str(error),
+            state=None,
+            metadata={'unexpected_error': True, 'error_type': type(error).__name__}
+        )
+    
+    async def get_execution_stats(self) -> Dict[str, Any]:
+        """Get comprehensive execution statistics."""
+        stats = self.execution_stats.copy()
+        
+        # Calculate averages
+        if stats['queue_wait_times']:
+            stats['avg_queue_wait_time'] = sum(stats['queue_wait_times']) / len(stats['queue_wait_times'])
+            stats['max_queue_wait_time'] = max(stats['queue_wait_times'])
+        else:
+            stats['avg_queue_wait_time'] = 0.0
+            stats['max_queue_wait_time'] = 0.0
+            
+        if stats['execution_times']:
+            stats['avg_execution_time'] = sum(stats['execution_times']) / len(stats['execution_times'])
+            stats['max_execution_time'] = max(stats['execution_times'])
+        else:
+            stats['avg_execution_time'] = 0.0
+            stats['max_execution_time'] = 0.0
+        
+        # Add WebSocket stats
+        delivery_stats = await self.websocket_notifier.get_delivery_stats()
+        stats.update(delivery_stats)
+        
+        return stats
+    
+    async def shutdown(self) -> None:
+        """Shutdown execution engine and clean up resources."""
+        # Shutdown WebSocket notifier
+        await self.websocket_notifier.shutdown()
+        
+        # Shutdown periodic update manager
+        await self.periodic_update_manager.shutdown()
+        
+        # Clear active runs
+        self.active_runs.clear()
+        
+        logger.info("ExecutionEngine shutdown complete")

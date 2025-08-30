@@ -69,21 +69,37 @@ class WebSocketReconnectionHandler:
         return self.reconnect_attempts < self.config.max_attempts
     
     def _calculate_reconnection_delay(self) -> float:
-        """Calculate delay for next reconnection attempt."""
-        delay = min(
-            self.config.initial_delay * (
-                self.config.backoff_multiplier ** self.reconnect_attempts
-            ),
-            self.config.max_delay
-        )
+        """
+        OPTIMIZED delay calculation for <5s recovery requirement.
+        
+        Uses aggressive initial timing with exponential backoff cap.
+        """
+        # PERFORMANCE OPTIMIZATION: Faster initial delays for <5s recovery
+        if self.reconnect_attempts == 0:
+            delay = 0.1  # 100ms for first attempt
+        elif self.reconnect_attempts == 1:
+            delay = 0.5  # 500ms for second attempt
+        elif self.reconnect_attempts == 2:
+            delay = 1.0  # 1s for third attempt
+        else:
+            # Standard exponential backoff for subsequent attempts
+            delay = min(
+                self.config.initial_delay * (
+                    self.config.backoff_multiplier ** (self.reconnect_attempts - 2)
+                ),
+                self.config.max_delay
+            )
+        
+        # Apply jitter but keep it minimal for faster recovery
         if self.config.jitter:
-            delay = self._add_jitter_to_delay(delay)
+            delay = self._add_jitter_to_delay(delay, factor=0.05)  # Reduced jitter
+        
         return delay
     
-    def _add_jitter_to_delay(self, delay: float) -> float:
-        """Add jitter to reconnection delay."""
+    def _add_jitter_to_delay(self, delay: float, factor: float = 0.5) -> float:
+        """Add jitter to reconnection delay with configurable factor."""
         import random
-        return delay * (0.5 + random.random() * 0.5)
+        return delay * (1.0 - factor + random.random() * factor)
     
     async def _execute_reconnection_attempt(self, connect_func: Callable) -> bool:
         """Execute a single reconnection attempt."""

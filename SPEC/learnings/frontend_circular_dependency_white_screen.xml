@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>Frontend Circular Dependency Causing White Screen</title>
+  <date>2025-08-30</date>
+  <severity>CRITICAL</severity>
+  <category>frontend-architecture</category>
+  <impact>Complete application failure - white screen preventing all user interaction</impact>
+  
+  <problem>
+    <description>
+      The main chat interface showed a white screen in the development environment due to a circular 
+      dependency between core modules that prevented the application from initializing.
+    </description>
+    <root_cause>
+      Circular import dependency between logger.ts and unified-api-config.ts:
+      - logger.ts imported unified-api-config to determine environment
+      - unified-api-config.ts imported logger for logging configuration details
+    </root_cause>
+    <symptoms>
+      - White screen on /chat route
+      - Page HTML loads but shows only "Loading..." 
+      - No JavaScript errors in console (circular dependency silently fails)
+      - Docker containers all healthy but frontend not rendering
+    </symptoms>
+  </problem>
+  
+  <solution>
+    <approach>
+      Remove the logger dependency from unified-api-config.ts to break the circular import chain.
+      Use console.log/warn/error directly with timestamp formatting to maintain logging functionality.
+    </approach>
+    <implementation>
+      <file path="/frontend/lib/unified-api-config.ts">
+        <change>
+          Removed: import { logger } from '@/lib/logger';
+          Replaced all logger.* calls with console.* equivalents:
+          - logger.info() -> console.log() with timestamp
+          - logger.warn() -> console.warn() with timestamp  
+          - logger.error() -> console.error() with timestamp
+        </change>
+      </file>
+    </implementation>
+    <verification>
+      - Frontend compiles successfully
+      - Chat page loads without white screen
+      - Logging still functional with console output
+      - No circular dependency warnings
+    </verification>
+  </solution>
+  
+  <prevention>
+    <guidelines>
+      - Core utility modules (logger, config) should have minimal dependencies
+      - Configuration modules should never import logging utilities
+      - Use console.* directly in low-level configuration code
+      - Implement dependency analysis in CI to detect circular imports
+      - Consider using barrel exports to control module boundaries
+    </guidelines>
+    <architecture_rules>
+      - Logger modules must be leaf nodes in the dependency graph
+      - Configuration modules should only import types, not implementations
+      - Use lazy imports or dependency injection for cross-cutting concerns
+    </architecture_rules>
+  </prevention>
+  
+  <detection>
+    <warning_signs>
+      - White screen with no console errors
+      - Page shows "Loading..." indefinitely
+      - Module initialization silently fails
+      - Import order affects application behavior
+    </warning_signs>
+    <debugging_steps>
+      1. Check for circular dependencies: grep for cross-imports between modules
+      2. Look for modules that import each other directly or transitively
+      3. Use webpack analyzer to visualize dependency graph
+      4. Check module initialization order in browser DevTools
+    </debugging_steps>
+  </detection>
+  
+  <related_files>
+    <file>/frontend/lib/logger.ts</file>
+    <file>/frontend/lib/unified-api-config.ts</file>
+    <file>/frontend/auth/unified-auth-service.ts</file>
+    <file>/frontend/providers/WebSocketProvider.tsx</file>
+  </related_files>
+  
+  <keywords>
+    circular-dependency white-screen frontend logger config initialization-failure
+  </keywords>
+</learning>

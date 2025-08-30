@@ -25,7 +25,7 @@ import os
 import time
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-from typing import Any, AsyncIterator, Dict, List, Optional, Tuple, Union
+from typing import Any, AsyncIterator, Dict, List, Optional, Tuple, Union, TYPE_CHECKING
 from urllib.parse import urlparse
 
 import pytest
@@ -35,12 +35,14 @@ try:
     import asyncpg
     POSTGRES_AVAILABLE = True
 except ImportError:
+    asyncpg = None
     POSTGRES_AVAILABLE = False
     
 try:
     import redis.asyncio as redis
     REDIS_AVAILABLE = True
 except ImportError:
+    redis = None
     REDIS_AVAILABLE = False
     
 try:
@@ -48,19 +50,30 @@ try:
     from clickhouse_driver import Client as ClickHouseClient
     CLICKHOUSE_AVAILABLE = True
 except ImportError:
+    clickhouse_driver = None
+    ClickHouseClient = None
     CLICKHOUSE_AVAILABLE = False
     
 try:
     import websockets
     WEBSOCKETS_AVAILABLE = True
 except ImportError:
+    websockets = None
     WEBSOCKETS_AVAILABLE = False
 
 try:
     import httpx
     HTTP_AVAILABLE = True
 except ImportError:
+    httpx = None
     HTTP_AVAILABLE = False
+
+# Type checking imports
+if TYPE_CHECKING:
+    import redis.asyncio as redis_types
+    import asyncpg as asyncpg_types
+    import httpx as httpx_types
+    from clickhouse_driver import Client as ClickHouseClient_types
 
 # Always import from environment isolation
 from test_framework.environment_isolation import get_test_env_manager
@@ -123,7 +136,7 @@ class DatabaseManager:
     
     def __init__(self, config: ServiceConfig):
         self.config = config
-        self._pool: Optional[asyncpg.Pool] = None
+        self._pool: Optional['asyncpg.Pool'] = None
         self._connection_count = 0
         
     @property
@@ -154,7 +167,7 @@ class DatabaseManager:
                 await asyncio.sleep(self.config.health_check_interval)
         return False
     
-    async def get_pool(self) -> asyncpg.Pool:
+    async def get_pool(self) -> 'asyncpg.Pool':
         """Get or create connection pool."""
         if self._pool is None:
             await self.ensure_available()
@@ -168,7 +181,7 @@ class DatabaseManager:
         return self._pool
     
     @asynccontextmanager
-    async def connection(self) -> AsyncIterator[asyncpg.Connection]:
+    async def connection(self) -> AsyncIterator['asyncpg.Connection']:
         """Get a database connection from the pool."""
         pool = await self.get_pool()
         async with pool.acquire() as conn:
@@ -179,7 +192,7 @@ class DatabaseManager:
                 self._connection_count -= 1
     
     @asynccontextmanager  
-    async def transaction(self) -> AsyncIterator[asyncpg.Connection]:
+    async def transaction(self) -> AsyncIterator['asyncpg.Connection']:
         """Get a database connection with an automatic transaction."""
         async with self.connection() as conn:
             async with conn.transaction():
@@ -190,12 +203,12 @@ class DatabaseManager:
         async with self.connection() as conn:
             return await conn.execute(query, *args)
     
-    async def fetch(self, query: str, *args) -> List[asyncpg.Record]:
+    async def fetch(self, query: str, *args) -> List['asyncpg.Record']:
         """Fetch multiple rows."""
         async with self.connection() as conn:
             return await conn.fetch(query, *args)
     
-    async def fetchrow(self, query: str, *args) -> Optional[asyncpg.Record]:
+    async def fetchrow(self, query: str, *args) -> Optional['asyncpg.Record']:
         """Fetch a single row.""" 
         async with self.connection() as conn:
             return await conn.fetchrow(query, *args)
@@ -258,7 +271,7 @@ class RedisManager:
     
     def __init__(self, config: ServiceConfig):
         self.config = config
-        self._client: Optional[redis.Redis] = None
+        self._client: Optional['redis.Redis'] = None
         
     @property
     def connection_url(self) -> str:
@@ -289,7 +302,7 @@ class RedisManager:
                 await asyncio.sleep(self.config.health_check_interval)
         return False
     
-    async def get_client(self) -> redis.Redis:
+    async def get_client(self) -> 'redis.Redis':
         """Get or create Redis client."""
         if self._client is None:
             await self.ensure_available()
@@ -343,7 +356,7 @@ class ClickHouseManager:
     
     def __init__(self, config: ServiceConfig):
         self.config = config
-        self._client: Optional[ClickHouseClient] = None
+        self._client: Optional['ClickHouseClient'] = None
     
     async def ensure_available(self) -> bool:
         """Ensure ClickHouse service is available."""
@@ -371,7 +384,7 @@ class ClickHouseManager:
                 await asyncio.sleep(self.config.health_check_interval)
         return False
     
-    def get_client(self) -> ClickHouseClient:
+    def get_client(self) -> 'ClickHouseClient':
         """Get or create ClickHouse client."""
         if self._client is None:
             self._client = ClickHouseClient(
@@ -498,9 +511,9 @@ class HTTPTestClient:
     
     def __init__(self, config: ServiceConfig):
         self.config = config
-        self._client: Optional[httpx.AsyncClient] = None
+        self._client: Optional['httpx.AsyncClient'] = None
     
-    async def get_client(self) -> httpx.AsyncClient:
+    async def get_client(self) -> 'httpx.AsyncClient':
         """Get or create HTTP client."""
         if self._client is None:
             if not HTTP_AVAILABLE:
@@ -512,24 +525,24 @@ class HTTPTestClient:
             )
         return self._client
     
-    async def request(self, method: str, url: str, **kwargs) -> httpx.Response:
+    async def request(self, method: str, url: str, **kwargs) -> 'httpx.Response':
         """Make HTTP request."""
         client = await self.get_client()
         return await client.request(method, url, **kwargs)
     
-    async def get(self, url: str, **kwargs) -> httpx.Response:
+    async def get(self, url: str, **kwargs) -> 'httpx.Response':
         """Make GET request."""
         return await self.request("GET", url, **kwargs)
     
-    async def post(self, url: str, **kwargs) -> httpx.Response:
+    async def post(self, url: str, **kwargs) -> 'httpx.Response':
         """Make POST request."""
         return await self.request("POST", url, **kwargs)
     
-    async def put(self, url: str, **kwargs) -> httpx.Response:
+    async def put(self, url: str, **kwargs) -> 'httpx.Response':
         """Make PUT request."""
         return await self.request("PUT", url, **kwargs)
     
-    async def delete(self, url: str, **kwargs) -> httpx.Response:
+    async def delete(self, url: str, **kwargs) -> 'httpx.Response':
         """Make DELETE request."""
         return await self.request("DELETE", url, **kwargs)
     

@@ -67,6 +67,24 @@ class FrontendLogger {
     this.currentLevel = this.parseLogLevel(envLevel) ?? (
       this.isProduction ? LogLevel.WARN : LogLevel.DEBUG
     );
+    
+    // Bind all public methods to ensure 'this' context is preserved
+    // when methods are passed as callbacks
+    this.debug = this.debug.bind(this);
+    this.info = this.info.bind(this);
+    this.warn = this.warn.bind(this);
+    this.error = this.error.bind(this);
+    this.performance = this.performance.bind(this);
+    this.apiCall = this.apiCall.bind(this);
+    this.websocketEvent = this.websocketEvent.bind(this);
+    this.userAction = this.userAction.bind(this);
+    this.errorBoundary = this.errorBoundary.bind(this);
+    this.getLogBuffer = this.getLogBuffer.bind(this);
+    this.clearLogBuffer = this.clearLogBuffer.bind(this);
+    this.setLogLevel = this.setLogLevel.bind(this);
+    this.isEnabled = this.isEnabled.bind(this);
+    this.group = this.group.bind(this);
+    this.groupEnd = this.groupEnd.bind(this);
   }
 
   private parseLogLevel(level?: string): LogLevel | null {
