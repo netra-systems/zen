@@ -207,7 +207,7 @@ services:
     command: >
       sh -c "
         echo 'Starting analytics service...' &&
-        uvicorn analytics_service.main:app --host \$HOST --port \$PORT --reload --reload-dir /app/analytics_service --reload-dir /app/shared --reload-include '*.py'
+        uvicorn analytics_service.main:app --host 0.0.0.0 --port 8090 --reload --reload-dir /app/analytics_service --reload-dir /app/shared --reload-include '*.py'
       "
 
   # Dev Backend Service (depends on auth)

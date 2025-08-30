@@ -3,13 +3,16 @@ Comprehensive tests for user signup flow with edge cases
 Tests database persistence, password hashing, validation, and error handling
 """
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+# Removed all mock imports - using real services per CLAUDE.md requirement
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 
 from auth_service.auth_core.services.auth_service import AuthService
 from auth_service.auth_core.database.models import AuthUser
 from auth_service.auth_core.database.repository import AuthUserRepository
+
+# Import test framework for isolated environment
+from test_framework.environment_isolation import isolated_test_env
 
 
 @pytest.fixture
@@ -20,12 +23,29 @@ def auth_service():
 
 
 @pytest.fixture
-def mock_db_session():
-    """Create mock database session"""
-    session = AsyncMock()
-    session.commit = AsyncMock()
-    session.rollback = AsyncMock()
-    return session
+async def real_db_session(isolated_test_env):
+    """Create real database session with test environment"""
+    from auth_service.auth_core.database.database_manager import AuthDatabaseManager
+    from auth_service.auth_core.database.models import Base
+    from auth_service.auth_core.config import AuthConfig
+    
+    database_url = AuthConfig.get_database_url()
+    engine = AuthDatabaseManager.create_async_engine(database_url)
+    
+    # Create tables
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+        
+    # Return session factory
+    from sqlalchemy.ext.asyncio import AsyncSession
+    session_factory = lambda: AsyncSession(bind=engine)
+    
+    yield session_factory
+    
+    # Cleanup
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+    await engine.dispose()
 
 
 @pytest.fixture

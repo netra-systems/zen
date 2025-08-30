@@ -131,3 +131,5 @@ test_reports/
 .serena/project.yml
 nul
 .env.dev
+/google-cloud-sdk
+google-cloud-cli-darwin-arm.tar.gz

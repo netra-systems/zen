@@ -44,6 +44,7 @@ jest.mock('@/components/chat/MainChat', () => {
       const [showCommandPalette, setShowCommandPalette] = React.useState(false);
       const [showHelp, setShowHelp] = React.useState(false);
       const [showExportOptions, setShowExportOptions] = React.useState(false);
+      const [isExportingPDF, setIsExportingPDF] = React.useState(false);
       
       const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
@@ -100,6 +101,46 @@ jest.mock('@/components/chat/MainChat', () => {
         setShowExportOptions(true);
       };
 
+      const handleMarkdownExport = () => {
+        // Get messages from global mock store
+        const messages = global.mockStore?.messages || [];
+        
+        // Convert messages to markdown format
+        const markdownContent = messages.map(msg => {
+          const timestamp = new Date(msg.timestamp || Date.now()).toLocaleString();
+          const role = msg.role === 'user' ? 'User' : 'Assistant';
+          return `## ${role} (${timestamp})\n\n${msg.content}\n\n---\n`;
+        }).join('\n');
+        
+        // Create a blob with the markdown content
+        const blob = new Blob([markdownContent], { type: 'text/markdown' });
+        
+        // Create download URL and trigger download
+        const url = URL.createObjectURL(blob);
+        
+        // Create a temporary link element to trigger download
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'conversation.md';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        // Clean up
+        URL.revokeObjectURL(url);
+      };
+
+      const handlePDFExport = async () => {
+        setIsExportingPDF(true);
+        
+        // Simulate PDF generation delay
+        setTimeout(() => {
+          setIsExportingPDF(false);
+          // Close export options after completion
+          setShowExportOptions(false);
+        }, 2000);
+      };
+
       return (
         <div data-testid="main-chat">
           <textarea 
@@ -132,10 +173,14 @@ jest.mock('@/components/chat/MainChat', () => {
           {showExportOptions && (
             <div>
               <div>Export as</div>
-              <button onClick={() => console.log('export markdown')}>Markdown</button>
-              <button onClick={() => console.log('export pdf')}>PDF</button>
+              <button onClick={handleMarkdownExport}>Markdown</button>
+              <button onClick={handlePDFExport}>PDF</button>
               <button onClick={() => console.log('export json')}>JSON</button>
             </div>
+          )}
+
+          {isExportingPDF && (
+            <div>Generating PDF...</div>
           )}
           
           {children}
@@ -256,18 +301,18 @@ jest.mock('@/components/chat/FormattedMessageContent', () => {
         }
         
         if (text.includes('```bash')) {
+          const [isCopied, setIsCopied] = React.useState(false);
+          
           return (
             <pre data-testid="code-block" data-language="bash">
               <code>npm install @anthropic/claude{'\n'}npm start</code>
               <button data-testid="copy-code-button" onClick={() => {
                 navigator.clipboard.writeText('npm install @anthropic/claude\nnpm start');
-                // Show copied message temporarily
-                setTimeout(() => {
-                  const copiedMsg = document.createElement('div');
-                  copiedMsg.textContent = 'Copied!';
-                  document.body.appendChild(copiedMsg);
-                }, 100);
+                setIsCopied(true);
+                // Reset after a delay
+                setTimeout(() => setIsCopied(false), 2000);
               }}>Copy</button>
+              {isCopied && <div data-testid="copied-feedback">Copied!</div>}
             </pre>
           );
         }

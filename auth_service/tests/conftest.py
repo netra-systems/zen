@@ -1,7 +1,14 @@
 """
 Auth service specific test configuration.
 Uses consolidated test framework infrastructure with auth-specific customizations.
+
+REAL SERVICES ENABLED: This conftest uses real PostgreSQL, Redis connections
+instead of mocks for authentic authentication testing.
 """
+
+# REAL SERVICES INTEGRATION  
+# Import all real service fixtures to replace auth service mocks
+from test_framework.conftest_real_services import *
 
 # Import all common fixtures from the consolidated base
 from test_framework.conftest_base import *

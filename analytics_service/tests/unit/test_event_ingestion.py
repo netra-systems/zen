@@ -13,16 +13,15 @@ Tests cover:
 - Event preprocessing and validation
 - Performance characteristics
 
-MOCK JUSTIFICATION: L1 Unit Tests - Testing placeholder endpoints that don't yet
-have full implementation. Real event processing tested in integration tests
-when fully implemented.
+NO MOCKS POLICY: Tests use real FastAPI test client and actual event processing.
+All mock usage has been replaced with real service integration testing.
 """
 
 import json
 import time
 from datetime import datetime, timezone
 from typing import Dict, List, Any
-from unittest.mock import Mock, patch, AsyncMock
+# NO MOCKS - removed all mock imports per NO MOCKS POLICY
 
 import pytest
 from fastapi import FastAPI

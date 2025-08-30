@@ -28,7 +28,7 @@ import secrets
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, Mock, patch
+# Removed all mock imports - using real services per CLAUDE.md requirement
 from urllib.parse import parse_qs, urlparse
 
 import httpx
@@ -559,20 +559,42 @@ def cleanup_test_state():
     AuthConfig._instance = None
 
 @pytest.fixture
-def mock_redis():
-    """Mock Redis for tests that need it."""
-    # Mock justification: Redis isolation for testing without real Redis dependency - provides controlled Redis instance for tests
-    with patch('redis.Redis') as mock_redis_class:
-        mock_redis_instance = Mock()
-        mock_redis_class.return_value = mock_redis_instance
-        yield mock_redis_instance
+async def real_redis():
+    """Real Redis connection for tests."""
+    from auth_service.auth_core.redis_manager import AuthRedisManager
+    manager = AuthRedisManager()
+    try:
+        await manager.initialize()
+        await manager.ping()
+        yield manager
+    except Exception as e:
+        pytest.skip(f"Redis not available: {e}")
+    finally:
+        try:
+            await manager.cleanup()
+        except:
+            pass
 
 @pytest.fixture 
-def mock_database():
-    """Mock database for tests that need it."""
-    # Mock justification: Database transaction isolation for unit testing without requiring real database connections
-    with patch('sqlalchemy.create_engine') as mock_engine:
-        yield mock_engine
+async def real_database():
+    """Real database connection for tests."""
+    from auth_service.auth_core.database.database_manager import AuthDatabaseManager
+    from auth_service.auth_core.database.models import Base
+    from auth_service.auth_core.config import AuthConfig
+    
+    database_url = AuthConfig.get_database_url()
+    engine = AuthDatabaseManager.create_async_engine(database_url)
+    
+    # Create tables
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+        
+    yield engine
+    
+    # Cleanup
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+    await engine.dispose()
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

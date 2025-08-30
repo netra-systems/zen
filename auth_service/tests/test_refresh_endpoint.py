@@ -7,41 +7,49 @@ import pytest
 import json
 import asyncio
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, patch, MagicMock
+# Removed all mock imports - using real services per CLAUDE.md requirement
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
 from httpx import AsyncClient
 import jwt
+
+# Import test framework for isolated environment
+from test_framework.environment_isolation import isolated_test_env
 
 # Test the refresh endpoint with various scenarios
 class TestRefreshEndpoint:
     """Test suite for the refresh endpoint to ensure it handles all cases correctly"""
     
     @pytest.fixture
-    def mock_jwt_manager(self):
-        """Create a mock JWT manager"""
-        manager = MagicMock()
-        manager.decode_token = MagicMock(return_value={
-            "sub": "test@example.com",
-            "user_id": "123",
-            "exp": (datetime.utcnow() + timedelta(hours=1)).timestamp()
-        })
-        manager.generate_tokens = MagicMock(return_value={
-            "access_token": "new_access_token",
-            "refresh_token": "new_refresh_token",
-            "expires_in": 3600
-        })
-        manager.is_token_blacklisted = AsyncMock(return_value=False)
-        return manager
+    def real_jwt_handler(self, isolated_test_env):
+        """Create real JWT handler with test environment"""
+        from auth_service.auth_core.core.jwt_handler import JWTHandler
+        return JWTHandler()
     
     @pytest.fixture
-    def mock_db_session(self):
-        """Create a mock database session"""
-        session = AsyncMock()
-        session.execute = AsyncMock()
-        session.commit = AsyncMock()
-        session.rollback = AsyncMock()
-        return session
+    async def real_db_session(self, isolated_test_env):
+        """Create real database session with test environment"""
+        from auth_service.auth_core.database.database_manager import AuthDatabaseManager
+        from auth_service.auth_core.database.models import Base
+        from auth_service.auth_core.config import AuthConfig
+        
+        database_url = AuthConfig.get_database_url()
+        engine = AuthDatabaseManager.create_async_engine(database_url)
+        
+        # Create tables
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+            
+        # Return session factory
+        from sqlalchemy.ext.asyncio import AsyncSession
+        session_factory = lambda: AsyncSession(bind=engine)
+        
+        yield session_factory
+        
+        # Cleanup
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)
+        await engine.dispose()
     
     @pytest.mark.asyncio
     async def test_refresh_endpoint_with_valid_token(self):

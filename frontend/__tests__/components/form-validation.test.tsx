@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 
@@ -77,11 +77,14 @@ describe('Form Validation', () => {
     // Clear error first, then test invalid email validation  
     const emailInput = screen.getByTestId('email-input');
     
-    // Use fireEvent.change instead of userEvent.type to properly trigger React onChange
-    fireEvent.change(emailInput, { target: { value: 'invalid-email' } });
+    // Use userEvent for proper React state updates
+    await user.clear(emailInput);
+    await user.type(emailInput, 'invalid-email');
     
-    // Debug: log the current value
-    console.log('Email input value before submit:', (emailInput as HTMLInputElement).value);
+    // Wait for the DOM to reflect the change  
+    await waitFor(() => {
+      expect(emailInput).toHaveValue('invalid-email');
+    });
     
     await user.click(screen.getByTestId('submit-button'));
     

@@ -524,15 +524,24 @@ class TestIntegrationWebSocketFlow:
         # Send events concurrently
         async def send_events_for_connection(conn_id):
             request_id = f"req-{conn_id}"
-            await notifier.send_agent_started(conn_id, request_id, "agent")
+            # Create proper context for notifier calls
+            context = AgentExecutionContext(
+                run_id=request_id,
+                thread_id=conn_id,
+                user_id=conn_id,
+                agent_name="agent",
+                retry_count=0,
+                max_retries=1
+            )
+            await notifier.send_agent_started(context)
             await asyncio.sleep(random.uniform(0.01, 0.05))
-            await notifier.send_agent_thinking(conn_id, request_id, "Thinking...")
+            await notifier.send_agent_thinking(context, "Thinking...")
             await asyncio.sleep(random.uniform(0.01, 0.05))
-            await notifier.send_tool_executing(conn_id, request_id, "tool", {})
+            await notifier.send_tool_executing(context, "tool")
             await asyncio.sleep(random.uniform(0.01, 0.05))
-            await notifier.send_tool_completed(conn_id, request_id, "tool", {"result": "done"})
+            await notifier.send_tool_completed(context, "tool", {"result": "done"})
             await asyncio.sleep(random.uniform(0.01, 0.05))
-            await notifier.send_agent_completed(conn_id, request_id, {"success": True})
+            await notifier.send_agent_completed(context, {"success": True})
         
         # Execute concurrently
         tasks = [send_events_for_connection(conn_id) for conn_id, _ in connections]
@@ -738,10 +747,19 @@ class TestE2EWebSocketChatFlow:
             nonlocal event_count
             for i in range(50):  # 50 events per connection
                 request_id = f"stress-{conn_id}-{i}"
-                await notifier.send_agent_thinking(conn_id, request_id, f"Processing {i}")
+                # Create proper context for notifier calls
+                context = AgentExecutionContext(
+                    run_id=request_id,
+                    thread_id=conn_id,
+                    user_id=conn_id,
+                    agent_name="stress_agent",
+                    retry_count=0,
+                    max_retries=1
+                )
+                await notifier.send_agent_thinking(context, f"Processing {i}")
                 event_count += 1
                 if i % 10 == 0:
-                    await notifier.send_partial_result(conn_id, request_id, f"Result {i}")
+                    await notifier.send_partial_result(context, f"Result {i}")
                     event_count += 1
         
         # Send events to all connections concurrently
@@ -788,8 +806,17 @@ class TestE2EWebSocketChatFlow:
         
         # Send some events
         notifier = WebSocketNotifier(ws_manager)
-        await notifier.send_agent_started(conn_id1, "req-1", "agent")
-        await notifier.send_agent_thinking(conn_id1, "req-1", "Processing...")
+        # Create proper context for first connection
+        context1 = AgentExecutionContext(
+            run_id="req-1",
+            thread_id=conn_id1,
+            user_id=user_id,
+            agent_name="agent",
+            retry_count=0,
+            max_retries=1
+        )
+        await notifier.send_agent_started(context1)
+        await notifier.send_agent_thinking(context1, "Processing...")
         
         # Disconnect
         await ws_manager.disconnect_user(user_id, mock_ws1, conn_id1)
@@ -808,9 +835,18 @@ class TestE2EWebSocketChatFlow:
         await ws_manager.connect_user(user_id, mock_ws2, conn_id2)
         
         # Continue sending events
-        await notifier.send_tool_executing(conn_id2, "req-1", "tool", {})
-        await notifier.send_tool_completed(conn_id2, "req-1", "tool", {"done": True})
-        await notifier.send_agent_completed(conn_id2, "req-1", {"success": True})
+        # Create proper context for second connection
+        context2 = AgentExecutionContext(
+            run_id="req-1",
+            thread_id=conn_id2,
+            user_id=user_id,
+            agent_name="agent",
+            retry_count=0,
+            max_retries=1
+        )
+        await notifier.send_tool_executing(context2, "tool")
+        await notifier.send_tool_completed(context2, "tool", {"done": True})
+        await notifier.send_agent_completed(context2, {"success": True})
         
         await asyncio.sleep(0.5)
         
