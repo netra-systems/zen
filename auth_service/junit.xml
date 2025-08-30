@@ -1,1 +1,63 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="0.187" timestamp="2025-08-29T13:55:28.801199-07:00" hostname="Anthony"><testcase classname="" name="tests.test_all_imports" time="0.000"><error message="collection failure">'import_validation' not found in `markers` configuration option</error></testcase></testsuite></testsuites>
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="6" skipped="0" tests="8" time="7.819" timestamp="2025-08-29T21:36:13.733416-07:00" hostname="Anthony"><testcase classname="tests.critical.test_oauth_configuration_missing_staging_regression.TestOAuthConfigurationMissingRegression" name="test_google_oauth_client_id_missing_staging_regression" time="0.433"><failure message="Failed: OAuth client ID missing in staging as expected (this confirms the bug)">tests\critical\test_oauth_configuration_missing_staging_regression.py:72: in test_google_oauth_client_id_missing_staging_regression
+    pytest.fail("OAuth client ID missing in staging as expected (this confirms the bug)")
+E   Failed: OAuth client ID missing in staging as expected (this confirms the bug)</failure></testcase><testcase classname="tests.critical.test_oauth_configuration_missing_staging_regression.TestOAuthConfigurationMissingRegression" name="test_google_oauth_client_secret_missing_staging_regression" time="0.006"><failure message="Failed: OAuth client secret missing in staging as expected (this confirms the bug)">tests\critical\test_oauth_configuration_missing_staging_regression.py:128: in test_google_oauth_client_secret_missing_staging_regression
+    pytest.fail("OAuth client secret missing in staging as expected (this confirms the bug)")
+E   Failed: OAuth client secret missing in staging as expected (this confirms the bug)</failure></testcase><testcase classname="tests.critical.test_oauth_configuration_missing_staging_regression.TestOAuthConfigurationMissingRegression" name="test_oauth_provider_initialization_failure_regression" time="0.009"><failure message="auth_service.auth_core.oauth.google_oauth.GoogleOAuthError: Failed to initialize OAuth credentials: Google OAuth client ID not configured for staging environment">auth_core\oauth\google_oauth.py:52: in _initialize_credentials
+    raise GoogleOAuthError(f"Google OAuth client ID not configured for {self.env} environment")
+E   auth_service.auth_core.oauth.google_oauth.GoogleOAuthError: Google OAuth client ID not configured for staging environment
+
+During handling of the above exception, another exception occurred:
+tests\critical\test_oauth_configuration_missing_staging_regression.py:180: in test_oauth_provider_initialization_failure_regression
+    provider = GoogleOAuthProvider()
+               ^^^^^^^^^^^^^^^^^^^^^
+auth_core\oauth\google_oauth.py:41: in __init__
+    self._initialize_credentials()
+auth_core\oauth\google_oauth.py:62: in _initialize_credentials
+    raise GoogleOAuthError(f"Failed to initialize OAuth credentials: {e}")
+E   auth_service.auth_core.oauth.google_oauth.GoogleOAuthError: Failed to initialize OAuth credentials: Google OAuth client ID not configured for staging environment</failure></testcase><testcase classname="tests.critical.test_oauth_configuration_missing_staging_regression.TestOAuthConfigurationMissingRegression" name="test_oauth_redirect_uri_configuration_missing_regression" time="0.008" /><testcase classname="tests.critical.test_oauth_configuration_missing_staging_regression.TestOAuthConfigurationMissingRegression" name="test_oauth_environment_specific_configuration_regression" time="0.018" /><testcase classname="tests.critical.test_oauth_configuration_missing_staging_regression.TestOAuthServiceIntegrationRegression" name="test_auth_service_oauth_providers_empty_regression" time="0.016"><failure message="auth_service.auth_core.oauth_manager.OAuthManagerError: Critical OAuth provider initialization failed: Failed to initialize OAuth credentials: Google OAuth client ID not configured for staging environment">auth_core\oauth\google_oauth.py:52: in _initialize_credentials
+    raise GoogleOAuthError(f"Google OAuth client ID not configured for {self.env} environment")
+E   auth_service.auth_core.oauth.google_oauth.GoogleOAuthError: Google OAuth client ID not configured for staging environment
+
+During handling of the above exception, another exception occurred:
+auth_core\oauth_manager.py:44: in _initialize_providers
+    google_provider = GoogleOAuthProvider()
+                      ^^^^^^^^^^^^^^^^^^^^^
+auth_core\oauth\google_oauth.py:41: in __init__
+    self._initialize_credentials()
+auth_core\oauth\google_oauth.py:62: in _initialize_credentials
+    raise GoogleOAuthError(f"Failed to initialize OAuth credentials: {e}")
+E   auth_service.auth_core.oauth.google_oauth.GoogleOAuthError: Failed to initialize OAuth credentials: Google OAuth client ID not configured for staging environment
+
+During handling of the above exception, another exception occurred:
+tests\critical\test_oauth_configuration_missing_staging_regression.py:379: in test_auth_service_oauth_providers_empty_regression
+    oauth_manager = OAuthManager()
+                    ^^^^^^^^^^^^^^
+auth_core\oauth_manager.py:38: in __init__
+    self._initialize_providers()
+auth_core\oauth_manager.py:56: in _initialize_providers
+    raise OAuthManagerError(f"Critical OAuth provider initialization failed: {e}")
+E   auth_service.auth_core.oauth_manager.OAuthManagerError: Critical OAuth provider initialization failed: Failed to initialize OAuth credentials: Google OAuth client ID not configured for staging environment</failure></testcase><testcase classname="tests.critical.test_oauth_configuration_missing_staging_regression.TestOAuthServiceIntegrationRegression" name="test_oauth_login_flow_broken_regression" time="0.012"><failure message="auth_service.auth_core.oauth.google_oauth.GoogleOAuthError: Failed to initialize OAuth credentials: Google OAuth client ID not configured for staging environment">auth_core\oauth\google_oauth.py:52: in _initialize_credentials
+    raise GoogleOAuthError(f"Google OAuth client ID not configured for {self.env} environment")
+E   auth_service.auth_core.oauth.google_oauth.GoogleOAuthError: Google OAuth client ID not configured for staging environment
+
+During handling of the above exception, another exception occurred:
+tests\critical\test_oauth_configuration_missing_staging_regression.py:435: in test_oauth_login_flow_broken_regression
+    provider = GoogleOAuthProvider()
+               ^^^^^^^^^^^^^^^^^^^^^
+auth_core\oauth\google_oauth.py:41: in __init__
+    self._initialize_credentials()
+auth_core\oauth\google_oauth.py:62: in _initialize_credentials
+    raise GoogleOAuthError(f"Failed to initialize OAuth credentials: {e}")
+E   auth_service.auth_core.oauth.google_oauth.GoogleOAuthError: Failed to initialize OAuth credentials: Google OAuth client ID not configured for staging environment</failure></testcase><testcase classname="tests.critical.test_oauth_configuration_missing_staging_regression.TestOAuthServiceIntegrationRegression" name="test_oauth_callback_handling_failure_regression" time="0.013"><failure message="auth_service.auth_core.oauth.google_oauth.GoogleOAuthError: Failed to initialize OAuth credentials: Google OAuth client secret not configured for staging environment">auth_core\oauth\google_oauth.py:57: in _initialize_credentials
+    raise GoogleOAuthError(f"Google OAuth client secret not configured for {self.env} environment")
+E   auth_service.auth_core.oauth.google_oauth.GoogleOAuthError: Google OAuth client secret not configured for staging environment
+
+During handling of the above exception, another exception occurred:
+tests\critical\test_oauth_configuration_missing_staging_regression.py:489: in test_oauth_callback_handling_failure_regression
+    provider = GoogleOAuthProvider()
+               ^^^^^^^^^^^^^^^^^^^^^
+auth_core\oauth\google_oauth.py:41: in __init__
+    self._initialize_credentials()
+auth_core\oauth\google_oauth.py:62: in _initialize_credentials
+    raise GoogleOAuthError(f"Failed to initialize OAuth credentials: {e}")
+E   auth_service.auth_core.oauth.google_oauth.GoogleOAuthError: Failed to initialize OAuth credentials: Google OAuth client secret not configured for staging environment</failure></testcase></testsuite></testsuites>
