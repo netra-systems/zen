@@ -144,13 +144,13 @@ class UnifiedTestRunner:
                 "path": self.project_root,  # Changed from backend_path to project_root
                 "test_dir": "netra_backend/tests",  # Updated to full path from root
                 "config": "netra_backend/pytest.ini",  # Updated to full path from root
-                "command": "pytest"
+                "command": "python3 -m pytest"
             },
             "auth": {
                 "path": self.project_root,  # Changed from auth_path to project_root
                 "test_dir": "auth_service/tests",  # Updated to full path from root
                 "config": "auth_service/pytest.ini",  # Updated to full path from root
-                "command": "pytest"
+                "command": "python3 -m pytest"
             },
             "frontend": {
                 "path": self.frontend_path,  # Frontend can stay as-is since it uses npm
@@ -999,7 +999,7 @@ class UnifiedTestRunner:
         """Build pytest command for backend/auth services."""
         config = self.test_configs[service]
         
-        cmd_parts = ["pytest"]
+        cmd_parts = ["python3", "-m", "pytest"]
         
         # Add category-specific selection (simplified to avoid marker hang issues)
         category_markers = {

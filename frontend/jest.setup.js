@@ -673,6 +673,53 @@ jest.mock('@/auth/service', () => {
   };
 });
 
+// Mock AuthGate component - CRITICAL: Must render children when authenticated
+jest.mock('@/components/auth/AuthGate', () => ({
+  AuthGate: ({ children, fallback, showLoginPrompt = true, requireTier, customMessage }) => {
+    const React = require('react');
+    const mockAuthState = global.mockAuthState || {
+      isAuthenticated: true,
+      isLoading: false,
+      userTier: 'Early'
+    };
+    
+    // Show loading state during auth check
+    if (mockAuthState.isLoading) {
+      return React.createElement('div', { 
+        'data-testid': 'auth-loading',
+        className: 'flex items-center justify-center p-6'
+      }, 'Verifying access...');
+    }
+
+    // Show fallback for unauthenticated users
+    if (!mockAuthState.isAuthenticated) {
+      if (fallback) return fallback;
+      if (!showLoginPrompt) return null;
+      return React.createElement('div', { 
+        'data-testid': 'auth-login-prompt',
+        className: 'p-6 text-center'
+      }, 'Please sign in');
+    }
+
+    // Check tier requirements
+    if (requireTier) {
+      const tierLevels = { Free: 0, Early: 1, Mid: 2, Enterprise: 3 };
+      const current = tierLevels[mockAuthState.userTier] || 0;
+      const required = tierLevels[requireTier] || 0;
+      
+      if (current < required) {
+        return React.createElement('div', { 
+          'data-testid': 'auth-tier-upgrade',
+          className: 'p-6 text-center'
+        }, `Upgrade to ${requireTier} required`);
+      }
+    }
+
+    // Render protected content - this is the key fix
+    return children;
+  }
+}));
+
 // Mock auth context
 jest.mock('@/auth/context', () => {
   const mockReact = require('react');
@@ -1505,6 +1552,32 @@ jest.mock('@/hooks/useAgentUpdates', () => ({
 
 // usePerformanceMetrics is not globally mocked to allow its own tests to work
 
+// Mock useAuthState hook - CRITICAL for AuthGate functionality
+jest.mock('@/hooks/useAuthState', () => ({
+  useAuthState: jest.fn(() => {
+    const currentState = global.mockAuthState || {
+      user: {
+        id: 'test-user',
+        email: 'test@example.com',
+        full_name: 'Test User'
+      },
+      loading: false,
+      isLoading: false, // Both camelCase and camelCase variants
+      error: null,
+      userTier: 'Early',
+      isAuthenticated: true,
+      refreshAuth: jest.fn(),
+      logout: jest.fn(),
+      clearError: jest.fn(),
+      hasPermission: jest.fn(() => true),
+      isAdminOrHigher: jest.fn(() => false),
+      isDeveloperOrHigher: jest.fn(() => false)
+    };
+    
+    return currentState;
+  })
+}));
+
 // Mock additional missing hooks
 jest.mock('@/hooks/useKeyboardShortcuts', () => {
   // Create these outside the mock factory to avoid scope issues
@@ -1733,7 +1806,50 @@ jest.mock('@/components/chat/ExamplePrompts', () => {
 if (!(global).mockStore) {
   (global).mockStore = {
     messages: [],
-    threads: [],
+    threads: [
+      {
+        id: 'thread-1',
+        title: 'AI Optimization Discussion',
+        created_at: Math.floor(Date.now() / 1000),
+        updated_at: Math.floor(Date.now() / 1000),
+        message_count: 15,
+        metadata: {
+          title: 'AI Optimization Discussion',
+          last_message: 'How can I optimize my model?',
+          lastActivity: new Date().toISOString(),
+          messageCount: 15,
+          tags: ['optimization', 'ai']
+        }
+      },
+      {
+        id: 'thread-2', 
+        title: 'Performance Analysis',
+        created_at: Math.floor((Date.now() - 3600000) / 1000), // 1 hour ago
+        updated_at: Math.floor((Date.now() - 3600000) / 1000),
+        message_count: 8,
+        metadata: {
+          title: 'Performance Analysis',
+          last_message: 'The results show 20% improvement',
+          lastActivity: new Date(Date.now() - 3600000).toISOString(),
+          messageCount: 8,
+          tags: ['performance']
+        }
+      },
+      {
+        id: 'thread-3',
+        title: 'Data Processing Pipeline',
+        created_at: Math.floor((Date.now() - 7200000) / 1000), // 2 hours ago
+        updated_at: Math.floor((Date.now() - 7200000) / 1000),
+        message_count: 32,
+        metadata: {
+          title: 'Data Processing Pipeline',
+          last_message: 'Pipeline completed successfully',
+          lastActivity: new Date(Date.now() - 7200000).toISOString(),
+          messageCount: 32,
+          tags: ['data', 'pipeline']
+        }
+      }
+    ],
     isProcessing: false,
     isThreadLoading: false,
     isSending: false, // Added for MessageInput tests
@@ -1745,7 +1861,8 @@ if (!(global).mockStore) {
     createThread: jest.fn(),
     addThread: jest.fn(),
     setActiveThread: jest.fn(),
-    deleteThread: jest.fn()
+    deleteThread: jest.fn(),
+    setSearchQuery: jest.fn()
   };
 }
 
@@ -1835,79 +1952,8 @@ jest.mock('@/components/chat/MainChat', () => {
   };
 });
 
-// Chat Sidebar Mock - provides thread management functionality
-jest.mock('@/components/chat/ChatSidebar', () => {
-  const React = require('react');
-  return {
-    ChatSidebar: jest.fn().mockImplementation(() => {
-      // Always read from global mock store that tests update
-      const mockThreads = (global).mockStore?.threads || [];
-      const [showConfirm, setShowConfirm] = React.useState(false);
-      const [threadToDelete, setThreadToDelete] = React.useState(null);
-      
-      const handleStartNewChat = () => {
-        if ((global).mockStore?.createThread) {
-          (global).mockStore.createThread();
-        }
-      };
-      
-      const handleThreadClick = (threadId) => {
-        if ((global).mockStore?.setActiveThread) {
-          (global).mockStore.setActiveThread(threadId);
-        }
-      };
-      
-      return React.createElement('div', { 'data-testid': 'chat-sidebar' },
-        React.createElement('button', {
-          'data-testid': 'start-new-chat',
-          onClick: handleStartNewChat
-        }, 'Start New Chat'),
-        React.createElement('div', { 'data-testid': 'thread-list' },
-          ...mockThreads.map((thread) => 
-            React.createElement('div', {
-              key: thread.id,
-              'data-testid': `thread-item-${thread.id}`,
-              onClick: () => handleThreadClick(thread.id),
-              style: { cursor: 'pointer' }
-            },
-              React.createElement('div', {
-                'data-testid': `thread-title-${thread.id}`
-              }, thread.title),
-              React.createElement('button', {
-                'data-testid': `delete-thread-${thread.id}`,
-                onClick: (e) => {
-                  e.stopPropagation();
-                  setShowConfirm(true);
-                  setThreadToDelete(thread.id);
-                }
-              }, 'Delete')
-            )
-          )
-        ),
-        showConfirm && React.createElement('div', { 'data-testid': 'confirmation-dialog' },
-          'Are you sure you want to delete this thread?',
-          React.createElement('button', {
-            'data-testid': 'confirm-delete',
-            onClick: () => {
-              if ((global).mockStore?.deleteThread && threadToDelete) {
-                (global).mockStore.deleteThread(threadToDelete);
-              }
-              setShowConfirm(false);
-              setThreadToDelete(null);
-            }
-          }, 'Delete'),
-          React.createElement('button', {
-            'data-testid': 'cancel-delete',
-            onClick: () => {
-              setShowConfirm(false);
-              setThreadToDelete(null);
-            }
-          }, 'Cancel')
-        )
-      );
-    })
-  };
-});
+// Note: ChatSidebar is NOT mocked globally - individual tests mock it as needed
+// This allows tests to use the real component with mocked hooks for more realistic testing
 
 // Message Input Mock - provides proper input handling and character limits
 jest.mock('@/components/chat/MessageInput', () => {

@@ -187,6 +187,17 @@ describe('ChatSidebar - Interactions', () => {
       
       renderWithProvider(<ChatSidebar />);
       
+      // Debug: Print the entire DOM to see what's actually rendered
+      console.log('🔍 Full DOM structure:', document.body.innerHTML);
+      
+      // Check if our debug element exists
+      const debugElement = screen.queryByTestId('debug-no-threads');
+      if (debugElement) {
+        console.log('🚫 Found debug element - ThreadList received no threads');
+      } else {
+        console.log('✅ Debug element not found - ThreadList should have threads');
+      }
+      
       // Debug: Check what threads are actually rendered
       const thread1 = screen.getByTestId('thread-item-thread-1');
       const thread2 = screen.getByTestId('thread-item-thread-2');
