@@ -112,6 +112,18 @@ Faker>=37.6.0
 # Cross-platform library for process and system monitoring.
 psutil>=7.0.0
 
+# --- Distributed Tracing & Observability ---
+# OpenTelemetry API for distributed tracing
+opentelemetry-api>=1.28.0
+# OpenTelemetry SDK for distributed tracing
+opentelemetry-sdk>=1.28.0
+# OpenTelemetry instrumentation for FastAPI
+opentelemetry-instrumentation-fastapi>=0.49b0
+# OpenTelemetry OTLP exporter for trace data
+opentelemetry-exporter-otlp>=1.28.0
+# OpenTelemetry Jaeger exporter for development/testing
+opentelemetry-exporter-jaeger>=1.28.0
+
 # --- Testing ---
 # The standard testing framework for Python.
 pytest>=8.4.1

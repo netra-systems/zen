@@ -115,6 +115,9 @@ class UnifiedTestRunner:
         self.auth_path = self.project_root / "auth_service"
         self.frontend_path = self.project_root / "frontend"
         
+        # Detect the correct Python command for cross-platform compatibility
+        self.python_command = self._detect_python_command()
+        
         # Initialize category system components
         self.config_loader = CategoryConfigLoader(self.project_root)
         config = self.config_loader.load_config()
@@ -144,13 +147,13 @@ class UnifiedTestRunner:
                 "path": self.project_root,  # Changed from backend_path to project_root
                 "test_dir": "netra_backend/tests",  # Updated to full path from root
                 "config": "netra_backend/pytest.ini",  # Updated to full path from root
-                "command": "python3 -m pytest"
+                "command": f"{self.python_command} -m pytest"
             },
             "auth": {
                 "path": self.project_root,  # Changed from auth_path to project_root
                 "test_dir": "auth_service/tests",  # Updated to full path from root
                 "config": "auth_service/pytest.ini",  # Updated to full path from root
-                "command": "python3 -m pytest"
+                "command": f"{self.python_command} -m pytest"
             },
             "frontend": {
                 "path": self.frontend_path,  # Frontend can stay as-is since it uses npm
@@ -159,6 +162,32 @@ class UnifiedTestRunner:
                 "command": "npm test"
             }
         }
+    
+    def _detect_python_command(self) -> str:
+        """Detect the correct Python command for the current platform."""
+        import shutil
+        
+        # Try Python commands in order of preference
+        commands_to_try = ['python3', 'python', 'py']
+        
+        for cmd in commands_to_try:
+            if shutil.which(cmd):
+                # Verify it's actually Python 3
+                try:
+                    result = subprocess.run(
+                        [cmd, '--version'],
+                        capture_output=True,
+                        text=True,
+                        timeout=5
+                    )
+                    if result.returncode == 0 and 'Python 3' in result.stdout:
+                        return cmd
+                except (subprocess.TimeoutExpired, Exception):
+                    continue
+        
+        # Fallback to python3 if nothing found (will error later if not available)
+        print("[WARNING] Could not detect Python 3 command, defaulting to 'python3'")
+        return 'python3'
     
     def initialize_components(self, args: argparse.Namespace):
         """Initialize test execution components based on arguments."""
@@ -999,11 +1028,11 @@ class UnifiedTestRunner:
         """Build pytest command for backend/auth services."""
         config = self.test_configs[service]
         
-        cmd_parts = ["python3", "-m", "pytest"]
+        cmd_parts = [self.python_command, "-m", "pytest"]
         
         # Add category-specific selection (simplified to avoid marker hang issues)
         category_markers = {
-            "smoke": [str(config["test_dir"]), "-k", "smoke"],
+            "smoke": [str(config["test_dir"]), "-m", "smoke"],
             "unit": ["netra_backend/tests/unit", "netra_backend/tests/core"],
             "integration": ["netra_backend/tests/integration", "netra_backend/tests/startup"],
             "api": ["netra_backend/tests/test_api_core_critical.py", "netra_backend/tests/test_api_error_handling_critical.py", "netra_backend/tests/test_api_threads_messages_critical.py", "netra_backend/tests/test_api_agent_generation_critical.py", "netra_backend/tests/test_api_endpoints_critical.py"],

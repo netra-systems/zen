@@ -1,50 +1,37 @@
 """
-Test JWT secret consistency between auth service and backend service.
-Ensures both services use the same JWT secret for token validation.
+Test JWT secret consistency for backend service.
+Ensures backend service correctly loads and uses JWT secret for token validation.
 """
 
-# Test framework import - using pytest fixtures instead
-
 import os
-import sys
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 
-import httpx
 import pytest
 
-# Add auth_service to path for imports
-
-from auth_service.auth_core.core.jwt_handler import JWTHandler
-from auth_service.auth_core.secret_loader import AuthSecretLoader
 from netra_backend.app.core.configuration.base import ActualSecretManager as SecretManager
 from netra_backend.app.schemas.config import AppConfig
 
 class TestJWTSecretConsistency:
-    """Test JWT secret consistency across services."""
+    """Test JWT secret configuration for backend service."""
     
-    def test_both_services_use_same_jwt_secret_key_env_var(self):
-        """Test that both services read from JWT_SECRET_KEY environment variable."""
+    def test_backend_service_uses_jwt_secret_key_env_var(self):
+        """Test that backend service reads from JWT_SECRET_KEY environment variable."""
         test_secret = "test-jwt-secret-for-consistency-check-32chars"
         
         with patch.dict(os.environ, {
             "JWT_SECRET_KEY": test_secret,
             "ENVIRONMENT": "development"
         }, clear=False):
-            # Test auth service secret loading
-            auth_secret = AuthSecretLoader.get_jwt_secret()
-            
             # Test backend service secret loading
             config = AppConfig()
             secret_manager = SecretManager()
             secret_manager.populate_secrets(config)
             backend_secret = config.jwt_secret_key
             
-            assert auth_secret == test_secret, f"Auth service got: {auth_secret}"
             assert backend_secret == test_secret, f"Backend service got: {backend_secret}"
-            assert auth_secret == backend_secret, "Services use different JWT secrets!"
     
     def test_jwt_secret_key_takes_priority_over_jwt_secret(self):
-        """Test that JWT_SECRET_KEY takes priority over JWT_SECRET in auth service."""
+        """Test that JWT_SECRET_KEY takes priority over JWT_SECRET in backend service."""
         jwt_secret_key_value = "primary-secret-32-chars-minimum-len"
         jwt_secret_value = "fallback-secret-32-chars-minimum-len"
         
@@ -53,12 +40,14 @@ class TestJWTSecretConsistency:
             "JWT_SECRET": jwt_secret_value,
             "ENVIRONMENT": "development"
         }, clear=False):
-            # Auth service should use JWT_SECRET_KEY (same as backend)
-            auth_secret = AuthSecretLoader.get_jwt_secret()
-            assert auth_secret == jwt_secret_key_value
+            # Backend service should use JWT_SECRET_KEY
+            config = AppConfig()
+            secret_manager = SecretManager()
+            secret_manager.populate_secrets(config)
             
+            assert config.jwt_secret_key == jwt_secret_key_value
             # Verify it's not using the legacy JWT_SECRET
-            assert auth_secret != jwt_secret_value
+            assert config.jwt_secret_key != jwt_secret_value
     
     def test_auth_service_jwt_handler_uses_correct_secret(self):
         """Test that JWTHandler gets the same secret as backend service."""

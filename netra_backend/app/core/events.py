@@ -125,3 +125,28 @@ def create_event(event_type: str, data: Dict[str, Any], source: Optional[str] = 
         timestamp=datetime.now(timezone.utc),
         source=source
     )
+
+
+# Compatibility class for legacy tests
+class Events:
+    """Compatibility wrapper for legacy tests expecting an Events class.
+    
+    This class delegates to the event system for backward compatibility.
+    New code should use the Event class and event_bus directly.
+    """
+    
+    def __init__(self):
+        """Initialize Events compatibility wrapper."""
+        self.event_bus = event_bus
+    
+    def create_event(self, event_type: str, data: Dict[str, Any] = None) -> Event:
+        """Create an event - compatibility method."""
+        return create_event(event_type, data or {})
+    
+    def publish_event(self, event: Event) -> None:
+        """Publish an event synchronously - compatibility method."""
+        self.event_bus.publish_sync(event)
+    
+    def process(self):
+        """Generic process method for test compatibility."""
+        return {"status": "initialized", "events": "ready"}

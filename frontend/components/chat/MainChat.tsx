@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChatHeader } from '@/components/chat/ChatHeader';
 import { MessageList } from '@/components/chat/MessageList';
-import { MessageInput } from '@/components/chat/MessageInput';
+import { MessageInput, MessageInputRef } from '@/components/chat/MessageInput';
 import { PersistentResponseCard } from '@/components/chat/PersistentResponseCard';
 import { ExamplePrompts } from '@/components/chat/ExamplePrompts';
 import { OverflowPanel } from '@/components/chat/OverflowPanel';
@@ -72,13 +72,25 @@ const handleDiagnosticsToggle = (
   }
 };
 
+const handleMessageInputFocus = (
+  e: KeyboardEvent,
+  messageInputRef: React.RefObject<MessageInputRef>
+): void => {
+  if (e.ctrlKey && e.key === 'i') {
+    e.preventDefault();
+    messageInputRef.current?.focus();
+  }
+};
+
 const createKeyboardHandler = (
   setIsOverflowOpen: (open: boolean | ((prev: boolean) => boolean)) => void,
-  setShowEventDiagnostics: (show: boolean | ((prev: boolean) => boolean)) => void
+  setShowEventDiagnostics: (show: boolean | ((prev: boolean) => boolean)) => void,
+  messageInputRef: React.RefObject<MessageInputRef>
 ) => {
   return (e: KeyboardEvent) => {
     handleOverflowToggle(e, setIsOverflowOpen);
     handleDiagnosticsToggle(e, setShowEventDiagnostics);
+    handleMessageInputFocus(e, messageInputRef);
   };
 };
 import { motion, AnimatePresence } from 'framer-motion';
@@ -110,6 +122,9 @@ const MainChat: React.FC = () => {
   const [showEventDiagnostics, setShowEventDiagnostics] = useState(false);
   const [testResults, setTestResults] = useState<any>(null);
   const [isRunningTests, setIsRunningTests] = useState(false);
+  
+  // Ref for MessageInput to enable focus from keyboard shortcuts
+  const messageInputRef = useRef<MessageInputRef>(null);
   
   // Use new loading state hook for clean state management
   const {
@@ -164,7 +179,7 @@ const MainChat: React.FC = () => {
 
   // Keyboard shortcuts for panels and diagnostics
   useEffect(() => {
-    const handleKeyDown = createKeyboardHandler(setIsOverflowOpen, setShowEventDiagnostics);
+    const handleKeyDown = createKeyboardHandler(setIsOverflowOpen, setShowEventDiagnostics, messageInputRef);
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
@@ -339,7 +354,7 @@ const MainChat: React.FC = () => {
           className="border-t bg-white/95 backdrop-blur-sm shadow-lg"
         >
           <div className="px-6 py-4 max-w-5xl mx-auto w-full">
-            <MessageInput />
+            <MessageInput ref={messageInputRef} />
           </div>
         </motion.div>
       </div>

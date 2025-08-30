@@ -9,5 +9,5 @@ warnings.warn(
     stacklevel=2
 )
 
-# Import AsyncDatabase for backward compatibility but with warning
-from netra_backend.app.db.postgres_core import AsyncDatabase
+# Import Database and AsyncDatabase for backward compatibility but with warning
+from netra_backend.app.db.postgres_core import Database, AsyncDatabase
