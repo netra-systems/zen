@@ -139,8 +139,8 @@ class LLMConfigManager:
     
     def __init__(self):
         """Initialize the configuration manager."""
-        self.config = self._load_configuration()
         self._api_keys = self._load_api_keys()
+        self.config = self._load_configuration()
         self._original_env = {}  # For restoration
         
     def _load_configuration(self) -> LLMTestConfig:

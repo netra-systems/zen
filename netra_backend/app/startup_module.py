@@ -969,6 +969,26 @@ async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
         logger = logging.getLogger(__name__)
         logger.error(f"Failed to initialize central logger, using fallback: {e}")
     
+    # CRITICAL: Validate environment configuration FIRST before any other initialization
+    # This ensures test flags never leak into production/staging
+    try:
+        from netra_backend.app.core.environment_validator import validate_environment_at_startup
+        logger.info("Validating environment configuration for security...")
+        validate_environment_at_startup()
+        logger.info("Environment validation passed")
+    except EnvironmentError as e:
+        # Critical environment violation - fail fast
+        logger.critical(f"Environment validation failed: {e}")
+        # Set failure state before raising
+        app.state.startup_complete = False
+        app.state.startup_in_progress = False
+        app.state.startup_failed = True
+        app.state.startup_error = str(e)
+        raise  # Re-raise to stop startup
+    except Exception as e:
+        # Non-critical validation error - log but continue
+        logger.warning(f"Environment validation warning: {e}")
+    
     # Check if we should use the new robust startup system
     config = get_config()
     use_robust_startup = getattr(config, 'use_robust_startup', 'true').lower() == 'true'

@@ -7,13 +7,13 @@ import sys
 
 from typing import Any, Dict, List
 
-from corpus_creation_validation import (
+from netra_backend.app.agents.corpus_admin.corpus_creation_validation import (
     REQUIRED,
     check_fields,
     print_errors,
     validate_simple,
 )
-from corpus_creation_validation import SimpleVal as BaseValidator
+from netra_backend.app.agents.corpus_admin.corpus_creation_validation import SimpleVal as BaseValidator
 
 
 class ValueCorpusValidator(BaseValidator):

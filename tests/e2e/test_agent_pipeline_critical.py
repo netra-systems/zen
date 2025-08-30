@@ -58,9 +58,12 @@ class TestAgentPipelineCritical:
     @pytest.fixture
     async def real_llm_manager(self, test_environment):
         """Provide real LLM manager for authentic responses."""
-        config = configure_real_llm_testing()
+        # Configure real LLM testing environment
+        configure_real_llm_testing()
+        # Create LLM manager using unified configuration system
+        from netra_backend.app.core.configuration.base import get_unified_config
+        config = get_unified_config()
         llm_manager = LLMManager(config)
-        await llm_manager.initialize()
         return llm_manager
     
     @pytest.fixture
