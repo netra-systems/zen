@@ -356,15 +356,18 @@ class TestUnitWebSocketComponents:
             max_retries=1
         )
         
-        # Mock tool
-        async def test_tool():
+        # Mock tool that accepts arguments
+        async def test_tool(*args, **kwargs):
             return {"result": "success"}
         
         # Execute with context
-        state = DeepAgentState()
-        state.chat_thread_id = conn_id
+        state = DeepAgentState(
+            chat_thread_id=conn_id,
+            user_id=conn_id,
+            run_id="run-123"
+        )
         
-        await executor.execute_with_state(
+        result = await executor.execute_with_state(
             test_tool, "test_tool", {}, state, "run-123"
         )
         
