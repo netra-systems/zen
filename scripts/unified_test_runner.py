@@ -1037,23 +1037,46 @@ class UnifiedTestRunner:
         
         cmd_parts = [self.python_command, "-m", "pytest"]
         
-        # Add category-specific selection (simplified to avoid marker hang issues)
-        category_markers = {
-            "smoke": [str(config["test_dir"]), "-m", "smoke"],
-            "unit": ["netra_backend/tests/unit", "netra_backend/tests/core"],
-            "integration": ["netra_backend/tests/integration", "netra_backend/tests/startup"],
-            "api": ["netra_backend/tests/test_api_core_critical.py", "netra_backend/tests/test_api_error_handling_critical.py", "netra_backend/tests/test_api_threads_messages_critical.py", "netra_backend/tests/test_api_agent_generation_critical.py", "netra_backend/tests/test_api_endpoints_critical.py"],
-            "database": ["netra_backend/tests/test_database_connections.py", "netra_backend/tests/test_database_manager_managers.py", "netra_backend/tests/clickhouse"],
-            "post_deployment": ["tests/post_deployment"],
-            "websocket": [str(config["test_dir"]), "-k", '"websocket or ws"'],
-            "agent": ["netra_backend/tests/agents"],
-            "security": [str(config["test_dir"]), "-k", '"auth or security"'],
-            # FIXED: E2E category now points only to actual e2e tests
-            "e2e_critical": ["tests/e2e/critical"],  # Curated critical e2e tests
-            "e2e": ["tests/e2e/integration"],  # Actual e2e integration tests only
-            "e2e_full": ["tests/e2e"],  # Full e2e suite (use with caution - may timeout),
-            "performance": [str(config["test_dir"]), "-k", "performance"]
-        }
+        # Add category-specific selection (service-aware paths)
+        # FIXED: Use service-specific paths instead of hardcoded backend paths
+        if service == "backend":
+            category_markers = {
+                "smoke": [str(config["test_dir"]), "-m", "smoke"],
+                "unit": ["netra_backend/tests/unit", "netra_backend/tests/core"],
+                "integration": ["netra_backend/tests/integration", "netra_backend/tests/startup"],
+                "api": ["netra_backend/tests/test_api_core_critical.py", "netra_backend/tests/test_api_error_handling_critical.py", "netra_backend/tests/test_api_threads_messages_critical.py", "netra_backend/tests/test_api_agent_generation_critical.py", "netra_backend/tests/test_api_endpoints_critical.py"],
+                "database": ["netra_backend/tests/test_database_connections.py", "netra_backend/tests/test_database_manager_managers.py", "netra_backend/tests/clickhouse"],
+                "post_deployment": ["tests/post_deployment"],
+                "websocket": [str(config["test_dir"]), "-k", '"websocket or ws"'],
+                "agent": ["netra_backend/tests/agents"],
+                "security": [str(config["test_dir"]), "-k", '"auth or security"'],
+                # FIXED: E2E category now points only to actual e2e tests
+                "e2e_critical": ["tests/e2e/critical"],  # Curated critical e2e tests
+                "e2e": ["tests/e2e/integration"],  # Actual e2e integration tests only
+                "e2e_full": ["tests/e2e"],  # Full e2e suite (use with caution - may timeout),
+                "performance": [str(config["test_dir"]), "-k", "performance"]
+            }
+        elif service == "auth":
+            category_markers = {
+                "smoke": [str(config["test_dir"]), "-m", "smoke"],
+                "unit": ["auth_service/tests", "-m", "unit"],
+                "integration": ["auth_service/tests", "-m", "integration"],
+                "security": ["auth_service/tests", "-m", "security"],
+                "performance": ["auth_service/tests", "-m", "performance"]
+            }
+        else:
+            # Fallback for unknown services
+            category_markers = {
+                "smoke": [str(config["test_dir"]), "-m", "smoke"],
+                "unit": [str(config["test_dir"]), "-m", "unit"],
+                "integration": [str(config["test_dir"]), "-m", "integration"],
+                "security": [str(config["test_dir"]), "-m", "security"],
+                "performance": [str(config["test_dir"]), "-m", "performance"]
+            }
+        
+        # Add service-specific configuration file
+        if "config" in config:
+            cmd_parts.extend(["-c", str(config["config"])])
         
         if category_name in category_markers:
             cmd_parts.extend(category_markers[category_name])
