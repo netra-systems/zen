@@ -26,6 +26,20 @@
             <critical-takeaway>Run tests/mission_critical/test_websocket_agent_events_suite.py before ANY deployment (websocket_agent_integration_critical.xml).</critical-takeaway>
         </category>
         
+        <category name="WebSocket/SubAgentPatterns" path="SPEC/learnings/websocket_subagent_enhancement_patterns.xml" keywords="Sub-Agents, WebSocket Events, TriageSubAgent, DataSubAgent, ValidationSubAgent, WebSocketContextMixin, Real-time Feedback, User Experience, Event Emission">
+            <critical-takeaway>WebSocketContextMixin provides standardized pattern for sub-agents to emit real-time events during execution (websocket_subagent_enhancement_patterns.xml).</critical-takeaway>
+            <critical-takeaway>All sub-agents MUST emit 5 critical events: agent_started, agent_thinking, tool_executing, tool_completed, agent_completed for proper UX (websocket_subagent_enhancement_patterns.xml).</critical-takeaway>
+            <critical-takeaway>Thread ID extraction in tool execution must check chat_thread_id > thread_id > run_id to match WebSocket connections (websocket_subagent_enhancement_patterns.xml).</critical-takeaway>
+            <critical-takeaway>Sub-agents must support both modern (BaseExecutionInterface) and legacy execution patterns with WebSocket events (websocket_subagent_enhancement_patterns.xml).</critical-takeaway>
+        </category>
+        
+        <category name="WebSocket/AgentLifecycle" path="SPEC/learnings/agent_manager_lifecycle_events.xml" keywords="Agent Manager, WebSocket, Lifecycle Events, Agent Registration, Agent Failure, Agent Cancellation, Metrics Updates, Real-time Monitoring, System Observability">
+            <critical-takeaway>Agent Manager MUST emit WebSocket events for all lifecycle transitions: registration, failure, cancellation, metrics (agent_manager_lifecycle_events.xml).</critical-takeaway>
+            <critical-takeaway>WebSocket notifier is optional in AgentManager - wrap all calls in try/except to maintain backward compatibility (agent_manager_lifecycle_events.xml).</critical-takeaway>
+            <critical-takeaway>Frontend expects 7 new lifecycle events: agent_registered, agent_failed, agent_cancelled, agent_metrics_updated, agent_unregistered, agent_status_changed, agent_manager_shutdown (agent_manager_lifecycle_events.xml).</critical-takeaway>
+            <critical-takeaway>Run tests/mission_critical/test_agent_manager_lifecycle_events.py to verify lifecycle event emission (agent_manager_lifecycle_events.xml).</critical-takeaway>
+        </category>
+        
         <category name="WebSocket/Routing" path="SPEC/learnings/websocket_routing_regression.xml" keywords="WebSocket, Message Routing, Run ID, Agent Updates, Privacy, Security, Regression, Broadcasting, Connection Management">
             <critical-takeaway>CRITICAL: WebSocket send_agent_update MUST route by run_id, NEVER broadcast to all users - severe privacy/security issue (websocket_routing_regression.xml).</critical-takeaway>
             <critical-takeaway>Always implement proper message routing from the start - broadcasting is almost never correct for user-specific data (websocket_routing_regression.xml).</critical-takeaway>
@@ -1537,6 +1551,17 @@
             <critical-takeaway>Auth service OAuth routes properly registered: /auth/login, /auth/callback, /oauth/providers, /oauth/config</critical-takeaway>
             <critical-takeaway>Frontend Docker builds must use staging URLs: https://api.staging.netrasystems.ai, not localhost</critical-takeaway>
             <critical-takeaway>Configuration validation pipeline prevents deployment failures - check secret lengths before deployment</critical-takeaway>
+        </category>
+        
+        <category name="Architecture/UnusedCode" path="SPEC/learnings/audit_unused_code_analysis.xml" keywords="Audit, Unused Code, Broken Pipes, Dead Code, Architecture Cleanup, Code Quality, SSOT, Legacy Code, Technical Debt">
+            <critical-takeaway>WebSocket large message handling system (764 lines) defined but never used - significant complexity without usage (audit_unused_code_analysis.xml).</critical-takeaway>
+            <critical-takeaway>Admin API endpoints exist in backend with no frontend implementation - 6 endpoints inaccessible to users (audit_unused_code_analysis.xml).</critical-takeaway>
+            <critical-takeaway>Multiple authentication patterns violate SSOT - auth_service, netra_backend, and frontend each implement separately (audit_unused_code_analysis.xml).</critical-takeaway>
+            <critical-takeaway>Agent registry contains unimplemented agents: GitHubAnalyzerAgent, SyntheticDataAgent, SupplyChainAgent (audit_unused_code_analysis.xml).</critical-takeaway>
+            <critical-takeaway>Database models without usage: WorkflowTemplate, AgentMetrics, SystemAudit - tables created but never queried (audit_unused_code_analysis.xml).</critical-takeaway>
+            <critical-takeaway>15-20% codebase reduction possible through cleanup - ~2,500 lines of unused code identified (audit_unused_code_analysis.xml).</critical-takeaway>
+            <critical-takeaway>Regular audits using scripts/audit_unused_code.py prevent accumulation of dead code (audit_unused_code_analysis.xml).</critical-takeaway>
+            <critical-takeaway>Test coverage gaps are strong indicators of unused code - code without tests often unused (audit_unused_code_analysis.xml).</critical-takeaway>
         </category>
         
     </categories>

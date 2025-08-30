@@ -13,6 +13,7 @@ from netra_backend.app.agents.agent_communication import AgentCommunicationMixin
 from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
 from netra_backend.app.agents.agent_observability import AgentObservabilityMixin
 from netra_backend.app.agents.agent_state import AgentStateMixin
+from netra_backend.app.agents.mixins.websocket_context_mixin import WebSocketContextMixin
 from netra_backend.app.agents.interfaces import BaseAgentProtocol
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.core.config import get_config
@@ -26,13 +27,26 @@ from netra_backend.app.agents.base.timing_collector import ExecutionTimingCollec
 
 
 class BaseSubAgent(
+    WebSocketContextMixin,
     AgentLifecycleMixin, 
     AgentCommunicationMixin, 
     AgentStateMixin, 
     AgentObservabilityMixin,
     ABC
 ):
-    """Base agent class combining all agent functionality through modular mixins"""
+    """Base agent class combining all agent functionality through modular mixins.
+    
+    Includes WebSocketContextMixin for centralized WebSocket event emission capabilities.
+    All sub-agents automatically inherit WebSocket event emission methods:
+    - emit_thinking() - For real-time reasoning visibility
+    - emit_tool_executing() / emit_tool_completed() - For tool usage transparency
+    - emit_progress() - For partial results and progress updates
+    - emit_error() - For structured error reporting
+    - emit_subagent_started() / emit_subagent_completed() - For sub-agent lifecycle
+    
+    CRITICAL: WebSocket context must be set via set_websocket_context() before
+    any WebSocket events can be emitted. This is handled by the supervisor/execution engine.
+    """
     
     def __init__(self, llm_manager: Optional[LLMManager] = None, name: str = "BaseSubAgent", description: str = "This is the base sub-agent."):
         self.llm_manager = llm_manager

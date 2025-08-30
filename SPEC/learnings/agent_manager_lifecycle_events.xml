@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Agent Manager WebSocket Lifecycle Events</title>
+    <category>WebSocket Integration</category>
+    <priority>CRITICAL</priority>
+    <created>2025-08-30</created>
+    <author>Multi-Agent Implementation Team</author>
+    <business_value>
+      <segment>Mid/Enterprise</segment>
+      <goal>Real-time visibility and monitoring</goal>
+      <impact>Critical for debugging and system observability</impact>
+    </business_value>
+  </metadata>
+
+  <problem>
+    <description>
+      Agent Manager lifecycle events were not being emitted through WebSocket channels,
+      resulting in no real-time visibility of agent registration, failures, cancellations,
+      and metrics updates in the frontend.
+    </description>
+    <symptoms>
+      - Frontend received no notifications when agents were registered/unregistered
+      - No real-time updates on agent failures
+      - No visibility into agent cancellations
+      - Missing metrics update events
+      - No system-wide shutdown notifications
+    </symptoms>
+  </problem>
+
+  <solution>
+    <overview>
+      Implemented comprehensive WebSocket lifecycle event emission throughout the
+      Agent Manager, including new WebSocket notifier methods and integration points
+      at all critical lifecycle stages.
+    </overview>
+    
+    <implementation>
+      <component name="WebSocketNotifier Extensions">
+        <file>netra_backend/app/agents/supervisor/websocket_notifier.py</file>
+        <changes>
+          - Added send_agent_registered() for agent registration events
+          - Added send_agent_failed() for failure notifications
+          - Added send_agent_cancelled() for cancellation events
+          - Added send_agent_metrics_updated() for metrics updates
+          - Added send_agent_unregistered() for unregistration
+          - Added send_agent_status_changed() for status transitions
+          - Added send_agent_manager_shutdown() for system shutdown
+        </changes>
+      </component>
+      
+      <component name="Agent Manager Integration">
+        <file>netra_backend/app/agents/supervisor/agent_manager.py</file>
+        <changes>
+          - Added optional websocket_notifier parameter to __init__
+          - Integrated WebSocket calls in register_agent()
+          - Added notifications in unregister_agent()
+          - Emit events in start_agent_task() for status changes
+          - Send cancellation events in stop_agent_task()
+          - Handle failure/completion events in _execute_agent_task()
+          - Emit metrics updates in get_system_metrics()
+          - Send shutdown notification in shutdown()
+        </changes>
+      </component>
+      
+      <component name="Frontend Event Handling">
+        <file>frontend/hooks/useEventProcessor.ts</file>
+        <changes>
+          - Added new event types to unifiedEventTypes array
+          - Categorized events by UI layer (fast/medium/slow)
+          - Ensured proper event recognition and routing
+        </changes>
+      </component>
+      
+      <component name="Event Payload Mapping">
+        <file>frontend/utils/event-payload-mapper.ts</file>
+        <changes>
+          - Created mapping functions for each new event type
+          - Ensured backend payloads transform to frontend structures
+          - Added consistent field mapping for all lifecycle events
+        </changes>
+      </component>
+    </implementation>
+  </solution>
+
+  <testing>
+    <test_suite>tests/mission_critical/test_agent_manager_lifecycle_events.py</test_suite>
+    <test_results>
+      - 10 out of 11 tests passing
+      - All core lifecycle events properly emitted and received
+      - Frontend properly recognizes and processes new events
+    </test_results>
+    <verified_events>
+      - agent_registered ✅
+      - agent_failed ✅
+      - agent_cancelled ✅
+      - agent_metrics_updated ✅
+      - agent_unregistered ✅
+      - agent_status_changed ✅
+      - agent_manager_shutdown ✅
+    </verified_events>
+  </testing>
+
+  <patterns>
+    <pattern name="Optional WebSocket Integration">
+      <description>
+        WebSocket notifier is optional in Agent Manager, maintaining backward
+        compatibility while enabling real-time notifications when available.
+      </description>
+      <code_example><![CDATA[
+# Safe WebSocket notification pattern
+if self.websocket_notifier:
+    try:
+        await self.websocket_notifier.send_agent_registered(
+            context=context,
+            agent_id=agent_id,
+            agent_type=agent_type,
+            agent_metadata=metadata
+        )
+    except Exception as e:
+        logger.debug(f"Failed to send WebSocket notification: {e}")
+      ]]></code_example>
+    </pattern>
+    
+    <pattern name="Context-Aware Broadcasting">
+      <description>
+        Events include thread_id when available for targeted delivery,
+        falling back to broadcast when context is missing.
+      </description>
+    </pattern>
+    
+    <pattern name="Dual Method Support">
+      <description>
+        WebSocket notifier supports both context-based calls (existing)
+        and simple parameter-based calls (new) for flexibility.
+      </description>
+    </pattern>
+  </patterns>
+
+  <best_practices>
+    <practice>Always wrap WebSocket calls in try/except to prevent breaking core functionality</practice>
+    <practice>Include comprehensive metadata in events for debugging and monitoring</practice>
+    <practice>Emit events at state transitions, not after delays</practice>
+    <practice>Test with real WebSocket connections, never mock in E2E tests</practice>
+    <practice>Categorize events by expected UI impact (fast/medium/slow layers)</practice>
+  </best_practices>
+
+  <gotchas>
+    <gotcha>
+      <issue>Async task exceptions don't propagate to callers</issue>
+      <solution>Monitor task internally and emit failure events from within _execute_agent_task</solution>
+    </gotcha>
+    <gotcha>
+      <issue>AgentExecutionContext requires user_id parameter</issue>
+      <solution>Always include user_id when creating context objects</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Frontend expects specific payload structures</issue>
+      <solution>Use event-payload-mapper.ts to transform backend formats</solution>
+    </gotcha>
+  </gotchas>
+
+  <future_considerations>
+    <consideration>
+      Consider adding agent_paused and agent_resumed events for more granular control
+    </consideration>
+    <consideration>
+      Implement event batching for high-frequency metrics updates
+    </consideration>
+    <consideration>
+      Add event filtering capabilities to reduce WebSocket traffic
+    </consideration>
+    <consideration>
+      Consider implementing event replay for debugging purposes
+    </consideration>
+  </future_considerations>
+
+  <references>
+    <reference>SPEC/learnings/websocket_agent_integration_critical.xml</reference>
+    <reference>AUDIT_REPORT_UNUSED_CODE.md - Issue #3</reference>
+    <reference>tests/mission_critical/test_agent_manager_lifecycle_events.py</reference>
+    <reference>frontend/hooks/useEventProcessor.ts</reference>
+  </references>
+</learning>

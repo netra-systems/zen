@@ -85,6 +85,20 @@ class AgentExecutionCore:
         # Set user_id on agent if available for proper websocket routing
         if hasattr(state, 'user_id') and state.user_id:
             agent._user_id = state.user_id
+        
+        # CRITICAL: Propagate WebSocket context to sub-agents for event emission
+        if self.websocket_notifier:
+            # Try multiple methods for backward compatibility
+            if hasattr(agent, 'set_websocket_context'):
+                # Preferred method: pass both context and notifier
+                agent.set_websocket_context(context, self.websocket_notifier)
+            elif hasattr(agent, 'websocket_notifier'):
+                # Direct notifier assignment
+                agent.websocket_notifier = self.websocket_notifier
+            elif hasattr(agent, 'websocket_manager'):
+                # Fallback: set manager directly (existing pattern)
+                agent.websocket_manager = self.websocket_notifier.websocket_manager
+                
         await agent.execute(state, context.run_id, True)
     
     def _handle_execution_error(self, context: AgentExecutionContext,

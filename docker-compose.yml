@@ -145,6 +145,71 @@ services:
         uvicorn auth_service.main:app --host \$HOST --port \$PORT --reload --reload-dir /app/auth_service --reload-dir /app/shared --reload-include '*.py'
       "
 
+  # Dev Analytics Service (depends on redis and clickhouse)
+  dev-analytics:
+    build:
+      context: .
+      dockerfile: ./docker/analytics.development.Dockerfile
+    container_name: netra-dev-analytics
+    profiles: ["dev"]
+    env_file:
+      - .env.development
+    environment:
+      # Database connections
+      CLICKHOUSE_HOST: dev-clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-netra}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-netra123}
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-netra_analytics}
+      
+      # Redis
+      REDIS_HOST: dev-redis
+      REDIS_PORT: 6379
+      REDIS_URL: redis://dev-redis:6379/2
+      
+      # Server Config
+      PORT: 8090
+      HOST: 0.0.0.0
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      # Uvicorn specific config
+      UVICORN_HOST: 0.0.0.0
+      UVICORN_PORT: 8090
+      
+      # Analytics-specific configuration
+      ANALYTICS_SERVICE_PORT: 8090
+      EVENT_BATCH_SIZE: 100
+      EVENT_FLUSH_INTERVAL_MS: 5000
+      MAX_EVENTS_PER_USER_PER_MINUTE: 1000
+      
+      # Service authentication
+      SERVICE_SECRET: ${SERVICE_SECRET:-xNp9hKjT5mQ8w2fE7vR4yU3iO6aS1gL9cB0zZ8tN6wX2eR4vY7uI0pQ3s9dF5gH8}
+      SERVICE_ID: analytics
+    ports:
+      - "${ANALYTICS_PORT:-8090}:8090"
+    volumes:
+      - ./analytics_service:/app/analytics_service
+      - ./shared:/app/shared
+      - ./logs:/app/logs
+    depends_on:
+      dev-redis:
+        condition: service_healthy
+      dev-clickhouse:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - netra-network
+    restart: unless-stopped
+    command: >
+      sh -c "
+        echo 'Starting analytics service...' &&
+        uvicorn analytics_service.main:app --host \$HOST --port \$PORT --reload --reload-dir /app/analytics_service --reload-dir /app/shared --reload-include '*.py'
+      "
+
   # Dev Backend Service (depends on auth)
   dev-backend:
     build:
@@ -412,6 +477,64 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8082/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - netra-network
+    restart: unless-stopped
+
+  # Test Analytics Service (depends on redis and clickhouse)
+  test-analytics:
+    build:
+      context: .
+      dockerfile: ./docker/analytics.development.Dockerfile
+      args:
+        BUILD_MODE: test
+    container_name: netra-test-analytics
+    profiles: ["test"]
+    environment:
+      # Test Environment
+      TESTING: "1"
+      ENVIRONMENT: testing
+      LOG_LEVEL: ERROR
+      
+      # Database connections
+      CLICKHOUSE_HOST: test-clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USER: test
+      CLICKHOUSE_PASSWORD: test
+      CLICKHOUSE_DB: netra_test_analytics
+      
+      # Redis
+      REDIS_HOST: test-redis
+      REDIS_PORT: 6379
+      REDIS_URL: redis://test-redis:6379/2
+      
+      # Server Config
+      PORT: 8091
+      HOST: 0.0.0.0
+      
+      # Analytics-specific configuration
+      ANALYTICS_SERVICE_PORT: 8091
+      EVENT_BATCH_SIZE: 50
+      EVENT_FLUSH_INTERVAL_MS: 1000
+      MAX_EVENTS_PER_USER_PER_MINUTE: 500
+    ports:
+      - "${TEST_ANALYTICS_PORT:-8091}:8091"
+    volumes:
+      - ./analytics_service:/app/analytics_service:ro
+      - ./shared:/app/shared:ro
+      - ./test_framework:/app/test_framework:ro
+      - ./logs:/app/logs
+    depends_on:
+      test-redis:
+        condition: service_healthy
+      test-clickhouse:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8091/health"]
       interval: 10s
       timeout: 5s
       retries: 3

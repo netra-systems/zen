@@ -14,6 +14,8 @@ ANY FAILURE HERE BLOCKS DEPLOYMENT.
 
 import asyncio
 import json
+import os
+import sys
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
@@ -22,6 +24,11 @@ from typing import Dict, List, Set, Any, Optional
 from unittest.mock import AsyncMock, MagicMock, patch, call
 import threading
 import random
+
+# CRITICAL: Add project root to Python path for imports
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 
 import pytest
 from loguru import logger
@@ -341,10 +348,10 @@ class TestUnitWebSocketComponents:
         
         # Create test context
         context = AgentExecutionContext(
+            run_id="req-123",
+            thread_id=conn_id,
+            user_id=conn_id,
             agent_name="test",
-            request_id="req-123",
-            connection_id=conn_id,
-            start_time=time.time(),
             retry_count=0,
             max_retries=1
         )
@@ -355,7 +362,7 @@ class TestUnitWebSocketComponents:
         
         # Execute with context
         state = DeepAgentState()
-        state.thread_id = conn_id
+        state.chat_thread_id = conn_id
         
         await executor.execute_with_state(
             test_tool, "test_tool", {}, state, "run-123"
@@ -420,10 +427,10 @@ class TestIntegrationWebSocketFlow:
         
         # Create context
         context = AgentExecutionContext(
+            run_id="req-456",
+            thread_id=conn_id,
+            user_id=conn_id,
             agent_name="test_agent",
-            request_id="req-456",
-            connection_id=conn_id,
-            start_time=time.time(),
             retry_count=0,
             max_retries=1
         )
@@ -431,7 +438,7 @@ class TestIntegrationWebSocketFlow:
         # Create state
         state = DeepAgentState()
         state.user_request = "Test request"
-        state.thread_id = conn_id
+        state.chat_thread_id = conn_id
         
         # Execute
         result = await engine.execute_agent(context, state)
@@ -541,16 +548,16 @@ class TestIntegrationWebSocketFlow:
         engine = ExecutionEngine(registry, ws_manager)
         
         context = AgentExecutionContext(
+            run_id="err-123",
+            thread_id=conn_id,
+            user_id=conn_id,
             agent_name="error_agent",
-            request_id="err-123",
-            connection_id=conn_id,
-            start_time=time.time(),
             retry_count=0,
             max_retries=1
         )
         
         state = DeepAgentState()
-        state.thread_id = conn_id
+        state.chat_thread_id = conn_id
         
         # Execute (should handle error)
         result = await engine.execute_agent(context, state)
@@ -831,15 +838,24 @@ class TestRegressionPrevention:
         
         notifier = WebSocketNotifier(ws_manager)
         
+        # Create proper context for notifier
+        from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+        context = AgentExecutionContext(
+            run_id="reg-1",
+            thread_id=conn_id,
+            user_id=conn_id,
+            agent_name="agent"
+        )
+        
         # Start execution
-        await notifier.send_agent_started(conn_id, "reg-1", "agent")
+        await notifier.send_agent_started(context)
         
         # Simulate error during execution
         try:
             raise Exception("Simulated error")
         except Exception:
-            # Must still send completion
-            await notifier.send_agent_fallback(conn_id, "reg-1", "Error occurred")
+            # Must still send completion using fallback
+            await notifier.send_fallback_notification(context, "error_fallback")
         
         await asyncio.sleep(0.1)
         
@@ -872,24 +888,26 @@ class TestRegressionPrevention:
         await ws_manager.connect_user(conn_id, mock_ws, conn_id)
         
         # Test both success and failure cases
-        state = DeepAgentState()
-        state.thread_id = conn_id
+        state = DeepAgentState(
+            chat_thread_id=conn_id,
+            user_id=conn_id
+        )
         
         # Success case
-        async def success_tool():
+        async def success_tool(state):
             return {"success": True}
         
         await enhanced_executor.execute_with_state(
-            success_tool, "success_tool", {}, state, "run-1"
+            success_tool, "success_tool", {}, state, conn_id
         )
         
         # Failure case
-        async def failure_tool():
+        async def failure_tool(state):
             raise Exception("Tool failed")
         
         try:
             await enhanced_executor.execute_with_state(
-                failure_tool, "failure_tool", {}, state, "run-2"
+                failure_tool, "failure_tool", {}, state, conn_id
             )
         except:
             pass  # Expected

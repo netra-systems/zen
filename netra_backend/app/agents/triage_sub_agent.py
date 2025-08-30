@@ -31,6 +31,7 @@ from netra_backend.app.agents.base.interface import (
 )
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.websocket_context import WebSocketContextMixin
 from netra_backend.app.agents.config import agent_config
 from netra_backend.app.agents.input_validation import validate_agent_input
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -56,8 +57,8 @@ from netra_backend.app.schemas.shared_types import RetryConfig as ModernRetryCon
 logger = central_logger.get_logger(__name__)
 
 
-class TriageSubAgent(BaseSubAgent, BaseExecutionInterface):
-    """Modernized triage agent with BaseExecutionInterface compliance."""
+class TriageSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin):
+    """Modernized triage agent with BaseExecutionInterface compliance and WebSocket events."""
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
                  redis_manager: Optional[RedisManager] = None,
@@ -72,6 +73,7 @@ class TriageSubAgent(BaseSubAgent, BaseExecutionInterface):
         """Initialize base agent components."""
         super().__init__(llm_manager, name="TriageSubAgent", description="Enhanced triage agent with modern execution.")
         BaseExecutionInterface.__init__(self, "TriageSubAgent", websocket_manager)
+        WebSocketContextMixin.__init__(self)
         self._setup_core_properties(tool_dispatcher, redis_manager)
         
     def _setup_core_properties(self, tool_dispatcher: ToolDispatcher, redis_manager: Optional[RedisManager]) -> None:
@@ -144,11 +146,32 @@ class TriageSubAgent(BaseSubAgent, BaseExecutionInterface):
         state.triage_result = TriageResult(category="Validation Error", confidence_score=0.0, validation_status=validation)
         
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
-        """Execute core triage logic with modern patterns."""
+        """Execute core triage logic with modern patterns and WebSocket events."""
         start_time = time.time()
+        
+        # Set up WebSocket context if available
+        await self._setup_websocket_context_if_available(context)
+        
+        # Emit agent started event
+        await self.emit_agent_started("Starting triage analysis for user request")
+        
+        # Emit thinking event
+        await self.emit_thinking("Analyzing user request and determining category...")
+        
         await self._send_processing_update(context.run_id, context.stream_updates)
+        
+        # Emit progress during triage computation
+        await self.emit_progress("Extracting entities and determining intent...")
         triage_result = await self._get_or_compute_triage_result(context.state, context.run_id, start_time)
-        return await self._finalize_triage_result(context.state, context.run_id, context.stream_updates, triage_result)
+        
+        await self.emit_progress("Finalizing triage results and recommendations...")
+        result = await self._finalize_triage_result(context.state, context.run_id, context.stream_updates, triage_result)
+        
+        # Emit completion event
+        duration_ms = (time.time() - start_time) * 1000
+        await self.emit_agent_completed(result, duration_ms)
+        
+        return result
         
     async def _send_processing_update(self, run_id: str, stream_updates: bool) -> None:
         """Send processing status update."""
@@ -199,11 +222,32 @@ class TriageSubAgent(BaseSubAgent, BaseExecutionInterface):
         )
     
     async def _execute_triage_main(self, state: DeepAgentState, run_id: str, stream_updates: bool):
-        """Main triage execution logic."""
+        """Main triage execution logic with WebSocket events."""
         start_time = time.time()
+        
+        # Set up WebSocket context for legacy execution
+        await self._setup_websocket_context_for_legacy(run_id)
+        
+        # Emit agent started event
+        await self.emit_agent_started("Starting triage analysis for user request")
+        
+        # Emit thinking event
+        await self.emit_thinking("Analyzing user request and determining category...")
+        
         await self._send_processing_update(run_id, stream_updates)
+        
+        # Emit progress during triage computation
+        await self.emit_progress("Extracting entities and determining intent...")
         triage_result = await self._get_or_compute_triage_result(state, run_id, start_time)
-        return await self._finalize_triage_result(state, run_id, stream_updates, triage_result)
+        
+        await self.emit_progress("Finalizing triage results and recommendations...")
+        result = await self._finalize_triage_result(state, run_id, stream_updates, triage_result)
+        
+        # Emit completion event
+        duration_ms = (time.time() - start_time) * 1000
+        await self.emit_agent_completed(result, duration_ms)
+        
+        return result
     
     async def _execute_triage_fallback(self, state: DeepAgentState, run_id: str, stream_updates: bool):
         """Fallback triage when main operation fails"""
@@ -250,6 +294,54 @@ class TriageSubAgent(BaseSubAgent, BaseExecutionInterface):
         legacy_status = legacy_health.get("overall_health", "unknown")
         modern_status = modern_health.get("monitor", {}).get("status", "unknown")
         return "healthy" if legacy_status == "healthy" and modern_status == "healthy" else "degraded"
+    
+    async def _setup_websocket_context_if_available(self, context: ExecutionContext) -> None:
+        """Set up WebSocket context if websocket manager is available."""
+        if hasattr(self, 'websocket_manager') and self.websocket_manager:
+            # Import here to avoid circular imports
+            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+            from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+            
+            try:
+                # Create WebSocket notifier and execution context
+                notifier = WebSocketNotifier(self.websocket_manager)
+                ws_context = AgentExecutionContext(
+                    run_id=context.run_id,
+                    agent_name="TriageSubAgent",
+                    thread_id=getattr(context.state, 'chat_thread_id', context.run_id),
+                    user_id=getattr(context.state, 'user_id', None),
+                    start_time=time.time()
+                )
+                
+                # Set WebSocket context in mixin
+                self.set_websocket_context(notifier, ws_context)
+                
+            except Exception as e:
+                self.logger.debug(f"Failed to setup WebSocket context: {e}")
+    
+    async def _setup_websocket_context_for_legacy(self, run_id: str) -> None:
+        """Set up WebSocket context for legacy execution paths."""
+        if hasattr(self, 'websocket_manager') and self.websocket_manager:
+            # Import here to avoid circular imports
+            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+            from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+            
+            try:
+                # Create WebSocket notifier and execution context
+                notifier = WebSocketNotifier(self.websocket_manager)
+                ws_context = AgentExecutionContext(
+                    run_id=run_id,
+                    agent_name="TriageSubAgent",
+                    thread_id=run_id,  # Use run_id as thread_id for legacy
+                    user_id=None,
+                    start_time=time.time()
+                )
+                
+                # Set WebSocket context in mixin
+                self.set_websocket_context(notifier, ws_context)
+                
+            except Exception as e:
+                self.logger.debug(f"Failed to setup WebSocket context for legacy: {e}")
 
     # Compact delegate methods to triage core
     def _validate_request(self, request: str): return self.triage_core.validator.validate_request(request)

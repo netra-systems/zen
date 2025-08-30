@@ -34,16 +34,16 @@ describeIfFeature('chat_sidebar_edge_cases', 'ChatSidebar - Edge Cases', () => {
       mockThreadService.listThreads.mockRejectedValue(new Error('API Error'));
       
       await safeAsync(async () => {
-        renderWithProviders(<ChatSidebar />);
+        renderWithProvider(<ChatSidebar />);
       });
       
       // Should not crash and show error state or render normally
       await waitForCondition(() => {
         const errorElement = screen.queryByText(/error loading threads/i) || 
                           screen.queryByText(/something went wrong/i);
-        const sidebarElement = document.querySelector('.w-80');
+        const sidebarElement = document.querySelector('[data-testid="chat-sidebar"]');
         return !!(errorElement || sidebarElement);
-      });
+      }, 5000); // Add explicit timeout to prevent infinite wait
     });
 
     it('should recover from transient network errors', async () => {
@@ -65,7 +65,7 @@ describeIfFeature('chat_sidebar_edge_cases', 'ChatSidebar - Edge Cases', () => {
       
       // Should retry and eventually succeed - check for sidebar container
       await waitFor(() => {
-        const sidebar = document.querySelector('.w-80') || document.querySelector('[data-testid="chat-sidebar"]');
+        const sidebar = document.querySelector('[data-testid="chat-sidebar"]');
         expect(sidebar).toBeInTheDocument();
       }, { timeout: 1000 });
       
@@ -107,8 +107,7 @@ describeIfFeature('chat_sidebar_edge_cases', 'ChatSidebar - Edge Cases', () => {
       }
       
       // Should handle the operation gracefully - check sidebar still exists
-      expect(document.querySelector('[data-testid="chat-sidebar"]') ||
-             document.querySelector('.w-80')).toBeInTheDocument();
+      expect(document.querySelector('[data-testid="chat-sidebar"]')).toBeInTheDocument();
       
       consoleSpy.mockRestore();
     });
@@ -126,8 +125,7 @@ describeIfFeature('chat_sidebar_edge_cases', 'ChatSidebar - Edge Cases', () => {
       // Should not crash
       expect(() => renderWithProvider(<ChatSidebar />)).not.toThrow();
       
-      expect(document.querySelector('.w-80') || 
-             screen.getByTestId('chat-sidebar')).toBeInTheDocument();
+      expect(document.querySelector('[data-testid="chat-sidebar"]')).toBeInTheDocument();
     });
 
     it('should handle extremely large thread datasets', () => {
@@ -149,7 +147,7 @@ describeIfFeature('chat_sidebar_edge_cases', 'ChatSidebar - Edge Cases', () => {
       
       // Should render within reasonable time
       expect(endTime - startTime).toBeLessThan(500);
-      expect(document.querySelector('.w-80')).toBeInTheDocument();
+      expect(document.querySelector('[data-testid="chat-sidebar"]')).toBeInTheDocument();
     });
 
     it('should handle rapid state updates', async () => {
@@ -171,7 +169,7 @@ describeIfFeature('chat_sidebar_edge_cases', 'ChatSidebar - Edge Cases', () => {
         });
       }
       
-      expect(document.querySelector('.w-80')).toBeInTheDocument();
+      expect(document.querySelector('[data-testid="chat-sidebar"]')).toBeInTheDocument();
     });
 
     it('should handle concurrent operations', async () => {
@@ -203,8 +201,7 @@ describeIfFeature('chat_sidebar_edge_cases', 'ChatSidebar - Edge Cases', () => {
       
       // Should handle concurrent operations without conflicts
       await waitFor(() => {
-        expect(document.querySelector('.w-80') || 
-               document.querySelector('[data-testid="chat-sidebar"]')).toBeInTheDocument();
+        expect(document.querySelector('[data-testid="chat-sidebar"]')).toBeInTheDocument();
       });
     });
   });
@@ -230,7 +227,7 @@ describeIfFeature('chat_sidebar_edge_cases', 'ChatSidebar - Edge Cases', () => {
       
       // With virtualization, should render far fewer than total threads
       expect(threadItems.length).toBeLessThan(100);
-      expect(document.querySelector('.w-80')).toBeInTheDocument();
+      expect(document.querySelector('[data-testid="chat-sidebar"]')).toBeInTheDocument();
     });
 
     it('should debounce search operations effectively', async () => {
@@ -273,7 +270,7 @@ describeIfFeature('chat_sidebar_edge_cases', 'ChatSidebar - Edge Cases', () => {
       rerender(<ChatSidebar />);
       
       // Should minimize unnecessary re-renders
-      expect(document.querySelector('.w-80')).toBeInTheDocument();
+      expect(document.querySelector('[data-testid="chat-sidebar"]')).toBeInTheDocument();
     });
 
     it('should handle memory cleanup on unmount', () => {
@@ -351,7 +348,7 @@ describeIfFeature('chat_sidebar_edge_cases', 'ChatSidebar - Edge Cases', () => {
       renderWithProvider(<ChatSidebar />);
       
       // Should render with high contrast considerations
-      expect(document.querySelector('.w-80')).toBeInTheDocument();
+      expect(document.querySelector('[data-testid="chat-sidebar"]')).toBeInTheDocument();
     });
 
     it('should support reduced motion preferences', () => {
@@ -376,7 +373,7 @@ describeIfFeature('chat_sidebar_edge_cases', 'ChatSidebar - Edge Cases', () => {
       renderWithProvider(<ChatSidebar />);
       
       // Should respect reduced motion preferences
-      expect(document.querySelector('.w-80')).toBeInTheDocument();
+      expect(document.querySelector('[data-testid="chat-sidebar"]')).toBeInTheDocument();
     });
 
     it('should handle screen reader announcements for updates', () => {
@@ -397,7 +394,7 @@ describeIfFeature('chat_sidebar_edge_cases', 'ChatSidebar - Edge Cases', () => {
                          );
       
       // Should handle dynamic content announcements
-      expect(document.querySelector('.w-80')).toBeInTheDocument();
+      expect(document.querySelector('[data-testid="chat-sidebar"]')).toBeInTheDocument();
     });
 
     it('should provide proper keyboard trap for modal interactions', async () => {
@@ -506,8 +503,7 @@ describeIfFeature('chat_sidebar_edge_cases', 'ChatSidebar - Edge Cases', () => {
       
       // Should handle very old threads appropriately
       await waitFor(() => {
-        expect(document.querySelector('.w-80') || 
-               document.querySelector('[data-testid="chat-sidebar"]')).toBeInTheDocument();
+        expect(document.querySelector('[data-testid="chat-sidebar"]')).toBeInTheDocument();
       });
       
       // Check for either thread title, loading state, or just verify sidebar exists
@@ -532,7 +528,7 @@ describeIfFeature('chat_sidebar_edge_cases', 'ChatSidebar - Edge Cases', () => {
       const { container } = renderWithProvider(<ChatSidebar />);
       
       // Check that sidebar rendered
-      expect(container.querySelector('.w-80')).toBeInTheDocument();
+      expect(container.querySelector('[data-testid="chat-sidebar"]')).toBeInTheDocument();
       
       consoleSpy.mockRestore();
     });

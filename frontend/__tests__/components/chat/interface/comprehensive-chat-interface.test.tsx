@@ -133,11 +133,15 @@ describe('Comprehensive Chat Interface Tests', () => {
       const textarea = screen.getByRole('textbox');
       const longMessage = 'Line 1\nLine 2\nLine 3\nLine 4\nLine 5';
       
+      // Set initial height measurement
+      const initialHeight = textarea.scrollHeight;
+      
       await user.type(textarea, longMessage);
       
-      // Check if textarea expanded
-      const computedStyle = window.getComputedStyle(textarea);
-      expect(textarea.scrollHeight).toBeGreaterThan(50);
+      // Wait for resize to occur
+      await waitFor(() => {
+        expect(textarea.scrollHeight).toBeGreaterThan(initialHeight);
+      }, { timeout: 2000 });
     });
 
     it('should enforce character limits with visual feedback', async () => {

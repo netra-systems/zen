@@ -79,6 +79,8 @@ CRITICAL: Develop a globally coherent and modular architecture. **Globally corre
   * **Composability:** Design components for reuse.
   * **Stability by Default:** Changes must be atomic. Explicitly flag any breaking changes.
 
+Use Test Runner to discover tests e.g. python unified_test_runner.py. Read testing xmls.
+
 **A compliance checklist against these tenets MUST be saved after every work session.**
 
 ### 2.2. Complexity Management

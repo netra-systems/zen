@@ -72,10 +72,17 @@ class EnhancedToolExecutionEngine(ToolExecutionEngine):
         # Create context for notifications
         context = None
         if self.websocket_notifier:
+            # Extract thread_id from state - check multiple possible attributes
+            thread_id = (
+                getattr(state, 'chat_thread_id', None) or 
+                getattr(state, 'thread_id', None) or 
+                run_id
+            )
+            
             context = AgentExecutionContext(
                 agent_name="ToolExecutor",
                 run_id=run_id,
-                thread_id=getattr(state, 'thread_id', run_id),
+                thread_id=thread_id,
                 user_id=getattr(state, 'user_id', run_id)
             )
             

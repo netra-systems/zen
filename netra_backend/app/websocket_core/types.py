@@ -316,6 +316,21 @@ def normalize_message_type(message_type: Union[str, MessageType]) -> MessageType
 
 def get_frontend_message_type(message_type: Union[str, MessageType]) -> str:
     """Get frontend-compatible message type string."""
+    # Critical agent event types that must pass through unchanged
+    AGENT_EVENT_TYPES = {
+        "agent_started", "agent_thinking", "agent_completed", 
+        "agent_fallback", "agent_failed", "agent_error",
+        "tool_executing", "tool_completed", "tool_started",
+        "partial_result", "final_report", "stream_chunk",
+        "agent_registered", "agent_unregistered", "agent_cancelled",
+        "agent_status_changed", "agent_metrics_updated",
+        "agent_manager_shutdown", "agent_stopped", "agent_log"
+    }
+    
+    # If it's a string and it's an agent event, pass it through unchanged
+    if isinstance(message_type, str) and message_type in AGENT_EVENT_TYPES:
+        return message_type
+    
     # First normalize to MessageType enum
     normalized = normalize_message_type(message_type)
     

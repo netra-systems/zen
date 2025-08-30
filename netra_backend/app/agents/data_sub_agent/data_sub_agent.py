@@ -20,6 +20,7 @@ from netra_backend.app.agents.base.interface import (
     ExecutionStatus,
     WebSocketManagerProtocol,
 )
+from netra_backend.app.agents.base.websocket_context import WebSocketContextMixin
 
 # Import focused helper modules
 from netra_backend.app.db.clickhouse import get_clickhouse_service
@@ -37,14 +38,15 @@ from netra_backend.app.schemas.strict_types import TypedAgentResult
 from netra_backend.app.services.llm.cost_optimizer import LLMCostOptimizer
 
 
-class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
-    """Consolidated data analysis agent with ClickHouse integration.
+class DataSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin):
+    """Consolidated data analysis agent with ClickHouse integration and WebSocket events.
     
     Provides reliable data insights for AI cost optimization through:
     - ClickHouse query execution with proper schema handling
     - Performance metrics analysis and trend detection
     - Cost optimization recommendations
     - Data validation and quality assurance
+    - Real-time WebSocket event emissions for user feedback
     """
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
@@ -54,6 +56,7 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
         BaseSubAgent.__init__(self, llm_manager, name="DataSubAgent", 
                             description="Advanced data analysis for AI cost optimization")
         BaseExecutionInterface.__init__(self, "DataSubAgent", websocket_manager)
+        WebSocketContextMixin.__init__(self)
         
         # Initialize core components
         self.tool_dispatcher = tool_dispatcher
@@ -74,19 +77,35 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
     
     @agent_type_safe
     async def execute(self, state: Optional[DeepAgentState], run_id: str = "", stream_updates: bool = False) -> TypedAgentResult:
-        """Execute data analysis workflow."""
+        """Execute data analysis workflow with WebSocket events."""
         start_time = time.time()
         
         try:
+            # Set up WebSocket context for legacy execution
+            await self._setup_websocket_context_for_legacy(run_id)
+            
+            # Emit agent started event
+            await self.emit_agent_started("Starting data analysis for AI cost optimization")
+            
             # Validate input
             if not self._validate_execution_state(state):
+                await self.emit_error("Invalid execution state provided")
                 return self._create_error_result("Invalid execution state", start_time)
+            
+            # Emit thinking event
+            await self.emit_thinking("Extracting analysis parameters from request...")
             
             # Extract analysis request
             analysis_request = self._extract_analysis_request(state)
             
+            # Emit progress during analysis
+            await self.emit_progress(f"Executing {analysis_request.get('type', 'performance')} analysis...")
+            
             # Execute analysis based on request type
             analysis_result = await self._execute_analysis(analysis_request)
+            
+            # Emit progress during insights generation
+            await self.emit_progress("Generating actionable insights and cost optimization recommendations...")
             
             # Generate insights and recommendations
             insights = await self._generate_insights(analysis_result)
@@ -104,6 +123,9 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
             # Add flattened insights directly to result
             result_data.update(insights)
             
+            # Emit completion event
+            await self.emit_agent_completed(result_data, execution_time)
+            
             return TypedAgentResult(
                 success=True,
                 result=result_data,
@@ -111,6 +133,7 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
             )
             
         except Exception as e:
+            await self.emit_error(f"DataSubAgent execution failed: {str(e)}")
             self.logger.error(f"DataSubAgent execution failed: {str(e)}")
             return self._create_error_result(str(e), start_time)
     
@@ -220,13 +243,28 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
     
     # BaseExecutionInterface implementation
     async def execute_core_logic(self, context: ExecutionContext) -> ExecutionResult:
-        """Core execution logic for BaseExecutionInterface."""
+        """Core execution logic for BaseExecutionInterface with WebSocket events."""
+        start_time = time.time()
+        
         try:
+            # Set up WebSocket context if available
+            await self._setup_websocket_context_if_available(context)
+            
+            # Emit agent started event
+            await self.emit_agent_started("Starting data analysis via BaseExecutionInterface")
+            
             # Convert context to state for backward compatibility
             state = self._context_to_state(context)
             
+            # Emit thinking event
+            await self.emit_thinking("Converting execution context to agent state...")
+            
             # Execute main logic
             result = await self.execute(state, context.run_id, context.stream_updates)
+            
+            # Emit completion
+            duration_ms = (time.time() - start_time) * 1000
+            await self.emit_agent_completed(result.result if result.success else {}, duration_ms)
             
             return ExecutionResult(
                 success=result.success,
@@ -236,6 +274,7 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
             )
             
         except Exception as e:
+            await self.emit_error(f"Core logic execution failed: {str(e)}")
             return ExecutionResult(
                 success=False,
                 status=ExecutionStatus.FAILED,
@@ -275,3 +314,51 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
         self.logger.info("Cleaning up DataSubAgent resources")
         await self.clickhouse_client.close()
         await self.schema_cache.cleanup()
+    
+    async def _setup_websocket_context_if_available(self, context: ExecutionContext) -> None:
+        """Set up WebSocket context if websocket manager is available."""
+        if hasattr(self, 'websocket_manager') and self.websocket_manager:
+            # Import here to avoid circular imports
+            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+            from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+            
+            try:
+                # Create WebSocket notifier and execution context
+                notifier = WebSocketNotifier(self.websocket_manager)
+                ws_context = AgentExecutionContext(
+                    run_id=context.run_id,
+                    agent_name="DataSubAgent",
+                    thread_id=getattr(context.state, 'chat_thread_id', context.run_id),
+                    user_id=getattr(context.state, 'user_id', None),
+                    start_time=time.time()
+                )
+                
+                # Set WebSocket context in mixin
+                self.set_websocket_context(notifier, ws_context)
+                
+            except Exception as e:
+                self.logger.debug(f"Failed to setup WebSocket context: {e}")
+    
+    async def _setup_websocket_context_for_legacy(self, run_id: str) -> None:
+        """Set up WebSocket context for legacy execution paths."""
+        if hasattr(self, 'websocket_manager') and self.websocket_manager:
+            # Import here to avoid circular imports
+            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+            from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+            
+            try:
+                # Create WebSocket notifier and execution context
+                notifier = WebSocketNotifier(self.websocket_manager)
+                ws_context = AgentExecutionContext(
+                    run_id=run_id,
+                    agent_name="DataSubAgent",
+                    thread_id=run_id,  # Use run_id as thread_id for legacy
+                    user_id=None,
+                    start_time=time.time()
+                )
+                
+                # Set WebSocket context in mixin
+                self.set_websocket_context(notifier, ws_context)
+                
+            except Exception as e:
+                self.logger.debug(f"Failed to setup WebSocket context for legacy: {e}")

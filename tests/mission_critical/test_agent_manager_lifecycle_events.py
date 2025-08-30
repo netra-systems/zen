@@ -97,14 +97,13 @@ class TestAgentManagerLifecycleEvents:
         # Reset mock to clear registration event
         websocket_manager.send_to_thread.reset_mock()
         
-        # Start task that will fail
-        with pytest.raises(Exception):
-            await agent_manager_with_websocket.start_agent_task(
-                agent_id=agent_id,
-                task_data={"task": "fail"}
-            )
-            # Wait for task to complete
-            await asyncio.sleep(0.1)
+        # Start task that will fail (doesn't raise since it's async)
+        await agent_manager_with_websocket.start_agent_task(
+            agent_id=agent_id,
+            task_data={"task": "fail"}
+        )
+        # Wait for task to complete
+        await asyncio.sleep(0.2)
         
         # Verify failure event was sent
         calls = websocket_manager.send_to_thread.call_args_list
@@ -438,14 +437,25 @@ class TestWebSocketNotifierIntegration:
     @pytest.mark.asyncio
     async def test_event_payload_structure(self):
         """Test that event payloads have correct structure."""
+        from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+        
         websocket_manager = AsyncMock(spec=WebSocketManager)
         notifier = WebSocketNotifier(websocket_manager)
+        
+        # Create a mock context for testing
+        context = AgentExecutionContext(
+            agent_name="test_agent",
+            thread_id="test_thread",
+            run_id="test_run",
+            user_id="test_user"
+        )
         
         # Test structures for new lifecycle events
         test_cases = [
             {
                 "method": "send_agent_registered",
                 "args": {
+                    "context": context,
                     "agent_id": "test_123",
                     "agent_type": "test",
                     "agent_metadata": {"key": "value"}
@@ -456,6 +466,7 @@ class TestWebSocketNotifierIntegration:
             {
                 "method": "send_agent_failed",
                 "args": {
+                    "context": context,
                     "agent_id": "test_123",
                     "error": "Test error message"
                 },
@@ -465,6 +476,7 @@ class TestWebSocketNotifierIntegration:
             {
                 "method": "send_agent_cancelled",
                 "args": {
+                    "context": context,
                     "agent_id": "test_123"
                 },
                 "expected_type": "agent_cancelled",
