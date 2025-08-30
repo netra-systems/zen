@@ -54,6 +54,7 @@ def _create_error_response(status_code: int, response_data: Dict[str, Any]) -> R
     )
 
 @router.get("/")
+@router.head("/")
 @router.options("/")
 async def health(request: Request, response: Response) -> Dict[str, Any]:
     """
@@ -179,6 +180,8 @@ async def health(request: Request, response: Response) -> Dict[str, Any]:
 
 # Add separate endpoint for /health (without trailing slash) to handle direct requests
 @router.get("", include_in_schema=False)  # This will match /health exactly
+@router.head("", include_in_schema=False)
+@router.options("", include_in_schema=False)  # Add OPTIONS support
 async def health_no_slash(request: Request, response: Response) -> Dict[str, Any]:
     """
     Health check endpoint without trailing slash - redirects to main health endpoint logic.
@@ -186,6 +189,7 @@ async def health_no_slash(request: Request, response: Response) -> Dict[str, Any
     return await health(request, response)
 
 @router.get("/live")
+@router.head("/live")
 @router.options("/live")
 async def live(request: Request) -> Dict[str, Any]:
     """
@@ -393,6 +397,7 @@ async def _check_readiness_status(db: AsyncSession) -> Dict[str, Any]:
         raise HTTPException(status_code=503, detail="Service readiness check failed")
 
 @router.get("/ready")
+@router.head("/ready")
 @router.options("/ready")
 async def ready(request: Request) -> Dict[str, Any]:
     """Readiness probe to check if the application is ready to serve requests."""
@@ -439,8 +444,11 @@ async def ready(request: Request) -> Dict[str, Any]:
         
         # Only try to get database dependency after startup state check passes
         try:
-            # Use async for to properly handle session lifecycle
-            async for db in get_db_dependency():
+            # CRITICAL FIX: Use direct database context manager from DatabaseManager
+            # This bypasses the dependency injection layer to avoid async generator issues
+            from netra_backend.app.db.database_manager import DatabaseManager
+            
+            async with DatabaseManager.get_async_session() as db:
                 try:
                     # CRITICAL FIX: Reduce timeout to align with faster database check (6.0s total allows for retries)
                     result = await asyncio.wait_for(_check_readiness_status(db), timeout=6.0)
