@@ -42,7 +42,7 @@ from auth_service.auth_core.database.models import Base
 from auth_service.auth_core.redis_manager import AuthRedisManager
 
 # Import auth service dependencies for real service setup
-from auth_service.auth_core.core.jwt_handler import JWTManager
+from auth_service.auth_core.core.jwt_handler import JWTHandler
 from auth_service.auth_core.services.auth_service import AuthService
 
 logger = logging.getLogger(__name__)
@@ -184,13 +184,9 @@ def real_jwt_manager():
     ZERO MOCKS: Uses actual JWT operations with test configuration.
     """
     # Use test JWT configuration
-    jwt_manager = JWTManager()
-    jwt_manager.secret_key = get_env().get("JWT_SECRET_KEY")
-    jwt_manager.algorithm = "HS256"
-    jwt_manager.access_token_expire_minutes = 15
-    jwt_manager.refresh_token_expire_days = 7
+    jwt_handler = JWTHandler()
     
-    return jwt_manager
+    return jwt_handler
 
 
 @pytest.fixture(scope="function")
