@@ -12,38 +12,34 @@
 
 from typing import Any, Dict, Optional
 
-# Import all JSON extraction functions from unified JSON handler
+# Import JSON utilities from unified handler
 from netra_backend.app.core.serialization.unified_json_handler import (
-    UnifiedJSONHandler, 
-    LLMResponseParser,
-    JSONErrorFixer,
-    backend_json_handler as json_handler,
-    llm_parser,
+    comprehensive_json_fix,
+    safe_json_loads,
+    safe_json_dumps,
 )
 
-# Create error fixer instance
-error_fixer = JSONErrorFixer()
-
-# Create convenience functions for backward compatibility
-def extract_json_from_response(response: str):
+# Create compatibility shims for old function names
+def extract_json_from_response(response: str) -> Optional[Dict[str, Any]]:
     """Extract JSON from LLM response."""
-    return llm_parser.extract_json_from_response(response)
+    return safe_json_loads(response)
 
-def extract_partial_json(response: str):
-    """Extract partial JSON from incomplete response."""
-    return llm_parser.extract_json_fragments(response)
+def extract_partial_json(response: str) -> Optional[Dict[str, Any]]:
+    """Extract partial JSON from response."""
+    return safe_json_loads(response)
 
-def fix_common_json_errors(json_str: str):
-    """Fix common JSON formatting errors."""
-    return error_fixer.fix_common_json_errors(json_str)
+def fix_common_json_errors(json_str: str) -> str:
+    """Fix common JSON errors."""
+    fixed = comprehensive_json_fix(json_str)
+    return safe_json_dumps(fixed) if fixed else json_str
 
-def preprocess_llm_response(response: str):
+def preprocess_llm_response(response: str) -> str:
     """Preprocess LLM response for JSON extraction."""
-    return llm_parser._preprocess_response(response)
+    return response.strip()
 
-def recover_truncated_json(json_str: str):
-    """Recover truncated JSON."""
-    return error_fixer.recover_truncated_json(json_str)
+def recover_truncated_json(json_str: str) -> Optional[Dict[str, Any]]:
+    """Attempt to recover truncated JSON."""
+    return safe_json_loads(json_str)
 
 # Re-export for backward compatibility
 __all__ = [

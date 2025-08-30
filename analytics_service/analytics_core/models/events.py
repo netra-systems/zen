@@ -32,6 +32,14 @@ class EventType(str, Enum):
     ERROR_TRACKING = "error_tracking"
 
 
+class EventCategory(str, Enum):
+    """Categories for grouping events by their nature and purpose."""
+    USER_INTERACTION = "user_interaction"
+    TECHNICAL = "technical"
+    BUSINESS = "business"
+    SYSTEM = "system"
+
+
 class MessageType(str, Enum):
     """Types of messages in chat interactions."""
     USER_PROMPT = "user_prompt"
@@ -311,6 +319,7 @@ class ProcessingResult(BaseModel):
 __all__ = [
     # Enums
     "EventType",
+    "EventCategory",
     "MessageType", 
     "ThreadAction",
     "QuestionType",

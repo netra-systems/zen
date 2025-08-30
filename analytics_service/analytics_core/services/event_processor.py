@@ -18,7 +18,6 @@ from analytics_service.analytics_core.models.events import (
     AnalyticsEvent,
     EventType,
     EventCategory,
-    PromptAnalytics,
     EventBatch,
     ProcessingResult
 )

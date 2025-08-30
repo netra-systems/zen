@@ -14,6 +14,7 @@ Business Value Justification (BVJ):
 from .events import (
     # Enums
     EventType,
+    EventCategory,
     FeedbackType,
     MessageType,
     MetricType,
@@ -87,6 +88,7 @@ from .reports import (
 __all__ = [
     # Event models - Enums
     "EventType",
+    "EventCategory",
     "MessageType", 
     "ThreadAction",
     "QuestionType",

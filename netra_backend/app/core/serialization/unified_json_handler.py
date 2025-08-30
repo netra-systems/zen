@@ -861,6 +861,11 @@ def fix_tool_parameters(data: Dict[str, Any]) -> Dict[str, Any]:
                 rec["parameters"] = parse_dict_field(rec["parameters"])
     return data
 
+def ensure_agent_response_is_json(response: Any) -> Dict[str, Any]:
+    """Ensure agent response is valid JSON."""
+    parser = LLMResponseParser()
+    return parser.ensure_agent_response_is_json(response)
+
 def comprehensive_json_fix(data: Any) -> Any:
     """Apply comprehensive JSON string parsing fixes to data."""
     if isinstance(data, dict):
