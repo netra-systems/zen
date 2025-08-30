@@ -29,7 +29,16 @@ export const MessageInput: React.FC = () => {
   
   const { messageHistory, addToHistory, navigateHistory } = useMessageHistory();
   const { rows } = useTextareaResize(textareaRef, message);
-  const { isSending, handleSend } = useMessageSending();
+  const { 
+    isSending, 
+    error, 
+    isTimeout, 
+    retryCount, 
+    isCircuitOpen, 
+    handleSend, 
+    retry,
+    reset 
+  } = useMessageSending();
 
   const focusTextarea = (): void => {
     if (textareaRef.current && isAuthenticated) {
@@ -129,6 +138,45 @@ export const MessageInput: React.FC = () => {
               data-testid="char-count"
             >
               {message.length}/{CHAR_LIMIT}
+            </div>
+          )}
+          
+          {/* Error Messages and Recovery UI */}
+          {error && (
+            <div className="absolute top-full mt-2 left-0 right-0 bg-red-50 border border-red-200 rounded-md p-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <span className="text-red-600 text-sm">
+                    {isTimeout ? 'Request timeout - ' : isCircuitOpen ? 'Service unavailable - ' : 'Error - '}
+                    {error}
+                  </span>
+                  {retryCount > 0 && (
+                    <span className="text-red-500 text-xs">
+                      (Attempt {retryCount}/3)
+                    </span>
+                  )}
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => retry({ 
+                      message, 
+                      activeThreadId, 
+                      currentThreadId, 
+                      isAuthenticated 
+                    })}
+                    className="text-xs px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                    disabled={isSending}
+                  >
+                    Try Again
+                  </button>
+                  <button
+                    onClick={reset}
+                    className="text-xs px-2 py-1 text-red-600 hover:text-red-800"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>
