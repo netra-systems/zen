@@ -210,7 +210,7 @@ class TestProductionDataE2ERealLLM:
             pytest.skip("Production scenarios require real LLM testing")
         
         # Setup production environment
-        production_executor = ProductionTestExecutor(test_core, production_monitor)
+        production_executor = ProductionExecutor(test_core, production_monitor)
         
         # Execute production scenario
         start_time = time.time()
@@ -623,7 +623,7 @@ Format your response professionally for enterprise decision-makers."""
             assert result["avg_request_time"] <= 8.0, f"Enterprise request time too slow: {result['avg_request_time']:.2f}s"
 
 
-class TestProductionExecutor:
+class ProductionExecutor:
     """Executes production test scenarios."""
     
     def __init__(self, test_core: AgentConversationTestCore, monitor: 'ProductionPerformanceMonitor'):

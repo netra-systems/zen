@@ -29,6 +29,7 @@ import time
 from typing import Dict, Any
 import pytest
 import pytest_asyncio
+from unittest.mock import patch
 
 from tests.e2e.agent_billing_test_helpers import (
     AgentBillingTestCore, AgentRequestSimulator, BillingFlowValidator, AgentBillingTestUtils,

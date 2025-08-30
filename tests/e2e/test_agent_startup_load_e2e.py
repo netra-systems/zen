@@ -55,7 +55,7 @@ from tests.e2e.service_manager import RealServicesManager
 from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
 
-class TestCorruptedStateManager:
+class CorruptedStateTestManager:
 
     """Manages corrupted state recovery testing."""
     
@@ -75,14 +75,14 @@ class TestCorruptedStateManager:
         self.corrupted_data_created = False
 
 
-async def setup_http_client(self) -> None:
+    async def setup_http_client(self) -> None:
 
         """Setup HTTP client for API requests."""
 
         self.http_client = httpx.AsyncClient(timeout=30.0, follow_redirects=True)
 
 
-async def create_corrupted_state(self) -> Dict[str, Any]:
+    async def create_corrupted_state(self) -> Dict[str, Any]:
 
         """Create intentionally corrupted user state data."""
 
@@ -103,7 +103,7 @@ async def create_corrupted_state(self) -> Dict[str, Any]:
         return corrupted_state
 
 
-async def simulate_corruption_recovery(self) -> Dict[str, Any]:
+    async def simulate_corruption_recovery(self) -> Dict[str, Any]:
 
         """Simulate corrupted state recovery without real services."""
         # Simulate corruption detection and recovery process
@@ -128,8 +128,7 @@ async def simulate_corruption_recovery(self) -> Dict[str, Any]:
         return recovery_result
 
 
-@pytest.mark.e2e
-async def test_agent_with_corruption_simulation(self) -> Dict[str, Any]:
+    async def test_agent_with_corruption_simulation(self) -> Dict[str, Any]:
 
         """Test agent startup with corrupted state using simulation."""
         # Simulate the corruption recovery process
@@ -154,7 +153,7 @@ async def test_agent_with_corruption_simulation(self) -> Dict[str, Any]:
         return recovery_result
 
 
-def validate_corruption_recovery(self, response: Dict[str, Any]) -> None:
+    def validate_corruption_recovery(self, response: Dict[str, Any]) -> None:
 
         """Validate agent recovered from corrupted state."""
 
@@ -169,7 +168,7 @@ def validate_corruption_recovery(self, response: Dict[str, Any]) -> None:
         assert response.get("type") == "agent_response", "Invalid response type"
 
 
-async def cleanup_resources(self) -> None:
+    async def cleanup_resources(self) -> None:
 
         """Cleanup test resources."""
 
@@ -182,7 +181,7 @@ async def cleanup_resources(self) -> None:
             await self.http_client.aclose()
 
 
-class TestLoadManager:
+class LoadTestManager:
 
     """Manages 100 concurrent users load testing."""
     
@@ -204,7 +203,7 @@ class TestLoadManager:
         self.success_count = 0
 
 
-async def execute_100_user_load_test(self) -> Dict[str, Any]:
+    async def execute_100_user_load_test(self) -> Dict[str, Any]:
 
         """Execute 100 concurrent user startup test."""
 
@@ -231,7 +230,7 @@ async def execute_100_user_load_test(self) -> Dict[str, Any]:
         return load_results
 
 
-async def _create_100_user_tasks(self) -> List[asyncio.Task]:
+    async def _create_100_user_tasks(self) -> List[asyncio.Task]:
 
         """Create 100 concurrent user simulation tasks."""
 
@@ -248,14 +247,14 @@ async def _create_100_user_tasks(self) -> List[asyncio.Task]:
         return tasks
 
 
-async def _execute_concurrent_tasks(self, tasks: List[asyncio.Task]) -> List[Any]:
+    async def _execute_concurrent_tasks(self, tasks: List[asyncio.Task]) -> List[Any]:
 
         """Execute all user tasks concurrently."""
 
         return await asyncio.gather(*tasks, return_exceptions=True)
 
 
-async def _simulate_single_user_startup(self, user_id: str) -> Dict[str, Any]:
+    async def _simulate_single_user_startup(self, user_id: str) -> Dict[str, Any]:
 
         """Simulate single user agent startup flow."""
 
@@ -288,7 +287,7 @@ async def _simulate_single_user_startup(self, user_id: str) -> Dict[str, Any]:
             return {"user_id": user_id, "error": str(e), "status": "failed"}
 
 
-async def _perform_user_auth(self, user_id: str) -> Dict[str, str]:
+    async def _perform_user_auth(self, user_id: str) -> Dict[str, str]:
 
         """Simulate authentication for load test user."""
         # Simulate auth delay (typical network + validation time)
@@ -298,7 +297,7 @@ async def _perform_user_auth(self, user_id: str) -> Dict[str, str]:
         return {"token": f"mock_token_{user_id}_{time.time()}"}
 
 
-async def _perform_websocket_connection(self, auth_result: Dict[str, str], user_id: str) -> Dict[str, Any]:
+    async def _perform_websocket_connection(self, auth_result: Dict[str, str], user_id: str) -> Dict[str, Any]:
 
         """Simulate WebSocket connection for load test user."""
         # Simulate connection establishment time
@@ -310,7 +309,7 @@ async def _perform_websocket_connection(self, auth_result: Dict[str, str], user_
         return {"connection_id": connection_id, "user_id": user_id}
 
 
-async def _perform_agent_startup(self, ws_result: Dict[str, Any], user_id: str) -> Dict[str, Any]:
+    async def _perform_agent_startup(self, ws_result: Dict[str, Any], user_id: str) -> Dict[str, Any]:
 
         """Simulate agent startup for load test user."""
         # Simulate agent initialization and response generation
@@ -330,7 +329,7 @@ async def _perform_agent_startup(self, ws_result: Dict[str, Any], user_id: str) 
         }
 
 
-async def _compile_load_results(self, results: List[Any], start_time: float) -> Dict[str, Any]:
+    async def _compile_load_results(self, results: List[Any], start_time: float) -> Dict[str, Any]:
 
         """Compile load test results and metrics."""
 
@@ -365,7 +364,7 @@ async def _compile_load_results(self, results: List[Any], start_time: float) -> 
         }
 
 
-def _calculate_p99_latency(self) -> float:
+    def _calculate_p99_latency(self) -> float:
 
         """Calculate P99 latency from response times."""
 
@@ -380,7 +379,7 @@ def _calculate_p99_latency(self) -> float:
         return sorted_times[p99_index] if p99_index < len(sorted_times) else sorted_times[-1]
 
 
-def _calculate_memory_metrics(self) -> Dict[str, float]:
+    def _calculate_memory_metrics(self) -> Dict[str, float]:
 
         """Calculate memory usage metrics."""
 

@@ -21,6 +21,7 @@ import asyncio
 import pytest
 import time
 from typing import Any, Dict, List, Optional
+from unittest.mock import patch
 
 from test_framework.environment_markers import env, env_requires, dev_and_staging
 from netra_backend.app.agents.base_agent import BaseSubAgent

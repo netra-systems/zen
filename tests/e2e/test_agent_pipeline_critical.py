@@ -36,7 +36,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.db.clickhouse import get_clickhouse_service
 from test_framework.real_llm_config import configure_real_llm_testing
-from test_framework.environment_isolation import IsolatedEnvironment
+from tests.e2e.agent_collaboration_helpers import AgentCollaborationTestCore
 
 
 @pytest.mark.e2e
@@ -46,17 +46,17 @@ class TestAgentPipelineCritical:
     """Critical E2E tests for the complete agent pipeline workflow."""
     
     @pytest.fixture
-    async def isolated_environment(self):
+    async def test_environment(self):
         """Provide isolated test environment."""
-        env = IsolatedEnvironment()
-        await env.setup()
+        core = AgentCollaborationTestCore()
+        await core.setup_test_environment()
         try:
-            yield env
+            yield core
         finally:
-            await env.cleanup()
+            await core.teardown_test_environment()
     
     @pytest.fixture
-    async def real_llm_manager(self, isolated_environment):
+    async def real_llm_manager(self, test_environment):
         """Provide real LLM manager for authentic responses."""
         config = configure_real_llm_testing()
         llm_manager = LLMManager(config)
@@ -64,9 +64,11 @@ class TestAgentPipelineCritical:
         return llm_manager
     
     @pytest.fixture
-    async def pipeline_components(self, isolated_environment, real_llm_manager):
+    async def pipeline_components(self, test_environment, real_llm_manager):
         """Setup complete pipeline components with real services."""
-        redis_manager = RedisManager(isolated_environment.get_redis_url())
+        import os
+        redis_url = os.getenv("REDIS_URL", "redis://localhost:6380/0")
+        redis_manager = RedisManager(redis_url)
         await redis_manager.initialize()
         
         tool_dispatcher = ToolDispatcher()
@@ -109,7 +111,7 @@ class TestAgentPipelineCritical:
         }
     
     @pytest.mark.asyncio
-    async def test_full_pipeline_execution_with_real_agents(self, pipeline_components, isolated_environment):
+    async def test_full_pipeline_execution_with_real_agents(self, pipeline_components, test_environment):
         """Test complete pipeline execution from user request to final report.
         
         This is the primary critical test validating the entire optimization flow.
@@ -230,7 +232,7 @@ class TestAgentPipelineCritical:
         print("✅ Full pipeline execution successful - all agents completed with valid results")
     
     @pytest.mark.asyncio
-    async def test_state_propagation_across_agents(self, pipeline_components, isolated_environment):
+    async def test_state_propagation_across_agents(self, pipeline_components, test_environment):
         """Test that agent state and context is properly propagated through the pipeline."""
         
         # Initialize state with tracking metadata
@@ -323,7 +325,7 @@ class TestAgentPipelineCritical:
         print("✅ State propagation test successful - context preserved across all agents")
     
     @pytest.mark.asyncio
-    async def test_error_recovery_with_invalid_inputs(self, pipeline_components, isolated_environment):
+    async def test_error_recovery_with_invalid_inputs(self, pipeline_components, test_environment):
         """Test error recovery and graceful degradation with invalid inputs."""
         
         # Test scenarios with problematic inputs that should trigger fallback mechanisms
@@ -380,7 +382,7 @@ class TestAgentPipelineCritical:
         print("✅ Error recovery test successful - system handles invalid inputs gracefully")
     
     @pytest.mark.asyncio
-    async def test_performance_metrics_aggregation(self, pipeline_components, isolated_environment):
+    async def test_performance_metrics_aggregation(self, pipeline_components, test_environment):
         """Test that performance metrics are properly collected and aggregated throughout pipeline."""
         
         # Initialize state with performance tracking
@@ -461,7 +463,7 @@ class TestAgentPipelineCritical:
         print("✅ Performance metrics aggregation test successful")
     
     @pytest.mark.asyncio
-    async def test_context_preservation_through_handoffs(self, pipeline_components, isolated_environment):
+    async def test_context_preservation_through_handoffs(self, pipeline_components, test_environment):
         """Test that context and important information is preserved through agent handoffs."""
         
         # Initialize state with rich context
@@ -599,7 +601,7 @@ class TestAgentPipelineStaging:
     """Staging-specific tests for agent pipeline with production-like conditions."""
     
     @pytest.mark.asyncio
-    async def test_pipeline_with_production_load_patterns(self, pipeline_components, isolated_environment):
+    async def test_pipeline_with_production_load_patterns(self, pipeline_components, test_environment):
         """Test pipeline behavior under production-like load and data patterns."""
         
         # Simulate realistic production request patterns

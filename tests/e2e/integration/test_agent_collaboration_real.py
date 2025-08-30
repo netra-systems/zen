@@ -210,6 +210,7 @@ class TestRealAgentCollaboration:
                                              request: Dict[str, Any]) -> Dict[str, Any]:
         """Execute collaboration request with mocked multi-agent responses."""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
+        from unittest.mock import patch
         with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
             mock_llm.return_value = "Multi-agent collaboration analysis completed with agent handoff"
             response = await AgentCollaborationTestUtils.send_collaboration_request(

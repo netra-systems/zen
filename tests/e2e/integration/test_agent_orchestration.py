@@ -15,6 +15,7 @@ COMPLIANCE: File size <300 lines, Functions <8 lines, Real agent testing
 import asyncio
 import time
 from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -43,7 +44,7 @@ class MockSubAgent(BaseSubAgent):
         self.state = SubAgentLifecycle.COMPLETED
 
 
-class TestAgentOrchestrationer:
+class AgentOrchestrationTester:
     """Tests multi-agent orchestration and coordination."""
     
     def __init__(self, use_mock_llm: bool = True):
@@ -56,11 +57,11 @@ class TestAgentOrchestrationer:
         
         # Create mocked dependencies
         # Mock: Session isolation for controlled testing without external state
-        self.db_session = AsyncNone  # TODO: Use real service instead of Mock
+        self.db_session = AsyncMock()  # TODO: Use real service instead of Mock
         # Mock: WebSocket connection isolation for testing without network overhead
-        self.websocket_manager = AsyncNone  # TODO: Use real service instead of Mock
+        self.websocket_manager = AsyncMock()  # TODO: Use real service instead of Mock
         # Mock: Tool execution isolation for predictable agent testing
-        self.tool_dispatcher = AsyncNone  # TODO: Use real service instead of Mock
+        self.tool_dispatcher = AsyncMock()  # TODO: Use real service instead of Mock
     
     async def create_supervisor_agent(self, name: str) -> SupervisorAgent:
         """Create supervisor agent for orchestration."""

@@ -255,7 +255,7 @@ async def test_agent_startup_with_rate_limiting():
     """
     # Mock the rate limiting behavior for focused testing
 
-    rate_limit_tester = AgentRateLimitTester(None, "mock://backend")
+    rate_limit_tester = TestAgentRateLimiter(None, "mock://backend")
 
     user_data = create_test_user_data()
     
@@ -341,7 +341,7 @@ async def test_agent_startup_database_connectivity_failure_recovery():
     # Mock database manager for focused testing
 
     # Mock: Generic component isolation for controlled unit testing
-    db_manager = MagicNone  # TODO: Use real service instead of Mock
+    db_manager = None  # Mock database manager for testing
 
     db_failure_simulator = DatabaseFailureSimulator(db_manager)
 

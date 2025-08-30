@@ -60,7 +60,7 @@ class TestToolAtomicityer:
         self.jwt_helper = JWTTestHelper()
         self.backend_url = "http://localhost:8000"
         self.test_tools = self._define_test_tools()
-        self.test_results: List[ToolTestResult] = []
+        self.test_results: List[TestToolResult] = []
 
     def _define_test_tools(self) -> Dict[str, Dict[str, Any]]:
         """Define test tools with expected atomic behaviors."""
@@ -190,3 +190,47 @@ class TestToolAtomicityer:
             "error_count": 0,
             "violations": violations
         }
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_tool_atomicity_basic_validation():
+    """Test basic tool atomicity validation."""
+    tester = TestToolAtomicityer()
+    
+    # Test a simple atomic output
+    mock_output = {
+        "cost_analysis": {
+            "current_cost": 150.0,
+            "optimized_cost": 120.0,
+            "savings": 30.0
+        }
+    }
+    
+    tool_config = tester.test_tools["cost_analyzer"]
+    result = tester._analyze_output_atomicity(mock_output, tool_config)
+    
+    assert result["level"] == ToolAtomicityLevel.ATOMIC
+    assert result["responsibility_count"] == 1
+    assert result["error_count"] == 0
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration 
+async def test_tool_complexity_detection():
+    """Test detection of non-atomic tool outputs."""
+    tester = TestToolAtomicityer()
+    
+    # Test a complex output with multiple responsibilities
+    mock_output = {
+        "cost_analysis": {"cost": 150.0},
+        "performance_data": {"throughput": 100},
+        "optimization_plan": {"steps": ["a", "b", "c"]}
+    }
+    
+    tool_config = tester.test_tools["cost_analyzer"]
+    result = tester._analyze_output_atomicity(mock_output, tool_config)
+    
+    assert result["level"] != ToolAtomicityLevel.ATOMIC
+    assert result["responsibility_count"] > 1
+    assert len(result["violations"]) > 0

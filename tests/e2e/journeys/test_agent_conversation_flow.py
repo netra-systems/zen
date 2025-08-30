@@ -60,8 +60,7 @@ class TestAgentConversationFlow:
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
-    async def test_complete_optimization_conversation_flow(self, test_core, flow_simulator:
-                                                         flow_validator):
+    async def test_complete_optimization_conversation_flow(self, test_core, flow_simulator, flow_validator):
         """Test complete optimization conversation with context preservation."""
         session_data = await test_core.establish_conversation_session(PlanTier.PRO)
         try:
@@ -138,12 +137,17 @@ class TestAgentConversationFlow:
                                        flow_simulator) -> Dict[str, Any]:
         """Execute complete conversation flow with mocked responses."""
         results = []
+        context_keywords = ["optimization", "cost_reduction", "performance"]
         for i, message in enumerate(messages):
             request = flow_simulator.create_agent_request(
-                session_data["user_data"].id, message, f"flow_turn_{i}", [f"context_{j}" for j in range(i)]
+                session_data["user_data"].id, message, f"flow_turn_{i}", context_keywords[:i+1]
             )
             response = await self._execute_agent_request_with_mock(session_data, request, "triage")
             results.append(response)
+            # Add turn to session for context validation
+            turn = AgentConversationTestUtils.create_conversation_turn(f"flow_turn_{i}", message, context_keywords[:i+1])
+            turn.response_time = response.get("response_time", 0)
+            session_data["session"].turns.append(turn)
         return {"responses": results, "flow_complete": True}
     
     async def _test_multiple_agents(self, session_data: Dict[str, Any], flow_simulator) -> Dict[str, Any]:

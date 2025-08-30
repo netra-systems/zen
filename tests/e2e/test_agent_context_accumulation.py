@@ -28,7 +28,7 @@ from tests.e2e.agent_response_test_utilities import (
     AgentResponseSimulator,
 )
 
-class TestAgentContextAccumulationer:
+class AgentContextAccumulationTester:
     """Tests agent context accumulation and memory management."""
     
     def __init__(self, use_mock_llm: bool = True):
@@ -42,11 +42,11 @@ class TestAgentContextAccumulationer:
     async def create_test_supervisor_with_context(self, thread_id: str) -> SupervisorAgent:
         """Create supervisor agent with context tracking enabled."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_db = MagicNone  # TODO: Use real service instead of Mock
+        mock_db = None  # TODO: Use real service instead of Mock
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket = MagicNone  # TODO: Use real service instead of Mock
+        mock_websocket = None  # TODO: Use real service instead of Mock
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        mock_tool_dispatcher = MagicNone  # TODO: Use real service instead of Mock
+        mock_tool_dispatcher = None  # TODO: Use real service instead of Mock
         
         supervisor = SupervisorAgent(
             db_session=mock_db,

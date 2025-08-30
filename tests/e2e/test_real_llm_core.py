@@ -30,7 +30,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.user_plan import PlanTier
 
 
-class TestRealLLMManager:
+class RealLLMManager:
     """Manages real LLM testing with cost controls."""
     
     def __init__(self):
@@ -59,7 +59,7 @@ class TestRealLLMCore:
     @pytest.fixture
     def llm_test_manager(self):
         """Initialize LLM test manager."""
-        return RealLLMTestManager()
+        return RealLLMManager()
     
     @pytest.fixture
     def llm_manager(self):
