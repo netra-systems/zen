@@ -122,8 +122,15 @@ class DockerServicesManager:
             
     def start(self, profile: str, build: bool = False, detach: bool = True):
         """Start services for a specific profile."""
+        if profile not in self.PROFILES:
+            print(f"[ERROR] Unknown profile: {profile}")
+            return False
+            
         print(f"\n[START] Starting {profile} services...")
         print(f"        {self.PROFILES[profile]['description']}")
+        
+        profile_config = self.PROFILES[profile]
+        compose_file = profile_config.get('compose_file', self.compose_file)
         
         args = ["up"]
         
@@ -133,11 +140,15 @@ class DockerServicesManager:
         if build:
             args.append("--build")
             
-        # Add profile argument
-        for p in self.PROFILES[profile]['profiles']:
-            args.extend(["--profile", p])
+        # Add profile argument only if profiles are defined
+        if profile_config.get('profiles'):
+            for p in profile_config['profiles']:
+                args.extend(["--profile", p])
+        else:
+            # For test profiles, explicitly list services
+            args.extend(profile_config['services'])
             
-        result = self.run_docker_compose(args)
+        result = self.run_docker_compose(args, compose_file=compose_file)
         
         if result.returncode == 0:
             print(f"[OK] {profile} services started successfully")
@@ -233,20 +244,37 @@ class DockerServicesManager:
         print('='*60)
         
         # Show service URLs based on profile
-        if profile in ['netra', 'backend', 'full']:
-            print(f"   Backend API: http://localhost:8000")
-            print(f"   Backend Health: http://localhost:8000/health")
-            print(f"   Backend Docs: http://localhost:8000/docs")
+        if profile.startswith('test'):
+            # Test environment URLs
+            if profile in ['test', 'test-full']:
+                print(f"   Backend API: http://localhost:8001")
+                print(f"   Backend Health: http://localhost:8001/health")
+                print(f"   Backend Docs: http://localhost:8001/docs")
+                print(f"   Auth API: http://localhost:8082")
+                print(f"   Auth Health: http://localhost:8082/health")
             
-        if profile in ['auth', 'backend', 'full']:
-            print(f"   Auth API: http://localhost:8081")
-            print(f"   Auth Health: http://localhost:8081/health")
+            if profile == 'test-full':
+                print(f"   Frontend: http://localhost:3001")
             
-        if profile in ['frontend', 'full']:
-            print(f"   Frontend: http://localhost:3000")
-            
-        if profile in ['db', 'netra', 'backend', 'auth', 'full']:
-            print(f"   PostgreSQL: localhost:5432")
+            if profile in ['test-db', 'test', 'test-full']:
+                print(f"   PostgreSQL: localhost:5434")
+                print(f"   Redis: localhost:6381")
+        else:
+            # Dev environment URLs
+            if profile in ['netra', 'backend', 'full']:
+                print(f"   Backend API: http://localhost:8000")
+                print(f"   Backend Health: http://localhost:8000/health")
+                print(f"   Backend Docs: http://localhost:8000/docs")
+                
+            if profile in ['auth', 'backend', 'full']:
+                print(f"   Auth API: http://localhost:8081")
+                print(f"   Auth Health: http://localhost:8081/health")
+                
+            if profile in ['frontend', 'full']:
+                print(f"   Frontend: http://localhost:3000")
+                
+            if profile in ['db', 'netra', 'backend', 'auth', 'full']:
+                print(f"   PostgreSQL: localhost:5432")
             
         if profile in ['cache', 'netra', 'backend', 'auth', 'full']:
             print(f"   Redis: localhost:6379")

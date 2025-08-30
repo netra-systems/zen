@@ -905,7 +905,8 @@ class UnifiedTestRunner:
             env = get_env()
             env.set('USE_REAL_SERVICES', 'false', 'test_runner_frontend')
             env.set('USE_DOCKER_SERVICES', 'false', 'test_runner_frontend')
-            env.set('USE_REAL_LLM', 'false', 'test_runner_frontend')
+            # CRITICAL: Real LLM enabled by default per CLAUDE.md - mocks forbidden
+            env.set('USE_REAL_LLM', 'true', 'test_runner_frontend')
         
         category_commands = {
             "unit": f"npm run test:unit -- --setupFilesAfterEnv='<rootDir>/{setup_file}'",

@@ -12,6 +12,9 @@ export const mockUseWebSocket = jest.fn(() => ({
   sendMessage: mockSendMessage,
 }));
 
+// Mock textarea resize hook
+export const mockUseTextareaResize = jest.fn();
+
 // Mock only external stores (these would make HTTP calls)
 export const mockChatStore = {
   activeThreadId: 'thread-1',
@@ -56,7 +59,13 @@ export const setupMinimalMocks = () => {
   jest.mock('@/components/chat/hooks/useMessageSending', () => ({
     useMessageSending: () => ({
       isSending: false,
-      handleSend: mockSendMessage
+      error: null,
+      isTimeout: false,
+      retryCount: 0,
+      isCircuitOpen: false,
+      handleSend: jest.fn().mockResolvedValue(undefined),
+      retry: jest.fn(),
+      reset: jest.fn()
     })
   }));
 
@@ -70,8 +79,16 @@ export const setupMinimalMocks = () => {
   }));
 
   jest.mock('@/components/chat/hooks/useTextareaResize', () => ({
-    useTextareaResize: () => ({ rows: 1 })
+    useTextareaResize: mockUseTextareaResize
   }));
+  
+  // Setup default mock behavior with dynamic response
+  mockUseTextareaResize.mockImplementation((textareaRef: any, message: string) => {
+    const lineCount = message ? message.split('\n').length : 1;
+    const rows = Math.min(Math.max(lineCount, 1), 5);
+    console.log(`[MOCK] useTextareaResize called with message: "${message}", returning rows: ${rows}`);
+    return { rows };
+  });
 };
 
 // Reset function
@@ -79,6 +96,13 @@ export const resetMocks = () => {
   jest.clearAllMocks();
   mockChatStore.isProcessing = false;
   mockAuthStore.isAuthenticated = true;
+  // Setup default textarea behavior with dynamic response
+  mockUseTextareaResize.mockImplementation((textareaRef: any, message: string) => {
+    const lineCount = message ? message.split('\n').length : 1;
+    const rows = Math.min(Math.max(lineCount, 1), 5);
+    console.log(`[MOCK] useTextareaResize called with message: "${message}", returning rows: ${rows}`);
+    return { rows };
+  });
 };
 
 // Quick overrides for test scenarios
@@ -94,3 +118,4 @@ export const setThreadId = (id: string) => {
   mockChatStore.activeThreadId = id;
   mockThreadStore.currentThreadId = id;
 };
+

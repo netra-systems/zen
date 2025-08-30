@@ -155,11 +155,19 @@ def configure_test_environment():
 def should_use_real_llm() -> bool:
     """Check if real LLM should be used, supporting both new and legacy variable names.
     
+    CRITICAL: Real LLM testing is the DEFAULT for Netra Apex (per CLAUDE.md).
     Returns:
         bool: True if real LLM should be used, False otherwise
     """
-    return (os.getenv("USE_REAL_LLM", "false").lower() == "true" or
-            os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true")
+    # Check primary control variable first (default to true)
+    primary = os.getenv("NETRA_REAL_LLM_ENABLED", "true").lower() == "true"
+    if primary:
+        return True
+    
+    # Check legacy variables for backward compatibility
+    return (os.getenv("USE_REAL_LLM", "true").lower() == "true" or
+            os.getenv("TEST_USE_REAL_LLM", "true").lower() == "true" or
+            os.getenv("ENABLE_REAL_LLM_TESTING", "true").lower() == "true")
 
 # LLM configuration functions moved to test_framework.llm_config_manager
 # Import the canonical function for backward compatibility

@@ -299,7 +299,7 @@ async def test_complete_agent_pipeline_execution(real_services):
     BVJ: Segment: ALL | Goal: Core Agent Value Delivery | Impact: $120K+ MRR
     Test: Complete agent pipeline from WebSocket message to agent response
     """
-    pipeline_tester = AgentPipelineExecutionTester(real_services)
+    pipeline_tester = TestAgentPipelineExecutioner(real_services)
     
     # Phase 1: Setup authenticated WebSocket connection
     ws_setup = await pipeline_tester.setup_authenticated_websocket()
@@ -353,8 +353,8 @@ async def test_complete_agent_pipeline_execution(real_services):
 @pytest.mark.e2e
 async def test_agent_pipeline_performance_requirements(real_services):
     """Test that agent pipeline meets performance requirements for different request types."""
-    pipeline_tester = AgentPipelineExecutionTester(real_services)
-    performance_tester = AgentPipelinePerformanceTester(pipeline_tester)
+    pipeline_tester = TestAgentPipelineExecutioner(real_services)
+    performance_tester = TestAgentPipelinePerformanceer(pipeline_tester)
     
     # Setup WebSocket
     ws_setup = await pipeline_tester.setup_authenticated_websocket()
@@ -393,7 +393,7 @@ async def test_agent_pipeline_performance_requirements(real_services):
 @pytest.mark.e2e
 async def test_concurrent_agent_pipeline_execution(real_services):
     """Test multiple concurrent agent pipeline executions."""
-    pipeline_tester = AgentPipelineExecutionTester(real_services)
+    pipeline_tester = TestAgentPipelineExecutioner(real_services)
     
     # Setup multiple WebSocket connections
     websockets = []
@@ -455,7 +455,7 @@ async def test_concurrent_agent_pipeline_execution(real_services):
 @pytest.mark.e2e
 async def test_agent_pipeline_error_handling(real_services):
     """Test agent pipeline error handling and recovery."""
-    pipeline_tester = AgentPipelineExecutionTester(real_services)
+    pipeline_tester = TestAgentPipelineExecutioner(real_services)
     
     # Setup WebSocket
     ws_setup = await pipeline_tester.setup_authenticated_websocket()

@@ -39,7 +39,7 @@ on:
           - 'mock'
           - 'real-llm'
           - 'full-validation'
-        default: 'mock'
+        default: 'real-llm'
       performance_baseline_check:
         description: 'Validate against performance baselines'
         required: false
@@ -115,21 +115,23 @@ jobs:
         run: |
           echo "=== Agent Startup E2E Test Configuration ==="
           
-          # Determine test mode based on inputs and event
+          # Determine test mode based on inputs and event - Real LLM is default per CLAUDE.md
           if [[ -n "${{ inputs.test_mode }}" ]]; then
             TEST_MODE="${{ inputs.test_mode }}"
           elif [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
-            TEST_MODE="real-llm"  # Main branch gets full validation
+            TEST_MODE="full-validation"  # Main branch gets full validation
           elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            TEST_MODE="mock"  # PRs use mock mode for speed
+            TEST_MODE="real-llm"  # PRs use real LLM (per CLAUDE.md)
           else
-            TEST_MODE="mock"  # Default to mock
+            TEST_MODE="real-llm"  # Default to real LLM
           fi
           
-          # Configure LLM usage
-          ENABLE_REAL_LLM="false"
-          if [[ "$TEST_MODE" =~ ^(real-llm|full-validation)$ ]]; then
-            ENABLE_REAL_LLM="true"
+          # Configure LLM usage - CRITICAL: Real LLM enabled by default per CLAUDE.md
+          ENABLE_REAL_LLM="true"
+          # Only disable for explicit mock mode (violates CLAUDE.md but needed for some CI scenarios)
+          if [[ "$TEST_MODE" == "mock" ]]; then
+            echo "WARNING: Mock mode enabled - violates CLAUDE.md principles"
+            ENABLE_REAL_LLM="false"
           fi
           
           # Performance baseline checks

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>WebSocket Message Routing Regression - Critical Fix</title>
+  <date>2025-08-29</date>
+  <severity>CRITICAL</severity>
+  
+  <problem>
+    <description>
+      The WebSocket manager's send_agent_update method was broadcasting messages to ALL 
+      connected users instead of routing them to specific users based on run_id. This 
+      caused severe privacy and performance issues where all users would receive all 
+      agent updates regardless of their session.
+    </description>
+    
+    <root_cause>
+      The implementation had a TODO comment acknowledging this was temporary, but it 
+      was never properly implemented. The method was using broadcast_to_all() instead 
+      of properly routing based on run_id.
+    </root_cause>
+    
+    <impact>
+      - Privacy breach: Users could potentially see other users' agent updates
+      - Performance degradation: Every user received every message, causing unnecessary network traffic
+      - Scalability issues: System would not scale as message volume grew with user count
+    </impact>
+  </problem>
+  
+  <solution>
+    <implementation>
+      1. Added run_id_connections mapping to WebSocketManager to track which connections belong to which run_id
+      2. Implemented associate_run_id() method to link connections with run_ids
+      3. Modified send_agent_update() to route messages only to connections associated with the given run_id
+      4. Added deduplication logic to prevent sending duplicate messages
+      5. Implemented proper cleanup in _cleanup_connection() to remove run_id associations on disconnect
+    </implementation>
+    
+    <code_changes>
+      - netra_backend/app/websocket_core/manager.py:
+        * Added self.run_id_connections: Dict[str, Set[str]] mapping
+        * Added associate_run_id() and get_connections_by_run_id() methods
+        * Rewrote send_agent_update() to use run_id-based routing instead of broadcast
+        * Updated _cleanup_connection() to clean up run_id mappings
+    </code_changes>
+  </solution>
+  
+  <prevention>
+    <testing>
+      Created comprehensive regression test suite in:
+      netra_backend/tests/integration/test_websocket_routing_regression.py
+      
+      Tests cover:
+      - Correct routing by run_id
+      - Multiple connections with same run_id
+      - No broadcast to unrelated connections
+      - Persistence across multiple updates
+      - Cleanup on disconnect
+      - Concurrent updates to different run_ids
+      - Invalid run_id handling
+    </testing>
+    
+    <monitoring>
+      The WebSocket manager now logs:
+      - Number of connections each message is sent to
+      - Debug messages when no connections found for run_id
+      - Connection association events
+    </monitoring>
+  </prevention>
+  
+  <lessons_learned>
+    <item priority="HIGH">
+      NEVER leave TODO comments for critical functionality like message routing.
+      Temporary implementations in security-sensitive areas must be tracked and fixed immediately.
+    </item>
+    
+    <item priority="HIGH">
+      Always implement proper routing from the start. Broadcasting is almost never 
+      the correct solution for user-specific data.
+    </item>
+    
+    <item priority="MEDIUM">
+      When implementing mapping-based routing, always consider:
+      - Deduplication (connections might be in multiple mappings)
+      - Cleanup on disconnect
+      - Backwards compatibility with existing code
+    </item>
+    
+    <item priority="HIGH">
+      Create regression tests IMMEDIATELY when fixing critical bugs to ensure 
+      they never resurface. The test should fail with the old code and pass with the fix.
+    </item>
+  </lessons_learned>
+  
+  <related_files>
+    <file>netra_backend/app/websocket_core/manager.py</file>
+    <file>netra_backend/tests/integration/test_websocket_routing_regression.py</file>
+    <file>netra_backend/app/agents/base/interface.py</file>
+    <file>netra_backend/app/agents/interfaces.py</file>
+  </related_files>
+  
+  <tags>
+    <tag>websocket</tag>
+    <tag>routing</tag>
+    <tag>security</tag>
+    <tag>privacy</tag>
+    <tag>regression</tag>
+    <tag>critical-fix</tag>
+    <tag>message-delivery</tag>
+  </tags>
+</learning>

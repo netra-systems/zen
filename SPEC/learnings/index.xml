@@ -19,6 +19,13 @@
     </retrieval-protocol>
 
     <categories>
+        <category name="WebSocket/Routing" path="SPEC/learnings/websocket_routing_regression.xml" keywords="WebSocket, Message Routing, Run ID, Agent Updates, Privacy, Security, Regression, Broadcasting, Connection Management">
+            <critical-takeaway>CRITICAL: WebSocket send_agent_update MUST route by run_id, NEVER broadcast to all users - severe privacy/security issue (websocket_routing_regression.xml).</critical-takeaway>
+            <critical-takeaway>Always implement proper message routing from the start - broadcasting is almost never correct for user-specific data (websocket_routing_regression.xml).</critical-takeaway>
+            <critical-takeaway>WebSocket manager must maintain run_id_connections mapping and clean up on disconnect (websocket_routing_regression.xml).</critical-takeaway>
+            <critical-takeaway>Create regression tests IMMEDIATELY when fixing critical bugs to ensure they never resurface (websocket_routing_regression.xml).</critical-takeaway>
+        </category>
+        
         <category name="Testing/Performance" path="SPEC/learnings/test_collection_optimization.xml" keywords="Test Collection, PyTest, Test Discovery, Test Performance, Test Audit, Test Markers, Test Organization, Collection Optimization">
             <critical-takeaway>Test collection optimized from 60+ seconds to ~21 seconds using importlib mode and ignore patterns (test_collection_optimization.xml).</critical-takeaway>
             <critical-takeaway>Use scripts/test_collection_audit.py to identify duplicate tests, orphaned files, and missing markers (test_collection_optimization.xml).</critical-takeaway>

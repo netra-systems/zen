@@ -51,7 +51,10 @@ env:
   
   # Test environment
   E2E_TESTING: true
-  ENABLE_REAL_LLM_TESTING: false  # Disabled for CI speed
+  NETRA_REAL_LLM_ENABLED: true  # CRITICAL: Real LLM testing required per CLAUDE.md
+  ENABLE_REAL_LLM_TESTING: true  # Legacy support - real LLM testing enabled
+  USE_REAL_LLM: true             # Legacy support - real LLM testing enabled
+  TEST_USE_REAL_LLM: true        # Legacy support - real LLM testing enabled
   TEST_TIMEOUT: 30
   PYTEST_TIMEOUT: 60
 

@@ -80,11 +80,20 @@ class TestDatabaseManagerIntegration:
     @pytest.fixture
     async def database_manager(self):
         """Create database manager connected to Docker Compose PostgreSQL service."""
-        # Use Docker Compose PostgreSQL service configuration
-        # The service is running on localhost:5432 with postgres/postgres credentials
+        # Use IsolatedEnvironment to determine correct database URL
+        env = get_env()
+        
+        # Check the current environment and set appropriate database URL
+        current_env = env.get('ENVIRONMENT', 'development')
+        if current_env in ['testing', 'test']:
+            # Use test PostgreSQL container (port 5434)
+            database_url = 'postgresql://test:test@localhost:5434/netra_test'
+        else:
+            # Use dev PostgreSQL container (port 5433) 
+            database_url = 'postgresql://netra:netra123@localhost:5433/netra_dev'
         
         config = {
-            'database_url': 'postgresql://postgres:postgres@localhost:5432/netra_dev',
+            'database_url': database_url,
             'pool_size': 5,
             'max_overflow': 10,
             'pool_timeout': 30
@@ -157,7 +166,17 @@ class TestDatabaseManagerIntegration:
     @pytest.mark.asyncio
     async def test_connection_failure_recovery(self):
         """Test recovery from connection failures."""
-        url = 'postgresql://postgres:postgres@localhost:5432/netra_dev'
+        # Use IsolatedEnvironment to get correct database URL
+        env = get_env()
+        
+        # Check the current environment and set appropriate database URL
+        current_env = env.get('ENVIRONMENT', 'development')
+        if current_env in ['testing', 'test']:
+            # Use test PostgreSQL container (port 5434)
+            url = 'postgresql://test:test@localhost:5434/netra_test'
+        else:
+            # Use dev PostgreSQL container (port 5433)
+            url = 'postgresql://netra:netra123@localhost:5433/netra_dev'
         
         manager = TestDatabaseManager({'database_url': url})
         await manager.connect()

@@ -250,6 +250,8 @@ This is a non-exhaustive list of mission-critical specs.
 | [`git_commit_atomic_units.xml`](https://www.google.com/search?q=SPEC/git_commit_atomic_units.xml) | **CRITICAL:** Git commit standards. |
 | [`import_management_architecture.xml`](https://www.google.com/search?q=SPEC/import_management_architecture.xml) | **CRITICAL:** Absolute import rules. |
 
+Direct OS.env access is FORBIDDEN except in each services canonical env config SSOT. Applies to ALL tests too. EACH SERVICE MUST MAINTAIN INDEPENDENCE. Import ONLY from the env of the service.
+
 -----
 
 ## 8\. System Status and Compliance Tracking

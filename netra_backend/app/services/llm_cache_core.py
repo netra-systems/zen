@@ -64,6 +64,10 @@ class LLMCacheCore:
             cached_data = await redis_client.get(cache_key)
             return self._parse_cache_entry(cached_data) if cached_data else None
         except Exception as e:
+            # Handle event loop closed gracefully - this is common during test teardown
+            if "Event loop is closed" in str(e) or "RuntimeError" in str(type(e).__name__):
+                logger.debug(f"Redis operation failed due to closed event loop during teardown: {e}")
+                return None
             logger.error(f"Error retrieving cached response: {e}")
             return None
 
@@ -108,6 +112,10 @@ class LLMCacheCore:
             logger.info(f"Cached response (TTL: {ttl}s)")
             return True
         except Exception as e:
+            # Handle event loop closed gracefully - this is common during test teardown
+            if "Event loop is closed" in str(e) or "RuntimeError" in str(type(e).__name__):
+                logger.debug(f"Redis cache store failed due to closed event loop during teardown: {e}")
+                return False
             logger.error(f"Error caching response: {e}")
             return False
 
@@ -135,6 +143,10 @@ class LLMCacheCore:
                 return deleted
             return 0
         except Exception as e:
+            # Handle event loop closed gracefully - this is common during test teardown
+            if "Event loop is closed" in str(e) or "RuntimeError" in str(type(e).__name__):
+                logger.debug(f"Redis cache clear failed due to closed event loop during teardown: {e}")
+                return 0
             logger.error(f"Error clearing cache: {e}")
             return 0
 
@@ -157,6 +169,10 @@ class LLMCacheCore:
             logger.info(f"No cache entries found matching pattern '{original_pattern}'")
             return 0
         except Exception as e:
+            # Handle event loop closed gracefully - this is common during test teardown
+            if "Event loop is closed" in str(e) or "RuntimeError" in str(type(e).__name__):
+                logger.debug(f"Redis pattern clear failed due to closed event loop during teardown: {e}")
+                return 0
             logger.error(f"Error clearing cache with pattern '{original_pattern}': {e}")
             return 0
 
