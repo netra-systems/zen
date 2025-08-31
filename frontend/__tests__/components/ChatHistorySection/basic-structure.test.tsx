@@ -1,10 +1,9 @@
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ChatHistorySection } from '@/components/ChatHistorySection';
 import { createTestSetup, setupEmptyState } from './shared-setup';
-import {
-import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-ySection } from '@/components/ChatHistorySection';
+import { ySection } from '@/components/ChatHistorySection';
 import { createTestSetup, setupEmptyState } from './shared-setup';
 import {
   expectBasicStructure,

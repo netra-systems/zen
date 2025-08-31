@@ -7,6 +7,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock components for testing
 const MockMessageInput: React.FC<{
@@ -83,7 +84,7 @@ const MockMessageInput: React.FC<{
 };
 
 describe('MessageInput - Length Validation', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   it('should enforce maximum message length limit', async () => {
     const mockSendMessage = jest.fn();

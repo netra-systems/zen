@@ -400,7 +400,7 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 import * as ChatSidebarHooks from '@/components/chat/ChatSidebarHooks';
 
 describe('Advanced Chat Features', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let mockStore: any;
   let user: ReturnType<typeof userEvent.setup>;
@@ -797,6 +797,7 @@ function optimizeModel(model) {
     it('should render Python code blocks with syntax highlighting', () => {
       const pythonCodeMessage = createMockMessage(`\`\`\`python
 import torch
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 def optimize_model(model):
     optimized_model = torch.quantization.quantize_dynamic(model)

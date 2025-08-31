@@ -7,6 +7,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { jest } from '@jest/globals';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Simple component mock for testing input validation
 const TestMessageInput: React.FC = () => {
@@ -88,7 +89,7 @@ declare global {
 }
 
 describe('MessageInput - Simplified Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   beforeEach(() => {
     // Clear any previous test state

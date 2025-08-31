@@ -87,6 +87,7 @@ jest.mock('@/hooks/useWebSocket', () => ({
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import * as ChatSidebarHooksModule from '@/components/chat/ChatSidebarHooks';
 import { useUnifiedChatStore } from '@/store/unified-chat';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import { 
   createTestSetup, 
   renderWithProvider, 
@@ -96,7 +97,7 @@ import {
 } from './setup';
 
 describe('ChatSidebar - Interactions', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const testSetup = createTestSetup();
 

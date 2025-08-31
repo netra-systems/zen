@@ -64,6 +64,7 @@ import { ChatHistorySection } from '@/components/ChatHistorySection';
 import { ThreadService } from '@/services/threadService';
 import { mockThreads } from './setup';
 import { createTestSetup } from './shared-setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 const mockStore = {
   isProcessing: false,
@@ -90,7 +91,7 @@ const createMockThread = (overrides: any = {}) => ({
 });
 
 describe('ChatHistorySection - Edge Cases', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const testSetup = createTestSetup();
 

@@ -7,6 +7,7 @@
  * @prevents websocket-loading-state-transitions regression
  */
 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -16,8 +17,7 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 import { useLoadingState } from '@/hooks/useLoadingState';
 import { useEventProcessor } from '@/hooks/useEventProcessor';
 import { ChatLoadingState } from '@/types/loading-state';
-import {
-  createInitializingState,
+import { createInitializingState,
   createThreadReadyState,
   createLoadingThreadState,
   createProcessingState,
@@ -94,7 +94,7 @@ jest.mock('lucide-react', () => ({
 }));
 
 describe('MainChat Loading State Transitions', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const mockUseUnifiedChatStore = useUnifiedChatStore as jest.MockedFunction<typeof useUnifiedChatStore>;
   const mockUseWebSocket = useWebSocket as jest.MockedFunction<typeof useWebSocket>;

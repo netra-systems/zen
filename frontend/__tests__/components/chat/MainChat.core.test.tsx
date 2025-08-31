@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import MainChat from '@/components/chat/MainChat';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Test wrapper for proper context
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -173,7 +174,7 @@ jest.mock('@/store/authStore', () => ({
 }));
 
 describe('MainChat - Core Component Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   beforeEach(() => {
     jest.useFakeTimers();

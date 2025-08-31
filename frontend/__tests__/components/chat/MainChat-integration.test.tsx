@@ -13,6 +13,7 @@ import { useInitializationCoordinator } from '@/hooks/useInitializationCoordinat
 import { useLoadingState } from '@/hooks/useLoadingState';
 import { useEventProcessor } from '@/hooks/useEventProcessor';
 import { useThreadNavigation } from '@/hooks/useThreadNavigation';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock all dependencies
 jest.mock('@/store/unified-chat');
@@ -68,7 +69,7 @@ jest.mock('@/components/chat/EventDiagnosticsPanel', () => ({
 }));
 
 describe('MainChat Integration Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const mockHandleWebSocketEvent = jest.fn();
   

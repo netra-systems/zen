@@ -6,6 +6,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { jest } from '@jest/globals';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock the auth store
 const mockUseAuthStore = jest.fn();
@@ -33,7 +34,7 @@ const TestAuthComponent: React.FC = () => {
 };
 
 describe('Auth Store Mock Fix - Iteration 5', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();

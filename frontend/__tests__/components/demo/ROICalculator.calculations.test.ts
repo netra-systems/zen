@@ -29,6 +29,7 @@ import {
 } from '@/components/demo/ROICalculator.types';
 
 import { describeFeature, testTDD } from '@/test-utils/feature-flags';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describeFeature('roi_calculator', 'ROI Calculator Individual Functions', () => {
   const createTestMetrics = (overrides: Partial<Metrics> = {}): Metrics => ({

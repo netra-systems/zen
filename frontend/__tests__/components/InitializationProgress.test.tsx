@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { InitializationProgress } from '@/components/InitializationProgress';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock the UI components
 jest.mock('@/components/ui/progress', () => ({
@@ -33,7 +34,7 @@ jest.mock('lucide-react', () => ({
 }));
 
 describe('InitializationProgress', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   describe('Phase Messages and Details', () => {
         setupAntiHang();

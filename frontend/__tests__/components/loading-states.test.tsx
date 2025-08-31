@@ -6,9 +6,10 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Loading States', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   it('should display loading spinner during async operations', async () => {
     const LoadingSpinnerComponent: React.FC = () => {

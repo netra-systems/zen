@@ -8,6 +8,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { AuthGuard } from '@/components/AuthGuard';
 import { useAuth } from '@/auth/context';
 import { useGTMEvent } from '@/hooks/useGTMEvent';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock dependencies
 jest.mock('@/auth/context');
@@ -17,7 +18,7 @@ jest.mock('@/hooks/useGTMEvent');
 const mockUseRouter = jest.requireMock('next/navigation').useRouter;
 
 describe('AuthGuard Component', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const mockPush = jest.fn();
   const mockTrackError = jest.fn();

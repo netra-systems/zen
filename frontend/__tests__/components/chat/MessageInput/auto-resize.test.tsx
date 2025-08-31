@@ -1,3 +1,4 @@
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -9,9 +10,7 @@ import { useThreadStore } from '@/store/threadStore';
 import { useAuthStore } from '@/store/authStore';
 import { useMessageSending } from '@/components/chat/hooks/useMessageSending';
 import { useMessageHistory } from '@/components/chat/hooks/useMessageHistory';
-import {
-import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-chat/hooks/useMessageHistory', () => ({
+import { chat/hooks/useMessageHistory', () => ({
   useMessageHistory: jest.fn()
 }));
 

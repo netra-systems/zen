@@ -102,6 +102,7 @@ jest.mock('@/store/authStore', () => ({
 }));
 
 import { ExamplePrompts } from '@/components/chat/ExamplePrompts';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 const resetMocks = () => {
   jest.clearAllMocks();
@@ -114,7 +115,7 @@ beforeEach(() => {
 });
 
 describe('ExamplePrompts', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   it('sends a message when an example prompt is clicked', () => {
     mockAuthStore.isAuthenticated = true;
