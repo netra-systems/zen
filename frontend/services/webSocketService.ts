@@ -54,6 +54,15 @@ class WebSocketService {
   private isRefreshingToken: boolean = false;
   private pendingMessages: (WebSocketMessage | UnifiedWebSocketEvent | AuthMessage | PingMessage | PongMessage)[] = [];
   
+  // Enhanced refresh handling
+  private reconnectAttempts: number = 0;
+  private maxReconnectAttempts: number = 10;
+  private baseReconnectDelay: number = 1000;
+  private maxReconnectDelay: number = 30000;
+  private lastSuccessfulConnection: number = 0;
+  private connectionId: string = '';
+  private beforeUnloadHandler: (() => void) | null = null;
+  
   // Large message handling
   private messageAssemblies: Map<string, {
     messageId: string;
@@ -235,13 +244,79 @@ class WebSocketService {
     logger.debug('[WebSocketService] Connection opened to:', url);
     this.state = 'connected';
     this.status = 'OPEN';
+    
+    // Reset reconnect attempts on successful connection
+    this.reconnectAttempts = 0;
+    this.lastSuccessfulConnection = Date.now();
+    this.connectionId = this.generateConnectionId();
+    
     // Use immediate status change for connection open
     clearTimeout(this.statusChangeTimer);
     this.onStatusChange?.(this.status);
+    
+    // Restore session state if available
+    this.restoreSessionState();
+    
     // Authentication is handled via subprotocol during connection establishment
     this.processQueuedMessages();
     this.startHeartbeatIfConfigured(options);
     options.onOpen?.();
+  }
+  
+  private generateConnectionId(): string {
+    return `conn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+  
+  private restoreSessionState(): void {
+    // Attempt to restore session state from localStorage
+    try {
+      const sessionState = localStorage.getItem('websocket_session_state');
+      if (sessionState) {
+        const state = JSON.parse(sessionState);
+        const stateAge = Date.now() - state.timestamp;
+        
+        // Only restore if state is less than 5 minutes old
+        if (stateAge < 5 * 60 * 1000) {
+          logger.debug('Restoring WebSocket session state', undefined, {
+            component: 'WebSocketService',
+            action: 'restore_session',
+            metadata: { stateAge, threadId: state.threadId }
+          });
+          
+          // Send session restore message
+          this.send({
+            type: 'session_restore',
+            payload: {
+              threadId: state.threadId,
+              lastMessageId: state.lastMessageId,
+              connectionId: this.connectionId
+            }
+          } as WebSocketMessage);
+        }
+      }
+    } catch (error) {
+      logger.debug('Failed to restore session state', undefined, {
+        component: 'WebSocketService',
+        action: 'restore_session_failed'
+      });
+    }
+  }
+  
+  public saveSessionState(threadId: string, lastMessageId?: string): void {
+    try {
+      const state = {
+        threadId,
+        lastMessageId,
+        connectionId: this.connectionId,
+        timestamp: Date.now()
+      };
+      localStorage.setItem('websocket_session_state', JSON.stringify(state));
+    } catch (error) {
+      logger.debug('Failed to save session state', undefined, {
+        component: 'WebSocketService',
+        action: 'save_session_failed'
+      });
+    }
   }
 
   private processQueuedMessages(): void {
@@ -771,6 +846,12 @@ class WebSocketService {
     this.options = options;
     this.currentToken = options.token || null;
     
+    // Register page unload handler for graceful disconnect
+    if (!this.beforeUnloadHandler && typeof window !== 'undefined') {
+      this.beforeUnloadHandler = () => this.handlePageUnload();
+      window.addEventListener('beforeunload', this.beforeUnloadHandler);
+    }
+    
     if (this.state === 'connected' || this.state === 'connecting') {
       return;
     }
@@ -980,12 +1061,39 @@ class WebSocketService {
   private scheduleReconnect() {
     if (this.reconnectTimer) return;
     
+    // Check if we've exceeded max reconnect attempts
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      logger.error('Max reconnection attempts reached', undefined, {
+        component: 'WebSocketService',
+        action: 'max_reconnect_attempts',
+        metadata: { attempts: this.reconnectAttempts }
+      });
+      this.status = 'CLOSED';
+      this.state = 'disconnected';
+      this.onStatusChange?.(this.status);
+      return;
+    }
+    
+    // Calculate exponential backoff with jitter
+    const delay = Math.min(
+      this.baseReconnectDelay * Math.pow(2, this.reconnectAttempts) + Math.random() * 1000,
+      this.maxReconnectDelay
+    );
+    
     this.state = 'reconnecting';
+    this.reconnectAttempts++;
+    
+    logger.debug(`Scheduling reconnect attempt ${this.reconnectAttempts} in ${delay}ms`, undefined, {
+      component: 'WebSocketService',
+      action: 'schedule_reconnect',
+      metadata: { attempt: this.reconnectAttempts, delay }
+    });
+    
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
       this.options.onReconnect?.();
       this.connect(this.url, this.options);
-    }, 5000);
+    }, delay);
   }
 
   public send(message: WebSocketMessage | UnifiedWebSocketEvent | AuthMessage | PingMessage | PongMessage) {
@@ -1047,8 +1155,28 @@ class WebSocketService {
     
     this.stopHeartbeat();
     
+    // Remove page unload handler
+    if (this.beforeUnloadHandler && typeof window !== 'undefined') {
+      window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+      this.beforeUnloadHandler = null;
+    }
+    
     if (this.ws && this.ws.readyState !== WebSocket.CLOSED) {
-      this.ws.close();
+      // Send graceful disconnect message if possible
+      if (this.ws.readyState === WebSocket.OPEN) {
+        try {
+          this.send({
+            type: 'disconnect',
+            payload: {
+              connectionId: this.connectionId,
+              reason: 'client_disconnect'
+            }
+          } as WebSocketMessage);
+        } catch (error) {
+          // Ignore errors during disconnect
+        }
+      }
+      this.ws.close(1000, 'Normal closure');
     }
     
     this.state = 'disconnected';
@@ -1056,9 +1184,39 @@ class WebSocketService {
     this.currentToken = null;
     this.isRefreshingToken = false;
     this.pendingMessages = [];
+    this.reconnectAttempts = 0;
     
     // Clean up large message assemblies
     this.messageAssemblies.clear();
+  }
+  
+  private handlePageUnload(): void {
+    // Send graceful disconnect on page unload
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      try {
+        // Use sendBeacon if available for reliability
+        if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+          const data = JSON.stringify({
+            type: 'page_unload',
+            connectionId: this.connectionId,
+            timestamp: Date.now()
+          });
+          const blob = new Blob([data], { type: 'application/json' });
+          navigator.sendBeacon(`${this.url.replace(/^ws/, 'http')}/beacon`, blob);
+        }
+        
+        // Also try to send via WebSocket
+        this.ws.send(JSON.stringify({
+          type: 'disconnect',
+          payload: {
+            connectionId: this.connectionId,
+            reason: 'page_unload'
+          }
+        }));
+      } catch (error) {
+        // Ignore errors during unload
+      }
+    }
   }
 
   // Get statistics about large message handling
