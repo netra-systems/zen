@@ -67,8 +67,7 @@ class TestDatabaseManagerURLConversion:
             result = DatabaseManager.get_base_database_url()
             assert result == expected_output
     
-    @mock_justified("L1 Unit Test: Mocking environment detection to test default URL fallback logic. Real environment configurations tested in L3 integration tests.", "L1")
-    def test_get_base_database_url_default_fallback(self):
+        def test_get_base_database_url_default_fallback(self):
         """Test default URL when DATABASE_URL not set."""
         with patch.dict(os.environ, {}, clear=True):
             with patch("netra_backend.app.db.database_manager.get_current_environment") as mock_env:
@@ -223,8 +222,7 @@ class TestDatabaseManagerEnvironmentDetection:
             result = DatabaseManager.is_cloud_sql_environment()
             assert result is False
     
-    @mock_justified("L1 Unit Test: Mocking environment detection to test environment-specific logic. Real environment testing in L3 integration tests.", "L1")
-    # Mock: Component isolation for testing without external dependencies
+        # Mock: Component isolation for testing without external dependencies
     @patch("netra_backend.app.db.database_manager.get_unified_config")
     def test_is_local_development_true(self, mock_get_config):
         """Test local development detection - positive case."""
@@ -234,8 +232,7 @@ class TestDatabaseManagerEnvironmentDetection:
         result = DatabaseManager.is_local_development()
         assert result is True
     
-    @mock_justified("L1 Unit Test: Mocking environment detection to test environment-specific logic. Real environment testing in L3 integration tests.", "L1")
-    # Mock: Component isolation for testing without external dependencies
+        # Mock: Component isolation for testing without external dependencies
     @patch("netra_backend.app.db.database_manager.get_unified_config") 
     def test_is_local_development_false(self, mock_get_config):
         """Test local development detection - negative case."""
@@ -633,8 +630,7 @@ class TestDatabaseManagerAdvancedErrorHandling:
         os.environ.pop("DATABASE_URL", None)
         os.environ.pop("ENVIRONMENT", None)
     
-    @mock_justified("L1 Unit Test: Mocking urllib.parse.urlparse to test malformed URL handling", "L1")
-    def test_malformed_url_parsing_error(self):
+        def test_malformed_url_parsing_error(self):
         """Test handling of URLs that cause parsing errors."""
         manager = DatabaseManager()
         
@@ -663,8 +659,7 @@ class TestDatabaseManagerAdvancedErrorHandling:
                     # Expected behavior for malformed URLs
                     assert "url" in str(e).lower() or "database" in str(e).lower()
     
-    @mock_justified("L1 Unit Test: Testing connection pool configuration error handling", "L1")
-    def test_connection_pool_configuration_errors(self):
+        def test_connection_pool_configuration_errors(self):
         """Test error handling in connection pool configuration."""
         with patch.dict(os.environ, {"DATABASE_URL": "postgresql://user:pass@host:5432/db"}):
             # Test with invalid pool configuration
@@ -675,8 +670,7 @@ class TestDatabaseManagerAdvancedErrorHandling:
                     from netra_backend.app.db.database_manager import create_migration_engine
                     create_migration_engine()
     
-    @mock_justified("L1 Unit Test: Testing engine creation with connection timeouts", "L1")
-    def test_engine_creation_with_timeout_errors(self):
+        def test_engine_creation_with_timeout_errors(self):
         """Test engine creation with connection timeout scenarios."""
         manager = DatabaseManager()
         
@@ -691,8 +685,7 @@ class TestDatabaseManagerAdvancedErrorHandling:
                 result = manager.create_migration_engine()
                 assert result is not None
     
-    @mock_justified("L1 Unit Test: Testing session factory error handling", "L1")
-    def test_session_factory_error_handling(self):
+        def test_session_factory_error_handling(self):
         """Test error handling in session factory creation."""
         with patch.dict(os.environ, {"DATABASE_URL": "postgresql://user:pass@host:5432/db"}):
             # Mock sessionmaker to fail
@@ -703,8 +696,7 @@ class TestDatabaseManagerAdvancedErrorHandling:
                     from netra_backend.app.db.database_manager import get_migration_session
                     get_migration_session()
     
-    @mock_justified("L1 Unit Test: Testing concurrent access to database manager", "L1")
-    def test_concurrent_access_error_handling(self):
+        def test_concurrent_access_error_handling(self):
         """Test database manager behavior under simulated concurrent access."""
         manager = DatabaseManager()
         
@@ -728,8 +720,7 @@ class TestDatabaseManagerAdvancedErrorHandling:
             assert len(results) == 10
             assert all(r[0] == results[0][0] for r in results)  # Base URLs consistent
     
-    @mock_justified("L1 Unit Test: Testing environment variable handling with unusual characters", "L1")
-    def test_environment_variable_handling_with_special_chars(self):
+        def test_environment_variable_handling_with_special_chars(self):
         """Test handling of environment variables with unusual characters."""
         manager = DatabaseManager()
         
@@ -752,8 +743,7 @@ class TestDatabaseManagerAdvancedErrorHandling:
                     # Document any issues with specific URL formats
                     pytest.fail(f"Failed to handle URL: {test_url}, error: {e}")
     
-    @mock_justified("L1 Unit Test: Testing database manager state consistency", "L1")
-    def test_database_manager_state_consistency(self):
+        def test_database_manager_state_consistency(self):
         """Test that database manager maintains consistent state."""
         manager = DatabaseManager()
         

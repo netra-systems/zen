@@ -21,7 +21,8 @@ from starlette.websockets import WebSocketDisconnect, WebSocketState
 from netra_backend.app.websocket_core.connection_info import ConnectionInfo
 from netra_backend.app.websocket_core.manager import WebSocketManager
 
-class MockWebSocket:
+# COMMENTED OUT: MockWebSocket class - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
+# class MockWebSocket:
 
     """Mock WebSocket for testing connection behavior"""
     

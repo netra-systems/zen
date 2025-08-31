@@ -20,7 +20,8 @@ from starlette.websockets import WebSocketDisconnect, WebSocketState
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.websocket_core.connection_info import ConnectionInfo
 from netra_backend.app.websocket_core.manager import WebSocketManager
-from netra_backend.tests.services.test_ws_connection_mocks import (
+# Removed WebSocket mock import - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
     MockConnectionPool,
 

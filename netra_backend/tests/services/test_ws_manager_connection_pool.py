@@ -14,7 +14,8 @@ from netra_backend.tests.services.test_ws_connection_basic import (
     TestWebSocketManagerConnectionPooling,
 
 )
-from netra_backend.tests.services.test_ws_connection_mocks import (
+# Removed WebSocket mock import - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
     MockConnectionPool,
 

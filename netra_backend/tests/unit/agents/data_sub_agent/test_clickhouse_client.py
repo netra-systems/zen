@@ -39,8 +39,7 @@ class TestClickHouseServiceConnection:
         # This avoids timing issues where the test environment isn't fully set up yet
         return ClickHouseService(force_mock=True)
     
-    @mock_justified("L1 Unit Test: Testing ClickHouse service initialization with mock client.", "L1")
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_initialize_success(self, clickhouse_client):
         """Test successful ClickHouse service initialization."""
         # Since we're using force_mock=True, this should initialize with NoOp client
@@ -50,8 +49,7 @@ class TestClickHouseServiceConnection:
         assert clickhouse_client._client is not None
         assert clickhouse_client.is_mock is True
     
-    @mock_justified("L1 Unit Test: Testing that service can be initialized with NoOp client in testing environment.", "L1")
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_service_can_use_mock(self, clickhouse_client):
         """Test that service can be initialized with NoOp client in testing environment."""
         # In testing environment with CLICKHOUSE_ENABLED=false, the service should use NoOp client
@@ -66,8 +64,7 @@ class TestClickHouseServiceConnection:
         # This aligns with the NoOp client behavior for testing
         assert clickhouse_client.is_mock is True
     
-    @mock_justified("L1 Unit Test: Testing ping method with NoOp client.", "L1")
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_ping_mock_client(self, clickhouse_client):
         """Test ping method with NoOp client."""
         # Ensure client is initialized (should auto-initialize with NoOp in testing)
@@ -77,8 +74,7 @@ class TestClickHouseServiceConnection:
         result = await clickhouse_client.ping()
         assert result is True
     
-    @mock_justified("L1 Unit Test: Testing ping method works with mock client.", "L1")
-    @pytest.mark.asyncio 
+        @pytest.mark.asyncio 
     async def test_ping_with_mock_client(self, clickhouse_client):
         """Test ping method with mock client."""
         # The ping method should automatically initialize if client is not set
@@ -130,8 +126,7 @@ class TestClickHouseServiceQueryExecution:
         # This avoids timing issues where the test environment isn't fully set up yet
         return ClickHouseService(force_mock=True)
     
-    @mock_justified("L1 Unit Test: Mocking ClickHouse client to test query execution without external dependencies.", "L1")
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_execute_query_success(self, clickhouse_client):
         """Test successful query execution."""
         mock_result = [{"id": 1, "name": "test"}]
@@ -152,8 +147,7 @@ class TestClickHouseServiceQueryExecution:
             assert result == mock_result
             mock_execute.assert_called_once_with(query, parameters)
     
-    @mock_justified("L1 Unit Test: Testing query execution with circuit breaker.", "L1")
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_execute_query_with_circuit_breaker(self, clickhouse_client):
         """Test query execution uses circuit breaker."""
         mock_result = [{"id": 1, "name": "test"}]
@@ -171,8 +165,7 @@ class TestClickHouseServiceQueryExecution:
             assert result == mock_result
             mock_execute.assert_called_once()
     
-    @mock_justified("L1 Unit Test: Testing query execution error handling.", "L1")
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_execute_query_failure(self, clickhouse_client):
         """Test query execution failure handling."""
         # Initialize with NoOp client
@@ -202,8 +195,7 @@ class TestClickHouseServiceWorkloadMetrics:
         # This avoids timing issues where the test environment isn't fully set up yet
         return ClickHouseService(force_mock=True)
     
-    @mock_justified("L1 Unit Test: Testing workload metrics query without user filter.", "L1")
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_get_workload_metrics_without_user_filter(self, clickhouse_client):
         """Test getting workload metrics without user filter."""
         mock_result = [
@@ -228,8 +220,7 @@ class TestClickHouseServiceWorkloadMetrics:
             assert result == mock_result
             mock_execute.assert_called_once_with(query)
     
-    @mock_justified("L1 Unit Test: Testing workload metrics query with user filter.", "L1")
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_get_workload_metrics_with_user_filter(self, clickhouse_client):
         """Test getting workload metrics with user filter."""
         mock_result = [
@@ -266,8 +257,7 @@ class TestClickHouseServiceCostBreakdown:
         # This avoids timing issues where the test environment isn't fully set up yet
         return ClickHouseService(force_mock=True)
     
-    @mock_justified("L1 Unit Test: Testing cost breakdown query construction.", "L1")
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_get_cost_breakdown_without_user_filter(self, clickhouse_client):
         """Test getting cost breakdown without user filter."""
         mock_result = [
@@ -339,8 +329,7 @@ class TestClickHouseServiceConnectionManagement:
         # This avoids timing issues where the test environment isn't fully set up yet
         return ClickHouseService(force_mock=True)
     
-    @mock_justified("L1 Unit Test: Testing batch insert functionality.", "L1")
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_batch_insert_mock(self, clickhouse_client):
         """Test batch insert with NoOp client."""
         # Initialize with NoOp client
@@ -380,8 +369,7 @@ class TestClickHouseServiceErrorHandling:
         # This avoids timing issues where the test environment isn't fully set up yet
         return ClickHouseService(force_mock=True)
     
-    @mock_justified("L1 Unit Test: Testing error handling and logging in query execution.", "L1")
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_query_execution_logs_error_details(self, clickhouse_client):
         """Test that query execution errors are logged with details."""
         # Initialize with NoOp client

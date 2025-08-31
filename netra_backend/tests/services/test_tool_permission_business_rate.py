@@ -26,7 +26,8 @@ from netra_backend.app.schemas.tool_permission import (
 from netra_backend.app.schemas.user_plan import PLAN_DEFINITIONS, PlanTier, UserPlan
 
 from netra_backend.app.services.tool_permission_service import ToolPermissionService
-from test_framework.mocks import MockRedisClient
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
 # MockRedisClient now imported from canonical test_framework location
 # OLD class MockRedisClient:

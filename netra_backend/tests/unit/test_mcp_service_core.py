@@ -234,8 +234,7 @@ class TestMCPServiceCore:
             assert hasattr(service, 'active_sessions')
             assert isinstance(service.active_sessions, dict)
     
-    @mock_justified("L1 Unit Test: Mocking database session to isolate client registration logic. Real database testing in L3 integration tests.", "L1")
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_register_client_success(self, mcp_service, sample_mcp_client):
         """Test successful client registration."""
         # Mock: Database session isolation for testing without real database dependency
@@ -272,8 +271,7 @@ class TestMCPServiceCore:
         # Verify repository was called with correct parameters
         mcp_service.client_repository.create_client.assert_called_once()
     
-    @mock_justified("L1 Unit Test: Mocking database session to test client registration error handling.", "L1")
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_register_client_database_error(self, mcp_service):
         """Test client registration with database error."""
         # Mock: Database session isolation for testing without real database dependency
@@ -293,8 +291,7 @@ class TestMCPServiceCore:
         
         assert "Failed to register MCP client" in str(exc_info.value)
     
-    @mock_justified("L1 Unit Test: Mocking database session to isolate client access validation logic.", "L1")
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_validate_client_access_success(self, mcp_service):
         """Test successful client access validation."""
         # Mock: Database session isolation for testing without real database dependency
@@ -322,8 +319,7 @@ class TestMCPServiceCore:
         # Verify last active was updated
         mcp_service.client_repository.update_last_active.assert_called_once()
     
-    @mock_justified("L1 Unit Test: Mocking database session to test client access validation failure.", "L1")
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_validate_client_access_permission_denied(self, mcp_service):
         """Test client access validation with permission denied."""
         # Mock: Database session isolation for testing without real database dependency
@@ -344,8 +340,7 @@ class TestMCPServiceCore:
         # Verify update_last_active was not called since permission was denied
         mcp_service.client_repository.update_last_active.assert_not_called()
     
-    @mock_justified("L1 Unit Test: Mocking database session to test tool execution recording.", "L1")
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_record_tool_execution_success(self, mcp_service, sample_tool_execution):
         """Test successful tool execution recording."""
         # Mock: Database session isolation for testing without real database dependency

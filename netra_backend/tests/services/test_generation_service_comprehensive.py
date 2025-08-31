@@ -102,8 +102,7 @@ def sample_corpus():
 class TestJobStatusManagement:
     """Test job status update functionality"""
     
-    @mock_justified("L1: Unit test isolating job status logic. Job store and manager mocked to test status update flow without external dependencies.")
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_update_job_status_running(self):
         """Test updating job status to running"""
         # Mock: Component isolation for testing without external dependencies
@@ -362,8 +361,7 @@ class TestRealLLMGeneration:
 class TestExistingFunctions:
     """Test the actual functions that exist in generation_service"""
     
-    @mock_justified("L1: Unit test for WebSocket broadcast mechanism. Mocking external services to isolate broadcast logic testing.")
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_update_job_status_broadcasts_update(self):
         """Test that job status updates are broadcast via WebSocket"""
         # Mock: Component isolation for testing without external dependencies
