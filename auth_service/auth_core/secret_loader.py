@@ -96,16 +96,16 @@ class AuthSecretLoader:
                 "Set JWT_SECRET_PRODUCTION environment variable or configure prod-jwt-secret in Secret Manager."
             )
         
-        elif env == "development":
-            # Development only: allow JWT_SECRET_KEY as primary secret
+        elif env == "development" or env == "test":
+            # Development/Test only: allow JWT_SECRET_KEY as primary secret
             secret = env_manager.get("JWT_SECRET_KEY")
             if secret:
-                logger.info("Using JWT_SECRET_KEY from environment (development only)")
+                logger.info(f"Using JWT_SECRET_KEY from environment ({env} only)")
                 return secret
             
-            # HARD STOP: No fallback in development
+            # HARD STOP: No fallback in development/test
             raise ValueError(
-                f"JWT secret not configured for development environment. "
+                f"JWT secret not configured for {env} environment. "
                 "Set JWT_SECRET_KEY environment variable."
             )
         
