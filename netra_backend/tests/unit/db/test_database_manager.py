@@ -67,8 +67,8 @@ class TestDatabaseManagerURLConversion:
             result = DatabaseManager.get_base_database_url()
             assert result == expected_output
     
-        def test_get_base_database_url_default_fallback(self):
-            """Test default URL when DATABASE_URL not set."""
+    def test_get_base_database_url_default_fallback(self):
+        """Test default URL when DATABASE_URL not set."""
         with patch.dict(os.environ, {}, clear=True):
             with patch("netra_backend.app.db.database_manager.get_current_environment") as mock_env:
                 mock_env.return_value = "testing"  # Changed from "development" to "testing" to match expected URL
