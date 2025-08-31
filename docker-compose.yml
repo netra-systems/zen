@@ -139,6 +139,10 @@ services:
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev-jwt-secret-key-must-be-at-least-32-characters}
       JWT_ALGORITHM: HS256
       ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      
+      # Google OAuth Configuration
+      GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT: ${GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT}
+      GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT: ${GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT}
     ports:
       - "${DEV_AUTH_PORT:-8081}:8081"
     volumes:
@@ -208,6 +212,9 @@ services:
       SERVICE_SECRET: ${SERVICE_SECRET:-dev-service-secret-for-cross-service-auth}
       FERNET_KEY: ${FERNET_KEY:-iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw=}
       SECRET_KEY: ${SECRET_KEY:-dev-secret-key-for-development}
+      
+      # AI/LLM Configuration
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
     ports:
       - "${DEV_BACKEND_PORT:-8000}:8000"
     volumes:
@@ -235,7 +242,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 1024M
           cpus: '0.4'
 
   # Dev Frontend Service

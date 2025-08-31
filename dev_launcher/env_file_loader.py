@@ -4,7 +4,6 @@ Loads from single .env file only with strict user control.
 """
 
 import logging
-import os
 from pathlib import Path
 from typing import Dict, Optional, Set, Tuple
 
@@ -91,7 +90,8 @@ class EnvFileLoader:
         
         if staging_file.exists():
             # Get current environment to determine severity
-            current_env = os.environ.get('ENVIRONMENT', '').lower()
+            env = get_env()
+            current_env = env.get('ENVIRONMENT', '').lower()
             is_staging_env = current_env in ['staging', 'stage']
             
             # Log critical warnings
