@@ -14,6 +14,8 @@ import { useAuth } from '@/auth/context';
 const mockNavigation = require('next/navigation');
 
 describe('Landing Page - Working with Setup Infrastructure', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let mockPush: jest.MockedFunction<any>;
 
   beforeEach(() => {
@@ -95,4 +97,8 @@ describe('Landing Page - Working with Setup Infrastructure', () => {
     
     expect(router.push).toHaveBeenCalledWith('/test');
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

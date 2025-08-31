@@ -1,12 +1,3 @@
-/**
- * E2E Chat Interaction Tests - Core Module
- * 
- * Business Value: Core chat revenue protection
- * Priority: P0 - Critical path testing
- * 
- * @compliance conventions.xml - Max 8 lines per function, under 300 lines
- */
-
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,6 +5,11 @@ import '@testing-library/jest-dom';
 import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
 import { MessageInput } from '@/components/chat/MessageInput';
 import { MessageItem } from '@/components/chat/MessageItem';
+import MainChat from '@/components/chat/MainChat'; // Default import
+import type { Message } from '@/types/unified';
+import { TestProviders } from '@/__tests__/setup/test-providers';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ } from '@/components/chat/MessageItem';
 import MainChat from '@/components/chat/MainChat'; // Default import
 import type { Message } from '@/types/unified';
 import { TestProviders } from '@/__tests__/setup/test-providers';
@@ -110,6 +106,7 @@ jest.mock('@/store/unified-chat', () => ({
 }));
 
 describe('Chat Input Basic Tests', () => {
+    jest.setTimeout(10000);
   let user: ReturnType<typeof userEvent.setup>;
   
   beforeEach(() => {
@@ -158,6 +155,7 @@ describe('Chat Input Basic Tests', () => {
 });
 
 describe('Message Display Tests', () => {
+    jest.setTimeout(10000);
   it('renders user message correctly', async () => {
     const testMessage = createTestMessage({ content: 'Hello world' });
     const { wsManager } = renderWithWebSocket(
@@ -192,6 +190,7 @@ describe('Message Display Tests', () => {
 });
 
 describe('MainChat Integration Tests', () => {
+    jest.setTimeout(10000);
   let user: ReturnType<typeof userEvent.setup>;
   
   beforeEach(() => {

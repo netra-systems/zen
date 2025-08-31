@@ -1,6 +1,8 @@
-/**
- * Landing Page Tests - Simplified for Test Stability
- * Focus on basic functionality testing without complex router interactions
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { jest } from '@jest/globals';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+nteractions
  */
 
 import React from 'react';
@@ -31,6 +33,7 @@ const TestHomePage = ({ loading, user, onNavigate }: { loading: boolean, user: a
 };
 
 describe('Landing Page - First-Time User Experience', () => {
+    jest.setTimeout(10000);
   const mockOnNavigate = jest.fn();
 
   beforeEach(() => {
@@ -39,6 +42,7 @@ describe('Landing Page - First-Time User Experience', () => {
   });
 
   describe('P0: Brand New User Landing Experience', () => {
+      jest.setTimeout(10000);
     it('should show loading state initially for new users', () => {
       render(<TestHomePage loading={true} user={null} onNavigate={mockOnNavigate} />);
 
@@ -86,6 +90,7 @@ describe('Landing Page - First-Time User Experience', () => {
   });
 
   describe('P0: Performance Metrics - Conversion Critical', () => {
+      jest.setTimeout(10000);
     it('should achieve Time to Interactive < 2s for auth check', () => {
       const startTime = performance.now();
       
@@ -111,6 +116,7 @@ describe('Landing Page - First-Time User Experience', () => {
   });
 
   describe('P0: Mobile Responsiveness & Accessibility', () => {
+      jest.setTimeout(10000);
     it('should be accessible with proper ARIA attributes', () => {
       render(<TestHomePage loading={true} user={null} onNavigate={mockOnNavigate} />);
 
@@ -123,6 +129,7 @@ describe('Landing Page - First-Time User Experience', () => {
   });
 
   describe('P0: Edge Cases & Error Recovery', () => {
+      jest.setTimeout(10000);
     it('should prevent navigation loops with proper state management', () => {
       render(<TestHomePage loading={false} user={null} onNavigate={mockOnNavigate} />);
 
@@ -133,6 +140,7 @@ describe('Landing Page - First-Time User Experience', () => {
   });
 
   describe('P0: Conversion Gateway Simulation', () => {
+      jest.setTimeout(10000);
     it('should simulate complete new user journey to login', () => {
       // Step 1: User lands on homepage
       render(<TestHomePage loading={false} user={null} onNavigate={mockOnNavigate} />);

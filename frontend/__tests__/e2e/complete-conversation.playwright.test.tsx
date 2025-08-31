@@ -1,7 +1,7 @@
-/**
- * End-to-End Complete Conversation Flow Test
- * 
- * Tests critical user journey: login → create conversation → send messages → logout
+import { test, expect, Page, BrowserContext } from '@playwright/test';
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+rney: login → create conversation → send messages → logout
  * Validates complete workflow performance and reliability
  * 
  * @compliance conventions.xml - Max 8 lines per function, under 300 lines
@@ -74,6 +74,7 @@ async function performLogoutFlow(page: Page): Promise<void> {
 }
 
 test.describe('Complete Conversation Flow E2E', () => {
+    jest.setTimeout(10000);
   let context: BrowserContext;
   let page: Page;
 

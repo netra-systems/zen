@@ -1,10 +1,10 @@
-/**
- * Onboarding Flow E2E Tests - Core Module
- * 
- * Business Value: Protects core revenue flow (Free → Paid conversion)
- * Priority: P0 - Critical path testing
- * 
- * @compliance conventions.xml - Max 8 lines per function, under 300 lines
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { act } from 'react-dom/test-utils';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+nder 300 lines
  * @compliance type_safety.xml - Strong typing for all test data
  */
 
@@ -125,6 +125,7 @@ const onboardingData: OnboardingTestData = {
 };
 
 describe('Onboarding Flow E2E Tests', () => {
+    jest.setTimeout(10000);
   let wsManager: WebSocketTestManager;
   
   beforeEach(() => {
@@ -137,9 +138,15 @@ describe('Onboarding Flow E2E Tests', () => {
   afterEach(() => {
     wsManager?.cleanup();
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
   
   describe('Basic Onboarding Flow', () => {
+      jest.setTimeout(10000);
     it('renders chat page with authentication', async () => {
       await renderChatPage();
       
@@ -187,6 +194,7 @@ describe('Onboarding Flow E2E Tests', () => {
   });
   
   describe('Message Flow', () => {
+      jest.setTimeout(10000);
     it('handles first message input', async () => {
       await renderChatPage();
       

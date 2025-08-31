@@ -1,9 +1,9 @@
-/**
- * Comprehensive Message Formatting Tests for Basic Chat Functions
- * ==============================================================
- * 
- * BUSINESS VALUE JUSTIFICATION (BVJ):
- * - Segment: Growth & Enterprise (Technical users with rich content needs)
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ - Segment: Growth & Enterprise (Technical users with rich content needs)
  * - Business Goal: Enable rich content rendering for technical conversations
  * - Value Impact: Rich formatting crucial for 70% of technical AI interactions
  * - Revenue Impact: Technical users represent 40% of paid tier revenue
@@ -57,6 +57,7 @@ import {
 } from './test-data-factories';
 
 describe('Message Formatting Core Functionality', () => {
+    jest.setTimeout(10000);
   let user: ReturnType<typeof userEvent.setup>;
 
   beforeEach(async () => {
@@ -69,6 +70,7 @@ describe('Message Formatting Core Functionality', () => {
   });
 
   describe('Markdown Basic Formatting', () => {
+      jest.setTimeout(10000);
     test('renders bold and italic text correctly', async () => {
       const boldItalicMessage = createMarkdownMessage('**bold** and *italic* text');
       
@@ -136,6 +138,7 @@ describe('Message Formatting Core Functionality', () => {
   });
 
   describe('Code Block Rendering', () => {
+      jest.setTimeout(10000);
     test('renders code blocks with syntax highlighting', async () => {
       const codeMessage = createCodeBlockMessage('javascript', 
         'function hello() {\n  console.log("Hello, world!");\n}'
@@ -227,6 +230,7 @@ describe('Message Formatting Core Functionality', () => {
   });
 
   describe('Links and Mentions', () => {
+      jest.setTimeout(10000);
     test('renders external links with proper attributes', async () => {
       const linkMessage = createLinkMessage('https://netrasystems.ai', 'Netra AI Platform');
       
@@ -295,6 +299,7 @@ describe('Message Formatting Core Functionality', () => {
   });
 
   describe('Lists and Tables', () => {
+      jest.setTimeout(10000);
     test('renders unordered lists with proper structure', async () => {
       const unorderedList = createListMessage('unordered', ['Item 1', 'Item 2', 'Item 3']);
       
@@ -371,6 +376,7 @@ describe('Message Formatting Core Functionality', () => {
   });
 
   describe('Complex Mixed Content', () => {
+      jest.setTimeout(10000);
     test('renders mixed content with multiple formatting types', async () => {
       const mixedMessage = createMixedContentMessage();
       
@@ -427,6 +433,7 @@ describe('Message Formatting Core Functionality', () => {
   });
 
   describe('Performance and Accessibility', () => {
+      jest.setTimeout(10000);
     test('provides proper ARIA labels for formatted content', async () => {
       const complexMessage = createComplexFormattedMessage();
       

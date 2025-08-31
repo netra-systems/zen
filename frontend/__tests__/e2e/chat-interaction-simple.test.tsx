@@ -1,9 +1,8 @@
-/**
- * Simple Chat Interaction Tests - Core Revenue Protection
- * 
- * Business Value Justification:
- * - Segment: All (Free → Enterprise)
- * - Goal: Protect core chat revenue flow, prevent user churn from bugs
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+t user churn from bugs
  * - Value Impact: Direct protection of 100% of user interactions
  * - Revenue Impact: Prevents 20%+ revenue loss from chat failures
  */
@@ -92,6 +91,7 @@ const MockChatInterface = () => {
 // ============================================
 
 describe('Chat Input - Basic Functionality', () => {
+    jest.setTimeout(10000);
   let wsManager: WebSocketTestManager;
   
   beforeEach(() => {
@@ -101,6 +101,11 @@ describe('Chat Input - Basic Functionality', () => {
   
   afterEach(() => {
     wsManager.cleanup();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   it('renders input field correctly', () => {
@@ -189,6 +194,7 @@ describe('Chat Input - Basic Functionality', () => {
 // ============================================
 
 describe('Message Display - Basic Rendering', () => {
+    jest.setTimeout(10000);
   let wsManager: WebSocketTestManager;
   
   beforeEach(() => {
@@ -198,6 +204,11 @@ describe('Message Display - Basic Rendering', () => {
   
   afterEach(() => {
     wsManager.cleanup();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   it('renders user message correctly', () => {
@@ -270,6 +281,7 @@ describe('Message Display - Basic Rendering', () => {
 // ============================================
 
 describe('Complete Chat Flow', () => {
+    jest.setTimeout(10000);
   let wsManager: WebSocketTestManager;
   
   beforeEach(() => {
@@ -279,6 +291,11 @@ describe('Complete Chat Flow', () => {
   
   afterEach(() => {
     wsManager.cleanup();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   it('handles complete message sending flow', () => {
