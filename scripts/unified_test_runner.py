@@ -252,7 +252,8 @@ class UnifiedTestRunner:
         e2e_categories = {'e2e', 'e2e_critical', 'cypress'}
         running_e2e = bool(set(categories_to_run) & e2e_categories)
         
-        if args.real_services or args.real_llm or args.env in ['dev', 'staging'] or running_e2e:
+        # Skip local service checks for staging - use remote staging services
+        if args.env != 'staging' and (args.real_services or args.real_llm or args.env in ['dev'] or running_e2e):
             self._check_service_availability(args)
         
         # Start test tracking session
@@ -333,6 +334,10 @@ class UnifiedTestRunner:
         e2e_categories = {'e2e', 'e2e_critical', 'cypress'}
         running_e2e = bool(set(categories_to_run) & e2e_categories)
         
+        # Auto-configure E2E bypass key for staging environment
+        if args.env == 'staging' and running_e2e:
+            self._configure_staging_e2e_auth()
+        
         # Real LLM should be enabled if:
         # 1. Explicitly requested with --real-llm flag
         # 2. Running E2E categories (real LLM is DEFAULT per CLAUDE.md)
@@ -387,7 +392,19 @@ class UnifiedTestRunner:
                 )
         
         # Configure services
-        if args.env == "dev":
+        if args.env == "staging":
+            # For staging, don't use Docker port discovery - use remote staging services
+            configure_test_environment()
+            env = get_env()
+            env.set('USE_REAL_SERVICES', 'true', 'test_runner')
+            # Import SSOT for staging URLs
+            from netra_backend.app.core.network_constants import URLConstants
+            # Set staging service URLs from SSOT
+            env.set('BACKEND_URL', URLConstants.STAGING_BACKEND_URL, 'test_runner')
+            env.set('AUTH_SERVICE_URL', URLConstants.STAGING_AUTH_URL, 'test_runner')
+            env.set('WEBSOCKET_URL', URLConstants.STAGING_WEBSOCKET_URL, 'test_runner')
+            self.port_discovery = None  # No port discovery for staging
+        elif args.env == "dev":
             configure_dev_environment()
             # Use DEV services for dev environment
             self.port_discovery = DockerPortDiscovery(use_test_services=False)
@@ -414,7 +431,8 @@ class UnifiedTestRunner:
         
         # Update service URLs with discovered Docker container ports
         # This fixes the hardcoded port issues by using actual Docker container ports
-        if hasattr(self, 'port_discovery') and self.port_discovery:
+        # Skip for staging since we use remote services
+        if hasattr(self, 'port_discovery') and self.port_discovery and args.env != 'staging':
             port_mappings = self.port_discovery.discover_all_ports()
             env = get_env()
             
@@ -497,6 +515,40 @@ class UnifiedTestRunner:
                 pass
             except Exception as e:
                 print(f"Warning: Could not load {test_env_file.name} file: {e}")
+    
+    def _configure_staging_e2e_auth(self):
+        """Automatically configure E2E bypass key for staging environment."""
+        try:
+            env = get_env()
+            
+            # Check if E2E_BYPASS_KEY is already set
+            if env.get('E2E_BYPASS_KEY'):
+                print("[INFO] E2E_BYPASS_KEY already configured")
+                return
+            
+            print("[INFO] Auto-configuring E2E bypass key for staging...")
+            
+            # Try to fetch the bypass key from Google Secrets Manager
+            import subprocess
+            result = subprocess.run(
+                ['gcloud', 'secrets', 'versions', 'access', 'latest', 
+                 '--secret=e2e-bypass-key', '--project=netra-staging'],
+                capture_output=True, text=True
+            )
+            
+            if result.returncode == 0:
+                bypass_key = result.stdout.strip()
+                env.set('E2E_BYPASS_KEY', bypass_key, 'staging_e2e_auth')
+                env.set('ENVIRONMENT', 'staging', 'staging_e2e_auth')
+                env.set('STAGING_AUTH_URL', 'https://api.staging.netrasystems.ai', 'staging_e2e_auth')
+                print("[INFO] ✅ E2E bypass key configured successfully")
+            else:
+                print(f"[WARNING] Could not fetch E2E bypass key from Google Secrets Manager: {result.stderr}")
+                print("[WARNING] E2E tests requiring authentication may fail")
+                
+        except Exception as e:
+            print(f"[WARNING] Failed to configure E2E bypass key: {e}")
+            print("[WARNING] E2E tests requiring authentication may fail")
     
     def _check_service_availability(self, args: argparse.Namespace):
         """Check availability of required real services before running tests."""
