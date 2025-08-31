@@ -122,24 +122,37 @@ python scripts/docker_launcher.py --build  # Rebuilds images
 4. **Set dev as DEFAULT** - Make development the default profile
 5. **Simplify launcher scripts** - Single entry point with clear flags
 
-## Quick Start (After Cleanup)
+## THE ONLY TWO VALID PATHS
 
+### Option 1: Development Environment (DEFAULT)
 ```bash
-# DEFAULT - Start development environment
+# Start development environment - THIS IS THE DEFAULT
 docker-compose up
 
-# OR using launcher (recommended)
-python scripts/docker_launcher.py
+# Stop development environment
+docker-compose down
+```
 
-# Start test environment
+### Option 2: Test Environment
+```bash
+# Start test environment (ephemeral, for running tests)
 docker-compose --profile test up
 
-# Stop all services
+# Stop test environment
 docker-compose down
-
-# Clean everything (including volumes)
-docker-compose down -v
 ```
+
+### DEPRECATED - DO NOT USE
+```bash
+# DO NOT USE THESE:
+docker-compose -f docker-compose.dev.yml up     # Creates duplicate images
+docker-compose -f docker-compose.minimal.yml up # Redundant
+docker-compose -f docker-compose.windows.yml up # Platform-specific, unnecessary
+```
+
+**CRITICAL:** Only use the main `docker-compose.yml` file with either:
+1. No profile (launches dev by default)
+2. `--profile test` (launches test environment)
 
 ## Resource Limits
 

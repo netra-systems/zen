@@ -1,10 +1,11 @@
-# Netra Development Docker Compose Configuration
-# Use this file for local development with all services
+# DEPRECATED - DO NOT USE THIS FILE
+# This file creates duplicate images without proper naming (auth, backend, frontend)
+# Please use the main docker-compose.yml instead:
+#   docker-compose up       # Starts dev environment by default
+#   docker-compose down     # Stops all services
 #
-# Usage:
-# docker-compose -f docker-compose.dev.yml up -d
-# docker-compose -f docker-compose.dev.yml down
-# docker-compose -f docker-compose.dev.yml logs -f
+# This file will be removed in next cleanup. It duplicates functionality
+# already in the main docker-compose.yml with dev- prefixed services.
 
 version: '3.8'
 

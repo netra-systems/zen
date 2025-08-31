@@ -4,12 +4,12 @@
 # CRITICAL: Maximum 10 named volumes to prevent Docker Desktop crashes
 # Code is baked into images - no code volumes needed
 #
-# DEFAULT: Development environment (dev profile) launches by default
+# DEFAULT: Development environment launches by default (no profile needed)
 # Usage:
 # - docker-compose up                   # Start development environment (DEFAULT)
-# - docker-compose --profile dev up     # Explicitly start development environment
-# - docker-compose --profile test up    # Start test environment
+# - docker-compose --profile test up    # Start test environment only
 # - docker-compose down                 # Stop all services
+# - docker-compose down -v              # Stop all services and remove volumes
 
 version: '3.8'
 
@@ -109,6 +109,7 @@ services:
 
   # Dev Auth Service
   dev-auth:
+    image: netra-dev-auth:latest
     build:
       context: .
       dockerfile: ./docker/auth.Dockerfile
@@ -175,6 +176,7 @@ services:
 
   # Dev Backend Service
   dev-backend:
+    image: netra-dev-backend:latest
     build:
       context: .
       dockerfile: ./docker/backend.Dockerfile
@@ -252,6 +254,7 @@ services:
 
   # Dev Frontend Service
   dev-frontend:
+    image: netra-dev-frontend:latest
     build:
       context: .
       dockerfile: ./docker/frontend.Dockerfile
