@@ -20,7 +20,7 @@ from typing import Dict, List, Optional, Union
 import aiohttp
 from pydantic import BaseModel, Field
 
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from dev_launcher.service_config import ResourceMode, ServicesConfiguration
 
 logger = logging.getLogger(__name__)

@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 from dev_launcher.service_config import ResourceMode, ServicesConfiguration
 from dev_launcher.unicode_utils import get_emoji, safe_print

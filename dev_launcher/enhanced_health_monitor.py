@@ -373,7 +373,7 @@ class EnhancedHealthMonitor:
     def _check_environment_health(self) -> Dict[str, Any]:
         """Check environment configuration health."""
         try:
-            from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+            from shared.isolated_environment import IsolatedEnvironment
             
             env = IsolatedEnvironment()
             

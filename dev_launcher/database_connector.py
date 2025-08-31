@@ -28,7 +28,7 @@ from netra_backend.app.core.network_constants import (
     NetworkEnvironmentHelper,
     ServicePorts,
 )
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from shared.database_url_builder import DatabaseURLBuilder
 
 logger = logging.getLogger(__name__)

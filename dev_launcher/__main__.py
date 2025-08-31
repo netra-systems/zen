@@ -25,7 +25,7 @@ from typing import Optional
 # Set UTF-8 encoding for Windows and Mac
 if sys.platform in ("win32", "darwin"):
     # Import here to avoid circular imports since this is __main__
-    from dev_launcher.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     env_manager = get_env()
     env_manager.set("PYTHONIOENCODING", "utf-8", "__main__")
     if hasattr(sys.stdout, 'reconfigure'):

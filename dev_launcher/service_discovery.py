@@ -169,7 +169,7 @@ class ServiceDiscovery:
     def get_cross_service_auth_token(self) -> Optional[str]:
         """Get cross-service authentication token from environment or discovery."""
         # Check environment first
-        from dev_launcher.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         env = get_env()
         token = env.get('CROSS_SERVICE_AUTH_TOKEN')
         if token:

@@ -14,7 +14,7 @@ import threading
 import pytest
 from unittest.mock import patch
 
-from dev_launcher.isolated_environment import get_env, get_environment_manager
+from shared.isolated_environment import get_env, get_environment_manager
 
 
 class TestPytestEnvironmentIntegration:
@@ -23,7 +23,7 @@ class TestPytestEnvironmentIntegration:
     def setup_method(self):
         """Setup for each test."""
         # Reset global manager state
-        from dev_launcher.isolated_environment import _global_env
+        from shared.isolated_environment import _global_env
         _global_env.reset_to_original()
         _global_env._protected_vars.clear()
         _global_env._variable_sources.clear()

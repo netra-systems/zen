@@ -22,8 +22,8 @@ from dev_launcher.critical_error_handler import CriticalError, critical_handler
 from dev_launcher.database_connector import DatabaseConnector
 from dev_launcher.database_initialization import DatabaseInitializer, DatabaseHealthChecker
 from dev_launcher.environment_checker import EnvironmentChecker
-from dev_launcher.isolated_environment import get_env
-from dev_launcher.isolated_environment import EnvironmentValidator
+from shared.isolated_environment import get_env
+from shared.isolated_environment import EnvironmentValidator
 from dev_launcher.health_monitor import HealthMonitor
 from dev_launcher.health_registration import HealthRegistrationHelper
 from dev_launcher.log_filter import LogFilter, StartupMode, StartupProgressTracker

@@ -11,7 +11,7 @@ import time
 from typing import Dict, List, Optional, Tuple
 
 from dev_launcher.container_discovery import ContainerDiscovery
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 

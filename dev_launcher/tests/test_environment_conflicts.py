@@ -10,12 +10,12 @@ import pytest
 import tempfile
 from pathlib import Path
 
-from dev_launcher.isolated_environment import get_env, get_environment_manager
+from shared.isolated_environment import get_env, get_environment_manager
 
 
 def reset_global_manager():
     """Reset the global environment manager for testing."""
-    from dev_launcher.isolated_environment import _global_env
+    from shared.isolated_environment import _global_env
     _global_env.reset_to_original()
     _global_env._protected_vars.clear()
     _global_env._variable_sources.clear()
