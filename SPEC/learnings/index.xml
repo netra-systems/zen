@@ -2030,4 +2030,20 @@
             <critical-takeaway>Message input changed from input element to textarea within [data-testid="message-input"] wrapper</critical-takeaway>
         </category>
     </testing_methodology>
+    
+    <learning id="frontend-api-url-configuration-2025-08-31">
+        <title>Frontend API URL Configuration Issue</title>
+        <category>Configuration</category>
+        <keywords>frontend, api, url, staging, production, domain, agent, endpoints, 404</keywords>
+        <path>frontend_api_url_configuration.xml</path>
+        <critical-takeaway>
+            Frontend MUST use absolute URLs with backend API domain for all API calls.
+            Relative URLs like /api/* resolve to frontend domain causing 404 errors.
+            Always use getUnifiedApiConfig() to get correct API URL.
+            Test in staging to catch domain-related issues early.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Complete agent functionality failure, broken chat in staging/production, poor user experience</business-impact>
+        <prevention>NEVER use relative URLs in frontend API calls. Always import and use getUnifiedApiConfig(). Test API calls in staging environment.</prevention>
+    </learning>
 </specification>

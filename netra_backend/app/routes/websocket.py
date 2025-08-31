@@ -222,16 +222,30 @@ async def websocket_endpoint(websocket: WebSocket):
                     message_router.add_handler(fallback_handler)
                     logger.info(f"Registered fallback AgentMessageHandler for {environment} environment")
         else:
-            # CRITICAL: NO FALLBACK IN STAGING/PRODUCTION
+            # CRITICAL: NO FALLBACK IN STAGING/PRODUCTION - CHAT IS KING
             if environment in ["staging", "production"] and not is_testing:
                 missing_deps = []
                 if supervisor is None:
                     missing_deps.append("agent_supervisor")
                 if thread_service is None:
                     missing_deps.append("thread_service")
-                error_msg = f"Critical WebSocket dependencies missing in {environment}: {missing_deps}"
-                logger.error(error_msg)
-                raise RuntimeError(error_msg)
+                error_msg = f"CRITICAL: Chat dependencies missing in {environment}: {missing_deps}"
+                logger.critical(error_msg)
+                logger.critical("Chat delivers 90% of value - cannot operate without agent services")
+                
+                # This should NEVER happen if startup is working correctly
+                # Send critical error and raise to trigger alerts
+                error_response = create_error_message(
+                    "CRITICAL_FAILURE",
+                    "Chat service failed to initialize. This is a critical error.",
+                    {"missing_dependencies": missing_deps, "environment": environment, "severity": "CRITICAL"}
+                )
+                await safe_websocket_send(websocket, error_response.model_dump())
+                await asyncio.sleep(0.1)  # Give time for message to be sent
+                await safe_websocket_close(websocket, code=1011, reason="Critical failure")
+                
+                # Raise to trigger monitoring alerts - chat MUST work
+                raise RuntimeError(f"Chat critical failure in {environment} - missing {missing_deps}")
             else:
                 logger.warning(f"WebSocket dependencies not available in {environment} - creating fallback agent handler")
                 # Create fallback agent handler only for testing/development
@@ -468,7 +482,7 @@ async def _handle_websocket_messages(
                     "disconnect_reason": e.reason or "No reason provided",
                     "connection_duration": time.time() - connection_monitor.get_connection_start_time(connection_id) if hasattr(connection_monitor, 'get_connection_start_time') else "Unknown"
                 }
-                logger.info(f"WebSocket disconnect: {disconnect_info}")
+                logger.debug(f"WebSocket disconnect: {disconnect_info}")
                 break
                 
             except Exception as e:
@@ -770,7 +784,7 @@ async def websocket_test_endpoint(websocket: WebSocket):
     try:
         # Accept WebSocket connection without authentication
         await websocket.accept()
-        logger.info("Test WebSocket connection accepted (no auth)")
+        logger.debug("Test WebSocket connection accepted (no auth)")
         
         # Generate a simple connection ID
         connection_id = f"test_{int(time.time())}"
@@ -784,7 +798,7 @@ async def websocket_test_endpoint(websocket: WebSocket):
         }
         await websocket.send_json(welcome_msg)
         
-        logger.info(f"Test WebSocket ready: {connection_id}")
+        logger.debug(f"Test WebSocket ready: {connection_id}")
         
         # Simple message handling loop
         while True:
@@ -795,7 +809,7 @@ async def websocket_test_endpoint(websocket: WebSocket):
                     timeout=30.0
                 )
                 
-                logger.info(f"Test WebSocket received: {raw_message}")
+                logger.debug(f"Test WebSocket received: {raw_message}")
                 
                 # Parse message
                 try:
@@ -883,7 +897,7 @@ async def websocket_test_endpoint(websocket: WebSocket):
                 })
                 
     except WebSocketDisconnect as e:
-        logger.info(f"Test WebSocket disconnected: {connection_id} ({e.code}: {e.reason})")
+        logger.debug(f"Test WebSocket disconnected: {connection_id} ({e.code}: {e.reason})")
     
     except Exception as e:
         logger.error(f"Test WebSocket error: {e}", exc_info=True)
@@ -895,7 +909,7 @@ async def websocket_test_endpoint(websocket: WebSocket):
     
     finally:
         if connection_id:
-            logger.info(f"Test WebSocket cleanup completed: {connection_id}")
+            logger.debug(f"Test WebSocket cleanup completed: {connection_id}")
 
 
 @router.get("/ws/stats")

@@ -676,7 +676,7 @@ def _create_tool_dispatcher(tool_registry):
 
 
 def _create_agent_supervisor(app: FastAPI) -> None:
-    """Create agent supervisor."""
+    """Create agent supervisor - CRITICAL for chat functionality."""
     from netra_backend.app.logging_config import central_logger
     from netra_backend.app.core.isolated_environment import get_env
     logger = central_logger.get_logger(__name__)
@@ -691,7 +691,7 @@ def _create_agent_supervisor(app: FastAPI) -> None:
         if supervisor is None:
             raise RuntimeError("Supervisor creation returned None")
         
-        # Verify WebSocket enhancement happened
+        # CRITICAL: Ensure WebSocket enhancement for agent events
         if hasattr(supervisor, 'registry') and hasattr(supervisor.registry, 'tool_dispatcher'):
             if not getattr(supervisor.registry.tool_dispatcher, '_websocket_enhanced', False):
                 logger.warning("Tool dispatcher not enhanced with WebSocket - attempting enhancement")
@@ -700,6 +700,8 @@ def _create_agent_supervisor(app: FastAPI) -> None:
                 ws_manager = get_websocket_manager()
                 if ws_manager:
                     supervisor.registry.set_websocket_manager(ws_manager)
+                    if not getattr(supervisor.registry.tool_dispatcher, '_websocket_enhanced', False):
+                        raise RuntimeError("Failed to enhance tool dispatcher with WebSocket notifications")
         
         _setup_agent_state(app, supervisor)
         
@@ -717,15 +719,19 @@ def _create_agent_supervisor(app: FastAPI) -> None:
         error_msg = f"Failed to create agent supervisor in {environment}: {e}"
         logger.error(error_msg, exc_info=True)
         
-        # CRITICAL: In staging/production, this must fail hard
+        # CRITICAL FIX: Agent supervisor is REQUIRED for chat functionality
+        # Chat is king - we MUST fail fast if agent services cannot be initialized
         if environment in ["staging", "production"]:
-            raise RuntimeError(error_msg) from e
+            logger.critical(f"CRITICAL: Agent supervisor failed in {environment} - chat functionality broken!")
+            logger.critical("Chat delivers 90% of value - failing startup to prevent broken user experience")
+            # Re-raise to fail startup - chat MUST work
+            raise RuntimeError(f"Agent supervisor initialization failed in {environment} - chat is broken") from e
         else:
-            # Set None for development/testing to allow graceful degradation
+            # In development/testing, still try to continue for debugging
             app.state.agent_supervisor = None
             app.state.thread_service = None
-            logger.warning(f"Agent supervisor set to None for {environment} after failure")
-            raise
+            logger.warning(f"Agent supervisor set to None for {environment} after failure - chat will not work!")
+            # Don't raise in dev to allow debugging
 
 
 def _build_supervisor_agent(app: FastAPI):
@@ -1186,15 +1192,20 @@ async def _run_legacy_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
         environment = get_env().get("ENVIRONMENT", "development").lower()
         
         if environment in ["staging", "production"]:
-            # In staging/production, Phase 3 failure is critical
+            # CRITICAL FIX: Phase 3 failure is CRITICAL - chat is broken
+            # Chat delivers 90% of value - we cannot run without it
+            logger.critical(f"CRITICAL: Phase 3 failure in {environment} - CHAT IS BROKEN!")
+            logger.critical("Cannot continue without agent supervisor - chat delivers 90% of value")
+            # Mark as failed and re-raise
             app.state.startup_complete = False
             app.state.startup_in_progress = False
             app.state.startup_failed = True
             app.state.startup_error = error_msg
-            raise RuntimeError(error_msg) from e
+            # Re-raise to fail startup - chat MUST work
+            raise RuntimeError(f"Phase 3 critical failure in {environment} - chat is broken") from e
         else:
-            # In development, log but continue with degraded functionality
-            logger.warning(f"Continuing with degraded functionality in {environment} after Phase 3 failure")
+            # In development, log but continue for debugging
+            logger.warning(f"Continuing with broken chat in {environment} after Phase 3 failure - FOR DEBUGGING ONLY")
     
     # CRITICAL: Set startup_complete flag for health endpoint
     app.state.startup_complete = True
