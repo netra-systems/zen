@@ -1838,8 +1838,8 @@ def main():
     if BACKGROUND_E2E_AVAILABLE:
         add_background_e2e_arguments(parser)
     
-    # NEW: Add Master Orchestration Controller arguments
-    if MASTER_ORCHESTRATION_AVAILABLE:
+    # NEW: Add Master Orchestration Controller arguments (only if not already added)
+    if MASTER_ORCHESTRATION_AVAILABLE and not ORCHESTRATOR_AVAILABLE:
         orchestration_group = parser.add_argument_group('Master Orchestration System')
         
         orchestration_group.add_argument(
@@ -1866,18 +1866,24 @@ def main():
             action="store_true",
             help="Execute E2E tests in background only"
         )
+    
+    # Add Master Orchestration specific arguments (non-conflicting)
+    if MASTER_ORCHESTRATION_AVAILABLE:
+        if not ORCHESTRATOR_AVAILABLE:
+            orchestration_group = parser.add_argument_group('Master Orchestration System')
+        else:
+            # Add to existing orchestration group
+            for group in parser._action_groups:
+                if group.title == 'Test Orchestrator Options':
+                    orchestration_group = group
+                    break
+            else:
+                orchestration_group = parser.add_argument_group('Master Orchestration System')
         
         orchestration_group.add_argument(
             "--orchestration-status",
             action="store_true",
             help="Show current orchestration status and exit"
-        )
-        
-        orchestration_group.add_argument(
-            "--progress-mode",
-            choices=["console", "json", "websocket", "silent"],
-            default="console",
-            help="Progress output mode"
         )
         
         orchestration_group.add_argument(
@@ -1891,6 +1897,12 @@ def main():
             "--websocket-thread-id",
             type=str,
             help="WebSocket thread ID for real-time updates"
+        )
+        
+        orchestration_group.add_argument(
+            "--master-orchestration",
+            action="store_true",
+            help="Use new Master Orchestration Controller (enhanced version)"
         )
     
     args = parser.parse_args()
@@ -1956,10 +1968,9 @@ def main():
     
     # NEW: Handle Master Orchestration Controller execution first
     if MASTER_ORCHESTRATION_AVAILABLE and (
-        getattr(args, 'use_layers', False) or 
-        getattr(args, 'execution_mode', None) or
-        getattr(args, 'background_e2e', False) or
-        getattr(args, 'orchestration_status', False)
+        getattr(args, 'master_orchestration', False) or
+        getattr(args, 'orchestration_status', False) or
+        (getattr(args, 'use_layers', False) and getattr(args, 'websocket_thread_id', None))
     ):
         # Use new orchestration system
         import asyncio
