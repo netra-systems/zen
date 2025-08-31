@@ -6,6 +6,15 @@ import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-t
 
 describe('Textarea Component - Comprehensive Tests', () => {
     jest.setTimeout(10000);
+    
+  beforeEach(() => {
+    setupAntiHang();
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
   const renderTextarea = (props = {}) => {
     return render(<Textarea data-testid="test-textarea" {...props} />);
   };

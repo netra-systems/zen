@@ -48,8 +48,15 @@ const MockButton: React.FC<{
 };
 
 describe('Button Component Tests', () => {
-      setupAntiHang();
     jest.setTimeout(10000);
+
+  beforeEach(() => {
+    setupAntiHang();
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });
   it('should render with default props', () => {
     render(<MockButton>Click me</MockButton>);
     

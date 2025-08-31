@@ -12,8 +12,11 @@ import {
 } from '@/components/ui/select';
 
 describe('Select Component', () => {
-  setupAntiHang();
   jest.setTimeout(10000);
+
+  beforeEach(() => {
+    setupAntiHang();
+  });
 
   afterEach(() => {
     cleanupAntiHang();

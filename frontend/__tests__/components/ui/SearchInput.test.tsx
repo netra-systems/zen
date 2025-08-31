@@ -62,6 +62,15 @@ const SearchInput = ({
 
 describe('SearchInput Component - Comprehensive Tests', () => {
     jest.setTimeout(10000);
+    
+  beforeEach(() => {
+    setupAntiHang();
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
   const defaultProps = {
     searchTerm: '',
     setSearchTerm: jest.fn(),

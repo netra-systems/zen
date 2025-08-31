@@ -3,13 +3,18 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { Button, buttonVariants } from '@/components/ui/button';
 
 describe('Button Component - Complete Test Suite', () => {
-    jest.setTimeout(10000);
+  jest.setTimeout(10000);
   const user = userEvent.setup();
+
+  beforeEach(() => {
+    setupAntiHang();
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });
 
   describe('Basic Rendering', () => {
       jest.setTimeout(10000);

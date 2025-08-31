@@ -6,6 +6,15 @@ import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-t
 
 describe('Input Component - Comprehensive Tests', () => {
     jest.setTimeout(10000);
+    
+  beforeEach(() => {
+    setupAntiHang();
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
   const renderInput = (props = {}) => {
     return render(<Input data-testid="test-input" {...props} />);
   };

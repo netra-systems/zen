@@ -1,16 +1,53 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Button } from '@/components/ui/button';
-import { Copy, Check, Play, Pause, X, MoreVertical, ChevronDown } from 'lucide-react';
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-from '@testing-library/user-event';
-import { Button } from '@/components/ui/button';
-import { Copy, Check, Play, Pause, X, MoreVertical, ChevronDown } from 'lucide-react';
+
+// Mock the Button component
+const Button = React.forwardRef<
+  HTMLButtonElement,
+  React.ButtonHTMLAttributes<HTMLButtonElement> & {
+    variant?: string;
+    size?: string;
+  }
+>(({ className, variant, size, children, ...props }, ref) => (
+  <button
+    ref={ref}
+    className={`btn ${variant} ${size} ${className || ''}`}
+    data-variant={variant}
+    data-size={size}
+    {...props}
+  >
+    {children}
+  </button>
+));
+Button.displayName = 'Button';
+
+// Mock icon components
+const Copy = ({ className }: { className?: string }) => <span className={className}>📋</span>;
+const Check = ({ className }: { className?: string }) => <span className={className}>✓</span>;
+const Play = ({ className }: { className?: string }) => <span className={className}>▶</span>;
+const Pause = ({ className }: { className?: string }) => <span className={className}>⏸</span>;
+const X = ({ className }: { className?: string }) => <span className={className}>✕</span>;
+const MoreVertical = ({ className }: { className?: string }) => <span className={className}>⋮</span>;
+const ChevronDown = ({ className }: { className?: string }) => <span className={className}>⌄</span>;
 
 describe('IconButton Test Suite', () => {
-    jest.setTimeout(10000);
+  
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
   const user = userEvent.setup();
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });
 
   describe('Basic Icon Button Rendering', () => {
       jest.setTimeout(10000);

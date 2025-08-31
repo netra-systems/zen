@@ -4,12 +4,18 @@ import userEvent from '@testing-library/user-event';
 import ActionButtons from '@/components/demo/ActionButtons';
 import { MessageActionButtons } from '@/components/chat/components/MessageActionButtons';
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-'@testing-library/user-event';
-import ActionButtons from '@/components/demo/ActionButtons';
-import { MessageActionButtons } from '@/components/chat/components/MessageActionButtons';
 
 describe('ActionButtons Test Suite', () => {
     jest.setTimeout(10000);
+    
+  beforeEach(() => {
+    setupAntiHang();
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
   const user = userEvent.setup();
 
   describe('Demo ActionButtons Component', () => {
