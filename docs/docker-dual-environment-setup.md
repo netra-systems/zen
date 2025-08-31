@@ -307,7 +307,7 @@ docker logs netra-backend | grep reload
 
 ### DEV-Specific
 
-- `ALLOW_DEV_AUTH_BYPASS=true` - Skip auth for development
+- `ALLOW_DEV_OAUTH_SIMULATION=true` - Skip auth for development
 - `WATCHDOG_*` - Hot reload configuration
 - Debug and monitoring settings
 

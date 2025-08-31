@@ -104,7 +104,7 @@ docker exec backend env | grep AUTH_BYPASS
 1. **Set authentication bypass environment variables:**
    ```bash
    # In .env.development.local
-   ALLOW_DEV_AUTH_BYPASS=true
+   ALLOW_DEV_OAUTH_SIMULATION=true
    WEBSOCKET_AUTH_BYPASS=true
    ENVIRONMENT=development
    ```
@@ -113,7 +113,7 @@ docker exec backend env | grep AUTH_BYPASS
    ```yaml
    backend:
      environment:
-       - ALLOW_DEV_AUTH_BYPASS=true
+       - ALLOW_DEV_OAUTH_SIMULATION=true
        - WEBSOCKET_AUTH_BYPASS=true
        - ENVIRONMENT=development
    ```
@@ -279,7 +279,7 @@ docker network inspect netra-core-generation-1_default
 ### ✅ Environment Variables Check
 
 **Backend (.env.development.local):**
-- [ ] `ALLOW_DEV_AUTH_BYPASS=true`
+- [ ] `ALLOW_DEV_OAUTH_SIMULATION=true`
 - [ ] `WEBSOCKET_AUTH_BYPASS=true`
 - [ ] `ENVIRONMENT=development`
 
@@ -487,7 +487,7 @@ python -c "from shared.cors_config import get_cors_origins; print(get_cors_origi
 # Verify authentication bypass
 docker exec backend python -c "
 import os
-print('ALLOW_DEV_AUTH_BYPASS:', os.getenv('ALLOW_DEV_AUTH_BYPASS'))
+print('ALLOW_DEV_OAUTH_SIMULATION:', os.getenv('ALLOW_DEV_OAUTH_SIMULATION'))
 print('WEBSOCKET_AUTH_BYPASS:', os.getenv('WEBSOCKET_AUTH_BYPASS'))
 print('ENVIRONMENT:', os.getenv('ENVIRONMENT'))
 "

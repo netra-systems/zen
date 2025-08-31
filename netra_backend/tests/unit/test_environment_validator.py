@@ -74,7 +74,7 @@ class TestEnvironmentValidator:
         
         # Set forbidden test variables
         os.environ['WEBSOCKET_AUTH_BYPASS'] = 'true'
-        os.environ['ALLOW_DEV_AUTH_BYPASS'] = 'true'
+        os.environ['ALLOW_DEV_OAUTH_SIMULATION'] = 'true'
         
         # Create validator and check
         validator = EnvironmentValidator()
@@ -85,7 +85,7 @@ class TestEnvironmentValidator:
         
         error_msg = str(exc_info.value)
         assert 'WEBSOCKET_AUTH_BYPASS' in error_msg
-        assert 'ALLOW_DEV_AUTH_BYPASS' in error_msg
+        assert 'ALLOW_DEV_OAUTH_SIMULATION' in error_msg
     
     def test_allow_test_vars_in_development(self):
         """Test that test variables are allowed in development environment."""
@@ -300,7 +300,7 @@ class TestEnvironmentValidator:
             'E2E_TESTING',
             'AUTH_FAST_TEST_MODE',
             'PYTEST_CURRENT_TEST',
-            'ALLOW_DEV_AUTH_BYPASS',
+            'ALLOW_DEV_OAUTH_SIMULATION',
             'WEBSOCKET_AUTH_BYPASS',
             'SKIP_AUTH_VALIDATION',
             'TEST_MODE',

@@ -35,7 +35,7 @@ class DockerWebSocketTester:
         
         # Test variables that should be set in Docker environment
         required_vars = {
-            "ALLOW_DEV_AUTH_BYPASS": "true",
+            "ALLOW_DEV_OAUTH_SIMULATION": "true",
             "WEBSOCKET_AUTH_BYPASS": "true", 
             "ENVIRONMENT": "development",
         }
@@ -154,7 +154,7 @@ class DockerWebSocketTester:
             {
                 "path": "docker-compose.dev.yml",
                 "checks": [
-                    "ALLOW_DEV_AUTH_BYPASS: true",
+                    "ALLOW_DEV_OAUTH_SIMULATION: true",
                     "WEBSOCKET_AUTH_BYPASS: true",
                     "NEXT_PUBLIC_WEBSOCKET_URL: ws://localhost:8000/ws"
                 ]
@@ -169,7 +169,7 @@ class DockerWebSocketTester:
             {
                 "path": ".env.development.local",
                 "checks": [
-                    "ALLOW_DEV_AUTH_BYPASS=true",
+                    "ALLOW_DEV_OAUTH_SIMULATION=true",
                     "WEBSOCKET_AUTH_BYPASS=true"
                 ]
             }
@@ -206,7 +206,7 @@ class DockerWebSocketTester:
         
         # Simulate the OAUTH SIMULATION check logic
         try:
-            allow_dev_bypass = os.environ.get("ALLOW_DEV_AUTH_BYPASS", "false").lower() == "true"
+            allow_dev_bypass = os.environ.get("ALLOW_DEV_OAUTH_SIMULATION", "false").lower() == "true"
             websocket_bypass = os.environ.get("WEBSOCKET_AUTH_BYPASS", "false").lower() == "true"
             environment = os.environ.get("ENVIRONMENT", "production").lower()
             

@@ -29,7 +29,7 @@ from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
 # Enable development OAUTH SIMULATION for WebSocket connections in e2e tests
 os.environ["WEBSOCKET_AUTH_BYPASS"] = "true"
-os.environ["ALLOW_DEV_AUTH_BYPASS"] = "true"
+os.environ["ALLOW_DEV_OAUTH_SIMULATION"] = "true"
 
 
 class TestRealUserFlower:

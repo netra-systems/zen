@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning id="docker-excessive-volumes-crash" criticality="CRITICAL" date="2025-08-31">
+    <title>Docker Desktop Crash - 33 Named Volumes Root Cause</title>
+    
+    <incident>
+        <description>
+            Docker Desktop repeatedly crashed due to 33 named volumes defined in docker-compose.yml,
+            combined with 30GB of uncleaned resources (images, build cache).
+        </description>
+        
+        <discovery_process>
+            <step>Initial hypothesis: Too many containers (6) causing crashes</step>
+            <step>Reduced memory allocations by 75% - still crashed</step>
+            <step>Discovered 38 Docker volumes in system</step>
+            <step>Found 3.4GB of old images never cleaned</step>
+            <step>Found 25.92GB of build cache never cleaned</step>
+            <step>Root cause: 33 named volumes defined in docker-compose.yml</step>
+        </discovery_process>
+        
+        <metrics>
+            <metric name="Named volumes defined">33</metric>
+            <metric name="Actual volumes in system">38</metric>
+            <metric name="Old images space">3.4GB</metric>
+            <metric name="Build cache space">25.92GB</metric>
+            <metric name="Total space wasted">30.6GB</metric>
+            <metric name="Volumes per service">3-6</metric>
+        </metrics>
+    </incident>
+
+    <root_cause_analysis>
+        <primary_cause>
+            Excessive volume definitions (33) in docker-compose.yml creating I/O overhead
+        </primary_cause>
+        
+        <contributing_factors>
+            <factor>Each service defined 3-6 volumes (code, logs, cache, shared)</factor>
+            <factor>No automatic cleanup of Docker resources</factor>
+            <factor>Bind mount synchronization from docker-compose.override.yml</factor>
+            <factor>Windows Docker Desktop file sync limitations</factor>
+            <factor>Build cache accumulation (25.92GB)</factor>
+        </contributing_factors>
+        
+        <why_it_crashes>
+            Docker Desktop on Windows/macOS has limited resources for managing volumes.
+            Each volume requires:
+            - File system watchers
+            - Synchronization threads
+            - Memory for metadata
+            - I/O bandwidth for sync
+            
+            With 33 volumes, the overhead exceeds Docker Desktop's capacity.
+        </why_it_crashes>
+    </root_cause_analysis>
+
+    <solution_applied>
+        <immediate_fix>
+            <action>Removed all containers: docker rm -f $(docker ps -aq)</action>
+            <action>Removed all volumes: docker volume prune -af</action>
+            <action>Removed all images: docker image prune -af</action>
+            <action>Cleared build cache: docker builder prune -af</action>
+            <result>30.6GB reclaimed, Docker stable</result>
+        </immediate_fix>
+        
+        <long_term_fix>
+            <action>Created docker-compose.minimal.yml with only 2 volumes</action>
+            <action>Created docker_auto_cleanup.py script</action>
+            <action>Documented in DOCKER_CLEANUP_PROCESS.md</action>
+            <action>Created SPEC/docker_volume_optimization.xml</action>
+        </long_term_fix>
+    </solution_applied>
+
+    <volume_analysis>
+        <current_state>
+            <volumes_in_compose>33</volumes_in_compose>
+            <breakdown>
+                <category name="dev-postgres">1 data volume</category>
+                <category name="dev-redis">1 data volume</category>
+                <category name="dev-clickhouse">2 volumes (data, logs)</category>
+                <category name="dev-auth">3 volumes (code, logs, pycache)</category>
+                <category name="dev-backend">6 volumes (code, shared, spec, scripts, logs, pycache)</category>
+                <category name="dev-frontend">4 volumes (code, node_modules, next, cache)</category>
+                <category name="test-services">16 volumes (duplicating dev structure)</category>
+            </breakdown>
+        </current_state>
+        
+        <recommended_state>
+            <volumes_in_compose>4-6 maximum</volumes_in_compose>
+            <breakdown>
+                <category name="postgres">1 data volume</category>
+                <category name="redis">1 data volume</category>
+                <category name="clickhouse">1 data volume (optional)</category>
+                <category name="backend">1 data volume (for uploads/cache)</category>
+                <category name="NO CODE VOLUMES">Code baked into images</category>
+                <category name="NO LOG VOLUMES">Use stdout/stderr</category>
+                <category name="NO CACHE VOLUMES">Keep in container</category>
+            </breakdown>
+        </recommended_state>
+    </volume_analysis>
+
+    <prevention_measures>
+        <measure priority="1">
+            <rule>Maximum 10 named volumes in docker-compose.yml</rule>
+            <implementation>CI validation to count volumes</implementation>
+        </measure>
+        
+        <measure priority="2">
+            <rule>Run cleanup before development: python scripts/docker_auto_cleanup.py</rule>
+            <implementation>Add to developer onboarding docs</implementation>
+        </measure>
+        
+        <measure priority="3">
+            <rule>No code volumes - code goes in images</rule>
+            <implementation>Use COPY in Dockerfile, not volumes</implementation>
+        </measure>
+        
+        <measure priority="4">
+            <rule>Resource limits on all services</rule>
+            <implementation>deploy.resources.limits required</implementation>
+        </measure>
+    </prevention_measures>
+
+    <commands_reference>
+        <command purpose="Count volumes in compose">grep -c "name: netra-" docker-compose.yml</command>
+        <command purpose="List all volumes">docker volume ls</command>
+        <command purpose="Check disk usage">docker system df</command>
+        <command purpose="Clean everything">docker system prune -af --volumes</command>
+        <command purpose="Clear build cache">docker builder prune -af</command>
+        <command purpose="Auto cleanup">python scripts/docker_auto_cleanup.py</command>
+    </commands_reference>
+
+    <business_impact>
+        <severity>CRITICAL</severity>
+        <downtime>Multiple hours per week from Docker crashes</downtime>
+        <disk_space>30GB+ wasted per developer</disk_space>
+        <productivity>50% reduction during crashes</productivity>
+        <solution_value>Immediate stability, 30GB reclaimed</solution_value>
+    </business_impact>
+
+    <key_learnings>
+        <learning>Docker Desktop has hard limits on volume management</learning>
+        <learning>33 volumes is 10x too many (should be 3-4)</learning>
+        <learning>Code should not be in volumes in production configs</learning>
+        <learning>Docker doesn't auto-clean resources</learning>
+        <learning>Build cache can grow to 25GB+ if not cleaned</learning>
+        <learning>6 containers is fine, 33 volumes is not</learning>
+    </key_learnings>
+
+    <cross_references>
+        <reference file="SPEC/docker_volume_optimization.xml" relation="solution"/>
+        <reference file="docker-compose.minimal.yml" relation="working-example"/>
+        <reference file="scripts/docker_auto_cleanup.py" relation="automation"/>
+        <reference file="DOCKER_CLEANUP_PROCESS.md" relation="documentation"/>
+    </cross_references>
+</learning>

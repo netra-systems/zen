@@ -41,7 +41,7 @@ class EnvironmentValidator:
         "E2E_TESTING", 
         "AUTH_FAST_TEST_MODE",
         "PYTEST_CURRENT_TEST",
-        "ALLOW_DEV_AUTH_BYPASS",
+        "ALLOW_DEV_OAUTH_SIMULATION",
         "WEBSOCKET_AUTH_BYPASS",
         "SKIP_AUTH_VALIDATION",
         "TEST_MODE",

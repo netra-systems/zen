@@ -118,7 +118,7 @@ JWT_SECRET_KEY=local-dev-jwt-secret-key-for-development-only-32-chars-minimum
 FERNET_KEY=zzqI4eHx8eH_vApZBb8RPbfi4CtoUl2bA_aMaPVX8-g=
 
 # OAUTH SIMULATIONes for local development
-ALLOW_DEV_AUTH_BYPASS=true
+ALLOW_DEV_OAUTH_SIMULATION=true
 WEBSOCKET_AUTH_BYPASS=true
 ALLOW_DEV_LOGIN=true
 

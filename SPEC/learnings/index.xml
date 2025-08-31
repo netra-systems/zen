@@ -33,6 +33,23 @@
         <prevention>Eliminate ALL fallback logic in authentication. Require environment-specific secrets: JWT_SECRET_STAGING, JWT_SECRET_PRODUCTION, JWT_SECRET_KEY (dev/test only).</prevention>
     </learning>
     
+    <learning id="docker-excessive-volumes-crash-2025-08-31">
+        <title>Docker Desktop Crash - 33 Named Volumes Root Cause</title>
+        <category>Infrastructure/Docker</category>
+        <keywords>docker, volumes, crash, resources, cleanup, optimization, windows, macos</keywords>
+        <path>docker_excessive_volumes_crash.xml</path>
+        <critical-takeaway>
+            Docker Desktop crashes with 33+ named volumes defined in docker-compose.yml.
+            Root cause: Excessive I/O overhead from volume synchronization.
+            Solution: Maximum 10 volumes total, no code volumes, mandatory resource limits.
+            30GB+ of uncleaned resources (images, build cache) compounds the problem.
+            Run docker_auto_cleanup.py before development sessions.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Development environment crashes, hours of downtime, 30GB disk waste per developer</business-impact>
+        <prevention>Limit to 10 volumes max. No code in volumes. Add resource limits. Run cleanup regularly.</prevention>
+    </learning>
+    
     <learning id="redis-vpc-connector-requirement-2025-08-31">
         <title>VPC Connector Required for Redis/Cloud SQL Access in Cloud Run</title>
         <category>Infrastructure/Networking</category>
@@ -758,7 +775,7 @@
         
         <category name="WebSocket Docker Fixes [RESOLVED]" path="SPEC/learnings/websocket_docker_fixes.xml" keywords="WebSocket, Docker, Development, Authentication Bypass, CORS, Container Networking, Bridge Network, Development Environment">
             <critical-takeaway>RESOLVED 2025-08-27: WebSocket Docker connectivity FIXED - development authentication bypass and CORS configuration implemented.</critical-takeaway>
-            <critical-takeaway>CRITICAL: Set ALLOW_DEV_AUTH_BYPASS=true and WEBSOCKET_AUTH_BYPASS=true for Docker development environment.</critical-takeaway>
+            <critical-takeaway>CRITICAL: Set ALLOW_DEV_OAUTH_SIMULATION=true and WEBSOCKET_AUTH_BYPASS=true for Docker development environment.</critical-takeaway>
             <critical-takeaway>Authentication bypass MUST be environment-aware - only enabled when ENVIRONMENT=development with multiple safeguards.</critical-takeaway>
             <critical-takeaway>CORS configuration enhanced with Docker service names (frontend:3000, backend:8000, auth:8081) and container names (netra-frontend, netra-backend, netra-auth).</critical-takeaway>
             <critical-takeaway>Docker bridge network IP ranges (172.17.0.1, 172.18.0.1, etc.) added to development CORS origins for container networking.</critical-takeaway>
@@ -2059,7 +2076,7 @@
             <critical-takeaway>Authentication and rate limiting bypasses MUST only exist in test-only helper modules, never in production code</critical-takeaway>
             <critical-takeaway>Use netra_backend/tests/helpers/auth_test_helper.py for test authentication, not production auth.py</critical-takeaway>
             <critical-takeaway>Run test_env_validation.py to verify environment configurations before deployment</critical-takeaway>
-            <critical-takeaway>Forbidden variables list: TESTING, E2E_TESTING, AUTH_FAST_TEST_MODE, PYTEST_CURRENT_TEST, ALLOW_DEV_AUTH_BYPASS, WEBSOCKET_AUTH_BYPASS</critical-takeaway>
+            <critical-takeaway>Forbidden variables list: TESTING, E2E_TESTING, AUTH_FAST_TEST_MODE, PYTEST_CURRENT_TEST, ALLOW_DEV_OAUTH_SIMULATION, WEBSOCKET_AUTH_BYPASS</critical-takeaway>
             <critical-takeaway>All secrets in staging/production MUST be loaded from Google Secrets Manager, never hardcoded</critical-takeaway>
             <critical-takeaway>Use .env.staging.example as template - actual .env.staging should never contain localhost or test flags</critical-takeaway>
         </category>

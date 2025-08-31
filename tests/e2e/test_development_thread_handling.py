@@ -29,7 +29,7 @@ class TestDevelopmentThreadHandling:
         # Set environment variables for development mode
         with patch.dict('os.environ', {
             'ENVIRONMENT': 'development',
-            'ALLOW_DEV_AUTH_BYPASS': 'true',
+            'ALLOW_DEV_OAUTH_SIMULATION': 'true',
             'WEBSOCKET_AUTH_BYPASS': 'true',
             'DATABASE_URL': 'postgresql+asyncpg://postgres:postgres@localhost:5432/netra_test'
         }):

@@ -1,7 +1,7 @@
 {
   "values": [
     "AI21_API_KEY",
-    "ALLOW_DEV_AUTH_BYPASS",
+    "ALLOW_DEV_OAUTH_SIMULATION",
     "ANTHROPIC_API_KEY",
     "API_",
     "API_001",

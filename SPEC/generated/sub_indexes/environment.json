@@ -14,8 +14,8 @@
         "netra_backend/app/agents/github_analyzer/config_parser.py:36"
       ]
     },
-    "ALLOW_DEV_AUTH_BYPASS": {
-      "value": "ALLOW_DEV_AUTH_BYPASS",
+    "ALLOW_DEV_OAUTH_SIMULATION": {
+      "value": "ALLOW_DEV_OAUTH_SIMULATION",
       "category": "environment",
       "locations": [
         "netra_backend/app/core/environment_validator.py:44",

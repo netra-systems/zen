@@ -46,7 +46,7 @@ class TestAuthHelper:
         # Additional check for specific bypass flags
         env = os.environ
         bypass_enabled = (
-            env.get("ALLOW_DEV_AUTH_BYPASS", "false").lower() == "true" or
+            env.get("ALLOW_DEV_OAUTH_SIMULATION", "false").lower() == "true" or
             env.get("WEBSOCKET_AUTH_BYPASS", "false").lower() == "true" or
             env.get("AUTH_FAST_TEST_MODE", "false").lower() == "true"
         )
@@ -138,7 +138,7 @@ def bypass_auth_for_test():
     
     # Set bypass flags
     original_values = {}
-    bypass_vars = ["ALLOW_DEV_AUTH_BYPASS", "AUTH_FAST_TEST_MODE"]
+    bypass_vars = ["ALLOW_DEV_OAUTH_SIMULATION", "AUTH_FAST_TEST_MODE"]
     
     for var in bypass_vars:
         original_values[var] = os.environ.get(var)

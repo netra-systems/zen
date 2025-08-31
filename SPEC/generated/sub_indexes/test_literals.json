@@ -12199,23 +12199,23 @@
         "scripts/check_conftest_violations.py:78"
       ]
     },
-    "ALLOW_DEV_AUTH_BYPASS": {
-      "value": "ALLOW_DEV_AUTH_BYPASS",
+    "ALLOW_DEV_OAUTH_SIMULATION": {
+      "value": "ALLOW_DEV_OAUTH_SIMULATION",
       "category": "test_literals",
       "locations": [
         "scripts/test_docker_websocket_fix.py:38",
         "scripts/test_docker_websocket_fix.py:209"
       ]
     },
-    "ALLOW_DEV_AUTH_BYPASS: true": {
-      "value": "ALLOW_DEV_AUTH_BYPASS: true",
+    "ALLOW_DEV_OAUTH_SIMULATION: true": {
+      "value": "ALLOW_DEV_OAUTH_SIMULATION: true",
       "category": "test_literals",
       "locations": [
         "scripts/test_docker_websocket_fix.py:157"
       ]
     },
-    "ALLOW_DEV_AUTH_BYPASS=true": {
-      "value": "ALLOW_DEV_AUTH_BYPASS=true",
+    "ALLOW_DEV_OAUTH_SIMULATION=true": {
+      "value": "ALLOW_DEV_OAUTH_SIMULATION=true",
       "category": "test_literals",
       "locations": [
         "scripts/test_docker_websocket_fix.py:172"

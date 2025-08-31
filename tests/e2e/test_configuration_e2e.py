@@ -158,7 +158,7 @@ class TestProductionConfiguration:
         """Test that test variables are not present in production."""
         test_vars = [
             "TESTING", "E2E_TESTING", "AUTH_FAST_TEST_MODE",
-            "PYTEST_CURRENT_TEST", "ALLOW_DEV_AUTH_BYPASS"
+            "PYTEST_CURRENT_TEST", "ALLOW_DEV_OAUTH_SIMULATION"
         ]
         
         # Add a test variable to production env

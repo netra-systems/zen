@@ -309,7 +309,7 @@ services:
       FRONTEND_URL: http://localhost:3000
       
       # Development OAUTH SIMULATION
-      ALLOW_DEV_AUTH_BYPASS: true
+      ALLOW_DEV_OAUTH_SIMULATION: true
       WEBSOCKET_AUTH_BYPASS: true
     ports:
       - "${BACKEND_PORT:-8000}:8000"
