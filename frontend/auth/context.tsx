@@ -234,6 +234,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         // CRITICAL FIX: Always process the token to restore user state
         // This ensures user is set on page refresh when token exists in localStorage
+        // Process token regardless of whether it was already in state
         try {
           const decodedUser = jwtDecode(storedToken) as User;
           

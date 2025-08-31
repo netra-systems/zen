@@ -59,7 +59,7 @@ const TierUpgradePrompt: React.FC<{ requiredTier: string; currentTier: string }>
     <p className="text-gray-600 mb-4">
       Upgrade from {currentTier} to {requiredTier} to access this feature
     </p>
-    <Button className="w-full bg-amber-600 hover:bg-amber-700">
+    <Button className="w-full bg-amber-600 hover:bg-amber-700" disabled>
       Upgrade to {requiredTier}
     </Button>
   </Card>
