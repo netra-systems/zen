@@ -9,11 +9,11 @@ services:
   dev-backend:
     # Performance optimizations for Mac/Windows
     volumes:
-      - ./netra_backend:/app/netra_backend:delegated
-      - ./shared:/app/shared:delegated
-      - ./SPEC:/app/SPEC:cached
-      - ./scripts:/app/scripts:cached
-      - ./logs:/app/logs:delegated
+      - ./netra_backend:/app/netra_backend
+      - ./shared:/app/shared
+      - ./SPEC:/app/SPEC
+      - ./scripts:/app/scripts
+      - ./logs:/app/logs
     
     # Additional environment variables for development
     environment:
@@ -23,7 +23,7 @@ services:
       # Watchdog settings for better file system monitoring on Mac
       WATCHDOG_ENABLE: "true"
       WATCHDOG_USE_POLLING: "true"  # Required for Mac due to Docker Desktop limitations
-      WATCHDOG_POLL_INTERVAL: "1"   # Poll every 1 second
+      WATCHDOG_POLL_INTERVAL: "2"   # Poll every 2 seconds
     
     # Override command with more aggressive reload settings
     command: >
@@ -43,23 +43,23 @@ services:
           --reload-include '*.json' \
           --reload-include '*.yaml' \
           --reload-include '*.yml' \
-          --reload-delay 60 \
-          --log-level debug
+          --reload-delay 0.5 \
+          --log-level info
       "
 
   dev-auth:
     # Performance optimizations for Mac/Windows
     volumes:
-      - ./auth_service:/app/auth_service:delegated
-      - ./shared:/app/shared:delegated
-      - ./logs:/app/logs:delegated
+      - ./auth_service:/app/auth_service
+      - ./shared:/app/shared
+      - ./logs:/app/logs
     
     environment:
       PYTHONDONTWRITEBYTECODE: 1
       PYTHONUNBUFFERED: 1
       WATCHDOG_ENABLE: "true"
       WATCHDOG_USE_POLLING: "true"
-      WATCHDOG_POLL_INTERVAL: "1"
+      WATCHDOG_POLL_INTERVAL: "2"
     
     command: >
       sh -c "
@@ -72,20 +72,20 @@ services:
           --reload-dir /app/shared \
           --reload-include '*.py' \
           --reload-include '*.json' \
-          --reload-delay 60 \
-          --log-level debug
+          --reload-delay 0.5 \
+          --log-level info
       "
 
   # Frontend already has hot reload via Next.js
   dev-frontend:
     volumes:
-      - ./frontend/src:/app/src:delegated
-      - ./frontend/public:/app/public:delegated
-      - ./frontend/next.config.ts:/app/next.config.ts:cached
-      - ./frontend/next.config.turbopack.ts:/app/next.config.turbopack.ts:cached
-      - ./frontend/tsconfig.json:/app/tsconfig.json:cached
-      - ./frontend/tailwind.config.ts:/app/tailwind.config.ts:cached
-      - ./frontend/postcss.config.mjs:/app/postcss.config.mjs:cached
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/next.config.ts:/app/next.config.ts
+      - ./frontend/next.config.turbopack.ts:/app/next.config.turbopack.ts
+      - ./frontend/tsconfig.json:/app/tsconfig.json
+      - ./frontend/tailwind.config.ts:/app/tailwind.config.ts
+      - ./frontend/postcss.config.mjs:/app/postcss.config.mjs
       - /app/node_modules
       - /app/.next
     environment:
@@ -105,8 +105,8 @@ services:
   # ClickHouse performance optimizations
   dev-clickhouse:
     volumes:
-      - dev_clickhouse_data:/var/lib/clickhouse:delegated
-      - ./scripts/init_clickhouse.sql:/docker-entrypoint-initdb.d/01-init.sql:cached
+      - dev_clickhouse_data:/var/lib/clickhouse
+      - ./scripts/init_clickhouse.sql:/docker-entrypoint-initdb.d/01-init.sql
     environment:
       # ClickHouse specific optimizations
       CLICKHOUSE_LOG_LEVEL: warning  # Reduce log verbosity in dev
