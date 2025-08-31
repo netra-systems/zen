@@ -94,12 +94,7 @@ class GCPDeployer:
                     "FRONTEND_URL": "https://app.staging.netrasystems.ai",
                     "FORCE_HTTPS": "true",  # REQUIREMENT 6: FORCE_HTTPS for load balancer
                     "GCP_PROJECT_ID": self.project_id,  # CRITICAL: Required for secret loading logic
-                    # Temporary workaround for ClickHouse requirement in staging
-                    "CLICKHOUSE_HOST": "staging-clickhouse.netra-staging.svc.cluster.local",
-                    "CLICKHOUSE_USER": "default",
-                    "CLICKHOUSE_DB": "default",
-                    "CLICKHOUSE_PASSWORD": "clickhouse123",
-                    "CLICKHOUSE_PORT": "8123",
+                    # CLICKHOUSE vars removed - they are set via secrets in Cloud Run
                 }
             ),
             ServiceConfig(
