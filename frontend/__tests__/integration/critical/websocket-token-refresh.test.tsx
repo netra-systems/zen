@@ -1,8 +1,8 @@
-/**
- * Critical WebSocket Token Refresh Test
- * 
- * Tests the WebSocket token refresh functionality to ensure seamless authentication
- * during long-lived connections. These tests validate the System Under Test (SUT)
+import React from 'react';
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ong-lived connections. These tests validate the System Under Test (SUT)
  * rather than mocking away the functionality we're trying to test.
  */
 // Unmock auth service for proper service functionality
@@ -101,6 +101,7 @@ const createJWTToken = (payload: any) => {
 };
 
 describe('WebSocket Token Refresh Management (CRITICAL)', () => {
+    jest.setTimeout(10000);
   let mockRefreshToken: jest.Mock;
   let authContext: any;
   
@@ -134,6 +135,7 @@ describe('WebSocket Token Refresh Management (CRITICAL)', () => {
   });
 
   describe('WebSocket Service Token Functionality', () => {
+      jest.setTimeout(10000);
     it('should handle token updates via updateToken method', async () => {
       const initialToken = createJWTToken({
         exp: Math.floor(Date.now() / 1000) + 3600,
@@ -227,6 +229,7 @@ describe('WebSocket Token Refresh Management (CRITICAL)', () => {
   });
 
   describe('Token Lifecycle Management', () => {
+      jest.setTimeout(10000);
     it('should handle connection state management', async () => {
       const token = createJWTToken({
         exp: Math.floor(Date.now() / 1000) + 3600,

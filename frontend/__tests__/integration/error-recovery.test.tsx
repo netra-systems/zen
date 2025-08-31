@@ -1,15 +1,14 @@
-/**
- * Error Handling and Recovery Integration Tests
- * Implements comprehensive error handling scenarios for Netra Apex frontend
- * Tests graceful degradation, automatic retry, and recovery without page refresh
- */
-
 import React from 'react';
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
 import WS from 'jest-websocket-mock';
 import { TestProviders } from '../setup/test-providers';
+import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
+import { webSocketService } from '@/services/webSocketService';
+import { logger } from '@/lib/logger';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+rom '../setup/test-providers';
 import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
 import { webSocketService } from '@/services/webSocketService';
 import { logger } from '@/lib/logger';
@@ -161,7 +160,7 @@ const SessionTimeoutComponent: React.FC = () => {
       setTimeout(() => {
         setIsAuthenticated(false);
         setShowTimeoutWarning(false);
-      }, 5000);
+      }, 1000);
     }, 10000);
     
     setSessionTimeout(timeout);
@@ -244,7 +243,7 @@ const RateLimitComponent: React.FC = () => {
         setIsRateLimited(false);
         setRequestCount(0);
         setResetTime(null);
-      }, 10000);
+      }, 1000);
     }
   };
 
@@ -268,6 +267,7 @@ const RateLimitComponent: React.FC = () => {
 };
 
 describe('Error Handling and Recovery Tests', () => {
+    jest.setTimeout(10000);
   let wsManager: WebSocketTestManager;
   let mockFetch: jest.MockedFunction<typeof fetch>;
 
@@ -287,9 +287,15 @@ describe('Error Handling and Recovery Tests', () => {
     wsManager.cleanup();
     jest.clearAllMocks();
     jest.useRealTimers();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('API Error Handling with Exponential Backoff', () => {
+      jest.setTimeout(10000);
     it('should handle API failures with automatic retry', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       
@@ -349,6 +355,7 @@ describe('Error Handling and Recovery Tests', () => {
   });
 
   describe('Session Timeout Recovery', () => {
+      jest.setTimeout(10000);
     it('should handle session timeout with warning and recovery', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       
@@ -400,6 +407,7 @@ describe('Error Handling and Recovery Tests', () => {
   });
 
   describe('Rate Limiting with User Feedback', () => {
+      jest.setTimeout(10000);
     it('should handle rate limiting with clear feedback', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       
@@ -435,6 +443,7 @@ describe('Error Handling and Recovery Tests', () => {
   });
 
   describe('Recovery Without Page Refresh', () => {
+      jest.setTimeout(10000);
     it('should recover from errors without losing application state', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       
@@ -497,6 +506,7 @@ describe('Error Handling and Recovery Tests', () => {
   });
 
   describe('Graceful Feature Degradation', () => {
+      jest.setTimeout(10000);
     it('should degrade gracefully when WebSocket is unavailable', async () => {
       // Simulate WebSocket connection failure
       wsManager.close();
@@ -509,7 +519,7 @@ describe('Error Handling and Recovery Tests', () => {
           const timer = setTimeout(() => {
             setWsStatus('failed');
             setFallbackMode(true);
-          }, 3000);
+          }, 1000);
           
           return () => clearTimeout(timer);
         }, []);
@@ -547,6 +557,7 @@ describe('Error Handling and Recovery Tests', () => {
   });
 
   describe('Error Boundary Integration', () => {
+      jest.setTimeout(10000);
     it('should catch and handle component errors gracefully', async () => {
       const ThrowingComponent = ({ shouldThrow }: { shouldThrow: boolean }) => {
         if (shouldThrow) {

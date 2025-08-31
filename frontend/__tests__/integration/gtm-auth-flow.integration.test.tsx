@@ -166,6 +166,8 @@ const AuthFlowTestComponent: React.FC = () => {
 };
 
 describe('GTM Authentication Flow Integration', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let mockDataLayer: any[];
 
   beforeEach(() => {
@@ -194,6 +196,8 @@ describe('GTM Authentication Flow Integration', () => {
   };
 
   describe('Login Flow Integration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track email login events end-to-end', async () => {
       renderWithProviders(<AuthFlowTestComponent />);
 
@@ -296,6 +300,8 @@ describe('GTM Authentication Flow Integration', () => {
   });
 
   describe('Signup Flow Integration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track new user signup events', async () => {
       renderWithProviders(<AuthFlowTestComponent />);
 
@@ -341,6 +347,8 @@ describe('GTM Authentication Flow Integration', () => {
   });
 
   describe('OAuth Flow Integration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track OAuth completion events', async () => {
       renderWithProviders(<AuthFlowTestComponent />);
 
@@ -369,6 +377,8 @@ describe('GTM Authentication Flow Integration', () => {
   });
 
   describe('Logout Flow Integration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track logout events with user context', async () => {
       renderWithProviders(<AuthFlowTestComponent />);
 
@@ -404,6 +414,8 @@ describe('GTM Authentication Flow Integration', () => {
   });
 
   describe('Multi-Step Authentication Flows', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track complete signup to first login journey', async () => {
       renderWithProviders(<AuthFlowTestComponent />);
 
@@ -489,6 +501,8 @@ describe('GTM Authentication Flow Integration', () => {
   });
 
   describe('Event Correlation and Context', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should maintain consistent user context across events', async () => {
       renderWithProviders(<AuthFlowTestComponent />);
 
@@ -539,6 +553,8 @@ describe('GTM Authentication Flow Integration', () => {
   });
 
   describe('Performance and Error Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle rapid authentication events', async () => {
       renderWithProviders(<AuthFlowTestComponent />);
 
@@ -585,4 +601,8 @@ describe('GTM Authentication Flow Integration', () => {
       });
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

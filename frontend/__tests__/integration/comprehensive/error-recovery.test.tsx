@@ -1,5 +1,6 @@
-/**
- * Error Recovery Integration Tests
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ror Recovery Integration Tests
  * 
  * BVJ: Enterprise segment - ensures platform resilience and error recovery
  * Tests advanced error boundaries, graceful degradation, and recovery mechanisms.
@@ -39,6 +40,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('Error Recovery Integration Tests', () => {
+    jest.setTimeout(10000);
   let server: WS;
   
   beforeEach(() => {
@@ -48,9 +50,15 @@ describe('Error Recovery Integration Tests', () => {
 
   afterEach(() => {
     cleanupTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Advanced Error Boundaries', () => {
+      jest.setTimeout(10000);
     it('should recover from component errors gracefully', async () => {
       const TestWrapper = createErrorBoundaryTestWrapper();
       
@@ -79,6 +87,7 @@ describe('Error Recovery Integration Tests', () => {
   });
 
   describe('Graceful Degradation', () => {
+      jest.setTimeout(10000);
     it('should degrade gracefully when features fail', async () => {
       const GracefulDegradationComponent = createGracefulDegradationComponent();
       
@@ -97,6 +106,7 @@ describe('Error Recovery Integration Tests', () => {
   });
 
   describe('Recovery Mechanisms', () => {
+      jest.setTimeout(10000);
     it('should implement automatic retry with backoff', async () => {
       const RetryMechanismComponent = createRetryMechanismComponent();
       

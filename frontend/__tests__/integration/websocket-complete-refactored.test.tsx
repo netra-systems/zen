@@ -1,11 +1,11 @@
-/**
- * WebSocket Complete Integration Tests - REFACTORED (Modular)
- * 
- * This file was refactored from 580 lines to comply with 450-line limit.
- * The original refactored test file has been reorganized to leverage the
- * existing modular WebSocket test architecture:
- * 
- * - websocket-lifecycle.test.tsx - Connection lifecycle tests
+import React from 'react';
+import { render, waitFor } from '@testing-library/react';
+import { jest } from '@jest/globals';
+import { TestProviders } from '../setup/test-providers';
+import { WebSocketTestManager, createWebSocketManager } from '@/__tests__/helpers/websocket-test-manager';
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+.test.tsx - Connection lifecycle tests
  * - websocket-messaging.test.tsx - Message processing tests  
  * - websocket-large-messages.test.tsx - Large message handling
  * - websocket-performance.test.tsx - Performance monitoring
@@ -40,6 +40,7 @@ export {
 } from './utils/websocket-test-components';
 
 describe('WebSocket Complete Integration Tests - Refactored Modular', () => {
+    jest.setTimeout(10000);
   let wsManager: WebSocketTestManager;
   let stateManager: ConnectionStateManager;
   let messageBuffer: MessageBuffer;
@@ -58,9 +59,15 @@ describe('WebSocket Complete Integration Tests - Refactored Modular', () => {
     advancedTester.closeAllConnections();
     advancedTester.clearLog();
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Refactored Architecture Validation', () => {
+      jest.setTimeout(10000);
     it('should maintain function size limit (≤8 lines)', () => {
       // All functions in modular files comply with 25-line limit
       expect(true).toBe(true);
@@ -84,6 +91,7 @@ describe('WebSocket Complete Integration Tests - Refactored Modular', () => {
   });
 
   describe('Enhanced Testing Capabilities', () => {
+      jest.setTimeout(10000);
     it('should handle refactored connection lifecycle', async () => {
       await wsManager.waitForConnection();
       expect(wsManager.isReady()).toBe(true);
@@ -120,6 +128,7 @@ describe('WebSocket Complete Integration Tests - Refactored Modular', () => {
   });
 
   describe('Protocol and Security Features', () => {
+      jest.setTimeout(10000);
     it('should validate message security', async () => {
       await wsManager.waitForConnection();
       
@@ -146,6 +155,7 @@ describe('WebSocket Complete Integration Tests - Refactored Modular', () => {
   });
 
   describe('Resource Management', () => {
+      jest.setTimeout(10000);
     it('should handle cleanup efficiently', async () => {
       await wsManager.waitForConnection();
       

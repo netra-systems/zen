@@ -1,9 +1,8 @@
-/**
- * Agent Provider Integration Tests
- * Tests for agent state coordination and WebSocket message handling
- */
-
 import React from 'react';
+import { render, waitFor, screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
@@ -14,6 +13,7 @@ import { useChatStore } from '@/store/chatStore';
 import { TestProviders, WebSocketContext } from '../../test-utils/providers';
 
 describe('Agent Provider Integration', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     
@@ -23,9 +23,15 @@ describe('Agent Provider Integration', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Agent State Coordination', () => {
+      jest.setTimeout(10000);
     it('should coordinate agent state with WebSocket messages', async () => {
       const TestComponent = () => {
         const [isProcessing, setIsProcessing] = React.useState(false);

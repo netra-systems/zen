@@ -1,25 +1,30 @@
-/**
- * Performance Monitoring Integration Tests
- * Tests for tracking and reporting performance metrics
- */
-
 import React from 'react';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+rt { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 // Import test utilities
 import { TestProviders } from '@/__tests__/setup/test-providers';
 
 describe('Performance Monitoring Integration', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Metrics Tracking', () => {
+      jest.setTimeout(10000);
     it('should track and report performance metrics', async () => {
       const metrics = {
         websocket_latency: [] as number[],

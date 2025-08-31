@@ -40,6 +40,8 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('Theme and Preferences Integration Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let server: WS;
   
   beforeEach(() => {
@@ -49,9 +51,17 @@ describe('Theme and Preferences Integration Tests', () => {
 
   afterEach(() => {
     cleanupTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Theme Synchronization', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should sync theme preferences across components', async () => {
       const ThemeContext = createThemeContext();
       const ThemeProvider = createThemeProvider(ThemeContext);
@@ -148,6 +158,8 @@ describe('Theme and Preferences Integration Tests', () => {
   });
 
   describe('Complex Form Validation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should validate multi-step forms with dependencies', async () => {
       const FormComponent = () => {
         const [step, setStep] = React.useState(1);

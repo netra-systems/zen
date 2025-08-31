@@ -1,25 +1,30 @@
-/**
- * File Upload Integration Tests
- * Tests for file upload functionality and progress tracking
- */
-
 import React from 'react';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ender, waitFor, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 // Import test utilities
 import { TestProviders } from '@/__tests__/setup/test-providers';
 
 describe('File Upload Integration', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Upload Functionality', () => {
+      jest.setTimeout(10000);
     it('should upload file and process with agent', async () => {
       const file = new File(['test content'], 'test.txt', { type: 'text/plain' });
       

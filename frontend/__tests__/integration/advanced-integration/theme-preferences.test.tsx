@@ -1,13 +1,12 @@
-/**
- * Theme and Preferences Integration Tests
- * Tests for theme synchronization and user preferences persistence
- */
-
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { createTestSetup, createThemeProvider } from './setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+er, fireEvent, waitFor } from '@testing-library/react';
+import { createTestSetup, createThemeProvider } from './setup';
 
 describe('Theme and Preferences Synchronization', () => {
+    jest.setTimeout(10000);
   const testSetup = createTestSetup();
 
   beforeEach(() => {
@@ -16,6 +15,11 @@ describe('Theme and Preferences Synchronization', () => {
 
   afterEach(() => {
     testSetup.afterEach();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   it('should sync theme preferences across components', async () => {

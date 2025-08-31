@@ -1,12 +1,10 @@
-/**
- * Corpus Management Integration Tests
- */
-
 import React from 'react';
 import { render, waitFor, screen, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import WS from 'jest-websocket-mock';
 import { WebSocketTestManager, createWebSocketManager } from '@/__tests__/helpers/websocket-test-manager';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+m '@/__tests__/helpers/websocket-test-manager';
 
 import { AgentProvider } from '@/providers/AgentProvider';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
@@ -53,9 +51,15 @@ beforeEach(() => {
 afterEach(() => {
   wsManager.cleanup();
   jest.clearAllMocks();
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
 });
 
 describe('Corpus Management Integration', () => {
+    jest.setTimeout(10000);
   it('should upload documents to corpus and update UI', async () => {
     const TestComponent = () => {
       const [uploadStatus, setUploadStatus] = React.useState('');

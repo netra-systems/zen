@@ -1,7 +1,8 @@
-/**
- * Critical WebSocket Authentication Headers Test
- * 
- * This test VERIFIES that the frontend now uses proper secure authentication methods.
+import React from 'react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ods.
  * 
  * FIXED BEHAVIOR: Frontend now sends JWT tokens via Sec-WebSocket-Protocol (secure)
  * SECURITY: Query parameter authentication is rejected by backend (as it should be)
@@ -60,6 +61,7 @@ const mockAuthContext = {
 };
 
 describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
+    jest.setTimeout(10000);
   let originalWebSocket: any;
   let mockWebSocket: any;
   let capturedConnections: Array<{ url: string; protocols?: string | string[] }> = [];
@@ -125,9 +127,15 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
     global.WebSocket = originalWebSocket;
     webSocketService.disconnect();
     jest.restoreAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Subprotocol Authentication (SECURE METHOD)', () => {
+      jest.setTimeout(10000);
     it('should use Sec-WebSocket-Protocol with Bearer token for WebSocket connection', async () => {
       // This test PASSES because frontend now uses secure subprotocol authentication
       
@@ -202,6 +210,7 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
   });
 
   describe('WebSocket Subprotocol Authentication (PRIMARY METHOD)', () => {
+      jest.setTimeout(10000);
     it('should use Sec-WebSocket-Protocol header for JWT authentication', async () => {
       // This test PASSES because frontend now implements secure subprotocol auth
       
@@ -265,6 +274,7 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
   });
 
   describe('Secure Connection Endpoint', () => {
+      jest.setTimeout(10000);
     it('should connect to the secure WebSocket endpoint', async () => {
       // This test PASSES because frontend now connects to secure endpoint
       
@@ -330,6 +340,7 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
   });
 
   describe('Token Management Integration', () => {
+      jest.setTimeout(10000);
     it('should not expose token in connection URL', async () => {
       // This test verifies that tokens are not exposed in URLs
       

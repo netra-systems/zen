@@ -146,9 +146,17 @@ afterEach(() => {
   localStorageMock.getItem.mockClear();
   localStorageMock.setItem.mockClear();
   localStorageMock.removeItem.mockClear();
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+    cleanupAntiHang();
 });
 
 describe('Collaboration Features', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   it('should share threads with team members', async () => {
     const TestComponent = () => {
       const [shareStatus, setShareStatus] = React.useState('');
@@ -338,6 +346,8 @@ describe('Collaboration Features', () => {
 });
 
 describe('Jupyter Notebook Support', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   it('should execute notebook cells', async () => {
     const TestComponent = () => {
       const [output, setOutput] = React.useState('');
@@ -438,6 +448,8 @@ describe('Jupyter Notebook Support', () => {
 });
 
 describe('State Persistence and Recovery', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   it('should persist application state across sessions', async () => {
     const mockPersistedState = {
       version: 2,

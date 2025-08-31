@@ -1,5 +1,6 @@
-/**
- * Collaboration Features Integration Tests
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+llaboration Features Integration Tests
  * 
  * Tests real-time cursor synchronization, presence awareness,
  * offline mode functionality, and collaborative editing features.
@@ -38,6 +39,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('Collaboration Features Integration Tests', () => {
+    jest.setTimeout(10000);
   let server: WS;
   
   beforeEach(() => {
@@ -47,15 +49,21 @@ describe('Collaboration Features Integration Tests', () => {
 
   afterEach(() => {
     cleanupTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Real-time Cursor Synchronization', () => {
+      jest.setTimeout(10000);
     it('should sync cursor positions in real-time', async () => {
       const CollaborativeEditor = () => {
         const [otherCursors, setOtherCursors] = React.useState<Map<string, { x: number, y: number }>>(new Map());
         
         React.useEffect(() => {
-          const ws = new WebSocket('ws://localhost:8000/ws');
+          const ws = new WebSocket('ws://localhost:3001/test'));
           
           ws.onmessage = (event) => {
             const message = JSON.parse(event.data);
@@ -114,7 +122,7 @@ describe('Collaboration Features Integration Tests', () => {
         const [cursors, setCursors] = React.useState<Map<string, any>>(new Map());
         
         React.useEffect(() => {
-          const ws = new WebSocket('ws://localhost:8000/ws');
+          const ws = new WebSocket('ws://localhost:3001/test'));
           
           ws.onmessage = (event) => {
             const message = JSON.parse(event.data);
@@ -159,13 +167,14 @@ describe('Collaboration Features Integration Tests', () => {
   });
 
   describe('Presence and Activity Status', () => {
+      jest.setTimeout(10000);
     it('should handle presence and activity status', async () => {
       const PresenceComponent = () => {
         const [activeUsers, setActiveUsers] = React.useState<Set<string>>(new Set());
         const [typingUsers, setTypingUsers] = React.useState<Set<string>>(new Set());
         
         React.useEffect(() => {
-          const ws = new WebSocket('ws://localhost:8000/ws');
+          const ws = new WebSocket('ws://localhost:3001/test'));
           
           ws.onmessage = (event) => {
             const message = JSON.parse(event.data);
@@ -239,7 +248,7 @@ describe('Collaboration Features Integration Tests', () => {
         const [users, setUsers] = React.useState<Map<string, any>>(new Map());
         
         React.useEffect(() => {
-          const ws = new WebSocket('ws://localhost:8000/ws');
+          const ws = new WebSocket('ws://localhost:3001/test'));
           
           ws.onmessage = (event) => {
             const message = JSON.parse(event.data);
@@ -287,6 +296,7 @@ describe('Collaboration Features Integration Tests', () => {
   });
 
   describe('Offline Mode Integration', () => {
+      jest.setTimeout(10000);
     it('should queue actions when offline and sync when online', async () => {
       const OfflineSyncComponent = () => {
         const [isOnline, setIsOnline] = React.useState(navigator.onLine);

@@ -76,11 +76,15 @@ const WebSocketTestComponent: React.FC = () => {
 };
 
 describe('WebSocket Mock Validation Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('MockWebSocket Basic Functionality', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should initialize with CONNECTING state and auto-connect to OPEN', async () => {
       render(<WebSocketTestComponent />);
       
@@ -145,6 +149,8 @@ describe('WebSocket Mock Validation Tests', () => {
   });
 
   describe('mockWebSocketConnection Helper', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should create connected mock with proper structure', () => {
       const mockConnection = mockWebSocketConnection(true);
       
@@ -168,6 +174,8 @@ describe('WebSocket Mock Validation Tests', () => {
   });
 
   describe('Global WebSocket Mock from jest.setup.js', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should have MockWebSocket available globally', () => {
       expect(global.WebSocket).toBeDefined();
       expect(global.WebSocket.CONNECTING).toBe(0);
@@ -177,7 +185,7 @@ describe('WebSocket Mock Validation Tests', () => {
     });
 
     it('should create WebSocket instances with proper properties', () => {
-      const ws = new WebSocket('ws://test.com');
+      const ws = new WebSocket('ws://localhost:3001/test'));
       
       expect(ws.url).toContain('ws://test.com');
       expect(ws.readyState).toBe(WebSocket.CONNECTING);
@@ -189,7 +197,7 @@ describe('WebSocket Mock Validation Tests', () => {
     });
 
     it('should auto-connect WebSocket after creation', async () => {
-      const ws = new WebSocket('ws://test.com');
+      const ws = new WebSocket('ws://localhost:3001/test'));
       let connected = false;
       
       ws.onopen = () => {
@@ -206,8 +214,10 @@ describe('WebSocket Mock Validation Tests', () => {
   });
 
   describe('Error Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle WebSocket errors gracefully', async () => {
-      const ws = new WebSocket('ws://test.com');
+      const ws = new WebSocket('ws://localhost:3001/test'));
       let errorReceived = false;
       
       ws.onerror = () => {
@@ -221,4 +231,8 @@ describe('WebSocket Mock Validation Tests', () => {
       expect(errorReceived).toBe(true);
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

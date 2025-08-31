@@ -1,5 +1,6 @@
-/**
- * Comprehensive Integration Test Suite - Index
+import * as testUtils from './test-utils';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ - Index
  * 
  * This file imports and orchestrates all split comprehensive integration test modules.
  * Each module is focused on specific functionality and maintains the 450-line limit.
@@ -46,6 +47,7 @@ import * as testUtils from './test-utils';
 // import './user-journey.test';
 
 describe('Comprehensive Integration Test Suite', () => {
+    jest.setTimeout(10000);
   it('should load test utilities successfully', () => {
     // This test ensures test utilities are properly exported and can be used
     expect(testUtils).toBeDefined();

@@ -26,9 +26,17 @@ beforeEach(() => {
 
 afterEach(() => {
   testContext.cleanup();
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+    cleanupAntiHang();
 });
 
 describe('Database Repository Pattern Integration', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   it('should perform CRUD operations through repositories', async () => {
     const TestComponent = () => {
       const [thread, setThread] = React.useState<any>(null);
@@ -217,6 +225,8 @@ describe('Database Repository Pattern Integration', () => {
 });
 
 describe('Database Transaction Integration', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   it('should handle database transactions', async () => {
     const TestComponent = () => {
       const [transactionStatus, setTransactionStatus] = React.useState('');

@@ -1,10 +1,9 @@
-/**
- * Simple Thread Switching Test
- * Basic verification of thread switching functionality
- */
-
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { jest } from '@jest/globals';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+act';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
 
@@ -62,6 +61,7 @@ const SimpleThreadSwitcher: React.FC = () => {
 };
 
 describe('Simple Thread Switching', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });

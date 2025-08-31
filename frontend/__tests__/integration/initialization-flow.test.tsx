@@ -56,6 +56,8 @@ const InitializationFlowTestComponent = ({ onPhaseChange }: { onPhaseChange?: (p
 };
 
 describe('Initialization Flow Integration', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let mockAuth: jest.Mocked<ReturnType<typeof useAuth>>;
   let mockWebSocketService: jest.Mocked<typeof webSocketService>;
   let mockInitializationCoordinator: jest.Mocked<ReturnType<typeof useInitializationCoordinator>>;
@@ -103,9 +105,17 @@ describe('Initialization Flow Integration', () => {
   afterEach(() => {
     jest.clearAllMocks();
     jest.useRealTimers();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
   
   describe('Complete Initialization Flow', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('progresses through all phases to completion', async () => {
       const phaseHistory: string[] = [];
       
@@ -252,6 +262,8 @@ describe('Initialization Flow Integration', () => {
   });
   
   describe('Error Handling During Initialization', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('handles auth phase failure', async () => {
       const { rerender } = render(
         <WebSocketProvider>
@@ -357,6 +369,8 @@ describe('Initialization Flow Integration', () => {
   });
   
   describe('WebSocket Integration During Initialization', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('shows WebSocket connection status during websocket phase', async () => {
       const { rerender } = render(
         <WebSocketProvider>
@@ -470,6 +484,8 @@ describe('Initialization Flow Integration', () => {
   });
   
   describe('Performance and Memory Management', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('cleans up properly when component unmounts during initialization', async () => {
       const { unmount } = render(
         <WebSocketProvider>

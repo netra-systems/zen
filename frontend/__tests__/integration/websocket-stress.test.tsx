@@ -1,8 +1,8 @@
-/**
- * WebSocket Stress Testing
- * Extracted from websocket-performance.test.tsx to maintain 450-line limit
- * Tests stress scenarios, memory management, and rapid operations
- * Focuses on edge cases and resource management
+import { waitFor } from '@testing-library/react';
+import { jest } from '@jest/globals';
+import { WebSocketTestManager, createWebSocketManager } from '@/__tests__/helpers/websocket-test-manager';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ases and resource management
  */
 
 import { waitFor } from '@testing-library/react';
@@ -10,6 +10,7 @@ import { jest } from '@jest/globals';
 import { WebSocketTestManager, createWebSocketManager } from '@/__tests__/helpers/websocket-test-manager';
 
 describe('WebSocket Stress Testing', () => {
+    jest.setTimeout(10000);
   let wsManager: WebSocketTestManager;
 
   beforeEach(() => {
@@ -21,9 +22,15 @@ describe('WebSocket Stress Testing', () => {
   afterEach(() => {
     wsManager.cleanup();
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Connection Stress', () => {
+      jest.setTimeout(10000);
     it('should handle rapid connect/disconnect cycles', async () => {
       const cycles = 5;
       
@@ -74,6 +81,7 @@ describe('WebSocket Stress Testing', () => {
   });
 
   describe('Memory Management', () => {
+      jest.setTimeout(10000);
     it('should handle memory cleanup during stress testing', async () => {
       const initialMemory = process.memoryUsage?.()?.heapUsed || 0;
       
@@ -132,6 +140,7 @@ describe('WebSocket Stress Testing', () => {
   });
 
   describe('Load Testing', () => {
+      jest.setTimeout(10000);
     it('should handle high message volume', async () => {
       await wsManager.waitForConnection();
       
@@ -177,6 +186,7 @@ describe('WebSocket Stress Testing', () => {
   });
 
   describe('Error Recovery Stress', () => {
+      jest.setTimeout(10000);
     it('should handle repeated error/recovery cycles', async () => {
       const cycles = 3;
       

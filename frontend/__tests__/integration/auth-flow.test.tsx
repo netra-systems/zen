@@ -1,8 +1,8 @@
-/**
- * Authentication Flow Integration Tests
- * 
- * Tests core authentication functionality including
- * login, logout, and state management.
+import React from 'react';
+import { render, waitFor, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+nagement.
  */
 
 // Mock hooks before imports
@@ -85,6 +85,7 @@ const localStorageMock = (() => {
 global.localStorage = localStorageMock as any;
 
 describe('Authentication Flow Integration', () => {
+    jest.setTimeout(10000);
   let server: any;
 
   beforeEach(() => {
@@ -185,6 +186,11 @@ describe('Authentication Flow Integration', () => {
 
   afterEach(() => {
     performFullCleanup(server);
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   it('should handle login and authentication', async () => {

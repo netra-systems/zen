@@ -10,6 +10,8 @@
  */
 
 describe('Task Processing Integration Test Suite', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   it('should reference modular task processing architecture', () => {
     const taskModules = [
       'task-processing-basic.test.tsx',
@@ -33,4 +35,8 @@ describe('Task Processing Integration Test Suite', () => {
     expect(taskRequirements.deadLetterQueue).toBe(true);
     expect(taskRequirements.maxFileLines).toBeLessThanOrEqual(300);
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

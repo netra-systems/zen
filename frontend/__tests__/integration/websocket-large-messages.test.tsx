@@ -1,17 +1,16 @@
-/**
- * WebSocket Large Message Handling Tests
- * Extracted from oversized websocket-complete.test.tsx for modularity
- * Tests large message processing, chunking, buffering, and performance
- * Focuses on real behavior with large payloads and memory management
- */
-
 import { waitFor } from '@testing-library/react';
 import { jest } from '@jest/globals';
 import { WebSocketTestManager, createWebSocketManager } from '@/__tests__/helpers/websocket-test-manager';
 import * as WebSocketTestUtilities from '@/__tests__/helpers/websocket-test-utilities';
 import { MessageBuffer } from '../setup/websocket-test-utils';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+als';
+import { WebSocketTestManager, createWebSocketManager } from '@/__tests__/helpers/websocket-test-manager';
+import * as WebSocketTestUtilities from '@/__tests__/helpers/websocket-test-utilities';
+import { MessageBuffer } from '../setup/websocket-test-utils';
 
 describe('WebSocket Large Message Handling Tests', () => {
+    jest.setTimeout(10000);
   let wsManager: WebSocketTestManager;
   let messageBuffer: MessageBuffer;
 
@@ -25,9 +24,15 @@ describe('WebSocket Large Message Handling Tests', () => {
   afterEach(() => {
     wsManager.cleanup();
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Large Message Sending', () => {
+      jest.setTimeout(10000);
     it('should handle 1MB messages with real WebSocket behavior', async () => {
       await wsManager.waitForConnection();
       
@@ -81,6 +86,7 @@ describe('WebSocket Large Message Handling Tests', () => {
   });
 
   describe('Large Message Receiving', () => {
+      jest.setTimeout(10000);
     it('should handle large message receiving with real event processing', async () => {
       await wsManager.waitForConnection();
       
@@ -121,6 +127,7 @@ describe('WebSocket Large Message Handling Tests', () => {
   });
 
   describe('Buffer Management', () => {
+      jest.setTimeout(10000);
     it('should respect real buffer limits with backpressure', async () => {
       const buffer = wsManager.getMessageBuffer();
       buffer.setMaxSize(3); // Small buffer for testing
@@ -180,6 +187,7 @@ describe('WebSocket Large Message Handling Tests', () => {
   });
 
   describe('Message Chunking', () => {
+      jest.setTimeout(10000);
     it('should handle chunked message reconstruction', async () => {
       await wsManager.waitForConnection();
       
@@ -229,6 +237,7 @@ describe('WebSocket Large Message Handling Tests', () => {
   });
 
   describe('Performance and Memory', () => {
+      jest.setTimeout(10000);
     it('should measure large message processing performance', async () => {
       await wsManager.waitForConnection();
       

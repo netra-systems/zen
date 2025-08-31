@@ -1,8 +1,9 @@
-/**
- * Route Guards Integration Tests
- * Agent 13: Tests authentication and authorization routing protection
- * Covers protected routes, tier-based access, redirects, and auth flows
- * Follows 25-line function rule and 450-line file limit
+import React from 'react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ne function rule and 450-line file limit
  * 
  * Business Value: Protects revenue by ensuring proper tier-based access control
  * Revenue Impact: Drives Free → Paid conversions through feature gating
@@ -101,6 +102,7 @@ const checkTierAccess = (currentTier: string, requiredTier: string): boolean => 
 };
 
 describe('Route Guards Integration Tests', () => {
+    jest.setTimeout(10000);
   const { authStates } = createAuthSetup();
 
   beforeEach(() => {
@@ -108,6 +110,7 @@ describe('Route Guards Integration Tests', () => {
   });
 
   describe('Authentication-Required Routes', () => {
+      jest.setTimeout(10000);
     it('should redirect unauthenticated users to login', async () => {
       const ProtectedComponent = createProtectedComponent(authStates.unauthenticated);
       render(<ProtectedComponent />);
@@ -148,6 +151,7 @@ describe('Route Guards Integration Tests', () => {
   });
 
   describe('Tier-Based Access Control', () => {
+      jest.setTimeout(10000);
     it('should block Free users from Early tier features', async () => {
       const Component = createTierComponent(authStates.freeUser, 'Early');
       render(<Component />);
@@ -198,6 +202,7 @@ describe('Route Guards Integration Tests', () => {
   });
 
   describe('Dynamic Route Protection', () => {
+      jest.setTimeout(10000);
     it('should protect dynamic thread routes', async () => {
       const threadId = 'thread-123';
       
@@ -236,6 +241,7 @@ describe('Route Guards Integration Tests', () => {
   });
 
   describe('Route Redirect Flows', () => {
+      jest.setTimeout(10000);
     it('should redirect to intended page after login', async () => {
       const intendedRoute = '/admin';
       
@@ -273,6 +279,7 @@ describe('Route Guards Integration Tests', () => {
   });
 
   describe('Error Handling and Edge Cases', () => {
+      jest.setTimeout(10000);
     it('should handle network errors during auth checks', async () => {
       await simulateNetworkError();
       

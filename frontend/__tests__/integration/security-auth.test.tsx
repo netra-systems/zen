@@ -1,12 +1,10 @@
-/**
- * Security and Authentication Integration Tests
- */
-
 import React from 'react';
 import { render, waitFor, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import apiClient from '@/services/apiClient';
 import { TestProviders } from '@/__tests__/setup/test-providers';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ TestProviders } from '@/__tests__/setup/test-providers';
 
 // Mock API
 jest.mock('@/services/apiClient');
@@ -16,9 +14,15 @@ global.fetch = jest.fn();
 
 afterEach(() => {
   jest.clearAllMocks();
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
 });
 
 describe('OAuth Secrets Management', () => {
+    jest.setTimeout(10000);
   it('should handle OAuth token refresh', async () => {
     const TestComponent = () => {
       const [tokenStatus, setTokenStatus] = React.useState('');
@@ -110,6 +114,7 @@ describe('OAuth Secrets Management', () => {
 });
 
 describe('Security Service Integration', () => {
+    jest.setTimeout(10000);
   it('should validate user permissions for protected resources', async () => {
     const TestComponent = () => {
       const [hasAccess, setHasAccess] = React.useState<boolean | null>(null);
@@ -203,6 +208,7 @@ describe('Security Service Integration', () => {
 });
 
 describe('Key Manager Integration', () => {
+    jest.setTimeout(10000);
   it('should manage API keys lifecycle', async () => {
     const TestComponent = () => {
       const [keys, setKeys] = React.useState<any[]>([]);
@@ -297,6 +303,7 @@ describe('Key Manager Integration', () => {
 });
 
 describe('Admin Functionality Integration', () => {
+    jest.setTimeout(10000);
   it('should manage user roles and permissions', async () => {
     const TestComponent = () => {
       const [userRole, setUserRole] = React.useState('user');

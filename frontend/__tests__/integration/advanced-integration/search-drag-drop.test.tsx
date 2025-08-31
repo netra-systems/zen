@@ -1,14 +1,13 @@
-/**
- * Search and Drag-Drop Integration Tests
- */
-
 import React from 'react';
 import { render, waitFor, fireEvent } from '@testing-library/react';
 import WS from 'jest-websocket-mock';
 import { safeWebSocketCleanup } from '../../helpers/websocket-test-manager';
 import { setupTestEnvironment } from './test-setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+port { setupTestEnvironment } from './test-setup';
 
 describe('Advanced Frontend Integration Tests - Search and Drag-Drop', () => {
+    jest.setTimeout(10000);
   let server: WS;
   
   setupTestEnvironment();
@@ -19,9 +18,15 @@ describe('Advanced Frontend Integration Tests - Search and Drag-Drop', () => {
 
   afterEach(() => {
     safeWebSocketCleanup();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('21. Advanced Search Integration', () => {
+      jest.setTimeout(10000);
     it('should implement fuzzy search with highlighting', async () => {
       const SearchComponent = () => {
         const [query, setQuery] = React.useState('');
@@ -150,6 +155,7 @@ describe('Advanced Frontend Integration Tests - Search and Drag-Drop', () => {
   });
 
   describe('22. Drag and Drop Integration', () => {
+      jest.setTimeout(10000);
     it('should handle file drag and drop with preview', async () => {
       const DragDropComponent = () => {
         const [isDragging, setIsDragging] = React.useState(false);

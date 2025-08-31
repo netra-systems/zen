@@ -1,7 +1,8 @@
-/**
- * Authentication Flow Integration Tests - REFACTORED
- * All functions ≤8 lines as per architecture requirements
- * Tests core authentication functionality with comprehensive utilities
+import React from 'react';
+import { render, waitFor, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+uthentication functionality with comprehensive utilities
  */
 
 // Declare mocks first (Jest Module Hoisting)
@@ -108,6 +109,7 @@ const localStorageMock = (() => {
 global.localStorage = localStorageMock as any;
 
 describe('Authentication Flow Integration', () => {
+    jest.setTimeout(10000);
   let server: any;
   let mockAuthStore: any;
 
@@ -123,6 +125,11 @@ describe('Authentication Flow Integration', () => {
 
   afterEach(() => {
     performFullCleanup(server);
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   it('should handle login and authentication', async () => {

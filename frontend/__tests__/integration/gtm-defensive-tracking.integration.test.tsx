@@ -103,6 +103,8 @@ const TestComponent = ({
 };
 
 describe('GTM Defensive Tracking Integration', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let originalDataLayer: any;
   let mockDataLayer: any[] = [];
 
@@ -134,9 +136,17 @@ describe('GTM Defensive Tracking Integration', () => {
     }
     
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Undefined Property Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle message events with all undefined properties', async () => {
       render(
         <GTMProvider enabled={true}>
@@ -244,6 +254,8 @@ describe('GTM Defensive Tracking Integration', () => {
   });
 
   describe('Valid Data Preservation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should preserve valid data while sanitizing undefined', async () => {
       render(
         <GTMProvider enabled={true}>
@@ -272,6 +284,8 @@ describe('GTM Defensive Tracking Integration', () => {
   });
 
   describe('Error Prevention', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should not throw errors when GTM tries to access undefined properties', async () => {
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
       
@@ -341,6 +355,8 @@ describe('GTM Defensive Tracking Integration', () => {
   });
 
   describe('GTM State Management', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should maintain debug state with sanitized events', async () => {
       const TestDebugComponent = () => {
         const gtm = useGTM();
@@ -377,6 +393,8 @@ describe('GTM Defensive Tracking Integration', () => {
   });
 
   describe('Authentication Events', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle auth events with undefined user properties', async () => {
       const TestAuthComponent = () => {
         const gtmEvent = useGTMEvent();
@@ -414,6 +432,8 @@ describe('GTM Defensive Tracking Integration', () => {
   });
 
   describe('Conversion Events', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should preserve numeric values while sanitizing undefined', async () => {
       const TestConversionComponent = () => {
         const gtmEvent = useGTMEvent();

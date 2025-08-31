@@ -1,11 +1,10 @@
-/**
- * ClickHouse Analytics Integration Tests
- * Tests for ClickHouse database queries and aggregations
- * Enterprise segment - ensures data insights capabilities
- */
-
 import React from 'react';
 import { render, waitFor, fireEvent, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { TestProviders } from '@/__tests__/setup/test-providers';
+import { 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+aitFor, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TestProviders } from '@/__tests__/setup/test-providers';
 import { 
@@ -26,9 +25,15 @@ beforeEach(() => {
 
 afterEach(() => {
   testContext.cleanup();
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
 });
 
 describe('ClickHouse Analytics Integration', () => {
+    jest.setTimeout(10000);
   it('should query analytics data from ClickHouse', async () => {
     const TestComponent = () => {
       const [analytics, setAnalytics] = React.useState<any>(null);

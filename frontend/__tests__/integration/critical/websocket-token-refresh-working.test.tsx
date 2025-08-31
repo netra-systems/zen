@@ -1,8 +1,9 @@
-/**
- * Working WebSocket Token Refresh Test
- * 
- * This test verifies the actual implemented WebSocket token refresh functionality.
- * Tests JWT parsing, expiry detection, and token refresh flow.
+import React from 'react';
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import WS from 'jest-websocket-mock';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+efresh flow.
  */
 
 import React from 'react';
@@ -102,6 +103,7 @@ const createMockAuthContext = (token: string) => ({
 });
 
 describe('WebSocket Token Refresh Implementation (Working)', () => {
+    jest.setTimeout(10000);
   let server: WS;
   let mockWebSocket: any;
   let authContext: any;
@@ -138,9 +140,15 @@ describe('WebSocket Token Refresh Implementation (Working)', () => {
     webSocketService.disconnect();
     jest.restoreAllMocks();
     jest.useRealTimers();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('JWT Token Parsing', () => {
+      jest.setTimeout(10000);
     it('should correctly parse JWT token expiry', async () => {
       // Create a token that expires in 5 minutes
       const shortExpiryToken = createMockJWT(300); // 5 minutes
@@ -211,6 +219,7 @@ describe('WebSocket Token Refresh Implementation (Working)', () => {
   });
 
   describe('Token Refresh Flow', () => {
+      jest.setTimeout(10000);
     it('should queue messages during token refresh', async () => {
       const validToken = createMockJWT(3600);
       authContext.token = validToken;
@@ -304,6 +313,7 @@ describe('WebSocket Token Refresh Implementation (Working)', () => {
   });
 
   describe('Token Synchronization', () => {
+      jest.setTimeout(10000);
     it('should update WebSocket when auth context token changes', async () => {
       const initialToken = createMockJWT(3600);
       authContext.token = initialToken;
@@ -345,6 +355,7 @@ describe('WebSocket Token Refresh Implementation (Working)', () => {
   });
 
   describe('Message Handling During Refresh', () => {
+      jest.setTimeout(10000);
     it('should process pending messages after successful refresh', async () => {
       const validToken = createMockJWT(3600);
       authContext.token = validToken;

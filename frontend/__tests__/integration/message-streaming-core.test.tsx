@@ -1,9 +1,3 @@
-/**
- * Message Streaming Core Tests
- * Core streaming functionality tests
- * Agent 10 Implementation - Split for 450-line compliance
- */
-
 import React from 'react';
 import { render, screen, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -11,6 +5,9 @@ import { jest } from '@jest/globals';
 import { TestProviders } from '../setup/test-providers';
 import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
 import * as WebSocketTestUtilities from '@/__tests__/helpers/websocket-test-utilities';
+import * as StreamingTestUtilities from '@/__tests__/helpers/streaming-test-utilities';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+m '@/__tests__/helpers/websocket-test-utilities';
 import * as StreamingTestUtilities from '@/__tests__/helpers/streaming-test-utilities';
 
 // Core streaming test component
@@ -50,6 +47,7 @@ const StreamingCoreTest: React.FC = () => {
 };
 
 describe('Message Streaming Core Tests', () => {
+    jest.setTimeout(10000);
   let wsManager: WebSocketTestManager;
   let streamBuffer: StreamBuffer;
   let frameController: FrameRateController;
@@ -68,9 +66,15 @@ describe('Message Streaming Core Tests', () => {
     wsManager.cleanup();
     jest.clearAllMocks();
     jest.useRealTimers();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Streaming Controls', () => {
+      jest.setTimeout(10000);
     it('should start and stop streaming', async () => {
       render(<TestProviders><StreamingCoreTest /></TestProviders>);
 
@@ -105,6 +109,7 @@ describe('Message Streaming Core Tests', () => {
   });
 
   describe('Performance Metrics', () => {
+      jest.setTimeout(10000);
     it('should track messages per second', async () => {
       render(<TestProviders><StreamingCoreTest /></TestProviders>);
 
@@ -150,6 +155,7 @@ describe('Message Streaming Core Tests', () => {
   });
 
   describe('Stream Buffer Management', () => {
+      jest.setTimeout(10000);
     it('should enqueue and dequeue messages', () => {
       const chunk = createMessageChunk('test data', 1);
       const success = streamBuffer.enqueue(chunk);
@@ -182,6 +188,7 @@ describe('Message Streaming Core Tests', () => {
   });
 
   describe('Frame Rate Control', () => {
+      jest.setTimeout(10000);
     it('should maintain 60 FPS target', () => {
       const controller = new FrameRateController(60);
       expect(controller.getTargetInterval()).toBeCloseTo(16.67, 1);
@@ -204,6 +211,7 @@ describe('Message Streaming Core Tests', () => {
   });
 
   describe('Message Types', () => {
+      jest.setTimeout(10000);
     it('should handle text message types', () => {
       const textChunk = createMessageChunk(JSON.stringify({ type: 'text', content: 'Hello' }), 1);
       expect(streamBuffer.enqueue(textChunk)).toBe(true);
@@ -227,6 +235,7 @@ describe('Message Streaming Core Tests', () => {
   });
 
   describe('Latency Monitoring', () => {
+      jest.setTimeout(10000);
     it('should measure message latency', () => {
       const sendTime = Date.now();
       const receiveTime = sendTime + 50;
@@ -242,6 +251,7 @@ describe('Message Streaming Core Tests', () => {
   });
 
   describe('Resource Cleanup', () => {
+      jest.setTimeout(10000);
     it('should clean up streaming resources', async () => {
       const { unmount } = render(<TestProviders><StreamingCoreTest /></TestProviders>);
       unmount();

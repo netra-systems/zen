@@ -1,14 +1,15 @@
-/**
- * First Load Integration Tests for Netra Apex Frontend
- * Critical for user onboarding and conversion - Phase 2, Agent 4
- * Tests unauthenticated first visit, bundle loading, auth checking, and redirects
- */
-
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
 import { TestProviders } from '../setup/test-providers';
+import { mockAuthServiceResponses } from '../mocks/auth-service-mock';
+import { authService } from '@/auth';
+import HomePage from '@/app/page';
+import LoginPage from '@/app/login/page';
+import { 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+/test-providers';
 import { mockAuthServiceResponses } from '../mocks/auth-service-mock';
 import { authService } from '@/auth';
 import HomePage from '@/app/page';
@@ -25,12 +26,14 @@ import { setupFirstLoadMockComponents } from '@/__tests__/helpers/first-load-moc
 setupFirstLoadMockComponents();
 
 describe('First Load Integration Tests', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     setupFirstLoadMocks();
     simulatePerformanceMetrics();
   });
 
   describe('Unauthenticated First Visit', () => {
+      jest.setTimeout(10000);
     it('should load application bundle and show loading state', async () => {
       simulateLoadingSequence({ authLoading: true, authUser: null, configLoaded: true });
       
@@ -97,6 +100,7 @@ describe('First Load Integration Tests', () => {
   });
 
   describe('Auth State Checking', () => {
+      jest.setTimeout(10000);
     it('should check authentication status on first load', async () => {
       simulateLoadingSequence({ 
         authLoading: false, 
@@ -179,6 +183,8 @@ describe('First Load Integration Tests', () => {
 
   describe('Redirect to Login', () => {
 
+      jest.setTimeout(10000);
+
     it('should render login page with Google OAuth button', async () => {
       const mockLogin = jest.fn();
       jest.mocked(authService.useAuth).mockReturnValue({
@@ -224,6 +230,7 @@ describe('First Load Integration Tests', () => {
   });
 
   describe('Error Handling and Performance', () => {
+      jest.setTimeout(10000);
     it('should display proper loading indicators', async () => {
       render(
         <TestProviders>

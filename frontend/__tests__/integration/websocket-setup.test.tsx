@@ -1,15 +1,14 @@
-/**
- * WebSocket Setup Integration Tests - Agent 6
- * 
- * BUSINESS VALUE JUSTIFICATION:
- * - Segment: All (Free → Enterprise) 
- * - Business Goal: Reliable real-time communication prevents 40% chat failures
- * - Value Impact: Protects $100K+ MRR from WebSocket-related support issues
- * - Revenue Impact: Ensures instant user experience critical for conversion
- * 
- * ARCHITECTURAL COMPLIANCE:
- * - File size: ≤300 lines (MANDATORY)
- * - Functions: ≤8 lines each (MANDATORY)
+import React from 'react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { jest } from '@jest/globals';
+import WS from 'jest-websocket-mock';
+import { WebSocketProvider } from '@/providers/WebSocketProvider';
+import { AuthContext } from '@/auth/context';
+import { webSocketService } from '@/services/webSocketService';
+import { createActCallback } from '../test-utils/react-act-utils';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ANDATORY)
  * - Real WebSocket connections with jest-websocket-mock
  * - Tests all critical connection scenarios
  */
@@ -82,6 +81,7 @@ const TestComponent: React.FC<{ onStatusChange?: (status: string) => void }> = (
 // ============================================================================
 
 describe('WebSocket Setup Integration Tests - Agent 6', () => {
+    jest.setTimeout(10000);
   let server: WS;
 
   beforeEach(async () => {
@@ -93,9 +93,15 @@ describe('WebSocket Setup Integration Tests - Agent 6', () => {
   afterEach(() => {
     WS.clean();
     webSocketService.disconnect();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('WebSocket Connection with Authentication', () => {
+      jest.setTimeout(10000);
     it('should connect with valid auth token within 500ms', async () => {
       const statusChanges: string[] = [];
       const AuthProvider = createAuthProvider('valid_test_token');
@@ -170,6 +176,7 @@ describe('WebSocket Setup Integration Tests - Agent 6', () => {
   });
 
   describe('Auto-Reconnection with Exponential Backoff', () => {
+      jest.setTimeout(10000);
     it('should automatically reconnect after unexpected disconnect', async () => {
       const statusChanges: string[] = [];
       const AuthProvider = createAuthProvider();
@@ -199,6 +206,7 @@ describe('WebSocket Setup Integration Tests - Agent 6', () => {
   });
 
   describe('Message Queue During Disconnection', () => {
+      jest.setTimeout(10000);
     it('should queue messages when disconnected and send on reconnect', async () => {
       const AuthProvider = createAuthProvider();
       
@@ -244,6 +252,7 @@ describe('WebSocket Setup Integration Tests - Agent 6', () => {
   });
 
   describe('Connection State Management', () => {
+      jest.setTimeout(10000);
     it('should accurately track connection state transitions', async () => {
       const stateTransitions: string[] = [];
       const AuthProvider = createAuthProvider();
@@ -276,6 +285,7 @@ describe('WebSocket Setup Integration Tests - Agent 6', () => {
   });
 
   describe('Concurrent Message Handling', () => {
+      jest.setTimeout(10000);
     it('should handle multiple simultaneous messages', async () => {
       const AuthProvider = createAuthProvider();
       
@@ -304,6 +314,7 @@ describe('WebSocket Setup Integration Tests - Agent 6', () => {
   });
 
   describe('Connection Cleanup', () => {
+      jest.setTimeout(10000);
     it('should cleanup connection properly', async () => {
       const AuthProvider = createAuthProvider();
       

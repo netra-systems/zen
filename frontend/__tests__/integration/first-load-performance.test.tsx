@@ -1,10 +1,9 @@
-/**
- * First Load Performance Testing - Agent 1 Implementation
- * 
- * BUSINESS VALUE JUSTIFICATION:
- * - Segment: All (Free → Enterprise)
- * - Business Goal: Sub-3s first contentful paint
- * - Value Impact: 40% reduction in bounce rate
+import React from 'react';
+import { render, screen, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { jest } from '@jest/globals';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+* - Value Impact: 40% reduction in bounce rate
  * - Revenue Impact: +$30K MRR from improved engagement
  * 
  * CRITICAL PERFORMANCE TESTS:
@@ -53,6 +52,7 @@ import { TestProviders } from '../setup/test-providers';
 // ============================================================================
 
 describe('First Load Performance Testing - Agent 1', () => {
+    jest.setTimeout(10000);
   let testEnv: any;
   let performanceMocks: any;
   let performanceObserver: any;
@@ -68,9 +68,15 @@ describe('First Load Performance Testing - Agent 1', () => {
     testEnv.cleanup();
     performanceObserver.cleanup();
     cleanupTest();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Core Performance Benchmarks', () => {
+      jest.setTimeout(10000);
     it('achieves First Contentful Paint under 1.5 seconds', async () => {
       const fcpStart = performance.now();
       
@@ -135,6 +141,7 @@ describe('First Load Performance Testing - Agent 1', () => {
   });
 
   describe('Resource Loading Performance', () => {
+      jest.setTimeout(10000);
     it('inlines critical CSS for above-fold content', async () => {
       render(
         <TestProviders>
@@ -192,6 +199,7 @@ describe('First Load Performance Testing - Agent 1', () => {
   });
 
   describe('Memory and CPU Performance', () => {
+      jest.setTimeout(10000);
     it('maintains memory usage under 100MB after load', async () => {
       const initialMemory = getMemoryUsage();
       
@@ -250,6 +258,7 @@ describe('First Load Performance Testing - Agent 1', () => {
   });
 
   describe('Network Performance Optimization', () => {
+      jest.setTimeout(10000);
     it('implements effective HTTP/2 resource prioritization', async () => {
       const resourceTiming = mockResourceTiming();
       

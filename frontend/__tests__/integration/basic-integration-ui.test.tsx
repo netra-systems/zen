@@ -1,14 +1,12 @@
-/**
- * UI Interaction Integration Tests
- * Tests for navigation, routing, and performance functionality
- */
-
 import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import WS from 'jest-websocket-mock';
 import { TestProviders } from '@/__tests__/setup/test-providers';
 import { setupTestEnvironment, clearStorages, resetStores, cleanupWebSocket } from './helpers/test-setup';
+import { assertTextContent } from './helpers/test-assertions';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+eanupWebSocket } from './helpers/test-setup';
 import { assertTextContent } from './helpers/test-assertions';
 
 // Mock Next.js
@@ -29,6 +27,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('UI Interaction Integration Tests', () => {
+    jest.setTimeout(10000);
   let server: WS;
   
   beforeEach(() => {
@@ -40,9 +39,15 @@ describe('UI Interaction Integration Tests', () => {
 
   afterEach(() => {
     cleanupWebSocket();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Navigation and Routing', () => {
+      jest.setTimeout(10000);
     it('should handle navigation between views', async () => {
       const router = require('next/navigation').useRouter();
       
@@ -87,6 +92,7 @@ describe('UI Interaction Integration Tests', () => {
   });
 
   describe('Performance and Optimization', () => {
+      jest.setTimeout(10000);
     it('should debounce rapid input changes', async () => {
       let apiCallCount = 0;
       
@@ -192,6 +198,7 @@ describe('UI Interaction Integration Tests', () => {
   });
 
   describe('Form Interactions', () => {
+      jest.setTimeout(10000);
     it('should handle form validation and submission', async () => {
       const FormComponent = () => {
         const [email, setEmail] = React.useState('');

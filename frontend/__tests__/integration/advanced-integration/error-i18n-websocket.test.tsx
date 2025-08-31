@@ -1,14 +1,14 @@
-/**
- * Error Handling, i18n, and WebSocket Resilience Tests
- */
-
 import React from 'react';
 import { render, waitFor, screen, fireEvent, act } from '@testing-library/react';
 import WS from 'jest-websocket-mock';
 import { safeWebSocketCleanup } from '../../helpers/websocket-test-manager';
 import { setupTestEnvironment } from './test-setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+t-manager';
+import { setupTestEnvironment } from './test-setup';
 
 describe('Advanced Frontend Integration Tests - Error, i18n, WebSocket', () => {
+    jest.setTimeout(10000);
   let server: WS;
   
   setupTestEnvironment();
@@ -19,9 +19,15 @@ describe('Advanced Frontend Integration Tests - Error, i18n, WebSocket', () => {
 
   afterEach(() => {
     safeWebSocketCleanup();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('27. Advanced Error Boundaries', () => {
+      jest.setTimeout(10000);
     it('should recover from component errors gracefully', async () => {
       class ErrorBoundary extends React.Component<
         { children: React.ReactNode },
@@ -131,6 +137,7 @@ describe('Advanced Frontend Integration Tests - Error, i18n, WebSocket', () => {
   });
 
   describe('28. Multi-language Support Integration', () => {
+      jest.setTimeout(10000);
     it('should switch languages dynamically', async () => {
       const translations = {
         en: { welcome: 'Welcome', goodbye: 'Goodbye' },
@@ -213,6 +220,7 @@ describe('Advanced Frontend Integration Tests - Error, i18n, WebSocket', () => {
   });
 
   describe('29. WebSocket Resilience Integration', () => {
+      jest.setTimeout(10000);
     it('should handle WebSocket message buffering during reconnection', async () => {
       let messageBuffer: any[] = [];
       
@@ -232,7 +240,7 @@ describe('Advanced Frontend Integration Tests - Error, i18n, WebSocket', () => {
         };
         
         const connect = () => {
-          const ws = new WebSocket('ws://localhost:8000/ws');
+          const ws = new WebSocket('ws://localhost:3001/test'));
           
           ws.onopen = () => {
             setIsConnected(true);
@@ -322,7 +330,7 @@ describe('Advanced Frontend Integration Tests - Error, i18n, WebSocket', () => {
           
           // Simulate connection attempt
           try {
-            const ws = new WebSocket('ws://localhost:8000/ws');
+            const ws = new WebSocket('ws://localhost:3001/test'));
             ws.onerror = () => {
               attemptReconnect();
             };

@@ -1,10 +1,8 @@
-/**
- * State Synchronization Tests
- * Tests for syncing local state with server state and concurrent updates
- */
-
 import React from 'react';
 import { render, waitFor, screen, fireEvent, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+rt { render, waitFor, screen, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 // Import stores
@@ -15,6 +13,7 @@ import { useThreadStore } from '@/store/threadStore';
 import { TestProviders } from '@/__tests__/setup/test-providers';
 
 describe('State Synchronization', () => {
+    jest.setTimeout(10000);
   beforeEach(async () => {
     jest.clearAllMocks();
     
@@ -27,9 +26,15 @@ describe('State Synchronization', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Server State Sync', () => {
+      jest.setTimeout(10000);
     it('should sync local state with server state', async () => {
       const serverState = {
         threads: [

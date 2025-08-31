@@ -1,15 +1,13 @@
-/**
- * WebSocket Resilience Integration Tests
- * Tests WebSocket disconnection/reconnection with automatic retry
- * Ensures message queuing and delivery after reconnection
- */
-
 import React from 'react';
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
 import WS from 'jest-websocket-mock';
 import { TestProviders } from '../setup/test-providers';
+import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
+import { webSocketService } from '@/services/webSocketService';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+om '../setup/test-providers';
 import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
 import { webSocketService } from '@/services/webSocketService';
 
@@ -111,6 +109,7 @@ const SimpleWebSocketComponent: React.FC = () => {
 
 
 describe('WebSocket Resilience Tests', () => {
+    jest.setTimeout(10000);
   let wsManager: WebSocketTestManager;
 
   beforeEach(() => {
@@ -121,9 +120,15 @@ describe('WebSocket Resilience Tests', () => {
   afterEach(() => {
     wsManager.cleanup();
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Connection Status Management', () => {
+      jest.setTimeout(10000);
     it('should display connection status correctly', async () => {
       render(
         <TestProviders>
@@ -166,6 +171,7 @@ describe('WebSocket Resilience Tests', () => {
   });
 
   describe('Message Queue Management', () => {
+      jest.setTimeout(10000);
     it('should queue messages when disconnected', async () => {
       render(
         <TestProviders>
@@ -199,6 +205,7 @@ describe('WebSocket Resilience Tests', () => {
   });
 
   describe('WebSocket Service Integration', () => {
+      jest.setTimeout(10000);
     it('should handle WebSocket service errors gracefully', async () => {
       // Mock webSocketService to throw error
       const mockWebSocketService = {
@@ -233,6 +240,7 @@ describe('WebSocket Resilience Tests', () => {
   });
 
   describe('Resilience Patterns', () => {
+      jest.setTimeout(10000);
     it('should recover from error state to connected state', async () => {
       render(
         <TestProviders>

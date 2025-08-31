@@ -55,6 +55,8 @@ class MockWebSocket {
 global.WebSocket = MockWebSocket as any;
 
 describe('Frontend Initialization', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     // Clear localStorage
     localStorage.clear();
@@ -67,9 +69,17 @@ describe('Frontend Initialization', () => {
   
   afterEach(() => {
     jest.restoreAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
   
   describe('Critical Module Loading', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('logger module should initialize without errors', async () => {
       const { logger } = await import('@/lib/logger');
       
@@ -113,6 +123,8 @@ describe('Frontend Initialization', () => {
   });
   
   describe('Provider Initialization', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('AuthProvider should render without errors', async () => {
       const { AuthProvider } = await import('@/auth/context');
       
@@ -178,6 +190,8 @@ describe('Frontend Initialization', () => {
   });
   
   describe('Chat Page Initialization', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('MainChat component should render without white screen', async () => {
       // Mock auth context to bypass authentication
       jest.mock('@/auth/context', () => ({
@@ -226,6 +240,8 @@ describe('Frontend Initialization', () => {
   });
   
   describe('Error Boundary Behavior', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should catch and handle initialization errors gracefully', async () => {
       const ErrorComponent = () => {
         throw new Error('Test initialization error');
@@ -263,6 +279,8 @@ describe('Frontend Initialization', () => {
   });
   
   describe('Module Import Order', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('critical modules should load in correct order', async () => {
       const loadOrder: string[] = [];
       

@@ -1,11 +1,10 @@
-/**
- * Real-time Analytics Integration Tests
- * Tests for real-time metrics streaming and anomaly detection
- * Enterprise segment - ensures real-time monitoring capabilities
- */
-
 import React from 'react';
 import { render, waitFor, fireEvent, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { TestProviders } from '@/__tests__/setup/test-providers';
+import { 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+{ render, waitFor, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TestProviders } from '@/__tests__/setup/test-providers';
 import { 
@@ -26,9 +25,15 @@ beforeEach(() => {
 
 afterEach(() => {
   testContext.cleanup();
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
 });
 
 describe('Real-time Metrics Integration', () => {
+    jest.setTimeout(10000);
   it('should aggregate metrics in real-time', async () => {
     const TestComponent = () => {
       const [metrics, setMetrics] = React.useState<any>({});

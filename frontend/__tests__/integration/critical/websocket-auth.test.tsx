@@ -1,10 +1,9 @@
-/**
- * WebSocket and Authentication Integration Tests
- * Tests for WebSocket provider with authentication state
- */
-
 import React from 'react';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import WS from 'jest-websocket-mock';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import WS from 'jest-websocket-mock';
 
@@ -25,6 +24,7 @@ const mockEnv = {
 };
 
 describe('WebSocket and Authentication Integration', () => {
+    jest.setTimeout(10000);
   let server: WS;
   
   beforeEach(() => {
@@ -37,9 +37,15 @@ describe('WebSocket and Authentication Integration', () => {
   afterEach(() => {
     server.close();
     resetAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('WebSocket Provider Integration', () => {
+      jest.setTimeout(10000);
     it('should integrate WebSocket with authentication state', async () => {
       await safeAsync(() => {
         setAuthenticatedState();
@@ -63,6 +69,7 @@ describe('WebSocket and Authentication Integration', () => {
   });
 
   describe('Authentication Flow Integration', () => {
+      jest.setTimeout(10000);
     it('should complete OAuth flow and establish WebSocket', async () => {
       const mockOAuthResponse = createMockOAuthResponse();
       (fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => mockOAuthResponse });

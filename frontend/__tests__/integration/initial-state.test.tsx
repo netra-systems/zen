@@ -25,11 +25,15 @@ import { setupInitialStateMockComponents } from '@/__tests__/helpers/initial-sta
 setupInitialStateMockComponents();
 
 describe('Initial State Integration Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     setupInitialStateMocks();
   });
 
   describe('Default Store State', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should initialize app store with default values', () => {
       const TestComponent = () => {
         const store = useAppStore();
@@ -107,6 +111,8 @@ describe('Initial State Integration Tests', () => {
   });
 
   describe('LocalStorage Checks', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     beforeEach(() => {
       setupInitialStateMocks();
     });
@@ -151,6 +157,8 @@ describe('Initial State Integration Tests', () => {
   });
 
   describe('Cookie Validation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     beforeEach(() => {
       setupInitialStateMocks();
     });
@@ -194,6 +202,8 @@ describe('Initial State Integration Tests', () => {
   });
 
   describe('WebSocket Initial Connection Attempts', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should attempt WebSocket connection on initialization', async () => {
       render(
         <TestProviders>
@@ -243,6 +253,8 @@ describe('Initial State Integration Tests', () => {
   });
 
   describe('UI Element Visibility', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should render essential UI elements on load', () => {
       render(
         <TestProviders>
@@ -317,4 +329,8 @@ describe('Initial State Integration Tests', () => {
       });
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

@@ -1,9 +1,9 @@
-/**
- * Background Task Processing Integration Tests
- * Module-based architecture: Task tests ≤300 lines, functions ≤8 lines
- */
-
 import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+act from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import {
@@ -44,6 +44,7 @@ jest.mock('@/hooks/useAgent', () => ({
 }));
 
 describe('Background Task Processing Integration Tests', () => {
+    jest.setTimeout(10000);
   let server: any;
   
   beforeEach(() => {
@@ -53,9 +54,15 @@ describe('Background Task Processing Integration Tests', () => {
 
   afterEach(() => {
     teardownIntegrationTest();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('15. Background Task Processing', () => {
+      jest.setTimeout(10000);
     it('should queue and process background tasks', async () => {
       const mockTask = createMockTask();
       const result = await queueTask(mockTask);

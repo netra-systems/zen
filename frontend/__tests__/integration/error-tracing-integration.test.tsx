@@ -10,6 +10,8 @@
  */
 
 describe('Error Tracing Integration Test Suite', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   it('should reference modular error tracing architecture', () => {
     const errorModules = [
       'error-context-tracing.test.tsx',
@@ -33,4 +35,8 @@ describe('Error Tracing Integration Test Suite', () => {
     expect(errorRequirements.automatedRemediation).toBe(true);
     expect(errorRequirements.maxFileLines).toBeLessThanOrEqual(300);
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

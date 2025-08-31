@@ -1,8 +1,8 @@
-/**
- * Message Reception Integration Tests
- * Tests WebSocket message parsing, streaming, and real-time display
- * 
- * Phase 4, Agent 14: Comprehensive AI response handling tests
+import React, { useState, useEffect, useRef } from 'react';
+import { render, waitFor, screen, fireEvent, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+
  */
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -120,6 +120,7 @@ const createMockWebSocket = () => {
 };
 
 describe('Message Reception Integration Tests', () => {
+    jest.setTimeout(10000);
   let mockWebSocket: ReturnType<typeof createMockWebSocket>;
   
   beforeEach(() => {
@@ -135,6 +136,7 @@ describe('Message Reception Integration Tests', () => {
   });
 
   describe('WebSocket Message Parsing', () => {
+      jest.setTimeout(10000);
     it('should parse structured WebSocket messages correctly', async () => {
       const testMessage = {
         type: 'agent_response',
@@ -182,6 +184,7 @@ describe('Message Reception Integration Tests', () => {
   });
 
   describe('First Token Display Performance', () => {
+      jest.setTimeout(10000);
     it('should display first token within 1 second', async () => {
       const firstTokenTimes: number[] = [];
       
@@ -233,6 +236,7 @@ describe('Message Reception Integration Tests', () => {
   });
 
   describe('Streaming Text Accumulation', () => {
+      jest.setTimeout(10000);
     it('should accumulate text progressively without jumps', async () => {
       const contentStates: string[] = [];
       
@@ -280,6 +284,7 @@ describe('Message Reception Integration Tests', () => {
   });
 
   describe('Markdown Real-time Rendering', () => {
+      jest.setTimeout(10000);
     it('should render markdown during streaming', async () => {
       const markdownContent = '# Heading **Bold text** and *italic text* ```javascript console.log("code"); ```';
       
@@ -326,6 +331,7 @@ describe('Message Reception Integration Tests', () => {
   });
 
   describe('Auto-scroll Behavior', () => {
+      jest.setTimeout(10000);
     it('should auto-scroll during message streaming', async () => {
       const AutoScrollTest: React.FC = () => {
         const scrollRef = useRef<HTMLDivElement>(null);
@@ -367,6 +373,7 @@ describe('Message Reception Integration Tests', () => {
   });
 
   describe('Stream Completion Detection', () => {
+      jest.setTimeout(10000);
     it('should detect when streaming is complete', async () => {
       const completionTimes: number[] = [];
       
@@ -422,6 +429,7 @@ describe('Message Reception Integration Tests', () => {
   });
 
   describe('Network Disconnection Recovery', () => {
+      jest.setTimeout(10000);
     it('should handle WebSocket disconnection during streaming', async () => {
       const DisconnectionTest: React.FC = () => {
         const [connected, setConnected] = useState(true);

@@ -1,11 +1,10 @@
-/**
- * Basic Task Processing Integration Tests
- * Tests for task queuing, monitoring, and batch processing
- * Enterprise segment - ensures reliable background processing
- */
-
 import React from 'react';
 import { render, waitFor, fireEvent, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { TestProviders } from '@/__tests__/setup/test-providers';
+import { 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+nder, waitFor, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TestProviders } from '@/__tests__/setup/test-providers';
 import { 
@@ -27,9 +26,15 @@ beforeEach(() => {
 
 afterEach(() => {
   testContext.cleanup();
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
 });
 
 describe('Background Task Processing', () => {
+    jest.setTimeout(10000);
   it('should queue and process background tasks', async () => {
     const TestComponent = () => {
       const [taskId, setTaskId] = React.useState<string | null>(null);

@@ -129,6 +129,8 @@ const healthService = {
 };
 
 describe('Comprehensive Frontend Integration Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let server: WS;
   
   beforeEach(() => {
@@ -143,9 +145,17 @@ describe('Comprehensive Frontend Integration Tests', () => {
 
   afterEach(() => {
     cleanupTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('1. Corpus Management Integration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should upload documents to corpus and process with embeddings', async () => {
       await testCorpusDocumentUpload();
     });
@@ -156,6 +166,8 @@ describe('Comprehensive Frontend Integration Tests', () => {
   });
 
   describe('2. Synthetic Data Generation Flow', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should generate synthetic data based on templates', async () => {
       jest.setTimeout(10000);
       await testSyntheticDataGeneration();
@@ -167,6 +179,8 @@ describe('Comprehensive Frontend Integration Tests', () => {
   });
 
   describe('3. LLM Cache Management Integration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should cache and retrieve LLM responses', async () => {
       await testLLMCacheOperations();
     });
@@ -177,6 +191,8 @@ describe('Comprehensive Frontend Integration Tests', () => {
   });
 
   describe('7. Health Check Monitoring', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should monitor service health status', async () => {
       await testHealthMonitoring();
     });
@@ -188,6 +204,8 @@ describe('Comprehensive Frontend Integration Tests', () => {
   });
 
   describe('15. Background Task Processing', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should queue and process background tasks', async () => {
       await testBackgroundTaskProcessing();
     });

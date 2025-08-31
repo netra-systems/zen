@@ -1,9 +1,9 @@
-/**
- * Health Check Monitoring Integration Tests
- * Module-based architecture: Health tests ≤300 lines, functions ≤8 lines
- */
-
 import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ct from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import {
@@ -46,6 +46,7 @@ jest.mock('@/hooks/useAgent', () => ({
 }));
 
 describe('Health Check Monitoring Integration Tests', () => {
+    jest.setTimeout(10000);
   let server: any;
   const healthService = createHealthService();
   
@@ -56,9 +57,15 @@ describe('Health Check Monitoring Integration Tests', () => {
 
   afterEach(() => {
     teardownIntegrationTest();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('7. Health Check Monitoring', () => {
+      jest.setTimeout(10000);
     it('should monitor service health status', async () => {
       const mockHealth = createMockHealthStatus();
       setupHealthMock(mockHealth);

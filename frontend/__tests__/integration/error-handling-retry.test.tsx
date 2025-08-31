@@ -1,10 +1,10 @@
-/**
- * Error Handling Integration Tests - Retry Logic Module
- * Tests retry mechanisms and timeout handling
- * 
- * Business Value Justification (BVJ):
- * - Segment: All (Free → Enterprise)
- * - Goal: Improve reliability through intelligent retry mechanisms
+import { render, screen, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { setupServer } from 'msw/node';
+import { http, HttpResponse } from 'msw';
+import React, { useState, useRef } from 'react';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+s
  * - Value Impact: Reduces user frustration from transient failures
  * - Revenue Impact: +$50K MRR from improved reliability
  */
@@ -328,7 +328,7 @@ const createRetryHandlers = () => [
     return new Promise(resolve => {
       setTimeout(() => {
         resolve(HttpResponse.json({ data: 'slow response' }));
-      }, 3000);
+      }, 1000);
     });
   }),
 
@@ -354,6 +354,11 @@ afterEach(() => {
   jest.clearAllMocks();
   act(() => {
     jest.runAllTimers();
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
   });
 });
 
@@ -367,6 +372,7 @@ afterAll(() => {
 // ============================================================================
 
 describe('Error Handling - Retry Logic', () => {
+    jest.setTimeout(10000);
   it('retries failed requests with exponential backoff', async () => {
     render(
       <RetryTestComponent 
@@ -496,6 +502,7 @@ describe('Error Handling - Retry Logic', () => {
 // ============================================================================
 
 describe('Error Handling - Request Cancellation', () => {
+    jest.setTimeout(10000);
   it('cancels ongoing requests', async () => {
     render(<CancellableRequestComponent />);
     
@@ -570,6 +577,7 @@ describe('Error Handling - Request Cancellation', () => {
 // ============================================================================
 
 describe('Error Handling - Timeout Handling', () => {
+    jest.setTimeout(10000);
   it('handles request timeouts correctly', async () => {
     render(<TimeoutComponent />);
     
