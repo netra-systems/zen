@@ -565,13 +565,36 @@ class RealServicesManager:
         self.config = config or self._load_config_from_env()
         
         # Service managers
-        self.postgres = DatabaseManager(self.config)
-        self.redis = RedisManager(self.config)  
-        self.clickhouse = ClickHouseManager(self.config)
+        self._postgres_manager = DatabaseManager(self.config)
+        self._redis_manager = RedisManager(self.config)  
+        self._clickhouse_manager = ClickHouseManager(self.config)
         
         # Test clients
         self._websocket_clients: List[WebSocketTestClient] = []
         self._http_client: Optional[HTTPTestClient] = None
+    
+    @asynccontextmanager
+    async def postgres(self) -> AsyncIterator[DatabaseManager]:
+        """Get PostgreSQL database manager as async context manager."""
+        await self._postgres_manager.ensure_available()
+        try:
+            yield self._postgres_manager
+        finally:
+            pass  # Connection cleanup is handled by the manager itself
+    
+    @asynccontextmanager
+    async def redis(self) -> AsyncIterator[RedisManager]:
+        """Get Redis manager as async context manager."""
+        await self._redis_manager.ensure_available()
+        try:
+            yield self._redis_manager
+        finally:
+            pass  # Connection cleanup is handled by the manager itself
+    
+    @property
+    def clickhouse(self) -> ClickHouseManager:
+        """Get the ClickHouse manager."""
+        return self._clickhouse_manager
     
     def _load_config_from_env(self) -> ServiceConfig:
         """Load configuration from environment variables."""
@@ -620,9 +643,9 @@ class RealServicesManager:
         
         # Check services in parallel
         tasks = [
-            self.postgres.ensure_available(),
-            self.redis.ensure_available(),
-            self.clickhouse.ensure_available(),
+            self._postgres_manager.ensure_available(),
+            self._redis_manager.ensure_available(),
+            self._clickhouse_manager.ensure_available(),
         ]
         
         results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -646,9 +669,9 @@ class RealServicesManager:
         
         # Reset in parallel where possible
         tasks = [
-            self.redis.flushdb(),
-            self.postgres.reset_database(),
-            self.clickhouse.reset_database(),
+            self._redis_manager.flushdb(),
+            self._postgres_manager.reset_database(),
+            self._clickhouse_manager.reset_database(),
         ]
         
         await asyncio.gather(*tasks)
@@ -681,9 +704,9 @@ class RealServicesManager:
             self._http_client = None
         
         # Close service managers
-        await self.postgres.close()
-        await self.redis.close()
-        self.clickhouse.close()
+        await self._postgres_manager.close()
+        await self._redis_manager.close()
+        self._clickhouse_manager.close()
         
         logger.info("All real service connections closed")
 
@@ -734,13 +757,15 @@ async def real_services(real_services_manager: RealServicesManager) -> AsyncIter
 @pytest.fixture(scope="function") 
 async def real_postgres(real_services: RealServicesManager) -> AsyncIterator[DatabaseManager]:
     """Real PostgreSQL database for testing."""
-    yield real_services.postgres
+    async with real_services.postgres() as db:
+        yield db
 
 
 @pytest.fixture(scope="function")
 async def real_redis(real_services: RealServicesManager) -> AsyncIterator[RedisManager]:
     """Real Redis cache for testing."""
-    yield real_services.redis
+    async with real_services.redis() as redis_client:
+        yield redis_client
 
 
 @pytest.fixture(scope="function")
@@ -800,18 +825,20 @@ async def load_test_fixtures(manager: RealServicesManager, fixture_dir: str) -> 
     # Load PostgreSQL fixtures
     postgres_fixtures = fixture_path / "postgres"
     if postgres_fixtures.exists():
-        for fixture_file in postgres_fixtures.glob("*.sql"):
-            with open(fixture_file) as f:
-                await manager.postgres.execute(f.read())
+        async with manager.postgres() as postgres_manager:
+            for fixture_file in postgres_fixtures.glob("*.sql"):
+                with open(fixture_file) as f:
+                    await postgres_manager.execute(f.read())
     
     # Load Redis fixtures
     redis_fixtures = fixture_path / "redis" 
     if redis_fixtures.exists():
-        for fixture_file in redis_fixtures.glob("*.json"):
-            with open(fixture_file) as f:
-                data = json.load(f)
-                for key, value in data.items():
-                    await manager.redis.set(key, value)
+        async with manager.redis() as redis_manager:
+            for fixture_file in redis_fixtures.glob("*.json"):
+                with open(fixture_file) as f:
+                    data = json.load(f)
+                    for key, value in data.items():
+                        await redis_manager.set(key, value)
     
     # Load ClickHouse fixtures
     clickhouse_fixtures = fixture_path / "clickhouse"
