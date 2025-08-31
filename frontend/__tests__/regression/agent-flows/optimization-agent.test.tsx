@@ -14,6 +14,7 @@ import { WebSocketProvider } from '@/providers/WebSocketProvider';
 import { AgentProvider, useAgentContext } from '@/providers/AgentProvider';
 import { useChatStore } from '@/store/chatStore';
 import type { WebSocketMessage, OptimizationResults } from '@/types/unified';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock WebSocket
 const mockWebSocket = {
@@ -27,7 +28,7 @@ const mockWebSocket = {
 global.WebSocket = jest.fn(() => mockWebSocket) as any;
 
 describe('Optimization Agent Flow Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let wsEventHandlers: { [key: string]: Function[] } = {};
   let chatStore: ReturnType<typeof useChatStore>;

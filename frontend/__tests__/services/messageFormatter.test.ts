@@ -15,10 +15,11 @@ import {
   type FormattingMetadata
 } from '@/services/messageFormatter';
 import type { Message } from '@/types/unified';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('MessageFormatter Service', () => {
   
-      setupAntiHang();
+  setupAntiHang();
   
     jest.setTimeout(10000);
   

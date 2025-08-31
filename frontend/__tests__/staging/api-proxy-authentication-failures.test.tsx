@@ -22,6 +22,7 @@
 
 import { render, screen, waitFor } from '@testing-library/react';
 import { getUnifiedApiConfig } from '../../lib/unified-api-config';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock Next.js router
 jest.mock('next/navigation', () => ({
@@ -43,7 +44,7 @@ if (typeof test !== 'undefined' && test.skip) {
 }
 
 describe('API Proxy Backend Connectivity Authentication Failures', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const originalEnv = process.env;
   const originalFetch = global.fetch;

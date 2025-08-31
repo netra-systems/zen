@@ -14,6 +14,7 @@ import { authService } from '@/auth/unified-auth-service';
 import { useAuthStore } from '@/store/authStore';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
 import { logger } from '@/lib/logger';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock dependencies
 jest.mock('@/auth/service');
@@ -123,7 +124,7 @@ const MockWebSocketComponent: React.FC = () => {
 };
 
 describe('OAuth Flow Integration Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let mockAuthService: jest.Mocked<typeof authService>;
   let mockAuthStore: any;
@@ -690,7 +691,7 @@ describe('OAuth Flow Integration Tests', () => {
 });
 
 describe('OAuth WebSocket Integration', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   test('WebSocket connection uses OAuth token', async () => {
     const mockToken = 'websocket_auth_token';

@@ -1,7 +1,8 @@
 import { cn, generateUniqueId } from '@/lib/utils';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Utils', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   describe('cn (className merge)', () => {
         setupAntiHang();

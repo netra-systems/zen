@@ -56,6 +56,7 @@ jest.mock('../../services/webSocketService', () => {
 
 // Import the mocked service after mocking
 import { webSocketService as mockWebSocketService } from '@/services/webSocketService';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock fetch for config - will be reset in beforeEach
 const mockFetch = jest.fn();
@@ -70,7 +71,7 @@ const mockAuthContextValue = {
 };
 
 describe('useWebSocket Hook Lifecycle', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let wrapper: React.ComponentType<{ children: React.ReactNode }>;
 

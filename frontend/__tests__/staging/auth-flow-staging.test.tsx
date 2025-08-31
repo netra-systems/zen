@@ -17,6 +17,7 @@ import { authInterceptor } from '@/lib/auth-interceptor';
 import { ThreadService } from '@/services/threadService';
 import { AuthProvider } from '@/auth/context';
 import { Button } from '@/components/ui/button';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Test environment validation
 if (process.env.NODE_ENV !== 'test' && process.env.NEXT_PUBLIC_ENVIRONMENT !== 'staging') {
@@ -58,7 +59,7 @@ const AuthTestWrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('Authentication Flow - Staging Environment', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const originalLocation = window.location;
   let mockFetch: jest.MockedFunction<typeof fetch>;

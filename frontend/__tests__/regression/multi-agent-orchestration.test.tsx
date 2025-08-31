@@ -16,6 +16,7 @@ import { AgentProvider, useAgentContext } from '@/providers/AgentProvider';
 import { useChatStore } from '@/store/chatStore';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import type { 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
   WebSocketMessage, 
   SubAgentState,
   Message,
@@ -108,7 +109,7 @@ jest.mock('@/providers/AgentProvider', () => {
 });
 
 describe('Multi-Agent Orchestration Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let wsEventHandlers: { [key: string]: Function[] } = {};
   let agentContext: ReturnType<typeof useAgentContext>;

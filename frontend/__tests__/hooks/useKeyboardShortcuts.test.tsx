@@ -3,6 +3,7 @@ import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useRouter } from 'next/navigation';
 import { useChatStore } from '@/store/chat';
 import { useThreadStore } from '@/store/threadStore';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock dependencies
 jest.mock('next/navigation', () => ({
@@ -12,7 +13,7 @@ jest.mock('@/store/chat');
 jest.mock('@/store/threadStore');
 
 describe('useKeyboardShortcuts', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let mockRouter: any;
   let mockChatStore: any;

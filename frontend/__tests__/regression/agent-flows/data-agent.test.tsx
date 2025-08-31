@@ -15,6 +15,7 @@ import { AgentProvider, useAgentContext } from '@/providers/AgentProvider';
 import { useChatStore } from '@/store/chatStore';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import type { WebSocketMessage } from '@/types/unified';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock WebSocket
 const mockWebSocket = {
@@ -79,7 +80,7 @@ jest.mock('@/store/unified-chat', () => ({
 }));
 
 describe('Data Agent Flow Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let wsEventHandlers: { [key: string]: Function[] } = {};
   let chatStore: ReturnType<typeof useChatStore>;

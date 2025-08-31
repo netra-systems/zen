@@ -54,9 +54,10 @@ jest.mock('@/lib/unified-api-config', () => ({
 }));
 
 import { AuthServiceClient } from '@/lib/auth-service-client';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('AuthServiceClient Logout', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let authClient: AuthServiceClient;
   const mockToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';

@@ -25,10 +25,11 @@ jest.mock('@/providers/WebSocketProvider', () => ({
 
 // Mock the context that useWebSocket depends on
 import { useWebSocketContext } from '@/providers/WebSocketProvider';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 const mockUseWebSocketContext = useWebSocketContext as jest.MockedFunction<typeof useWebSocketContext>;
 
 describe('useChatWebSocket Hook - Message Processing', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const mockUnifiedChatStore = useUnifiedChatStore as jest.MockedFunction<typeof useUnifiedChatStore>;
 

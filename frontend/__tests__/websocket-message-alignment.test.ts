@@ -6,9 +6,10 @@
  */
 
 import { webSocketService } from '../services/webSocketService';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('WebSocket Message Type Alignment', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let mockWebSocket: any;
   let onMessageCallback: jest.Mock;

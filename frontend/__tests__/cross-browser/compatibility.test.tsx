@@ -1,8 +1,7 @@
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { 
-import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-consistent behavior across different browser implementations
+import { consistent behavior across different browser implementations
  * 
  * Business Value: Prevents revenue loss from browser-specific bugs
  * Target: All customer segments (Free → Enterprise)

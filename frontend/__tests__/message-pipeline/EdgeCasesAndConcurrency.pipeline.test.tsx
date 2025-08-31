@@ -23,6 +23,7 @@ import { webSocketService } from '@/services/webSocketService';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useThreadStore } from '@/store/threadStore';
 import { ThreadService } from '@/services/threadService';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Advanced test harness for edge case and concurrency testing
 const ConcurrencyTestHarness: React.FC<{
@@ -141,7 +142,7 @@ jest.mock('@/store/unified-chat');
 jest.mock('@/store/threadStore');
 
 describe('Edge Cases and Concurrency Pipeline Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const mockWebSocketService = {
     onMessage: null,

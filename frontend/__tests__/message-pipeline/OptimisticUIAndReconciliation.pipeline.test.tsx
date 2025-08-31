@@ -20,6 +20,7 @@ import { optimisticMessageManager } from '@/services/optimistic-updates';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { reconciliationService } from '@/services/reconciliation';
 import type { ChatMessage } from '@/types/unified';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Test component that visualizes optimistic updates
 const OptimisticUpdateVisualizer: React.FC<{
@@ -186,7 +187,7 @@ jest.mock('@/services/reconciliation');
 jest.mock('@/store/unified-chat');
 
 describe('Optimistic UI Updates and Reconciliation Pipeline Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const mockReconciliationService = {
     processConfirmation: jest.fn((msg) => msg),

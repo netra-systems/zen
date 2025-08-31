@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, waitFor, act, cleanup } from '@testing-library/react';
 import { GTMProvider } from '@/providers/GTMProvider';
 import { useGTM } from '@/hooks/useGTM';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock performance.memory API
 interface MockMemoryInfo {
@@ -224,7 +225,7 @@ const FrequentMountComponent: React.FC<{ mountCount: number }> = ({ mountCount }
 };
 
 describe('GTM Memory Leak Detection Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let mockDataLayer: any[];
   let initialMemoryUsage: number;

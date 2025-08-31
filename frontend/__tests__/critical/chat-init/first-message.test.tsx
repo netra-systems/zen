@@ -86,6 +86,7 @@ import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useThreadStore } from '@/store/threadStore';
 import { useAuthStore } from '@/store/authStore';
 import { useWebSocket } from '@/hooks/useWebSocket';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 const mockUseUnifiedChatStoreImpl = useUnifiedChatStore as jest.MockedFunction<typeof useUnifiedChatStore>;
 const mockUseThreadStoreImpl = useThreadStore as jest.MockedFunction<typeof useThreadStore>;
@@ -157,7 +158,7 @@ const setupWebSocket = (overrides = {}) => {
 };
 
 describe('First Message Experience - Complete User Journey', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();

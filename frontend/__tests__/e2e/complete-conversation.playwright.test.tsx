@@ -1,7 +1,6 @@
-import { test, expect, Page, BrowserContext } from '@playwright/test';
-import {
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-rney: login → create conversation → send messages → logout
+import { test, expect, Page, BrowserContext } from '@playwright/test';
+import { rney: login → create conversation → send messages → logout
  * Validates complete workflow performance and reliability
  * 
  * @compliance conventions.xml - Max 8 lines per function, under 300 lines

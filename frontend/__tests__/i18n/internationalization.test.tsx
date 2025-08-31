@@ -6,6 +6,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock translation data
 const translations = {
@@ -121,7 +122,7 @@ const useI18n = (): I18nContextValue => {
 };
 
 describe('Internationalization', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   it('should provide default English translations', () => {
     const TestComponent: React.FC = () => {

@@ -18,9 +18,10 @@
 
 import path from 'path';
 import fs from 'fs';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Missing Static Assets 404 Errors - Staging Replication', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const originalEnv = process.env;
   

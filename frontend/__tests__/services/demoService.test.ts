@@ -11,6 +11,7 @@
  */
 
 import { demoService, DemoChatRequest, DemoChatResponse, ROICalculationRequest, ROICalculationResponse, IndustryTemplate, DemoMetrics, ExportReportRequest, SessionStatus } from '@/services/demoService';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock API configuration
 jest.mock('@/services/apiConfig', () => ({
@@ -113,7 +114,7 @@ const setupUnauthenticatedTest = () => {
 };
 
 describe('DemoService', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();

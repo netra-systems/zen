@@ -7,6 +7,7 @@
 
 import '@testing-library/jest-dom';
 import { sanitizeDataForGTM } from '../../providers/GTMProvider';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock the GTMProvider module to export sanitizeDataForGTM for testing
 jest.mock('../../providers/GTMProvider', () => {
@@ -38,7 +39,7 @@ jest.mock('../../providers/GTMProvider', () => {
 });
 
 describe('GTM Data Sanitization', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   describe('sanitizeDataForGTM', () => {
         setupAntiHang();

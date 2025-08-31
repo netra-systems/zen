@@ -16,9 +16,10 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { parse } from '@babel/parser';
 import traverse from '@babel/traverse';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Module Export Duplication Detection', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const registryPath = path.resolve(__dirname, '../../types/registry.ts');
 

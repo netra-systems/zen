@@ -9,9 +9,10 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Circular Dependency Detection', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const frontendRoot = path.resolve(__dirname, '../..');
   

@@ -9,9 +9,10 @@
 
 import { websocketDebugger } from '@/services/websocketDebugger';
 import { WebSocketMessage } from '@/types/websocket.types';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('WebSocketDebugger - Defensive Programming', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   beforeEach(() => {
     websocketDebugger.reset();

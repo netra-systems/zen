@@ -7,6 +7,7 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import { useLoadingState } from '@/hooks/useLoadingState';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock store - keep this consistent for all tests
 const mockStoreState = {
@@ -58,7 +59,7 @@ const TestComponent: React.FC = () => {
 };
 
 describe('Loading State Timeout Fix', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();

@@ -12,9 +12,10 @@
  */
 
 import { AuthStoreTestUtils, GlobalTestUtils } from './store-test-utils';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('AuthStore - Permission System', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let storeResult: ReturnType<typeof AuthStoreTestUtils.initializeStore>;
 

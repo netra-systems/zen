@@ -12,6 +12,7 @@ global.WebSocket = jest.fn(() => ({
 import { act, renderHook } from '@testing-library/react';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import type {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
   AgentStartedEvent,
   ToolExecutingEvent,
   AgentThinkingEvent,
@@ -22,7 +23,7 @@ import type {
 } from '@/types/unified-chat';
 
 describe('UnifiedChatStore', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   beforeEach(() => {
     // Reset store state before each test

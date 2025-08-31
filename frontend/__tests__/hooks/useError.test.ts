@@ -13,9 +13,10 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { useError } from '@/hooks/useError';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('useError', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();

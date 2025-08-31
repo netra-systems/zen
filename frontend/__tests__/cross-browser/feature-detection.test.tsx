@@ -1,8 +1,7 @@
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { 
-import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-pex works across different browser capabilities
+import { pex works across different browser capabilities
  * 
  * Business Value: Maximizes user reach and reduces support burden
  * Target: All customer segments with diverse browser environments

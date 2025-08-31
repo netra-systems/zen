@@ -8,6 +8,7 @@ import { useInitializationCoordinator } from '@/hooks/useInitializationCoordinat
 import { useAuth } from '@/auth/context';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useUnifiedChatStore } from '@/store/unified-chat';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock dependencies
 jest.mock('@/auth/context', () => ({
@@ -21,7 +22,7 @@ jest.mock('@/store/unified-chat', () => ({
 }));
 
 describe('useInitializationCoordinator', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const mockUseAuth = useAuth as jest.Mock;
   const mockUseWebSocket = useWebSocket as jest.Mock;

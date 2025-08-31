@@ -14,13 +14,14 @@ import { OptimisticMessageManager, optimisticMessageManager } from '@/services/o
 import type { ChatMessage } from '@/types/unified';
 import { generateUniqueId } from '@/lib/utils';
 import { logger } from '@/lib/logger';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock dependencies
 jest.mock('@/lib/utils');
 jest.mock('@/lib/logger');
 
 describe('OptimisticMessageManager Pipeline Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let manager: OptimisticMessageManager;
   

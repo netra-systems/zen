@@ -6,6 +6,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 interface AppState {
   user: { name: string; email: string } | null;
@@ -72,7 +73,7 @@ const useAppContext = () => {
 };
 
 describe('Context State Management', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   it('should provide initial state to consumers', () => {
     const TestComponent: React.FC = () => {

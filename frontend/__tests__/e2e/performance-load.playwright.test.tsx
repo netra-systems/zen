@@ -1,7 +1,6 @@
-import { test, expect, Page, BrowserContext } from '@playwright/test';
-import {
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-er heavy load conditions
+import { test, expect, Page, BrowserContext } from '@playwright/test';
+import { er heavy load conditions
  * Validates smooth operation with 1000+ threads and 10000+ messages
  * 
  * @compliance conventions.xml - Max 8 lines per function, under 300 lines

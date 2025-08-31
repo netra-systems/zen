@@ -1,14 +1,14 @@
 // Tool tracking service tests
 // Testing the enhanced tool tracking service functionality
 
-import { 
-  ToolTrackingService,
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+import { ToolTrackingService,
   createToolTrackingService,
   DEFAULT_TOOL_TRACKING_CONFIG
 } from '@/services/tool-tracking-service';
 
 describe('ToolTrackingService', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let service: ToolTrackingService;
   let onToolsUpdated: jest.Mock;
