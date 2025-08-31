@@ -483,25 +483,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         unifiedAuthService.setDevLogoutFlag();
       }
 
-      // Clear all chat-related state first
+      // Clear all chat-related state with comprehensive reset
       const chatStore = useUnifiedChatStore.getState();
-      
-      // Reset all chat layers and data
-      chatStore.resetLayers();
-      chatStore.clearMessages();
-      chatStore.clearOptimisticMessages();
-      chatStore.resetAgentTracking();
-      
-      // Clear WebSocket connection if active
-      if (chatStore.isConnected) {
-        chatStore.setConnectionStatus(false, null);
-      }
-      
-      // Clear active thread
-      chatStore.setActiveThread(null);
-      
-      // Reset processing state
-      chatStore.setProcessing(false);
+      chatStore.resetStore(); // Complete reset of all chat state
 
       // Clear additional localStorage items
       if (typeof window !== 'undefined') {
