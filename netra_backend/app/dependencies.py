@@ -83,4 +83,5 @@ def get_message_handler_service(request: Request):
     from netra_backend.app.services.message_handlers import MessageHandlerService
     supervisor = get_agent_supervisor(request)
     thread_service = get_thread_service(request)
+    # Note: websocket_manager is optional and typically provided via WebSocket route
     return MessageHandlerService(supervisor, thread_service)

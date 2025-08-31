@@ -1,6 +1,12 @@
 from netra_backend.app.core.isolated_environment import get_env
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
+# SSOT: Import central configuration validator
+import sys
+from pathlib import Path
+project_root = Path(__file__).parent.parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
+
 """Unified Secret Management Module
 
 Provides a unified interface for all secret management operations.
@@ -24,6 +30,14 @@ if TYPE_CHECKING:
 
 from netra_backend.app.core.configuration.secrets import SecretManager
 from netra_backend.app.logging_config import central_logger as logger
+
+# SSOT: Import central configuration validator after logger is defined
+try:
+    from shared.configuration import get_central_validator
+except ImportError as e:
+    logger.error(f"Failed to import central configuration validator: {e}")
+    # Fallback for development - can be removed once all environments have shared module
+    get_central_validator = None
 
 
 class UnifiedSecretManager:
@@ -221,47 +235,151 @@ class UnifiedSecretManager:
         return True
     
     def get_database_credentials(self) -> Dict[str, Any]:
-        """Get database connection credentials.
-        
-        CONFIG MANAGER: Direct env access for database credential loading.
-        
-        Returns:
-            Dict with database credentials
         """
-        # CONFIG BOOTSTRAP: Direct env access for database credentials
-        return {
-            "host": get_env().get("DATABASE_HOST", "localhost"),
-            "port": int(get_env().get("DATABASE_PORT", "5432")),
-            "database": get_env().get("DATABASE_NAME", "netra_dev"),
-            "username": get_env().get("DATABASE_USER", "postgres"),
-            "password": self.get_secret("DATABASE_PASSWORD", "")
-        }
+        Get database connection credentials using central configuration validator (SSOT).
+        
+        This method now delegates to the central validator to ensure consistency
+        across all services and eliminate dangerous empty password defaults.
+        """
+        if get_central_validator is not None:
+            # Use central validator (SSOT)
+            try:
+                validator = get_central_validator(lambda key, default=None: get_env().get(key, default))
+                return validator.get_database_credentials()
+            except Exception as e:
+                self._logger.error(f"Central validator failed for database credentials: {e}")
+                # Fall through to legacy logic temporarily
+        
+        # LEGACY: Fallback to original logic (can be removed once central validator is deployed)
+        self._logger.warning("Using legacy database credential loading - central validator not available")
+        return self._legacy_get_database_credentials()
+    
+    def _legacy_get_database_credentials(self) -> Dict[str, Any]:
+        """Legacy database credential loading logic - DEPRECATED."""
+        env = get_env().get("ENVIRONMENT", "development").lower()
+        
+        if env in ["staging", "production"]:
+            # Hard requirements for staging/production
+            host = get_env().get("DATABASE_HOST")
+            if not host or host == "localhost":
+                raise ValueError(f"DATABASE_HOST must be explicitly set for {env} environment. Cannot be localhost or empty.")
+            
+            password = self.get_secret("DATABASE_PASSWORD")
+            if not password:
+                raise ValueError(f"DATABASE_PASSWORD required for {env} environment. Cannot be empty.")
+            
+            return {
+                "host": host,
+                "port": int(get_env().get("DATABASE_PORT", "5432")),
+                "database": get_env().get("DATABASE_NAME", "netra_dev"),
+                "username": get_env().get("DATABASE_USER", "postgres"),
+                "password": password
+            }
+        else:
+            # Development can use defaults
+            return {
+                "host": get_env().get("DATABASE_HOST", "localhost"),
+                "port": int(get_env().get("DATABASE_PORT", "5432")),
+                "database": get_env().get("DATABASE_NAME", "netra_dev"),
+                "username": get_env().get("DATABASE_USER", "postgres"),
+                "password": self.get_secret("DATABASE_PASSWORD", "")
+            }
     
     def get_redis_credentials(self) -> Dict[str, Any]:
-        """Get Redis connection credentials.
-        
-        CONFIG MANAGER: Direct env access for Redis credential loading.
-        
-        Returns:
-            Dict with Redis credentials
         """
-        # CONFIG BOOTSTRAP: Direct env access for Redis credentials
-        return {
-            "host": get_env().get("REDIS_HOST", "localhost"),
-            "port": int(get_env().get("REDIS_PORT", "6379")),
-            "db": int(get_env().get("REDIS_DB", "0")),
-            "password": self.get_secret("REDIS_PASSWORD", "")
-        }
+        Get Redis connection credentials using central configuration validator (SSOT).
+        
+        This method now delegates to the central validator to ensure consistency
+        across all services and eliminate dangerous empty password defaults.
+        """
+        if get_central_validator is not None:
+            # Use central validator (SSOT)
+            try:
+                validator = get_central_validator(lambda key, default=None: get_env().get(key, default))
+                return validator.get_redis_credentials()
+            except Exception as e:
+                self._logger.error(f"Central validator failed for Redis credentials: {e}")
+                # Fall through to legacy logic temporarily
+        
+        # LEGACY: Fallback to original logic (can be removed once central validator is deployed)
+        self._logger.warning("Using legacy Redis credential loading - central validator not available")
+        return self._legacy_get_redis_credentials()
+    
+    def _legacy_get_redis_credentials(self) -> Dict[str, Any]:
+        """Legacy Redis credential loading logic - DEPRECATED."""
+        env = get_env().get("ENVIRONMENT", "development").lower()
+        
+        if env in ["staging", "production"]:
+            # Hard requirements for staging/production
+            host = get_env().get("REDIS_HOST")
+            if not host or host == "localhost":
+                raise ValueError(f"REDIS_HOST must be explicitly set for {env} environment. Cannot be localhost or empty.")
+            
+            password = self.get_secret("REDIS_PASSWORD")
+            if not password:
+                raise ValueError(f"REDIS_PASSWORD required for {env} environment. Cannot be empty.")
+            
+            return {
+                "host": host,
+                "port": int(get_env().get("REDIS_PORT", "6379")),
+                "db": int(get_env().get("REDIS_DB", "0")),
+                "password": password
+            }
+        else:
+            # Development can use defaults
+            return {
+                "host": get_env().get("REDIS_HOST", "localhost"),
+                "port": int(get_env().get("REDIS_PORT", "6379")),
+                "db": int(get_env().get("REDIS_DB", "0")),
+                "password": self.get_secret("REDIS_PASSWORD", "")
+            }
     
     def get_llm_credentials(self) -> Dict[str, Any]:
-        """Get LLM API credentials.
-        
-        CONFIG MANAGER: Direct env access for LLM credential loading.
-        
-        Returns:
-            Dict with LLM credentials
         """
-        # CONFIG BOOTSTRAP: Direct env access for LLM credentials
+        Get LLM API credentials using central configuration validator (SSOT).
+        
+        This method now delegates to the central validator to ensure consistency
+        across all services and eliminate dangerous empty API key defaults.
+        """
+        if get_central_validator is not None:
+            # Use central validator (SSOT) 
+            try:
+                validator = get_central_validator(lambda key, default=None: get_env().get(key, default))
+                central_creds = validator.get_llm_credentials()
+                
+                # Transform central validator format to backend format
+                provider = get_env().get("LLM_PROVIDER", "openai")
+                model = get_env().get("LLM_MODEL", LLMModel.GEMINI_2_5_FLASH.value)
+                
+                credentials = {
+                    "provider": provider,
+                    "model": model
+                }
+                
+                # Map provider to central validator keys
+                if provider == "openai":
+                    credentials["api_key"] = central_creds.get("openai", "")
+                elif provider == "anthropic":
+                    credentials["api_key"] = central_creds.get("anthropic", "")
+                elif provider == "gemini":
+                    credentials["api_key"] = central_creds.get("gemini", "")
+                else:
+                    # Default to first available key
+                    credentials["api_key"] = (central_creds.get("anthropic") or 
+                                           central_creds.get("openai") or 
+                                           central_creds.get("gemini") or "")
+                
+                return credentials
+            except Exception as e:
+                self._logger.error(f"Central validator failed for LLM credentials: {e}")
+                # Fall through to legacy logic temporarily
+        
+        # LEGACY: Fallback to original logic (can be removed once central validator is deployed)
+        self._logger.warning("Using legacy LLM credential loading - central validator not available")
+        return self._legacy_get_llm_credentials()
+    
+    def _legacy_get_llm_credentials(self) -> Dict[str, Any]:
+        """Legacy LLM credential loading logic - DEPRECATED."""
         provider = get_env().get("LLM_PROVIDER", "openai")
         
         credentials = {
@@ -269,41 +387,69 @@ class UnifiedSecretManager:
             "model": get_env().get("LLM_MODEL", LLMModel.GEMINI_2_5_FLASH.value)
         }
         
-        # Get provider-specific API key
-        if provider == "openai":
-            credentials["api_key"] = self.get_secret("GOOGLE_API_KEY", "")
-        elif provider == "anthropic":
-            credentials["api_key"] = self.get_secret("ANTHROPIC_API_KEY", "")
-        elif provider == "gemini":
-            credentials["api_key"] = self.get_secret("GEMINI_API_KEY", "")
+        # Get provider-specific API key with hard requirements
+        env = get_env().get("ENVIRONMENT", "development").lower()
+        
+        if env in ["staging", "production"]:
+            # Hard requirements for staging/production
+            if provider == "openai":
+                api_key = self.get_secret("GOOGLE_API_KEY")
+                if not api_key:
+                    raise ValueError(f"GOOGLE_API_KEY required for OpenAI provider in {env} environment.")
+                credentials["api_key"] = api_key
+            elif provider == "anthropic":
+                api_key = self.get_secret("ANTHROPIC_API_KEY")
+                if not api_key:
+                    raise ValueError(f"ANTHROPIC_API_KEY required for Anthropic provider in {env} environment.")
+                credentials["api_key"] = api_key
+            elif provider == "gemini":
+                api_key = self.get_secret("GEMINI_API_KEY")
+                if not api_key:
+                    raise ValueError(f"GEMINI_API_KEY required for Gemini provider in {env} environment.")
+                credentials["api_key"] = api_key
+            else:
+                api_key = self.get_secret("LLM_API_KEY")
+                if not api_key:
+                    raise ValueError(f"LLM_API_KEY required for {provider} provider in {env} environment.")
+                credentials["api_key"] = api_key
         else:
-            credentials["api_key"] = self.get_secret("LLM_API_KEY", "")
+            # Development can use defaults
+            if provider == "openai":
+                credentials["api_key"] = self.get_secret("GOOGLE_API_KEY", "")
+            elif provider == "anthropic":
+                credentials["api_key"] = self.get_secret("ANTHROPIC_API_KEY", "")
+            elif provider == "gemini":
+                credentials["api_key"] = self.get_secret("GEMINI_API_KEY", "")
+            else:
+                credentials["api_key"] = self.get_secret("LLM_API_KEY", "")
             
         return credentials
     
     def get_jwt_secret(self) -> str:
-        """CANONICAL JWT SECRET METHOD - SINGLE SOURCE OF TRUTH
-        
-        Get JWT secret key with proper fallback chain matching auth service pattern.
-        This is the ONLY method that should determine JWT secret loading logic.
-        All other JWT secret loading should delegate to this method.
-        
-        Fallback priority:
-        1. Environment-specific secrets (JWT_SECRET_STAGING, JWT_SECRET_PRODUCTION)
-        2. Generic JWT_SECRET_KEY 
-        3. Legacy JWT_SECRET
-        4. Development fallback (development environment only)
-        
-        Returns:
-            str: JWT secret key
-            
-        Raises:
-            ValueError: If no secret found in non-development environments
         """
-        # CONFIG BOOTSTRAP: Direct env access for JWT secret resolution
+        Get JWT secret using central configuration validator (SSOT).
+        
+        This method now delegates to the central validator to ensure consistency
+        across all services and eliminate duplicate validation logic.
+        """
+        if get_central_validator is not None:
+            # Use central validator (SSOT)
+            try:
+                validator = get_central_validator(lambda key, default=None: get_env().get(key, default))
+                return validator.get_jwt_secret()
+            except Exception as e:
+                self._logger.error(f"Central validator failed: {e}")
+                # Fall through to legacy logic temporarily
+        
+        # LEGACY: Fallback to original logic (can be removed once central validator is deployed)
+        self._logger.warning("Using legacy JWT secret loading - central validator not available")
+        return self._legacy_get_jwt_secret()
+    
+    def _legacy_get_jwt_secret(self) -> str:
+        """Legacy JWT secret loading logic - DEPRECATED."""
         env = get_env().get("ENVIRONMENT", "development").lower()
         
-        # 1. Environment-specific secrets (REQUIRED for staging/production)
+        # Environment-specific secrets (REQUIRED for staging/production)
         if env == "staging":
             secret = get_env().get("JWT_SECRET_STAGING")
             if secret and secret.strip():
@@ -349,10 +495,11 @@ class UnifiedSecretManager:
         self._cache.clear()
     
     def populate_secrets(self, config) -> None:
-        """Populate secrets into configuration object.
+        """Populate secrets into configuration object using central validator.
         
         This method is called by the unified configuration manager
         to populate secrets into the application configuration.
+        Uses central validator to ensure consistency and eliminate dangerous defaults.
         """
         secrets = self.load_all_secrets()
         
@@ -363,18 +510,22 @@ class UnifiedSecretManager:
         if hasattr(config, 'service_secret'):
             config.service_secret = self.get_secret("SERVICE_SECRET", config.service_secret)
         
+        # Use central validator for database credentials
         if hasattr(config, 'database_password'):
-            config.database_password = self.get_secret("DATABASE_PASSWORD", "")
+            db_creds = self.get_database_credentials()
+            config.database_password = db_creds.get('password', '')
             
+        # Use central validator for Redis credentials
         if hasattr(config, 'redis_password'):
-            config.redis_password = self.get_secret("REDIS_PASSWORD", "")
+            redis_creds = self.get_redis_credentials()
+            config.redis_password = redis_creds.get('password', '')
             
         if hasattr(config, 'clickhouse_password'):
             config.clickhouse_password = self.get_secret("CLICKHOUSE_PASSWORD", "")
             
-        # Populate LLM credentials
-        llm_creds = self.get_llm_credentials()
+        # Use central validator for LLM credentials
         if hasattr(config, 'llm_api_key'):
+            llm_creds = self.get_llm_credentials()
             config.llm_api_key = llm_creds.get('api_key', '')
             
         self._logger.info(f"Populated {len(secrets)} secrets into configuration")
