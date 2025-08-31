@@ -30,7 +30,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 # )
 from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.services.monitoring.metrics_service import MetricsService
-from netra_backend.app.monitoring.metrics_exporter import PrometheusExporter
+from netra_backend.app.monitoring.metrics_exporter import PrometheusExporter, MetricRegistry
 
 # Mock SQL model classes for testing (until real models are available)
 class PerformanceMetric:
@@ -77,12 +77,16 @@ class TestPerformanceAnalyzerRealData:
         """Create real PerformanceAnalyzer instance."""
         session = real_database_session
         
-        # Real services
-        llm_manager = LLMManager()
-        await llm_manager.initialize()
+        # Real services - get settings for LLMManager
+        from netra_backend.app.core.config import get_settings
+        settings = get_settings()
+        llm_manager = LLMManager(settings)
         
-        metrics_service = MetricsService(session)
-        prometheus_metrics = PrometheusExporter()
+        metrics_service = MetricsService()
+        
+        # Create metric registry for prometheus exporter
+        metric_registry = MetricRegistry()
+        prometheus_metrics = PrometheusExporter(metric_registry)
         data_processor = PerformanceDataProcessor(session)
         insights_analyzer = PerformanceInsightsAnalyzer({
             "error_rate": 0.05,  # 5% error rate threshold
@@ -90,18 +94,13 @@ class TestPerformanceAnalyzerRealData:
             "latency_p99": 2000   # 2000ms P99 latency threshold
         })
         
-        analyzer = PerformanceAnalyzer(
-            session=session,
-            metrics_service=metrics_service,
-            prometheus_metrics=prometheus_metrics,
-            data_processor=data_processor,
-            insights_analyzer=insights_analyzer,
-            llm_manager=llm_manager
-        )
+        # Create a mock ClickHouse client for legacy mode
+        mock_clickhouse_client = type('MockClickHouseClient', (), {})()
+        
+        # Initialize PerformanceAnalyzer in legacy mode with just the clickhouse client
+        analyzer = PerformanceAnalyzer(mock_clickhouse_client)
         
         yield analyzer
-        
-        await llm_manager.cleanup()
 
     @pytest.fixture
     async def generate_real_performance_data(self, real_database_session):
