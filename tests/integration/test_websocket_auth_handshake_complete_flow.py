@@ -228,7 +228,7 @@ class TestWebSocketAuthHandshakeCompleteFlow(BaseIntegrationTest):
 # COMMENTED OUT: Mock-dependent test -         assert result.connection_time < 5.0, "Connection should establish within 5 seconds"
 # COMMENTED OUT: Mock-dependent test -         assert result.auth_time < 2.0, "Auth handshake should complete within 2 seconds"
 # COMMENTED OUT: Mock-dependent test -     
-        async def test_invalid_token_rejection(self):
+    async def test_invalid_token_rejection(self):
         """Test that invalid tokens are properly rejected."""
         invalid_token = "invalid.token.here"
         
