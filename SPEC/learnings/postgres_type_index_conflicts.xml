@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning id="postgres-type-index-conflicts" category="database" severity="high">
+    <title>PostgreSQL Type Index Conflicts During Table Creation</title>
+    
+    <problem>
+        <description>
+            The auth service database initialization was not gracefully handling re-initialization,
+            causing PostgreSQL duplicate key violations on the pg_type_typname_nsp_index constraint.
+            This error occurred even when using SQLAlchemy's checkfirst=True parameter.
+        </description>
+        <error_message>
+            duplicate key value violates unique constraint "pg_type_typname_nsp_index"
+            DETAIL: Key (typname, typnamespace)=(auth_users, 2200) already exists.
+        </error_message>
+        <symptoms>
+            - Error logged as INFO level despite being an expected condition
+            - PostgreSQL internal type conflicts when re-creating tables
+            - Occurs during service restarts or re-initialization
+        </symptoms>
+    </problem>
+    
+    <root_cause>
+        <issue>Race condition in PostgreSQL type system</issue>
+        <details>
+            SQLAlchemy's create_all(checkfirst=True) checks for table existence, but
+            PostgreSQL may still attempt to create internal types for tables, leading to
+            conflicts on the pg_type_typname_nsp_index unique constraint. This is a 
+            PostgreSQL-specific issue that doesn't occur with SQLite.
+        </details>
+    </root_cause>
+    
+    <solution>
+        <approach>Explicit table existence check before creation</approach>
+        <implementation>
+            1. For PostgreSQL databases, query information_schema.tables directly
+            2. If main table (auth_users) exists, skip all table creation
+            3. Enhanced error handling to gracefully handle PostgreSQL type conflicts
+            4. Log as INFO (not ERROR) when tables already exist
+        </implementation>
+        <code_location>auth_service/auth_core/database/connection.py:215-270</code_location>
+    </solution>
+    
+    <prevention>
+        <guidelines>
+            - Always check table existence explicitly for PostgreSQL before create_all()
+            - Handle pg_type_typname_nsp_index errors as expected conditions
+            - Use proper logging levels (INFO for expected, ERROR for unexpected)
+            - Test idempotency with multiple initialization cycles
+        </guidelines>
+        <pattern>
+            For any service with PostgreSQL database initialization:
+            1. Check if tables exist using information_schema
+            2. Skip creation if tables exist
+            3. Handle type conflicts gracefully in error handler
+        </pattern>
+    </prevention>
+    
+    <applies_to>
+        <services>
+            - auth_service
+            - netra_backend (if using similar pattern)
+            - Any service with PostgreSQL database initialization
+        </services>
+        <databases>
+            - PostgreSQL (all versions)
+            - Does not apply to SQLite
+        </databases>
+    </applies_to>
+    
+    <test_validation>
+        <test_file>test_auth_db_fix.py</test_file>
+        <test_scenarios>
+            - Multiple sequential initializations
+            - Initialization with existing tables
+            - Initialization after connection close and re-open
+        </test_scenarios>
+    </test_validation>
+    
+    <related_learnings>
+        - database_connection_management.xml
+        - sqlalchemy_async_patterns.xml
+    </related_learnings>
+    
+    <keywords>
+        - PostgreSQL
+        - pg_type_typname_nsp_index
+        - duplicate key constraint
+        - table creation
+        - idempotent operations
+        - SQLAlchemy
+        - create_all
+        - checkfirst
+    </keywords>
+</learning>

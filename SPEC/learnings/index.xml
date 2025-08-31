@@ -83,6 +83,23 @@
         <prevention>Always include --vpc-connector in deployment. Verify connector exists with gcloud compute networks vpc-access connectors list. Test Redis connectivity post-deployment.</prevention>
     </learning>
     
+    <learning id="postgres-type-index-conflicts-2025-08-31">
+        <title>PostgreSQL Type Index Conflicts During Table Creation</title>
+        <category>Database/PostgreSQL</category>
+        <keywords>postgresql, pg_type_typname_nsp_index, duplicate-key, table-creation, idempotent, sqlalchemy, auth-service</keywords>
+        <path>postgres_type_index_conflicts.xml</path>
+        <critical-takeaway>
+            PostgreSQL duplicate key violations on pg_type_typname_nsp_index occur during table re-creation.
+            SQLAlchemy's checkfirst=True insufficient - must explicitly check information_schema.tables first.
+            Solution: Query table existence before create_all() for PostgreSQL databases.
+            Handle type conflicts as expected conditions (INFO level, not ERROR).
+            Affects all services with PostgreSQL initialization, not SQLite.
+        </critical-takeaway>
+        <severity>HIGH</severity>
+        <business-impact>Service restarts trigger error logs, confusing monitoring and creating false alerts</business-impact>
+        <prevention>Check information_schema.tables before create_all(). Handle pg_type errors gracefully. Test idempotent initialization cycles.</prevention>
+    </learning>
+    
     <learning id="deterministic-startup-critical-2025-08-31">
         <title>Deterministic Startup - Critical Path for Chat</title>
         <category>Startup Architecture</category>
