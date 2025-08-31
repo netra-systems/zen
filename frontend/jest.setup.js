@@ -151,11 +151,16 @@ if (typeof document !== 'undefined') {
 // ============================================================================
 // ENVIRONMENT VARIABLES
 // ============================================================================
+// CRITICAL: Set test environment first to prevent staging detection
+process.env.NODE_ENV = 'test';
+process.env.NEXT_PUBLIC_ENVIRONMENT = 'test';
 process.env.NEXT_PUBLIC_API_URL = 'http://localhost:8000';
 process.env.NEXT_PUBLIC_WS_URL = 'ws://localhost:8000';
 process.env.NEXT_PUBLIC_AUTH_SERVICE_URL = 'http://localhost:8081';
 process.env.NEXT_PUBLIC_AUTH_API_URL = 'http://localhost:8081';
-process.env.NODE_ENV = 'test';
+process.env.NEXT_PUBLIC_FRONTEND_URL = 'http://localhost:3000';
+// Ensure no staging environment variables are set
+delete process.env.NEXT_PUBLIC_STAGING;
 
 // ============================================================================
 // JSDOM API MOCKS
@@ -1627,9 +1632,9 @@ jest.mock('framer-motion', () => {
   const mockReact = require('react');
   return {
     motion: {
-      div: ({ children, whileHover, whileTap, initial, animate, exit, transition, ...props }) => 
+      div: ({ children, whileHover, whileTap, initial, animate, exit, transition, layoutId, ...props }) => 
         mockReact.createElement('div', props, children),
-      button: ({ children, whileHover, whileTap, initial, animate, exit, transition, ...props }) => 
+      button: ({ children, whileHover, whileTap, initial, animate, exit, transition, layoutId, ...props }) => 
         mockReact.createElement('button', props, children)
     },
     AnimatePresence: ({ children, mode }) => children
