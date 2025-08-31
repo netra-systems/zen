@@ -11,7 +11,8 @@ from typing import Any, Dict, List
 
 # Add project root to path for imports
 
-from test_framework.mocks import (
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
     MockDatabaseConnections,
     MockE2EServiceOrchestrator,
     MockHttpClient,

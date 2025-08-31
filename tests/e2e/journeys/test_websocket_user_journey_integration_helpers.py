@@ -28,7 +28,8 @@ import pytest
 import websockets
 from websockets.exceptions import ConnectionClosedError
 
-from test_framework.mock_utils import mock_justified
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 from tests.e2e.config import TEST_ENDPOINTS, TEST_SECRETS, CustomerTier, TestUser
 from tests.e2e.auth_flow_manager import AuthCompleteFlowManager
 from tests.e2e.integration.websocket_dev_utilities import (

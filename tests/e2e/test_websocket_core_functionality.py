@@ -156,6 +156,8 @@ class InMemoryWebSocketConnection:
         self._connected = True
         self.sent_messages = []
         self.received_events = []
+        self.timeout_used = None  # Track timeout usage for compatibility
+        self.send_count = 0  # Debug counter
     
     async def send(self, message: str):
         """Send message - captures for validation."""
@@ -163,11 +165,63 @@ class InMemoryWebSocketConnection:
         data = json.loads(message) if isinstance(message, str) else message
         self.sent_messages.append(message)
         self.received_events.append(data)
-        logger.info(f"WebSocket sent: {data.get('type', 'unknown')}")
+        self.send_count += 1
+        logger.info(f"WebSocket send #{self.send_count}: {data.get('type', 'unknown')}")
     
-    async def close(self):
-        """Close connection."""
+    async def send_json(self, message: dict, timeout: float = None):
+        """Send JSON message - required by WebSocket manager."""
+        self.send_count += 1
+        self.timeout_used = timeout
+        
+        try:
+            import json
+            from datetime import datetime
+            
+            if not isinstance(message, dict):
+                logger.error(f"send_json got non-dict message: {type(message)}")
+                raise TypeError(f"Expected dict, got {type(message)}")
+            
+            # Create a JSON-serializable version of the message
+            def make_json_serializable(obj):
+                """Convert objects to JSON-serializable format."""
+                if isinstance(obj, datetime):
+                    return obj.isoformat()
+                elif isinstance(obj, dict):
+                    return {k: make_json_serializable(v) for k, v in obj.items()}
+                elif isinstance(obj, list):
+                    return [make_json_serializable(item) for item in obj]
+                else:
+                    return obj
+            
+            # Convert message to JSON-serializable format
+            serializable_message = make_json_serializable(message)
+            
+            # Validate the message can be serialized
+            message_str = json.dumps(serializable_message)
+            
+            # Store both formats
+            self.sent_messages.append(message_str)
+            self.received_events.append(serializable_message)
+            
+            logger.info(f"WebSocket send_json #{self.send_count} SUCCESS: {serializable_message.get('type', 'unknown')} (timeout={timeout})")
+            
+            # Simulate successful send - must not raise exceptions
+            return None  # FastAPI WebSocket send_json doesn't return anything
+            
+        except Exception as e:
+            logger.error(f"WebSocket send_json #{self.send_count} ERROR: {e} for message: {message}")
+            # Re-raise to trigger circuit breaker for debugging
+            raise
+    
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close connection with WebSocket close codes."""
+        logger.info(f"WebSocket closing with code {code}: {reason}")
         self._connected = False
+    
+    @property
+    def client_state(self):
+        """Mock WebSocket state property."""
+        return "CONNECTED" if self._connected else "DISCONNECTED"
 
 
 @pytest.mark.asyncio
@@ -284,11 +338,11 @@ async def test_websocket_core_event_flow():
         for required_event in required_events:
             assert required_event in event_types, f"Missing required event: {required_event}. Got: {event_types}"
         
-        # Validate event data structure
+        # Validate event data structure (WebSocket message format)
         for event in received_events:
             assert "type" in event, f"Event missing 'type' field: {event}"
             assert "timestamp" in event, f"Event missing 'timestamp' field: {event}"
-            assert "data" in event, f"Event missing 'data' field: {event}"
+            assert "payload" in event, f"Event missing 'payload' field: {event}"
         
         # Validate tool event pairing
         tool_executing_count = event_types.count("tool_executing")

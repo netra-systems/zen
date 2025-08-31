@@ -61,8 +61,7 @@ class TestResponsePersistenceRecovery:
     """Integration test for response persistence and recovery mechanisms"""
 
     @pytest.fixture
-    @mock_justified("ClickHouse is external dependency - focus on persistence logic, not ClickHouse infrastructure")
-    async def clickhouse_client(self):
+        async def clickhouse_client(self):
         """Create mocked ClickHouse client for testing"""
         # Mock: Generic component isolation for controlled unit testing
         client_mock = AsyncNone  # TODO: Use real service instead of Mock

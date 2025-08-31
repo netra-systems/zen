@@ -27,7 +27,8 @@ from tests.e2e.jwt_token_helpers import JWTTestHelper
 
 # Import proper dependencies
 from tests.e2e.config import TestTokenManager, TEST_SECRETS
-from netra_backend.tests.services.test_ws_connection_mocks import MockWebSocket
+# Removed WebSocket mock import - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket_core.manager import get_websocket_manager
 
