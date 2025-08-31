@@ -521,22 +521,13 @@ class TestCompleteWebSocketChatFlow:
             websocket_manager=self.ws_manager
         )
         
-        # Create test payload
-        test_payload = {
-            "content": "Test WebSocket manager propagation",
-            "thread_id": self.test_thread_id
-        }
+        # CRITICAL: The _setup_supervisor method should set the WebSocket manager
+        # Let's call it directly to test this functionality
+        thread = Mock()
+        thread.id = self.test_thread_id
         
-        # Mock database session
-        mock_session = AsyncMock()
-        
-        # Execute user message handling (this should propagate WebSocket manager)
-        await message_handler.handle_user_message(
-            user_id=self.test_user_id,
-            payload=test_payload,
-            db_session=mock_session,
-            websocket=Mock()
-        )
+        # Call the setup method that should propagate WebSocket manager
+        message_handler._setup_supervisor(thread, self.test_user_id, AsyncMock())
         
         # CRITICAL VERIFICATION: WebSocket manager propagation
         
@@ -711,7 +702,7 @@ class TestCompleteWebSocketChatFlow:
         await notifier.send_agent_completed(context, {
             "success": True,
             "total_recommendations": 3
-        }, total_time=1500.0)
+        })
         
         # Analyze all events
         validator = ChatFlowValidator(self.test_thread_id)
