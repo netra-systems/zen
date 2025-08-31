@@ -56,20 +56,22 @@ services:
       # Disable file watching optimizations that don't work well on Windows
       WATCHDOG_ENABLE: "false"
       WATCHDOG_USE_POLLING: "false"
+      # Force polling for Windows compatibility
+      WATCHFILES_FORCE_POLLING: "true"
       # Use simpler reload mechanism
       UVICORN_RELOAD_EXCLUDES: "*.pyc,__pycache__,*.log,*.pid"
     # Use simpler command without aggressive reload
     command: >
       sh -c "
         echo 'Starting auth service (Windows mode)...' &&
-        uvicorn auth_service.main:app \
-          --host 0.0.0.0 \
-          --port 8000 \
-          --reload \
-          --reload-dir /app/auth_service \
-          --reload-dir /app/shared \
-          --reload-delay 1.0 \
-          --log-level warning
+        uvicorn auth_service.main:app
+          --host 0.0.0.0
+          --port 8000
+          --reload
+          --reload-dir /app/auth_service
+          --reload-dir /app/shared
+          --reload-delay 1.0
+          --log-level info
       "
     healthcheck:
       interval: 60s
@@ -104,64 +106,51 @@ services:
       PYTHONUNBUFFERED: 1
       WATCHDOG_ENABLE: "false"
       WATCHDOG_USE_POLLING: "false"
+      # Force polling for Windows compatibility
+      WATCHFILES_FORCE_POLLING: "true"
       # Simpler reload settings
       UVICORN_RELOAD_EXCLUDES: "*.pyc,__pycache__,*.log,*.pid,SPEC/*,scripts/*"
-    # Simplified volume mounts for Windows
-    volumes:
-      - ./netra_backend:/app/netra_backend
-      - ./shared:/app/shared
-      - ./SPEC:/app/SPEC:ro
-      - ./scripts:/app/scripts:ro
-      - ./logs:/app/logs
-    # Use simpler command
+    # Volume mounts handled by docker-compose.override.yml
+    # Use simpler command without backslashes
     command: >
       sh -c "
         echo 'Waiting for database (Windows mode)...' &&
-        sleep 10 &&
         python scripts/wait_for_db.py &&
         echo 'Running migrations...' &&
         alembic -c netra_backend/alembic.ini upgrade head &&
         echo 'Starting backend (Windows mode)...' &&
-        uvicorn netra_backend.app.main:app \
-          --host 0.0.0.0 \
-          --port 8000 \
-          --reload \
-          --reload-dir /app/netra_backend \
-          --reload-delay 1.0 \
-          --log-level warning
+        uvicorn netra_backend.app.main:app
+          --host 0.0.0.0
+          --port 8000
+          --reload
+          --reload-dir /app/netra_backend
+          --reload-delay 1.0
+          --log-level info
       "
     healthcheck:
       interval: 60s
       start_period: 90s
-    # More conservative resource limits for Windows
+    # Increased resource limits per user request
     deploy:
       resources:
         limits:
-          memory: 768M
-          cpus: '0.75'
+          memory: 3G
+          cpus: '1.5'
 
   dev-frontend:
-    # Reduce volume mounts for Windows
-    volumes:
-      - ./frontend/src:/app/src
-      - ./frontend/public:/app/public
-      - ./frontend/app:/app/app
-      - ./frontend/components:/app/components
-      - ./frontend/styles:/app/styles
-      - /app/node_modules
-      - /app/.next
+    # Volume mounts handled by docker-compose.override.yml
     environment:
-      # Windows-specific Next.js settings
-      WATCHPACK_POLLING: "false"  # Disable polling on Windows
-      CHOKIDAR_USEPOLLING: "false"
-      # Reduce memory usage
-      NODE_OPTIONS: "--max-old-space-size=1024"
-    # More conservative resource limits for Windows
+      # Windows-specific Next.js settings - Enable polling for Windows
+      WATCHPACK_POLLING: "true"  # Enable polling on Windows for reliability
+      CHOKIDAR_USEPOLLING: "true"
+      # Increase memory for better performance
+      NODE_OPTIONS: "--max-old-space-size=3072"
+    # Increased resource limits per user request
     deploy:
       resources:
         limits:
-          memory: 768M
-          cpus: '0.75'
+          memory: 3G
+          cpus: '1.5'
     healthcheck:
       interval: 60s
       start_period: 120s

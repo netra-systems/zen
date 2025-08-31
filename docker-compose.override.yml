@@ -59,31 +59,11 @@ services:
   # Dev Frontend Service - Bind mount override
   dev-frontend:
     volumes:
-      # Selective bind mounts for frontend development
-      # Mount only source directories, not node_modules
-      - ./frontend/src:/app/src:delegated
-      - ./frontend/public:/app/public:delegated
-      - ./frontend/app:/app/app:delegated
-      - ./frontend/auth:/app/auth:delegated
-      - ./frontend/components:/app/components:delegated
-      - ./frontend/hooks:/app/hooks:delegated
-      - ./frontend/lib:/app/lib:delegated
-      - ./frontend/services:/app/services:delegated
-      - ./frontend/store:/app/store:delegated
-      - ./frontend/styles:/app/styles:delegated
-      - ./frontend/types:/app/types:delegated
-      - ./frontend/utils:/app/utils:delegated
-      - ./frontend/providers:/app/providers:delegated
-      - ./frontend/scripts:/app/scripts:delegated
-      # Configuration files
-      - ./frontend/next.config.ts:/app/next.config.ts:delegated
-      - ./frontend/next.config.turbopack.ts:/app/next.config.turbopack.ts:delegated
-      - ./frontend/tsconfig.json:/app/tsconfig.json:delegated
-      - ./frontend/tailwind.config.ts:/app/tailwind.config.ts:delegated
-      - ./frontend/postcss.config.mjs:/app/postcss.config.mjs:delegated
-      - ./frontend/package.json:/app/package.json:delegated
-      - ./frontend/package-lock.json:/app/package-lock.json:delegated
-      # CRITICAL: Keep node_modules and .next in named volumes
+      # Simplified: Mount the entire frontend directory for better performance
+      - ./frontend:/app:delegated
+      
+      # CRITICAL: Mask the bind mount above using named volumes for build artifacts
+      # This prevents these directories from being synced with the host
       - dev_frontend_node_modules:/app/node_modules
       - dev_frontend_next:/app/.next
       - dev_frontend_cache:/app/.cache

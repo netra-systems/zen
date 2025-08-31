@@ -33,6 +33,22 @@
         <prevention>Eliminate ALL fallback logic in authentication. Require environment-specific secrets: JWT_SECRET_STAGING, JWT_SECRET_PRODUCTION, JWT_SECRET_KEY (dev/test only).</prevention>
     </learning>
     
+    <learning id="deterministic-startup-critical-2025-08-31">
+        <title>Deterministic Startup - Critical Path for Chat</title>
+        <category>Startup Architecture</category>
+        <keywords>startup, deterministic, critical-path, chat, websocket, agent, graceful-degradation, fail-fast</keywords>
+        <path>deterministic_startup_critical.xml</path>
+        <critical-takeaway>
+            Graceful degradation for critical services is an anti-pattern that creates unpredictable failures.
+            Chat delivers 90% of value and MUST be on the critical path with no fallbacks.
+            Setting critical services to None is NEVER acceptable - fail fast instead.
+            Found and fixed 25+ violations where startup could succeed with broken chat.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Chat completely broken while service appears healthy, 90% of platform value lost</business-impact>
+        <prevention>Use deterministic StartupOrchestrator with strict phases. No conditional paths for critical services. No setting services to None. Fail immediately if any chat component cannot initialize.</prevention>
+    </learning>
+    
     <learning id="auth-state-race-condition-2025-08-31">
         <title>Authentication State Race Condition During Initialization</title>
         <category>Frontend Authentication</category>
