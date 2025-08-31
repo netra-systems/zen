@@ -14,7 +14,7 @@ The staging infrastructure is operational (all services returning 200 OK), but t
 1. **Unified Test Runner**: Failed due to missing Redis password configuration for staging environment
 2. **Direct Test Execution**: Module import issues due to Python path configuration
 3. **Pytest with Environment**: Tests skip even when `ENVIRONMENT=staging` is set
-4. **OAuth Simulation**: Missing `E2E_BYPASS_KEY` for test authentication
+4. **OAuth Simulation**: Missing `E2E_OAUTH_SIMULATION_KEY` for test authentication
 
 ## Action Plan
 
@@ -55,10 +55,10 @@ SKIPPED [1] tests\e2e\test_staging_e2e_comprehensive.py:74: These tests only run
 - [ ] Review pytest mark conditions
 
 ### 4. Missing E2E Bypass Key
-**Problem**: OAuth simulation requires `E2E_BYPASS_KEY`
+**Problem**: OAuth simulation requires `E2E_OAUTH_SIMULATION_KEY`
 ```python
-if not os.getenv("E2E_BYPASS_KEY"):
-    print("ERROR: E2E_BYPASS_KEY environment variable not set")
+if not os.getenv("E2E_OAUTH_SIMULATION_KEY"):
+    print("ERROR: E2E_OAUTH_SIMULATION_KEY environment variable not set")
 ```
 
 **Actions**:
@@ -85,7 +85,7 @@ import subprocess
 # Set environment
 os.environ["ENVIRONMENT"] = "staging"
 os.environ["PYTHONPATH"] = os.path.dirname(os.path.abspath(__file__))
-os.environ["E2E_BYPASS_KEY"] = "your-bypass-key"
+os.environ["E2E_OAUTH_SIMULATION_KEY"] = "your-bypass-key"
 
 # Run tests
 subprocess.run([sys.executable, "-m", "pytest", "tests/e2e", "-v"])
@@ -110,7 +110,7 @@ subprocess.run([sys.executable, "-m", "pytest", "tests/e2e", "-v"])
 ### 8. Quick Fixes Needed
 **Immediate Actions**:
 - [ ] Set `ENVIRONMENT=staging` in test scripts
-- [ ] Add `E2E_BYPASS_KEY` to environment
+- [ ] Add `E2E_OAUTH_SIMULATION_KEY` to environment
 - [ ] Fix Unicode encoding issues in test output (Windows)
 - [ ] Update import paths in test files
 
@@ -118,7 +118,7 @@ subprocess.run([sys.executable, "-m", "pytest", "tests/e2e", "-v"])
 
 1. **Immediate** (Today)
    - Fix environment variables
-   - Add E2E_BYPASS_KEY
+   - Add E2E_OAUTH_SIMULATION_KEY
    - Set PYTHONPATH
 
 2. **High** (This Week)
@@ -155,13 +155,13 @@ curl -s https://auth.staging.netrasystems.ai/health | jq .
 ```bash
 # Windows
 set ENVIRONMENT=staging
-set E2E_BYPASS_KEY=your-key
+set E2E_OAUTH_SIMULATION_KEY=your-key
 set PYTHONPATH=%CD%
 python -m pytest tests/e2e/test_staging_e2e_comprehensive.py -v
 
 # Unix/Linux
 export ENVIRONMENT=staging
-export E2E_BYPASS_KEY=your-key
+export E2E_OAUTH_SIMULATION_KEY=your-key
 export PYTHONPATH=$(pwd)
 python -m pytest tests/e2e/test_staging_e2e_comprehensive.py -v
 ```
