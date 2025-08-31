@@ -9,6 +9,7 @@
 
 // Import test setup with mocks FIRST
 import './auth-test-setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import { authService } from '@/auth';
 import {
   setupAuthTestEnvironment,
@@ -31,8 +32,16 @@ import {
 } from './auth-test-utils';
 
 describe('Auth Login Flow', () => {
-      setupAntiHang();
-    jest.setTimeout(10000);
+      
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
   let testEnv: ReturnType<typeof setupAuthTestEnvironment>;
   let mockAuthConfig: ReturnType<typeof createMockAuthConfig>;
   let mockToken: string;
@@ -58,8 +67,16 @@ describe('Auth Login Flow', () => {
   });
 
   describe('getAuthConfig', () => {
-        setupAntiHang();
-      jest.setTimeout(10000);
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     beforeEach(() => {
       // Clear mock calls but keep the default implementation
       mockAuthServiceClient.getConfig.mockClear();
@@ -119,8 +136,16 @@ describe('Auth Login Flow', () => {
   });
 
   describe('handleDevLogin', () => {
-        setupAntiHang();
-      jest.setTimeout(10000);
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     it('should perform dev login successfully', async () => {
       setupSuccessfulDevLogin();
       const result = await authService.handleDevLogin(mockAuthConfig);
@@ -162,8 +187,16 @@ describe('Auth Login Flow', () => {
   });
 
   describe('handleLogin', () => {
-        setupAntiHang();
-      jest.setTimeout(10000);
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     beforeEach(() => {
       mockAuthServiceClient.initiateLogin.mockClear();
     });
@@ -199,8 +232,16 @@ describe('Auth Login Flow', () => {
   });
 
   describe('Login Flow Integration', () => {
-        setupAntiHang();
-      jest.setTimeout(10000);
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     it('should handle complete login flow', async () => {
       setupCompleteLoginFlow();
       const config = await authService.getAuthConfig();

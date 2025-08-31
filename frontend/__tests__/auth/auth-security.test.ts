@@ -9,6 +9,7 @@
 
 // Import test setup with mocks FIRST
 import './auth-test-setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Set up localStorage mock before importing authService
 import { createLocalStorageMock } from './auth-test-utils';
@@ -31,8 +32,16 @@ import {
 } from './auth-test-utils';
 
 describe('Auth Security & Error Handling', () => {
-      setupAntiHang();
-    jest.setTimeout(10000);
+      
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
   let testEnv: ReturnType<typeof setupAuthTestEnvironment>;
   let mockAuthConfig: ReturnType<typeof createMockAuthConfig>;
   let mockToken: string;
@@ -58,8 +67,16 @@ describe('Auth Security & Error Handling', () => {
   });
 
   describe('Security Tests', () => {
-        setupAntiHang();
-      jest.setTimeout(10000);
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     it('should not expose sensitive data in headers', () => {
       testEnv.localStorageMock.getItem.mockReturnValue(mockToken);
       
@@ -138,8 +155,16 @@ describe('Auth Security & Error Handling', () => {
   });
 
   describe('API Error Handling', () => {
-        setupAntiHang();
-      jest.setTimeout(10000);
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     it('should fallback to offline config on 401 unauthorized response', async () => {
       mockAuthServiceClient.getConfig.mockRejectedValue(
         new Error('HTTP 401: Failed to fetch auth configuration')
@@ -274,8 +299,16 @@ describe('Auth Security & Error Handling', () => {
   });
 
   describe('Edge Cases', () => {
-        setupAntiHang();
-      jest.setTimeout(10000);
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     it('should handle concurrent login/logout operations', async () => {
       testEnv.localStorageMock.getItem.mockReturnValue(mockToken);
       testEnv.fetchMock.mockResolvedValue(createSuccessResponse({}));
@@ -395,8 +428,16 @@ describe('Auth Security & Error Handling', () => {
   });
 
   describe('Performance & Reliability', () => {
-        setupAntiHang();
-      jest.setTimeout(10000);
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     it('should handle rapid successive calls', async () => {
       mockAuthServiceClient.getConfig.mockResolvedValue(mockAuthConfig);
 

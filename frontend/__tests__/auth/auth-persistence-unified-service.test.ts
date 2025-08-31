@@ -3,6 +3,7 @@
  * Tests environment-aware token refresh thresholds and dynamic scheduling
  */
 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import { UnifiedAuthService } from '@/auth/unified-auth-service';
 import { jwtDecode } from 'jwt-decode';
 

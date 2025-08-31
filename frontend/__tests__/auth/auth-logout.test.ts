@@ -9,6 +9,7 @@
 
 // Import test setup with mocks FIRST
 import './auth-test-setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Define local mock since import from setup might have issues
 const localMockAuthServiceClient = {
@@ -59,8 +60,16 @@ import {
 } from './auth-test-utils';
 
 describe('Auth Logout Flow', () => {
-      setupAntiHang();
-    jest.setTimeout(10000);
+      
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
   let testEnv: ReturnType<typeof setupAuthTestEnvironment>;
   let mockAuthConfig: ReturnType<typeof createMockAuthConfig>;
   let mockToken: string;
@@ -100,8 +109,16 @@ describe('Auth Logout Flow', () => {
   });
 
   describe('handleLogout', () => {
-        setupAntiHang();
-      jest.setTimeout(10000);
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     it('should perform logout successfully with token', async () => {
       testEnv.localStorageMock.getItem.mockReturnValue(mockToken);
       localMockAuthServiceClient.logout.mockResolvedValue({});
@@ -156,11 +173,27 @@ describe('Auth Logout Flow', () => {
   });
 
   describe('Dev Logout Flag Management', () => {
-        setupAntiHang();
-      jest.setTimeout(10000);
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     describe('getDevLogoutFlag', () => {
-          setupAntiHang();
-        jest.setTimeout(10000);
+          
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
       it('should return true when flag is set', () => {
         setupTrueFlagValue();
         const result = authService.getDevLogoutFlag();
@@ -194,8 +227,16 @@ describe('Auth Logout Flow', () => {
     });
 
     describe('setDevLogoutFlag', () => {
-          setupAntiHang();
-        jest.setTimeout(10000);
+          
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
       it('should set dev logout flag', () => {
         authService.setDevLogoutFlag();
 
@@ -212,8 +253,16 @@ describe('Auth Logout Flow', () => {
     });
 
     describe('clearDevLogoutFlag', () => {
-          setupAntiHang();
-        jest.setTimeout(10000);
+          
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
       it('should clear dev logout flag', () => {
         authService.clearDevLogoutFlag();
 
@@ -230,8 +279,16 @@ describe('Auth Logout Flow', () => {
     });
 
     describe('Dev Flag Integration', () => {
-          setupAntiHang();
-        jest.setTimeout(10000);
+          
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
       it('should handle complete dev flag cycle', () => {
         verifyInitialFlagState();
         performFlagSet();
@@ -252,8 +309,16 @@ describe('Auth Logout Flow', () => {
   });
 
   describe('Logout Flow Integration', () => {
-        setupAntiHang();
-      jest.setTimeout(10000);
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     it('should handle logout with dev flag management', async () => {
       setupLogoutWithDevFlag();
       authService.setDevLogoutFlag();
