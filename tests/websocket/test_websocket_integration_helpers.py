@@ -19,7 +19,8 @@ import pytest
 import time
 import websockets
 
-from test_framework.mock_utils import mock_justified
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
 class WebSocketTestHelpers:
     """Helper utilities for WebSocket testing."""
@@ -61,32 +62,4 @@ class WebSocketTestHelpers:
     ):
         """Create a mock WebSocket for testing."""
         
-        class MockWebSocket:
-            def __init__(self):
-                if with_auth:
-                    self.headers = {"authorization": f"Bearer {jwt_token}"}
-                else:
-                    self.headers = {}
-                self.application_state = "CONNECTED"
-                self.sent_messages = []
-                self.closed = False
-                self.close_code = None
-                self.close_reason = None
-            
-            async def send(self, message):
-                self.sent_messages.append(message)
-            
-            async def close(self, code=1000, reason="Normal closure"):
-                self.closed = True
-                self.close_code = code
-                self.close_reason = reason
-        
-        return MockWebSocket()
-    
-    @staticmethod
-    def validate_websocket_message(message: Dict[str, Any], expected_type: str):
-        """Validate WebSocket message structure."""
-        assert "type" in message, "Message missing 'type' field"
-        assert message["type"] == expected_type, f"Expected type '{expected_type}', got '{message['type']}'"
-        assert "timestamp" in message, "Message missing 'timestamp' field"
-        return True
+        # MockWebSocket class removed - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"

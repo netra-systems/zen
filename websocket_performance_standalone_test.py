@@ -22,7 +22,8 @@ from netra_backend.app.websocket_core.message_buffer import BufferConfig, Buffer
 from netra_backend.app.core.websocket_reconnection_handler import WebSocketReconnectionHandler, ReconnectionConfig
 
 
-class MockWebSocket:
+# COMMENTED OUT: MockWebSocket class - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
+# class MockWebSocket:
     """Mock WebSocket for standalone testing."""
     
     def __init__(self, user_id: str):

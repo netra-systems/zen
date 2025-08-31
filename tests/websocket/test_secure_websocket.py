@@ -28,12 +28,11 @@ import json
 import pytest
 import time
 
-from test_framework.mock_utils import mock_justified
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
-class MockWebSocket:
+# MockWebSocket class removed - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
 
-    # """Mock WebSocket for testing."""
-    
 
     def __init__(self, headers: Dict[str, str] = None, query_params: Dict[str, str] = None):
 
@@ -134,9 +133,7 @@ def mock_cors_handler():
 class TestUnifiedWebSocketManager:
     """Test WebSocketManager functionality."""
     
-    @mock_justified("External auth service API not available in test environment - testing JWT validation flow")
-
-    # async def test_secure_auth_header_success(self, mock_db_session):
+        # async def test_secure_auth_header_success(self, mock_db_session):
 
     # """Test successful JWT authentication via Authorization header."""
 
@@ -174,9 +171,7 @@ class TestUnifiedWebSocketManager:
     # mock_validate.assert_called_once_with("valid_token_123")
     
 
-    # @mock_justified("External auth service API not available in test environment - testing subprotocol JWT flow")
-
-    # async def test_secure_auth_subprotocol_success(self, mock_db_session):
+    #     # async def test_secure_auth_subprotocol_success(self, mock_db_session):
 
     # """Test successful JWT authentication via Sec-WebSocket-Protocol."""
 
@@ -452,9 +447,7 @@ class TestUnifiedWebSocketManager:
     # assert connection_ids[0] not in manager.connections  # Oldest removed
     
 
-    # @mock_justified("Testing message handling flow without invoking actual LLM API calls in test environment")
-
-    # async def test_message_handling_success(self, mock_db_session):
+    #     # async def test_message_handling_success(self, mock_db_session):
 
     # """Test successful message handling."""
 
@@ -723,14 +716,10 @@ class TestSecureWebSocketEndpoint:
         })
     
 
-    @mock_justified("WebSocket CORS validation service not available in test environment - testing CORS flow")
-
-    # Mock: Component isolation for testing without external dependencies
+        # Mock: Component isolation for testing without external dependencies
     @patch('app.routes.websocket_secure.check_websocket_cors')
 
-    @mock_justified("External auth service API not available in test environment - testing CORS + auth integration")
-
-    @patch.object(auth_client, 'validate_token')
+        @patch.object(auth_client, 'validate_token')
 
     async def test_cors_validation_success(self, mock_validate, mock_cors, mock_websocket, mock_db_session):
 
@@ -758,9 +747,7 @@ class TestSecureWebSocketEndpoint:
         mock_cors.assert_called_once_with(mock_websocket)
     
 
-    @mock_justified("WebSocket CORS validation service not available in test environment - testing CORS failure flow")
-
-    # Mock: Component isolation for testing without external dependencies
+        # Mock: Component isolation for testing without external dependencies
     @patch('app.routes.websocket_secure.check_websocket_cors')
 
     async def test_cors_validation_failure(self, mock_cors, mock_websocket, mock_db_session):
@@ -891,9 +878,7 @@ class TestErrorHandling:
     # assert result is False  # Should handle error gracefully
     
 
-    # @mock_justified("Simulating agent service errors to test error handling paths in WebSocket layer")
-
-    # async def test_message_processing_error_handling(self, mock_db_session):
+    #     # async def test_message_processing_error_handling(self, mock_db_session):
 
     # """Test handling of message processing errors."""
 

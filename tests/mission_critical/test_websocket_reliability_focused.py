@@ -75,7 +75,8 @@ logger = MockLogger()
 # MOCK IMPLEMENTATIONS - Self-contained, no external dependencies
 # ============================================================================
 
-class MockWebSocket:
+# COMMENTED OUT: MockWebSocket class - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
+# class MockWebSocket:
     """Mock WebSocket that simulates real behavior without external services."""
     
     def __init__(self, connection_id: str):
@@ -128,7 +129,8 @@ class MockWebSocket:
         self.sent_messages.clear()
 
 
-class MockWebSocketManager:
+# COMMENTED OUT: MockWebSocket class - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
+# class MockWebSocketManager:
     """Mock WebSocket Manager that simulates connection management."""
     
     def __init__(self):

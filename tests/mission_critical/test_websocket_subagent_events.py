@@ -262,7 +262,8 @@ class TestWebSocketSubAgentEvents:
             ws_manager = WebSocketManager()
             
             # Mock WebSocket connection for internal use
-            class MockWebSocket:
+            # COMMENTED OUT: MockWebSocket class - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
+# class MockWebSocket:
                 async def send_json(self, data):
                     validator.record_event(data)
                     
