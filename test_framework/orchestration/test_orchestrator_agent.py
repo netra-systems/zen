@@ -167,219 +167,10 @@ class AgentCommunicationProtocol:
                 await agent.handle_message(message)
 
 
-class LayerExecutionAgent:
-    """Agent responsible for executing individual test layers"""
-    
-    def __init__(self, agent_id: str, layer_system: LayerSystem, communication_protocol: AgentCommunicationProtocol):
-        self.agent_id = agent_id
-        self.layer_system = layer_system
-        self.communication = communication_protocol
-        self.logger = logging.getLogger(f"LayerAgent.{agent_id}")
-        self.current_execution = None
-        
-    async def execute_layer(self, layer_name: str, config: OrchestrationConfig) -> Dict[str, Any]:
-        """Execute a specific test layer"""
-        self.logger.info(f"Starting execution of layer: {layer_name}")
-        
-        # Notify orchestrator of layer start
-        await self.communication.send_message(
-            self.agent_id, "orchestrator", "layer_started", 
-            {"layer": layer_name, "timestamp": datetime.now().isoformat()}
-        )
-        
-        try:
-            layer = self.layer_system.layers.get(layer_name)
-            if not layer:
-                raise ValueError(f"Layer not found: {layer_name}")
-                
-            # Create execution plan for this layer  
-            execution_plan = self.layer_system.create_execution_plan(
-                selected_layers=[layer_name],
-                environment=config.environment
-            )
-            
-            # Request resource allocation
-            resources_allocated = await self._request_resources(layer, config)
-            if not resources_allocated:
-                raise RuntimeError(f"Could not allocate required resources for layer: {layer_name}")
-                
-            # Execute the layer
-            start_time = datetime.now()
-            result = await self._execute_layer_categories(layer, config)
-            duration = datetime.now() - start_time
-            
-            # Release resources
-            await self._release_resources(layer)
-            
-            # Notify completion
-            await self.communication.send_message(
-                self.agent_id, "orchestrator", "layer_completed",
-                {
-                    "layer": layer_name,
-                    "success": result["success"],
-                    "duration": duration.total_seconds(),
-                    "results": result
-                }
-            )
-            
-            return result
-            
-        except Exception as e:
-            self.logger.error(f"Layer execution failed: {layer_name}: {e}")
-            await self.communication.send_message(
-                self.agent_id, "orchestrator", "layer_failed",
-                {
-                    "layer": layer_name,
-                    "error": str(e),
-                    "traceback": traceback.format_exc()
-                }
-            )
-            raise
-            
-    async def _request_resources(self, layer: TestLayer, config: OrchestrationConfig) -> bool:
-        """Request resource allocation for layer execution"""
-        # Get resource limits (check attribute names)
-        memory_limit = getattr(layer.resource_limits, 'max_memory_mb', 
-                              getattr(layer.resource_limits, 'memory_mb', 1024))
-        cpu_limit = getattr(layer.resource_limits, 'max_cpu_percent',
-                           getattr(layer.resource_limits, 'cpu_percent', 70))
-        parallel_limit = getattr(layer.resource_limits, 'max_parallel_instances',
-                                getattr(layer.resource_limits, 'max_parallel_processes', 4))
-        services_required = getattr(layer, 'required_services', set())
-                                
-        resource_request = {
-            "memory_limit": memory_limit,
-            "cpu_limit": cpu_limit,
-            "parallel_processes": parallel_limit,
-            "services_required": services_required
-        }
-        
-        await self.communication.send_message(
-            self.agent_id, "resource_manager", "request_resources", resource_request
-        )
-        
-        # Wait for resource allocation response (simplified - would be more complex in practice)
-        return True  # Placeholder
-        
-    async def _release_resources(self, layer: TestLayer):
-        """Release allocated resources after layer execution"""
-        await self.communication.send_message(
-            self.agent_id, "resource_manager", "release_resources",
-            {"layer": layer.name}
-        )
-        
-    async def _execute_layer_categories(self, layer: TestLayer, config: OrchestrationConfig) -> Dict[str, Any]:
-        """Execute all categories within a layer"""
-        results = {
-            "success": True,
-            "categories": {},
-            "total_tests": 0,
-            "passed_tests": 0,
-            "failed_tests": 0,
-            "execution_mode": layer.execution_mode.value
-        }
-        
-        if layer.execution_mode == LayerExecutionMode.SEQUENTIAL:
-            # Execute categories sequentially
-            for category_config in layer.categories:
-                category_name = category_config.name if hasattr(category_config, 'name') else str(category_config)
-                category_result = await self._execute_category(category_name, layer, config)
-                results["categories"][category_name] = category_result
-                results["total_tests"] += category_result.get("total_tests", 0)
-                results["passed_tests"] += category_result.get("passed_tests", 0) 
-                results["failed_tests"] += category_result.get("failed_tests", 0)
-                
-                if not category_result.get("success", False):
-                    results["success"] = False
-                    if config.fail_fast_strategy == FailFastStrategy.CATEGORY:
-                        break
-                        
-        elif layer.execution_mode == LayerExecutionMode.PARALLEL:
-            # Execute categories in parallel
-            tasks = []
-            for category_config in layer.categories:
-                category_name = category_config.name if hasattr(category_config, 'name') else str(category_config)
-                task = asyncio.create_task(self._execute_category(category_name, layer, config))
-                tasks.append((category_name, task))
-                
-            # Wait for all category executions
-            for category_name, task in tasks:
-                try:
-                    category_result = await task
-                    results["categories"][category_name] = category_result
-                    results["total_tests"] += category_result.get("total_tests", 0)
-                    results["passed_tests"] += category_result.get("passed_tests", 0)
-                    results["failed_tests"] += category_result.get("failed_tests", 0)
-                    
-                    if not category_result.get("success", False):
-                        results["success"] = False
-                        
-                except Exception as e:
-                    results["categories"][category_name] = {
-                        "success": False,
-                        "error": str(e),
-                        "total_tests": 0,
-                        "passed_tests": 0,
-                        "failed_tests": 0
-                    }
-                    results["success"] = False
-                    
-        else:  # HYBRID mode
-            # Implement hybrid execution based on category dependencies
-            results = await self._execute_hybrid_mode(layer, config)
-            
-        return results
-        
-    async def _execute_category(self, category: str, layer: TestLayer, config: OrchestrationConfig) -> Dict[str, Any]:
-        """Execute a specific test category"""
-        self.logger.info(f"Executing category: {category} in layer: {layer.name}")
-        
-        # For now, this is a placeholder that would integrate with the existing test runner
-        # In a real implementation, this would call the unified_test_runner with specific category
-        
-        try:
-            # Simulate test execution (replace with actual test runner integration)
-            await asyncio.sleep(0.1)  # Placeholder
-            
-            return {
-                "success": True,
-                "category": category,
-                "total_tests": 10,  # Placeholder
-                "passed_tests": 9,   # Placeholder
-                "failed_tests": 1,   # Placeholder
-                "duration": 30.5     # Placeholder
-            }
-            
-        except Exception as e:
-            return {
-                "success": False,
-                "category": category, 
-                "error": str(e),
-                "total_tests": 0,
-                "passed_tests": 0,
-                "failed_tests": 0,
-                "duration": 0
-            }
-            
-    async def _execute_hybrid_mode(self, layer: TestLayer, config: OrchestrationConfig) -> Dict[str, Any]:
-        """Execute layer in hybrid mode (mix of parallel and sequential)"""
-        # This would implement intelligent category ordering and parallel/sequential execution
-        # based on category dependencies and resource requirements
-        
-        # Placeholder implementation
-        return await self._execute_layer_categories(layer, config)
-        
-    async def handle_message(self, message: AgentCommunicationMessage):
-        """Handle incoming messages from other agents"""
-        if message.message_type == "cancel_execution":
-            self.logger.info("Received cancellation request")
-            # Implement cancellation logic
-        elif message.message_type == "pause_execution":
-            self.logger.info("Received pause request")  
-            # Implement pause logic
-        elif message.message_type == "resume_execution":
-            self.logger.info("Received resume request")
-            # Implement resume logic
+# Import the new LayerExecutionAgent
+from test_framework.orchestration.layer_execution_agent import (
+    LayerExecutionAgent as NewLayerExecutionAgent, LayerExecutionConfig, ExecutionStrategy
+)
 
 
 class BackgroundE2EAgent:
@@ -654,7 +445,8 @@ class TestOrchestratorAgent:
         self.communication = AgentCommunicationProtocol(self.agent_id)
         
         # Initialize specialized agents
-        self.layer_agent = LayerExecutionAgent("layer_executor", self.layer_system, self.communication)
+        self.layer_agent = NewLayerExecutionAgent(self.project_root)
+        self.layer_agent.enable_communication(self.communication)
         self.background_agent = BackgroundE2EAgent("background_e2e", self.communication)
         self.progress_agent = ProgressStreamingAgent("progress_streamer", self.communication, self.project_root)
         self.resource_agent = ResourceManagementAgent("resource_manager", self.communication)
@@ -808,9 +600,19 @@ class TestOrchestratorAgent:
         if len(phase_layers) == 1:
             # Single layer - execute directly
             try:
-                result = await self.layer_agent.execute_layer(phase_layers[0], config)
-                self.execution_results[phase_layers[0]] = result
-                return result.get("success", False)
+                # Create layer execution config
+                layer_config = LayerExecutionConfig(
+                    layer_name=phase_layers[0],
+                    environment=config.environment,
+                    use_real_services=config.force_real_services,
+                    use_real_llm=config.force_real_llm,
+                    timeout_multiplier=config.timeout_multiplier,
+                    fail_fast_enabled=(config.fail_fast_strategy == FailFastStrategy.IMMEDIATE)
+                )
+                
+                result = await self.layer_agent.execute_layer(phase_layers[0], layer_config)
+                self.execution_results[phase_layers[0]] = result._asdict()
+                return result.success
             except Exception as e:
                 self.logger.error(f"Layer execution failed: {phase_layers[0]}: {e}")
                 return False
@@ -823,9 +625,19 @@ class TestOrchestratorAgent:
             async def execute_with_semaphore(layer_name: str):
                 async with semaphore:
                     try:
-                        result = await self.layer_agent.execute_layer(layer_name, config)
-                        self.execution_results[layer_name] = result
-                        return result.get("success", False)
+                        # Create layer execution config
+                        layer_config = LayerExecutionConfig(
+                            layer_name=layer_name,
+                            environment=config.environment,
+                            use_real_services=config.force_real_services,
+                            use_real_llm=config.force_real_llm,
+                            timeout_multiplier=config.timeout_multiplier,
+                            fail_fast_enabled=(config.fail_fast_strategy == FailFastStrategy.IMMEDIATE)
+                        )
+                        
+                        result = await self.layer_agent.execute_layer(layer_name, layer_config)
+                        self.execution_results[layer_name] = result._asdict()
+                        return result.success
                     except Exception as e:
                         self.logger.error(f"Layer execution failed: {layer_name}: {e}")
                         return False
@@ -864,24 +676,27 @@ class TestOrchestratorAgent:
         
     def get_available_layers(self) -> List[str]:
         """Get list of available test layers"""
-        return list(self.layer_system.layers.keys())
+        # Delegate to the layer execution agent
+        return self.layer_agent.get_available_layers()
         
     def get_layer_configuration(self, layer_name: str) -> Optional[Dict[str, Any]]:
         """Get configuration for a specific layer"""
-        layer = self.layer_system.layers.get(layer_name)
-        if layer:
-            # Convert categories to strings (they are CategoryConfig objects)
-            category_names = [cat.name if hasattr(cat, 'name') else str(cat) for cat in layer.categories]
-            services_required = getattr(layer, 'required_services', set())
-            
-            return {
-                "name": layer.name,
-                "categories": category_names,
-                "execution_mode": layer.execution_mode.value,
-                "estimated_duration": f"{layer.max_duration_minutes} minutes",
-                "dependencies": list(layer.dependencies),
-                "services_required": list(services_required)
-            }
+        # Delegate to the layer execution agent
+        if hasattr(self.layer_agent, 'layer_system'):
+            layer = self.layer_agent.layer_system.layers.get(layer_name)
+            if layer:
+                # Convert categories to strings (they are CategoryConfig objects)
+                category_names = [cat.name if hasattr(cat, 'name') else str(cat) for cat in layer.categories]
+                services_required = getattr(layer, 'required_services', set())
+                
+                return {
+                    "name": layer.name,
+                    "categories": category_names,
+                    "execution_mode": layer.execution_mode.value,
+                    "estimated_duration": f"{layer.max_duration_minutes} minutes",
+                    "dependencies": list(layer.dependencies),
+                    "services_required": list(services_required)
+                }
         return None
         
     async def cancel_execution(self):
