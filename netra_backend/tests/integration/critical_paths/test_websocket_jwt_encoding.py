@@ -96,7 +96,8 @@ class SecureWebSocketManager:
             "auth_method": auth_method
         }
 
-class MockWebSocket:
+# COMMENTED OUT: MockWebSocket class - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
+# class MockWebSocket:
 
     """Mock WebSocket for testing."""
     

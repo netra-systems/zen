@@ -31,7 +31,8 @@ from netra_backend.app.schemas import User
 
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.websocket_core.manager import WebSocketManager
-from test_framework.mock_utils import mock_justified
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
 logger = logging.getLogger(__name__)
 
@@ -105,98 +106,7 @@ class ConnectionHealthState:
 
     cleanup_attempts: int = 0
 
-class MockWebSocketConnection:
-
-    """Mock WebSocket connection for testing."""
-    
-    def __init__(self, user_id: str, connection_id: str = None):
-
-        self.user_id = user_id
-
-        self.connection_id = connection_id or str(uuid.uuid4())
-
-        self.is_active = True
-
-        self.send_queue = []
-
-        self.receive_queue = []
-
-        self.close_called = False
-
-        self.close_code = None
-
-        self.close_reason = None
-        
-    async def send(self, message: str):
-
-        """Mock send message."""
-
-        if self.is_active:
-
-            self.send_queue.append({
-
-                "message": message,
-
-                "timestamp": time.time()
-
-            })
-
-        else:
-
-            raise ConnectionError("Connection is closed")
-    
-    async def receive(self):
-
-        """Mock receive message."""
-
-        if self.receive_queue:
-
-            return self.receive_queue.pop(0)
-
-        await asyncio.sleep(0.1)
-
-        return None
-    
-    async def close(self, code: int = 1000, reason: str = ""):
-
-        """Mock close connection."""
-
-        self.is_active = False
-
-        self.close_called = True
-
-        self.close_code = code
-
-        self.close_reason = reason
-    
-    def simulate_disconnect(self):
-
-        """Simulate unexpected disconnection."""
-
-        self.is_active = False
-    
-    def simulate_heartbeat_response(self, delay: float = 0.0):
-
-        """Simulate heartbeat response from client."""
-
-        async def add_response():
-
-            if delay > 0:
-
-                await asyncio.sleep(delay)
-
-            if self.is_active:
-
-                self.receive_queue.append({
-
-                    "type": "heartbeat_response",
-
-                    "timestamp": time.time()
-
-                })
-        
-        asyncio.create_task(add_response())
-
+# MockWebSocket class removed - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
 class WebSocketHeartbeatZombieManager:
 
     """Manages WebSocket heartbeat monitoring and zombie detection."""
@@ -1326,9 +1236,7 @@ class TestWebSocketHeartbeatZombieL3:
         assert 0.05 <= metrics.average_response_time <= 0.5, \
             f"Average response time {metrics.average_response_time:.3f}s seems unreasonable"
     
-    @mock_justified("L3: WebSocket heartbeat and zombie detection testing with controlled connection simulation")
-
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_comprehensive_zombie_detection_reliability(self, heartbeat_manager, test_users):
 
         """Test comprehensive zombie detection reliability and accuracy."""

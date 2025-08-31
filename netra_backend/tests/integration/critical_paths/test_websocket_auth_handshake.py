@@ -30,7 +30,8 @@ import pytest
 from netra_backend.app.schemas import User
 
 from netra_backend.app.websocket_core.manager import WebSocketManager
-from test_framework.mock_utils import mock_justified
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 from test_framework.test_patterns import L3IntegrationTest
 
 class HandshakeState(Enum):
@@ -1595,9 +1596,7 @@ class TestWebSocketAuthHandshake(L3IntegrationTest):
 
         assert "no supported protocol" in result["error"].lower()
     
-    @mock_justified("L2: WebSocket auth handshake with real internal components")
-
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_complete_handshake_flow_integration(self, auth_handshake, upgrade_handler, test_users):
 
         """Test complete handshake flow integration."""
