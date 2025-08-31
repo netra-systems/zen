@@ -178,7 +178,7 @@ class TestDeploymentConfigurationFailures:
             "google-client-id-staging",
             "google-client-secret-staging",
             "service-secret-staging",
-            "clickhouse-default-password-staging",
+            "clickhouse-password-staging",
             "redis-url-staging"  # Often missing
         ]
         

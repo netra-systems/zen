@@ -19,7 +19,7 @@ REQUIRED_SECRETS = [
     "fernet-key-staging",
     "langfuse-secret-key-staging",
     "langfuse-public-key-staging",
-    "clickhouse-default-password-staging",
+    "clickhouse-password-staging",
 ]
 
 # Optional secrets
