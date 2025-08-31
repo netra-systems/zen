@@ -12,7 +12,7 @@ from typing import Dict, Any, Optional
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
-from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.services.state_persistence import StatePersistenceService
 from netra_backend.app.redis_manager import RedisManager
 

@@ -17,7 +17,7 @@ from unittest.mock import AsyncMock, MagicMock, patch, call
 import json
 from datetime import datetime, timezone
 
-from netra_backend.app.agents.supervisor_agent import SupervisorAgent
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
