@@ -1,118 +1,96 @@
-# Docker Compose Override for Development
-# This file is automatically loaded by docker-compose and overrides settings
-# Perfect for developer-specific settings and Mac/Windows performance optimizations
+# Docker Compose Override for Local Development
+# 
+# IMPORTANT: This file provides bind mounts for active development where you need
+# real-time file synchronization. Only use this when necessary as bind mounts can
+# cause Docker Desktop crashes on Windows/macOS.
+#
+# To use bind mounts for development:
+# - docker-compose --profile dev up
+#
+# To use only named volumes (more stable):
+# - mv docker-compose.override.yml docker-compose.override.yml.disabled
+# - docker-compose --profile dev up
+#
+# WARNING: Bind mounts can cause:
+# - High CPU/memory usage
+# - Docker Desktop crashes
+# - Slow file operations
+# - File permission issues
 
 version: '3.8'
 
 services:
-  # Development environment overrides
-  dev-backend:
-    # Performance optimizations for Mac/Windows
-    volumes:
-      - ./netra_backend:/app/netra_backend
-      - ./shared:/app/shared
-      - ./SPEC:/app/SPEC
-      - ./scripts:/app/scripts
-      - ./logs:/app/logs
-    
-    # Additional environment variables for development
-    environment:
-      # Enable Python development mode
-      PYTHONDONTWRITEBYTECODE: 1
-      PYTHONUNBUFFERED: 1
-      # Watchdog settings for better file system monitoring on Mac
-      WATCHDOG_ENABLE: "true"
-      WATCHDOG_USE_POLLING: "true"  # Required for Mac due to Docker Desktop limitations
-      WATCHDOG_POLL_INTERVAL: "2"   # Poll every 2 seconds
-    
-    # Override command with more aggressive reload settings
-    command: >
-      sh -c "
-        echo 'Waiting for database...' &&
-        python scripts/wait_for_db.py &&
-        echo 'Running migrations...' &&
-        alembic -c netra_backend/alembic.ini upgrade head &&
-        echo 'Starting backend with hot reload...' &&
-        uvicorn netra_backend.app.main:app \
-          --host 0.0.0.0 \
-          --port 8000 \
-          --reload \
-          --reload-dir /app/netra_backend \
-          --reload-dir /app/shared \
-          --reload-include '*.py' \
-          --reload-include '*.json' \
-          --reload-include '*.yaml' \
-          --reload-include '*.yml' \
-          --reload-delay 0.5 \
-          --log-level info
-      "
-
+  # Dev Auth Service - Bind mount override
   dev-auth:
-    # Performance optimizations for Mac/Windows
     volumes:
-      - ./auth_service:/app/auth_service
-      - ./shared:/app/shared
-      - ./logs:/app/logs
-    
-    environment:
-      PYTHONDONTWRITEBYTECODE: 1
-      PYTHONUNBUFFERED: 1
-      WATCHDOG_ENABLE: "true"
-      WATCHDOG_USE_POLLING: "true"
-      WATCHDOG_POLL_INTERVAL: "2"
-    
-    command: >
-      sh -c "
-        echo 'Starting auth service with hot reload...' &&
-        uvicorn auth_service.main:app \
-          --host 0.0.0.0 \
-          --port 8081 \
-          --reload \
-          --reload-dir /app/auth_service \
-          --reload-dir /app/shared \
-          --reload-include '*.py' \
-          --reload-include '*.json' \
-          --reload-delay 0.5 \
-          --log-level info
-      "
+      # Bind mount for live code editing
+      # Use delegated for better performance on macOS
+      - ./auth_service:/app/auth_service:delegated
+      - ./shared:/app/shared:delegated
+      - ./logs/auth:/app/logs:delegated
+      # Exclude Python cache from bind mount
+      - /app/auth_service/__pycache__
+      - /app/shared/__pycache__
 
-  # Frontend already has hot reload via Next.js
+  # Dev Analytics Service - Bind mount override
+  # NOTE: Temporarily disabled - may be causing crashes
+  # dev-analytics:
+  #   volumes:
+  #     - ./analytics_service:/app/analytics_service:delegated
+  #     - ./shared:/app/shared:delegated
+  #     - ./logs/analytics:/app/logs:delegated
+  #     # Exclude Python cache
+  #     - /app/analytics_service/__pycache__
+  #     - /app/shared/__pycache__
+
+  # Dev Backend Service - Bind mount override
+  dev-backend:
+    volumes:
+      - ./netra_backend:/app/netra_backend:delegated
+      - ./shared:/app/shared:delegated
+      - ./SPEC:/app/SPEC:delegated
+      - ./scripts:/app/scripts:delegated
+      - ./logs/backend:/app/logs:delegated
+      # Exclude Python cache
+      - /app/netra_backend/__pycache__
+      - /app/shared/__pycache__
+      - /app/scripts/__pycache__
+
+  # Dev Frontend Service - Bind mount override
   dev-frontend:
     volumes:
-      - ./frontend/src:/app/src
-      - ./frontend/public:/app/public
-      - ./frontend/next.config.ts:/app/next.config.ts
-      - ./frontend/next.config.turbopack.ts:/app/next.config.turbopack.ts
-      - ./frontend/tsconfig.json:/app/tsconfig.json
-      - ./frontend/tailwind.config.ts:/app/tailwind.config.ts
-      - ./frontend/postcss.config.mjs:/app/postcss.config.mjs
-      - /app/node_modules
-      - /app/.next
-    environment:
-      # Next.js hot reload optimization
-      WATCHPACK_POLLING: "true"  # Required for file watching on Mac/Windows
-      CHOKIDAR_USEPOLLING: "true"
-      CHOKIDAR_INTERVAL: 1000
+      # Selective bind mounts for frontend development
+      # Mount only source directories, not node_modules
+      - ./frontend/src:/app/src:delegated
+      - ./frontend/public:/app/public:delegated
+      - ./frontend/app:/app/app:delegated
+      - ./frontend/auth:/app/auth:delegated
+      - ./frontend/components:/app/components:delegated
+      - ./frontend/hooks:/app/hooks:delegated
+      - ./frontend/lib:/app/lib:delegated
+      - ./frontend/services:/app/services:delegated
+      - ./frontend/store:/app/store:delegated
+      - ./frontend/styles:/app/styles:delegated
+      - ./frontend/types:/app/types:delegated
+      - ./frontend/utils:/app/utils:delegated
+      - ./frontend/providers:/app/providers:delegated
+      - ./frontend/scripts:/app/scripts:delegated
+      # Configuration files
+      - ./frontend/next.config.ts:/app/next.config.ts:delegated
+      - ./frontend/next.config.turbopack.ts:/app/next.config.turbopack.ts:delegated
+      - ./frontend/tsconfig.json:/app/tsconfig.json:delegated
+      - ./frontend/tailwind.config.ts:/app/tailwind.config.ts:delegated
+      - ./frontend/postcss.config.mjs:/app/postcss.config.mjs:delegated
+      - ./frontend/package.json:/app/package.json:delegated
+      - ./frontend/package-lock.json:/app/package-lock.json:delegated
+      # CRITICAL: Keep node_modules and .next in named volumes
+      - dev_frontend_node_modules:/app/node_modules
+      - dev_frontend_next:/app/.next
+      - dev_frontend_cache:/app/.cache
 
-  # Redis configuration override for development
-  dev-redis:
-    command: >
-      redis-server
-      --appendonly yes
-      --maxmemory 256mb
-      --maxmemory-policy allkeys-lru
-
-  # ClickHouse performance optimizations
-  dev-clickhouse:
-    volumes:
-      - dev_clickhouse_data:/var/lib/clickhouse
-      - ./scripts/init_clickhouse.sql:/docker-entrypoint-initdb.d/01-init.sql
-    environment:
-      # ClickHouse specific optimizations
-      CLICKHOUSE_LOG_LEVEL: warning  # Reduce log verbosity in dev
-
-# Mac-specific notes:
-# - :delegated = container's view is authoritative (best for app code that changes frequently)
-# - :cached = host's view is authoritative (best for read-heavy operations like configs)
-# - Polling is required on Mac due to Docker Desktop's file system event limitations
-# - Consider using docker-sync or Mutagen for even better performance on large codebases
+# Performance optimization tips:
+# 1. Use :delegated on macOS for better write performance
+# 2. Use :cached for read-heavy directories
+# 3. Exclude build artifacts and dependencies from bind mounts
+# 4. Consider using mutagen or docker-sync for better performance
+# 5. Regularly prune unused volumes: docker volume prune

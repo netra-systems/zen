@@ -75,26 +75,27 @@ services:
       interval: 60s
       start_period: 60s
 
-  dev-analytics:
-    environment:
-      WATCHDOG_ENABLE: "false"
-      WATCHDOG_USE_POLLING: "false"
-      UVICORN_RELOAD_EXCLUDES: "*.pyc,__pycache__,*.log,*.pid"
-    command: >
-      sh -c "
-        echo 'Starting analytics service (Windows mode)...' &&
-        uvicorn analytics_service.main:app \
-          --host 0.0.0.0 \
-          --port 8090 \
-          --reload \
-          --reload-dir /app/analytics_service \
-          --reload-dir /app/shared \
-          --reload-delay 1.0 \
-          --log-level warning
-      "
-    healthcheck:
-      interval: 60s
-      start_period: 60s
+  # NOTE: Temporarily disabled - may be causing crashes
+  # dev-analytics:
+  #   environment:
+  #     WATCHDOG_ENABLE: "false"
+  #     WATCHDOG_USE_POLLING: "false"
+  #     UVICORN_RELOAD_EXCLUDES: "*.pyc,__pycache__,*.log,*.pid"
+  #   command: >
+  #     sh -c "
+  #       echo 'Starting analytics service (Windows mode)...' &&
+  #       uvicorn analytics_service.main:app \
+  #         --host 0.0.0.0 \
+  #         --port 8090 \
+  #         --reload \
+  #         --reload-dir /app/analytics_service \
+  #         --reload-dir /app/shared \
+  #         --reload-delay 1.0 \
+  #         --log-level warning
+  #     "
+  #   healthcheck:
+  #     interval: 60s
+  #     start_period: 60s
 
   dev-backend:
     environment:

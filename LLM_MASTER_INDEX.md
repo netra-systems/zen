@@ -64,9 +64,16 @@
 |------|----------|---------|----------------|
 | **🔴 AUTH INTEGRATION (MANDATORY)** | | | |
 | `auth.py` | `/netra_backend/app/auth_integration/auth.py` | **SHARED AUTH SERVICE** | get_current_user(), get_current_user_optional(), validate_token() |
+| **🔴 AUTH INITIALIZATION FIX** | | **CRITICAL CHAT FIX** | |
+| `auth/context.tsx` | `/frontend/auth/context.tsx` | **Fixed race condition** | Lines 237-274: Unconditional token decode |
+| `auth-validation.ts` | `/frontend/lib/auth-validation.ts` | **Auth state validation** | validateAuthState(), monitorAuthState() |
+| `AuthGuard.tsx` | `/frontend/components/AuthGuard.tsx` | **Route protection** | Proper user state checking |
+| **Auth Race Conditions** | [`SPEC/learnings/auth_race_conditions_critical.xml`](SPEC/learnings/auth_race_conditions_critical.xml) | **Critical auth learnings** | CHAT IS KING - 90% value delivery |
+| **Auth Complete Learnings** | [`SPEC/learnings/auth_initialization_complete_learnings.md`](SPEC/learnings/auth_initialization_complete_learnings.md) | **Full cross-references** | All auth fixes documented |
 | **OAuth Port Config** | [`SPEC/oauth_port_configuration.xml`](SPEC/oauth_port_configuration.xml) | **OAuth port requirements & setup** | Explains why ports 3000, 8000, 8001, 8081 need authorization |
 | **OAuth Environment Config** | [`SPEC/learnings/oauth_client_environment_configuration.xml`](SPEC/learnings/oauth_client_environment_configuration.xml) | Environment-specific OAuth setup | Development, staging, production OAuth isolation |
 | **CRITICAL**: ALL authentication throughout ENTIRE system MUST use `/netra_backend/app/auth_integration/`. NO duplicate auth logic allowed. |
+| **CRITICAL**: Frontend auth MUST always decode tokens to set user state. Test page refresh scenarios! |
 
 ### WebSocket Files (Complex Structure) ✅ State Management & Subprotocol Fixed (2025-08-27)
 | File | Location | Purpose | Key Functions |

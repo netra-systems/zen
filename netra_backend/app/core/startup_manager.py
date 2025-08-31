@@ -550,11 +550,12 @@ class StartupManager:
             )
             
             # Register agent_supervisor as HIGH priority - required for WebSocket agent communication
+            # CRITICAL: Depends on auth_service for llm_manager
             self.register_component(
                 name="agent_supervisor",
                 init_func=lambda: self._initialize_agent_supervisor(app),
                 priority=ComponentPriority.HIGH,
-                dependencies=["database", "websocket"],
+                dependencies=["database", "websocket", "auth_service"],
                 timeout_seconds=30.0,
                 max_retries=2
             )

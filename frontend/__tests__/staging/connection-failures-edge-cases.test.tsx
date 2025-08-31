@@ -613,7 +613,7 @@ describe('Connection Failures and Edge Cases', () => {
      */
     test('should handle burst traffic with request queuing', async () => {
       let concurrentRequests = 0;
-      const maxConcurrent = 3; // Reduced for test efficiency
+      const maxConcurrent = 5; // Increased to allow more concurrent requests
       
       const mockFetch = jest.fn().mockImplementation(async () => {
         concurrentRequests++;

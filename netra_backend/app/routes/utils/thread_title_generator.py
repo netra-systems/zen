@@ -68,12 +68,13 @@ async def update_thread_with_title(db: AsyncSession, thread, title: str) -> None
     await db.commit()
 
 
-async def send_thread_rename_notification(user_id: int, thread_id: str, title: str) -> None:
+async def send_thread_rename_notification(user_id: str, thread_id: str, title: str) -> None:
     """Send WebSocket notification for thread rename."""
     event = {
         "type": "thread_renamed", "thread_id": thread_id,
         "new_title": title, "timestamp": int(time.time())
     }
+    websocket_manager = get_websocket_manager()
     await websocket_manager.send_to_user(str(user_id), event)
 
 

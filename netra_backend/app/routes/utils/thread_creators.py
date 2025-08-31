@@ -14,7 +14,7 @@ def generate_thread_id() -> str:
     return f"thread_{uuid.uuid4().hex[:16]}"
 
 
-def prepare_thread_metadata(thread_data, user_id: int) -> Dict[str, Any]:
+def prepare_thread_metadata(thread_data, user_id: str) -> Dict[str, Any]:
     """Prepare thread metadata."""
     metadata = thread_data.metadata or {}
     metadata["user_id"] = user_id
@@ -40,7 +40,7 @@ async def create_thread_repositories():
     return ThreadRepository(), MessageRepository()
 
 
-async def get_user_threads(db: AsyncSession, user_id: int):
+async def get_user_threads(db: AsyncSession, user_id: str):
     """Get all threads for user."""
     thread_repo = ThreadRepository()
     return await thread_repo.find_by_user(db, user_id)

@@ -106,14 +106,24 @@ export interface ThreadState {
  * 2. thread.name (registry pattern)
  * 3. thread.metadata?.title (metadata storage)
  * 4. thread.metadata?.last_message (preview)
- * 5. Generated fallback with date
+ * 5. "New Chat" as default fallback
  */
 export function getThreadTitle(thread: Thread): string {
   if (thread.title) return thread.title;
   if (thread.name) return thread.name;
   if (thread.metadata?.title) return thread.metadata.title;
   if (thread.metadata?.last_message) return thread.metadata.last_message;
-  return `Chat ${new Date(thread.created_at).toLocaleDateString()}`;
+  
+  // Check if created_at is valid before using it for title generation
+  if (thread.created_at) {
+    const date = new Date(thread.created_at);
+    // Check for valid date (not Unix epoch or invalid date)
+    if (!isNaN(date.getTime()) && date.getTime() > 86400000) { // After Jan 2, 1970
+      return `Chat ${date.toLocaleDateString()}`;
+    }
+  }
+  
+  return 'New Chat';
 }
 
 /**

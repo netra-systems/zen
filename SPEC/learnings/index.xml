@@ -33,6 +33,38 @@
         <prevention>Eliminate ALL fallback logic in authentication. Require environment-specific secrets: JWT_SECRET_STAGING, JWT_SECRET_PRODUCTION, JWT_SECRET_KEY (dev/test only).</prevention>
     </learning>
     
+    <learning id="docker-compose-restart-issues-2025-08-31">
+        <title>Docker Compose Service Restart Issues and Resolution</title>
+        <category>Docker Infrastructure</category>
+        <keywords>docker, docker-compose, restart, crash, exit code 255, override, ports, multi-line commands</keywords>
+        <path>docker_compose_restart_issues.xml</path>
+        <critical-takeaway>
+            Docker Compose override files can cause configuration conflicts and service crashes.
+            Multi-line commands must use proper YAML syntax without backslash continuations.
+            Port configurations must be consistent between environment variables and actual bindings.
+            Removing unnecessary override files simplifies configuration and improves stability.
+        </critical-takeaway>
+        <severity>HIGH</severity>
+        <business-impact>Development environment instability, reduced developer productivity, service availability issues</business-impact>
+        <prevention>Avoid docker-compose.override.yml unless necessary. Use proper YAML block syntax for multi-line commands. Verify port consistency. Test service restarts after configuration changes.</prevention>
+    </learning>
+    
+    <learning id="auth-race-conditions-chat-initialization-2025-08-31">
+        <title>Critical Auth Race Conditions and Chat Initialization Failure</title>
+        <category>Authentication</category>
+        <keywords>auth, race condition, chat, initialization, localStorage, jwt, token, user state, AuthGuard, MainChat</keywords>
+        <path>auth_race_conditions_critical.xml</path>
+        <critical-takeaway>
+            CHAT IS KING - 90% of value delivery. Auth context had race condition where tokens in localStorage
+            were not decoded to set user state when storedToken === currentToken. Always decode JWT tokens
+            unconditionally to ensure user state initialization. Test page refresh scenarios, not just fresh logins.
+            Never assume state correlation (token presence ≠ user state).
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Complete chat interface failure for authenticated users, blocking 90% of platform value delivery</business-impact>
+        <prevention>Always decode tokens regardless of state. Add comprehensive auth state validation. Monitor for token/user state mismatches. Test page refresh with existing auth.</prevention>
+    </learning>
+    
     <learning id="configuration-hardening-patterns-no-fallbacks-2025-08-30">
         <title>Configuration Hardening: Eliminate Dangerous Fallback Patterns</title>
         <category>Security Configuration</category>

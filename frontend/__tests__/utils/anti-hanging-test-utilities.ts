@@ -49,10 +49,16 @@ export function setupAntiHang(customTimeout: number = TEST_TIMEOUTS.DEFAULT): vo
   setTestTimeout(customTimeout);
   
   // Store original timer functions only if not already stored
-  if (!originalSetTimeout) {
+  if (!originalSetTimeout || global.setTimeout === originalSetTimeout) {
     originalSetTimeout = global.setTimeout;
+  }
+  if (!originalSetInterval || global.setInterval === originalSetInterval) {
     originalSetInterval = global.setInterval;
+  }
+  if (!originalClearTimeout || global.clearTimeout === originalClearTimeout) {
     originalClearTimeout = global.clearTimeout;
+  }
+  if (!originalClearInterval || global.clearInterval === originalClearInterval) {
     originalClearInterval = global.clearInterval;
   }
   

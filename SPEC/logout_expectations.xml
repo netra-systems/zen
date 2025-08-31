@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <title>Comprehensive Logout Expectations</title>
+  <version>1.0</version>
+  <author>Principal Engineer</author>
+  <date>2025-08-31</date>
+  
+  <overview>
+    Complete specification of expected logout behavior across the Netra platform.
+    Defines all data clearing, UI state resets, and navigation requirements.
+  </overview>
+
+  <critical_requirements>
+    <requirement id="LO-001" priority="CRITICAL">
+      <title>Complete Data Clearing</title>
+      <description>
+        ALL sensitive data MUST be cleared from all storage locations on logout.
+        This includes localStorage, sessionStorage, memory stores, and caches.
+      </description>
+      <items>
+        <item>JWT tokens (jwt_token, refresh_token)</item>
+        <item>User data (user_data, user object)</item>
+        <item>Session information (session_id, session_data)</item>
+        <item>Chat history and messages</item>
+        <item>Thread data and metadata</item>
+        <item>Agent execution state</item>
+        <item>Optimistic updates and pending messages</item>
+        <item>WebSocket connection state</item>
+        <item>Cached API responses</item>
+        <item>User preferences (if not persisted)</item>
+      </items>
+    </requirement>
+
+    <requirement id="LO-002" priority="CRITICAL">
+      <title>UI State Reset</title>
+      <description>
+        The UI MUST return to a clean, unauthenticated state regardless of current view.
+      </description>
+      <behaviors>
+        <behavior context="chat_view">Navigate to login, clear all messages</behavior>
+        <behavior context="thread_view">Navigate to login, clear thread data</behavior>
+        <behavior context="settings_view">Navigate to login, clear settings</behavior>
+        <behavior context="any_modal">Close modal, then navigate to login</behavior>
+        <behavior context="loading_state">Cancel loading, navigate to login</behavior>
+      </behaviors>
+    </requirement>
+
+    <requirement id="LO-003" priority="HIGH">
+      <title>WebSocket Cleanup</title>
+      <description>
+        WebSocket connections MUST be properly closed and cleaned up.
+      </description>
+      <actions>
+        <action>Send logout event to server</action>
+        <action>Close WebSocket connection</action>
+        <action>Clear WebSocket event buffer</action>
+        <action>Reset connection state</action>
+        <action>Clear reconnection timers</action>
+      </actions>
+    </requirement>
+
+    <requirement id="LO-004" priority="HIGH">
+      <title>Store Cleanup</title>
+      <description>
+        All Zustand stores MUST be reset to initial state.
+      </description>
+      <stores>
+        <store name="authStore">
+          <clear>isAuthenticated = false</clear>
+          <clear>user = null</clear>
+          <clear>token = null</clear>
+          <clear>error = null</clear>
+        </store>
+        <store name="unifiedChatStore">
+          <clear>All layer data (fast, medium, slow)</clear>
+          <clear>All messages</clear>
+          <clear>All threads</clear>
+          <clear>Active thread ID</clear>
+          <clear>Agent execution state</clear>
+          <clear>Optimistic messages</clear>
+          <clear>WebSocket event buffer</clear>
+        </store>
+        <store name="uiStore">
+          <clear>Current view state</clear>
+          <clear>Modal states</clear>
+          <clear>Sidebar states</clear>
+        </store>
+      </stores>
+    </requirement>
+
+    <requirement id="LO-005" priority="HIGH">
+      <title>Navigation Handling</title>
+      <description>
+        User MUST be redirected to login page after logout from any location.
+      </description>
+      <scenarios>
+        <scenario>From chat view → login page</scenario>
+        <scenario>From thread view → login page</scenario>
+        <scenario>From settings → login page</scenario>
+        <scenario>From profile → login page</scenario>
+        <scenario>During agent execution → cancel agent, then login page</scenario>
+      </scenarios>
+    </requirement>
+
+    <requirement id="LO-006" priority="MEDIUM">
+      <title>Transition Experience</title>
+      <description>
+        Logout should provide smooth transition with appropriate feedback.
+      </description>
+      <steps>
+        <step>Show logout confirmation (if configured)</step>
+        <step>Display "Logging out..." indicator</step>
+        <step>Clear data progressively</step>
+        <step>Navigate to login with clean state</step>
+        <step>Show "Successfully logged out" message (optional)</step>
+      </steps>
+    </requirement>
+
+    <requirement id="LO-007" priority="HIGH">
+      <title>Error Recovery</title>
+      <description>
+        Logout MUST succeed even if backend calls fail.
+      </description>
+      <fallback_behavior>
+        <step>Attempt backend logout call</step>
+        <step>If fails, log error but continue</step>
+        <step>Clear all local state regardless</step>
+        <step>Navigate to login page</step>
+        <step>Ensure no authenticated state remains</step>
+      </fallback_behavior>
+    </requirement>
+
+    <requirement id="LO-008" priority="MEDIUM">
+      <title>Multi-Tab Synchronization</title>
+      <description>
+        Logout in one tab should trigger logout in all tabs.
+      </description>
+      <implementation>
+        <step>Broadcast logout event via localStorage event</step>
+        <step>Listen for logout events in all tabs</step>
+        <step>Synchronize logout across all instances</step>
+      </implementation>
+    </requirement>
+
+    <requirement id="LO-009" priority="HIGH">
+      <title>Development Mode Handling</title>
+      <description>
+        In development mode, set flag to prevent auto-login after manual logout.
+      </description>
+      <dev_behavior>
+        <step>Set dev_logout_performed flag</step>
+        <step>Skip auto dev login on next init</step>
+        <step>Allow manual login to clear flag</step>
+      </dev_behavior>
+    </requirement>
+
+    <requirement id="LO-010" priority="CRITICAL">
+      <title>Security Considerations</title>
+      <description>
+        Ensure complete removal of sensitive data from memory and DOM.
+      </description>
+      <security_checks>
+        <check>No tokens in localStorage after logout</check>
+        <check>No user data in memory stores</check>
+        <check>No sensitive data in DOM elements</check>
+        <check>No active WebSocket with auth</check>
+        <check>No pending API requests with auth headers</check>
+      </security_checks>
+    </requirement>
+  </critical_requirements>
+
+  <implementation_checklist>
+    <task status="pending">Update logout function in auth context</task>
+    <task status="pending">Add unified chat store reset on logout</task>
+    <task status="pending">Implement UI state cleanup</task>
+    <task status="pending">Add navigation to login on logout</task>
+    <task status="pending">Handle WebSocket cleanup</task>
+    <task status="pending">Add transition animations/feedback</task>
+    <task status="pending">Implement multi-tab sync</task>
+    <task status="pending">Add comprehensive tests</task>
+  </implementation_checklist>
+
+  <test_scenarios>
+    <scenario id="TS-001">
+      <name>Logout from active chat</name>
+      <steps>
+        <step>User is in active chat with messages</step>
+        <step>User clicks logout</step>
+        <step>Verify all messages cleared</step>
+        <step>Verify navigation to login</step>
+        <step>Verify no auth state remains</step>
+      </steps>
+    </scenario>
+    
+    <scenario id="TS-002">
+      <name>Logout from thread view</name>
+      <steps>
+        <step>User is viewing specific thread</step>
+        <step>User clicks logout</step>
+        <step>Verify thread data cleared</step>
+        <step>Verify navigation to login</step>
+        <step>Verify main window not visible</step>
+      </steps>
+    </scenario>
+    
+    <scenario id="TS-003">
+      <name>Logout during agent execution</name>
+      <steps>
+        <step>Agent is actively executing</step>
+        <step>User clicks logout</step>
+        <step>Verify agent execution cancelled</step>
+        <step>Verify WebSocket closed</step>
+        <step>Verify navigation to login</step>
+      </steps>
+    </scenario>
+    
+    <scenario id="TS-004">
+      <name>Logout with backend failure</name>
+      <steps>
+        <step>Simulate backend logout endpoint failure</step>
+        <step>User clicks logout</step>
+        <step>Verify local state still cleared</step>
+        <step>Verify navigation to login</step>
+        <step>Verify error logged but not shown to user</step>
+      </steps>
+    </scenario>
+  </test_scenarios>
+
+  <tracking>
+    <gtm_events>
+      <event name="user_logout" category="authentication">
+        <parameter>logout_source</parameter>
+        <parameter>session_duration</parameter>
+        <parameter>last_activity</parameter>
+      </event>
+    </gtm_events>
+  </tracking>
+
+  <notes>
+    <note priority="HIGH">
+      Current implementation only partially clears data. Chat store and UI state
+      are not properly reset, causing the main window to remain visible after
+      logout from thread view.
+    </note>
+    <note priority="MEDIUM">
+      Consider adding logout reason tracking (manual, session_expired, forced).
+    </note>
+  </notes>
+</spec>

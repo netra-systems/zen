@@ -156,6 +156,10 @@ export interface OptimisticActions {
   clearOptimisticMessages: () => void;
 }
 
+export interface StoreManagementActions {
+  resetStore: () => void; // Comprehensive store reset for logout
+}
+
 // ============================================
 // Combined Store Types
 // ============================================
@@ -178,7 +182,8 @@ export interface UnifiedChatState extends
   ThreadActions,
   LegacySubAgentActions,
   AgentTrackingActions,
-  OptimisticActions {}
+  OptimisticActions,
+  StoreManagementActions {}
 
 // ============================================
 // Store Configuration

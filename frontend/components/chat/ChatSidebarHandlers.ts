@@ -76,7 +76,9 @@ export const createNewChatHandler = (
       setActiveThreadInStore(newThread.id);
       await loadThreads();
     } catch (error) {
-      logger.error('Failed to create thread:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorObj = error instanceof Error ? error : new Error(errorMessage);
+      logger.error('Failed to create thread:', errorObj);
     } finally {
       setIsCreatingThread(false);
     }
@@ -105,7 +107,9 @@ export const createThreadClickHandler = (
       connectToNewThread(threadId);
       logger.debug('Switched to thread:', threadId, 'with', convertedMessages.length, 'messages');
     } catch (error) {
-      logger.error('Failed to switch thread:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorObj = error instanceof Error ? error : new Error(errorMessage);
+      logger.error('Failed to switch thread:', errorObj);
       setThreadLoadingState(false);
     }
   };

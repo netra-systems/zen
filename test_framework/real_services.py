@@ -89,8 +89,8 @@ class ServiceConfig:
     # PostgreSQL
     postgres_host: str = "localhost"
     postgres_port: int = 5434
-    postgres_user: str = "test_user"
-    postgres_password: str = "test_pass"
+    postgres_user: str = "test"
+    postgres_password: str = "test"
     postgres_database: str = "netra_test"
     
     # Redis
@@ -101,9 +101,9 @@ class ServiceConfig:
     
     # ClickHouse
     clickhouse_host: str = "localhost"
-    clickhouse_port: int = 9002
-    clickhouse_user: str = "test_user"
-    clickhouse_password: str = "test_pass"
+    clickhouse_port: int = 9000
+    clickhouse_user: str = "test"
+    clickhouse_password: str = "test"
     clickhouse_database: str = "netra_test_analytics"
     
     # Service URLs
@@ -605,8 +605,8 @@ class RealServicesManager:
             # PostgreSQL
             postgres_host=env.get("TEST_POSTGRES_HOST", "localhost"),
             postgres_port=int(env.get("TEST_POSTGRES_PORT", "5434")),
-            postgres_user=env.get("TEST_POSTGRES_USER", "test_user"),
-            postgres_password=env.get("TEST_POSTGRES_PASSWORD", "test_pass"),
+            postgres_user=env.get("TEST_POSTGRES_USER", "test"),
+            postgres_password=env.get("TEST_POSTGRES_PASSWORD", "test"),
             postgres_database=env.get("TEST_POSTGRES_DB", "netra_test"),
             
             # Redis
@@ -617,9 +617,9 @@ class RealServicesManager:
             
             # ClickHouse
             clickhouse_host=env.get("TEST_CLICKHOUSE_HOST", "localhost"),
-            clickhouse_port=int(env.get("TEST_CLICKHOUSE_TCP_PORT", "9002")),
-            clickhouse_user=env.get("TEST_CLICKHOUSE_USER", "test_user"),
-            clickhouse_password=env.get("TEST_CLICKHOUSE_PASSWORD", "test_pass"),
+            clickhouse_port=int(env.get("TEST_CLICKHOUSE_TCP_PORT", "9000")),
+            clickhouse_user=env.get("TEST_CLICKHOUSE_USER", "test"),
+            clickhouse_password=env.get("TEST_CLICKHOUSE_PASSWORD", "test"),
             clickhouse_database=env.get("TEST_CLICKHOUSE_DB", "netra_test_analytics"),
             
             # Service URLs

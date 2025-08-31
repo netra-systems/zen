@@ -178,6 +178,20 @@ async def websocket_endpoint(websocket: WebSocket):
         supervisor = getattr(websocket.app.state, 'agent_supervisor', None)
         thread_service = getattr(websocket.app.state, 'thread_service', None)
         
+        # Check environment to determine if fallback is allowed
+        from netra_backend.app.core.isolated_environment import get_env
+        environment = get_env().get("ENVIRONMENT", "development").lower()
+        is_testing = get_env().get("TESTING", "0") == "1"
+        
+        # Log dependency status for debugging
+        logger.info(f"WebSocket dependency check - Environment: {environment}, Testing: {is_testing}")
+        logger.info(f"WebSocket dependency check - Supervisor: {supervisor is not None}, ThreadService: {thread_service is not None}")
+        
+        # Check if startup is still in progress
+        startup_complete = getattr(websocket.app.state, 'startup_complete', False)
+        if not startup_complete and environment in ["staging", "production"]:
+            logger.warning(f"WebSocket accessed before startup complete in {environment} - startup_complete={startup_complete}")
+        
         # CRITICAL FIX: If thread_service is missing but supervisor exists, create it
         if supervisor is not None and thread_service is None:
             logger.warning("thread_service missing but supervisor available - creating thread_service")
@@ -197,19 +211,35 @@ async def websocket_endpoint(websocket: WebSocket):
                 message_router.add_handler(agent_handler)
                 logger.info("Registered real AgentMessageHandler for production agent pipeline")
             except Exception as e:
-                logger.warning(f"Failed to register real AgentMessageHandler: {e}, using fallback")
-                # Create fallback agent handler for E2E tests when real services fail
+                # CRITICAL: NO FALLBACK IN STAGING/PRODUCTION
+                if environment in ["staging", "production"] and not is_testing:
+                    logger.error(f"Failed to register AgentMessageHandler in {environment}: {e}")
+                    raise RuntimeError(f"AgentMessageHandler registration failed in {environment} - this is a critical error") from e
+                else:
+                    logger.warning(f"Failed to register real AgentMessageHandler: {e}, using fallback for {environment}")
+                    # Create fallback agent handler only for testing/development
+                    fallback_handler = _create_fallback_agent_handler()
+                    message_router.add_handler(fallback_handler)
+                    logger.info(f"Registered fallback AgentMessageHandler for {environment} environment")
+        else:
+            # CRITICAL: NO FALLBACK IN STAGING/PRODUCTION
+            if environment in ["staging", "production"] and not is_testing:
+                missing_deps = []
+                if supervisor is None:
+                    missing_deps.append("agent_supervisor")
+                if thread_service is None:
+                    missing_deps.append("thread_service")
+                error_msg = f"Critical WebSocket dependencies missing in {environment}: {missing_deps}"
+                logger.error(error_msg)
+                raise RuntimeError(error_msg)
+            else:
+                logger.warning(f"WebSocket dependencies not available in {environment} - creating fallback agent handler")
+                # Create fallback agent handler only for testing/development
                 fallback_handler = _create_fallback_agent_handler()
                 message_router.add_handler(fallback_handler)
-                logger.info("Registered fallback AgentMessageHandler due to real service failure")
-        else:
-            logger.warning("WebSocket dependencies not available - creating fallback agent handler for testing")
-            # Create fallback agent handler for E2E tests when real services are not available
-            fallback_handler = _create_fallback_agent_handler()
-            message_router.add_handler(fallback_handler)
-            logger.info("🤖 Registered fallback AgentMessageHandler for E2E testing - will handle CHAT messages!")
-            logger.info(f"🤖 Fallback handler can handle: {fallback_handler.supported_types}")
-            logger.info(f"🤖 Total handlers registered: {len(message_router.handlers)}")
+                logger.info(f"🤖 Registered fallback AgentMessageHandler for {environment} - will handle CHAT messages!")
+                logger.info(f"🤖 Fallback handler can handle: {fallback_handler.supported_types}")
+                logger.info(f"🤖 Total handlers registered: {len(message_router.handlers)}")
         
         # Authenticate and establish secure connection AFTER accepting
         # CRITICAL FIX: Handle authentication errors gracefully without breaking message loop

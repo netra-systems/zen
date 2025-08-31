@@ -28,7 +28,7 @@ from netra_backend.app.routes.utils.thread_validators import (
 from netra_backend.app.services.database.message_repository import MessageRepository
 
 
-async def handle_list_threads_request(db: AsyncSession, user_id: int, offset: int, limit: int):
+async def handle_list_threads_request(db: AsyncSession, user_id: str, offset: int, limit: int):
     """Handle list threads request logic."""
     threads = await get_user_threads(db, user_id)
     return await convert_threads_to_responses(db, threads, offset, limit)
@@ -40,7 +40,7 @@ def _validate_thread_creation(thread) -> None:
         from fastapi import HTTPException
         raise HTTPException(status_code=500, detail="Failed to create thread in database")
 
-async def handle_create_thread_request(db: AsyncSession, thread_data, user_id: int):
+async def handle_create_thread_request(db: AsyncSession, thread_data, user_id: str):
     """Handle create thread request logic."""
     thread_id = generate_thread_id()
     metadata = prepare_thread_metadata(thread_data, user_id)
@@ -49,7 +49,7 @@ async def handle_create_thread_request(db: AsyncSession, thread_data, user_id: i
     return await build_thread_response(thread, 0, metadata.get("title"))
 
 
-async def handle_get_thread_request(db: AsyncSession, thread_id: str, user_id: int):
+async def handle_get_thread_request(db: AsyncSession, thread_id: str, user_id: str):
     """Handle get thread request logic."""
     thread = await get_thread_with_validation(db, thread_id, user_id)
     message_count = await MessageRepository().count_by_thread(db, thread_id)
@@ -75,7 +75,7 @@ async def update_thread_metadata_fields(thread, thread_update):
     thread.metadata_["updated_at"] = int(time.time())
 
 
-async def handle_update_thread_request(db: AsyncSession, thread_id: str, thread_update, user_id: int):
+async def handle_update_thread_request(db: AsyncSession, thread_id: str, thread_update, user_id: str):
     """Handle update thread request logic."""
     thread = await get_thread_with_validation(db, thread_id, user_id)
     await update_thread_metadata_fields(thread, thread_update)
@@ -84,20 +84,20 @@ async def handle_update_thread_request(db: AsyncSession, thread_id: str, thread_
     return await build_thread_response(thread, message_count)
 
 
-async def handle_delete_thread_request(db: AsyncSession, thread_id: str, user_id: int):
+async def handle_delete_thread_request(db: AsyncSession, thread_id: str, user_id: str):
     """Handle delete thread request logic."""
     await get_thread_with_validation(db, thread_id, user_id)
     await archive_thread_safely(db, thread_id)
     return {"message": "Thread archived successfully"}
 
 
-async def handle_get_messages_request(db: AsyncSession, thread_id: str, user_id: int, limit: int, offset: int):
+async def handle_get_messages_request(db: AsyncSession, thread_id: str, user_id: str, limit: int, offset: int):
     """Handle get thread messages request logic."""
     await get_thread_with_validation(db, thread_id, user_id)
     return await build_thread_messages_response(db, thread_id, limit, offset)
 
 
-async def handle_auto_rename_request(db: AsyncSession, thread_id: str, user_id: int):
+async def handle_auto_rename_request(db: AsyncSession, thread_id: str, user_id: str):
     """Handle auto rename thread request logic."""
     thread = await get_thread_with_validation(db, thread_id, user_id)
     first_message = await get_first_user_message_safely(db, thread_id)

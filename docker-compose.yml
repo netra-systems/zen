@@ -1,8 +1,14 @@
-# Netra Docker Compose Configuration
+# Netra Docker Compose Configuration - Optimized for Stability
+# 
+# IMPORTANT: This configuration uses named volumes to avoid Docker Desktop crashes
+# caused by bind mount synchronization issues on Windows/macOS.
+#
 # Use profiles to run dev or test environments independently:
 # - docker-compose --profile dev up     # Start development environment  
 # - docker-compose --profile test up    # Start test environment
 # - docker-compose down                 # Stop all services
+#
+# For local development with bind mounts, use docker-compose.override.yml
 
 version: '3.8'
 
@@ -25,8 +31,10 @@ services:
     ports:
       - "${DEV_POSTGRES_PORT:-5433}:5432"
     volumes:
+      # Named volume for database - stable and fast
       - dev_postgres_data:/var/lib/postgresql/data
-      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      # Init script with :ro for safety
+      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro,cached
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-netra} && psql -U ${POSTGRES_USER:-netra} -d ${POSTGRES_DB:-netra_dev} -c 'SELECT 1' > /dev/null 2>&1"]
       interval: 30s
@@ -37,7 +45,7 @@ services:
     stop_grace_period: 30s
     networks:
       - netra-network
-    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
+    restart: no
     deploy:
       resources:
         limits:
@@ -55,6 +63,7 @@ services:
     ports:
       - "${DEV_REDIS_PORT:-6380}:6379"
     volumes:
+      # Named volume for Redis persistence
       - dev_redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -63,7 +72,7 @@ services:
       retries: 5
     networks:
       - netra-network
-    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
+    restart: no
     deploy:
       resources:
         limits:
@@ -86,8 +95,11 @@ services:
       - "${DEV_CLICKHOUSE_HTTP_PORT:-8124}:8123"
       - "${DEV_CLICKHOUSE_TCP_PORT:-9001}:9000"
     volumes:
+      # Named volume for ClickHouse data
       - dev_clickhouse_data:/var/lib/clickhouse
-      - ./scripts/init_clickhouse.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - dev_clickhouse_logs:/var/log/clickhouse-server
+      # Init script with :ro,cached for safety
+      - ./scripts/init_clickhouse.sql:/docker-entrypoint-initdb.d/01-init.sql:ro,cached
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8123/ping"]
       interval: 30s
@@ -95,7 +107,7 @@ services:
       retries: 5
     networks:
       - netra-network
-    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
+    restart: no
     deploy:
       resources:
         limits:
@@ -104,7 +116,7 @@ services:
         reservations:
           memory: 512M
 
-  # Dev Auth Service (starts first among Netra services)
+  # Dev Auth Service
   dev-auth:
     build:
       context: .
@@ -130,7 +142,6 @@ services:
       PORT: 8000
       HOST: 0.0.0.0
       ENVIRONMENT: ${ENVIRONMENT:-development}
-      # Uvicorn specific config
       UVICORN_HOST: 0.0.0.0
       UVICORN_PORT: 8000
       
@@ -143,9 +154,12 @@ services:
     ports:
       - "${AUTH_PORT:-8081}:8000"
     volumes:
-      - ./auth_service:/app/auth_service
-      - ./shared:/app/shared
-      - ./logs:/app/logs
+      # Named volumes for code and dependencies
+      - dev_auth_code:/app/auth_service
+      - dev_shared_code:/app/shared
+      - dev_auth_logs:/app/logs
+      # Python cache volume to avoid sync issues
+      - dev_auth_pycache:/app/.pycache
     depends_on:
       dev-postgres:
         condition: service_healthy
@@ -159,7 +173,7 @@ services:
       start_period: 40s
     networks:
       - netra-network
-    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
+    restart: no
     deploy:
       resources:
         limits:
@@ -170,82 +184,84 @@ services:
     command: >
       sh -c "
         echo 'Starting auth service...' &&
-        uvicorn auth_service.main:app --host \$HOST --port \$PORT --reload --reload-dir /app/auth_service --reload-dir /app/shared --reload-include '*.py'
+        uvicorn auth_service.main:app --host 0.0.0.0 --port 8000 --reload
       "
 
-  # Dev Analytics Service (depends on redis and clickhouse)
-  dev-analytics:
-    build:
-      context: .
-      dockerfile: ./docker/analytics.development.Dockerfile
-    container_name: netra-dev-analytics
-    profiles: ["dev"]
-    env_file:
-      - .env.development
-    environment:
-      # Database connections
-      CLICKHOUSE_HOST: dev-clickhouse
-      CLICKHOUSE_PORT: 8123
-      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-netra}
-      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-netra123}
-      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-netra_analytics}
-      
-      # Redis
-      REDIS_HOST: dev-redis
-      REDIS_PORT: 6379
-      REDIS_URL: redis://dev-redis:6379/2
-      
-      # Server Config
-      PORT: 8090
-      HOST: 0.0.0.0
-      ENVIRONMENT: ${ENVIRONMENT:-development}
-      # Uvicorn specific config
-      UVICORN_HOST: 0.0.0.0
-      UVICORN_PORT: 8090
-      
-      # Analytics-specific configuration
-      ANALYTICS_SERVICE_PORT: 8090
-      EVENT_BATCH_SIZE: 100
-      EVENT_FLUSH_INTERVAL_MS: 5000
-      MAX_EVENTS_PER_USER_PER_MINUTE: 1000
-      
-      # Service authentication
-      SERVICE_SECRET: ${SERVICE_SECRET:-xNp9hKjT5mQ8w2fE7vR4yU3iO6aS1gL9cB0zZ8tN6wX2eR4vY7uI0pQ3s9dF5gH8}
-      SERVICE_ID: analytics
-    ports:
-      - "${ANALYTICS_PORT:-8090}:8090"
-    volumes:
-      - ./analytics_service:/app/analytics_service
-      - ./shared:/app/shared
-      - ./logs:/app/logs
-    depends_on:
-      dev-redis:
-        condition: service_healthy
-      dev-clickhouse:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8090/health"]
-      interval: 60s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    networks:
-      - netra-network
-    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-        reservations:
-          memory: 256M
-    command: >
-      sh -c "
-        echo 'Starting analytics service...' &&
-        uvicorn analytics_service.main:app --host 0.0.0.0 --port 8090 --reload --reload-dir /app/analytics_service --reload-dir /app/shared --reload-include '*.py'
-      "
+  # Dev Analytics Service
+  # NOTE: Temporarily disabled - may be causing crashes
+  # dev-analytics:
+  #   build:
+  #     context: .
+  #     dockerfile: ./docker/analytics.development.Dockerfile
+  #   container_name: netra-dev-analytics
+  #   profiles: ["dev"]
+  #   env_file:
+  #     - .env.development
+  #   environment:
+  #     # Database connections
+  #     CLICKHOUSE_HOST: dev-clickhouse
+  #     CLICKHOUSE_PORT: 8123
+  #     CLICKHOUSE_USER: ${CLICKHOUSE_USER:-netra}
+  #     CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-netra123}
+  #     CLICKHOUSE_DB: ${CLICKHOUSE_DB:-netra_analytics}
+  #     
+  #     # Redis
+  #     REDIS_HOST: dev-redis
+  #     REDIS_PORT: 6379
+  #     REDIS_URL: redis://dev-redis:6379/2
+  #     
+  #     # Server Config
+  #     PORT: 8090
+  #     HOST: 0.0.0.0
+  #     ENVIRONMENT: ${ENVIRONMENT:-development}
+  #     UVICORN_HOST: 0.0.0.0
+  #     UVICORN_PORT: 8090
+  #     
+  #     # Analytics-specific configuration
+  #     ANALYTICS_SERVICE_PORT: 8090
+  #     EVENT_BATCH_SIZE: 100
+  #     EVENT_FLUSH_INTERVAL_MS: 5000
+  #     MAX_EVENTS_PER_USER_PER_MINUTE: 1000
+  #     
+  #     # Service authentication
+  #     SERVICE_SECRET: ${SERVICE_SECRET:-xNp9hKjT5mQ8w2fE7vR4yU3iO6aS1gL9cB0zZ8tN6wX2eR4vY7uI0pQ3s9dF5gH8}
+  #     SERVICE_ID: analytics
+  #   ports:
+  #     - "${ANALYTICS_PORT:-8090}:8090"
+  #   volumes:
+  #     # Named volumes for code
+  #     - dev_analytics_code:/app/analytics_service
+  #     - dev_shared_code:/app/shared
+  #     - dev_analytics_logs:/app/logs
+  #     - dev_analytics_pycache:/app/.pycache
+  #   depends_on:
+  #     dev-redis:
+  #       condition: service_healthy
+  #     dev-clickhouse:
+  #       condition: service_healthy
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8090/health"]
+  #     interval: 60s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
+  #   networks:
+  #     - netra-network
+  #   restart: no
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 512M
+  #         cpus: '0.5'
+  #       reservations:
+  #         memory: 256M
+  #   command: >
+  #     sh -c "
+  #       echo 'Starting analytics service...' &&
+  #       uvicorn analytics_service.main:app --host 0.0.0.0 --port 8090 --reload
+  #     "
 
-  # Dev Backend Service (depends on auth)
+  # Dev Backend Service
   dev-backend:
     build:
       context: .
@@ -280,7 +296,6 @@ services:
       PORT: 8000
       HOST: 0.0.0.0
       ENVIRONMENT: ${ENVIRONMENT:-development}
-      # Uvicorn specific config  
       UVICORN_HOST: 0.0.0.0
       UVICORN_PORT: 8000
       
@@ -299,11 +314,13 @@ services:
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:
-      - ./netra_backend:/app/netra_backend
-      - ./shared:/app/shared
-      - ./SPEC:/app/SPEC
-      - ./scripts:/app/scripts
-      - ./logs:/app/logs
+      # Named volumes for code and data
+      - dev_backend_code:/app/netra_backend
+      - dev_shared_code:/app/shared
+      - dev_spec_data:/app/SPEC
+      - dev_scripts:/app/scripts
+      - dev_backend_logs:/app/logs
+      - dev_backend_pycache:/app/.pycache
     depends_on:
       dev-postgres:
         condition: service_healthy
@@ -321,7 +338,7 @@ services:
       start_period: 40s
     networks:
       - netra-network
-    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
+    restart: no
     deploy:
       resources:
         limits:
@@ -336,10 +353,10 @@ services:
         echo 'Running migrations...' &&
         alembic -c netra_backend/alembic.ini upgrade head &&
         echo 'Starting backend...' &&
-        uvicorn netra_backend.app.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir /app/netra_backend --reload-dir /app/shared --reload-include '*.py'
+        uvicorn netra_backend.app.main:app --host 0.0.0.0 --port 8000 --reload
       "
 
-  # Dev Frontend Service (depends on backend)
+  # Dev Frontend Service
   dev-frontend:
     build:
       context: .
@@ -372,28 +389,11 @@ services:
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     volumes:
-      - ./frontend/src:/app/src
-      - ./frontend/public:/app/public
-      - ./frontend/app:/app/app
-      - ./frontend/auth:/app/auth
-      - ./frontend/components:/app/components
-      - ./frontend/hooks:/app/hooks
-      - ./frontend/lib:/app/lib
-      - ./frontend/services:/app/services
-      - ./frontend/store:/app/store
-      - ./frontend/styles:/app/styles
-      - ./frontend/types:/app/types
-      - ./frontend/utils:/app/utils
-      - ./frontend/providers:/app/providers
-      - ./frontend/scripts:/app/scripts
-      - ./frontend/next.config.ts:/app/next.config.ts
-      - ./frontend/next.config.turbopack.ts:/app/next.config.turbopack.ts
-      - ./frontend/tsconfig.json:/app/tsconfig.json
-      - ./frontend/tailwind.config.ts:/app/tailwind.config.ts
-      - ./frontend/postcss.config.mjs:/app/postcss.config.mjs
-      - ./frontend/package.json:/app/package.json
-      - /app/node_modules
-      - /app/.next
+      # Named volumes to avoid node_modules sync issues
+      - dev_frontend_code:/app
+      - dev_frontend_node_modules:/app/node_modules
+      - dev_frontend_next:/app/.next
+      - dev_frontend_cache:/app/.cache
     depends_on:
       dev-backend:
         condition: service_healthy
@@ -401,7 +401,7 @@ services:
         condition: service_healthy
     networks:
       - netra-network
-    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
+    restart: no
     deploy:
       resources:
         limits:
@@ -411,13 +411,8 @@ services:
           memory: 512M
     command: >
       sh -c "
-        echo '🚀 Starting frontend with pre-compilation...' &&
-        npm run dev &
-        sleep 15 &&
-        if [ -f scripts/docker-precompile.js ]; then
-          node scripts/docker-precompile.js
-        fi &&
-        wait
+        echo '🚀 Starting frontend...' &&
+        npm run dev
       "
 
   # ============================================
@@ -437,6 +432,7 @@ services:
     ports:
       - "${TEST_POSTGRES_PORT:-5434}:5432"
     volumes:
+      # Named volume for test database
       - test_postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U test"]
@@ -445,7 +441,7 @@ services:
       retries: 5
     networks:
       - netra-network
-    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
+    restart: no
 
   # Test Redis Cache
   test-redis:
@@ -462,7 +458,7 @@ services:
       retries: 5
     networks:
       - netra-network
-    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
+    restart: no
 
   # Test ClickHouse Analytics
   test-clickhouse:
@@ -478,7 +474,9 @@ services:
       - "${TEST_CLICKHOUSE_HTTP_PORT:-8123}:8123"
       - "${TEST_CLICKHOUSE_TCP_PORT:-9000}:9000"
     volumes:
+      # Named volume for test ClickHouse
       - test_clickhouse_data:/var/lib/clickhouse
+      - test_clickhouse_logs:/var/log/clickhouse-server
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8123/ping"]
       interval: 5s
@@ -486,9 +484,9 @@ services:
       retries: 5
     networks:
       - netra-network
-    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
+    restart: no
 
-  # Test Auth Service (starts first among Netra services)
+  # Test Auth Service
   test-auth:
     build:
       context: .
@@ -526,10 +524,9 @@ services:
     ports:
       - "${TEST_AUTH_PORT:-8082}:8082"
     volumes:
-      - ./auth_service:/app/auth_service:ro
-      - ./shared:/app/shared:ro
-      - ./test_framework:/app/test_framework:ro
-      - ./logs:/app/logs
+      # Use read-only volumes for test environment
+      - test_auth_code:/app:ro
+      - test_auth_logs:/app/logs
     depends_on:
       test-postgres:
         condition: service_healthy
@@ -543,9 +540,9 @@ services:
       start_period: 20s
     networks:
       - netra-network
-    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
+    restart: no
 
-  # Test Analytics Service (depends on redis and clickhouse)
+  # Test Analytics Service
   test-analytics:
     build:
       context: .
@@ -584,10 +581,9 @@ services:
     ports:
       - "${TEST_ANALYTICS_PORT:-8091}:8091"
     volumes:
-      - ./analytics_service:/app/analytics_service:ro
-      - ./shared:/app/shared:ro
-      - ./test_framework:/app/test_framework:ro
-      - ./logs:/app/logs
+      # Read-only volumes for test
+      - test_analytics_code:/app:ro
+      - test_analytics_logs:/app/logs
     depends_on:
       test-redis:
         condition: service_healthy
@@ -601,9 +597,9 @@ services:
       start_period: 20s
     networks:
       - netra-network
-    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
+    restart: no
 
-  # Test Backend Service (depends on auth)
+  # Test Backend Service
   test-backend:
     build:
       context: .
@@ -659,13 +655,9 @@ services:
     ports:
       - "${TEST_BACKEND_PORT:-8001}:8001"
     volumes:
-      - ./netra_backend:/app/netra_backend:ro
-      - ./shared:/app/shared:ro
-      - ./test_framework:/app/test_framework:ro
-      - ./tests:/app/tests:ro
-      - ./SPEC:/app/SPEC:ro
-      - ./scripts:/app/scripts:ro
-      - ./logs:/app/logs
+      # Read-only volumes for test
+      - test_backend_code:/app:ro
+      - test_backend_logs:/app/logs
     depends_on:
       test-postgres:
         condition: service_healthy
@@ -683,7 +675,7 @@ services:
       start_period: 20s
     networks:
       - netra-network
-    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
+    restart: no
     command: >
       sh -c "
         echo 'Test Backend: Waiting for database...' &&
@@ -691,10 +683,10 @@ services:
         echo 'Test Backend: Running migrations...' &&
         alembic -c netra_backend/alembic.ini upgrade head &&
         echo 'Test Backend: Starting...' &&
-        uvicorn netra_backend.app.main:app --host 0.0.0.0 --port 8001 --reload-dir /app/netra_backend
+        uvicorn netra_backend.app.main:app --host 0.0.0.0 --port 8001
       "
 
-  # Test Frontend Service (depends on backend)
+  # Test Frontend Service
   test-frontend:
     build:
       context: .
@@ -722,7 +714,10 @@ services:
     ports:
       - "${TEST_FRONTEND_PORT:-3001}:3001"
     volumes:
-      - ./frontend:/app
+      # Named volumes for test frontend
+      - test_frontend_code:/app
+      - test_frontend_node_modules:/app/node_modules
+      - test_frontend_next:/app/.next
     depends_on:
       test-backend:
         condition: service_healthy
@@ -736,7 +731,7 @@ services:
       start_period: 30s
     networks:
       - netra-network
-    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
+    restart: no
     command: >
       sh -c "
         echo 'Test Frontend: Starting Next.js server...' &&
@@ -749,19 +744,87 @@ networks:
     driver: bridge
     name: netra-network
 
-# Volumes for persistent data
+# Named Volumes for persistent data
+# These are stored entirely within the Docker VM and avoid bind mount issues
 volumes:
-  # Dev volumes
+  # Dev environment volumes
   dev_postgres_data:
     name: netra-dev-postgres-data
   dev_redis_data:
     name: netra-dev-redis-data
   dev_clickhouse_data:
     name: netra-dev-clickhouse-data
-  # Test volumes
+  dev_clickhouse_logs:
+    name: netra-dev-clickhouse-logs
+  
+  # Dev service code volumes
+  dev_auth_code:
+    name: netra-dev-auth-code
+  dev_auth_logs:
+    name: netra-dev-auth-logs
+  dev_auth_pycache:
+    name: netra-dev-auth-pycache
+  
+  dev_analytics_code:
+    name: netra-dev-analytics-code
+  dev_analytics_logs:
+    name: netra-dev-analytics-logs
+  dev_analytics_pycache:
+    name: netra-dev-analytics-pycache
+  
+  dev_backend_code:
+    name: netra-dev-backend-code
+  dev_backend_logs:
+    name: netra-dev-backend-logs
+  dev_backend_pycache:
+    name: netra-dev-backend-pycache
+  
+  dev_shared_code:
+    name: netra-dev-shared-code
+  dev_spec_data:
+    name: netra-dev-spec-data
+  dev_scripts:
+    name: netra-dev-scripts
+  
+  # Frontend volumes (critical for node_modules stability)
+  dev_frontend_code:
+    name: netra-dev-frontend-code
+  dev_frontend_node_modules:
+    name: netra-dev-frontend-node-modules
+  dev_frontend_next:
+    name: netra-dev-frontend-next
+  dev_frontend_cache:
+    name: netra-dev-frontend-cache
+  
+  # Test environment volumes
   test_postgres_data:
     name: netra-test-postgres-data
   test_redis_data:
     name: netra-test-redis-data
   test_clickhouse_data:
     name: netra-test-clickhouse-data
+  test_clickhouse_logs:
+    name: netra-test-clickhouse-logs
+  
+  # Test service volumes
+  test_auth_code:
+    name: netra-test-auth-code
+  test_auth_logs:
+    name: netra-test-auth-logs
+  
+  test_analytics_code:
+    name: netra-test-analytics-code
+  test_analytics_logs:
+    name: netra-test-analytics-logs
+  
+  test_backend_code:
+    name: netra-test-backend-code
+  test_backend_logs:
+    name: netra-test-backend-logs
+  
+  test_frontend_code:
+    name: netra-test-frontend-code
+  test_frontend_node_modules:
+    name: netra-test-frontend-node-modules
+  test_frontend_next:
+    name: netra-test-frontend-next
