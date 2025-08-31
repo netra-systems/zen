@@ -5,7 +5,8 @@ import { handleWebSocketEvent as coreHandler } from './websocket-event-handlers-
 import { 
   handleAgentStarted,
   handleAgentCompleted,
-  handleAgentThinking
+  handleAgentThinking,
+  handleAgentResponse
 } from './websocket-agent-handlers';
 import { 
   handleToolExecutingEnhanced as handleToolExecuting,
@@ -37,6 +38,7 @@ export const getEventHandlers = () => ({
   'agent_completed': handleAgentCompleted,
   'agent_finished': handleAgentCompleted,
   'subagent_completed': handleAgentCompleted,
+  'agent_response': handleAgentResponse,
   'final_report': handleFinalReport,
   'tool_executing': handleToolExecuting,
   'tool_call': handleToolExecuting,
