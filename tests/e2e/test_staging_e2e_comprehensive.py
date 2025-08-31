@@ -29,11 +29,7 @@ logger = logging.getLogger(__name__)
 # Mark all tests as staging E2E tests
 pytestmark = [
     pytest.mark.e2e,
-    pytest.mark.staging,
-    pytest.mark.skipif(
-        os.getenv("ENVIRONMENT", "development") != "staging",
-        reason="These tests only run against staging environment (set ENVIRONMENT=staging)"
-    )
+    pytest.mark.staging
 ]
 
 

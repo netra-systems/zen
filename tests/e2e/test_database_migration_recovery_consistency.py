@@ -51,7 +51,7 @@ from clickhouse_connect import get_async_client
 # Use absolute imports per CLAUDE.md requirements  
 from netra_backend.app.db.alembic_state_recovery import AlembicStateRecovery, MigrationStateManager
 from dev_launcher.database_connector import DatabaseConnector, DatabaseType
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from test_framework.base_e2e_test import BaseE2ETest
 
 logger = logging.getLogger(__name__)
@@ -311,7 +311,7 @@ class TestDatabaseMigrationConsistencyer:
         """Initialize migration and recovery managers."""
         try:
             # Initialize Alembic state recovery manager with database URL
-            from dev_launcher.isolated_environment import get_env
+            from shared.isolated_environment import get_env
             env = get_env()
             database_url = env.get("DATABASE_URL")
             if database_url:

@@ -32,7 +32,7 @@ sys.path.insert(0, str(project_root))
 
 from netra_backend.app.core.configuration.database import DatabaseConfigManager
 from shared.database_url_builder import DatabaseURLBuilder
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from test_framework.environment_markers import env
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.database.connection import AuthDatabaseConnection

@@ -57,7 +57,7 @@ class TestAgentPipelineCritical:
     
     def _setup_test_environment(self):
         """Setup test environment using proper environment management."""
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         env = get_env()
         
         # Database configuration for E2E tests - use SQLite for fast isolated testing
@@ -81,7 +81,7 @@ class TestAgentPipelineCritical:
     
     def _check_api_key_available(self):
         """Check if API key is available for real LLM testing."""
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         env = get_env()
         
         # Check for any available LLM API key
@@ -96,7 +96,7 @@ class TestAgentPipelineCritical:
     @pytest.fixture
     async def real_llm_manager(self, test_environment):
         """Provide real LLM manager for authentic responses."""
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         # Configure test environment variables
         self._setup_test_environment()

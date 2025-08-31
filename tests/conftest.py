@@ -10,7 +10,7 @@ import pytest
 # Add project root for imports
 
 # Import isolated environment for proper test isolation
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from test_framework.environment_isolation import (
     get_test_env_manager,
     isolated_test_session,
@@ -93,12 +93,22 @@ def event_loop_policy():
 
 # Environment configuration for performance tests
 # Use isolated environment for safe access
+current_env = get_env().get("ENVIRONMENT", "development")
+is_staging = current_env == "staging"
+
+# Default URLs for different environments
+default_websocket_url = "ws://localhost:8888/ws" if current_env == "development" else "wss://api.staging.netrasystems.ai/ws"
+default_backend_url = "http://localhost:8888" if current_env == "development" else "https://api.staging.netrasystems.ai"
+default_auth_url = "http://localhost:8001" if current_env == "development" else "https://auth.staging.netrasystems.ai"
+
 E2E_TEST_CONFIG = {
-    "websocket_url": get_env().get("E2E_WEBSOCKET_URL", "ws://localhost:8765"),
-    "backend_url": get_env().get("E2E_BACKEND_URL", "http://localhost:8000"),
-    "auth_service_url": get_env().get("E2E_AUTH_SERVICE_URL", "http://localhost:8081"),
+    "websocket_url": get_env().get("E2E_WEBSOCKET_URL", default_websocket_url),
+    "backend_url": get_env().get("E2E_BACKEND_URL", default_backend_url),
+    "auth_service_url": get_env().get("E2E_AUTH_SERVICE_URL", default_auth_url),
     "skip_real_services": get_env().get("SKIP_REAL_SERVICES", "true").lower() == "true",
-    "test_mode": get_env().get("HIGH_VOLUME_TEST_MODE", "mock")
+    "test_mode": get_env().get("HIGH_VOLUME_TEST_MODE", "mock"),
+    "environment": current_env,
+    "is_staging": is_staging
 }
 
 
@@ -557,15 +567,38 @@ logging.basicConfig(
 e2e_logger = logging.getLogger("e2e_conftest")
 
 # E2E Test Environment Configuration
+# Detect staging environment and set appropriate URLs
+current_env = get_env().get("ENVIRONMENT", get_env().get("TEST_ENV", "test")).lower()
+is_staging = current_env == "staging"
+
+if is_staging:
+    # Staging environment URLs
+    default_auth_url = "https://api.staging.netrasystems.ai"
+    default_backend_url = "https://api.staging.netrasystems.ai"
+    default_websocket_url = "wss://api.staging.netrasystems.ai/ws"
+    default_redis_url = get_env().get("STAGING_REDIS_URL", "redis://localhost:6379")
+    default_postgres_url = get_env().get("STAGING_DATABASE_URL", "postgresql://postgres:netra@localhost:5432/netra_staging")
+    default_clickhouse_url = get_env().get("STAGING_CLICKHOUSE_URL", "clickhouse://localhost:8123/netra_staging")
+else:
+    # Local/test environment URLs
+    default_auth_url = "http://localhost:8081"
+    default_backend_url = "http://localhost:8000"
+    default_websocket_url = "ws://localhost:8000/ws"
+    default_redis_url = "redis://localhost:6379"
+    default_postgres_url = "postgresql://postgres:netra@localhost:5432/netra_test"
+    default_clickhouse_url = "clickhouse://localhost:8123/netra_test"
+
 E2E_CONFIG = {
-    "auth_service_url": get_env().get("E2E_AUTH_SERVICE_URL", "http://localhost:8081"),
-    "backend_url": get_env().get("E2E_BACKEND_URL", "http://localhost:8000"),
-    "websocket_url": get_env().get("E2E_WEBSOCKET_URL", "ws://localhost:8000/ws"),
-    "redis_url": get_env().get("E2E_REDIS_URL", "redis://localhost:6379"),
-    "postgres_url": get_env().get("E2E_POSTGRES_URL", "postgresql://postgres:netra@localhost:5432/netra_test"),
-    "clickhouse_url": get_env().get("E2E_CLICKHOUSE_URL", "clickhouse://localhost:8123/netra_test"),
+    "auth_service_url": get_env().get("E2E_AUTH_SERVICE_URL", default_auth_url),
+    "backend_url": get_env().get("E2E_BACKEND_URL", default_backend_url),
+    "websocket_url": get_env().get("E2E_WEBSOCKET_URL", default_websocket_url),
+    "redis_url": get_env().get("E2E_REDIS_URL", default_redis_url),
+    "postgres_url": get_env().get("E2E_POSTGRES_URL", default_postgres_url),
+    "clickhouse_url": get_env().get("E2E_CLICKHOUSE_URL", default_clickhouse_url),
     "test_timeout": int(get_env().get("E2E_TEST_TIMEOUT", "300")),  # 5 minutes
-    "performance_mode": get_env().get("E2E_PERFORMANCE_MODE", "true").lower() == "true"
+    "performance_mode": get_env().get("E2E_PERFORMANCE_MODE", "true").lower() == "true",
+    "environment": current_env,
+    "is_staging": is_staging
 }
 
 
@@ -749,9 +782,9 @@ async def validate_e2e_environment():
     """Validate E2E test environment before running tests."""
     logging.getLogger(__name__).info("Validating E2E test environment...")
     
-    # Skip E2E tests if not explicitly enabled
-    if not get_env().get("RUN_E2E_TESTS", "false").lower() == "true":
-        pytest.skip("E2E tests disabled (set RUN_E2E_TESTS=true to enable)")
+    # Skip E2E tests if not explicitly enabled, but allow staging tests
+    if not (get_env().get("RUN_E2E_TESTS", "false").lower() == "true" or is_staging):
+        pytest.skip("E2E tests disabled (set RUN_E2E_TESTS=true to enable or ENVIRONMENT=staging)")
     
     validator = E2EEnvironmentValidator()
     
@@ -841,7 +874,9 @@ def setup_e2e_test_environment():
     env = get_env()
     env.set("TESTING", "1", source="e2e_test_setup")
     env.set("NETRA_ENV", "e2e_testing", source="e2e_test_setup")
-    env.set("ENVIRONMENT", "test", source="e2e_test_setup")
+    # Only override ENVIRONMENT if not already set to staging
+    if not is_staging:
+        env.set("ENVIRONMENT", "test", source="e2e_test_setup")
     env.set("USE_REAL_SERVICES", "true", source="e2e_test_setup")
     env.set("AUTH_FAST_TEST_MODE", "true", source="e2e_test_setup")
     

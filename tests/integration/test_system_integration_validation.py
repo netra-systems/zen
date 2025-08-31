@@ -103,7 +103,7 @@ class TestSystemIntegrationValidation:
 
     def test_environment_isolation_works(self):
         """Test that environment isolation works properly."""
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         env = get_env()
         assert env is not None
@@ -268,7 +268,7 @@ class TestSystemIntegrationValidation:
 
         # Test environment readiness
         try:
-            from netra_backend.app.core.isolated_environment import get_env
+            from shared.isolated_environment import get_env
             env = get_env()
             components_ready['environment'] = env is not None
         except Exception:
@@ -288,7 +288,7 @@ class TestSystemIntegrationValidation:
         
         # Step 1: Load environment
         try:
-            from netra_backend.app.core.isolated_environment import get_env
+            from shared.isolated_environment import get_env
             env = get_env()
             startup_steps.append('environment_loaded')
         except Exception:

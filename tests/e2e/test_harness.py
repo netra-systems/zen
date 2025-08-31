@@ -22,7 +22,7 @@ from tests.e2e.config import (
     get_test_environment_config,
 )
 # Import IsolatedEnvironment for proper environment management
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 

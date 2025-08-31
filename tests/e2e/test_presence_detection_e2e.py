@@ -25,7 +25,7 @@ from datetime import datetime, timedelta, timezone
 import pytest
 import httpx
 
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from netra_backend.app.logging_config import central_logger
 from test_framework.conftest_real_services import (
     real_postgres,

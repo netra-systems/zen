@@ -23,7 +23,7 @@ from datetime import datetime, timezone
 
 # ABSOLUTE IMPORTS ONLY - CLAUDE.md compliance
 from test_framework.environment_isolation import get_test_env_manager
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 @pytest.mark.asyncio

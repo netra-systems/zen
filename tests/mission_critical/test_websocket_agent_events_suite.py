@@ -30,6 +30,9 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
+# Check if staging mode is enabled
+STAGING_MODE = os.getenv('WEBSOCKET_TEST_STAGING', 'false').lower() == 'true'
+
 import pytest
 from loguru import logger
 
@@ -46,6 +49,19 @@ from netra_backend.app.agents.enhanced_tool_execution import (
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
+
+# Import staging test utilities if staging mode enabled
+if STAGING_MODE:
+    try:
+        from test_framework.staging_websocket_test_helper import StagingWebSocketTestHelper
+        from tests.e2e.staging_config import get_staging_config
+        STAGING_AVAILABLE = True
+        logger.info("Staging WebSocket testing utilities loaded")
+    except ImportError as e:
+        STAGING_AVAILABLE = False
+        logger.warning(f"Staging utilities not available: {e}")
+else:
+    STAGING_AVAILABLE = False
 
 
 # ============================================================================
@@ -878,6 +894,73 @@ class TestRegressionPrevention:
 
 
 # ============================================================================
+# STAGING INTEGRATION TESTS (if enabled)
+# ============================================================================
+
+class TestStagingIntegration:
+    """Test WebSocket events against real staging environment when available."""
+    
+    @pytest.mark.asyncio
+    @pytest.mark.staging
+    @pytest.mark.skipif(not STAGING_AVAILABLE, reason="Staging utilities not available")
+    @pytest.mark.skipif(not STAGING_MODE, reason="Staging mode not enabled (set WEBSOCKET_TEST_STAGING=true)")
+    async def test_staging_websocket_agent_events(self):
+        """Test WebSocket agent events in real staging environment."""
+        logger.info("\n🌐 Testing WebSocket agent events in STAGING environment")
+        
+        config = get_staging_config()
+        if not config.validate_configuration():
+            pytest.skip("Staging configuration not valid")
+        
+        helper = StagingWebSocketTestHelper()
+        validator = MissionCriticalEventValidator()
+        
+        try:
+            # Connect to staging
+            connected = await helper.connect_with_auth()
+            assert connected, "Failed to connect to staging WebSocket"
+            
+            # Set up event tracking
+            thread_id = f"staging-mission-critical-{int(time.time())}"
+            
+            def track_staging_event(data):
+                validator.record(data)
+                logger.info(f"📨 Staging event: {data.get('type')}")
+            
+            # Register event handlers
+            for event_type in validator.REQUIRED_EVENTS:
+                helper.on_event(event_type, track_staging_event)
+            
+            # Send agent request to staging
+            success = await helper.send_agent_request(
+                query="Mission critical test: Validate WebSocket events in staging",
+                thread_id=thread_id
+            )
+            assert success, "Failed to send agent request to staging"
+            
+            # Wait for agent flow with staging timeout
+            flow_result = await helper.wait_for_agent_flow(
+                thread_id=thread_id,
+                timeout=120.0  # Generous timeout for staging
+            )
+            
+            assert flow_result["success"], f"Agent flow failed in staging: {flow_result}"
+            
+            # Validate events meet mission critical requirements
+            is_valid, failures = validator.validate_critical_requirements()
+            
+            if not is_valid:
+                logger.error(validator.generate_report())
+            
+            assert is_valid, f"Mission critical validation failed in staging: {failures}"
+            
+            logger.info("✅ Mission critical WebSocket events working in STAGING")
+            
+        finally:
+            await helper.disconnect()
+
+
+# ============================================================================
 # TEST SUITE RUNNER
 # ============================================================================
 
@@ -889,20 +972,32 @@ class TestMissionCriticalSuite:
     @pytest.mark.asyncio
     async def test_run_complete_suite(self):
         """Run the complete mission-critical test suite."""
+        test_mode = "STAGING" if STAGING_MODE and STAGING_AVAILABLE else "MOCK"
+        
         logger.info("\n" + "=" * 80)
-        logger.info("RUNNING MISSION CRITICAL WEBSOCKET TEST SUITE - FIXED VERSION")
+        logger.info(f"RUNNING MISSION CRITICAL WEBSOCKET TEST SUITE - {test_mode} MODE")
         logger.info("=" * 80)
+        
+        if STAGING_MODE and STAGING_AVAILABLE:
+            logger.info("🌐 Staging mode enabled - will test against real staging services")
+            logger.info("   Set WEBSOCKET_TEST_STAGING=false to use mock mode")
+        else:
+            logger.info("🔧 Mock mode - using mock WebSocket connections for reliable testing")
+            logger.info("   Set WEBSOCKET_TEST_STAGING=true to test against staging")
         
         results = {
             "unit": {"passed": 0, "failed": 0},
             "integration": {"passed": 0, "failed": 0},
             "e2e": {"passed": 0, "failed": 0},
-            "regression": {"passed": 0, "failed": 0}
+            "regression": {"passed": 0, "failed": 0},
+            "staging": {"passed": 0, "failed": 0} if STAGING_MODE else None
         }
         
         # This is a meta-test that validates the suite itself works
-        logger.info("\n✅ Mission Critical Test Suite is operational - MOCK CONNECTIONS ONLY")
-        logger.info("Run with: pytest tests/mission_critical/test_websocket_agent_events_suite_fixed.py -v")
+        logger.info(f"\n✅ Mission Critical Test Suite is operational - {test_mode} MODE")
+        logger.info("Run with: pytest tests/mission_critical/test_websocket_agent_events_suite.py -v")
+        if STAGING_MODE:
+            logger.info("Run staging tests: pytest tests/mission_critical/test_websocket_agent_events_suite.py -v -m staging")
 
 
 if __name__ == "__main__":

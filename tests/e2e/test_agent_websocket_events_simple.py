@@ -18,7 +18,7 @@ from typing import Dict, List, Set
 import pytest
 import websockets
 
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket_core import get_websocket_manager
 from tests.e2e.config import UnifiedTestConfig

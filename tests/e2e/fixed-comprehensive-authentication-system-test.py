@@ -4,7 +4,7 @@ Tests actual configuration issues instead of non-existent endpoints
 """
 
 import pytest
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 @pytest.mark.critical

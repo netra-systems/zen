@@ -12,7 +12,7 @@ import logging
 from unittest import mock
 from typing import Dict, Any
 
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from tests.clients.backend_client import BackendTestClient
 from tests.e2e.config import UnifiedTestConfig
 

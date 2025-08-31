@@ -46,35 +46,62 @@ def pytest_configure(config):
 # E2E tests should be fast and not depend on external databases
 # This must be set BEFORE any backend modules are imported
 if "pytest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
-    # Force SQLite for E2E tests regardless of other configurations
-    os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
-    os.environ["TESTING"] = "1"
-    os.environ["ENVIRONMENT"] = "testing"
-    os.environ["E2E_TESTING"] = "true"
+    # Check if we're in staging environment
+    current_env = os.environ.get("ENVIRONMENT", "").lower()
+    is_staging = current_env == "staging"
+    
+    if is_staging:
+        # Staging environment - use staging database configuration
+        os.environ["E2E_TESTING"] = "true"
+        os.environ["TESTING"] = "0"  # Not local testing in staging
+        # Keep existing ENVIRONMENT=staging
+    else:
+        # Force SQLite for local E2E tests regardless of other configurations
+        os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+        os.environ["TESTING"] = "1"
+        os.environ["ENVIRONMENT"] = "testing"
+        os.environ["E2E_TESTING"] = "true"
 
 # Dynamic port configuration for E2E tests
-try:
-    from tests.e2e.dynamic_port_manager import get_port_manager
-    port_mgr = get_port_manager()
-    urls = port_mgr.get_service_urls()
+# Determine current environment
+current_env = os.environ.get("ENVIRONMENT", "").lower()
+is_staging = current_env == "staging"
+
+if is_staging:
+    # Staging environment configuration
     E2E_CONFIG = {
-        "timeout": 30,
-        "base_url": urls["backend"],
-        "websocket_url": urls["websocket"],
-        "auth_url": urls["auth"],
-        "test_user": "test@example.com"
+        "timeout": 60,  # Longer timeouts for staging
+        "base_url": "https://api.staging.netrasystems.ai",
+        "websocket_url": "wss://api.staging.netrasystems.ai/ws",
+        "auth_url": "https://api.staging.netrasystems.ai",
+        "test_user": "test@example.com",
+        "environment": "staging"
     }
-except ImportError:
-    # Fallback to defaults if port manager not available
-    backend_port = os.environ.get("TEST_BACKEND_PORT", "8000")
-    auth_port = os.environ.get("TEST_AUTH_PORT", "8081")
-    E2E_CONFIG = {
-        "timeout": 30,
-        "base_url": f"http://localhost:{backend_port}",
-        "websocket_url": f"ws://localhost:{backend_port}/ws",
-        "auth_url": f"http://localhost:{auth_port}",
-        "test_user": "test@example.com"
-    }
+else:
+    try:
+        from tests.e2e.dynamic_port_manager import get_port_manager
+        port_mgr = get_port_manager()
+        urls = port_mgr.get_service_urls()
+        E2E_CONFIG = {
+            "timeout": 30,
+            "base_url": urls["backend"],
+            "websocket_url": urls["websocket"],
+            "auth_url": urls["auth"],
+            "test_user": "test@example.com",
+            "environment": "test"
+        }
+    except ImportError:
+        # Fallback to defaults if port manager not available
+        backend_port = os.environ.get("TEST_BACKEND_PORT", "8000")
+        auth_port = os.environ.get("TEST_AUTH_PORT", "8081")
+        E2E_CONFIG = {
+            "timeout": 30,
+            "base_url": f"http://localhost:{backend_port}",
+            "websocket_url": f"ws://localhost:{backend_port}/ws",
+            "auth_url": f"http://localhost:{auth_port}",
+            "test_user": "test@example.com",
+            "environment": "test"
+        }
 
 class E2EEnvironmentValidator:
     """Validator for E2E test environment."""
@@ -85,6 +112,45 @@ class E2EEnvironmentValidator:
         return True
 
 # Basic test setup fixtures
+@pytest.fixture
+def staging_oauth_config():
+    """Configure OAuth simulation for staging tests."""
+    if is_staging:
+        # Ensure E2E_OAUTH_SIMULATION_KEY is available for staging tests
+        oauth_key = os.getenv("E2E_OAUTH_SIMULATION_KEY")
+        if not oauth_key:
+            pytest.skip("E2E_OAUTH_SIMULATION_KEY not available - required for staging OAuth simulation")
+        
+        return {
+            "oauth_simulation_enabled": True,
+            "oauth_simulation_key": oauth_key,
+            "auth_headers": {"X-E2E-OAuth-Simulation-Key": oauth_key},
+            "environment": "staging"
+        }
+    else:
+        return {
+            "oauth_simulation_enabled": False,
+            "oauth_simulation_key": None,
+            "auth_headers": {},
+            "environment": current_env
+        }
+
+@pytest.fixture
+async def test_user_token(staging_oauth_config):
+    """Get a valid test user token for API testing."""
+    if staging_oauth_config["oauth_simulation_enabled"]:
+        # Use OAuth simulation for staging
+        try:
+            from tests.e2e.staging_auth_bypass import StagingAuthHelper
+            auth_helper = StagingAuthHelper(staging_oauth_config["oauth_simulation_key"])
+            token = await auth_helper.get_test_token()
+            return {"token": token, "headers": {"Authorization": f"Bearer {token}"}}
+        except Exception as e:
+            pytest.skip(f"Failed to get staging auth token: {e}")
+    else:
+        # Mock token for local testing
+        return {"token": "mock-test-token", "headers": {"Authorization": "Bearer mock-test-token"}}
+
 @pytest.fixture
 async def real_agent_service():
     """Real agent service for E2E tests."""
@@ -134,7 +200,8 @@ def real_llm_config():
     use_real_llm = (primary_enabled or
                     os.getenv("USE_REAL_LLM", "true").lower() == "true" or
                     os.getenv("TEST_USE_REAL_LLM", "true").lower() == "true" or
-                    os.getenv("ENABLE_REAL_LLM_TESTING", "true").lower() == "true")
+                    os.getenv("ENABLE_REAL_LLM_TESTING", "true").lower() == "true" or
+                    is_staging)  # Always use real LLM in staging
     return {
         "enabled": use_real_llm,
         "timeout": 30.0,

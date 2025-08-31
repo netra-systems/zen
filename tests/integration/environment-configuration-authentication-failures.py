@@ -39,9 +39,9 @@ import json
 from unittest.mock import Mock, patch, MagicMock
 from pathlib import Path
 
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.core.config import get_unified_config
-from auth_service.auth_core.isolated_environment import IsolatedEnvironment as AuthIsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment as AuthIsolatedEnvironment
 
 
 class TestEnvironmentConfigurationAuthenticationFailures:

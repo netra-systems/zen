@@ -33,7 +33,7 @@ import pytest
 from dev_launcher.cache_manager import CacheManager
 from dev_launcher.config import LauncherConfig
 from dev_launcher.database_connector import ConnectionStatus, DatabaseConnector
-from dev_launcher.isolated_environment import EnvironmentValidator
+from shared.isolated_environment import EnvironmentValidator
 from dev_launcher.health_monitor import HealthMonitor, HealthStatus, ServiceState
 from dev_launcher.launcher import DevLauncher
 from dev_launcher.log_streamer import LogManager

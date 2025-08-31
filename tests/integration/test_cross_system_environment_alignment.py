@@ -21,7 +21,7 @@ from unittest.mock import patch, MagicMock
 from pathlib import Path
 
 from netra_backend.app.core.unified_logging import central_logger
-from dev_launcher.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 logger = central_logger.get_logger(__name__)
 

@@ -8,7 +8,7 @@ import os
 import pytest
 from unittest.mock import patch
 
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 class TestEnvironmentIsolation:
@@ -97,7 +97,7 @@ class TestEnvironmentIsolation:
     def test_environment_variable_isolation_in_config(self):
         """Test that environment variables are properly isolated and accessible through IsolatedEnvironment."""
         # Use IsolatedEnvironment to properly isolate test settings
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         # Store original values to restore later
         original_env_val = os.environ.get('ENVIRONMENT')

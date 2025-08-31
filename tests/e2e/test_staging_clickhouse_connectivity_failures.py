@@ -47,7 +47,7 @@ from typing import Any, Dict, Optional, Tuple
 import httpx
 
 # Core system imports using absolute paths
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from test_framework.environment_markers import env_requires, staging_only
 
 

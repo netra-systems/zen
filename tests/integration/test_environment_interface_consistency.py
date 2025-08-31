@@ -15,8 +15,8 @@ from typing import Dict, Any, Optional
 from pathlib import Path
 
 # Import both IsolatedEnvironment implementations to test consistency
-from dev_launcher.isolated_environment import IsolatedEnvironment as DevLauncherIsolatedEnvironment
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment as BackendIsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment as DevLauncherIsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment as BackendIsolatedEnvironment
 
 
 class TestEnvironmentInterfaceConsistency:

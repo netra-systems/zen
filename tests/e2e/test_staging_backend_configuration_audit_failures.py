@@ -70,7 +70,7 @@ from urllib.parse import urlparse
 import httpx
 
 # Core system imports using absolute paths per SPEC/import_management_architecture.xml
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from test_framework.environment_markers import env_requires, staging_only
 
 

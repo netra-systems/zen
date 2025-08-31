@@ -56,7 +56,7 @@ from netra_backend.app.core.resilience.unified_circuit_breaker import (
     UnifiedCircuitBreakerManager,
     get_unified_circuit_breaker_manager
 )
-from dev_launcher.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.database_connector import DatabaseConnector
 from test_framework.base_e2e_test import BaseE2ETest

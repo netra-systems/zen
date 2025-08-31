@@ -39,7 +39,7 @@ sys.path.insert(0, project_root)
 import pytest
 from shared.jwt_config import SharedJWTConfig
 from netra_backend.app.core.unified.jwt_validator import jwt_validator
-from dev_launcher.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class JWTConfigBuilder:

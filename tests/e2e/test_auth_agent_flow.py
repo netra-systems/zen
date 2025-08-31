@@ -17,7 +17,7 @@ from typing import Any, Dict, Optional
 import pytest
 
 # Import isolated environment for proper env management
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 # Set test environment using IsolatedEnvironment
 env = get_env()

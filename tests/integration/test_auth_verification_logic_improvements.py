@@ -32,7 +32,7 @@ import json
 import jwt
 from urllib.parse import urlparse
 
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 

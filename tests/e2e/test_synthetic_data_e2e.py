@@ -163,7 +163,7 @@ class TestSyntheticDataE2E:
     @pytest.fixture
     def performance_timeout(self):
         """Get performance timeout for E2E tests."""
-        from dev_launcher.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         env = get_env()
         return int(env.get("E2E_PERFORMANCE_TIMEOUT", "120"))
     
