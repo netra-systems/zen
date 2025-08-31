@@ -36,6 +36,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import pytest
 
+from test_framework.service_dependencies import requires_services
 from tests.e2e.database_test_connections import (
     DatabaseTestConnections,
 )
@@ -440,6 +441,7 @@ class CrossServiceDatabaseSyncValidator:
 # PYTEST TEST IMPLEMENTATIONS
 
 @pytest.mark.critical
+@requires_services(["auth", "backend", "database", "redis"], mode="either")
 @pytest.mark.asyncio 
 @pytest.mark.e2e
 async def test_user_creation_database_sync():
@@ -469,6 +471,7 @@ async def test_user_creation_database_sync():
 
 
 @pytest.mark.critical
+@requires_services(["auth", "backend", "database", "redis"], mode="either")
 @pytest.mark.asyncio
 @pytest.mark.e2e
 async def test_profile_update_propagation():
@@ -496,6 +499,7 @@ async def test_profile_update_propagation():
 
 
 @pytest.mark.critical
+@requires_services(["auth", "backend", "database"], mode="either")
 @pytest.mark.asyncio
 @pytest.mark.e2e
 async def test_transaction_consistency_across_services():
@@ -522,6 +526,7 @@ async def test_transaction_consistency_across_services():
 
 
 @pytest.mark.critical
+@requires_services(["auth", "backend", "database", "redis"], mode="either")
 @pytest.mark.asyncio
 @pytest.mark.e2e
 async def test_concurrent_updates_conflict_resolution():
@@ -549,6 +554,7 @@ async def test_concurrent_updates_conflict_resolution():
 
 
 @pytest.mark.critical
+@requires_services(["auth", "backend", "database"], mode="either")
 @pytest.mark.asyncio
 @pytest.mark.e2e
 async def test_foreign_key_relationships():
@@ -575,6 +581,7 @@ async def test_foreign_key_relationships():
 
 
 @pytest.mark.critical
+@requires_services(["auth", "backend", "database", "redis"], mode="either")
 @pytest.mark.asyncio
 @pytest.mark.e2e
 async def test_cache_layer_synchronization():
@@ -601,6 +608,7 @@ async def test_cache_layer_synchronization():
 
 
 @pytest.mark.critical
+@requires_services(["auth", "backend", "database", "redis"], mode="either")
 @pytest.mark.asyncio
 @pytest.mark.e2e
 async def test_complete_cross_service_database_sync():

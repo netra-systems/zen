@@ -60,7 +60,7 @@ jest.mock('@/store/unified-chat', () => ({
 
 describe('Triage Agent Flow Tests', () => {
   setupAntiHang();
-    jest.setTimeout(10000);
+  
   let wsEventHandlers: { [key: string]: Function[] } = {};
   let unifiedStore: ReturnType<typeof useUnifiedChatStore>;
 
@@ -82,9 +82,8 @@ describe('Triage Agent Flow Tests', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    jest.clearAllTimers();
     wsEventHandlers = {};
-      cleanupAntiHang();
+    cleanupAntiHang();
   });
 
   const simulateWebSocketMessage = (message: WebSocketMessage) => {
