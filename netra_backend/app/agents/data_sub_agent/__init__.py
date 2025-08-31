@@ -33,21 +33,8 @@ from netra_backend.app.schemas.shared_types import (
 )
 from netra_backend.app.services.llm.cost_optimizer import LLMCostOptimizer
 
-# LEGACY IMPORTS - Deprecated, will be removed in next phase
-# Kept temporarily for backward compatibility during migration
-try:
-    from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent as LegacyDataSubAgent
-    from netra_backend.app.agents.data_sub_agent.analysis_engine import AnalysisEngine
-    from netra_backend.app.agents.data_sub_agent.data_operations import DataOperations
-    from netra_backend.app.agents.data_sub_agent.execution_engine import ExecutionEngine
-    from netra_backend.app.agents.data_sub_agent.query_builder import QueryBuilder
-except ImportError:
-    # Legacy imports may fail as we clean up fragmented files
-    LegacyDataSubAgent = None
-    QueryBuilder = None
-    AnalysisEngine = None
-    DataOperations = None
-    ExecutionEngine = None
+# Legacy imports have been removed as part of SSOT compliance
+# All functionality is now consolidated into the unified DataSubAgent implementation
 
 __all__ = [
     # PRIMARY CONSOLIDATED IMPLEMENTATION
@@ -66,11 +53,4 @@ __all__ = [
     'create_workload_events_table_if_missing',
     'get_clickhouse_client',
     'clickhouse_client',  # Backward compatibility
-    
-    # LEGACY - Deprecated, remove after migration
-    'LegacyDataSubAgent',
-    'QueryBuilder',
-    'AnalysisEngine', 
-    'DataOperations',
-    'ExecutionEngine'
 ]
