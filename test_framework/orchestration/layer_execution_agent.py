@@ -41,11 +41,8 @@ from test_framework.layer_system import (
 )
 from test_framework.category_system import CategorySystem, TestCategory, CategoryPriority
 
-# Import existing test runner components for integration
-try:
-    from scripts.unified_test_runner import UnifiedTestRunner as LegacyUnifiedTestRunner
-except ImportError:
-    LegacyUnifiedTestRunner = None
+# Legacy import removed as part of SSOT compliance
+# Test runner integration handled through proper interfaces
 
 # Environment management
 try:
