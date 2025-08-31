@@ -170,7 +170,7 @@ class TestHealthCheckersCore:
         assert "ClickHouse disabled in development" in result.details["reason"]
     
     # Unit test with direct error handler testing to avoid mock isolation issues
-        def test_check_clickhouse_health_connection_error_direct(self):
+    def test_check_clickhouse_health_connection_error_direct(self):
         """Test ClickHouse error handler directly with critical priority in non-development environment."""
         from netra_backend.app.core.health_checkers import _handle_clickhouse_error, ServicePriority
         
@@ -337,7 +337,7 @@ class TestHealthCheckersCore:
         assert "component_name" in result.details
         assert "success" in result.details
 
-        @patch('netra_backend.app.core.health_checkers.check_postgres_health')
+    @patch('netra_backend.app.core.health_checkers.check_postgres_health')
     @patch('netra_backend.app.core.health_checkers.check_redis_health')
     @patch('netra_backend.app.core.health_checkers.check_clickhouse_health')
     @patch('netra_backend.app.core.health_checkers.check_websocket_health')
