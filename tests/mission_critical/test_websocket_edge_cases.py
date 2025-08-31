@@ -30,9 +30,9 @@ from loguru import logger
 
 # Import minimal test framework
 from tests.mission_critical.test_websocket_load_minimal import (
-    MinimalWebSocketLoadTester, 
-    MinimalLoadMetrics,
-    MockWebSocketConnection
+    RealWebSocketLoadTester, 
+    RealWebSocketLoadMetrics,
+    RealWebSocketConnection
 )
 
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
@@ -40,7 +40,7 @@ from fastapi import WebSocket
 
 
 @dataclass
-class EdgeCaseMetrics(MinimalLoadMetrics):
+class EdgeCaseMetrics(RealWebSocketLoadMetrics):
     """Extended metrics for edge case testing."""
     connection_drops: int = 0
     reconnection_successes: int = 0
@@ -60,7 +60,7 @@ class EdgeCaseMetrics(MinimalLoadMetrics):
             self.max_recovery_time_ms = max(self.recovery_times_ms)
 
 
-class EdgeCaseStressTester(MinimalWebSocketLoadTester):
+class EdgeCaseStressTester(RealWebSocketLoadTester):
     """Extended tester for edge case scenarios."""
     
     async def test_exact_limits(self) -> EdgeCaseMetrics:
@@ -108,7 +108,7 @@ class EdgeCaseStressTester(MinimalWebSocketLoadTester):
         
         # Create 3 users for recovery testing
         for i in range(3):
-            conn = MockWebSocketConnection(f"recovery-user-{i:03d}")
+            conn = RealWebSocketConnection(f"recovery-user-{i:03d}", self.services_manager)
             self.connections.append(conn)
             
             # Connect with thread_id
@@ -259,7 +259,7 @@ class EdgeCaseStressTester(MinimalWebSocketLoadTester):
         # Create 2 users for burst testing
         burst_connections = []
         for i in range(2):
-            conn = MockWebSocketConnection(f"burst-user-{i:03d}")
+            conn = RealWebSocketConnection(f"burst-user-{i:03d}", self.services_manager)
             burst_connections.append(conn)
             
             mock_websocket = MagicMock(spec=WebSocket)
