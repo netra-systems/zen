@@ -68,7 +68,7 @@ class TestDatabaseManagerURLConversion:
             assert result == expected_output
     
         def test_get_base_database_url_default_fallback(self):
-        """Test default URL when DATABASE_URL not set."""
+            """Test default URL when DATABASE_URL not set."""
         with patch.dict(os.environ, {}, clear=True):
             with patch("netra_backend.app.db.database_manager.get_current_environment") as mock_env:
                 mock_env.return_value = "testing"  # Changed from "development" to "testing" to match expected URL
@@ -631,7 +631,7 @@ class TestDatabaseManagerAdvancedErrorHandling:
         os.environ.pop("ENVIRONMENT", None)
     
         def test_malformed_url_parsing_error(self):
-        """Test handling of URLs that cause parsing errors."""
+            """Test handling of URLs that cause parsing errors."""
         manager = DatabaseManager()
         
         # Test with various malformed URLs
@@ -660,7 +660,7 @@ class TestDatabaseManagerAdvancedErrorHandling:
                     assert "url" in str(e).lower() or "database" in str(e).lower()
     
         def test_connection_pool_configuration_errors(self):
-        """Test error handling in connection pool configuration."""
+            """Test error handling in connection pool configuration."""
         with patch.dict(os.environ, {"DATABASE_URL": "postgresql://user:pass@host:5432/db"}):
             # Test with invalid pool configuration
             with patch('netra_backend.app.db.database_manager.create_engine') as mock_create_engine:
@@ -671,7 +671,7 @@ class TestDatabaseManagerAdvancedErrorHandling:
                     create_migration_engine()
     
         def test_engine_creation_with_timeout_errors(self):
-        """Test engine creation with connection timeout scenarios."""
+            """Test engine creation with connection timeout scenarios."""
         manager = DatabaseManager()
         
         with patch.dict(os.environ, {"DATABASE_URL": "postgresql://user:pass@host:5432/db"}):
@@ -686,7 +686,7 @@ class TestDatabaseManagerAdvancedErrorHandling:
                 assert result is not None
     
         def test_session_factory_error_handling(self):
-        """Test error handling in session factory creation."""
+            """Test error handling in session factory creation."""
         with patch.dict(os.environ, {"DATABASE_URL": "postgresql://user:pass@host:5432/db"}):
             # Mock sessionmaker to fail
             with patch('netra_backend.app.db.database_manager.sessionmaker') as mock_sessionmaker:
@@ -697,7 +697,7 @@ class TestDatabaseManagerAdvancedErrorHandling:
                     get_migration_session()
     
         def test_concurrent_access_error_handling(self):
-        """Test database manager behavior under simulated concurrent access."""
+            """Test database manager behavior under simulated concurrent access."""
         manager = DatabaseManager()
         
         with patch.dict(os.environ, {"DATABASE_URL": "postgresql://user:pass@host:5432/db"}):
@@ -721,7 +721,7 @@ class TestDatabaseManagerAdvancedErrorHandling:
             assert all(r[0] == results[0][0] for r in results)  # Base URLs consistent
     
         def test_environment_variable_handling_with_special_chars(self):
-        """Test handling of environment variables with unusual characters."""
+            """Test handling of environment variables with unusual characters."""
         manager = DatabaseManager()
         
         # Test with various potentially problematic URLs that should be handled gracefully
@@ -744,7 +744,7 @@ class TestDatabaseManagerAdvancedErrorHandling:
                     pytest.fail(f"Failed to handle URL: {test_url}, error: {e}")
     
         def test_database_manager_state_consistency(self):
-        """Test that database manager maintains consistent state."""
+            """Test that database manager maintains consistent state."""
         manager = DatabaseManager()
         
         # Test state consistency across different environment changes
