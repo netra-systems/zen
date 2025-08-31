@@ -427,23 +427,19 @@ class UnifiedSecretManager:
     
     def get_jwt_secret(self) -> str:
         """
-        Get JWT secret using central configuration validator (SSOT).
+        Get JWT secret using SHARED secret manager.
         
-        This method now delegates to the central validator to ensure consistency
-        across all services and eliminate duplicate validation logic.
+        CRITICAL: This now uses SharedJWTSecretManager to ensure
+        the EXACT same JWT secret is used by both auth service and backend.
+        This is REQUIRED for cross-service authentication to work.
+        
+        This replaces the previous central validator approach to ensure
+        true cross-service synchronization.
         """
-        if get_central_validator is not None:
-            # Use central validator (SSOT)
-            try:
-                validator = get_central_validator(lambda key, default=None: get_env().get(key, default))
-                return validator.get_jwt_secret()
-            except Exception as e:
-                self._logger.error(f"Central validator failed: {e}")
-                # Fall through to legacy logic temporarily
+        from shared.jwt_secret_manager import SharedJWTSecretManager
         
-        # LEGACY: Fallback to original logic (can be removed once central validator is deployed)
-        self._logger.warning("Using legacy JWT secret loading - central validator not available")
-        return self._legacy_get_jwt_secret()
+        # Use the SINGLE source of truth for JWT secrets
+        return SharedJWTSecretManager.get_jwt_secret()
     
     def _legacy_get_jwt_secret(self) -> str:
         """Legacy JWT secret loading logic - DEPRECATED."""

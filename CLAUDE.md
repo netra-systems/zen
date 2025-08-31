@@ -94,6 +94,7 @@ Use Test Runner to discover tests e.g. python unified_test_runner.py. Read testi
   * **Architectural Simplicity (Anti-Over-Engineering):** Assume a finite complexity budget. Every new service, queue, or abstraction must provide more value than the complexity it adds. Strive for the fewest possible steps between a request's entry point and the business logic.
   * **"Rule of Two":** Do not abstract or generalize a pattern until you have implemented it at least twice.
   * **Code Clarity:** Aim for concise functions (\<25 lines) and focused modules (\<750 lines). Exceeding these is a signal to re-evaluate for SRP adherence.
+  * **Mega Class Exceptions:** Central SSOT classes defined in [`SPEC/mega_class_exceptions.xml`](SPEC/mega_class_exceptions.xml) may extend to 2000 lines with explicit justification. These must be true integration points that cannot be split without violating SSOT principles.
   * **Task Decomposition:** If a task is too large or complex, decompose and delegate it to specialized sub-agents with fresh contexts. ALWAYS carefully manage your own context use and agents context use.
 
 ### 2.3. Code Quality Standards
@@ -286,6 +287,7 @@ This is a non-exhaustive list of mission-critical specs.
 | [`core.xml`](SPEC/core.xml) | Core system architecture. |
 | [`type_safety.xml`](SPEC/type_safety.xml) | Type safety and duplication rules. |
 | [`conventions.xml`](SPEC/conventions.xml) | Standards and guidelines. |
+| [`mega_class_exceptions.xml`](SPEC/mega_class_exceptions.xml) | **CRITICAL:** Approved exceptions for central SSOT classes up to 2000 lines. |
 | [`git_commit_atomic_units.xml`](SPEC/git_commit_atomic_units.xml) | **CRITICAL:** Git commit standards. |
 | [`import_management_architecture.xml`](SPEC/import_management_architecture.xml) | **CRITICAL:** Absolute import rules. |
 
@@ -298,7 +300,8 @@ Direct OS.env access is FORBIDDEN except in each services canonical env config S
 **CRITICAL: Check the work in progress and current system state BEFORE starting work.**
 
   * [`MASTER_WIP_STATUS.md`](MASTER_WIP_STATUS.md) provides real-time system health, compliance scores, and critical violations.
-  * Always review this report first and regenerate it after your work is complete.
+  * **[`DEFINITION_OF_DONE_CHECKLIST.md`](DEFINITION_OF_DONE_CHECKLIST.md) - MANDATORY checklist for all module changes. Review ALL files listed for your module.**
+  * Always review these reports first and regenerate status after your work is complete.
 
 -----
 
@@ -307,15 +310,17 @@ Direct OS.env access is FORBIDDEN except in each services canonical env config S
 ### For Every Code Change:
 
 1.  **Assess Scope:** Determine if specialized agents (PM, Design, QA, etc.) are required.
+2.  **Review DoD Checklist:** Open [`DEFINITION_OF_DONE_CHECKLIST.md`](DEFINITION_OF_DONE_CHECKLIST.md) and identify your module's section.
 3.  **Check Learnings:** Search recent [`learnings/index.xml`](SPEC/learnings/index.xml) and recent commit changes.
 4.  **Verify Strings:** Validate literals with `scripts/query_string_literals.py`.
 5.  **Review Core Specs:** Re-read [`type_safety.xml`](SPEC/type_safety.xml) and [`conventions.xml`](SPEC/conventions.xml).
-6.  **Crate New Test Suite**. Create a new failing test suite or regression suite.
+6.  **Create New Test Suite:** Create a new failing test suite or regression suite.
 7.  **Run Local Tests:** Run relevant tests for the scope of work done. Real services > mock.
-8.  **Update Documentation:** Ensure specs reflect the implemented reality.
-9.  **Refresh Indexes:** Update the string literal index if new constants were added.
-10. **Update Status:** Regenerate the WIP report.
-11. **Save new Learnings** [`learnings/index.xml`](SPEC/learnings/index.xml).
+8.  **Complete DoD Checklist:** Go through EVERY item in your module's checklist section.
+9.  **Update Documentation:** Ensure specs reflect the implemented reality.
+10. **Refresh Indexes:** Update the string literal index if new constants were added.
+11. **Update Status:** Regenerate the WIP report.
+12. **Save new Learnings:** [`learnings/index.xml`](SPEC/learnings/index.xml).
 
 ### 9.1 Git Commit Standards.
 **All commits follow [`SPEC/git_commit_atomic_units.xml`](SPEC/git_commit_atomic_units.xml).**

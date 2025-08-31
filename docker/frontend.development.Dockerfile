@@ -17,7 +17,6 @@ RUN npm ci --legacy-peer-deps
 COPY frontend/ ./
 
 # Build the application (for production mode)
-# Skip build in dev mode as we'll use next dev
 ARG BUILD_MODE=development
 RUN if [ "$BUILD_MODE" = "production" ]; then npm run build; fi
 
@@ -27,7 +26,7 @@ FROM node:20-alpine
 # Install runtime dependencies
 RUN apk add --no-cache curl
 
-# Create non-root user (check if group/user exists first)
+# Create non-root user
 RUN (addgroup -g 1000 netra 2>/dev/null || true) && \
     (adduser -D -u 1000 -G netra netra 2>/dev/null || true) && \
     mkdir -p /app && \
@@ -36,17 +35,33 @@ RUN (addgroup -g 1000 netra 2>/dev/null || true) && \
 # Set working directory
 WORKDIR /app
 
-# Copy node modules and built app from builder
-COPY --from=builder --chown=1000:1000 /app/node_modules ./node_modules
+# Copy package files first
 COPY --from=builder --chown=1000:1000 /app/package*.json ./
+
+# Copy node modules
+COPY --from=builder --chown=1000:1000 /app/node_modules ./node_modules
+
+# Copy only necessary config files
 COPY --from=builder --chown=1000:1000 /app/tsconfig.json ./
 COPY --from=builder --chown=1000:1000 /app/tailwind.config.ts ./
 COPY --from=builder --chown=1000:1000 /app/postcss.config.mjs ./
+COPY --from=builder --chown=1000:1000 /app/next.config.ts ./
+COPY --from=builder --chown=1000:1000 /app/next.config.turbopack.ts ./
 
-# Copy Next.js specific directories (these may or may not exist depending on dev/prod mode)
-COPY --from=builder --chown=1000:1000 /app/ ./
+# Copy only source code directories (no test files, no cypress)
+COPY --from=builder --chown=1000:1000 /app/app ./app
+COPY --from=builder --chown=1000:1000 /app/components ./components
+COPY --from=builder --chown=1000:1000 /app/hooks ./hooks
+COPY --from=builder --chown=1000:1000 /app/services ./services
+COPY --from=builder --chown=1000:1000 /app/store ./store
+COPY --from=builder --chown=1000:1000 /app/types ./types
+COPY --from=builder --chown=1000:1000 /app/utils ./utils
+COPY --from=builder --chown=1000:1000 /app/lib ./lib
+COPY --from=builder --chown=1000:1000 /app/providers ./providers
+COPY --from=builder --chown=1000:1000 /app/auth ./auth
+COPY --from=builder --chown=1000:1000 /app/public ./public
 
-# Create .next directory with proper permissions
+# Create .next directory with proper permissions for dev mode
 RUN mkdir -p /app/.next && chown -R 1000:1000 /app/.next
 
 # Switch to non-root user
@@ -56,7 +71,7 @@ USER 1000
 ENV NODE_ENV=development \
     NEXT_TELEMETRY_DISABLED=1
 
-# Health check - check the Next.js health endpoint or app root  
+# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:3000/api/health || curl -f http://localhost:3000/ || exit 1
 
