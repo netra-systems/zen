@@ -185,6 +185,16 @@ class CentralConfigurationValidator:
         
     def get_environment(self) -> Environment:
         """Get the current deployment environment."""
+        # In test contexts, don't cache the environment value to ensure 
+        # test patches (patch.dict(os.environ, ...)) are respected
+        if self._is_test_context():
+            env_str = self.env_getter("ENVIRONMENT", "development").lower()
+            try:
+                return Environment(env_str)
+            except ValueError:
+                raise ValueError(f"Invalid ENVIRONMENT value: '{env_str}'. Must be one of: {[e.value for e in Environment]}")
+        
+        # In non-test contexts, use caching for performance
         if self._current_environment is None:
             env_str = self.env_getter("ENVIRONMENT", "development").lower()
             try:
@@ -193,6 +203,47 @@ class CentralConfigurationValidator:
                 raise ValueError(f"Invalid ENVIRONMENT value: '{env_str}'. Must be one of: {[e.value for e in Environment]}")
         
         return self._current_environment
+    
+    def _is_test_context(self) -> bool:
+        """Check if we're currently running in a test context.
+        
+        This method detects various test environments to ensure proper
+        environment variable handling during tests.
+        
+        Returns:
+            bool: True if in test context, False otherwise
+        """
+        import sys
+        
+        # Check for pytest execution
+        if 'pytest' in sys.modules:
+            return True
+        
+        # Check for test environment variables
+        test_indicators = [
+            'PYTEST_CURRENT_TEST',
+            'TESTING',
+            'TEST_MODE'
+        ]
+        
+        for indicator in test_indicators:
+            if self.env_getter(indicator):
+                return True
+        
+        # Check if ENVIRONMENT is set to testing
+        env_value = self.env_getter('ENVIRONMENT', '').lower()
+        if env_value in ['test', 'testing']:
+            return True
+        
+        return False
+    
+    def clear_environment_cache(self) -> None:
+        """Clear the cached environment value.
+        
+        This is useful in test contexts where the environment may change
+        between tests via environment variable patching.
+        """
+        self._current_environment = None
     
     def validate_all_requirements(self) -> None:
         """
@@ -430,6 +481,19 @@ def get_central_validator(env_getter_func=None) -> CentralConfigurationValidator
         _global_validator = CentralConfigurationValidator(env_getter_func)
     
     return _global_validator
+
+
+def clear_central_validator_cache() -> None:
+    """
+    Clear the central validator's cached values.
+    
+    This is useful in test contexts where environment variables may change
+    between tests via environment variable patching.
+    """
+    global _global_validator
+    
+    if _global_validator is not None:
+        _global_validator.clear_environment_cache()
 
 
 def validate_platform_configuration() -> None:
