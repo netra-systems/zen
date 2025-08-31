@@ -303,32 +303,46 @@ class UnifiedSecretManager:
         # CONFIG BOOTSTRAP: Direct env access for JWT secret resolution
         env = get_env().get("ENVIRONMENT", "development").lower()
         
-        # 1. Check environment-specific secrets first
-        env_specific_key = f"JWT_SECRET_{env.upper()}"
-        secret = get_env().get(env_specific_key)
-        if secret and secret.strip():
-            self._logger.debug(f"Using environment-specific JWT secret: {env_specific_key}")
-            return secret.strip()
+        # 1. Environment-specific secrets (REQUIRED for staging/production)
+        if env == "staging":
+            secret = get_env().get("JWT_SECRET_STAGING")
+            if secret and secret.strip():
+                self._logger.debug("Using JWT_SECRET_STAGING")
+                return secret.strip()
+            
+            # HARD STOP: No fallback in staging
+            raise ValueError(
+                f"JWT secret not configured for staging environment. "
+                "Set JWT_SECRET_STAGING environment variable."
+            )
         
-        # 2. Check generic JWT_SECRET_KEY
-        secret = get_env().get("JWT_SECRET_KEY")
-        if secret and secret.strip():
-            self._logger.debug("Using JWT_SECRET_KEY")
-            return secret.strip()
+        elif env == "production":
+            secret = get_env().get("JWT_SECRET_PRODUCTION")
+            if secret and secret.strip():
+                self._logger.debug("Using JWT_SECRET_PRODUCTION")
+                return secret.strip()
+            
+            # HARD STOP: No fallback in production
+            raise ValueError(
+                f"JWT secret not configured for production environment. "
+                "Set JWT_SECRET_PRODUCTION environment variable."
+            )
         
-        # 3. Check legacy JWT_SECRET (for backward compatibility)
-        secret = get_env().get("JWT_SECRET")
-        if secret and secret.strip():
-            self._logger.warning("Using legacy JWT_SECRET - consider upgrading to JWT_SECRET_KEY")
-            return secret.strip()
+        elif env == "development":
+            # Development: require JWT_SECRET_KEY
+            secret = get_env().get("JWT_SECRET_KEY")
+            if secret and secret.strip():
+                self._logger.debug("Using JWT_SECRET_KEY (development)")
+                return secret.strip()
+            
+            # HARD STOP: No fallback even in development
+            raise ValueError(
+                f"JWT secret not configured for development environment. "
+                "Set JWT_SECRET_KEY environment variable."
+            )
         
-        # 4. Development fallback
-        if env == "development":
-            self._logger.warning("No JWT secret configured - using development fallback")
-            return "dev-secret-key-DO-NOT-USE-IN-PRODUCTION"
-        
-        # 5. No secret found in non-development environment
-        raise ValueError(f"JWT secret not configured for {env} environment. Set JWT_SECRET_KEY or JWT_SECRET_{env.upper()}")
+        # HARD STOP: Unknown environment
+        raise ValueError(f"Unknown environment '{env}'. Set ENVIRONMENT to development, staging, or production.")
     
     def clear_cache(self):
         """Clear the secret cache."""

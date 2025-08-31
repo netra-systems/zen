@@ -71,6 +71,12 @@ class AuthSecretLoader:
                 logger.info("Using staging-jwt-secret from Secret Manager")
                 return secret
                 
+            # HARD STOP: No fallback in staging
+            raise ValueError(
+                f"JWT secret not configured for staging environment. "
+                "Set JWT_SECRET_STAGING environment variable or configure staging-jwt-secret in Secret Manager."
+            )
+                
         elif env == "production":
             # In production, check for production-specific secret first
             secret = env_manager.get("JWT_SECRET_PRODUCTION")
@@ -83,18 +89,30 @@ class AuthSecretLoader:
             if secret:
                 logger.info("Using prod-jwt-secret from Secret Manager")
                 return secret
+                
+            # HARD STOP: No fallback in production
+            raise ValueError(
+                f"JWT secret not configured for production environment. "
+                "Set JWT_SECRET_PRODUCTION environment variable or configure prod-jwt-secret in Secret Manager."
+            )
         
-        # CRITICAL: Check JWT_SECRET_KEY as primary secret for consistency with backend service
-        # This ensures both services use the same secret when environment-specific secrets are not available
-        secret = env_manager.get("JWT_SECRET_KEY")
-        if secret:
-            logger.info("Using JWT_SECRET_KEY from environment (shared with backend)")
-            return secret
+        elif env == "development":
+            # Development only: allow JWT_SECRET_KEY as primary secret
+            secret = env_manager.get("JWT_SECRET_KEY")
+            if secret:
+                logger.info("Using JWT_SECRET_KEY from environment (development only)")
+                return secret
+            
+            # HARD STOP: No fallback in development
+            raise ValueError(
+                f"JWT secret not configured for development environment. "
+                "Set JWT_SECRET_KEY environment variable."
+            )
         
-        # No fallback in any environment - require explicit JWT secret configuration
+        # HARD STOP: Environment-specific secrets are required, no fallbacks
         raise ValueError(
             f"JWT secret not configured for {env} environment. "
-            "Set JWT_SECRET_KEY environment variable."
+            f"Set JWT_SECRET_{env.upper()} environment variable or configure {env}-jwt-secret in Secret Manager."
         )
     
     @staticmethod
