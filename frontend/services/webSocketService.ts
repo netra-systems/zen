@@ -57,8 +57,8 @@ class WebSocketService {
   // Enhanced refresh handling
   private reconnectAttempts: number = 0;
   private maxReconnectAttempts: number = 10;
-  private baseReconnectDelay: number = 1000;
-  private maxReconnectDelay: number = 30000;
+  private baseReconnectDelay: number = 100;  // Start with 100ms for faster initial reconnect
+  private maxReconnectDelay: number = 10000;  // Cap at 10s instead of 30s
   private lastSuccessfulConnection: number = 0;
   private connectionId: string = '';
   private beforeUnloadHandler: (() => void) | null = null;
@@ -1074,11 +1074,17 @@ class WebSocketService {
       return;
     }
     
-    // Calculate exponential backoff with jitter
-    const delay = Math.min(
-      this.baseReconnectDelay * Math.pow(2, this.reconnectAttempts) + Math.random() * 1000,
-      this.maxReconnectDelay
-    );
+    // First reconnect should be immediate (likely a page refresh)
+    let delay: number;
+    if (this.reconnectAttempts === 0) {
+      delay = 0;  // Immediate reconnect on first attempt
+    } else {
+      // Calculate exponential backoff with jitter for subsequent attempts
+      delay = Math.min(
+        this.baseReconnectDelay * Math.pow(2, this.reconnectAttempts - 1) + Math.random() * 100,
+        this.maxReconnectDelay
+      );
+    }
     
     this.state = 'reconnecting';
     this.reconnectAttempts++;
