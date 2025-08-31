@@ -230,7 +230,7 @@ def main():
     print(f"  export STAGING_AUTH_URL=https://api.staging.netrasystems.ai")
     print("\nOr add to your .env.staging file:")
     print(f"  E2E_BYPASS_KEY={bypass_key}")
-    print("\nTest the auth bypass:")
+    print("\nTest the OAUTH SIMULATION:")
     print(f"  python tests/e2e/staging_auth_bypass.py")
     print("\n" + "="*60)
     

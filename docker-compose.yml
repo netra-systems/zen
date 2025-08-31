@@ -308,7 +308,7 @@ services:
       # Frontend URL
       FRONTEND_URL: http://localhost:3000
       
-      # Development Auth Bypass
+      # Development OAUTH SIMULATION
       ALLOW_DEV_AUTH_BYPASS: true
       WEBSOCKET_AUTH_BYPASS: true
     ports:

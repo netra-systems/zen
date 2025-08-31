@@ -201,10 +201,10 @@ class DockerWebSocketTester:
             self.results["configuration_validation"][file_path] = file_results
     
     def test_auth_bypass_logic(self) -> None:
-        """Test the WebSocket auth bypass logic configuration."""
-        logger.info("Testing auth bypass logic...")
+        """Test the WebSocket OAUTH SIMULATION logic configuration."""
+        logger.info("Testing OAUTH SIMULATION logic...")
         
-        # Simulate the auth bypass check logic
+        # Simulate the OAUTH SIMULATION check logic
         try:
             allow_dev_bypass = os.environ.get("ALLOW_DEV_AUTH_BYPASS", "false").lower() == "true"
             websocket_bypass = os.environ.get("WEBSOCKET_AUTH_BYPASS", "false").lower() == "true"
@@ -222,9 +222,9 @@ class DockerWebSocketTester:
             }
             
             if bypass_should_work:
-                logger.info("✅ Auth bypass is properly configured for development")
+                logger.info("✅ OAUTH SIMULATION is properly configured for development")
             else:
-                logger.warning("⚠️ Auth bypass may not work - check environment variables")
+                logger.warning("⚠️ OAUTH SIMULATION may not work - check environment variables")
                 
         except Exception as e:
             self.results["auth_bypass_tests"]["error"] = str(e)
@@ -236,7 +236,7 @@ class DockerWebSocketTester:
         # Test environment variables
         self.test_environment_variables()
         
-        # Test auth bypass logic
+        # Test OAUTH SIMULATION logic
         self.test_auth_bypass_logic()
         
         # Validate configuration files
@@ -263,17 +263,17 @@ class DockerWebSocketTester:
             status = "[OK]" if info["matches"] else "[FAIL]"
             print(f"  {status} {var_name}: {info['actual']} (expected: {info['expected']})")
         
-        # Auth Bypass Configuration
-        print("\nAuth Bypass Configuration:")
+        # OAUTH SIMULATION Configuration
+        print("\nOAUTH SIMULATION Configuration:")
         auth_tests = self.results["auth_bypass_tests"]
         if "error" not in auth_tests:
             bypass_status = "[OK]" if auth_tests["bypass_should_work"] else "[FAIL]"
-            print(f"  {bypass_status} Auth bypass enabled: {auth_tests['bypass_should_work']}")
+            print(f"  {bypass_status} OAUTH SIMULATION enabled: {auth_tests['bypass_should_work']}")
             print(f"     - Environment: {auth_tests['environment']}")
             print(f"     - DEV_AUTH_BYPASS: {auth_tests['allow_dev_bypass']}")
             print(f"     - WEBSOCKET_BYPASS: {auth_tests['websocket_bypass']}")
         else:
-            print(f"  [FAIL] Error testing auth bypass: {auth_tests['error']}")
+            print(f"  [FAIL] Error testing OAUTH SIMULATION: {auth_tests['error']}")
         
         # Configuration Files
         print("\nConfiguration Files:")
