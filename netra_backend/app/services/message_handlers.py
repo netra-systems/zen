@@ -4,6 +4,7 @@ from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.websockets import WebSocketDisconnect
+from fastapi import WebSocket
 
 from netra_backend.app.db.models_postgres import Run, Thread
 from netra_backend.app.logging_config import central_logger
@@ -11,6 +12,7 @@ from netra_backend.app.services.service_interfaces import IMessageHandlerService
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor import SupervisorAgent
+    from netra_backend.app.websocket_core import WebSocketManager
 import json
 
 from netra_backend.app.schemas.registry import (
@@ -76,15 +78,17 @@ class StartAgentPayloadTyped(TypedDict):
 class MessageHandlerService(IMessageHandlerService):
     """Handles different types of WebSocket messages following conventions"""
     
-    def __init__(self, supervisor: 'SupervisorAgent', thread_service: ThreadService):
+    def __init__(self, supervisor: 'SupervisorAgent', thread_service: ThreadService, websocket_manager: Optional['WebSocketManager'] = None):
         self.supervisor = supervisor
         self.thread_service = thread_service
+        self.websocket_manager = websocket_manager
     
     async def handle_start_agent(
         self,
         user_id: str,
         payload: StartAgentPayloadTyped,
-        db_session: AsyncSession
+        db_session: AsyncSession,
+        websocket: Optional['WebSocket'] = None
     ) -> None:
         """Handle start_agent message type"""
         user_request = self._extract_user_request(payload)
@@ -157,6 +161,15 @@ class MessageHandlerService(IMessageHandlerService):
         MessageHandlerBase.configure_supervisor(
             self.supervisor, user_id, thread, db_session
         )
+        
+        # CRITICAL: Ensure supervisor has WebSocket manager for real-time events
+        if self.websocket_manager and hasattr(self.supervisor, 'agent_registry'):
+            logger.info(f"Setting WebSocket manager on supervisor for user {user_id}")
+            self.supervisor.agent_registry.set_websocket_manager(self.websocket_manager)
+        elif self.websocket_manager is None:
+            logger.warning(f"WebSocket manager not available for user {user_id} - events disabled")
+        else:
+            logger.warning(f"Supervisor missing agent_registry - WebSocket events may not work for user {user_id}")
     
     async def _execute_supervisor(
         self, user_request: str, thread: Thread, user_id: str, run: Run
@@ -186,7 +199,8 @@ class MessageHandlerService(IMessageHandlerService):
         self,
         user_id: str,
         payload: UserMessagePayload,
-        db_session: Optional[AsyncSession]
+        db_session: Optional[AsyncSession],
+        websocket: Optional[WebSocket] = None
     ) -> None:
         """Handle user_message type"""
         text, references, thread_id = self._extract_message_data(payload)
@@ -298,6 +312,15 @@ class MessageHandlerService(IMessageHandlerService):
         self.supervisor.thread_id = thread.id
         self.supervisor.user_id = user_id
         self.supervisor.db_session = db_session
+        
+        # CRITICAL: Ensure supervisor has WebSocket manager for real-time events
+        if self.websocket_manager and hasattr(self.supervisor, 'agent_registry'):
+            logger.info(f"Setting WebSocket manager on supervisor for user {user_id}")
+            self.supervisor.agent_registry.set_websocket_manager(self.websocket_manager)
+        elif self.websocket_manager is None:
+            logger.warning(f"WebSocket manager not available for user {user_id} - events disabled")
+        else:
+            logger.warning(f"Supervisor missing agent_registry - WebSocket events may not work for user {user_id}")
     
     async def _process_user_message(
         self, user_id: str, text: str, thread: Optional[Thread],

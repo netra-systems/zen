@@ -29,14 +29,15 @@ logger = central_logger.get_logger(__name__)
 class AgentMessageHandler(BaseMessageHandler):
     """Handler for agent-related WebSocket messages."""
     
-    def __init__(self, message_handler_service: MessageHandlerService):
-        """Initialize with message handler service dependency."""
+    def __init__(self, message_handler_service: MessageHandlerService, websocket: Optional[WebSocket] = None):
+        """Initialize with message handler service dependency and websocket."""
         super().__init__([
             MessageType.START_AGENT,
             MessageType.USER_MESSAGE,
             MessageType.CHAT
         ])
         self.message_handler_service = message_handler_service
+        self.websocket = websocket
         self.processing_stats = {
             "messages_processed": 0,
             "start_agent_requests": 0,
@@ -119,7 +120,8 @@ class AgentMessageHandler(BaseMessageHandler):
             await self.message_handler_service.handle_start_agent(
                 user_id=user_id,
                 payload=payload,
-                db_session=db_session
+                db_session=db_session,
+                websocket=self.websocket
             )
             
             logger.info(f"Successfully processed start_agent for {user_id}")
@@ -145,7 +147,8 @@ class AgentMessageHandler(BaseMessageHandler):
             await self.message_handler_service.handle_user_message(
                 user_id=user_id,
                 payload=payload,
-                db_session=db_session
+                db_session=db_session,
+                websocket=self.websocket
             )
             
             logger.info(f"Successfully processed user_message for {user_id}")
