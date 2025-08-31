@@ -29,6 +29,7 @@ const createInitialState = () => ({
   activeThreadId: null,
   threads: new Map(),
   isThreadLoading: false,
+  threadLoadingState: null,
   messages: [],
   
   // WebSocket connection

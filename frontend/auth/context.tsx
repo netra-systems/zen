@@ -356,6 +356,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
       setInitialized(true); // Mark initialization as complete
+      
+      logger.info('[AUTH INIT] Auth context initialization finished', {
+        component: 'AuthContext',
+        action: 'init_finished',
+        hasUser: !!user,
+        hasToken: !!token,
+        initialized: true,
+        timestamp: new Date().toISOString()
+      });
     }
   }, [syncAuthStore, scheduleTokenRefreshCheck, handleTokenRefresh]);
 

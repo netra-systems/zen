@@ -41,11 +41,19 @@ export function setupAntiHang(customTimeout: number = TEST_TIMEOUTS.DEFAULT): vo
   // Set Jest timeout using centralized configuration
   setTestTimeout(customTimeout);
   
-  // Store original timer functions
-  originalSetTimeout = global.setTimeout;
-  originalSetInterval = global.setInterval;
-  originalClearTimeout = global.clearTimeout;
-  originalClearInterval = global.clearInterval;
+  // Store original timer functions only if not already stored
+  if (!originalSetTimeout || global.setTimeout === originalSetTimeout) {
+    originalSetTimeout = global.setTimeout;
+  }
+  if (!originalSetInterval || global.setInterval === originalSetInterval) {
+    originalSetInterval = global.setInterval;
+  }
+  if (!originalClearTimeout || global.clearTimeout === originalClearTimeout) {
+    originalClearTimeout = global.clearTimeout;
+  }
+  if (!originalClearInterval || global.clearInterval === originalClearInterval) {
+    originalClearInterval = global.clearInterval;
+  }
   
   // Override setTimeout to track timers
   global.setTimeout = ((callback: TimerHandler, delay?: number, ...args: any[]) => {
