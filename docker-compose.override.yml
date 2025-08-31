@@ -33,14 +33,15 @@ services:
       - /app/shared/__pycache__
 
   # Dev Analytics Service - Bind mount override
-  dev-analytics:
-    volumes:
-      - ./analytics_service:/app/analytics_service:delegated
-      - ./shared:/app/shared:delegated
-      - ./logs/analytics:/app/logs:delegated
-      # Exclude Python cache
-      - /app/analytics_service/__pycache__
-      - /app/shared/__pycache__
+  # NOTE: Temporarily disabled - may be causing crashes
+  # dev-analytics:
+  #   volumes:
+  #     - ./analytics_service:/app/analytics_service:delegated
+  #     - ./shared:/app/shared:delegated
+  #     - ./logs/analytics:/app/logs:delegated
+  #     # Exclude Python cache
+  #     - /app/analytics_service/__pycache__
+  #     - /app/shared/__pycache__
 
   # Dev Backend Service - Bind mount override
   dev-backend:
