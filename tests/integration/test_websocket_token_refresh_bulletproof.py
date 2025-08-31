@@ -35,9 +35,6 @@ from loguru import logger
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-from netra_backend.app.auth_integration.auth import AuthService
-from netra_backend.app.websocket.token_refresh_handler import TokenRefreshHandler
-from netra_backend.app.services.message_handler import MessageHandlerService
 from netra_backend.app.schemas.registry import WebSocketMessage
 from fastapi import WebSocket
 from fastapi.websockets import WebSocketState
@@ -258,12 +255,6 @@ class TestTokenRefreshIntegration:
         self.auth_service = MockAuthService(self.token_manager)
         self.ws_manager = WebSocketManager()
         self.metrics = TokenRefreshMetrics()
-        
-        # Create token refresh handler
-        self.refresh_handler = TokenRefreshHandler(
-            auth_service=self.auth_service,
-            ws_manager=self.ws_manager
-        )
         
         yield
         
