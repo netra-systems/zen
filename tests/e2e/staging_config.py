@@ -60,7 +60,7 @@ class StagingTestConfig:
         self.max_retries = 3
         self.verify_ssl = True
         
-        # Auth bypass configuration
+        # OAUTH SIMULATION configuration
         self.e2e_bypass_key = os.getenv("E2E_BYPASS_KEY")
         self.test_user_email = "e2e-test@staging.netrasystems.ai"
         self.test_user_name = "E2E Test User"
@@ -88,7 +88,7 @@ class StagingTestConfig:
         }
     
     def get_bypass_auth_headers(self) -> Dict[str, str]:
-        """Get headers for auth bypass endpoint."""
+        """Get headers for OAUTH SIMULATION endpoint."""
         if not self.e2e_bypass_key:
             raise ValueError("E2E_BYPASS_KEY not set in environment")
         

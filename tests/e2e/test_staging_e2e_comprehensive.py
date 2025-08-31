@@ -9,7 +9,7 @@ Business Value:
 - Prevents deployment issues that could affect customer experience
 - Ensures staging environment mirrors production behavior
 
-The auth bypass ONLY simulates the Google OAuth flow for testing,
+The OAUTH SIMULATION ONLY simulates the Google OAuth flow for testing,
 it does not bypass authentication - valid tokens are still required.
 """
 
@@ -111,7 +111,7 @@ class TestStagingAuthentication:
     
     @pytest.mark.asyncio
     async def test_auth_token_generation(self, auth_client):
-        """Test that auth bypass correctly simulates OAuth flow."""
+        """Test that OAUTH SIMULATION correctly simulates OAuth flow."""
         # Get token simulating OAuth login
         tokens = await auth_client.get_auth_token(
             email="test-oauth@staging.netrasystems.ai",

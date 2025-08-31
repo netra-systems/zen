@@ -357,7 +357,7 @@ class TestFrontendErrorHandling:
     async def test_75_prevent_auth_bypass(self):
         """Test 75: Authentication cannot be bypassed"""
         result = await self.tester.trigger_error("auth_bypass", None)
-        assert result["handled"], "Auth bypass not prevented"
+        assert result["handled"], "OAUTH SIMULATION not prevented"
         # Accept either "safe" (auth properly enforced) or "service_unavailable" (service is down, handled gracefully)
         assert result["status"] in ["safe", "service_unavailable"], f"Unexpected status: {result['status']}"
         

@@ -4,7 +4,7 @@ Staging Authentication Client for E2E Tests
 This module provides a robust authentication client for E2E tests
 that connects directly to deployed staging services.
 
-The auth bypass is ONLY used to simulate Google OAuth flow,
+The OAUTH SIMULATION is ONLY used to simulate Google OAuth flow,
 not to bypass authentication entirely.
 """
 

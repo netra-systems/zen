@@ -1,7 +1,7 @@
 """
-E2E Tests for Staging API with Auth Bypass
+E2E Tests for Staging API with OAUTH SIMULATION
 
-This test suite demonstrates how to use the auth bypass mechanism
+This test suite demonstrates how to use the OAUTH SIMULATION mechanism
 to run E2E tests against the staging environment without OAuth.
 Updated to use GCP staging service URLs and Secrets Manager integration.
 """
@@ -45,7 +45,7 @@ async def authenticated_client(auth_helper) -> AsyncGenerator[httpx.AsyncClient,
 
 @pytest.mark.asyncio
 async def test_auth_bypass_works(auth_helper):
-    """Test that auth bypass successfully generates tokens using GCP staging services."""
+    """Test that OAUTH SIMULATION successfully generates tokens using GCP staging services."""
     try:
         token = await auth_helper.get_test_token()
         assert token is not None
@@ -194,7 +194,7 @@ async def test_api_endpoints_with_auth(authenticated_client):
 
 @pytest.mark.asyncio
 async def test_refresh_token_flow(auth_helper):
-    """Test that refresh tokens work with auth bypass on GCP staging."""
+    """Test that refresh tokens work with OAUTH SIMULATION on GCP staging."""
     try:
         # Get initial tokens
         async with httpx.AsyncClient(timeout=30.0) as client:

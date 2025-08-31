@@ -152,7 +152,7 @@ def get_staging_auth() -> StagingAuthHelper:
 
 # Example usage and test
 async def test_staging_auth():
-    """Test the staging auth bypass functionality."""
+    """Test the staging OAUTH SIMULATION functionality."""
     try:
         auth = StagingAuthHelper()
         

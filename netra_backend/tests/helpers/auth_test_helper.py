@@ -115,7 +115,7 @@ class TestOnlyWebSocketAuth:
             return TestAuthHelper.create_test_auth_info()
         
         if TestAuthHelper.should_bypass_auth():
-            # Auth bypass enabled for testing
+            # OAUTH SIMULATION enabled for testing
             return TestAuthHelper.create_test_auth_info()
         
         # No valid test auth
@@ -134,7 +134,7 @@ class TestOnlyWebSocketAuth:
 def bypass_auth_for_test():
     """Context manager to temporarily bypass auth for testing."""
     if not TestAuthHelper.is_test_environment():
-        raise RuntimeError("Auth bypass can only be used in test environments!")
+        raise RuntimeError("OAUTH SIMULATION can only be used in test environments!")
     
     # Set bypass flags
     original_values = {}
