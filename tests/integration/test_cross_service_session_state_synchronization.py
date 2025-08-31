@@ -25,7 +25,8 @@ import pytest
 import redis
 
 from test_framework.base_integration_test import BaseIntegrationTest
-from test_framework.mock_utils import mock_justified
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
 
 @dataclass
