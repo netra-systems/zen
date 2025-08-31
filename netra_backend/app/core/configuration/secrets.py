@@ -318,17 +318,12 @@ class SecretManager:
     
     def _apply_secrets_to_config(self, config: AppConfig) -> None:
         """Apply loaded secrets to configuration object."""
+        # CRITICAL FIX: Use SharedJWTSecretManager for JWT secrets to ensure consistency
+        self._ensure_jwt_secret_from_shared_manager()
+        
         # Ensure critical secrets exist for staging/development
         if self._environment in ["staging", "development"]:
-            import hashlib
             from cryptography.fernet import Fernet
-            
-            # Ensure JWT_SECRET_KEY exists
-            if "JWT_SECRET_KEY" not in self._secret_cache:
-                # Generate a deterministic key for non-production environments
-                default_key = hashlib.sha256(f"netra-{self._environment}-default-jwt-key".encode()).hexdigest()
-                self._secret_cache["JWT_SECRET_KEY"] = default_key
-                self._logger.warning(f"Using default JWT secret key for {self._environment} environment")
             
             # Ensure FERNET_KEY exists
             if "FERNET_KEY" not in self._secret_cache:
@@ -339,6 +334,7 @@ class SecretManager:
             
             # Ensure SERVICE_SECRET exists
             if "SERVICE_SECRET" not in self._secret_cache:
+                import hashlib
                 service_secret = hashlib.sha256(f"netra-{self._environment}-service-secret".encode()).hexdigest()
                 self._secret_cache["SERVICE_SECRET"] = service_secret
                 self._logger.warning(f"Using default service secret for {self._environment} environment")
@@ -347,6 +343,41 @@ class SecretManager:
             secret_value = self._secret_cache.get(secret_name)
             if secret_value:
                 self._apply_single_secret(config, secret_name, secret_value, secret_mapping)
+    
+    def _ensure_jwt_secret_from_shared_manager(self) -> None:
+        """Ensure JWT secret comes from SharedJWTSecretManager for consistency.
+        
+        CRITICAL FIX: This ensures both auth service and backend service use
+        the EXACT same JWT secret by delegating to SharedJWTSecretManager.
+        """
+        try:
+            from shared.jwt_secret_manager import SharedJWTSecretManager
+            
+            # Get JWT secret from the SINGLE source of truth
+            jwt_secret = SharedJWTSecretManager.get_jwt_secret()
+            
+            # Cache it for use by the rest of the secret loading system
+            self._secret_cache["JWT_SECRET_KEY"] = jwt_secret
+            
+            self._logger.info("JWT secret loaded from SharedJWTSecretManager (synchronized with auth service)")
+            
+        except Exception as e:
+            self._logger.error(f"Failed to load JWT secret from SharedJWTSecretManager: {e}")
+            
+            # Fallback: only for non-production environments
+            if self._environment not in ["staging", "production"]:
+                fallback_secret = self._secret_cache.get("JWT_SECRET_KEY")
+                if fallback_secret:
+                    self._logger.warning(f"Using fallback JWT secret in {self._environment} environment")
+                else:
+                    # Generate a fallback for development
+                    import hashlib
+                    fallback_secret = hashlib.sha256(f"netra-{self._environment}-jwt-fallback".encode()).hexdigest()
+                    self._secret_cache["JWT_SECRET_KEY"] = fallback_secret
+                    self._logger.warning(f"Generated fallback JWT secret for {self._environment} environment")
+            else:
+                # Production: must fail if SharedJWTSecretManager is not available
+                raise Exception(f"SharedJWTSecretManager is required in {self._environment} environment")
     
     def _apply_single_secret(self, config: AppConfig, name: str, value: str, mapping: dict) -> None:
         """Apply single secret to configuration."""
