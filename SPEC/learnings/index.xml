@@ -50,6 +50,23 @@
         <prevention>Limit to 10 volumes max. No code in volumes. Add resource limits. Run cleanup regularly.</prevention>
     </learning>
     
+    <learning id="clickhouse-staging-secret-mapping-2025-08-31">
+        <title>ClickHouse Staging Secret Mapping Critical Fix</title>
+        <category>Deployment/GCP-Secrets</category>
+        <keywords>clickhouse, staging, gcp-secrets, cloud-run, deployment, authentication, secret-manager</keywords>
+        <path>clickhouse_staging_secret_mapping.xml</path>
+        <critical-takeaway>
+            Backend fails in staging when CLICKHOUSE_PASSWORD not mapped from GCP Secret Manager.
+            Root cause: deploy_to_gcp.py creates secret but doesn't map it in --set-secrets.
+            Solution: Add CLICKHOUSE_PASSWORD=clickhouse-default-password-staging:latest to backend deployment.
+            Validation: Always verify secret creation AND mapping are both configured.
+            Prevention: Centralize secret configuration to avoid creation/mapping mismatch.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Entire staging environment non-functional, blocking all testing workflows</business-impact>
+        <prevention>Validate all secrets in setup_secrets() are mapped in --set-secrets. Use verify_clickhouse_fix.py before deployment.</prevention>
+    </learning>
+    
     <learning id="redis-vpc-connector-requirement-2025-08-31">
         <title>VPC Connector Required for Redis/Cloud SQL Access in Cloud Run</title>
         <category>Infrastructure/Networking</category>
