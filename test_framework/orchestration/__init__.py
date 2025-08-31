@@ -7,8 +7,19 @@ from .test_orchestrator_agent import (
     OrchestrationConfig,
     BackgroundE2EAgent,
     ProgressStreamingAgent,
-    ResourceManagementAgent,
     AgentCommunicationProtocol
+)
+
+from .resource_management_agent import (
+    ResourceManagementAgent,
+    create_resource_manager,
+    ensure_layer_resources_available,
+    ResourceStatus,
+    ServiceStatus,
+    ResourcePool,
+    ServiceHealth,
+    ResourceAllocation,
+    SystemMetrics
 )
 
 from .layer_execution_agent import (
@@ -28,5 +39,13 @@ __all__ = [
     'BackgroundE2EAgent',
     'ProgressStreamingAgent',
     'ResourceManagementAgent',
+    'create_resource_manager',
+    'ensure_layer_resources_available',
+    'ResourceStatus',
+    'ServiceStatus',
+    'ResourcePool',
+    'ServiceHealth',
+    'ResourceAllocation', 
+    'SystemMetrics',
     'AgentCommunicationProtocol'
 ]
