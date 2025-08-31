@@ -27,28 +27,6 @@ except ImportError as e:
 logger = logging.getLogger(__name__)
 
 
-class SecretLoader:
-    """Legacy alias for AuthSecretLoader to maintain compatibility."""
-    
-    def load_google_oauth_client_id(self) -> Optional[str]:
-        """Load Google OAuth client ID for current environment."""
-        try:
-            client_id = AuthSecretLoader.get_google_client_id()
-            return client_id if client_id else None
-        except Exception as e:
-            logger.error(f"Failed to load Google OAuth client ID: {e}")
-            return None
-    
-    def load_google_oauth_client_secret(self) -> Optional[str]:
-        """Load Google OAuth client secret for current environment."""
-        try:
-            client_secret = AuthSecretLoader.get_google_client_secret()
-            return client_secret if client_secret else None
-        except Exception as e:
-            logger.error(f"Failed to load Google OAuth client secret: {e}")
-            return None
-
-
 class AuthSecretLoader:
     """Load secrets for auth service based on environment."""
     
@@ -67,75 +45,12 @@ class AuthSecretLoader:
                 return validator.get_jwt_secret()
             except Exception as e:
                 logger.error(f"Central validator failed: {e}")
-                # Fall through to legacy logic temporarily
+                # If central validator fails, raise error - no legacy fallback
+                raise ValueError(f"JWT secret configuration failed: {e}")
         
-        # LEGACY: Fallback to original logic (can be removed once central validator is deployed)
-        logger.warning("Using legacy JWT secret loading - central validator not available")
-        return AuthSecretLoader._legacy_get_jwt_secret()
+        # If central validator not available, raise error - no legacy fallback
+        raise ValueError("Central configuration validator not available and legacy fallback removed")
     
-    @staticmethod
-    def _legacy_get_jwt_secret() -> str:
-        """Legacy JWT secret loading logic - DEPRECATED."""
-        env_manager = get_env()
-        env = env_manager.get("ENVIRONMENT", "development").lower()
-        
-        # Try environment-specific variables first (highest priority)
-        if env == "staging":
-            # In staging, check for staging-specific secret first
-            secret = env_manager.get("JWT_SECRET_STAGING")
-            if secret:
-                logger.info("Using JWT_SECRET_STAGING from environment")
-                return secret
-                
-            # Try to load from Google Secret Manager (if available)
-            secret = AuthSecretLoader._load_from_secret_manager("staging-jwt-secret")
-            if secret:
-                logger.info("Using staging-jwt-secret from Secret Manager")
-                return secret
-                
-            # HARD STOP: No fallback in staging
-            raise ValueError(
-                f"JWT secret not configured for staging environment. "
-                "Set JWT_SECRET_STAGING environment variable or configure staging-jwt-secret in Secret Manager."
-            )
-                
-        elif env == "production":
-            # In production, check for production-specific secret first
-            secret = env_manager.get("JWT_SECRET_PRODUCTION")
-            if secret:
-                logger.info("Using JWT_SECRET_PRODUCTION from environment")
-                return secret
-                
-            # Try to load from Google Secret Manager (if available)
-            secret = AuthSecretLoader._load_from_secret_manager("prod-jwt-secret")
-            if secret:
-                logger.info("Using prod-jwt-secret from Secret Manager")
-                return secret
-                
-            # HARD STOP: No fallback in production
-            raise ValueError(
-                f"JWT secret not configured for production environment. "
-                "Set JWT_SECRET_PRODUCTION environment variable or configure prod-jwt-secret in Secret Manager."
-            )
-        
-        elif env == "development" or env == "test":
-            # Development/Test only: allow JWT_SECRET_KEY as primary secret
-            secret = env_manager.get("JWT_SECRET_KEY")
-            if secret:
-                logger.info(f"Using JWT_SECRET_KEY from environment ({env} only)")
-                return secret
-            
-            # HARD STOP: No fallback in development/test
-            raise ValueError(
-                f"JWT secret not configured for {env} environment. "
-                "Set JWT_SECRET_KEY environment variable."
-            )
-        
-        # HARD STOP: Environment-specific secrets are required, no fallbacks
-        raise ValueError(
-            f"JWT secret not configured for {env} environment. "
-            f"Set JWT_SECRET_{env.upper()} environment variable or configure {env}-jwt-secret in Secret Manager."
-        )
     
     @staticmethod
     def _load_from_secret_manager(secret_name: str) -> Optional[str]:

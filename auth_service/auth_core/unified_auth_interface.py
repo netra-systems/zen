@@ -316,25 +316,37 @@ class UnifiedAuthInterface:
         """Get user by ID from auth service.
         
         Args:
-            db: Database session (ignored, using auth service)
+            db: Database session (used by auth service repository)
             user_id: User ID to lookup
             
         Returns:
             User dict if found, None otherwise
         """
         try:
-            # Use auth service to get user data
-            # For now, return a basic user structure
-            # This would be replaced by actual auth service user lookup
+            # Check user blacklist first
             if self.is_user_blacklisted(user_id):
                 return None
             
-            # Placeholder implementation - would query auth service database
-            return {
-                "id": user_id,
-                "active": True,
-                "email": f"user_{user_id}@example.com"  # Placeholder
-            }
+            # Use auth service repository for proper user lookup
+            if db:
+                from auth_service.auth_core.database.repository import AuthUserRepository
+                user_repo = AuthUserRepository(db)
+                user = await user_repo.get_by_id(user_id)
+                
+                if user and user.is_active:
+                    return {
+                        "id": user.id,
+                        "active": user.is_active,
+                        "email": user.email,
+                        "full_name": user.full_name,
+                        "is_verified": user.is_verified,
+                        "auth_provider": user.auth_provider,
+                        "created_at": user.created_at.isoformat() if user.created_at else None
+                    }
+            
+            # If no database session or user not found, return None
+            return None
+            
         except Exception as e:
             logger.error(f"Failed to get user {user_id}: {e}")
             return None
@@ -377,37 +389,9 @@ def get_unified_auth() -> UnifiedAuthInterface:
     return _unified_auth_interface
 
 
-# =======================
-# BACKWARD COMPATIBILITY
-# =======================
 
-# These functions provide backward compatibility while services transition
-# They all delegate to the unified interface
-
-def validate_token_legacy(token: str) -> Optional[Dict]:
-    """Legacy token validation - delegates to unified interface."""
-    return get_unified_auth().validate_user_token(token)
-
-def create_access_token_legacy(user_id: str, email: str, 
-                              permissions: List[str] = None) -> str:
-    """Legacy token creation - delegates to unified interface."""
-    return get_unified_auth().create_access_token(user_id, email, permissions)
-
-def blacklist_token_legacy(token: str) -> bool:
-    """Legacy token blacklisting - delegates to unified interface."""
-    return get_unified_auth().blacklist_token(token)
-
-async def validate_user_token_legacy(token: str) -> Optional[Dict]:
-    """Legacy user token validation - delegates to unified interface."""
-    return await get_unified_auth().validate_user_token(token)
-
-
-# Export the main interface and legacy functions
+# Export the main interface
 __all__ = [
     "UnifiedAuthInterface",
-    "get_unified_auth",
-    "validate_token_legacy",
-    "create_access_token_legacy", 
-    "blacklist_token_legacy",
-    "validate_user_token_legacy"
+    "get_unified_auth"
 ]
