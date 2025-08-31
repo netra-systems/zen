@@ -6,7 +6,40 @@ export * from './backend_schema_auth';
 export * from './backend_schema_tools';
 
 // Export core backend schema types (AUTHORITATIVE SOURCE)
-export * from './backend_schema_base';
+// Note: Exclude Message interface to prevent conflict with canonical Message from domains/messages
+export { 
+  MessageType,
+  SubAgentLifecycle,
+  ToolStatus,
+  AgentMessage,
+  BaseMessage,
+  AgentState,
+  SubAgentState,
+  SubAgentStatus,
+  StreamEvent,
+  RunComplete,
+  MessageToUser,
+  UserMessage,
+  StartAgentMessage,
+  StartAgentPayload,
+  Settings,
+  AnalysisRequest,
+  RequestModel,
+  Workload,
+  DataSource,
+  TimeRange,
+  AnalysisResult,
+  Response,
+  UnifiedLogEntry,
+  Performance,
+  BaselineMetrics,
+  EnrichedMetrics,
+  CostComparison,
+  EventMetadata,
+  FinOps,
+  TraceContext,
+  ModelIdentifier
+} from './backend_schema_base';
 
 // Export consolidated agent types (SINGLE SOURCE OF TRUTH)
 export * from './agent-types';

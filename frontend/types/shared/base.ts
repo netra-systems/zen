@@ -118,39 +118,9 @@ export interface MessageMetadata {
   [key: string]: unknown;
 }
 
-// USER AND AUTH TYPES
-
-export interface User {
-  id: string;
-  email: string;
-  full_name?: string | null;
-  picture?: string | null;
-  is_active?: boolean;
-  is_superuser?: boolean;
-  hashed_password?: string | null;
-  access_token?: string;
-  token_type?: string;
-}
-
-export interface AuthEndpoints {
-  login: string;
-  logout: string;
-  callback: string;
-  token: string;
-  user: string;
-  dev_login?: string;
-}
-
-export interface AuthConfigResponse {
-  google_client_id: string;
-  endpoints: AuthEndpoints;
-  development_mode: boolean;
-  user?: User | null;
-  authorized_javascript_origins: string[];
-  authorized_redirect_uris: string[];
-  google_login_url?: string;
-  logout_url?: string;
-}
+// USER AND AUTH TYPES - Use unified auth types instead
+// These types are now re-exported from @/types/unified/auth.types
+// which provides the canonical definitions from types/domains/auth.ts
 
 // COMMON TYPE ALIASES & UTILITY TYPES
 
@@ -171,13 +141,10 @@ export const TYPE_REGISTRY = {
   BASE_TIMESTAMP_ENTITY: 'BaseTimestampEntity', 
   BASE_MESSAGE: 'BaseMessage',
   BASE_METADATA: 'BaseMetadata',
-  USER: 'User',
   MESSAGE_ATTACHMENT: 'MessageAttachment',
   MESSAGE_REACTION: 'MessageReaction',
   MESSAGE_METADATA: 'MessageMetadata',
-  BASE_WEBSOCKET_PAYLOAD: 'BaseWebSocketPayload',
-  AUTH_CONFIG_RESPONSE: 'AuthConfigResponse',
-  AUTH_ENDPOINTS: 'AuthEndpoints'
+  BASE_WEBSOCKET_PAYLOAD: 'BaseWebSocketPayload'
 } as const;
 
 export type TypeRegistryKey = keyof typeof TYPE_REGISTRY;
@@ -233,11 +200,7 @@ export function createMessageReaction(
   };
 }
 
-export function isValidUser(obj: unknown): obj is User {
-  if (typeof obj !== 'object' || obj === null) return false;
-  const user = obj as User;
-  return typeof user.id === 'string' && typeof user.email === 'string';
-}
+// isValidUser function moved to @/types/unified/auth.types
 
 export function hasRequiredMessageFields(obj: unknown): obj is BaseMessage {
   if (typeof obj !== 'object' || obj === null) return false;
@@ -292,7 +255,6 @@ export default {
   createBaseEntity,
   createTimestampEntity,
   createBaseMetadata,
-  isValidUser,
   hasRequiredMessageFields,
   isValidEntity,
   getTypeFromRegistry,
