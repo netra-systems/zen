@@ -11,7 +11,7 @@ from typing import Dict, Any, List
 from websockets.exceptions import ConnectionClosed, WebSocketException
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 
 class WebSocketEventType:
