@@ -33,6 +33,22 @@
         <prevention>Eliminate ALL fallback logic in authentication. Require environment-specific secrets: JWT_SECRET_STAGING, JWT_SECRET_PRODUCTION, JWT_SECRET_KEY (dev/test only).</prevention>
     </learning>
     
+    <learning id="redis-vpc-connector-requirement-2025-08-31">
+        <title>VPC Connector Required for Redis/Cloud SQL Access in Cloud Run</title>
+        <category>Infrastructure/Networking</category>
+        <keywords>vpc, connector, redis, cloud-sql, cloud-run, networking, staging, deployment, private-network</keywords>
+        <path>redis_vpc_connector_requirement.xml</path>
+        <critical-takeaway>
+            Cloud Run services CANNOT access Redis, Cloud SQL, or other private VPC resources without a VPC connector.
+            This is mandatory - services will fail at startup with "Redis ping timeout" errors.
+            Deployment scripts MUST include --vpc-connector flag for all services needing database/cache access.
+            Environment validator must check actual POSTGRES_* variables, not constructed DATABASE_URL.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Complete service failure, chat functionality broken, 90% of platform value lost</business-impact>
+        <prevention>Always include --vpc-connector in deployment. Verify connector exists with gcloud compute networks vpc-access connectors list. Test Redis connectivity post-deployment.</prevention>
+    </learning>
+    
     <learning id="deterministic-startup-critical-2025-08-31">
         <title>Deterministic Startup - Critical Path for Chat</title>
         <category>Startup Architecture</category>
