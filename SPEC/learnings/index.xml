@@ -48,6 +48,24 @@
         <prevention>Apply environment-specific hard requirements to all critical configuration. Remove empty defaults for secrets.</prevention>
     </learning>
     
+    <learning id="central-configuration-validator-ssot-implementation-2025-08-31">
+        <title>Central Configuration Validator: SSOT Implementation for Platform Security</title>
+        <category>Platform Security, Configuration Management</category>
+        <keywords>central validator, ssot, configuration, security, jwt, database, redis, llm, validation, hard requirements</keywords>
+        <path>central_configuration_validator_ssot_implementation.xml</path>
+        <critical-takeaway>
+            Single Source of Truth for all configuration validation eliminates drift and inconsistencies.
+            Central validator in shared/configuration enforces environment-specific hard requirements.
+            Both auth and backend services now delegate all critical secret validation to central validator.
+            Dangerous empty string defaults eliminated across all services.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Platform Security, Operational Reliability, Compliance (SOC 2, PCI DSS, ISO 27001)</business-impact>
+        <prevention>Use CentralConfigurationValidator for ALL configuration validation. Call validate_platform_configuration() at service startup.</prevention>
+        <implementation-status>FULLY IMPLEMENTED AND TESTED</implementation-status>
+        <documentation>docs/central_configuration_validator.md</documentation>
+    </learning>
+    
     <learning id="websocket-logger-dual-import-2025-08-31">
         <title>WebSocket Logger Dual Import Context Binding Issue</title>
         <category>Runtime Error Resolution</category>

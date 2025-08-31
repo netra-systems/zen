@@ -1,7 +1,7 @@
 # Comprehensive Compliance Validation Report
 
-**Generated:** 2025-08-30 14:34:09
-**Overall Compliance:** 5.5%
+**Generated:** 2025-08-30 20:54:55
+**Overall Compliance:** 6.5%
 **Status:** ❌ FAILED
 
 ## Executive Summary
@@ -14,17 +14,17 @@ connections, and WebSocket functionality.
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| Mock Violations | 1370 | ❌ |
-| Environment Violations | 159 | ❌ |
+| Mock Violations | 1202 | ❌ |
+| Environment Violations | 161 | ❌ |
 | Architecture Violations | 9999 | ❌ |
-| Test Quality Score | 44.7% | ❌ |
+| Test Quality Score | 48.3% | ❌ |
 | WebSocket Events | FAILING | ❌ |
 | Real Service Connections | FAILING | ❌ |
 
 ## Critical Issues
 
-- ❌ 1370 mock violations detected
-- ❌ 159 environment isolation violations
+- ❌ 1202 mock violations detected
+- ❌ 161 environment isolation violations
 - ❌ Architecture compliance at 0.0% (need 90%+)
 - ❌ Real service connections failing
 - ❌ WebSocket agent events not working
@@ -40,7 +40,7 @@ connections, and WebSocket functionality.
 
 ## Compliance Score Breakdown
 
-The overall compliance score of 5.5% is calculated as:
+The overall compliance score of 6.5% is calculated as:
 
 - Mock Policy Compliance: 0% (30% weight)
 - Environment Isolation: 0% (15% weight)  
