@@ -30,7 +30,9 @@ class TestWebSocketManagerRecoveryInitialization:
         assert hasattr(manager, 'connections')
         assert hasattr(manager, 'user_connections')
         assert hasattr(manager, 'connection_stats')
-        assert isinstance(manager.connections, dict)
+        # connections is a TTLCache, not a dict
+        from cachetools import TTLCache
+        assert isinstance(manager.connections, TTLCache)
         assert len(manager.connections) == 0
         
     def test_manager_singleton_pattern(self):
