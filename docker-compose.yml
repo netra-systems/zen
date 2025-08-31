@@ -49,17 +49,17 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
-          cpus: '0.5'
-        reservations:
           memory: 256M
+          cpus: '0.25'
+        reservations:
+          memory: 128M
 
   # Dev Redis Cache
   dev-redis:
     image: redis:7-alpine
     container_name: netra-dev-redis
     profiles: ["dev"]
-    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
     ports:
       - "${DEV_REDIS_PORT:-6380}:6379"
     volumes:
@@ -76,10 +76,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256M
-          cpus: '0.25'
-        reservations:
           memory: 128M
+          cpus: '0.125'
+        reservations:
+          memory: 64M
 
   # Dev ClickHouse Analytics
   dev-clickhouse:
@@ -111,10 +111,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1G
-          cpus: '0.5'
-        reservations:
           memory: 512M
+          cpus: '0.25'
+        reservations:
+          memory: 256M
 
   # Dev Auth Service
   dev-auth:
