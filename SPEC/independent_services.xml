@@ -24,11 +24,27 @@
       See SPEC/learnings/microservice_independence.xml for detailed explanation of "Unique Concept = ONCE per service" principle.
       See SPEC/acceptable_duplicates.xml for the canonical list of acceptable cross-service duplicates.
     </clarification>
-    <shared_component_exception>
-      Services MAY import from the /shared directory for truly universal utilities that act like external libraries.
-      See SPEC/shared_component_architecture.xml for strict criteria on what belongs in /shared.
-      CRITICAL: The existence of /shared does NOT change independence requirements - services must remain independently deployable.
-    </shared_component_exception>
+    <shared_library_pattern>
+      <title>The Shared Library Pattern</title>
+      <principle>
+        Services MAY import from /shared for infrastructure libraries that would otherwise
+        be external pip packages. Think of /shared as "internal pip packages" - pure utilities
+        with no business logic.
+      </principle>
+      <good_examples>
+        <example>from shared.isolated_environment import get_env  # Like python-dotenv</example>
+        <example>from shared.database_url_builder import build_url  # Like a URL utility</example>
+        <example>from shared.schemas import WebSocketMessage  # Like API specs</example>
+      </good_examples>
+      <critical_distinction>
+        These are NOT service boundary violations because:
+        - They contain ZERO business logic
+        - They're stateless utilities (or per-process singletons)
+        - They could literally be external pip packages
+        - Each service still owns its configuration and business logic
+      </critical_distinction>
+      <reference>See SPEC/shared_component_architecture.xml for complete criteria</reference>
+    </shared_library_pattern>
     <violation_example date="2025-08-28">
       CATASTROPHIC FAILURE: Auth service importing from netra_backend caused complete authentication failure 
       in staging. Auth service database manager was delegating to netra_backend's DatabaseManager, but in 

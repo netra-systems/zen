@@ -18,7 +18,7 @@ RUN apk add --no-cache libc6-compat python3 make g++
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+COPY frontend/package*.json ./
 
 # Install dependencies with native rebuild
 RUN npm ci && \
@@ -26,7 +26,7 @@ RUN npm ci && \
     npm cache clean --force
 
 # Copy application code
-COPY . .
+COPY frontend/ .
 
 # Set environment variables for build
 ENV NODE_ENV=production

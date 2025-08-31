@@ -135,6 +135,45 @@
                 - Prevents SSL parameter bugs
             </why_appropriate>
         </category>
+
+        <category id="SCA-GOOD-004">
+            <name>Environment Variable Management Library</name>
+            <justification>
+                IsolatedEnvironment provides a unified interface for environment variable
+                access across all services. This is a perfect example of shared infrastructure
+                that acts like an external library (similar to python-dotenv or environs).
+            </justification>
+            <examples>
+                <example>/shared/isolated_environment.py</example>
+            </examples>
+            <why_appropriate>
+                - Pure infrastructure utility with no business logic
+                - Provides consistent interface across all services
+                - Acts like an external library (could be a pip package)
+                - Prevents environment pollution and enables testing isolation
+                - Thread-safe operations for concurrent access
+                - Source tracking for debugging environment conflicts
+            </why_appropriate>
+            <usage_pattern>
+                ```python
+                # Each service imports this shared library
+                from shared.isolated_environment import get_env
+                
+                # Services maintain their own configuration using the library
+                class ServiceConfig:
+                    def __init__(self):
+                        self.env = get_env()  # Get singleton instance
+                        self.database_url = self.env.get("DATABASE_URL")
+                ```
+            </usage_pattern>
+            <key_principle>
+                This is NOT a violation of service independence because:
+                - It's a stateless utility library (singleton pattern is per-process)
+                - Each service maintains its own configuration values
+                - No business logic or service coupling
+                - Similar to using any external library like 'requests' or 'redis-py'
+            </key_principle>
+        </category>
     </section>
 
     <section title="Bad Use Cases for /shared">
@@ -482,6 +521,79 @@
                 Keep in billing service, expose via API
             </implementation>
         </example>
+
+        <example id="SCA-EX-005">
+            <scenario>Environment variable access utility (IsolatedEnvironment)</scenario>
+            <analysis>
+                Pure infrastructure utility for managing environment variables.
+                No business logic, acts like python-dotenv or environs library.
+                Provides thread-safety, isolation, and debugging features.
+            </analysis>
+            <decision>APPROPRIATE for /shared</decision>
+            <implementation>
+                /shared/isolated_environment.py - imported by all services
+            </implementation>
+            <why_good>
+                - Acts exactly like an external library
+                - Zero business logic
+                - Each service still owns its configuration values
+                - Provides infrastructure capability, not business behavior
+            </why_good>
+        </example>
+
+        <example id="SCA-EX-006">
+            <scenario>Redis connection manager</scenario>
+            <analysis>
+                Stateful component that manages connections.
+                Each service needs its own connection pool.
+                Sharing would create hidden coupling.
+            </analysis>
+            <decision>NOT appropriate for /shared</decision>
+            <implementation>
+                Each service has its own redis_manager.py
+            </implementation>
+            <why_bad>
+                - Stateful (connection pools)
+                - Service-specific configuration
+                - Would couple service lifecycles
+            </why_bad>
+        </example>
+
+        <example id="SCA-EX-007">
+            <scenario>JWT token validation logic</scenario>
+            <analysis>
+                Business logic for authentication.
+                May have service-specific rules.
+                Should be owned by auth service.
+            </analysis>
+            <decision>NOT appropriate for /shared</decision>
+            <implementation>
+                Auth service provides token validation via API
+            </implementation>
+            <why_bad>
+                - Core business logic
+                - May evolve with security requirements
+                - Services should call auth API, not share code
+            </why_bad>
+        </example>
+
+        <example id="SCA-EX-008">
+            <scenario>String sanitization utilities</scenario>
+            <analysis>
+                Generic utility functions for cleaning strings.
+                No business logic, pure transformations.
+                Similar to standard library functions.
+            </analysis>
+            <decision>APPROPRIATE for /shared</decision>
+            <implementation>
+                /shared/utils/string_utils.py
+            </implementation>
+            <why_good>
+                - Pure functions with no state
+                - Would typically come from stdlib
+                - No service-specific behavior
+            </why_good>
+        </example>
     </section>
 
     <summary>
@@ -491,18 +603,42 @@
             or sharing business logic.
         </key_principle>
         
+        <library_concept>
+            <title>The "Python Library" Mental Model</title>
+            <description>
+                Think of /shared as your organization's internal "pip packages" that haven't
+                been published yet. If code in /shared makes sense as an external library
+                that you would install via pip, then it belongs there. If not, it doesn't.
+            </description>
+            <good_library_examples>
+                - isolated_environment.py → Like python-dotenv or environs
+                - database_url_builder.py → Like a database URL utility package  
+                - string_utils.py → Like standard library extensions
+                - JSON schemas → Like shared API specifications
+            </good_library_examples>
+            <not_library_examples>
+                - User authentication logic → Business logic, not a library
+                - Redis connection managers → Stateful components
+                - Service configurations → Service-specific
+                - Agent orchestration → Core business behavior
+            </not_library_examples>
+        </library_concept>
+        
         <golden_rules>
             <rule>When in doubt, DON'T share</rule>
             <rule>Business logic NEVER belongs in /shared</rule>
             <rule>Services must remain independently deployable</rule>
             <rule>Treat /shared like an external library</rule>
             <rule>Stability before sharing</rule>
+            <rule>If it could be a pip package, it can be in /shared</rule>
         </golden_rules>
         
         <remember>
             The goal is pragmatic independence, not absolute isolation.
-            Share what truly makes sense to share, but preserve the ability
-            for services to evolve independently.
+            Share what truly makes sense to share (infrastructure libraries),
+            but preserve the ability for services to evolve independently.
+            IsolatedEnvironment is a perfect example: it's infrastructure that
+            enables service independence, not something that violates it.
         </remember>
     </summary>
 </specification>

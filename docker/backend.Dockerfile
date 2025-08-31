@@ -39,11 +39,11 @@ WORKDIR /app
 COPY --from=builder --chown=netra:netra /root/.local /home/netra/.local
 
 # Copy application code
-COPY --chown=netra:netra ./netra_backend /app/netra_backend
-COPY --chown=netra:netra ./shared /app/shared
-COPY --chown=netra:netra ./scripts /app/scripts
-COPY --chown=netra:netra ./alembic /app/alembic
-COPY --chown=netra:netra ./SPEC /app/SPEC
+COPY --chown=netra:netra netra_backend /app/netra_backend
+COPY --chown=netra:netra shared /app/shared
+COPY --chown=netra:netra scripts /app/scripts
+COPY --chown=netra:netra alembic /app/alembic
+COPY --chown=netra:netra SPEC /app/SPEC
 
 # Set Python path
 ENV PATH=/home/netra/.local/bin:$PATH

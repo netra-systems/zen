@@ -105,7 +105,17 @@ Provide default values in StagingConfig that get overridden by DatabaseConfigMan
 3. E2E test: Deploy to staging and verify service starts successfully
 4. Regression test: Ensure development and production configs still work
 
+## Test Results
+The fix has been successfully implemented and tested:
+- ✅ **Test 1 Passed**: StagingConfig can now be instantiated without ClickHouse environment variables
+- ✅ **Validation Working**: The validation correctly identifies missing ClickHouse configuration when called after instantiation
+- ✅ **Fix Confirmed**: The error "ClickHouse configuration is MANDATORY in staging" is no longer thrown during instantiation
+
 ## Risk Assessment
 - **Low Risk**: Changes are isolated to configuration validation timing
 - **High Impact**: Fixes critical blocker for staging deployments
 - **Rollback Plan**: Revert changes if validation becomes too permissive
+
+## Files Modified
+1. `netra_backend/app/schemas/config.py` - Moved validation from `__init__` to `validate_mandatory_services()` method
+2. `netra_backend/app/core/configuration/base.py` - Added call to `validate_mandatory_services()` after configuration population

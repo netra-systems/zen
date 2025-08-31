@@ -15,10 +15,10 @@ async def test_backend_health():
         try:
             async with session.get(f"{STAGING_BACKEND_URL}/health") as response:
                 data = await response.json()
-                print(f"✓ Backend Health: {response.status} - {data.get('status', 'unknown')}")
+                print(f"[OK] Backend Health: {response.status} - {data.get('status', 'unknown')}")
                 return response.status == 200
         except Exception as e:
-            print(f"✗ Backend Health Failed: {e}")
+            print(f"[FAIL] Backend Health Failed: {e}")
             return False
 
 async def test_backend_api():
@@ -28,9 +28,9 @@ async def test_backend_api():
         try:
             async with session.get(f"{STAGING_BACKEND_URL}/system/info") as response:
                 data = await response.json()
-                print(f"✓ System Info: {response.status} - Version {data.get('version', 'unknown')}")
+                print(f"[OK] System Info: {response.status} - Version {data.get('version', 'unknown')}")
         except Exception as e:
-            print(f"✗ System Info Failed: {e}")
+            print(f"[FAIL] System Info Failed: {e}")
 
 async def test_websocket_connection():
     """Test WebSocket connectivity"""
@@ -44,13 +44,13 @@ async def test_websocket_connection():
                 timeout=aiohttp.ClientTimeout(total=5),
                 headers={"Authorization": "Bearer test"}
             ) as ws:
-                print(f"✓ WebSocket endpoint reachable")
+                print(f"[OK] WebSocket endpoint reachable")
                 await ws.close()
     except aiohttp.ClientError as e:
         if "401" in str(e) or "403" in str(e):
-            print(f"✓ WebSocket endpoint exists (auth required)")
+            print(f"[OK] WebSocket endpoint exists (auth required)")
         else:
-            print(f"✗ WebSocket Connection Failed: {e}")
+            print(f"[FAIL] WebSocket Connection Failed: {e}")
     except Exception as e:
         print(f"✗ WebSocket Connection Failed: {e}")
 

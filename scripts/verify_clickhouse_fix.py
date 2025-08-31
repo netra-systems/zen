@@ -25,17 +25,17 @@ def check_deployment_script():
     content = deploy_script.read_text(encoding='utf-8')
     
     # Check if CLICKHOUSE_PASSWORD is in the backend secrets mapping
-    if "CLICKHOUSE_PASSWORD=clickhouse-default-password-staging:latest" in content:
+    if "CLICKHOUSE_PASSWORD=clickhouse-password-staging:latest" in content:
         print("   [OK] CLICKHOUSE_PASSWORD secret mapping found in backend deployment")
     else:
         print("   [FAIL] CLICKHOUSE_PASSWORD secret mapping MISSING in backend deployment")
         return False
     
     # Check if it's in the required secrets list
-    if "clickhouse-default-password-staging" in content:
-        print("   [OK] clickhouse-default-password-staging in required secrets list")
+    if "clickhouse-password-staging" in content:
+        print("   [OK] clickhouse-password-staging in required secrets list")
     else:
-        print("   [FAIL] clickhouse-default-password-staging MISSING from required secrets")
+        print("   [FAIL] clickhouse-password-staging MISSING from required secrets")
         return False
     
     return True
@@ -68,7 +68,7 @@ def check_staging_env():
     content = staging_env.read_text(encoding='utf-8')
     
     # Check for documentation about GCP Secret Manager
-    if "GCP Secret Manager" in content and "clickhouse-default-password-staging" in content:
+    if "GCP Secret Manager" in content and "clickhouse-password-staging" in content:
         print("   [OK] Proper documentation about GCP Secret Manager found")
     else:
         print("   [FAIL] Missing documentation about secret source")
@@ -91,7 +91,7 @@ def check_secret_exists():
     try:
         # Try to describe the secret
         result = subprocess.run(
-            ["gcloud", "secrets", "describe", "clickhouse-default-password-staging",
+            ["gcloud", "secrets", "describe", "clickhouse-password-staging",
              "--project", "netra-staging"],
             capture_output=True,
             text=True,
@@ -99,12 +99,12 @@ def check_secret_exists():
         )
         
         if result.returncode == 0:
-            print("   [OK] Secret 'clickhouse-default-password-staging' exists in GCP")
+            print("   [OK] Secret 'clickhouse-password-staging' exists in GCP")
             
             # Try to check if it has a value (not placeholder)
             version_result = subprocess.run(
                 ["gcloud", "secrets", "versions", "access", "latest",
-                 "--secret", "clickhouse-default-password-staging",
+                 "--secret", "clickhouse-password-staging",
                  "--project", "netra-staging"],
                 capture_output=True,
                 text=True,
@@ -121,7 +121,7 @@ def check_secret_exists():
             else:
                 print("   [WARN] Cannot access secret value (permission denied)")
         else:
-            print("   [FAIL] Secret 'clickhouse-default-password-staging' NOT FOUND")
+            print("   [FAIL] Secret 'clickhouse-password-staging' NOT FOUND")
             print("     ACTION REQUIRED: Create the secret in GCP Secret Manager")
             return False
             

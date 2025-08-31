@@ -213,6 +213,12 @@ All microservices MUST be 100% independent. See [`SPEC/independent_services.xml`
   * Auth Service (`/auth_service`)
   * Frontend (`/frontend`)
 
+**CRITICAL CLARIFICATION - Shared Libraries Pattern:**
+Services MAY import from `/shared` for infrastructure libraries (like `shared.isolated_environment`).
+These are NOT service boundary violations because they're pure utilities with no business logic - 
+think of them as internal pip packages. See [`docs/shared_library_pattern.md`](docs/shared_library_pattern.md) 
+for the simple "pip package test" to determine what belongs in `/shared`.
+
 ### 5.2. Naming Conventions
 
   * **"Agent":** Only for LLM-based sub-agents. **"Executor/Manager":** For infrastructure patterns **"Service":** For specialized processors. **Utility:** Descriptive names without suffixes.

@@ -305,7 +305,7 @@ class DatabaseConfigManager:
         if not password and self._environment == "staging":
             raise ConfigurationError(
                 "CLICKHOUSE_PASSWORD is required in staging but not configured. "
-                "Please ensure the secret 'clickhouse-default-password-staging' is properly mapped in Cloud Run."
+                "Please ensure the secret 'clickhouse-password-staging' is properly mapped in Cloud Run."
             )
         
         # Require explicit ClickHouse configuration in staging/production
