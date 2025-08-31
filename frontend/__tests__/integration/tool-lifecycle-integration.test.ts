@@ -1,8 +1,7 @@
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import { renderHook, act } from '@testing-library/react';
 import { useUnifiedChatStore } from '@/store/unified-chat';
-import { 
-import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-rst (Jest Module Hoisting)
+import { rst (Jest Module Hoisting)
 const mockUseUnifiedChatStore = jest.fn();
 const mockUseWebSocket = jest.fn();
 const mockUseAuthStore = jest.fn();

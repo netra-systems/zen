@@ -31,29 +31,17 @@ import pytest
 
 from tests.e2e.config import TestUser, UnifiedTestConfig
 
-# Import MockWebSocket from the actual location
+# Import MockWebSocket from the correct location
 try:
-    from netra_backend.app.tests.services.test_ws_connection_mocks import MockWebSocket
+    # Removed WebSocket mock import - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
     # Create dummy classes for missing ones
     class WebSocketBuilder:
         def build(self):
             return MockWebSocket()
 except ImportError:
     # Fallback if even this doesn't work
-    class MockWebSocket:
-        def __init__(self, user_id=None):
-            self.user_id = user_id
-            self.sent_messages = []
-    
-    class WebSocketBuilder:
-        def build(self):
-            return MockWebSocket()
-from netra_backend.app.logging_config import central_logger
-from tests.e2e.jwt_token_helpers import JWTTestHelper
-
-logger = central_logger.get_logger(__name__)
-
-
+    # MockWebSocket class removed - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
 class LatencyMeasurer:
     """High-precision latency measurement for performance validation."""
     

@@ -1,6 +1,5 @@
-import {
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-er Journey Workflow Integration Tests
+import { er Journey Workflow Integration Tests
  * ULTRA DEEP THINK: Module-based architecture - Workflow tests extracted for 450-line compliance
  */
 

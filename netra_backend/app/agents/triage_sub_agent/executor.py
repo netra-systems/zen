@@ -65,6 +65,10 @@ class TriageExecutor:
     
     async def _execute_with_monitoring(self, context: ExecutionContext) -> None:
         """Execute triage workflow with comprehensive monitoring."""
+        # Store context info for notifications
+        self._current_run_id = context.run_id
+        self._current_thread_id = getattr(context, 'thread_id', context.run_id)
+        
         self.monitor.start_execution(context)
         try:
             await self._execute_core_triage_workflow(context)
@@ -95,11 +99,25 @@ class TriageExecutor:
         return _main_triage_operation
     
     async def _execute_direct_workflow(self, context: ExecutionContext) -> None:
-        """Execute triage workflow directly."""
+        """Execute triage workflow directly with WebSocket notifications."""
         self._log_execution_start(context.run_id)
+        
+        # Send thinking notification about analyzing request
+        await self._send_thinking_notification(context, "Analyzing request details...")
+        
         triage_operation = self._create_legacy_triage_operation(context)
         result = await self._execute_with_fallback(triage_operation)
         await self._process_triage_result(result, context)
+    
+    async def _send_thinking_notification(self, context: ExecutionContext, thought: str) -> None:
+        """Send thinking notification if WebSocket manager available."""
+        if hasattr(self.agent, 'websocket_manager') and self.agent.websocket_manager:
+            try:
+                notifier = self.agent._get_websocket_notifier()
+                ws_context = self.agent._create_websocket_context(context)
+                await notifier.send_agent_thinking(ws_context, thought)
+            except Exception as e:
+                logger.debug(f"Failed to send thinking notification: {e}")
     
     def _create_legacy_triage_operation(self, context: ExecutionContext):
         """Create legacy triage operation for backward compatibility."""
@@ -110,12 +128,31 @@ class TriageExecutor:
         return _legacy_triage_operation
     
     async def _execute_with_fallback(self, triage_operation):
-        """Execute triage operation with fallback handling."""
+        """Execute triage operation with fallback handling and notifications."""
+        # Send progress notification about LLM processing
+        await self._send_progress_notification("Processing with AI model...")
+        
         if hasattr(self.agent, 'llm_fallback_handler'):
             return await self.agent.llm_fallback_handler.execute_with_fallback(
                 triage_operation, "triage_analysis", "triage", "triage"
             )
         return await triage_operation()
+    
+    async def _send_progress_notification(self, message: str) -> None:
+        """Send progress notification if WebSocket manager available."""
+        if hasattr(self.agent, 'websocket_manager') and self.agent.websocket_manager:
+            try:
+                notifier = self.agent._get_websocket_notifier()
+                # Create a minimal context for progress notifications
+                from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+                context = AgentExecutionContext(
+                    agent_name=self.agent.name,
+                    run_id=getattr(self, '_current_run_id', 'unknown'),
+                    thread_id=getattr(self, '_current_thread_id', 'unknown')
+                )
+                await notifier.send_partial_result(context, message, is_complete=False)
+            except Exception as e:
+                logger.debug(f"Failed to send progress notification: {e}")
     
     async def _process_triage_result(
         self, result: Any, context: ExecutionContext
@@ -137,7 +174,10 @@ class TriageExecutor:
     async def _handle_successful_result(
         self, result: dict, context: ExecutionContext
     ) -> None:
-        """Handle successful triage result with monitoring."""
+        """Handle successful triage result with monitoring and notifications."""
+        # Send thinking notification about processing results
+        await self._send_thinking_notification(context, "Processing analysis results...")
+        
         processed_result = self.agent.result_processor.process_result(
             result, context.state.user_request
         )

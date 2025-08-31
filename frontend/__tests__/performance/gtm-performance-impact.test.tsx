@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { GTMProvider } from '@/providers/GTMProvider';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock performance API
 interface MockPerformanceEntry {
@@ -177,7 +178,7 @@ const PerformanceTestComponent: React.FC<{
 };
 
 describe('GTM Performance Impact Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let mockPerformance: MockPerformance;
   let mockDataLayer: any[];

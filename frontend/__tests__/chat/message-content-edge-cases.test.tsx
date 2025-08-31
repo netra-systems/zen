@@ -1,12 +1,11 @@
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MessageList } from '@/components/chat/MessageList';
 import { MessageItem } from '@/components/chat/MessageItem';
 import { useUnifiedChatStore } from '@/store/unified-chat';
-import {
-import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-revents user frustration from crashes and potential security vulnerabilities
+import { revents user frustration from crashes and potential security vulnerabilities
  */
 
 import React from 'react';

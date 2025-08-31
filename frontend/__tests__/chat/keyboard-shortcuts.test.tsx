@@ -1,10 +1,9 @@
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
-import {
-import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-ortcuts
+import { ortcuts
  * Business Goal: Increased user efficiency and retention
  * Value Impact: Improves workflow speed for advanced users, increasing platform stickiness
  */

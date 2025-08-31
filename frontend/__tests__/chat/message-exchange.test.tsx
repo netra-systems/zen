@@ -1,3 +1,4 @@
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -6,9 +7,7 @@ import { ChatWindow } from '../../components/chat/ChatWindow';
 import { MessageList } from '../../components/chat/MessageList';
 import MainChat from '../../components/chat/MainChat';
 import { TestProviders } from '@/__tests__/test-utils/providers';
-import {
-import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-library/react';
+import { library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { ChatWindow } from '../../components/chat/ChatWindow';

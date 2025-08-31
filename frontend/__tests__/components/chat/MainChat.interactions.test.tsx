@@ -97,6 +97,7 @@ import { useLoadingState } from '@/hooks/useLoadingState';
 import { useThreadNavigation } from '@/hooks/useThreadNavigation';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useEventProcessor } from '@/hooks/useEventProcessor';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Get the mocked functions
 const mockUseUnifiedChatStore = useUnifiedChatStore as jest.MockedFunction<typeof useUnifiedChatStore>;
@@ -122,7 +123,7 @@ const mockStore = {
 };
 
 describe('MainChat - Message Interactions Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();

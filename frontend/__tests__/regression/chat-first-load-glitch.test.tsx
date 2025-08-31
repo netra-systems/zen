@@ -25,6 +25,7 @@ import { useAuth } from '@/auth/context';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { logger } from '@/lib/logger';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock modules
 jest.mock('next/navigation', () => ({
@@ -108,7 +109,7 @@ const createLifecycleTracker = (): LifecycleTracker => ({
 });
 
 describe('Chat First-Time Page Load Glitch Detection', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let lifecycleTracker: LifecycleTracker;
   let mockWebSocket: any;
@@ -621,7 +622,7 @@ describe('Chat First-Time Page Load Glitch Detection', () => {
  * Integration Test Suite - Full Page Load Scenario
  */
 describe('Chat Page Full Load Integration', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   /**
    * Test 9: Complete first-time user flow

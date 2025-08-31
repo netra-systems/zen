@@ -39,7 +39,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('Connection Failures and Edge Cases', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const originalEnv = process.env;
   const originalFetch = global.fetch;

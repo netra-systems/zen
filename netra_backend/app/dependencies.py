@@ -10,6 +10,7 @@ from netra_backend.app.database import get_db
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.security_service import SecurityService
+from netra_backend.app.websocket_core import get_websocket_manager
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor_consolidated import (
@@ -59,7 +60,27 @@ def get_security_service(request: Request) -> SecurityService:
 LLMManagerDep = Annotated[LLMManager, Depends(get_llm_manager)]
 
 def get_agent_supervisor(request: Request) -> "Supervisor":
-    return request.app.state.agent_supervisor
+    """Get agent supervisor from app state.
+    
+    The supervisor is initialized at startup with WebSocket manager,
+    so it should already have WebSocket capabilities when retrieved here.
+    """
+    supervisor = request.app.state.agent_supervisor
+    
+    # Verify supervisor has WebSocket capabilities
+    if supervisor and hasattr(supervisor, 'agent_registry'):
+        # Get WebSocket manager and ensure it's set on the agent registry
+        websocket_manager = get_websocket_manager()
+        if websocket_manager and hasattr(supervisor.agent_registry, 'set_websocket_manager'):
+            # Ensure WebSocket manager is properly configured
+            supervisor.agent_registry.set_websocket_manager(websocket_manager)
+            logger.debug("Verified WebSocket manager is set on supervisor agent registry")
+        else:
+            logger.warning("WebSocket manager not available or supervisor lacks agent_registry")
+    else:
+        logger.warning("Supervisor lacks agent_registry - WebSocket events may not work")
+    
+    return supervisor
 
 def get_agent_service(request: Request) -> "AgentService":
     """Get agent service from app state"""
@@ -83,4 +104,14 @@ def get_message_handler_service(request: Request):
     from netra_backend.app.services.message_handlers import MessageHandlerService
     supervisor = get_agent_supervisor(request)
     thread_service = get_thread_service(request)
-    return MessageHandlerService(supervisor, thread_service)
+    
+    # CRITICAL FIX: Include WebSocket manager to enable real-time agent events
+    # This ensures WebSocket events work in all scenarios, not just direct WebSocket routes
+    try:
+        websocket_manager = get_websocket_manager()
+        logger.info("Successfully injected WebSocket manager into MessageHandlerService via dependency injection")
+        return MessageHandlerService(supervisor, thread_service, websocket_manager)
+    except Exception as e:
+        # Backward compatibility: if WebSocket manager isn't available, still work without it
+        logger.warning(f"Failed to get WebSocket manager for MessageHandlerService: {e}, creating without WebSocket support")
+        return MessageHandlerService(supervisor, thread_service)

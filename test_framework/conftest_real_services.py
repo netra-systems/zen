@@ -289,10 +289,15 @@ async def test_user(real_postgres: DatabaseManager) -> Dict:
         'is_superuser': False
     }
     
-    # Insert real user into database
+    # Insert or update real user into database (handle existing users)
     user_id = await real_postgres.fetchval("""
         INSERT INTO auth.users (email, name, password_hash, is_active, is_superuser)
         VALUES ($1, $2, $3, $4, $5)
+        ON CONFLICT (email) DO UPDATE SET
+            name = EXCLUDED.name,
+            password_hash = EXCLUDED.password_hash,
+            is_active = EXCLUDED.is_active,
+            is_superuser = EXCLUDED.is_superuser
         RETURNING id
     """, user_data['email'], user_data['name'], user_data['password_hash'],
         user_data['is_active'], user_data['is_superuser'])

@@ -1,10 +1,8 @@
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import {
-import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-
-import React from 'react';
+import { import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import {

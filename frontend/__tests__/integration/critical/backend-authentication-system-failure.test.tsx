@@ -42,7 +42,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('CRITICAL: Backend Authentication System Complete Failure', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const originalFetch = global.fetch;
   let performanceStartTime: number;

@@ -8,9 +8,10 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { UserProfileForm, UserProfile } from '../../../components/forms/UserProfileForm';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('User Profile Form Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   it('should display validation errors for empty required fields', async () => {
     const mockSubmit = jest.fn();

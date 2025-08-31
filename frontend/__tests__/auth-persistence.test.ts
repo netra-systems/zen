@@ -116,6 +116,7 @@ class MockUnifiedAuthService {
 const UnifiedAuthService = MockUnifiedAuthService;
 
 import { jwtDecode } from 'jwt-decode';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -131,7 +132,7 @@ const localStorageMock = (() => {
 Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
 describe('Auth Persistence Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let authService: UnifiedAuthService;
 

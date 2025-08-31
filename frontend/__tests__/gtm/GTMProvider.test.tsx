@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import { GTMProvider, useGTMContext } from '@/providers/GTMProvider';
 import type { GTMConfig, GTMEventData } from '@/types/gtm.types';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock Next.js Script component
 jest.mock('next/script', () => {
@@ -71,7 +72,7 @@ const TestComponent: React.FC<{
 };
 
 describe('GTMProvider', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let mockDataLayer: any[];
   let originalWindow: any;

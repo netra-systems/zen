@@ -1,5 +1,6 @@
 from netra_backend.app.core.isolated_environment import get_env
-from test_framework.mocks import MockRedisClient
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 """
 Containerized services for L3 realism level integration testing.
 Simplified version that uses existing database connections for testing.

@@ -33,11 +33,12 @@ jest.mock('@/services/apiClientWrapper', () => ({
 }));
 
 import { apiClient } from '@/services/apiClientWrapper';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 const mockApiClient = apiClient as jest.Mocked<typeof apiClient>;
 
 describe('ThreadService Revenue-Critical Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();

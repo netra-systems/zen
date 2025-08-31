@@ -13,6 +13,7 @@ import { LoginButton } from '@/auth/components';
 import { authService } from '@/auth/unified-auth-service';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock auth service
 jest.mock('@/auth/service');
@@ -25,7 +26,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('Authentication Success Redirects Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const mockLogin = jest.fn();
   const mockLogout = jest.fn();

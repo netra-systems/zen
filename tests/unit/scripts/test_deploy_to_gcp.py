@@ -158,8 +158,7 @@ class TestGCPDeployerDockerOperations:
         """Create deployer instance for testing."""
         return GCPDeployer(project_id="test-project")
     
-    @mock_justified("L1 Unit Test: Mocking subprocess to test Docker command construction without external dependencies.", "L1")
-    def test_build_image_local_success(self, deployer):
+        def test_build_image_local_success(self, deployer):
         """Test successful local Docker image building."""
         service = ServiceConfig(
             name="test-service",
@@ -179,8 +178,7 @@ class TestGCPDeployerDockerOperations:
                 assert result is True
                 mock_build.assert_called_once_with(service)
     
-    @mock_justified("L1 Unit Test: Mocking subprocess to test Docker authentication without external dependencies.", "L1")
-    def test_configure_docker_auth_success(self, deployer):
+        def test_configure_docker_auth_success(self, deployer):
         """Test successful Docker authentication configuration."""
         with patch('subprocess.run') as mock_run:
             mock_run.return_value.returncode = 0
@@ -191,8 +189,7 @@ class TestGCPDeployerDockerOperations:
                 assert result is True
                 mock_auth.assert_called_once()
     
-    @mock_justified("L1 Unit Test: Mocking subprocess to test image pushing without external dependencies.", "L1")
-    def test_push_image_success(self, deployer):
+        def test_push_image_success(self, deployer):
         """Test successful image pushing to registry."""
         image_name = "gcr.io/test-project/test-service:latest"
         
@@ -230,8 +227,7 @@ class TestGCPDeployerCloudRunOperations:
             max_instances=5
         )
     
-    @mock_justified("L1 Unit Test: Mocking gcloud commands to test Cloud Run deployment without external dependencies.", "L1")
-    def test_deploy_to_cloud_run_success(self, deployer, sample_service):
+        def test_deploy_to_cloud_run_success(self, deployer, sample_service):
         """Test successful Cloud Run deployment."""
         image_name = "gcr.io/test-project/test-service:latest"
         
@@ -245,8 +241,7 @@ class TestGCPDeployerCloudRunOperations:
                 assert result is True
                 mock_deploy.assert_called_once_with(sample_service, image_name)
     
-    @mock_justified("L1 Unit Test: Mocking gcloud commands to test service cleanup without external dependencies.", "L1")
-    def test_cleanup_old_revisions_success(self, deployer):
+        def test_cleanup_old_revisions_success(self, deployer):
         """Test successful cleanup of old Cloud Run revisions."""
         service_name = "test-service"
         
@@ -273,8 +268,7 @@ class TestGCPDeployerErrorHandling:
         """Create deployer instance for testing."""
         return GCPDeployer(project_id="test-project")
     
-    @mock_justified("L1 Unit Test: Mocking subprocess failures to test error handling without external dependencies.", "L1")
-    def test_docker_build_failure(self, deployer):
+        def test_docker_build_failure(self, deployer):
         """Test handling of Docker build failures."""
         service = ServiceConfig(
             name="test-service",
@@ -295,8 +289,7 @@ class TestGCPDeployerErrorHandling:
                 assert result is False
                 mock_build.assert_called_once_with(service)
     
-    @mock_justified("L1 Unit Test: Mocking gcloud command failures to test deployment error handling.", "L1")
-    def test_cloud_run_deployment_failure(self, deployer):
+        def test_cloud_run_deployment_failure(self, deployer):
         """Test handling of Cloud Run deployment failures."""
         service = ServiceConfig(
             name="test-service",
@@ -415,8 +408,7 @@ class TestGCPDeployerIntegration:
             cpu="2"
         )
     
-    @mock_justified("L1 Unit Test: Mocking complete deployment workflow to test integration without external dependencies.", "L1")
-    def test_full_deployment_workflow_success(self, deployer, sample_service):
+        def test_full_deployment_workflow_success(self, deployer, sample_service):
         """Test complete deployment workflow."""
         with patch('subprocess.run') as mock_run:
             mock_run.return_value.returncode = 0
@@ -437,8 +429,7 @@ class TestGCPDeployerIntegration:
                     assert result is True
                     mock_deploy_service.assert_called_once_with(sample_service)
     
-    @mock_justified("L1 Unit Test: Testing deployment failure scenarios and rollback procedures.", "L1")
-    def test_deployment_failure_rollback(self, deployer, sample_service):
+        def test_deployment_failure_rollback(self, deployer, sample_service):
         """Test deployment failure and rollback scenarios."""
         with patch('subprocess.run') as mock_run:
             # Build succeeds, deployment fails

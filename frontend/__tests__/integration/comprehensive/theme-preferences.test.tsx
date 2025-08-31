@@ -5,8 +5,8 @@
  * and complex form validation with debouncing.
  */
 
-import {
-  React,
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+import { React,
   render,
   waitFor,
   fireEvent,
@@ -40,7 +40,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('Theme and Preferences Integration Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let server: WS;
   

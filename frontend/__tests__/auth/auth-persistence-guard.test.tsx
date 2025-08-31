@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { AuthGuard } from '@/components/AuthGuard';
 import { useAuth } from '@/auth/context';
 import { useGTMEvent } from '@/hooks/useGTMEvent';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock dependencies
 jest.mock('next/navigation', () => ({
@@ -24,7 +25,7 @@ jest.mock('@/hooks/useGTMEvent', () => ({
 }));
 
 describe('AuthGuard - Race Condition Prevention', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const mockPush = jest.fn();
   const mockTrackError = jest.fn();

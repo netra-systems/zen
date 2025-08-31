@@ -1,5 +1,6 @@
 import { renderHook } from '@testing-library/react';
 import { useThreadSidebarActions } from '@/components/chat/ThreadSidebarActions';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock dependencies
 jest.mock('@/store/threadStore', () => ({
@@ -33,7 +34,7 @@ jest.mock('@/hooks/useAuthState', () => ({
 }));
 
 describe('ThreadSidebarActions - Timestamp Handling', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   describe('formatDate function', () => {
         setupAntiHang();

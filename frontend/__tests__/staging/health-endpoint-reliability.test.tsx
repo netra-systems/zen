@@ -36,7 +36,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('Health Endpoint Reliability and API Route Intermittent Failures', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const originalEnv = process.env;
   const originalFetch = global.fetch;

@@ -24,10 +24,29 @@ class SupervisorWorkflowExecutor:
     async def execute_workflow_steps(self, flow_id: str, user_prompt: str, 
                                    thread_id: str, user_id: str, run_id: str) -> DeepAgentState:
         """Execute all workflow steps."""
+        # Send orchestration-level start notification
+        await self._send_orchestration_notification(thread_id, run_id, "orchestration_started", 
+                                                   f"Starting to process your request: {user_prompt[:100]}...")
+        
         context = await self._create_context_step(flow_id, thread_id, user_id, run_id)
         state = await self._initialize_state_step(flow_id, user_prompt, thread_id, user_id, run_id)
+        
+        # Send analysis notification
+        await self._send_orchestration_notification(thread_id, run_id, "orchestration_thinking", 
+                                                   "Analyzing your request and determining which agents to use...")
+        
         pipeline = await self._build_pipeline_step(flow_id, user_prompt, state)
+        
+        # Send delegation notification
+        agent_names = [getattr(step, 'agent_name', 'agent') for step in pipeline]
+        await self._send_orchestration_notification(thread_id, run_id, "orchestration_delegating", 
+                                                   f"Delegating to specialized agents: {', '.join(agent_names)}")
+        
         await self._execute_pipeline_step(flow_id, pipeline, state, context)
+        
+        # Send completion notification
+        await self._send_orchestration_notification(thread_id, run_id, "orchestration_completed", 
+                                                   "Task completed - combining results and preparing response")
         return state
     
     async def _create_context_step(self, flow_id: str, thread_id: str, user_id: str, run_id: str) -> dict:
@@ -74,3 +93,38 @@ class SupervisorWorkflowExecutor:
             pipeline, state, context["run_id"], context
         )
         await self.supervisor.pipeline_executor.finalize_state(state, context)
+    
+    async def _send_orchestration_notification(self, thread_id: str, run_id: str, 
+                                             event_type: str, message: str) -> None:
+        """Send orchestration-level WebSocket notification."""
+        try:
+            # Check if supervisor has websocket manager
+            websocket_manager = getattr(self.supervisor, 'websocket_manager', None)
+            if not websocket_manager:
+                logger.debug(f"No WebSocket manager available for orchestration event: {event_type}")
+                return
+            
+            # Create orchestration notification payload
+            payload = {
+                "run_id": run_id,
+                "event_type": event_type,
+                "message": message,
+                "timestamp": self._get_current_timestamp(),
+                "agent_name": "supervisor",
+                "orchestration_level": True
+            }
+            
+            # Send notification
+            from netra_backend.app.schemas.websocket_models import WebSocketMessage
+            notification = WebSocketMessage(type=event_type, payload=payload)
+            await websocket_manager.send_to_thread(thread_id, notification.model_dump())
+            
+            logger.info(f"Sent orchestration notification: {event_type} - {message[:50]}...")
+            
+        except Exception as e:
+            logger.warning(f"Failed to send orchestration notification {event_type}: {e}")
+    
+    def _get_current_timestamp(self) -> float:
+        """Get current timestamp."""
+        from datetime import datetime, timezone
+        return datetime.now(timezone.utc).timestamp()

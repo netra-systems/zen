@@ -10,6 +10,10 @@ require('whatwg-fetch');
 require('@testing-library/jest-dom');
 const fetchMock = require('jest-fetch-mock');
 
+// Set global test timeout using centralized configuration
+const { setupGlobalTestTimeout } = require('./__tests__/config/test-timeouts');
+setupGlobalTestTimeout();
+
 // Add React for JSX components
 global.React = require('react');
 

@@ -656,7 +656,8 @@ class RealServicesManager:
             token_validation = self.validate_jwt_token(token)
             if token_validation.get('valid', False):
                 # Create a mock websocket object for testing
-                class MockWebSocket:
+                # COMMENTED OUT: MockWebSocket class - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
+# class MockWebSocket:
                     def __init__(self):
                         self.closed = False
                         

@@ -4,7 +4,7 @@
  */
 
 describe('External NPM Dependencies Import Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   // @smoke-test
   describe('Core React and Next.js imports', () => {

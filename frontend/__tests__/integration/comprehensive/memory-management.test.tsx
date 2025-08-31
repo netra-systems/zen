@@ -1,6 +1,5 @@
-import {
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-mory Management Integration Tests
+import { mory Management Integration Tests
  * 
  * BVJ: Enterprise segment - ensures platform scalability, reduces infrastructure costs
  * Tests memory management, resource cleanup, and large dataset handling.

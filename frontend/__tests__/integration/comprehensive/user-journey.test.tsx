@@ -1,6 +1,5 @@
-import {
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-er Journey Stateful and Collaborative Tests
+import { er Journey Stateful and Collaborative Tests
  * ULTRA DEEP THINK: Module-based architecture - Stateful tests extracted for 450-line compliance
  */
 

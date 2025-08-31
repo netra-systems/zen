@@ -73,7 +73,7 @@ const nextConfig: NextConfig = {
                 "script-src 'self' 'unsafe-eval' 'unsafe-inline' http://localhost:* http://127.0.0.1:* https://www.googletagmanager.com https://tagmanager.google.com https://www.clarity.ms https://scripts.clarity.ms",
                 "style-src 'self' 'unsafe-inline' http://localhost:* http://127.0.0.1:*",
                 "img-src 'self' data: blob: http://localhost:* http://127.0.0.1:* https://www.googletagmanager.com https://*.clarity.ms https://c.bing.com",
-                "connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* wss://localhost:* wss://127.0.0.1:* https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://*.clarity.ms",
+                "connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* wss://localhost:* wss://127.0.0.1:* https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://*.clarity.ms",
                 "font-src 'self' data: http://localhost:* http://127.0.0.1:*",
                 "media-src 'self' http://localhost:* http://127.0.0.1:*",
                 "frame-src 'self' http://localhost:* http://127.0.0.1:* https://www.googletagmanager.com"
@@ -98,7 +98,7 @@ const nextConfig: NextConfig = {
                 "script-src 'self' 'unsafe-inline' https://*.staging.netrasystems.ai https://www.googletagmanager.com https://tagmanager.google.com https://www.clarity.ms https://scripts.clarity.ms",
                 "style-src 'self' 'unsafe-inline' https://*.staging.netrasystems.ai",
                 "img-src 'self' data: blob: https://*.staging.netrasystems.ai https://www.googletagmanager.com https://*.clarity.ms https://c.bing.com",
-                "connect-src 'self' https://*.staging.netrasystems.ai wss://*.staging.netrasystems.ai https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://*.clarity.ms",
+                "connect-src 'self' https://*.staging.netrasystems.ai wss://*.staging.netrasystems.ai https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://*.clarity.ms",
                 "font-src 'self' data: https://*.staging.netrasystems.ai",
                 "media-src 'self' https://*.staging.netrasystems.ai",
                 "frame-src 'self' https://*.staging.netrasystems.ai https://accounts.google.com https://www.googletagmanager.com"
@@ -161,10 +161,10 @@ const nextConfig: NextConfig = {
     if (dev && !isProduction) {
       config.watchOptions = {
         ...config.watchOptions,
-        // Poll for changes every 5 minutes (300000 ms)
-        poll: 300000,
-        // Aggregate changes for 5 minutes before rebuilding
-        aggregateTimeout: 300000,
+        // Poll for changes every 2 seconds in Docker environment, 10 seconds otherwise
+        poll: process.env.DOCKER_ENV ? 2000 : 10000,
+        // Aggregate changes for 300ms before rebuilding
+        aggregateTimeout: 300,
         // Ignore node_modules to reduce file watching overhead
         ignored: /node_modules/,
       };

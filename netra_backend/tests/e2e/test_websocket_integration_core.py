@@ -31,61 +31,45 @@ from netra_backend.app.websocket_core.handlers import (
     HeartbeatHandler
 )
 
-class MockWebSocket:
-
-    """Mock WebSocket for testing."""
+# COMMENTED OUT: MockWebSocket class - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
+# COMMENTED OUT: MockWebSocket class - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
+# class MockWebSocket:
+#     """Mock WebSocket for testing."""
     
-    def __init__(self):
+#     def __init__(self):
+#         self.messages_sent = []
+#         self.messages_received = []
+#         self.closed = False
+#         self.accepted = False
+#         self.connection_id = f"test_conn_{int(asyncio.get_event_loop().time() * 1000)}"
+#     
+#     async def accept(self):
+#         self.accepted = True
+#     
+#     async def send_json(self, data: Dict[str, Any]):
+#         self.messages_sent.append(data)
+#     
+#     async def send_text(self, data: str):
+#         self.messages_sent.append(data)
+#     
+#     async def receive_json(self) -> Dict[str, Any]:
+#         if self.messages_received:
+#             return self.messages_received.pop(0)
+#         await asyncio.sleep(0.1)
+#         return {"type": "ping"}
+#     
+#     async def close(self):
+#         self.closed = True
+#     
+#     def add_received_message(self, message: Dict[str, Any]):
+#         """Add message to received queue for testing."""
+#         self.messages_received.append(message)
 
-        self.messages_sent = []
-
-        self.messages_received = []
-
-        self.closed = False
-
-        self.accepted = False
-
-        self.connection_id = f"test_conn_{int(asyncio.get_event_loop().time() * 1000)}"
-    
-    async def accept(self):
-
-        self.accepted = True
-    
-    async def send_json(self, data: Dict[str, Any]):
-
-        self.messages_sent.append(data)
-    
-    async def send_text(self, data: str):
-
-        self.messages_sent.append(data)
-    
-    async def receive_json(self) -> Dict[str, Any]:
-
-        if self.messages_received:
-
-            return self.messages_received.pop(0)
-
-        await asyncio.sleep(0.1)
-
-        return {"type": "ping"}
-    
-    async def close(self):
-
-        self.closed = True
-    
-    def add_received_message(self, message: Dict[str, Any]):
-
-        """Add message to received queue for testing."""
-
-        self.messages_received.append(message)
-
-@pytest.fixture
-
-def mock_websocket() -> MockWebSocket:
-
-    """Create mock WebSocket for testing."""
-
-    return MockWebSocket()
+# COMMENTED OUT: mock_websocket fixture - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
+# @pytest.fixture
+# def mock_websocket() -> MockWebSocket:
+#     """Create mock WebSocket for testing."""
+#     return MockWebSocket()
 
 @pytest.fixture
 
@@ -121,23 +105,16 @@ def sample_message() -> Dict[str, Any]:
 
     }
 
-@pytest.fixture
-
-def error_prone_websocket() -> MockWebSocket:
-
-    """Create WebSocket that simulates errors."""
-
-    mock_ws = MockWebSocket()
-    
-    # Override send_json to simulate errors
-
-    async def error_send_json(data):
-
-        raise ConnectionError("Simulated connection error")
-    
-    mock_ws.send_json = error_send_json
-
-    return mock_ws
+# COMMENTED OUT: error_prone_websocket fixture - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
+# @pytest.fixture
+# def error_prone_websocket() -> MockWebSocket:
+#     """Create WebSocket that simulates errors."""
+#     mock_ws = MockWebSocket()
+#     # Override send_json to simulate errors
+#     async def error_send_json(data):
+#         raise ConnectionError("Simulated connection error")
+#     mock_ws.send_json = error_send_json
+#     return mock_ws
 
 # =============================================================================
 # WEBSOCKET CORE TESTS

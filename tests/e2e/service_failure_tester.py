@@ -5,7 +5,8 @@ Modular design: <300 lines, 25-line functions max
 """
 
 from netra_backend.app.monitoring.metrics_collector import PerformanceMetric
-from test_framework.mocks import MockHttpClient, MockTimeoutException
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 from typing import Any, Dict
 
 class ServiceFailureScenarioTester:

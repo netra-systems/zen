@@ -17,6 +17,7 @@
 
 import { getUnifiedApiConfig } from '@/lib/unified-api-config';
 import { apiClient } from '@/services/apiClientWrapper';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock Next.js router for tests
 jest.mock('next/navigation', () => ({
@@ -25,7 +26,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('Missing API Routes 404 Errors - Staging Replication', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const originalEnv = process.env;
   

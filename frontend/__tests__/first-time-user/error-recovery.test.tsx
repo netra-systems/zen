@@ -71,9 +71,10 @@ jest.mock('@/lib/logger', () => ({
 
 // Import component after mocks
 import MainChat from '@/components/chat/MainChat';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('First-Time User Error Recovery', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();

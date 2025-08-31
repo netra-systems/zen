@@ -3,7 +3,10 @@ import { render, fireEvent, waitFor, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { setupTestEnvironment, resetTestState } from '@/__tests__/test-utils/integration-test-setup';
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-per monetization through tier-based access,
+
+/**
+ * Role-based access control tests
+ * Business Value: per monetization through tier-based access,
  * prevents unauthorized feature usage, protects premium functionality.
  */
 

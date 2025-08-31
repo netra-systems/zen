@@ -20,6 +20,7 @@ import { reconciliationService } from '@/services/reconciliation';
 import { unifiedAuthService } from '@/lib/unified-auth-service';
 import { config as appConfig } from '@/config';
 import { logger } from '@/lib/logger';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock all dependencies
 jest.mock('@/services/webSocketService');
@@ -102,7 +103,7 @@ const useTokenController = () => {
 };
 
 describe('WebSocketProvider Timing Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const mockWebSocketService = {
     onStatusChange: null,

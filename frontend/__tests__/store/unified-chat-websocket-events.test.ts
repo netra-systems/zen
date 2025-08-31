@@ -13,6 +13,7 @@
 
 import { UnifiedChatStoreTestUtils, GlobalTestUtils } from './store-test-utils';
 import type {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
   AgentStartedEvent,
   ToolExecutingEvent,
   AgentThinkingEvent,
@@ -23,7 +24,7 @@ import type {
 } from '@/types/unified-chat';
 
 describe('UnifiedChatStore - WebSocket Events', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let storeResult: ReturnType<typeof UnifiedChatStoreTestUtils.initializeStore>;
 

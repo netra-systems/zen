@@ -3,9 +3,10 @@
  */
 
 import { unifiedAuthService } from '@/auth/unified-auth-service';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Debug Token Refresh', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   test('should call needsRefresh method', () => {
     // Create a simple mock token

@@ -32,22 +32,16 @@ import { mockUseContext } from './auth-test-setup';
 import { AuthContext } from '@/auth';
 
 import { useAuth } from '@/auth/context';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Auth Token Management', () => {
-      
   jest.setTimeout(10000);
-
-  beforeEach(() => {
-
-  });
-
-  afterEach(() => {
-    cleanupAntiHang();
-  });jest.setTimeout(10000);
+  
   let testEnv: ReturnType<typeof setupAuthTestEnvironment>;
   let mockToken: string;
 
   beforeEach(() => {
+    setupAntiHang();
     testEnv = setupAuthTestEnvironment();
     mockToken = createMockToken();
     
@@ -60,21 +54,15 @@ describe('Auth Token Management', () => {
     resetAuthTestMocks(testEnv);
   });
 
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
   afterAll(() => {
     jest.restoreAllMocks();
   });
 
   describe('getToken', () => {
-        
-  jest.setTimeout(10000);
-
-  beforeEach(() => {
-
-  });
-
-  afterEach(() => {
-    cleanupAntiHang();
-  });jest.setTimeout(10000);
     it('should retrieve token from localStorage', () => {
       const result = authService.getToken();
       // Test that we get a token (the current mock infrastructure provides a JWT token)
@@ -123,16 +111,6 @@ describe('Auth Token Management', () => {
   });
 
   describe('getAuthHeaders', () => {
-        
-  jest.setTimeout(10000);
-
-  beforeEach(() => {
-
-  });
-
-  afterEach(() => {
-    cleanupAntiHang();
-  });jest.setTimeout(10000);
     it('should return auth headers with token', () => {
       testLocalStorageMock.clear();
       testLocalStorageMock.getItem.mockReturnValue(mockToken);
@@ -184,16 +162,6 @@ describe('Auth Token Management', () => {
   });
 
   describe('removeToken', () => {
-        
-  jest.setTimeout(10000);
-
-  beforeEach(() => {
-
-  });
-
-  afterEach(() => {
-    cleanupAntiHang();
-  });jest.setTimeout(10000);
     it('should remove token from localStorage', () => {
       authService.removeToken();
 
@@ -296,16 +264,6 @@ describe('Auth Token Management', () => {
   };
 
   describe('Token Operations Integration', () => {
-        
-  jest.setTimeout(10000);
-
-  beforeEach(() => {
-
-  });
-
-  afterEach(() => {
-    cleanupAntiHang();
-  });jest.setTimeout(10000);
     it('should handle rapid token operations', () => {
       performRapidTokenOperations();
       const { token1, token2 } = getTokensAfterOperations();
@@ -328,16 +286,6 @@ describe('Auth Token Management', () => {
   });
 
   describe('useAuth Hook', () => {
-        
-  jest.setTimeout(10000);
-
-  beforeEach(() => {
-
-  });
-
-  afterEach(() => {
-    cleanupAntiHang();
-  });jest.setTimeout(10000);
     beforeEach(() => {
       // Reset the mock before each test if it exists
       if (mockUseContext && jest.isMockFunction(mockUseContext)) {
@@ -393,8 +341,4 @@ describe('Auth Token Management', () => {
       expect(result.loading).toBe(true);
     });
   });
-  afterEach(() => {
-    cleanupAntiHang();
-  });
-
 });

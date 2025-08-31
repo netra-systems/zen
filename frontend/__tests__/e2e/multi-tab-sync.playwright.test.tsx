@@ -1,7 +1,6 @@
-import { test, expect } from '@playwright/test';
-import {
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-sts real-time synchronization between multiple browser tabs/windows
+import { test, expect } from '@playwright/test';
+import { sts real-time synchronization between multiple browser tabs/windows
  * Validates state consistency across concurrent sessions
  * 
  * @compliance conventions.xml - Max 8 lines per function, under 300 lines

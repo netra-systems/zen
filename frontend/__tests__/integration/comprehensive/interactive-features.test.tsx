@@ -1,6 +1,5 @@
-import {
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-teractive Features Animation Integration Tests
+import { teractive Features Animation Integration Tests
  * ULTRA DEEP THINK: Module-based architecture - Animation tests extracted for 450-line compliance
  */
 

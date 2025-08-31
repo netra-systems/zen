@@ -6,7 +6,7 @@
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Connection Status Utils', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   // Mock utility functions for testing
   const mockConnectionStatusUtils = {

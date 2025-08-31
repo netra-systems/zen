@@ -1,6 +1,5 @@
-import {
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-ternationalization Tests
+import { ternationalization Tests
  * 
  * Tests multi-language support, RTL languages, and locale formatting.
  * All functions ≤8 lines, file ≤300 lines for modular architecture compliance.

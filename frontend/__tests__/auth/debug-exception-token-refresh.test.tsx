@@ -4,6 +4,7 @@
 
 import { unifiedAuthService } from '@/auth/unified-auth-service';
 import * as jwtDecodeMock from 'jwt-decode';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock jwt-decode
 jest.mock('jwt-decode', () => ({
@@ -11,7 +12,7 @@ jest.mock('jwt-decode', () => ({
 }));
 
 describe('Debug Exception Token Refresh', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let mockJwtDecode: jest.MockedFunction<typeof jwtDecodeMock.jwtDecode>;
   

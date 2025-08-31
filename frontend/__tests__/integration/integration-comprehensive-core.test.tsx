@@ -3,12 +3,12 @@
  * Module-based architecture: Core comprehensive tests ≤300 lines, functions ≤8 lines
  */
 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TestProviders } from '@/__tests__/setup/test-providers';
-import {
-  setupComprehensiveMocks,
+import { setupComprehensiveMocks,
   setupComprehensiveTestEnvironment,
   cleanupComprehensiveTestEnvironment,
   setupComprehensiveHookMocks,
@@ -81,7 +81,7 @@ jest.mock('@/components/auth/AuthGate', () => {
 });
 
 describe('Comprehensive Integration Tests - Core', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let server: any;
   const useCorpusStore = createComprehensiveCorpusStore();

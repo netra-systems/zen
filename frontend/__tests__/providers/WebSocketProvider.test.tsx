@@ -5,6 +5,7 @@ import { WebSocketProvider, useWebSocket } from '@/providers/WebSocketProvider';
 import { useAuth } from '@/hooks/useAuth';
 import webSocketService from '@/services/webSocketService';
 import { reconciliationService } from '@/services/reconciliationService';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock external dependencies
 jest.mock('@/hooks/useAuth');
@@ -36,7 +37,7 @@ const TestComponent = () => {
 };
 
 describe('WebSocketProvider', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let mockAuth: jest.Mocked<ReturnType<typeof useAuth>>;
   let mockWebSocketService: jest.Mocked<typeof webSocketService>;

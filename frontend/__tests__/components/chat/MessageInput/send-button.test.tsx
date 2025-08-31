@@ -167,6 +167,7 @@ import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useThreadStore } from '@/store/threadStore';
 import { useAuthStore } from '@/store/authStore';
 import { generateUniqueId } from '@/lib/utils';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Get the mocked functions
 const mockUseWebSocket = useWebSocket as jest.Mock;
@@ -176,7 +177,7 @@ const mockUseAuthStore = useAuthStore as jest.Mock;
 const mockGenerateUniqueId = generateUniqueId as jest.Mock;
 
 describe('MessageInput - Send Button States', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();

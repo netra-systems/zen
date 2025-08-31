@@ -6,6 +6,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
@@ -23,7 +24,7 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 describe('Mobile Layout Responsive Design', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   beforeEach(() => {
     // Reset window size mocks

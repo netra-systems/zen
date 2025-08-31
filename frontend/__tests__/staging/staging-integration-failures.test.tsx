@@ -12,6 +12,7 @@
 
 import { render, screen, waitFor } from '@testing-library/react';
 import { getUnifiedApiConfig, detectEnvironment } from '@/lib/unified-api-config';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock Next.js router
 jest.mock('next/navigation', () => ({
@@ -27,7 +28,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('Staging Integration Failures - End-to-End', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const originalEnv = process.env;
   const originalFetch = global.fetch;

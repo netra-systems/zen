@@ -18,6 +18,7 @@ import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useThreadStore } from '@/store/threadStore';
 import { useAuthStore } from '@/store/authStore';
 import { optimisticMessageManager } from '@/services/optimistic-updates';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock all dependencies
 jest.mock('@/store/unified-chat');
@@ -85,7 +86,7 @@ const { useMessageHistory } = require('@/components/chat/hooks/useMessageHistory
 const { useTextareaResize } = require('@/components/chat/hooks/useTextareaResize');
 
 describe('MessageInput Pipeline Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const mockHandleSend = jest.fn();
   const mockAddToHistory = jest.fn();

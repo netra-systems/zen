@@ -63,7 +63,8 @@ try:
         create_mock_websocket,
     )
 except ImportError:
-    class MockWebSocket:
+    # COMMENTED OUT: MockWebSocket class - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
+# class MockWebSocket:
         def __init__(self, user_id: str = None):
             self.user_id = user_id or "test_user"
             self.connection_id = f"conn_{int(time.time() * 1000)}"

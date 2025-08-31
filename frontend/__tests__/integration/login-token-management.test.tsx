@@ -1,10 +1,9 @@
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { jest } from '@jest/globals';
-import {
-import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
- breaches
+import { breaches
  * - Value Impact: Eliminates token-related auth failures
  * - Revenue Impact: Protects against security incidents costing $500K+
  * 

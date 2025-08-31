@@ -1,3 +1,4 @@
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -7,9 +8,7 @@ import { mockAuthServiceResponses } from '../mocks/auth-service-mock';
 import { authService } from '@/auth';
 import HomePage from '@/app/page';
 import LoginPage from '@/app/login/page';
-import { 
-import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-/test-providers';
+import { /test-providers';
 import { mockAuthServiceResponses } from '../mocks/auth-service-mock';
 import { authService } from '@/auth';
 import HomePage from '@/app/page';

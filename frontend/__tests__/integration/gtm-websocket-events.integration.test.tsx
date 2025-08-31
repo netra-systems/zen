@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
 import { GTMProvider } from '@/providers/GTMProvider';
 import { useGTM } from '@/hooks/useGTM';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock Next.js Script component
 jest.mock('next/script', () => {
@@ -320,7 +321,7 @@ const WebSocketGTMTestComponent: React.FC = () => {
 };
 
 describe('GTM WebSocket Events Integration', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let mockDataLayer: any[];
 

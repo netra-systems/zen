@@ -12,6 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { LoginButton } from '@/auth/components';
 import { authService } from '@/auth/unified-auth-service';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock auth service
 jest.mock('@/auth/service');
@@ -29,7 +30,7 @@ Object.defineProperty(window, 'localStorage', {
 });
 
 describe('Session Status Indicators Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const mockLogin = jest.fn();
   const mockLogout = jest.fn();

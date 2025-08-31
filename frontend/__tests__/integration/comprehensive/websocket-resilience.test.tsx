@@ -1,6 +1,5 @@
-import {
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-bSocket Resilience Tests
+import { bSocket Resilience Tests
  * 
  * Tests WebSocket message buffering, exponential backoff reconnection, 
  * and heartbeat mechanisms.

@@ -42,9 +42,7 @@ class AgentPipelineMocks:
     
     @staticmethod
 
-    @mock_justified("LLM provider external dependency for agent response generation")
-
-    def create_llm_manager_mock():
+        def create_llm_manager_mock():
 
         """Mock LLM manager for agent response testing"""
 
@@ -104,9 +102,7 @@ class AgentPipelineMocks:
 
     @staticmethod
 
-    @mock_justified("WebSocket connection external dependency for message delivery")
-
-    def create_websocket_mock():
+        def create_websocket_mock():
 
         """Mock WebSocket for message delivery testing"""
 
@@ -138,9 +134,7 @@ class AgentPipelineMocks:
 
     @staticmethod
 
-    @mock_justified("Redis state management external dependency")
-
-    def create_redis_manager_mock():
+        def create_redis_manager_mock():
 
         """Mock Redis manager for agent state management"""
 
@@ -170,9 +164,7 @@ class AgentPipelineMocks:
 
     @staticmethod
 
-    @mock_justified("WebSocket manager external dependency for connection handling")
-
-    def create_websocket_manager_mock():
+        def create_websocket_manager_mock():
 
         """Mock WebSocket manager for connection management"""
 

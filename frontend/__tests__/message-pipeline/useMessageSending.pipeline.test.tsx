@@ -20,6 +20,7 @@ import { ThreadRenameService } from '@/services/threadRenameService';
 import { optimisticMessageManager } from '@/services/optimistic-updates';
 import { generateUniqueId } from '@/lib/utils';
 import { logger } from '@/lib/logger';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock all dependencies
 jest.mock('@/hooks/useWebSocket');
@@ -32,7 +33,7 @@ jest.mock('@/lib/utils');
 jest.mock('@/lib/logger');
 
 describe('useMessageSending Pipeline Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const mockSendMessage = jest.fn();
   const mockAddMessage = jest.fn();

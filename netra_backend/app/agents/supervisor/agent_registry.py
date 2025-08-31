@@ -142,6 +142,9 @@ class AgentRegistry:
                 raise RuntimeError("Tool dispatcher WebSocket enhancement failed")
             else:
                 logger.info("✅ Tool dispatcher WebSocket enhancement verified")
+        elif manager is None:
+            # Graceful degradation when manager is None - log but don't fail
+            logger.warning("WebSocket manager is None - agent events will not be available")
         
         # Set WebSocket manager for all registered agents with verification
         agent_count = 0
@@ -152,4 +155,7 @@ class AgentRegistry:
             except Exception as e:
                 logger.warning(f"Failed to set WebSocket manager for agent {agent_name}: {e}")
         
-        logger.info(f"✅ WebSocket manager set for {agent_count}/{len(self.agents)} agents")
+        if manager is not None:
+            logger.info(f"✅ WebSocket manager set for {agent_count}/{len(self.agents)} agents")
+        else:
+            logger.info(f"WebSocket manager set to None for {agent_count}/{len(self.agents)} agents")

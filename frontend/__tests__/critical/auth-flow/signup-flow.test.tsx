@@ -249,7 +249,7 @@ const SignupForm = ({ onRedirect }: { onRedirect?: jest.Mock }) => {
 };
 
 describe('Signup Flow - Business Critical Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let user: ReturnType<typeof userEvent.setup>;
 

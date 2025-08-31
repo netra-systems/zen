@@ -4,9 +4,10 @@
  */
 
 import { CoreReconciliationService } from '@/services/reconciliation/core';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Reconciliation Cleanup Fix', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let service: CoreReconciliationService;
 

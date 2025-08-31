@@ -13,6 +13,7 @@
 import { calculateROI } from '@/components/demo/ROICalculator.calculations';
 import { demoService } from '@/services/demoService';
 import { Metrics, Savings, INDUSTRY_MULTIPLIERS, DEFAULT_METRICS } from '@/components/demo/ROICalculator.types';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock dependencies
 jest.mock('@/services/demoService', () => ({
@@ -28,7 +29,7 @@ jest.mock('@/lib/logger', () => ({
 }));
 
 describe('ROI Calculator Business Logic', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const mockDemoService = demoService as jest.Mocked<typeof demoService>;
 

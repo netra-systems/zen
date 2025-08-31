@@ -29,7 +29,8 @@ import redis.asyncio as redis
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.schemas import User
-from test_framework.mock_utils import mock_justified
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
 from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 
@@ -631,9 +632,7 @@ class TestWebSocketReconnectionStateRecoveryL3:
 
             await state_manager.clear_state(user.id)
     
-    @mock_justified("L3: State recovery testing with real Redis persistence")
-
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_state_recovery_performance(self, websocket_manager, state_manager, test_users):
 
         """Test performance of state recovery operations."""

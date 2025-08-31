@@ -5,6 +5,7 @@ import { ChatHistorySection } from '@/components/ChatHistorySection';
 import { ThreadSidebarActions } from '@/components/chat/ThreadSidebarActions';
 import { ThreadService } from '@/services/threadService';
 import { Thread } from '@/types/thread';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock all dependencies
 jest.mock('next/navigation');
@@ -26,7 +27,7 @@ jest.mock('@/services/threadService');
  */
 describe('Thread Timestamp Display - Integration Tests', () => {
   
-      setupAntiHang();
+  setupAntiHang();
   
     jest.setTimeout(10000);
   

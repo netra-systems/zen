@@ -64,6 +64,20 @@ class WebSocketContextMixin:
         if hasattr(self, 'user_id'):
             self.user_id = context.user_id
     
+    def propagate_websocket_context_to_state(self, state) -> None:
+        """Propagate WebSocket context to agent state for tool execution.
+        
+        Args:
+            state: The agent state object that tools will receive
+            
+        CRITICAL: This method should be called by agents before executing tools
+        to ensure tools can send WebSocket events with proper context.
+        """
+        if self.has_websocket_context() and state is not None:
+            # Set context on state so tools can access it
+            state._websocket_context = self._websocket_context
+            logger.debug(f"Propagated WebSocket context to state for {self.name}")
+    
     def has_websocket_context(self) -> bool:
         """Check if WebSocket context is available."""
         return (hasattr(self, '_websocket_context') and self._websocket_context is not None and

@@ -104,7 +104,7 @@ class SecurityHeadersConfig:
             "style-src 'self' https://fonts.googleapis.com",
             "font-src 'self' https://fonts.gstatic.com",
             "img-src 'self' data: https: https://www.googletagmanager.com https://*.clarity.ms https://c.bing.com",
-            "connect-src 'self' https://api.netrasystems.ai wss://api.netrasystems.ai https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://*.clarity.ms"
+            "connect-src 'self' https://api.netrasystems.ai wss://api.netrasystems.ai https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://*.clarity.ms"
         ]
     
     @staticmethod

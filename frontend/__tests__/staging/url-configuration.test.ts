@@ -6,9 +6,10 @@
 import { getSecureApiConfig, getSecureApiConfigAsync } from '@/lib/secure-api-config';
 import { getAuthServiceConfig, getAuthServiceConfigAsync } from '@/lib/auth-service-config';
 import { apiClient } from '@/services/apiClientWrapper';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Frontend URL Configuration - Staging/Production', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const originalEnv = process.env;
 

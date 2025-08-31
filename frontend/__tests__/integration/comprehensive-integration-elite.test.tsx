@@ -57,6 +57,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 // Now imports
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, waitFor, screen, fireEvent, act } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
@@ -71,8 +72,7 @@ import { WebSocketProvider } from '@/providers/WebSocketProvider';
 
 import { TestProviders } from '@/__tests__/setup/test-providers';
 import * as TestSetupHelpers from '@/__tests__/helpers/test-setup-helpers';
-import {
-  createMockDocument,
+import { createMockDocument,
   createMockSearchResults,
   createMockGenerationJob,
   createMockExportData,
@@ -129,7 +129,7 @@ const healthService = {
 };
 
 describe('Comprehensive Frontend Integration Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let server: WS;
   

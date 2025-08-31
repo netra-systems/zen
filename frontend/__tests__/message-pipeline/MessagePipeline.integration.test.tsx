@@ -31,6 +31,7 @@ import { useAuthStore } from '@/store/authStore';
 import { optimisticMessageManager } from '@/services/optimistic-updates';
 import { webSocketService } from '@/services/webSocketService';
 import { ThreadService } from '@/services/threadService';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Create a comprehensive test harness that integrates all components
 const MessagePipelineTestHarness: React.FC<{
@@ -138,7 +139,7 @@ jest.mock('@/store/threadStore');
 jest.mock('@/store/authStore');
 
 describe('Complete Message Pipeline Integration Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const mockWebSocketService = {
     onMessage: null,

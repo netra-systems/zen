@@ -23,9 +23,10 @@ import {
   createLoadingResult
 } from '@/utils/loading-state-machine';
 import { WebSocketStatus } from '@/services/webSocketService';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Loading State Machine', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   describe('State Transitions', () => {
         setupAntiHang();

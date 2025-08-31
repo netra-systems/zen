@@ -6,6 +6,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { unstable_batchedUpdates } from 'react-dom';
 import { useUnifiedChatStore } from '@/store/unified-chat';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock react-dom's batchedUpdates
 jest.mock('react-dom', () => ({
@@ -14,7 +15,7 @@ jest.mock('react-dom', () => ({
 }));
 
 describe('Unified Chat Store - Batched Updates', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   beforeEach(() => {
     // Reset store to initial state

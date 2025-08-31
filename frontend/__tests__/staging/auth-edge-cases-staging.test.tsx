@@ -15,6 +15,7 @@ import { jest } from '@jest/globals';
 import { authService } from '@/auth/service';
 import { authInterceptor } from '@/lib/auth-interceptor';
 import { unifiedAuthService } from '@/lib/unified-auth-service';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Test environment validation
 if (process.env.NODE_ENV !== 'test' && process.env.NEXT_PUBLIC_ENVIRONMENT !== 'staging') {
@@ -22,7 +23,7 @@ if (process.env.NODE_ENV !== 'test' && process.env.NEXT_PUBLIC_ENVIRONMENT !== '
 }
 
 describe('Authentication Edge Cases - Staging Environment', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let mockFetch: jest.MockedFunction<typeof fetch>;
   const originalLocation = window.location;

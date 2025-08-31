@@ -73,15 +73,8 @@ class EnhancedToolExecutionEngine(ToolExecutionEngine):
         # Create context for notifications
         context = None
         if self.websocket_notifier:
-            # Extract thread_id using unified utility
-            thread_id = extract_thread_id(state, run_id)
-            
-            context = AgentExecutionContext(
-                agent_name="ToolExecutor",
-                run_id=run_id,
-                thread_id=thread_id,
-                user_id=getattr(state, 'user_id', run_id)
-            )
+            # CRITICAL: Try to use existing WebSocket context from agent if available
+            context = self._get_or_create_context(state, run_id, tool_name)
             
             # Send tool executing notification
             await self.websocket_notifier.send_tool_executing(context, tool_name)
@@ -115,6 +108,30 @@ class EnhancedToolExecutionEngine(ToolExecutionEngine):
                     context, tool_name, error_dict
                 )
             raise
+    
+    def _get_or_create_context(self, state: Any, run_id: str, tool_name: str) -> AgentExecutionContext:
+        """Get existing WebSocket context from agent or create new one for tool execution."""
+        # CRITICAL: First try to get context from the agent that called this tool
+        if hasattr(state, '_websocket_context') and state._websocket_context:
+            # Use the agent's existing context but update agent_name to show tool usage
+            original_context = state._websocket_context
+            return AgentExecutionContext(
+                agent_name=f"{original_context.agent_name}[{tool_name}]",
+                run_id=original_context.run_id,
+                thread_id=original_context.thread_id,
+                user_id=original_context.user_id,
+                retry_count=original_context.retry_count,
+                max_retries=original_context.max_retries
+            )
+        
+        # Fallback: Create new context if agent context not available
+        thread_id = extract_thread_id(state, run_id)
+        return AgentExecutionContext(
+            agent_name=f"ToolExecutor[{tool_name}]",
+            run_id=run_id,
+            thread_id=thread_id,
+            user_id=getattr(state, 'user_id', run_id)
+        )
 
 
 def enhance_tool_dispatcher_with_notifications(tool_dispatcher, websocket_manager):

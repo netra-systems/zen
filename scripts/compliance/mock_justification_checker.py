@@ -184,8 +184,7 @@ def create_mock_justified_decorator():
         Decorator to document mock justification.
         
         Usage:
-            @mock_justified("External API not available in test environment")
-            @patch('app.services.external_api')
+                        @patch('app.services.external_api')
             def test_something(self, mock_api):
                 ...
         """

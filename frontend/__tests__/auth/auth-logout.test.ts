@@ -8,6 +8,7 @@
  */
 
 // Import test setup with mocks FIRST
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import './auth-test-setup';
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
@@ -42,8 +43,7 @@ jest.unmock('@/auth/service');
 jest.unmock('@/auth');
 
 import { authService } from '@/auth';
-import {
-  setupAuthTestEnvironment,
+import { setupAuthTestEnvironment,
   resetAuthTestMocks,
   createMockAuthConfig,
   createMockToken,
@@ -60,21 +60,14 @@ import {
 } from './auth-test-utils';
 
 describe('Auth Logout Flow', () => {
-      
   jest.setTimeout(10000);
-
-  beforeEach(() => {
-
-  });
-
-  afterEach(() => {
-    cleanupAntiHang();
-  });jest.setTimeout(10000);
+  
   let testEnv: ReturnType<typeof setupAuthTestEnvironment>;
   let mockAuthConfig: ReturnType<typeof createMockAuthConfig>;
   let mockToken: string;
 
   beforeEach(() => {
+    setupAntiHang();
     testEnv = setupAuthTestEnvironment();
     mockAuthConfig = createMockAuthConfig();
     mockToken = createMockToken();
@@ -95,13 +88,12 @@ describe('Auth Logout Flow', () => {
   });
 
   afterEach(() => {
-    // Clean up
-      // Clean up timers to prevent hanging
-      jest.clearAllTimers();
-      jest.useFakeTimers();
-      jest.runOnlyPendingTimers();
-      jest.useRealTimers();
-      cleanupAntiHang();
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+    cleanupAntiHang();
   });
 
   afterAll(() => {
@@ -109,16 +101,6 @@ describe('Auth Logout Flow', () => {
   });
 
   describe('handleLogout', () => {
-        
-  jest.setTimeout(10000);
-
-  beforeEach(() => {
-
-  });
-
-  afterEach(() => {
-    cleanupAntiHang();
-  });jest.setTimeout(10000);
     it('should perform logout successfully with token', async () => {
       testEnv.localStorageMock.getItem.mockReturnValue(mockToken);
       localMockAuthServiceClient.logout.mockResolvedValue({});
@@ -173,27 +155,7 @@ describe('Auth Logout Flow', () => {
   });
 
   describe('Dev Logout Flag Management', () => {
-        
-  jest.setTimeout(10000);
-
-  beforeEach(() => {
-
-  });
-
-  afterEach(() => {
-    cleanupAntiHang();
-  });jest.setTimeout(10000);
     describe('getDevLogoutFlag', () => {
-          
-  jest.setTimeout(10000);
-
-  beforeEach(() => {
-
-  });
-
-  afterEach(() => {
-    cleanupAntiHang();
-  });jest.setTimeout(10000);
       it('should return true when flag is set', () => {
         setupTrueFlagValue();
         const result = authService.getDevLogoutFlag();
@@ -227,16 +189,6 @@ describe('Auth Logout Flow', () => {
     });
 
     describe('setDevLogoutFlag', () => {
-          
-  jest.setTimeout(10000);
-
-  beforeEach(() => {
-
-  });
-
-  afterEach(() => {
-    cleanupAntiHang();
-  });jest.setTimeout(10000);
       it('should set dev logout flag', () => {
         authService.setDevLogoutFlag();
 
@@ -253,16 +205,6 @@ describe('Auth Logout Flow', () => {
     });
 
     describe('clearDevLogoutFlag', () => {
-          
-  jest.setTimeout(10000);
-
-  beforeEach(() => {
-
-  });
-
-  afterEach(() => {
-    cleanupAntiHang();
-  });jest.setTimeout(10000);
       it('should clear dev logout flag', () => {
         authService.clearDevLogoutFlag();
 
@@ -279,16 +221,6 @@ describe('Auth Logout Flow', () => {
     });
 
     describe('Dev Flag Integration', () => {
-          
-  jest.setTimeout(10000);
-
-  beforeEach(() => {
-
-  });
-
-  afterEach(() => {
-    cleanupAntiHang();
-  });jest.setTimeout(10000);
       it('should handle complete dev flag cycle', () => {
         verifyInitialFlagState();
         performFlagSet();
@@ -309,16 +241,6 @@ describe('Auth Logout Flow', () => {
   });
 
   describe('Logout Flow Integration', () => {
-        
-  jest.setTimeout(10000);
-
-  beforeEach(() => {
-
-  });
-
-  afterEach(() => {
-    cleanupAntiHang();
-  });jest.setTimeout(10000);
     it('should handle logout with dev flag management', async () => {
       setupLogoutWithDevFlag();
       authService.setDevLogoutFlag();

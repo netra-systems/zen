@@ -7,6 +7,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Simple form component for final iteration
 const SimpleForm: React.FC<{ onSubmit: (data: { name: string }) => void }> = ({ onSubmit }) => {
@@ -41,7 +42,7 @@ const SimpleForm: React.FC<{ onSubmit: (data: { name: string }) => void }> = ({ 
 };
 
 describe('Final Form Validation - Iteration 7', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   it('should show error when name is empty', async () => {
     const mockOnSubmit = jest.fn();

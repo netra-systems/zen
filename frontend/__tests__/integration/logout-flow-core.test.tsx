@@ -13,6 +13,7 @@ import '@testing-library/jest-dom';
 import { TestProviders, AuthTestProvider, mockAuthContextValue } from '../setup/test-providers';
 import { authService } from '@/auth/unified-auth-service';
 import { useAuthStore } from '@/store/authStore';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock dependencies
 jest.mock('@/auth/service');
@@ -100,7 +101,7 @@ const renderLogoutComponent = () => {
 };
 
 describe('Logout Flow Core Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let mockAuthStore: any;
   

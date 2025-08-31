@@ -57,6 +57,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ChatHistorySection } from '@/components/ChatHistorySection';
 import { mockThreads } from './setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 const mockStore = {
   isProcessing: false,
@@ -83,7 +84,7 @@ const createMockThread = (overrides: any = {}) => ({
 });
 
 describe('ChatHistorySection - Performance & Accessibility', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   beforeEach(() => {
     // Clear only call history, not implementations

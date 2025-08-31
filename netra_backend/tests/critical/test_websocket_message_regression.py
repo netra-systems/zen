@@ -31,7 +31,8 @@ from starlette.exceptions import WebSocketException
 
 from netra_backend.app.main import app as backend_app
 from netra_backend.app.schemas.websocket_models import UserMessagePayload
-from test_framework.mock_utils import mock_justified
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
 
 class TestWebSocketMessageRegression:
@@ -340,7 +341,6 @@ class TestRealWebSocketErrorHandling:
             # Expected if auth fails in test environment
             assert e.code in [1008, 1011, 4001]
 
-    @mock_justified("Timeout scenarios require controlled environment")
     @pytest.mark.asyncio
     async def test_websocket_timeout_handling(self):
         """Test WebSocket timeout handling with real connections."""

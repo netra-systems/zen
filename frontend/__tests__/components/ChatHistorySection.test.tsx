@@ -5,6 +5,7 @@ import { useThreadStore } from '@/store/threadStore';
 import { useChatStore } from '@/store/chat';
 import { useAuthStore } from '@/store/authStore';
 import { ThreadService } from '@/services/threadService';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock dependencies
 jest.mock('next/navigation', () => ({
@@ -25,7 +26,7 @@ jest.mock('framer-motion', () => ({
 }));
 
 describe('ChatHistorySection - Timestamp Handling', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const mockThreads = [
     {

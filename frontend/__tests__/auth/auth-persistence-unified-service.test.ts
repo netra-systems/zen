@@ -6,6 +6,7 @@
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import { UnifiedAuthService } from '@/auth/unified-auth-service';
 import { jwtDecode } from 'jwt-decode';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock dependencies
 jest.mock('jwt-decode');
@@ -28,7 +29,7 @@ jest.mock('@/lib/unified-api-config', () => ({
 }));
 
 describe('UnifiedAuthService - Auth Persistence', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let service: UnifiedAuthService;
   const mockDecode = jwtDecode as jest.MockedFunction<typeof jwtDecode>;

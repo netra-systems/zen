@@ -29,7 +29,8 @@ import redis.asyncio as redis
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.schemas import User
-from test_framework.mock_utils import mock_justified
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
 from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 
@@ -606,9 +607,7 @@ class TestWebSocketMessageDeliveryGuaranteeL3:
 
         assert delivery_tracker.get_delivery_rate() >= 0.99
     
-    @mock_justified("L3: Message delivery guarantee testing with real Redis")
-
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_message_delivery_under_load(self, websocket_manager, redis_client, test_users, delivery_tracker):
 
         """Test message delivery guarantees under system load."""

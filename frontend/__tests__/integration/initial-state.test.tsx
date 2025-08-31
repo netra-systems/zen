@@ -20,12 +20,13 @@ import {
 } from '../helpers/initial-state-helpers';
 import * as InitialStateStorageHelpers from '@/__tests__/helpers/initial-state-storage-helpers';
 import { setupInitialStateMockComponents } from '@/__tests__/helpers/initial-state-mock-components';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Setup all mocks
 setupInitialStateMockComponents();
 
 describe('Initial State Integration Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   beforeEach(() => {
     setupInitialStateMocks();

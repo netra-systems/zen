@@ -22,6 +22,7 @@ import { optimisticMessageManager } from '@/services/optimistic-updates';
 import { webSocketService } from '@/services/webSocketService';
 import { ThreadService } from '@/services/threadService';
 import { logger } from '@/lib/logger';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Test component for error handling scenarios
 const ErrorHandlingTestHarness: React.FC<{
@@ -120,7 +121,7 @@ jest.mock('@/services/threadRenameService');
 jest.mock('@/lib/logger');
 
 describe('Error Handling and Retry Pipeline Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const mockWebSocketService = {
     onMessage: null,

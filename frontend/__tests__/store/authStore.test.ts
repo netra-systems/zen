@@ -14,6 +14,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { useAuthStore } from '@/store/authStore';
 import { User } from '@/types/unified';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock localStorage globally
 const mockLocalStorage = {
@@ -31,7 +32,7 @@ Object.defineProperty(window, 'localStorage', {
 const originalWindow = global.window;
 
 describe('AuthStore - Business Critical Authentication', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   // Helper to reset store state before each test (≤8 lines)
   const resetAuthStore = () => {

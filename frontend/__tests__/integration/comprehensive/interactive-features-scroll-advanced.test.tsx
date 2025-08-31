@@ -1,6 +1,5 @@
-import {
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-teractive Features Advanced Scroll Integration Tests
+import { teractive Features Advanced Scroll Integration Tests
  * ULTRA DEEP THINK: Module-based architecture - Advanced scroll tests extracted for 450-line compliance
  */
 

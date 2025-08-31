@@ -1,7 +1,8 @@
 import { CircularBuffer, WebSocketEventBuffer, WSEvent } from '@/lib/circular-buffer';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('CircularBuffer', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   describe('Basic operations', () => {
         setupAntiHang();
@@ -250,7 +251,7 @@ describe('CircularBuffer', () => {
 });
 
 describe('WebSocketEventBuffer', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const createMockEvent = (
     type: string,

@@ -12,6 +12,7 @@ import { AuthProvider } from '@/auth/context';
 import { GTMProvider } from '@/providers/GTMProvider';
 import { useRouter } from 'next/navigation';
 import { getGTMCircuitBreaker } from '@/lib/gtm-circuit-breaker';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
@@ -30,7 +31,7 @@ jest.mock('@/hooks/useGTMEvent', () => ({
 }));
 
 describe('GTM Infinite Loop Prevention', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let mockPush: jest.Mock;
   let mockTrackError: jest.Mock;

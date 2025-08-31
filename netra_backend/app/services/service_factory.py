@@ -22,11 +22,19 @@ def _create_message_handler_service():
     from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
     from netra_backend.app.services.message_handlers import MessageHandlerService
     from netra_backend.app.services.thread_service import ThreadService
+    from netra_backend.app.websocket_core import get_websocket_manager
     
     # Create dependencies
     supervisor = SupervisorAgent(None, None, None, None)  # Will be properly initialized when used
     thread_service = ThreadService()
-    return MessageHandlerService(supervisor, thread_service)
+    
+    # CRITICAL FIX: Include WebSocket manager to enable real-time agent events in service factory
+    try:
+        websocket_manager = get_websocket_manager()
+        return MessageHandlerService(supervisor, thread_service, websocket_manager)
+    except Exception:
+        # Fallback without WebSocket manager if not available
+        return MessageHandlerService(supervisor, thread_service)
 
 
 def _create_core_services() -> Dict[str, Any]:

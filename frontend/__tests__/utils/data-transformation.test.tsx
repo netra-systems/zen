@@ -6,9 +6,10 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Data Transformation Utilities', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   it('should format dates correctly', () => {
     const DateFormattingComponent: React.FC = () => {

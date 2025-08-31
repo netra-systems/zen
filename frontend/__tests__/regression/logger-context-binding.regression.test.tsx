@@ -22,6 +22,7 @@ import { WebSocketProvider } from '@/providers/WebSocketProvider';
 import { AuthContext } from '@/auth/context';
 import { logger } from '@/lib/logger';
 import { webSocketService } from '@/services/webSocketService';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock the webSocketService
 jest.mock('@/services/webSocketService', () => ({
@@ -47,7 +48,7 @@ jest.mock('@/config', () => ({
 }));
 
 describe('Logger Context Binding Regression Test', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const mockAuthContextValue = {
     token: 'test-token',

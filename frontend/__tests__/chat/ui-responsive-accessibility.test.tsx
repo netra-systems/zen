@@ -1,12 +1,11 @@
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { MessageInput } from '@/components/chat/MessageInput';
 import { TestProviders } from '@/__tests__/test-utils/providers';
-import {
-import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-gal issues, expands addressable market, improves UX for all users
+import { gal issues, expands addressable market, improves UX for all users
  */
 
 import React from 'react';

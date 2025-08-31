@@ -1,11 +1,10 @@
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { jest } from '@jest/globals';
 import { TestProviders } from '../setup/test-providers';
 import { WebSocketTestManager, createWebSocketManager } from '@/__tests__/helpers/websocket-test-manager';
-import {
-import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-.test.tsx - Connection lifecycle tests
+import { .test.tsx - Connection lifecycle tests
  * - websocket-messaging.test.tsx - Message processing tests  
  * - websocket-large-messages.test.tsx - Large message handling
  * - websocket-performance.test.tsx - Performance monitoring

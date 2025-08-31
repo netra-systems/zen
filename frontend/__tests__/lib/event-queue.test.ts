@@ -90,7 +90,7 @@ class MockEventQueue<T extends ProcessableEvent> {
 }
 
 describe('EventQueue', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let processedEvents: TestEvent[];
   let processingDelays: number[];

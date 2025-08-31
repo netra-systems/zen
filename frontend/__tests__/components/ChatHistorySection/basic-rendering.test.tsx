@@ -1,11 +1,10 @@
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ChatHistorySection } from '@/components/ChatHistorySection';
 import { createTestSetup, setupCustomThreads } from './shared-setup';
 import { mockThreads, createMockThread } from './mockData';
-import {
-import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-import { createTestSetup, setupCustomThreads } from './shared-setup';
+import { import { createTestSetup, setupCustomThreads } from './shared-setup';
 import { mockThreads, createMockThread } from './mockData';
 import {
   expectBasicStructure,

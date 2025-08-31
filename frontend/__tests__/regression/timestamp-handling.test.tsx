@@ -7,7 +7,7 @@
 
 describe('Timestamp Handling Regression Tests', () => {
   
-      setupAntiHang();
+  setupAntiHang();
   
     jest.setTimeout(10000);
   

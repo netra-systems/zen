@@ -75,7 +75,6 @@ class TestDataSubAgentInitialization:
         assert agent.tool_dispatcher == mock_tool_dispatcher
         
     @pytest.mark.real_llm
-    @mock_justified("L3: Using real Redis for agent integration testing. Redis is critical for agent state management and query caching. Mock would hide Redis integration issues.")
     async def test_initialization_with_real_redis(self):
         """Test DataSubAgent initializes with real Redis components"""
         # Use real LLM manager with test configuration

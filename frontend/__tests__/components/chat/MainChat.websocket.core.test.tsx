@@ -37,11 +37,11 @@ jest.mock('framer-motion', () => ({
   AnimatePresence: ({ children }: any) => children,
 }));
 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import MainChat from '@/components/chat/MainChat';
-import { 
-  setupMocks, 
+import { setupMocks, 
   cleanupMocks, 
   mockStore,
   mockUseUnifiedChatStore,
@@ -49,7 +49,7 @@ import {
 } from './MainChat.websocket.test-utils';
 
 describe('MainChat - WebSocket Core Connection Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   beforeEach(() => {
     setupMocks();

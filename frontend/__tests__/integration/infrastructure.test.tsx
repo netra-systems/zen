@@ -13,7 +13,7 @@
  */
 
 describe('Infrastructure Integration Test Suite', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   it('should reference modular test architecture', () => {
     // This test confirms the modular architecture is in place

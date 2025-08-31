@@ -14,9 +14,10 @@
  */
 
 import { getUnifiedApiConfig } from '@/lib/unified-api-config';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Health Endpoints 404 Errors - Staging Replication', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const originalEnv = process.env;
   

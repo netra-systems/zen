@@ -131,6 +131,7 @@ jest.mock('framer-motion', () => {
   };
 });
 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { createTestSetup } from './setup';
@@ -138,8 +139,7 @@ import { mockThreads } from './mockData';
 
 // Import ChatHistorySection after mocks are set up
 const { ChatHistorySection } = require('@/components/ChatHistorySection');
-import { 
-  setupStoreForEmptyState, 
+import { setupStoreForEmptyState, 
   setupStoreForCurrentThread, 
   setupStoreWithCustomThreads,
   expectBasicStructure, 
@@ -167,7 +167,7 @@ const mockStore = {
 };
 
 describe('ChatHistorySection - Basic Functionality', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();

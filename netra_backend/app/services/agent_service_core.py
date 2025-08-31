@@ -34,7 +34,14 @@ class AgentService(IAgentService):
     def __init__(self, supervisor: Supervisor) -> None:
         self.supervisor = supervisor
         self.thread_service = ThreadService()
-        self.message_handler = MessageHandlerService(supervisor, self.thread_service)
+        
+        # CRITICAL FIX: Include WebSocket manager to enable real-time agent events in agent service core
+        try:
+            websocket_manager = get_websocket_manager()
+            self.message_handler = MessageHandlerService(supervisor, self.thread_service, websocket_manager)
+        except Exception:
+            # Fallback without WebSocket manager if not available
+            self.message_handler = MessageHandlerService(supervisor, self.thread_service)
 
     async def run(self, request_model: schemas.RequestModel, run_id: str, stream_updates: bool = False) -> Any:
         """Starts the agent. The supervisor will stream logs back to the websocket if requested."""

@@ -5,6 +5,7 @@
  */
 
 import { CircuitBreaker } from '@/lib/circuit-breaker';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock dependencies first
 jest.mock('@/lib/secure-api-config', () => ({
@@ -43,7 +44,7 @@ Object.defineProperty(window, 'localStorage', { value: mockLocalStorage });
 Object.defineProperty(window, 'sessionStorage', { value: mockSessionStorage });
 
 describe('ApiClient Infrastructure Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let apiClient: any;
 

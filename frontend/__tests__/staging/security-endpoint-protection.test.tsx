@@ -5,9 +5,10 @@
  */
 
 import { getUnifiedApiConfig } from '../../lib/unified-api-config';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Security - Endpoint Protection (Staging)', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const config = getUnifiedApiConfig();
   const frontendUrl = config.urls.frontend;

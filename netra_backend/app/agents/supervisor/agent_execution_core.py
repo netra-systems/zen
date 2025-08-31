@@ -92,6 +92,9 @@ class AgentExecutionCore:
             if hasattr(agent, 'set_websocket_context'):
                 # Preferred method: pass both context and notifier
                 agent.set_websocket_context(context, self.websocket_notifier)
+                # CRITICAL: Also propagate context to state for tool execution
+                if hasattr(agent, 'propagate_websocket_context_to_state'):
+                    agent.propagate_websocket_context_to_state(state)
             elif hasattr(agent, 'websocket_notifier'):
                 # Direct notifier assignment
                 agent.websocket_notifier = self.websocket_notifier

@@ -1,9 +1,10 @@
 import { act, renderHook } from '@testing-library/react';
 import { useChatStore } from '@/store/chat';
 import { Message } from '@/types/unified';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('useChatStore', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   beforeEach(() => {
     // Reset store state before each test

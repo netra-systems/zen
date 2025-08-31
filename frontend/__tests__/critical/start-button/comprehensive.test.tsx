@@ -1,10 +1,9 @@
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { ThreadSidebarHeader } from '@/components/chat/ThreadSidebarComponents';
-import {
-import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-sion point from visitors to active users.
+import { sion point from visitors to active users.
  * 
  * Business Value Justification:
  * - Segment: All (Free → Enterprise) - Primary conversion gateway

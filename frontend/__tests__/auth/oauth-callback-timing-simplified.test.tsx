@@ -83,7 +83,7 @@ const mockSetTimeout = jest.fn((callback: () => void, delay: number) => {
 });
 
 describe('OAuth Callback Timing - Focused Challenges', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   // Mock the AuthCallbackClient component to control its behavior
   const MockAuthCallbackClient: React.ComponentType = () => {

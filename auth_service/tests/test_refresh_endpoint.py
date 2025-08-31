@@ -29,7 +29,7 @@ import jwt
 
 # Real auth service components
 from auth_service.main import app
-from auth_service.auth_core.core.jwt_handler import JWTManager
+from auth_service.auth_core.core.jwt_handler import JWTHandler
 from auth_service.auth_core.models.auth_models import User
 from auth_service.auth_core.isolated_environment import get_env
 

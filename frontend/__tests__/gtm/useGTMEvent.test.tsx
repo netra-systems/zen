@@ -2,6 +2,7 @@ import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { GTMProvider } from '@/providers/GTMProvider';
 import { useGTMEvent } from '@/hooks/useGTMEvent';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock Next.js Script component
 jest.mock('next/script', () => {
@@ -34,7 +35,7 @@ const createWrapper = (enabled = true) => {
 };
 
 describe('useGTMEvent Hook', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let mockDataLayer: any[];
 

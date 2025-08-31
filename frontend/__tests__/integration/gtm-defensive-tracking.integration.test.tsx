@@ -11,6 +11,7 @@ import '@testing-library/jest-dom';
 import { GTMProvider } from '../../providers/GTMProvider';
 import { useGTMEvent } from '../../hooks/useGTMEvent';
 import { useGTM } from '../../hooks/useGTM';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock logger to prevent console noise during tests
 jest.mock('../../lib/logger', () => ({
@@ -103,7 +104,7 @@ const TestComponent = ({
 };
 
 describe('GTM Defensive Tracking Integration', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let originalDataLayer: any;
   let mockDataLayer: any[] = [];

@@ -1,12 +1,11 @@
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import { renderWithProviders, safeAsync, resetAllMocks } from '../../shared/unified-test-utilities';
 import { safeAct, waitForCondition, flushPromises } from '../../helpers/test-timing-utilities';
 import { describeIfFeature, itIfFeature } from '../../helpers/feature-flag-helpers';
-import { 
-import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-./../helpers/test-timing-utilities';
+import { ./../helpers/test-timing-utilities';
 import { describeIfFeature, itIfFeature } from '../../helpers/feature-flag-helpers';
 import { 
   mockThreadService,

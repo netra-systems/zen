@@ -1,8 +1,8 @@
 // Tool lifecycle tracker tests
 // Testing the new tool lifecycle management functionality
 
-import {
-  createToolEntry,
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+import { createToolEntry,
   completeToolEntry,
   isToolExpired,
   getActiveToolNames,
@@ -13,7 +13,7 @@ import {
 } from '@/utils/tool-lifecycle-tracker';
 
 describe('Tool Lifecycle Tracker', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let mockTimeoutId: NodeJS.Timeout;
 

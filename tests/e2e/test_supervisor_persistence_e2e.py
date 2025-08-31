@@ -36,7 +36,8 @@ from netra_backend.app.services.state_persistence import state_persistence_servi
 from netra_backend.app.logging_config import central_logger
 from tests.e2e.config import TEST_USERS, TestDataFactory
 from tests.e2e.harness_utils import UnifiedE2ETestHarness
-from test_framework.mock_utils import mock_justified
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
 logger = central_logger.get_logger(__name__)
 

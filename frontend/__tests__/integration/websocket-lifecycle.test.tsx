@@ -1,11 +1,10 @@
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { jest } from '@jest/globals';
 import { TestProviders } from '@/__tests__/setup/test-providers';
 import { WebSocketTestManager, createWebSocketManager } from '@/__tests__/helpers/websocket-test-manager';
-import {
-import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-{ render, waitFor } from '@testing-library/react';
+import { { render, waitFor } from '@testing-library/react';
 import { jest } from '@jest/globals';
 import { TestProviders } from '@/__tests__/setup/test-providers';
 import { WebSocketTestManager, createWebSocketManager } from '@/__tests__/helpers/websocket-test-manager';

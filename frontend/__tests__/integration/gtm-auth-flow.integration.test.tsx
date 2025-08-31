@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { GTMProvider } from '@/providers/GTMProvider';
 import { useGTM } from '@/hooks/useGTM';
 import { AuthProvider } from '@/auth/context';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock Next.js components
 jest.mock('next/script', () => {
@@ -166,7 +167,7 @@ const AuthFlowTestComponent: React.FC = () => {
 };
 
 describe('GTM Authentication Flow Integration', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let mockDataLayer: any[];
 

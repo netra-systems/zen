@@ -1,6 +1,5 @@
-import { 
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-ied tool lifecycle integration test
+import { ied tool lifecycle integration test
 // Tests basic tool tracking functionality
 
 import { 

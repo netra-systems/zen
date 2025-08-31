@@ -3,6 +3,7 @@
  */
 
 import { ExportService, ExportFormat } from '@/utils/exportService';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock the dependencies
 jest.mock('html2canvas', () => {
@@ -48,7 +49,7 @@ jest.mock('papaparse', () => ({
 }));
 
 describe('ExportService', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   // Mock DOM methods
   let createElementSpy: jest.SpyInstance;

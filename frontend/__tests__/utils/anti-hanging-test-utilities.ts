@@ -18,6 +18,8 @@
  * });
  */
 
+import { TEST_TIMEOUTS, setTestTimeout } from '../config/test-timeouts';
+
 // Maximum allowed timeout for any test operation
 const MAX_TIMEOUT_MS = 5000;
 
@@ -35,9 +37,9 @@ let originalClearInterval: typeof clearInterval;
  * Setup anti-hanging utilities for a test suite
  * Call this in your describe block
  */
-export function setupAntiHang(customTimeout: number = 10000): void {
-  // Set Jest timeout
-  jest.setTimeout(customTimeout);
+export function setupAntiHang(customTimeout: number = TEST_TIMEOUTS.DEFAULT): void {
+  // Set Jest timeout using centralized configuration
+  setTestTimeout(customTimeout);
   
   // Store original timer functions
   originalSetTimeout = global.setTimeout;

@@ -6,6 +6,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock login component for testing
 const MockLoginRedirect: React.FC<{
@@ -57,7 +58,7 @@ const MockLoginRedirect: React.FC<{
 };
 
 describe('Login Redirect Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   it('should show login form when not authenticated', () => {
     render(

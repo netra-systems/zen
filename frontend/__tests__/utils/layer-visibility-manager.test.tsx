@@ -1,6 +1,5 @@
-import {
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-AL Layer Visibility Manager Tests
+import { AL Layer Visibility Manager Tests
  * BVJ: Prevents $12K MRR loss from UI rendering failures
  */
 

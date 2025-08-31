@@ -10,7 +10,7 @@
  */
 
 describe('Error Tracing Integration Test Suite', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   it('should reference modular error tracing architecture', () => {
     const errorModules = [

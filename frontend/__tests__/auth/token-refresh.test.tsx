@@ -6,6 +6,7 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock the auth store
 const mockSetUser = jest.fn();
@@ -33,7 +34,7 @@ jest.mock('@/lib/auth-service-client', () => ({
 }));
 
 describe('Token Refresh Functionality', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
