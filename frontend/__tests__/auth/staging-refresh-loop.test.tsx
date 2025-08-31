@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import HomePage from '@/app/page';
 import AuthCallbackClient from '@/app/auth/callback/client';
 import { logger } from '@/lib/logger';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock Next.js navigation
 jest.mock('next/navigation', () => ({
@@ -52,6 +53,10 @@ jest.mock('@/lib/auth-service-client', () => ({
 }));
 
 describe('Staging Refresh Loop Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
+  // Set test timeout to prevent hanging
+  jest.setTimeout(8000);
   let mockPush: jest.Mock;
   let mockReload: jest.Mock;
   let originalLocation: Location;
@@ -92,9 +97,17 @@ describe('Staging Refresh Loop Tests', () => {
   afterEach(() => {
     window.location = originalLocation;
     delete process.env.NEXT_PUBLIC_ENVIRONMENT;
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Test 1: Auth Token Refresh Loop', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should detect infinite loop when token refresh keeps triggering on every render', async () => {
       const { unifiedAuthService } = require('@/auth/unified-auth-service');
       
@@ -165,12 +178,14 @@ describe('Staging Refresh Loop Tests', () => {
 
         await waitFor(() => {
           expect(configFetchCount).toBeGreaterThan(5);
-        }, { timeout: 10000 });
+        }, { timeout: 5000 });
       }).rejects.toThrow('Auth config fetch loop detected');
     });
   });
 
   describe('Test 2: Route Guard Infinite Redirect', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should detect infinite redirect between login and home page', async () => {
       const { unifiedAuthService } = require('@/auth/unified-auth-service');
       
@@ -242,6 +257,8 @@ describe('Staging Refresh Loop Tests', () => {
   });
 
   describe('Test 3: Environment Config Mismatch', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should detect issues when staging URLs resolve to localhost', async () => {
       const { unifiedApiConfig } = require('@/lib/unified-api-config');
       

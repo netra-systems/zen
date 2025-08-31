@@ -10,6 +10,8 @@ jest.unmock('@/auth/unified-auth-service');
 import { authService } from '@/auth';
 
 describe('useAuth Missing Function Error - REAL IMPLEMENTATION TEST', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   it('should demonstrate that authService.useAuth exists in test but not in production', () => {
     // In test environment, authService.useAuth is mocked as a function
     // But in the real implementation, it doesn't exist
@@ -124,4 +126,8 @@ describe('useAuth Missing Function Error - REAL IMPLEMENTATION TEST', () => {
     console.log('2. Update @/auth/index.ts to export the useAuth hook');
     console.log('3. Ensure authService.useAuth properly references this hook');
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

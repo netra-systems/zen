@@ -17,6 +17,8 @@ jest.mock('jwt-decode', () => ({
 }));
 
 describe('Token Refresh Fixed Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const mockJwtDecode = jwtDecode as jest.MockedFunction<typeof jwtDecode>;
   
   beforeEach(() => {
@@ -96,4 +98,8 @@ describe('Token Refresh Fixed Tests', () => {
     // Restore Date.now
     jest.restoreAllMocks();
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

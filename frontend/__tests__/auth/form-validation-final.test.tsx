@@ -41,6 +41,8 @@ const SimpleForm: React.FC<{ onSubmit: (data: { name: string }) => void }> = ({ 
 };
 
 describe('Final Form Validation - Iteration 7', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   it('should show error when name is empty', async () => {
     const mockOnSubmit = jest.fn();
     const user = userEvent.setup();
@@ -54,4 +56,8 @@ describe('Final Form Validation - Iteration 7', () => {
     // Fixed: Should match the actual error message
     expect(screen.getByTestId('error-message')).toHaveTextContent('Name is required');
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

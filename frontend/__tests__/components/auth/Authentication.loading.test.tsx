@@ -18,6 +18,8 @@ import '@testing-library/jest-dom';
 jest.mock('@/auth/service');
 
 describe('Authentication Loading States Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const mockLogin = jest.fn();
   const mockLogout = jest.fn();
   
@@ -43,6 +45,8 @@ describe('Authentication Loading States Tests', () => {
   });
 
   describe('Initial Loading State', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should show loading state during auth initialization', () => {
       jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
@@ -97,6 +101,8 @@ describe('Authentication Loading States Tests', () => {
   });
 
   describe('Login Process Loading', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should show loading state during login attempt', async () => {
       const { rerender } = render(<LoginButton />);
       
@@ -170,6 +176,8 @@ describe('Authentication Loading States Tests', () => {
   });
 
   describe('Logout Process Loading', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should show loading during logout process', async () => {
       // Start with logged in user
       jest.mocked(authService.useAuth).mockReturnValue({
@@ -261,6 +269,8 @@ describe('Authentication Loading States Tests', () => {
   });
 
   describe('Loading State Transitions', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle rapid state transitions', async () => {
       const { rerender } = render(<LoginButton />);
       
@@ -336,6 +346,8 @@ describe('Authentication Loading States Tests', () => {
   });
 
   describe('Loading Accessibility', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should provide accessible loading indicators', () => {
       jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
@@ -391,4 +403,8 @@ describe('Authentication Loading States Tests', () => {
       expect(button).toBeDisabled();
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

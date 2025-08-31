@@ -25,6 +25,8 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('Authentication Success Redirects Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const mockLogin = jest.fn();
   const mockLogout = jest.fn();
   const mockPush = jest.fn();
@@ -61,6 +63,8 @@ describe('Authentication Success Redirects Tests', () => {
   });
 
   describe('Default Redirect Behavior', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should redirect to dashboard after successful login', async () => {
       const { rerender } = render(<LoginButton />);
       
@@ -139,6 +143,8 @@ describe('Authentication Success Redirects Tests', () => {
   });
 
   describe('Query Parameter Redirects', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should redirect to return URL from query params', async () => {
       (useSearchParams as jest.Mock).mockReturnValue(
         new URLSearchParams('?returnUrl=/dashboard')
@@ -233,6 +239,8 @@ describe('Authentication Success Redirects Tests', () => {
   });
 
   describe('Role-Based Redirects', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should redirect admin users to admin panel', async () => {
       const { rerender } = render(<LoginButton />);
       
@@ -315,6 +323,8 @@ describe('Authentication Success Redirects Tests', () => {
   });
 
   describe('Development Mode Redirects', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle dev mode login redirects', async () => {
       jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
@@ -429,6 +439,8 @@ describe('Authentication Success Redirects Tests', () => {
   });
 
   describe('Redirect Error Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle redirect failures gracefully', async () => {
       mockPush.mockRejectedValueOnce(new Error('Redirect failed'));
       
@@ -515,4 +527,8 @@ describe('Authentication Success Redirects Tests', () => {
       expect(screen.getByText('Test User')).toBeInTheDocument();
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

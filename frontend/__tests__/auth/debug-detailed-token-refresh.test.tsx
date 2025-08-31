@@ -24,6 +24,8 @@ jest.mock('@/lib/logger', () => ({
 }));
 
 describe('Debug Detailed Token Refresh', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let mockJwtDecode: jest.MockedFunction<typeof jwtDecodeMock.jwtDecode>;
   
   beforeEach(() => {
@@ -62,4 +64,8 @@ describe('Debug Detailed Token Refresh', () => {
       console.log('Debug data:', debugCall[1]);
     }
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

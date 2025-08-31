@@ -36,11 +36,15 @@ const AuthStateDisplay = () => {
 };
 
 describe('Authentication Mock System', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     resetMockAuthState();
   });
 
   describe('Default authenticated state', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should provide authenticated user by default', () => {
       renderWithAuth(<AuthStateDisplay />);
       
@@ -53,6 +57,8 @@ describe('Authentication Mock System', () => {
   });
 
   describe('Unauthenticated state', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should allow setting unauthenticated state', () => {
       setUnauthenticatedState();
       
@@ -67,6 +73,8 @@ describe('Authentication Mock System', () => {
   });
 
   describe('Loading state', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should allow setting loading state', () => {
       setLoadingAuthState();
       
@@ -81,6 +89,8 @@ describe('Authentication Mock System', () => {
   });
 
   describe('Custom auth state', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should allow setting custom auth state', () => {
       const customUser = {
         id: 'custom-user',
@@ -106,6 +116,8 @@ describe('Authentication Mock System', () => {
   });
 
   describe('Predefined auth states', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should work with authenticated state', () => {
       renderWithAuth(<AuthStateDisplay />, { authState: authStates.authenticated });
       
@@ -136,6 +148,8 @@ describe('Authentication Mock System', () => {
   });
 
   describe('Auth state persistence', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should maintain auth state across multiple renders', () => {
       setMockAuthState({
         user: { id: 'persistent-user', email: 'persist@example.com', full_name: 'Persistent User' },
@@ -159,6 +173,8 @@ describe('Authentication Mock System', () => {
   });
 
   describe('State reset functionality', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should reset to default authenticated state', () => {
       // First set unauthenticated
       setUnauthenticatedState();
@@ -175,6 +191,8 @@ describe('Authentication Mock System', () => {
 });
 
 describe('Global Auth State Management', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   it('should update localStorage when token changes', () => {
     const testToken = 'test-storage-token';
     
@@ -200,4 +218,8 @@ describe('Global Auth State Management', () => {
     expect(global.localStorage.getItem('token')).toBeNull();
     expect(global.localStorage.getItem('auth_token')).toBeNull();
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

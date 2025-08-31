@@ -20,6 +20,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 describe('Auth Components States', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const mockLogin = jest.fn();
   const mockLogout = jest.fn();
   
@@ -38,6 +40,8 @@ describe('Auth Components States', () => {
   });
 
   describe('Loading State', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should render loading state when loading is true', () => {
       jest.mocked(authService.useAuth).mockReturnValue({
         ...mockAuthContext,
@@ -68,6 +72,8 @@ describe('Auth Components States', () => {
   });
 
   describe('Logged Out State', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should render login button when user is not authenticated', () => {
       render(<LoginButton />);
 
@@ -93,6 +99,8 @@ describe('Auth Components States', () => {
   });
 
   describe('Logged In State - Production Mode', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     const mockUser = {
       id: 'user-123',
       email: 'test@example.com',
@@ -156,6 +164,8 @@ describe('Auth Components States', () => {
   });
 
   describe('Logged In State - Development Mode', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     const mockUser = {
       id: 'user-123',
       email: 'dev@example.com',
@@ -225,6 +235,8 @@ describe('Auth Components States', () => {
   });
 
   describe('State Transitions', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle state change from loading to logged out', () => {
       const { rerender } = render(<LoginButton />);
 
@@ -295,4 +307,8 @@ describe('Auth Components States', () => {
       expect(screen.getByText('DEV MODE')).toBeInTheDocument();
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

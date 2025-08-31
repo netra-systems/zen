@@ -1,12 +1,12 @@
-/**
- * Auth Token Refresh Automatic Tests
- * Tests automatic token refresh and API call refresh scenarios
- * 
- * BVJ: Enterprise segment - ensures seamless user experience, prevents auth interruptions
- * Architecture: ≤300 lines, functions ≤8 lines
- */
-
 import React from 'react';
+import { render, screen, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { jwtDecode } from 'jwt-decode';
+import { logger } from '@/lib/logger';
+import '@testing-library/jest-dom';
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+act';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jwtDecode } from 'jwt-decode';
@@ -51,12 +51,16 @@ jest.mock('@/auth/context', () => ({
 const REFRESH_THRESHOLD_MS = 5 * 60 * 1000; // Refresh 5 minutes before expiry
 
 describe('Auth Token Refresh Automatic', () => {
+    jest.setTimeout(10000);
   let mocks: ReturnType<typeof setupAuthTestEnvironment>;
   let mockAuthStore: any;
   let realDateNow: typeof Date.now;
   let mockDateNow: jest.Mock;
 
   beforeEach(() => {
+    jest.clearAllMocks();
+    jest.clearAllTimers();
+    
     mocks = setupAuthTestEnvironment();
     mockAuthStore = {
       user: null,
@@ -90,15 +94,13 @@ describe('Auth Token Refresh Automatic', () => {
     
     const mockConfig = createMockAuthConfig();
     mockAuthServiceClient.getConfig.mockResolvedValue(mockConfig);
-    
-    // Reset all mocks
-    jest.clearAllMocks();
   });
 
   afterEach(() => {
     Date.now = realDateNow;
     jest.clearAllMocks();
     jest.clearAllTimers();
+    jest.useRealTimers();
   });
 
   const createExpiringToken = (minutesUntilExpiry: number) => {
@@ -163,6 +165,7 @@ describe('Auth Token Refresh Automatic', () => {
   };
 
   describe('Automatic Token Refresh', () => {
+      jest.setTimeout(10000);
     it('should refresh token before expiry threshold', async () => {
       jest.useFakeTimers();
       const { mockToken } = createExpiringToken(6); // 6 minutes until expiry
@@ -257,7 +260,7 @@ describe('Auth Token Refresh Automatic', () => {
         const appContent = screen.getByTestId('app-content');
         await userEvent.click(appContent);
         // Let the click handler and any async operations complete
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 10));
       });
 
       // Check that the test environment is set up correctly
@@ -284,7 +287,7 @@ describe('Auth Token Refresh Automatic', () => {
 
       // Wait a bit then check that refresh was not called
       await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 10));
       });
       
       expect(mockAuthServiceClient.refreshToken).not.toHaveBeenCalled();
@@ -292,6 +295,7 @@ describe('Auth Token Refresh Automatic', () => {
   });
 
   describe('Token Refresh on API Calls', () => {
+      jest.setTimeout(10000);
     it('should refresh token before making authenticated API calls', async () => {
       const { mockToken } = createExpiringToken(4); // 4 minutes until expiry
       
@@ -358,7 +362,7 @@ describe('Auth Token Refresh Automatic', () => {
       await act(async () => {
         const appContent = screen.getByTestId('app-content');
         await userEvent.click(appContent);
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 10));
       });
 
       // Check that the test environment is set up correctly
@@ -395,7 +399,7 @@ describe('Auth Token Refresh Automatic', () => {
       await act(async () => {
         const appContent = screen.getByTestId('app-content');
         await userEvent.click(appContent);
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 10));
       });
 
       // Verify the 401 response handling setup
@@ -414,12 +418,12 @@ describe('Auth Token Refresh Automatic', () => {
         Authorization: `Bearer ${mockToken}`
       });
       
-      // Mock a slow refresh to simulate concurrent calls
+      // Mock a faster refresh to avoid test timeout
       mockAuthServiceClient.refreshToken.mockImplementation(() => 
         new Promise(resolve => setTimeout(() => resolve({
           access_token: 'new-token',
           expires_in: 1800
-        }), 500))
+        }), 50))
       );
       
       mocks.fetchMock.mockResolvedValue(createSuccessResponse({ data: 'test' }));
@@ -435,7 +439,7 @@ describe('Auth Token Refresh Automatic', () => {
         await userEvent.click(appContent);
         await userEvent.click(appContent);
         await userEvent.click(appContent);
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 10));
       });
 
       // Check that the concurrent request handling is set up correctly

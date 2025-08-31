@@ -27,6 +27,8 @@ jest.mock('@/lib/unified-api-config', () => ({
 }));
 
 describe('UnifiedAuthService - Auth Persistence', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let service: UnifiedAuthService;
   const mockDecode = jwtDecode as jest.MockedFunction<typeof jwtDecode>;
 
@@ -37,6 +39,8 @@ describe('UnifiedAuthService - Auth Persistence', () => {
   });
 
   describe('needsRefresh - Environment-Aware Thresholds', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should refresh 30-second tokens at 25% lifetime remaining', () => {
       const now = Math.floor(Date.now() / 1000);
       const shortToken = 'short.token.here';
@@ -140,6 +144,8 @@ describe('UnifiedAuthService - Auth Persistence', () => {
   });
 
   describe('Token Storage - SSOT', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should store token in localStorage', () => {
       const token = 'test.jwt.token';
       service.setToken(token);
@@ -187,6 +193,8 @@ describe('UnifiedAuthService - Auth Persistence', () => {
   });
 
   describe('Auth Headers', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should return Authorization header when token exists', () => {
       const token = 'test.jwt.token';
       service.setToken(token);
@@ -204,6 +212,8 @@ describe('UnifiedAuthService - Auth Persistence', () => {
   });
 
   describe('Development Mode Flags', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should set dev logout flag in development mode', () => {
       // Mock development environment
       Object.defineProperty(service, 'environment', {
@@ -243,6 +253,8 @@ describe('UnifiedAuthService - Auth Persistence', () => {
   });
 
   describe('Edge Cases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle very short tokens (10 seconds)', () => {
       const now = Math.floor(Date.now() / 1000);
       const veryShortToken = 'very.short.token';
@@ -291,4 +303,8 @@ describe('UnifiedAuthService - Auth Persistence', () => {
       expect(needsRefresh).toBe(false); // Can't determine lifetime, don't refresh
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

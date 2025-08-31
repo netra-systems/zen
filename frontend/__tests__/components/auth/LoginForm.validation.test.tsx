@@ -17,6 +17,8 @@ import '@testing-library/jest-dom';
 jest.mock('@/auth/service');
 
 describe('LoginForm Validation Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const mockLogin = jest.fn();
   const mockLogout = jest.fn();
   
@@ -42,6 +44,8 @@ describe('LoginForm Validation Tests', () => {
   });
 
   describe('Email Validation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should accept valid email format', async () => {
       render(<LoginButton />);
       
@@ -82,6 +86,8 @@ describe('LoginForm Validation Tests', () => {
   });
 
   describe('Password Validation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle empty password gracefully', async () => {
       render(<LoginButton />);
       
@@ -123,6 +129,8 @@ describe('LoginForm Validation Tests', () => {
   });
 
   describe('Form Submission Validation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should prevent submission with invalid data', async () => {
       render(<LoginButton />);
       
@@ -173,6 +181,8 @@ describe('LoginForm Validation Tests', () => {
   });
 
   describe('Accessibility and UX', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should have proper ARIA labels', () => {
       render(<LoginButton />);
       
@@ -208,6 +218,8 @@ describe('LoginForm Validation Tests', () => {
   });
 
   describe('Security Considerations', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should not expose sensitive data in DOM', () => {
       render(<LoginButton />);
       
@@ -243,4 +255,8 @@ describe('LoginForm Validation Tests', () => {
       expect(screen.getByText('Login with Google')).toBeInTheDocument();
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

@@ -33,6 +33,8 @@ jest.mock('jwt-decode', () => ({
 }));
 
 describe('Auth Login Advanced Features', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let mockAuthStore: any;
   let user: ReturnType<typeof userEvent.setup>;
 
@@ -46,9 +48,12 @@ describe('Auth Login Advanced Features', () => {
   afterEach(() => {
     jest.clearAllMocks();
     jest.clearAllTimers();
+      cleanupAntiHang();
   });
 
   describe('Remember Me Functionality', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('stores remember me preference in cookies', async () => {
       renderLoginComponent();
       
@@ -88,6 +93,8 @@ describe('Auth Login Advanced Features', () => {
   });
 
   describe('Social Login Integration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('initiates Google OAuth flow', async () => {
       renderLoginComponent();
       
@@ -120,6 +127,8 @@ describe('Auth Login Advanced Features', () => {
   });
 
   describe('MFA (Multi-Factor Authentication)', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('prompts for MFA code when required', async () => {
       jest.mocked(authService.handleLogin).mockResolvedValue({
         success: false,

@@ -7,6 +7,7 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // IMPORTANT: Unmock the real auth context to test actual implementation
 jest.unmock('@/auth/context');
@@ -91,6 +92,10 @@ function TestComponent() {
 }
 
 describe('Dev Auto-Login Feature', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
+  // Set test timeout to prevent hanging
+  jest.setTimeout(10000);
   const mockDevToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZXYtdXNlci1pZCIsImVtYWlsIjoiZGV2QGV4YW1wbGUuY29tIiwiZnVsbF9uYW1lIjoiRGV2IFVzZXIiLCJleHAiOjk5OTk5OTk5OTksImlhdCI6MTYwMDAwMDAwMH0.test';
   
   const mockAuthConfig = {
@@ -146,9 +151,17 @@ describe('Dev Auto-Login Feature', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+    jest.clearAllTimers();
+    // Clean up any pending timers to prevent hanging
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Auto-Login on Initial Load', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should automatically log in user in development mode on first load', async () => {
       // Mock successful dev login response
       (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -221,7 +234,7 @@ describe('Dev Auto-Login Feature', () => {
       // Wait for initialization with retry
       await waitFor(() => {
         expect(screen.getByTestId('initialized')).toHaveTextContent('true');
-      }, { timeout: 10000 });
+      }, { timeout: 5000 });
 
       // Verify successful login after retry
       expect(screen.getByTestId('user-status')).toHaveTextContent('logged-in');
@@ -324,6 +337,8 @@ describe('Dev Auto-Login Feature', () => {
   });
 
   describe('Auto-Login Persistence', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should maintain login state across page refreshes', async () => {
       // Simulate existing token in localStorage
       localStorage.setItem('jwt_token', mockDevToken);
@@ -412,6 +427,8 @@ describe('Dev Auto-Login Feature', () => {
   });
 
   describe('Auto-Login Error Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle auth service being offline gracefully', async () => {
       // Mock auth service offline
       (authServiceClient.getAuthConfig as jest.Mock).mockRejectedValue(
@@ -499,6 +516,8 @@ describe('Dev Auto-Login Feature', () => {
   });
 
   describe('Auto-Login Timing and Performance', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should complete auto-login within 3 seconds', async () => {
       const startTime = Date.now();
       

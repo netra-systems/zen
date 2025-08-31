@@ -33,6 +33,8 @@ jest.mock('@/lib/auth-service-client', () => ({
 }));
 
 describe('Token Refresh Functionality', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     // Clear localStorage
@@ -107,4 +109,8 @@ describe('Token Refresh Functionality', () => {
       expect(screen.getByTestId('error-message')).toHaveTextContent('Network request failed');
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

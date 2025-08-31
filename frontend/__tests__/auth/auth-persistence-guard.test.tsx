@@ -24,6 +24,8 @@ jest.mock('@/hooks/useGTMEvent', () => ({
 }));
 
 describe('AuthGuard - Race Condition Prevention', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const mockPush = jest.fn();
   const mockTrackError = jest.fn();
   const mockTrackPageView = jest.fn();
@@ -38,6 +40,8 @@ describe('AuthGuard - Race Condition Prevention', () => {
   });
 
   describe('Initialization State Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should show loading when loading=true regardless of initialized state', () => {
       (useAuth as jest.Mock).mockReturnValue({
         user: null,
@@ -116,6 +120,8 @@ describe('AuthGuard - Race Condition Prevention', () => {
   });
 
   describe('Progressive State Transitions', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle progressive initialization states correctly', () => {
       const { rerender } = render(
         <AuthGuard>
@@ -217,6 +223,8 @@ describe('AuthGuard - Race Condition Prevention', () => {
   });
 
   describe('Custom Props', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should redirect to custom path when not authenticated', () => {
       (useAuth as jest.Mock).mockReturnValue({
         user: null,
@@ -270,6 +278,8 @@ describe('AuthGuard - Race Condition Prevention', () => {
   });
 
   describe('GTM Event Tracking', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track auth failure only once per mount and path', () => {
       (useAuth as jest.Mock).mockReturnValue({
         user: null,
@@ -315,6 +325,8 @@ describe('AuthGuard - Race Condition Prevention', () => {
   });
 
   describe('Edge Cases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle rapid state changes gracefully', () => {
       const { rerender } = render(
         <AuthGuard>
@@ -390,6 +402,8 @@ describe('AuthGuard - Race Condition Prevention', () => {
   });
 
   describe('Loading Screen', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should display loading screen with correct styling', () => {
       (useAuth as jest.Mock).mockReturnValue({
         user: null,
@@ -411,4 +425,8 @@ describe('AuthGuard - Race Condition Prevention', () => {
       expect(spinner).toBeInTheDocument();
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

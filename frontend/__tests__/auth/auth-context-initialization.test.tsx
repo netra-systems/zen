@@ -112,6 +112,8 @@ const mockAuthConfig = {
 };
 
 describe('AuthContext Token Initialization - Critical Race Condition Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let mockAuthStore: any;
   let mockUnifiedAuthService: jest.Mocked<typeof unifiedAuthService>;
   let mockJwtDecode: jest.MockedFunction<typeof jwtDecode>;
@@ -182,6 +184,7 @@ describe('AuthContext Token Initialization - Critical Race Condition Tests', () 
     
     jest.clearAllTimers();
     jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   /**
