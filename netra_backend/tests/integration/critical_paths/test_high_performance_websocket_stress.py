@@ -278,7 +278,8 @@ def mock_justified(reason):
 #     OptimizedMessageProcessor,
 # )
 
-class MockWebSocketForStress:
+# COMMENTED OUT: MockWebSocket class - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
+# class MockWebSocketForStress:
 
     """High-performance mock WebSocket for stress testing."""
     
@@ -1306,9 +1307,7 @@ class TestHighPerformanceWebSocketStress:
 
         assert global_metrics["total_queued_messages"] > 0
     
-    @mock_justified("L3: Comprehensive stress testing with enhanced WebSocket systems")
-
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_comprehensive_stress_scenario(self, high_performance_broadcaster,
 
                                                load_balanced_manager, enhanced_rate_limiter,
