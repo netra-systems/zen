@@ -4,7 +4,8 @@ import asyncio
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock
 
-class MockWebSocket:
+# COMMENTED OUT: MockWebSocket class - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
+# class MockWebSocket:
     """Mock WebSocket for testing."""
     
     def __init__(self, query_params=None, headers=None):
@@ -40,7 +41,8 @@ class MockAuthClient:
             "permissions": [] if valid_response else None
         })
 
-class MockWebSocketManager:
+# COMMENTED OUT: MockWebSocket class - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
+# class MockWebSocketManager:
     """Mock WebSocket manager for testing."""
     
     def __init__(self):
