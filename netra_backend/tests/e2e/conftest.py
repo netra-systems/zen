@@ -5,7 +5,7 @@ import asyncio
 from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, patch
 from test_framework.containers_utils import TestcontainerHelper
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
 

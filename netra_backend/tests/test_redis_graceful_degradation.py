@@ -39,7 +39,7 @@ from typing import Dict, Any
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.startup_module import initialize_logging
 from netra_backend.app.routes.health_check import readiness_probe, liveness_probe
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from netra_backend.app.core.configuration.base import get_unified_config
 
 

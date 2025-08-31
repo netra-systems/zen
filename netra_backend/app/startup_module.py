@@ -1,4 +1,4 @@
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 """
 Application startup management module.
 Handles initialization of logging, database connections, services, and health checks.
@@ -210,7 +210,7 @@ def _setup_optimization_components(app: FastAPI) -> None:
 
 async def _schedule_background_optimizations(app: FastAPI, logger: logging.Logger) -> None:
     """Schedule index optimization as background task."""
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     
     # Check if background tasks are disabled for testing
     if get_env().get("DISABLE_BACKGROUND_TASKS", "false").lower() == "true":
@@ -538,7 +538,7 @@ def setup_security_services(app: FastAPI, key_manager: KeyManager) -> None:
     
     # CRITICAL FIX: Set ClickHouse availability flag based on configuration
     config = get_config()
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
     
     # ClickHouse is available if required or if not in staging/development
@@ -554,7 +554,7 @@ async def initialize_clickhouse(logger: logging.Logger) -> None:
     graceful_startup = getattr(config, 'graceful_startup_mode', 'true').lower() == "true"
     
     # CRITICAL FIX: Check if ClickHouse is explicitly required
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
     
     # CRITICAL FIX: Make ClickHouse optional in development when not explicitly required
@@ -618,7 +618,7 @@ async def initialize_clickhouse(logger: logging.Logger) -> None:
 async def _setup_clickhouse_tables(logger: logging.Logger, mode: str) -> None:
     """Setup ClickHouse tables with timeout and error handling."""
     import asyncio
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     
     try:
         _log_clickhouse_start(logger, mode)
@@ -678,7 +678,7 @@ def _create_tool_dispatcher(tool_registry):
 def _create_agent_supervisor(app: FastAPI) -> None:
     """Create agent supervisor - CRITICAL for chat functionality."""
     from netra_backend.app.logging_config import central_logger
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     logger = central_logger.get_logger(__name__)
     
     environment = get_env().get("ENVIRONMENT", "development").lower()
@@ -928,7 +928,7 @@ async def start_monitoring(app: FastAPI, logger: logging.Logger) -> None:
 
 async def _create_monitoring_task(app: FastAPI, logger: logging.Logger) -> None:
     """Create comprehensive monitoring tasks."""
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     
     # Check if monitoring is disabled for testing
     if get_env().get("DISABLE_MONITORING", "false").lower() == "true":
@@ -1005,7 +1005,7 @@ async def _run_startup_phase_two(app: FastAPI, logger: logging.Logger) -> None:
     except Exception as e:
         logger.error(f"Failed to initialize ClickHouse: {e}", exc_info=True)
         # ClickHouse failures are non-critical in some environments
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         environment = get_env().get("ENVIRONMENT", "development").lower()
         if environment not in ["staging", "production"]:
             logger.warning(f"Continuing without ClickHouse in {environment}")
@@ -1169,7 +1169,7 @@ async def _run_legacy_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
         logger.error(error_msg, exc_info=True)
         
         # Check environment for critical failure handling
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         environment = get_env().get("ENVIRONMENT", "development").lower()
         
         if environment in ["staging", "production"]:
@@ -1196,7 +1196,7 @@ async def _run_legacy_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
         logger.error(error_msg, exc_info=True)
         
         # Check environment for critical failure handling
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         environment = get_env().get("ENVIRONMENT", "development").lower()
         
         if environment in ["staging", "production"]:

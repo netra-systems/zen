@@ -32,12 +32,12 @@ from netra_backend.app.logging_config import central_logger
 
 # Use centralized environment management following SPEC
 try:
-    from dev_launcher.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     env = get_env()
     env.enable_isolation()  # Enable isolation for integration tests
 except ImportError:
     # Fallback for environments without dev_launcher
-    from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+    from shared.isolated_environment import IsolatedEnvironment
     env = IsolatedEnvironment()
     env.enable_isolation()
 

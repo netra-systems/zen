@@ -777,7 +777,7 @@ class StatePersistenceService:
     # Optimization methods merged from OptimizedStatePersistence
     def _configure_optimizations(self) -> None:
         """Configure optimizations based on environment settings."""
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         # Check if optimized persistence is enabled
         # Note: The get_env() function already reads from environment or defaults

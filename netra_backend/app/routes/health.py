@@ -261,7 +261,7 @@ async def _handle_clickhouse_error(error: Exception) -> None:
     # CRITICAL FIX: ClickHouse is optional in staging and development by default
     if config.environment in ["staging", "development"]:
         # Check if ClickHouse is explicitly required
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
         
         if not clickhouse_required:
@@ -325,7 +325,7 @@ async def _check_readiness_status(db: AsyncSession) -> Dict[str, Any]:
         # This prevents race conditions between different environment configurations
         
         # CRITICAL FIX: ClickHouse check with proper graceful degradation
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
         
         if config.environment == "staging" and not clickhouse_required:

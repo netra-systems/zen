@@ -17,7 +17,7 @@ from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMe
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.database import get_db_session
 from netra_backend.app.logging_config import central_logger
 
@@ -25,11 +25,11 @@ logger = central_logger.get_logger(__name__)
 
 # Use centralized environment management from dev_launcher
 try:
-    from dev_launcher.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     env = get_env()
 except ImportError:
     # Fallback if dev_launcher is not available
-    from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+    from shared.isolated_environment import IsolatedEnvironment
     env = IsolatedEnvironment()
 
 

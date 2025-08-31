@@ -113,7 +113,7 @@ class EnvironmentValidator:
         """Get the current environment name."""
         # Use unified environment management
         try:
-            from netra_backend.app.core.isolated_environment import get_env
+            from shared.isolated_environment import get_env
             env = get_env()
             
             # Check multiple possible environment indicators

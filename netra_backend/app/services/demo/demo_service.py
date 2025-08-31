@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.agent_service import AgentService
-from netra_backend.app.services.demo.session_manager import SessionManager
+from netra_backend.app.services.redis.session_manager import RedisSessionManager as SessionManager
 from netra_backend.app.services.demo.analytics_tracker import AnalyticsTracker
 from netra_backend.app.services.demo.metrics_generator import (
     calculate_roi,
@@ -32,16 +32,16 @@ class DemoService:
                                user_id: Optional[int] = None) -> Dict[str, Any]:
         """Process a demo chat interaction with simulated multi-agent response."""
         try:
-            session_data = await self.session_manager.get_session(session_id)
+            session_data = await self.session_manager.get_demo_session(session_id)
             if not session_data:
-                session_data = await self.session_manager.create_session(
+                session_data = await self.session_manager.create_demo_session(
                     session_id, industry, user_id)
-            await self.session_manager.add_message(session_id, "user", message)
+            await self.session_manager.add_demo_message(session_id, "user", message)
             agents_involved = ["TriageAgent", "DataAgent", 
                              "OptimizationAgent", "ReportingAgent"]
             optimization_metrics = generate_optimization_metrics(industry)
             response = generate_demo_response(message, industry, optimization_metrics)
-            await self.session_manager.add_message(
+            await self.session_manager.add_demo_message(
                 session_id, "assistant", response,
                 agents=agents_involved, metrics=optimization_metrics)
             return {
@@ -78,7 +78,7 @@ class DemoService:
         
     async def get_session_status(self, session_id: str) -> Dict[str, Any]:
         """Get the status of a demo session."""
-        return await self.session_manager.get_session_status(session_id)
+        return await self.session_manager.get_demo_session_status(session_id)
         
     async def submit_feedback(self, session_id: str, 
                             feedback: Dict[str, Any]) -> None:

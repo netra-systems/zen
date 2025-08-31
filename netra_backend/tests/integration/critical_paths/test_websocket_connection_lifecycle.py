@@ -17,7 +17,7 @@ from typing import Dict, Any, Optional
 import pytest
 import websockets
 
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from netra_backend.app.config import get_config
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from test_framework.test_patterns import L3IntegrationTest

@@ -18,7 +18,7 @@ from typing import Dict, Optional, Tuple, Union
 
 from pydantic import ValidationError
 
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from netra_backend.app.core.exceptions_config import ConfigurationError
 from netra_backend.app.schemas.config import AppConfig
 
@@ -192,6 +192,15 @@ class UnifiedConfigManager:
     
     def _validate_final_config(self, config: AppConfig) -> None:
         """Validate final configuration before use."""
+        # First validate mandatory services for staging/production
+        if self._environment in ["staging", "production"]:
+            if hasattr(config, 'validate_mandatory_services'):
+                try:
+                    config.validate_mandatory_services()
+                except ValueError as e:
+                    raise ConfigurationError(str(e))
+        
+        # Then run standard validation
         validation_result = self._validator.validate_complete_config(config)
         if not validation_result.is_valid:
             raise ConfigurationError(f"Configuration validation failed: {validation_result.errors}")

@@ -1,4 +1,4 @@
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
 # SSOT: Import central configuration validator

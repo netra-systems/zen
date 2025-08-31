@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from unittest.mock import AsyncMock, patch, Mock, mock_open
 from pathlib import Path
 
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestErrorHandlingEdgeCases:

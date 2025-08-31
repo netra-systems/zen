@@ -10,10 +10,10 @@ import pytest
 
 # Import get_env early for pytest_configure
 try:
-    from dev_launcher.isolated_environment import get_env
+    from shared.isolated_environment import get_env
 except ImportError:
     # Fallback if dev_launcher is not available
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
 
 # REAL SERVICES INTEGRATION
 # Import all real service fixtures to replace backend mocks

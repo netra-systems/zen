@@ -15,7 +15,7 @@ from typing import Tuple
 
 from fastapi import FastAPI
 
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from netra_backend.app.core.project_utils import get_project_root as _get_project_root
 from netra_backend.app.config import get_config, settings
 from netra_backend.app.logging_config import central_logger

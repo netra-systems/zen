@@ -41,7 +41,7 @@ def is_test_environment() -> bool:
     """
     # Use service-local isolated environment management
     try:
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         env = get_env()
         
         # Method 1: Check pytest-specific environment variables
@@ -72,7 +72,7 @@ def is_test_environment() -> bool:
         # This should not happen within the same service, but provide fallback
         # Try dev_launcher environment management as secondary fallback
         try:
-            from dev_launcher.isolated_environment import get_env
+            from shared.isolated_environment import get_env
             env = get_env()
             
             # Method 1: Check pytest-specific environment variables

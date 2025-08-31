@@ -11,7 +11,7 @@ from typing import Dict, List, Optional, Tuple
 import re
 from dataclasses import dataclass
 
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from netra_backend.app.logging_config import central_logger as logger
 
 

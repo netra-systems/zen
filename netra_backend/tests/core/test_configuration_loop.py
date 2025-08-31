@@ -3,7 +3,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 import logging
 from netra_backend.app.core.configuration.base import UnifiedConfigManager
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestConfigurationLoop(unittest.TestCase):

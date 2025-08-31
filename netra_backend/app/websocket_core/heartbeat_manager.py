@@ -560,7 +560,7 @@ def get_heartbeat_manager(config: Optional[HeartbeatConfig] = None) -> WebSocket
     if _heartbeat_manager is None:
         # CRITICAL FIX: Use environment-specific configuration if none provided
         if config is None:
-            from netra_backend.app.core.isolated_environment import get_env
+            from shared.isolated_environment import get_env
             env = get_env()
             environment = env.get("ENVIRONMENT", "development").lower()
             config = HeartbeatConfig.for_environment(environment)

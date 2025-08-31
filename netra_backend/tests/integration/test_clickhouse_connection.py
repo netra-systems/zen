@@ -22,7 +22,7 @@ from netra_backend.app.config import get_config
 from netra_backend.app.database import get_clickhouse_client
 from netra_backend.app.db.clickhouse_init import initialize_clickhouse_tables
 from netra_backend.app.db.clickhouse import ClickHouseService
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 class TestClickHouseConnection:

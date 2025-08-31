@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Optional, Union
 from netra_backend.app.core.health.telemetry import telemetry_manager
 from netra_backend.app.core.shared_health_types import HealthStatus
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from netra_backend.app.schemas.core_models import HealthCheckResult
 
 logger = central_logger.get_logger(__name__)

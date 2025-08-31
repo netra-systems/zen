@@ -19,7 +19,7 @@ from sqlalchemy.exc import OperationalError
 import psycopg2
 
 from netra_backend.app.db.database_manager import DatabaseManager
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestPostgreSQLAuthenticationFailures:

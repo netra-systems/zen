@@ -58,7 +58,7 @@ tracing_manager = TracingManager()
 def _get_rate_limit_for_environment() -> int:
     """Get WebSocket rate limit based on environment."""
     from netra_backend.app.core.environment_constants import Environment
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     
     env = get_env()
     environment = env.get("ENVIRONMENT", "development").lower()
@@ -76,7 +76,7 @@ def _get_rate_limit_for_environment() -> int:
 
 def _get_staging_optimized_timeouts():
     """Get staging-optimized timeout configuration to prevent disconnections."""
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     
     env = get_env()
     environment = env.get("ENVIRONMENT", "development").lower()
@@ -179,7 +179,7 @@ async def websocket_endpoint(websocket: WebSocket):
         thread_service = getattr(websocket.app.state, 'thread_service', None)
         
         # Check environment to determine if fallback is allowed
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         environment = get_env().get("ENVIRONMENT", "development").lower()
         is_testing = get_env().get("TESTING", "0") == "1"
         

@@ -5,7 +5,8 @@ from netra_backend.app.services.demo.demo_metrics_generator import DemoMetricsGe
 from netra_backend.app.services.demo.demo_service import DemoService, get_demo_service
 from netra_backend.app.services.demo.industry_config import INDUSTRY_FACTORS
 from netra_backend.app.services.demo.report_generator import ReportGenerator
-from netra_backend.app.services.demo.session_manager import SessionManager
+# Note: SessionManager now consolidated in Redis service
+# from netra_backend.app.services.redis.session_manager import RedisSessionManager as SessionManager
 
 __all__ = [
     "DemoService",
@@ -13,6 +14,6 @@ __all__ = [
     "INDUSTRY_FACTORS",
     "DemoMetricsGenerator",
     "ReportGenerator",
-    "SessionManager",
+    # "SessionManager",  # Now consolidated in Redis service
     "AnalyticsTracker"
 ]

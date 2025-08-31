@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.agents.data_sub_agent.performance_analyzer import PerformanceAnalyzer
 from netra_backend.app.agents.data_sub_agent.performance_data_processor import PerformanceDataProcessor
 from netra_backend.app.agents.data_sub_agent.insights_performance_analyzer import PerformanceInsightsAnalyzer
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.database import get_async_session
 from netra_backend.app.llm.llm_manager import LLMManager
 # SQL models not found - commenting out for now

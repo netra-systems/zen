@@ -182,7 +182,7 @@ class TestBackendHealthChecks:
         In testing environment, ClickHouse uses a MOCK client which should always return healthy.
         This validates that the MOCK behavior is working correctly.
         """
-        from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+        from shared.isolated_environment import IsolatedEnvironment
         
         # Use testing environment which should use MOCK ClickHouse client
         env = IsolatedEnvironment()
@@ -494,7 +494,7 @@ class TestHealthCheckReliabilityImprovement:
         assert checker.timeout == 1.0
         
         # Test timeout configuration using IsolatedEnvironment system
-        from dev_launcher.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         env = get_env()
         
         # Set environment variable through IsolatedEnvironment
@@ -635,7 +635,7 @@ class TestBackendComponentHealthChecks:
 
     def test_environment_configuration_health(self):
         """Test environment configuration health check."""
-        from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+        from shared.isolated_environment import IsolatedEnvironment
         
         env = IsolatedEnvironment()
         

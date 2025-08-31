@@ -63,7 +63,7 @@ class ClickHouseDatabase:
     
     def _create_client_connection(self):
         """Create ClickHouse client connection with environment-aware timeouts."""
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         environment = get_env().get("ENVIRONMENT", "development").lower()
         
@@ -87,7 +87,7 @@ class ClickHouseDatabase:
     def _establish_connection(self):
         """Establish and test ClickHouse connection with timeout protection."""
         import time
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         environment = get_env().get("ENVIRONMENT", "development").lower()
         
@@ -139,7 +139,7 @@ class ClickHouseDatabase:
     async def test_connection(self) -> bool:
         """Test if the ClickHouse connection is working with environment-aware timeout."""
         import asyncio
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         try:
             if not self.client:

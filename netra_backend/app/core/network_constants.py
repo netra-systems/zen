@@ -355,14 +355,14 @@ class NetworkEnvironmentHelper:
     @classmethod
     def get_environment(cls) -> str:
         """Get current environment (development, staging, production)."""
-        from dev_launcher.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         env = get_env()
         return env.get("ENVIRONMENT", "development").lower()
     
     @classmethod
     def is_cloud_environment(cls) -> bool:
         """Check if running in cloud environment."""
-        from dev_launcher.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         env = get_env()
         # Check for Cloud Run or Cloud SQL indicators
         return (env.get("K_SERVICE") is not None or 
@@ -376,7 +376,7 @@ class NetworkEnvironmentHelper:
         This delegates all URL construction to DatabaseURLBuilder as per
         database_connectivity_architecture.xml specification.
         """
-        from dev_launcher.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         from shared.database_url_builder import DatabaseURLBuilder
         
         env = get_env()
@@ -433,7 +433,7 @@ class NetworkEnvironmentHelper:
     @classmethod
     def get_service_urls_for_environment(cls) -> Dict[str, str]:
         """Get service URLs for current environment."""
-        from dev_launcher.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         is_test = cls.is_test_environment()
         environment = cls.get_environment()

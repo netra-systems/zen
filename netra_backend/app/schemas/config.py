@@ -11,7 +11,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 
 # Use backend-specific isolated environment
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -599,11 +599,11 @@ class ProductionConfig(AppConfig):
     log_level: str = "INFO"
     
     def __init__(self, **data):
-        """Initialize production config with mandatory service validation."""
+        """Initialize production config."""
         super().__init__(**data)
-        self._validate_mandatory_services()
+        # Validation moved to validate_mandatory_services() to be called after population
     
-    def _validate_mandatory_services(self):
+    def validate_mandatory_services(self):
         """Validate that all mandatory services are configured for production."""
         # CRITICAL: ClickHouse is MANDATORY in production
         if not self.clickhouse_native.host and not self.clickhouse_https.host:
@@ -638,11 +638,11 @@ class StagingConfig(AppConfig):
     skip_redis_init: bool = False
     
     def __init__(self, **data):
-        """Initialize staging config with mandatory service validation."""
+        """Initialize staging config."""
         super().__init__(**data)
-        self._validate_mandatory_services()
+        # Validation moved to validate_mandatory_services() to be called after population
     
-    def _validate_mandatory_services(self):
+    def validate_mandatory_services(self):
         """Validate that all mandatory services are configured for staging."""
         # CRITICAL: ClickHouse is MANDATORY in staging
         if not self.clickhouse_native.host and not self.clickhouse_https.host:

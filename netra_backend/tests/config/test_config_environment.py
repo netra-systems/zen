@@ -49,7 +49,7 @@ class TestConfigEnvironmentDetection:
     @pytest.fixture
     def clean_environment(self):
         """Clean environment variables for isolated testing"""
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         original_env = os.environ.copy()
         env = get_env()
@@ -114,7 +114,7 @@ class TestConfigEnvironmentDetection:
         # Arrange
         # Mock: Component isolation for testing without external dependencies
         # Also need to clear TESTING flag since it takes highest priority
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         env = get_env()
         
         with patch('netra_backend.app.core.environment_constants.EnvironmentDetector.detect_cloud_environment') as mock_detect:

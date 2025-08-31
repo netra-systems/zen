@@ -128,12 +128,12 @@ async def test_data_agent_modular():
 
 
 async def test_enhanced_registry():
-    """Test the enhanced agent registry."""
+    """Test the enhanced agent registry (now using consolidated AgentRegistry)."""
     print("\nTesting enhanced agent registry...")
     
     try:
-        from netra_backend.app.agents.supervisor.agent_registry_enhanced import (
-            EnhancedAgentRegistry,
+        from netra_backend.app.agents.supervisor.agent_registry import (
+            AgentRegistry,
         )
         
         # Create mock dependencies
@@ -144,8 +144,8 @@ async def test_enhanced_registry():
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = Mock()
         
-        # Create registry
-        registry = EnhancedAgentRegistry(mock_llm_manager, mock_tool_dispatcher)
+        # Create registry (now using consolidated AgentRegistry with enhanced features)
+        registry = AgentRegistry(mock_llm_manager, mock_tool_dispatcher)
         
         print(f"[PASS] Registry created")
         

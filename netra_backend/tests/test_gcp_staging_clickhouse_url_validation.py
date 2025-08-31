@@ -18,7 +18,7 @@ from unittest.mock import patch, MagicMock
 from urllib.parse import urlparse, ParseResult
 
 from netra_backend.app.db.clickhouse import ClickHouseDatabase
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestClickHouseURLControlCharacters:

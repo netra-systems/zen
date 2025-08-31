@@ -16,7 +16,7 @@ import redis
 from redis.connection import ConnectionPool
 
 from netra_backend.app.core.configuration.base import UnifiedConfigManager
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 

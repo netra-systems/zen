@@ -205,7 +205,7 @@ class LogHandlerConfig:
     def add_console_handler(self, should_log_func):
         """Add console handler with appropriate formatting."""
         # During testing, use safer console handling to prevent I/O errors
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         is_testing = get_env().get('TESTING') == '1' or get_env().get('ENVIRONMENT') == 'testing'
         
         if is_testing:
@@ -233,7 +233,7 @@ class LogHandlerConfig:
     
     def _add_readable_console_handler(self, should_log_func):
         """Add human-readable console handler with proper color mapping."""
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         # Disable colors in staging/production to prevent ANSI codes in logs
         environment = get_env().get('ENVIRONMENT', 'development').lower()

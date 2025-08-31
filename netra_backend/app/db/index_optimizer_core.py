@@ -50,7 +50,7 @@ class DatabaseValidation:
     def log_engine_unavailable(operation: str) -> None:
         """Log engine unavailable error."""
         # Check if we're in development - this is often expected during startup
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         env = get_env()
         environment = env.get('ENVIRONMENT', 'development')
         

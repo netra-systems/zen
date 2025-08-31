@@ -22,7 +22,7 @@ from contextlib import contextmanager
 import logging
 
 from netra_backend.app.main import app
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestStartupLoggerScopingIssues:

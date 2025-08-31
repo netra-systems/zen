@@ -38,7 +38,7 @@ from typing import Any, Callable, Dict, List, Optional, Set, TextIO, Union
 from uuid import UUID
 from dataclasses import is_dataclass, asdict
 
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 logger = logging.getLogger(__name__)
 

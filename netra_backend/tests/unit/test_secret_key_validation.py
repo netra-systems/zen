@@ -28,7 +28,7 @@ import pytest
 from unittest.mock import patch, Mock
 from typing import Optional
 
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 class TestSecretKeyValidation:
@@ -361,7 +361,7 @@ class TestSecretKeySecurityImplications:
         This should FAIL if staging is using insecure patterns, demonstrating the issue.
         """
         from netra_backend.app.schemas.config import AppConfig
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         # Get actual environment
         env = get_env()

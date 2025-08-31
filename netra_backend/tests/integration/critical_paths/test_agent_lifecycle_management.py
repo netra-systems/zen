@@ -20,7 +20,7 @@ from typing import Any, Dict, List, Optional
 import pytest
 
 # Use absolute imports following CLAUDE.md standards
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent

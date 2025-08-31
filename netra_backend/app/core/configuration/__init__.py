@@ -21,7 +21,7 @@ Architecture:
 All files ≤300 lines, all functions ≤8 lines.
 """
 
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from netra_backend.app.core.configuration.base import (
     ActualSecretManager as SecretManager,
 )

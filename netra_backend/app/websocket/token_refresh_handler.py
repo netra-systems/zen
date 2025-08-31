@@ -149,7 +149,7 @@ class TokenRefreshHandler:
                 current_token = conn_info["token"]
                 
                 # Check if token needs refresh
-                if self._needs_refresh(current_token):
+                if await self._needs_refresh(current_token):
                     logger.info(f"Auto-refreshing token for connection {connection_id}")
                     
                     # Perform refresh
@@ -174,65 +174,59 @@ class TokenRefreshHandler:
                 logger.error(f"Auto-refresh monitor error for {connection_id}: {e}")
                 await asyncio.sleep(60)  # Back off on error
     
-    def _needs_refresh(self, token: str) -> bool:
-        """Check if token needs refresh (expires within 5 minutes)."""
+    async def _needs_refresh(self, token: str) -> bool:
+        """Check if token needs refresh (expires within 5 minutes) - USES AUTH SERVICE."""
         try:
-            decoded = jwt.decode(
-                token, 
-                self.config.jwt_secret, 
-                algorithms=["HS256"],
-                options={"verify_exp": False}
-            )
+            # CRITICAL SECURITY FIX: Use auth service to check token expiry
+            # Local JWT decoding is a security vulnerability
+            validation = await auth_client.validate_token_jwt(token)
+            if not validation or not validation.get("valid"):
+                return True  # Token is invalid, needs refresh
             
-            exp_timestamp = decoded.get("exp")
-            if not exp_timestamp:
-                return False
+            # Check if token expires soon
+            expires_at = validation.get("expires_at")
+            if not expires_at:
+                return True  # No expiry info, refresh to be safe
             
-            exp_time = datetime.fromtimestamp(exp_timestamp)
+            # Parse expiry time
+            if isinstance(expires_at, (int, float)):
+                exp_time = datetime.fromtimestamp(expires_at)
+            else:
+                # Try to parse as ISO string
+                from datetime import datetime
+                exp_time = datetime.fromisoformat(str(expires_at).replace('Z', '+00:00'))
+            
             time_until_expiry = exp_time - datetime.utcnow()
             
             # Refresh if less than 5 minutes until expiry
             return time_until_expiry < timedelta(minutes=5)
             
         except Exception as e:
-            logger.error(f"Failed to check token expiry: {e}")
+            logger.error(f"Failed to check token expiry through auth service: {e}")
             return True  # Err on side of caution
     
     async def _refresh_token(self, old_token: str) -> Optional[Dict[str, Any]]:
-        """Refresh an access token."""
+        """Refresh an access token through auth service - CRITICAL SECURITY FIX."""
         try:
-            # Extract refresh token if available
-            # In a real implementation, this would use a stored refresh token
-            # For now, we'll simulate a refresh
+            # CRITICAL SECURITY FIX: ALL token operations MUST go through auth service
+            # Creating tokens locally is a major security vulnerability
+            logger.info("Refreshing token through auth service")
             
-            decoded = jwt.decode(
-                old_token,
-                self.config.jwt_secret,
-                algorithms=["HS256"],
-                options={"verify_exp": False}
-            )
+            # Use auth service to refresh the token
+            refresh_result = await auth_client.refresh_token(old_token)
             
-            # Create new token with extended expiration
-            now = datetime.utcnow()
-            new_payload = decoded.copy()
-            new_payload["iat"] = int(now.timestamp())
-            new_payload["exp"] = int((now + timedelta(hours=1)).timestamp())
-            new_payload["refresh_count"] = decoded.get("refresh_count", 0) + 1
-            
-            new_token = jwt.encode(
-                new_payload,
-                self.config.jwt_secret,
-                algorithm="HS256"
-            )
+            if not refresh_result or not refresh_result.get("success"):
+                logger.error("Auth service token refresh failed")
+                return None
             
             return {
-                "access_token": new_token,
+                "access_token": refresh_result.get("access_token"),
                 "token_type": "Bearer",
-                "expires_in": 3600
+                "expires_in": refresh_result.get("expires_in", 3600)
             }
             
         except Exception as e:
-            logger.error(f"Token refresh failed: {e}")
+            logger.error(f"Token refresh through auth service failed: {e}")
             return None
     
     async def _send_refresh_notification(self, websocket: WebSocket, new_token: str):

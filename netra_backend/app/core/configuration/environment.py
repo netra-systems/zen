@@ -1,4 +1,4 @@
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment, get_env
+from shared.isolated_environment import IsolatedEnvironment, get_env
 
 # Always export IsolatedEnvironment for imports
 __all__ = ['IsolatedEnvironment', 'get_env', 'EnvironmentDetector']

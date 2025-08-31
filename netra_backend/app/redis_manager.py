@@ -7,7 +7,7 @@ import redis.asyncio as redis
 from typing import Dict
 
 from netra_backend.app.core.configuration.base import get_unified_config
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from netra_backend.app.logging_config import central_logger as logger
 from shared.redis_config_builder import RedisConfigurationBuilder
 
@@ -140,7 +140,7 @@ class RedisManager:
     async def _test_redis_connection(self):
         """Test Redis connection with timeout protection."""
         import asyncio
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         environment = get_env().get("ENVIRONMENT", "development").lower()
         

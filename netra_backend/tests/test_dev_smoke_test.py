@@ -60,9 +60,9 @@ class TestDevSmokeTest:
         """Test that required environment variables are set."""
         # Use the SAME get_env from the test framework to avoid multiple instances
         try:
-            from dev_launcher.isolated_environment import get_env
+            from shared.isolated_environment import get_env
         except ImportError:
-            from netra_backend.app.core.isolated_environment import get_env
+            from shared.isolated_environment import get_env
         
         env = get_env()
         
@@ -187,9 +187,9 @@ class TestDevSmokeTest:
         # Test that environment supports dev launcher functionality
         # Use the SAME get_env from the test framework to avoid multiple instances
         try:
-            from dev_launcher.isolated_environment import get_env
+            from shared.isolated_environment import get_env
         except ImportError:
-            from netra_backend.app.core.isolated_environment import get_env
+            from shared.isolated_environment import get_env
         env = get_env()
         
         # Should be able to get environment variables

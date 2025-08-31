@@ -28,7 +28,7 @@ from netra_backend.app.core.security_monitoring import check_and_alert_mock_toke
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket_core.types import AuthInfo, WebSocketConfig
 from netra_backend.app.websocket_core.utils import is_websocket_connected
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 logger = central_logger.get_logger(__name__)
 tracing_manager = TracingManager()
@@ -200,20 +200,16 @@ class WebSocketAuthenticator:
                 detail="Authentication failed: Invalid token format"
             )
         
-        # Validate token with auth service
+        # Validate token with auth service ONLY - CRITICAL SECURITY FIX
         try:
             with tracing_manager.start_span("websocket_jwt_validation") as span:
                 span.set_attribute("auth.method", auth_method)
                 span.set_attribute("websocket.auth", True)
                 
-                # CRITICAL FIX: Try local JWT validation first for E2E tests
-                # This allows WebSocket tests to work without the auth service
-                validation_result = await self._try_local_jwt_validation(token)
-                
-                if not validation_result:
-                    # Fall back to auth service validation
-                    from netra_backend.app.clients.auth_client_core import auth_client
-                    validation_result = await auth_client.validate_token_jwt(token)
+                # CRITICAL SECURITY FIX: ALL JWT validation MUST go through auth service
+                # Local validation bypasses are a security vulnerability
+                from netra_backend.app.clients.auth_client_core import auth_client
+                validation_result = await auth_client.validate_token_jwt(token)
                 
                 if not validation_result or not validation_result.get("valid"):
                     self.auth_stats["failed_auths"] += 1
@@ -273,61 +269,6 @@ class WebSocketAuthenticator:
         
         return None, None
     
-    
-    async def _try_local_jwt_validation(self, token: str) -> Optional[Dict[str, Any]]:
-        """Try to validate JWT token locally without auth service (for E2E tests)."""
-        try:
-            # Only attempt local validation in test/dev environments
-            env = get_env()
-            environment = env.get("ENVIRONMENT", "development").lower()
-            testing = env.get("TESTING", "0") == "1"
-            
-            logger.info(f"Local JWT validation check - environment: {environment}, testing: {testing}")
-            
-            if not (testing or environment in ["development", "testing", "e2e_testing"]):
-                logger.debug("Skipping local JWT validation in production environment")
-                return None
-            
-            # Try to decode JWT locally
-            try:
-                import jwt as jwt_lib
-            except ImportError:
-                logger.debug("JWT library not available for local validation")
-                return None
-            
-            # Get JWT secret from environment
-            jwt_secret = env.get("JWT_SECRET", "test_secret_key")
-            
-            # Decode and validate the token
-            try:
-                payload = jwt_lib.decode(token, jwt_secret, algorithms=["HS256"])
-                
-                # Extract user information from payload
-                user_id = payload.get("sub")
-                if not user_id:
-                    logger.warning("Local JWT validation failed: No 'sub' claim found")
-                    return None
-                
-                logger.info(f"Local JWT validation successful for user: {user_id}")
-                
-                return {
-                    "valid": True,
-                    "user_id": user_id,
-                    "email": payload.get("email", f"{user_id}@test.local"),
-                    "permissions": payload.get("permissions", ["user"]),
-                    "expires_at": payload.get("exp")
-                }
-                
-            except jwt_lib.ExpiredSignatureError:
-                logger.warning("Local JWT validation failed: Token expired")
-                return None
-            except jwt_lib.InvalidTokenError as e:
-                logger.warning(f"Local JWT validation failed: Invalid token - {e}")
-                return None
-                
-        except Exception as e:
-            logger.debug(f"Local JWT validation error (will fall back to auth service): {e}")
-            return None
     
     def _decode_jwt_subprotocol(self, protocol: str) -> Optional[str]:
         """Decode JWT from subprotocol format."""
