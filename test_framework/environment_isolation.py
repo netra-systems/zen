@@ -55,16 +55,31 @@ def get_env():
         return dev_get_env()
 
 # Import IsolatedEnvironment only when not in pytest to avoid triggering dev setup
+<<<<<<< Updated upstream
 # Create substitute class to prevent TypeError when IsolatedEnvironment() is called
+=======
+# Create type aliases for better type annotations and prevent TypeError
+>>>>>>> Stashed changes
 try:
     if 'pytest' not in sys.modules and not os.environ.get("PYTEST_CURRENT_TEST"):  # @marked: Test framework detection
         from dev_launcher.isolated_environment import IsolatedEnvironment
         EnvironmentType = IsolatedEnvironment
     else:
+<<<<<<< Updated upstream
         # Create a substitute that returns TestEnvironmentWrapper when called
         class TestIsolatedEnvironmentSubstitute:
             """Substitute for IsolatedEnvironment during pytest to prevent TypeError."""
             
+=======
+        # Create a substitute IsolatedEnvironment class for tests that prevents TypeError
+        class TestIsolatedEnvironmentSubstitute:
+            """Substitute for IsolatedEnvironment during pytest to prevent TypeError."""
+            
+            def __init__(self, *args, **kwargs):
+                # Create a TestEnvironmentWrapper instance instead
+                return get_env()
+            
+>>>>>>> Stashed changes
             def __new__(cls, *args, **kwargs):
                 # Return TestEnvironmentWrapper when IsolatedEnvironment() is called
                 return get_env()
@@ -84,6 +99,12 @@ except ImportError:
     class TestIsolatedEnvironmentSubstitute:
         """Substitute for IsolatedEnvironment when import fails."""
         
+<<<<<<< Updated upstream
+=======
+        def __init__(self, *args, **kwargs):
+            return get_env()
+        
+>>>>>>> Stashed changes
         def __new__(cls, *args, **kwargs):
             return get_env()
     
