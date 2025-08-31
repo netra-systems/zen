@@ -757,7 +757,7 @@ class TestConfigurationValidationPipelineL3:
             cached_result = json.loads(cached_data)
             assert cached_result["is_valid"] == result1.is_valid
     
-        @pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_validation_pipeline_reliability(self, config_validator):
         """Test overall validation pipeline reliability and consistency."""
         # Test configuration with various complexity levels

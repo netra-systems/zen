@@ -255,6 +255,50 @@ class StressTestClient:
 
 
 # ============================================================================
+# ============================================================================
+# MOCK WEBSOCKET MANAGER FOR TESTING
+# ============================================================================
+
+class MockWebSocketManager:
+    """Mock WebSocket manager that captures events for validation."""
+    
+    def __init__(self):
+        self.messages: List[Dict] = []
+        self.connections: Dict[str, Any] = {}
+    
+    async def send_to_thread(self, thread_id: str, message: Dict[str, Any]) -> bool:
+        """Record message and simulate successful delivery."""
+        self.messages.append({
+            'thread_id': thread_id,
+            'message': message,
+            'event_type': message.get('type', 'unknown'),
+            'timestamp': time.time()
+        })
+        return True
+    
+    async def connect_user(self, user_id: str, websocket, thread_id: str):
+        """Mock user connection."""
+        self.connections[thread_id] = {'user_id': user_id, 'connected': True}
+    
+    async def disconnect_user(self, user_id: str, websocket, thread_id: str):
+        """Mock user disconnection."""
+        if thread_id in self.connections:
+            self.connections[thread_id]['connected'] = False
+    
+    def get_events_for_thread(self, thread_id: str) -> List[Dict]:
+        """Get all events for a specific thread."""
+        return [msg for msg in self.messages if msg['thread_id'] == thread_id]
+    
+    def get_event_types_for_thread(self, thread_id: str) -> List[str]:
+        """Get event types for a thread in order."""
+        return [msg['event_type'] for msg in self.messages if msg['thread_id'] == thread_id]
+    
+    def clear_messages(self):
+        """Clear all recorded messages."""
+        self.messages.clear()
+
+
+# ============================================================================
 # UNIT TESTS - Component Isolation
 # ============================================================================
 
@@ -264,8 +308,7 @@ class TestUnitWebSocketComponents:
     @pytest.fixture(autouse=True)
     async def setup_mock_services(self):
         """Setup mock services for reliable testing without external dependencies."""
-        # Create mock WebSocket manager for tests
-        from tests.mission_critical.test_websocket_agent_events_fixed import MockWebSocketManager
+        # Create mock WebSocket manager for tests using the MockWebSocketManager from the fixed file
         self.mock_ws_manager = MockWebSocketManager()
         
         yield

@@ -780,7 +780,7 @@ class TestCrossServiceConfigConsistencyL3:
         assert result3.accuracy_percentage >= 99.9
         assert len(result3.drift_results) == 0
     
-        @pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_consistency_monitoring_reliability(self, consistency_manager):
         """Test reliability and accuracy of consistency monitoring system."""
         # Setup comprehensive test scenario

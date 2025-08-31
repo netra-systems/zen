@@ -676,7 +676,7 @@ class TestAgentStateRecoveryL3:
         failure_detected = await recovery_manager.detect_agent_failure("test_agent_1")
         assert failure_detected == recoverable_agent.is_crashed
         
-        @pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_recovery_performance_under_load(self, recovery_manager):
         """Test recovery performance with multiple agents under load."""
         # Create multiple agents

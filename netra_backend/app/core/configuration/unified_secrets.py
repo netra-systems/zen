@@ -475,13 +475,24 @@ class UnifiedSecretManager:
             )
         
         elif env == "development" or env == "test":
-            # Development/Test: require JWT_SECRET_KEY
+            # Development/Test: JWT_SECRET_KEY first
             secret = get_env().get("JWT_SECRET_KEY")
             if secret and secret.strip():
                 self._logger.debug(f"Using JWT_SECRET_KEY ({env})")
                 return secret.strip()
             
-            # HARD STOP: No fallback even in development/test
+            # Fallback to legacy JWT_SECRET for backward compatibility
+            secret = get_env().get("JWT_SECRET")
+            if secret and secret.strip():
+                self._logger.debug(f"Using JWT_SECRET fallback ({env})")
+                return secret.strip()
+                
+            # Development fallback secret (only for development, not test)
+            if env == "development":
+                self._logger.debug("Using development fallback secret")
+                return "dev-secret-key-DO-NOT-USE-IN-PRODUCTION"
+            
+            # HARD STOP: No fallback in test environment
             raise ValueError(
                 f"JWT secret not configured for {env} environment. "
                 "Set JWT_SECRET_KEY environment variable."

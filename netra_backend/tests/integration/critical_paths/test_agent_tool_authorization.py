@@ -514,7 +514,7 @@ class TestAgentToolAuthorizationL3:
         
         assert len(cross_service_logs) >= 5  # 5 successful operations
         
-        @pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_authorization_under_concurrent_load(self, authorization_service, test_agents):
         """Test authorization system under concurrent load."""
         # Create concurrent authorization requests

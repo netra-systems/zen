@@ -456,7 +456,7 @@ class TestAgentQualityGatePipelineL3:
         assert normal_result.overall_score is not None
         assert emergency_result.overall_score is not None
         
-        @pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_batch_quality_validation(self, quality_gate_service, quality_test_manager):
         """Test batch quality validation for high-throughput scenarios."""
         # Generate batch of content for validation
