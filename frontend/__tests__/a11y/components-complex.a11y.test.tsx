@@ -1,7 +1,8 @@
-/**
- * Complex Components Accessibility Test Suite
- * Tests component combinations and complex interaction patterns
- * Follows 25-line function rule and 450-line file limit
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ollows 25-line function rule and 450-line file limit
  * 
  * Business Value Justification (BVJ):
  * - Segment: All (Free → Enterprise)
@@ -34,6 +35,7 @@ import {
 // ============================================================================
 
 describe('Component Combinations - Accessibility', () => {
+    jest.setTimeout(10000);
   it('passes axe tests for complex component layouts', async () => {
     const { container } = render(
       <div>

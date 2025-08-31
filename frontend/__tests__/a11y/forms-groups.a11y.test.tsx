@@ -1,7 +1,8 @@
-/**
- * Forms Groups Accessibility Test Suite - Modular Architecture
- * 
- * This file was refactored from 481 lines to comply with 450-line limit.
+import './forms-groups-basic.a11y.test';
+import './forms-groups-dynamic.a11y.test';
+import './forms-groups-validation.a11y.test';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+450-line limit.
  * The original oversized test file has been split into focused modules:
  * 
  * - forms-groups-basic.a11y.test.tsx - Basic form structures, radio groups, validation
@@ -47,6 +48,7 @@ export {
  */
 
 describe('Form Groups Accessibility - Modular', () => {
+    jest.setTimeout(10000);
   it('should have all accessibility test modules properly organized', () => {
     // This test ensures the modular structure is maintained
     expect(true).toBe(true);

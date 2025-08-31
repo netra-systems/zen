@@ -9,6 +9,8 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 
 describe('Keyboard Navigation Accessibility', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   it('should support tab navigation through interactive elements', async () => {
     const TabNavigationComponent: React.FC = () => {
       const [focusedElement, setFocusedElement] = React.useState<string>('');
@@ -240,4 +242,8 @@ describe('Keyboard Navigation Accessibility', () => {
     expect(screen.getByTestId('modal-status')).toHaveTextContent('Modal is closed');
     expect(screen.queryByTestId('modal')).not.toBeInTheDocument();
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

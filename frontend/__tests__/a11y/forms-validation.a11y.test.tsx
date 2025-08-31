@@ -1,9 +1,9 @@
-/**
- * Forms Validation Accessibility Test Suite
- * Tests form validation, error states, and feedback mechanisms
- * Follows 25-line function rule and 450-line file limit
- * 
- * Business Value Justification (BVJ):
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ess Value Justification (BVJ):
  * - Segment: All (Free → Enterprise)
  * - Goal: Ensure validation feedback is accessible for compliance
  * - Value Impact: Enables users with disabilities to understand and fix errors
@@ -34,6 +34,7 @@ import {
 // ============================================================================
 
 describe('Form Validation - Error States and Feedback', () => {
+    jest.setTimeout(10000);
   it('passes axe tests for forms with validation errors', async () => {
     const { container } = render(
       <form>

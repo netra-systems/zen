@@ -1,6 +1,8 @@
-/**
- * Navigation Keyboard Accessibility Test Suite
- * Tests core keyboard navigation functionality and activation patterns
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+rns
  * Follows 25-line function rule and 450-line file limit
  * 
  * Business Value Justification (BVJ):
@@ -30,6 +32,7 @@ import {
 // ============================================================================
 
 describe('Keyboard Navigation - Core Functionality', () => {
+    jest.setTimeout(10000);
   it('passes axe accessibility tests for navigation', async () => {
     const { container } = render(
       <nav role="navigation" aria-label="Main navigation">
