@@ -461,11 +461,16 @@ class WebSocketTestClient:
         url = f"{self.config.websocket_url.rstrip('/')}/{path.lstrip('/')}"
         
         try:
-            self._websocket = await websockets.connect(
-                url,
-                extra_headers=headers or {},
-                timeout=self.config.connection_timeout
-            )
+            # Handle websockets library version compatibility
+            connect_kwargs = {
+                "open_timeout": self.config.connection_timeout
+            }
+            
+            # Only add additional_headers if headers are provided
+            if headers:
+                connect_kwargs["additional_headers"] = headers
+                
+            self._websocket = await websockets.connect(url, **connect_kwargs)
             self._connected = True
             logger.info(f"WebSocket connected to {url}")
         except Exception as e:
