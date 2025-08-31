@@ -19,7 +19,7 @@ from enum import Enum
 import aiohttp
 
 from netra_backend.app.core.shared_health_types import HealthChecker, HealthStatus
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.llm.llm_defaults import LLMModel
 from netra_backend.app.llm.gemini_config import (
     get_gemini_config, 

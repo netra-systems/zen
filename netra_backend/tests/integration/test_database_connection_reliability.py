@@ -23,7 +23,7 @@ from unittest.mock import patch
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.database import get_db
 from dev_launcher.database_connector import DatabaseConnector
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 class TestDatabaseConnectionReliability:

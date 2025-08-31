@@ -4,7 +4,7 @@ Comprehensive WebSocket CORS Test Script
 
 This script tests WebSocket connectivity in various scenarios to ensure CORS is properly configured
 for Docker development environment. It tests connections with different origins and validates
-that the development auth bypass works properly.
+that the development OAUTH SIMULATION works properly.
 
 Business Value Justification (BVJ):
 - Segment: Platform/Internal

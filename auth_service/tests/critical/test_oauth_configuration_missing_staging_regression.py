@@ -41,7 +41,7 @@ def mock_database_initialization():
         with patch('auth_service.tests.conftest.initialize_test_database'):
             yield mock_auth_db
 
-from auth_service.auth_core.secret_loader import SecretLoader
+from auth_service.auth_core.secret_loader import AuthSecretLoader
 from auth_service.auth_core.oauth.google_oauth import GoogleOAuthProvider
 
 
@@ -59,7 +59,7 @@ class TestOAuthConfigurationMissingRegression:
         
         Expected behavior: OAuth client ID loading should return None/empty when not configured
         """
-        from auth_service.auth_core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         # Arrange - Simulate staging environment without OAuth client ID
         env_manager = get_env()
@@ -74,9 +74,8 @@ class TestOAuthConfigurationMissingRegression:
             env_manager.set('GOOGLE_OAUTH_CLIENT_ID_STAGING', '', 'test_oauth_regression')
             env_manager.set('GOOGLE_CLIENT_ID', '', 'test_oauth_regression')  # Remove fallback too
             
-            # Act - Try to load OAuth credentials
-            secret_loader = SecretLoader()
-            client_id = secret_loader.load_google_oauth_client_id()
+            # Act - Try to load OAuth credentials directly using AuthSecretLoader
+            client_id = AuthSecretLoader.get_google_client_id()
             
             # Assert - Client ID should be None/empty when not configured
             assert client_id is None or client_id == "", \
@@ -97,7 +96,7 @@ class TestOAuthConfigurationMissingRegression:
         
         Expected behavior: OAuth client secret loading should return None/empty when not configured
         """
-        from auth_service.auth_core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         # Arrange - Simulate staging environment without OAuth client secret
         env_manager = get_env()
@@ -112,9 +111,8 @@ class TestOAuthConfigurationMissingRegression:
             env_manager.set('GOOGLE_OAUTH_CLIENT_SECRET_STAGING', '', 'test_oauth_regression')
             env_manager.set('GOOGLE_CLIENT_SECRET', '', 'test_oauth_regression')  # Remove fallback too
             
-            # Act - Try to load OAuth credentials
-            secret_loader = SecretLoader()
-            client_secret = secret_loader.load_google_oauth_client_secret()
+            # Act - Try to load OAuth credentials directly using AuthSecretLoader
+            client_secret = AuthSecretLoader.get_google_client_secret()
             
             # Assert - Client secret should be None/empty when not configured
             assert client_secret is None or client_secret == "", \
@@ -135,7 +133,7 @@ class TestOAuthConfigurationMissingRegression:
         
         Expected behavior: OAuth provider should fail to initialize or have empty credentials
         """
-        from auth_service.auth_core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         from auth_service.auth_core.oauth.google_oauth import GoogleOAuthError
         
         # Arrange - Simulate staging environment without OAuth credentials
@@ -188,7 +186,7 @@ class TestOAuthConfigurationMissingRegression:
         
         Expected behavior: OAuth provider should initialize successfully with valid credentials
         """
-        from auth_service.auth_core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         # Arrange - Simulate staging environment with proper OAuth credentials
         env_manager = get_env()
@@ -206,10 +204,9 @@ class TestOAuthConfigurationMissingRegression:
             env_manager.set('GOOGLE_OAUTH_CLIENT_ID_STAGING', test_client_id, 'test_oauth_regression')
             env_manager.set('GOOGLE_OAUTH_CLIENT_SECRET_STAGING', test_client_secret, 'test_oauth_regression')
             
-            # Act - Initialize OAuth components
-            secret_loader = SecretLoader()
-            client_id = secret_loader.load_google_oauth_client_id()
-            client_secret = secret_loader.load_google_oauth_client_secret()
+            # Act - Initialize OAuth components directly using AuthSecretLoader
+            client_id = AuthSecretLoader.get_google_client_id()
+            client_secret = AuthSecretLoader.get_google_client_secret()
             
             # Assert - Credentials should load correctly
             assert client_id == test_client_id, \
@@ -259,7 +256,7 @@ class TestOAuthConfigurationMissingRegression:
         
         Expected behavior: OAuth manager should report healthy status with configured providers
         """
-        from auth_service.auth_core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         from auth_service.auth_core.oauth_manager import OAuthManager
         
         # Arrange - Simulate staging environment with proper OAuth credentials
@@ -320,7 +317,7 @@ class TestOAuthServiceIntegrationRegression:
         This test confirms that when OAuth is properly configured, the auth service
         reports OAuth providers as available and healthy.
         """
-        from auth_service.auth_core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         from auth_service.auth_core.oauth_manager import OAuthManager
         
         # Arrange - Simulate staging environment with OAuth configuration
@@ -359,7 +356,7 @@ class TestOAuthServiceIntegrationRegression:
         This test confirms that OAuth login URL generation works correctly
         when proper credentials are configured in staging.
         """
-        from auth_service.auth_core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         from auth_service.auth_core.oauth.google_oauth import GoogleOAuthProvider
         
         # Arrange - Simulate staging environment with OAuth credentials
@@ -402,7 +399,7 @@ class TestOAuthServiceIntegrationRegression:
         This test confirms that OAuth callback processing works correctly
         when proper credentials are configured in staging.
         """
-        from auth_service.auth_core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         from auth_service.auth_core.oauth.google_oauth import GoogleOAuthProvider
         
         # Arrange - Simulate staging environment with OAuth credentials

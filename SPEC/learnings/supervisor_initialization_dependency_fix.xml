@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <metadata>
+        <title>Supervisor Agent Initialization Dependency Fix</title>
+        <date>2025-08-30</date>
+        <category>startup</category>
+        <priority>CRITICAL</priority>
+        <tags>supervisor, dependencies, initialization, llm_manager, startup</tags>
+    </metadata>
+    
+    <problem>
+        <description>
+            The supervisor agent initialization was failing with the error:
+            "Missing required app state attributes for supervisor: ['llm_manager']"
+            
+            This occurred during application startup when the supervisor agent tried to 
+            initialize before its dependencies were ready.
+        </description>
+        
+        <root_cause>
+            The agent_supervisor component in StartupManager was missing a dependency 
+            declaration for auth_service, which is responsible for creating the llm_manager.
+            
+            The supervisor requires three dependencies:
+            1. db_session_factory (from database initialization)
+            2. llm_manager (from auth_service initialization)
+            3. tool_dispatcher (from websocket handler registration)
+            
+            However, it only declared dependencies on ["database", "websocket"], 
+            missing the auth_service dependency that provides llm_manager.
+        </root_cause>
+        
+        <impact>
+            - Application startup failure
+            - WebSocket agent communication unavailable
+            - Chat functionality broken
+            - Agent system non-functional
+        </impact>
+    </problem>
+    
+    <solution>
+        <approach>
+            Added auth_service to the dependency list for the agent_supervisor component
+            in the StartupManager to ensure proper initialization order.
+        </approach>
+        
+        <implementation>
+            <file>netra_backend/app/core/startup_manager.py</file>
+            <change>
+                <before><![CDATA[
+# Register agent_supervisor as HIGH priority - required for WebSocket agent communication
+self.register_component(
+    name="agent_supervisor",
+    init_func=lambda: self._initialize_agent_supervisor(app),
+    priority=ComponentPriority.HIGH,
+    dependencies=["database", "websocket"],
+    timeout_seconds=30.0,
+    max_retries=2
+)
+                ]]></before>
+                <after><![CDATA[
+# Register agent_supervisor as HIGH priority - required for WebSocket agent communication
+# CRITICAL: Depends on auth_service for llm_manager
+self.register_component(
+    name="agent_supervisor",
+    init_func=lambda: self._initialize_agent_supervisor(app),
+    priority=ComponentPriority.HIGH,
+    dependencies=["database", "websocket", "auth_service"],
+    timeout_seconds=30.0,
+    max_retries=2
+)
+                ]]></after>
+            </change>
+        </implementation>
+        
+        <verification>
+            The fix ensures the following initialization order:
+            1. Database initialization (provides db_session_factory)
+            2. Auth service initialization (provides llm_manager)
+            3. WebSocket handler registration (provides tool_dispatcher)
+            4. Agent supervisor initialization (uses all three dependencies)
+        </verification>
+    </solution>
+    
+    <prevention>
+        <guidelines>
+            1. Always explicitly declare ALL dependencies for components in StartupManager
+            2. Document the app.state attributes each component provides
+            3. Use dependency checking in component initialization code
+            4. Add integration tests for startup sequences
+        </guidelines>
+        
+        <checklist>
+            - [ ] Check all required app.state attributes before building components
+            - [ ] Declare all dependencies in StartupManager registration
+            - [ ] Log missing dependencies with clear error messages
+            - [ ] Test startup sequence with various failure scenarios
+            - [ ] Document component dependencies in code comments
+        </checklist>
+    </prevention>
+    
+    <testing>
+        <test_suite>tests/mission_critical/test_supervisor_initialization_suite.py</test_suite>
+        <test_cases>
+            1. Test supervisor fails without required dependencies
+            2. Test supervisor succeeds with all dependencies
+            3. Test partial dependencies failure scenarios
+            4. Test startup manager respects dependency order
+            5. Test auth_service creates llm_manager
+            6. Test websocket handlers create tool_dispatcher
+            7. Test recovery from partial initialization
+            8. Test circular dependency detection
+        </test_cases>
+    </testing>
+    
+    <related_issues>
+        <issue>WebSocket agent events not being sent during execution</issue>
+        <issue>Chat UI appearing broken due to missing agent notifications</issue>
+        <issue>Startup hanging on supervisor initialization</issue>
+    </related_issues>
+    
+    <lessons_learned>
+        1. Implicit dependencies are dangerous - always make them explicit
+        2. StartupManager's dependency resolution is critical for stability
+        3. Component initialization order matters significantly
+        4. Missing a single dependency can cascade to total system failure
+        5. Proper error messages are essential for debugging startup issues
+    </lessons_learned>
+</learning>

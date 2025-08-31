@@ -235,7 +235,7 @@ class TestDevLoginDockerCompose:
              """
 from auth_service.auth_core.config import AuthConfig
 from shared.database_url_builder import DatabaseURLBuilder
-from auth_service.auth_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 env = get_env()
 url_from_config = AuthConfig.get_database_url()

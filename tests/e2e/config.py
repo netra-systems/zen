@@ -420,15 +420,17 @@ def get_test_environment_config(env_type: TestEnvironmentType = TestEnvironmentT
             )
         )
     elif target_env == TestEnvironmentType.STAGING:
+        # Import SSOT for staging URLs
+        from netra_backend.app.core.network_constants import URLConstants
         return TestEnvironmentConfig(
             environment_type=TestEnvironmentType.STAGING,
-            base_url="https://staging.netra-apex.com",
-            ws_url="wss://staging.netra-apex.com/ws",
-            auth_url="https://auth-staging.netra-apex.com",
+            base_url=URLConstants.STAGING_BACKEND_URL,
+            ws_url=URLConstants.STAGING_WEBSOCKET_URL,
+            auth_url=URLConstants.STAGING_AUTH_URL,
             services=TestServices(
-                auth="https://auth-staging.netra-apex.com",
-                backend="https://staging.netra-apex.com",
-                frontend="https://staging.netra-apex.com"
+                auth=URLConstants.STAGING_AUTH_URL,
+                backend=URLConstants.STAGING_BACKEND_URL,
+                frontend=URLConstants.STAGING_FRONTEND_URL
             )
         )
     else:

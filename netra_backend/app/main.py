@@ -15,7 +15,7 @@ import logging
 from pathlib import Path
 from netra_backend.app.core.project_utils import get_project_root as _get_project_root
 
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 # Add the project root to the Python path
 

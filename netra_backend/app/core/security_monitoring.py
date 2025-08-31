@@ -22,7 +22,7 @@ import json
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.tracing import TracingManager
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 class SecurityEventSeverity(Enum):

@@ -21,7 +21,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Dict, Any
 from unittest.mock import patch
 
-from netra_backend.app.core.isolated_environment import get_env, IsolatedEnvironment
+from shared.isolated_environment import get_env, IsolatedEnvironment
 
 
 class TestEnvironmentIsolationThreadSafety:

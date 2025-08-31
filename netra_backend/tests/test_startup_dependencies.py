@@ -41,7 +41,7 @@ from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.db.postgres import initialize_postgres
 from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.services.agent_service import get_agent_service
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 class TestStartupDependencies:

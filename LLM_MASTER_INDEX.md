@@ -1,17 +1,63 @@
 # 🤖 LLM MASTER INDEX - Netra Apex Navigation Guide
+**Last Updated: 2025-08-31**
 
 ## 🔴 CRITICAL: Cross-System Navigation
 
-**NEW COMPREHENSIVE INDEXES AVAILABLE:**
+**PRIMARY NAVIGATION INDEXES:**
 - [`SPEC/CROSS_SYSTEM_MASTER_INDEX.md`](SPEC/CROSS_SYSTEM_MASTER_INDEX.md) - Complete cross-system navigation with health metrics
 - [`SPEC/SYSTEM_INTEGRATION_MAP.xml`](SPEC/SYSTEM_INTEGRATION_MAP.xml) - Detailed integration points and data flows
 - [`SPEC/cross_system_context_reference.md`](SPEC/cross_system_context_reference.md) - Complete system context
+- [`MASTER_WIP_STATUS.md`](MASTER_WIP_STATUS.md) - Real-time system health and compliance
+- **[`DEFINITION_OF_DONE_CHECKLIST.md`](DEFINITION_OF_DONE_CHECKLIST.md) - MANDATORY checklist for ALL module changes**
 
 **USE THESE FIRST** when searching for functionality or making changes.
 
 ---
 
+## 🗺️ QUICK NAVIGATION MAP
+
+### By Task Type
+| Task | Go To | Key Files |
+|------|-------|-----------|
+| **Review changes** | [`DEFINITION_OF_DONE_CHECKLIST.md`](DEFINITION_OF_DONE_CHECKLIST.md) | Module-specific checklists |
+| **Fix a bug** | [`SPEC/learnings/index.xml`](SPEC/learnings/index.xml) | Check learnings first |
+| **Add new feature** | [`SPEC/core.xml`](SPEC/core.xml) | Architecture patterns |
+| **Fix tests** | [`docs/testing/TESTING_GUIDE.md`](docs/testing/TESTING_GUIDE.md) | Test framework guide |
+| **Deploy changes** | [`scripts/deploy_to_gcp.py`](scripts/deploy_to_gcp.py) | Official deploy script |
+| **Check compliance** | [`scripts/check_architecture_compliance.py`](scripts/check_architecture_compliance.py) | Architecture validator |
+| **WebSocket issues** | [`SPEC/learnings/websocket_agent_integration_critical.xml`](SPEC/learnings/websocket_agent_integration_critical.xml) | Critical fixes |
+| **Auth problems** | [`SPEC/learnings/auth_race_conditions_critical.xml`](SPEC/learnings/auth_race_conditions_critical.xml) | Auth learnings |
+| **Database issues** | [`SPEC/database_connectivity_architecture.xml`](SPEC/database_connectivity_architecture.xml) | DB patterns |
+
+### By Service
+| Service | Main Entry | Config | Tests |
+|---------|------------|--------|-------|
+| **Backend** | `/netra_backend/app/main.py` | `/netra_backend/app/config.py` | `/netra_backend/tests/` |
+| **Auth** | `/auth_service/main.py` | `/auth_service/config.py` | `/auth_service/tests/` |
+| **Frontend** | `/frontend/pages/_app.tsx` | `/frontend/.env.*` | `/frontend/__tests__/` |
+
+---
+
 ## 📍 COMMONLY CONFUSED FILES & LOCATIONS
+
+## 🚨 RECENT CRITICAL UPDATES (2025-08-31)
+
+### Infrastructure Changes
+| Component | Update | Impact |
+|-----------|---------|--------|
+| **VPC Connector** | Added for GCP Cloud Run | Enables Redis/Cloud SQL connectivity |
+| **Agent Orchestration** | New E2E testing framework | Background agent testing support |
+| **Staging Config** | Unified staging URLs | Single source of truth for staging |
+| **Startup Sequence** | Deterministic initialization | Critical chat service reliability |
+
+### New Files & Locations
+| File | Purpose | Reference |
+|------|---------|----------|
+| `/terraform-gcp-staging/vpc-connector.tf` | VPC connector config | [`SPEC/learnings/redis_vpc_connector_requirement.xml`](SPEC/learnings/redis_vpc_connector_requirement.xml) |
+| `/tests/e2e/agent_orchestration_fixtures.py` | Agent testing fixtures | E2E agent orchestration |
+| `/tests/e2e/helpers/agent/agent_orchestration_runner.py` | Agent test runner | Background agent execution |
+
+---
 
 ### 🏗️ UNIFIED ARCHITECTURE COMPONENTS (Critical Infrastructure)
 | Component | Location | Purpose | Key Specs |
@@ -33,6 +79,7 @@
 | **🔴 Docker Hot Reload** | `/docker-compose.override.yml` | **10x faster development** | [`SPEC/docker_hot_reload.xml`](SPEC/docker_hot_reload.xml) |
 | **🔴 Adaptive Workflow** | `/netra_backend/app/agents/supervisor/workflow_orchestrator.py` | **Dynamic workflow based on data sufficiency** | [`SPEC/supervisor_adaptive_workflow.xml`](SPEC/supervisor_adaptive_workflow.xml) |
 | **🔴 Test Criticality Analysis** | `/docs/TEST_CRITICALITY_ANALYSIS.md` | **Top 100 critical tests protecting $10M+ revenue** | [`SPEC/learnings/test_criticality_analysis.xml`](SPEC/learnings/test_criticality_analysis.xml) |
+| **🔴 VPC Connector** | `/terraform-gcp-staging/vpc-connector.tf` | **Required for Cloud Run Redis/SQL access** | [`SPEC/learnings/redis_vpc_connector_requirement.xml`](SPEC/learnings/redis_vpc_connector_requirement.xml) |
 
 ### Configuration Files (Unified System - CRITICAL CHANGE)
 | File | Location | Purpose | Common Confusion |
@@ -64,11 +111,18 @@
 |------|----------|---------|----------------|
 | **🔴 AUTH INTEGRATION (MANDATORY)** | | | |
 | `auth.py` | `/netra_backend/app/auth_integration/auth.py` | **SHARED AUTH SERVICE** | get_current_user(), get_current_user_optional(), validate_token() |
+| **🔴 AUTH INITIALIZATION FIX** | | **CRITICAL CHAT FIX** | |
+| `auth/context.tsx` | `/frontend/auth/context.tsx` | **Fixed race condition** | Lines 237-274: Unconditional token decode |
+| `auth-validation.ts` | `/frontend/lib/auth-validation.ts` | **Auth state validation** | validateAuthState(), monitorAuthState() |
+| `AuthGuard.tsx` | `/frontend/components/AuthGuard.tsx` | **Route protection** | Proper user state checking |
+| **Auth Race Conditions** | [`SPEC/learnings/auth_race_conditions_critical.xml`](SPEC/learnings/auth_race_conditions_critical.xml) | **Critical auth learnings** | CHAT IS KING - 90% value delivery |
+| **Auth Complete Learnings** | [`SPEC/learnings/auth_initialization_complete_learnings.md`](SPEC/learnings/auth_initialization_complete_learnings.md) | **Full cross-references** | All auth fixes documented |
 | **OAuth Port Config** | [`SPEC/oauth_port_configuration.xml`](SPEC/oauth_port_configuration.xml) | **OAuth port requirements & setup** | Explains why ports 3000, 8000, 8001, 8081 need authorization |
 | **OAuth Environment Config** | [`SPEC/learnings/oauth_client_environment_configuration.xml`](SPEC/learnings/oauth_client_environment_configuration.xml) | Environment-specific OAuth setup | Development, staging, production OAuth isolation |
 | **CRITICAL**: ALL authentication throughout ENTIRE system MUST use `/netra_backend/app/auth_integration/`. NO duplicate auth logic allowed. |
+| **CRITICAL**: Frontend auth MUST always decode tokens to set user state. Test page refresh scenarios! |
 
-### WebSocket Files (Complex Structure) ✅ State Management & Subprotocol Fixed (2025-08-27)
+### WebSocket Files (Complex Structure) ✅ State Management & Agent Integration Fixed (2025-08-31)
 | File | Location | Purpose | Key Functions |
 |------|----------|---------|---------------|
 | **🔴 CRITICAL FIXES (2025-08-27)** | | | |
@@ -87,7 +141,10 @@
 | **🔴 CORE WEBSOCKET FILES** | | | |
 | `websocket.py` | `/netra_backend/app/routes/websocket.py` | **WebSocket endpoints (with subprotocol fix)** | websocket_endpoint() with subprotocol negotiation |
 | `manager.py` | `/netra_backend/app/websocket_core/manager.py` | **WebSocket manager (with run_id fix)** | send_to_user(), send_to_thread() with proper ID handling |
-| `websocket_core/auth.py` | `/netra_backend/app/websocket_core/auth.py` | **WebSocket authentication (Docker bypass)** | Development auth bypass, JWT validation |
+| `websocket_core/auth.py` | `/netra_backend/app/websocket_core/auth.py` | **WebSocket authentication (Docker bypass)** | Development OAUTH SIMULATION, JWT validation |
+| **🔴 AGENT INTEGRATION** | | | |
+| `websocket_agent_integration_critical.xml` | `/SPEC/learnings/websocket_agent_integration_critical.xml` | **Critical agent-WebSocket integration** | MUST send events or chat breaks |
+| `test_websocket_agent_events_suite.py` | `/tests/mission_critical/test_websocket_agent_events_suite.py` | **Mission critical WebSocket tests** | Validates all required events |
 | `websocket_cors.py` | `/netra_backend/app/core/websocket_cors.py` | **CORS handling (Docker origins)** | Docker service names, bridge network IPs |
 | `connection.py` | `/netra_backend/app/websocket/connection.py` | Connection management | ConnectionManager class |
 | `quality_message_handler.py` | `/netra_backend/app/services/websocket/quality_message_handler.py` | Message quality handling | QualityMessageHandler |
@@ -220,30 +277,46 @@ The Netra Apex platform operates as a **unified, coherent system** with three in
 
 ---
 
-## 📈 System Health Status (2025-08-27)
+## 📈 System Health Status (2025-08-31)
 
 ### Recent Critical Fixes
 | Date | Issue | Fix | Impact |
 |------|-------|-----|--------|
-| 2025-08-27 | WebSocket ABNORMAL_CLOSURE (1006) | Fixed state checking & subprotocol negotiation | Chat UI now working |
-| 2025-08-27 | WebSocket Docker connectivity | Authentication bypass & CORS for dev | Docker development functional |
+| 2025-08-31 | VPC Connector missing | Added terraform config for Cloud Run | Staging Redis/SQL connectivity |
+| 2025-08-30 | Agent orchestration testing | New E2E framework for agents | Background agent validation |
+| 2025-08-29 | Startup sequence non-deterministic | Implemented deterministic init | Chat service reliability |
+| 2025-08-27 | WebSocket ABNORMAL_CLOSURE (1006) | Fixed state checking & subprotocol | Chat UI now working |
+| 2025-08-27 | WebSocket Docker connectivity | Authentication bypass & CORS | Docker development functional |
 
 | Metric | Current | Target | Priority |
 |--------|---------|--------|----------|
-| **Test Coverage** | 51.4% | 97% | 🔴 Critical |
-| **Config Compliance** | 89% | 100% | 🟡 High |
-| **Import Compliance** | 48.21% | 100% | 🔴 Critical |
+| **Test Coverage** | ~52% | 97% | 🔴 Critical |
+| **Architecture Compliance** | 87.5% | 100% | 🟡 High |
+| **Import Compliance** | ~50% | 100% | 🔴 Critical |
 | **Service Independence** | 85% | 100% | 🟡 High |
+| **WebSocket Events** | 100% | 100% | ✅ Fixed |
 
 ### Critical Issues
-- **Zero Coverage**: Security validators, agent systems
-- **Import Violations**: 193 cross-service, widespread relative imports
-- **Type Duplications**: 93 duplicate definitions
-- **Test Discovery**: Only 2 tests collectible
+- **Test Parsing Errors**: 30+ test files with syntax errors
+- **Import Violations**: 236 violations in real system, 15K+ in tests
+- **Type Duplications**: Multiple duplicate definitions remain
+- **WebSocket Integration**: Must maintain event flow for chat
 
 ---
 
 ## 🚀 Quick Start Commands
+
+### Mission Critical Testing
+```bash
+# CRITICAL: Run before ANY WebSocket/Agent changes
+python tests/mission_critical/test_websocket_agent_events_suite.py
+
+# Check architecture compliance
+python scripts/check_architecture_compliance.py
+
+# Pre-deployment audit
+python scripts/pre_deployment_audit.py
+```
 
 ### Development
 ```bash
@@ -274,8 +347,9 @@ curl -X GET "http://localhost:8000/api/corpus/main/document/doc123/symbols"
 
 ### Deployment
 ```bash
-# Deploy to Staging (Fast)
+# Deploy to Staging (WITH VPC CONNECTOR)
 python scripts/deploy_to_gcp.py --project netra-staging --build-local
+# NOTE: Requires VPC connector 'netra-connector' for Redis/SQL access
 
 # Deploy to Production (With Checks)
 python scripts/deploy_to_gcp.py --project netra-production --run-checks
@@ -291,7 +365,7 @@ python scripts/deploy_to_gcp.py --project netra-production --run-checks
 **Quick Reference:**
 - **Master Control:** `python scripts/docker_env_manager.py status` - Check both environments
 - **Quick Start:** `python scripts/docker_env_manager.py start both` - Launch both environments
-- **Documentation:** [`DOCKER_ENVIRONMENTS.md`](DOCKER_ENVIRONMENTS.md) - Quick reference guide
+- **Documentation:** [`reports/docker/DOCKER_ENVIRONMENTS.md`](reports/docker/DOCKER_ENVIRONMENTS.md) - Quick reference guide
 - **Complete Guide:** [`docs/docker-dual-environment-setup.md`](docs/docker-dual-environment-setup.md) - Full documentation
 
 #### 🐳 Environment-Specific Launchers
@@ -336,10 +410,38 @@ python scripts/docker_services.py stop
 
 ---
 
+## 🔴 MISSION CRITICAL: Must Know Before Coding
+
+### WebSocket Agent Event Requirements
+**CRITICAL: The chat UI depends on these WebSocket events. Removing ANY will break user experience.**
+
+Required events that MUST be sent:
+1. `agent_started` - User sees agent began
+2. `agent_thinking` - Real-time reasoning 
+3. `tool_executing` - Tool transparency
+4. `tool_completed` - Tool results
+5. `agent_completed` - Completion signal
+
+**Before ANY changes to agent/WebSocket code:**
+```bash
+python tests/mission_critical/test_websocket_agent_events_suite.py
+```
+
+### Critical Integration Points
+| System | Files | Impact if Broken |
+|--------|-------|------------------|
+| WebSocket Manager | `/netra_backend/app/websocket_core/manager.py` | No chat messages |
+| Agent Registry | `/netra_backend/app/agents/registry.py` | No agent events |
+| Tool Dispatcher | `/netra_backend/app/tools/enhanced_dispatcher.py` | No tool feedback |
+| Execution Engine | `/netra_backend/app/agents/supervisor/execution_engine.py` | No agent execution |
+
+---
+
 ## 📚 Essential Documentation
 
 ### Primary References
 - [`CLAUDE.md`](CLAUDE.md) - AI agent instructions and principles
+- **[`DEFINITION_OF_DONE_CHECKLIST.md`](DEFINITION_OF_DONE_CHECKLIST.md) - Module review checklists (MANDATORY)**
 - [`SPEC/CROSS_SYSTEM_MASTER_INDEX.md`](SPEC/CROSS_SYSTEM_MASTER_INDEX.md) - Complete cross-system navigation
 - [`SPEC/SYSTEM_INTEGRATION_MAP.xml`](SPEC/SYSTEM_INTEGRATION_MAP.xml) - Integration points and flows
 - [`SPEC/cross_system_context_reference.md`](SPEC/cross_system_context_reference.md) - System context
@@ -368,21 +470,21 @@ python scripts/docker_services.py stop
 - [`SPEC/pre_deployment_audit.xml`](SPEC/pre_deployment_audit.xml) - **Pre-deployment audit specification**
 - [`SPEC/learnings/test_system_improvements.xml`](SPEC/learnings/test_system_improvements.xml) - **E2E fix & test tracking learnings**
 - [`SPEC/test_infrastructure_architecture.xml`](SPEC/test_infrastructure_architecture.xml) - Test architecture patterns
-- [`E2E_TEST_BLOCKING_AUDIT.md`](E2E_TEST_BLOCKING_AUDIT.md) - E2E test issues documentation
+- [`reports/audit/E2E_TEST_BLOCKING_AUDIT.md`](reports/audit/E2E_TEST_BLOCKING_AUDIT.md) - E2E test issues documentation
 
 ---
 
 ## 🎯 Action Items
 
-### Immediate (Week 1)
-1. Fix import violations - 100% compliance
-2. Address zero-coverage security files - 25% coverage
-3. Stabilize test runner - Full discovery
+### Immediate (Critical)
+1. Fix 30+ test file syntax errors blocking test discovery
+2. Maintain WebSocket agent event flow (run mission critical tests)
+3. Fix import violations - 236 in real system
 
-### Short-term (Month 1)
-1. Consolidate 93 duplicate types
-2. Improve coverage to 75%
-3. Complete auth migration
+### Short-term (Week 1)
+1. Restore test suite functionality
+2. Improve architecture compliance to 95%
+3. Document VPC connector requirements
 
 ### Long-term (Quarter 1)
 1. Achieve 97% coverage
@@ -391,6 +493,31 @@ python scripts/docker_services.py stop
 
 ---
 
+## 🔍 Search Patterns & Common Queries
+
+### Finding Code
+```bash
+# Find all implementations of a function
+python scripts/query_string_literals.py search "function_name"
+
+# Find WebSocket event handlers
+grep -r "agent_started\|agent_thinking\|tool_executing" netra_backend/
+
+# Find configuration keys
+python scripts/query_string_literals.py validate "CONFIG_KEY"
+```
+
+### Common File Patterns
+| Pattern | Purpose | Example |
+|---------|---------|---------|
+| `*_prompts.py` | Agent prompts | `supervisor_prompts.py` |
+| `test_*_suite.py` | Test suites | `test_websocket_agent_events_suite.py` |
+| `*_manager.py` | Service managers | `database_manager.py` |
+| `*_config.py` | Configuration files | `cors_config.py` |
+
+---
+
 **For complete cross-system navigation and detailed integration maps, refer to:**
-- [`SPEC/CROSS_SYSTEM_MASTER_INDEX.md`](SPEC/CROSS_SYSTEM_MASTER_INDEX.md)
-- [`SPEC/SYSTEM_INTEGRATION_MAP.xml`](SPEC/SYSTEM_INTEGRATION_MAP.xml)
+- [`SPEC/CROSS_SYSTEM_MASTER_INDEX.md`](SPEC/CROSS_SYSTEM_MASTER_INDEX.md) - Complete navigation
+- [`SPEC/SYSTEM_INTEGRATION_MAP.xml`](SPEC/SYSTEM_INTEGRATION_MAP.xml) - Integration points
+- [`MASTER_WIP_STATUS.md`](MASTER_WIP_STATUS.md) - Current system health

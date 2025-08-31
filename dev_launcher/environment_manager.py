@@ -13,7 +13,7 @@ from contextlib import contextmanager
 from typing import Dict, Optional, Set, Any, List, Tuple
 import logging
 
-from dev_launcher.isolated_environment import IsolatedEnvironment, get_env
+from shared.isolated_environment import IsolatedEnvironment, get_env
 
 logger = logging.getLogger(__name__)
 

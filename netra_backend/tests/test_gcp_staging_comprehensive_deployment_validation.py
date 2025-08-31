@@ -28,7 +28,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from dataclasses import dataclass
 
 from netra_backend.app.config import get_config
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.db.database_manager import DatabaseManager
 
 

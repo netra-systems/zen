@@ -33,7 +33,7 @@ from alembic.runtime.migration import MigrationContext
 from alembic.script import ScriptDirectory
 
 from netra_backend.app.db.database_manager import DatabaseManager
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.db.migration_utils import execute_migration
 from netra_backend.app.core.unified_logging import get_logger
 

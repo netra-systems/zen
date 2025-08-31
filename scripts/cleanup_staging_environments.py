@@ -17,7 +17,7 @@ import requests
 
 # Use centralized environment management
 try:
-    from dev_launcher.isolated_environment import get_env
+    from shared.isolated_environment import get_env
 except ImportError:
     # Fallback for standalone execution
     class FallbackEnv:

@@ -41,7 +41,7 @@
         <symptom>Frontend unable to establish WebSocket connections</symptom>
       </symptoms>
       <resolution>
-        <action>Added environment variable ALLOW_DEV_AUTH_BYPASS=true</action>
+        <action>Added environment variable ALLOW_DEV_OAUTH_SIMULATION=true</action>
         <action>Added environment variable WEBSOCKET_AUTH_BYPASS=true</action>
         <action>Modified WebSocketAuthenticator to automatically enable bypass in development</action>
         <action>Updated docker-compose.dev.yml with proper environment variables</action>
@@ -116,8 +116,8 @@
       </files_modified>
       <changes>
         <change type="environment_variables">
-          <description>Added ALLOW_DEV_AUTH_BYPASS=true to development environment</description>
-          <code>ALLOW_DEV_AUTH_BYPASS=true</code>
+          <description>Added ALLOW_DEV_OAUTH_SIMULATION=true to development environment</description>
+          <code>ALLOW_DEV_OAUTH_SIMULATION=true</code>
         </change>
         <change type="environment_variables">
           <description>Added WEBSOCKET_AUTH_BYPASS=true for WebSocket-specific bypass</description>
@@ -126,7 +126,7 @@
         <change type="code_modification">
           <description>Enhanced WebSocketAuthenticator._is_development_auth_bypass_enabled()</description>
           <implementation>
-            # CRITICAL FIX: Enable development auth bypass automatically in development environment
+            # CRITICAL FIX: Enable development OAUTH SIMULATION automatically in development environment
             # This allows WebSocket connections to work in development without requiring tokens
             bypass_enabled = is_development and (auth_bypass or websocket_bypass or True)  # Auto-enable for dev
           </implementation>
@@ -229,7 +229,7 @@
           <description>Added environment variables to docker-compose.dev.yml</description>
           <implementation>
             environment:
-              - ALLOW_DEV_AUTH_BYPASS=true
+              - ALLOW_DEV_OAUTH_SIMULATION=true
               - WEBSOCKET_AUTH_BYPASS=true
               - ENVIRONMENT=development
               - NEXT_PUBLIC_WEBSOCKET_URL=ws://localhost:8000/ws
@@ -285,10 +285,10 @@
         <location>scripts/test_docker_websocket_fix.py</location>
         <capabilities>
           <capability>Environment variable validation</capability>
-          <capability>WebSocket connection testing with auth bypass</capability>
+          <capability>WebSocket connection testing with OAUTH SIMULATION</capability>
           <capability>Docker networking scenario testing</capability>
           <capability>Configuration file validation</capability>
-          <capability>Auth bypass logic verification</capability>
+          <capability>OAUTH SIMULATION logic verification</capability>
         </capabilities>
         <usage>python scripts/test_docker_websocket_fix.py</usage>
       </script>
@@ -317,7 +317,7 @@
 
     <validation_checklist>
       <check category="environment">Environment variables properly configured</check>
-      <check category="authentication">Auth bypass working in development only</check>
+      <check category="authentication">OAUTH SIMULATION working in development only</check>
       <check category="cors">CORS allowing Docker service connections</check>
       <check category="networking">WebSocket URLs resolving correctly</check>
       <check category="connectivity">End-to-end WebSocket communication working</check>
@@ -327,8 +327,8 @@
 
   <docker_development_configuration>
     <required_environment_variables>
-      <variable name="ALLOW_DEV_AUTH_BYPASS" value="true" purpose="Enable development authentication bypass" />
-      <variable name="WEBSOCKET_AUTH_BYPASS" value="true" purpose="Specific WebSocket auth bypass flag" />
+      <variable name="ALLOW_DEV_OAUTH_SIMULATION" value="true" purpose="Enable development authentication bypass" />
+      <variable name="WEBSOCKET_AUTH_BYPASS" value="true" purpose="Specific WebSocket OAUTH SIMULATION flag" />
       <variable name="ENVIRONMENT" value="development" purpose="Environment detection for bypass logic" />
       <variable name="NEXT_PUBLIC_WEBSOCKET_URL" value="ws://localhost:8000/ws" purpose="Frontend WebSocket URL" />
       <variable name="NEXT_PUBLIC_API_URL" value="http://localhost:8000" purpose="Backend API URL" />
@@ -339,7 +339,7 @@
       <service name="backend">
         <ports>8000:8000</ports>
         <environment>
-          <var>ALLOW_DEV_AUTH_BYPASS=true</var>
+          <var>ALLOW_DEV_OAUTH_SIMULATION=true</var>
           <var>WEBSOCKET_AUTH_BYPASS=true</var>
           <var>ENVIRONMENT=development</var>
         </environment>
@@ -399,12 +399,12 @@
           <symptom>Authentication required: Use Authorization header</symptom>
         </symptoms>
         <diagnosis>
-          <step>Check ALLOW_DEV_AUTH_BYPASS environment variable</step>
+          <step>Check ALLOW_DEV_OAUTH_SIMULATION environment variable</step>
           <step>Verify ENVIRONMENT is set to 'development'</step>
           <step>Check WebSocket authenticator logs</step>
         </diagnosis>
         <solutions>
-          <solution>Set ALLOW_DEV_AUTH_BYPASS=true in .env.development.local</solution>
+          <solution>Set ALLOW_DEV_OAUTH_SIMULATION=true in .env.development.local</solution>
           <solution>Restart services after environment changes</solution>
           <solution>Run test_docker_websocket_fix.py to validate configuration</solution>
         </solutions>

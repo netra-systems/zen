@@ -23,7 +23,7 @@ errors and ensures consistent environment handling across all services.
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 # Import unified config for non-bootstrap functionality
 try:

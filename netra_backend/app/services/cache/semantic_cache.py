@@ -1,4 +1,4 @@
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 """Semantic cache enhancement for NACIS with vector similarity search.
 
 Date Created: 2025-01-22

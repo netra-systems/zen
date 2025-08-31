@@ -18,7 +18,7 @@ from unittest.mock import patch, MagicMock
 import os
 from secrets import token_urlsafe
 
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.config import get_config
 
 

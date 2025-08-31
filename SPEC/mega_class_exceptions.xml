@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mega_class_exceptions>
+  <metadata>
+    <created>2025-08-31</created>
+    <purpose>Define exceptions for central SSOT classes that can exceed standard module size limits</purpose>
+    <rationale>Some central classes serve as Single Source of Truth and must contain comprehensive functionality that cannot be meaningfully split without violating SSOT principles</rationale>
+  </metadata>
+
+  <limits>
+    <standard_module_limit>750</standard_module_limit>
+    <mega_class_limit>2000</mega_class_limit>
+    <standard_function_limit>25</standard_function_limit>
+    <mega_class_function_limit>50</mega_class_function_limit>
+  </limits>
+
+  <exception_criteria>
+    <criterion>Must be a Single Source of Truth (SSOT) for its domain</criterion>
+    <criterion>Must serve as a central integration point for multiple services</criterion>
+    <criterion>Splitting would violate SSOT principles or create circular dependencies</criterion>
+    <criterion>Must be explicitly documented and justified in this file</criterion>
+    <criterion>Must have comprehensive test coverage (>90%)</criterion>
+    <criterion>Functions within mega classes can be up to 50 lines if they coordinate multiple operations</criterion>
+  </exception_criteria>
+
+  <approved_exceptions>
+    <exception>
+      <path>/netra_backend/app/db/database_manager.py</path>
+      <current_size>1825</current_size>
+      <max_allowed>2000</max_allowed>
+      <justification>
+        Central SSOT for all database operations across the platform.
+        Contains unified interfaces for PostgreSQL, ClickHouse, and Redis.
+        Splitting would require duplicate connection management and transaction handling.
+      </justification>
+      <requirements>
+        <requirement>Must maintain single connection pool per database type</requirement>
+        <requirement>Must provide unified transaction management</requirement>
+        <requirement>Must centralize all database configuration</requirement>
+      </requirements>
+    </exception>
+
+    <exception>
+      <path>/netra_backend/app/websocket_core/manager.py</path>
+      <current_size>1718</current_size>
+      <max_allowed>2000</max_allowed>
+      <justification>
+        Central WebSocket manager handling all real-time communications.
+        Critical for chat functionality (90% of platform value).
+        Contains WebSocket lifecycle, event routing, and agent integration.
+        Splitting would break real-time event flow and create race conditions.
+      </justification>
+      <requirements>
+        <requirement>Must maintain single WebSocket connection per client</requirement>
+        <requirement>Must handle all agent event types in one place</requirement>
+        <requirement>Must provide centralized connection state management</requirement>
+      </requirements>
+    </exception>
+
+    <exception>
+      <path>/unified_test_runner.py</path>
+      <current_size>1728</current_size>
+      <max_allowed>2000</max_allowed>
+      <justification>
+        Central test orchestration for entire platform.
+        Must coordinate unit, integration, E2E, and mission-critical tests.
+        Contains all test discovery, execution, and reporting logic.
+        Splitting would fragment test configuration and reporting.
+      </justification>
+      <requirements>
+        <requirement>Must provide single entry point for all test types</requirement>
+        <requirement>Must maintain unified test configuration</requirement>
+        <requirement>Must generate consolidated test reports</requirement>
+      </requirements>
+    </exception>
+
+    <exception>
+      <path>/scripts/deploy_to_gcp.py</path>
+      <current_size>1437</current_size>
+      <max_allowed>2000</max_allowed>
+      <justification>
+        Central deployment orchestrator for GCP.
+        Contains all build, push, and deployment logic for multiple services.
+        Must coordinate frontend, backend, auth service deployments.
+        Splitting would risk deployment inconsistencies.
+      </justification>
+      <requirements>
+        <requirement>Must maintain atomic deployment transactions</requirement>
+        <requirement>Must provide rollback capability for all services</requirement>
+        <requirement>Must centralize all GCP configuration</requirement>
+      </requirements>
+    </exception>
+  </approved_exceptions>
+
+  <rejected_candidates>
+    <candidate>
+      <path>/netra_backend/app/db/clickhouse.py</path>
+      <current_size>943</current_size>
+      <rejection_reason>
+        Not truly central - specific to ClickHouse operations only.
+        Can be refactored to use database_manager.py as SSOT.
+        Size is manageable with minor refactoring.
+      </rejection_reason>
+    </candidate>
+
+    <candidate>
+      <path>/frontend/auth/context.tsx</path>
+      <current_size>Unknown</current_size>
+      <rejection_reason>
+        Frontend auth context should be lightweight.
+        Complex logic should be in backend auth service.
+        fetchAuthConfig function (166 lines) must be refactored.
+      </rejection_reason>
+    </candidate>
+  </rejected_candidates>
+
+  <refactoring_guidelines>
+    <guideline>
+      Classes approaching 2000 lines must be reviewed quarterly for potential refactoring.
+    </guideline>
+    <guideline>
+      New additions to mega classes must be justified in pull requests.
+    </guideline>
+    <guideline>
+      Functions within mega classes should still aim for <25 lines where possible.
+    </guideline>
+    <guideline>
+      Mega classes must maintain internal organization with clear sections and documentation.
+    </guideline>
+    <guideline>
+      Consider using composition or delegation patterns before expanding mega classes.
+    </guideline>
+  </refactoring_guidelines>
+
+  <compliance_notes>
+    <note>
+      Files exceeding 2000 lines are NOT eligible for mega class exception and MUST be refactored.
+    </note>
+    <note>
+      This exception list must be reviewed and approved by Principal Engineer role.
+    </note>
+    <note>
+      New exceptions require explicit BVJ (Business Value Justification).
+    </note>
+    <note>
+      Mega classes must have dedicated integration tests validating SSOT behavior.
+    </note>
+  </compliance_notes>
+</mega_class_exceptions>

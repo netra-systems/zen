@@ -29,7 +29,7 @@ import socket
 import logging
 
 # Import IsolatedEnvironment for proper environment management as required by CLAUDE.md
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from test_framework.service_availability import ServiceUnavailableError
 
 # Initialize logger for proper logging as per CLAUDE.md standards

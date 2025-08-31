@@ -14,87 +14,18 @@ Each function ≤8 lines, file ≤300 lines.
 import threading
 from datetime import datetime
 from functools import lru_cache
-from typing import Any, Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, Union
 
 from pydantic import ValidationError
 
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from netra_backend.app.core.exceptions_config import ConfigurationError
 from netra_backend.app.schemas.config import AppConfig
 
-# Import actual configuration managers
-try:
-    from netra_backend.app.core.configuration.services import (
-        ServiceConfigManager as ActualServiceConfigManager,
-    )
-except ImportError:
-    # Fallback placeholder if services module not available
-    class ActualServiceConfigManager:
-        """Placeholder for service configuration manager."""
-        def populate_service_config(self, config):
-            """Populate service configuration."""
-            pass
-        
-        def validate_service_consistency(self, config):
-            """Validate service configuration consistency."""
-            return []
-        
-        def get_enabled_services_count(self):
-            """Get count of enabled services."""
-            return 0
-
-try:
-    from netra_backend.app.core.configuration.database import (
-        DatabaseConfigManager as ActualDatabaseConfigManager,
-    )
-except ImportError:
-    # Fallback placeholder if database module not available
-    class ActualDatabaseConfigManager:
-        """Placeholder for database configuration manager."""
-        def populate_database_config(self, config):
-            """Populate database configuration."""
-            pass
-        
-        def validate_database_consistency(self, config):
-            """Validate database configuration consistency."""
-            return []
-        
-        def refresh_environment(self):
-            """Refresh environment settings."""
-            pass
-
-try:
-    from netra_backend.app.core.configuration.secrets import (
-        SecretManager as ActualSecretManager,
-    )
-except ImportError:
-    # Fallback placeholder if secrets module not available
-    class ActualSecretManager:
-        """Placeholder for secret manager."""
-        def populate_secrets(self, config):
-            """Populate secrets."""
-            pass
-        
-        def validate_secrets_consistency(self, config):
-            """Validate secrets consistency."""
-            return []
-        
-        def get_loaded_secrets_count(self):
-            """Get count of loaded secrets."""
-            return 0
-
-class ConfigurationValidator:
-    """Placeholder for configuration validator."""
-    def validate_complete_config(self, config):
-        """Validate complete configuration."""
-        class ValidationResult:
-            is_valid = True
-            errors = []
-        return ValidationResult()
-    
-    def refresh_environment(self):
-        """Refresh environment settings."""
-        pass
+from netra_backend.app.core.configuration.services import ServiceConfigManager as ActualServiceConfigManager
+from netra_backend.app.core.configuration.database import DatabaseConfigManager as ActualDatabaseConfigManager
+from netra_backend.app.core.configuration.secrets import SecretManager as ActualSecretManager
+from netra_backend.app.core.configuration.validator import ConfigurationValidator
 
 
 class UnifiedConfigManager:
@@ -163,63 +94,54 @@ class UnifiedConfigManager:
         return get_env().get("CONFIG_HOT_RELOAD", "false").lower() == "true"
     
     def _is_test_context(self) -> bool:
-        """Check if we're currently running in a test context.
-        
-        This method detects various test environments to ensure proper
-        configuration caching behavior during tests.
-        
-        Returns:
-            bool: True if in test context, False otherwise
-        """
+        """Check if running in test context."""
+        return (self._check_pytest_active() or
+                self._check_test_env_vars() or 
+                self._check_environment_is_test())
+    
+    def _check_pytest_active(self) -> bool:
+        """Check if pytest is actively running."""
         import sys
-        
-        # Check for pytest execution
-        if 'pytest' in sys.modules:
-            return True
-        
-        # Check for test environment variables using IsolatedEnvironment
-        # These should be explicitly true, not just present
-        test_indicators = [
-            'PYTEST_CURRENT_TEST',
-            'TESTING',
-            'TEST_MODE'
-        ]
-        
-        for indicator in test_indicators:
-            value = get_env().get(indicator, '').lower()
-            # Only consider it a test context if the value is explicitly true
-            if value in ['true', '1', 'yes', 'on']:
+        if 'pytest' in sys.modules and hasattr(sys.modules['pytest'], 'main'):
+            if hasattr(sys, '_pytest_running') or get_env().get('PYTEST_CURRENT_TEST'):
                 return True
-        
-        # Check if ENVIRONMENT is set to testing
-        env_value = get_env().get('ENVIRONMENT', '').lower()
-        if env_value in ['test', 'testing']:
-            return True
-        
         return False
     
+    def _check_test_env_vars(self) -> bool:
+        """Check test environment variables."""
+        test_indicators = ['PYTEST_CURRENT_TEST', 'TESTING', 'TEST_MODE']
+        for indicator in test_indicators:
+            value = get_env().get(indicator, '').lower()
+            if value in ['true', '1', 'yes', 'on']:
+                return True
+        return False
+    
+    def _check_environment_is_test(self) -> bool:
+        """Check if ENVIRONMENT is test/testing."""
+        env_value = get_env().get('ENVIRONMENT', '').lower()
+        return env_value in ['test', 'testing']
+    
     def get_config(self) -> AppConfig:
-        """Get the unified application configuration.
-        
-        **CRITICAL**: This is the ONLY way to access configuration.
-        All other access methods are deprecated.
-        """
-        # CRITICAL TEST INTEGRATION: Use time-based cache invalidation in test context
-        # This ensures test environment changes are reflected while maintaining performance
+        """Get the unified application configuration."""
         if self._is_test_context():
-            # Check if cache is stale (invalidate every 30 seconds instead of every request)
-            if (self._config_cache is None or 
-                self._load_timestamp is None or 
-                (datetime.now() - self._load_timestamp).total_seconds() > 30):
-                # Clear all caches only when stale
-                self._clear_all_caches()
-                # Reload configuration
-                return self._load_complete_configuration()
-            
-            # Return cached config if still fresh
-            return self._config_cache
-        
-        # Use caching for non-test environments
+            return self._get_test_config()
+        return self._get_cached_config()
+    
+    def _get_test_config(self) -> AppConfig:
+        """Get config for test context with time-based cache."""
+        if self._is_cache_stale():
+            self._clear_all_caches()
+            return self._load_complete_configuration()
+        return self._config_cache
+    
+    def _is_cache_stale(self) -> bool:
+        """Check if config cache is stale."""
+        if self._config_cache is None or self._load_timestamp is None:
+            return True
+        return (datetime.now() - self._load_timestamp).total_seconds() > 30
+    
+    def _get_cached_config(self) -> AppConfig:
+        """Get cached config for non-test environments."""
         if self._config_cache is None:
             self._config_cache = self._load_complete_configuration()
         return self._config_cache
@@ -270,6 +192,15 @@ class UnifiedConfigManager:
     
     def _validate_final_config(self, config: AppConfig) -> None:
         """Validate final configuration before use."""
+        # First validate mandatory services for staging/production
+        if self._environment in ["staging", "production"]:
+            if hasattr(config, 'validate_mandatory_services'):
+                try:
+                    config.validate_mandatory_services()
+                except ValueError as e:
+                    raise ConfigurationError(str(e))
+        
+        # Then run standard validation
         validation_result = self._validator.validate_complete_config(config)
         if not validation_result.is_valid:
             raise ConfigurationError(f"Configuration validation failed: {validation_result.errors}")
@@ -381,7 +312,7 @@ class UnifiedConfigManager:
         self._database_manager.refresh_environment()
         self._secrets_manager.refresh_environment()
     
-    def get_config_summary(self) -> Dict[str, Any]:
+    def get_config_summary(self) -> Dict[str, Union[str, int, bool, Optional[datetime]]]:
         """Get configuration summary for monitoring."""
         config = self.get_config()
         return {

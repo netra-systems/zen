@@ -41,7 +41,7 @@ from test_framework.docker_test_manager import (
 
 # Use centralized environment management for test framework
 try:
-    from dev_launcher.isolated_environment import get_env
+    from shared.isolated_environment import get_env
 except ImportError:
     # Fallback for standalone execution
     class FallbackEnv:

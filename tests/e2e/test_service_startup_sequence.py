@@ -26,7 +26,7 @@ from typing import Dict, List, Optional, Tuple
 import time
 
 # CLAUDE.md compliance: Use IsolatedEnvironment for ALL environment access
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 @pytest.mark.e2e
 @pytest.mark.asyncio

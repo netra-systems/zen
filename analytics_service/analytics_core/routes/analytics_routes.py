@@ -12,7 +12,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, validator
 
 from analytics_service.analytics_core.config import AnalyticsConfig
-from analytics_service.analytics_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from analytics_service.analytics_core.services.event_ingestion_service import EventIngestionService
 from analytics_service.analytics_core.services.analytics_service import AnalyticsService  
 from analytics_service.analytics_core.services.metrics_service import MetricsService

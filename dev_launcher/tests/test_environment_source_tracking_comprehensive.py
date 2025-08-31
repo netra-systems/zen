@@ -22,7 +22,7 @@ from pathlib import Path
 
 import pytest
 
-from dev_launcher.isolated_environment import get_env, IsolatedEnvironment
+from shared.isolated_environment import get_env, IsolatedEnvironment
 
 
 class TestEnvironmentSourceTrackingComprehensive:

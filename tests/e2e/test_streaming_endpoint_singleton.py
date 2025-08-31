@@ -36,12 +36,12 @@ class TestStreamingEndpointSingleton:
         service.supervisor = MagicNone  # TODO: Use real service instead of Mock
         service.supervisor.agent_registry = MagicNone  # TODO: Use real service instead of Mock
         service.supervisor.agent_registry.agents = {
-            'triage': MagicNone  # TODO: Use real service instead of Mock,
-            'data': MagicNone  # TODO: Use real service instead of Mock,
-            'optimization': MagicNone  # TODO: Use real service instead of Mock,
-            'actions': MagicNone  # TODO: Use real service instead of Mock,
-            'reporting': MagicNone  # TODO: Use real service instead of Mock,
-            'synthetic_data': MagicNone  # TODO: Use real service instead of Mock,
+            'triage': MagicNone,  # TODO: Use real service instead of Mock
+            'data': MagicNone,  # TODO: Use real service instead of Mock
+            'optimization': MagicNone,  # TODO: Use real service instead of Mock
+            'actions': MagicNone,  # TODO: Use real service instead of Mock
+            'reporting': MagicNone,  # TODO: Use real service instead of Mock
+            'synthetic_data': MagicNone,  # TODO: Use real service instead of Mock
             'corpus_admin': MagicNone  # TODO: Use real service instead of Mock
         }
         service.supervisor.agent_registry._agents_registered = True

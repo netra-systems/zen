@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "events",
-    "generated_at": "2025-08-30T21:09:08.234853",
-    "root_directory": "/Users/anthony/Documents/GitHub/netra-apex",
-    "total_literals": 27
+    "generated_at": "2025-08-31T15:38:41.715409",
+    "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
+    "total_literals": 28
   },
   "literals": {
     ":event": {
@@ -165,6 +165,13 @@
         "netra_backend/app/services/metrics/billing_metrics.py:338"
       ]
     },
+    "onError": {
+      "value": "onError",
+      "category": "events",
+      "locations": [
+        "scripts/validate_websocket_compliance.py:185"
+      ]
+    },
     "onFilterChange": {
       "value": "onFilterChange",
       "category": "events",
@@ -190,7 +197,7 @@
         "netra_backend/app/routes/mcp/websocket_handler.py:141",
         "netra_backend/app/routes/utils/websocket_helpers.py:207",
         "netra_backend/app/routes/utils/websocket_helpers.py:278",
-        "netra_backend/app/routes/websocket.py:783",
+        "netra_backend/app/routes/websocket.py:827",
         "netra_backend/app/schemas/core_enums.py:62",
         "netra_backend/app/schemas/core_enums.py:171"
       ]
@@ -203,11 +210,11 @@
         "netra_backend/app/routes/mcp/websocket_handler.py:145",
         "netra_backend/app/routes/utils/websocket_helpers.py:199",
         "netra_backend/app/routes/utils/websocket_helpers.py:311",
-        "netra_backend/app/routes/websocket.py:397",
-        "netra_backend/app/routes/websocket.py:786",
+        "netra_backend/app/routes/websocket.py:441",
+        "netra_backend/app/routes/websocket.py:830",
         "netra_backend/app/schemas/core_enums.py:63",
         "netra_backend/app/schemas/core_enums.py:172",
-        "netra_backend/app/websocket_core/manager.py:1120",
+        "netra_backend/app/websocket_core/manager.py:1252",
         "netra_backend/app/websocket_core/types.py:47"
       ]
     },

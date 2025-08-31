@@ -37,7 +37,7 @@ from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.schemas.core_models import Thread, User
-from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.services.message_handlers import MessageHandlerService
 
 # Real imports - not mocked unless external API

@@ -54,7 +54,7 @@
         <variable>E2E_TESTING</variable>
         <variable>AUTH_FAST_TEST_MODE</variable>
         <variable>PYTEST_CURRENT_TEST</variable>
-        <variable>ALLOW_DEV_AUTH_BYPASS</variable>
+        <variable>ALLOW_DEV_OAUTH_SIMULATION</variable>
         <variable>WEBSOCKET_AUTH_BYPASS</variable>
         <variable>SKIP_AUTH_VALIDATION</variable>
         <variable>TEST_MODE</variable>

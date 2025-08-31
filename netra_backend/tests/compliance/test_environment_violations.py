@@ -497,7 +497,7 @@ class TestEnvironmentViolationsComprehensive:
             report += "💡 REMEDIATION:\n"
             report += "   1. Replace os.environ.get() with env.get()\n"
             report += "   2. Replace os.getenv() with env.get()\n"
-            report += "   3. Import: from netra_backend.app.core.isolated_environment import get_env\n"
+            report += "   3. Import: from shared.isolated_environment import get_env\n"
             
             pytest.fail(report)
         else:
@@ -584,7 +584,7 @@ class TestEnvironmentViolationsComprehensive:
         sys.path.insert(0, str(project_root))
         
         try:
-            from netra_backend.app.core.isolated_environment import get_env
+            from shared.isolated_environment import get_env
         except ImportError:
             pytest.fail("Could not import IsolatedEnvironment - this indicates a critical architecture issue")
         
@@ -714,7 +714,7 @@ class TestEnvironmentViolationsComprehensive:
             report += "💡 These violations MUST be fixed by:\n"
             report += "   1. Replace os.environ.get() with env.get()\n" 
             report += "   2. Replace os.getenv() with env.get()\n"
-            report += "   3. Import: from netra_backend.app.core.isolated_environment import get_env\n"
+            report += "   3. Import: from shared.isolated_environment import get_env\n"
             
             pytest.fail(report)
         else:
@@ -842,7 +842,7 @@ class TestEnvironmentViolationsComprehensive:
         print("   1. Replace os.environ.get() with env.get()")
         print("   2. Replace os.getenv() with env.get()")
         print("   3. Replace os.environ['KEY'] with env.get('KEY')")
-        print("   4. Import: from netra_backend.app.core.isolated_environment import get_env")
+        print("   4. Import: from shared.isolated_environment import get_env")
         print("   5. Initialize: env = get_env()")
         print("   6. For tests: env.enable_isolation()")
         

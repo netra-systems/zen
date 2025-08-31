@@ -288,7 +288,7 @@ os.environ["SERVICE_ID"] = "auth-service"
 os.environ["TEST_VAR"] = "test-value"
 
 # Import isolated environment
-from auth_service.auth_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 env = get_env()
 

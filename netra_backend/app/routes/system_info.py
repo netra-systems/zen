@@ -123,7 +123,7 @@ async def validate_configuration(
     effective_config = {}
     
     try:
-        from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+        from shared.isolated_environment import IsolatedEnvironment
         env = IsolatedEnvironment()
         
         # Check required environment variables

@@ -32,7 +32,7 @@ import httpx
 import pytest
 from loguru import logger
 
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.services.health_check_service import HealthCheckService
 

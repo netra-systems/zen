@@ -1,4 +1,4 @@
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 # Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
 from test_framework.real_services import get_real_services
 """

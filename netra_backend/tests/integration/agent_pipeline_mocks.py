@@ -41,9 +41,7 @@ class AgentPipelineMocks:
     """Collection of mocks for agent pipeline testing."""
     
     @staticmethod
-
-        def create_llm_manager_mock():
-
+    def create_llm_manager_mock():
         """Mock LLM manager for agent response testing"""
 
         llm_mock = Mock(spec=LLMManager)
@@ -101,9 +99,7 @@ class AgentPipelineMocks:
         return llm_mock
 
     @staticmethod
-
-        def create_websocket_mock():
-
+    def create_websocket_mock():
         """Mock WebSocket for message delivery testing"""
 
         ws_mock = Mock(spec=WebSocket)
@@ -133,9 +129,7 @@ class AgentPipelineMocks:
         return ws_mock
 
     @staticmethod
-
-        def create_redis_manager_mock():
-
+    def create_redis_manager_mock():
         """Mock Redis manager for agent state management"""
 
         redis_mock = Mock(spec=RedisManager)
@@ -163,9 +157,7 @@ class AgentPipelineMocks:
         return redis_mock
 
     @staticmethod
-
-        def create_websocket_manager_mock():
-
+    def create_websocket_manager_mock():
         """Mock WebSocket manager for connection management"""
 
         ws_manager_mock = Mock(spec=WebSocketManager)

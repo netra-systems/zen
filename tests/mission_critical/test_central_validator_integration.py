@@ -24,7 +24,7 @@ def test_auth_service_uses_central_validator_for_jwt():
     
     # Import auth service
     from auth_service.auth_core.secret_loader import AuthSecretLoader
-    from auth_service.auth_core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     
     # Test staging environment
     original_env = get_env().get("ENVIRONMENT")
@@ -55,7 +55,7 @@ def test_backend_service_uses_central_validator_for_jwt():
     
     # Import backend service
     from netra_backend.app.core.configuration.unified_secrets import UnifiedSecretManager
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     
     # Test production environment
     original_env = get_env().get("ENVIRONMENT")
@@ -87,7 +87,7 @@ def test_backend_service_uses_central_validator_for_database():
     print("✅ Testing backend service central validator integration for database...")
     
     from netra_backend.app.core.configuration.unified_secrets import UnifiedSecretManager
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     
     # Test staging environment
     original_env = get_env().get("ENVIRONMENT")
@@ -118,7 +118,7 @@ def test_backend_service_uses_central_validator_for_redis():
     print("✅ Testing backend service central validator integration for Redis...")
     
     from netra_backend.app.core.configuration.unified_secrets import UnifiedSecretManager
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     
     # Test production environment
     original_env = get_env().get("ENVIRONMENT")
@@ -149,7 +149,7 @@ def test_backend_service_uses_central_validator_for_llm():
     print("✅ Testing backend service central validator integration for LLM...")
     
     from netra_backend.app.core.configuration.unified_secrets import UnifiedSecretManager
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     
     # Test staging environment
     original_env = get_env().get("ENVIRONMENT")
@@ -183,7 +183,7 @@ def test_central_validator_eliminates_dangerous_defaults():
     print("✅ Testing central validator eliminates dangerous empty string defaults...")
     
     from shared.configuration import get_central_validator
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     
     # Mock environment getter that returns None for missing values
     def mock_env_getter(key, default=None):

@@ -47,7 +47,7 @@
           <title>Authentication Bypass in Development</title>
           <description>WebSocket connections must work without authentication in development environment</description>
           <configuration>
-            <env-var>ALLOW_DEV_AUTH_BYPASS=true</env-var>
+            <env-var>ALLOW_DEV_OAUTH_SIMULATION=true</env-var>
             <env-var>WEBSOCKET_AUTH_BYPASS=true</env-var>
             <env-var>ENVIRONMENT=development</env-var>
           </configuration>
@@ -95,7 +95,7 @@
         <test-script>tests/e2e/test_websocket_dev_docker_connection.py - E2E Docker WebSocket testing</test-script>
         <validation-checklist>
           <check>Environment variables properly configured</check>
-          <check>Auth bypass working in development only</check>
+          <check>OAUTH SIMULATION working in development only</check>
           <check>CORS allowing Docker service connections</check>
           <check>WebSocket URLs resolving correctly</check>
           <check>End-to-end WebSocket communication working</check>
@@ -110,7 +110,7 @@
         </common-issue>
         <common-issue>
           <problem>Authentication required error</problem>
-          <solution>Set ALLOW_DEV_AUTH_BYPASS=true</solution>
+          <solution>Set ALLOW_DEV_OAUTH_SIMULATION=true</solution>
           <solution>Verify ENVIRONMENT=development</solution>
           <diagnostic>Run test_docker_websocket_fix.py</diagnostic>
         </common-issue>

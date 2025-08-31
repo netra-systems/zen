@@ -140,7 +140,8 @@ class BackendStarter:
     def _build_uvicorn_command(self, port: int) -> list:
         """Build uvicorn command."""
         return [sys.executable, "-m", "uvicorn", "netra_backend.app.main:app", 
-                "--host", "0.0.0.0", "--port", str(port)]
+                "--host", "0.0.0.0", "--port", str(port), 
+                "--log-level", "warning"]
     
     def _add_backend_flags(self, cmd: list, server_script: Optional[Path]):
         """Add backend command flags."""

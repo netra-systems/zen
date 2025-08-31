@@ -22,7 +22,7 @@ from test_framework import setup_test_path
 # CRITICAL: setup_test_path() MUST be called before any project imports per CLAUDE.md
 setup_test_path()
 
-from analytics_service.analytics_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 @dataclass

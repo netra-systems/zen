@@ -26,7 +26,7 @@ import pytest
 import uvicorn
 import aiohttp
 
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 class ServerStartupValidator:

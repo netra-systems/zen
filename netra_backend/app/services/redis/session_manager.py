@@ -1,16 +1,30 @@
-"""Redis Session Manager implementation."""
+"""Consolidated Redis Session Manager - Single Source of Truth for all session management.
 
+This is the canonical session manager for the entire Netra platform,
+consolidating all session management functionality in one location.
+"""
+
+import asyncio
 import json
 import time
-from datetime import datetime, timedelta
+import uuid
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
 
 class RedisSessionManager:
-    """Manages user sessions using Redis."""
+    """Consolidated session manager - Single Source of Truth for all session management.
+    
+    Supports:
+    - User authentication sessions
+    - Demo session management with message tracking
+    - Security features (fingerprinting, session limits)
+    - Database persistence backup
+    - Memory fallback when Redis unavailable
+    """
     
     def __init__(self, redis_client=None):
-        """Initialize session manager with Redis client."""
+        """Initialize consolidated session manager with Redis client."""
         # Initialize memory store for fallback
         self._memory_store = {}
         
@@ -22,9 +36,19 @@ class RedisSessionManager:
             # Fallback to in-memory storage for tests
             self.redis = None
         
+        # Session prefixes for different session types
         self.session_prefix = "session:"
         self.user_sessions_prefix = "user_sessions:"
+        self.demo_session_prefix = "demo:session:"
         self.default_ttl = 3600  # 1 hour
+        self.demo_ttl = 86400  # 24 hours for demo sessions
+        
+        # Security and performance features
+        self.used_refresh_tokens = set()
+        self._session_locks = {}
+        self._user_session_limits = {}
+        self._session_activities = {}
+        self._invalidation_history = {}
     
     def _get_session_key(self, session_id: str) -> str:
         """Get Redis key for session."""
@@ -237,6 +261,200 @@ class RedisSessionManager:
             stats["total_sessions"] = stats["memory_sessions"]
         
         return stats
+    
+    # Demo Session Management Methods
+    async def create_demo_session(self, session_id: str, industry: str, 
+                                 user_id: Optional[int] = None) -> Dict[str, Any]:
+        """Create a new demo session with industry context."""
+        session_key = f"{self.demo_session_prefix}{session_id}"
+        session_data = {
+            "industry": industry,
+            "user_id": user_id,
+            "started_at": datetime.now(timezone.utc).isoformat(),
+            "messages": [],
+            "session_type": "demo"
+        }
+        
+        redis_success = False
+        if self.redis:
+            try:
+                setex_result = await self.redis.setex(
+                    session_key, 
+                    self.demo_ttl,  # 24 hours for demo sessions
+                    json.dumps(session_data)
+                )
+                redis_success = bool(setex_result)
+            except Exception:
+                pass
+        
+        if not redis_success:
+            # Store in memory fallback
+            self._memory_store[session_key] = {
+                "data": session_data,
+                "expires_at": time.time() + self.demo_ttl
+            }
+        
+        return session_data
+    
+    async def get_demo_session(self, session_id: str) -> Optional[Dict[str, Any]]:
+        """Get demo session data."""
+        session_key = f"{self.demo_session_prefix}{session_id}"
+        
+        if self.redis:
+            try:
+                session_data = await self.redis.get(session_key)
+                if session_data:
+                    return json.loads(session_data)
+            except Exception:
+                pass
+        
+        # Check memory store
+        if session_key in self._memory_store:
+            entry = self._memory_store[session_key]
+            if time.time() < entry["expires_at"]:
+                return entry["data"]
+            else:
+                del self._memory_store[session_key]
+        
+        return None
+    
+    async def add_demo_message(self, session_id: str, role: str, 
+                              content: str, **metadata) -> Dict[str, Any]:
+        """Add a message to a demo session."""
+        session_data = await self.get_demo_session(session_id)
+        if not session_data:
+            raise ValueError(f"Demo session not found: {session_id}")
+        
+        message = {
+            "role": role,
+            "content": content,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            **metadata
+        }
+        session_data["messages"].append(message)
+        
+        # Update session
+        session_key = f"{self.demo_session_prefix}{session_id}"
+        if self.redis:
+            try:
+                await self.redis.setex(session_key, self.demo_ttl, json.dumps(session_data))
+            except Exception:
+                pass
+        
+        # Update memory store if needed
+        if session_key in self._memory_store:
+            self._memory_store[session_key]["data"] = session_data
+        
+        return message
+    
+    async def get_demo_session_status(self, session_id: str) -> Dict[str, Any]:
+        """Get the status of a demo session."""
+        session_data = await self.get_demo_session(session_id)
+        if not session_data:
+            raise ValueError(f"Demo session not found: {session_id}")
+        
+        message_count = len(session_data.get("messages", []))
+        expected_steps = 6  # Demo flow steps
+        progress = min(100, (message_count / expected_steps) * 100)
+        
+        return {
+            "session_id": session_id,
+            "industry": session_data.get("industry"),
+            "started_at": session_data.get("started_at"),
+            "message_count": message_count,
+            "progress_percentage": progress,
+            "status": "active" if progress < 100 else "completed",
+            "last_interaction": (session_data["messages"][-1]["timestamp"] 
+                               if session_data.get("messages") else None)
+        }
+    
+    # Security and Performance Methods
+    async def regenerate_session_id(self, old_session_id: str, user_id: str, 
+                                   user_data: Optional[Dict] = None) -> str:
+        """Regenerate session ID for session fixation protection."""
+        import secrets
+        
+        # Create new session with cryptographically secure ID
+        new_session_id = secrets.token_urlsafe(32)
+        
+        # Get old session data
+        old_session = await self.get_session(old_session_id)
+        if old_session and user_data is None:
+            user_data = old_session.get("data", {})
+        
+        # Create new session
+        if user_data is None:
+            user_data = {}
+        await self.create_session(user_id, user_data, ttl=self.default_ttl)
+        
+        # Delete old session
+        if old_session_id:
+            await self.delete_session(old_session_id)
+        
+        return new_session_id
+    
+    async def set_user_session_limit(self, user_id: str, limit: int):
+        """Set concurrent session limit for a user."""
+        self._user_session_limits[user_id] = limit
+    
+    async def record_session_activity(self, session_id: str, activity_type: str, 
+                                    resource: str, client_ip: str, timestamp: float = None):
+        """Record session activity for security monitoring."""
+        if session_id not in self._session_activities:
+            self._session_activities[session_id] = []
+        
+        activity = {
+            "activity_type": activity_type,
+            "resource": resource,
+            "client_ip": client_ip,
+            "timestamp": timestamp or time.time()
+        }
+        self._session_activities[session_id].append(activity)
+    
+    async def get_session_security_status(self, session_id: str) -> Dict[str, Any]:
+        """Get session security status based on activities."""
+        activities = self._session_activities.get(session_id, [])
+        
+        # Simple risk assessment
+        risk_level = "low"
+        if len(activities) > 10:
+            risk_level = "medium"
+        if len(activities) > 20:
+            risk_level = "high_risk"
+        
+        return {
+            "session_id": session_id,
+            "security_level": risk_level,
+            "activity_count": len(activities)
+        }
+    
+    async def invalidate_all_user_sessions(self, user_id: str, reason: str = None, 
+                                         except_session_id: str = None) -> int:
+        """Invalidate all sessions for a user with race condition protection."""
+        if user_id not in self._session_locks:
+            self._session_locks[user_id] = asyncio.Lock()
+        
+        async with self._session_locks[user_id]:
+            sessions = await self.get_user_sessions(user_id)
+            count = 0
+            
+            for session_id in sessions:
+                if except_session_id and session_id == except_session_id:
+                    continue
+                if await self.delete_session(session_id):
+                    count += 1
+        
+        # Log invalidation
+        if user_id not in self._invalidation_history:
+            self._invalidation_history[user_id] = []
+        
+        self._invalidation_history[user_id].append({
+            "reason": reason,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "sessions_invalidated": count
+        })
+        
+        return count
     
     async def validate_session(self, session_id: str, user_id: str) -> bool:
         """Validate that session belongs to user and is still valid."""

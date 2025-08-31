@@ -405,7 +405,7 @@ class TestHealthEndpointSecurityBypass:
         headers = {"Authorization": "Bearer invalid_token_12345"}
         response = client.get("/api/health", headers=headers)
         
-        print(f"\n=== AUTH BYPASS TEST ===")
+        print(f"\n=== OAUTH SIMULATION TEST ===")
         print(f"URL: /api/health")
         print(f"Headers: {headers}")
         print(f"Status: {response.status_code}")

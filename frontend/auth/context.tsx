@@ -9,6 +9,8 @@ import { jwtDecode } from 'jwt-decode';
 import { useAuthStore } from '@/store/authStore';
 import { logger } from '@/lib/logger';
 import { useGTMEvent } from '@/hooks/useGTMEvent';
+import { monitorAuthState } from '@/lib/auth-validation';
+import { useUnifiedChatStore } from '@/store/unified-chat';
 export interface AuthContextType {
   user: User | null;
   login: () => Promise<void> | void;
@@ -100,6 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       unifiedAuthService.removeToken();
       setToken(null);
       setUser(null);
+      // Explicitly pass null values to ensure consistency
       syncAuthStore(null, null);
       return;
     }
@@ -142,10 +145,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           // Reset failure count on successful refresh with new token
           refreshFailureCountRef.current = 0;
-          setToken(newToken);
           
           const decodedUser = jwtDecode(newToken) as User;
+          
+          // Update all auth state atomically
+          setToken(newToken);
           setUser(decodedUser);
+          // Use the actual values we're setting, not stale state
           syncAuthStore(decodedUser, newToken);
           
           logger.info('Automatic token refresh successful', {
@@ -216,6 +222,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [handleTokenRefresh]);
 
   const fetchAuthConfig = useCallback(async () => {
+    // Track the actual user that will be set for monitoring
+    let actualUser: User | null = null;
+    let actualToken: string | null = token;
+    
     try {
       const data = await unifiedAuthService.getAuthConfig();
       setAuthConfig(data);
@@ -224,6 +234,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // But prefer the token already in state if it exists (from initialization)
       const currentToken = token;
       const storedToken = currentToken || unifiedAuthService.getToken();
+      actualToken = storedToken;
       
       if (storedToken) {
         // Process the token if we have one
@@ -255,11 +266,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               logger.warn('Could not refresh expired token', refreshError as Error);
               unifiedAuthService.removeToken();
               syncAuthStore(null, null);
+              actualUser = null;
+              actualToken = null;
             }
           } else {
             // CRITICAL: Always set user even if token was already in state
             // This fixes the page refresh logout issue
             setUser(decodedUser);
+            actualUser = decodedUser; // Track the user we're setting
             // Sync with Zustand store
             syncAuthStore(decodedUser, storedToken);
             // Start automatic token refresh cycle
@@ -272,6 +286,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           });
           unifiedAuthService.removeToken();
           syncAuthStore(null, null);
+          actualUser = null;
+          actualToken = null;
         }
       } else if (data.development_mode) {
         // Check if user explicitly logged out in dev mode
@@ -299,8 +315,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const devLoginResponse = await Promise.race([devLoginPromise, timeoutPromise]);
             if (devLoginResponse) {
               setToken(devLoginResponse.access_token);
+              actualToken = devLoginResponse.access_token;
               const decodedUser = jwtDecode(devLoginResponse.access_token) as User;
               setUser(decodedUser);
+              actualUser = decodedUser; // Track the user we're setting
               // Sync with Zustand store
               syncAuthStore(decodedUser, devLoginResponse.access_token);
               // Start automatic token refresh cycle
@@ -356,8 +374,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
       setInitialized(true); // Mark initialization as complete
+      
+      logger.info('[AUTH INIT] Auth context initialization finished', {
+        component: 'AuthContext',
+        action: 'init_finished',
+        hasUser: !!actualUser,
+        hasToken: !!actualToken,
+        initialized: true,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Monitor auth state for consistency - use actual values that were set
+      monitorAuthState(actualToken, actualUser, true, 'auth_init_complete');
     }
-  }, [syncAuthStore, scheduleTokenRefreshCheck, handleTokenRefresh]);
+  }, [syncAuthStore, scheduleTokenRefreshCheck, handleTokenRefresh, token]);
 
   const hasMountedRef = useRef(false);
 
@@ -380,10 +410,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
         
         // Update token immediately when detected via storage event
-        setToken(e.newValue);
         try {
           const decodedUser = jwtDecode(e.newValue) as User;
+          // Update state atomically
+          setToken(e.newValue);
           setUser(decodedUser);
+          // Use actual values being set
           syncAuthStore(decodedUser, e.newValue);
           scheduleTokenRefreshCheck(e.newValue);
         } catch (error) {
@@ -455,16 +487,98 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
-    if (authConfig) {
+    logger.info('[LOGOUT] Starting comprehensive logout process', {
+      component: 'AuthContext',
+      hasAuthConfig: !!authConfig
+    });
+
+    try {
       // Track logout event
       trackLogout();
+      
       // Set dev logout flag in development mode
-      if (authConfig.development_mode) {
+      if (authConfig?.development_mode) {
         unifiedAuthService.setDevLogoutFlag();
       }
-      await unifiedAuthService.handleLogout(authConfig);
-      // Clear Zustand store
+
+      // Clear all chat-related state with comprehensive reset
+      const chatStore = useUnifiedChatStore.getState();
+      chatStore.resetStore(); // Complete reset of all chat state
+
+      // Clear additional localStorage items
+      if (typeof window !== 'undefined') {
+        // Clear all auth and chat related items
+        const itemsToRemove = [
+          'jwt_token',
+          'refresh_token',
+          'user_data',
+          'user_preferences',
+          'active_thread_id',
+          'chat_history',
+          'session_id',
+          'dev_logout_performed'
+        ];
+        
+        itemsToRemove.forEach(item => {
+          try {
+            localStorage.removeItem(item);
+          } catch (e) {
+            logger.warn(`Failed to remove ${item} from localStorage`, e as Error);
+          }
+        });
+
+        // Clear sessionStorage
+        try {
+          sessionStorage.clear();
+        } catch (e) {
+          logger.warn('Failed to clear sessionStorage', e as Error);
+        }
+      }
+
+      // Attempt backend logout (but don't fail if it errors)
+      if (authConfig) {
+        try {
+          await unifiedAuthService.handleLogout(authConfig);
+        } catch (error) {
+          logger.error('[LOGOUT] Backend logout failed, continuing with local cleanup', error as Error);
+        }
+      }
+      
+      // Clear auth state in context
+      setUser(null);
+      setToken(null);
+      
+      // Clear Zustand auth store
       syncAuthStore(null, null);
+      
+      // Cancel any pending token refresh
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current);
+        refreshTimeoutRef.current = null;
+      }
+
+      logger.info('[LOGOUT] Logout process completed successfully', {
+        component: 'AuthContext'
+      });
+      
+      // Navigate to login page
+      if (typeof window !== 'undefined') {
+        // Use window.location for a full page refresh to ensure clean state
+        window.location.href = '/login';
+      }
+    } catch (error) {
+      logger.error('[LOGOUT] Error during logout process', error as Error, {
+        component: 'AuthContext'
+      });
+      
+      // Even on error, ensure we clear local state and redirect
+      setUser(null);
+      setToken(null);
+      syncAuthStore(null, null);
+      
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
     }
   };
 

@@ -14,7 +14,7 @@ if str(project_root) not in sys.path:
 
 # Absolute imports following CLAUDE.md standards
 from tests.e2e.harness_utils import TestHarnessContext, UnifiedTestHarnessComplete, TestClient, create_minimal_harness, create_test_harness
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from typing import Any, Dict
 import asyncio
 import pytest

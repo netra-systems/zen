@@ -78,7 +78,7 @@ except ImportError:
         async def close(self, code: int = 1000, reason: str = "Normal closure"): 
             self.state = "disconnected"
     
-    class create_mock_websocket:
+class create_mock_websocket:
         def __init__(self):
             self._websocket = MockWebSocket()
         def with_user_id(self, user_id: str): 

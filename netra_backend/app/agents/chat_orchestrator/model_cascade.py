@@ -20,7 +20,7 @@ from datetime import UTC, datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.llm.model_selector import ModelSelector, SelectionCriteria
 from netra_backend.app.agents.chat_orchestrator.quality_evaluator import QualityEvaluator, EvaluationCriteria

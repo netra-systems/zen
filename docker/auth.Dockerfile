@@ -39,8 +39,8 @@ WORKDIR /app
 COPY --from=builder --chown=netra:netra /root/.local /home/netra/.local
 
 # Copy application code
-COPY --chown=netra:netra ./auth_service /app/auth_service
-COPY --chown=netra:netra ./shared /app/shared
+COPY --chown=netra:netra auth_service /app/auth_service
+COPY --chown=netra:netra shared /app/shared
 
 # Set Python path
 ENV PATH=/home/netra/.local/bin:$PATH
@@ -60,4 +60,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 EXPOSE 8081
 
 # Default command for production
-CMD ["gunicorn", "auth_service.main:app", "-w", "${WORKERS:-2}", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8081", "--timeout", "120", "--graceful-timeout", "30", "--access-logfile", "-", "--error-logfile", "-", "--log-level", "${LOG_LEVEL:-info}"]
+CMD ["sh", "-c", "gunicorn auth_service.main:app -w ${WORKERS:-2} -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8081 --timeout 120 --graceful-timeout 30 --access-logfile - --error-logfile - --log-level ${LOG_LEVEL:-info}"]

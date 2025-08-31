@@ -16,7 +16,7 @@ import json
 import logging
 import time
 
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum

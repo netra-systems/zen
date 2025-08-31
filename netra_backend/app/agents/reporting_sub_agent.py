@@ -25,11 +25,6 @@ from netra_backend.app.agents.prompts import reporting_prompt_template
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.utils import extract_json_from_response
-from netra_backend.app.core.reliability import (
-    CircuitBreakerConfig as LegacyCircuitConfig,
-)
-from netra_backend.app.core.reliability import RetryConfig as LegacyRetryConfig
-from netra_backend.app.core.reliability import get_reliability_wrapper
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.llm.observability import (
     generate_llm_correlation_id,
@@ -49,14 +44,8 @@ class ReportingSubAgent(BaseSubAgent, BaseExecutionInterface):
         BaseSubAgent.__init__(self, llm_manager, name="ReportingSubAgent", description="This agent generates a final report.")
         BaseExecutionInterface.__init__(self, "ReportingSubAgent", websocket_manager)
         self.tool_dispatcher = tool_dispatcher
-        self.reliability = self._initialize_reliability_wrapper()
         self._initialize_modern_components()
     
-    def _initialize_reliability_wrapper(self):
-        """Initialize reliability wrapper with circuit breaker and retry configs."""
-        circuit_config = self._create_legacy_circuit_breaker_config()
-        retry_config = self._create_legacy_retry_config()
-        return get_reliability_wrapper("ReportingSubAgent", circuit_config, retry_config)
     
     def _initialize_modern_components(self) -> None:
         """Initialize modern execution components."""
@@ -78,13 +67,6 @@ class ReportingSubAgent(BaseSubAgent, BaseExecutionInterface):
         """Initialize modern error handling."""
         self.error_handler = ExecutionErrorHandler
     
-    def _create_legacy_circuit_breaker_config(self) -> LegacyCircuitConfig:
-        """Create legacy circuit breaker configuration."""
-        return LegacyCircuitConfig(
-            failure_threshold=3,
-            recovery_timeout=30.0,
-            name="ReportingSubAgent"
-        )
     
     def _create_modern_circuit_config(self) -> CircuitBreakerConfig:
         """Create modern circuit breaker configuration."""
@@ -94,13 +76,6 @@ class ReportingSubAgent(BaseSubAgent, BaseExecutionInterface):
             recovery_timeout=30
         )
     
-    def _create_legacy_retry_config(self) -> LegacyRetryConfig:
-        """Create legacy retry configuration."""
-        return LegacyRetryConfig(
-            max_retries=2,
-            base_delay=1.0,
-            max_delay=10.0
-        )
     
     def _create_modern_retry_config(self) -> RetryConfig:
         """Create modern retry configuration."""
@@ -274,7 +249,7 @@ class ReportingSubAgent(BaseSubAgent, BaseExecutionInterface):
     
     def _extract_and_validate_report(self, llm_response_str: str, run_id: str) -> dict:
         """Extract and validate JSON result from LLM response."""
-        report_result = llm_parser.extract_json_from_response(llm_response_str)
+        report_result = extract_json_from_response(llm_response_str)
         if not report_result:
             self.logger.warning(f"Could not extract JSON from LLM response for run_id: {run_id}. Using default report.")
             report_result = {"report": "No report could be generated."}

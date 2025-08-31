@@ -4,7 +4,7 @@ Unicode output utilities for cross-platform compatibility.
 
 import os
 import sys
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 def safe_print(text: str, fallback_text: str = None):

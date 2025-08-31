@@ -151,7 +151,7 @@ class TestDevModeAuthentication:
 
     @pytest.mark.asyncio
     async def test_bypass_oauth_in_dev(self, client_with_dev_mode, mock_dev_mode_config):
-        """Test OAuth bypass in development
+        """Test OOAUTH SIMULATION in development
         
         Business Value: Eliminates OAuth setup complexity in dev,
         reducing developer onboarding time from hours to minutes

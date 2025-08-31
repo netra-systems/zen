@@ -24,19 +24,24 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 
-# CRITICAL: Load environment variables BEFORE importing any auth service modules
-# This ensures SERVICE_SECRET and other env vars are available when auth service initializes
-environment = os.environ.get('ENVIRONMENT', '').lower()
+# Import auth service isolated environment first to handle bootstrap
+from shared.isolated_environment import get_env
+
+# CRITICAL: Initialize environment and load .env files using proper environment management
+env = get_env()
+
+# Get environment to decide on .env loading
+environment = env.get('ENVIRONMENT', '').lower()
 if environment in ['staging', 'production', 'prod']:
     print(f"Running in {environment} - skipping .env file loading (using GSM)")
 else:
-    # Try parent directory first (where main .env is located)
+    # Try parent directory first (where main .env is located)  
     env_path = Path(__file__).parent.parent / ".env"
     if env_path.exists():
         load_dotenv(env_path, override=True)  # override=True ensures env vars are set
         print(f"Loaded environment from: {env_path}")
-        # Verify critical variables are loaded
-        if os.environ.get('SERVICE_SECRET'):
+        # Verify critical variables are loaded using proper environment management
+        if env.get('SERVICE_SECRET'):
             print("SERVICE_SECRET successfully loaded from .env")
         else:
             print("WARNING: SERVICE_SECRET not found in .env file")
@@ -45,8 +50,7 @@ else:
         load_dotenv(override=True)
         print("Loaded environment from current directory or system")
 
-# NOW import auth service modules after environment is fully loaded
-from auth_service.auth_core.isolated_environment import get_env
+# NOW import auth service modules after environment is properly initialized
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.routes.auth_routes import router as auth_router, oauth_router
 from shared.logging import get_logger, configure_service_logging
@@ -135,9 +139,9 @@ async def lifespan(app: FastAPI):
             # TOMBSTONE: GOOGLE_CLIENT_ID variable superseded by environment-specific GOOGLE_OAUTH_CLIENT_ID_* variables
             oauth_validation_errors.append("Google OAuth client ID is not configured")
             logger.error("❌ CRITICAL: Google OAuth client ID is missing!")
-        elif google_client_id.startswith("REPLACE_") or len(google_client_id) < 50:
-            oauth_validation_errors.append(f"Google OAuth client ID appears invalid: {google_client_id[:20]}...")
-            logger.error(f"❌ CRITICAL: Google OAuth client ID looks like a placeholder: {google_client_id[:20]}...")
+        elif len(google_client_id) < 50:
+            oauth_validation_errors.append(f"Google OAuth client ID appears too short: {google_client_id[:20]}...")
+            logger.error(f"❌ CRITICAL: Google OAuth client ID appears too short: {google_client_id[:20]}...")
         elif not google_client_id.endswith(".apps.googleusercontent.com"):
             oauth_validation_errors.append(f"Google OAuth client ID has invalid format (should end with .apps.googleusercontent.com): {google_client_id}")
             logger.error(f"❌ CRITICAL: Google OAuth client ID has invalid format: {google_client_id}")
@@ -150,9 +154,9 @@ async def lifespan(app: FastAPI):
             # TOMBSTONE: GOOGLE_CLIENT_SECRET variable superseded by environment-specific GOOGLE_OAUTH_CLIENT_SECRET_* variables
             oauth_validation_errors.append("Google OAuth client secret is not configured")
             logger.error("❌ CRITICAL: Google OAuth client secret is missing!")
-        elif google_client_secret.startswith("REPLACE_") or len(google_client_secret) < 20:
-            oauth_validation_errors.append(f"Google OAuth client secret appears invalid")
-            logger.error(f"❌ CRITICAL: Google OAuth client secret looks like a placeholder")
+        elif len(google_client_secret) < 20:
+            oauth_validation_errors.append(f"Google OAuth client secret appears too short")
+            logger.error(f"❌ CRITICAL: Google OAuth client secret appears too short")
         else:
             logger.info("✅ Google OAuth client secret configured")
         

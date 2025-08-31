@@ -24,7 +24,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import pytest
 
-from analytics_service.analytics_core.isolated_environment import (
+from shared.isolated_environment import (
     IsolatedEnvironment,
     get_env,
 )

@@ -22,6 +22,7 @@ import time
 import pytest
 from typing import Dict, Any
 
+from test_framework.service_dependencies import requires_services
 from test_framework.auth_helpers import (
     WebSocketAuthTester,
     TokenExpiryTester,
@@ -32,6 +33,7 @@ from test_framework.auth_helpers import (
 )
 
 
+@requires_services(["auth", "backend", "websocket"], mode="either")
 @pytest.mark.critical
 @pytest.mark.asyncio
 @pytest.mark.e2e

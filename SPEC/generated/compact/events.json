@@ -19,6 +19,7 @@
     "message",
     "newest_event",
     "oldest_event",
+    "onError",
     "onFilterChange",
     "onSearchChange",
     "ping",

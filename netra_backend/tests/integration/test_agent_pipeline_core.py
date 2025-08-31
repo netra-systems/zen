@@ -26,10 +26,10 @@ os.environ["TESTING"] = "1"
 os.environ["ENVIRONMENT"] = "testing"
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor_agent import SupervisorAgent
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.schemas.config import AppConfig
 from netra_backend.app.database import get_db
 from netra_backend.app.logging_config import central_logger

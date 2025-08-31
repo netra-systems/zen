@@ -11,16 +11,10 @@
 
 import React, { ReactNode } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
+import { User } from '../../../../types/unified/auth.types';
+import { Message } from '../../../../types/domains/messages';
 
 // Types
-interface Message {
-  id: string;
-  content: string;
-  role: 'user' | 'assistant';
-  timestamp: string;
-  threadId: string;
-  isStreaming?: boolean;
-}
 
 interface Thread {
   id: string;
@@ -29,11 +23,7 @@ interface Thread {
   updatedAt?: string;
 }
 
-interface User {
-  id: string;
-  email: string;
-  name: string;
-}
+// User interface now imported from @/types/unified/auth.types
 
 interface WebSocketEvent {
   type: string;
@@ -86,7 +76,7 @@ export const mockAuthStore = () => ({
   user: { 
     id: 'test-user', 
     email: 'test@example.com', 
-    name: 'Test User' 
+    full_name: 'Test User' 
   } as User,
   token: 'test-token',
   isAuthenticated: true,
@@ -111,13 +101,14 @@ export const mockThreadStore = () => ({
 // Create Mock Message Helper
 export const createMockMessage = (
   content: string, 
-  role: 'user' | 'assistant' = 'user',
+  role: 'user' | 'assistant' | 'system' = 'user',
   overrides: Partial<Message> = {}
 ): Message => ({
   id: `msg-${Math.random().toString(36).substr(2, 9)}`,
   content,
   role,
-  timestamp: new Date().toISOString(),
+  timestamp: Date.now(),
+  created_at: new Date().toISOString(),
   threadId: 'thread1',
   ...overrides
 });

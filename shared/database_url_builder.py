@@ -828,7 +828,7 @@ class DatabaseURLBuilder:
         Example:
             # Replace internal hostnames with external ones
             DatabaseURLBuilder.register_normalization_rule(
-                r'internal-db\.example\.com',
+                'internal-db\\.example\\.com',
                 'external-db.example.com'
             )
         """

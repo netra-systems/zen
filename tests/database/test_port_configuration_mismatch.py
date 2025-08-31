@@ -376,7 +376,7 @@ def diagnose_port_configuration():
     Diagnostic function to understand the current database configuration.
     Can be run independently for debugging purposes.
     """
-    from dev_launcher.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     
     print("=== DATABASE PORT CONFIGURATION DIAGNOSIS ===")
     

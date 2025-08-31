@@ -499,7 +499,7 @@ class TestMicroserviceDependencyStartupSequence:
             )
         }
     
-        def _mock_container_images(self):
+    def _mock_container_images(self):
         """Mock container images for testing when real images unavailable."""
         # In production tests, use real service images
         # For unit testing, mock the container behavior

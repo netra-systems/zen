@@ -31,7 +31,7 @@ import jwt
 from auth_service.main import app
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 from auth_service.auth_core.models.auth_models import User
-from auth_service.auth_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 class TestRefreshEndpointReal:

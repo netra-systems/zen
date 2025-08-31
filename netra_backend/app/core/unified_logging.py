@@ -12,7 +12,7 @@ import logging
 from typing import Any, Dict, Optional
 
 from loguru import logger
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 from netra_backend.app.core.logging_context import (
     ExecutionTimeDecorator,

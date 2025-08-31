@@ -46,7 +46,7 @@ class TestDatabaseValidationURLFix:
                     )
                     
                     # Get database URLs from environment
-                    from dev_launcher.isolated_environment import get_env
+                    from shared.isolated_environment import get_env
                     env = get_env()
                     db_configs = {
                         'postgres': (env.get('DATABASE_URL'), 'postgresql'),

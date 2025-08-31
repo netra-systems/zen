@@ -21,7 +21,7 @@ import pytest
 from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from netra_backend.app.config import get_config
 from test_framework.test_patterns import L3IntegrationTest
 

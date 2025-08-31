@@ -6,7 +6,7 @@ This document describes the E2E test authentication bypass mechanism for running
 
 ## Security Model
 
-The E2E auth bypass is designed with multiple security layers:
+The E2E OAUTH SIMULATION is designed with multiple security layers:
 
 1. **Environment Restriction**: Only works in staging environment, completely disabled in production
 2. **Secure Bypass Key**: Requires a secret key stored in Google Secrets Manager
@@ -46,7 +46,7 @@ gcloud secrets add-iam-policy-binding e2e-bypass-key \
 Export the bypass key in your test environment:
 
 ```bash
-export E2E_BYPASS_KEY="your-generated-key"
+export E2E_OAUTH_SIMULATION_KEY="your-generated-key"
 export ENVIRONMENT=staging
 export STAGING_AUTH_URL=https://api.staging.netrasystems.ai
 ```
@@ -79,7 +79,7 @@ async with await auth.get_authenticated_client() as client:
 import { unifiedAuthService } from '@/auth/unified-auth-service';
 
 // Authenticate with E2E bypass
-const bypassKey = process.env.E2E_BYPASS_KEY;
+const bypassKey = process.env.E2E_OAUTH_SIMULATION_KEY;
 const result = await unifiedAuthService.handleE2ETestAuth(bypassKey, {
   email: 'e2e-test@staging.netrasystems.ai',
   name: 'E2E Test User',
@@ -96,7 +96,7 @@ if (result) {
 ```bash
 curl -X POST https://api.staging.netrasystems.ai/auth/e2e/test-auth \
   -H "Content-Type: application/json" \
-  -H "X-E2E-Bypass-Key: $E2E_BYPASS_KEY" \
+  -H "X-E2E-Bypass-Key: $E2E_OAUTH_SIMULATION_KEY" \
   -d '{
     "email": "e2e-test@staging.netrasystems.ai",
     "name": "E2E Test User",
@@ -123,7 +123,7 @@ token = await auth.get_test_token(
 ```yaml
 - name: Run E2E Tests on Staging
   env:
-    E2E_BYPASS_KEY: ${{ secrets.E2E_BYPASS_KEY }}
+    E2E_OAUTH_SIMULATION_KEY: ${{ secrets.E2E_OAUTH_SIMULATION_KEY }}
     ENVIRONMENT: staging
     STAGING_AUTH_URL: https://api.staging.netrasystems.ai
   run: |
@@ -136,7 +136,7 @@ token = await auth.get_test_token(
 e2e-staging:
   stage: test
   variables:
-    E2E_BYPASS_KEY: $E2E_BYPASS_KEY
+    E2E_OAUTH_SIMULATION_KEY: $E2E_OAUTH_SIMULATION_KEY
     ENVIRONMENT: staging
     STAGING_AUTH_URL: https://api.staging.netrasystems.ai
   script:
@@ -217,4 +217,4 @@ Monitor these logs for:
 
 ## Example Test Suite
 
-See `tests/e2e/test_staging_api_with_auth.py` for a complete example test suite using the auth bypass mechanism.
+See `tests/e2e/test_staging_api_with_auth.py` for a complete example test suite using the OAUTH SIMULATION mechanism.

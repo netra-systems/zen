@@ -42,7 +42,7 @@ from enum import Enum
 import weakref
 
 # Core environment management - SSOT compliance
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment, get_env
+from shared.isolated_environment import IsolatedEnvironment, get_env
 from test_framework.environment_isolation import get_test_env_manager
 
 # Service dependencies with graceful fallback

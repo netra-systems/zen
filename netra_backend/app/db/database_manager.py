@@ -22,7 +22,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 from sqlalchemy.exc import OperationalError, DisconnectionError, IllegalStateChangeError
 
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from netra_backend.app.core.environment_constants import get_current_environment
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.logging_config import central_logger as logger
@@ -394,7 +394,7 @@ class DatabaseManager:
         migration_url = DatabaseManager.get_migration_url_sync_format()
         
         # Get SQL echo setting from environment variable or unified config
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         env = get_env()
         sql_echo_env = env.get("SQL_ECHO", "false").lower() == "true"
         
@@ -1115,7 +1115,7 @@ class DatabaseManager:
             # CRITICAL FIX: Add ClickHouse with graceful failure handling
             try:
                 from netra_backend.app.db.clickhouse import get_clickhouse_client
-                from netra_backend.app.core.isolated_environment import get_env
+                from shared.isolated_environment import get_env
                 import asyncio
                 
                 environment = get_env().get("ENVIRONMENT", "development").lower()
@@ -1737,7 +1737,7 @@ async def get_db_client():
 @asynccontextmanager  
 async def get_clickhouse_client():
     """Context manager for getting ClickHouse client with graceful failure."""
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     
     environment = get_env().get("ENVIRONMENT", "development").lower()
     clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"

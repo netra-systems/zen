@@ -47,7 +47,7 @@ import redis
 from unittest.mock import Mock, patch, AsyncMock
 from contextlib import asynccontextmanager
 
-from auth_service.auth_core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from auth_service.main import app
 from test_framework.base_integration_test import BaseIntegrationTest
 

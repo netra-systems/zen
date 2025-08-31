@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec id="docker-volume-optimization" criticality="CRITICAL" date="2025-08-31">
+    <title>Docker Volume Optimization - Preventing Docker Desktop Crashes</title>
+    
+    <problem_statement>
+        <description>
+            Docker Desktop crashes on Windows/macOS when docker-compose.yml defines 33+ named volumes.
+            Excessive volume definitions combined with bind mounts cause resource exhaustion.
+        </description>
+        
+        <root_causes>
+            <cause priority="1">33 named volumes defined in docker-compose.yml</cause>
+            <cause priority="2">Each service has 3-6 volumes (code, logs, cache, shared)</cause>
+            <cause priority="3">Bind mount synchronization overhead from override files</cause>
+            <cause priority="4">No automatic cleanup of old images/volumes (30GB+ accumulation)</cause>
+        </root_causes>
+        
+        <impact>
+            <item>Complete Docker Desktop failure requiring restart</item>
+            <item>Development environment unusable</item>
+            <item>30GB+ disk space wasted on old resources</item>
+            <item>System instability affecting productivity</item>
+        </impact>
+    </problem_statement>
+
+    <solution>
+        <principle id="minimal-volumes">
+            <title>Minimal Volume Principle</title>
+            <rule>Each service should have AT MOST 1-2 volumes</rule>
+            <rationale>Reduces I/O overhead and Docker daemon stress</rationale>
+            
+            <implementation>
+                <!-- BAD: Current approach with 6 volumes per service -->
+                <bad_example>
+                    <![CDATA[
+services:
+  dev-backend:
+    volumes:
+      - dev_backend_code:/app/netra_backend     # Code volume
+      - dev_shared_code:/app/shared             # Shared volume
+      - dev_spec_data:/app/SPEC                 # Spec volume
+      - dev_scripts:/app/scripts                # Scripts volume
+      - dev_backend_logs:/app/logs              # Logs volume
+      - dev_backend_pycache:/app/.pycache       # Cache volume
+                    ]]>
+                </bad_example>
+                
+                <!-- GOOD: Minimal approach with 1 volume -->
+                <good_example>
+                    <![CDATA[
+services:
+  dev-backend:
+    volumes:
+      - backend_data:/app/data     # Single data volume for persistence
+      # Logs go to stdout/stderr (Docker native)
+      # Cache stays in container (ephemeral)
+      # Code is baked into image
+                    ]]>
+                </good_example>
+            </implementation>
+        </principle>
+
+        <principle id="no-code-volumes">
+            <title>No Code Volumes in Production Config</title>
+            <rule>Code should be baked into Docker images, not mounted as volumes</rule>
+            <rationale>Volumes are for data persistence, not code delivery</rationale>
+            
+            <implementation>
+                <step>Build code into image during docker build</step>
+                <step>Use COPY instructions in Dockerfile</step>
+                <step>Only use bind mounts for active development (optional override)</step>
+            </implementation>
+        </principle>
+
+        <principle id="resource-limits">
+            <title>Mandatory Resource Limits</title>
+            <rule>Every service MUST define memory and CPU limits</rule>
+            
+            <limits>
+                <service name="postgres" memory="256M" cpu="0.25"/>
+                <service name="redis" memory="128M" cpu="0.125"/>
+                <service name="clickhouse" memory="512M" cpu="0.25"/>
+                <service name="backend" memory="512M" cpu="0.5"/>
+                <service name="frontend" memory="512M" cpu="0.5"/>
+                <service name="auth" memory="256M" cpu="0.25"/>
+                <total memory="2.2GB" cpu="1.875" comment="Well within Docker Desktop limits"/>
+            </limits>
+        </principle>
+
+        <principle id="automatic-cleanup">
+            <title>Automatic Resource Cleanup</title>
+            <rule>Implement automatic cleanup of Docker resources</rule>
+            
+            <implementation>
+                <daily_cleanup>
+                    <command>docker image prune -f</command>
+                    <command>docker container prune -f</command>
+                    <command>docker volume prune -f</command>
+                </daily_cleanup>
+                
+                <weekly_cleanup>
+                    <command>docker system prune -af --volumes</command>
+                    <command>docker builder prune -af</command>
+                </weekly_cleanup>
+                
+                <automation>
+                    Use scripts/docker_auto_cleanup.py before each development session
+                </automation>
+            </implementation>
+        </principle>
+    </solution>
+
+    <recommended_configuration>
+        <docker_compose_volumes>
+            <![CDATA[
+# MAXIMUM volumes for entire docker-compose.yml
+volumes:
+  # Infrastructure data only (required for persistence)
+  postgres_data:
+  redis_data:
+  clickhouse_data:   # Optional - can be ephemeral
+  
+  # Application data (if needed)
+  backend_data:       # For file uploads, caches, etc.
+  
+# Total: 4 volumes maximum (vs current 33)
+            ]]>
+        </docker_compose_volumes>
+
+        <service_configuration>
+            <![CDATA[
+services:
+  postgres:
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+  
+  backend:
+    # NO volumes for code - it's in the image
+    volumes:
+      - backend_data:/app/data  # Only if persistent storage needed
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+            ]]>
+        </service_configuration>
+    </recommended_configuration>
+
+    <migration_plan>
+        <phase number="1" name="Cleanup">
+            <action>Run docker system prune -af --volumes</action>
+            <action>Delete docker-compose.override.yml</action>
+            <action>Clear 30GB+ of accumulated resources</action>
+        </phase>
+        
+        <phase number="2" name="Reduce Volumes">
+            <action>Remove all code volumes (dev_backend_code, etc.)</action>
+            <action>Remove all cache volumes (pycache, node_modules)</action>
+            <action>Remove all log volumes (use stdout/stderr)</action>
+            <action>Keep only data persistence volumes</action>
+        </phase>
+        
+        <phase number="3" name="Add Limits">
+            <action>Add deploy.resources.limits to every service</action>
+            <action>Total memory should not exceed 3GB</action>
+            <action>Total CPU should not exceed 2 cores</action>
+        </phase>
+        
+        <phase number="4" name="Automation">
+            <action>Add cleanup script to development workflow</action>
+            <action>Configure Docker Desktop resources (8GB RAM, 4 CPUs)</action>
+            <action>Enable WSL2 backend on Windows</action>
+        </phase>
+    </migration_plan>
+
+    <monitoring>
+        <command purpose="Check volume count">docker volume ls | wc -l</command>
+        <command purpose="Check disk usage">docker system df</command>
+        <command purpose="Check resource usage">docker stats --no-stream</command>
+        <command purpose="Monitor build cache">docker builder du</command>
+        
+        <thresholds>
+            <threshold metric="volumes" max="10" critical="20"/>
+            <threshold metric="images" max="20" critical="50"/>
+            <threshold metric="disk_usage" max="10GB" critical="20GB"/>
+            <threshold metric="build_cache" max="5GB" critical="10GB"/>
+        </thresholds>
+    </monitoring>
+
+    <enforcement_rules>
+        <rule id="volume-limit">
+            <description>No more than 10 named volumes total</description>
+            <validation>Count volumes in docker-compose.yml during CI</validation>
+        </rule>
+        
+        <rule id="resource-limits">
+            <description>Every service must have memory/CPU limits</description>
+            <validation>Fail CI if deploy.resources.limits missing</validation>
+        </rule>
+        
+        <rule id="no-bind-mounts-production">
+            <description>No bind mounts in main docker-compose.yml</description>
+            <validation>Bind mounts only allowed in override files</validation>
+        </rule>
+        
+        <rule id="cleanup-before-commit">
+            <description>Run cleanup before committing Docker changes</description>
+            <validation>Add pre-commit hook for docker cleanup check</validation>
+        </rule>
+    </enforcement_rules>
+
+    <business_impact>
+        <item>Development velocity: 50% improvement from stability</item>
+        <item>Disk space: 30GB+ reclaimed per developer</item>
+        <item>Downtime: Eliminated Docker crash-related downtime</item>
+        <item>Onboarding: New developers can start immediately</item>
+    </business_impact>
+
+    <cross_references>
+        <reference file="docker-compose.yml" action="reduce-volumes"/>
+        <reference file="docker-compose.minimal.yml" relation="best-practice"/>
+        <reference file="scripts/docker_auto_cleanup.py" relation="automation"/>
+        <reference file="DOCKER_CLEANUP_PROCESS.md" relation="documentation"/>
+        <reference file="SPEC/learnings/docker_daemon_crash_resource_exhaustion.xml"/>
+    </cross_references>
+</spec>

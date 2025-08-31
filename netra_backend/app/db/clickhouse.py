@@ -98,7 +98,7 @@ _clickhouse_cache = ClickHouseCache()
 
 def _is_testing_environment() -> bool:
     """Check if running in testing environment."""
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     
     # Check TESTING environment variable directly for pytest compatibility
     if get_env().get("TESTING"):
@@ -110,7 +110,7 @@ def _is_testing_environment() -> bool:
 def _is_real_database_test() -> bool:
     """Check if this is a test that explicitly requires real database connections."""
     import sys
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     
     # Check if we're running under pytest
     if 'pytest' not in sys.modules:
@@ -130,7 +130,7 @@ def _is_real_database_test() -> bool:
 
 def _should_disable_clickhouse_for_tests() -> bool:
     """Check if ClickHouse should be disabled for the current test context."""
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     
     # Always check if we're in a real database test first
     if _is_real_database_test():
@@ -247,7 +247,7 @@ async def get_clickhouse_client():
         async with get_clickhouse_client() as client:
             results = await client.execute("SELECT * FROM events")
     """
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     
     if use_mock_clickhouse():
         # Only for regular testing environment where ClickHouse is explicitly disabled
@@ -326,7 +326,7 @@ async def _test_and_yield_client(client):
     Enhanced with async generator protection against corruption and staging-specific timeouts.
     """
     import asyncio
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     
     environment = get_env().get("ENVIRONMENT", "development").lower()
     client_yielded = False
@@ -375,7 +375,7 @@ def _create_intercepted_client(config, use_secure: bool):
 
 def _handle_connection_error(e: Exception):
     """Handle ClickHouse connection error with environment-aware handling."""
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     
     environment = get_env().get("ENVIRONMENT", "development").lower()
     
@@ -422,7 +422,7 @@ async def _create_real_client():
     This is the default behavior - connects to actual ClickHouse instance.
     With graceful degradation for optional environments.
     """
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     
     environment = get_env().get("ENVIRONMENT", "development").lower()
     
@@ -492,7 +492,7 @@ class ClickHouseService:
     async def _initialize_real_client(self):
         """Initialize real ClickHouse client with enhanced retry logic and graceful failure."""
         import asyncio
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         environment = get_env().get("ENVIRONMENT", "development").lower()
         
@@ -543,7 +543,7 @@ class ClickHouseService:
     async def initialize(self):
         """Initialize ClickHouse connection with timeout protection."""
         import asyncio
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         if self.force_mock or use_mock_clickhouse():
             # In testing environment with ClickHouse disabled, use NoOp client
@@ -928,3 +928,17 @@ def _prepare_state_history_record(run_id: str, state_data: dict, metadata: dict)
 ClickHouseManager = ClickHouseService  # Alias for test imports
 ClickHouseClient = ClickHouseService  # Alias for consolidation
 ClickHouseDatabaseClient = ClickHouseService  # Alias for consolidation
+
+# Re-export MockClickHouseDatabase for backward compatibility
+# Tests and database_manager expect this import path to work
+try:
+    from test_framework.fixtures.clickhouse_fixtures import MockClickHouseDatabase
+    # Make it available for import from this module
+    __all__ = ['MockClickHouseDatabase', 'ClickHouseService', 'ClickHouseCache', 'NoOpClickHouseClient', 
+               'get_clickhouse_client', 'get_clickhouse_service', 'create_agent_state_history_table',
+               'insert_agent_state_history', 'ClickHouseManager', 'ClickHouseClient', 'ClickHouseDatabaseClient']
+except ImportError:
+    # If test framework not available, define minimal exports without MockClickHouseDatabase
+    __all__ = ['ClickHouseService', 'ClickHouseCache', 'NoOpClickHouseClient', 
+               'get_clickhouse_client', 'get_clickhouse_service', 'create_agent_state_history_table',
+               'insert_agent_state_history', 'ClickHouseManager', 'ClickHouseClient', 'ClickHouseDatabaseClient']

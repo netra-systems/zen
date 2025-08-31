@@ -29,7 +29,7 @@ class TestDatabaseSessionEfficiency:
     def setup_test(self):
         """Setup test environment."""
         # Force postgres initialization for tests
-        from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+        from shared.isolated_environment import IsolatedEnvironment
         with IsolatedEnvironment() as env:
             env.set('TEST_COLLECTION_MODE', '0')  # Disable test collection mode
             initialize_postgres()

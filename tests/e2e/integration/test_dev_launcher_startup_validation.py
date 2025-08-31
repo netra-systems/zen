@@ -39,7 +39,7 @@ from dev_launcher import DevLauncher, LauncherConfig
 from dev_launcher.database_connector import DatabaseConnector
 from dev_launcher.health_monitor import HealthMonitor
 from dev_launcher.service_coordinator import ServiceCoordinator
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 

@@ -58,7 +58,7 @@ from websockets.exceptions import ConnectionClosed, InvalidURI
 from dev_launcher import DevLauncher, LauncherConfig
 from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.database_connector import DatabaseConnector, DatabaseType
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from test_framework.base_e2e_test import BaseE2ETest
 
 logger = logging.getLogger(__name__)

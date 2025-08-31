@@ -15,7 +15,7 @@ import jwt
 import uuid
 from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Optional, Any
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 def generate_test_jwt_token(

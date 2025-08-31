@@ -456,13 +456,13 @@ class CentralConfigurationValidator:
             if self.env_getter("DEBUG", "").lower() == "true":
                 raise ValueError("DEBUG must not be enabled in production environment")
             
-            if self.env_getter("ALLOW_DEV_AUTH_BYPASS", "").lower() == "true":
-                raise ValueError("ALLOW_DEV_AUTH_BYPASS must not be enabled in production environment")
+            if self.env_getter("ALLOW_DEV_OAUTH_SIMULATION", "").lower() == "true":
+                raise ValueError("ALLOW_DEV_OAUTH_SIMULATION must not be enabled in production environment")
         
         elif environment == Environment.STAGING:
             # Staging-specific validations
-            if self.env_getter("ALLOW_DEV_AUTH_BYPASS", "").lower() == "true":
-                logger.warning("ALLOW_DEV_AUTH_BYPASS enabled in staging - this should only be temporary")
+            if self.env_getter("ALLOW_DEV_OAUTH_SIMULATION", "").lower() == "true":
+                logger.warning("ALLOW_DEV_OAUTH_SIMULATION enabled in staging - this should only be temporary")
 
 
 # Global instance - SSOT for configuration validation

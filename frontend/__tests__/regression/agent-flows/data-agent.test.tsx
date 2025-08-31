@@ -81,7 +81,7 @@ jest.mock('@/store/unified-chat', () => ({
 
 describe('Data Agent Flow Tests', () => {
   setupAntiHang();
-    jest.setTimeout(10000);
+  
   let wsEventHandlers: { [key: string]: Function[] } = {};
   let chatStore: ReturnType<typeof useChatStore>;
   let unifiedStore: ReturnType<typeof useUnifiedChatStore>;
@@ -706,6 +706,7 @@ describe('Data Agent Flow Tests', () => {
       });
     });
   });
+  
   afterEach(() => {
     cleanupAntiHang();
   });

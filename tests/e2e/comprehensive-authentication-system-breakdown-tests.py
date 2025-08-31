@@ -54,7 +54,7 @@ import subprocess
 import psutil
 
 from test_framework.base_e2e_test import BaseE2ETest
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.e2e

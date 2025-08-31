@@ -14,7 +14,7 @@ from typing import Dict, Optional, Any
 
 from netra_backend.app.llm.llm_defaults import LLMModel
 from netra_backend.app.schemas.llm_types import LLMProvider
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 class TriageConfig:

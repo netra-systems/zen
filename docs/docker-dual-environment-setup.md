@@ -91,7 +91,7 @@ docker-compose -f docker-compose.dev.yml --env-file .env.dev up
 - **Characteristics**:
   - Verbose logging (DEBUG level)
   - Hot reload enabled for all services
-  - Development auth bypass
+  - Development OAUTH SIMULATION
   - Real API keys from .env.development
   - Browser-accessible frontend
 
@@ -112,7 +112,7 @@ docker-compose -f docker-compose.dev.yml --env-file .env.dev up
 ### Backend API
 - **DEV**: `http://localhost:8000`
   - Hot reload enabled
-  - Development auth bypass
+  - Development OAUTH SIMULATION
   - Debug logging
 - **TEST**: `http://localhost:8001`
   - Minimal logging
@@ -307,7 +307,7 @@ docker logs netra-backend | grep reload
 
 ### DEV-Specific
 
-- `ALLOW_DEV_AUTH_BYPASS=true` - Skip auth for development
+- `ALLOW_DEV_OAUTH_SIMULATION=true` - Skip auth for development
 - `WATCHDOG_*` - Hot reload configuration
 - Debug and monitoring settings
 
@@ -390,7 +390,7 @@ docker-compose -f docker-compose.dev.yml --env-file .env.dev up
 | Database | netra_test | netra_dev |
 | Hot Reload | No | Yes |
 | Logging | ERROR | DEBUG |
-| Auth Bypass | No | Yes |
+| OAUTH SIMULATION | No | Yes |
 | API Keys | Mock | Real |
 | Startup Time | Fast | Normal |
 | Resource Usage | Minimal | Normal |

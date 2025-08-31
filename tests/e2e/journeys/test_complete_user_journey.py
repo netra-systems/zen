@@ -26,6 +26,8 @@ from typing import Any, Dict, List
 
 import pytest
 
+from test_framework.service_dependencies import requires_services
+
 # Test environment setup
 os.environ["TESTING"] = "1"
 os.environ["CORS_ORIGINS"] = "*"
@@ -47,6 +49,7 @@ from tests.e2e.helpers.journey.user_journey_helpers import (
 )
 
 
+@requires_services(["auth", "backend", "websocket", "database", "redis"], mode="either")
 @pytest.mark.e2e
 class TestCompleteUserJourney:
     """Complete user journey integration tests."""

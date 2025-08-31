@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from netra_backend.app.core.environment_constants import (
     Environment,
     EnvironmentVariables,

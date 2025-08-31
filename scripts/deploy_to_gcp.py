@@ -27,8 +27,9 @@ from dataclasses import dataclass
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-# Import centralized GCP authentication
+# Import centralized GCP authentication and environment management
 from scripts.gcp_auth_config import GCPAuthConfig
+from shared.isolated_environment import get_env
 
 # Fix Unicode encoding issues on Windows
 if sys.platform == "win32":
@@ -94,6 +95,12 @@ class GCPDeployer:
                     "FRONTEND_URL": "https://app.staging.netrasystems.ai",
                     "FORCE_HTTPS": "true",  # REQUIREMENT 6: FORCE_HTTPS for load balancer
                     "GCP_PROJECT_ID": self.project_id,  # CRITICAL: Required for secret loading logic
+                    # ClickHouse configuration - password comes from secrets
+                    "CLICKHOUSE_HOST": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud",
+                    "CLICKHOUSE_PORT": "8443",
+                    "CLICKHOUSE_USER": "default",
+                    "CLICKHOUSE_DB": "default",
+                    "CLICKHOUSE_SECURE": "true",
                 }
             ),
             ServiceConfig(
@@ -664,19 +671,24 @@ CMD ["npm", "start"]
         if env_vars:
             cmd.extend(["--set-env-vars", ",".join(env_vars)])
         
+        # Add VPC connector for services that need Redis/database access
+        if service.name in ["backend", "auth"]:
+            # CRITICAL: VPC connector required for Redis and Cloud SQL connectivity
+            cmd.extend(["--vpc-connector", "staging-connector"])
+        
         # Add service-specific configurations
         if service.name == "backend":
             # Backend needs connections to databases and all required secrets from GSM
             cmd.extend([
                 "--add-cloudsql-instances", f"{self.project_id}:us-central1:staging-shared-postgres,{self.project_id}:us-central1:netra-postgres",
-                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_STAGING=jwt-secret-staging:latest,SECRET_KEY=secret-key-staging:latest,OPENAI_API_KEY=openai-api-key-staging:latest,FERNET_KEY=fernet-key-staging:latest,GEMINI_API_KEY=gemini-api-key-staging:latest,GOOGLE_OAUTH_CLIENT_ID_STAGING=google-oauth-client-id-staging:latest,GOOGLE_OAUTH_CLIENT_SECRET_STAGING=google-oauth-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,CLICKHOUSE_USER=clickhouse-user-staging:latest,CLICKHOUSE_DB=clickhouse-db-staging:latest,CLICKHOUSE_PASSWORD=clickhouse-password-staging:latest,REDIS_URL=redis-url-staging:latest,REDIS_PASSWORD=redis-password-staging:latest,CLICKHOUSE_HOST=clickhouse-host-staging:latest,CLICKHOUSE_PORT=clickhouse-port-staging:latest,CLICKHOUSE_URL=clickhouse-url-staging:latest,ANTHROPIC_API_KEY=anthropic-api-key-staging:latest"
+                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_STAGING=jwt-secret-staging:latest,JWT_SECRET_KEY=jwt-secret-key:latest,SECRET_KEY=secret-key-staging:latest,OPENAI_API_KEY=openai-api-key-staging:latest,FERNET_KEY=fernet-key-staging:latest,GEMINI_API_KEY=gemini-api-key-staging:latest,GOOGLE_OAUTH_CLIENT_ID_STAGING=google-oauth-client-id-staging:latest,GOOGLE_OAUTH_CLIENT_SECRET_STAGING=google-oauth-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,REDIS_URL=redis-url-staging:latest,REDIS_PASSWORD=redis-password-staging:latest,ANTHROPIC_API_KEY=anthropic-api-key-staging:latest,CLICKHOUSE_PASSWORD=clickhouse-password-staging:latest"
             ])
         elif service.name == "auth":
             # Auth service needs database, JWT secrets, OAuth credentials from GSM only
             # CRITICAL FIX: Use correct OAuth environment variable names expected by auth service
             cmd.extend([
                 "--add-cloudsql-instances", f"{self.project_id}:us-central1:staging-shared-postgres,{self.project_id}:us-central1:netra-postgres",
-                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_STAGING=jwt-secret-staging:latest,GOOGLE_OAUTH_CLIENT_ID_STAGING=google-oauth-client-id-staging:latest,GOOGLE_OAUTH_CLIENT_SECRET_STAGING=google-oauth-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,SERVICE_ID=service-id-staging:latest,OAUTH_HMAC_SECRET=oauth-hmac-secret-staging:latest,REDIS_URL=redis-url-staging:latest,REDIS_PASSWORD=redis-password-staging:latest"
+                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_STAGING=jwt-secret-staging:latest,JWT_SECRET_KEY=jwt-secret-key:latest,GOOGLE_OAUTH_CLIENT_ID_STAGING=google-oauth-client-id-staging:latest,GOOGLE_OAUTH_CLIENT_SECRET_STAGING=google-oauth-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,SERVICE_ID=service-id-staging:latest,OAUTH_HMAC_SECRET=oauth-hmac-secret-staging:latest,REDIS_URL=redis-url-staging:latest,REDIS_PASSWORD=redis-password-staging:latest"
             ])
         
         try:
@@ -838,7 +850,8 @@ CMD ["npm", "start"]
             "google-oauth-client-secret-staging",
             "service-secret-staging",
             "redis-url-staging",
-            "redis-password-staging"
+            "redis-password-staging",
+            "clickhouse-password-staging"  # Required for ClickHouse authentication
             # anthropic-api-key-staging is optional, not required
         ]
         
@@ -1011,7 +1024,7 @@ CMD ["npm", "start"]
             "clickhouse-port-staging": "8123",
             "clickhouse-user-staging": "default",
             "clickhouse-db-staging": "default",
-            "clickhouse-default-password-staging": "REPLACE_WITH_CLICKHOUSE_PASSWORD",
+            "clickhouse-password-staging": "REPLACE_WITH_CLICKHOUSE_PASSWORD",
             # Additional required secrets for comprehensive staging support
             "gemini-api-key-staging": os.getenv("GEMINI_API_KEY", "REPLACE_WITH_REAL_GEMINI_KEY"),
             "anthropic-api-key-staging": os.getenv("ANTHROPIC_API_KEY", "REPLACE_WITH_REAL_ANTHROPIC_KEY")
@@ -1232,10 +1245,10 @@ CMD ["npm", "start"]
             
             print(f"\nTesting {environment} environment...")
             
-            # Set environment variables for the test
-            import os
-            os.environ["AUTH_SERVICE_URL"] = service_urls.get("auth", "")
-            os.environ["BACKEND_URL"] = service_urls.get("backend", "")
+            # Set environment variables for the test using proper environment management
+            env = get_env()
+            env.set("AUTH_SERVICE_URL", service_urls.get("auth", ""), "deploy_gcp_post_deployment_test")
+            env.set("BACKEND_URL", service_urls.get("backend", ""), "deploy_gcp_post_deployment_test")
             
             # Run the tests asynchronously
             import asyncio

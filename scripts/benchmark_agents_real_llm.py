@@ -28,7 +28,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.llm.client_factory import get_llm_client
 from netra_backend.app.llm.client_retry import RetryableLLMClient
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.core.config import get_settings
 
 
@@ -79,7 +79,7 @@ class RealLLMBenchmark:
     
     async def benchmark_supervisor(self) -> AgentBenchmark:
         """Benchmark Supervisor Agent with real LLM"""
-        from netra_backend.app.agents.supervisor_agent import SupervisorAgent
+        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
         from netra_backend.app.db.session import get_async_db
         
         benchmark = AgentBenchmark(

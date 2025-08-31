@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Optional, Tuple
 
 from dev_launcher.config import LauncherConfig, resolve_path
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from dev_launcher.log_streamer import Colors, LogManager, LogStreamer
 from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.utils import (
@@ -111,7 +111,8 @@ class AuthStarter:
             sys.executable, "-m", "uvicorn",
             "auth_service.main:app",
             "--host", "0.0.0.0",
-            "--port", str(port)
+            "--port", str(port),
+            "--log-level", "warning"
         ]
         
         # Add reload based on configuration

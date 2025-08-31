@@ -37,7 +37,7 @@ from unittest.mock import patch, MagicMock
 # ABSOLUTE IMPORTS - Following SPEC/import_management_architecture.xml
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.core.configuration.secrets import SecretManager
-from netra_backend.app.core.isolated_environment import get_env, IsolatedEnvironment
+from shared.isolated_environment import get_env, IsolatedEnvironment
 from netra_backend.app.config import get_config
 from netra_backend.app.startup_module import initialize_logging
 

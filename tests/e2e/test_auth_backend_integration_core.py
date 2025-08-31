@@ -35,8 +35,8 @@ import logging
 from typing import Dict, Any, Optional, List
 
 # Import IsolatedEnvironment for proper environment management as required by CLAUDE.md
-from auth_service.auth_core.isolated_environment import get_env as get_auth_env
-from netra_backend.app.core.isolated_environment import get_env as get_backend_env
+from shared.isolated_environment import get_env as get_auth_env
+from shared.isolated_environment import get_env as get_backend_env
 
 logger = logging.getLogger(__name__)
 

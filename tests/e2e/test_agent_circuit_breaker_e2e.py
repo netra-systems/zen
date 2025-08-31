@@ -28,7 +28,7 @@ import aiohttp
 import pytest
 
 # Use IsolatedEnvironment for env management per CLAUDE.md
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 # Set test environment using IsolatedEnvironment - SSOT for env access
 env = get_env()

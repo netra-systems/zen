@@ -36,7 +36,7 @@ from test_framework.real_services import (
 )
 
 # Use auth service isolated environment
-from auth_service.auth_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from auth_service.auth_core.database.connection import auth_db
 from auth_service.auth_core.database.models import Base
 from auth_service.auth_core.redis_manager import AuthRedisManager

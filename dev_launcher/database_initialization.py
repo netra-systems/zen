@@ -19,7 +19,7 @@ import random
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from shared.database_url_builder import DatabaseURLBuilder
 
 from dev_launcher.utils import print_with_emoji

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>Docker Compose Service Restart Issues and Resolution</title>
+  <date>2025-08-31</date>
+  <category>docker</category>
+  <subcategory>infrastructure</subcategory>
+  
+  <problem>
+    <description>
+      Docker Compose services were crashing when using "docker compose restart" command.
+      Services would exit with code 255, causing dependent services to fail.
+    </description>
+    <symptoms>
+      - Database containers (postgres, redis, clickhouse) exiting with code 255
+      - Dependent services unable to connect to databases
+      - Services showing "could not translate host name" errors
+      - Frontend container not starting automatically
+    </symptoms>
+  </problem>
+  
+  <root_causes>
+    <cause id="1">
+      <description>docker-compose.override.yml conflicting with main configuration</description>
+      <details>
+        Override file contained conflicting port configurations and improperly formatted
+        multi-line commands that caused shell execution errors.
+      </details>
+    </cause>
+    <cause id="2">
+      <description>Multi-line command formatting issues</description>
+      <details>
+        Commands in docker-compose.override.yml had incorrect line continuations
+        with backslashes within quoted strings, causing "command not found" errors.
+      </details>
+    </cause>
+    <cause id="3">
+      <description>Port configuration inconsistencies</description>
+      <details>
+        Auth service had mismatched ports between override (8081) and main config (8000),
+        though internal/external port mapping was correct.
+      </details>
+    </cause>
+  </root_causes>
+  
+  <solution>
+    <step number="1">
+      <action>Removed docker-compose.override.yml file</action>
+      <reason>
+        Override file was creating unnecessary complexity and configuration conflicts.
+        All necessary settings can be maintained in the main docker-compose.yml.
+      </reason>
+    </step>
+    <step number="2">
+      <action>Fixed multi-line command in main docker-compose.yml</action>
+      <change>
+        Changed auth service command from using environment variable substitution
+        to hardcoded values to avoid shell interpretation issues.
+      </change>
+    </step>
+    <step number="3">
+      <action>Verified port consistency across all services</action>
+      <confirmation>
+        Ensured internal ports match what services actually bind to,
+        and external ports provide proper host mapping.
+      </confirmation>
+    </step>
+  </solution>
+  
+  <best_practices>
+    <practice>
+      Avoid using docker-compose.override.yml unless absolutely necessary.
+      It adds complexity and can cause configuration conflicts that are hard to debug.
+    </practice>
+    <practice>
+      When using multi-line commands in docker-compose.yml, use proper YAML
+      block scalar syntax (>) and avoid backslash continuations within strings.
+    </practice>
+    <practice>
+      Always ensure port configurations are consistent:
+      - Environment PORT variable should match what the service binds to
+      - Container port in ports mapping should match the internal port
+      - Use explicit values rather than variable substitution in commands when possible
+    </practice>
+    <practice>
+      Use "docker compose down" followed by "docker compose up" instead of
+      "docker compose restart" when configuration changes are made.
+    </practice>
+  </best_practices>
+  
+  <testing>
+    <test>docker compose --profile dev down</test>
+    <test>docker compose --profile dev up -d</test>
+    <test>docker compose --profile dev restart</test>
+    <result>All services start and restart successfully without crashes</result>
+  </testing>
+  
+  <impact>
+    <item>Resolved Docker Compose service stability issues</item>
+    <item>Simplified configuration by removing override file</item>
+    <item>Improved developer experience with reliable service restarts</item>
+  </impact>
+</learning>

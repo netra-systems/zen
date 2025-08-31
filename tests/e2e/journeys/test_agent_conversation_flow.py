@@ -40,7 +40,7 @@ class TestAgentConversationFlow:
     
     def setup_method(self):
         """Configure real service connections before each test."""
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         env = get_env()
         
@@ -204,7 +204,7 @@ class TestAgentConversationFlow:
                                              agent_type: str) -> Dict[str, Any]:
         """Execute agent request with real LLM response - NO MOCKING."""
         from test_framework.real_llm_config import get_real_llm_manager
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         from netra_backend.app.config import get_config
         from netra_backend.app.llm.llm_manager import LLMManager
         
@@ -262,7 +262,7 @@ class TestAgentConversationPerformance:
     
     def setup_method(self):
         """Configure real service connections before each performance test."""
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         env = get_env()
         

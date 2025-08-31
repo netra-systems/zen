@@ -50,7 +50,7 @@ from netra_backend.app.core.exceptions import (
 try:
     from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitBreaker, UnifiedCircuitBreakerState
     from netra_backend.app.core.resilience.unified_retry_handler import UnifiedRetryHandler
-    from netra_backend.app.core.environment.isolated_environment import IsolatedEnvironment
+    from shared.isolated_environment import IsolatedEnvironment
     from netra_backend.app.db.database_manager import DatabaseManager
 except ImportError as e:
     # Some modules may not be available in all test environments

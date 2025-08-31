@@ -19,7 +19,7 @@ from typing import Optional, Tuple
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from shared.database_url_builder import DatabaseURLBuilder
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

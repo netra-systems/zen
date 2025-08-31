@@ -118,7 +118,7 @@ class ReconnectionManager:
                 delay = self.config.calculate_delay(attempt_number)
                 
                 # CRITICAL FIX: Add circuit breaker pattern for staging environments
-                from netra_backend.app.core.isolated_environment import get_env
+                from shared.isolated_environment import get_env
                 env = get_env()
                 environment = env.get("ENVIRONMENT", "development").lower()
                 
@@ -313,7 +313,7 @@ def get_reconnection_manager(config: Optional[ReconnectionConfig] = None) -> Rec
     if _reconnection_manager is None:
         # CRITICAL FIX: Use environment-specific reconnection configuration
         if config is None:
-            from netra_backend.app.core.isolated_environment import get_env
+            from shared.isolated_environment import get_env
             env = get_env()
             environment = env.get("ENVIRONMENT", "development").lower()
             

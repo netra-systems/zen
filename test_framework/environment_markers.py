@@ -31,7 +31,13 @@ class TestEnvironment(Enum):
     @classmethod
     def get_current(cls) -> 'TestEnvironment':
         """Get the current test environment from env vars."""
-        env_str = os.environ.get("TEST_ENV", "test").lower()
+        # Check multiple environment variables for compatibility
+        env_str = (
+            os.environ.get("TEST_ENV") or
+            os.environ.get("ENVIRONMENT") or
+            os.environ.get("NETRA_ENVIRONMENT") or
+            "test"
+        ).lower()
         return cls.from_string(env_str)
 
 
@@ -480,6 +486,52 @@ def _apply_rate_limit(limit: int):
     """Apply rate limiting to test execution."""
     import time
     time.sleep(1.0 / limit)  # Simple rate limiting
+
+
+# Utility functions for skipif conditions
+
+def is_environment(env_name: str) -> bool:
+    """Check if current environment matches the given name.
+    
+    Args:
+        env_name: Environment name to check (e.g., "staging", "dev", "test")
+    
+    Returns:
+        True if current environment matches
+    """
+    try:
+        current_env = TestEnvironment.get_current()
+        return current_env.value == env_name.lower()
+    except ValueError:
+        return False
+
+
+def requires_environment(env_name: str) -> bool:
+    """Check if test should run in the given environment.
+    
+    Used in pytest.mark.skipif conditions.
+    
+    Args:
+        env_name: Environment name required (e.g., "staging")
+    
+    Returns:
+        True if test should run (environment matches)
+    """
+    return is_environment(env_name)
+
+
+def skip_unless_environment(env_name: str) -> bool:
+    """Check if test should be skipped unless in given environment.
+    
+    Used in pytest.mark.skipif conditions.
+    
+    Args:
+        env_name: Environment name required
+    
+    Returns:
+        True if test should be skipped (environment doesn't match)
+    """
+    return not is_environment(env_name)
 
 
 # Convenience decorators for common patterns

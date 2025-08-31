@@ -50,6 +50,11 @@ class StatePersistenceService:
     - Redis: PRIMARY active state storage (authoritative for running agents)
     - ClickHouse: Historical analytics (completed runs, time-series data)
     - PostgreSQL: Metadata and recovery checkpoints (minimal critical data)
+    
+    Includes optimizations:
+    - Intelligent deduplication to avoid redundant writes
+    - In-memory caching for recent states
+    - Configurable optimization strategies
     """
     
     def __init__(self):
@@ -60,16 +65,39 @@ class StatePersistenceService:
         self.serializer = StateSerializer()
         self.validator = StateValidator()
         self._use_legacy_mode = False  # Flag for backward compatibility
+        
+        # Optimization features from OptimizedStatePersistence
+        self._state_cache = {}  # In-memory cache for recent states
+        self._cache_max_size = 1000  # Maximum number of cached states
+        self._enable_deduplication = False  # Disabled by default for backward compatibility
+        self._enable_compression = False  # Additional compression beyond threshold
+        self._optimization_enabled = False  # Master flag for all optimizations
+        
+        # Auto-enable optimizations based on environment
+        self._configure_optimizations()
     
     async def save_agent_state(self, *args, **kwargs) -> Tuple[bool, Optional[str]]:
-        """Save agent state using optimal 3-tier architecture.
+        """Save agent state using optimal 3-tier architecture with optional optimizations.
         
         Flow:
-        1. Save to Redis (PRIMARY) - immediate, high-performance
-        2. Optionally create PostgreSQL checkpoint (critical recovery points only)
-        3. Schedule ClickHouse migration for completed runs
+        1. Check for deduplication opportunities (if enabled)
+        2. Save to Redis (PRIMARY) - immediate, high-performance
+        3. Optionally create PostgreSQL checkpoint (critical recovery points only)
+        4. Schedule ClickHouse migration for completed runs
         """
         request, db_session = self._parse_save_arguments(*args, **kwargs)
+        
+        # Apply optimizations if enabled
+        if self._optimization_enabled:
+            # Check for deduplication opportunity
+            if await self._should_skip_persistence(request):
+                logger.debug(f"Skipping redundant state persistence for run {request.run_id}")
+                return True, self._get_cached_snapshot_id(request.run_id)
+            
+            # Apply state optimizations
+            if self._is_optimizable_save(request):
+                request = self._optimize_state_data(request)
+        
         return await self._execute_new_save_workflow(request, db_session)
 
     def _parse_save_arguments(self, *args, **kwargs) -> Tuple[StatePersistenceRequest, AsyncSession]:
@@ -745,6 +773,166 @@ class StatePersistenceService:
         essential['recovery_version'] = '3-tier-v1'
         
         return essential
+    
+    # Optimization methods merged from OptimizedStatePersistence
+    def _configure_optimizations(self) -> None:
+        """Configure optimizations based on environment settings."""
+        from shared.isolated_environment import get_env
+        
+        # Check if optimized persistence is enabled
+        # Note: The get_env() function already reads from environment or defaults
+        env_value = get_env().get("ENABLE_OPTIMIZED_PERSISTENCE", "false")
+        self._optimization_enabled = str(env_value).lower() == "true"
+        
+        if self._optimization_enabled:
+            self._enable_deduplication = True
+            self._enable_compression = True
+            logger.info("State persistence optimizations enabled (deduplication, compression)")
+        else:
+            logger.debug("State persistence optimizations disabled")
+    
+    def _is_optimizable_save(self, request: StatePersistenceRequest) -> bool:
+        """Determine if this save can be optimized."""
+        # Optimize non-critical checkpoints
+        non_critical_types = {
+            CheckpointType.AUTO,
+            CheckpointType.INTERMEDIATE,
+            CheckpointType.PIPELINE_COMPLETE
+        }
+        
+        # Don't optimize critical save points
+        if hasattr(request, 'checkpoint_type') and request.checkpoint_type:
+            checkpoint_type = request.checkpoint_type
+            if hasattr(checkpoint_type, 'value'):
+                checkpoint_type = checkpoint_type.value
+            
+            return checkpoint_type in {ct.value for ct in non_critical_types}
+        
+        # Default to optimizable for backwards compatibility
+        return True
+    
+    async def _should_skip_persistence(self, request: StatePersistenceRequest) -> bool:
+        """Check if we can skip this persistence operation due to deduplication."""
+        if not self._enable_deduplication:
+            return False
+        
+        # Calculate state hash for deduplication
+        state_hash = self._calculate_state_hash(request.state_data)
+        cache_key = f"{request.run_id}:{request.user_id}"
+        
+        # Check if we've already persisted this exact state
+        cached_info = self._state_cache.get(cache_key)
+        if cached_info and cached_info.get('state_hash') == state_hash:
+            # State hasn't changed, skip persistence
+            return True
+        
+        # Update cache with new state hash
+        self._update_state_cache(cache_key, state_hash)
+        return False
+    
+    def _calculate_state_hash(self, state_data: Dict[str, Any]) -> str:
+        """Calculate hash of state data for deduplication."""
+        import hashlib
+        try:
+            # Create a deterministic string representation of the state
+            state_str = json.dumps(state_data, sort_keys=True, default=str)
+            return hashlib.md5(state_str.encode()).hexdigest()
+        except Exception as e:
+            logger.warning(f"Failed to calculate state hash: {e}")
+            # Return random hash to disable deduplication for this state
+            return str(uuid.uuid4())
+    
+    def _update_state_cache(self, cache_key: str, state_hash: str) -> None:
+        """Update the state cache with new state hash."""
+        # Implement LRU-style cache eviction if needed
+        if len(self._state_cache) >= self._cache_max_size:
+            # Remove oldest entry (simple FIFO for now)
+            oldest_key = next(iter(self._state_cache))
+            del self._state_cache[oldest_key]
+        
+        snapshot_id = str(uuid.uuid4())
+        self._state_cache[cache_key] = {
+            'state_hash': state_hash,
+            'snapshot_id': snapshot_id,
+            'timestamp': datetime.now(timezone.utc)
+        }
+    
+    def _get_cached_snapshot_id(self, run_id: str) -> Optional[str]:
+        """Get cached snapshot ID for deduplication scenarios."""
+        # Find cache entry by run_id
+        for cache_key, cache_info in self._state_cache.items():
+            if cache_key.startswith(f"{run_id}:"):
+                return cache_info.get('snapshot_id')
+        return str(uuid.uuid4())  # Return dummy ID if not found
+    
+    def _optimize_state_data(self, request: StatePersistenceRequest) -> StatePersistenceRequest:
+        """Apply optimizations to state data before persistence."""
+        import copy
+        # Deep copy the request to avoid modifying the original
+        optimized_data = copy.deepcopy(request.state_data)
+        
+        # Apply compression optimizations if enabled
+        if self._enable_compression:
+            optimized_data = self._compress_state_data(optimized_data)
+        
+        # Create new request with optimized data
+        return StatePersistenceRequest(
+            run_id=request.run_id,
+            thread_id=request.thread_id,
+            user_id=request.user_id,
+            state_data=optimized_data,
+            checkpoint_type=request.checkpoint_type,
+            agent_phase=request.agent_phase,
+            execution_context=request.execution_context,
+            is_recovery_point=request.is_recovery_point,
+            expires_at=request.expires_at
+        )
+    
+    def _compress_state_data(self, state_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Apply compression optimizations to state data."""
+        # For now, this is a placeholder for compression logic
+        # Could implement:
+        # - Remove redundant fields
+        # - Compress large text fields
+        # - Optimize data structures
+        return state_data
+    
+    def configure(self, **config_options) -> None:
+        """Configure optimization settings."""
+        if 'enable_optimizations' in config_options:
+            self._optimization_enabled = config_options['enable_optimizations']
+            if self._optimization_enabled:
+                self._enable_deduplication = True
+                self._enable_compression = True
+            logger.info(f"Optimizations {'enabled' if self._optimization_enabled else 'disabled'}")
+        
+        if 'enable_deduplication' in config_options:
+            self._enable_deduplication = config_options['enable_deduplication']
+            logger.info(f"Deduplication {'enabled' if self._enable_deduplication else 'disabled'}")
+        
+        if 'enable_compression' in config_options:
+            self._enable_compression = config_options['enable_compression']
+            logger.info(f"Compression {'enabled' if self._enable_compression else 'disabled'}")
+        
+        if 'cache_max_size' in config_options:
+            self._cache_max_size = config_options['cache_max_size']
+            logger.info(f"Cache max size set to {self._cache_max_size}")
+    
+    def get_cache_stats(self) -> Dict[str, Any]:
+        """Get cache statistics for monitoring."""
+        return {
+            'cache_size': len(self._state_cache),
+            'cache_max_size': self._cache_max_size,
+            'optimization_enabled': self._optimization_enabled,
+            'deduplication_enabled': self._enable_deduplication,
+            'compression_enabled': self._enable_compression,
+            'cache_entries': list(self._state_cache.keys())
+        }
+    
+    def clear_cache(self) -> None:
+        """Clear the state cache (useful for testing)."""
+        self._state_cache.clear()
+        logger.debug("State cache cleared")
 
 # Global instance
 state_persistence_service = StatePersistenceService()

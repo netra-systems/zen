@@ -25,7 +25,7 @@ See: CRITICAL_AUTH_ARCHITECTURE.md for full details
 # Create auth-specific logger
 import logging
 from datetime import timedelta
-from typing import Annotated, Any, Dict, Optional
+from typing import Annotated, Dict, Optional
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -41,12 +41,6 @@ from netra_backend.app.dependencies import get_db_dependency as get_db
 
 # Note: Password hashing is handled by the auth service, not directly here
 
-# Compatibility function for legacy imports
-def get_password_hash(password: str) -> str:
-    """Hash a password - delegates to auth service."""
-    # For testing purposes, return a simple hash
-    import hashlib
-    return hashlib.sha256(password.encode()).hexdigest()
 
 logger = logging.getLogger('auth_integration.auth')
 
@@ -57,51 +51,51 @@ async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: AsyncSession = Depends(get_db)
 ) -> User:
-    """
-    Get current authenticated user from auth service
-    """
+    """Get current authenticated user from auth service."""
     token = credentials.credentials
-    
-    # Validate token with auth service
+    validation_result = await _validate_token_with_auth_service(token)
+    user = await _get_user_from_database(db, validation_result)
+    return user
+
+async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
+    """Validate token with auth service."""
     validation_result = await auth_client.validate_token_jwt(token)
-    
     if not validation_result or not validation_result.get("valid"):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
-    # Get user from database
-    user_id = validation_result.get("user_id")
-    if not user_id:
+    if not validation_result.get("user_id"):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token payload",
         )
-    
-    import os
+    return validation_result
 
+async def _get_user_from_database(db: AsyncSession, validation_result: Dict[str, str]) -> User:
+    """Get or create user from database."""
     from sqlalchemy import select
     
-    # db is already an AsyncSession from the dependency injection
+    user_id = validation_result.get("user_id")
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
     
     if not user:
-        # Auto-create users from JWT claims in all environments
-        from netra_backend.app.services.user_service import user_service
-        
-        # Extract user info from JWT claims
-        email = validation_result.get("email", f"user_{user_id}@example.com")
-        
-        # Create user from JWT claims
-        user = await user_service.get_or_create_dev_user(db, email=email, user_id=user_id)
-        
-        from netra_backend.app.config import get_config
-        config = get_config()
-        logger.info(f"Auto-created user from JWT: {user.email} (env: {config.environment})")
+        user = await _auto_create_user_if_needed(db, validation_result)
+    return user
+
+async def _auto_create_user_if_needed(db: AsyncSession, validation_result: Dict[str, str]) -> User:
+    """Auto-create user from JWT claims."""
+    from netra_backend.app.services.user_service import user_service
+    from netra_backend.app.config import get_config
     
+    user_id = validation_result.get("user_id")
+    email = validation_result.get("email", f"user_{user_id}@example.com")
+    user = await user_service.get_or_create_dev_user(db, email=email, user_id=user_id)
+    
+    config = get_config()
+    logger.info(f"Auto-created user from JWT: {user.email} (env: {config.environment})")
     return user
 
 async def get_current_user_optional(
@@ -121,22 +115,11 @@ async def get_current_user_optional(
         logger.debug(f"Optional auth failed: {e}")
         return None
 
-# Alias for compatibility
-get_optional_current_user = get_current_user_optional
+# Alias for backward compatibility
 get_current_active_user = get_current_user
 
-# Legacy function exports for backward compatibility
-async def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
-    """Create an access token through the auth service."""
-    from netra_backend.app.services.token_service import token_service
-    return await token_service.create_access_token(
-        user_id=data.get("sub", data.get("user_id")),
-        email=data.get("email"),
-        additional_claims=data,
-        expires_delta=expires_delta
-    )
 
-async def validate_token_jwt(token: str) -> Optional[Dict[str, Any]]:
+async def validate_token_jwt(token: str) -> Optional[Dict[str, str]]:
     """Validate a JWT token through the auth service."""
     validation = await auth_client.validate_token(token)
     return validation if validation else None
@@ -147,17 +130,19 @@ OptionalUserDep = Annotated[Optional[User], Depends(get_current_user_optional)]
 
 # Permission-based dependencies
 async def require_admin(user: User = Depends(get_current_user)) -> User:
-    """Require admin permissions"""
-    # Check both is_superuser, role, and legacy is_admin for admin permissions
-    is_admin = (hasattr(user, 'is_superuser') and user.is_superuser) or \
-               (hasattr(user, 'role') and user.role in ['admin', 'super_admin']) or \
-               (hasattr(user, 'is_admin') and user.is_admin)
-    if not is_admin:
+    """Require admin permissions."""
+    if not _check_admin_permissions(user):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin access required"
         )
     return user
+
+def _check_admin_permissions(user: User) -> bool:
+    """Check if user has admin permissions."""
+    return ((hasattr(user, 'is_superuser') and user.is_superuser) or
+            (hasattr(user, 'role') and user.role in ['admin', 'super_admin']) or
+            (hasattr(user, 'is_admin') and user.is_admin))
 
 async def require_developer(user: User = Depends(get_current_user)) -> User:
     """Require developer permissions"""

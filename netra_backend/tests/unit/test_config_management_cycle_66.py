@@ -15,7 +15,7 @@ from unittest.mock import patch, MagicMock
 
 from netra_backend.app.core.configuration.base import get_unified_config, config_manager
 from netra_backend.app.core.environment_constants import get_current_environment
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 @pytest.mark.unit

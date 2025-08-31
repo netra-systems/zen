@@ -45,3 +45,7 @@ USING UNIFIED TEST RUNNER:  STEP: Run tests most likely to fail and fail the fas
     USING UNIFIED TEST RUNNER: Run most likely to fail and fail the fastest first AND be the most useful. Use test discovery. One at a time, step through each failure. spawn a new sub agent. Run the test. Fix the SUT. 
 
     AUDIT e2e tests most badly using mocks One at a time, step through each failure. spawn a new sub agent. Make the test more realistic and much tougher. Focus on the BASICS, the most expected critical paths. Run it. Fix the system under test.
+
+   the POINT of the staging test is to run the test items with the STAGING SERVICES DIRECTLY e.g. make API and WS     │
+│   calls etc. the OAUTH SIMULATION should ONLY Be to mimic google oauth. make a plan to update this. must be able to run   │
+│   e2e testing concept against the ALREADY DEPLOYED staging env.

@@ -132,7 +132,7 @@ def check_duplicate_secrets(project: str):
     # that should be deleted from GCP, not used as duplicates to check
     duplicates = {
         "redis-url": "redis-url-staging",
-        "clickhouse-default-password-staging": "clickhouse-password-staging",
+        # Already using the correct name
     }
     
     found_issues = []

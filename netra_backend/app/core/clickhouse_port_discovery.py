@@ -16,7 +16,7 @@ import subprocess
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from netra_backend.app.logging_config import central_logger as logger
 
 

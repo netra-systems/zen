@@ -15,7 +15,7 @@ import logging
 import sys
 from typing import Dict, Any, List, Optional
 from netra_backend.app.core.configuration.base import UnifiedConfigManager
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.schemas.config import AppConfig
 
 

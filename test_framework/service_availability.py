@@ -20,7 +20,7 @@ from urllib.parse import urlparse
 
 # Try to import IsolatedEnvironment, handle if not available in some contexts
 try:
-    from dev_launcher.isolated_environment import get_env as get_isolated_env
+    from shared.isolated_environment import get_env as get_isolated_env
     _env = get_isolated_env()
     def get_env(key: str, default: str = None) -> Optional[str]:
         """Get environment variable value."""

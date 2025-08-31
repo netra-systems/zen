@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, patch
 import asyncpg
 import psycopg2
 import pytest
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from sqlalchemy import text
 
 # Import database management components

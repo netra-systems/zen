@@ -30,7 +30,7 @@ from clickhouse_driver import Client as ClickHouseClient
 from redis import Redis
 
 # CLAUDE.md compliance: Use absolute imports
-from netra_backend.app.core.isolated_environment import get_env, IsolatedEnvironment
+from shared.isolated_environment import get_env, IsolatedEnvironment
 from netra_backend.app.core.configuration_validator import (
     ConfigurationValidator, ValidationRule, ConfigType, ValidationSeverity
 )

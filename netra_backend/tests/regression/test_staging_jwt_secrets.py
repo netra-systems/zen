@@ -30,7 +30,7 @@ sys.path.insert(0, str(backend_path))
 from netra_backend.app.core.configuration.database import DatabaseConfigManager
 from netra_backend.app.core.configuration.secrets import SecretManager
 from netra_backend.app.core.exceptions_config import ConfigurationError
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.schemas.config import AppConfig
 
 

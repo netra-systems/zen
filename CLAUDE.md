@@ -21,7 +21,7 @@ prime directives. your operating instructions. your core principles.
 Your primary mission is to get existing systems fully operational. **Maintain the current feature set.**
 
 **Goals:**
-  * **0.1: Tests Pass:** The system under test is fixed with minimal refactoring.
+  * **0.1: Business Value and Systems Up:** The point is to have a working real system. Tests exists to serve the working system. The system exists to serve the business. Business > Real System > Tests.
   * **0.2: User and Dev Experience:** User chat works and first-time user experience work end-to-end.
   * **0.3: Staging Parity:** The staging environment works end-to-end.
   * **0.4: Configuration Stability:** Configurations are coherent and tested across all environments.
@@ -42,15 +42,20 @@ Netra Apex succeeds by creating and capturing value from a customer's AI spend.
   * **Value Capture:** Capture a significant percentage of the value Apex creates.
   * **Customer Segments:** Free, Early, Mid, Enterprise. The goal of the Free tier is conversion to paid tiers.
   * **Prioritization:** Business goals drive engineering priorities. Rigor enables long-term business velocity.
-  * **Lean Development (MVP/YAGNI):** Adhere strictly to Minimum Viable Product (MVP) and "You Ain't Gonna Need It" (YAGNI) principles. Every component must justify its existence with immediate business value.
+  * **Lean Development (MVP/YAGNI):** Adhere strictly to Minimum Viable Product (MVP) and "You Ain't Gonna Need It" (YAGNI) principles. Every component MUST justify its existence with immediate business value.
   * **AI Leverage:** Use the AI Factory and specialized agent workflows as force multipliers to automate and augment processes, maximizing throughput and quality.
   * **COMPLETE YOUR TASKS FULLY** You always "finish the job" even when it takes many hours of work, sub agents, many tools or tasks.
-  * **User Chat is King** The user chat is currently the channel we deliever 90% of our value.
-  It must be responsive, useful and strong. When a user is actively running an agent they must get timely updates.
-  We must protect our IP so messages to the users must proect "secrets" of how the agents work.
-  Some agents run slower or faster than others. Updates must be reasonable and contextually useful.
+  * **User Chat is King - SUBSTANTIVE VALUE** The user "Chat" means the COMPLETE value of AI-powered interactions. Because chat is currently the how we deliver 90% of our value. The current sub-focus is on the web UI/UX websocket based channel.
 
-### 1.1. Revenue-Driven Development: Business Value Justification (BVJ)
+### 1.1. **"Chat" Business Value** 
+  * **Real Solutions** Agents solving REAL problems, providing insights, and delivering actionable results. Technical send/receive of messages is one part of that whole.
+  * **Helpful** The Chat UI/UX/Backend interconnections must be responsive, useful and strong. Success is measured by the substance and quality of AI responses.
+  * **Timely** When a user is running an agent they must get timely updates AND receive meaningful, problem-solving results.  Some agents run slower or faster than others. Updates must be reasonable and contextually useful.
+  * **Business IP** We must protect our IP so messages to the users must protect "secrets" of how the agents work.
+
+  The system must make sense for the default flows expected for business value. Business value > Abstract system purity.
+
+### 1.2. Revenue-Driven Development: Business Value Justification (BVJ)
 
 Every engineering task requires a Business Value Justification (BVJ) to align technical work with business outcomes. A BVJ must account for revenue and strategic value (e.g., Platform Stability, Development Velocity, Risk Reduction). Think like Elon Musk. Like Steve Jobs. Like Bill Gates.
 
@@ -94,12 +99,14 @@ Use Test Runner to discover tests e.g. python unified_test_runner.py. Read testi
   * **Architectural Simplicity (Anti-Over-Engineering):** Assume a finite complexity budget. Every new service, queue, or abstraction must provide more value than the complexity it adds. Strive for the fewest possible steps between a request's entry point and the business logic.
   * **"Rule of Two":** Do not abstract or generalize a pattern until you have implemented it at least twice.
   * **Code Clarity:** Aim for concise functions (\<25 lines) and focused modules (\<750 lines). Exceeding these is a signal to re-evaluate for SRP adherence.
+  * **Mega Class Exceptions:** Central SSOT classes defined in [`SPEC/mega_class_exceptions.xml`](SPEC/mega_class_exceptions.xml) may extend to 2000 lines with explicit justification. These must be true integration points that cannot be split without violating SSOT principles.
   * **Task Decomposition:** If a task is too large or complex, decompose and delegate it to specialized sub-agents with fresh contexts. ALWAYS carefully manage your own context use and agents context use.
 
 ### 2.3. Code Quality Standards
 
   * **Type Safety:** Adhere strictly to `SPEC/type_safety.xml`.
   * **Environment:** All environment access MUST go through `IsolatedEnvironment` as defined in [`SPEC/unified_environment_management.xml`](SPEC/unified_environment_management.xml).
+  * **Configuration Architecture:** Follow the comprehensive configuration system documented in [`docs/configuration_architecture.md`](docs/configuration_architecture.md).
   * **Compliance Check:** Run `python scripts/check_architecture_compliance.py` to check status.
 
 ### 2.4. Strategic Trade-offs
@@ -159,12 +166,16 @@ Code is not "done" until it is validated in environments that mirror production.
 2.  **Development:** Integration/E2E tests against deployed services.
 ALWAYS use real services for testing. If they appear to not be available start or restarting them. If that too fails then hard fail the entire test suite.
 
-### 3.5. Bug Fixing: Test-Driven Correction (TDC)
+### 3.5. MANDATORY BUG FIXING PROCESS:
 
-1.  **Define Discrepancy (QA/PM Agent):** Analyze exactly how the code diverges from requirements. Why did existing tests miss this?
-2.  **Create a FAILING Test (QA Agent):** Write a minimal test that reproduces the bug.
-3.  **Surgical Fix (Implementation Agent):** Isolate and fix the specific code block.
-4.  **Verification (Principal/QA Agent):** All bug fixes require a full QA review and regression testing.
+EACH AGENT MUST SAVE THEIR WORK TO A JOINT BUG FIX REPORT for each bug.
+The work is only complete when ALL DoD items are complete and the report is updated. SLOW DOWN. Think step by step.
+
+At every opportunity spawn new subagent with dedicated focus mission and context window.
+1.  **WHY:** Analyze why the code diverges from requirements. Why did existing tests miss this? MUST USE FIVE WHYS METHOD? Why? Why? Why!!!?
+2.  **Prove it:** Write out TWO Mermaid diagrams. One of the ideal working state and one of the current failure state. Save your work the .md file. Write a test that reproduces the bug.
+3.  **Plan system wide claude.md compaliant fix**  Think about ALL associated and related modules that must also be updated. Think about cross system impacts of bug. SLOWLY think DEEPLY about the implications. What is the spirit of the problem beyond the literal one-off problem? Plan the fix. Save to the bugfix .md.
+4.  **Verification and proof implementation worked** QA review and regression testing. Use fail fast, starting with proving that newly created test suite now passes, then rest of tests related to this issue. repeat until all tests pass or 100 times.
 
 -----
 
@@ -202,13 +213,19 @@ All microservices MUST be 100% independent. See [`SPEC/independent_services.xml`
   * Auth Service (`/auth_service`)
   * Frontend (`/frontend`)
 
+**CRITICAL CLARIFICATION - Shared Libraries Pattern:**
+Services MAY import from `/shared` for infrastructure libraries (like `shared.isolated_environment`).
+These are NOT service boundary violations because they're pure utilities with no business logic - 
+think of them as internal pip packages. See [`docs/shared_library_pattern.md`](docs/shared_library_pattern.md) 
+for the simple "pip package test" to determine what belongs in `/shared`.
+
 ### 5.2. Naming Conventions
 
   * **"Agent":** Only for LLM-based sub-agents. **"Executor/Manager":** For infrastructure patterns **"Service":** For specialized processors. **Utility:** Descriptive names without suffixes.
 
 ### 5.3. Directory Organization
 
-**CRITICAL: Files MUST be placed in their designated locations.**
+**Files MUST be placed in their designated locations.**
 
   * **Service-Specific Tests:** Each service has its own `tests/` directory (e.g., `/netra_backend/tests/`). **NEVER mix tests between services.**
   * **E2E Tests:** End-to-end tests go in `/tests/e2e/`.
@@ -224,19 +241,19 @@ All microservices MUST be 100% independent. See [`SPEC/independent_services.xml`
 
 -----
 
-## 6\. MISSION CRITICAL: WebSocket Agent Events
+## 6\. MISSION CRITICAL: WebSocket Agent Events (Infrastructure for Chat Value)
 
-**CRITICAL: Basic chat functionality depends on WebSocket events. This CANNOT regress.**
+**CRITICAL: WebSocket events enable substantive chat interactions - they serve the business goal of delivering AI value to users.**
 
-### 6.1. Required WebSocket Events for Chat
+### 6.1. Required WebSocket Events for Substantive Chat Value
 
-The following events MUST be sent during agent execution or the chat UI will appear broken:
+The following events MUST be sent during agent execution to enable meaningful AI interactions:
 
-1. **agent_started** - User must see agent began processing
-2. **agent_thinking** - Real-time reasoning visibility
-3. **tool_executing** - Tool usage transparency  
-4. **tool_completed** - Tool results display
-5. **agent_completed** - User must know when done
+1. **agent_started** - User must see agent began processing their problem
+2. **agent_thinking** - Real-time reasoning visibility (shows AI is working on valuable solutions)
+3. **tool_executing** - Tool usage transparency (demonstrates problem-solving approach)
+4. **tool_completed** - Tool results display (delivers actionable insights)
+5. **agent_completed** - User must know when valuable response is ready
 
 ### 6.2. WebSocket Integration Requirements
 
@@ -286,8 +303,10 @@ This is a non-exhaustive list of mission-critical specs.
 | [`core.xml`](SPEC/core.xml) | Core system architecture. |
 | [`type_safety.xml`](SPEC/type_safety.xml) | Type safety and duplication rules. |
 | [`conventions.xml`](SPEC/conventions.xml) | Standards and guidelines. |
+| [`mega_class_exceptions.xml`](SPEC/mega_class_exceptions.xml) | **CRITICAL:** Approved exceptions for central SSOT classes up to 2000 lines. |
 | [`git_commit_atomic_units.xml`](SPEC/git_commit_atomic_units.xml) | **CRITICAL:** Git commit standards. |
 | [`import_management_architecture.xml`](SPEC/import_management_architecture.xml) | **CRITICAL:** Absolute import rules. |
+| [`configuration_architecture.md`](docs/configuration_architecture.md) | **CRITICAL:** Configuration and environment management architecture with complete diagrams and flows. |
 
 Direct OS.env access is FORBIDDEN except in each services canonical env config SSOT. Applies to ALL tests too. EACH SERVICE MUST MAINTAIN INDEPENDENCE. Import ONLY from the env of the service.
 
@@ -298,8 +317,11 @@ Direct OS.env access is FORBIDDEN except in each services canonical env config S
 **CRITICAL: Check the work in progress and current system state BEFORE starting work.**
 
   * [`MASTER_WIP_STATUS.md`](MASTER_WIP_STATUS.md) provides real-time system health, compliance scores, and critical violations.
-  * Always review this report first and regenerate it after your work is complete.
+  * **[`DEFINITION_OF_DONE_CHECKLIST.md`](DEFINITION_OF_DONE_CHECKLIST.md) - MANDATORY checklist for all module changes. Review ALL files listed for your module.**
+  * Review these reports first and regenerate status after your work is complete.
 
+** YOU MUST USE A **CHECKLIST** EVERYTIME.
+If you ever have a chance to audit or verify or spawn new subagent, even if 10x as much work to improve 1% chance of overall success do it. Success = Complete work at all costs.
 -----
 
 ## 9\. Execution Checklist
@@ -307,22 +329,24 @@ Direct OS.env access is FORBIDDEN except in each services canonical env config S
 ### For Every Code Change:
 
 1.  **Assess Scope:** Determine if specialized agents (PM, Design, QA, etc.) are required.
+2.  **Review DoD Checklist:** Open [`DEFINITION_OF_DONE_CHECKLIST.md`](DEFINITION_OF_DONE_CHECKLIST.md) and identify your module's section.
 3.  **Check Learnings:** Search recent [`learnings/index.xml`](SPEC/learnings/index.xml) and recent commit changes.
 4.  **Verify Strings:** Validate literals with `scripts/query_string_literals.py`.
 5.  **Review Core Specs:** Re-read [`type_safety.xml`](SPEC/type_safety.xml) and [`conventions.xml`](SPEC/conventions.xml).
-6.  **Crate New Test Suite**. Create a new failing test suite or regression suite.
+6.  **Create New Test Suite:** Create a new test suite of difficult tests idealy failing tests.
 7.  **Run Local Tests:** Run relevant tests for the scope of work done. Real services > mock.
-8.  **Update Documentation:** Ensure specs reflect the implemented reality.
-9.  **Refresh Indexes:** Update the string literal index if new constants were added.
-10. **Update Status:** Regenerate the WIP report.
-11. **Save new Learnings** [`learnings/index.xml`](SPEC/learnings/index.xml).
+8.  **Complete DoD Checklist:** Go through EVERY item in your module's checklist section.
+9.  **Update Documentation:** Ensure specs reflect the implemented reality.
+10. **Refresh Indexes:** Update the string literal index if new constants were added.
+11. **Update Status:** Regenerate and refresh reports .mds and learnings.
+12. **Save new Learnings:** [`learnings/index.xml`](SPEC/learnings/index.xml).
 
 ### 9.1 Git Commit Standards.
 **All commits follow [`SPEC/git_commit_atomic_units.xml`](SPEC/git_commit_atomic_units.xml).**
 **Windows Unicode/emoji issues: See [`SPEC/windows_unicode_handling.xml`](SPEC/windows_unicode_handling.xml).**
 A user asking for "git commit" means: For EACH group of work that's related do a commit. e.g. 1-10 commits as per need.
   * **GROUP CONCEPTS - LIMIT COUNT OF FILES:** Commits must be small, focused, and conceptually similar units.
-  * **CONCEPT-BASED:** Group changes by concept, not by file count (e.g., one conceptual change across up to 50 files is one commit; three conceptual changes in one file are three commits) NEVER bulk commit massive changes without express orders.
+  * **CONCEPT-BASED:** Group changes by concept. NEVER bulk commit massive changes without express orders.
   * **REVIEWABLE:** Each commit must be reviewable in under one minute.
 
 **Final Reminder:** ULTRA THINK DEEPLY. Your mission is to generate monetization-focused value. Prioritize a coherent, unified system that delivers end-to-end value for our customers. **Think deeply. YOUR WORK MATTERS. THINK STEP BY STEP AS DEEPLY AS POSSIBLE.**

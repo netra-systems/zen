@@ -17,7 +17,7 @@ Each function ≤8 lines, file ≤300 lines.
 from typing import Dict, List, Optional, Tuple
 from urllib.parse import urlparse, urlunparse
 
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from netra_backend.app.core.environment_constants import EnvironmentDetector
 from netra_backend.app.core.exceptions_config import ConfigurationError
 from netra_backend.app.logging_config import central_logger as logger
@@ -299,6 +299,13 @@ class DatabaseConfigManager:
             logger.warning(
                 "CLICKHOUSE_PASSWORD not set. "
                 "Database connections may fail. Please set this environment variable."
+            )
+        
+        # CRITICAL: Fail fast in staging if ClickHouse password is missing
+        if not password and self._environment == "staging":
+            raise ConfigurationError(
+                "CLICKHOUSE_PASSWORD is required in staging but not configured. "
+                "Please ensure the secret 'clickhouse-password-staging' is properly mapped in Cloud Run."
             )
         
         # Require explicit ClickHouse configuration in staging/production

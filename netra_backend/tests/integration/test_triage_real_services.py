@@ -26,7 +26,7 @@ from netra_backend.app.agents.triage_sub_agent.models import (
     TriageResult,
 )
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.database import get_db_session
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger

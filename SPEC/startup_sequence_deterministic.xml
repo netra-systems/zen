@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <metadata>
+    <title>Deterministic Startup Sequence - MANDATORY ORDER</title>
+    <date>2025-08-31</date>
+    <severity>CRITICAL</severity>
+    <principle>NO AMBIGUITY. NO FALLBACKS. NO GRACEFUL DEGRADATION FOR CORE SERVICES.</principle>
+  </metadata>
+
+  <core_principle>
+    <statement>
+      The startup sequence MUST be deterministic and fail fast.
+      Chat delivers 90% of value. If chat cannot work, the service MUST NOT start.
+    </statement>
+    <rules>
+      <rule>Each step depends on the previous step completing successfully</rule>
+      <rule>Any failure in critical services causes immediate startup failure</rule>
+      <rule>No conditional paths based on environment for core functionality</rule>
+      <rule>No "graceful degradation" that leaves chat broken</rule>
+    </rules>
+  </core_principle>
+
+  <mandatory_startup_order>
+    <!-- PHASE 1: Foundation (Required for everything) -->
+    <phase number="1" name="Foundation" critical="true">
+      <step order="1" name="logging" critical="true">
+        <description>Initialize central logging - required for all error reporting</description>
+        <failure>EXIT IMMEDIATELY - Cannot operate without logging</failure>
+      </step>
+      
+      <step order="2" name="environment_validation" critical="true">
+        <description>Validate environment configuration and security</description>
+        <failure>EXIT IMMEDIATELY - Security risk</failure>
+      </step>
+      
+      <step order="3" name="database_migrations" critical="false">
+        <description>Run database migrations if needed</description>
+        <failure>Log warning but continue - migrations can be manual</failure>
+      </step>
+    </phase>
+
+    <!-- PHASE 2: Core Services (Required for chat) -->
+    <phase number="2" name="Core Services" critical="true">
+      <step order="4" name="database_connection" critical="true">
+        <description>Establish PostgreSQL connection and verify tables</description>
+        <failure>EXIT IMMEDIATELY - No data persistence = no product</failure>
+      </step>
+      
+      <step order="5" name="redis_connection" critical="true">
+        <description>Establish Redis connection for caching/sessions</description>
+        <failure>EXIT IMMEDIATELY - No session management = no auth</failure>
+      </step>
+      
+      <step order="6" name="key_manager" critical="true">
+        <description>Initialize KeyManager for security</description>
+        <failure>EXIT IMMEDIATELY - No encryption = security breach</failure>
+      </step>
+      
+      <step order="7" name="llm_manager" critical="true">
+        <description>Initialize LLM Manager for AI operations</description>
+        <failure>EXIT IMMEDIATELY - No LLM = no agents = no chat</failure>
+      </step>
+    </phase>
+
+    <!-- PHASE 3: Chat Pipeline (THE CRITICAL PATH) -->
+    <phase number="3" name="Chat Pipeline" critical="true">
+      <step order="8" name="tool_registry" critical="true">
+        <description>Create tool registry and dispatcher</description>
+        <failure>EXIT IMMEDIATELY - No tools = agents cannot function</failure>
+      </step>
+      
+      <step order="9" name="websocket_manager" critical="true">
+        <description>Initialize WebSocket manager for real-time communication</description>
+        <failure>EXIT IMMEDIATELY - No WebSocket = no chat UI</failure>
+      </step>
+      
+      <step order="10" name="agent_supervisor" critical="true">
+        <description>Create agent supervisor with WebSocket-enhanced tool dispatcher</description>
+        <failure>EXIT IMMEDIATELY - No agents = chat is broken</failure>
+        <verification>
+          - agent_supervisor MUST NOT be None
+          - tool_dispatcher MUST have _websocket_enhanced = true
+          - thread_service MUST be initialized
+        </verification>
+      </step>
+      
+      <step order="11" name="message_handlers" critical="true">
+        <description>Register WebSocket message handlers including AgentMessageHandler</description>
+        <failure>EXIT IMMEDIATELY - No message routing = chat is broken</failure>
+      </step>
+    </phase>
+
+    <!-- PHASE 4: Optional Services (Can fail without breaking chat) -->
+    <phase number="4" name="Optional Services" critical="false">
+      <step order="12" name="clickhouse" critical="false">
+        <description>Initialize ClickHouse for analytics</description>
+        <failure>Log warning and continue - analytics not critical for chat</failure>
+      </step>
+      
+      <step order="13" name="monitoring" critical="false">
+        <description>Start performance monitoring</description>
+        <failure>Log warning and continue - monitoring not critical for chat</failure>
+      </step>
+      
+      <step order="14" name="background_tasks" critical="false">
+        <description>Start background task manager</description>
+        <failure>Log warning and continue - background tasks not critical for chat</failure>
+      </step>
+    </phase>
+
+    <!-- PHASE 5: Validation -->
+    <phase number="5" name="Validation" critical="true">
+      <step order="15" name="health_check" critical="true">
+        <description>Verify all critical services are operational</description>
+        <failure>EXIT IMMEDIATELY - System not healthy</failure>
+        <checks>
+          - Database connection active
+          - Redis connection active  
+          - LLM manager responsive
+          - Agent supervisor initialized
+          - WebSocket manager active
+          - At least one WebSocket handler registered
+        </checks>
+      </step>
+    </phase>
+  </mandatory_startup_order>
+
+  <implementation_requirements>
+    <requirement>
+      NO CONDITIONAL LOGIC for critical services based on environment.
+      If it's critical in production, it's critical in development.
+    </requirement>
+    
+    <requirement>
+      NO TRY-EXCEPT that swallows critical failures.
+      Exceptions must propagate and cause startup failure.
+    </requirement>
+    
+    <requirement>
+      NO SETTING CRITICAL SERVICES TO None.
+      If a service cannot be initialized, FAIL FAST.
+    </requirement>
+    
+    <requirement>
+      EXPLICIT DEPENDENCIES.
+      Each step must check its dependencies are initialized before proceeding.
+    </requirement>
+  </implementation_requirements>
+
+  <startup_contract>
+    <guarantee>
+      When startup completes successfully, the following MUST be true:
+      1. app.state.db_session_factory is NOT None
+      2. app.state.redis_manager is NOT None  
+      3. app.state.llm_manager is NOT None
+      4. app.state.agent_supervisor is NOT None
+      5. app.state.thread_service is NOT None
+      6. WebSocket manager has enhanced tool dispatcher
+      7. Chat pipeline is fully operational
+    </guarantee>
+    
+    <failure_contract>
+      If ANY critical service fails:
+      1. Log CRITICAL error with clear failure reason
+      2. Set app.state.startup_failed = True
+      3. Raise exception to prevent server start
+      4. Exit with non-zero status code
+    </failure_contract>
+  </startup_contract>
+
+  <testing_requirements>
+    <test name="critical_path_test">
+      Simulate failure of each critical service and verify startup fails
+    </test>
+    
+    <test name="dependency_order_test">
+      Verify services initialize in correct order
+    </test>
+    
+    <test name="no_none_test">
+      Verify no critical service is ever set to None
+    </test>
+    
+    <test name="websocket_enhancement_test">
+      Verify tool dispatcher has WebSocket enhancement after startup
+    </test>
+  </testing_requirements>
+</specification>

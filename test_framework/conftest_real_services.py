@@ -63,23 +63,35 @@ if "pytest" in sys.modules or get_test_env_manager().env.get("PYTEST_CURRENT_TES
     env_manager = get_test_env_manager()
     env = env_manager.env
     env.set("USE_REAL_SERVICES", "true", source="real_services_conftest")
-    env.set("TESTING", "1", source="real_services_conftest") 
     env.set("SKIP_MOCKS", "true", source="real_services_conftest")
     
-    # Service endpoints for real testing (Docker containers)
-    env.set("TEST_POSTGRES_HOST", "localhost", source="real_services_conftest")
-    env.set("TEST_POSTGRES_PORT", "5434", source="real_services_conftest")
-    env.set("TEST_POSTGRES_USER", "test_user", source="real_services_conftest")
-    env.set("TEST_POSTGRES_PASSWORD", "test_pass", source="real_services_conftest")
-    env.set("TEST_POSTGRES_DB", "netra_test", source="real_services_conftest")
-    env.set("TEST_REDIS_HOST", "localhost", source="real_services_conftest") 
-    env.set("TEST_REDIS_PORT", "6381", source="real_services_conftest")
-    env.set("TEST_CLICKHOUSE_HOST", "localhost", source="real_services_conftest")
-    env.set("TEST_CLICKHOUSE_HTTP_PORT", "8125", source="real_services_conftest")
-    env.set("TEST_CLICKHOUSE_TCP_PORT", "9002", source="real_services_conftest")
-    env.set("TEST_CLICKHOUSE_USER", "test_user", source="real_services_conftest")
-    env.set("TEST_CLICKHOUSE_PASSWORD", "test_pass", source="real_services_conftest")
-    env.set("TEST_CLICKHOUSE_DB", "netra_test_analytics", source="real_services_conftest")
+    # Check for staging environment
+    current_env = env.get("ENVIRONMENT", "").lower()
+    is_staging = current_env == "staging"
+    
+    if is_staging:
+        # Staging environment - use GCP services
+        env.set("TESTING", "0", source="real_services_conftest")  # Not local testing
+        # Use staging service URLs from environment or defaults
+        pass  # Staging services use environment variables from GCP
+    else:
+        # Local/test environment - use Docker containers
+        env.set("TESTING", "1", source="real_services_conftest") 
+        
+        # Service endpoints for real testing (Docker containers)
+        env.set("TEST_POSTGRES_HOST", "localhost", source="real_services_conftest")
+        env.set("TEST_POSTGRES_PORT", "5434", source="real_services_conftest")
+        env.set("TEST_POSTGRES_USER", "test", source="real_services_conftest")
+        env.set("TEST_POSTGRES_PASSWORD", "test", source="real_services_conftest")
+        env.set("TEST_POSTGRES_DB", "netra_test", source="real_services_conftest")
+        env.set("TEST_REDIS_HOST", "localhost", source="real_services_conftest") 
+        env.set("TEST_REDIS_PORT", "6381", source="real_services_conftest")
+        env.set("TEST_CLICKHOUSE_HOST", "localhost", source="real_services_conftest")
+        env.set("TEST_CLICKHOUSE_HTTP_PORT", "8123", source="real_services_conftest")
+        env.set("TEST_CLICKHOUSE_TCP_PORT", "9000", source="real_services_conftest")
+        env.set("TEST_CLICKHOUSE_USER", "test", source="real_services_conftest")
+        env.set("TEST_CLICKHOUSE_PASSWORD", "test", source="real_services_conftest")
+        env.set("TEST_CLICKHOUSE_DB", "netra_test_analytics", source="real_services_conftest")
 
 
 # =============================================================================
@@ -94,10 +106,16 @@ async def real_services_session() -> AsyncIterator[RealServicesManager]:
     # Check if real services should be used
     env_manager = get_test_env_manager()
     use_real_services = env_manager.env.get("USE_REAL_SERVICES", "false").lower() == "true"
+    current_env = env_manager.env.get("ENVIRONMENT", "").lower()
+    is_staging = current_env == "staging"
     
-    if not use_real_services:
+    # Real services are always used in staging environment
+    if not (use_real_services or is_staging):
         logger.info("Real services disabled, skipping real service fixtures")
-        pytest.skip("Real services disabled (set USE_REAL_SERVICES=true to enable)")
+        pytest.skip("Real services disabled (set USE_REAL_SERVICES=true to enable or ENVIRONMENT=staging)")
+        
+    if is_staging:
+        logger.info("Running in staging environment with real GCP services")
     
     manager = get_real_services()
     

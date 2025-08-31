@@ -103,7 +103,7 @@ def is_websocket_connected(websocket: WebSocket) -> bool:
         
         # 4. CRITICAL FIX: For staging, be more conservative - if we can't determine state, assume disconnected
         # This prevents sending to potentially dead connections in cloud environments
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         env = get_env()
         environment = env.get("ENVIRONMENT", "development").lower()
         
@@ -134,7 +134,7 @@ async def safe_websocket_send(websocket: WebSocket, data: Union[Dict[str, Any], 
         return False
     
     # CRITICAL FIX: Environment-aware retry configuration
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     env = get_env()
     environment = env.get("ENVIRONMENT", "development").lower()
     

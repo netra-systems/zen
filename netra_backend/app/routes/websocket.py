@@ -58,7 +58,7 @@ tracing_manager = TracingManager()
 def _get_rate_limit_for_environment() -> int:
     """Get WebSocket rate limit based on environment."""
     from netra_backend.app.core.environment_constants import Environment
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     
     env = get_env()
     environment = env.get("ENVIRONMENT", "development").lower()
@@ -76,7 +76,7 @@ def _get_rate_limit_for_environment() -> int:
 
 def _get_staging_optimized_timeouts():
     """Get staging-optimized timeout configuration to prevent disconnections."""
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     
     env = get_env()
     environment = env.get("ENVIRONMENT", "development").lower()
@@ -160,10 +160,10 @@ async def websocket_endpoint(websocket: WebSocket):
         # Accept with selected subprotocol BEFORE authentication
         if selected_protocol:
             await websocket.accept(subprotocol=selected_protocol)
-            logger.info(f"WebSocket accepted with subprotocol: {selected_protocol}")
+            logger.debug(f"WebSocket accepted with subprotocol: {selected_protocol}")
         else:
             await websocket.accept()
-            logger.info("WebSocket accepted without subprotocol")
+            logger.debug("WebSocket accepted without subprotocol")
         
         # Get service instances
         ws_manager = get_websocket_manager()
@@ -177,6 +177,20 @@ async def websocket_endpoint(websocket: WebSocket):
         # Get dependencies from app state (check if they exist first)
         supervisor = getattr(websocket.app.state, 'agent_supervisor', None)
         thread_service = getattr(websocket.app.state, 'thread_service', None)
+        
+        # Check environment to determine if fallback is allowed
+        from shared.isolated_environment import get_env
+        environment = get_env().get("ENVIRONMENT", "development").lower()
+        is_testing = get_env().get("TESTING", "0") == "1"
+        
+        # Log dependency status for debugging
+        logger.info(f"WebSocket dependency check - Environment: {environment}, Testing: {is_testing}")
+        logger.info(f"WebSocket dependency check - Supervisor: {supervisor is not None}, ThreadService: {thread_service is not None}")
+        
+        # Check if startup is still in progress
+        startup_complete = getattr(websocket.app.state, 'startup_complete', False)
+        if not startup_complete and environment in ["staging", "production"]:
+            logger.warning(f"WebSocket accessed before startup complete in {environment} - startup_complete={startup_complete}")
         
         # CRITICAL FIX: If thread_service is missing but supervisor exists, create it
         if supervisor is not None and thread_service is None:
@@ -197,19 +211,49 @@ async def websocket_endpoint(websocket: WebSocket):
                 message_router.add_handler(agent_handler)
                 logger.info("Registered real AgentMessageHandler for production agent pipeline")
             except Exception as e:
-                logger.warning(f"Failed to register real AgentMessageHandler: {e}, using fallback")
-                # Create fallback agent handler for E2E tests when real services fail
+                # CRITICAL: NO FALLBACK IN STAGING/PRODUCTION
+                if environment in ["staging", "production"] and not is_testing:
+                    logger.error(f"Failed to register AgentMessageHandler in {environment}: {e}")
+                    raise RuntimeError(f"AgentMessageHandler registration failed in {environment} - this is a critical error") from e
+                else:
+                    logger.warning(f"Failed to register real AgentMessageHandler: {e}, using fallback for {environment}")
+                    # Create fallback agent handler only for testing/development
+                    fallback_handler = _create_fallback_agent_handler()
+                    message_router.add_handler(fallback_handler)
+                    logger.info(f"Registered fallback AgentMessageHandler for {environment} environment")
+        else:
+            # CRITICAL: NO FALLBACK IN STAGING/PRODUCTION - CHAT IS KING
+            if environment in ["staging", "production"] and not is_testing:
+                missing_deps = []
+                if supervisor is None:
+                    missing_deps.append("agent_supervisor")
+                if thread_service is None:
+                    missing_deps.append("thread_service")
+                error_msg = f"CRITICAL: Chat dependencies missing in {environment}: {missing_deps}"
+                logger.critical(error_msg)
+                logger.critical("Chat delivers 90% of value - cannot operate without agent services")
+                
+                # This should NEVER happen if startup is working correctly
+                # Send critical error and raise to trigger alerts
+                error_response = create_error_message(
+                    "CRITICAL_FAILURE",
+                    "Chat service failed to initialize. This is a critical error.",
+                    {"missing_dependencies": missing_deps, "environment": environment, "severity": "CRITICAL"}
+                )
+                await safe_websocket_send(websocket, error_response.model_dump())
+                await asyncio.sleep(0.1)  # Give time for message to be sent
+                await safe_websocket_close(websocket, code=1011, reason="Critical failure")
+                
+                # Raise to trigger monitoring alerts - chat MUST work
+                raise RuntimeError(f"Chat critical failure in {environment} - missing {missing_deps}")
+            else:
+                logger.warning(f"WebSocket dependencies not available in {environment} - creating fallback agent handler")
+                # Create fallback agent handler only for testing/development
                 fallback_handler = _create_fallback_agent_handler()
                 message_router.add_handler(fallback_handler)
-                logger.info("Registered fallback AgentMessageHandler due to real service failure")
-        else:
-            logger.warning("WebSocket dependencies not available - creating fallback agent handler for testing")
-            # Create fallback agent handler for E2E tests when real services are not available
-            fallback_handler = _create_fallback_agent_handler()
-            message_router.add_handler(fallback_handler)
-            logger.info("🤖 Registered fallback AgentMessageHandler for E2E testing - will handle CHAT messages!")
-            logger.info(f"🤖 Fallback handler can handle: {fallback_handler.supported_types}")
-            logger.info(f"🤖 Total handlers registered: {len(message_router.handlers)}")
+                logger.info(f"🤖 Registered fallback AgentMessageHandler for {environment} - will handle CHAT messages!")
+                logger.info(f"🤖 Fallback handler can handle: {fallback_handler.supported_types}")
+                logger.info(f"🤖 Total handlers registered: {len(message_router.handlers)}")
         
         # Authenticate and establish secure connection AFTER accepting
         # CRITICAL FIX: Handle authentication errors gracefully without breaking message loop
@@ -253,17 +297,17 @@ async def websocket_endpoint(websocket: WebSocket):
                 )
                 await safe_websocket_send(websocket, welcome_msg.model_dump())
                 
-                logger.info(f"WebSocket ready: {connection_id}")
+                logger.debug(f"WebSocket ready: {connection_id}")
                 
                 # Main message handling loop
-                logger.info(f"Starting message handling loop for connection: {connection_id}")
+                logger.debug(f"Starting message handling loop for connection: {connection_id}")
                 # Debug: Check WebSocket state before entering loop
-                logger.info(f"WebSocket state before loop - client_state: {getattr(websocket, 'client_state', 'N/A')}, application_state: {getattr(websocket, 'application_state', 'N/A')}")
+                logger.debug(f"WebSocket state before loop - client_state: {getattr(websocket, 'client_state', 'N/A')}, application_state: {getattr(websocket, 'application_state', 'N/A')}")
                 await _handle_websocket_messages(
                     websocket, user_id, connection_id, ws_manager, 
                     message_router, connection_monitor, security_manager, heartbeat
                 )
-                logger.info(f"Message handling loop ended for connection: {connection_id}")
+                logger.debug(f"Message handling loop ended for connection: {connection_id}")
                 
         except HTTPException as auth_error:
             # CRITICAL FIX: Authentication failed after WebSocket was accepted
@@ -287,7 +331,7 @@ async def websocket_endpoint(websocket: WebSocket):
             return
             
     except WebSocketDisconnect as e:
-        logger.info(f"WebSocket disconnected: {connection_id} ({e.code}: {e.reason})")
+        logger.debug(f"WebSocket disconnected: {connection_id} ({e.code}: {e.reason})")
     
     except Exception as e:
         logger.error(f"WebSocket error: {e}", exc_info=True)
@@ -327,7 +371,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 connection_monitor.unregister_connection(connection_id)
                 security_manager.unregister_connection(connection_id)
                 
-                logger.info(f"WebSocket cleanup completed: {connection_id}")
+                logger.debug(f"WebSocket cleanup completed: {connection_id}")
             except Exception as cleanup_error:
                 logger.warning(f"Error during WebSocket cleanup: {cleanup_error}")
 
@@ -359,7 +403,7 @@ async def _handle_websocket_messages(
         first_check = True
         while is_websocket_connected(websocket):
             if first_check:
-                logger.info(f"First loop iteration for {connection_id}, WebSocket is_connected returned True")
+                logger.debug(f"First loop iteration for {connection_id}, WebSocket is_connected returned True")
                 first_check = False
             try:
                 # Track loop iteration with detailed state
@@ -438,7 +482,7 @@ async def _handle_websocket_messages(
                     "disconnect_reason": e.reason or "No reason provided",
                     "connection_duration": time.time() - connection_monitor.get_connection_start_time(connection_id) if hasattr(connection_monitor, 'get_connection_start_time') else "Unknown"
                 }
-                logger.info(f"WebSocket disconnect: {disconnect_info}")
+                logger.debug(f"WebSocket disconnect: {disconnect_info}")
                 break
                 
             except Exception as e:
@@ -546,7 +590,7 @@ def _create_fallback_agent_handler():
 async def get_websocket_service_discovery():
     """Get WebSocket service discovery configuration for tests."""
     ws_manager = get_websocket_manager()
-    stats = ws_manager.get_stats()
+    stats = await ws_manager.get_stats()
     
     return {
         "status": "success",
@@ -592,7 +636,7 @@ async def authenticate_websocket_with_database(session_info: Dict[str, str]) -> 
 async def get_websocket_config():
     """Get WebSocket configuration for clients."""
     ws_manager = get_websocket_manager()
-    stats = ws_manager.get_stats()
+    stats = await ws_manager.get_stats()
     
     return {
         "websocket": {
@@ -641,7 +685,7 @@ async def websocket_health_check():
     # Try to get WebSocket manager stats (most basic requirement)
     try:
         ws_manager = get_websocket_manager()
-        ws_stats = ws_manager.get_stats()
+        ws_stats = await ws_manager.get_stats()
         metrics["websocket"] = {
             "active_connections": ws_stats["active_connections"],
             "total_connections": ws_stats["total_connections"], 
@@ -740,7 +784,7 @@ async def websocket_test_endpoint(websocket: WebSocket):
     try:
         # Accept WebSocket connection without authentication
         await websocket.accept()
-        logger.info("Test WebSocket connection accepted (no auth)")
+        logger.debug("Test WebSocket connection accepted (no auth)")
         
         # Generate a simple connection ID
         connection_id = f"test_{int(time.time())}"
@@ -754,7 +798,7 @@ async def websocket_test_endpoint(websocket: WebSocket):
         }
         await websocket.send_json(welcome_msg)
         
-        logger.info(f"Test WebSocket ready: {connection_id}")
+        logger.debug(f"Test WebSocket ready: {connection_id}")
         
         # Simple message handling loop
         while True:
@@ -765,7 +809,7 @@ async def websocket_test_endpoint(websocket: WebSocket):
                     timeout=30.0
                 )
                 
-                logger.info(f"Test WebSocket received: {raw_message}")
+                logger.debug(f"Test WebSocket received: {raw_message}")
                 
                 # Parse message
                 try:
@@ -853,7 +897,7 @@ async def websocket_test_endpoint(websocket: WebSocket):
                 })
                 
     except WebSocketDisconnect as e:
-        logger.info(f"Test WebSocket disconnected: {connection_id} ({e.code}: {e.reason})")
+        logger.debug(f"Test WebSocket disconnected: {connection_id} ({e.code}: {e.reason})")
     
     except Exception as e:
         logger.error(f"Test WebSocket error: {e}", exc_info=True)
@@ -865,7 +909,7 @@ async def websocket_test_endpoint(websocket: WebSocket):
     
     finally:
         if connection_id:
-            logger.info(f"Test WebSocket cleanup completed: {connection_id}")
+            logger.debug(f"Test WebSocket cleanup completed: {connection_id}")
 
 
 @router.get("/ws/stats")
@@ -879,7 +923,7 @@ async def websocket_detailed_stats():
     
     return {
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "websocket_manager": ws_manager.get_stats(),
+        "websocket_manager": await ws_manager.get_stats(),
         "message_router": message_router.get_stats(),
         "authentication": authenticator.get_auth_stats(),
         "security": security_manager.get_security_summary(),

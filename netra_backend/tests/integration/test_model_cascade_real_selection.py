@@ -20,7 +20,7 @@ from netra_backend.app.agents.chat_orchestrator.model_cascade import ModelCascad
 from netra_backend.app.services.llm.model_selector import ModelSelector
 from netra_backend.app.agents.chat_orchestrator.quality_evaluator import QualityEvaluator
 from netra_backend.app.services.analytics.cost_tracker import CostTracker
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.database import get_async_session
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.models.analytics_models import (

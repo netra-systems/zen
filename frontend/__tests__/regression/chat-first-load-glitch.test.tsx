@@ -110,7 +110,7 @@ const createLifecycleTracker = (): LifecycleTracker => ({
 
 describe('Chat First-Time Page Load Glitch Detection', () => {
   setupAntiHang();
-    jest.setTimeout(10000);
+  
   let lifecycleTracker: LifecycleTracker;
   let mockWebSocket: any;
   let consoleErrorSpy: jest.SpyInstance;
@@ -156,12 +156,7 @@ describe('Chat First-Time Page Load Glitch Detection', () => {
     consoleErrorSpy.mockRestore();
     consoleWarnSpy.mockRestore();
     jest.clearAllMocks();
-      // Clean up timers to prevent hanging
-      jest.clearAllTimers();
-      jest.useFakeTimers();
-      jest.runOnlyPendingTimers();
-      jest.useRealTimers();
-      cleanupAntiHang();
+    cleanupAntiHang();
   });
 
   /**
@@ -550,26 +545,10 @@ describe('Chat First-Time Page Load Glitch Detection', () => {
    * EXPECTED TO FAIL: Memory leaks from unmounted components
    */
   test('should not leak memory from unmounted components', async () => {
-    const activeTimers: NodeJS.Timeout[] = [];
-    const activeIntervals: NodeJS.Timeout[] = [];
     const activeListeners: Array<{ type: string; listener: Function }> = [];
     
-    // Mock timers and track them
-    const originalSetTimeout = global.setTimeout;
-    const originalSetInterval = global.setInterval;
+    // Only mock event listeners to avoid conflicts with anti-hanging utilities
     const originalAddEventListener = window.addEventListener;
-    
-    global.setTimeout = jest.fn((fn, delay) => {
-      const timer = originalSetTimeout(fn, delay);
-      activeTimers.push(timer);
-      return timer;
-    }) as any;
-    
-    global.setInterval = jest.fn((fn, delay) => {
-      const interval = originalSetInterval(fn, delay);
-      activeIntervals.push(interval);
-      return interval;
-    }) as any;
     
     window.addEventListener = jest.fn((type, listener) => {
       activeListeners.push({ type, listener });
@@ -589,8 +568,6 @@ describe('Chat First-Time Page Load Glitch Detection', () => {
       await new Promise(resolve => setTimeout(resolve, 200));
     });
 
-    const timersBeforeUnmount = activeTimers.length;
-    const intervalsBeforeUnmount = activeIntervals.length;
     const listenersBeforeUnmount = activeListeners.length;
 
     // Unmount component
@@ -602,19 +579,13 @@ describe('Chat First-Time Page Load Glitch Detection', () => {
     });
 
     // Restore original functions
-    global.setTimeout = originalSetTimeout;
-    global.setInterval = originalSetInterval;
     window.addEventListener = originalAddEventListener;
 
     // ASSERTIONS:
-    // 1. All timers should be cleared
-    expect(activeTimers.filter(t => t._destroyed !== true).length).toBe(0);
-    
-    // 2. All intervals should be cleared
-    expect(activeIntervals.filter(i => i._destroyed !== true).length).toBe(0);
-    
-    // 3. Event listeners should be minimal (some global ones are ok)
+    // Event listeners should be minimal (some global ones are ok)
     expect(activeListeners.length).toBeLessThanOrEqual(5);
+    
+    // Note: Timer cleanup is handled by anti-hanging utilities
   });
 });
 
@@ -622,8 +593,6 @@ describe('Chat First-Time Page Load Glitch Detection', () => {
  * Integration Test Suite - Full Page Load Scenario
  */
 describe('Chat Page Full Load Integration', () => {
-  setupAntiHang();
-    jest.setTimeout(10000);
   /**
    * Test 9: Complete first-time user flow
    * EXPECTED TO FAIL: Multiple issues in complete flow

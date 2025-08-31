@@ -28,7 +28,7 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 logger = logging.getLogger(__name__)
 

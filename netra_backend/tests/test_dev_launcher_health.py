@@ -72,7 +72,7 @@ class TestDevLauncherHealth:
 
     def test_environment_isolation(self):
         """Test that environment is properly isolated for dev mode."""
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         env = get_env()
         # Should have development environment settings

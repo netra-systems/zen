@@ -27,25 +27,42 @@ const MAX_TIMEOUT_MS = 5000;
 let activeTimers = new Set<NodeJS.Timeout>();
 let activeIntervals = new Set<NodeJS.Timeout>();
 
-// Original timer functions
+// Original timer functions - ensure they're captured only once
 let originalSetTimeout: typeof setTimeout;
 let originalSetInterval: typeof setInterval;
 let originalClearTimeout: typeof clearTimeout;
 let originalClearInterval: typeof clearInterval;
+let isSetupActive = false;
 
 /**
  * Setup anti-hanging utilities for a test suite
  * Call this in your describe block
  */
 export function setupAntiHang(customTimeout: number = TEST_TIMEOUTS.DEFAULT): void {
+  // Prevent multiple setups from interfering with each other
+  if (isSetupActive) {
+    console.warn('setupAntiHang() called while already active - skipping to prevent recursion');
+    return;
+  }
+  
   // Set Jest timeout using centralized configuration
   setTestTimeout(customTimeout);
   
-  // Store original timer functions
-  originalSetTimeout = global.setTimeout;
-  originalSetInterval = global.setInterval;
-  originalClearTimeout = global.clearTimeout;
-  originalClearInterval = global.clearInterval;
+  // Store original timer functions only if not already stored
+  if (!originalSetTimeout || global.setTimeout === originalSetTimeout) {
+    originalSetTimeout = global.setTimeout;
+  }
+  if (!originalSetInterval || global.setInterval === originalSetInterval) {
+    originalSetInterval = global.setInterval;
+  }
+  if (!originalClearTimeout || global.clearTimeout === originalClearTimeout) {
+    originalClearTimeout = global.clearTimeout;
+  }
+  if (!originalClearInterval || global.clearInterval === originalClearInterval) {
+    originalClearInterval = global.clearInterval;
+  }
+  
+  isSetupActive = true;
   
   // Override setTimeout to track timers
   global.setTimeout = ((callback: TimerHandler, delay?: number, ...args: any[]) => {
@@ -93,34 +110,51 @@ export function setupAntiHang(customTimeout: number = TEST_TIMEOUTS.DEFAULT): vo
 export function cleanupAntiHang(): void {
   // Clear all tracked timers
   for (const id of activeTimers) {
-    originalClearTimeout(id);
+    if (originalClearTimeout) {
+      originalClearTimeout(id);
+    } else {
+      clearTimeout(id);
+    }
   }
   activeTimers.clear();
   
   // Clear all tracked intervals
   for (const id of activeIntervals) {
-    originalClearInterval(id);
+    if (originalClearInterval) {
+      originalClearInterval(id);
+    } else {
+      clearInterval(id);
+    }
   }
   activeIntervals.clear();
   
   // Use Jest fake timers to clear any remaining timers
-  jest.useFakeTimers();
-  jest.clearAllTimers();
-  jest.runOnlyPendingTimers();
-  jest.useRealTimers();
+  try {
+    jest.useFakeTimers();
+    jest.clearAllTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+  } catch (error) {
+    // Jest timer manipulation may fail in some contexts, continue cleanup
+    console.warn('Jest timer cleanup failed:', error);
+  }
   
-  // Restore original timer functions if they were overridden
-  if (originalSetTimeout) {
-    global.setTimeout = originalSetTimeout;
-  }
-  if (originalSetInterval) {
-    global.setInterval = originalSetInterval;
-  }
-  if (originalClearTimeout) {
-    global.clearTimeout = originalClearTimeout;
-  }
-  if (originalClearInterval) {
-    global.clearInterval = originalClearInterval;
+  // Restore original timer functions if they were overridden and setup is active
+  if (isSetupActive) {
+    if (originalSetTimeout) {
+      global.setTimeout = originalSetTimeout;
+    }
+    if (originalSetInterval) {
+      global.setInterval = originalSetInterval;
+    }
+    if (originalClearTimeout) {
+      global.clearTimeout = originalClearTimeout;
+    }
+    if (originalClearInterval) {
+      global.clearInterval = originalClearInterval;
+    }
+    
+    isSetupActive = false;
   }
 }
 
@@ -130,6 +164,9 @@ export function cleanupAntiHang(): void {
  */
 export function restoreAntiHang(): void {
   cleanupAntiHang();
+  
+  // Force reset of setup state
+  isSetupActive = false;
 }
 
 /**
@@ -320,18 +357,32 @@ export function getTimerStats(): { timers: number; intervals: number } {
 export function forceCleanupAll(): void {
   cleanupAntiHang();
   
+  // Force reset all state
+  isSetupActive = false;
+  activeTimers.clear();
+  activeIntervals.clear();
+  
   // Additional cleanup for stubborn resources
   if (typeof window !== 'undefined') {
     // Clear any window-level resources
-    const highestTimeoutId = setTimeout(() => {}, 0);
-    for (let i = 0; i <= highestTimeoutId; i++) {
-      clearTimeout(i);
+    try {
+      const highestTimeoutId = setTimeout(() => {}, 0);
+      clearTimeout(highestTimeoutId);
+      for (let i = 1; i <= highestTimeoutId; i++) {
+        clearTimeout(i);
+      }
+    } catch (error) {
+      console.warn('Failed to clear window timeouts:', error);
     }
   }
   
   // Force garbage collection if available
   if ((global as any).gc) {
-    (global as any).gc();
+    try {
+      (global as any).gc();
+    } catch (error) {
+      console.warn('Failed to force garbage collection:', error);
+    }
   }
 }
 

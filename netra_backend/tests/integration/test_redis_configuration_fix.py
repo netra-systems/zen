@@ -91,7 +91,7 @@ class TestRedisConfigurationFix:
         
         try:
             # Try to access isolated environment
-            from netra_backend.app.core.configuration.isolated_environment import IsolatedEnvironment
+            from shared.isolated_environment import IsolatedEnvironment
             
             env = IsolatedEnvironment()
             redis_url_from_env = env.get('REDIS_URL')

@@ -37,7 +37,7 @@ sys.path.insert(0, project_root)
 
 from netra_backend.app.core.network_constants import ServicePorts, HostConstants, URLConstants
 from shared.database_url_builder import DatabaseURLBuilder
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 class TestBasicSystemFunctionality:

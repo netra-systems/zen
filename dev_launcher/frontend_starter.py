@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Dict, Optional, Tuple
 
 from dev_launcher.config import LauncherConfig, resolve_path
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from dev_launcher.log_streamer import Colors, LogManager, LogStreamer
 from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.utils import (

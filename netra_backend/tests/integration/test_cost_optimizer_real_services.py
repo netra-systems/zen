@@ -19,7 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.agents.data_sub_agent.cost_optimizer import CostOptimizer
 from netra_backend.app.agents.data_sub_agent.configuration_manager import DataSubAgentConfigurationManager
 from netra_backend.app.agents.data_sub_agent.data_fetching import DataFetching
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.database import get_async_session
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.core.config import get_config

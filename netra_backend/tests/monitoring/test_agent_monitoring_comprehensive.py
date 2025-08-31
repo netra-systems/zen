@@ -14,7 +14,7 @@ import json
 from datetime import datetime, timezone
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 
 
 @pytest.mark.monitoring

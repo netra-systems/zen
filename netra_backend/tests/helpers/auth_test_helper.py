@@ -46,7 +46,7 @@ class TestAuthHelper:
         # Additional check for specific bypass flags
         env = os.environ
         bypass_enabled = (
-            env.get("ALLOW_DEV_AUTH_BYPASS", "false").lower() == "true" or
+            env.get("ALLOW_DEV_OAUTH_SIMULATION", "false").lower() == "true" or
             env.get("WEBSOCKET_AUTH_BYPASS", "false").lower() == "true" or
             env.get("AUTH_FAST_TEST_MODE", "false").lower() == "true"
         )
@@ -115,7 +115,7 @@ class TestOnlyWebSocketAuth:
             return TestAuthHelper.create_test_auth_info()
         
         if TestAuthHelper.should_bypass_auth():
-            # Auth bypass enabled for testing
+            # OAUTH SIMULATION enabled for testing
             return TestAuthHelper.create_test_auth_info()
         
         # No valid test auth
@@ -134,11 +134,11 @@ class TestOnlyWebSocketAuth:
 def bypass_auth_for_test():
     """Context manager to temporarily bypass auth for testing."""
     if not TestAuthHelper.is_test_environment():
-        raise RuntimeError("Auth bypass can only be used in test environments!")
+        raise RuntimeError("OAUTH SIMULATION can only be used in test environments!")
     
     # Set bypass flags
     original_values = {}
-    bypass_vars = ["ALLOW_DEV_AUTH_BYPASS", "AUTH_FAST_TEST_MODE"]
+    bypass_vars = ["ALLOW_DEV_OAUTH_SIMULATION", "AUTH_FAST_TEST_MODE"]
     
     for var in bypass_vars:
         original_values[var] = os.environ.get(var)

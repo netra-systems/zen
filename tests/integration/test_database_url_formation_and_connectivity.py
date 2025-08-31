@@ -29,7 +29,7 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from shared.database_url_builder import DatabaseURLBuilder
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from auth_service.auth_core.database.database_manager import AuthDatabaseManager
 from auth_service.auth_core.config import AuthConfig
 from test_framework.environment_markers import env
@@ -429,7 +429,7 @@ class TestDatabaseURLFormationAndConnectivity:
             # Test AuthDatabaseManager URL transformations
             try:
                 # Set test URL temporarily
-                from auth_service.auth_core.isolated_environment import get_env
+                from shared.isolated_environment import get_env
                 env = get_env()
                 original_url = env.get('DATABASE_URL')
                 

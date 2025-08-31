@@ -87,7 +87,7 @@ class MessageFlowTestHelper:
         for step in expected_steps:
             assert step in actual_steps, f"Missing flow step: {step}"
 
-class TestWebSocketMock(MockWebSocket):
+class TestWebSocketMock(Mock):
     """Extended mock WebSocket for testing."""
     
     def __init__(self, user_id=None):

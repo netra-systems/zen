@@ -44,7 +44,7 @@ import pytest
 from typing import Dict, Any, Optional, Set
 
 from test_framework.environment_markers import env
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 # Test the current fragmented state to prove the need for consolidation
 class TestSecretManagerBuilderRequirement:

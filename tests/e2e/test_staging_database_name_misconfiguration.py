@@ -13,7 +13,7 @@ Business Value Justification (BVJ):
 import os
 import pytest
 from unittest import mock
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.e2e

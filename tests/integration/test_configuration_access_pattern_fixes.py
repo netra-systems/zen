@@ -25,7 +25,7 @@ from typing import Dict, Any, List, Optional
 import pytest
 import tempfile
 
-from dev_launcher.isolated_environment import IsolatedEnvironment, get_env
+from shared.isolated_environment import IsolatedEnvironment, get_env
 
 logger = logging.getLogger(__name__)
 

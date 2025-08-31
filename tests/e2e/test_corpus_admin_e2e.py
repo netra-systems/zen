@@ -54,9 +54,9 @@ from netra_backend.app.agents.corpus_admin.models import (
     CorpusType,
 )
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.schemas.user_plan import PlanTier
 
@@ -963,7 +963,7 @@ class TestCorpusAdminE2E:
     async def _store_performance_results(self, report: Dict[str, Any]):
         """Store performance results for CI/CD tracking."""
         # Store in test artifacts directory if available
-        from dev_launcher.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         env = get_env()
         results_dir = env.get("TEST_RESULTS_DIR", "/tmp")
         if results_dir:
@@ -1446,7 +1446,7 @@ class TestCorpusAdminRealLLME2E:
     @pytest.fixture
     def use_real_llm(self):
         """Check if real LLM testing is enabled."""
-        from dev_launcher.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         env = get_env()
         return env.get("TEST_USE_REAL_LLM", "false").lower() == "true"
     
@@ -1468,7 +1468,7 @@ class TestCorpusAdminRealLLME2E:
 
 
 # Environment-aware test markers
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 _test_env = get_env()
 
 pytest.mark.dev = pytest.mark.skipif(

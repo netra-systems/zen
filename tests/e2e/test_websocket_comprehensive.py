@@ -522,7 +522,7 @@ class TestWebSocketConnectionEstablishment:
     @pytest.mark.asyncio 
     @pytest.mark.e2e
     async def test_websocket_invalid_token_rejection(self):
-        """Test that invalid tokens are properly rejected - MIGHT EXPOSE AUTH BYPASS."""
+        """Test that invalid tokens are properly rejected - MIGHT EXPOSE OAUTH SIMULATION."""
         client = WebSocketTestClient(
             "http://localhost:8000",
             "invalid_token_12345",

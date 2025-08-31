@@ -21,7 +21,7 @@ from netra_backend.app.core.health_checkers import (
 
 async def setup_backend_health_service() -> UnifiedHealthService:
     """Configure health checks for the backend service."""
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     
     health_service = UnifiedHealthService("netra_backend", "1.0.0")
     

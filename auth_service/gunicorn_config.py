@@ -9,7 +9,7 @@ import sys
 
 # Import IsolatedEnvironment for consistent environment access
 try:
-    from auth_service.auth_core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
 except ImportError:
     # Fallback for when imports may not be available during gunicorn setup
     def get_env():

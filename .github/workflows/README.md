@@ -1,181 +1,240 @@
-# GitHub Workflows Architecture
-
-This directory contains the master workflow orchestrator and reusable workflow components following the architecture specified in `SPEC/MASTER_GITHUB_WORKFLOW.xml`.
+# GitHub Workflows Documentation
 
 ## Overview
 
-The workflow architecture is designed around a single entry point (`master-orchestrator.yml`) that provides:
+This repository uses a sophisticated CI/CD pipeline with three distinct execution models optimized for different scenarios. All workflows are aligned with CLAUDE.md requirements and project goals for the Netra Apex AI Optimization Platform.
 
-- **Conditional Execution**: Smart routing based on triggers, changes, and configuration
-- **Centralized Configuration**: JSON-based configuration management
-- **ACT Compatibility**: Full support for local testing with the ACT tool
-- **Reusable Components**: DRY principle applied to workflow components
-- **Intelligent Skipping**: Automatic detection of when workflows should be skipped
+## Core Principles
+
+1. **Real Services Only**: All tests use real databases and services (PostgreSQL, Redis) - no mocks allowed per CLAUDE.md
+2. **Mission Critical First**: WebSocket agent events are tested first and must always pass
+3. **Business Value Focus**: Every workflow decision is made to maximize value delivery
+4. **Fail Fast Philosophy**: Get feedback as quickly as possible when things break
+
+## Execution Models
+
+### 1. Max Parallel (`ci-max-parallel.yml`)
+- **Purpose**: Fastest overall completion time
+- **Strategy**: All tests run simultaneously
+- **Best For**: Development branches, comprehensive testing
+- **Trade-off**: Higher resource usage
+- **Completion Time**: ~5-10 minutes
+
+### 2. Balanced (`ci-balanced.yml`)
+- **Purpose**: Optimal resource usage with smart dependencies
+- **Strategy**: Phased execution with logical grouping
+- **Best For**: Pull requests, standard development
+- **Trade-off**: Balanced speed vs resource usage
+- **Completion Time**: ~10-15 minutes
+
+### 3. Fail Fast (`ci-fail-fast.yml`)
+- **Purpose**: Immediate feedback on first failure
+- **Strategy**: Sequential execution, stops on first error
+- **Best For**: Main branch, production deployments
+- **Trade-off**: Longer total time but fastest failure feedback
+- **Completion Time**: ~15-20 minutes (or immediate on failure)
+
+## Main Workflows
+
+### CI Orchestrator (`ci-orchestrator.yml`)
+The main entry point that automatically selects the appropriate execution model:
+- **Pull Requests**: Uses Balanced model
+- **Main Branch**: Uses Fail-Fast model
+- **Develop Branch**: Uses Max-Parallel model
+- **Manual Override**: Available via workflow_dispatch
+
+### Master Orchestrator (`master-orchestrator.yml`)
+Legacy orchestrator with comprehensive workflow management (being phased out in favor of ci-orchestrator.yml).
+
+### Deployment Workflows
+
+#### Staging Deployment (`deploy-staging.yml`)
+- Automatic deployment from main branch
+- Pre-deployment validation including mission critical tests
+- Blue-green deployment strategy
+- Health checks and smoke tests
+
+#### Production Deployment (`deploy-production.yml`)
+- Manual approval required
+- Comprehensive pre-deployment testing
+- Database backup before deployment
+- Gradual traffic shifting (10% → 50% → 100%)
+- Automatic rollback plan generation
+
+### Utility Workflows
+
+#### Cleanup (`cleanup.yml`)
+- PR environment cleanup on close
+- Old artifact removal (7-day retention)
+- Unused container image cleanup (30-day retention)
+- Weekly scheduled cleanup
+
+## Workflow Selection Guide
+
+| Scenario | Recommended Model | Reason |
+|----------|------------------|---------|
+| Feature Development | Max Parallel | Get all test results quickly |
+| Pull Request | Balanced | Optimal feedback with resource efficiency |
+| Hotfix to Main | Fail Fast | Immediate feedback if something breaks |
+| Large Refactor | Max Parallel | See all impacts at once |
+| Pre-Production | Fail Fast | Ensure quality gate compliance |
+
+## Mission Critical Tests
+
+Per CLAUDE.md section 6, the following are MISSION CRITICAL and must never fail:
+- WebSocket agent event tests (`test_websocket_agent_events_suite.py`)
+- Agent startup notifications
+- Tool execution events
+- Agent completion events
+
+These tests run first in all workflows and block deployment if they fail.
+
+## Test Categories
+
+1. **Mission Critical**: WebSocket events, core agent functionality
+2. **Unit Tests**: Backend, Frontend, Auth Service
+3. **Integration Tests**: Service interactions, database operations
+4. **E2E Tests**: Full user flows with real services
+5. **Security Scans**: Vulnerability detection, dependency audits
+6. **Architecture Compliance**: SSOT, import rules, type safety
 
 ## Directory Structure
 
 ```
 .github/workflows/
-├── master-orchestrator.yml      # Single entry point for all workflows
-├── config/                      # Centralized configuration
-│   ├── settings.json           # Global workflow settings
-│   ├── features.json           # Feature flags and toggles
-│   ├── environments.json       # Environment-specific configurations
-│   └── secrets-mapping.json    # Secret name mappings
-├── reusable/                    # Reusable workflow library
-│   ├── test-runner.yml         # Test execution with multiple levels
-│   ├── deploy-staging.yml      # Staging deployment workflow
-│   ├── deploy-production.yml   # Production deployment workflow
-│   ├── security-scan.yml       # Security vulnerability scanning
-│   ├── code-quality.yml        # Code quality and compliance checks
-│   ├── cleanup.yml             # Resource cleanup operations
-│   └── notification-handler.yml # Notification management
-├── jobs/                        # Atomic job definitions (future)
-├── pending/                     # Non-vetted workflows (experimental)
-└── README.md                   # This documentation
+├── ci-orchestrator.yml          # Main CI/CD orchestrator with strategy selection
+├── ci-max-parallel.yml          # Maximum parallelization strategy
+├── ci-balanced.yml              # Balanced execution strategy
+├── ci-fail-fast.yml            # Sequential fail-fast strategy
+├── deploy-staging.yml          # Staging deployment pipeline
+├── deploy-production.yml       # Production deployment with approvals
+├── cleanup.yml                 # Resource cleanup automation
+├── master-orchestrator.yml     # Legacy orchestrator (phasing out)
+├── unified-test-runner.yml     # Shared test execution logic
+├── mission-critical-tests.yml  # Critical WebSocket tests
+├── config/                     # Centralized configuration
+│   ├── settings.json          # Workflow settings
+│   └── features.json          # Feature flags
+└── README.md                  # This file
 ```
 
-## Master Orchestrator
+## Environment Variables
 
-The `master-orchestrator.yml` serves as the central dispatcher with these phases:
+All workflows use consistent environment variables:
+- `PYTHON_VERSION`: 3.11
+- `NODE_VERSION`: 20
+- `NETRA_ENV`: test/staging/production
+- `TEST_DATABASE_URL`: PostgreSQL connection
+- `TEST_REDIS_URL`: Redis connection
+- `CI`: true
 
-### Phase 1: Determine Strategy
-- **Environment Detection**: ACT vs GitHub Actions
-- **Change Analysis**: Analyze modified files and determine risk level
-- **Execution Planning**: Decide which workflows to run based on context
+## Triggering Workflows
 
-### Phase 2: Test Execution
-- **Conditional Testing**: Run tests based on change analysis
-- **Multiple Levels**: smoke, unit, integration, comprehensive
-- **ACT Compatible**: Mock execution for local testing
+### Automatic Triggers
+- **Push to main**: Fail-fast CI → Staging deployment
+- **Pull Request**: Balanced CI
+- **PR Close**: Cleanup resources
+- **Weekly Schedule**: Resource cleanup
 
-### Phase 3: Deployment
-- **Staging Deployment**: Automatic for qualifying branches
-- **Production Deployment**: Manual approval required, main branch only
-- **Environment-Specific**: Different configurations per environment
-
-### Phase 4: Cleanup
-- **Resource Management**: Clean up staging environments on PR close
-- **Scheduled Cleanup**: Remove stale resources automatically
-
-### Phase 5: Security & Quality
-- **Security Scanning**: Dependency, static analysis, secrets detection
-- **Code Quality**: Architecture compliance, linting, type checking
-- **Risk Assessment**: Automatic scoring and reporting
-
-### Phase 6: Notifications
-- **Multi-Channel**: PR comments, Slack, email (configurable)
-- **Smart Filtering**: Only notify when configured conditions are met
-- **Unified Updates**: Single comment per PR, always updated
-
-## Trigger Support
-
-The master orchestrator responds to these GitHub events:
-
-- **Pull Requests**: `opened`, `synchronize`, `reopened`, `closed`
-- **Push Events**: `main`, `develop` branches
-- **Manual Dispatch**: `workflow_dispatch` with parameters
-- **External Events**: `repository_dispatch` for integrations
-- **Scheduled Runs**: Daily health checks via cron
-
-## Configuration
-
-### Settings (`config/settings.json`)
-Global workflow behavior including test timeouts, deployment policies, and notification preferences.
-
-### Features (`config/features.json`)
-Feature flags to enable/disable specific workflow capabilities without code changes.
-
-### Environments (`config/environments.json`)
-Environment-specific settings for staging, production, and development.
-
-### Secrets Mapping (`config/secrets-mapping.json`)
-Maps logical secret names to actual GitHub secret names for different environments.
-
-## Skip Conditions
-
-The orchestrator intelligently skips workflows when:
-
-- Commit message contains `[skip ci]` or `[ci skip]`
-- Only documentation files (`.md`, `docs/`, `SPEC/`) were changed
-- Frontend-only changes (skips backend tests)
-- Backend-only changes (skips frontend builds)
-
-## ACT Compatibility
-
-All workflows are designed to run locally using the [ACT tool](https://github.com/nektos/act):
-
-```bash
-# Test the master orchestrator
-act pull_request
-
-# Test with specific event
-act workflow_dispatch -e test-events/manual-deploy.json
-
-# List available workflows
-act --list
-```
-
-Key ACT compatibility features:
-- No self-referencing environment variables
-- Static defaults for all variables
-- Mock services and external dependencies
-- Conditional logic for local vs cloud execution
-
-## Permissions
-
-All workflows follow the least-privilege principle with explicit permissions:
-
-```yaml
-permissions:
-  contents: read          # Always needed for checkout
-  deployments: write      # For deployment operations
-  pull-requests: write    # For PR comments
-  issues: write          # For issue operations (PRs are issues)
-  statuses: write        # For commit status updates
-```
-
-## Error Handling
-
-- **Retry Logic**: Automatic retry for transient failures
-- **Graceful Degradation**: Continue with warnings when possible
-- **Always Cleanup**: Resource cleanup even on failures
-- **Detailed Reporting**: Comprehensive logging and artifacts
+### Manual Triggers
+All workflows support `workflow_dispatch` for manual execution with options:
+- Select CI strategy
+- Skip non-critical tests
+- Force deployment
+- Start from specific phase
 
 ## Best Practices
 
-1. **Single Entry Point**: All workflows route through master-orchestrator.yml
-2. **Configuration Over Code**: Use JSON configs instead of hardcoded values
-3. **DRY Principle**: Reusable workflows for common patterns
-4. **Fail Fast**: Validate early to save resources
-5. **Test Locally**: Use ACT to validate changes before push
-6. **Version Control**: Tag reusable workflows for stability
+1. **Never Skip Mission Critical Tests**: These ensure core functionality
+2. **Use Real Services**: Mocks are forbidden per CLAUDE.md
+3. **Check Architecture Compliance**: Run before major changes
+4. **Monitor Resource Usage**: Use appropriate model for the task
+5. **Review Rollback Plans**: Always have a way back
 
-## Migration from Legacy Workflows
+## GCP Deployment
 
-To migrate from existing individual workflows:
+Deployments use the official script:
+```bash
+python scripts/deploy_to_gcp.py --project netra-staging --build-local
+```
 
-1. **Extract Common Logic**: Move shared steps to reusable workflows
-2. **Update Triggers**: Route through master orchestrator
-3. **Test Thoroughly**: Validate with ACT and staging environments
-4. **Monitor**: Watch for issues during rollout
-5. **Cleanup**: Remove old workflow files once stable
+### Service Configuration
+- **Backend**: Cloud Run, 2-4 CPU, 4-8Gi RAM
+- **Auth Service**: Cloud Run, 1-2 CPU, 2-4Gi RAM  
+- **Frontend**: Cloud Run, 1-2 CPU, 2-4Gi RAM
+- **Database**: Cloud SQL PostgreSQL
+- **Cache**: Memorystore Redis
 
-## Monitoring and Debugging
+## ACT Compatibility
 
-- **GitHub Step Summary**: Detailed reports for each workflow run
-- **Artifacts**: Logs, reports, and debugging information preserved
-- **Status Updates**: Real-time commit status updates
-- **Notifications**: Configurable alerts for failures
+All workflows support local testing with [act](https://github.com/nektos/act):
 
-## Future Enhancements
+```bash
+# Test specific workflow
+act -W .github/workflows/ci-balanced.yml
 
-- **Matrix Testing**: Cross-platform and multi-version testing
-- **Performance Metrics**: Workflow execution time tracking
-- **Advanced Security**: Integration with external security tools
-- **Blue-Green Deployments**: Zero-downtime deployment strategies
-- **Auto-Scaling**: Dynamic resource allocation based on load
+# Test with specific event
+act pull_request -W .github/workflows/ci-orchestrator.yml
 
----
+# Test with custom inputs
+act workflow_dispatch -W .github/workflows/ci-orchestrator.yml \
+  --input ci_strategy=fail-fast
+```
 
-For questions or issues with the workflow architecture, consult the `SPEC/MASTER_GITHUB_WORKFLOW.xml` specification or review the existing workflow runs for examples.
+## Troubleshooting
+
+### Common Issues
+
+1. **Mission Critical Tests Failing**
+   - Priority: IMMEDIATE
+   - Action: Block all deployments until fixed
+   - Check: WebSocket event handling, agent registry
+
+2. **Resource Cleanup Not Running**
+   - Check: PR close events, scheduled triggers
+   - Manual: Run cleanup workflow manually
+
+3. **Deployment Blocked**
+   - Verify: All pre-deployment checks passing
+   - Check: Manual approval for production
+   - Ensure: Staging is healthy first
+
+4. **Workflow Selection Wrong**
+   - Check: ci-orchestrator.yml logic
+   - Override: Use workflow_dispatch with manual selection
+
+## Security Considerations
+
+- Secrets stored in GitHub Secrets
+- GCP authentication via Workload Identity Federation
+- Database credentials in Secret Manager
+- JWT secrets rotated regularly
+- No hardcoded credentials in workflows
+
+## Performance Metrics
+
+Target metrics for workflow execution:
+- **Unit Tests**: < 5 minutes
+- **Integration Tests**: < 10 minutes
+- **E2E Tests**: < 15 minutes
+- **Full CI Pipeline**: < 20 minutes
+- **Staging Deployment**: < 10 minutes
+- **Production Deployment**: < 30 minutes (including approvals)
+
+## Contributing
+
+When modifying workflows:
+1. Maintain compatibility with CLAUDE.md requirements
+2. Ensure mission critical tests remain first priority
+3. Test locally with act before committing
+4. Document any new environment variables or secrets
+5. Update this README with changes
+6. Follow git commit standards in `SPEC/git_commit_atomic_units.xml`
+
+## Related Documentation
+
+- [`CLAUDE.md`](../../CLAUDE.md) - Core system requirements
+- [`SPEC/learnings/websocket_agent_integration_critical.xml`](../../SPEC/learnings/websocket_agent_integration_critical.xml) - WebSocket requirements
+- [`MASTER_WIP_STATUS.md`](../../MASTER_WIP_STATUS.md) - Current system status
+- [`DEFINITION_OF_DONE_CHECKLIST.md`](../../DEFINITION_OF_DONE_CHECKLIST.md) - Module completion checklist
+- [`unified_test_runner.py`](../../unified_test_runner.py) - Test execution framework

@@ -308,7 +308,7 @@ class TestSecretManagerBuilderCritical:
         try:
             # Test current AuthSecretLoader implementation
             from auth_service.auth_core.secret_loader import AuthSecretLoader
-            from auth_service.auth_core.isolated_environment import get_env
+            from shared.isolated_environment import get_env
             
             # Simulate loading all critical secrets (auth_service doesn't have load_all method)
             env_manager = get_env()

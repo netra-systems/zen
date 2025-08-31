@@ -14,7 +14,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import AsyncGenerator, Optional
 
-from auth_service.auth_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, AsyncEngine
 # SSOT compliance: Use AuthDatabaseManager.create_async_engine instead of create_async_engine

@@ -55,7 +55,7 @@ import httpx
 import aiohttp
 
 # Core system imports using absolute paths per SPEC/import_management_architecture.xml
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from test_framework.environment_markers import env_requires, staging_only
 from tests.e2e.staging_test_helpers import StagingTestSuite, ServiceHealthStatus, get_staging_suite
 

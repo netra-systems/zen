@@ -15,46 +15,7 @@
  */
 
 import { jest } from '@jest/globals';
-
-// Define types locally to avoid import issues during testing
-export interface User {
-  id: string;
-  email: string;
-  full_name?: string | null;
-  picture?: string | null;
-  is_active?: boolean;
-  is_superuser?: boolean;
-  access_token?: string;
-  token_type?: string;
-}
-
-export interface Token {
-  access_token: string;
-  token_type: string;
-  expires_in?: number | null;
-  refresh_token?: string | null;
-  user: User;
-}
-
-export interface AuthEndpoints {
-  login: string;
-  logout: string;
-  callback: string;
-  token: string;
-  user: string;
-  dev_login?: string;
-}
-
-export interface AuthConfigResponse {
-  google_client_id: string;
-  endpoints: AuthEndpoints;
-  development_mode: boolean;
-  user?: User | null;
-  authorized_javascript_origins: string[];
-  authorized_redirect_uris: string[];
-  google_login_url?: string;
-  logout_url?: string;
-}
+import { User, Token, AuthEndpoints, AuthConfigResponse } from '../../types/unified/auth.types';
 
 // ============================================================================
 // AUTH USER MOCK FACTORIES - User account generation

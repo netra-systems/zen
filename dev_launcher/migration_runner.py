@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 from typing import Dict, Optional, Tuple
 
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from dev_launcher.utils import print_with_emoji
 
 logger = logging.getLogger(__name__)

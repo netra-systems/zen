@@ -28,7 +28,7 @@ import psycopg2
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from test_framework.environment_markers import env
 
 

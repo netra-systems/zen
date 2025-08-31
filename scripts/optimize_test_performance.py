@@ -18,7 +18,7 @@ from collections import defaultdict, Counter
 import sys
 sys.path.append(str(Path(__file__).parent.parent))
 
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 env = IsolatedEnvironment()
 

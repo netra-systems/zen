@@ -14,12 +14,52 @@ import type {
 } from '@/types/mcp-types';
 import { authInterceptor } from '@/lib/auth-interceptor';
 import { logger } from '@/lib/logger';
+import { serviceDiscovery } from '@/lib/service-discovery';
 
 // ============================================
 // Service Configuration
 // ============================================
 
-const MCP_API_BASE = '/api/mcp';
+let MCP_API_BASE = '/api/mcp';
+let mcpConfigCache: { endpoint?: string; timestamp?: number } = {};
+const CONFIG_CACHE_TTL = 60000; // 1 minute cache
+
+// Discover MCP configuration from backend
+const discoverMCPConfig = async (): Promise<string> => {
+  // Check cache first
+  if (mcpConfigCache.endpoint && mcpConfigCache.timestamp && 
+      Date.now() - mcpConfigCache.timestamp < CONFIG_CACHE_TTL) {
+    return mcpConfigCache.endpoint;
+  }
+
+  try {
+    // First try to get the base API URL from service discovery
+    const apiUrl = await serviceDiscovery.getApiUrl();
+    
+    // Then fetch MCP configuration from the config endpoint
+    const response = await authInterceptor.get(`${apiUrl}/api/mcp/config`);
+    if (response.ok) {
+      const config = await response.json();
+      // Use the HTTP endpoint from the config if available
+      if (config?.http?.endpoint) {
+        const endpoint = new URL(config.http.endpoint).pathname;
+        mcpConfigCache = { endpoint, timestamp: Date.now() };
+        return endpoint;
+      }
+    }
+  } catch (error) {
+    logger.warn('Failed to discover MCP configuration, using default', error);
+  }
+  
+  // Fall back to default
+  return MCP_API_BASE;
+};
+
+// Update MCP_API_BASE before making requests
+const getMCPBase = async (): Promise<string> => {
+  MCP_API_BASE = await discoverMCPConfig();
+  return MCP_API_BASE;
+};
 
 // All API calls now use auth interceptor for consistent header management
 
@@ -82,7 +122,8 @@ const handleApiResponse = async <T>(response: Response | any): Promise<T> => {
 
 export const listServers = async (): Promise<MCPServerInfo[]> => {
   try {
-    const response = await authInterceptor.get(`${MCP_API_BASE}/servers`);
+    const base = await getMCPBase();
+    const response = await authInterceptor.get(`${base}/servers`);
     const result = await handleApiResponse<ListServersResponse>(response);
     return result.data || [];
   } catch (error) {
@@ -96,7 +137,8 @@ export const listServers = async (): Promise<MCPServerInfo[]> => {
 
 export const getServerStatus = async (serverName: string): Promise<MCPServerInfo | null> => {
   try {
-    const response = await authInterceptor.get(`${MCP_API_BASE}/servers/${serverName}/status`);
+    const base = await getMCPBase();
+    const response = await authInterceptor.get(`${base}/servers/${serverName}/status`);
     const result = await handleApiResponse<MCPApiResponse<MCPServerInfo>>(response);
     return result.data || null;
   } catch (error) {
@@ -111,7 +153,8 @@ export const getServerStatus = async (serverName: string): Promise<MCPServerInfo
 
 export const connectServer = async (serverName: string): Promise<boolean> => {
   try {
-    const response = await authInterceptor.post(`${MCP_API_BASE}/servers/${serverName}/connect`);
+    const base = await getMCPBase();
+    const response = await authInterceptor.post(`${base}/servers/${serverName}/connect`);
     const result = await handleApiResponse<MCPApiResponse>(response);
     return result.success;
   } catch (error) {
@@ -126,7 +169,8 @@ export const connectServer = async (serverName: string): Promise<boolean> => {
 
 export const disconnectServer = async (serverName: string): Promise<boolean> => {
   try {
-    const response = await authInterceptor.post(`${MCP_API_BASE}/servers/${serverName}/disconnect`);
+    const base = await getMCPBase();
+    const response = await authInterceptor.post(`${base}/servers/${serverName}/disconnect`);
     const result = await handleApiResponse<MCPApiResponse>(response);
     return result.success;
   } catch (error) {
@@ -145,9 +189,10 @@ export const disconnectServer = async (serverName: string): Promise<boolean> => 
 
 export const discoverTools = async (serverName?: string): Promise<MCPTool[]> => {
   try {
+    const base = await getMCPBase();
     const url = serverName 
-      ? `${MCP_API_BASE}/tools?server=${serverName}` 
-      : `${MCP_API_BASE}/tools`;
+      ? `${base}/tools?server=${serverName}` 
+      : `${base}/tools`;
     const response = await authInterceptor.get(url);
     const result = await handleApiResponse<DiscoverToolsResponse>(response);
     return result.data || [];
@@ -167,7 +212,8 @@ export const executeTool = async (
   arguments_: Record<string, any>
 ): Promise<MCPToolResult> => {
   try {
-    const response = await authInterceptor.post(`${MCP_API_BASE}/tools/execute`, {
+    const base = await getMCPBase();
+    const response = await authInterceptor.post(`${base}/tools/execute`, {
       server_name: serverName, 
       tool_name: toolName, 
       arguments: arguments_
@@ -192,7 +238,8 @@ export const getToolSchema = async (
   serverName: string,
   toolName: string
 ): Promise<Record<string, any>> => {
-  const response = await authInterceptor.get(`${MCP_API_BASE}/tools/${serverName}/${toolName}/schema`);
+  const base = await getMCPBase();
+  const response = await authInterceptor.get(`${base}/tools/${serverName}/${toolName}/schema`);
   return handleApiResponse<Record<string, any>>(response);
 };
 
@@ -201,7 +248,8 @@ export const getToolSchema = async (
 // ============================================
 
 export const listResources = async (serverName: string): Promise<MCPResource[]> => {
-  const response = await authInterceptor.get(`${MCP_API_BASE}/resources?server=${serverName}`);
+  const base = await getMCPBase();
+  const response = await authInterceptor.get(`${base}/resources?server=${serverName}`);
   const result = await handleApiResponse<MCPApiResponse<MCPResource[]>>(response);
   return result.data || [];
 };
@@ -210,7 +258,8 @@ export const fetchResource = async (
   serverName: string,
   uri: string
 ): Promise<MCPResource | null> => {
-  const response = await authInterceptor.post(`${MCP_API_BASE}/resources/fetch`, {
+  const base = await getMCPBase();
+  const response = await authInterceptor.post(`${base}/resources/fetch`, {
     server_name: serverName, 
     uri
   });
@@ -226,7 +275,8 @@ export const clearCache = async (
   serverName?: string,
   cacheType?: string
 ): Promise<boolean> => {
-  const response = await authInterceptor.post(`${MCP_API_BASE}/cache/clear`, {
+  const base = await getMCPBase();
+  const response = await authInterceptor.post(`${base}/cache/clear`, {
     server_name: serverName, 
     cache_type: cacheType
   });
@@ -240,7 +290,8 @@ export const clearCache = async (
 
 export const healthCheck = async (): Promise<boolean> => {
   try {
-    const response = await authInterceptor.get(`${MCP_API_BASE}/health`);
+    const base = await getMCPBase();
+    const response = await authInterceptor.get(`${base}/health`);
     return response.ok;
   } catch {
     return false;
@@ -249,7 +300,8 @@ export const healthCheck = async (): Promise<boolean> => {
 
 export const serverHealthCheck = async (serverName: string): Promise<boolean> => {
   try {
-    const response = await authInterceptor.get(`${MCP_API_BASE}/servers/${serverName}/health`);
+    const base = await getMCPBase();
+    const response = await authInterceptor.get(`${base}/servers/${serverName}/health`);
     return response.ok;
   } catch {
     return false;
@@ -261,13 +313,15 @@ export const serverHealthCheck = async (serverName: string): Promise<boolean> =>
 // ============================================
 
 export const getServerConnections = async (): Promise<MCPServerInfo[]> => {
-  const response = await authInterceptor.get(`${MCP_API_BASE}/connections`);
+  const base = await getMCPBase();
+  const response = await authInterceptor.get(`${base}/connections`);
   const result = await handleApiResponse<ServerStatusResponse>(response);
   return result.data || [];
 };
 
 export const refreshAllConnections = async (): Promise<boolean> => {
-  const response = await authInterceptor.post(`${MCP_API_BASE}/connections/refresh`);
+  const base = await getMCPBase();
+  const response = await authInterceptor.post(`${base}/connections/refresh`);
   const result = await handleApiResponse<MCPApiResponse>(response);
   return result.success;
 };

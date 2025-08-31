@@ -2,7 +2,7 @@
 
 from typing import Optional
 
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 def get_staging_url() -> str:
     """Get staging URL."""

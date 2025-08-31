@@ -249,7 +249,7 @@ from netra_backend.app.monitoring.tracing import *
     # Dev launcher modules
     "dev_launcher/secret_loader.py": """
 # Shim module for secret loading - functionality moved to isolated_environment
-from dev_launcher.isolated_environment import load_secrets, SecretLoader
+from shared.isolated_environment import load_secrets, SecretLoader
 """,
 }
 

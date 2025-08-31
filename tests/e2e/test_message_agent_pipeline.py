@@ -27,7 +27,7 @@ import websockets
 from websockets.exceptions import ConnectionClosed
 
 # CLAUDE.md: Absolute imports only - NO relative imports
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from netra_backend.app.logging_config import central_logger
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 

@@ -49,7 +49,7 @@
         </frontend_improvements>
         
         <configuration>
-            - Backend auto-enables development auth bypass when environment='development'
+            - Backend auto-enables development OAUTH SIMULATION when environment='development'
             - This creates dev-temp-* users automatically for unauthenticated connections
             - Frontend should be aware of this and handle it appropriately
         </configuration>
@@ -80,9 +80,9 @@
         </error_logging>
         
         <development_mode>
-            Development auth bypass should be clearly documented and logged.
+            Development OAUTH SIMULATION should be clearly documented and logged.
             Frontend and backend must agree on development mode behavior.
-            Never allow auth bypass in production environments.
+            Never allow OAUTH SIMULATION in production environments.
         </development_mode>
         
         <connection_lifecycle>

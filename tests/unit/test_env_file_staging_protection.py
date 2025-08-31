@@ -26,11 +26,11 @@ def test_env_file_not_loaded_in_staging():
             # Set ENVIRONMENT to staging
             with patch.dict(os.environ, {"ENVIRONMENT": "staging"}, clear=False):
                 # Clear any existing instance
-                from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+                from shared.isolated_environment import IsolatedEnvironment
                 IsolatedEnvironment._instance = None
                 
                 # Import and create new instance
-                from netra_backend.app.core.isolated_environment import get_env
+                from shared.isolated_environment import get_env
                 env = get_env()
                 
                 # Verify .env values were NOT loaded
@@ -56,11 +56,11 @@ def test_env_file_not_loaded_in_production():
             # Set ENVIRONMENT to production
             with patch.dict(os.environ, {"ENVIRONMENT": "production"}, clear=False):
                 # Clear any existing instance
-                from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+                from shared.isolated_environment import IsolatedEnvironment
                 IsolatedEnvironment._instance = None
                 
                 # Import and create new instance
-                from netra_backend.app.core.isolated_environment import get_env
+                from shared.isolated_environment import get_env
                 env = get_env()
                 
                 # Verify .env values were NOT loaded
@@ -91,7 +91,7 @@ def test_env_file_is_loaded_in_development():
             
             with patch.dict(os.environ, env_vars, clear=True):
                 # Clear any existing instance AND its initialized flag
-                from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+                from shared.isolated_environment import IsolatedEnvironment
                 IsolatedEnvironment._instance = None
                 
                 # Also import the module-level instance and clear it
@@ -101,7 +101,7 @@ def test_env_file_is_loaded_in_development():
                     iso_env_module._env_instance = IsolatedEnvironment()
                 
                 # Import and get the fresh instance
-                from netra_backend.app.core.isolated_environment import get_env
+                from shared.isolated_environment import get_env
                 env = get_env()
                 
                 # Verify .env values WERE loaded in development
@@ -126,11 +126,11 @@ def test_env_file_does_not_override_existing_vars():
             # Set an existing environment variable and development mode
             with patch.dict(os.environ, {"ENVIRONMENT": "development", "EXISTING_VAR": "from_environment"}, clear=False):
                 # Clear any existing instance
-                from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+                from shared.isolated_environment import IsolatedEnvironment
                 IsolatedEnvironment._instance = None
                 
                 # Import and create new instance
-                from netra_backend.app.core.isolated_environment import get_env
+                from shared.isolated_environment import get_env
                 env = get_env()
                 
                 # Verify existing environment variable was NOT overridden

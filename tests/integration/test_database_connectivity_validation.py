@@ -32,7 +32,7 @@ sys.path.insert(0, str(project_root))
 
 from netra_backend.app.core.configuration.database import DatabaseConfigManager
 from shared.database_url_builder import DatabaseURLBuilder
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from test_framework.environment_markers import env
 
 
@@ -566,7 +566,7 @@ class TestDatabaseConfigurationRegression:
         This test prevents regression of the port configuration issue where
         sync URLs ignored the POSTGRES_PORT environment variable.
         """
-        from dev_launcher.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         env = get_env()
         
         original_port = env.get('POSTGRES_PORT')
@@ -609,7 +609,7 @@ class TestDatabaseConfigurationRegression:
         
         This test prevents regression of ClickHouse authentication issues.
         """
-        from dev_launcher.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         env = get_env()
         
         clickhouse_host = env.get('CLICKHOUSE_HOST')
@@ -641,7 +641,7 @@ class TestDatabaseConfigurationRegression:
         
         # Test asyncpg conversion (sslmode -> ssl)
         from auth_service.auth_core.database.database_manager import AuthDatabaseManager
-        from dev_launcher.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         env = get_env()
         
         original_url = env.get('DATABASE_URL')

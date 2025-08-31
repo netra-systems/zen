@@ -38,7 +38,7 @@ import json
 from fastapi.testclient import TestClient
 from fastapi import FastAPI
 from netra_backend.app.routes.health_check import router, readiness_probe, liveness_probe, startup_probe
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 # Create test FastAPI app for endpoint testing

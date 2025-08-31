@@ -14,7 +14,7 @@ from io import StringIO
 from pathlib import Path
 
 # Import isolated environment for proper environment management
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 class TestDatabaseAuthLogging:

@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 from test_framework.decorators import mock_justified
 from netra_backend.app.core.configuration.base import get_unified_config
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.db.postgres_core import Database, AsyncDatabase

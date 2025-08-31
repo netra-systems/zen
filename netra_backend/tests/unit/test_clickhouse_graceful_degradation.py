@@ -29,7 +29,7 @@ from unittest.mock import patch, Mock, AsyncMock, MagicMock
 from typing import Optional, Dict, Any
 import logging
 
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 class TestClickHouseGracefulDegradation:

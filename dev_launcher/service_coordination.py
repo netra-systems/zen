@@ -14,7 +14,7 @@ from typing import Dict, List, Optional, Set, Tuple
 import logging
 import random
 
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 

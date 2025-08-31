@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Frontend API URL Configuration Issue</title>
+    <date>2025-08-31</date>
+    <category>configuration</category>
+    <severity>critical</severity>
+    <tags>
+      <tag>frontend</tag>
+      <tag>api</tag>
+      <tag>staging</tag>
+      <tag>production</tag>
+    </tags>
+  </metadata>
+
+  <problem>
+    <description>
+      Frontend was making API calls to agent endpoints using relative URLs, causing them to be sent 
+      to the frontend domain (app.staging.netrasystems.ai) instead of the backend API domain 
+      (api.staging.netrasystems.ai), resulting in 404 errors.
+    </description>
+    
+    <symptoms>
+      <symptom>404 errors when calling /api/agents/triage from frontend chat</symptom>
+      <symptom>Requests going to app.staging.netrasystems.ai instead of api.staging.netrasystems.ai</symptom>
+      <symptom>Agent functionality broken in staging/production but working locally</symptom>
+    </symptoms>
+    
+    <root_cause>
+      The sendRestApiMessage function in useMessageSending.ts was using relative URLs like 
+      `/api/agents/${agentType}` which resolve to the current domain, not the backend API domain.
+    </root_cause>
+  </problem>
+
+  <solution>
+    <description>
+      Use absolute URLs with the proper backend API domain for all API calls from the frontend.
+    </description>
+    
+    <implementation>
+      <step>Import getUnifiedApiConfig from @/lib/unified-api-config</step>
+      <step>Get the API URL from config.urls.api</step>
+      <step>Use absolute URL: ${apiUrl}/api/agents/${agentType}</step>
+    </implementation>
+    
+    <code_example><![CDATA[
+// WRONG - Uses relative URL that goes to frontend domain
+const response = await fetch(`/api/agents/${agentType}`, {...});
+
+// CORRECT - Uses absolute URL with backend API domain
+import { getUnifiedApiConfig } from '@/lib/unified-api-config';
+
+const config = getUnifiedApiConfig();
+const apiUrl = config.urls.api;
+const response = await fetch(`${apiUrl}/api/agents/${agentType}`, {...});
+    ]]></code_example>
+  </solution>
+
+  <prevention>
+    <guideline>ALWAYS use absolute URLs with the backend API domain for API calls from frontend</guideline>
+    <guideline>NEVER use relative URLs like /api/* in frontend code - they will go to the frontend domain</guideline>
+    <guideline>Import and use getUnifiedApiConfig() to get the correct API URL</guideline>
+    <guideline>Test in staging environment to catch domain-related issues early</guideline>
+  </prevention>
+
+  <testing>
+    <test_file>frontend/__tests__/regression/api-url-configuration.test.tsx</test_file>
+    <test_description>
+      Regression test that verifies all API calls use the correct backend domain, 
+      not relative URLs that would resolve to the frontend domain.
+    </test_description>
+  </testing>
+
+  <related_files>
+    <file>frontend/components/chat/hooks/useMessageSending.ts</file>
+    <file>frontend/lib/unified-api-config.ts</file>
+    <file>frontend/lib/secure-api-config.ts</file>
+    <file>netra_backend/app/routes/agents_execute.py</file>
+  </related_files>
+
+  <impact>
+    <area>Chat functionality</area>
+    <area>Agent execution</area>
+    <area>User experience in staging/production</area>
+  </impact>
+</learning>

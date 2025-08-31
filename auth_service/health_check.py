@@ -12,7 +12,7 @@ import urllib.error
 import json
 import time
 from typing import Tuple
-from auth_service.auth_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 def check_health(port=None) -> bool:

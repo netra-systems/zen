@@ -25,7 +25,7 @@ project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(_
 sys.path.insert(0, project_root)
 
 from shared.database_url_builder import DatabaseURLBuilder
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 class TestDatabaseInitializationBasic:

@@ -16,9 +16,9 @@ import redis.asyncio as redis
 from netra_backend.app.config import get_config
 
 try:
-    from dev_launcher.isolated_environment import get_env
+    from shared.isolated_environment import get_env
 except ImportError:
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
 
 
 class MockAuthService:

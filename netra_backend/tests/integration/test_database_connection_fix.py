@@ -115,7 +115,7 @@ class TestDatabaseConnectionFix:
         print(f"DATABASE_URL set to: {dev_db_url}")
         
         # Verify the fix would work
-        from netra_backend.app.core.configuration.isolated_environment import IsolatedEnvironment
+        from shared.isolated_environment import IsolatedEnvironment
         env = IsolatedEnvironment()
         env.set('DATABASE_URL', dev_db_url, source='database_fix')
         

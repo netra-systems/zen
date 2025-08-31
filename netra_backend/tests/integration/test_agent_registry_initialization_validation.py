@@ -33,7 +33,7 @@ import pytest
 # CLAUDE.md compliance: Use absolute imports only, no relative imports
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.config import AppConfig

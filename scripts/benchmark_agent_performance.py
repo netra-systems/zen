@@ -34,8 +34,8 @@ from netra_backend.app.agents.supply_researcher_sub_agent import SupplyResearche
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
 from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
-from netra_backend.app.agents.supervisor_agent import SupervisorAgent
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.core.config import get_settings
 from netra_backend.app.db.session import get_session_local
 from netra_backend.app.services.llm_client import LLMClientInterface, get_llm_client

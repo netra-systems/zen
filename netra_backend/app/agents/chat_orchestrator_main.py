@@ -1,4 +1,4 @@
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 """NACIS Chat Orchestrator Agent - Central control for AI optimization consultation.
 
 Date Created: 2025-01-22
@@ -29,7 +29,7 @@ from netra_backend.app.agents.chat_orchestrator.pipeline_executor import (
     PipelineExecutor,
 )
 from netra_backend.app.agents.chat_orchestrator.trace_logger import TraceLogger
-from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger

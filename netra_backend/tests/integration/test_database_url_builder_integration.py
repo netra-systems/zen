@@ -5,7 +5,7 @@ import os
 from unittest.mock import patch
 
 from shared.database_url_builder import DatabaseURLBuilder
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 pytestmark = [
     pytest.mark.integration,

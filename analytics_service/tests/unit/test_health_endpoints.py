@@ -29,7 +29,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from fastapi.responses import JSONResponse
 
-from analytics_service.analytics_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 # Real health services fixtures for NO MOCKS policy

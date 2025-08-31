@@ -19,7 +19,7 @@ import redis
 # Import existing dev launcher infrastructure
 from dev_launcher.docker_services import DockerServiceManager, check_docker_availability
 from dev_launcher.service_availability_checker import ServiceAvailabilityChecker
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from test_framework.docker_port_discovery import DockerPortDiscovery, ServicePortMapping
 
 logger = logging.getLogger(__name__)

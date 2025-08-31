@@ -9,7 +9,7 @@ environment access while maintaining complete microservice independence.
 import logging
 
 # Use auth_service's own isolated environment management - NEVER import from dev_launcher or netra_backend
-from auth_service.auth_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from auth_service.auth_core.secret_loader import AuthSecretLoader
 from shared.database_url_builder import DatabaseURLBuilder
 from shared.port_discovery import PortDiscovery
@@ -44,18 +44,17 @@ class AuthConfig:
     
     @staticmethod
     def get_jwt_secret() -> str:
-        """Get JWT secret key using unified secret loader"""
-        secret = AuthSecretLoader.get_jwt_secret()
-        env = AuthConfig.get_environment()
+        """
+        Get JWT secret key using SHARED secret manager.
         
-        # Validate secret in staging/production
-        if env in ["staging", "production"] and not secret:
-            raise ValueError(f"JWT_SECRET_KEY must be set in {env} environment")
+        CRITICAL: This now uses SharedJWTSecretManager to ensure
+        the EXACT same JWT secret is used by both auth service and backend.
+        This is REQUIRED for cross-service authentication to work.
+        """
+        from shared.jwt_secret_manager import SharedJWTSecretManager
         
-        if env in ["staging", "production"] and len(secret) < 32:
-            raise ValueError(f"JWT_SECRET_KEY must be at least 32 characters in {env} environment")
-        
-        return secret
+        # Use the SINGLE source of truth for JWT secrets
+        return SharedJWTSecretManager.get_jwt_secret()
     
     @staticmethod
     def get_service_secret() -> str:

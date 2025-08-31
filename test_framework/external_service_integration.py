@@ -38,7 +38,7 @@ import threading
 import weakref
 
 # Core environment management
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from test_framework.isolated_environment_manager import TestResource, ResourceType
 
 # External service dependencies with graceful fallback

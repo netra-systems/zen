@@ -70,7 +70,7 @@ class CorsAuthServiceL4Test(L4StagingCriticalPathTestBase):
         
         self.docker_compose = DockerCompose(
             str(compose_file.parent),
-            compose_file_name="docker-compose.staging.yml"
+            compose_file_name="docker-compose.yml"  # Use main compose file with profiles
         )
         
         # Start services with health checks

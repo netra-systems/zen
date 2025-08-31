@@ -112,7 +112,7 @@ async def main():
     logger.info("Test 1: Testing /ws/test endpoint")
     test_result = await test_websocket_test_endpoint()
     
-    # Test 2: Main endpoint (may require auth bypass)
+    # Test 2: Main endpoint (may require OAUTH SIMULATION)
     logger.info("\nTest 2: Testing /ws main endpoint")
     main_result = await test_websocket_connection()
     
@@ -129,7 +129,7 @@ async def main():
         logger.info("❌ WebSocket infrastructure needs attention")
         
     if main_result:
-        logger.info("✅ Development auth bypass is working!")
+        logger.info("✅ Development OAUTH SIMULATION is working!")
     else:
         logger.info("ℹ️  Main endpoint requires authentication or bypass configuration")
     

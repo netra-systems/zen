@@ -5,8 +5,8 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock
 
 # COMMENTED OUT: MockWebSocket class - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
-# class MockWebSocket:
-#     """Mock WebSocket for testing."""
+class MockWebSocket:
+    """Mock WebSocket for testing."""
     
     def __init__(self, query_params=None, headers=None):
         self.query_params = query_params or {}

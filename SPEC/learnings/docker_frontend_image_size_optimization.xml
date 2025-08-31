@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>Docker Frontend Image Size Optimization</title>
+  <date>2025-08-31</date>
+  <category>infrastructure</category>
+  <subcategory>docker</subcategory>
+  <severity>high</severity>
+  
+  <problem>
+    <description>
+      Frontend Docker image was 2.21GB instead of expected ~500MB due to duplicate copying of node_modules
+      and inclusion of unnecessary test/build artifacts.
+    </description>
+    <symptoms>
+      - Docker image size: 2.21GB for dev-frontend
+      - Slow build times
+      - Excessive disk usage
+      - Slow container startup
+    </symptoms>
+    <root_cause>
+      Line 47 in frontend.development.Dockerfile used:
+      COPY --from=builder --chown=1000:1000 /app/ ./
+      
+      This copied the ENTIRE app directory including:
+      1. node_modules (1.2GB) - already copied in line 40
+      2. Test files (cypress-results-summary.json - 4.1MB)
+      3. Build artifacts (tsconfig.tsbuildinfo - 1.6MB)
+      4. Test mocks and results
+    </root_cause>
+  </problem>
+  
+  <solution>
+    <approach>Use specific COPY commands for only necessary files</approach>
+    <implementation>
+      <!-- Instead of copying entire /app directory -->
+      <!-- Copy only specific directories needed for runtime -->
+      - Copy package.json and node_modules separately
+      - Copy only source directories (app, components, hooks, etc.)
+      - Exclude test files, cypress, mocks, build info
+      - Use .dockerignore effectively
+    </implementation>
+    <results>
+      - Expected image size reduction from 2.21GB to ~500-600MB
+      - Faster builds and container startup
+      - Staging image already optimized at 434MB proves this is achievable
+    </results>
+  </solution>
+  
+  <best_practices>
+    <practice>
+      <rule>Never use wildcard COPY for entire directories in multi-stage builds</rule>
+      <reason>Causes duplication and includes unnecessary files</reason>
+    </practice>
+    <practice>
+      <rule>Always use specific COPY commands for known directories</rule>
+      <reason>Ensures only runtime-necessary files are included</reason>
+    </practice>
+    <practice>
+      <rule>Copy node_modules only once in the final stage</rule>
+      <reason>node_modules is typically the largest directory (1.2GB+)</reason>
+    </practice>
+    <practice>
+      <rule>Exclude test files and build artifacts from production images</rule>
+      <reason>These files are not needed at runtime and add significant size</reason>
+    </practice>
+  </best_practices>
+  
+  <validation>
+    <commands>
+      <!-- Check image size -->
+      docker images | findstr frontend
+      
+      <!-- Analyze what's in the image -->
+      docker run --rm IMAGE_NAME sh -c "du -sh /app/* | sort -hr | head -20"
+      
+      <!-- Expected sizes -->
+      - node_modules: ~1.2GB (should appear only once)
+      - Total image: ~500-600MB (not 2.2GB)
+    </commands>
+  </validation>
+  
+  <prevention>
+    <checklist>
+      - [ ] Review Dockerfile COPY commands for wildcards
+      - [ ] Ensure node_modules is copied only once
+      - [ ] Verify .dockerignore excludes test files
+      - [ ] Check final image size after builds
+      - [ ] Compare with staging/production image sizes
+    </checklist>
+  </prevention>
+  
+  <references>
+    <file>docker/frontend.development.Dockerfile</file>
+    <file>.dockerignore</file>
+  </references>
+</learning>

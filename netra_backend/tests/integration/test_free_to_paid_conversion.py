@@ -54,7 +54,7 @@ class TestFreeToPaidConversionRevenuePipeline:
         return {"session": session, "engine": engine, "db_file": db_file.name}
 
     @pytest.fixture
-        def service_mocks(self):
+    def service_mocks(self):
         """Setup service mocks for external dependencies"""
         return {
             # Mock: Generic component isolation for controlled unit testing

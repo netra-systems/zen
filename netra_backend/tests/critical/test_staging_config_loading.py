@@ -46,7 +46,7 @@ class TestStagingConfigurationLoading:
         # Clear any existing environment
         with patch.dict(os.environ, {}, clear=True):
             # Import after clearing to ensure fresh state
-            from netra_backend.app.core.isolated_environment import get_env
+            from shared.isolated_environment import get_env
             from netra_backend.app.core.configuration.base import UnifiedConfigManager
             
             # Set environment variables through IsolatedEnvironment
@@ -63,7 +63,7 @@ class TestStagingConfigurationLoading:
     def test_secret_manager_uses_isolated_environment(self, staging_env_vars):
         """Test that SecretManager uses IsolatedEnvironment for environment detection."""
         with patch.dict(os.environ, {}, clear=True):
-            from netra_backend.app.core.isolated_environment import get_env
+            from shared.isolated_environment import get_env
             
             # Set staging environment through IsolatedEnvironment
             env = get_env()
@@ -88,7 +88,7 @@ class TestStagingConfigurationLoading:
     def test_staging_configuration_validator(self, staging_env_vars):
         """Test staging configuration validator."""
         with patch.dict(os.environ, {}, clear=True):
-            from netra_backend.app.core.isolated_environment import get_env
+            from shared.isolated_environment import get_env
             from netra_backend.app.core.configuration.staging_validator import (
                 StagingConfigurationValidator,
                 validate_staging_config
@@ -111,7 +111,7 @@ class TestStagingConfigurationLoading:
     def test_staging_validator_detects_missing_variables(self):
         """Test that validator detects missing critical variables."""
         with patch.dict(os.environ, {}, clear=True):
-            from netra_backend.app.core.isolated_environment import get_env
+            from shared.isolated_environment import get_env
             from netra_backend.app.core.configuration.staging_validator import StagingConfigurationValidator
             
             # Set only partial environment
@@ -131,7 +131,7 @@ class TestStagingConfigurationLoading:
     def test_staging_validator_detects_placeholders(self):
         """Test that validator detects placeholder values."""
         with patch.dict(os.environ, {}, clear=True):
-            from netra_backend.app.core.isolated_environment import get_env
+            from shared.isolated_environment import get_env
             from netra_backend.app.core.configuration.staging_validator import StagingConfigurationValidator
             
             # Set environment with placeholders
@@ -154,7 +154,7 @@ class TestStagingConfigurationLoading:
     def test_staging_validator_detects_localhost(self):
         """Test that validator detects localhost references."""
         with patch.dict(os.environ, {}, clear=True):
-            from netra_backend.app.core.isolated_environment import get_env
+            from shared.isolated_environment import get_env
             from netra_backend.app.core.configuration.staging_validator import StagingConfigurationValidator
             
             # Set environment with localhost
@@ -177,7 +177,7 @@ class TestStagingConfigurationLoading:
     def test_env_file_loading_in_isolated_environment(self):
         """Test that .env file is properly loaded by IsolatedEnvironment."""
         with patch.dict(os.environ, {}, clear=True):
-            from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+            from shared.isolated_environment import IsolatedEnvironment
             
             # Create a temporary .env file
             import tempfile
@@ -211,7 +211,7 @@ class TestStagingConfigurationLoading:
     def test_full_staging_config_flow(self, staging_env_vars):
         """Test the full staging configuration loading flow."""
         with patch.dict(os.environ, {}, clear=True):
-            from netra_backend.app.core.isolated_environment import get_env
+            from shared.isolated_environment import get_env
             
             # Set up staging environment
             env = get_env()

@@ -803,7 +803,7 @@ async def _execute_auth_service_check() -> None:
     """Execute lightweight auth service connectivity check."""
     try:
         import aiohttp
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         # Get auth service URL from environment
         auth_base_url = get_env().get('AUTH_SERVICE_URL', 'http://localhost:8081')

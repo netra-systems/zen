@@ -16,7 +16,7 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-from dev_launcher.isolated_environment import IsolatedEnvironment, get_env, setenv, getenv, delenv
+from shared.isolated_environment import IsolatedEnvironment, get_env, setenv, getenv, delenv
 
 
 class TestIsolatedEnvironmentBasics:

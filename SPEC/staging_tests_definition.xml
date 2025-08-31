@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <metadata>
+    <title>Staging Tests Definition - Environment Clarification</title>
+    <category>Testing Architecture</category>
+    <version>1.0.0</version>
+    <last_updated>2025-08-31</last_updated>
+    <status>Active</status>
+    <priority>Critical</priority>
+  </metadata>
+
+  <purpose>
+    <description>
+      Defines what "staging" tests mean in the Netra codebase to eliminate confusion
+      between Docker Compose local environments and actual GCP staging environment testing.
+      This spec establishes clear naming conventions and environment boundaries.
+    </description>
+    <business_value>
+      Prevents costly production incidents by ensuring staging tests validate real 
+      production-like behavior. Eliminates $50K+ MRR loss from staging/production
+      configuration drift by maintaining clear test environment boundaries.
+    </business_value>
+  </purpose>
+
+  <definitions>
+    <core_principle>
+      <name>Staging Always Means GCP Remote</name>
+      <description>
+        In the Netra codebase, "staging" ALWAYS refers to the deployed GCP Cloud Run
+        staging environment. It NEVER refers to Docker Compose configurations.
+      </description>
+      <enforcement>CRITICAL - Violations must be immediately corrected</enforcement>
+    </core_principle>
+
+    <environment name="local-dev">
+      <description>Local development using Docker Compose dev profile</description>
+      <infrastructure>Docker Compose with dev profile</infrastructure>
+      <services_prefix>dev-</services_prefix>
+      <ports>PostgreSQL:5433, Redis:6380, Auth:8081, Backend:8000, Frontend:3000</ports>
+      <test_naming>test_local_*, test_dev_*, test_docker_*</test_naming>
+      <usage>Developer workflow and unit testing</usage>
+      <environment_variable>ENVIRONMENT=dev or ENVIRONMENT=local</environment_variable>
+    </environment>
+
+    <environment name="local-test">
+      <description>Local testing using Docker Compose test profile</description>
+      <infrastructure>Docker Compose with test profile</infrastructure>
+      <services_prefix>test-</services_prefix>
+      <ports>PostgreSQL:5434, Redis:6381, Auth:8082, Backend:8001, Frontend:3001</ports>
+      <test_naming>test_integration_*, test_unit_*, test_docker_compose_*</test_naming>
+      <usage>Integration testing and CI/CD validation</usage>
+      <environment_variable>ENVIRONMENT=test</environment_variable>
+    </environment>
+
+    <environment name="staging">
+      <description>GCP Cloud Run deployed staging environment</description>
+      <infrastructure>GCP Cloud Run services with load balancer</infrastructure>
+      <services>
+        <service name="backend">https://netra-backend-staging-701982941522.us-central1.run.app</service>
+        <service name="auth">https://netra-auth-service-701982941522.us-central1.run.app</service>
+        <service name="frontend">https://netra-frontend-staging-701982941522.us-central1.run.app</service>
+        <service name="websocket">wss://netra-backend-staging-701982941522.us-central1.run.app/ws</service>
+      </services>
+      <test_naming>test_staging_*, test_e2e_staging_*, StagingTest*</test_naming>
+      <test_location>/tests/e2e/test_staging_*.py</test_location>
+      <usage>End-to-end validation before production deployment</usage>
+      <environment_variable>ENVIRONMENT=staging</environment_variable>
+      <authentication>E2E_OAUTH_SIMULATION_KEY required for test user creation</authentication>
+    </environment>
+
+    <environment name="production">
+      <description>GCP Cloud Run production environment</description>
+      <infrastructure>GCP Cloud Run services with production configuration</infrastructure>
+      <test_naming>test_prod_*, test_production_*, ProductionTest*</test_naming>
+      <test_location>/tests/production/ (if any)</test_location>
+      <usage>Production monitoring and smoke tests only</usage>
+      <environment_variable>ENVIRONMENT=production</environment_variable>
+      <authentication>Production authentication required</authentication>
+    </environment>
+  </definitions>
+
+  <naming_conventions>
+    <test_files>
+      <pattern>
+        <name>Staging E2E Tests</name>
+        <pattern>test_staging_*.py</pattern>
+        <location>/tests/e2e/</location>
+        <description>Tests that run against deployed GCP staging services</description>
+        <example>test_staging_e2e_comprehensive.py</example>
+      </pattern>
+      
+      <pattern>
+        <name>Docker Compose Tests</name>
+        <pattern>test_docker_*.py, test_local_*.py, test_integration_*.py</pattern>
+        <location>SERVICE/tests/</location>
+        <description>Tests that run against local Docker Compose services</description>
+        <example>test_docker_auth_integration.py</example>
+      </pattern>
+      
+      <pattern>
+        <name>Unit Tests</name>
+        <pattern>test_*.py (without staging/docker prefixes)</pattern>
+        <location>SERVICE/tests/unit/</location>
+        <description>Pure unit tests with minimal external dependencies</description>
+        <example>test_user_model.py</example>
+      </pattern>
+    </test_files>
+
+    <test_classes>
+      <pattern>
+        <name>Staging Test Classes</name>
+        <pattern>class TestStaging*, class StagingTest*</pattern>
+        <description>Test classes for staging environment validation</description>
+        <example>class TestStagingAuthentication</example>
+      </pattern>
+      
+      <pattern>
+        <name>Docker Test Classes</name>
+        <pattern>class TestDocker*, class TestLocal*</pattern>
+        <description>Test classes for Docker Compose environment</description>
+        <example>class TestDockerIntegration</example>
+      </pattern>
+    </test_classes>
+
+    <configuration_files>
+      <pattern>
+        <name>Staging Configuration</name>
+        <pattern>staging_*.py, *_staging_*.py</pattern>
+        <description>Configuration for GCP staging environment</description>
+        <example>staging_config.py, staging_auth_client.py</example>
+      </pattern>
+      
+      <pattern>
+        <name>Docker Configuration</name>
+        <pattern>docker_*.py, local_*.py</pattern>
+        <description>Configuration for Docker Compose environments</description>
+        <example>docker_test_config.py, local_auth_client.py</example>
+      </pattern>
+    </configuration_files>
+  </naming_conventions>
+
+  <environment_variables>
+    <variable name="ENVIRONMENT">
+      <values>
+        <value name="dev">Local development with Docker Compose dev profile</value>
+        <value name="test">Local testing with Docker Compose test profile</value>
+        <value name="local">Alias for dev environment</value>
+        <value name="staging">GCP Cloud Run staging environment</value>
+        <value name="production">GCP Cloud Run production environment</value>
+      </values>
+      <usage>
+        Tests must check ENVIRONMENT variable to determine target infrastructure.
+        Staging tests MUST verify ENVIRONMENT=staging before executing.
+      </usage>
+    </variable>
+
+    <variable name="E2E_OAUTH_SIMULATION_KEY">
+      <description>Required for staging authentication bypass</description>
+      <environment>staging only</environment>
+      <storage>GCP Secrets Manager</storage>
+      <usage>Enables test user creation in staging environment</usage>
+    </variable>
+  </environment_variables>
+
+  <test_execution_patterns>
+    <pattern name="Local Development Testing">
+      <command>python unified_test_runner.py --category unit integration</command>
+      <environment>ENVIRONMENT=dev</environment>
+      <infrastructure>Docker Compose dev profile</infrastructure>
+      <description>Fast feedback loop for developers</description>
+    </pattern>
+
+    <pattern name="CI/CD Integration Testing">
+      <command>python unified_test_runner.py --categories unit integration api</command>
+      <environment>ENVIRONMENT=test</environment>
+      <infrastructure>Docker Compose test profile</infrastructure>
+      <description>Comprehensive testing before deployment</description>
+    </pattern>
+
+    <pattern name="Staging E2E Testing">
+      <command>python tests/run_staging_tests.py</command>
+      <environment>ENVIRONMENT=staging</environment>
+      <infrastructure>GCP Cloud Run staging</infrastructure>
+      <description>Production-like validation before deployment</description>
+      <requirements>E2E_OAUTH_SIMULATION_KEY must be set</requirements>
+    </pattern>
+
+    <pattern name="Production Smoke Testing">
+      <command>python tests/run_production_smoke_tests.py</command>
+      <environment>ENVIRONMENT=production</environment>
+      <infrastructure>GCP Cloud Run production</infrastructure>
+      <description>Basic health checks and monitoring</description>
+    </pattern>
+  </test_execution_patterns>
+
+  <migration_guidelines>
+    <rule>
+      <name>Eliminate Docker Compose Staging References</name>
+      <action>
+        Remove any references to "docker-compose.staging.yml" or similar files.
+        Docker Compose is for local development only.
+      </action>
+    </rule>
+
+    <rule>
+      <name>Rename Confusing Test Names</name>
+      <action>
+        Rename tests that use "staging" but test Docker Compose:
+        - test_staging_docker_* → test_docker_*
+        - staging_integration_* → local_integration_*
+      </action>
+    </rule>
+
+    <rule>
+      <name>Update Configuration References</name>
+      <action>
+        Ensure all staging configuration points to GCP URLs, not localhost ports.
+        Use staging_config.py as the canonical example.
+      </action>
+    </rule>
+  </migration_guidelines>
+
+  <validation_checklist>
+    <item>All "staging" test files must test GCP Cloud Run services</item>
+    <item>No Docker Compose files should contain "staging" in their name</item>
+    <item>Test classes named "Staging*" must use ENVIRONMENT=staging</item>
+    <item>Staging tests must require E2E_OAUTH_SIMULATION_KEY for authentication</item>
+    <item>Docker tests must use localhost URLs and Docker Compose ports</item>
+    <item>Configuration files must match their target infrastructure</item>
+  </validation_checklist>
+
+  <examples>
+    <example name="Correct Staging Test">
+      <filename>tests/e2e/test_staging_e2e_comprehensive.py</filename>
+      <environment>ENVIRONMENT=staging</environment>
+      <target>https://netra-backend-staging-701982941522.us-central1.run.app</target>
+      <authentication>E2E_OAUTH_SIMULATION_KEY</authentication>
+    </example>
+
+    <example name="Correct Docker Test">
+      <filename>netra_backend/tests/integration/test_docker_auth_flow.py</filename>
+      <environment>ENVIRONMENT=test</environment>
+      <target>http://localhost:8001 (Docker test profile)</target>
+      <authentication>Local test credentials</authentication>
+    </example>
+
+    <example name="Incorrect Usage">
+      <filename>test_staging_docker_integration.py</filename>
+      <problem>Uses "staging" name but tests Docker Compose</problem>
+      <correction>Rename to test_docker_integration.py</correction>
+    </example>
+  </examples>
+
+  <compliance_monitoring>
+    <automated_checks>
+      <check name="Staging Test URL Validation">
+        <description>Verify staging tests use GCP URLs, not localhost</description>
+        <pattern>test_staging_*.py files must not contain localhost URLs</pattern>
+      </check>
+      
+      <check name="Docker Test Environment Validation">
+        <description>Verify Docker tests use correct environment variable</description>
+        <pattern>Tests using localhost must set ENVIRONMENT=test or ENVIRONMENT=dev</pattern>
+      </check>
+      
+      <check name="Configuration Consistency">
+        <description>Ensure configuration files match their target environment</description>
+        <pattern>staging_*.py files must not contain localhost references</pattern>
+      </check>
+    </automated_checks>
+
+    <manual_reviews>
+      <review name="Test Naming Audit">
+        <frequency>Monthly</frequency>
+        <scope>All test files with "staging" in name</scope>
+        <validation>Ensure they test actual staging environment</validation>
+      </review>
+      
+      <review name="Environment Variable Consistency">
+        <frequency>Before major releases</frequency>
+        <scope>All test configuration files</scope>
+        <validation>Verify environment variables match target infrastructure</validation>
+      </review>
+    </manual_reviews>
+  </compliance_monitoring>
+
+  <enforcement>
+    <severity>CRITICAL</severity>
+    <rationale>
+      Environment confusion leads to false confidence in staging validation,
+      potentially causing $50K+ MRR loss from production incidents that
+      staging tests failed to catch.
+    </rationale>
+    
+    <consequences>
+      <immediate>All new tests must follow naming conventions</immediate>
+      <short_term>Existing non-compliant tests must be renamed within 1 sprint</short_term>
+      <long_term>Automated compliance checks must pass before merge</long_term>
+    </consequences>
+  </enforcement>
+
+  <related_specifications>
+    <spec>docker_compose_architecture.xml - Local Docker development setup</spec>
+    <spec>testing.xml - Overall testing strategy</spec>
+    <spec>gcp_deployment.xml - Staging and production deployment</spec>
+    <spec>learnings/staging_e2e_direct_testing_integration.xml - Staging test implementation</spec>
+    <spec>independent_services.xml - Service isolation requirements</spec>
+  </related_specifications>
+</spec>

@@ -58,7 +58,7 @@ from netra_backend.app.agents.enhanced_tool_execution import (
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.agents.supervisor_agent import SupervisorAgent
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 
 

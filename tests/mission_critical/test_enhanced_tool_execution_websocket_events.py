@@ -1,29 +1,23 @@
 #!/usr/bin/env python
-"""SPECIALIZED TEST SUITE: Enhanced Tool Execution WebSocket Events - MISSION CRITICAL
+"""MISSION CRITICAL: Enhanced Tool Execution WebSocket Events Test Suite
 
-THIS SUITE SPECIFICALLY TESTS THE ENHANCED TOOL EXECUTION WEBSOCKET INTEGRATION.
-Business Value: $500K+ ARR - Critical for tool execution visibility in chat
+Business Value: $500K+ ARR - Ensures tool execution events reach users in real-time
+This test suite validates that EnhancedToolExecutionEngine properly sends WebSocket
+events during tool execution, which is critical for user experience during AI processing.
 
-The WebSocket injection fix includes enhancing tool dispatchers with WebSocket notifications.
-This ensures users see:
-- tool_executing events when tools start
-- tool_completed events when tools finish  
-- Real-time tool execution progress
-
-ANY FAILURE HERE INDICATES TOOL EXECUTION EVENTS ARE NOT WORKING.
+CRITICAL: Tool execution events are the most visible part of agent processing to users.
+If these fail, users see "blank screen" during the most important part of the workflow.
 """
 
 import asyncio
-import json
 import os
 import sys
 import time
 import uuid
-from datetime import datetime, timedelta
-from typing import Dict, List, Set, Any, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
-# CRITICAL: Add project root to Python path for imports
+# Add project root to path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
@@ -31,68 +25,66 @@ if project_root not in sys.path:
 import pytest
 from loguru import logger
 
-# Import production components for testing
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+# Import enhanced tool execution components
 from netra_backend.app.agents.enhanced_tool_execution import (
     EnhancedToolExecutionEngine,
     enhance_tool_dispatcher_with_notifications
 )
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.schemas.tool import ToolInput, ToolResult
 
 
 # ============================================================================
-# MOCK WEBSOCKET MANAGER FOR TOOL EXECUTION TESTING
+# MOCK CLASSES FOR ENHANCED TOOL EXECUTION TESTING
 # ============================================================================
 
-class MockWebSocketManagerForTools:
-    """Mock WebSocket manager optimized for tool execution event testing."""
+class MockWebSocketManager:
+    """Mock WebSocket manager optimized for tool execution testing."""
     
     def __init__(self):
         self.messages: List[Dict] = []
+        self.tool_events: List[Dict] = []
         self.connections: Dict[str, Any] = {}
-        self.tool_events: List[Dict] = []  # Specialized tracking for tool events
-        
+    
     async def send_to_thread(self, thread_id: str, message: Dict[str, Any]) -> bool:
-        """Record message and track tool events specially."""
-        event = {
+        """Record message and simulate successful delivery."""
+        event_data = {
             'thread_id': thread_id,
             'message': message,
             'event_type': message.get('type', 'unknown'),
             'timestamp': time.time()
         }
-        self.messages.append(event)
         
-        # Track tool events specifically
-        if event['event_type'] in ['tool_executing', 'tool_completed']:
-            self.tool_events.append(event)
-            
+        self.messages.append(event_data)
+        
+        # Track tool-specific events separately
+        if event_data['event_type'] in ['tool_executing', 'tool_completed']:
+            self.tool_events.append(event_data)
+        
         return True
     
     def get_tool_events_for_thread(self, thread_id: str) -> List[Dict]:
-        """Get tool events for a specific thread."""
-        return [evt for evt in self.tool_events if evt['thread_id'] == thread_id]
+        """Get tool-specific events for a thread."""
+        return [event for event in self.tool_events if event['thread_id'] == thread_id]
     
-    def get_tool_execution_pairs(self, thread_id: str) -> List[Dict]:
-        """Get tool execution/completion pairs for validation."""
-        tool_events = self.get_tool_events_for_thread(thread_id)
+    def get_tool_event_pairs(self, thread_id: str) -> List[tuple]:
+        """Get tool event pairs (executing, completed) for validation."""
+        events = self.get_tool_events_for_thread(thread_id)
         pairs = []
-        executing_tools = {}
+        executing_events = {}
         
-        for event in tool_events:
-            tool_name = event['message'].get('tool_name', 'unknown')
+        for event in events:
+            tool_name = event['message'].get('payload', {}).get('tool_name', 'unknown')
             
             if event['event_type'] == 'tool_executing':
-                executing_tools[tool_name] = event
-            elif event['event_type'] == 'tool_completed' and tool_name in executing_tools:
-                pairs.append({
-                    'tool_name': tool_name,
-                    'executing': executing_tools[tool_name],
-                    'completed': event
-                })
-                del executing_tools[tool_name]
+                executing_events[tool_name] = event
+            elif event['event_type'] == 'tool_completed' and tool_name in executing_events:
+                pairs.append((executing_events[tool_name], event))
+                del executing_events[tool_name]
         
         return pairs
     
@@ -102,294 +94,313 @@ class MockWebSocketManagerForTools:
         self.tool_events.clear()
 
 
+class MockTool:
+    """Mock tool for testing enhanced tool execution."""
+    
+    def __init__(self, name: str, should_fail: bool = False, execution_time: float = 0.01):
+        self.name = name
+        self.should_fail = should_fail
+        self.execution_time = execution_time
+        self.call_count = 0
+    
+    async def execute(self, **kwargs) -> Any:
+        """Mock tool execution."""
+        self.call_count += 1
+        await asyncio.sleep(self.execution_time)
+        
+        if self.should_fail:
+            raise Exception(f"Tool {self.name} failed intentionally")
+        
+        return f"Result from {self.name} (call #{self.call_count})"
+
+
+class MockToolInput:
+    """Mock ToolInput for testing."""
+    
+    def __init__(self, tool_name: str, parameters: Dict = None):
+        self.tool_name = tool_name
+        self.parameters = parameters or {}
+
+
+class MockToolResult:
+    """Mock ToolResult for testing."""
+    
+    def __init__(self, result: Any, success: bool = True):
+        self.result = result
+        self.success = success
+
+
 # ============================================================================
-# UNIT TESTS - Enhanced Tool Execution Components
+# UNIT TESTS - Enhanced Tool Execution Engine
 # ============================================================================
 
-class TestEnhancedToolExecutionUnit:
-    """Unit tests for enhanced tool execution WebSocket components."""
+class TestEnhancedToolExecutionEngineUnit:
+    """Unit tests for EnhancedToolExecutionEngine WebSocket events."""
     
     @pytest.fixture(autouse=True)
-    async def setup_tool_mock_services(self):
-        """Setup mock services for tool execution tests."""
-        self.mock_ws_manager = MockWebSocketManagerForTools()
+    def setup_enhanced_tool_mocks(self):
+        """Setup mocks for enhanced tool execution testing."""
+        self.mock_ws_manager = MockWebSocketManager()
+        
         yield
+        
+        # Cleanup
         self.mock_ws_manager.clear_messages()
-
+    
     @pytest.mark.asyncio
     @pytest.mark.critical
     async def test_enhanced_tool_execution_engine_creation(self):
-        """Test creation of EnhancedToolExecutionEngine with WebSocket manager."""
+        """Test that EnhancedToolExecutionEngine creates properly with WebSocket manager."""
+        
         # Create enhanced executor
-        enhanced_executor = EnhancedToolExecutionEngine(self.mock_ws_manager)
+        executor = EnhancedToolExecutionEngine(self.mock_ws_manager)
         
-        # Verify it has WebSocket notifier
-        assert enhanced_executor.websocket_notifier is not None, \
-            "EnhancedToolExecutionEngine missing websocket_notifier"
-        assert isinstance(enhanced_executor.websocket_notifier, WebSocketNotifier), \
-            "websocket_notifier is not WebSocketNotifier instance"
-        
-        logger.info("✅ EnhancedToolExecutionEngine creation PASSED")
-
+        # Verify initialization
+        assert executor.websocket_manager is self.mock_ws_manager, \
+            "WebSocket manager should be stored"
+        assert executor.websocket_notifier is not None, \
+            "WebSocket notifier should be created"
+        assert isinstance(executor.websocket_notifier, WebSocketNotifier), \
+            "Should have WebSocketNotifier instance"
+    
     @pytest.mark.asyncio
-    @pytest.mark.critical  
+    @pytest.mark.critical
+    async def test_enhanced_tool_execution_sends_events(self):
+        """Test that enhanced tool execution sends WebSocket events."""
+        
+        executor = EnhancedToolExecutionEngine(self.mock_ws_manager)
+        
+        # Create test context and tool
+        context = AgentExecutionContext(
+            run_id="test-enhanced-tool",
+            thread_id="enhanced-test-thread",
+            user_id="enhanced-test-user",
+            agent_name="test_agent",
+            retry_count=0,
+            max_retries=1
+        )
+        
+        mock_tool = MockTool("test_enhanced_tool", should_fail=False, execution_time=0.05)
+        tool_input = MockToolInput("test_enhanced_tool", {"param1": "value1"})
+        
+        # Mock the parent execute method to return a proper result
+        with patch.object(executor.__class__.__bases__[0], 'execute_tool_with_input', 
+                         return_value=MockToolResult("success")) as mock_parent_execute:
+            
+            # Execute tool with enhanced notifications
+            result = await executor.execute_tool_with_input(
+                tool_input, mock_tool, {'context': context}
+            )
+            
+            # Verify parent method was called
+            mock_parent_execute.assert_called_once()
+            
+            # Verify WebSocket events were sent
+            tool_events = self.mock_ws_manager.get_tool_events_for_thread("enhanced-test-thread")
+            assert len(tool_events) == 2, f"Expected 2 tool events, got {len(tool_events)}"
+            
+            # Verify event types and order
+            event_types = [event['event_type'] for event in tool_events]
+            assert event_types == ['tool_executing', 'tool_completed'], \
+                f"Expected [tool_executing, tool_completed], got {event_types}"
+            
+            # Verify event content
+            executing_event = tool_events[0]
+            completed_event = tool_events[1]
+            
+            assert executing_event['message']['payload']['tool_name'] == 'test_enhanced_tool', \
+                "Executing event should have correct tool name"
+            assert completed_event['message']['payload']['status'] == 'success', \
+                "Completed event should indicate success"
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_enhanced_tool_execution_error_handling(self):
+        """Test that enhanced tool execution handles errors and still sends events."""
+        
+        executor = EnhancedToolExecutionEngine(self.mock_ws_manager)
+        
+        # Create test context
+        context = AgentExecutionContext(
+            run_id="test-error-tool",
+            thread_id="error-test-thread",
+            user_id="error-test-user",
+            agent_name="error_agent",
+            retry_count=0,
+            max_retries=1
+        )
+        
+        mock_tool = MockTool("error_tool", should_fail=True)
+        tool_input = MockToolInput("error_tool")
+        
+        # Mock parent execute method to raise an exception
+        with patch.object(executor.__class__.__bases__[0], 'execute_tool_with_input',
+                         side_effect=Exception("Tool execution failed")) as mock_parent_execute:
+            
+            # Execute tool and expect exception
+            with pytest.raises(Exception, match="Tool execution failed"):
+                await executor.execute_tool_with_input(
+                    tool_input, mock_tool, {'context': context}
+                )
+            
+            # Verify WebSocket events were still sent
+            tool_events = self.mock_ws_manager.get_tool_events_for_thread("error-test-thread")
+            assert len(tool_events) == 2, f"Expected 2 tool events even with error, got {len(tool_events)}"
+            
+            # Verify event types
+            event_types = [event['event_type'] for event in tool_events]
+            assert event_types == ['tool_executing', 'tool_completed'], \
+                f"Expected [tool_executing, tool_completed] even with error, got {event_types}"
+            
+            # Verify error event content
+            completed_event = tool_events[1]
+            assert completed_event['message']['payload']['status'] == 'error', \
+                "Completed event should indicate error"
+            assert 'error' in completed_event['message']['payload'], \
+                "Error event should contain error information"
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
     async def test_tool_dispatcher_enhancement_function(self):
-        """Test enhance_tool_dispatcher_with_notifications function."""
-        # Create tool dispatcher
+        """Test the enhance_tool_dispatcher_with_notifications function."""
+        
+        # Create a regular tool dispatcher
         dispatcher = ToolDispatcher()
         original_executor = dispatcher.executor
+        
+        # Verify initial state
+        assert not hasattr(dispatcher, '_websocket_enhanced'), \
+            "Dispatcher should not be enhanced initially"
         
         # Enhance it
         enhance_tool_dispatcher_with_notifications(dispatcher, self.mock_ws_manager)
         
         # Verify enhancement
-        assert dispatcher.executor != original_executor, \
-            "Tool dispatcher executor was not replaced during enhancement"
-        assert isinstance(dispatcher.executor, EnhancedToolExecutionEngine), \
-            "Enhanced executor is not EnhancedToolExecutionEngine"
         assert hasattr(dispatcher, '_websocket_enhanced'), \
-            "Enhancement marker _websocket_enhanced not set"
+            "Dispatcher should have enhancement marker"
         assert dispatcher._websocket_enhanced is True, \
-            "Enhancement marker not set to True"
-        
-        logger.info("✅ Tool dispatcher enhancement function PASSED")
-
+            "Enhancement marker should be True"
+        assert dispatcher.executor != original_executor, \
+            "Executor should be replaced"
+        assert isinstance(dispatcher.executor, EnhancedToolExecutionEngine), \
+            "Executor should be EnhancedToolExecutionEngine"
+        assert dispatcher.executor.websocket_manager is self.mock_ws_manager, \
+            "Enhanced executor should have WebSocket manager"
+    
     @pytest.mark.asyncio
     @pytest.mark.critical
-    async def test_agent_registry_enhances_tool_dispatcher_automatically(self):
-        """Test that AgentRegistry automatically enhances tool dispatcher."""
-        class MockLLM:
-            pass
-        
-        # Create tool dispatcher and registry
-        tool_dispatcher = ToolDispatcher()
-        original_executor = tool_dispatcher.executor
-        
-        registry = AgentRegistry(MockLLM(), tool_dispatcher)
-        
-        # Set WebSocket manager (this should trigger enhancement)
-        registry.set_websocket_manager(self.mock_ws_manager)
-        
-        # Verify tool dispatcher was enhanced
-        assert tool_dispatcher.executor != original_executor, \
-            "AgentRegistry did not enhance tool dispatcher automatically"
-        assert isinstance(tool_dispatcher.executor, EnhancedToolExecutionEngine), \
-            "AgentRegistry enhancement resulted in wrong executor type"
-        assert hasattr(tool_dispatcher, '_websocket_enhanced'), \
-            "AgentRegistry enhancement did not set marker"
-        
-        logger.info("✅ AgentRegistry automatic tool dispatcher enhancement PASSED")
-
-    @pytest.mark.asyncio  
-    @pytest.mark.critical
     async def test_double_enhancement_protection(self):
-        """Test that double enhancement is prevented."""
+        """Test that double enhancement is handled gracefully."""
+        
         dispatcher = ToolDispatcher()
         
         # First enhancement
         enhance_tool_dispatcher_with_notifications(dispatcher, self.mock_ws_manager)
         first_executor = dispatcher.executor
         
-        # Second enhancement (should be prevented)
-        enhance_tool_dispatcher_with_notifications(dispatcher, self.mock_ws_manager)  
+        # Second enhancement attempt
+        enhance_tool_dispatcher_with_notifications(dispatcher, self.mock_ws_manager)
         second_executor = dispatcher.executor
         
-        # Should be the same executor
-        assert first_executor == second_executor, \
-            "Double enhancement occurred - should be prevented"
+        # Should be the same executor (no double enhancement)
+        assert first_executor is second_executor, \
+            "Double enhancement should not create new executor"
         assert dispatcher._websocket_enhanced is True, \
-            "Enhancement marker lost during double enhancement attempt"
-        
-        logger.info("✅ Double enhancement protection PASSED")
+            "Enhancement marker should remain True"
 
 
 # ============================================================================
-# INTEGRATION TESTS - Tool Execution Event Flow
+# INTEGRATION TESTS - Tool Dispatcher Integration
 # ============================================================================
 
-class TestEnhancedToolExecutionIntegration:
-    """Integration tests for tool execution WebSocket event flow."""
+class TestEnhancedToolDispatcherIntegration:
+    """Integration tests for enhanced tool dispatcher with WebSocket events."""
     
     @pytest.fixture(autouse=True)
-    async def setup_tool_integration_services(self):
-        """Setup services for tool execution integration tests."""
-        self.mock_ws_manager = MockWebSocketManagerForTools()
+    def setup_tool_integration_mocks(self):
+        """Setup mocks for tool dispatcher integration testing."""
+        self.mock_ws_manager = MockWebSocketManager()
+        
         yield
+        
+        # Cleanup
         self.mock_ws_manager.clear_messages()
-
+    
     @pytest.mark.asyncio
     @pytest.mark.critical
-    @pytest.mark.timeout(30)
-    async def test_enhanced_executor_sends_tool_events(self):
-        """Test that enhanced executor sends tool execution events."""
+    async def test_agent_registry_tool_dispatcher_enhancement(self):
+        """Test that AgentRegistry enhances tool dispatcher with WebSocket events."""
+        
+        # Create components
+        class MockLLM:
+            pass
+        
+        mock_llm = MockLLM()
+        tool_dispatcher = ToolDispatcher()
+        
+        # Create registry and set WebSocket manager
+        registry = AgentRegistry(mock_llm, tool_dispatcher)
+        original_executor = tool_dispatcher.executor
+        
+        # Set WebSocket manager (this should trigger enhancement)
+        registry.set_websocket_manager(self.mock_ws_manager)
+        
+        # Verify enhancement occurred
+        assert tool_dispatcher.executor != original_executor, \
+            "AgentRegistry should enhance tool dispatcher executor"
+        assert isinstance(tool_dispatcher.executor, EnhancedToolExecutionEngine), \
+            "Tool dispatcher should have enhanced executor"
+        assert hasattr(tool_dispatcher, '_websocket_enhanced'), \
+            "Tool dispatcher should be marked as enhanced"
+        assert tool_dispatcher.executor.websocket_manager is self.mock_ws_manager, \
+            "Enhanced executor should have WebSocket manager"
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_enhanced_tool_dispatcher_execution_with_state(self):
+        """Test enhanced tool execution with state using execute_with_state method."""
+        
         # Create enhanced executor
-        enhanced_executor = EnhancedToolExecutionEngine(self.mock_ws_manager)
-        notifier = enhanced_executor.websocket_notifier
+        executor = EnhancedToolExecutionEngine(self.mock_ws_manager)
         
-        # Create execution context
-        context = AgentExecutionContext(
-            run_id="tool-test",
-            thread_id="tool-thread",
-            user_id="tool-user",
-            agent_name="tool_agent",
-            retry_count=0,
-            max_retries=1
-        )
+        # Create test parameters
+        mock_tool = MockTool("state_tool")
+        tool_name = "state_tool"
+        parameters = {"param1": "value1"}
+        mock_state = {"state_key": "state_value"}
+        run_id = "test-state-run"
         
-        # Send tool events directly
-        await notifier.send_tool_executing(context, "test_analysis_tool")
-        await notifier.send_tool_completed(context, "test_analysis_tool", {
-            "result": "analysis complete",
-            "data": {"insights": 42}
-        })
-        
-        # Verify events were captured
-        tool_events = self.mock_ws_manager.get_tool_events_for_thread("tool-thread")
-        assert len(tool_events) == 2, \
-            f"Expected 2 tool events, got {len(tool_events)}"
-        
-        # Verify event types
-        event_types = [e['event_type'] for e in tool_events]
-        assert 'tool_executing' in event_types, "Missing tool_executing event"
-        assert 'tool_completed' in event_types, "Missing tool_completed event"
-        
-        # Verify event pairing
-        pairs = self.mock_ws_manager.get_tool_execution_pairs("tool-thread")
-        assert len(pairs) == 1, f"Expected 1 tool pair, got {len(pairs)}"
-        assert pairs[0]['tool_name'] == "test_analysis_tool", \
-            f"Wrong tool name in pair: {pairs[0]['tool_name']}"
-        
-        logger.info("✅ Enhanced executor tool event sending PASSED")
-
-    @pytest.mark.asyncio
-    @pytest.mark.critical  
-    @pytest.mark.timeout(30)
-    async def test_tool_dispatcher_with_enhanced_executor_flow(self):
-        """Test complete tool dispatcher flow with enhanced executor."""
-        # Create and enhance tool dispatcher
-        dispatcher = ToolDispatcher()
-        enhance_tool_dispatcher_with_notifications(dispatcher, self.mock_ws_manager)
-        
-        # Verify enhancement worked
-        assert isinstance(dispatcher.executor, EnhancedToolExecutionEngine), \
-            "Tool dispatcher not properly enhanced"
-        
-        # Create context for tool execution
-        context = AgentExecutionContext(
-            run_id="dispatcher-test",
-            thread_id="dispatcher-thread", 
-            user_id="dispatcher-user",
-            agent_name="dispatcher_agent",
-            retry_count=0,
-            max_retries=1
-        )
-        
-        # Simulate tool execution through dispatcher
-        # Note: We can't fully test tool execution without LLM, but we can test the WebSocket part
-        enhanced_executor = dispatcher.executor
-        await enhanced_executor.websocket_notifier.send_tool_executing(context, "dispatcher_tool")
-        await enhanced_executor.websocket_notifier.send_tool_completed(context, "dispatcher_tool", {"status": "ok"})
-        
-        # Verify tool events through dispatcher
-        tool_events = self.mock_ws_manager.get_tool_events_for_thread("dispatcher-thread")
-        assert len(tool_events) >= 2, \
-            f"Tool dispatcher flow missing events, got {len(tool_events)}"
-        
-        pairs = self.mock_ws_manager.get_tool_execution_pairs("dispatcher-thread")
-        assert len(pairs) >= 1, f"Tool dispatcher flow missing pairs, got {len(pairs)}"
-        
-        logger.info("✅ Tool dispatcher enhanced executor flow PASSED")
-
-    @pytest.mark.asyncio
-    @pytest.mark.critical
-    @pytest.mark.timeout(30)  
-    async def test_multiple_concurrent_tool_executions(self):
-        """Test multiple concurrent tool executions with WebSocket events.""" 
-        enhanced_executor = EnhancedToolExecutionEngine(self.mock_ws_manager)
-        notifier = enhanced_executor.websocket_notifier
-        
-        # Define multiple tools to execute concurrently
-        tools = ["data_analyzer", "report_generator", "trend_analyzer", "compliance_checker"]
-        
-        # Create contexts for each tool
-        contexts = []
-        for i, tool in enumerate(tools):
-            context = AgentExecutionContext(
-                run_id=f"concurrent-{i}",
-                thread_id=f"concurrent-thread-{i}",
-                user_id=f"concurrent-user-{i}",
-                agent_name="concurrent_agent",
-                retry_count=0,
-                max_retries=1
+        # Mock the parent execute_with_state method
+        expected_result = "state execution result"
+        with patch.object(executor.__class__.__bases__[0], 'execute_with_state',
+                         return_value=expected_result) as mock_parent_execute:
+            
+            # Execute with state
+            result = await executor.execute_with_state(
+                mock_tool, tool_name, parameters, mock_state, run_id
             )
-            contexts.append((context, tool))
-        
-        # Execute tools concurrently  
-        async def execute_tool(context, tool_name):
-            await notifier.send_tool_executing(context, tool_name)
-            await asyncio.sleep(0.01)  # Simulate tool execution time
-            await notifier.send_tool_completed(context, tool_name, {"result": f"{tool_name}_complete"})
-        
-        # Run all tools concurrently
-        tasks = [execute_tool(ctx, tool) for ctx, tool in contexts]
-        await asyncio.gather(*tasks)
-        
-        # Verify all tool events were captured
-        total_tool_events = len(self.mock_ws_manager.tool_events)
-        expected_events = len(tools) * 2  # executing + completed for each tool
-        assert total_tool_events == expected_events, \
-            f"Concurrent tool execution lost events: got {total_tool_events}, expected {expected_events}"
-        
-        # Verify each tool has proper pairs
-        for i, tool in enumerate(tools):
-            thread_id = f"concurrent-thread-{i}"
-            pairs = self.mock_ws_manager.get_tool_execution_pairs(thread_id)
-            assert len(pairs) == 1, f"Tool {tool} missing event pair"
-            assert pairs[0]['tool_name'] == tool, f"Wrong tool name for {tool}"
-        
-        logger.info(f"✅ Concurrent tool execution ({len(tools)} tools) PASSED")
-
-    @pytest.mark.asyncio
-    @pytest.mark.critical
-    @pytest.mark.timeout(30)
-    async def test_tool_execution_error_handling_events(self):
-        """Test that tool execution errors still produce proper WebSocket events."""
-        enhanced_executor = EnhancedToolExecutionEngine(self.mock_ws_manager)
-        notifier = enhanced_executor.websocket_notifier
-        
-        context = AgentExecutionContext(
-            run_id="error-tool-test",
-            thread_id="error-tool-thread",
-            user_id="error-tool-user", 
-            agent_name="error_tool_agent",
-            retry_count=0,
-            max_retries=1
-        )
-        
-        # Start tool execution
-        await notifier.send_tool_executing(context, "failing_tool")
-        
-        # Simulate tool error - still send completion with error info
-        await notifier.send_tool_completed(context, "failing_tool", {
-            "status": "error",
-            "error": "Tool failed to analyze data",
-            "details": "Network timeout during API call"
-        })
-        
-        # Verify events were sent even for errors
-        tool_events = self.mock_ws_manager.get_tool_events_for_thread("error-tool-thread")
-        assert len(tool_events) == 2, \
-            f"Error tool execution missing events, got {len(tool_events)}"
-        
-        pairs = self.mock_ws_manager.get_tool_execution_pairs("error-tool-thread")
-        assert len(pairs) == 1, f"Error tool execution missing pairs, got {len(pairs)}"
-        
-        # Verify error information in completed event
-        completed_event = pairs[0]['completed']
-        result = completed_event['message'].get('result', {})
-        assert result.get('status') == 'error', "Error status not preserved in tool completion"
-        
-        logger.info("✅ Tool execution error handling events PASSED")
+            
+            # Verify parent method was called
+            mock_parent_execute.assert_called_once_with(
+                mock_tool, tool_name, parameters, mock_state, run_id
+            )
+            
+            # Verify result
+            assert result == expected_result, "Should return parent execution result"
+            
+            # Verify WebSocket events were sent
+            # Note: execute_with_state creates its own context, so we need to check for events
+            all_events = self.mock_ws_manager.messages
+            tool_events = [e for e in all_events if e['event_type'] in ['tool_executing', 'tool_completed']]
+            
+            assert len(tool_events) >= 2, f"Expected at least 2 tool events, got {len(tool_events)}"
+            
+            # Verify event sequence
+            executing_events = [e for e in tool_events if e['event_type'] == 'tool_executing']
+            completed_events = [e for e in tool_events if e['event_type'] == 'tool_completed']
+            
+            assert len(executing_events) > 0, "Should have at least one tool_executing event"
+            assert len(completed_events) > 0, "Should have at least one tool_completed event"
 
 
 # ============================================================================
@@ -397,245 +408,291 @@ class TestEnhancedToolExecutionIntegration:
 # ============================================================================
 
 class TestEnhancedToolExecutionPerformance:
-    """Performance tests for tool execution WebSocket events."""
+    """Performance tests for enhanced tool execution WebSocket events."""
     
     @pytest.fixture(autouse=True)
-    async def setup_tool_performance_services(self):
-        """Setup services for tool execution performance tests."""
-        self.mock_ws_manager = MockWebSocketManagerForTools()
+    def setup_performance_mocks(self):
+        """Setup mocks for performance testing."""
+        self.mock_ws_manager = MockWebSocketManager()
+        
         yield
+        
+        # Cleanup
         self.mock_ws_manager.clear_messages()
-
+    
     @pytest.mark.asyncio
     @pytest.mark.critical
-    @pytest.mark.timeout(60)
-    async def test_tool_execution_high_frequency_events(self):
-        """Test tool execution WebSocket events under high frequency."""
-        enhanced_executor = EnhancedToolExecutionEngine(self.mock_ws_manager)
-        notifier = enhanced_executor.websocket_notifier
+    async def test_concurrent_tool_execution_performance(self):
+        """Test WebSocket events with concurrent tool execution."""
         
-        # High frequency tool executions
-        tool_count = 50
-        start_time = time.time()
+        executor = EnhancedToolExecutionEngine(self.mock_ws_manager)
+        concurrent_tools = 20
         
-        async def rapid_tool_execution(tool_id):
+        async def execute_single_tool(tool_id: int):
+            """Execute a single tool with WebSocket events."""
             context = AgentExecutionContext(
-                run_id=f"rapid-{tool_id}",
-                thread_id=f"rapid-thread-{tool_id % 10}",  # 10 concurrent threads
-                user_id=f"rapid-user-{tool_id % 10}",
-                agent_name="rapid_agent",
+                run_id=f"perf-tool-{tool_id}",
+                thread_id=f"perf-thread-{tool_id}",
+                user_id=f"perf-user-{tool_id}",
+                agent_name="performance_agent",
                 retry_count=0,
                 max_retries=1
             )
             
-            await notifier.send_tool_executing(context, f"rapid_tool_{tool_id}")
-            await notifier.send_tool_completed(context, f"rapid_tool_{tool_id}", {"rapid": True})
+            mock_tool = MockTool(f"perf_tool_{tool_id}", execution_time=0.01)
+            tool_input = MockToolInput(f"perf_tool_{tool_id}")
+            
+            # Mock parent execution
+            with patch.object(executor.__class__.__bases__[0], 'execute_tool_with_input',
+                             return_value=MockToolResult(f"result_{tool_id}")):
+                
+                return await executor.execute_tool_with_input(
+                    tool_input, mock_tool, {'context': context}
+                )
         
-        # Execute all tools rapidly
-        tasks = [rapid_tool_execution(i) for i in range(tool_count)]
-        await asyncio.gather(*tasks)
-        
+        # Execute all tools concurrently
+        start_time = time.time()
+        results = await asyncio.gather(
+            *[execute_single_tool(i) for i in range(concurrent_tools)],
+            return_exceptions=True
+        )
         duration = time.time() - start_time
-        events_per_second = (tool_count * 2) / duration  # 2 events per tool
+        
+        # Verify all tools executed successfully
+        successful_results = [r for r in results if not isinstance(r, Exception)]
+        assert len(successful_results) == concurrent_tools, \
+            f"Expected {concurrent_tools} successful executions, got {len(successful_results)}"
+        
+        # Verify WebSocket events were sent for all tools
+        total_tool_events = len(self.mock_ws_manager.tool_events)
+        expected_events = concurrent_tools * 2  # Each tool sends 2 events
+        assert total_tool_events == expected_events, \
+            f"Expected {expected_events} tool events, got {total_tool_events}"
         
         # Verify performance
-        assert events_per_second >= 100, \
-            f"Tool execution events too slow: {events_per_second:.0f} events/sec (expected ≥100)"
+        tools_per_second = concurrent_tools / duration
+        assert tools_per_second > 50, \
+            f"Tool execution too slow: {tools_per_second:.0f} tools/s (expected >50)"
         
-        # Verify all events captured
-        total_tool_events = len(self.mock_ws_manager.tool_events)
-        expected_events = tool_count * 2
-        assert total_tool_events == expected_events, \
-            f"High frequency tool execution lost events: got {total_tool_events}, expected {expected_events}"
-        
-        logger.info(f"✅ High frequency tool execution: {events_per_second:.0f} events/sec PASSED")
-
-    @pytest.mark.asyncio
-    @pytest.mark.critical
-    @pytest.mark.timeout(60)
-    async def test_tool_execution_burst_load_handling(self):
-        """Test tool execution WebSocket events handling burst loads."""
-        enhanced_executor = EnhancedToolExecutionEngine(self.mock_ws_manager)
-        notifier = enhanced_executor.websocket_notifier
-        
-        # Simulate burst load - many tools starting simultaneously
-        burst_size = 20
-        
-        # Create all contexts first
-        contexts = []
-        for i in range(burst_size):
-            context = AgentExecutionContext(
-                run_id=f"burst-{i}",
-                thread_id=f"burst-thread",  # All same thread
-                user_id="burst-user",
-                agent_name="burst_agent",
-                retry_count=0,
-                max_retries=1
-            )
-            contexts.append(context)
-        
-        start_time = time.time()
-        
-        # Send all tool_executing events simultaneously (burst start)
-        executing_tasks = [
-            notifier.send_tool_executing(ctx, f"burst_tool_{i}")
-            for i, ctx in enumerate(contexts)
-        ]
-        await asyncio.gather(*executing_tasks)
-        
-        # Small delay to simulate processing
-        await asyncio.sleep(0.1)
-        
-        # Send all tool_completed events simultaneously (burst end)  
-        completed_tasks = [
-            notifier.send_tool_completed(ctx, f"burst_tool_{i}", {"burst_result": i})
-            for i, ctx in enumerate(contexts)
-        ]
-        await asyncio.gather(*completed_tasks)
-        
-        duration = time.time() - start_time
-        
-        # Verify burst handling
-        tool_events = self.mock_ws_manager.get_tool_events_for_thread("burst-thread")
-        assert len(tool_events) == burst_size * 2, \
-            f"Burst load lost events: got {len(tool_events)}, expected {burst_size * 2}"
-        
-        # Verify all tools have proper pairs
-        pairs = self.mock_ws_manager.get_tool_execution_pairs("burst-thread")
-        assert len(pairs) == burst_size, \
-            f"Burst load missing tool pairs: got {len(pairs)}, expected {burst_size}"
-        
-        # Verify timing (should handle burst quickly)
-        assert duration < 5.0, \
-            f"Burst load too slow: {duration:.2f}s (expected <5s)"
-        
-        logger.info(f"✅ Burst load handling ({burst_size} tools in {duration:.2f}s) PASSED")
-
-
-# ============================================================================
-# REGRESSION TESTS - Tool Execution Specific
-# ============================================================================  
-
-class TestEnhancedToolExecutionRegression:
-    """Regression tests specifically for tool execution WebSocket events."""
+        logger.info(f"Concurrent tool performance: {tools_per_second:.0f} tools/s in {duration:.2f}s")
     
-    @pytest.fixture(autouse=True)  
-    async def setup_tool_regression_services(self):
-        """Setup services for tool execution regression tests."""
-        self.mock_ws_manager = MockWebSocketManagerForTools()
-        yield
-        self.mock_ws_manager.clear_messages()
-
     @pytest.mark.asyncio
     @pytest.mark.critical
-    async def test_regression_tool_dispatcher_enhancement_still_works(self):
-        """REGRESSION TEST: Tool dispatcher enhancement still works after updates."""
-        from netra_backend.app.agents.enhanced_tool_execution import enhance_tool_dispatcher_with_notifications
-        import inspect
+    async def test_tool_event_throughput_validation(self):
+        """Test WebSocket event throughput during rapid tool execution."""
         
-        # Verify enhancement function still exists and works
-        dispatcher = ToolDispatcher()
-        original_executor = dispatcher.executor
+        executor = EnhancedToolExecutionEngine(self.mock_ws_manager)
         
-        # This should not raise an exception
-        enhance_tool_dispatcher_with_notifications(dispatcher, self.mock_ws_manager)
-        
-        # Verify enhancement still works
-        assert dispatcher.executor != original_executor, \
-            "REGRESSION: Tool dispatcher enhancement no longer works"
-        assert isinstance(dispatcher.executor, EnhancedToolExecutionEngine), \
-            "REGRESSION: Tool dispatcher enhancement produces wrong executor type"
-        
-        logger.info("✅ Regression test tool dispatcher enhancement PASSED")
-
-    @pytest.mark.asyncio
-    @pytest.mark.critical  
-    async def test_regression_agent_registry_still_enhances_tools(self):
-        """REGRESSION TEST: AgentRegistry still enhances tool dispatcher."""
-        class MockLLM:
-            pass
-        
-        dispatcher = ToolDispatcher()
-        original_executor = dispatcher.executor
-        
-        registry = AgentRegistry(MockLLM(), dispatcher)
-        registry.set_websocket_manager(self.mock_ws_manager)
-        
-        # Should still be enhanced
-        assert dispatcher.executor != original_executor, \
-            "REGRESSION: AgentRegistry no longer enhances tool dispatcher"
-        assert hasattr(dispatcher, '_websocket_enhanced'), \
-            "REGRESSION: AgentRegistry enhancement marker missing"
-        
-        logger.info("✅ Regression test AgentRegistry tool enhancement PASSED")
-
-    @pytest.mark.asyncio
-    @pytest.mark.critical
-    async def test_regression_tool_events_still_paired(self):
-        """REGRESSION TEST: Tool events are still properly paired."""
-        enhanced_executor = EnhancedToolExecutionEngine(self.mock_ws_manager)
-        notifier = enhanced_executor.websocket_notifier
-        
+        # Create single context for rapid execution
         context = AgentExecutionContext(
-            run_id="regression-pair-test",
-            thread_id="regression-pair-thread",
-            user_id="regression-pair-user",
-            agent_name="regression_agent",
+            run_id="throughput-test",
+            thread_id="throughput-thread",
+            user_id="throughput-user",
+            agent_name="throughput_agent",
             retry_count=0,
             max_retries=1
         )
         
-        # Send multiple tool event pairs
-        tools = ["tool1", "tool2", "tool3"]
-        for tool in tools:
-            await notifier.send_tool_executing(context, tool)
-            await notifier.send_tool_completed(context, tool, {"done": True})
+        # Execute many tools rapidly
+        rapid_executions = 100
+        start_time = time.time()
         
-        # Verify pairing still works
-        pairs = self.mock_ws_manager.get_tool_execution_pairs("regression-pair-thread")
-        assert len(pairs) == len(tools), \
-            f"REGRESSION: Tool event pairing broken - got {len(pairs)} pairs, expected {len(tools)}"
+        with patch.object(executor.__class__.__bases__[0], 'execute_tool_with_input',
+                         return_value=MockToolResult("rapid_result")):
+            
+            for i in range(rapid_executions):
+                mock_tool = MockTool(f"rapid_tool_{i}", execution_time=0.001)
+                tool_input = MockToolInput(f"rapid_tool_{i}")
+                
+                await executor.execute_tool_with_input(
+                    tool_input, mock_tool, {'context': context}
+                )
         
-        # Verify all tools accounted for
-        pair_tools = {pair['tool_name'] for pair in pairs}
-        assert pair_tools == set(tools), \
-            f"REGRESSION: Tool pairing missing tools - got {pair_tools}, expected {set(tools)}"
+        duration = time.time() - start_time
+        events_per_second = (rapid_executions * 2) / duration  # 2 events per execution
         
-        logger.info("✅ Regression test tool event pairing PASSED")
+        # Verify high throughput
+        assert events_per_second > 200, \
+            f"WebSocket event throughput too low: {events_per_second:.0f} events/s (expected >200)"
+        
+        # Verify all events were captured
+        thread_events = self.mock_ws_manager.get_tool_events_for_thread("throughput-thread")
+        assert len(thread_events) == rapid_executions * 2, \
+            f"Expected {rapid_executions * 2} events, got {len(thread_events)}"
+        
+        logger.info(f"Event throughput: {events_per_second:.0f} events/s for {rapid_executions} executions")
 
 
 # ============================================================================
-# TEST SUITE RUNNER  
+# ERROR HANDLING TESTS - Tool Execution Failures
 # ============================================================================
 
-@pytest.mark.critical
-@pytest.mark.mission_critical
-class TestEnhancedToolExecutionSuite:
-    """Main test suite for enhanced tool execution WebSocket events."""
+class TestEnhancedToolExecutionErrorHandling:
+    """Error handling tests for enhanced tool execution WebSocket events."""
+    
+    @pytest.fixture(autouse=True)
+    def setup_error_handling_mocks(self):
+        """Setup mocks for error handling testing."""
+        self.mock_ws_manager = MockWebSocketManager()
+        
+        yield
+        
+        # Cleanup
+        self.mock_ws_manager.clear_messages()
     
     @pytest.mark.asyncio
-    async def test_run_enhanced_tool_execution_suite(self):
-        """Run the complete enhanced tool execution WebSocket test suite."""
-        logger.info("\n" + "=" * 80)
-        logger.info("RUNNING ENHANCED TOOL EXECUTION WEBSOCKET TEST SUITE")
-        logger.info("Business Value: $500K+ ARR - Tool execution visibility in chat")
-        logger.info("=" * 80)
+    @pytest.mark.critical
+    async def test_tool_execution_error_events(self):
+        """Test that tool execution errors still produce proper WebSocket events."""
         
-        suite_components = [
-            "Unit Tests - Enhanced tool execution components",
-            "Integration Tests - Tool execution event flow", 
-            "Performance Tests - Tool execution under load",
-            "Regression Tests - Tool execution specific checks"
+        executor = EnhancedToolExecutionEngine(self.mock_ws_manager)
+        
+        # Create error scenarios
+        error_scenarios = [
+            ("timeout_tool", Exception("Tool execution timeout")),
+            ("memory_tool", MemoryError("Out of memory during tool execution")),
+            ("network_tool", ConnectionError("Network error in tool")),
+            ("validation_tool", ValueError("Invalid tool parameters"))
         ]
         
-        for component in suite_components:
-            logger.info(f"✅ {component} - Test classes defined")
+        for tool_name, error in error_scenarios:
+            context = AgentExecutionContext(
+                run_id=f"error-test-{tool_name}",
+                thread_id=f"error-thread-{tool_name}",
+                user_id=f"error-user-{tool_name}",
+                agent_name="error_agent",
+                retry_count=0,
+                max_retries=1
+            )
+            
+            mock_tool = MockTool(tool_name, should_fail=True)
+            tool_input = MockToolInput(tool_name)
+            
+            # Mock parent to raise the specific error
+            with patch.object(executor.__class__.__bases__[0], 'execute_tool_with_input',
+                             side_effect=error):
+                
+                # Execute and expect error
+                with pytest.raises(type(error)):
+                    await executor.execute_tool_with_input(
+                        tool_input, mock_tool, {'context': context}
+                    )
+                
+                # Verify WebSocket events were sent despite error
+                thread_events = self.mock_ws_manager.get_tool_events_for_thread(f"error-thread-{tool_name}")
+                assert len(thread_events) == 2, \
+                    f"Expected 2 events for {tool_name} error, got {len(thread_events)}"
+                
+                # Verify event content
+                executing_event = thread_events[0]
+                completed_event = thread_events[1]
+                
+                assert executing_event['event_type'] == 'tool_executing', \
+                    f"First event should be tool_executing for {tool_name}"
+                assert completed_event['event_type'] == 'tool_completed', \
+                    f"Second event should be tool_completed for {tool_name}"
+                assert completed_event['message']['payload']['status'] == 'error', \
+                    f"Completed event should indicate error for {tool_name}"
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_websocket_manager_failure_resilience(self):
+        """Test that tool execution continues even if WebSocket manager fails."""
         
-        logger.info("\n🔧 TOOL EXECUTION WEBSOCKET SUITE READY") 
-        logger.info("Run with: pytest tests/mission_critical/test_enhanced_tool_execution_websocket_events.py -v")
-        logger.info("=" * 80)
+        # Create executor with failing WebSocket manager
+        class FailingWebSocketManager:
+            async def send_to_thread(self, thread_id, message):
+                raise ConnectionError("WebSocket connection lost")
+        
+        failing_ws_manager = FailingWebSocketManager()
+        executor = EnhancedToolExecutionEngine(failing_ws_manager)
+        
+        context = AgentExecutionContext(
+            run_id="websocket-failure-test",
+            thread_id="websocket-failure-thread",
+            user_id="websocket-failure-user",
+            agent_name="resilient_agent",
+            retry_count=0,
+            max_retries=1
+        )
+        
+        mock_tool = MockTool("resilient_tool")
+        tool_input = MockToolInput("resilient_tool")
+        expected_result = MockToolResult("resilient_result")
+        
+        # Mock parent execution to succeed
+        with patch.object(executor.__class__.__bases__[0], 'execute_tool_with_input',
+                         return_value=expected_result):
+            
+            # Tool execution should succeed despite WebSocket failure
+            result = await executor.execute_tool_with_input(
+                tool_input, mock_tool, {'context': context}
+            )
+            
+            # Verify tool execution succeeded
+            assert result == expected_result, \
+                "Tool execution should succeed even if WebSocket events fail"
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_missing_context_handling(self):
+        """Test tool execution when context is missing from kwargs."""
+        
+        executor = EnhancedToolExecutionEngine(self.mock_ws_manager)
+        
+        mock_tool = MockTool("no_context_tool")
+        tool_input = MockToolInput("no_context_tool")
+        expected_result = MockToolResult("no_context_result")
+        
+        # Mock parent execution
+        with patch.object(executor.__class__.__bases__[0], 'execute_tool_with_input',
+                         return_value=expected_result):
+            
+            # Execute without context in kwargs
+            result = await executor.execute_tool_with_input(
+                tool_input, mock_tool, {}  # No context provided
+            )
+            
+            # Should still work
+            assert result == expected_result, \
+                "Tool execution should work without context"
+            
+            # No WebSocket events should be sent (no context to send to)
+            assert len(self.mock_ws_manager.messages) == 0, \
+                "No WebSocket events should be sent without context"
+
+
+# ============================================================================
+# VALIDATION RUNNER
+# ============================================================================
+
+def run_enhanced_tool_execution_websocket_validation():
+    """Run comprehensive validation of enhanced tool execution WebSocket events."""
+    
+    logger.info("\n" + "=" * 80)
+    logger.info("ENHANCED TOOL EXECUTION WEBSOCKET EVENTS - COMPREHENSIVE VALIDATION")
+    logger.info("=" * 80)
+    
+    # Run the tests
+    test_results = pytest.main([
+        __file__,
+        "-v",
+        "--tb=short",
+        "-x",  # Stop on first failure
+        "-m", "critical"  # Only run critical tests
+    ])
+    
+    if test_results == 0:
+        logger.info("\n✅ ALL ENHANCED TOOL EXECUTION WEBSOCKET TESTS PASSED")
+        logger.info("Tool execution WebSocket events are working correctly ($500K+ ARR protected)")
+    else:
+        logger.error("\n❌ ENHANCED TOOL EXECUTION WEBSOCKET TESTS FAILED")
+        logger.error("CRITICAL: Tool execution WebSocket events are broken!")
+    
+    return test_results
 
 
 if __name__ == "__main__":
-    # Run with comprehensive output  
-    pytest.main([__file__, "-v", "--tb=short", "-x", "--durations=10"])
+    # Run comprehensive validation
+    exit_code = run_enhanced_tool_execution_websocket_validation()
+    sys.exit(exit_code)

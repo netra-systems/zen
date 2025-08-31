@@ -232,7 +232,7 @@ async def startup_probe(
     
     # Check configuration
     try:
-        from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+        from shared.isolated_environment import IsolatedEnvironment
         env = IsolatedEnvironment()
         if env.get("DATABASE_URL"):
             initialization_checks["configuration"] = True

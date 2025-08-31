@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 """
-Unified Staging Build Script
-Handles Docker image building and local testing for staging environment
+DEPRECATED: Local Docker Build Script
+This script is deprecated. It incorrectly refers to Docker Compose as "staging".
+
+For actual staging deployment, use:
+  python scripts/deploy_to_gcp.py --project netra-staging
+
+For local testing with Docker Compose, use:
+  docker-compose --profile dev up  # or --profile test
 """
 
 import os
@@ -25,7 +31,8 @@ class StagingBuilder:
     
     def __init__(self, project_root: Path):
         self.project_root = project_root
-        self.docker_compose_file = project_root / "docker-compose.staging.yml"
+        # DEPRECATED: This should reference docker-compose.yml with profiles
+        self.docker_compose_file = project_root / "docker-compose.yml"
         
     def check_docker(self) -> bool:
         """Check if Docker is installed and running"""

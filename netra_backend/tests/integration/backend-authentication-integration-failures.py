@@ -41,7 +41,7 @@ import jwt
 from datetime import datetime, timedelta, timezone
 
 # Configuration-related imports
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.middleware.auth_middleware import AuthMiddleware
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from netra_backend.app.core.exceptions_auth import AuthenticationError, AuthorizationError

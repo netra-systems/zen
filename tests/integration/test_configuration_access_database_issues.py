@@ -27,7 +27,7 @@ import pytest
 import tempfile
 import logging
 
-from dev_launcher.isolated_environment import IsolatedEnvironment, get_env
+from shared.isolated_environment import IsolatedEnvironment, get_env
 
 logger = logging.getLogger(__name__)
 

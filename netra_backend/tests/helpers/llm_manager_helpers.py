@@ -15,7 +15,7 @@ from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 import pytest
 from pydantic import BaseModel
 
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from netra_backend.app.schemas.config import AppConfig, LLMConfig
 
 class LLMProvider(Enum):

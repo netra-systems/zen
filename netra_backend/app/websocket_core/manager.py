@@ -24,11 +24,12 @@ All functions ≤25 lines as per CLAUDE.md requirements.
 
 import asyncio
 import json
+import random
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any, Dict, List, Optional, Set, Union, Tuple
 from contextlib import asynccontextmanager
 import logging
 from cachetools import TTLCache
@@ -91,6 +92,11 @@ class WebSocketManager:
         # Compatibility attribute for tests
         self.active_connections: Dict[str, list] = {}
         self.connection_registry: Dict[str, Any] = {}
+        
+        # Typing indicator state management
+        self.typing_states: TTLCache = TTLCache(maxsize=200, ttl=10)  # Auto-expire after 10s
+        self.typing_locks: Dict[str, asyncio.Lock] = {}  # Per-thread typing locks
+        self.typing_timeouts: Dict[str, asyncio.Task] = {}  # Timeout tasks
         
         # Connection configuration - OPTIMIZED for <2s response times
         self.send_timeout: float = 2.0  # Reduced for faster response requirement
@@ -829,35 +835,89 @@ class WebSocketManager:
     
     async def send_to_thread(self, thread_id: str, 
                             message: Union[WebSocketMessage, Dict[str, Any]]) -> bool:
-        """Send message to all users in a thread with optimized concurrent delivery (<500ms target)."""
-        # Find all connections for the given thread (copy keys to avoid iteration issues)
+        """Send message to all users in a thread with robust error handling."""
+        try:
+            # ROBUSTNESS: Use thread-safe connection lookup
+            thread_connections = await self._get_thread_connections(thread_id)
+            
+            if not thread_connections:
+                logger.warning(f"No active connections found for thread {thread_id}")
+                return False
+            
+            # ROBUSTNESS: Serialize with error recovery
+            try:
+                message_dict = await self._serialize_message_safely_async(message)
+            except Exception as e:
+                logger.error(f"Failed to serialize message for thread {thread_id}: {e}")
+                # Fallback to simple serialization
+                message_dict = {"type": "error", "message": "Message serialization failed", "thread_id": thread_id}
+            
+            # ROBUSTNESS: Add message metadata for tracking
+            message_dict["timestamp"] = datetime.now(timezone.utc).isoformat()
+            message_dict["thread_id"] = thread_id
+            
+            # Send to all connections concurrently with error isolation
+            send_tasks = []
+            for conn_id, conn_info in thread_connections:
+                websocket = conn_info.get("websocket")
+                if websocket and conn_info.get("is_healthy", True):
+                    send_tasks.append(self._send_to_connection_with_retry(
+                        conn_id, websocket, message_dict, conn_info
+                    ))
+            
+            if not send_tasks:
+                logger.warning(f"No healthy connections for thread {thread_id}")
+                return False
+            
+            # ROBUSTNESS: Use gather with return_exceptions to isolate failures
+            results = await asyncio.gather(*send_tasks, return_exceptions=True)
+            
+            # Count successes and handle exceptions
+            successes = 0
+            for i, result in enumerate(results):
+                if isinstance(result, Exception):
+                    logger.error(f"Send task failed: {result}")
+                elif result:
+                    successes += 1
+            
+            # ROBUSTNESS: Consider partial success as success
+            success_rate = successes / len(results) if results else 0
+            if success_rate < 0.5 and successes == 0:
+                logger.error(f"Failed to send to any connection in thread {thread_id}")
+                return False
+            
+            if success_rate < 1.0:
+                logger.warning(f"Partial send success for thread {thread_id}: {successes}/{len(results)}")
+            
+            return successes > 0
+            
+        except Exception as e:
+            logger.error(f"Unexpected error in send_to_thread for {thread_id}: {e}")
+            self.connection_stats["send_errors"] = self.connection_stats.get("send_errors", 0) + 1
+            return False
+    
+    async def _get_thread_connections(self, thread_id: str) -> List[Tuple[str, Dict]]:
+        """Get all healthy connections for a thread safely."""
+        thread_connections = []
+        
+        # Create snapshot of connection IDs to avoid modification during iteration
         conn_ids = list(self.connections.keys())
         
-        # Filter connections for this thread
-        thread_connections = []
         for conn_id in conn_ids:
-            if conn_id in self.connections:
-                conn_info = self.connections[conn_id]
-                if conn_info.get("thread_id") == thread_id:
-                    thread_connections.append((conn_id, conn_info))
+            try:
+                if conn_id in self.connections:
+                    conn_info = self.connections[conn_id]
+                    if (conn_info.get("thread_id") == thread_id and 
+                        conn_info.get("is_healthy", True)):
+                        thread_connections.append((conn_id, conn_info))
+            except KeyError:
+                # Connection was removed during iteration
+                continue
+            except Exception as e:
+                logger.warning(f"Error checking connection {conn_id}: {e}")
+                continue
         
-        if not thread_connections:
-            logger.warning(f"No active connections found for thread {thread_id}")
-            return False
-        
-        # Serialize message once asynchronously (non-blocking)
-        message_dict = await self._serialize_message_safely_async(message)
-        
-        # Send to all connections concurrently
-        send_tasks = []
-        for conn_id, conn_info in thread_connections:
-            websocket = conn_info["websocket"]
-            send_tasks.append(self._send_to_connection_with_retry(
-                conn_id, websocket, message_dict, conn_info
-            ))
-        
-        # Execute all sends concurrently with gather
-        results = await asyncio.gather(*send_tasks, return_exceptions=True)
+        return thread_connections
         
         # Count successful sends
         connections_sent = sum(1 for r in results if r is True)
@@ -873,53 +933,125 @@ class WebSocketManager:
         self, conn_id: str, websocket: WebSocket, 
         message_dict: Dict[str, Any], conn_info: Dict[str, Any]
     ) -> bool:
-        """Send message to a single connection with timeout and retry logic."""
+        """Send message to a single connection with robust error handling and retry logic."""
         max_retries = self.max_retries
         
         for attempt in range(max_retries):
             try:
-                # Pass timeout parameter directly to send_json for test compatibility
-                # Set timeout_used attribute on websocket for test verification
+                # ROBUSTNESS: Pre-check connection state before sending
+                if not is_websocket_connected(websocket):
+                    logger.warning(f"Connection {conn_id} disconnected before send")
+                    conn_info["is_healthy"] = False
+                    return False
+                
+                # ROBUSTNESS: Add timeout with graceful degradation
                 if not hasattr(websocket, 'timeout_used'):
                     websocket.timeout_used = None
                 websocket.timeout_used = self.send_timeout
-                await websocket.send_json(message_dict, timeout=self.send_timeout)
+                
+                # ROBUSTNESS: Use asyncio.wait_for for guaranteed timeout
+                try:
+                    await asyncio.wait_for(
+                        websocket.send_json(message_dict),
+                        timeout=self.send_timeout
+                    )
+                except AttributeError:
+                    # Fallback for WebSockets without timeout parameter
+                    await websocket.send_json(message_dict)
+                
+                # Update metrics on success
                 conn_info["message_count"] = conn_info.get("message_count", 0) + 1
+                conn_info["last_activity"] = datetime.now(timezone.utc)
+                
                 # Reset failure count on success
                 if conn_id in self.connection_failure_counts:
                     self.connection_failure_counts[conn_id] = 0
                 return True
+                
             except asyncio.TimeoutError:
                 self.connection_stats["send_timeouts"] += 1
                 logger.warning(f"WebSocket send timeout for {conn_id}, attempt {attempt + 1}/{max_retries}")
+                
+                # ROBUSTNESS: Check if connection is still viable
+                if not is_websocket_connected(websocket):
+                    conn_info["is_healthy"] = False
+                    return False
+                
                 if attempt < max_retries - 1:
                     # Exponential backoff with jitter
-                    delay = self.base_backoff * (2 ** attempt)
+                    delay = self.base_backoff * (2 ** attempt) + random.uniform(0, 0.1)
                     await asyncio.sleep(delay)
                     self.connection_stats["timeout_retries"] += 1
+                    
+            except (ConnectionResetError, ConnectionAbortedError, BrokenPipeError) as e:
+                # ROBUSTNESS: Handle network-level errors explicitly
+                logger.warning(f"Network error for {conn_id}: {type(e).__name__}")
+                conn_info["is_healthy"] = False
+                self.connection_stats["network_errors"] = self.connection_stats.get("network_errors", 0) + 1
+                return False
+                
+            except WebSocketDisconnect as e:
+                # ROBUSTNESS: Handle WebSocket disconnection gracefully
+                logger.info(f"WebSocket {conn_id} disconnected: {e.code} - {e.reason}")
+                conn_info["is_healthy"] = False
+                await self._cleanup_connection(conn_id, e.code, e.reason)
+                return False
+                
+            except json.JSONDecodeError as e:
+                # ROBUSTNESS: Handle serialization errors
+                logger.error(f"JSON serialization error for {conn_id}: {e}")
+                self.connection_stats["serialization_errors"] = self.connection_stats.get("serialization_errors", 0) + 1
+                # Try to send error notification
+                try:
+                    error_msg = {"type": "error", "message": "Message serialization failed"}
+                    await websocket.send_json(error_msg)
+                except Exception:
+                    pass
+                return False
+                
             except Exception as e:
                 logger.debug(f"Failed to send to connection {conn_id}: {e}")
+                
                 # Track failure count
                 self.connection_failure_counts[conn_id] = \
                     self.connection_failure_counts.get(conn_id, 0) + 1
                 
-                # Check circuit breaker
-                if self.connection_failure_counts[conn_id] >= self.circuit_breaker_threshold:
-                    logger.error(f"Circuit breaker activated for {conn_id} after {self.circuit_breaker_threshold} failures")
+                # ROBUSTNESS: Progressive response to failures
+                failure_count = self.connection_failure_counts[conn_id]
+                
+                if failure_count >= self.circuit_breaker_threshold:
+                    # Circuit breaker activated
+                    logger.error(f"Circuit breaker activated for {conn_id} after {failure_count} failures")
                     self.failed_connections.add(conn_id)
-                    # Remove connection from active pool
-                    await self.disconnect_user(conn_id)
+                    conn_info["is_healthy"] = False
+                    
+                    # Schedule cleanup instead of immediate disconnect
+                    asyncio.create_task(self._schedule_cleanup(conn_id, delay=1.0))
                     return False
+                    
+                elif failure_count >= self.circuit_breaker_threshold // 2:
+                    # Mark as unhealthy but don't disconnect yet
+                    logger.warning(f"Connection {conn_id} marked unhealthy after {failure_count} failures")
+                    conn_info["is_healthy"] = False
                 
                 if attempt < max_retries - 1:
-                    await asyncio.sleep(self.base_backoff * (2 ** attempt))
+                    # Adaptive backoff based on failure count
+                    delay = min(self.base_backoff * (2 ** attempt) * (1 + failure_count * 0.1), 5.0)
+                    await asyncio.sleep(delay)
                 else:
                     return False
         
         # All retries failed
         self.connection_stats["timeout_failures"] += 1
         logger.error(f"Failed to send to {conn_id} after {max_retries} attempts")
+        conn_info["is_healthy"] = False
         return False
+    
+    async def _schedule_cleanup(self, conn_id: str, delay: float = 0):
+        """Schedule connection cleanup with optional delay."""
+        if delay > 0:
+            await asyncio.sleep(delay)
+        await self._cleanup_connection(conn_id, 1011, "Connection unhealthy")
     
     def _is_connection_ready(self, connection_info: 'ConnectionInfo') -> bool:
         """Check if connection is ready to receive messages."""
@@ -1560,9 +1692,79 @@ def get_websocket_manager() -> WebSocketManager:
     if _websocket_manager is None:
         _websocket_manager = WebSocketManager()
     return _websocket_manager
+    
+    async def _broadcast_typing_indicator(self, thread_id: str, 
+                                         user_id: str, is_typing: bool) -> None:
+        """Broadcast typing indicator to other users in thread."""
+        try:
+            from netra_backend.app.websocket_core.types import MessageType
+            
+            message = {
+                "type": MessageType.USER_TYPING,
+                "payload": {
+                    "user_id": user_id,
+                    "is_typing": is_typing,
+                    "thread_id": thread_id,
+                    "timestamp": time.time()
+                }
+            }
+            
+            # Send to all connections in thread except the typer
+            conn_ids = list(self.connections.keys())
+            tasks = []
+            
+            for conn_id in conn_ids:
+                if conn_id in self.connections:
+                    conn_info = self.connections[conn_id]
+                    if (conn_info.get("thread_id") == thread_id and 
+                        conn_info.get("user_id") != user_id):
+                        # Send to this connection
+                        websocket = conn_info.get("websocket")
+                        if websocket:
+                            tasks.append(self._send_with_timeout(websocket, message))
+            
+            if tasks:
+                results = await asyncio.gather(*tasks, return_exceptions=True)
+                success_count = sum(1 for r in results if r is True)
+                logger.debug(f"Broadcast typing to {success_count}/{len(tasks)} connections")
+                
+        except Exception as e:
+            logger.error(f"Error broadcasting typing indicator: {e}")
+    
+    def get_active_typers(self, thread_id: str) -> List[str]:
+        """Get list of users currently typing in a thread."""
+        try:
+            active_typers = []
+            for key, state in self.typing_states.items():
+                if state.thread_id == thread_id and state.is_typing:
+                    if not state.is_expired():
+                        active_typers.append(state.user_id)
+            return active_typers
+        except Exception as e:
+            logger.error(f"Error getting active typers: {e}")
+            return []
+    
+    async def clear_user_typing(self, user_id: str, thread_id: str) -> None:
+        """Clear typing state for a user (e.g., on disconnect)."""
+        try:
+            typing_key = f"{thread_id}:{user_id}"
+            timeout_key = f"{thread_id}:{user_id}"
+            
+            # Cancel timeout task
+            if timeout_key in self.typing_timeouts:
+                self.typing_timeouts[timeout_key].cancel()
+                del self.typing_timeouts[timeout_key]
+            
+            # Clear typing state
+            if typing_key in self.typing_states:
+                del self.typing_states[typing_key]
+                # Broadcast typing stopped
+                await self._broadcast_typing_indicator(thread_id, user_id, False)
+                
+        except Exception as e:
+            logger.error(f"Error clearing user typing state: {e}")
 
 
-# Backward compatibility aliases for recovery system
 def get_manager() -> WebSocketManager:
     """Get WebSocket manager (legacy compatibility)."""
     return get_websocket_manager()

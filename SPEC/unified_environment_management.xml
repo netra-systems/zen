@@ -31,7 +31,7 @@
                 variable operations. Direct os.environ access is FORBIDDEN outside the unified
                 config module.
             </description>
-            <implementation>dev_launcher.isolated_environment.IsolatedEnvironment</implementation>
+            <implementation>shared.isolated_environment.IsolatedEnvironment</implementation>
             <enforcement>Pre-commit hooks and CI/CD validation</enforcement>
         </requirement>
 
@@ -80,7 +80,7 @@
         <pattern name="Service Initialization">
             <description>How services should initialize environment management</description>
             <code>
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 class ServiceConfig:
     def __init__(self):
@@ -102,7 +102,7 @@ class ServiceConfig:
             <description>How tests should ensure environment isolation</description>
             <code>
 import pytest
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 @pytest.fixture(autouse=True)
 def isolated_test_env():

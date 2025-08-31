@@ -14,7 +14,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth_service.auth_core.config import AuthConfig
-from auth_service.auth_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from auth_service.auth_core.secret_loader import AuthSecretLoader
 from auth_service.auth_core.security.oauth_security import (
     OAuthSecurityManager, 
@@ -108,41 +108,8 @@ def _determine_urls() -> tuple[str, str]:
     """Determine auth service and frontend URLs based on environment"""
     return AuthConfig.get_auth_service_url(), AuthConfig.get_frontend_url()
 
-def _is_placeholder_oauth_credential(credential: str, credential_type: str) -> bool:
-    """Check if OAuth credential appears to be a placeholder value."""
-    if not credential:
-        return True
-        
-    # Known placeholder patterns
-    placeholder_indicators = [
-        "REPLACE_", "PLACEHOLDER", "TODO", "CHANGEME", "YOUR_", 
-        "placeholder", "replace_me", "insert_here"
-    ]
-    
-    # Check for obvious placeholders
-    credential_lower = credential.lower()
-    for indicator in placeholder_indicators:
-        if indicator.lower() in credential_lower:
-            return True
-    
-    # Type-specific validation
-    if credential_type == "client_id":
-        # Google Client IDs should end with .apps.googleusercontent.com and be reasonable length
-        if not credential.endswith(".apps.googleusercontent.com"):
-            return True
-        # Google Client IDs are typically 70+ characters, but allow shorter ones that are valid format
-        # Only flag as placeholder if unreasonably short (less than 40 chars total)
-        if len(credential) < 40:
-            return True
-    elif credential_type == "client_secret":
-        # Google Client Secrets are typically 24+ characters and alphanumeric with some symbols
-        if len(credential) < 20:
-            return True
-        # Very short secrets or obvious test patterns
-        if credential in ["test", "secret", "dev", "development", "dummy"]:
-            return True
-    
-    return False
+# Removed _is_placeholder_oauth_credential function - placeholder detection no longer needed
+# Focus on actual OAuth functionality rather than placeholder detection
 
 async def _sync_user_to_main_db(auth_user):
     """Return user ID - no sync needed as auth service uses same database"""
@@ -260,13 +227,13 @@ async def get_auth_config(request: Request):
         oauth_warnings = []
         if not google_client_id:
             oauth_warnings.append("GOOGLE_CLIENT_ID is not configured")
-        elif _is_placeholder_oauth_credential(google_client_id, "client_id"):
-            oauth_warnings.append(f"GOOGLE_CLIENT_ID appears to be a placeholder: {google_client_id[:20]}...")
+        elif len(google_client_id) < 50 or not google_client_id.endswith(".apps.googleusercontent.com"):
+            oauth_warnings.append(f"GOOGLE_CLIENT_ID appears invalid: {google_client_id[:20]}...")
             
         if not google_client_secret:
             oauth_warnings.append("GOOGLE_CLIENT_SECRET is not configured")
-        elif _is_placeholder_oauth_credential(google_client_secret, "client_secret"):
-            oauth_warnings.append("GOOGLE_CLIENT_SECRET appears to be a placeholder")
+        elif len(google_client_secret) < 20:
+            oauth_warnings.append("GOOGLE_CLIENT_SECRET appears too short")
         
         if oauth_warnings and env in ["staging", "production"]:
             logger.error(f"""
@@ -368,13 +335,13 @@ async def initiate_oauth_login(
             
             if not google_client_id:
                 oauth_errors.append("GOOGLE_CLIENT_ID is not configured")
-            elif google_client_id.startswith("REPLACE_") or len(google_client_id) < 50:
-                oauth_errors.append(f"GOOGLE_CLIENT_ID appears to be a placeholder: {google_client_id[:20]}...")
+            elif len(google_client_id) < 50:
+                oauth_errors.append(f"GOOGLE_CLIENT_ID appears too short: {google_client_id[:20]}...")
                 
             if not google_client_secret:
                 oauth_errors.append("GOOGLE_CLIENT_SECRET is not configured")
-            elif google_client_secret.startswith("REPLACE_") or len(google_client_secret) < 20:
-                oauth_errors.append("GOOGLE_CLIENT_SECRET appears to be a placeholder")
+            elif len(google_client_secret) < 20:
+                oauth_errors.append("GOOGLE_CLIENT_SECRET appears too short")
                 
         elif provider == "github":
             github_client_id = get_env().get("GITHUB_CLIENT_ID")
@@ -857,7 +824,7 @@ db_manager = DBManagerWrapper(auth_service)
 @router.post("/e2e/test-auth")
 async def e2e_test_auth(
     request: Request,
-    x_e2e_bypass_key: Optional[str] = Header(None),
+    x_E2E_OAUTH_SIMULATION_KEY: Optional[str] = Header(None),
     client_info: dict = Depends(get_client_info)
 ):
     """E2E test authentication endpoint for staging environment only.
@@ -883,7 +850,7 @@ async def e2e_test_auth(
         )
     
     # Validate E2E bypass key
-    if not x_e2e_bypass_key:
+    if not x_E2E_OAUTH_SIMULATION_KEY:
         logger.error("E2E test auth attempted without bypass key")
         raise HTTPException(
             status_code=401,
@@ -891,7 +858,7 @@ async def e2e_test_auth(
         )
     
     # Get expected bypass key from secrets
-    expected_key = AuthSecretLoader.get_e2e_bypass_key()
+    expected_key = AuthSecretLoader.get_E2E_OAUTH_SIMULATION_KEY()
     if not expected_key:
         logger.error("E2E bypass key not configured in Google Secrets Manager")
         raise HTTPException(
@@ -901,7 +868,7 @@ async def e2e_test_auth(
     
     # Validate bypass key
     import hmac
-    if not hmac.compare_digest(x_e2e_bypass_key, expected_key):
+    if not hmac.compare_digest(x_E2E_OAUTH_SIMULATION_KEY, expected_key):
         logger.error(f"Invalid E2E bypass key from IP: {client_info.get('ip')}")
         raise HTTPException(
             status_code=401,

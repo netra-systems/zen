@@ -23,12 +23,14 @@ from typing import Any, Dict
 
 import pytest
 
+from test_framework.service_dependencies import requires_services
 from tests.e2e.admin_audit_trail_validator import AdminAuditTrailValidator
 from tests.e2e.admin_user_management_tester import AdminUserManagementTester
 from tests.e2e.auth_flow_manager import AuthCompleteFlowManager
 
 
 # Pytest Test Implementations
+@requires_services(["auth", "backend", "database"], mode="either")
 @pytest.mark.asyncio
 @pytest.mark.e2e
 async def test_admin_user_management_complete_flow():

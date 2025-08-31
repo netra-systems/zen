@@ -1,7 +1,7 @@
 """End-to-end test for development mode thread handling.
 
 This test verifies the complete flow from WebSocket connection to database
-operations when handling threads in development mode with auth bypass.
+operations when handling threads in development mode with OAUTH SIMULATION.
 """
 
 import asyncio
@@ -25,11 +25,11 @@ class TestDevelopmentThreadHandling:
     
     @pytest.fixture
     async def setup_development_environment(self):
-        """Setup development environment with auth bypass."""
+        """Setup development environment with OAUTH SIMULATION."""
         # Set environment variables for development mode
         with patch.dict('os.environ', {
             'ENVIRONMENT': 'development',
-            'ALLOW_DEV_AUTH_BYPASS': 'true',
+            'ALLOW_DEV_OAUTH_SIMULATION': 'true',
             'WEBSOCKET_AUTH_BYPASS': 'true',
             'DATABASE_URL': 'postgresql+asyncpg://postgres:postgres@localhost:5432/netra_test'
         }):

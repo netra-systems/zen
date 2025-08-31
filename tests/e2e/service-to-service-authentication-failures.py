@@ -39,7 +39,7 @@ from fastapi import HTTPException, status
 import jwt
 from datetime import datetime, timedelta, timezone
 
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from test_framework.base_e2e_test import BaseE2ETest
 
 

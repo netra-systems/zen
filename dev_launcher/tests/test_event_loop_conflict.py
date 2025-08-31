@@ -25,7 +25,7 @@ from typing import Dict, List, Optional
 
 from dev_launcher.config import LauncherConfig
 from dev_launcher.launcher import DevLauncher
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from dev_launcher.network_resilience import NetworkResilientClient, RetryPolicy
 
 

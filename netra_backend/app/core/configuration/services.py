@@ -17,7 +17,7 @@ Each function ≤8 lines, file ≤300 lines.
 
 from typing import Any, Dict, List, Optional
 
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from netra_backend.app.core.environment_constants import (
     Environment,
     EnvironmentVariables,

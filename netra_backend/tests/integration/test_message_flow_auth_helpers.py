@@ -66,7 +66,7 @@ class AuthFlowTracker:
         successful = sum(1 for attempt in self.auth_attempts if attempt["token_valid"])
         return successful / len(self.auth_attempts)
 
-class TestWebSocketAuthMock(MockWebSocket):
+class TestWebSocketAuthMock(Mock):
     """Extended mock WebSocket for auth testing."""
     
     def __init__(self, user_id=None):

@@ -24,7 +24,7 @@ from netra_backend.app.agents.base.interface import WebSocketManagerProtocol
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.agents.triage_sub_agent.core import TriageCore

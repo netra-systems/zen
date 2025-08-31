@@ -9,7 +9,7 @@ import time
 from enum import Enum
 from typing import Any, Dict, Optional, Set
 
-from dev_launcher.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 from dev_launcher.filter_patterns import (
     COMMON_NOISE_PATTERNS,

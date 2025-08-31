@@ -1,4 +1,4 @@
-from netra_backend.app.core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 """
 Application startup management module.
 Handles initialization of logging, database connections, services, and health checks.
@@ -210,7 +210,7 @@ def _setup_optimization_components(app: FastAPI) -> None:
 
 async def _schedule_background_optimizations(app: FastAPI, logger: logging.Logger) -> None:
     """Schedule index optimization as background task."""
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     
     # Check if background tasks are disabled for testing
     if get_env().get("DISABLE_BACKGROUND_TASKS", "false").lower() == "true":
@@ -538,7 +538,7 @@ def setup_security_services(app: FastAPI, key_manager: KeyManager) -> None:
     
     # CRITICAL FIX: Set ClickHouse availability flag based on configuration
     config = get_config()
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
     
     # ClickHouse is available if required or if not in staging/development
@@ -554,7 +554,7 @@ async def initialize_clickhouse(logger: logging.Logger) -> None:
     graceful_startup = getattr(config, 'graceful_startup_mode', 'true').lower() == "true"
     
     # CRITICAL FIX: Check if ClickHouse is explicitly required
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
     
     # CRITICAL FIX: Make ClickHouse optional in development when not explicitly required
@@ -618,7 +618,7 @@ async def initialize_clickhouse(logger: logging.Logger) -> None:
 async def _setup_clickhouse_tables(logger: logging.Logger, mode: str) -> None:
     """Setup ClickHouse tables with timeout and error handling."""
     import asyncio
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     
     try:
         _log_clickhouse_start(logger, mode)
@@ -676,19 +676,62 @@ def _create_tool_dispatcher(tool_registry):
 
 
 def _create_agent_supervisor(app: FastAPI) -> None:
-    """Create agent supervisor."""
+    """Create agent supervisor - CRITICAL for chat functionality."""
     from netra_backend.app.logging_config import central_logger
+    from shared.isolated_environment import get_env
     logger = central_logger.get_logger(__name__)
     
+    environment = get_env().get("ENVIRONMENT", "development").lower()
+    
     try:
+        logger.info(f"Creating agent supervisor for {environment} environment...")
         supervisor = _build_supervisor_agent(app)
+        
+        # Verify supervisor was created properly
+        if supervisor is None:
+            raise RuntimeError("Supervisor creation returned None")
+        
+        # CRITICAL: Ensure WebSocket enhancement for agent events
+        if hasattr(supervisor, 'registry') and hasattr(supervisor.registry, 'tool_dispatcher'):
+            if not getattr(supervisor.registry.tool_dispatcher, '_websocket_enhanced', False):
+                logger.warning("Tool dispatcher not enhanced with WebSocket - attempting enhancement")
+                # Try to enhance it now
+                from netra_backend.app.websocket_core import get_websocket_manager
+                ws_manager = get_websocket_manager()
+                if ws_manager:
+                    supervisor.registry.set_websocket_manager(ws_manager)
+                    if not getattr(supervisor.registry.tool_dispatcher, '_websocket_enhanced', False):
+                        raise RuntimeError("Failed to enhance tool dispatcher with WebSocket notifications")
+        
         _setup_agent_state(app, supervisor)
-        logger.info("Agent supervisor created successfully")
+        
+        # Final verification
+        if not hasattr(app.state, 'agent_supervisor') or app.state.agent_supervisor is None:
+            raise RuntimeError("Agent supervisor not set on app.state after setup")
+        
+        if not hasattr(app.state, 'thread_service') or app.state.thread_service is None:
+            raise RuntimeError("Thread service not set on app.state after setup")
+        
+        logger.info(f"✅ Agent supervisor created successfully for {environment}")
+        logger.info(f"✅ WebSocket enhancement status: {getattr(supervisor.registry.tool_dispatcher, '_websocket_enhanced', False) if hasattr(supervisor, 'registry') else 'N/A'}")
+        
     except Exception as e:
-        logger.error(f"Failed to create agent supervisor: {e}")
-        # Set a None supervisor so WebSocket doesn't crash
-        app.state.agent_supervisor = None
-        raise
+        error_msg = f"Failed to create agent supervisor in {environment}: {e}"
+        logger.error(error_msg, exc_info=True)
+        
+        # CRITICAL FIX: Agent supervisor is REQUIRED for chat functionality
+        # Chat is king - we MUST fail fast if agent services cannot be initialized
+        if environment in ["staging", "production"]:
+            logger.critical(f"CRITICAL: Agent supervisor failed in {environment} - chat functionality broken!")
+            logger.critical("Chat delivers 90% of value - failing startup to prevent broken user experience")
+            # Re-raise to fail startup - chat MUST work
+            raise RuntimeError(f"Agent supervisor initialization failed in {environment} - chat is broken") from e
+        else:
+            # In development/testing, still try to continue for debugging
+            app.state.agent_supervisor = None
+            app.state.thread_service = None
+            logger.warning(f"Agent supervisor set to None for {environment} after failure - chat will not work!")
+            # Don't raise in dev to allow debugging
 
 
 def _build_supervisor_agent(app: FastAPI):
@@ -698,12 +741,24 @@ def _build_supervisor_agent(app: FastAPI):
     from netra_backend.app.logging_config import central_logger
     logger = central_logger.get_logger(__name__)
     
+    # Log current app.state attributes for debugging
+    logger.info("Checking supervisor dependencies in app.state...")
+    app_state_attrs = [attr for attr in dir(app.state) if not attr.startswith('_')]
+    logger.info(f"Current app.state attributes: {app_state_attrs}")
+    
     # Check required dependencies
     required_attrs = ['db_session_factory', 'llm_manager', 'tool_dispatcher']
     missing = [attr for attr in required_attrs if not hasattr(app.state, attr)]
     
     if missing:
         logger.error(f"Missing required app state attributes for supervisor: {missing}")
+        # Log detailed state of each required attribute
+        for attr in required_attrs:
+            if hasattr(app.state, attr):
+                value = getattr(app.state, attr)
+                logger.info(f"  {attr}: {value is not None} (type: {type(value).__name__})")
+            else:
+                logger.error(f"  {attr}: NOT SET")
         raise RuntimeError(f"Cannot create supervisor - missing dependencies: {missing}")
     
     websocket_manager = get_websocket_manager()
@@ -873,7 +928,7 @@ async def start_monitoring(app: FastAPI, logger: logging.Logger) -> None:
 
 async def _create_monitoring_task(app: FastAPI, logger: logging.Logger) -> None:
     """Create comprehensive monitoring tasks."""
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     
     # Check if monitoring is disabled for testing
     if get_env().get("DISABLE_MONITORING", "false").lower() == "true":
@@ -917,10 +972,45 @@ async def _run_startup_phase_one(app: FastAPI) -> Tuple[float, logging.Logger]:
 
 async def _run_startup_phase_two(app: FastAPI, logger: logging.Logger) -> None:
     """Run service initialization phase."""
-    await setup_database_connections(app)  # Move database setup first
-    key_manager = initialize_core_services(app, logger)
-    setup_security_services(app, key_manager)
-    await initialize_clickhouse(logger)
+    logger.info("Starting Phase 2: Service initialization")
+    
+    try:
+        logger.info("Setting up database connections...")
+        await setup_database_connections(app)  # Move database setup first
+        logger.info("Database connections established successfully")
+    except Exception as e:
+        logger.error(f"Failed to setup database connections: {e}", exc_info=True)
+        raise
+    
+    try:
+        logger.info("Initializing core services...")
+        key_manager = initialize_core_services(app, logger)
+        logger.info("Core services initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize core services: {e}", exc_info=True)
+        raise
+    
+    try:
+        logger.info("Setting up security services and LLM manager...")
+        setup_security_services(app, key_manager)
+        logger.info(f"Security services initialized - LLM manager: {app.state.llm_manager is not None}")
+    except Exception as e:
+        logger.error(f"Failed to setup security services: {e}", exc_info=True)
+        raise
+    
+    try:
+        logger.info("Initializing ClickHouse...")
+        await initialize_clickhouse(logger)
+        logger.info("ClickHouse initialization completed")
+    except Exception as e:
+        logger.error(f"Failed to initialize ClickHouse: {e}", exc_info=True)
+        # ClickHouse failures are non-critical in some environments
+        from shared.isolated_environment import get_env
+        environment = get_env().get("ENVIRONMENT", "development").lower()
+        if environment not in ["staging", "production"]:
+            logger.warning(f"Continuing without ClickHouse in {environment}")
+        else:
+            raise
     
     # FIX: Initialize background task manager to prevent 4-minute crash
     logger.info("Initializing background task manager with 2-minute timeout...")
@@ -956,9 +1046,17 @@ async def _run_startup_phase_three(app: FastAPI, logger: logging.Logger) -> None
 
 
 async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
-    """Run complete startup sequence with improved initialization handling."""
-    # Use the global startup manager instance
+    """Run complete startup sequence - DETERMINISTIC MODE."""
+    # Check if deterministic mode is enabled (default: YES)
+    config = get_config()
+    use_deterministic = getattr(config, 'deterministic_startup', 'true').lower() == 'true'
     
+    if use_deterministic:
+        # Use the new deterministic startup - NO FALLBACKS, NO GRACEFUL DEGRADATION
+        from netra_backend.app.startup_module_deterministic import run_deterministic_startup
+        return await run_deterministic_startup(app)
+    
+    # Legacy startup (deprecated - will be removed)
     # Initialize logger FIRST - before any logic to ensure it's always available in all scopes
     logger = None
     try:
@@ -1062,8 +1160,60 @@ async def _run_legacy_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
         app.state.startup_error = None
         app.state.startup_start_time = start_time
         logger.info("Legacy startup in progress flags set")
-    await _run_startup_phase_two(app, logger)
-    await _run_startup_phase_three(app, logger)
+    
+    try:
+        await _run_startup_phase_two(app, logger)
+        logger.info("Phase 2 completed successfully - core services initialized")
+    except Exception as e:
+        error_msg = f"Phase 2 (service initialization) failed: {e}"
+        logger.error(error_msg, exc_info=True)
+        
+        # Check environment for critical failure handling
+        from shared.isolated_environment import get_env
+        environment = get_env().get("ENVIRONMENT", "development").lower()
+        
+        if environment in ["staging", "production"]:
+            # In staging/production, Phase 2 failure is critical
+            app.state.startup_complete = False
+            app.state.startup_in_progress = False
+            app.state.startup_failed = True
+            app.state.startup_error = error_msg
+            raise RuntimeError(error_msg) from e
+        else:
+            # In development, log but continue with degraded functionality
+            logger.warning(f"Continuing with degraded functionality in {environment} after Phase 2 failure")
+            # Set minimal state to prevent complete failure
+            if not hasattr(app.state, 'llm_manager'):
+                app.state.llm_manager = None
+            if not hasattr(app.state, 'db_session_factory'):
+                app.state.db_session_factory = None
+    
+    try:
+        await _run_startup_phase_three(app, logger)
+        logger.info("Phase 3 completed successfully - agent supervisor initialized")
+    except Exception as e:
+        error_msg = f"Phase 3 (agent supervisor) failed: {e}"
+        logger.error(error_msg, exc_info=True)
+        
+        # Check environment for critical failure handling
+        from shared.isolated_environment import get_env
+        environment = get_env().get("ENVIRONMENT", "development").lower()
+        
+        if environment in ["staging", "production"]:
+            # CRITICAL FIX: Phase 3 failure is CRITICAL - chat is broken
+            # Chat delivers 90% of value - we cannot run without it
+            logger.critical(f"CRITICAL: Phase 3 failure in {environment} - CHAT IS BROKEN!")
+            logger.critical("Cannot continue without agent supervisor - chat delivers 90% of value")
+            # Mark as failed and re-raise
+            app.state.startup_complete = False
+            app.state.startup_in_progress = False
+            app.state.startup_failed = True
+            app.state.startup_error = error_msg
+            # Re-raise to fail startup - chat MUST work
+            raise RuntimeError(f"Phase 3 critical failure in {environment} - chat is broken") from e
+        else:
+            # In development, log but continue for debugging
+            logger.warning(f"Continuing with broken chat in {environment} after Phase 3 failure - FOR DEBUGGING ONLY")
     
     # CRITICAL: Set startup_complete flag for health endpoint
     app.state.startup_complete = True

@@ -25,7 +25,7 @@ from typing import Dict, Any, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from netra_backend.app.config import get_config
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 
 

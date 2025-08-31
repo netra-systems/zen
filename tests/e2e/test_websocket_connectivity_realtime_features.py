@@ -52,7 +52,7 @@ from websockets.exceptions import ConnectionClosed, InvalidURI, WebSocketExcepti
 
 # Use absolute imports per CLAUDE.md requirements
 from dev_launcher.service_discovery import ServiceDiscovery
-from dev_launcher.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from test_framework.base_e2e_test import BaseE2ETest
 
 logger = logging.getLogger(__name__)

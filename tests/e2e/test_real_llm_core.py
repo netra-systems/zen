@@ -41,7 +41,7 @@ class RealLLMManager:
         
     def _validate_api_key_required(self):
         """Validate that GEMINI_API_KEY is available - FAIL if not set."""
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         env = get_env()
         gemini_key = env.get("GEMINI_API_KEY")
         
@@ -84,7 +84,7 @@ class TestRealLLMCore:
         config = get_config()
         
         # Ensure API keys are populated - FAIL if not available
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         env = get_env()
         gemini_key = env.get("GEMINI_API_KEY")
         
@@ -212,7 +212,7 @@ class TestRealLLMCore:
         """Test BaseSubAgent with real LLM."""
         # Validate API key is available - FAIL if not configured
         from netra_backend.app.config import get_config
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         env = get_env()
         gemini_key = env.get("GEMINI_API_KEY")
         
@@ -372,7 +372,7 @@ class TestBusinessValueValidation:
     async def test_cost_reduction_validation(self):
         """Validate 20-50% cost reduction claims."""
         # Validate API key is available - FAIL if not configured
-        from netra_backend.app.core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         env = get_env()
         gemini_key = env.get("GEMINI_API_KEY")
         

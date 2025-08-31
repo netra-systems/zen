@@ -33,6 +33,134 @@
         <prevention>Eliminate ALL fallback logic in authentication. Require environment-specific secrets: JWT_SECRET_STAGING, JWT_SECRET_PRODUCTION, JWT_SECRET_KEY (dev/test only).</prevention>
     </learning>
     
+    <learning id="docker-excessive-volumes-crash-2025-08-31">
+        <title>Docker Desktop Crash - 33 Named Volumes Root Cause</title>
+        <category>Infrastructure/Docker</category>
+        <keywords>docker, volumes, crash, resources, cleanup, optimization, windows, macos</keywords>
+        <path>docker_excessive_volumes_crash.xml</path>
+        <critical-takeaway>
+            Docker Desktop crashes with 33+ named volumes defined in docker-compose.yml.
+            Root cause: Excessive I/O overhead from volume synchronization.
+            Solution: Maximum 10 volumes total, no code volumes, mandatory resource limits.
+            30GB+ of uncleaned resources (images, build cache) compounds the problem.
+            Run docker_auto_cleanup.py before development sessions.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Development environment crashes, hours of downtime, 30GB disk waste per developer</business-impact>
+        <prevention>Limit to 10 volumes max. No code in volumes. Add resource limits. Run cleanup regularly.</prevention>
+    </learning>
+    
+    <learning id="clickhouse-staging-secret-mapping-2025-08-31">
+        <title>ClickHouse Staging Secret Mapping Critical Fix</title>
+        <category>Deployment/GCP-Secrets</category>
+        <keywords>clickhouse, staging, gcp-secrets, cloud-run, deployment, authentication, secret-manager</keywords>
+        <path>clickhouse_staging_secret_mapping.xml</path>
+        <critical-takeaway>
+            Backend fails in staging when CLICKHOUSE_PASSWORD not mapped from GCP Secret Manager.
+            Root cause: deploy_to_gcp.py creates secret but doesn't map it in --set-secrets.
+            Solution: Add CLICKHOUSE_PASSWORD=clickhouse-default-password-staging:latest to backend deployment.
+            Validation: Always verify secret creation AND mapping are both configured.
+            Prevention: Centralize secret configuration to avoid creation/mapping mismatch.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Entire staging environment non-functional, blocking all testing workflows</business-impact>
+        <prevention>Validate all secrets in setup_secrets() are mapped in --set-secrets. Use verify_clickhouse_fix.py before deployment.</prevention>
+    </learning>
+    
+    <learning id="redis-vpc-connector-requirement-2025-08-31">
+        <title>VPC Connector Required for Redis/Cloud SQL Access in Cloud Run</title>
+        <category>Infrastructure/Networking</category>
+        <keywords>vpc, connector, redis, cloud-sql, cloud-run, networking, staging, deployment, private-network</keywords>
+        <path>redis_vpc_connector_requirement.xml</path>
+        <critical-takeaway>
+            Cloud Run services CANNOT access Redis, Cloud SQL, or other private VPC resources without a VPC connector.
+            This is mandatory - services will fail at startup with "Redis ping timeout" errors.
+            Deployment scripts MUST include --vpc-connector flag for all services needing database/cache access.
+            Environment validator must check actual POSTGRES_* variables, not constructed DATABASE_URL.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Complete service failure, chat functionality broken, 90% of platform value lost</business-impact>
+        <prevention>Always include --vpc-connector in deployment. Verify connector exists with gcloud compute networks vpc-access connectors list. Test Redis connectivity post-deployment.</prevention>
+    </learning>
+    
+    <learning id="deterministic-startup-critical-2025-08-31">
+        <title>Deterministic Startup - Critical Path for Chat</title>
+        <category>Startup Architecture</category>
+        <keywords>startup, deterministic, critical-path, chat, websocket, agent, graceful-degradation, fail-fast</keywords>
+        <path>deterministic_startup_critical.xml</path>
+        <critical-takeaway>
+            Graceful degradation for critical services is an anti-pattern that creates unpredictable failures.
+            Chat delivers 90% of value and MUST be on the critical path with no fallbacks.
+            Setting critical services to None is NEVER acceptable - fail fast instead.
+            Found and fixed 25+ violations where startup could succeed with broken chat.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Chat completely broken while service appears healthy, 90% of platform value lost</business-impact>
+        <prevention>Use deterministic StartupOrchestrator with strict phases. No conditional paths for critical services. No setting services to None. Fail immediately if any chat component cannot initialize.</prevention>
+    </learning>
+    
+    <learning id="auth-state-race-condition-2025-08-31">
+        <title>Authentication State Race Condition During Initialization</title>
+        <category>Frontend Authentication</category>
+        <keywords>auth, race condition, state management, react, frontend, token, user, initialization</keywords>
+        <path>auth_state_race_condition_fix.xml</path>
+        <critical-takeaway>
+            React setState is asynchronous - never assume state has updated immediately after calling setState.
+            Auth state monitoring must use tracked actual values, not React state values during initialization.
+            hasToken=true but hasUser=false breaks chat functionality (90% of platform value).
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Complete chat failure, users appear logged out despite valid tokens, broken user experience</business-impact>
+        <prevention>Track actual values being set in local variables during state updates. Use these tracked values for validation/monitoring instead of React state. Consider useReducer for atomic multi-state updates.</prevention>
+    </learning>
+    
+    <learning id="supervisor-initialization-dependency-fix-2025-08-30">
+        <title>Supervisor Agent Initialization Dependency Fix</title>
+        <category>Startup Dependencies</category>
+        <keywords>supervisor, dependencies, initialization, llm_manager, startup, agent_supervisor, auth_service</keywords>
+        <path>supervisor_initialization_dependency_fix.xml</path>
+        <critical-takeaway>
+            The agent_supervisor component requires explicit dependency on auth_service for llm_manager.
+            Missing dependency declarations cause initialization failures and race conditions.
+            StartupManager dependencies must include ALL required app.state attributes, not just direct ones.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Complete agent system failure, chat unavailable, WebSocket communication broken</business-impact>
+        <prevention>Always declare ALL dependencies explicitly in StartupManager. Document required app.state attributes. Add dependency validation before component creation.</prevention>
+    </learning>
+    
+    <learning id="docker-compose-restart-issues-2025-08-31">
+        <title>Docker Compose Service Restart Issues and Resolution</title>
+        <category>Docker Infrastructure</category>
+        <keywords>docker, docker-compose, restart, crash, exit code 255, override, ports, multi-line commands</keywords>
+        <path>docker_compose_restart_issues.xml</path>
+        <critical-takeaway>
+            Docker Compose override files can cause configuration conflicts and service crashes.
+            Multi-line commands must use proper YAML syntax without backslash continuations.
+            Port configurations must be consistent between environment variables and actual bindings.
+            Removing unnecessary override files simplifies configuration and improves stability.
+        </critical-takeaway>
+        <severity>HIGH</severity>
+        <business-impact>Development environment instability, reduced developer productivity, service availability issues</business-impact>
+        <prevention>Avoid docker-compose.override.yml unless necessary. Use proper YAML block syntax for multi-line commands. Verify port consistency. Test service restarts after configuration changes.</prevention>
+    </learning>
+    
+    <learning id="auth-race-conditions-chat-initialization-2025-08-31">
+        <title>Critical Auth Race Conditions and Chat Initialization Failure</title>
+        <category>Authentication</category>
+        <keywords>auth, race condition, chat, initialization, localStorage, jwt, token, user state, AuthGuard, MainChat</keywords>
+        <path>auth_race_conditions_critical.xml</path>
+        <critical-takeaway>
+            CHAT IS KING - 90% of value delivery. Auth context had race condition where tokens in localStorage
+            were not decoded to set user state when storedToken === currentToken. Always decode JWT tokens
+            unconditionally to ensure user state initialization. Test page refresh scenarios, not just fresh logins.
+            Never assume state correlation (token presence ≠ user state).
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Complete chat interface failure for authenticated users, blocking 90% of platform value delivery</business-impact>
+        <prevention>Always decode tokens regardless of state. Add comprehensive auth state validation. Monitor for token/user state mismatches. Test page refresh with existing auth.</prevention>
+    </learning>
+    
     <learning id="configuration-hardening-patterns-no-fallbacks-2025-08-30">
         <title>Configuration Hardening: Eliminate Dangerous Fallback Patterns</title>
         <category>Security Configuration</category>
@@ -102,6 +230,14 @@
             <critical-takeaway>All sub-agents MUST emit 5 critical events: agent_started, agent_thinking, tool_executing, tool_completed, agent_completed for proper UX (websocket_subagent_enhancement_patterns.xml).</critical-takeaway>
             <critical-takeaway>Thread ID extraction in tool execution must check chat_thread_id > thread_id > run_id to match WebSocket connections (websocket_subagent_enhancement_patterns.xml).</critical-takeaway>
             <critical-takeaway>Sub-agents must support both modern (BaseExecutionInterface) and legacy execution patterns with WebSocket events (websocket_subagent_enhancement_patterns.xml).</critical-takeaway>
+        </category>
+        
+        <category name="Staging/E2E-Comprehensive" path="SPEC/learnings/staging_e2e_comprehensive_implementation.xml" keywords="Staging, E2E Testing, WebSocket, OAuth Simulation, Cloud Run, Chat Validation, Auth Client, WebSocket Client, User Journeys">
+            <critical-takeaway>Complete E2E test suite for staging with dedicated clients for Auth, WebSocket, and API - no local dependencies (staging_e2e_comprehensive_implementation.xml).</critical-takeaway>
+            <critical-takeaway>OAUTH SIMULATION IS OAUTH SIMULATION - creates valid user sessions as if users completed Google OAuth, NOT a security bypass (staging_e2e_comprehensive_implementation.xml).</critical-takeaway>
+            <critical-takeaway>WebSocket event tracking validates 90% of platform value (Chat functionality) in production-like environment (staging_e2e_comprehensive_implementation.xml).</critical-takeaway>
+            <critical-takeaway>Proper error handling for Cloud Run cold starts with 30s API timeouts and 60s WebSocket timeouts (staging_e2e_comprehensive_implementation.xml).</critical-takeaway>
+            <critical-takeaway>Run tests/run_staging_tests.py with E2E_OAUTH_SIMULATION_KEY for comprehensive staging validation before production deployment (staging_e2e_comprehensive_implementation.xml).</critical-takeaway>
         </category>
         
         <category name="WebSocket/AgentLifecycle" path="SPEC/learnings/agent_manager_lifecycle_events.xml" keywords="Agent Manager, WebSocket, Lifecycle Events, Agent Registration, Agent Failure, Agent Cancellation, Metrics Updates, Real-time Monitoring, System Observability">
@@ -513,7 +649,7 @@
         </category>
         
         <category name="3-Tier Persistence Architecture" path="SPEC/3tier_persistence_architecture.xml" keywords="3-Tier, Three-Tier, Persistence, Redis, PostgreSQL, ClickHouse, Failover, Enterprise, Disaster Recovery, State Management">
-            <critical-takeaway>CRITICAL: 3-tier persistence architecture provides enterprise-grade reliability with Redis → PostgreSQL → ClickHouse failover chain.</critical-takeaway>
+            <critical-takeaway>CRITICAL: 3-tier persistence architecture provides enterprise-grade reliability with Redis to PostgreSQL to ClickHouse failover chain.</critical-takeaway>
             <critical-takeaway>Redis PRIMARY tier must maintain sub-100ms performance for active agent states with version tracking and TTL management.</critical-takeaway>
             <critical-takeaway>PostgreSQL checkpoints required for CRITICAL checkpoint types to ensure disaster recovery capability.</critical-takeaway>
             <critical-takeaway>ClickHouse migration scheduled automatically for completed runs to enable cost optimization analytics.</critical-takeaway>
@@ -656,7 +792,7 @@
         
         <category name="WebSocket Docker Fixes [RESOLVED]" path="SPEC/learnings/websocket_docker_fixes.xml" keywords="WebSocket, Docker, Development, Authentication Bypass, CORS, Container Networking, Bridge Network, Development Environment">
             <critical-takeaway>RESOLVED 2025-08-27: WebSocket Docker connectivity FIXED - development authentication bypass and CORS configuration implemented.</critical-takeaway>
-            <critical-takeaway>CRITICAL: Set ALLOW_DEV_AUTH_BYPASS=true and WEBSOCKET_AUTH_BYPASS=true for Docker development environment.</critical-takeaway>
+            <critical-takeaway>CRITICAL: Set ALLOW_DEV_OAUTH_SIMULATION=true and WEBSOCKET_AUTH_BYPASS=true for Docker development environment.</critical-takeaway>
             <critical-takeaway>Authentication bypass MUST be environment-aware - only enabled when ENVIRONMENT=development with multiple safeguards.</critical-takeaway>
             <critical-takeaway>CORS configuration enhanced with Docker service names (frontend:3000, backend:8000, auth:8081) and container names (netra-frontend, netra-backend, netra-auth).</critical-takeaway>
             <critical-takeaway>Docker bridge network IP ranges (172.17.0.1, 172.18.0.1, etc.) added to development CORS origins for container networking.</critical-takeaway>
@@ -760,6 +896,13 @@
         <category name="CORS/Dynamic Ports" path="SPEC/learnings/cors_dynamic_ports.xml" keywords="CORS, Dynamic Ports, Localhost, Development">
             <critical-takeaway>CRITICAL: CORS configuration MUST support dynamic ports in development. Pattern matching for localhost with ANY port must be checked FIRST.</critical-takeaway>
             <critical-takeaway>Use DynamicCORSMiddleware when CORS_ORIGINS=* to handle credentials properly (RFC 6454).</critical-takeaway>
+        </category>
+
+        <category name="Staging Tests Definition" path="SPEC/staging_tests_definition.xml" keywords="staging, environment, testing, GCP, Docker Compose, naming conventions, test boundaries">
+            <critical-takeaway>CRITICAL: "Staging" ALWAYS means GCP Cloud Run deployed environment, NEVER Docker Compose.</critical-takeaway>
+            <critical-takeaway>Docker Compose is for local development only - use test_docker_*, test_local_*, test_integration_* naming.</critical-takeaway>
+            <critical-takeaway>Staging tests must use ENVIRONMENT=staging and test real GCP URLs, not localhost.</critical-takeaway>
+            <critical-takeaway>Environment confusion leads to false confidence causing $50K+ MRR loss from production incidents.</critical-takeaway>
         </category>
 
         <category name="Testing" path="SPEC/learnings/testing.xml" keywords="TDD, Feature Flags, Pytest, Jest, Test Discovery, Test Runner, Environment Testing, E2E Tests, Resource Cleanup, AsyncMock, Test Tracking, Test Dashboard, Flaky Tests">
@@ -902,9 +1045,9 @@
             <critical-takeaway context="Initialization">Use hasMountedRef pattern to prevent multiple initialization calls in auth context (frontend_initialization_patterns.xml).</critical-takeaway>
         </category>
         
-        <category name="Frontend Loading States & UX" path="SPEC/learnings/frontend_loading_states.xml" keywords="Loading, Spinner, Skeleton, UX, UI, User Experience, Initialization, Bootstrap, Auth Loading, Dev Experience">
+        <category name="Frontend Loading States &amp; UX" path="SPEC/learnings/frontend_loading_states.xml" keywords="Loading, Spinner, Skeleton, UX, UI, User Experience, Initialization, Bootstrap, Auth Loading, Dev Experience">
             <critical-takeaway>MANDATORY: Test ALL loading/init changes with __tests__/auth/dev-auto-login.test.tsx - breaking auto-login severely impacts dev productivity.</critical-takeaway>
-            <critical-takeaway>Loading states hierarchy: AuthProvider Loading → Token Processing → Dev Auto-Login - each phase has specific requirements.</critical-takeaway>
+            <critical-takeaway>Loading states hierarchy: AuthProvider Loading to Token Processing to Dev Auto-Login - each phase has specific requirements.</critical-takeaway>
             <critical-takeaway>Never block UI completely for >3 seconds - use progressive enhancement and skeleton screens.</critical-takeaway>
             <critical-takeaway>Auth context token processing MUST handle existing tokens correctly or dev auto-login breaks on page refresh.</critical-takeaway>
             <critical-takeaway>Dev auto-login requires 5+ retries with exponential backoff to handle backend startup delays.</critical-takeaway>
@@ -1164,7 +1307,7 @@
             <critical-takeaway>NEVER import logger directly in configuration modules - use lazy initialization to prevent circular dependencies.</critical-takeaway>
             <critical-takeaway>Always provide print fallbacks for logging during bootstrap phase when logger may not be available.</critical-takeaway>
             <critical-takeaway>Check loading flags (e.g., _loading) to prevent recursive initialization between interdependent systems.</critical-takeaway>
-            <critical-takeaway>Safe logging pattern: Try logger → fallback to print → handle all exceptions with print.</critical-takeaway>
+            <critical-takeaway>Safe logging pattern: Try logger, fallback to print, handle all exceptions with print.</critical-takeaway>
             <critical-takeaway>Test initialization order in staging-like environments to catch circular dependencies early.</critical-takeaway>
         </category>
 
@@ -1393,7 +1536,7 @@
         </category>
         
         <category name="Frontend Port Conflict Resolution" path="SPEC/learnings/frontend_port_conflict_resolution.xml" keywords="Frontend, Port 3000, Port Conflict, Dev Launcher, Fallback, Process Detection, Windows, Race Condition">
-            <critical-takeaway>COMPREHENSIVE FALLBACK STRATEGY: Preferred port → Original range → Extended service range → OS allocation → Emergency range</critical-takeaway>
+            <critical-takeaway>COMPREHENSIVE FALLBACK STRATEGY: Preferred port to Original range to Extended service range to OS allocation to Emergency range</critical-takeaway>
             <critical-takeaway>PROCESS-AWARE DIAGNOSTICS: Identify which process occupies conflicting ports using netstat/lsof for actionable troubleshooting</critical-takeaway>
             <critical-takeaway>INTERFACE CONSISTENCY: Always use 0.0.0.0 for both port checking and binding to prevent Windows race conditions</critical-takeaway>
             <critical-takeaway>SERVICE-SPECIFIC RANGES: Frontend (3000-3099), Backend (8000-8099), Auth (8080-8199) for intelligent fallback</critical-takeaway>
@@ -1475,7 +1618,7 @@
             <critical-takeaway>REDIS_FALLBACK_ENABLED=true in staging masks infrastructure issues - should be false to catch Redis provisioning gaps.</critical-takeaway>
             <critical-takeaway>Staging must enforce production-like strict validation - development fallbacks create dangerous staging/production drift.</critical-takeaway>
             <critical-takeaway>Service health endpoints should return 503 when external dependencies unavailable - health != operational capability.</critical-takeaway>
-            <critical-takeaway>Multiple configuration failures compound exponentially - missing env vars → wrong defaults → connection failures → service degradation.</critical-takeaway>
+            <critical-takeaway>Multiple configuration failures compound exponentially - missing env vars to wrong defaults to connection failures to service degradation.</critical-takeaway>
             <critical-takeaway>External services must be required in staging, not optional - validates infrastructure provisioning for production readiness.</critical-takeaway>
             <critical-takeaway>Silent fallbacks and degraded mode operation in staging hide critical infrastructure issues that break production.</critical-takeaway>
             <critical-takeaway>33 comprehensive failing tests across 4 test files provide complete validation of staging backend service infrastructure.</critical-takeaway>
@@ -1950,7 +2093,7 @@
             <critical-takeaway>Authentication and rate limiting bypasses MUST only exist in test-only helper modules, never in production code</critical-takeaway>
             <critical-takeaway>Use netra_backend/tests/helpers/auth_test_helper.py for test authentication, not production auth.py</critical-takeaway>
             <critical-takeaway>Run test_env_validation.py to verify environment configurations before deployment</critical-takeaway>
-            <critical-takeaway>Forbidden variables list: TESTING, E2E_TESTING, AUTH_FAST_TEST_MODE, PYTEST_CURRENT_TEST, ALLOW_DEV_AUTH_BYPASS, WEBSOCKET_AUTH_BYPASS</critical-takeaway>
+            <critical-takeaway>Forbidden variables list: TESTING, E2E_TESTING, AUTH_FAST_TEST_MODE, PYTEST_CURRENT_TEST, ALLOW_DEV_OAUTH_SIMULATION, WEBSOCKET_AUTH_BYPASS</critical-takeaway>
             <critical-takeaway>All secrets in staging/production MUST be loaded from Google Secrets Manager, never hardcoded</critical-takeaway>
             <critical-takeaway>Use .env.staging.example as template - actual .env.staging should never contain localhost or test flags</critical-takeaway>
         </category>
@@ -1968,4 +2111,20 @@
             <critical-takeaway>Message input changed from input element to textarea within [data-testid="message-input"] wrapper</critical-takeaway>
         </category>
     </testing_methodology>
+    
+    <learning id="frontend-api-url-configuration-2025-08-31">
+        <title>Frontend API URL Configuration Issue</title>
+        <category>Configuration</category>
+        <keywords>frontend, api, url, staging, production, domain, agent, endpoints, 404</keywords>
+        <path>frontend_api_url_configuration.xml</path>
+        <critical-takeaway>
+            Frontend MUST use absolute URLs with backend API domain for all API calls.
+            Relative URLs like /api/* resolve to frontend domain causing 404 errors.
+            Always use getUnifiedApiConfig() to get correct API URL.
+            Test in staging to catch domain-related issues early.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Complete agent functionality failure, broken chat in staging/production, poor user experience</business-impact>
+        <prevention>NEVER use relative URLs in frontend API calls. Always import and use getUnifiedApiConfig(). Test API calls in staging environment.</prevention>
+    </learning>
 </specification>

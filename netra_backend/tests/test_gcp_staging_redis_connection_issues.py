@@ -26,7 +26,7 @@ import redis.asyncio as redis
 from redis.exceptions import ConnectionError, AuthenticationError, TimeoutError
 
 from netra_backend.app.config import get_config
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestRedisConnectionIssues:

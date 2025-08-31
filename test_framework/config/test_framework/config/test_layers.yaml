@@ -1,0 +1,195 @@
+metadata:
+  version: 1.0.0
+  description: Auto-generated layer configuration
+  created_at: '2025-08-30T23:09:02.531475'
+  config_schema_version: '1.0'
+layers:
+  fast_feedback:
+    name: Fast Feedback
+    description: Quick validation tests for immediate developer feedback
+    priority: 1
+    execution_order: 1
+    max_duration_minutes: 2
+    execution_mode: sequential
+    fail_fast: true
+    background_execution: false
+    resource_limits:
+      max_memory_mb: 512
+      max_cpu_percent: 50
+      max_parallel_instances: 2
+    categories:
+    - name: smoke
+      timeout_seconds: 60
+      max_parallel_instances: 2
+      priority_order: 1
+    - name: unit
+      timeout_seconds: 120
+      max_parallel_instances: 4
+      priority_order: 2
+    dependencies: []
+    conflicts: []
+    required_services: []
+    success_criteria:
+      min_pass_rate: 0.95
+      max_failures: 5
+      critical_tests_must_pass: true
+      allow_partial_success: false
+    llm_requirements:
+      mode: mock
+      timeout_seconds: 60
+      fallback_to_mock: true
+    environment_overrides: {}
+  core_integration:
+    name: Core Integration
+    description: Database, API, and core service integration tests
+    priority: 2
+    execution_order: 2
+    max_duration_minutes: 10
+    execution_mode: parallel
+    fail_fast: false
+    background_execution: false
+    resource_limits:
+      max_memory_mb: 1024
+      max_cpu_percent: 70
+      max_parallel_instances: 4
+    categories:
+    - name: database
+      timeout_seconds: 300
+      max_parallel_instances: 2
+      priority_order: 1
+    - name: api
+      timeout_seconds: 300
+      max_parallel_instances: 3
+      priority_order: 2
+    - name: websocket
+      timeout_seconds: 300
+      max_parallel_instances: 2
+      priority_order: 3
+    - name: integration
+      timeout_seconds: 600
+      max_parallel_instances: 2
+      priority_order: 4
+    dependencies:
+    - fast_feedback
+    conflicts: []
+    required_services:
+    - backend_service
+    - postgresql
+    - redis
+    success_criteria:
+      min_pass_rate: 0.95
+      max_failures: 5
+      critical_tests_must_pass: true
+      allow_partial_success: false
+    llm_requirements:
+      mode: mock
+      timeout_seconds: 60
+      fallback_to_mock: true
+    environment_overrides: {}
+  service_integration:
+    name: Service Integration
+    description: Backend integration, agent workflows, and cross-service tests
+    priority: 3
+    execution_order: 3
+    max_duration_minutes: 20
+    execution_mode: hybrid
+    fail_fast: false
+    background_execution: false
+    resource_limits:
+      max_memory_mb: 2048
+      max_cpu_percent: 80
+      max_parallel_instances: 3
+    categories:
+    - name: agent
+      timeout_seconds: 600
+      max_parallel_instances: 2
+      priority_order: 1
+    - name: e2e_critical
+      timeout_seconds: 300
+      max_parallel_instances: 2
+      priority_order: 2
+    - name: frontend
+      timeout_seconds: 300
+      max_parallel_instances: 3
+      priority_order: 3
+    dependencies:
+    - core_integration
+    conflicts:
+    - performance
+    - cypress
+    required_services:
+    - auth_service
+    - postgresql
+    - backend_service
+    - redis
+    success_criteria:
+      min_pass_rate: 0.95
+      max_failures: 5
+      critical_tests_must_pass: true
+      allow_partial_success: false
+    llm_requirements:
+      mode: real
+      timeout_seconds: 60
+      fallback_to_mock: false
+    environment_overrides: {}
+  e2e_performance:
+    name: E2E & Performance
+    description: Full end-to-end tests and performance validation
+    priority: 4
+    execution_order: 4
+    max_duration_minutes: 60
+    execution_mode: sequential
+    fail_fast: false
+    background_execution: true
+    resource_limits:
+      max_memory_mb: 4096
+      max_cpu_percent: 90
+      max_parallel_instances: 1
+    categories:
+    - name: cypress
+      timeout_seconds: 1800
+      max_parallel_instances: 1
+      priority_order: 1
+    - name: e2e
+      timeout_seconds: 1800
+      max_parallel_instances: 1
+      priority_order: 2
+    - name: performance
+      timeout_seconds: 1800
+      max_parallel_instances: 1
+      priority_order: 3
+    dependencies:
+    - service_integration
+    conflicts:
+    - core_integration
+    - fast_feedback
+    required_services:
+    - redis
+    - auth_service
+    - postgresql
+    - frontend_service
+    - backend_service
+    success_criteria:
+      min_pass_rate: 0.85
+      max_failures: 10
+      critical_tests_must_pass: true
+      allow_partial_success: true
+    llm_requirements:
+      mode: real
+      timeout_seconds: 120
+      fallback_to_mock: false
+    environment_overrides: {}
+execution_config:
+  layer_execution_mode: waterfall_with_background
+  global_timeout_minutes: 90
+  layer_startup_timeout_seconds: 30
+  inter_layer_delay_seconds: 5
+  max_global_parallel_tests: 8
+  max_memory_usage_mb: 6144
+  max_cpu_usage_percent: 90
+  resource_conflict_resolution: priority_based
+  background_execution:
+    enabled: true
+    max_background_layers: 1
+    background_layers: []
+service_dependencies: {}

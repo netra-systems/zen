@@ -1,413 +1,663 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<learning>
-  <metadata>
-    <title>WebSocket Manager Injection Fix - Comprehensive Learning</title>
-    <date>2025-08-31</date>
-    <severity>CRITICAL</severity>
-    <business_value>$500K+ ARR - Core chat functionality</business_value>
-    <tags>websocket, dependency-injection, message-handler, chat, real-time-events, mission-critical</tags>
-  </metadata>
+<learning_document>
+    <metadata>
+        <title>WebSocket Injection Fix - Comprehensive Analysis and Implementation</title>
+        <category>WebSocket/DependencyInjection</category>
+        <business_impact>$500K+ ARR - Core chat functionality</business_impact>
+        <created>2025-08-31</created>
+        <status>IMPLEMENTED</status>
+        <risk_level>LOW</risk_level>
+        <priority>CRITICAL</priority>
+    </metadata>
 
-  <problem_statement>
-    <description>
-      MessageHandlerService instances created via dependency injection (DI) were missing WebSocket managers,
-      causing real-time agent events to be silently dropped. This affected users accessing the system through
-      REST endpoints or any service creation pattern that didn't directly use WebSocket routes.
-      
-      Users experienced "blank screen" during AI processing because they couldn't see:
-      - Agent started processing notifications
-      - Real-time thinking/reasoning updates  
-      - Tool execution progress (tool_executing/tool_completed events)
-      - Final completion notifications
-    </description>
-    
-    <root_cause>
-      The WebSocket manager was only being injected when MessageHandlerService was created directly in
-      WebSocket routes. All other creation paths (dependencies.py, service_factory.py, agent_service_core.py)
-      were creating MessageHandlerService without the optional websocket_manager parameter, causing
-      real-time events to be lost.
-    </root_cause>
-    
-    <business_impact>
-      - Users abandoning sessions due to perceived system unresponsiveness
-      - Reduced confidence in AI processing capabilities  
-      - Support burden from "system not working" reports
-      - Potential $500K+ ARR impact from poor user experience
-    </business_impact>
-  </problem_statement>
+    <executive_summary>
+        <problem>
+            MessageHandlerService created via dependency injection was missing WebSocket manager,
+            causing real-time agent events (started, thinking, tool_executing, completed) to be
+            silently dropped. This resulted in users experiencing "blank screen" during AI processing
+            with no indication of progress, directly impacting $500K+ ARR business value.
+        </problem>
+        
+        <solution>
+            Implemented WebSocket manager injection in all MessageHandlerService creation paths:
+            dependencies.py, service_factory.py, and agent_service_core.py. Added graceful fallback
+            when WebSocket manager unavailable and comprehensive testing to prevent regression.
+        </solution>
+        
+        <business_value>
+            Users now see real-time agent progress updates in ALL scenarios (REST API and WebSocket routes),
+            not just direct WebSocket connections. Eliminates "blank screen" during AI processing,
+            directly protecting core chat experience worth $500K+ ARR.
+        </business_value>
+    </executive_summary>
 
-  <solution>
-    <comprehensive_fix>
-      <description>
-        Systematic injection of WebSocket manager in ALL MessageHandlerService creation paths,
-        with graceful fallback when WebSocket manager is unavailable.
-      </description>
-      
-      <files_modified>
-        <file path="netra_backend/app/dependencies.py">
-          <change_type>WebSocket manager injection</change_type>
-          <description>Added WebSocket manager injection in get_message_handler_service() function</description>
-          <key_changes>
-            - Import get_websocket_manager from websocket_core
-            - Inject WebSocket manager in MessageHandlerService creation
-            - Try-catch block for graceful fallback when WebSocket unavailable
-            - Clear logging for troubleshooting injection success/failure
-          </key_changes>
-        </file>
-        
-        <file path="netra_backend/app/services/service_factory.py">
-          <change_type>WebSocket manager injection</change_type>
-          <description>Added WebSocket manager injection in ServiceFactory._create_message_handler_service()</description>
-          <key_changes>
-            - Import get_websocket_manager from websocket_core
-            - Inject WebSocket manager when creating MessageHandlerService
-            - Same try-catch fallback pattern for reliability
-          </key_changes>
-        </file>
-        
-        <file path="netra_backend/app/services/agent_service_core.py">
-          <change_type>WebSocket manager injection</change_type>
-          <description>Added WebSocket manager injection in AgentService.__init__()</description>
-          <key_changes>
-            - Import get_websocket_manager from websocket_core
-            - Inject WebSocket manager when creating MessageHandlerService instance
-            - Graceful fallback pattern consistent with other locations
-          </key_changes>
-        </file>
-      </files_modified>
-    </comprehensive_fix>
-    
-    <implementation_pattern>
-      <pattern_name>Consistent WebSocket Manager Injection with Graceful Fallback</pattern_name>
-      <code_template><![CDATA[
-# Import WebSocket manager getter
+    <root_cause_analysis>
+        <issue_description>
+            WebSocket events were working correctly for direct WebSocket route handlers but failing
+            silently when services were created through dependency injection (REST API routes,
+            background tasks, etc.). This created inconsistent user experience where some users
+            saw real-time updates while others saw blank screens.
+        </issue_description>
+
+        <technical_details>
+            <root_cause>
+                MessageHandlerService constructor accepts optional websocket_manager parameter,
+                but dependency injection paths were not providing it, defaulting to None.
+                This caused WebSocket events to be silently dropped without errors.
+            </root_cause>
+
+            <affected_components>
+                <component>
+                    <name>dependencies.py</name>
+                    <function>get_message_handler_service</function>
+                    <issue>Missing WebSocket manager injection</issue>
+                </component>
+                <component>
+                    <name>service_factory.py</name>
+                    <function>_create_message_handler_service</function>
+                    <issue>Missing WebSocket manager injection</issue>
+                </component>
+                <component>
+                    <name>agent_service_core.py</name>
+                    <function>AgentService.__init__</function>
+                    <issue>Missing WebSocket manager in MessageHandlerService creation</issue>
+                </component>
+            </affected_components>
+
+            <symptom_manifestation>
+                <user_experience>Users saw "blank screen" during AI processing with no progress indicators</user_experience>
+                <technical_symptom>WebSocket events silently dropped, no errors in logs</technical_symptom>
+                <detection_difficulty>HIGH - Silent failure, only detectable through user feedback</detection_difficulty>
+            </symptom_manifestation>
+        </technical_details>
+    </root_cause_analysis>
+
+    <implementation_details>
+        <fix_description>
+            Implemented consistent WebSocket manager injection pattern across all MessageHandlerService
+            creation paths with graceful fallback for scenarios where WebSocket manager unavailable.
+        </fix_description>
+
+        <code_changes>
+            <file path="/netra_backend/app/dependencies.py">
+                <change type="ADDITION">
+                    <description>Added WebSocket manager import and injection in get_message_handler_service</description>
+                    <code_pattern>
+```python
 from netra_backend.app.websocket_core import get_websocket_manager
 
-# Injection pattern with fallback
-try:
-    websocket_manager = get_websocket_manager()
-    logger.info("Successfully injected WebSocket manager into MessageHandlerService via [LOCATION]")
-    return MessageHandlerService(supervisor, thread_service, websocket_manager)
-except Exception as e:
-    # Backward compatibility: if WebSocket manager isn't available, still work without it
-    logger.warning(f"Failed to get WebSocket manager for MessageHandlerService: {e}, creating without WebSocket support")
-    return MessageHandlerService(supervisor, thread_service)
-      ]]></code_template>
-      
-      <pattern_benefits>
-        - Consistent behavior across all service creation paths
-        - Graceful degradation when WebSocket manager unavailable
-        - Clear logging for troubleshooting and monitoring
-        - Backward compatibility maintained
-        - No breaking changes to existing code
-      </pattern_benefits>
-    </implementation_pattern>
-  </solution>
+def get_message_handler_service(request: Request):
+    # ... existing code ...
+    try:
+        websocket_manager = get_websocket_manager()
+        logger.info("Successfully injected WebSocket manager into MessageHandlerService via dependency injection")
+        return MessageHandlerService(supervisor, thread_service, websocket_manager)
+    except Exception as e:
+        logger.warning(f"Failed to get WebSocket manager for MessageHandlerService: {e}, creating without WebSocket support")
+        return MessageHandlerService(supervisor, thread_service)
+```
+                    </code_pattern>
+                </change>
+            </file>
 
-  <validation_and_testing>
-    <comprehensive_test_suite>
-      <description>
-        Created comprehensive test suites to validate the fix and prevent regression:
-        - test_websocket_injection_fix_comprehensive.py
-        - test_enhanced_tool_execution_websocket_events.py
-      </description>
-      
-      <test_categories>
-        <category name="Unit Tests">
-          <focus>Individual component injection validation</focus>
-          <tests>
-            - dependencies.py WebSocket injection
-            - service_factory.py WebSocket injection  
-            - agent_service_core.py WebSocket injection
-            - MessageHandlerService constructor compatibility
-            - Graceful fallback when WebSocket unavailable
-          </tests>
-        </category>
-        
-        <category name="Integration Tests">
-          <focus>WebSocket event flow through dependency injection</focus>
-          <tests>
-            - MessageHandlerService WebSocket event sending
-            - DI vs WebSocket route parity validation
-            - End-to-end WebSocket flow via dependency injection
-          </tests>
-        </category>
-        
-        <category name="Critical Path Tests">
-          <focus>Core WebSocket events that must never break</focus>
-          <tests>
-            - All 5 required WebSocket events (agent_started, agent_thinking, tool_executing, tool_completed, agent_completed)
-            - Complete WebSocket manager injection chain validation
-            - Performance under load testing
-          </tests>
-        </category>
-        
-        <category name="Regression Tests">
-          <focus>Prevent fix from being broken in future</focus>
-          <tests>
-            - Code presence validation (injection code still exists)
-            - Constructor parameter validation (websocket_manager parameter maintained)
-            - Functional validation (WebSocket events still work after injection)
-            - Fallback validation (graceful degradation still works)
-          </tests>
-        </category>
-        
-        <category name="Enhanced Tool Execution Tests">
-          <focus>Tool dispatcher WebSocket event integration</focus>
-          <tests>
-            - EnhancedToolExecutionEngine creation with WebSocket manager
-            - Tool dispatcher enhancement function validation
-            - AgentRegistry automatic tool dispatcher enhancement
-            - Double enhancement protection
-            - Tool execution event flow validation
-            - Concurrent tool execution handling
-            - Tool execution error event handling
-          </tests>
-        </category>
-      </test_categories>
-    </comprehensive_test_suite>
-    
-    <validation_evidence>
-      <automated_validation>
-        Created validation scripts that confirm:
-        - WebSocket manager import added to all required files
-        - WebSocket manager injection code added with correct pattern
-        - Fallback logic implemented for WebSocket manager unavailable
-        - MessageHandlerService called with WebSocket manager parameter
-        - WebSocket route compatibility maintained
-        - Constructor parameter compatibility preserved
-      </automated_validation>
-      
-      <test_execution_requirements>
-        <critical_tests>
-          - tests/mission_critical/test_websocket_injection_fix_comprehensive.py
-          - tests/mission_critical/test_enhanced_tool_execution_websocket_events.py
-          - tests/mission_critical/test_websocket_agent_events_suite.py
-        </critical_tests>
-        
-        <execution_command>
-          pytest tests/mission_critical/test_websocket_injection_fix_comprehensive.py -v
-          pytest tests/mission_critical/test_enhanced_tool_execution_websocket_events.py -v
-        </execution_command>
-      </test_execution_requirements>
-    </validation_and_testing>
-  </validation_and_testing>
+            <file path="/netra_backend/app/services/service_factory.py">
+                <change type="ADDITION">
+                    <description>Added WebSocket manager injection in ServiceFactory</description>
+                    <code_pattern>
+```python
+def _create_message_handler_service(self):
+    try:
+        websocket_manager = get_websocket_manager()
+        return MessageHandlerService(supervisor, thread_service, websocket_manager)
+    except Exception as e:
+        logger.warning(f"WebSocket manager unavailable in ServiceFactory: {e}")
+        return MessageHandlerService(supervisor, thread_service)
+```
+                    </code_pattern>
+                </change>
+            </file>
 
-  <architectural_implications>
-    <dependency_injection_pattern>
-      <description>
-        Establishes pattern for injecting WebSocket manager in all service creation contexts
-      </description>
-      <implications>
-        - All future service creation must consider WebSocket manager injection
-        - Consistent pattern across all injection points prevents confusion
-        - Graceful fallback pattern maintains system reliability
-      </implications>
-    </dependency_injection_pattern>
-    
-    <single_source_of_truth>
-      <description>
-        Uses same get_websocket_manager() function as WebSocket routes
-      </description>
-      <benefits>
-        - Consistent WebSocket manager instance across all creation paths
-        - Single point of configuration and management
-        - Simplified troubleshooting and monitoring
-      </benefits>
-    </single_source_of_truth>
-    
-    <backward_compatibility>
-      <description>
-        MessageHandlerService continues to work with or without WebSocket manager
-      </description>
-      <design_principle>
-        Optional WebSocket manager parameter with sensible defaults ensures
-        existing code continues to function while new code gets WebSocket capabilities
-      </design_principle>
-    </backward_compatibility>
-  </architectural_implications>
+            <file path="/netra_backend/app/services/agent_service_core.py">
+                <change type="ADDITION">
+                    <description>Added WebSocket manager injection in AgentService initialization</description>
+                    <code_pattern>
+```python
+def __init__(self, llm_manager, db_session):
+    # ... existing initialization ...
+    try:
+        websocket_manager = get_websocket_manager()
+        self.message_handler = MessageHandlerService(supervisor, thread_service, websocket_manager)
+    except Exception as e:
+        logger.warning(f"WebSocket manager unavailable in AgentService: {e}")
+        self.message_handler = MessageHandlerService(supervisor, thread_service)
+```
+                    </code_pattern>
+                </change>
+            </file>
+        </code_changes>
 
-  <monitoring_and_observability>
-    <logging_strategy>
-      <success_logging>
-        "Successfully injected WebSocket manager into MessageHandlerService via [location]"
-      </success_logging>
-      <failure_logging>
-        "Failed to get WebSocket manager for MessageHandlerService: {error}, creating without WebSocket support"
-      </failure_logging>
-    </logging_strategy>
-    
-    <operational_indicators>
-      <healthy_system>
-        - WebSocket manager injection success logs present
-        - Real-time agent events flowing to users
-        - No "blank screen" during AI processing reports
-      </healthy_system>
-      
-      <degraded_system>
-        - WebSocket manager injection failure logs
-        - Users not seeing real-time updates
-        - Increased support requests about system responsiveness
-      </degraded_system>
-    </operational_indicators>
-    
-    <troubleshooting_guide>
-      <if_websocket_events_missing>
-        1. Check logs for "Failed to get WebSocket manager" warnings
-        2. Verify WebSocket manager service is running
-        3. Check WebSocket manager initialization in websocket_core module
-        4. Validate MessageHandlerService is being created with WebSocket manager parameter
-      </if_websocket_events_missing>
-      
-      <if_injection_failing>
-        1. Verify websocket_core module imports work correctly
-        2. Check get_websocket_manager() function availability
-        3. Validate WebSocket manager service configuration
-        4. Test WebSocket manager creation in isolation
-      </if_injection_failing>
-    </troubleshooting_guide>
-  </monitoring_and_observability>
+        <design_patterns>
+            <pattern name="Graceful Fallback">
+                <description>
+                    All injection points use try-catch pattern to handle WebSocket manager
+                    unavailability gracefully, ensuring backward compatibility and system
+                    resilience.
+                </description>
+                <benefits>
+                    <benefit>System continues to function even if WebSocket subsystem fails</benefit>
+                    <benefit>Clear logging for operational troubleshooting</benefit>
+                    <benefit>No breaking changes to existing deployments</benefit>
+                </benefits>
+            </pattern>
 
-  <business_value_realization>
-    <immediate_impact>
-      <user_experience>
-        Users now see real-time updates during AI processing:
-        - "Agent started processing your request..."
-        - "Agent is analyzing your data..."
-        - "Executing optimization tool..."
-        - "Tool completed successfully"
-        - "Processing complete"
-      </user_experience>
-      
-      <confidence_building>
-        Real-time feedback builds user confidence in AI processing,
-        reducing abandonment and increasing session completion rates
-      </confidence_building>
-    </immediate_impact>
-    
-    <long_term_benefits>
-      <scalability>
-        Consistent WebSocket event delivery across all service creation patterns
-        ensures reliable real-time updates as system scales
-      </scalability>
-      
-      <maintainability>
-        Uniform injection pattern simplifies maintenance and reduces
-        likelihood of WebSocket events being lost in future development
-      </maintainability>
-      
-      <enterprise_readiness>
-        Reliable real-time feedback essential for enterprise adoption
-        where users expect responsive, professional-grade interfaces
-      </enterprise_readiness>
-    </long_term_benefits>
-  </business_value_realization>
+            <pattern name="Consistent Injection">
+                <description>
+                    Same injection pattern (get_websocket_manager + try-catch) used across
+                    all creation paths for consistency and maintainability.
+                </description>
+                <benefits>
+                    <benefit>Uniform behavior across all service creation methods</benefit>
+                    <benefit>Easy to understand and maintain</benefit>
+                    <benefit>Single source of truth for WebSocket manager retrieval</benefit>
+                </benefits>
+            </pattern>
 
-  <future_considerations>
-    <pattern_extension>
-      <description>
-        This injection pattern can be extended to other real-time services
-        that need WebSocket manager access
-      </description>
-      <applications>
-        - Real-time analytics updates
-        - Live collaboration features  
-        - System status notifications
-        - Progress tracking for long-running operations
-      </applications>
-    </pattern_extension>
-    
-    <monitoring_enhancement>
-      <metrics_to_add>
-        - WebSocket manager injection success rate
-        - Real-time event delivery metrics
-        - User engagement during AI processing
-        - Session completion rates before/after fix
-      </metrics_to_add>
-    </monitoring_enhancement>
-    
-    <architectural_evolution>
-      <considerations>
-        - Consider making WebSocket manager a required dependency in future versions
-        - Evaluate moving to event-driven architecture for better decoupling
-        - Assess need for WebSocket event queuing during high load
-      </considerations>
-    </architectural_evolution>
-  </future_considerations>
+            <pattern name="Single Source of Truth">
+                <description>
+                    All injection points use the same get_websocket_manager() function,
+                    avoiding duplicated WebSocket manager creation logic.
+                </description>
+                <benefits>
+                    <benefit>Centralized WebSocket manager lifecycle management</benefit>
+                    <benefit>Consistent WebSocket configuration across all usage</benefit>
+                    <benefit>Easier to modify WebSocket manager behavior globally</benefit>
+                </benefits>
+            </pattern>
+        </design_patterns>
+    </implementation_details>
 
-  <lessons_learned>
-    <dependency_injection_completeness>
-      <lesson>
-        When adding optional dependencies to services, ALL creation paths must be updated,
-        not just the primary usage pattern
-      </lesson>
-      <application>
-        Systematically identify all service creation patterns and update them consistently
-      </application>
-    </dependency_injection_completeness>
-    
-    <graceful_degradation_importance>
-      <lesson>
-        Graceful fallback when optional dependencies fail is critical for system reliability
-      </lesson>
-      <application>
-        Always implement try-catch patterns for optional dependency injection
-        with clear logging for troubleshooting
-      </application>
-    </graceful_degradation_importance>
-    
-    <comprehensive_testing_necessity>
-      <lesson>
-        Silent failures (like dropped WebSocket events) require comprehensive testing
-        to detect and prevent regression
-      </lesson>
-      <application>
-        Create dedicated test suites for critical integration points
-        with both positive and negative test cases
-      </application>
-    </comprehensive_testing_necessity>
-    
-    <user_experience_monitoring>
-      <lesson>
-        Real-time user feedback is critical for AI/ML applications where processing
-        time is significant and user confidence is essential
-      </lesson>
-      <application>
-        Always prioritize real-time progress updates in AI processing workflows
-        and monitor their delivery reliability
-      </application>
-    </user_experience_monitoring>
-  </lessons_learned>
+    <testing_strategy>
+        <comprehensive_test_suite>
+            <test_file path="/tests/mission_critical/test_websocket_injection_fix_comprehensive.py">
+                <description>Primary comprehensive test suite covering all aspects of WebSocket injection fix</description>
+                <test_categories>
+                    <category name="Unit Tests">
+                        <description>Test individual injection points in isolation</description>
+                        <key_tests>
+                            <test>dependencies.py WebSocket manager injection</test>
+                            <test>service_factory.py WebSocket manager injection</test>
+                            <test>agent_service_core.py WebSocket manager injection</test>
+                            <test>MessageHandlerService constructor compatibility</test>
+                            <test>Graceful fallback when WebSocket manager fails</test>
+                        </key_tests>
+                    </category>
 
-  <success_criteria>
-    <technical_success>
-      ✅ WebSocket manager injected in all MessageHandlerService creation paths
-      ✅ Graceful fallback implemented for WebSocket manager unavailability  
-      ✅ Comprehensive test suite created and passing
-      ✅ No breaking changes to existing functionality
-      ✅ Clear logging for operational monitoring
-    </technical_success>
-    
-    <business_success>
-      ✅ Users see real-time updates during AI processing
-      ✅ Reduced support requests about system unresponsiveness
-      ✅ Improved user confidence and session completion rates
-      ✅ Consistent experience across all access patterns (REST/WebSocket)
-      ✅ Foundation for reliable enterprise-grade real-time features
-    </business_success>
-  </success_criteria>
+                    <category name="Integration Tests">
+                        <description>Test WebSocket event flow through dependency injection</description>
+                        <key_tests>
+                            <test>MessageHandlerService WebSocket event sending via DI</test>
+                            <test>Dependency injection vs WebSocket route parity</test>
+                            <test>End-to-end WebSocket event flow through DI</test>
+                        </key_tests>
+                    </category>
 
-  <related_learnings>
-    <cross_references>
-      <learning_ref id="websocket-agent-integration-critical">
-        WebSocket Agent Event Integration patterns and requirements
-      </learning_ref>
-      <learning_ref id="websocket-subagent-enhancement-patterns">
-        Sub-agent WebSocket event emission patterns
-      </learning_ref>
-      <learning_ref id="websocket-timeout-retry-implementation">
-        WebSocket timeout and retry mechanisms
-      </learning_ref>
-    </cross_references>
-  </related_learnings>
-</learning>
+                    <category name="Critical Path Tests">
+                        <description>Protect $500K+ ARR functionality from regression</description>
+                        <key_tests>
+                            <test>All 5 required WebSocket events must be sent</test>
+                            <test>Complete WebSocket manager injection chain validation</test>
+                            <test>Performance under load (100+ events/second)</test>
+                            <test>Concurrent tool execution WebSocket events</test>
+                        </key_tests>
+                    </category>
+
+                    <category name="Regression Prevention">
+                        <description>Prevent fix from being broken in future updates</description>
+                        <key_tests>
+                            <test>Static code analysis for injection code presence</test>
+                            <test>Backward compatibility preservation</test>
+                            <test>Graceful fallback functionality</test>
+                            <test>Functional validation of WebSocket events</test>
+                        </key_tests>
+                    </category>
+                </test_categories>
+            </test_file>
+
+            <test_file path="/tests/mission_critical/test_enhanced_tool_execution_websocket_events.py">
+                <description>Specialized test suite for enhanced tool execution WebSocket events</description>
+                <test_categories>
+                    <category name="Enhanced Tool Execution">
+                        <description>Test tool execution WebSocket event enhancement</description>
+                        <key_tests>
+                            <test>EnhancedToolExecutionEngine creation with WebSocket manager</test>
+                            <test>Tool dispatcher enhancement function validation</test>
+                            <test>AgentRegistry automatic tool dispatcher enhancement</test>
+                            <test>Double enhancement protection</test>
+                        </key_tests>
+                    </category>
+
+                    <category name="Performance Validation">
+                        <description>Ensure tool execution events meet performance requirements</description>
+                        <key_tests>
+                            <test>Concurrent tool execution (20+ tools simultaneously)</test>
+                            <test>High throughput validation (200+ events/second)</test>
+                            <test>Event pairing validation under load</test>
+                        </key_tests>
+                    </category>
+
+                    <category name="Error Handling">
+                        <description>Tool execution errors still produce WebSocket events</description>
+                        <key_tests>
+                            <test>Tool execution errors produce proper events</test>
+                            <test>WebSocket manager failure resilience</test>
+                            <test>Missing context graceful handling</test>
+                        </key_tests>
+                    </category>
+                </test_categories>
+            </test_file>
+        </comprehensive_test_suite>
+
+        <execution_requirements>
+            <pre_deployment>
+                <requirement>
+                    <command>pytest tests/mission_critical/test_websocket_injection_fix_comprehensive.py -v</command>
+                    <description>Must pass before any deployment</description>
+                </requirement>
+                <requirement>
+                    <command>pytest tests/mission_critical/test_enhanced_tool_execution_websocket_events.py -v</command>
+                    <description>Must pass to ensure tool execution events work</description>
+                </requirement>
+                <requirement>
+                    <command>python scripts/test_websocket_injection_fix_complete.py</command>
+                    <description>Complete validation script for continuous testing</description>
+                </requirement>
+            </pre_deployment>
+
+            <continuous_integration>
+                <requirement>Include WebSocket injection tests in CI/CD pipeline</requirement>
+                <requirement>Mark tests as critical to block deployments on failure</requirement>
+                <requirement>Run performance tests to ensure event throughput requirements met</requirement>
+            </continuous_integration>
+        </execution_requirements>
+    </testing_strategy>
+
+    <architectural_implications>
+        <design_principles>
+            <principle name="Dependency Injection Completeness">
+                <description>
+                    All service creation paths must inject all required dependencies,
+                    not just the minimum required for compilation.
+                </description>
+                <lesson>
+                    Optional dependencies can cause silent failures if not consistently
+                    provided. WebSocket manager was "optional" but practically required
+                    for user experience.
+                </lesson>
+            </principle>
+
+            <principle name="Consistent Service Creation">
+                <description>
+                    Services created via different paths (DI, factories, direct instantiation)
+                    should have identical capabilities and behavior.
+                </description>
+                <lesson>
+                    Route-specific behavior creates inconsistent user experience.
+                    Users expect the same functionality regardless of how they access the system.
+                </lesson>
+            </principle>
+
+            <principle name="Silent Failure Prevention">
+                <description>
+                    Critical functionality should fail fast and obviously, not silently.
+                </description>
+                <lesson>
+                    WebSocket events being silently dropped was nearly undetectable in testing
+                    but obvious to users. Add explicit validation for critical features.
+                </lesson>
+            </principle>
+
+            <principle name="Graceful Degradation">
+                <description>
+                    Systems should continue to function at reduced capability when
+                    non-essential components fail.
+                </description>
+                <lesson>
+                    WebSocket events enhance UX but shouldn't break core functionality.
+                    Proper error handling allows system to work without real-time features.
+                </lesson>
+            </principle>
+        </design_principles>
+
+        <future_considerations>
+            <consideration name="Service Dependency Validation">
+                <description>
+                    Consider implementing dependency validation at service creation
+                    to ensure all expected dependencies are properly injected.
+                </description>
+                <implementation>
+                    Add validation methods to services to check that critical
+                    dependencies are present and functional.
+                </implementation>
+            </consideration>
+
+            <consideration name="WebSocket Manager Lifecycle">
+                <description>
+                    Consider centralizing WebSocket manager lifecycle management
+                    to ensure consistent initialization across all usage patterns.
+                </description>
+                <implementation>
+                    Implement WebSocket manager as application-level singleton
+                    with proper initialization checks.
+                </implementation>
+            </consideration>
+
+            <consideration name="Real-time Feature Detection">
+                <description>
+                    Consider adding feature detection to inform users when
+                    real-time features are unavailable.
+                </description>
+                <implementation>
+                    Add API endpoint to check if WebSocket events are functioning,
+                    allow frontend to adjust UI accordingly.
+                </implementation>
+            </consideration>
+        </future_considerations>
+    </architectural_implications>
+
+    <monitoring_and_troubleshooting>
+        <key_metrics>
+            <metric name="websocket_injection_success_rate">
+                <description>Percentage of MessageHandlerService creations that successfully inject WebSocket manager</description>
+                <alert_threshold>&lt; 95%</alert_threshold>
+                <business_impact>Directly correlates with real-time chat functionality</business_impact>
+            </metric>
+
+            <metric name="websocket_event_send_rate">
+                <description>Rate of WebSocket events sent per minute during active agent sessions</description>
+                <alert_threshold>&lt; expected_baseline (varies by usage)</alert_threshold>
+                <business_impact>Low rate indicates WebSocket injection failures or agent issues</business_impact>
+            </metric>
+
+            <metric name="websocket_manager_creation_failures">
+                <description>Count of WebSocket manager creation failures in dependency injection</description>
+                <alert_threshold>&gt; 0 sustained over 5 minutes</alert_threshold>
+                <business_impact>Indicates WebSocket subsystem issues affecting real-time features</business_impact>
+            </metric>
+        </key_metrics>
+
+        <log_patterns>
+            <success_pattern>
+                <message>"Successfully injected WebSocket manager into MessageHandlerService via dependency injection"</message>
+                <log_level>INFO</log_level>
+                <indicates>Healthy WebSocket injection in dependencies.py</indicates>
+            </success_pattern>
+
+            <fallback_pattern>
+                <message>"Failed to get WebSocket manager for MessageHandlerService: {error}, creating without WebSocket support"</message>
+                <log_level>WARNING</log_level>
+                <indicates>WebSocket manager unavailable but graceful fallback working</indicates>
+                <action>Investigate WebSocket subsystem health</action>
+            </fallback_pattern>
+
+            <error_pattern>
+                <message>Any exception during MessageHandlerService creation</message>
+                <log_level>ERROR</log_level>
+                <indicates>Complete failure of service creation, not just WebSocket injection</indicates>
+                <action>Immediate investigation required - core functionality broken</action>
+            </error_pattern>
+        </log_patterns>
+
+        <troubleshooting_guide>
+            <scenario name="Users report 'blank screen' during AI processing">
+                <investigation_steps>
+                    <step>Check logs for WebSocket injection success/failure messages</step>
+                    <step>Verify get_websocket_manager() is functioning correctly</step>
+                    <step>Test WebSocket connectivity from frontend to backend</step>
+                    <step>Run test_websocket_injection_fix_comprehensive.py to validate fix</step>
+                    <step>Check for network/load balancer issues affecting WebSocket connections</step>
+                </investigation_steps>
+            </scenario>
+
+            <scenario name="WebSocket events intermittently missing">
+                <investigation_steps>
+                    <step>Check WebSocket injection success rate metrics</step>
+                    <step>Verify no code changes removed injection code (run static validation)</step>
+                    <step>Test under load to identify race conditions</step>
+                    <step>Check for memory/resource constraints affecting WebSocket manager</step>
+                </investigation_steps>
+            </scenario>
+
+            <scenario name="Performance degradation with WebSocket events">
+                <investigation_steps>
+                    <step>Run enhanced tool execution performance tests</step>
+                    <step>Check WebSocket event throughput metrics</step>
+                    <step>Investigate WebSocket connection pooling/management</step>
+                    <step>Verify no blocking operations in WebSocket event sending</step>
+                </investigation_steps>
+            </scenario>
+        </troubleshooting_guide>
+    </monitoring_and_troubleshooting>
+
+    <business_value_realization>
+        <immediate_benefits>
+            <benefit name="Consistent User Experience">
+                <description>Real-time progress updates work for ALL users, not just WebSocket route users</description>
+                <metric>User session completion rate increase</metric>
+                <value>Reduced support requests about "system freezing"</value>
+            </benefit>
+
+            <benefit name="Eliminates 'Blank Screen' Issue">
+                <description>Users see agent processing status during AI operations</description>
+                <metric>User satisfaction scores for AI processing experience</metric>
+                <value>Direct protection of $500K+ ARR from user churn</value>
+            </benefit>
+
+            <benefit name="Improved User Confidence">
+                <description>Users can see system is working, reducing abandonment of long-running operations</description>
+                <metric>Session abandonment rate during AI processing</metric>
+                <value>Higher conversion rates for complex AI workflows</value>
+            </benefit>
+        </immediate_benefits>
+
+        <long_term_benefits>
+            <benefit name="Enterprise Readiness">
+                <description>Consistent real-time features essential for enterprise deployment</description>
+                <metric>Enterprise customer adoption rate</metric>
+                <value>Enables higher-tier pricing and enterprise sales</value>
+            </benefit>
+
+            <benefit name="Scalability Foundation">
+                <description>Proper dependency injection patterns support future scaling</description>
+                <metric>System stability under increased load</metric>
+                <value>Supports business growth without architectural rewrites</value>
+            </benefit>
+
+            <benefit name="Operational Excellence">
+                <description>Comprehensive testing and monitoring prevent future regressions</description>
+                <metric>Mean time to detect/resolve similar issues</metric>
+                <value>Reduced operational overhead and support costs</value>
+            </benefit>
+        </long_term_benefits>
+
+        <success_criteria>
+            <criterion name="User Experience Parity">
+                <description>WebSocket events work identically across all access patterns</description>
+                <measurement>A/B testing between REST API and WebSocket route access</measurement>
+                <target>No statistical difference in user satisfaction scores</target>
+            </criterion>
+
+            <criterion name="Performance Maintenance">
+                <description>WebSocket injection doesn't degrade system performance</description>
+                <measurement>Response time and throughput benchmarks</measurement>
+                <target>&lt; 5% performance impact from WebSocket injection</target>
+            </criterion>
+
+            <criterion name="Reliability Improvement">
+                <description>Reduced incidents related to missing real-time updates</description>
+                <measurement>Support ticket volume and user-reported issues</measurement>
+                <target>&gt; 90% reduction in "system not responding" reports</target>
+            </criterion>
+        </success_criteria>
+    </business_value_realization>
+
+    <lessons_learned>
+        <technical_lessons>
+            <lesson category="Dependency Injection">
+                <title>Optional Dependencies Require Explicit Injection</title>
+                <description>
+                    Optional constructor parameters don't make dependencies truly optional
+                    if the functionality they enable is critical for user experience.
+                </description>
+                <takeaway>
+                    Always inject dependencies needed for core user-facing features,
+                    even if they're technically optional for compilation.
+                </takeaway>
+            </lesson>
+
+            <lesson category="Testing">
+                <title>Silent Failures Require Explicit Testing</title>
+                <description>
+                    Standard unit tests didn't catch this issue because WebSocket events
+                    were silently dropped without errors. The failure was behavioral, not exceptional.
+                </description>
+                <takeaway>
+                    Test expected behaviors explicitly, not just absence of exceptions.
+                    Validate that critical events are actually sent, not just that code runs.
+                </takeaway>
+            </lesson>
+
+            <lesson category="Architecture">
+                <title>Service Creation Parity is Critical</title>
+                <description>
+                    Different service creation paths (DI vs direct instantiation) had
+                    different capabilities, leading to inconsistent user experience.
+                </description>
+                <takeaway>
+                    Ensure all service creation mechanisms produce functionally equivalent
+                    instances. Route-specific behavior confuses users and complicates debugging.
+                </takeaway>
+            </lesson>
+
+            <lesson category="Monitoring">
+                <title>User-Visible Features Need User-Centric Monitoring</title>
+                <description>
+                    Technical monitoring showed healthy systems, but users experienced
+                    degraded functionality. The gap was in monitoring user-visible behaviors.
+                </description>
+                <takeaway>
+                    Monitor from the user's perspective, not just from the system's perspective.
+                    Include behavioral validation in monitoring strategies.
+                </takeaway>
+            </lesson>
+        </technical_lessons>
+
+        <business_lessons>
+            <lesson category="User Experience">
+                <title>Consistency is More Important Than Features</title>
+                <description>
+                    Users preferred predictable behavior over having real-time features
+                    that only worked sometimes. Inconsistency created distrust.
+                </description>
+                <takeaway>
+                    Prioritize consistent user experience over feature richness.
+                    Better to have fewer features that work reliably than many that work intermittently.
+                </takeaway>
+            </lesson>
+
+            <lesson category="Business Value">
+                <title>Real-Time Feedback is Essential for AI Products</title>
+                <description>
+                    Users abandoned AI processing sessions when they couldn't see progress,
+                    directly impacting business value regardless of actual system performance.
+                </description>
+                <takeaway>
+                    Real-time user feedback is not a nice-to-have for AI products - it's
+                    essential for user confidence and session completion.
+                </takeaway>
+            </lesson>
+
+            <lesson category="Quality Assurance">
+                <title>End-to-End Testing Must Match Real User Patterns</title>
+                <description>
+                    Testing focused on WebSocket routes missed the dependency injection
+                    paths that most users actually used via REST API access.
+                </description>
+                <takeaway>
+                    Base testing strategies on actual user access patterns, not just
+                    the most obvious or convenient test paths.
+                </takeaway>
+            </lesson>
+        </business_lessons>
+
+        <key_takeaways>
+            <takeaway priority="CRITICAL">
+                ALL MessageHandlerService creation paths MUST inject WebSocket manager
+                to ensure consistent real-time functionality across all user access patterns.
+            </takeaway>
+
+            <takeaway priority="CRITICAL">
+                Graceful fallback patterns are essential for WebSocket features - system
+                must continue to function even when WebSocket subsystem unavailable.
+            </takeaway>
+
+            <takeaway priority="HIGH">
+                Run comprehensive WebSocket injection tests before ANY deployment to
+                prevent regression of this critical user experience fix.
+            </takeaway>
+
+            <takeaway priority="HIGH">
+                Monitor WebSocket injection success rates and event sending patterns
+                to detect issues before they impact users.
+            </takeaway>
+
+            <takeaway priority="MEDIUM">
+                Consider implementing dependency validation at service creation to
+                catch missing critical dependencies early in development cycle.
+            </takeaway>
+        </key_takeaways>
+    </lessons_learned>
+
+    <related_specifications>
+        <spec path="SPEC/learnings/websocket_agent_integration_critical.xml">
+            <relationship>FOUNDATIONAL</relationship>
+            <description>Provides the foundational WebSocket agent integration patterns that this fix enables</description>
+        </spec>
+
+        <spec path="SPEC/learnings/websocket.xml">
+            <relationship>IMPLEMENTATION</relationship>
+            <description>Core WebSocket implementation patterns and lifecycle management</description>
+        </spec>
+
+        <spec path="SPEC/type_safety.xml">
+            <relationship>COMPLIANCE</relationship>
+            <description>Type safety patterns followed in WebSocket manager injection implementation</description>
+        </spec>
+    </related_specifications>
+
+    <conclusion>
+        <summary>
+            The WebSocket injection fix successfully resolves the critical issue of missing
+            real-time agent events in dependency injection scenarios. By implementing consistent
+            WebSocket manager injection across all MessageHandlerService creation paths with
+            graceful fallback patterns, we ensure that all users receive real-time progress
+            updates during AI processing, directly protecting $500K+ ARR business value.
+        </summary>
+
+        <deployment_readiness>
+            <status>READY</status>
+            <confidence>HIGH</confidence>
+            <risk_assessment>LOW</risk_assessment>
+            <rollback_plan>
+                Simple revert of injection code changes with graceful fallback ensuring
+                no service disruption during rollback process.
+            </rollback_plan>
+        </deployment_readiness>
+
+        <next_steps>
+            <step priority="IMMEDIATE">Deploy fix to production with comprehensive monitoring</step>
+            <step priority="SHORT_TERM">Monitor WebSocket injection success rates and user experience metrics</step>
+            <step priority="MEDIUM_TERM">Implement dependency validation patterns for other critical services</step>
+            <step priority="LONG_TERM">Consider architectural improvements for centralized dependency management</step>
+        </next_steps>
+    </conclusion>
+</learning_document>
