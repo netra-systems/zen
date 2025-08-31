@@ -10,6 +10,7 @@
 
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import { useChatWebSocket } from '@/hooks/useChatWebSocket';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
@@ -28,8 +29,16 @@ import { useWebSocketContext } from '@/providers/WebSocketProvider';
 const mockUseWebSocketContext = useWebSocketContext as jest.MockedFunction<typeof useWebSocketContext>;
 
 describe('useChatWebSocket Hook - Message Processing', () => {
-      setupAntiHang();
-    jest.setTimeout(10000);
+      
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
   const mockUnifiedChatStore = useUnifiedChatStore as jest.MockedFunction<typeof useUnifiedChatStore>;
 
   // Helper: Create mock WebSocket context (≤8 lines)
@@ -73,8 +82,16 @@ describe('useChatWebSocket Hook - Message Processing', () => {
    * Tests basic hook setup and default state
    */
   describe('Hook Initialization', () => {
-        setupAntiHang();
-      jest.setTimeout(10000);
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     // Helper: Setup basic test environment (≤8 lines)
     const setupBasicTest = () => {
       const mockContext = createMockWebSocketContext();
@@ -127,8 +144,16 @@ describe('useChatWebSocket Hook - Message Processing', () => {
    * Tests WebSocket message routing and processing
    */
   describe('Message Processing', () => {
-        setupAntiHang();
-      jest.setTimeout(10000);
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     // Helper: Setup message processing test (≤8 lines)
     const setupMessageTest = (messages: any[]) => {
       const mockContext = createMockWebSocketContext(messages);
@@ -207,8 +232,16 @@ describe('useChatWebSocket Hook - Message Processing', () => {
    * Tests agent state derivation from processing state
    */
   describe('Agent Status Management', () => {
-        setupAntiHang();
-      jest.setTimeout(10000);
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     it('should derive agent status from processing state', () => {
       testIdleStatus();
       testRunningStatus();
@@ -243,8 +276,16 @@ describe('useChatWebSocket Hook - Message Processing', () => {
    * Tests workflow progress derivation from layer data
    */
   describe('Workflow Progress Tracking', () => {
-        setupAntiHang();
-      jest.setTimeout(10000);
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     it('should handle workflow progress update', () => {
       const mockStore = createMockUnifiedStore({
         fastLayerData: { agentName: 'TestAgent', activeTools: ['tool1'] }
@@ -288,8 +329,16 @@ describe('useChatWebSocket Hook - Message Processing', () => {
    * Tests handling of message sequences and re-renders
    */
   describe('Multiple Message Handling', () => {
-        setupAntiHang();
-      jest.setTimeout(10000);
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     it('should handle multiple messages in sequence', () => {
       const messages = [
         createTestMessage('agent_started', {}),
@@ -328,8 +377,16 @@ describe('useChatWebSocket Hook - Message Processing', () => {
    * Tests enhanced mode with metrics and tracking
    */
   describe('Enhanced Mode Features', () => {
-        setupAntiHang();
-      jest.setTimeout(10000);
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     it('should provide enhanced features when enabled', () => {
       const { mockStore } = setupBasicTest();
       const { result } = renderHook(() => useChatWebSocket({ enhanced: true }));
@@ -365,8 +422,16 @@ describe('useChatWebSocket Hook - Message Processing', () => {
    * Tests tool registration and execution compatibility
    */
   describe('Tool Management', () => {
-        setupAntiHang();
-      jest.setTimeout(10000);
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     it('should provide tool management methods', () => {
       const { mockStore } = setupBasicTest();
       const { result } = renderHook(() => useChatWebSocket());
