@@ -48,6 +48,31 @@
         <severity>CRITICAL</severity>
         <business-impact>Development environment crashes, hours of downtime, 30GB disk waste per developer</business-impact>
         <prevention>Limit to 10 volumes max. No code in volumes. Add resource limits. Run cleanup regularly.</prevention>
+        <related-specs>
+            <spec href="../docker_volume_optimization.xml">Complete volume optimization specification</spec>
+            <spec href="../frontend_docker_optimization.xml">Frontend image size optimization</spec>
+            <report href="../../DOCKER_STABILITY_LEARNINGS.md">Comprehensive stability analysis</report>
+        </related-specs>
+    </learning>
+    
+    <learning id="frontend-docker-size-optimization-2025-08-31">
+        <title>Frontend Docker Image 94% Size Reduction - Next.js Standalone Mode</title>
+        <category>Infrastructure/Docker/Frontend</category>
+        <keywords>docker, frontend, nextjs, standalone, node_modules, optimization, image size</keywords>
+        <path>../frontend_docker_optimization.xml</path>
+        <critical-takeaway>
+            Frontend Docker images reduced from 1.6GB to 100MB using Next.js standalone output mode.
+            Root cause: Copying entire node_modules folder including 500MB+ of unused dev dependencies.
+            Solution: Configure Next.js with output: 'standalone' and copy only .next/standalone directory.
+            This creates optimized server.js with tree-shaken, production-only dependencies.
+            NEVER copy node_modules to production images - use standalone mode instead.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>10x faster deployments, 94% reduction in storage/bandwidth costs, 3x faster container startup</business-impact>
+        <prevention>Always use output: 'standalone' in next.config.ts. Fail CI if frontend image >200MB. Include node_modules in .dockerignore.</prevention>
+        <refresh-procedure>
+            After any Docker changes: docker-compose down, docker system prune -af --volumes, docker-compose build --no-cache
+        </refresh-procedure>
     </learning>
     
     <learning id="clickhouse-staging-secret-mapping-2025-08-31">

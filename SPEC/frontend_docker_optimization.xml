@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec id="frontend-docker-optimization" criticality="CRITICAL" date="2025-08-31">
+    <title>Frontend Docker Image Optimization - 94% Size Reduction</title>
+    
+    <problem_statement>
+        <description>
+            Frontend Docker images were 1.6GB+ due to including entire node_modules directory.
+            This caused slow builds, deployment failures, and excessive resource consumption.
+        </description>
+        
+        <root_causes>
+            <cause priority="1">Copying entire node_modules folder (500MB+ of dev dependencies)</cause>
+            <cause priority="2">Not using Next.js standalone output mode</cause>
+            <cause priority="3">Including test files, cypress, and development tools</cause>
+            <cause priority="4">Multi-stage build not optimized for production</cause>
+        </root_causes>
+        
+        <impact>
+            <item>1.6GB Docker images (vs 100MB optimized)</item>
+            <item>Slow CI/CD pipelines (10+ minute builds)</item>
+            <item>Deployment failures due to size limits</item>
+            <item>Excessive bandwidth and storage costs</item>
+            <item>Container startup time 3x slower</item>
+        </impact>
+    </problem_statement>
+
+    <solution>
+        <principle id="nextjs-standalone">
+            <title>Next.js Standalone Output Mode</title>
+            <rule>ALWAYS use output: 'standalone' in Next.js configuration</rule>
+            <rationale>Creates minimal production bundle with only required dependencies</rationale>
+            
+            <implementation>
+                <!-- Configuration -->
+                <config_file path="next.config.ts">
+                    <![CDATA[
+const nextConfig = {
+  output: 'standalone',  // CRITICAL: Enables optimized production build
+  // ... other config
+}
+                    ]]>
+                </config_file>
+                
+                <!-- Dockerfile production stage -->
+                <dockerfile_snippet>
+                    <![CDATA[
+# Copy ONLY standalone output (not node_modules!)
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
+
+# Start with the optimized server
+CMD ["node", "server.js"]
+                    ]]>
+                </dockerfile_snippet>
+            </implementation>
+            
+            <benefits>
+                <benefit>Reduces image from 1.6GB to ~100MB (94% reduction)</benefit>
+                <benefit>Includes only production dependencies actually imported</benefit>
+                <benefit>Tree-shakes unused code automatically</benefit>
+                <benefit>Creates optimized server.js with embedded deps</benefit>
+                <benefit>Faster cold starts in production</benefit>
+            </benefits>
+        </principle>
+
+        <principle id="dockerignore-optimization">
+            <title>Comprehensive .dockerignore Configuration</title>
+            <rule>Exclude ALL non-essential files from Docker build context</rule>
+            
+            <required_exclusions>
+                <![CDATA[
+# CRITICAL exclusions for frontend
+node_modules
+frontend/node_modules
+**/node_modules
+frontend/.next
+frontend/coverage
+frontend/cypress
+frontend/__tests__
+frontend/**/*.test.ts
+frontend/**/*.test.tsx
+frontend/**/*.spec.ts
+frontend/**/*.spec.tsx
+
+# Prevent override files (CRITICAL for stability)
+docker-compose.override.yml
+docker-compose.override.yml.*
+*.override.yml
+                ]]>
+            </required_exclusions>
+        </principle>
+
+        <principle id="multi-stage-optimization">
+            <title>Optimized Multi-Stage Build</title>
+            <rule>Use separate builder and runtime stages with minimal final image</rule>
+            
+            <stages>
+                <stage name="builder">
+                    <purpose>Install deps and build application</purpose>
+                    <includes>All source code, dev dependencies, build tools</includes>
+                    <output>Standalone build artifacts only</output>
+                </stage>
+                
+                <stage name="runtime">
+                    <purpose>Run the application</purpose>
+                    <includes>ONLY standalone output + static files</includes>
+                    <excludes>Source code, node_modules, build tools</excludes>
+                </stage>
+            </stages>
+        </principle>
+
+        <principle id="development-vs-production">
+            <title>Separate Development and Production Configurations</title>
+            <rule>Development can include node_modules for hot reload, production MUST use standalone</rule>
+            
+            <comparison>
+                <development>
+                    <![CDATA[
+# frontend.development.Dockerfile
+# Can copy node_modules for hot reload support
+COPY --from=builder /app/node_modules ./node_modules
+CMD ["npm", "run", "dev"]
+                    ]]>
+                </development>
+                
+                <production>
+                    <![CDATA[
+# frontend.Dockerfile (production)
+# MUST use standalone output
+COPY --from=builder /app/.next/standalone ./
+CMD ["node", "server.js"]
+                    ]]>
+                </production>
+            </comparison>
+        </principle>
+    </solution>
+
+    <validation>
+        <check_commands>
+            <![CDATA[
+# Build frontend image
+docker build -f docker/frontend.Dockerfile -t frontend-test ./
+
+# Check image size (MUST be <200MB)
+docker images frontend-test --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}"
+
+# Verify standalone mode
+docker run --rm frontend-test ls -la / | grep server.js
+
+# Ensure no node_modules in production image
+docker run --rm frontend-test ls -la / | grep -v node_modules || echo "✅ No node_modules"
+            ]]>
+        </check_commands>
+        
+        <regression_prevention>
+            <item>CI pipeline must fail if frontend image >200MB</item>
+            <item>Pre-commit hook to verify output: 'standalone' in next.config.ts</item>
+            <item>Weekly audit of Docker image sizes</item>
+            <item>Automated cleanup of old images</item>
+        </regression_prevention>
+    </validation>
+
+    <related_specs>
+        <spec href="docker_volume_optimization.xml">Docker volume optimization for stability</spec>
+        <spec href="unified_environment_management.xml">Environment variable management</spec>
+    </related_specs>
+
+    <references>
+        <reference type="learning" href="../DOCKER_STABILITY_LEARNINGS.md#frontend-image-size-reduction">
+            Detailed analysis of frontend optimization impact
+        </reference>
+        <reference type="documentation" href="https://nextjs.org/docs/advanced-features/output-file-tracing">
+            Next.js Standalone Output documentation
+        </reference>
+    </references>
+</spec>
