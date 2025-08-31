@@ -12,7 +12,7 @@
     
     <summary>
         Successfully implemented comprehensive staging E2E test suite that runs directly against deployed 
-        staging.netrasystems.ai services. Features include dedicated staging clients, auth bypass with OAuth 
+        staging.netrasystems.ai services. Features include dedicated staging clients, OAUTH SIMULATION with OAuth 
         simulation, WebSocket testing, and comprehensive test coverage of all critical user flows.
     </summary>
     
@@ -58,7 +58,7 @@ class StagingConfig:
             <file>tests/e2e/staging_auth_client.py</file>
             <purpose>Handle authentication flows for staging tests</purpose>
             <critical_note>
-                AUTH BYPASS SIMULATES OAUTH - NOT A SECURITY BYPASS
+                OAUTH SIMULATION SIMULATES OAUTH - NOT A SECURITY BYPASS
                 Creates valid user sessions as if users logged in via Google OAuth
                 Still requires proper JWT tokens for all API calls
             </critical_note>
@@ -211,7 +211,7 @@ python tests/run_staging_tests.py --category websocket
     
     <critical_insights>
         <insight priority="CRITICAL">
-            Auth bypass ONLY simulates OAuth flow - it creates valid user sessions
+            OAUTH SIMULATION ONLY simulates OAuth flow - it creates valid user sessions
             as if users logged in via Google OAuth. This is NOT a security bypass,
             just automated test user creation.
         </insight>

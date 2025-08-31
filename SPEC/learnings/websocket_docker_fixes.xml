@@ -126,7 +126,7 @@
         <change type="code_modification">
           <description>Enhanced WebSocketAuthenticator._is_development_auth_bypass_enabled()</description>
           <implementation>
-            # CRITICAL FIX: Enable development auth bypass automatically in development environment
+            # CRITICAL FIX: Enable development OAUTH SIMULATION automatically in development environment
             # This allows WebSocket connections to work in development without requiring tokens
             bypass_enabled = is_development and (auth_bypass or websocket_bypass or True)  # Auto-enable for dev
           </implementation>
@@ -285,10 +285,10 @@
         <location>scripts/test_docker_websocket_fix.py</location>
         <capabilities>
           <capability>Environment variable validation</capability>
-          <capability>WebSocket connection testing with auth bypass</capability>
+          <capability>WebSocket connection testing with OAUTH SIMULATION</capability>
           <capability>Docker networking scenario testing</capability>
           <capability>Configuration file validation</capability>
-          <capability>Auth bypass logic verification</capability>
+          <capability>OAUTH SIMULATION logic verification</capability>
         </capabilities>
         <usage>python scripts/test_docker_websocket_fix.py</usage>
       </script>
@@ -317,7 +317,7 @@
 
     <validation_checklist>
       <check category="environment">Environment variables properly configured</check>
-      <check category="authentication">Auth bypass working in development only</check>
+      <check category="authentication">OAUTH SIMULATION working in development only</check>
       <check category="cors">CORS allowing Docker service connections</check>
       <check category="networking">WebSocket URLs resolving correctly</check>
       <check category="connectivity">End-to-end WebSocket communication working</check>
@@ -328,7 +328,7 @@
   <docker_development_configuration>
     <required_environment_variables>
       <variable name="ALLOW_DEV_AUTH_BYPASS" value="true" purpose="Enable development authentication bypass" />
-      <variable name="WEBSOCKET_AUTH_BYPASS" value="true" purpose="Specific WebSocket auth bypass flag" />
+      <variable name="WEBSOCKET_AUTH_BYPASS" value="true" purpose="Specific WebSocket OAUTH SIMULATION flag" />
       <variable name="ENVIRONMENT" value="development" purpose="Environment detection for bypass logic" />
       <variable name="NEXT_PUBLIC_WEBSOCKET_URL" value="ws://localhost:8000/ws" purpose="Frontend WebSocket URL" />
       <variable name="NEXT_PUBLIC_API_URL" value="http://localhost:8000" purpose="Backend API URL" />

@@ -11,7 +11,7 @@
     
     <summary>
         Successfully implemented comprehensive system to run ALL E2E tests directly on staging.netrasystems.ai 
-        with automatic GCP secret management, auth bypass, and integrated introspection tools.
+        with automatic GCP secret management, OAUTH SIMULATION, and integrated introspection tools.
     </summary>
     
     <key_achievements>

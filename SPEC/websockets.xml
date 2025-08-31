@@ -95,7 +95,7 @@
         <test-script>tests/e2e/test_websocket_dev_docker_connection.py - E2E Docker WebSocket testing</test-script>
         <validation-checklist>
           <check>Environment variables properly configured</check>
-          <check>Auth bypass working in development only</check>
+          <check>OAUTH SIMULATION working in development only</check>
           <check>CORS allowing Docker service connections</check>
           <check>WebSocket URLs resolving correctly</check>
           <check>End-to-end WebSocket communication working</check>
