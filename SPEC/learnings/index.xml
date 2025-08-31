@@ -304,6 +304,14 @@
             <critical-takeaway>Timeout implementation MUST maintain backward compatibility with existing WebSocket API (websocket_timeout_retry_implementation.xml).</critical-takeaway>
         </category>
         
+        <category name="WebSocket/MessageHandlers" path="SPEC/learnings/websocket_agent_response_missing_handler.xml" keywords="WebSocket, agent_response, Message Handler, Frontend, Event Registry, Silent Failures, Chat UI, Message Types">
+            <critical-takeaway>CRITICAL: Frontend MUST have handlers for ALL backend WebSocket message types - missing handler for agent_response caused complete chat failure (websocket_agent_response_missing_handler.xml).</critical-takeaway>
+            <critical-takeaway>Backend sends both agent_response (content) and agent_completed (signal) - frontend must handle BOTH message types (websocket_agent_response_missing_handler.xml).</critical-takeaway>
+            <critical-takeaway>Silent WebSocket failures MUST be prevented - add console warnings for unhandled message types (websocket_agent_response_missing_handler.xml).</critical-takeaway>
+            <critical-takeaway>Always verify frontend handler registry matches backend message types - run alignment tests before deployment (websocket_agent_response_missing_handler.xml).</critical-takeaway>
+            <critical-takeaway>Test coverage MUST include all message types: unit tests for extractors, integration tests for routing, E2E tests for UI display (websocket_agent_response_missing_handler.xml).</critical-takeaway>
+        </category>
+        
         <category name="Authentication/MultiSystem" path="SPEC/multi_system_authentication_architecture.xml" keywords="Authentication, SSOT, JWT, OAuth, Multi-System, Auth Service, Token Management, Service-to-Service, Architecture">
             <critical-takeaway>CRITICAL: auth_service is the SOLE authentication authority - all JWT validation must go through auth_service (multi_system_authentication_architecture.xml).</critical-takeaway>
             <critical-takeaway>Multiple authentication patterns violate SSOT - 3x maintenance burden and security risk (multi_system_authentication_architecture.xml).</critical-takeaway>
