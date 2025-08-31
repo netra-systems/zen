@@ -111,7 +111,8 @@ class AuthStarter:
             sys.executable, "-m", "uvicorn",
             "auth_service.main:app",
             "--host", "0.0.0.0",
-            "--port", str(port)
+            "--port", str(port),
+            "--log-level", "warning"
         ]
         
         # Add reload based on configuration

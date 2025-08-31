@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <metadata>
+        <title>WebSocket Staging Startup Dependencies Fix</title>
+        <date>2025-08-31</date>
+        <category>startup</category>
+        <priority>CRITICAL</priority>
+        <tags>websocket, startup, staging, dependencies, supervisor, llm_manager</tags>
+    </metadata>
+    
+    <problem>
+        <description>
+            WebSocket endpoints in staging were failing with the error:
+            "Critical WebSocket dependencies missing in staging: ['agent_supervisor', 'thread_service']"
+            
+            This occurred when users tried to connect via WebSocket after application startup,
+            making the chat functionality completely broken in staging.
+        </description>
+        
+        <root_cause>
+            The startup sequence was failing silently during Phase 2 (service initialization)
+            but still proceeding to Phase 3 (agent supervisor creation). When Phase 2 failed,
+            critical dependencies like llm_manager were not initialized, causing the supervisor
+            creation to fail. The WebSocket endpoint then couldn't find the required dependencies.
+            
+            The startup sequence had three phases:
+            1. Phase 1: Database migrations
+            2. Phase 2: Service initialization (including llm_manager)
+            3. Phase 3: WebSocket and agent supervisor initialization
+            
+            If Phase 2 failed (e.g., database connection issues), Phase 3 would still run
+            but fail due to missing dependencies from Phase 2.
+        </root_cause>
+        
+        <impact>
+            - WebSocket connections fail immediately in staging
+            - Chat functionality completely broken
+            - User cannot interact with agents
+            - Application appears to start successfully but is non-functional
+        </impact>
+    </problem>
+    
+    <solution>
+        <approach>
+            Added comprehensive error handling and logging to the startup sequence to:
+            1. Detect and report Phase 2 failures clearly
+            2. Prevent Phase 3 from running if Phase 2 fails in staging/production
+            3. Add detailed logging to identify which dependencies are missing
+            4. Ensure proper error propagation in critical environments
+        </approach>
+        
+        <implementation>
+            <file>netra_backend/app/startup_module.py</file>
+            
+            <change name="phase_error_handling">
+                <description>
+                    Added try-catch blocks around Phase 2 and Phase 3 in _run_legacy_startup
+                    to properly handle failures and prevent cascading errors.
+                </description>
+                <critical_behavior>
+                    In staging/production: Phase 2 or Phase 3 failures cause immediate startup failure
+                    In development: Log warnings but continue with degraded functionality
+                </critical_behavior>
+            </change>
+            
+            <change name="detailed_phase2_logging">
+                <description>
+                    Added detailed logging to each step of Phase 2 to identify exactly
+                    where initialization fails.
+                </description>
+                <logs>
+                    - Database connection status
+                    - Core services initialization
+                    - Security services and LLM manager creation
+                    - ClickHouse initialization
+                </logs>
+            </change>
+            
+            <change name="supervisor_dependency_diagnostics">
+                <description>
+                    Enhanced _build_supervisor_agent to log all available app.state attributes
+                    and provide detailed information about missing dependencies.
+                </description>
+                <diagnostic_output>
+                    - Lists all current app.state attributes
+                    - Shows which required dependencies are present/missing
+                    - Provides type information for debugging
+                </diagnostic_output>
+            </change>
+        </implementation>
+        
+        <verification>
+            The fix ensures:
+            1. Clear error messages when Phase 2 fails
+            2. No attempt to create supervisor without required dependencies
+            3. WebSocket endpoints get proper error messages instead of cryptic failures
+            4. Staging/production fail fast on critical errors
+            5. Development environments can continue with degraded functionality
+        </verification>
+    </solution>
+    
+    <prevention>
+        <guidelines>
+            1. Always wrap startup phases in proper error handling
+            2. Check dependencies before attempting to use them
+            3. Log detailed diagnostic information during startup
+            4. Fail fast in production environments
+            5. Ensure error messages clearly indicate the root cause
+        </guidelines>
+        
+        <checklist>
+            - [ ] Each startup phase has error handling
+            - [ ] Dependencies are checked before use
+            - [ ] Logging clearly shows startup progress
+            - [ ] Critical environments fail fast on errors
+            - [ ] Error messages include actionable information
+        </checklist>
+    </prevention>
+    
+    <testing>
+        <test_suite>tests/mission_critical/test_websocket_startup_dependencies.py</test_suite>
+        <test_cases>
+            1. Test Phase 2 properly initializes llm_manager
+            2. Test Phase 3 fails when dependencies are missing
+            3. Test supervisor logs detailed missing dependencies
+            4. Test WebSocket fails gracefully without supervisor
+            5. Test full startup sequence with all dependencies
+        </test_cases>
+    </testing>
+    
+    <related_issues>
+        <issue>WebSocket connections failing in staging environment</issue>
+        <issue>Agent supervisor initialization failures</issue>
+        <issue>Silent startup failures leading to broken functionality</issue>
+        <issue>Missing llm_manager during supervisor creation</issue>
+    </related_issues>
+    
+    <lessons_learned>
+        1. Silent failures during startup are extremely dangerous
+        2. Each startup phase must validate its preconditions
+        3. Detailed logging during startup is essential for debugging
+        4. Dependencies between startup phases must be explicit
+        5. Production environments should fail fast and loud
+        6. Error messages should guide troubleshooting
+    </lessons_learned>
+    
+    <monitoring>
+        <metrics>
+            - Startup phase completion times
+            - Dependency initialization success rates
+            - WebSocket connection success after startup
+            - Agent supervisor availability
+        </metrics>
+        
+        <alerts>
+            - Phase 2 failures in staging/production
+            - Missing dependencies during supervisor creation
+            - WebSocket connection failures due to missing dependencies
+            - Startup taking longer than expected
+        </alerts>
+    </monitoring>
+</learning>

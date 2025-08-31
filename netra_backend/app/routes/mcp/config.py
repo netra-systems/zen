@@ -123,8 +123,9 @@ def get_standard_mcp_config(base_url: str) -> Dict[str, Any]:
 
 def _build_standard_mcp_server_config(base_url: str) -> Dict[str, Any]:
     """Build standard MCP server configuration"""
-    # For staging/production, use HTTP transport
-    if base_url.startswith('https://') or base_url.startswith('http://'):
+    # For staging/production (non-localhost URLs), use HTTP transport
+    if (base_url.startswith('https://') or 
+        (base_url.startswith('http://') and 'localhost' not in base_url and '127.0.0.1' not in base_url)):
         return {
             "transport": "http",
             "endpoint": f"{base_url}/api/mcp"
