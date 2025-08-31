@@ -14,7 +14,7 @@ jest.mock('@/lib/secure-api-config', () => ({
   }
 }));
 
-jest.mock('@/utils/debug-logger', () => ({
+jest.mock('@/lib/logger', () => ({
   logger: {
     error: jest.fn(),
     warn: jest.fn(),

@@ -13,11 +13,11 @@
 import { OptimisticMessageManager, optimisticMessageManager } from '@/services/optimistic-updates';
 import type { ChatMessage } from '@/types/unified';
 import { generateUniqueId } from '@/lib/utils';
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 
 // Mock dependencies
 jest.mock('@/lib/utils');
-jest.mock('@/utils/debug-logger');
+jest.mock('@/lib/logger');
 
 describe('OptimisticMessageManager Pipeline Tests', () => {
   let manager: OptimisticMessageManager;

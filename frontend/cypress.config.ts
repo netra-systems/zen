@@ -5,6 +5,8 @@ import * as path from 'path';
 
 export default defineConfig({
   e2e: {
+    experimentalMemoryManagement: true,
+    numTestsKeptInMemory: 1,
     setupNodeEvents(on, config) {
       // implement node event listeners here
       on('task', {

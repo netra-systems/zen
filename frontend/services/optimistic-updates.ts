@@ -12,7 +12,7 @@
 
 import { generateUniqueId } from '@/lib/utils';
 import type { ChatMessage, MessageRole } from '@/types/unified';
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 
 // ============================================================================
 // Core Types and Interfaces

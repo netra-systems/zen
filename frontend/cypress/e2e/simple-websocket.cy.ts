@@ -1,128 +1,109 @@
 describe('Simple WebSocket Tests', () => {
   beforeEach(() => {
-    // Setup auth
+    // Setup auth using current token format
     cy.window().then((win) => {
       win.localStorage.setItem('jwt_token', 'test-jwt-token');
     });
     cy.visit('/chat');
-  });
-
-  it('should load chat interface', () => {
-    // Wait for page to load
-    cy.get('body').should('be.visible');
     
-    // Check if chat elements are available with fallbacks
+    // Wait for initialization
+    cy.get('[data-testid="main-chat"]', { timeout: 15000 }).should('be.visible');
+  });
+
+  it('should load chat interface with current DOM structure', () => {
+    // Verify main chat container is present
+    cy.get('[data-testid="main-chat"]').should('be.visible');
+    
+    // Verify message input using current data-testid structure
+    cy.get('[data-testid="message-input"]').within(() => {
+      cy.get('textarea[aria-label="Message input"]').should('be.visible');
+    });
+    
+    // Verify send button using current data-testid
+    cy.get('[data-testid="send-button"]').should('be.visible');
+    
+    // Verify initialization is complete
+    cy.get('[data-testid="main-content"]').should('be.visible');
+  });
+
+  it('should send messages using current interface', () => {
+    const testMessage = 'Test WebSocket message';
+    
+    // Type message in the textarea
+    cy.get('[data-testid="message-input"]').within(() => {
+      cy.get('textarea[aria-label="Message input"]')
+        .should('be.visible')
+        .clear()
+        .type(testMessage);
+    });
+    
+    // Click send button
+    cy.get('[data-testid="send-button"]')
+      .should('be.visible')
+      .click();
+    
+    // Verify message was sent (check if input was cleared)
+    cy.get('[data-testid="message-input"]').within(() => {
+      cy.get('textarea[aria-label="Message input"]').should('have.value', '');
+    });
+    
+    // Log result for debugging without failing the test
+    cy.log('Message sent successfully through current interface');
+  });
+
+  it('should verify input clearing behavior', () => {
+    const testMessage = 'Clear test message';
+    
+    // Type and send message
+    cy.get('[data-testid="message-input"]').within(() => {
+      cy.get('textarea[aria-label="Message input"]')
+        .clear()
+        .type(testMessage);
+    });
+    
+    cy.get('[data-testid="send-button"]').click();
+    
+    // Verify input is cleared after sending
+    cy.get('[data-testid="message-input"]').within(() => {
+      cy.get('textarea[aria-label="Message input"]')
+        .should('have.value', '');
+    });
+  });
+
+  it('should verify WebSocket event handling readiness', () => {
+    const testMessage = 'WebSocket event test';
+    
+    // Send message to potentially trigger WebSocket events
+    cy.get('[data-testid="message-input"]').within(() => {
+      cy.get('textarea[aria-label="Message input"]')
+        .clear()
+        .type(testMessage);
+    });
+    
+    cy.get('[data-testid="send-button"]').click();
+    
+    // Check for any response card or thinking indicators that would show WebSocket events
     cy.get('body').then($body => {
-      if ($body.find('textarea[aria-label="Message input"]').length > 0) {
+      // Look for response card (current system shows this for agent responses)
+      const hasResponseCard = $body.find('[data-testid="response-card"]').length > 0;
+      
+      // Look for thinking indicator
+      const hasThinkingIndicator = $body.find('[data-testid="thinking-indicator"]').length > 0;
+      
+      if (hasResponseCard) {
+        cy.log('Response card detected - WebSocket events are being processed');
+        cy.get('[data-testid="response-card"]').should('be.visible');
+      } else if (hasThinkingIndicator) {
+        cy.log('Thinking indicator detected - WebSocket agent events working');
+        cy.get('[data-testid="thinking-indicator"]').should('be.visible');
+      } else {
+        cy.log('No immediate WebSocket response detected - system may require backend connection');
+      }
+      
+      // Verify the interface remains functional
+      cy.get('[data-testid="message-input"]').within(() => {
         cy.get('textarea[aria-label="Message input"]').should('be.visible');
-        cy.get('button[aria-label="Send message"]').should('be.visible');
-      } else if ($body.find('textarea').length > 0) {
-        cy.get('textarea').first().should('be.visible');
-        cy.log('Found textarea without specific aria-label');
-      } else {
-        // Check if page is still loading
-        const hasLoadingIndicator = $body.find('[class*="loading"], [class*="spinner"], .animate-spin').length > 0;
-        if (hasLoadingIndicator) {
-          cy.log('Chat interface appears to be loading');
-          cy.wait(3000);
-          // Try again after waiting
-          cy.get('textarea, input[type="text"]', { timeout: 15000 }).should('exist');
-        } else {
-          cy.log('Chat interface elements not found - checking basic page structure');
-          cy.url().should('include', '/chat');
-        }
-      }
-    });
-  });
-
-  it('should send and display user messages', () => {
-    // Only run this test if we can find the required elements
-    cy.get('body').then($body => {
-      const hasTextarea = $body.find('textarea[aria-label="Message input"]').length > 0;
-      const hasButton = $body.find('button[aria-label="Send message"]').length > 0;
-      
-      if (hasTextarea && hasButton) {
-        const messages = ['First message', 'Second message'];
-        
-        messages.forEach((msg, index) => {
-          cy.get('textarea[aria-label="Message input"]').clear().type(msg);
-          cy.get('button[aria-label="Send message"]').click();
-          
-          // Wait a moment for the message to potentially appear
-          cy.wait(1000);
-          
-          // Try to find the message, but don't fail if not found
-          cy.get('body').then($bodyCheck => {
-            if ($bodyCheck.text().includes(msg)) {
-              cy.contains(msg).should('be.visible');
-            } else {
-              cy.log(`Message "${msg}" not found in DOM - may require backend connection`);
-            }
-          });
-        });
-      } else {
-        cy.log('Required elements not found - skipping message sending test');
-      }
-    });
-  });
-
-  it('should clear input after sending message', () => {
-    // Check if required elements exist
-    cy.get('body').then($body => {
-      const hasTextarea = $body.find('textarea[aria-label="Message input"]').length > 0;
-      const hasButton = $body.find('button[aria-label="Send message"]').length > 0;
-      
-      if (hasTextarea && hasButton) {
-        cy.get('textarea[aria-label="Message input"]').type('Test message');
-        cy.get('button[aria-label="Send message"]').click();
-        
-        // Check input state (may not clear immediately without backend)
-        cy.get('textarea[aria-label="Message input"]').should(($input) => {
-          const value = $input.val();
-          // Input might be cleared or might still contain text if no backend
-          expect(value).to.satisfy((val) => 
-            val === '' || val === 'Test message' || typeof val === 'string'
-          );
-        });
-      } else {
-        cy.log('Required elements not found - skipping clear test');
-      }
-    });
-  });
-
-  it('should disable input while processing', () => {
-    // Check if elements exist before testing
-    cy.get('body').then($body => {
-      const hasTextarea = $body.find('textarea[aria-label="Message input"]').length > 0;
-      const hasButton = $body.find('button[aria-label="Send message"]').length > 0;
-      
-      if (hasTextarea && hasButton) {
-        cy.get('textarea[aria-label="Message input"]').type('Process this');
-        cy.get('button[aria-label="Send message"]').click();
-        
-        // Check for processing state (may not occur without backend)
-        cy.get('textarea[aria-label="Message input"]').then($input => {
-          const isDisabled = $input.prop('disabled');
-          const placeholder = $input.attr('placeholder');
-          const value = $input.val();
-          
-          // More flexible check for processing state
-          if (isDisabled) {
-            cy.log('Input is disabled - processing state detected');
-          } else if (placeholder && placeholder.includes('thinking')) {
-            cy.log('Thinking placeholder detected');
-          } else if (value === '') {
-            cy.log('Input was cleared after send');
-          } else {
-            cy.log('No obvious processing state detected - may require backend connection');
-          }
-          
-          // Don't fail the test, just verify the input exists
-          expect($input).to.exist;
-        });
-      } else {
-        cy.log('Required elements not found - skipping processing test');
-      }
+      });
     });
   });
 });

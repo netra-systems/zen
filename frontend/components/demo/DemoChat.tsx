@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Send, Loader2, Bot, Brain, Zap } from 'lucide-react'
-import { logger } from '@/utils/debug-logger'
+import { logger } from '@/lib/logger'
 import { demoService } from '@/services/demoService'
 import { useDemoWebSocket } from '@/hooks/useDemoWebSocket'
 

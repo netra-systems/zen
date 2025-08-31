@@ -23,7 +23,7 @@ jest.mock('@/hooks/useEventProcessor', () => ({
 }));
 
 // Mock utility services but NOT UI components
-jest.mock('@/utils/debug-logger', () => ({
+jest.mock('@/lib/logger', () => ({
   logger: {
     debug: jest.fn(),
     error: jest.fn(),

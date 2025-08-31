@@ -12,7 +12,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useUnifiedChatStore } from '../store/unified-chat';
 import { useWebSocket } from './useWebSocket';
 import type { UnifiedChatState } from '../types/store-types';
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 import {
   ChatLoadingState,
   LoadingStateResult,

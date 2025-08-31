@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 
 import { ReferenceItem as Reference } from '@/types/Reference';
 

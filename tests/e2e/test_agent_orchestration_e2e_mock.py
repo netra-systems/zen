@@ -584,7 +584,7 @@ class MockLLMManager:
 
 
 @pytest.fixture(scope="function")
-async def mock_orchestration_setup():
+def mock_orchestration_setup():
     """Set up complete orchestration environment with mocked services."""
     
     # Create mock components
@@ -605,7 +605,7 @@ async def mock_orchestration_setup():
     mock_config.llm_mode = "mock"
     mock_config.dev_mode_llm_enabled = True
     
-    yield {
+    return {
         "supervisor": supervisor,
         "llm_manager": llm_manager,
         "websocket_manager": websocket_manager,

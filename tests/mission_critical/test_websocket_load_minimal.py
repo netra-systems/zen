@@ -197,10 +197,13 @@ class MinimalWebSocketLoadTester:
             mock_websocket.send_text = AsyncMock()
             mock_websocket.send_json = AsyncMock()
             
-            # Register connection with WebSocket manager
+            # Register connection with WebSocket manager with proper thread_id
+            thread_id = f"thread_{conn.user_id}"
             try:
-                connection_id = await self.ws_manager.connect_user(conn.user_id, mock_websocket)
-                logger.debug(f"Connected user {conn.user_id} with connection_id {connection_id}")
+                connection_id = await self.ws_manager.connect_user(
+                    conn.user_id, mock_websocket, thread_id=thread_id
+                )
+                logger.debug(f"Connected user {conn.user_id} with connection_id {connection_id} and thread_id {thread_id}")
             except Exception as e:
                 logger.error(f"Failed to connect user {conn.user_id}: {e}")
                 conn.connected = False

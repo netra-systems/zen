@@ -21,7 +21,7 @@ jest.mock('@/hooks/useInitializationCoordinator');
 jest.mock('@/hooks/useLoadingState');
 jest.mock('@/hooks/useEventProcessor');
 jest.mock('@/hooks/useThreadNavigation');
-jest.mock('@/utils/debug-logger', () => ({
+jest.mock('@/lib/logger', () => ({
   logger: {
     debug: jest.fn(),
     error: jest.fn(),

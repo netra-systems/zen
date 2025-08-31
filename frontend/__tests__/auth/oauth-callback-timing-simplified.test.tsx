@@ -32,7 +32,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 // Mock the debug logger
-jest.mock('@/utils/debug-logger', () => ({
+jest.mock('@/lib/logger', () => ({
   logger: {
     info: jest.fn(),
     error: jest.fn(),

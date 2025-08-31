@@ -19,7 +19,7 @@ import { ThreadService } from '@/services/threadService';
 import { ThreadRenameService } from '@/services/threadRenameService';
 import { optimisticMessageManager } from '@/services/optimistic-updates';
 import { generateUniqueId } from '@/lib/utils';
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 
 // Mock all dependencies
 jest.mock('@/hooks/useWebSocket');
@@ -29,7 +29,7 @@ jest.mock('@/services/threadService');
 jest.mock('@/services/threadRenameService');
 jest.mock('@/services/optimistic-updates');
 jest.mock('@/lib/utils');
-jest.mock('@/utils/debug-logger');
+jest.mock('@/lib/logger');
 
 describe('useMessageSending Pipeline Tests', () => {
   const mockSendMessage = jest.fn();

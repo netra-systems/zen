@@ -7,7 +7,7 @@ import { useChatStore } from '@/store/chat';
 import { useAuthStore } from '@/store/authStore';
 import { ThreadService } from '@/services/threadService';
 import { motion, AnimatePresence } from 'framer-motion';
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 import { 
   Plus, 
   MessageSquare,

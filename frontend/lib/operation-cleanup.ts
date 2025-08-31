@@ -8,7 +8,7 @@
  * @compliance type_safety.xml - Strongly typed cleanup management
  */
 
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 
 /**
  * Cleanup operation function type

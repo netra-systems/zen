@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Download, Share2, Send } from 'lucide-react';
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 
 interface ExportButtonProps {
   icon: React.ReactNode;

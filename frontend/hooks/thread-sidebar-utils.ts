@@ -8,7 +8,7 @@
  * @compliance type_safety.xml - Strongly typed utility functions
  */
 
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 import { ThreadService } from '@/services/threadService';
 import { useAuthStore } from '@/store/authStore';
 

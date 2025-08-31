@@ -18,8 +18,7 @@ jest.mock('../services/webSocketService', () => ({
   }
 }));
 
-jest.mock('@/lib/logger');
-jest.mock('@/utils/debug-logger', () => ({
+jest.mock('@/lib/logger', () => ({
   logger: {
     debug: jest.fn(),
     warn: jest.fn(),

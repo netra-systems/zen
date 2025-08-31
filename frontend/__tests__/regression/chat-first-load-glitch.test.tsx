@@ -24,7 +24,7 @@ import { useLoadingState } from '@/hooks/useLoadingState';
 import { useAuth } from '@/auth/context';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useWebSocket } from '@/hooks/useWebSocket';
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 
 // Mock modules
 jest.mock('next/navigation', () => ({

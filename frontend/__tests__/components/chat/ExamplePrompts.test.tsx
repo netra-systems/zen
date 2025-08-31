@@ -52,7 +52,7 @@ jest.mock('@/lib/utils', () => ({
   generateUniqueId: jest.fn(() => 'test-id-123')
 }));
 
-jest.mock('@/utils/debug-logger', () => ({
+jest.mock('@/lib/logger', () => ({
   logger: {
     info: jest.fn(),
     error: jest.fn()

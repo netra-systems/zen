@@ -14,7 +14,7 @@ import { useLoadingState } from '@/hooks/useLoadingState';
 import { useEventProcessor } from '@/hooks/useEventProcessor';
 import { useThreadNavigation } from '@/hooks/useThreadNavigation';
 import { useInitializationCoordinator } from '@/hooks/useInitializationCoordinator';
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 
 // Helper Functions (8 lines max each)
 const executeTestRun = async (

@@ -202,7 +202,7 @@ jest.mock('@/components/chat/components/MessageActionButtons', () => ({
 // No mock needed for KeyboardShortcutsHint - using simple icon replacement
 
 
-jest.mock('@/utils/debug-logger', () => ({
+jest.mock('@/lib/logger', () => ({
   logger: {
     debug: jest.fn(),
     error: jest.fn()

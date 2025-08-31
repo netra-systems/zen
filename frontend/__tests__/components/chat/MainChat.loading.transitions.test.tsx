@@ -40,7 +40,7 @@ jest.mock('@/hooks/useEventProcessor', () => ({
 jest.mock('@/hooks/useThreadNavigation', () => ({
   useThreadNavigation: jest.fn()
 }));
-jest.mock('@/utils/debug-logger', () => ({
+jest.mock('@/lib/logger', () => ({
   logger: {
     debug: jest.fn(),
     error: jest.fn(),

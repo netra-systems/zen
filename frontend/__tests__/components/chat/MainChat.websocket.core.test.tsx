@@ -20,7 +20,7 @@ jest.mock('@/hooks/useThreadNavigation', () => ({
 }));
 
 // Mock utility services but NOT UI components
-jest.mock('@/utils/debug-logger', () => ({
+jest.mock('@/lib/logger', () => ({
   logger: {
     debug: jest.fn(),
     error: jest.fn(),

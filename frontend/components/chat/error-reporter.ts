@@ -1,5 +1,5 @@
 import type { ErrorReport } from './error-boundary-types';
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 
 export class ErrorReporter {
   private static readonly MAX_STORED_ERRORS = 10;

@@ -69,7 +69,7 @@ jest.mock('@/hooks/useThreadNavigation', () => ({
 
 jest.mock('@/store/authStore');
 
-jest.mock('@/utils/debug-logger', () => ({
+jest.mock('@/lib/logger', () => ({
   logger: {
     debug: jest.fn(),
     error: jest.fn(),

@@ -9,19 +9,39 @@ Business Value Justification (BVJ):
 """
 import asyncio
 import logging
-import os
-import sys
-from io import StringIO
-from unittest.mock import patch
 import pytest
+from io import StringIO
+from pathlib import Path
 
-# Add project root to path
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.insert(0, project_root)
+# Import isolated environment for proper environment management
+from dev_launcher.isolated_environment import get_env
 
 
 class TestDatabaseAuthLogging:
     """Test database authentication and connection logging issues."""
+    
+    @pytest.fixture(autouse=True)
+    def setup_isolated_env(self, isolated_test_env):
+        """Ensure isolated environment for all tests."""
+        self.env = isolated_test_env
+        return self.env
+    
+    @pytest.fixture(autouse=True, scope="function")
+    def require_real_services(self, isolated_test_env):
+        """Ensure real services are available for integration tests."""
+        from test_framework.service_availability import require_real_services
+        
+        # Check the services needed for database auth testing
+        # Set test environment to match our Docker compose test services
+        isolated_test_env.set('DATABASE_URL', 'postgresql://test_user:test_pass@localhost:5434/netra_test', source="test_database_setup")
+        isolated_test_env.set('REDIS_URL', 'redis://localhost:6381', source="test_redis_setup")
+        
+        try:
+            require_real_services(['postgresql', 'redis'], timeout=10.0)
+        except Exception as e:
+            pytest.skip(f"Real services unavailable: {e}")
+        
+        yield
     
     @pytest.mark.asyncio
     async def test_auth_service_database_connection_logs(self):
@@ -142,12 +162,21 @@ class TestDatabaseAuthLogging:
             manager = AuthDatabaseManager()
             
             for url in test_urls:
-                # Set environment variable
-                with patch.dict(os.environ, {'DATABASE_URL': url}):
+                # Set environment variable using isolated environment
+                original_url = self.env.get('DATABASE_URL')
+                self.env.set('DATABASE_URL', url, source="test_database_manager_url_building")
+                
+                try:
                     # Get various URL formats
                     base_url = manager.get_base_database_url()
                     migration_url = manager.get_migration_url_sync_format()
                     auth_url = manager.get_auth_database_url_async()
+                finally:
+                    # Restore original URL
+                    if original_url:
+                        self.env.set('DATABASE_URL', original_url, source="test_cleanup")
+                    else:
+                        self.env.delete('DATABASE_URL', source="test_cleanup")
             
             # Get captured logs
             log_output = log_capture.getvalue()
@@ -189,7 +218,6 @@ class TestDatabaseAuthLogging:
         migration_logger.setLevel(logging.DEBUG)
         
         try:
-            from pathlib import Path
             project_root = Path(__file__).parent.parent.parent
             runner = MigrationRunner(project_root)
             

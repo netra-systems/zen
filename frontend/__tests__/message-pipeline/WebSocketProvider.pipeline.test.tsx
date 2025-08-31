@@ -26,7 +26,6 @@ jest.mock('@/services/reconciliation');
 jest.mock('@/lib/unified-auth-service');
 jest.mock('@/config');
 jest.mock('@/lib/logger');
-jest.mock('@/utils/debug-logger');
 
 // Test component to consume WebSocket context
 const TestConsumer: React.FC<{ onContextUpdate?: (context: any) => void }> = ({ 

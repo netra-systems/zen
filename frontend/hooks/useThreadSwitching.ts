@@ -22,7 +22,7 @@ import { executeWithRetry } from '@/lib/retry-manager';
 import { globalCleanupManager } from '@/lib/operation-cleanup';
 import type { ThreadError, createThreadError } from '@/types/thread-error-types';
 import { useURLSync, useBrowserHistorySync } from '@/services/urlSyncService';
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 
 /**
  * Thread switching state

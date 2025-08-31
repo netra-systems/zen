@@ -7,7 +7,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { jest } from '@jest/globals';
 
 // Mock the debug logger first to avoid console noise
-jest.mock('@/utils/debug-logger', () => ({
+jest.mock('@/lib/logger', () => ({
   logger: {
     debug: jest.fn(),
     error: jest.fn()
@@ -101,7 +101,7 @@ jest.mock('@/components/chat/EventDiagnosticsPanel', () => ({
   EventDiagnosticsPanel: () => React.createElement('div', { 'data-testid': 'diagnostics-panel' }, 'Diagnostics Panel')
 }));
 
-jest.mock('@/utils/debug-logger', () => ({
+jest.mock('@/lib/logger', () => ({
   logger: {
     debug: jest.fn(),
     error: jest.fn()

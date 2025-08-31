@@ -3,7 +3,7 @@ import { UnifiedWebSocketEvent } from '../types/unified-chat';
 import { WebSocketStatus, WebSocketState, WebSocketServiceError } from '../types/domains/websocket';
 import { config } from '@/config';
 import { logger } from '@/lib/logger';
-import { logger as debugLogger } from '@/utils/debug-logger';
+import { logger as debugLogger } from '@/lib/logger';
 
 interface JWTPayload {
   exp: number;

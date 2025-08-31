@@ -27,7 +27,6 @@ jest.mock('@/services/reconciliation');
 jest.mock('@/lib/unified-auth-service');
 jest.mock('@/config');
 jest.mock('@/lib/logger');
-jest.mock('@/utils/debug-logger');
 
 // Test component to consume WebSocket context and monitor timing
 const TimingTestConsumer: React.FC<{ 

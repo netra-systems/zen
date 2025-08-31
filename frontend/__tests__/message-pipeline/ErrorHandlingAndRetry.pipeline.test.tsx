@@ -21,7 +21,7 @@ import { useMessageSending } from '@/components/chat/hooks/useMessageSending';
 import { optimisticMessageManager } from '@/services/optimistic-updates';
 import { webSocketService } from '@/services/webSocketService';
 import { ThreadService } from '@/services/threadService';
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 
 // Test component for error handling scenarios
 const ErrorHandlingTestHarness: React.FC<{
@@ -117,7 +117,7 @@ const ErrorHandlingTestHarness: React.FC<{
 jest.mock('@/services/webSocketService');
 jest.mock('@/services/threadService');
 jest.mock('@/services/threadRenameService');
-jest.mock('@/utils/debug-logger');
+jest.mock('@/lib/logger');
 
 describe('Error Handling and Retry Pipeline Tests', () => {
   const mockWebSocketService = {

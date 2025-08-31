@@ -4,7 +4,7 @@ import { webSocketService, WebSocketStatus } from '../services/webSocketService'
 import { WebSocketMessage, Message } from '@/types/unified';
 import { config as appConfig } from '@/config';
 import { logger } from '@/lib/logger';
-import { logger as debugLogger } from '@/utils/debug-logger';
+import { logger as debugLogger } from '@/lib/logger';
 import { WebSocketContextType, WebSocketProviderProps } from '../types/websocket-context-types';
 import { reconciliationService, OptimisticMessage } from '../services/reconciliation';
 

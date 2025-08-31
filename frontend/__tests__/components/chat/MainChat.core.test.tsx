@@ -84,7 +84,7 @@ jest.mock('framer-motion', () => ({
 }));
 
 // Mock utility services and dependencies
-jest.mock('@/utils/debug-logger', () => ({
+jest.mock('@/lib/logger', () => ({
   logger: {
     debug: jest.fn(),
     error: jest.fn(),

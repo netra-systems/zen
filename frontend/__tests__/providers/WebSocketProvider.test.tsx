@@ -10,7 +10,7 @@ import { reconciliationService } from '@/services/reconciliationService';
 jest.mock('@/hooks/useAuth');
 jest.mock('@/services/webSocketService');
 jest.mock('@/services/reconciliationService');
-jest.mock('@/utils/debug-logger', () => ({
+jest.mock('@/lib/logger', () => ({
   debugLogger: {
     debug: jest.fn(),
     error: jest.fn(),

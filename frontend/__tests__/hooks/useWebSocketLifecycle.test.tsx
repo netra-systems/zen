@@ -14,16 +14,6 @@ jest.mock('@/lib/logger', () => ({
   }
 }));
 
-// Mock the debug logger
-jest.mock('@/utils/debug-logger', () => ({
-  logger: {
-    error: jest.fn(),
-    info: jest.fn(),
-    debug: jest.fn(),
-    warn: jest.fn()
-  }
-}));
-
 // Mock the reconciliation service  
 jest.mock('@/services/reconciliation', () => ({
   reconciliationService: {

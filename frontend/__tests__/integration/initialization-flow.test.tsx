@@ -17,7 +17,7 @@ jest.mock('@/services/reconciliationService', () => ({
     clearUnreconciledMessages: jest.fn()
   }
 }));
-jest.mock('@/utils/debug-logger', () => ({
+jest.mock('@/lib/logger', () => ({
   debugLogger: {
     debug: jest.fn(),
     error: jest.fn(),

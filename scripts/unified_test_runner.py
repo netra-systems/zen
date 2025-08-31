@@ -472,7 +472,7 @@ class UnifiedTestRunner:
         """Check availability of required real services before running tests."""
         
         # Skip service availability check for tests that specifically test service startup/resilience
-        test_pattern = getattr(args, 'pattern', '')
+        test_pattern = getattr(args, 'pattern', '') or ''
         if 'dev_launcher_critical_path' in test_pattern or 'startup' in test_pattern:
             print("[INFO] Skipping service availability check for dev launcher/startup resilience test")
             return

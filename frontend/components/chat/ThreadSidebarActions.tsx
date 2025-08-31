@@ -5,7 +5,7 @@ import { useThreadCreation } from '@/hooks/useThreadCreation';
 import { useAuthState } from '@/hooks/useAuthState';
 import { defaultRecoveryManager } from '@/lib/thread-error-recovery';
 import { createThreadErrorFromError } from './ThreadSidebarErrorHandling';
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 import {
   executeThreadLoad,
   executeThreadCreation,

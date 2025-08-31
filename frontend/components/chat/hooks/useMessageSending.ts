@@ -7,7 +7,7 @@ import { ThreadRenameService } from '@/services/threadRenameService';
 import { generateUniqueId } from '@/lib/utils';
 import { ChatMessage, MessageSendingParams, MESSAGE_INPUT_CONSTANTS } from '../types';
 import { optimisticMessageManager } from '@/services/optimistic-updates';
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 import { useGTMEvent } from '@/hooks/useGTMEvent';
 
 // Constants for error handling and recovery
