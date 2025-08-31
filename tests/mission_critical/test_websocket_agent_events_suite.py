@@ -28,7 +28,7 @@ import random
 
 # Real services infrastructure for mock elimination
 from test_framework.real_services import get_real_services, RealServicesManager
-from test_framework.environment_isolation import IsolatedEnvironment
+from test_framework.environment_isolation import get_test_env_manager
 
 # CRITICAL: Add project root to Python path for imports
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -416,8 +416,8 @@ class TestIntegrationWebSocketFlow:
     @pytest.fixture(autouse=True)
     async def setup_real_integration_services(self):
         """Setup real services for integration tests."""
-        self.env = IsolatedEnvironment()
-        self.env.enable()
+        self.env_manager = get_test_env_manager()
+        self.env = self.env_manager.setup_test_environment()
         
         self.real_services = get_real_services()
         await self.real_services.ensure_all_services_available()
@@ -426,7 +426,7 @@ class TestIntegrationWebSocketFlow:
         yield
         
         await self.real_services.close_all()
-        self.env.disable(restore_original=True)
+        self.env_manager.teardown_test_environment()
     
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -708,8 +708,8 @@ class TestE2EWebSocketChatFlow:
     @pytest.fixture(autouse=True)
     async def setup_real_e2e_services(self):
         """Setup real services for E2E tests."""
-        self.env = IsolatedEnvironment()
-        self.env.enable()
+        self.env_manager = get_test_env_manager()
+        self.env = self.env_manager.setup_test_environment()
         
         self.real_services = get_real_services()
         await self.real_services.ensure_all_services_available()
@@ -718,7 +718,7 @@ class TestE2EWebSocketChatFlow:
         yield
         
         await self.real_services.close_all()
-        self.env.disable(restore_original=True)
+        self.env_manager.teardown_test_environment()
     
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -992,8 +992,8 @@ class TestRegressionPrevention:
     @pytest.fixture(autouse=True)
     async def setup_real_regression_services(self):
         """Setup real services for regression tests."""
-        self.env = IsolatedEnvironment()
-        self.env.enable()
+        self.env_manager = get_test_env_manager()
+        self.env = self.env_manager.setup_test_environment()
         
         self.real_services = get_real_services()
         await self.real_services.ensure_all_services_available()
@@ -1002,7 +1002,7 @@ class TestRegressionPrevention:
         yield
         
         await self.real_services.close_all()
-        self.env.disable(restore_original=True)
+        self.env_manager.teardown_test_environment()
     
     @pytest.mark.asyncio
     @pytest.mark.critical
