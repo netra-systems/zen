@@ -31,7 +31,8 @@ from netra_backend.app.websocket_core.handlers import (
     HeartbeatHandler
 )
 
-class MockWebSocket:
+# COMMENTED OUT: MockWebSocket class - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
+# class MockWebSocket:
 
     """Mock WebSocket for testing."""
     
