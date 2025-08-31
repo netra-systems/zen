@@ -1,0 +1,175 @@
+# Docker Compose Windows-Specific Overrides
+# This file contains optimizations specifically for Windows environments
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.windows.yml --profile dev up
+
+version: '3.8'
+
+services:
+  # Windows-specific optimizations for dev environment
+  dev-postgres:
+    # Disable shared memory for Windows compatibility
+    shm_size: '256mb'
+    # Windows-specific environment
+    environment:
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+      # Disable JIT compilation which can cause issues on Windows
+      POSTGRES_JIT: "off"
+    # Slower healthcheck for Windows
+    healthcheck:
+      interval: 45s
+      timeout: 10s
+      start_period: 60s
+
+  dev-redis:
+    # Windows-specific Redis configuration
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --tcp-backlog 128
+      --tcp-keepalive 60
+      --timeout 300
+      --databases 16
+    # Slower healthcheck for Windows
+    healthcheck:
+      interval: 45s
+
+  dev-clickhouse:
+    # Windows-specific ClickHouse settings
+    environment:
+      CLICKHOUSE_LOG_LEVEL: warning
+      # Disable memory tracking that can cause issues on Windows
+      CLICKHOUSE_DISABLE_INTERNAL_DNS_CACHE: 1
+    # Slower healthcheck for Windows
+    healthcheck:
+      interval: 45s
+    # Limit ClickHouse's memory usage more aggressively on Windows
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+          cpus: '0.5'
+
+  dev-auth:
+    environment:
+      # Disable file watching optimizations that don't work well on Windows
+      WATCHDOG_ENABLE: "false"
+      WATCHDOG_USE_POLLING: "false"
+      # Use simpler reload mechanism
+      UVICORN_RELOAD_EXCLUDES: "*.pyc,__pycache__,*.log,*.pid"
+    # Use simpler command without aggressive reload
+    command: >
+      sh -c "
+        echo 'Starting auth service (Windows mode)...' &&
+        uvicorn auth_service.main:app \
+          --host 0.0.0.0 \
+          --port 8000 \
+          --reload \
+          --reload-dir /app/auth_service \
+          --reload-dir /app/shared \
+          --reload-delay 1.0 \
+          --log-level warning
+      "
+    healthcheck:
+      interval: 60s
+      start_period: 60s
+
+  dev-analytics:
+    environment:
+      WATCHDOG_ENABLE: "false"
+      WATCHDOG_USE_POLLING: "false"
+      UVICORN_RELOAD_EXCLUDES: "*.pyc,__pycache__,*.log,*.pid"
+    command: >
+      sh -c "
+        echo 'Starting analytics service (Windows mode)...' &&
+        uvicorn analytics_service.main:app \
+          --host 0.0.0.0 \
+          --port 8090 \
+          --reload \
+          --reload-dir /app/analytics_service \
+          --reload-dir /app/shared \
+          --reload-delay 1.0 \
+          --log-level warning
+      "
+    healthcheck:
+      interval: 60s
+      start_period: 60s
+
+  dev-backend:
+    environment:
+      # Disable Python optimizations that can cause issues on Windows
+      PYTHONDONTWRITEBYTECODE: 1
+      PYTHONUNBUFFERED: 1
+      WATCHDOG_ENABLE: "false"
+      WATCHDOG_USE_POLLING: "false"
+      # Simpler reload settings
+      UVICORN_RELOAD_EXCLUDES: "*.pyc,__pycache__,*.log,*.pid,SPEC/*,scripts/*"
+    # Simplified volume mounts for Windows
+    volumes:
+      - ./netra_backend:/app/netra_backend
+      - ./shared:/app/shared
+      - ./SPEC:/app/SPEC:ro
+      - ./scripts:/app/scripts:ro
+      - ./logs:/app/logs
+    # Use simpler command
+    command: >
+      sh -c "
+        echo 'Waiting for database (Windows mode)...' &&
+        sleep 10 &&
+        python scripts/wait_for_db.py &&
+        echo 'Running migrations...' &&
+        alembic -c netra_backend/alembic.ini upgrade head &&
+        echo 'Starting backend (Windows mode)...' &&
+        uvicorn netra_backend.app.main:app \
+          --host 0.0.0.0 \
+          --port 8000 \
+          --reload \
+          --reload-dir /app/netra_backend \
+          --reload-delay 1.0 \
+          --log-level warning
+      "
+    healthcheck:
+      interval: 60s
+      start_period: 90s
+    # More conservative resource limits for Windows
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+          cpus: '0.75'
+
+  dev-frontend:
+    # Reduce volume mounts for Windows
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/app:/app/app
+      - ./frontend/components:/app/components
+      - ./frontend/styles:/app/styles
+      - /app/node_modules
+      - /app/.next
+    environment:
+      # Windows-specific Next.js settings
+      WATCHPACK_POLLING: "false"  # Disable polling on Windows
+      CHOKIDAR_USEPOLLING: "false"
+      # Reduce memory usage
+      NODE_OPTIONS: "--max-old-space-size=1024"
+    # More conservative resource limits for Windows
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+          cpus: '0.75'
+    healthcheck:
+      interval: 60s
+      start_period: 120s
+
+# Windows-specific network configuration
+networks:
+  netra-network:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.enable_icc: "true"
+      com.docker.network.bridge.enable_ip_masquerade: "true"
+      com.docker.network.driver.mtu: "1450"  # Lower MTU for Windows compatibility
