@@ -1,4 +1,5 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 import { TestProviders } from '@/__tests__/test-utils/providers'; // Using Jest, not vitest
 import { useDemoWebSocket } from '@/hooks/useDemoWebSocket';
@@ -24,6 +25,7 @@ if (typeof WebSocket === 'undefined') {
 
 // Test 65: useDemoWebSocket connection
 describe('test_useDemoWebSocket_connection', () => {
+    jest.setTimeout(10000);
   let mockWebSocketInstance: any;
   let mockWebSocketConstructor: jest.Mock;
   
@@ -93,6 +95,11 @@ describe('test_useDemoWebSocket_connection', () => {
   afterEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   it('should establish demo WebSocket connection', async () => {
@@ -238,6 +245,7 @@ describe('test_useDemoWebSocket_connection', () => {
 
 // Test 66: useMediaQuery responsive
 describe('test_useMediaQuery_responsive', () => {
+    jest.setTimeout(10000);
   let matchMediaMock: any;
   
   beforeEach(() => {

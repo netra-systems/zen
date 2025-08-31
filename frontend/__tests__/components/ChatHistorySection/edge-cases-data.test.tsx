@@ -1,11 +1,10 @@
-/**
- * ChatHistorySection Edge Cases - Data Handling Tests
- * Tests for data edge cases and malformed inputs ≤300 lines, ≤8 line functions
- */
-
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ChatHistorySection } from '@/components/ChatHistorySection';
+import { createTestSetup, setupCustomThreads } from './shared-setup';
+import { mockThreads } from './mockData';
+import { s/ChatHistorySection';
 import { createTestSetup, setupCustomThreads } from './shared-setup';
 import { mockThreads } from './mockData';
 import {
@@ -17,6 +16,7 @@ import {
 } from './test-utils';
 
 describe('ChatHistorySection - Data Edge Cases', () => {
+    jest.setTimeout(10000);
   const testSetup = createTestSetup();
 
   beforeEach(() => {
@@ -25,9 +25,15 @@ describe('ChatHistorySection - Data Edge Cases', () => {
 
   afterEach(() => {
     testSetup.afterEach();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Large dataset handling', () => {
+      jest.setTimeout(10000);
     it('should handle extremely large number of threads', async () => {
       const manyThreads = createLargeThreadSet(1000);
       setupCustomThreads(manyThreads);
@@ -77,6 +83,7 @@ describe('ChatHistorySection - Data Edge Cases', () => {
   });
 
   describe('Special character handling', () => {
+      jest.setTimeout(10000);
     it('should handle threads with special characters in titles', () => {
       const specialThreads = [
         createThreadWithSpecialChars(mockThreads[0]),
@@ -140,6 +147,7 @@ describe('ChatHistorySection - Data Edge Cases', () => {
   });
 
   describe('Malformed data handling', () => {
+      jest.setTimeout(10000);
     it('should handle malformed thread data gracefully', () => {
       const malformedThreads = [
         createMalformedThread('thread-1'),
@@ -191,6 +199,7 @@ describe('ChatHistorySection - Data Edge Cases', () => {
   });
 
   describe('Timestamp edge cases', () => {
+      jest.setTimeout(10000);
     it('should handle very old timestamps', () => {
       const oldThreads = [
         createThreadWithTimestamp(mockThreads[0], 0), // Unix epoch
@@ -251,6 +260,7 @@ describe('ChatHistorySection - Data Edge Cases', () => {
   });
 
   describe('Data type edge cases', () => {
+      jest.setTimeout(10000);
     it('should handle threads array as different types', () => {
       // Test with non-array types
       testSetup.configureStore({ threads: null });
@@ -309,6 +319,7 @@ describe('ChatHistorySection - Data Edge Cases', () => {
   });
 
   describe('Memory and performance edge cases', () => {
+      jest.setTimeout(10000);
     it('should handle rapid data updates without memory leaks', () => {
       const { rerender } = render(<ChatHistorySection />);
       

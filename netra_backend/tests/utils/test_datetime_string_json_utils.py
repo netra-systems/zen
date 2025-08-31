@@ -142,8 +142,8 @@ class TestJsonUtilsSerialization:
     
     @pytest.mark.asyncio
     async def test_custom_serialization(self):
-        from netra_backend.app.utils.json_utils import JsonUtils
-        utils = JsonUtils()
+        from netra_backend.app.core.serialization.unified_json_handler import CircularReferenceHandler
+        utils = CircularReferenceHandler()
         
         data = JsonTestHelpers.create_datetime_data()
         serialized = utils.serialize(data)
@@ -156,8 +156,8 @@ class TestJsonUtilsSerialization:
     
     @pytest.mark.asyncio
     async def test_circular_reference_handling(self):
-        from netra_backend.app.utils.json_utils import JsonUtils
-        utils = JsonUtils()
+        from netra_backend.app.core.serialization.unified_json_handler import CircularReferenceHandler
+        utils = CircularReferenceHandler()
         
         obj1 = JsonTestHelpers.create_circular_reference()
         serialized = utils.serialize_safe(obj1)

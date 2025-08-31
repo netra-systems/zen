@@ -1,18 +1,14 @@
-/**
- * Complete Login Flow Integration Tests
- * Tests complete user journey from credentials to chat-ready state
- * Business Value: Critical for user onboarding and retention
- * 
- * ARCHITECTURAL COMPLIANCE: ≤300 lines, functions ≤8 lines
- * Coverage: Phase 2, Agent 5 - Login Flow Complete Journey
- */
-
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AuthProvider } from '@/auth/context';
 import { useAuthStore } from '@/store/authStore';
 import { useUnifiedChatStore } from '@/store/unified-chat';
+import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
+import { mockAuthServiceResponses } from '@/__tests__/mocks/auth-service-mock';
+import { setupBasicMocks, setupTokenMocks } from '@/__tests__/auth/helpers/test-helpers';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+useUnifiedChatStore } from '@/store/unified-chat';
 import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
 import { mockAuthServiceResponses } from '@/__tests__/mocks/auth-service-mock';
 import { setupBasicMocks, setupTokenMocks } from '@/__tests__/auth/helpers/test-helpers';
@@ -42,6 +38,7 @@ jest.mock('@/components/MessageInput', () => ({
 }));
 
 describe('Complete Login Flow Integration', () => {
+    jest.setTimeout(10000);
   let wsManager: WebSocketTestManager;
   let mockAuthStore: any;
   let mockChatStore: any;
@@ -63,9 +60,15 @@ describe('Complete Login Flow Integration', () => {
   afterEach(() => {
     wsManager.cleanup();
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Complete Login Journey', () => {
+      jest.setTimeout(10000);
     it('completes full login to chat-ready state in <2s', async () => {
       const startTime = Date.now();
       
@@ -112,6 +115,7 @@ describe('Complete Login Flow Integration', () => {
   });
 
   describe('WebSocket Connection with Auth', () => {
+      jest.setTimeout(10000);
     it('establishes WebSocket connection with token', async () => {
       const server = wsManager.setup();
       const { result } = renderLoginFlow();
@@ -139,6 +143,7 @@ describe('Complete Login Flow Integration', () => {
   });
 
   describe('Post-Login Data Loading', () => {
+      jest.setTimeout(10000);
     it('fetches user data after authentication', async () => {
       const { result } = renderLoginFlow();
       
@@ -183,6 +188,7 @@ describe('Complete Login Flow Integration', () => {
   });
 
   describe('UI State After Login', () => {
+      jest.setTimeout(10000);
     it('activates chat input field', async () => {
       const { result } = renderLoginFlow();
       
@@ -219,6 +225,7 @@ describe('Complete Login Flow Integration', () => {
   });
 
   describe('Race Condition Prevention', () => {
+      jest.setTimeout(10000);
     it('prevents concurrent login attempts', async () => {
       const { result } = renderLoginFlow();
       

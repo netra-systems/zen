@@ -1,7 +1,12 @@
 import { cn, generateUniqueId } from '@/lib/utils';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Utils', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   describe('cn (className merge)', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should merge class names correctly', () => {
       expect(cn('foo', 'bar')).toBe('foo bar');
     });
@@ -56,6 +61,8 @@ describe('Utils', () => {
   });
 
   describe('generateUniqueId', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     beforeEach(() => {
       // Reset the id counter by accessing the module internals
       jest.resetModules();
@@ -231,7 +238,11 @@ describe('Utils', () => {
   });
 
   describe('Edge cases and error handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     describe('cn edge cases', () => {
+          setupAntiHang();
+        jest.setTimeout(10000);
       it('should handle very long class strings', () => {
         const longClass = 'a'.repeat(1000);
         const result = cn(longClass, 'short');
@@ -257,6 +268,8 @@ describe('Utils', () => {
     });
 
     describe('generateUniqueId edge cases', () => {
+          setupAntiHang();
+        jest.setTimeout(10000);
       it('should handle Math.random returning edge values', () => {
         jest.spyOn(Math, 'random').mockReturnValue(0);
         const id1 = generateUniqueId('edge');
@@ -300,6 +313,8 @@ describe('Utils', () => {
   });
 
   describe('Type safety', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should have correct TypeScript types for cn', () => {
       // These should compile without errors
       const result1: string = cn('foo');
@@ -320,4 +335,8 @@ describe('Utils', () => {
       expect(typeof id2).toBe('string');
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

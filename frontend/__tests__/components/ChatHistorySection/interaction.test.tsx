@@ -43,27 +43,27 @@ const mockThreads = [
 
 // Define mockThreadService inline to avoid hoisting issues
 jest.mock('@/store/unified-chat', () => ({
-  useUnifiedChatStore: mockUseUnifiedChatStore
+  useUnifiedChatStore: () => mockUseUnifiedChatStore()
 }));
 
 jest.mock('@/hooks/useLoadingState', () => ({
-  useLoadingState: mockUseLoadingState
+  useLoadingState: () => mockUseLoadingState()
 }));
 
 jest.mock('@/hooks/useThreadNavigation', () => ({
-  useThreadNavigation: mockUseThreadNavigation
+  useThreadNavigation: () => mockUseThreadNavigation()
 }));
 
 jest.mock('@/store/authStore', () => ({
-  useAuthStore: mockUseAuthStore
+  useAuthStore: () => mockUseAuthStore()
 }));
 
 jest.mock('@/store/threadStore', () => ({
-  useThreadStore: mockUseThreadStore
+  useThreadStore: () => mockUseThreadStore()
 }));
 
 jest.mock('@/store/chat', () => ({
-  useChatStore: mockUseChatStore
+  useChatStore: () => mockUseChatStore()
 }));
 
 jest.mock('@/services/threadService', () => ({
@@ -82,22 +82,29 @@ jest.mock('next/navigation', () => ({
 }));
 
 // AuthGate mock - always render children
-jest.mock('@/components/auth/AuthGate', () => ({
-  AuthGate: ({ children }: { children: React.ReactNode }) => children
-}));
+jest.mock('@/components/auth/AuthGate', () => {
+  const React = require('react');
+  return {
+    AuthGate: ({ children }: { children: React.ReactNode }) => children
+  };
+});
 
-jest.mock('framer-motion', () => ({
-  motion: {
-    div: ({ children, ...props }: any) => React.createElement('div', props, children),
-  },
-  AnimatePresence: ({ children }: any) => children,
-}));
+jest.mock('framer-motion', () => {
+  const React = require('react');
+  return {
+    motion: {
+      div: ({ children, ...props }: any) => React.createElement('div', props, children),
+    },
+    AnimatePresence: ({ children }: any) => children,
+  };
+});
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ChatHistorySection } from '@/components/ChatHistorySection';
 import { ThreadService } from '@/services/threadService';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 const mockStore = {
   isProcessing: false,
@@ -113,6 +120,8 @@ const mockStore = {
 };
 
 describe('ChatHistorySection - Interactions', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     mockRouter.push.mockClear();
@@ -166,6 +175,8 @@ describe('ChatHistorySection - Interactions', () => {
   });
 
   describe('Search functionality', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should filter threads based on search input', async () => {
       render(<ChatHistorySection />);
       
@@ -197,6 +208,8 @@ describe('ChatHistorySection - Interactions', () => {
   });
 
   describe('Delete conversation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should show delete confirmation dialog when delete is clicked', async () => {
       render(<ChatHistorySection />);
       
@@ -235,6 +248,8 @@ describe('ChatHistorySection - Interactions', () => {
   });
 
   describe('Load more pagination', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should load more threads when load more button is clicked', async () => {
       render(<ChatHistorySection />);
       
@@ -243,6 +258,8 @@ describe('ChatHistorySection - Interactions', () => {
   });
 
   describe('Conversation switching', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should switch to conversation when clicked', async () => {
       render(<ChatHistorySection />);
       
@@ -299,4 +316,8 @@ describe('ChatHistorySection - Interactions', () => {
       mockRouter.push.mockClear();
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

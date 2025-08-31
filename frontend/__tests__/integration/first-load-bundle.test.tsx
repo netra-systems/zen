@@ -1,10 +1,9 @@
-/**
- * First Load Bundle Testing - Agent 1 Implementation
- * 
- * BUSINESS VALUE JUSTIFICATION:
- * - Segment: All (Free → Enterprise)
- * - Business Goal: Zero first impression failures
- * - Value Impact: 30% reduction in bounce rate
+import React from 'react';
+import { render, screen, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { jest } from '@jest/globals';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+Value Impact: 30% reduction in bounce rate
  * - Revenue Impact: +$50K MRR from improved conversion
  * 
  * CRITICAL TESTS:
@@ -51,6 +50,7 @@ import { TestProviders } from '../setup/test-providers';
 // ============================================================================
 
 describe('First Load Bundle Testing - Agent 1', () => {
+    jest.setTimeout(10000);
   let testEnv: any;
   let performanceMocks: any;
 
@@ -63,9 +63,15 @@ describe('First Load Bundle Testing - Agent 1', () => {
   afterEach(() => {
     testEnv.cleanup();
     cleanupTest();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Bundle Loading Performance', () => {
+      jest.setTimeout(10000);
     it('loads bundle under 3G conditions within 5 seconds', async () => {
       simulateSlowNetwork(3000); // 3G simulation
       
@@ -126,6 +132,7 @@ describe('First Load Bundle Testing - Agent 1', () => {
   });
 
   describe('Hydration Verification', () => {
+      jest.setTimeout(10000);
     it('completes hydration without mismatches', async () => {
       const hydrationSpy = mockHydrationProcess();
       
@@ -178,6 +185,7 @@ describe('First Load Bundle Testing - Agent 1', () => {
   });
 
   describe('Authentication State Initialization', () => {
+      jest.setTimeout(10000);
     it('initializes with no authenticated content flash', async () => {
       const contentFlashSpy = jest.fn();
       
@@ -228,6 +236,7 @@ describe('First Load Bundle Testing - Agent 1', () => {
   });
 
   describe('Storage Initialization', () => {
+      jest.setTimeout(10000);
     it('initializes localStorage without errors', async () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       

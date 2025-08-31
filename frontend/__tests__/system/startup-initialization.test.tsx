@@ -1,5 +1,6 @@
-/**
- * Frontend System Startup - Initialization Tests
+import '../setup/startup-setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+Initialization Tests
  * Tests for Store, Router, Service Worker, Theme, and Configuration initialization
  */
 
@@ -116,6 +117,7 @@ import {
 } from './helpers/startup-test-mocks';
 
 describe('Frontend System Startup - Initialization', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     setupTestEnvironment();
     jest.clearAllMocks();
@@ -130,9 +132,15 @@ describe('Frontend System Startup - Initialization', () => {
 
   afterEach(() => {
     cleanupTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Store Initialization', () => {
+      jest.setTimeout(10000);
     it('should initialize Zustand stores', () => {
       testStoreInitialization();
     });
@@ -214,6 +222,7 @@ describe('Frontend System Startup - Initialization', () => {
   });
 
   describe('Service Worker Registration', () => {
+      jest.setTimeout(10000);
     it('should register service worker in production', async () => {
       await testServiceWorkerRegistration();
     });
@@ -269,6 +278,7 @@ describe('Frontend System Startup - Initialization', () => {
   });
 
   describe('Router Initialization', () => {
+      jest.setTimeout(10000);
     it('should initialize Next.js router', () => {
       testRouterInitialization();
     });
@@ -317,6 +327,7 @@ describe('Frontend System Startup - Initialization', () => {
   });
 
   describe('Configuration Loading', () => {
+      jest.setTimeout(10000);
     it('should load application configuration', () => {
       testConfigurationLoading();
     });
@@ -357,6 +368,7 @@ describe('Frontend System Startup - Initialization', () => {
   });
 
   describe('Theme Initialization', () => {
+      jest.setTimeout(10000);
     it('should initialize theme from user preferences', () => {
       testThemeInitialization();
     });
@@ -416,6 +428,7 @@ describe('Frontend System Startup - Initialization', () => {
   });
 
   describe('State Synchronization', () => {
+      jest.setTimeout(10000);
     it('should synchronize store states', () => {
       testStateSynchronization();
     });
@@ -444,6 +457,7 @@ describe('Frontend System Startup - Initialization', () => {
   });
 
   describe('Initialization Order', () => {
+      jest.setTimeout(10000);
     it('should initialize components in correct order', () => {
       testInitializationOrder();
     });

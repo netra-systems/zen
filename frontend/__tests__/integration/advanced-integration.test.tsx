@@ -1,5 +1,6 @@
-/**
- * Advanced Frontend Integration Tests - Compatibility Layer
+import './advanced-integration/index.test';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ Compatibility Layer
  * 
  * This file now serves as a compatibility layer that imports all modular test components.
  * The original 1790-line file has been refactored into organized, maintainable modules

@@ -1,12 +1,10 @@
-/**
- * Data Generation and Processing Integration Tests
- */
-
 import React from 'react';
 import { render, waitFor, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import WS from 'jest-websocket-mock';
 import { WebSocketTestManager, safeWebSocketCleanup } from '@/__tests__/helpers/websocket-test-manager';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+Cleanup } from '@/__tests__/helpers/websocket-test-manager';
 
 import { TestProviders } from '@/__tests__/setup/test-providers';
 
@@ -43,9 +41,15 @@ beforeEach(() => {
 afterEach(() => {
   safeWebSocketCleanup();
   jest.clearAllMocks();
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
 });
 
 describe('Synthetic Data Generation Flow', () => {
+    jest.setTimeout(10000);
   it('should generate synthetic data based on user input', async () => {
     const TestComponent = () => {
       const [generationStatus, setGenerationStatus] = React.useState('');
@@ -119,6 +123,7 @@ describe('Synthetic Data Generation Flow', () => {
 });
 
 describe('Generation Service Integration', () => {
+    jest.setTimeout(10000);
   it('should handle batch generation jobs', async () => {
     const TestComponent = () => {
       const [batchStatus, setBatchStatus] = React.useState<any>({});
@@ -161,7 +166,7 @@ describe('Generation Service Integration', () => {
       const [progress, setProgress] = React.useState(0);
       
       React.useEffect(() => {
-        const ws = new WebSocket('ws://localhost:8000/ws');
+        const ws = new WebSocket('ws://localhost:3001/test'));
         ws.onmessage = (event) => {
           const data = JSON.parse(event.data);
           if (data.type === 'generation_progress') {

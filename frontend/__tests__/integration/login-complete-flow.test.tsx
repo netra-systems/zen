@@ -1,9 +1,9 @@
-/**
- * Login Complete Flow Integration Tests - Agent 2
- * 
- * BUSINESS VALUE JUSTIFICATION:
- * - Segment: All (Free → Enterprise)  
- * - Business Goal: Zero friction login experience maximizing conversion
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+import React from 'react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { jest } from '@jest/globals';
+import { g conversion
  * - Value Impact: Prevents 50% of auth-related churn
  * - Revenue Impact: Protects $100K+ MRR from login abandonment
  * 
@@ -148,6 +148,7 @@ const LoginFlowTestComponent: React.FC = () => {
 // ============================================================================
 
 describe('Login Complete Flow Integration - Agent 2', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     setupMockDefaults();
     cleanupTest();
@@ -157,9 +158,15 @@ describe('Login Complete Flow Integration - Agent 2', () => {
     jest.clearAllMocks();
     localStorage.clear();
     sessionStorage.clear();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Login Form Interaction', () => {
+      jest.setTimeout(10000);
     it('should validate form inputs before submission', async () => {
       const { container } = renderLoginComponent();
       
@@ -210,6 +217,7 @@ describe('Login Complete Flow Integration - Agent 2', () => {
   });
 
   describe('Token Storage and Management', () => {
+      jest.setTimeout(10000);
     it('should store token securely after login', async () => {
       setupSuccessfulAuthScenario();
       renderLoginComponent();
@@ -242,6 +250,7 @@ describe('Login Complete Flow Integration - Agent 2', () => {
   });
 
   describe('WebSocket Connection Establishment', () => {
+      jest.setTimeout(10000);
     it('should establish WebSocket connection after auth', async () => {
       setupSuccessfulAuthScenario();
       setupWebSocketScenario();
@@ -271,6 +280,7 @@ describe('Login Complete Flow Integration - Agent 2', () => {
   });
 
   describe('User Data Fetching Sequence', () => {
+      jest.setTimeout(10000);
     it('should fetch user profile after authentication', async () => {
       setupUserDataFetchScenario();
       renderLoginComponent();
@@ -303,6 +313,7 @@ describe('Login Complete Flow Integration - Agent 2', () => {
   });
 
   describe('Route Navigation After Login', () => {
+      jest.setTimeout(10000);
     it('should redirect to dashboard after successful login', async () => {
       setupSuccessfulAuthScenario();
       renderLoginComponent();

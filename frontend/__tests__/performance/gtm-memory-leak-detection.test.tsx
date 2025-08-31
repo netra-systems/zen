@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, waitFor, act, cleanup } from '@testing-library/react';
 import { GTMProvider } from '@/providers/GTMProvider';
 import { useGTM } from '@/hooks/useGTM';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock performance.memory API
 interface MockMemoryInfo {
@@ -224,6 +225,8 @@ const FrequentMountComponent: React.FC<{ mountCount: number }> = ({ mountCount }
 };
 
 describe('GTM Memory Leak Detection Tests', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   let mockDataLayer: any[];
   let initialMemoryUsage: number;
 
@@ -255,9 +258,17 @@ describe('GTM Memory Leak Detection Tests', () => {
     cleanup();
     // Simulate garbage collection after each test
     mockPerformanceMemory.garbageCollect();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Event Tracking Memory Usage', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should not leak memory during normal event tracking', async () => {
       const initialMemory = mockPerformanceMemory.memory.usedJSHeapSize;
 
@@ -376,6 +387,8 @@ describe('GTM Memory Leak Detection Tests', () => {
   });
 
   describe('Component Lifecycle Memory Management', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should not leak memory during frequent mount/unmount cycles', async () => {
       const initialMemory = mockPerformanceMemory.memory.usedJSHeapSize;
 
@@ -457,6 +470,8 @@ describe('GTM Memory Leak Detection Tests', () => {
   });
 
   describe('DataLayer Memory Growth', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should prevent unbounded dataLayer growth', async () => {
       const initialMemory = mockPerformanceMemory.memory.usedJSHeapSize;
 
@@ -587,6 +602,8 @@ describe('GTM Memory Leak Detection Tests', () => {
   });
 
   describe('Memory Leak Prevention', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should implement automatic memory cleanup strategies', async () => {
       const initialMemory = mockPerformanceMemory.memory.usedJSHeapSize;
 

@@ -6,8 +6,11 @@
  */
 
 import { webSocketService } from '../services/webSocketService';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+import { TEST_TIMEOUTS } from '@/__tests__/config/test-timeouts';
 
 describe('WebSocket Message Type Alignment', () => {
+  setupAntiHang(TEST_TIMEOUTS.WEBSOCKET);
   let mockWebSocket: any;
   let onMessageCallback: jest.Mock;
   let onErrorCallback: jest.Mock;
@@ -33,6 +36,12 @@ describe('WebSocket Message Type Alignment', () => {
 
   afterEach(() => {
     webSocketService.disconnect();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Backend Message Types from MessageType Enum', () => {

@@ -9,11 +9,14 @@ import { jest } from '@jest/globals';
 import HomePage from '@/app/page';
 
 import { useAuth } from '@/auth/context';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Get the existing router mock from jest.setup.js
 const mockNavigation = require('next/navigation');
 
 describe('Landing Page - Working with Setup Infrastructure', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   let mockPush: jest.MockedFunction<any>;
 
   beforeEach(() => {
@@ -95,4 +98,8 @@ describe('Landing Page - Working with Setup Infrastructure', () => {
     
     expect(router.push).toHaveBeenCalledWith('/test');
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

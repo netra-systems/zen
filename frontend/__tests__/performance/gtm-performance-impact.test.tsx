@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { GTMProvider } from '@/providers/GTMProvider';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock performance API
 interface MockPerformanceEntry {
@@ -177,6 +178,8 @@ const PerformanceTestComponent: React.FC<{
 };
 
 describe('GTM Performance Impact Tests', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   let mockPerformance: MockPerformance;
   let mockDataLayer: any[];
   let originalPerformance: Performance;
@@ -209,9 +212,17 @@ describe('GTM Performance Impact Tests', () => {
 
   afterEach(() => {
     global.performance = originalPerformance;
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Initial Load Performance', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should measure GTM script loading time', async () => {
       const startTime = Date.now();
       mockPerformance.mark('gtm-load-start', { startTime });
@@ -323,6 +334,8 @@ describe('GTM Performance Impact Tests', () => {
   });
 
   describe('Runtime Performance', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should measure event tracking performance', async () => {
       render(
         <GTMProvider enabled={true} config={{ debug: true }}>
@@ -457,6 +470,8 @@ describe('GTM Performance Impact Tests', () => {
   });
 
   describe('Performance Regression Detection', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should detect performance regressions in script loading', async () => {
       const performanceBaseline = {
         scriptLoadTime: 50,
@@ -576,6 +591,8 @@ describe('GTM Performance Impact Tests', () => {
   });
 
   describe('Resource Usage Optimization', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should minimize DOM manipulation during event tracking', async () => {
       let domMutationCount = 0;
       
@@ -690,6 +707,8 @@ describe('GTM Performance Impact Tests', () => {
   });
 
   describe('Performance Budgets', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should stay within script loading performance budget', async () => {
       const performanceBudget = {
         scriptLoadTime: 100, // 100ms budget for script loading

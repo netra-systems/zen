@@ -68,7 +68,7 @@ class SyntheticDataProfileParser:
         try:
             prompt = self.create_parsing_prompt(user_request)
             response = await llm_manager.ask_llm(prompt, llm_config_name='default')
-            params = extract_json_from_response(response)
+            params = llm_parser.extract_json_from_response(response)
             return self.create_profile_from_params(params)
         except Exception as e:
             self._log_parsing_failure(e)

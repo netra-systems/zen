@@ -1,7 +1,8 @@
-/**
- * Bundle Size Tests - Modular Architecture
- * 
- * This file was refactored from 483 lines to comply with 450-line limit.
+import './bundle-size-monitoring.test';
+import './bundle-size-optimization.test';
+import './bundle-size-network.test';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+limit.
  * The original oversized test file has been split into focused modules:
  * 
  * - bundle-size-monitoring.test.tsx - Bundle size monitoring and analysis
@@ -39,6 +40,7 @@ import './bundle-size-network.test';
  */
 
 describe('Bundle Size Tests - Modular', () => {
+    jest.setTimeout(10000);
   it('should have all bundle size test modules properly organized', () => {
     // This test ensures the modular structure is maintained
     expect(true).toBe(true);

@@ -130,3 +130,6 @@ test_reports/
 .serena/cache/python/document_symbols_cache_v23-06-25.pkl
 .serena/project.yml
 nul
+.env.dev
+/google-cloud-sdk
+google-cloud-cli-darwin-arm.tar.gz

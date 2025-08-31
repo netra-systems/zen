@@ -157,19 +157,10 @@
                 }
               },
               {
-                "name": "JWT_SECRET_KEY",
+                "name": "JWT_SECRET_STAGING",
                 "valueFrom": {
                   "secretKeyRef": {
-                    "key": "latest",
-                    "name": "jwt-secret-key-staging"
-                  }
-                }
-              },
-              {
-                "name": "JWT_SECRET",
-                "valueFrom": {
-                  "secretKeyRef": {
-                    "key": "latest",
+                    "key": "latest", 
                     "name": "jwt-secret-staging"
                   }
                 }

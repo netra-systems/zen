@@ -71,6 +71,15 @@ class WebSocketMessageType(str, Enum):
     AGENT_LOG = "agent_log"
     AGENT_THINKING = "agent_thinking"
     AGENT_FALLBACK = "agent_fallback"
+    
+    # Agent lifecycle management (for agent manager)
+    AGENT_REGISTERED = "agent_registered"
+    AGENT_UNREGISTERED = "agent_unregistered"
+    AGENT_FAILED = "agent_failed"
+    AGENT_CANCELLED = "agent_cancelled"
+    AGENT_STATUS_CHANGED = "agent_status_changed"
+    AGENT_METRICS_UPDATED = "agent_metrics_updated"
+    AGENT_MANAGER_SHUTDOWN = "agent_manager_shutdown"
     TOOL_STARTED = "tool_started"
     TOOL_COMPLETED = "tool_completed"
     TOOL_CALL = "tool_call"
@@ -169,6 +178,13 @@ MessageTypeLiteral = Literal[
     "agent_log",
     "agent_thinking",
     "agent_fallback",
+    "agent_registered",
+    "agent_unregistered",
+    "agent_failed",
+    "agent_cancelled",
+    "agent_status_changed",
+    "agent_metrics_updated",
+    "agent_manager_shutdown",
     "tool_started",
     "tool_completed",
     "tool_call",

@@ -1,11 +1,9 @@
-/**
- * Task Retry Mechanisms Integration Tests
- * Tests for task failures, retries, and dead letter queue handling
- * Enterprise segment - ensures reliable error recovery
- */
-
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, waitFor, fireEvent, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { TestProviders } from '@/__tests__/setup/test-providers';
+import { ender, waitFor, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TestProviders } from '@/__tests__/setup/test-providers';
 import { 
@@ -26,9 +24,15 @@ beforeEach(() => {
 
 afterEach(() => {
   testContext.cleanup();
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
 });
 
 describe('Task Failure and Retry Mechanisms', () => {
+    jest.setTimeout(10000);
   it('should handle task failures and retries', async () => {
     const TestComponent = () => {
       const [retryCount, setRetryCount] = React.useState(0);

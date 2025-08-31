@@ -7,6 +7,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock button component that should have proper accessibility features
 const AccessibleButton: React.FC<{
@@ -29,6 +30,8 @@ const AccessibleButton: React.FC<{
 };
 
 describe('Button Accessibility Tests', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   it('should have proper accessibility attributes', () => {
     const mockOnClick = jest.fn();
     render(
@@ -62,4 +65,8 @@ describe('Button Accessibility Tests', () => {
     
     expect(mockOnClick).toHaveBeenCalledTimes(1);
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

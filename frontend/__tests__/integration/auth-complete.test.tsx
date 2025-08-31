@@ -1,15 +1,11 @@
-/**
- * Complete Authentication Flow Integration Tests
- * 
- * Tests comprehensive authentication flows including login, logout, 
- * token refresh, and state persistence for Netra Apex.
- * 
- * Business Value: Protects authentication security for all tiers,
- * prevents unauthorized access, ensures reliable user sessions.
- */
-
-// Mock declarations (Jest hoisting)
-const mockUseAuthStore = jest.fn();
+import React from 'react';
+import { render, fireEvent, waitFor, screen, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { jwtDecode } from 'jwt-decode';
+import { AuthProvider, AuthContext } from '@/auth/context';
+import { setupTestEnvironment, resetTestState, mockUser, mockAuthToken } from '@/__tests__/test-utils/integration-test-setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+UseAuthStore = jest.fn();
 const mockUseRouter = jest.fn();
 const mockAuthService = {
   getAuthConfig: jest.fn(),
@@ -75,6 +71,7 @@ const mockAuthConfig = {
 };
 
 describe('Complete Authentication Flow Integration', () => {
+    jest.setTimeout(10000);
   let mockRouter: any;
 
   beforeEach(() => {
@@ -86,9 +83,15 @@ describe('Complete Authentication Flow Integration', () => {
   afterEach(() => {
     jest.clearAllMocks();
     localStorage.clear();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('OAuth Login Flow', () => {
+      jest.setTimeout(10000);
     it('should complete OAuth login with token validation', async () => {
       const { mockLogin } = setupOAuthLoginScenario();
       const TestComponent = createAuthTestComponent();
@@ -133,6 +136,7 @@ describe('Complete Authentication Flow Integration', () => {
   });
 
   describe('Development Mode Authentication', () => {
+      jest.setTimeout(10000);
     it('should auto-login in development mode', async () => {
       const { mockDevLogin } = setupDevModeScenario();
       const TestComponent = createAuthTestComponent();
@@ -163,6 +167,7 @@ describe('Complete Authentication Flow Integration', () => {
   });
 
   describe('Logout Flow', () => {
+      jest.setTimeout(10000);
     it('should complete logout with full cleanup', async () => {
       const { mockLogout } = setupAuthenticatedScenario();
       const TestComponent = createAuthTestComponent();
@@ -203,6 +208,7 @@ describe('Complete Authentication Flow Integration', () => {
   });
 
   describe('Token Management', () => {
+      jest.setTimeout(10000);
     it('should validate token format and claims', async () => {
       const validToken = createValidJWT();
       const TestComponent = createAuthTestComponent();

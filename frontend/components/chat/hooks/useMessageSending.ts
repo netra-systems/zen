@@ -7,7 +7,7 @@ import { ThreadRenameService } from '@/services/threadRenameService';
 import { generateUniqueId } from '@/lib/utils';
 import { ChatMessage, MessageSendingParams, MESSAGE_INPUT_CONSTANTS } from '../types';
 import { optimisticMessageManager } from '@/services/optimistic-updates';
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 import { useGTMEvent } from '@/hooks/useGTMEvent';
 
 // Constants for error handling and recovery
@@ -239,7 +239,13 @@ export const useMessageSending = () => {
 
   const handleThreadRename = async (threadId: string, message: string): Promise<void> => {
     const thread = await ThreadService.getThread(threadId);
-    const shouldRename = thread && (!thread.metadata?.renamed || thread.metadata?.title === 'New Chat');
+    // Check if this is the first user message and thread hasn't been manually renamed
+    const isFirstUserMessage = checkIfFirstMessage(threadId);
+    const notManuallyRenamed = !thread?.metadata?.manually_renamed;
+    const hasDefaultTitle = thread?.title === 'New Chat' || thread?.title === 'New Conversation' || 
+                           thread?.name === 'New Chat' || thread?.name === 'New Conversation';
+    
+    const shouldRename = thread && isFirstUserMessage && notManuallyRenamed && (hasDefaultTitle || !thread.metadata?.auto_renamed);
     if (shouldRename) {
       ThreadRenameService.autoRenameThread(threadId, message);
     }

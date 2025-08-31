@@ -1,12 +1,18 @@
 """Simplified Circuit Breaker E2E Tests
 
 Basic validation tests for circuit breaker functionality using real UnifiedCircuitBreaker.
+Complies with CLAUDE.md requirements:
+- Uses IsolatedEnvironment for environment management
+- Uses absolute imports only
+- Tests real services (no mocks)
+- Focuses on basic circuit breaker flows
 """
 
 import pytest
 import asyncio
 from typing import Dict, Any
 
+from test_framework.environment_isolation import isolated_test_env
 from netra_backend.app.core.resilience.unified_circuit_breaker import (
     UnifiedCircuitBreaker,
     UnifiedCircuitConfig,
@@ -17,8 +23,12 @@ from netra_backend.app.core.resilience.unified_circuit_breaker import (
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-async def test_circuit_breaker_basic_functionality():
-    """Test basic circuit breaker functionality."""
+async def test_circuit_breaker_basic_functionality(isolated_test_env):
+    """Test basic circuit breaker functionality with real UnifiedCircuitBreaker."""
+    # Verify test environment is properly isolated
+    assert isolated_test_env.get("TESTING") == "1", "Test should run in isolated environment"
+    assert isolated_test_env.get("NETRA_ENV") == "testing", "Should be in testing environment"
+    
     # Create real circuit breaker
     config = UnifiedCircuitConfig(
         name="test_basic",
@@ -44,8 +54,11 @@ async def test_circuit_breaker_basic_functionality():
 
 @pytest.mark.asyncio
 @pytest.mark.e2e 
-async def test_circuit_breaker_state_transitions():
-    """Test circuit breaker state transitions."""
+async def test_circuit_breaker_state_transitions(isolated_test_env):
+    """Test circuit breaker state transitions from CLOSED -> OPEN -> HALF_OPEN -> CLOSED."""
+    # Verify test environment is properly isolated
+    assert isolated_test_env.get("TESTING") == "1", "Test should run in isolated environment"
+    
     # Create circuit breaker with low failure threshold for testing
     config = UnifiedCircuitConfig(
         name="test_transitions",
@@ -98,8 +111,11 @@ async def test_circuit_breaker_state_transitions():
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-async def test_circuit_breaker_metrics_collection():
-    """Test circuit breaker metrics collection."""
+async def test_circuit_breaker_metrics_collection(isolated_test_env):
+    """Test circuit breaker metrics collection with real operations."""
+    # Verify test environment is properly isolated
+    assert isolated_test_env.get("TESTING") == "1", "Test should run in isolated environment"
+    
     # Create circuit breaker for metrics testing
     config = UnifiedCircuitConfig(
         name="test_metrics",
@@ -142,8 +158,11 @@ async def test_circuit_breaker_metrics_collection():
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-async def test_circuit_breaker_error_handling():
-    """Test circuit breaker error handling."""
+async def test_circuit_breaker_error_handling(isolated_test_env):
+    """Test circuit breaker error handling with real timeouts and exceptions."""
+    # Verify test environment is properly isolated
+    assert isolated_test_env.get("TESTING") == "1", "Test should run in isolated environment"
+    
     # Create circuit breaker for error handling testing
     config = UnifiedCircuitConfig(
         name="test_errors",
@@ -194,8 +213,11 @@ async def test_circuit_breaker_error_handling():
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-async def test_circuit_breaker_recovery():
-    """Test circuit breaker recovery process."""
+async def test_circuit_breaker_recovery(isolated_test_env):
+    """Test circuit breaker recovery process with real timeout-based recovery."""
+    # Verify test environment is properly isolated
+    assert isolated_test_env.get("TESTING") == "1", "Test should run in isolated environment"
+    
     # Create circuit breaker for recovery testing
     config = UnifiedCircuitConfig(
         name="test_recovery",
@@ -254,8 +276,11 @@ async def test_circuit_breaker_recovery():
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-async def test_circuit_breaker_threshold_configuration():
-    """Test circuit breaker threshold configuration."""
+async def test_circuit_breaker_threshold_configuration(isolated_test_env):
+    """Test circuit breaker threshold configuration and validation."""
+    # Verify test environment is properly isolated
+    assert isolated_test_env.get("TESTING") == "1", "Test should run in isolated environment"
+    
     # Test custom configuration
     config = UnifiedCircuitConfig(
         name="test_config",

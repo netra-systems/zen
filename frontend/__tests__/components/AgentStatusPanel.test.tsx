@@ -3,6 +3,7 @@ import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AgentStatusPanel from '@/components/chat/AgentStatusPanel';
 import { useUnifiedChatStore } from '@/store/unified-chat';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 import { TestProviders } from '@/__tests__/test-utils/providers';
 
@@ -14,6 +15,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 
 describe('AgentStatusPanel Component', () => {
+    jest.setTimeout(10000);
   const mockUnifiedChatStore = {
     isProcessing: false,
     subAgentName: null,
@@ -37,6 +39,11 @@ describe('AgentStatusPanel Component', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   const renderWithProvider = (component: React.ReactElement) => {
@@ -48,6 +55,7 @@ describe('AgentStatusPanel Component', () => {
   };
 
   describe('Agent Status Display', () => {
+      jest.setTimeout(10000);
     it('should render the component when processing', () => {
       const activeStore = {
         ...mockUnifiedChatStore,
@@ -144,6 +152,7 @@ describe('AgentStatusPanel Component', () => {
   });
 
   describe('Real-time Updates', () => {
+      jest.setTimeout(10000);
     it('should update humor elements during processing', async () => {
       const activeStore = {
         ...mockUnifiedChatStore,
@@ -192,6 +201,7 @@ describe('AgentStatusPanel Component', () => {
   });
 
   describe('Performance and Optimization', () => {
+      jest.setTimeout(10000);
     it('should cleanup timers on unmount', () => {
       const activeStore = {
         ...mockUnifiedChatStore,

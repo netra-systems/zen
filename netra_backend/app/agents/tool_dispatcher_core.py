@@ -58,6 +58,36 @@ class ToolDispatcher:
         """Check if a tool exists"""
         return self.registry.has_tool(tool_name)
     
+    def register_tool(self, tool_name: str, tool_func, description: str = None) -> None:
+        """Register a tool function with the dispatcher - public interface for tests."""
+        from langchain_core.tools import BaseTool
+        
+        # Create a simple tool wrapper if needed
+        if not isinstance(tool_func, BaseTool):
+            # Create a simple BaseTool wrapper
+            desc = description or f"Dynamic tool: {tool_name}"
+            
+            class DynamicTool(BaseTool):
+                name: str = tool_name
+                description: str = desc
+                
+                def _run(self, *args, **kwargs):
+                    return tool_func(*args, **kwargs)
+                
+                async def _arun(self, *args, **kwargs):
+                    if hasattr(tool_func, '__call__'):
+                        # Check if it's a coroutine function
+                        import asyncio
+                        if asyncio.iscoroutinefunction(tool_func):
+                            return await tool_func(*args, **kwargs)
+                        else:
+                            return tool_func(*args, **kwargs)
+                    return tool_func(*args, **kwargs)
+            
+            tool_func = DynamicTool()
+        
+        self.registry.register_tool(tool_func)
+    
     async def dispatch(self, tool_name: str, **kwargs: Any) -> ToolResult:
         """Dispatch tool execution with proper typing"""
         tool_input = self._create_tool_input(tool_name, kwargs)

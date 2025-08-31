@@ -4,6 +4,7 @@ import { WebSocketProvider } from '../providers/WebSocketProvider';
 import { AuthContext } from '@/auth/context';
 import { webSocketService } from '../services/webSocketService';
 import { logger } from '@/lib/logger';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock the webSocketService
 jest.mock('../services/webSocketService', () => ({
@@ -18,8 +19,7 @@ jest.mock('../services/webSocketService', () => ({
   }
 }));
 
-jest.mock('@/lib/logger');
-jest.mock('@/utils/debug-logger', () => ({
+jest.mock('@/lib/logger', () => ({
   logger: {
     debug: jest.fn(),
     warn: jest.fn(),
@@ -28,6 +28,8 @@ jest.mock('@/utils/debug-logger', () => ({
 }));
 
 describe('WebSocket Parse Error Test', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   const mockToken = 'test-auth-token';
   const mockAuthContext = {
     token: mockToken,
@@ -211,4 +213,8 @@ describe('WebSocket Parse Error Test', () => {
       expect(parseError).toBeDefined();
     }, { timeout: 500 });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

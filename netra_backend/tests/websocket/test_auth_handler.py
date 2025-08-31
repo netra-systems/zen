@@ -6,7 +6,7 @@ Business Value: Customer-facing functionality
 
 import pytest
 import asyncio
-from netra_backend.app.websocket.auth_handler import AuthHandler
+from netra_backend.app.websocket_core.auth import WebSocketAuthenticator
 
 @pytest.mark.asyncio
 class TestAuthHandlerAsync:
@@ -14,7 +14,7 @@ class TestAuthHandlerAsync:
     
     async def test_websocket_connection(self):
         """Test WebSocket connection"""
-        manager = AuthHandler()
+        manager = WebSocketAuthenticator()
         connection = await manager.connect("test_client")
         assert connection is not None
         await manager.disconnect("test_client")
@@ -32,7 +32,7 @@ class TestAuthHandlerAsync:
     
     async def test_concurrent_connections(self):
         """Test multiple connections"""
-        manager = AuthHandler()
+        manager = WebSocketAuthenticator()
         tasks = []
         for i in range(50):
             tasks.append(manager.connect(f"client_{i}"))

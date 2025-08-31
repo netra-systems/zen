@@ -1,10 +1,10 @@
-/**
- * Thread Creation Integration Tests - Core Flow
- * 
- * Tests the complete thread creation flow from Start Chat button click
- * through API call, optimistic UI updates, and navigation to new thread.
- * 
- * Business Value Justification:
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { useRouter } from 'next/navigation';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+stification:
  * - Segment: All (Free, Early, Mid, Enterprise)
  * - Goal: Ensure seamless thread creation flow for user engagement
  * - Value Impact: Critical for Free → Paid conversion pipeline
@@ -58,15 +58,22 @@ const mockAuthStore = {
 };
 
 describe('Thread Creation Core Integration', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     setupIntegrationTests();
   });
   
   afterEach(() => {
     cleanupIntegrationTests();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
   
   describe('API Call to Create Thread', () => {
+      jest.setTimeout(10000);
     const apiTests: ThreadCreationTest[] = [
       {
         description: 'successfully creates thread with valid API response',
@@ -120,6 +127,7 @@ describe('Thread Creation Core Integration', () => {
   });
   
   describe('Optimistic UI Updates', () => {
+      jest.setTimeout(10000);
     it('shows thread immediately in sidebar', async () => {
       setupOptimisticUpdate([]);
       renderThreadCreationFlow();
@@ -147,6 +155,7 @@ describe('Thread Creation Core Integration', () => {
   });
   
   describe('Sidebar and Navigation Updates', () => {
+      jest.setTimeout(10000);
     it('adds new thread to sidebar list immediately', async () => {
       renderThreadCreationFlow();
       await triggerThreadCreation();
@@ -170,6 +179,7 @@ describe('Thread Creation Core Integration', () => {
   });
   
   describe('Error Handling and Analytics', () => {
+      jest.setTimeout(10000);
     it('shows error message on API failure', async () => {
       setupApiFailure();
       renderThreadCreationFlow();

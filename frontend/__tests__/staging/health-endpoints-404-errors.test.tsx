@@ -14,8 +14,11 @@
  */
 
 import { getUnifiedApiConfig } from '@/lib/unified-api-config';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Health Endpoints 404 Errors - Staging Replication', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   const originalEnv = process.env;
   
   beforeAll(() => {
@@ -35,6 +38,8 @@ describe('Health Endpoints 404 Errors - Staging Replication', () => {
   });
 
   describe('Frontend Health Endpoint Accessibility', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: Frontend service attempting to serve backend health endpoints
@@ -100,6 +105,8 @@ describe('Health Endpoints 404 Errors - Staging Replication', () => {
   });
 
   describe('Correct Health Endpoint Configuration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO PASS (but demonstrates correct approach)
      * Shows how health endpoints SHOULD be accessed in staging
@@ -150,6 +157,8 @@ describe('Health Endpoints 404 Errors - Staging Replication', () => {
   });
 
   describe('Kubernetes Health Probe Configuration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: Kubernetes probes misconfigured to hit frontend service
@@ -186,6 +195,8 @@ describe('Health Endpoints 404 Errors - Staging Replication', () => {
   });
 
   describe('Service Mesh / Ingress Configuration Issues', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: Load balancer or ingress routing health requests to wrong service
@@ -227,6 +238,8 @@ describe('Health Endpoints 404 Errors - Staging Replication', () => {
   });
 
   describe('Network Configuration Diagnosis', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: DNS or service discovery misconfiguration
@@ -261,6 +274,8 @@ describe('Health Endpoints 404 Errors - Staging Replication', () => {
   });
 
   describe('Error Response Analysis', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Documents the current 404 error patterns from staging logs
@@ -300,4 +315,8 @@ describe('Health Endpoints 404 Errors - Staging Replication', () => {
       global.fetch = fetch;
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

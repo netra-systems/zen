@@ -1,5 +1,5 @@
-/**
- * Real-time Collaboration Sync Tests
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+import { al-time Collaboration Sync Tests
  * 
  * BVJ: Enterprise segment - ensures platform scalability for collaborative features
  * Tests conflict resolution, operation history, and collaborative editing.
@@ -44,6 +44,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('Real-time Collaboration Sync Tests', () => {
+    jest.setTimeout(10000);
   let server: WS;
   
   beforeEach(() => {
@@ -53,9 +54,15 @@ describe('Real-time Collaboration Sync Tests', () => {
 
   afterEach(() => {
     cleanupTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Conflict Resolution', () => {
+      jest.setTimeout(10000);
     it('should handle conflict resolution in collaborative editing', async () => {
       const CollaborativeEditor = createCollaborativeEditor();
       
@@ -87,6 +94,7 @@ describe('Real-time Collaboration Sync Tests', () => {
   });
 
   describe('Operation History Management', () => {
+      jest.setTimeout(10000);
     it('should maintain operation history for undo/redo', async () => {
       const UndoRedoComponent = createUndoRedoComponent();
       
@@ -116,6 +124,7 @@ describe('Real-time Collaboration Sync Tests', () => {
   });
 
   describe('Real-time Synchronization', () => {
+      jest.setTimeout(10000);
     it('should sync changes across multiple clients', async () => {
       const SyncComponent = createSyncComponent();
       

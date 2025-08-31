@@ -29,6 +29,7 @@ import {
 } from '@/components/demo/ROICalculator.types';
 
 import { describeFeature, testTDD } from '@/test-utils/feature-flags';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describeFeature('roi_calculator', 'ROI Calculator Individual Functions', () => {
   const createTestMetrics = (overrides: Partial<Metrics> = {}): Metrics => ({
@@ -46,6 +47,8 @@ describeFeature('roi_calculator', 'ROI Calculator Individual Functions', () => {
   });
 
   describe('calculateInfrastructureSavings', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     const originalRandom = Math.random;
 
     beforeEach(() => {
@@ -54,6 +57,12 @@ describeFeature('roi_calculator', 'ROI Calculator Individual Functions', () => {
 
     afterEach(() => {
       Math.random = originalRandom;
+        // Clean up timers to prevent hanging
+        jest.clearAllTimers();
+        jest.useFakeTimers();
+        jest.runOnlyPendingTimers();
+        jest.useRealTimers();
+        cleanupAntiHang();
     });
 
     it('should calculate infrastructure savings with base formula', () => {
@@ -99,6 +108,8 @@ describeFeature('roi_calculator', 'ROI Calculator Individual Functions', () => {
   });
 
   describe('calculateOperationalSavings', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should calculate operational savings based on team size', () => {
       const metrics = createTestMetrics({ teamSize: 10 });
       const result = calculateOperationalSavings(metrics);
@@ -128,6 +139,8 @@ describeFeature('roi_calculator', 'ROI Calculator Individual Functions', () => {
   });
 
   describe('calculatePerformanceValue', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should calculate performance value from request volume', () => {
       const metrics = createTestMetrics({ requestsPerMonth: 10000000 });
       const result = calculatePerformanceValue(metrics);
@@ -157,6 +170,8 @@ describeFeature('roi_calculator', 'ROI Calculator Individual Functions', () => {
   });
 
   describe('calculatePaybackPeriod', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should calculate payback period correctly', () => {
       const implementationCost = 100000;
       const monthlySavings = 25000;
@@ -187,6 +202,8 @@ describeFeature('roi_calculator', 'ROI Calculator Individual Functions', () => {
   });
 
   describe('calculateThreeYearROI', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should calculate three-year ROI percentage', () => {
       const annualSavings = 100000;
       const implementationCost = 50000;
@@ -217,6 +234,8 @@ describeFeature('roi_calculator', 'ROI Calculator Individual Functions', () => {
   });
 
   describe('buildCalculationInput', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should build calculation input from metrics and industry', () => {
       const metrics = createTestMetrics({
         currentMonthlySpend: 75000,
@@ -245,6 +264,8 @@ describeFeature('roi_calculator', 'ROI Calculator Individual Functions', () => {
   });
 
   describe('mapApiResponseToSavings', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should map API response to savings structure correctly', () => {
       const apiResponse = createMockAPIResponse();
       const metrics = createTestMetrics({ currentMonthlySpend: 50000 });
@@ -276,6 +297,8 @@ describeFeature('roi_calculator', 'ROI Calculator Individual Functions', () => {
   });
 
   describe('buildFallbackSavings - Enterprise Sales Critical', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should build complete fallback savings for Technology industry', () => {
       const metrics = createTestMetrics({
         currentMonthlySpend: 100000,

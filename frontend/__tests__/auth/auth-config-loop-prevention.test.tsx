@@ -11,6 +11,7 @@
 import React from 'react';
 import { render, waitFor, act } from '@testing-library/react';
 import { unifiedAuthService } from '@/auth/unified-auth-service';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock dependencies (store and logger are already mocked globally)
 jest.mock('@/store/authStore', () => ({
@@ -29,6 +30,8 @@ jest.mock('@/lib/logger', () => ({
 }));
 
 describe('Auth Configuration Loop Prevention', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   let getAuthConfigSpy: jest.SpyInstance;
   let getTokenSpy: jest.SpyInstance;
   let AuthProvider: any;
@@ -73,6 +76,12 @@ describe('Auth Configuration Loop Prevention', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   test('should prevent config fetch loops during component re-renders', async () => {

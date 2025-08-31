@@ -20,6 +20,7 @@ class PortDiscovery:
         "development": {
             "backend": 8001,
             "auth": 8081,
+            "analytics": 8090,
             "frontend": 3000,
             "postgres": 5432,
             "redis": 6379,
@@ -28,6 +29,7 @@ class PortDiscovery:
         "test": {
             "backend": 8001,
             "auth": 8082,  # Note: test uses different auth port
+            "analytics": 8091,  # Note: test uses different analytics port
             "frontend": 3001,
             "postgres": 5434,
             "redis": 6381,
@@ -36,6 +38,7 @@ class PortDiscovery:
         "staging": {
             "backend": 443,  # HTTPS in staging
             "auth": 443,  # HTTPS in staging
+            "analytics": 443,  # HTTPS in staging
             "frontend": 443,  # HTTPS in staging
             "postgres": 5432,
             "redis": 6379,
@@ -44,6 +47,7 @@ class PortDiscovery:
         "production": {
             "backend": 443,  # HTTPS in production
             "auth": 443,  # HTTPS in production
+            "analytics": 443,  # HTTPS in production
             "frontend": 443,  # HTTPS in production
             "postgres": 5432,
             "redis": 6379,
@@ -128,6 +132,8 @@ class PortDiscovery:
                     host = f"auth.{'staging.' if env == 'staging' else ''}netrasystems.ai"
                 elif service == "backend":
                     host = f"api.{'staging.' if env == 'staging' else ''}netrasystems.ai"
+                elif service == "analytics":
+                    host = f"analytics.{'staging.' if env == 'staging' else ''}netrasystems.ai"
                 elif service == "frontend":
                     host = f"{'staging.' if env == 'staging' else ''}netrasystems.ai"
                 else:
@@ -137,12 +143,13 @@ class PortDiscovery:
                 if cls._is_docker():
                     # Use service names in Docker
                     host = {
-                        "backend": "backend" if env == "development" else "backend-test",
-                        "auth": "auth" if env == "development" else "auth-test",
-                        "frontend": "frontend" if env == "development" else "frontend-test",
-                        "postgres": "postgres" if env == "development" else "postgres-test",
-                        "redis": "redis" if env == "development" else "redis-test",
-                        "clickhouse": "clickhouse" if env == "development" else "clickhouse-test"
+                        "backend": "dev-backend" if env == "development" else "test-backend",
+                        "auth": "dev-auth" if env == "development" else "test-auth",
+                        "analytics": "dev-analytics" if env == "development" else "test-analytics",
+                        "frontend": "dev-frontend" if env == "development" else "test-frontend",
+                        "postgres": "dev-postgres" if env == "development" else "test-postgres",
+                        "redis": "dev-redis" if env == "development" else "test-redis",
+                        "clickhouse": "dev-clickhouse" if env == "development" else "test-clickhouse"
                     }.get(service, "localhost")
                 else:
                     host = "localhost"
@@ -211,7 +218,7 @@ class PortDiscovery:
             Dictionary of service names to URLs
         """
         env = environment or cls.get_environment()
-        services = ["backend", "auth", "frontend"]
+        services = ["backend", "auth", "analytics", "frontend"]
         
         return {
             service: cls.get_service_url(service, environment=env)
@@ -231,7 +238,7 @@ class PortDiscovery:
         
         # Check for port conflicts
         used_ports = {}
-        for service in ["backend", "auth", "frontend", "postgres", "redis", "clickhouse"]:
+        for service in ["backend", "auth", "analytics", "frontend", "postgres", "redis", "clickhouse"]:
             try:
                 port = cls.get_port(service, env)
                 if port in used_ports:
@@ -257,6 +264,10 @@ def get_auth_service_url(environment: Optional[str] = None) -> str:
 def get_backend_service_url(environment: Optional[str] = None) -> str:
     """Get backend service URL for current or specified environment"""
     return PortDiscovery.get_service_url("backend", environment=environment)
+
+def get_analytics_service_url(environment: Optional[str] = None) -> str:
+    """Get analytics service URL for current or specified environment"""
+    return PortDiscovery.get_service_url("analytics", environment=environment)
 
 def get_frontend_url(environment: Optional[str] = None) -> str:
     """Get frontend URL for current or specified environment"""

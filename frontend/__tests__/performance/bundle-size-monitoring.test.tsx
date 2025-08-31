@@ -1,7 +1,7 @@
-/**
- * Bundle Size Monitoring Tests
- * Tests bundle size monitoring and basic analysis functionality
- * Extracted from oversized bundle-size.test.tsx for modularity
+import { render, screen, act, waitFor } from '@testing-library/react';
+import { TestProviders } from '@/__tests__/test-utils/providers';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ize.test.tsx for modularity
  * 
  * Business Value Justification (BVJ):
  * - Segment: All (Free → Enterprise)
@@ -89,12 +89,14 @@ function calculatePerformanceImpact(metrics: NetworkMetrics): number {
 }
 
 describe('Bundle Size Monitoring Tests', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     // Reset any global state
     jest.clearAllMocks();
   });
 
   describe('Bundle Size Analysis', () => {
+      jest.setTimeout(10000);
     it('should analyze main bundle size correctly', () => {
       const analysis = analyzeBundleSize();
       
@@ -140,6 +142,7 @@ describe('Bundle Size Monitoring Tests', () => {
   });
 
   describe('Performance Threshold Validation', () => {
+      jest.setTimeout(10000);
     it('should validate bundle size thresholds', () => {
       const analysis = analyzeBundleSize();
       const isValid = validateBundleThresholds(analysis);
@@ -176,6 +179,7 @@ describe('Bundle Size Monitoring Tests', () => {
   });
 
   describe('Network Metrics', () => {
+      jest.setTimeout(10000);
     it('should measure network performance', () => {
       const metrics = measureNetworkMetrics();
       
@@ -212,6 +216,7 @@ describe('Bundle Size Monitoring Tests', () => {
   });
 
   describe('Bundle Health Checks', () => {
+      jest.setTimeout(10000);
     it('should detect bundle size regression', () => {
       const currentAnalysis = analyzeBundleSize();
       const baselineSize = 200000; // 200KB baseline

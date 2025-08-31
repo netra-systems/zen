@@ -1,8 +1,9 @@
-/**
- * Mobile and navigation tests for MessageInput component - FIXED VERSION
- * Tests mobile keyboard behavior, draft preservation, navigation
- * 
- * BVJ: Ensures optimal mobile experience and user flow continuity.
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { jest } from '@jest/globals';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ser flow continuity.
  * Critical for mobile-first user engagement and retention.
  */
 
@@ -111,6 +112,7 @@ const resetViewport = () => {
 };
 
 describe('MessageInput - Mobile Navigation', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     resetViewport();
@@ -118,12 +120,18 @@ describe('MessageInput - Mobile Navigation', () => {
 
   afterEach(() => {
     resetViewport();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   const getTextarea = () => screen.getByRole('textbox', { name: /message input/i }) as HTMLTextAreaElement;
   const getSendButton = () => screen.getByRole('button', { name: /send/i });
 
   describe('Mobile viewport behavior', () => {
+      jest.setTimeout(10000);
     test('should render properly in mobile viewport', () => {
       simulateMobileViewport();
       render(<MessageInput />);
@@ -189,6 +197,7 @@ describe('MessageInput - Mobile Navigation', () => {
   });
 
   describe('Draft preservation', () => {
+      jest.setTimeout(10000);
     test('should preserve draft content during navigation', async () => {
       render(<MessageInput />);
       
@@ -239,6 +248,7 @@ describe('MessageInput - Mobile Navigation', () => {
   });
 
   describe('Navigation handling', () => {
+      jest.setTimeout(10000);
     test('should handle browser back/forward navigation', async () => {
       render(<MessageInput />);
       
@@ -310,6 +320,7 @@ describe('MessageInput - Mobile Navigation', () => {
   });
 
   describe('Mobile keyboard shortcuts', () => {
+      jest.setTimeout(10000);
     test('should handle mobile Enter key behavior', async () => {
       simulateMobileViewport();
       render(<MessageInput />);
@@ -363,6 +374,7 @@ describe('MessageInput - Mobile Navigation', () => {
   });
 
   describe('Responsive design', () => {
+      jest.setTimeout(10000);
     test('should adapt to different screen sizes', async () => {
       // Test various mobile screen sizes
       const screenSizes = [

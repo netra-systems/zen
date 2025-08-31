@@ -9,7 +9,7 @@ Prevents test environment pollution and ensures reliable test execution.
 """
 import os
 import pytest
-from typing import Dict, Optional, Any
+from typing import Dict, Optional, Any, Union
 from pathlib import Path
 import sys
 
@@ -19,13 +19,23 @@ import sys
 def get_env():
     """Get appropriate environment manager based on context."""
     # Check if we're in pytest environment
-    if 'pytest' in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
+    if 'pytest' in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):  # @marked: Test framework detection
         # During pytest, use a minimal environment wrapper that doesn't trigger dev setup
         class TestEnvironmentWrapper:
             def get(self, key: str, default=None):
-                return os.environ.get(key, default)
+                return os.environ.get(key, default)  # @marked: Test wrapper for isolated access
             def set(self, key: str, value: str, source: str = "test"):
-                os.environ[key] = value
+                os.environ[key] = value  # @marked: Test wrapper for isolated access
+            def get_all(self):
+                return dict(os.environ)  # @marked: Test wrapper for isolated access
+            def delete(self, key: str, source: str = "test"):
+                if key in os.environ:  # @marked: Test wrapper for isolated access
+                    del os.environ[key]  # @marked: Test wrapper for isolated access
+            def get_subprocess_env(self, additional_vars=None):
+                env = dict(os.environ)  # @marked: Test wrapper for isolated access
+                if additional_vars:
+                    env.update(additional_vars)
+                return env
             def is_isolation_enabled(self):
                 # Always return True for test environment wrapper
                 return True
@@ -45,14 +55,41 @@ def get_env():
         return dev_get_env()
 
 # Import IsolatedEnvironment only when not in pytest to avoid triggering dev setup
+# Create type aliases for better type annotations and prevent TypeError
 try:
-    if 'pytest' not in sys.modules and not os.environ.get("PYTEST_CURRENT_TEST"):
+    if 'pytest' not in sys.modules and not os.environ.get("PYTEST_CURRENT_TEST"):  # @marked: Test framework detection
         from dev_launcher.isolated_environment import IsolatedEnvironment
+        EnvironmentType = IsolatedEnvironment
     else:
-        # Define a minimal IsolatedEnvironment for tests
-        IsolatedEnvironment = None
+        # Create a substitute IsolatedEnvironment class for tests that prevents TypeError
+        class TestIsolatedEnvironmentSubstitute:
+            """Substitute for IsolatedEnvironment during pytest to prevent TypeError."""
+            
+            def __new__(cls, *args, **kwargs):
+                # Return TestEnvironmentWrapper when IsolatedEnvironment() is called
+                return get_env()
+        
+        IsolatedEnvironment = TestIsolatedEnvironmentSubstitute
+        
+        # Create a type alias that represents the actual runtime type during tests
+        from typing import TYPE_CHECKING, Any
+        if TYPE_CHECKING:
+            # For type checking, use forward reference
+            EnvironmentType = 'IsolatedEnvironment'
+        else:
+            # At runtime, this will be the actual TestEnvironmentWrapper
+            EnvironmentType = Any
 except ImportError:
-    IsolatedEnvironment = None
+    # Same substitute for import errors
+    class TestIsolatedEnvironmentSubstitute:
+        """Substitute for IsolatedEnvironment when import fails."""
+        
+        def __new__(cls, *args, **kwargs):
+            return get_env()
+    
+    IsolatedEnvironment = TestIsolatedEnvironmentSubstitute
+    from typing import Any
+    EnvironmentType = Any
 
 
 class TestEnvironmentManager:
@@ -71,19 +108,23 @@ class TestEnvironmentManager:
         "LOG_LEVEL": "ERROR",
         "TEST_COLLECTION_MODE": "0",
         
-        # Database configuration - Using DATABASE_URL only to avoid conflicts
-        "DATABASE_URL": "sqlite+aiosqlite:///:memory:",
-        # Explicitly clear individual database variables to prevent conflicts
-        "DATABASE_HOST": "",
-        "DATABASE_USER": "",
-        "DATABASE_PASSWORD": "",
-        "DATABASE_NAME": "",
-        "DATABASE_PORT": "",
+        # Database configuration - Using separate components per database_connectivity_architecture.xml
+        # For test environment, DatabaseURLBuilder's TestBuilder will use SQLite memory by default
+        # We set USE_MEMORY_DB to ensure SQLite is used for tests
+        "USE_MEMORY_DB": "true",
+        # Clear all database config to let TestBuilder use memory database
         "POSTGRES_HOST": "",
         "POSTGRES_USER": "",
         "POSTGRES_PASSWORD": "",
         "POSTGRES_DB": "",
         "POSTGRES_PORT": "",
+        # Clear legacy DATABASE_URL to ensure central config manager is used
+        "DATABASE_URL": "",
+        "DATABASE_HOST": "",
+        "DATABASE_USER": "",
+        "DATABASE_PASSWORD": "",
+        "DATABASE_NAME": "",
+        "DATABASE_PORT": "",
         
         # Redis configuration
         "REDIS_URL": "redis://localhost:6379/1",
@@ -125,7 +166,7 @@ class TestEnvironmentManager:
         self, 
         additional_vars: Optional[Dict[str, str]] = None,
         enable_real_llm: bool = False
-    ) -> IsolatedEnvironment:
+    ) -> EnvironmentType:
         """
         Set up isolated test environment.
         
@@ -159,45 +200,34 @@ class TestEnvironmentManager:
     
     def _ensure_database_config_consistency(self) -> None:
         """
-        Ensure database configuration consistency by preventing multiple sources.
+        Ensure database configuration consistency per database_connectivity_architecture.xml.
         
-        This method enforces that only one database configuration method is used:
-        - Either DATABASE_URL is set (for test environments)
-        - Or individual components are set (DATABASE_HOST, DATABASE_USER, etc.)
-        But not both, which causes configuration conflicts.
+        For test environments:
+        - Clear any legacy DATABASE_URL to ensure central config manager is used
+        - DatabaseURLBuilder's TestBuilder will handle SQLite memory database
+        - USE_MEMORY_DB=true ensures tests use SQLite in-memory
         """
+        # Clear any legacy DATABASE_URL to prevent conflicts
         database_url = self.env.get("DATABASE_URL")
-        
-        # List of individual database configuration variables that conflict with DATABASE_URL
-        individual_db_vars = [
-            "DATABASE_HOST", "DATABASE_USER", "DATABASE_PASSWORD", 
-            "DATABASE_NAME", "DATABASE_PORT",
-            "POSTGRES_HOST", "POSTGRES_USER", "POSTGRES_PASSWORD", 
-            "POSTGRES_DB", "POSTGRES_PORT"
-        ]
-        
         if database_url and database_url.strip():
-            # DATABASE_URL is set, ensure individual components are cleared to prevent conflicts
-            conflicts_cleared = []
-            for var in individual_db_vars:
-                existing_value = self.env.get(var)
-                if existing_value and existing_value.strip():
-                    # Clear conflicting individual database variables
-                    self.env.set(var, "", source="database_config_consistency_clear")
-                    conflicts_cleared.append(var)
+            self.env.set("DATABASE_URL", "", source="database_config_consistency_clear")
+            print("[INFO] Cleared legacy DATABASE_URL to use central config manager")
+        
+        # Ensure test environment uses memory database
+        environment = self.env.get("ENVIRONMENT", "").lower()
+        if environment in ["test", "testing"]:
+            # Ensure USE_MEMORY_DB is set for test environment
+            if not self.env.get("USE_MEMORY_DB"):
+                self.env.set("USE_MEMORY_DB", "true", source="test_memory_db_config")
             
-            if conflicts_cleared:
-                print(f"[INFO] Cleared database configuration conflicts: {', '.join(conflicts_cleared)}")
-        else:
-            # DATABASE_URL is not set, check if we have individual components
-            has_individual_config = any(
-                self.env.get(var) and self.env.get(var).strip() 
-                for var in individual_db_vars
-            )
-            if not has_individual_config:
-                # No database configuration at all, use default test DATABASE_URL
-                self.env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", source="database_config_fallback")
-                print("[INFO] Set fallback DATABASE_URL for test environment")
+            # Clear all PostgreSQL config to ensure memory database is used
+            postgres_vars = [
+                "POSTGRES_HOST", "POSTGRES_USER", "POSTGRES_PASSWORD", 
+                "POSTGRES_DB", "POSTGRES_PORT"
+            ]
+            for var in postgres_vars:
+                if self.env.get(var):
+                    self.env.set(var, "", source="test_clear_postgres_config")
     
     def _configure_real_llm(self) -> None:
         """Configure environment for real LLM testing.

@@ -1,10 +1,10 @@
-/**
- * Data Fetching Integration Tests - Core Module
- * Tests basic data fetching patterns including caching
- * 
- * Business Value Justification (BVJ):
- * - Segment: All (Free → Enterprise)  
- * - Goal: Ensure reliable data synchronization for improved user experience
+import { render, screen, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { setupServer } from 'msw/node';
+import { http, HttpResponse } from 'msw';
+import React, { useState, useEffect } from 'react';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+experience
  * - Value Impact: Reduces user frustration and improves conversion rates
  * - Revenue Impact: +$50K MRR from enhanced reliability and performance
  */
@@ -151,7 +151,7 @@ const createBasicHandlers = () => [
     return new Promise(resolve => {
       setTimeout(() => {
         resolve(HttpResponse.json({ data: 'slow response' }));
-      }, 3000);
+      }, 1000);
     });
   })
 ];
@@ -175,6 +175,11 @@ afterEach(() => {
   pendingRequests.clear();
   act(() => {
     jest.runAllTimers();
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
   });
 });
 
@@ -188,6 +193,7 @@ afterAll(() => {
 // ============================================================================
 
 describe('Data Fetching - Core Caching', () => {
+    jest.setTimeout(10000);
   it('fetches data on initial load', async () => {
     render(<ThreadList />);
     

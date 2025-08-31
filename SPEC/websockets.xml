@@ -181,6 +181,31 @@
       <title>Error Handling</title>
       <description>If the front end sends a socket but the backend rejects, it must be logged clearly</description>
     </requirement>
+    <requirement id="timeout-retry">
+      <title>Timeout and Retry Mechanism</title>
+      <description>CRITICAL: All WebSocket send operations must have timeout and retry capabilities</description>
+      <timeout-configuration>
+        <default-timeout>5 seconds - prevents indefinite hanging</default-timeout>
+        <max-retries>3 attempts - balances reliability with resource usage</max-retries>
+        <backoff-strategy>Exponential backoff: 1s, 2s, 4s - prevents retry storms</backoff-strategy>
+      </timeout-configuration>
+      <implementation-requirements>
+        <requirement priority="critical">Use asyncio.wait_for for deterministic timeout behavior</requirement>
+        <requirement priority="critical">Implement exponential backoff to prevent cascade failures</requirement>
+        <requirement priority="high">Track metrics: send_timeouts, timeout_retries, timeout_failures</requirement>
+        <requirement priority="high">Maintain backward compatibility with existing WebSocket API</requirement>
+      </implementation-requirements>
+      <business-impact>
+        <impact>Affects 90% of value delivery through chat interface</impact>
+        <impact>Prevents silent failures that make chat appear unresponsive</impact>
+        <impact>Enables recovery from transient network issues</impact>
+      </business-impact>
+      <related-files>
+        <file>netra_backend/app/websocket_core/manager.py - Implementation location</file>
+        <file>netra_backend/tests/mission_critical/test_websocket_timeout_retry.py - Test suite</file>
+        <file>SPEC/learnings/websocket_timeout_retry_implementation.xml - Detailed learnings</file>
+      </related-files>
+    </requirement>
     <requirement id="backend-management">
       <title>Backend Management</title>
       <description>Backend sends responses using a single source of truth to manage NETRA_WEBSOCKETS</description>
@@ -211,6 +236,15 @@
     </learning>
     <learning path="SPEC/learnings/websocket_consolidation.xml">
       <description>WebSocket module consolidation and SSOT patterns</description>
+    </learning>
+    <learning path="SPEC/learnings/websocket_timeout_retry_implementation.xml">
+      <description>CRITICAL: WebSocket timeout and retry mechanism implementation</description>
+      <key-points>
+        <point>WebSocket sends MUST have 5-second timeout to prevent indefinite hanging</point>
+        <point>Exponential backoff retry (1s, 2s, 4s) with max 3 attempts prevents cascade failures</point>
+        <point>Affects 90% of value delivery through chat interface</point>
+        <point>Track send_timeouts, timeout_retries, timeout_failures metrics for monitoring</point>
+      </key-points>
     </learning>
   </related-learnings>
 </specification>

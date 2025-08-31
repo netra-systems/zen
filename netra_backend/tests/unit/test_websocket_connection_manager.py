@@ -25,11 +25,24 @@ class TestWebSocketConnectionManager:
     @pytest.fixture
     def manager(self):
         """Create connection manager with mocked dependencies."""
+        # Reset the singleton instance to ensure clean state for each test
+        WebSocketManager._instance = None
         # Mock: Component isolation for testing without external dependencies
         manager = WebSocketManager()
+        
+        # Ensure clean state for compatibility attributes
+        manager.active_connections = {}
+        manager.connection_registry = {}
+        
         # Mock: Generic component isolation for controlled unit testing
         manager.orchestrator = Mock()
         return manager
+    
+    @pytest.fixture
+    def mock_websocket(self):
+        """Create mock WebSocket connection."""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
+        mock_ws = Mock(spec=WebSocket)
         mock_ws.client_state = Mock()
         mock_ws.client_state.name = "CONNECTED"
         return mock_ws

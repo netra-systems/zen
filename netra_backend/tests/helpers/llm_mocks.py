@@ -7,7 +7,8 @@ from typing import Any, AsyncIterator, Type, TypeVar
 
 from pydantic import BaseModel
 
-from test_framework.mocks import create_mock_structured_response
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
 T = TypeVar('T', bound=BaseModel)
 

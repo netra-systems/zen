@@ -6,7 +6,7 @@ Business Value: Customer-facing functionality
 
 import pytest
 import asyncio
-from netra_backend.app.websocket.error_handler import ErrorHandler
+from netra_backend.app.websocket_core.handlers import ErrorHandler
 
 @pytest.mark.asyncio
 class TestErrorHandlerAsync:

@@ -12,8 +12,11 @@
  */
 
 import { UnifiedChatStoreTestUtils, GlobalTestUtils } from './store-test-utils';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('UnifiedChatStore - State Management', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   let storeResult: ReturnType<typeof UnifiedChatStoreTestUtils.initializeStore>;
 
   // Setup test environment (≤8 lines)
@@ -32,6 +35,8 @@ describe('UnifiedChatStore - State Management', () => {
   });
 
   describe('Layer Reset Functionality', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should reset all layers correctly', () => {
       // Set some data first
       UnifiedChatStoreTestUtils.updateFastLayerAndVerify(storeResult, {
@@ -71,6 +76,8 @@ describe('UnifiedChatStore - State Management', () => {
   });
 
   describe('Message Management', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should add messages to history correctly', () => {
       const message = {
         id: 'msg1',
@@ -125,6 +132,8 @@ describe('UnifiedChatStore - State Management', () => {
   });
 
   describe('Connection Status Management', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should set connection status correctly', () => {
       UnifiedChatStoreTestUtils.verifyConnectionStatus(storeResult, false, null);
 
@@ -157,6 +166,8 @@ describe('UnifiedChatStore - State Management', () => {
   });
 
   describe('Processing State Management', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle processing state changes correctly', () => {
       expect(storeResult.current.isProcessing).toBe(false);
 
@@ -187,6 +198,8 @@ describe('UnifiedChatStore - State Management', () => {
   });
 
   describe('Run ID Management', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track current run ID correctly', () => {
       expect(storeResult.current.currentRunId).toBeNull();
 
@@ -234,6 +247,8 @@ describe('UnifiedChatStore - State Management', () => {
   });
 
   describe('State Integrity', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should maintain consistent state across updates', () => {
       // Set up fast layer
       UnifiedChatStoreTestUtils.updateFastLayerAndVerify(storeResult, {
@@ -276,4 +291,8 @@ describe('UnifiedChatStore - State Management', () => {
       expect(storeResult.current.currentRunId).toBe('updated-run');
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

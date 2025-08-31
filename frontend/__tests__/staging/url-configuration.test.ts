@@ -6,8 +6,11 @@
 import { getSecureApiConfig, getSecureApiConfigAsync } from '@/lib/secure-api-config';
 import { getAuthServiceConfig, getAuthServiceConfigAsync } from '@/lib/auth-service-config';
 import { apiClient } from '@/services/apiClientWrapper';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Frontend URL Configuration - Staging/Production', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   const originalEnv = process.env;
 
   beforeEach(() => {
@@ -17,9 +20,17 @@ describe('Frontend URL Configuration - Staging/Production', () => {
 
   afterEach(() => {
     process.env = originalEnv;
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Staging Environment Configuration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     beforeEach(() => {
       process.env.NODE_ENV = 'production';
       process.env.NEXT_PUBLIC_ENVIRONMENT = 'staging';
@@ -61,6 +72,8 @@ describe('Frontend URL Configuration - Staging/Production', () => {
   });
 
   describe('Production Environment Configuration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     beforeEach(() => {
       process.env.NODE_ENV = 'production';
       process.env.NEXT_PUBLIC_ENVIRONMENT = 'production';
@@ -86,6 +99,8 @@ describe('Frontend URL Configuration - Staging/Production', () => {
   });
 
   describe('Health Check URL Configuration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('health check should use full backend URL in staging', async () => {
       process.env.NODE_ENV = 'production';
       process.env.NEXT_PUBLIC_ENVIRONMENT = 'staging';
@@ -116,6 +131,8 @@ describe('Frontend URL Configuration - Staging/Production', () => {
   });
 
   describe('API Client URL Construction', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('API client should use backend URLs directly in staging', () => {
       process.env.NODE_ENV = 'production';
       process.env.NEXT_PUBLIC_ENVIRONMENT = 'staging';
@@ -138,6 +155,8 @@ describe('Frontend URL Configuration - Staging/Production', () => {
   });
 
   describe('Next.js Rewrites Configuration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('rewrites should be disabled in production/staging', () => {
       const nextConfig = require('@/next.config.ts').default;
       
@@ -163,6 +182,8 @@ describe('Frontend URL Configuration - Staging/Production', () => {
   });
 
   describe('Auth Service Client Configuration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('AuthServiceClient should not have duplicate getConfig methods', () => {
       const { AuthServiceClient } = require('@/lib/auth-service-config');
       const client = new AuthServiceClient();
@@ -209,6 +230,8 @@ describe('Frontend URL Configuration - Staging/Production', () => {
   });
 
   describe('CSP Headers Configuration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('CSP should allow staging domains in staging environment', async () => {
       process.env.NODE_ENV = 'production';
       process.env.NEXT_PUBLIC_ENVIRONMENT = 'staging';
@@ -229,6 +252,8 @@ describe('Frontend URL Configuration - Staging/Production', () => {
   });
 
   describe('Error Cases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should handle missing environment variables gracefully', () => {
       delete process.env.NEXT_PUBLIC_ENVIRONMENT;
       delete process.env.NEXT_PUBLIC_API_URL;

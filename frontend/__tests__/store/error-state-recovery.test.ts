@@ -1,10 +1,9 @@
-/**
- * Error State Recovery Tests - Resilient State Management
- * 
- * BVJ (Business Value Justification):
- * - Segment: All (Free, Growth, Enterprise)
- * - Business Goal: Prevent user data loss during errors
- * - Value Impact: Error recovery prevents 90% of support tickets
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { useAuthStore } from '@/store/authStore';
+import { useChatStore } from '@/store/chat';
+import { AuthStoreTestUtils, ChatStoreTestUtils, GlobalTestUtils } from './store-test-utils';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+f support tickets
  * - Revenue Impact: Robust error handling maintains user trust
  * 
  * Tests: Error handling, retry mechanisms, graceful degradation
@@ -24,6 +23,7 @@ const mockErrorBoundary = {
 };
 
 describe('Error State Recovery Tests', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     GlobalTestUtils.setupStoreTestEnvironment();
     jest.clearAllMocks();
@@ -31,9 +31,15 @@ describe('Error State Recovery Tests', () => {
 
   afterEach(() => {
     GlobalTestUtils.cleanupStoreTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Auth Store Error Recovery', () => {
+      jest.setTimeout(10000);
     it('should handle authentication errors gracefully', () => {
       const result = AuthStoreTestUtils.initializeStore();
 
@@ -127,6 +133,7 @@ describe('Error State Recovery Tests', () => {
   });
 
   describe('Chat Store Error Recovery', () => {
+      jest.setTimeout(10000);
     it('should handle message sending errors', () => {
       const result = ChatStoreTestUtils.initializeStore();
 
@@ -218,6 +225,7 @@ describe('Error State Recovery Tests', () => {
   });
 
   describe('Retry Mechanisms', () => {
+      jest.setTimeout(10000);
     it('should implement exponential backoff for auth retries', async () => {
       const result = AuthStoreTestUtils.initializeStore();
       let retryCount = 0;
@@ -347,6 +355,7 @@ describe('Error State Recovery Tests', () => {
   });
 
   describe('Graceful Degradation', () => {
+      jest.setTimeout(10000);
     it('should degrade to offline mode on network errors', () => {
       const result = ChatStoreTestUtils.initializeStore();
 
@@ -407,6 +416,7 @@ describe('Error State Recovery Tests', () => {
   });
 
   describe('State Corruption Recovery', () => {
+      jest.setTimeout(10000);
     it('should detect and recover from corrupted state', () => {
       const result = ChatStoreTestUtils.initializeStore();
 

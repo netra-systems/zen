@@ -19,7 +19,8 @@ import pytest
 import time
 import websockets
 
-from test_framework.mock_utils import mock_justified
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
 @pytest.fixture
 def test_client():

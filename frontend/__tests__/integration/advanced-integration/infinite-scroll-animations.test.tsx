@@ -1,14 +1,13 @@
-/**
- * Infinite Scroll and Animation Tests
- */
-
 import React from 'react';
 import { render, waitFor, fireEvent } from '@testing-library/react';
 import WS from 'jest-websocket-mock';
 import { safeWebSocketCleanup } from '../../helpers/websocket-test-manager';
 import { setupTestEnvironment } from './test-setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+t { setupTestEnvironment } from './test-setup';
 
 describe('Advanced Frontend Integration Tests - Infinite Scroll and Animations', () => {
+    jest.setTimeout(10000);
   let server: WS;
   
   setupTestEnvironment();
@@ -19,9 +18,15 @@ describe('Advanced Frontend Integration Tests - Infinite Scroll and Animations',
 
   afterEach(() => {
     safeWebSocketCleanup();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('23. Infinite Scroll Integration', () => {
+      jest.setTimeout(10000);
     it('should load more content on scroll', async () => {
       const InfiniteScrollComponent = () => {
         const [items, setItems] = React.useState(Array.from({ length: 10 }, (_, i) => `Item ${i + 1}`));
@@ -137,6 +142,7 @@ describe('Advanced Frontend Integration Tests - Infinite Scroll and Animations',
   });
 
   describe('24. Complex Animation Sequences', () => {
+      jest.setTimeout(10000);
     it('should chain animations with proper timing', async () => {
       const AnimationComponent = () => {
         const [stage, setStage] = React.useState(0);
@@ -239,6 +245,7 @@ describe('Advanced Frontend Integration Tests - Infinite Scroll and Animations',
   });
 
   describe('25. Memory Management Integration', () => {
+      jest.setTimeout(10000);
     it('should cleanup resources on unmount', async () => {
       const cleanupFunctions: (() => void)[] = [];
       

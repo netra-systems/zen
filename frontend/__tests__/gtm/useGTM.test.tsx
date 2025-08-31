@@ -3,6 +3,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { GTMProvider } from '@/providers/GTMProvider';
 import { useGTM } from '@/hooks/useGTM';
 import type { AuthenticationEventData, EngagementEventData, ConversionEventData } from '@/types/gtm.types';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock Next.js Script component
 jest.mock('next/script', () => {
@@ -35,6 +36,8 @@ const createWrapper = (enabled = true, debug = true) => {
 };
 
 describe('useGTM Hook', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   let mockDataLayer: any[];
 
   beforeEach(() => {
@@ -52,9 +55,17 @@ describe('useGTM Hook', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Hook Initialization', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should provide all GTM functionality', async () => {
       const { result } = renderHook(() => useGTM(), {
         wrapper: createWrapper()
@@ -108,6 +119,8 @@ describe('useGTM Hook', () => {
   });
 
   describe('Authentication Event Tracking', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track user login events', async () => {
       const { result } = renderHook(() => useGTM(), {
         wrapper: createWrapper()
@@ -188,6 +201,8 @@ describe('useGTM Hook', () => {
   });
 
   describe('Engagement Event Tracking', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track chat started events', async () => {
       const { result } = renderHook(() => useGTM(), {
         wrapper: createWrapper()
@@ -287,6 +302,8 @@ describe('useGTM Hook', () => {
   });
 
   describe('Conversion Event Tracking', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track trial started events', async () => {
       const { result } = renderHook(() => useGTM(), {
         wrapper: createWrapper()
@@ -367,6 +384,8 @@ describe('useGTM Hook', () => {
   });
 
   describe('Custom Event Tracking', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track custom events', async () => {
       const { result } = renderHook(() => useGTM(), {
         wrapper: createWrapper()
@@ -402,6 +421,8 @@ describe('useGTM Hook', () => {
   });
 
   describe('Statistics and Analytics', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should provide event statistics', async () => {
       const { result } = renderHook(() => useGTM(), {
         wrapper: createWrapper()
@@ -444,6 +465,8 @@ describe('useGTM Hook', () => {
   });
 
   describe('Debug Functionality', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should enable debug mode', async () => {
       const { result } = renderHook(() => useGTM(), {
         wrapper: createWrapper()
@@ -526,6 +549,8 @@ describe('useGTM Hook', () => {
   });
 
   describe('Error Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle events when GTM is disabled', async () => {
       const { result } = renderHook(() => useGTM(), {
         wrapper: createWrapper(false, true)
@@ -545,6 +570,8 @@ describe('useGTM Hook', () => {
   });
 
   describe('Performance', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle multiple rapid events', async () => {
       const { result } = renderHook(() => useGTM(), {
         wrapper: createWrapper()

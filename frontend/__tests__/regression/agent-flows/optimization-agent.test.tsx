@@ -14,6 +14,7 @@ import { WebSocketProvider } from '@/providers/WebSocketProvider';
 import { AgentProvider, useAgentContext } from '@/providers/AgentProvider';
 import { useChatStore } from '@/store/chatStore';
 import type { WebSocketMessage, OptimizationResults } from '@/types/unified';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock WebSocket
 const mockWebSocket = {
@@ -27,6 +28,8 @@ const mockWebSocket = {
 global.WebSocket = jest.fn(() => mockWebSocket) as any;
 
 describe('Optimization Agent Flow Tests', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   let wsEventHandlers: { [key: string]: Function[] } = {};
   let chatStore: ReturnType<typeof useChatStore>;
 
@@ -59,6 +62,8 @@ describe('Optimization Agent Flow Tests', () => {
   );
 
   describe('Cost Optimization Strategies', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should generate comprehensive cost optimization strategies', async () => {
       const { result } = renderHook(() => useAgentContext(), { wrapper: createWrapper });
 
@@ -228,6 +233,8 @@ describe('Optimization Agent Flow Tests', () => {
   });
 
   describe('Performance Optimization', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should identify and optimize performance bottlenecks', async () => {
       const { result } = renderHook(() => useAgentContext(), { wrapper: createWrapper });
 
@@ -361,6 +368,8 @@ describe('Optimization Agent Flow Tests', () => {
   });
 
   describe('Resource Optimization', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should optimize resource allocation and utilization', async () => {
       const { result } = renderHook(() => useAgentContext(), { wrapper: createWrapper });
 
@@ -422,6 +431,8 @@ describe('Optimization Agent Flow Tests', () => {
   });
 
   describe('Trade-off Analysis', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should provide comprehensive trade-off analysis', async () => {
       const { result } = renderHook(() => useAgentContext(), { wrapper: createWrapper });
 
@@ -489,6 +500,8 @@ describe('Optimization Agent Flow Tests', () => {
   });
 
   describe('Optimization Validation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should validate optimization recommendations are achievable', async () => {
       const { result } = renderHook(() => useAgentContext(), { wrapper: createWrapper });
 
@@ -539,6 +552,8 @@ describe('Optimization Agent Flow Tests', () => {
   });
 
   describe('Progressive Optimization', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should support progressive optimization with milestones', async () => {
       const { result } = renderHook(() => useAgentContext(), { wrapper: createWrapper });
 
@@ -612,4 +627,8 @@ describe('Optimization Agent Flow Tests', () => {
       });
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

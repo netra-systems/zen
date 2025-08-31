@@ -347,13 +347,16 @@ class DatabaseURLBuilder:
         @property
         def auto_url(self) -> str:
             """Auto-select best URL for test."""
-            # Use memory if requested
+            # PRIORITY 1: Explicit DATABASE_URL takes precedence for tests
+            if self.parent.database_url:
+                return self.parent.database_url
+            # PRIORITY 2: Use memory if explicitly requested
             if self.parent.env.get("USE_MEMORY_DB") == "true":
                 return self.memory_url
-            # Try PostgreSQL config
+            # PRIORITY 3: Try PostgreSQL config only if DATABASE_URL not set
             if self.postgres_url:
                 return self.postgres_url
-            # Default to memory
+            # PRIORITY 4: Default to memory
             return self.memory_url
     
     class DockerBuilder:

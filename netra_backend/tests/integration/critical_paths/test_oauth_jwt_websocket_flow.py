@@ -54,7 +54,8 @@ from starlette.testclient import WebSocketTestSession
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 from auth_service.main import app as auth_app
 from netra_backend.app.main import app as backend_app
-from test_framework.mock_utils import mock_justified
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
 from netra_backend.app.schemas.auth_types import (
     AuthProvider,
@@ -198,9 +199,8 @@ class OAuthJWTWebSocketTestManager:
                 logger.warning(f"Redis connection failed, falling back to mock: {e}")
                 await self._fallback_to_mock_redis()
             
-    @mock_justified("Redis unavailable in test environment")
-    async def _fallback_to_mock_redis(self):
-        """Fallback to mock Redis when real Redis unavailable."""
+        async def _fallback_to_mock_redis(self):
+            """Fallback to mock Redis when real Redis unavailable."""
         from unittest.mock import AsyncMock
         
         # Mock: Redis caching isolation to prevent test interference and external dependencies

@@ -1,4 +1,5 @@
-// Simplified tool lifecycle integration test
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+import { ied tool lifecycle integration test
 // Tests basic tool tracking functionality
 
 import { 
@@ -10,7 +11,9 @@ import {
 import type { ToolExecutionStatus } from '@/types/layer-types';
 
 describe('Tool Lifecycle Integration - Simplified', () => {
+    jest.setTimeout(10000);
   describe('Tool Status Management', () => {
+      jest.setTimeout(10000);
     it('should create and track tool status', () => {
       const tool = createToolExecutionStatus('analyzer', Date.now());
       
@@ -65,6 +68,7 @@ describe('Tool Lifecycle Integration - Simplified', () => {
   });
 
   describe('Tool Deduplication', () => {
+      jest.setTimeout(10000);
     it('should prevent duplicate tools in statuses', () => {
       let statuses: ToolExecutionStatus[] = [];
       

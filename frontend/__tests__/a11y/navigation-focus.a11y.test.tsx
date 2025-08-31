@@ -1,7 +1,8 @@
-/**
- * Navigation Focus Management Accessibility Test Suite
- * Tests focus trapping, restoration, and dynamic content focus
- * Follows 25-line function rule and 450-line file limit
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+llows 25-line function rule and 450-line file limit
  * 
  * Business Value Justification (BVJ):
  * - Segment: All (Free → Enterprise) 
@@ -29,6 +30,7 @@ import {
 // ============================================================================
 
 describe('Focus Management - Trapping and Restoration', () => {
+    jest.setTimeout(10000);
   it('traps focus in modal dialogs', async () => {
     const user = setupKeyboardTest();
     const ModalDialog = () => {

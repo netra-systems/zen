@@ -1,0 +1,637 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "executive_overview_001",
+    "title": "Executive Overview - Netra Analytics",
+    "tags": ["analytics", "executive", "overview"],
+    "timezone": "browser",
+    "schemaVersion": 30,
+    "version": 1,
+    "refresh": "30s",
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": [
+        "5s",
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+      ]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Active Users (Real-time)",
+        "type": "stat",
+        "gridPos": {
+          "x": 0,
+          "y": 0,
+          "w": 6,
+          "h": 4
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT count(DISTINCT user_id) as active_users FROM frontend_events WHERE timestamp >= now() - INTERVAL 5 MINUTE",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "red",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 10
+                },
+                {
+                  "color": "green",
+                  "value": 50
+                }
+              ]
+            },
+            "unit": "short",
+            "displayName": "Active Users"
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": ""
+          },
+          "orientation": "auto",
+          "textMode": "value",
+          "colorMode": "background",
+          "graphMode": "none",
+          "justifyMode": "center"
+        }
+      },
+      {
+        "id": 2,
+        "title": "Total Events Today",
+        "type": "stat",
+        "gridPos": {
+          "x": 6,
+          "y": 0,
+          "w": 6,
+          "h": 4
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT count() as total_events FROM frontend_events WHERE date = today()",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "unit": "short",
+            "displayName": "Events Today"
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": [
+              "lastNotNull"
+            ]
+          },
+          "orientation": "auto",
+          "textMode": "value",
+          "colorMode": "value",
+          "graphMode": "area"
+        }
+      },
+      {
+        "id": 3,
+        "title": "Chat Threads Active",
+        "type": "stat",
+        "gridPos": {
+          "x": 12,
+          "y": 0,
+          "w": 6,
+          "h": 4
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT count(DISTINCT extractJSON(properties, 'thread_id')) as active_threads FROM frontend_events WHERE event_type = 'chat_interaction' AND timestamp >= now() - INTERVAL 1 HOUR",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 100
+                },
+                {
+                  "color": "red",
+                  "value": 500
+                }
+              ]
+            },
+            "unit": "short",
+            "displayName": "Active Threads"
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "System Health Score",
+        "type": "gauge",
+        "gridPos": {
+          "x": 18,
+          "y": 0,
+          "w": 6,
+          "h": 4
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT (1 - (countIf(event_type = 'error_tracking') / count())) * 100 as health_score FROM frontend_events WHERE timestamp >= now() - INTERVAL 1 HOUR",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "red",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 85
+                },
+                {
+                  "color": "green",
+                  "value": 95
+                }
+              ]
+            },
+            "min": 0,
+            "max": 100,
+            "unit": "percent",
+            "displayName": "Health Score"
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": [
+              "lastNotNull"
+            ]
+          },
+          "orientation": "auto",
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true
+        }
+      },
+      {
+        "id": 5,
+        "title": "Chat Volume (24h)",
+        "type": "timeseries",
+        "gridPos": {
+          "x": 0,
+          "y": 4,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT toStartOfHour(timestamp) as time, count() as chat_messages FROM frontend_events WHERE event_type = 'chat_interaction' AND timestamp >= now() - INTERVAL 24 HOUR GROUP BY time ORDER BY time",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisPlacement": "auto",
+              "axisLabel": "",
+              "axisWidth": 80,
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "barAlignment": 0,
+              "lineWidth": 2,
+              "fillOpacity": 10,
+              "gradientMode": "opacity",
+              "spanNulls": -1,
+              "insertNulls": false,
+              "showPoints": "never",
+              "pointSize": 5,
+              "stacking": {
+                "mode": "none",
+                "group": "A"
+              },
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "hideFrom": {
+                "tooltip": false,
+                "vis": false,
+                "legend": false
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "displayName": "Messages per Hour",
+            "unit": "short"
+          }
+        },
+        "options": {
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          },
+          "legend": {
+            "displayMode": "hidden"
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Response Time Distribution",
+        "type": "timeseries",
+        "gridPos": {
+          "x": 12,
+          "y": 4,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT toStartOfMinute(timestamp) as time, avg(toFloat64(extractJSON(properties, 'response_time_ms'))) as avg_response_time, quantile(0.95)(toFloat64(extractJSON(properties, 'response_time_ms'))) as p95_response_time FROM frontend_events WHERE event_type = 'chat_interaction' AND timestamp >= now() - INTERVAL 1 HOUR GROUP BY time ORDER BY time",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisPlacement": "auto",
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "lineWidth": 2,
+              "fillOpacity": 10,
+              "gradientMode": "none",
+              "spanNulls": false,
+              "insertNulls": false,
+              "showPoints": "never",
+              "pointSize": 5,
+              "stacking": {
+                "mode": "none",
+                "group": "A"
+              }
+            },
+            "unit": "ms",
+            "displayName": "Response Time"
+          }
+        },
+        "options": {
+          "tooltip": {
+            "mode": "multi",
+            "sort": "none"
+          },
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom"
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Top Features by Usage",
+        "type": "table",
+        "gridPos": {
+          "x": 0,
+          "y": 12,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT extractJSON(properties, 'feature_name') as feature, count() as usage_count, avg(toFloat64(extractJSON(properties, 'duration_ms'))) as avg_duration FROM frontend_events WHERE event_type = 'feature_usage' AND timestamp >= now() - INTERVAL 24 HOUR GROUP BY feature ORDER BY usage_count DESC LIMIT 10",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "left",
+              "displayMode": "auto",
+              "filterable": false
+            },
+            "displayName": "Feature Usage"
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "usage_count"
+              },
+              "properties": [
+                {
+                  "id": "custom.displayMode",
+                  "value": "color-background"
+                },
+                {
+                  "id": "displayName",
+                  "value": "Usage Count"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "avg_duration"
+              },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "ms"
+                },
+                {
+                  "id": "displayName",
+                  "value": "Avg Duration"
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "showHeader": true,
+          "sortBy": [
+            {
+              "desc": true,
+              "displayName": "Usage Count"
+            }
+          ]
+        }
+      },
+      {
+        "id": 8,
+        "title": "User Acquisition Funnel",
+        "type": "piechart",
+        "gridPos": {
+          "x": 12,
+          "y": 12,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT CASE WHEN countIf(event_type = 'thread_lifecycle' AND extractJSON(properties, 'action') = 'created') > 0 THEN 'Active Users' WHEN countIf(event_type = 'chat_interaction') > 0 THEN 'Engaged Users' ELSE 'Visitors' END as user_segment, count(DISTINCT user_id) as user_count FROM frontend_events WHERE timestamp >= now() - INTERVAL 24 HOUR GROUP BY user_segment",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "hideFrom": {
+                "tooltip": false,
+                "vis": false,
+                "legend": false
+              }
+            },
+            "displayName": "Users"
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": [
+              "lastNotNull"
+            ]
+          },
+          "pieType": "pie",
+          "displayLabels": [
+            "name",
+            "percent"
+          ],
+          "legend": {
+            "displayMode": "list",
+            "placement": "right"
+          }
+        }
+      },
+      {
+        "id": 9,
+        "title": "Error Rate Trend",
+        "type": "timeseries",
+        "gridPos": {
+          "x": 0,
+          "y": 20,
+          "w": 24,
+          "h": 6
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT toStartOfMinute(timestamp) as time, (countIf(event_type = 'error_tracking') / count()) * 100 as error_rate FROM frontend_events WHERE timestamp >= now() - INTERVAL 6 HOUR GROUP BY time ORDER BY time",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "custom": {
+              "axisPlacement": "auto",
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "lineWidth": 2,
+              "fillOpacity": 20,
+              "gradientMode": "opacity",
+              "spanNulls": false,
+              "insertNulls": false,
+              "showPoints": "never",
+              "pointSize": 5,
+              "stacking": {
+                "mode": "none",
+                "group": "A"
+              },
+              "thresholdsStyle": {
+                "mode": "area"
+              }
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 2
+                },
+                {
+                  "color": "red",
+                  "value": 5
+                }
+              ]
+            },
+            "unit": "percent",
+            "displayName": "Error Rate %"
+          }
+        },
+        "options": {
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          },
+          "legend": {
+            "displayMode": "hidden"
+          }
+        },
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  5
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "A",
+                  "5m",
+                  "now"
+                ]
+              },
+              "reducer": {
+                "params": [],
+                "type": "avg"
+              },
+              "type": "query"
+            }
+          ],
+          "executionErrorState": "alerting",
+          "for": "2m",
+          "frequency": "10s",
+          "handler": 1,
+          "name": "High Error Rate Alert",
+          "noDataState": "no_data",
+          "notifications": []
+        }
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "current": {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          },
+          "datasource": {
+            "uid": "clickhouse_analytics"
+          },
+          "definition": "SELECT DISTINCT user_id FROM frontend_events WHERE timestamp >= now() - INTERVAL 24 HOUR ORDER BY user_id",
+          "hide": 0,
+          "includeAll": true,
+          "label": "User",
+          "multi": false,
+          "name": "user_filter",
+          "options": [],
+          "query": "SELECT DISTINCT user_id FROM frontend_events WHERE timestamp >= now() - INTERVAL 24 HOUR ORDER BY user_id",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 1,
+          "type": "query"
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": {
+            "type": "grafana",
+            "uid": "-- Grafana --"
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    }
+  },
+  "overwrite": true,
+  "message": "Executive Overview Dashboard - Real-time analytics and KPIs"
+}

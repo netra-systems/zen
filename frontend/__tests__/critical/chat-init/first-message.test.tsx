@@ -86,6 +86,7 @@ import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useThreadStore } from '@/store/threadStore';
 import { useAuthStore } from '@/store/authStore';
 import { useWebSocket } from '@/hooks/useWebSocket';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 const mockUseUnifiedChatStoreImpl = useUnifiedChatStore as jest.MockedFunction<typeof useUnifiedChatStore>;
 const mockUseThreadStoreImpl = useThreadStore as jest.MockedFunction<typeof useThreadStore>;
@@ -157,6 +158,8 @@ const setupWebSocket = (overrides = {}) => {
 };
 
 describe('First Message Experience - Complete User Journey', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     mockIsSending = false;
@@ -179,9 +182,17 @@ describe('First Message Experience - Complete User Journey', () => {
 
   afterEach(() => {
     resetViewport();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('P0: Instant Input Focus & Readiness', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should auto-focus message input on chat open < 100ms', async () => {
       const focusTime = await measurePerformance(async () => {
         await act(async () => {
@@ -236,6 +247,8 @@ describe('First Message Experience - Complete User Journey', () => {
   });
 
   describe('P0: Enter Key & Sending Behavior', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should send message on Enter key (not Shift+Enter)', async () => {
       const user = userEvent.setup();
       renderWithProviders(<MessageInput />);
@@ -284,6 +297,8 @@ describe('First Message Experience - Complete User Journey', () => {
   });
 
   describe('P0: Optimistic UI & Instant Feedback', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should show message instantly in chat (optimistic UI)', async () => {
       const user = userEvent.setup();
       
@@ -336,6 +351,8 @@ describe('First Message Experience - Complete User Journey', () => {
   });
 
   describe('P0: AI Response Streaming', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should begin AI response streaming within 1 second', async () => {
       const user = userEvent.setup();
       
@@ -393,6 +410,8 @@ describe('First Message Experience - Complete User Journey', () => {
   });
 
   describe('P0: Copy & Retry Functionality', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should provide copy button for AI responses', async () => {
       // This would test the MessageList component with copy functionality
       // Since we're testing the complete experience
@@ -441,6 +460,8 @@ describe('First Message Experience - Complete User Journey', () => {
   });
 
   describe('P0: Markdown Rendering Quality', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should render markdown content correctly in responses', async () => {
       const markdownContent = `
 # AI Cost Optimization Plan
@@ -477,6 +498,8 @@ def optimize_model_selection(task_complexity):
   });
 
   describe('P0: Mobile Experience', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should work perfectly on mobile viewport', async () => {
       simulateMobileViewport();
       
@@ -515,6 +538,8 @@ def optimize_model_selection(task_complexity):
   });
 
   describe('P0: Complete First Message Journey', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should complete entire first message flow in under 3 seconds', async () => {
       const journeyStartTime = performance.now();
       
@@ -623,6 +648,8 @@ Your investment in optimization will pay back in 3.2 months.`,
   });
 
   describe('P0: Conversion Moment Validation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should create the "aha moment" that converts users to paid', async () => {
       const user = userEvent.setup();
       

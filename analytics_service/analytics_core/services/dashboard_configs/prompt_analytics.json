@@ -1,0 +1,731 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "prompt_analytics_001",
+    "title": "Prompt Analytics - AI Interaction Intelligence",
+    "tags": ["analytics", "prompts", "ai", "intelligence"],
+    "timezone": "browser",
+    "schemaVersion": 30,
+    "version": 1,
+    "refresh": "1m",
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": [
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+      ]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Prompt Volume Trends",
+        "type": "timeseries",
+        "gridPos": {
+          "x": 0,
+          "y": 0,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT toStartOfMinute(timestamp) as time, count() as prompt_count FROM frontend_events WHERE event_type = 'chat_interaction' AND extractJSON(properties, 'message_type') = 'user_prompt' AND timestamp >= $__timeFrom() AND timestamp <= $__timeTo() GROUP BY time ORDER BY time",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisPlacement": "auto",
+              "axisLabel": "Prompts per Minute",
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "lineWidth": 2,
+              "fillOpacity": 15,
+              "gradientMode": "opacity",
+              "spanNulls": false,
+              "insertNulls": false,
+              "showPoints": "never",
+              "pointSize": 5,
+              "stacking": {
+                "mode": "none",
+                "group": "A"
+              }
+            },
+            "unit": "short",
+            "displayName": "Prompts/min"
+          }
+        },
+        "options": {
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          },
+          "legend": {
+            "displayMode": "hidden"
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Average Response Time",
+        "type": "stat",
+        "gridPos": {
+          "x": 12,
+          "y": 0,
+          "w": 6,
+          "h": 4
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT avg(toFloat64(extractJSON(properties, 'response_time_ms'))) as avg_response_time FROM frontend_events WHERE event_type = 'chat_interaction' AND extractJSON(properties, 'message_type') = 'user_prompt' AND timestamp >= now() - INTERVAL 1 HOUR",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 3000
+                },
+                {
+                  "color": "red",
+                  "value": 8000
+                }
+              ]
+            },
+            "unit": "ms",
+            "displayName": "Avg Response Time"
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": [
+              "lastNotNull"
+            ]
+          },
+          "orientation": "auto",
+          "textMode": "value",
+          "colorMode": "background"
+        }
+      },
+      {
+        "id": 3,
+        "title": "Follow-up Rate",
+        "type": "stat",
+        "gridPos": {
+          "x": 18,
+          "y": 0,
+          "w": 6,
+          "h": 4
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT (countIf(extractJSON(properties, 'is_follow_up') = 'true') / count()) * 100 as follow_up_rate FROM frontend_events WHERE event_type = 'chat_interaction' AND extractJSON(properties, 'message_type') = 'user_prompt' AND timestamp >= now() - INTERVAL 1 HOUR",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "red",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 20
+                },
+                {
+                  "color": "green",
+                  "value": 40
+                }
+              ]
+            },
+            "unit": "percent",
+            "displayName": "Follow-up Rate"
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": [
+              "lastNotNull"
+            ]
+          },
+          "orientation": "auto",
+          "textMode": "value",
+          "colorMode": "value"
+        }
+      },
+      {
+        "id": 4,
+        "title": "Token Consumption",
+        "type": "stat",
+        "gridPos": {
+          "x": 12,
+          "y": 4,
+          "w": 12,
+          "h": 4
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT sum(toInt32(extractJSON(properties, 'tokens_consumed'))) as total_tokens FROM frontend_events WHERE event_type = 'chat_interaction' AND timestamp >= now() - INTERVAL 1 HOUR",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "unit": "short",
+            "displayName": "Tokens (1h)"
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": [
+              "lastNotNull"
+            ]
+          },
+          "orientation": "auto",
+          "textMode": "value",
+          "colorMode": "value",
+          "graphMode": "area"
+        }
+      },
+      {
+        "id": 5,
+        "title": "Common Prompt Categories",
+        "type": "piechart",
+        "gridPos": {
+          "x": 0,
+          "y": 8,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT CASE WHEN length(extractJSON(properties, 'prompt_text')) > 200 THEN 'Long Form' WHEN extractJSON(properties, 'prompt_text') LIKE '%code%' OR extractJSON(properties, 'prompt_text') LIKE '%function%' THEN 'Code Related' WHEN extractJSON(properties, 'prompt_text') LIKE '%explain%' OR extractJSON(properties, 'prompt_text') LIKE '%what%' OR extractJSON(properties, 'prompt_text') LIKE '%how%' THEN 'Questions' WHEN extractJSON(properties, 'prompt_text') LIKE '%create%' OR extractJSON(properties, 'prompt_text') LIKE '%generate%' OR extractJSON(properties, 'prompt_text') LIKE '%write%' THEN 'Creative' ELSE 'General' END as category, count() as count FROM frontend_events WHERE event_type = 'chat_interaction' AND extractJSON(properties, 'message_type') = 'user_prompt' AND timestamp >= now() - INTERVAL 6 HOUR GROUP BY category ORDER BY count DESC",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "hideFrom": {
+                "tooltip": false,
+                "vis": false,
+                "legend": false
+              }
+            },
+            "displayName": "Prompt Categories"
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": [
+              "lastNotNull"
+            ]
+          },
+          "pieType": "donut",
+          "displayLabels": [
+            "name",
+            "percent"
+          ],
+          "legend": {
+            "displayMode": "list",
+            "placement": "right"
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Response Quality Metrics",
+        "type": "timeseries",
+        "gridPos": {
+          "x": 12,
+          "y": 8,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT toStartOfMinute(timestamp) as time, avg(toFloat64(extractJSON(properties, 'response_length'))) as avg_response_length FROM frontend_events WHERE event_type = 'chat_interaction' AND extractJSON(properties, 'message_type') = 'ai_response' AND timestamp >= $__timeFrom() AND timestamp <= $__timeTo() GROUP BY time ORDER BY time",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisPlacement": "auto",
+              "axisLabel": "Characters",
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "lineWidth": 2,
+              "fillOpacity": 10,
+              "gradientMode": "none",
+              "spanNulls": false,
+              "insertNulls": false,
+              "showPoints": "never"
+            },
+            "unit": "short",
+            "displayName": "Avg Response Length"
+          }
+        },
+        "options": {
+          "tooltip": {
+            "mode": "single"
+          },
+          "legend": {
+            "displayMode": "hidden"
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Most Common Prompt Patterns",
+        "type": "table",
+        "gridPos": {
+          "x": 0,
+          "y": 16,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT substring(extractJSON(properties, 'prompt_text'), 1, 100) as prompt_preview, count() as frequency, avg(toFloat64(extractJSON(properties, 'response_time_ms'))) as avg_response_time FROM frontend_events WHERE event_type = 'chat_interaction' AND extractJSON(properties, 'message_type') = 'user_prompt' AND timestamp >= now() - INTERVAL 6 HOUR GROUP BY prompt_preview HAVING frequency >= 3 ORDER BY frequency DESC LIMIT 10",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "left",
+              "displayMode": "auto",
+              "filterable": false
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "frequency"
+              },
+              "properties": [
+                {
+                  "id": "custom.displayMode",
+                  "value": "color-background"
+                },
+                {
+                  "id": "displayName",
+                  "value": "Frequency"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "avg_response_time"
+              },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "ms"
+                },
+                {
+                  "id": "displayName",
+                  "value": "Avg Response Time"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "prompt_preview"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "Prompt Preview"
+                },
+                {
+                  "id": "custom.width",
+                  "value": 400
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "showHeader": true,
+          "sortBy": [
+            {
+              "desc": true,
+              "displayName": "Frequency"
+            }
+          ]
+        }
+      },
+      {
+        "id": 8,
+        "title": "Model Usage Distribution",
+        "type": "piechart",
+        "gridPos": {
+          "x": 12,
+          "y": 16,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT extractJSON(properties, 'model_used') as model, count() as usage_count FROM frontend_events WHERE event_type = 'chat_interaction' AND extractJSON(properties, 'model_used') != '' AND timestamp >= now() - INTERVAL 6 HOUR GROUP BY model ORDER BY usage_count DESC",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "hideFrom": {
+                "tooltip": false,
+                "vis": false,
+                "legend": false
+              }
+            },
+            "displayName": "Model Usage"
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": [
+              "lastNotNull"
+            ]
+          },
+          "pieType": "pie",
+          "displayLabels": [
+            "name",
+            "percent"
+          ],
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom"
+          }
+        }
+      },
+      {
+        "id": 9,
+        "title": "Prompt Length vs Response Time Correlation",
+        "type": "scattergraph",
+        "gridPos": {
+          "x": 0,
+          "y": 24,
+          "w": 24,
+          "h": 8
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT toFloat64(extractJSON(properties, 'prompt_length')) as prompt_length, toFloat64(extractJSON(properties, 'response_time_ms')) as response_time FROM frontend_events WHERE event_type = 'chat_interaction' AND extractJSON(properties, 'message_type') = 'user_prompt' AND timestamp >= now() - INTERVAL 6 HOUR AND prompt_length > 0 AND response_time > 0 ORDER BY timestamp DESC LIMIT 1000",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisPlacement": "auto",
+              "axisLabel": "",
+              "pointSize": {
+                "fixed": 5
+              },
+              "show": "points"
+            },
+            "unit": "short"
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "prompt_length"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "Prompt Length (chars)"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "response_time"
+              },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "ms"
+                },
+                {
+                  "id": "displayName",
+                  "value": "Response Time (ms)"
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "tooltip": {
+            "mode": "single"
+          },
+          "legend": {
+            "displayMode": "hidden"
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Unanswered/Problem Prompts",
+        "type": "table",
+        "gridPos": {
+          "x": 0,
+          "y": 32,
+          "w": 24,
+          "h": 8
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT timestamp, user_id, substring(extractJSON(properties, 'prompt_text'), 1, 150) as prompt_text, toFloat64(extractJSON(properties, 'response_time_ms')) as response_time FROM frontend_events WHERE event_type = 'chat_interaction' AND extractJSON(properties, 'message_type') = 'user_prompt' AND (response_time > 10000 OR extractJSON(properties, 'prompt_text') LIKE '%error%' OR extractJSON(properties, 'prompt_text') LIKE '%not working%' OR extractJSON(properties, 'prompt_text') LIKE '%problem%') AND timestamp >= now() - INTERVAL 6 HOUR ORDER BY timestamp DESC LIMIT 20",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "left",
+              "displayMode": "auto",
+              "filterable": true
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "timestamp"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "Time"
+                },
+                {
+                  "id": "custom.width",
+                  "value": 150
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "user_id"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "User"
+                },
+                {
+                  "id": "custom.width",
+                  "value": 150
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "prompt_text"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "Prompt"
+                },
+                {
+                  "id": "custom.width",
+                  "value": 400
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "response_time"
+              },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "ms"
+                },
+                {
+                  "id": "displayName",
+                  "value": "Response Time"
+                },
+                {
+                  "id": "custom.displayMode",
+                  "value": "color-background"
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "showHeader": true,
+          "sortBy": [
+            {
+              "desc": true,
+              "displayName": "Time"
+            }
+          ]
+        }
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "current": {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          },
+          "datasource": {
+            "uid": "clickhouse_analytics"
+          },
+          "definition": "SELECT DISTINCT extractJSON(properties, 'model_used') as model FROM frontend_events WHERE event_type = 'chat_interaction' AND timestamp >= now() - INTERVAL 24 HOUR AND model != '' ORDER BY model",
+          "hide": 0,
+          "includeAll": true,
+          "label": "AI Model",
+          "multi": true,
+          "name": "model_filter",
+          "options": [],
+          "query": "SELECT DISTINCT extractJSON(properties, 'model_used') as model FROM frontend_events WHERE event_type = 'chat_interaction' AND timestamp >= now() - INTERVAL 24 HOUR AND model != '' ORDER BY model",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 1,
+          "type": "query"
+        },
+        {
+          "current": {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          },
+          "datasource": {
+            "uid": "clickhouse_analytics"
+          },
+          "definition": "SELECT DISTINCT user_id FROM frontend_events WHERE event_type = 'chat_interaction' AND timestamp >= now() - INTERVAL 24 HOUR ORDER BY user_id",
+          "hide": 0,
+          "includeAll": true,
+          "label": "User",
+          "multi": false,
+          "name": "user_filter",
+          "options": [],
+          "query": "SELECT DISTINCT user_id FROM frontend_events WHERE event_type = 'chat_interaction' AND timestamp >= now() - INTERVAL 24 HOUR ORDER BY user_id",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 1,
+          "type": "query"
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": {
+            "type": "grafana",
+            "uid": "-- Grafana --"
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    }
+  },
+  "overwrite": true,
+  "message": "Prompt Analytics Dashboard - AI interaction intelligence and patterns"
+}

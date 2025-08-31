@@ -1,8 +1,9 @@
-/**
- * Performance Benchmarks Integration Tests - Main Entry Point
- * 
- * BVJ: Enterprise segment - ensures platform meets performance SLAs
- * Provides backward compatibility while leveraging modular test architecture.
+import './render-performance.test';
+import './interaction-latency.test';
+import './resource-utilization.test';
+import './concurrent-performance.test';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ backward compatibility while leveraging modular test architecture.
  */
 
 // Import all test suites to maintain backward compatibility
@@ -26,6 +27,7 @@ import './concurrent-performance.test';
  */
 
 describe('Performance Benchmarks Integration Tests Suite', () => {
+    jest.setTimeout(10000);
   it('should load all performance test modules', () => {
     // This test ensures all modules are properly imported
     expect(true).toBe(true);

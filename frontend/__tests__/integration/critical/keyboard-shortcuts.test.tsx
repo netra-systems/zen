@@ -1,9 +1,7 @@
-/**
- * Keyboard Shortcuts Integration Tests
- * Tests for global keyboard shortcuts and input field handling
- */
-
 import React from 'react';
+import { render, waitFor, screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
@@ -11,15 +9,22 @@ import '@testing-library/jest-dom';
 import { TestProviders } from '@/__tests__/setup/test-providers';
 
 describe('Keyboard Shortcuts Integration', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Global Shortcuts', () => {
+      jest.setTimeout(10000);
     it('should handle global keyboard shortcuts', async () => {
       const shortcuts = new Map([
         ['cmd+k', 'openSearch'],

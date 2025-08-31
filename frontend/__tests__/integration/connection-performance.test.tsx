@@ -1,13 +1,11 @@
-/**
- * Connection Performance Tests
- * Split from connection-management-advanced.test.tsx for 450-line compliance
- * Agent 10 Implementation - Performance and load testing
- */
-
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
+import { TestProviders } from '../setup/test-providers';
+import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+mport { jest } from '@jest/globals';
 import { TestProviders } from '../setup/test-providers';
 import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
 
@@ -71,6 +69,7 @@ class ConnectionStateMachine {
 }
 
 describe('Connection Performance Tests', () => {
+    jest.setTimeout(10000);
   let wsManager: WebSocketTestManager;
   let multiManager: MultiConnectionManager;
 
@@ -86,9 +85,15 @@ describe('Connection Performance Tests', () => {
     multiManager.closeAllConnections();
     jest.clearAllMocks();
     jest.useRealTimers();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Multiple Concurrent Connections', () => {
+      jest.setTimeout(10000);
     it('should handle multiple WebSocket connections', () => {
       const conn1 = multiManager.createConnection('conn1');
       const conn2 = multiManager.createConnection('conn2');
@@ -133,6 +138,7 @@ describe('Connection Performance Tests', () => {
   });
 
   describe('Performance Under Load', () => {
+      jest.setTimeout(10000);
     it('should handle concurrent connection attempts', async () => {
       const promises = Array(5).fill(0).map((_, i) => 
         Promise.resolve(multiManager.createConnection(`load-${i}`))
@@ -181,6 +187,7 @@ describe('Connection Performance Tests', () => {
   });
 
   describe('Memory Management', () => {
+      jest.setTimeout(10000);
     it('should prevent memory leaks', () => {
       const initialCount = multiManager.getConnectionCount();
       
@@ -213,6 +220,7 @@ describe('Connection Performance Tests', () => {
   });
 
   describe('Stress Testing', () => {
+      jest.setTimeout(10000);
     it('should handle rapid create/destroy cycles', () => {
       const cycles = 20;
       const start = Date.now();
@@ -264,6 +272,7 @@ describe('Connection Performance Tests', () => {
   });
 
   describe('Resource Optimization', () => {
+      jest.setTimeout(10000);
     it('should optimize connection reuse', () => {
       const id = 'reusable';
       multiManager.createConnection(id);

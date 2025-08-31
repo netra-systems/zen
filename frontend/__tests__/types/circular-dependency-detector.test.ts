@@ -19,6 +19,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { parse } from '@babel/parser';
 import traverse from '@babel/traverse';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 interface DependencyNode {
   path: string;
@@ -32,6 +33,8 @@ interface CircularDependency {
 }
 
 describe('Circular Dependency Detection', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   const typesDirPath = path.resolve(__dirname, '../../types');
 
   /**

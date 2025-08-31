@@ -14,6 +14,7 @@ import { WebSocketProvider } from '@/providers/WebSocketProvider';
 import { AgentProvider, useAgentContext } from '@/providers/AgentProvider';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import type { WebSocketMessage, SubAgentState } from '@/types/unified';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock WebSocket
 const mockWebSocket = {
@@ -58,11 +59,14 @@ jest.mock('@/store/unified-chat', () => ({
 }));
 
 describe('Triage Agent Flow Tests', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   let wsEventHandlers: { [key: string]: Function[] } = {};
   let unifiedStore: ReturnType<typeof useUnifiedChatStore>;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.clearAllTimers();
     wsEventHandlers = {};
     
     mockWebSocket.addEventListener.mockImplementation((event: string, handler: Function) => {
@@ -74,6 +78,13 @@ describe('Triage Agent Flow Tests', () => {
 
     unifiedStore = useUnifiedChatStore.getState();
     unifiedStore.resetState();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.clearAllTimers();
+    wsEventHandlers = {};
+      cleanupAntiHang();
   });
 
   const simulateWebSocketMessage = (message: WebSocketMessage) => {
@@ -90,14 +101,16 @@ describe('Triage Agent Flow Tests', () => {
   );
 
   describe('Request Classification', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should classify cost optimization requests correctly', async () => {
       const { result } = renderHook(() => useAgentContext(), { wrapper: createWrapper });
 
-      act(() => {
+      await act(async () => {
         result.current.startAgent('How can I reduce my AI infrastructure costs?', 'thread-cost');
       });
 
-      act(() => {
+      await act(async () => {
         simulateWebSocketMessage({
           type: 'sub_agent_update',
           data: {
@@ -108,7 +121,7 @@ describe('Triage Agent Flow Tests', () => {
         });
       });
 
-      act(() => {
+      await act(async () => {
         simulateWebSocketMessage({
           type: 'sub_agent_update',
           data: {
@@ -128,7 +141,7 @@ describe('Triage Agent Flow Tests', () => {
         const state = mockUnifiedStoreState.fastLayerData?.subAgentStatus;
         expect(state?.metadata?.classification).toBe('cost_optimization');
         expect(state?.metadata?.confidence).toBeGreaterThan(0.9);
-      });
+      }, { timeout: 1000 });
     });
 
     it('should classify performance optimization requests', async () => {
@@ -193,6 +206,8 @@ describe('Triage Agent Flow Tests', () => {
   });
 
   describe('Data Sufficiency Evaluation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should determine sufficient data scenario', async () => {
       const { result } = renderHook(() => useAgentContext(), { wrapper: createWrapper });
 
@@ -308,6 +323,8 @@ describe('Triage Agent Flow Tests', () => {
   });
 
   describe('Priority Assignment', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should assign high priority to production issues', async () => {
       const { result } = renderHook(() => useAgentContext(), { wrapper: createWrapper });
 
@@ -365,11 +382,11 @@ describe('Triage Agent Flow Tests', () => {
       ];
 
       for (const testCase of testCases) {
-        act(() => {
+        await act(async () => {
           result.current.startAgent(testCase.request, `thread-${testCase.expectedPriority}`);
         });
 
-        act(() => {
+        await act(async () => {
           simulateWebSocketMessage({
             type: 'sub_agent_update',
             data: {
@@ -386,12 +403,14 @@ describe('Triage Agent Flow Tests', () => {
         await waitFor(() => {
           const state = mockUnifiedStoreState.fastLayerData?.subAgentStatus;
           expect(state?.metadata?.priority).toBe(testCase.expectedPriority);
-        });
+        }, { timeout: 1000 });
       }
     });
   });
 
   describe('Workflow Path Determination', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should route to skip optimization for simple queries', async () => {
       const { result } = renderHook(() => useAgentContext(), { wrapper: createWrapper });
 
@@ -456,6 +475,8 @@ describe('Triage Agent Flow Tests', () => {
   });
 
   describe('Context Preparation for Next Agents', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should prepare context for optimization agent', async () => {
       const { result } = renderHook(() => useAgentContext(), { wrapper: createWrapper });
 
@@ -497,6 +518,8 @@ describe('Triage Agent Flow Tests', () => {
   });
 
   describe('Error Scenarios', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle classification uncertainty', async () => {
       const { result } = renderHook(() => useAgentContext(), { wrapper: createWrapper });
 

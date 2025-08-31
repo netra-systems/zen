@@ -4,7 +4,6 @@ import { webSocketService, WebSocketStatus } from '../services/webSocketService'
 import { WebSocketMessage, Message } from '@/types/unified';
 import { config as appConfig } from '@/config';
 import { logger } from '@/lib/logger';
-import { logger as debugLogger } from '@/utils/debug-logger';
 import { WebSocketContextType, WebSocketProviderProps } from '../types/websocket-context-types';
 import { reconciliationService, OptimisticMessage } from '../services/reconciliation';
 
@@ -19,10 +18,11 @@ export const useWebSocketContext = () => {
 };
 
 import { AuthContext } from '@/auth/context';
+import { useAuth } from '@/auth/context';
 import { unifiedAuthService } from '@/lib/unified-auth-service';
 
 export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
-  const { token } = useContext(AuthContext)!;
+  const { token, initialized: authInitialized } = useAuth();
   const [status, setStatus] = useState<WebSocketStatus>('CLOSED');
   const [messages, setMessages] = useState<WebSocketMessage[]>([]);
   const isConnectingRef = useRef(false);
@@ -72,7 +72,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
 
   // Memoized status handler
   const handleStatusChange = useCallback((newStatus: WebSocketStatus) => {
-    debugLogger.debug('[WebSocketProvider] Status changed to:', newStatus);
+    logger.debug('[WebSocketProvider] Status changed to:', newStatus);
     setStatus(newStatus);
   }, []);
 
@@ -80,9 +80,16 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     // In development mode, allow connection without token
     const isDevelopment = process.env.NODE_ENV === 'development';
     
+    // Wait for auth to initialize before attempting connection
+    // This prevents race conditions and spurious authentication errors
+    if (!authInitialized) {
+      logger.debug('[WebSocketProvider] Waiting for auth initialization');
+      return;
+    }
+    
     // Guard: Skip connection if no token is available (unless in development mode)
     if (!token && !isDevelopment) {
-      debugLogger.debug('[WebSocketProvider] WebSocket connection skipped - no token available');
+      logger.debug('[WebSocketProvider] WebSocket connection skipped - no token available');
       return;
     }
     
@@ -102,7 +109,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
           const baseWsUrl = appConfig.wsUrl || `${appConfig.apiUrl.replace(/^http/, 'ws')}/ws`;
           const wsUrl = webSocketService.getSecureUrl(baseWsUrl);
           
-          debugLogger.debug('[WebSocketProvider] Establishing secure WebSocket connection on app load', {
+          logger.debug('[WebSocketProvider] Establishing secure WebSocket connection on app load', {
             baseWsUrl: baseWsUrl,
             finalWsUrl: wsUrl.replace(/jwt\.[^&]+/, 'jwt.***'), // Hide token in logs
             hasToken: !!token,
@@ -138,10 +145,10 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
               }
             },
             onOpen: () => {
-              debugLogger.debug('[WebSocketProvider] Secure WebSocket connection established');
+              logger.debug('[WebSocketProvider] Secure WebSocket connection established');
             },
             onError: (error) => {
-              // Log auth errors as authentication failures, not WebSocket errors
+              // Log auth errors appropriately based on context
               const errorMessage = error.type === 'auth' 
                 ? 'Authentication failure' 
                 : 'WebSocket connection error';
@@ -150,7 +157,9 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
                 ? 'authentication_error'
                 : 'connection_error';
               
-              logger.error(errorMessage, undefined, {
+              // Use warning level for recoverable errors, error level for critical ones
+              const logLevel = error.recoverable ? 'warn' : 'error';
+              const logContext = {
                 component: 'WebSocketProvider',
                 action: errorAction,
                 metadata: { 
@@ -159,7 +168,14 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
                   recoverable: error.recoverable,
                   code: error.code
                 }
-              });
+              };
+              
+              // Call logger methods directly to maintain proper 'this' context
+              if (error.recoverable) {
+                logger.warn(errorMessage, logContext);
+              } else {
+                logger.error(errorMessage, undefined, logContext);
+              }
               
               // Handle different error types
               if (error.type === 'auth') {
@@ -180,7 +196,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
               }
             },
             onReconnect: () => {
-              debugLogger.debug('[WebSocketProvider] WebSocket reconnecting with fresh authentication');
+              logger.debug('[WebSocketProvider] WebSocket reconnecting with fresh authentication');
             },
             heartbeatInterval: 15000, // 15 second heartbeat for better responsiveness
             rateLimit: {
@@ -221,7 +237,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
       }
       isConnectingRef.current = false;
     };
-  }, [token, handleMessage, handleStatusChange]);
+  }, [token, authInitialized, handleMessage, handleStatusChange]);
 
   // Token synchronization effect - update WebSocket when token changes
   useEffect(() => {

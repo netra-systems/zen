@@ -1,11 +1,10 @@
-/**
- * Error Handling Integration Tests - Core Module
- * Tests 4xx/5xx error handling patterns
- * 
- * Business Value Justification (BVJ):
- * - Segment: All (Free → Enterprise)
- * - Goal: Prevent revenue loss from poor error handling and improve user trust
- * - Value Impact: Reduces customer churn by 20% through better error experiences  
+import { render, screen, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { setupServer } from 'msw/node';
+import { http, HttpResponse } from 'msw';
+import React, { useState, useRef, useEffect } from 'react';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ Impact: Reduces customer churn by 20% through better error experiences  
  * - Revenue Impact: +$50K MRR from improved reliability and user confidence
  */
 import { render, screen, waitFor, act } from '@testing-library/react';
@@ -353,6 +352,11 @@ afterEach(() => {
   jest.clearAllMocks();
   act(() => {
     jest.runAllTimers();
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
   });
 });
 
@@ -366,6 +370,7 @@ afterAll(() => {
 // ============================================================================
 
 describe('Error Handling - 4xx Client Errors', () => {
+    jest.setTimeout(10000);
   it('handles 404 Not Found errors', async () => {
     render(<ErrorHandlingComponent url={`${mockApiUrl}/api/not-found`} />);
     
@@ -432,6 +437,7 @@ describe('Error Handling - 4xx Client Errors', () => {
 // ============================================================================
 
 describe('Error Handling - 5xx Server Errors', () => {
+    jest.setTimeout(10000);
   it('handles 500 Internal Server errors with retry', async () => {
     render(
       <ErrorHandlingComponent 

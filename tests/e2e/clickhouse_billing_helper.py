@@ -20,6 +20,8 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock
 
 from netra_backend.app.schemas.user_plan import PlanTier
+# Import IsolatedEnvironment per CLAUDE.md requirements
+from test_framework.environment_isolation import get_env
 
 
 class MockClickHouseBillingClient:

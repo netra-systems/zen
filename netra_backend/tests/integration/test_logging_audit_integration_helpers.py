@@ -21,7 +21,8 @@ from netra_backend.app.core.logging_context import (
     trace_id_context,
     user_id_context,
 )
-from test_framework.mock_utils import mock_justified
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
 class AuditEventHelper:
     """Helper class for audit events (renamed from TestSyntaxFix to avoid pytest collection)"""

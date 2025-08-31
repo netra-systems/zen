@@ -4,13 +4,7 @@ import { ROICalculatorHelpers } from '../support/roi-calculator-helpers'
 
 // ROI Calculator Component Basic Initialization Tests
 // BVJ: Enterprise segment - validates core component functionality
-// Modular design following 450-line limit and 25-line function requirements
-// 
-// NOTE: Comprehensive tests are now split into focused modules:
-// - roi-calculator-inputs.cy.ts - Input validation and interactions
-// - roi-calculator-calculations.cy.ts - Calculations and results  
-// - roi-calculator-features.cy.ts - Advanced features and comparisons
-// - roi-calculator-ui.cy.ts - UI/accessibility testing
+// Updated for current SUT: Simple card-based ROI Calculator in demo tabs
 
 describe('ROI Calculator Component - Basic Initialization', () => {
   beforeEach(() => {
@@ -19,35 +13,36 @@ describe('ROI Calculator Component - Basic Initialization', () => {
 
   describe('Component Initialization', () => {
     it('should render ROI Calculator component', () => {
-      cy.get('[data-testid="roi-calculator"]').should('be.visible')
+      cy.contains('ROI Calculator').should('be.visible')
+      cy.get('[role="tabpanel"]').should('contain', 'ROI Calculator')
     })
 
     it('should display calculator heading', () => {
-      cy.contains('h2', 'Calculate Your AI Optimization Savings')
+      cy.contains('ROI Calculator').should('be.visible')
+      cy.contains('Calculate your potential savings with Netra AI Optimization Platform')
         .should('be.visible')
     })
 
     it('should show industry context', () => {
       cy.contains('Technology').should('be.visible')
-      cy.contains('industry-specific').should('be.visible')
+      cy.contains('Personalized for Technology').should('be.visible')
     })
 
-    it('should display all input sections', () => {
-      cy.contains('Infrastructure Metrics').should('be.visible')
-      cy.contains('Operational Metrics').should('be.visible')
-      cy.contains('AI Workload Details').should('be.visible')
+    it('should display input form', () => {
+      cy.contains('Current Monthly AI Infrastructure Spend').should('be.visible')
+      cy.contains('Monthly AI Requests').should('be.visible')
+      cy.contains('AI/ML Team Size').should('be.visible')
     })
 
-    it('should have glassmorphic styling', () => {
-      cy.get('.backdrop-blur-md').should('exist')
-      cy.get('.bg-opacity-10').should('exist')
+    it('should have card-based styling', () => {
+      cy.get('.border').should('exist')
+      cy.get('[class*="Card"]').should('exist')
     })
 
     it('should load with default values', () => {
-      cy.get('input[type="range"][data-testid="monthly-spend"]')
-        .should('have.value', '50000')
-      cy.get('input[type="number"][data-testid="model-count"]')
-        .should('have.value', '15')
+      cy.get('input[id="spend"]').should('have.value', '50000')
+      cy.get('input[id="requests"]').should('have.value', '10000000')
+      cy.get('input[id="team"]').should('exist')
     })
 
     it('should display calculate button', () => {
@@ -55,92 +50,82 @@ describe('ROI Calculator Component - Basic Initialization', () => {
       cy.contains('button', 'Calculate ROI').should('be.enabled')
     })
 
-    it('should show navigation elements', () => {
-      cy.get('[data-testid="demo-navigation"]').should('be.visible')
-      cy.contains('Technology').should('be.visible')
+    it('should show tab navigation', () => {
+      cy.get('[role="tablist"]').should('be.visible')
+      cy.contains('ROI Calculator').should('be.visible')
     })
   })
 
   describe('Essential Component Elements', () => {
     it('should display monthly spend input', () => {
-      cy.contains('Current Monthly AI Spend').should('be.visible')
-      cy.get('input[type="range"][data-testid="monthly-spend"]')
-        .should('be.visible')
+      cy.contains('Current Monthly AI Infrastructure Spend').should('be.visible')
+      cy.get('input[id="spend"]').should('be.visible')
     })
 
-    it('should display model count input', () => {
-      cy.contains('Number of AI Models').should('be.visible')
-      cy.get('input[type="number"][data-testid="model-count"]')
-        .should('be.visible')
+    it('should display requests input', () => {
+      cy.contains('Monthly AI Requests').should('be.visible')
+      cy.get('input[id="requests"]').should('be.visible')
     })
 
-    it('should display latency input', () => {
-      cy.contains('Average Latency').should('be.visible')
-      cy.get('input[type="range"][data-testid="latency"]')
-        .should('be.visible')
+    it('should display latency slider', () => {
+      cy.contains('Average Latency (ms)').should('be.visible')
+      cy.get('input[id="latency"]').should('be.visible')
     })
 
-    it('should display engineering hours input', () => {
-      cy.contains('Engineering Hours/Month').should('be.visible')
-      cy.get('input[type="range"][data-testid="engineering-hours"]')
-        .should('be.visible')
+    it('should display team size slider', () => {
+      cy.contains('AI/ML Team Size').should('be.visible')
+      cy.get('input[id="team"]').should('be.visible')
     })
 
-    it('should display team size input', () => {
-      cy.contains('Team Size').should('be.visible')
-      cy.get('input[type="number"][data-testid="team-size"]')
-        .should('be.visible')
+    it('should display accuracy slider', () => {
+      cy.contains('Model Accuracy (%)').should('be.visible')
+      cy.get('input[id="accuracy"]').should('be.visible')
     })
 
-    it('should display model types selection', () => {
-      cy.contains('Model Types').should('be.visible')
-      cy.get('[data-testid="model-type-checkbox"]')
-        .should('have.length.at.least', 3)
+    it('should display industry multiplier info', () => {
+      cy.contains('Industry multiplier applied').should('be.visible')
+      cy.contains('Technology').should('be.visible')
     })
   })
 
   describe('Component Structure Validation', () => {
-    it('should have proper form structure', () => {
-      cy.get('[data-testid="roi-calculator"] form')
-        .should('exist')
-      cy.get('fieldset').should('have.length.at.least', 3)
+    it('should have proper card structure', () => {
+      cy.get('[class*="Card"]').should('exist')
+      cy.get('[class*="CardHeader"]').should('exist')
+      cy.get('[class*="CardContent"]').should('exist')
     })
 
-    it('should display deployment frequency selector', () => {
-      cy.contains('Deployment Frequency').should('be.visible')
-      cy.get('select[data-testid="deployment-frequency"]')
-        .should('be.visible')
+    it('should have grid layout for inputs', () => {
+      cy.get('.grid').should('exist')
+      cy.get('.space-y-4').should('exist')
     })
 
-    it('should display cloud provider selector', () => {
-      cy.contains('Cloud Provider').should('be.visible')
-      cy.get('select[data-testid="cloud-provider"]')
-        .should('be.visible')
+    it('should display input labels properly', () => {
+      cy.get('label').should('have.length.at.least', 5)
+      cy.get('label[for="spend"]').should('contain', 'Infrastructure Spend')
     })
 
-    it('should have proper error message containers', () => {
-      cy.get('[data-testid="error-message"]')
-        .should('exist')
-        .and('not.be.visible')
+    it('should have help text for inputs', () => {
+      cy.contains('Include compute, storage, and API costs').should('be.visible')
+      cy.contains('Total inference and training requests').should('be.visible')
     })
 
-    it('should contain results placeholder', () => {
-      cy.get('[data-testid="results-container"]')
-        .should('exist')
+    it('should show industry multiplier alert', () => {
+      cy.get('[class*="Alert"]').should('exist')
+      cy.contains('Industry multiplier applied').should('be.visible')
     })
   })
 
   describe('Navigation and Integration', () => {
-    it('should integrate with demo page navigation', () => {
-      cy.get('[data-testid="breadcrumb"]').should('contain', 'Demo')
-      cy.get('[data-testid="breadcrumb"]')
-        .should('contain', 'ROI Calculator')
+    it('should integrate with demo tabs navigation', () => {
+      cy.get('[role="tablist"]').should('be.visible')
+      cy.contains('ROI Calculator').should('be.visible')
     })
 
-    it('should display requests per day input', () => {
-      cy.contains('Requests/Day').should('be.visible')
-      cy.get('input[type="range"][data-testid="requests-per-day"]')
-        .should('be.visible')
+    it('should show other demo tabs', () => {
+      cy.contains('Overview').should('be.visible')
+      cy.contains('AI Chat').should('be.visible')
+      cy.contains('Metrics').should('be.visible')
     })
 
     it('should load industry context correctly', () => {
@@ -148,18 +133,18 @@ describe('ROI Calculator Component - Basic Initialization', () => {
       cy.contains('Technology').should('be.visible')
     })
 
-    it('should maintain state during page interactions', () => {
-      cy.get('input[type="number"][data-testid="model-count"]')
-        .clear().type('20')
-      cy.reload()
+    it('should maintain state during tab navigation', () => {
+      cy.get('input[id="spend"]').clear().type('75000')
+      cy.contains('Overview').click()
+      cy.contains('ROI Calculator').click()
       // Should maintain or reset to defaults appropriately
-      cy.get('[data-testid="roi-calculator"]').should('be.visible')
+      cy.contains('ROI Calculator').should('be.visible')
     })
 
-    it('should handle browser back/forward navigation', () => {
+    it('should handle browser navigation within demo', () => {
       cy.go('back')
       cy.go('forward')
-      cy.get('[data-testid="roi-calculator"]').should('be.visible')
+      cy.contains('ROI Calculator').should('be.visible')
     })
   })
 

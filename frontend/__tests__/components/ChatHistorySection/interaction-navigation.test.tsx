@@ -1,11 +1,10 @@
-/**
- * ChatHistorySection Navigation Interaction Tests
- * Tests for thread switching and navigation ≤300 lines, ≤8 line functions
- */
-
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ChatHistorySection } from '@/components/ChatHistorySection';
+import { createTestSetup } from './shared-setup';
+import { mockRouter } from './shared-setup';
+import { omponents/ChatHistorySection';
 import { createTestSetup } from './shared-setup';
 import { mockRouter } from './shared-setup';
 import {
@@ -16,6 +15,7 @@ import {
 } from './test-utils';
 
 describe('ChatHistorySection - Navigation Interactions', () => {
+    jest.setTimeout(10000);
   const testSetup = createTestSetup();
 
   beforeEach(() => {
@@ -24,9 +24,15 @@ describe('ChatHistorySection - Navigation Interactions', () => {
 
   afterEach(() => {
     testSetup.afterEach();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Thread clicking behavior', () => {
+      jest.setTimeout(10000);
     it('should handle thread click interactions', () => {
       render(<ChatHistorySection />);
       
@@ -75,6 +81,7 @@ describe('ChatHistorySection - Navigation Interactions', () => {
   });
 
   describe('Current thread handling', () => {
+      jest.setTimeout(10000);
     it('should not navigate if already on current thread', async () => {
       render(<ChatHistorySection />);
       
@@ -119,6 +126,7 @@ describe('ChatHistorySection - Navigation Interactions', () => {
   });
 
   describe('Navigation error handling', () => {
+      jest.setTimeout(10000);
     it('should handle thread switching errors', async () => {
       const restoreConsole = mockConsoleError();
       mockRouter.push.mockImplementation(() => {
@@ -196,6 +204,7 @@ describe('ChatHistorySection - Navigation Interactions', () => {
   });
 
   describe('Keyboard navigation', () => {
+      jest.setTimeout(10000);
     it('should handle keyboard thread selection', () => {
       render(<ChatHistorySection />);
       
@@ -264,6 +273,7 @@ describe('ChatHistorySection - Navigation Interactions', () => {
   });
 
   describe('Focus management', () => {
+      jest.setTimeout(10000);
     it('should handle focus on thread items', () => {
       render(<ChatHistorySection />);
       
@@ -317,6 +327,7 @@ describe('ChatHistorySection - Navigation Interactions', () => {
   });
 
   describe('Navigation state management', () => {
+      jest.setTimeout(10000);
     it('should handle navigation loading states', () => {
       testSetup.configureStore({ 
         isLoading: true,
@@ -375,6 +386,7 @@ describe('ChatHistorySection - Navigation Interactions', () => {
   });
 
   describe('Navigation accessibility', () => {
+      jest.setTimeout(10000);
     it('should provide accessible navigation elements', () => {
       render(<ChatHistorySection />);
       

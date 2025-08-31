@@ -19,8 +19,13 @@ import { act } from 'react-dom/test-utils';
 import * as webpack from 'webpack';
 import * as path from 'path';
 import * as fs from 'fs/promises';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Module Resolution Failures - Integration Tests', () => {
+  
+  setupAntiHang();
+  
+    jest.setTimeout(10000);
   
   /**
    * This test will FAIL when components cannot import from registry

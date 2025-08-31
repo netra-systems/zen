@@ -44,7 +44,8 @@ from netra_backend.app.services.quality_gate.quality_gate_models import (
     QualityMetrics,
     ValidationResult,
 )
-from test_framework.mock_utils import mock_justified
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
 logger = logging.getLogger(__name__)
 
@@ -455,7 +456,6 @@ class TestAgentQualityGatePipelineL3:
         assert normal_result.overall_score is not None
         assert emergency_result.overall_score is not None
         
-    @mock_justified("L3: Quality gate pipeline testing with real service components")
     @pytest.mark.asyncio
     async def test_batch_quality_validation(self, quality_gate_service, quality_test_manager):
         """Test batch quality validation for high-throughput scenarios."""

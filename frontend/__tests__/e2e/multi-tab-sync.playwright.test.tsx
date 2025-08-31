@@ -1,7 +1,6 @@
-/**
- * End-to-End Multi-Tab Synchronization Test
- * 
- * Tests real-time synchronization between multiple browser tabs/windows
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+import { test, expect } from '@playwright/test';
+import { sts real-time synchronization between multiple browser tabs/windows
  * Validates state consistency across concurrent sessions
  * 
  * @compliance conventions.xml - Max 8 lines per function, under 300 lines
@@ -84,6 +83,7 @@ async function testMessageSyncWorkflow(
 }
 
 test.describe('Multi-Tab Synchronization E2E', () => {
+    jest.setTimeout(10000);
   let browser: any;
   let tabs: TabTestState[] = [];
 

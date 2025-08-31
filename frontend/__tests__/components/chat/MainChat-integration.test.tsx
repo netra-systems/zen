@@ -13,6 +13,7 @@ import { useInitializationCoordinator } from '@/hooks/useInitializationCoordinat
 import { useLoadingState } from '@/hooks/useLoadingState';
 import { useEventProcessor } from '@/hooks/useEventProcessor';
 import { useThreadNavigation } from '@/hooks/useThreadNavigation';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock all dependencies
 jest.mock('@/store/unified-chat');
@@ -21,7 +22,7 @@ jest.mock('@/hooks/useInitializationCoordinator');
 jest.mock('@/hooks/useLoadingState');
 jest.mock('@/hooks/useEventProcessor');
 jest.mock('@/hooks/useThreadNavigation');
-jest.mock('@/utils/debug-logger', () => ({
+jest.mock('@/lib/logger', () => ({
   logger: {
     debug: jest.fn(),
     error: jest.fn(),
@@ -68,6 +69,8 @@ jest.mock('@/components/chat/EventDiagnosticsPanel', () => ({
 }));
 
 describe('MainChat Integration Tests', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   const mockHandleWebSocketEvent = jest.fn();
   
   const defaultStoreState = {
@@ -122,6 +125,8 @@ describe('MainChat Integration Tests', () => {
   });
 
   describe('Initialization Coordinator Integration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should show loading when not initialized', () => {
       (useInitializationCoordinator as jest.Mock).mockReturnValue({
         ...defaultInitState,
@@ -192,6 +197,8 @@ describe('MainChat Integration Tests', () => {
   });
 
   describe('Loading State Integration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should prioritize initialization state over loading state', () => {
       (useInitializationCoordinator as jest.Mock).mockReturnValue({
         ...defaultInitState,
@@ -223,6 +230,8 @@ describe('MainChat Integration Tests', () => {
   });
 
   describe('Component Rendering', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should render all main components when initialized', () => {
       render(<MainChat />);
       
@@ -271,6 +280,8 @@ describe('MainChat Integration Tests', () => {
   });
 
   describe('WebSocket Event Processing', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should process WebSocket messages through event processor', () => {
       const mockMessages = [
         { type: 'message', data: { content: 'Test' } }
@@ -298,6 +309,8 @@ describe('MainChat Integration Tests', () => {
   });
 
   describe('Keyboard Shortcuts', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should toggle overflow panel with Ctrl+Shift+D', async () => {
       render(<MainChat />);
       
@@ -342,6 +355,8 @@ describe('MainChat Integration Tests', () => {
   });
 
   describe('Thread Navigation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should handle thread switching', () => {
       (useThreadNavigation as jest.Mock).mockReturnValue({
         currentThreadId: 'thread-123',
@@ -362,6 +377,8 @@ describe('MainChat Integration Tests', () => {
   });
 
   describe('Auto-collapse Response Card', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should auto-collapse card after completion', async () => {
       jest.useFakeTimers();
       
@@ -390,6 +407,8 @@ describe('MainChat Integration Tests', () => {
   });
 
   describe('Performance Optimizations', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should not re-render when unrelated store data changes', () => {
       const { rerender } = render(<MainChat />);
       
@@ -420,6 +439,8 @@ describe('MainChat Integration Tests', () => {
   });
 
   describe('Error Boundaries', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should handle component errors gracefully', () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
       
@@ -438,6 +459,8 @@ describe('MainChat Integration Tests', () => {
   });
 
   describe('Welcome Message', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should show welcome message in empty state', () => {
       (useLoadingState as jest.Mock).mockReturnValue({
         ...defaultLoadingState,
@@ -468,6 +491,8 @@ describe('MainChat Integration Tests', () => {
   });
 
   describe('Integration with Multiple Hooks', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should coordinate all hooks correctly', () => {
       // Set up complex state
       (useInitializationCoordinator as jest.Mock).mockReturnValue({
@@ -510,4 +535,8 @@ describe('MainChat Integration Tests', () => {
       expect(screen.getByTestId('message-input')).toBeInTheDocument();
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

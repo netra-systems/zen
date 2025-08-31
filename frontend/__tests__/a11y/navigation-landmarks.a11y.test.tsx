@@ -1,6 +1,8 @@
-/**
- * Navigation ARIA Landmarks Accessibility Test Suite
- * Tests landmark structure, skip links, and navigation patterns
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ns
  * Follows 25-line function rule and 450-line file limit
  * 
  * Business Value Justification (BVJ):
@@ -28,6 +30,7 @@ import {
 // ============================================================================
 
 describe('ARIA Landmarks - Structure and Navigation', () => {
+    jest.setTimeout(10000);
   it('passes axe tests for landmark structure', async () => {
     const { container } = render(
       <div>

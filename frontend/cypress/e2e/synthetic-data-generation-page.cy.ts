@@ -25,8 +25,6 @@
  * Total coverage: All original test scenarios maintained across modular files
  */
 
-import { SyntheticDataPageObject } from './utils/synthetic-data-page-object'
-
 describe('Synthetic Data Generation Page - Master Test Suite', () => {
   /**
    * Smoke test to verify the page loads and basic functionality works
@@ -34,34 +32,64 @@ describe('Synthetic Data Generation Page - Master Test Suite', () => {
    */
   
   beforeEach(() => {
-    SyntheticDataPageObject.visitPage()
+    cy.viewport(1920, 1080)
+    cy.visit('/synthetic-data-generation')
+    cy.wait(1000)
   })
 
   describe('Smoke Tests - Core Functionality', () => {
     it('should load page and display main components', () => {
-      SyntheticDataPageObject.verifyPageLoad()
-      cy.get(SyntheticDataPageObject.selectors.page).should('be.visible')
-      cy.contains('Configuration').should('be.visible')
+      cy.url().should('include', '/synthetic-data-generation')
+      cy.contains('Generate Synthetic Data').should('be.visible')
+<<<<<<< Updated upstream
+      cy.get('.max-w-2xl').should('be.visible')
     })
 
     it('should have default configuration values', () => {
-      SyntheticDataPageObject.verifyDefaultValues()
+      cy.get('#num_traces').should('have.value', '100')
+      cy.get('#num_users').should('have.value', '10')
+      cy.get('#error_rate').should('have.value', '0.1')
+      cy.get('#event_types').should('have.value', 'search,login')
     })
 
     it('should allow basic parameter updates', () => {
-      SyntheticDataPageObject.setTraceCount('2000')
-      cy.get(SyntheticDataPageObject.selectors.tracesInput)
-        .should('have.value', '2000')
+      cy.get('#num_traces').clear().type('2000')
+      cy.get('#num_traces').should('have.value', '2000')
     })
 
     it('should support pattern selection', () => {
-      SyntheticDataPageObject.selectWorkloadPattern('Burst')
-      SyntheticDataPageObject.verifyPatternSelected('Burst')
+      cy.get('[data-testid="select-trigger"]').click()
+      cy.contains('Cost-Sensitive').click()
+      cy.get('body').click(0, 0) // Close dropdown
     })
 
     it('should have generate button available', () => {
-      cy.get(SyntheticDataPageObject.selectors.generateButton)
-        .should('be.visible')
+      cy.contains('Generate Data').should('be.visible')
+      cy.get('button').contains('Generate Data').should('not.be.disabled')
+=======
+      cy.contains('Number of Traces').should('be.visible')
+    })
+
+    it('should have default configuration values', () => {
+      cy.get('input[name="num_traces"]').should('have.value', '100')
+      cy.get('input[name="num_users"]').should('have.value', '10')
+      cy.get('input[name="error_rate"]').should('have.value', '0.1')
+    })
+
+    it('should allow basic parameter updates', () => {
+      cy.get('input[name="num_traces"]').clear().type('2000')
+      cy.get('input[name="num_traces"]').should('have.value', '2000')
+    })
+
+    it('should support pattern selection', () => {
+      cy.get('button[role="combobox"]').click()
+      cy.contains('Cost-Sensitive').click()
+      cy.get('button[role="combobox"]').should('contain', 'Cost-Sensitive')
+    })
+
+    it('should have generate button available', () => {
+      cy.contains('button', 'Generate Data').should('be.visible')
+>>>>>>> Stashed changes
     })
   })
 

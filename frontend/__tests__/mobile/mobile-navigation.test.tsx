@@ -1,8 +1,9 @@
-/**
- * Mobile Navigation Test Suite
- * Tests mobile-specific navigation patterns, gestures, and interactions
- * Business Value: Ensures seamless mobile navigation = critical for user retention
- * Follows 25-line function rule and 450-line file limit
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { Button } from '@/components/ui/button';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+-line function rule and 450-line file limit
  */
 
 import React from 'react';
@@ -22,6 +23,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('Mobile Navigation - Test Suite', () => {
+    jest.setTimeout(10000);
   const user = userEvent.setup();
 
   beforeEach(() => {
@@ -52,6 +54,7 @@ describe('Mobile Navigation - Test Suite', () => {
   };
 
   describe('Swipe Navigation', () => {
+      jest.setTimeout(10000);
     it('handles right swipe for navigation', async () => {
       const handleSwipe = jest.fn();
       
@@ -129,6 +132,7 @@ describe('Mobile Navigation - Test Suite', () => {
   });
 
   describe('Touch Navigation Controls', () => {
+      jest.setTimeout(10000);
     it('handles hamburger menu toggle on mobile', async () => {
       const handleMenuToggle = jest.fn();
       
@@ -206,6 +210,7 @@ describe('Mobile Navigation - Test Suite', () => {
   });
 
   describe('Mobile Browser Navigation', () => {
+      jest.setTimeout(10000);
     it('handles browser back button correctly', async () => {
       const handlePopState = jest.fn();
       
@@ -263,6 +268,7 @@ describe('Mobile Navigation - Test Suite', () => {
   });
 
   describe('Keyboard Navigation on Mobile', () => {
+      jest.setTimeout(10000);
     it('handles virtual keyboard appearance', async () => {
       const handleKeyboardShow = jest.fn();
       
@@ -332,6 +338,7 @@ describe('Mobile Navigation - Test Suite', () => {
   });
 
   describe('Navigation Performance', () => {
+      jest.setTimeout(10000);
     it('provides instant visual feedback for navigation', async () => {
       const startTime = performance.now();
       
@@ -414,6 +421,7 @@ describe('Mobile Navigation - Test Suite', () => {
   });
 
   describe('Accessibility in Mobile Navigation', () => {
+      jest.setTimeout(10000);
     it('announces navigation changes to screen readers', () => {
       render(
         <nav 

@@ -1,11 +1,9 @@
-/**
- * Error Remediation Integration Tests
- * Tests for error alerting and automated remediation workflows
- * Enterprise segment - ensures automated error recovery
- */
-
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, waitFor, fireEvent, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { TestProviders } from '@/__tests__/setup/test-providers';
+import { waitFor, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TestProviders } from '@/__tests__/setup/test-providers';
 import { 
@@ -25,9 +23,15 @@ beforeEach(() => {
 
 afterEach(() => {
   testContext.cleanup();
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
 });
 
 describe('Error Alerting and Notifications', () => {
+    jest.setTimeout(10000);
   it('should support error alerting and notifications', async () => {
     const TestComponent = () => {
       const [alertStatus, setAlertStatus] = React.useState('');
@@ -176,6 +180,7 @@ describe('Error Alerting and Notifications', () => {
 });
 
 describe('Automated Remediation Workflows', () => {
+    jest.setTimeout(10000);
   it('should handle error remediation workflows', async () => {
     const TestComponent = () => {
       const [remediationStatus, setRemediationStatus] = React.useState('');
@@ -361,7 +366,7 @@ describe('Automated Remediation Workflows', () => {
       data: {
         state: 'open',
         fallback_enabled: true,
-        recovery_timeout: 60000
+        recovery_timeout: 50000
       }
     });
     

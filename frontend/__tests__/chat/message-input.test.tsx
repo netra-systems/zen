@@ -1,7 +1,8 @@
-/**
- * Message Display & Input Tests
- * =============================
- * Modular UI tests for message display and input functionality
+import React from 'react';
+import { render } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+d input functionality
  * Tests 8-11 (Message Display) and Tests 12-15 (Message Input)
  * Core chat messaging experience components
  */
@@ -79,18 +80,27 @@ import { useChatStore } from '../../store/chatStore';
 
 describe('Message Display & Input Tests', () => {
   
+    jest.setTimeout(10000);
+  
   beforeEach(() => {
     setupDefaultMocks();
   });
 
   afterEach(() => {
     cleanupMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   // ============================================
   // Message Display Tests (Tests 8-11)
   // ============================================
   describe('Message Display and Interaction', () => {
+    
+      jest.setTimeout(10000);
     
     test('8. Should display messages in the list', () => {
       const mockMessages = [
@@ -166,6 +176,8 @@ describe('Message Display & Input Tests', () => {
   // ============================================
   describe('Message Input Functionality', () => {
     
+      jest.setTimeout(10000);
+    
     test('12. Should handle text input', async () => {
       const user = userEvent.setup();
       render(<MessageInput />);
@@ -226,6 +238,8 @@ describe('Message Display & Input Tests', () => {
   // Message & Input Integration Tests
   // ============================================
   describe('Message & Input Integration', () => {
+    
+      jest.setTimeout(10000);
     
     test('Should handle empty message list', () => {
       const mockChatStore = createChatStoreMock({

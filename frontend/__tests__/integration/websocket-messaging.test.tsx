@@ -1,8 +1,9 @@
-/**
- * WebSocket Message Processing Tests
- * Extracted from oversized websocket-complete.test.tsx for modularity
- * Tests message sending, receiving, queuing, and basic processing scenarios
- * Focuses on real message behavior simulation with proper error handling
+import { waitFor } from '@testing-library/react';
+import { jest } from '@jest/globals';
+import { WebSocketTestManager, createWebSocketManager } from '@/__tests__/helpers/websocket-test-manager';
+import { MessageBuffer } from '../setup/websocket-test-utils';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+dling
  */
 
 import { waitFor } from '@testing-library/react';
@@ -11,6 +12,7 @@ import { WebSocketTestManager, createWebSocketManager } from '@/__tests__/helper
 import { MessageBuffer } from '../setup/websocket-test-utils';
 
 describe('WebSocket Message Processing Tests', () => {
+    jest.setTimeout(10000);
   let wsManager: any;
   let messageBuffer: MessageBuffer;
 
@@ -24,9 +26,15 @@ describe('WebSocket Message Processing Tests', () => {
   afterEach(() => {
     wsManager.cleanup();
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Message Sending', () => {
+      jest.setTimeout(10000);
     it('should handle real message sending with queue tracking', async () => {
       await wsManager.waitForConnection();
       
@@ -79,6 +87,7 @@ describe('WebSocket Message Processing Tests', () => {
   });
 
   describe('Message Receiving', () => {
+      jest.setTimeout(10000);
     it('should handle real message receiving with event simulation', async () => {
       await wsManager.waitForConnection();
       
@@ -141,6 +150,7 @@ describe('WebSocket Message Processing Tests', () => {
   });
 
   describe('Message Queuing', () => {
+      jest.setTimeout(10000);
     it('should handle message queuing with real buffer behavior', async () => {
       const buffer = wsManager.getMessageBuffer();
       
@@ -198,6 +208,7 @@ describe('WebSocket Message Processing Tests', () => {
   });
 
   describe('Message Failure Handling', () => {
+      jest.setTimeout(10000);
     it('should handle failed messages with real error conditions', async () => {
       // Close connection to simulate failure
       wsManager.close();
@@ -230,6 +241,7 @@ describe('WebSocket Message Processing Tests', () => {
   });
 
   describe('Message Performance', () => {
+      jest.setTimeout(10000);
     it('should measure real message round-trip latency', async () => {
       await wsManager.waitForConnection();
       

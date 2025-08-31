@@ -22,6 +22,7 @@
 
 import { render, screen, waitFor } from '@testing-library/react';
 import { getUnifiedApiConfig } from '../../lib/unified-api-config';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock Next.js router
 jest.mock('next/navigation', () => ({
@@ -43,6 +44,8 @@ if (typeof test !== 'undefined' && test.skip) {
 }
 
 describe('API Proxy Backend Connectivity Authentication Failures', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   const originalEnv = process.env;
   const originalFetch = global.fetch;
 
@@ -63,6 +66,12 @@ describe('API Proxy Backend Connectivity Authentication Failures', () => {
   afterEach(() => {
     global.fetch = originalFetch;
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   afterAll(() => {
@@ -70,6 +79,8 @@ describe('API Proxy Backend Connectivity Authentication Failures', () => {
   });
 
   describe('High Priority: /api/threads 403 Backend Service Unavailable', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: Frontend service gets 403 when trying to access backend /api/threads
@@ -203,6 +214,8 @@ describe('API Proxy Backend Connectivity Authentication Failures', () => {
   });
 
   describe('Service-to-Service Authentication Failures', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: JWT token validation failing between frontend and backend
@@ -362,6 +375,8 @@ describe('API Proxy Backend Connectivity Authentication Failures', () => {
   });
 
   describe('Authentication Token Validation Edge Cases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: Malformed JWT tokens not being handled properly
@@ -442,7 +457,7 @@ describe('API Proxy Backend Connectivity Authentication Failures', () => {
             }
           }),
           new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Test timeout')), 5000)
+            setTimeout(() => reject(new Error('Test timeout')), 1000)
           )
         ]);
 
@@ -462,6 +477,8 @@ describe('API Proxy Backend Connectivity Authentication Failures', () => {
   });
 
   describe('CORS and Cross-Origin Authentication Issues', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: CORS policy blocking authenticated requests in staging
@@ -558,6 +575,8 @@ describe('API Proxy Backend Connectivity Authentication Failures', () => {
   });
 
   describe('Network and Connection Authentication Edge Cases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: Authentication fails during network interruptions

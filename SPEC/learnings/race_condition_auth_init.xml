@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Race Conditions in Auth Initialization - Redirect Loops</title>
+    <date>2025-08-30</date>
+    <severity>MEDIUM</severity>
+    <components>
+      <component>frontend/app/page.tsx</component>
+      <component>frontend/app/login/page.tsx</component>
+      <component>frontend/auth/context.tsx</component>
+    </components>
+    <related_learnings>
+      <learning>frontend_refresh_loop_fix.xml</learning>
+    </related_learnings>
+  </metadata>
+
+  <problem>
+    <description>
+      Multiple components checking auth state simultaneously without coordination
+      caused redirect loops between login and home pages.
+    </description>
+    <scenario>
+      <step>HomePage checks auth, sees no user, redirects to /login</step>
+      <step>LoginPage checks auth, thinks user exists, redirects to /chat</step>
+      <step>Chat page checks auth, sees no user, redirects to /login</step>
+      <step>Infinite loop continues</step>
+    </scenario>
+  </problem>
+
+  <root_cause>
+    <issue>
+      Auth context's 'initialized' flag was not being checked before making
+      redirect decisions, causing premature redirects during auth loading.
+    </issue>
+    <issue>
+      No mechanism to prevent multiple redirect attempts from the same component.
+    </issue>
+  </root_cause>
+
+  <fix_applied>
+    <change location="frontend/app/page.tsx">
+      Added hasRedirectedRef to prevent multiple redirects:
+      ```typescript
+      const hasRedirectedRef = useRef(false);
+      
+      useEffect(() => {
+        if (hasRedirectedRef.current) return;
+        
+        if (initialized && !loading) {
+          hasRedirectedRef.current = true;
+          // redirect logic
+        }
+      }, [initialized, loading, user, router]);
+      ```
+    </change>
+    
+    <change location="frontend/app/login/page.tsx">
+      Added initialization check before redirect:
+      ```typescript
+      if (initialized && !loading && user) {
+        hasRedirectedRef.current = true;
+        router.push('/chat');
+      }
+      ```
+    </change>
+
+    <change location="frontend/auth/context.tsx">
+      Added initialized state to track auth readiness:
+      ```typescript
+      const [initialized, setInitialized] = useState(false);
+      // Set to true after auth config is loaded
+      ```
+    </change>
+  </fix_applied>
+
+  <pattern>
+    <name>Auth Initialization Pattern</name>
+    <description>
+      Always check these conditions before auth-based redirects:
+      1. Auth context is initialized
+      2. Not currently loading
+      3. Has not already redirected
+    </description>
+    <code>
+      if (initialized && !loading && !hasRedirected) {
+        // Safe to make auth decisions
+      }
+    </code>
+  </pattern>
+
+  <key_insight>
+    <title>Auth State Must Be Fully Initialized Before Decisions</title>
+    <description>
+      Never make authentication-based routing decisions until:
+      - Auth configuration is loaded
+      - Token validation is complete
+      - User state is determined
+      
+      Use an 'initialized' flag to track when auth is ready for use.
+    </description>
+  </key_insight>
+
+  <prevention>
+    <measure>Always use initialization flags for async auth state</measure>
+    <measure>Implement redirect guards to prevent multiple attempts</measure>
+    <measure>Add delay/debounce for auth-based redirects</measure>
+    <measure>Test auth flows with slow network conditions</measure>
+  </prevention>
+</learning>

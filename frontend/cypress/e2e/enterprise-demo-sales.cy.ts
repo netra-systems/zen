@@ -5,10 +5,10 @@ import { EnterpriseDemoUtils, ENTERPRISE_DEMO_CONSTANTS, ENTERPRISE_SELECTORS } 
 /**
  * Enterprise Demo Sales Enablement Tests
  * 
- * BVJ: Enterprise segment - Sales enablement and conversion validation
- * Business Goal: Validate sales process elements for enterprise prospects
- * Value Impact: Ensures sales team can effectively demonstrate ROI and conversion paths
- * Revenue Impact: Directly supports enterprise sales pipeline and conversion rates
+ * BVJ: Enterprise segment - Interactive demo conversion and sales enablement validation
+ * Business Goal: Validate interactive demo supports enterprise sales process and conversions
+ * Value Impact: Ensures demo effectively communicates value proposition and drives prospect engagement
+ * Revenue Impact: Directly supports enterprise conversion through compelling demo experience
  */
 
 describe('Enterprise Demo - Sales Enablement', () => {
@@ -16,190 +16,224 @@ describe('Enterprise Demo - Sales Enablement', () => {
     EnterpriseDemoUtils.setupDemoPage()
   })
 
-  describe('Customer Success Stories', () => {
-    it('should display testimonial carousel', () => {
-      cy.contains('Customer Success').should('be.visible')
-      cy.get(ENTERPRISE_SELECTORS.testimonialCard).should('have.length.at.least', 3)
+  describe('Value Proposition Communication', () => {
+    it('should clearly communicate enterprise value on welcome screen', () => {
+      EnterpriseDemoUtils.verifyWelcomeScreen()
+      cy.contains('reduce your AI costs by 40-60%').should('be.visible')
+      cy.contains('improving performance by 2-3x').should('be.visible')
     })
 
-    it('should show Fortune 500 logos', () => {
-      cy.get('[data-testid="customer-logo"]').should('have.length.at.least', 5)
+    it('should display compelling business metrics', () => {
+      EnterpriseDemoUtils.verifyWelcomeScreen()
+      cy.contains('$2.4M').should('be.visible') // Annual Savings
+      cy.contains('3.2x').should('be.visible') // Performance improvement
+      cy.contains('99.9%').should('be.visible') // Uptime SLA
     })
 
-    it('should display case study metrics', () => {
-      ENTERPRISE_DEMO_CONSTANTS.CASE_STUDY_METRICS.forEach(metric => {
-        cy.contains(metric).should('be.visible')
-      })
+    it('should present metrics in business language', () => {
+      EnterpriseDemoUtils.verifyWelcomeScreen()
+      cy.contains('Annual Savings').should('be.visible')
+      cy.contains('Faster Response').should('be.visible')
+      cy.contains('Uptime SLA').should('be.visible')
     })
 
-    it('should navigate testimonial carousel', () => {
-      EnterpriseDemoUtils.navigateTestimonials()
-    })
-
-    it('should link to detailed case studies', () => {
-      cy.contains('Read Case Study').should('have.attr', 'href')
-    })
-  })
-
-  describe('Implementation Timeline', () => {
-    it('should display implementation phases', () => {
-      cy.contains('Implementation Timeline').should('be.visible')
-      cy.get(ENTERPRISE_SELECTORS.timelinePhase).should('have.length', 4)
-    })
-
-    it('should show phase details', () => {
-      ENTERPRISE_DEMO_CONSTANTS.PHASES.forEach(phase => {
-        cy.contains(phase).should('be.visible')
-      })
-    })
-
-    it('should display timeline duration', () => {
-      cy.contains('Week 1-2').should('be.visible')
-      cy.contains('Week 3-4').should('be.visible')
-      cy.contains('Week 5-8').should('be.visible')
-    })
-
-    it('should highlight current phase', () => {
-      cy.get('[data-testid="current-phase"]').should('have.class', 'ring-2')
-    })
-
-    it('should show phase deliverables on click', () => {
-      cy.contains('Discovery').click()
-      cy.contains('Requirements Analysis').should('be.visible')
-      cy.contains('Architecture Review').should('be.visible')
+    it('should maintain consistent value messaging throughout demo', () => {
+      EnterpriseDemoUtils.verifyWelcomeScreen()
+      EnterpriseDemoUtils.startInteractiveDemo()
+      EnterpriseDemoUtils.selectWorkload()
+      // Value messaging should persist in header
+      cy.contains('Netra AI Optimization Platform').should('be.visible')
     })
   })
 
-  describe('Pricing and Packages', () => {
-    it('should display enterprise pricing tiers', () => {
-      cy.contains('Enterprise Pricing').should('be.visible')
-      cy.get(ENTERPRISE_SELECTORS.pricingTier).should('have.length', 3)
+  describe('Demo Progression and Engagement', () => {
+    it('should guide prospects through logical demo steps', () => {
+      EnterpriseDemoUtils.verifyDemoProgressSteps()
+      // Verify clear progression path
+      cy.contains('Select Workload').should('be.visible')
+      cy.contains('Generate Data').should('be.visible')
+      cy.contains('Analyze & Optimize').should('be.visible')
+      cy.contains('View Results').should('be.visible')
     })
 
-    it('should show tier features', () => {
-      ENTERPRISE_DEMO_CONSTANTS.PRICING_TIERS.forEach(tier => {
-        cy.contains(tier).should('be.visible')
-      })
+    it('should engage prospects with interactive workload selection', () => {
+      EnterpriseDemoUtils.startInteractiveDemo()
+      cy.contains('Choose your industry profile').should('be.visible')
+      cy.get(ENTERPRISE_SELECTORS.workloadOption).should('exist')
     })
 
-    it('should display custom pricing option', () => {
-      cy.contains('Custom Pricing').should('be.visible')
-      cy.contains('Contact Sales').should('be.visible')
+    it('should maintain engagement during processing steps', () => {
+      EnterpriseDemoUtils.startInteractiveDemo()
+      EnterpriseDemoUtils.selectWorkload()
+      EnterpriseDemoUtils.verifyGeneratingScreen()
+      // Verify engaging content during wait
+      cy.contains('Generating synthetic workload data').should('be.visible')
     })
 
-    it('should highlight recommended tier', () => {
-      cy.get('[data-testid="recommended-tier"]').should('have.class', 'scale-105')
+    it('should provide visual progress indicators', () => {
+      EnterpriseDemoUtils.startInteractiveDemo()
+      EnterpriseDemoUtils.selectWorkload()
+      // Verify visual engagement elements
+      cy.get(ENTERPRISE_SELECTORS.loadingSpinner, { timeout: 10000 }).should('be.visible')
     })
 
-    it('should open pricing calculator', () => {
-      cy.contains('Calculate Pricing').click()
-      cy.get('[data-testid="pricing-calculator"]').should('be.visible')
-    })
-  })
-
-  describe('Call-to-Action Sections', () => {
-    it('should display primary CTA buttons', () => {
-      cy.contains('button', 'Schedule Demo').should('be.visible')
-      cy.contains('button', 'Request Trial').should('be.visible')
-      cy.contains('button', 'Contact Sales').should('be.visible')
-    })
-
-    it('should show demo scheduling form', () => {
-      EnterpriseDemoUtils.openDemoForm()
-      cy.get('input[name="company"]').should('be.visible')
-      cy.get('input[name="email"]').should('be.visible')
-    })
-
-    it('should validate form inputs', () => {
-      EnterpriseDemoUtils.openDemoForm()
-      cy.get('button[type="submit"]').click()
-      cy.contains('Required').should('be.visible')
-    })
-
-    it('should submit demo request', () => {
-      EnterpriseDemoUtils.openDemoForm()
-      EnterpriseDemoUtils.fillDemoForm()
-      EnterpriseDemoUtils.submitDemoForm()
-    })
-
-    it('should open contact sales modal', () => {
-      cy.contains('Contact Sales').click()
-      cy.get(ENTERPRISE_SELECTORS.salesModal).should('be.visible')
-      cy.contains('Enterprise Sales Team').should('be.visible')
+    it('should show clear completion and results', () => {
+      EnterpriseDemoUtils.completeFullDemoFlow()
+      cy.contains('Optimization Complete').should('be.visible')
     })
   })
 
-  describe('Sales Conversion Flow', () => {
-    it('should guide from success stories to pricing', () => {
-      cy.contains('Customer Success').scrollIntoView()
-      EnterpriseDemoUtils.navigateTestimonials()
-      cy.contains('Enterprise Pricing').scrollIntoView()
-      cy.get(ENTERPRISE_SELECTORS.pricingTier).should('be.visible')
+  describe('ROI Demonstration and Business Case', () => {
+    beforeEach(() => {
+      // Complete demo to access results for ROI validation
+      EnterpriseDemoUtils.completeFullDemoFlow()
     })
 
-    it('should connect timeline to demo scheduling', () => {
-      cy.contains('Implementation Timeline').scrollIntoView()
-      cy.contains('Discovery').should('be.visible')
-      EnterpriseDemoUtils.openDemoForm()
+    it('should provide concrete ROI metrics', () => {
+      cy.contains('Cost Reduction').should('be.visible')
+      cy.contains('42%').should('be.visible')
+      cy.contains('Monthly Savings').should('be.visible')
+      cy.contains('$124K').should('be.visible')
     })
 
-    it('should link success metrics to ROI calculation', () => {
-      ENTERPRISE_DEMO_CONSTANTS.CASE_STUDY_METRICS.forEach(metric => {
-        cy.contains(metric).should('be.visible')
-      })
-      cy.contains('Calculate Pricing').click()
-      cy.get('[data-testid="pricing-calculator"]').should('be.visible')
+    it('should demonstrate performance improvements', () => {
+      cy.contains('Response Time').should('be.visible')
+      cy.contains('3.2x').should('be.visible')
+      cy.contains('Latency').should('be.visible')
     })
 
-    it('should support sales team demo workflow', () => {
-      cy.contains('Customer Success').should('be.visible')
-      cy.contains('Implementation Timeline').should('be.visible')
-      cy.contains('Enterprise Pricing').should('be.visible')
-      cy.contains('Schedule Demo').should('be.visible')
+    it('should show infrastructure efficiency gains', () => {
+      cy.contains('GPU Utilization').should('be.visible')
+      cy.contains('85%').should('be.visible')
+      cy.contains('From 45%').should('be.visible')
     })
 
-    it('should validate enterprise lead capture', () => {
-      EnterpriseDemoUtils.openDemoForm()
-      EnterpriseDemoUtils.fillDemoForm()
-      cy.get('button[type="submit"]').should('be.enabled')
+    it('should provide reliability improvements', () => {
+      cy.contains('Reliability').should('be.visible')
+      cy.contains('99.9%').should('be.visible')
+      cy.contains('From 97.2%').should('be.visible')
     })
 
-    it('should demonstrate complete sales journey', () => {
-      // Customer proof points
-      cy.contains('Customer Success').scrollIntoView()
-      cy.get(ENTERPRISE_SELECTORS.testimonialCard).should('be.visible')
-      
-      // Implementation clarity
-      cy.contains('Implementation Timeline').scrollIntoView()
-      cy.get(ENTERPRISE_SELECTORS.timelinePhase).should('be.visible')
-      
-      // Pricing transparency
-      cy.contains('Enterprise Pricing').scrollIntoView()
-      cy.get(ENTERPRISE_SELECTORS.pricingTier).should('be.visible')
-      
-      // Call to action
-      EnterpriseDemoUtils.openDemoForm()
+    it('should calculate specific business impact', () => {
+      // Verify specific, credible business metrics
+      cy.contains('$124K').should('be.visible') // Monthly savings
+      cy.contains('42%').should('be.visible') // Cost reduction percentage
     })
   })
 
-  describe('Enterprise Sales Analytics', () => {
-    it('should track pricing calculator usage', () => {
-      EnterpriseDemoUtils.trackAnalyticsEvent('pricing_calculator_open')
-      cy.contains('Calculate Pricing').click()
+  describe('Conversion and Next Steps', () => {
+    it('should provide clear initial call-to-action', () => {
+      EnterpriseDemoUtils.verifyWelcomeScreen()
+      cy.contains('Start Interactive Demo').should('be.visible')
+      cy.get(ENTERPRISE_SELECTORS.startDemoButton).should('be.enabled')
+    })
+
+    it('should maintain engagement throughout demo flow', () => {
+      EnterpriseDemoUtils.startInteractiveDemo()
+      EnterpriseDemoUtils.selectWorkload()
+      // Verify user remains engaged during processing
+      cy.contains('Generating synthetic workload data').should('be.visible')
+    })
+
+    it('should provide compelling results to drive conversion', () => {
+      EnterpriseDemoUtils.completeFullDemoFlow()
+      cy.contains('Optimization Complete').should('be.visible')
+      // Results should be compelling enough to drive next conversation
+      cy.contains('42%').should('be.visible') // Cost reduction
+      cy.contains('$124K').should('be.visible') // Monthly savings
+    })
+
+    it('should demonstrate beta program value', () => {
+      EnterpriseDemoUtils.verifyWelcomeScreen()
+      cy.contains('BETA').should('be.visible')
+      cy.contains('Experience AI Optimization in Action').should('be.visible')
+    })
+
+    it('should support sales team demo narrative', () => {
+      // Complete demo validates entire sales story
+      EnterpriseDemoUtils.verifyWelcomeScreen() // Value proposition
+      EnterpriseDemoUtils.startInteractiveDemo() // Engagement
+      EnterpriseDemoUtils.selectWorkload() // Relevance
+      EnterpriseDemoUtils.verifyResultsScreen() // Proof of value
+    })
+  })
+
+  describe('Complete Sales Journey Validation', () => {
+    it('should support discovery phase conversation', () => {
+      EnterpriseDemoUtils.verifyWelcomeScreen()
+      // Demo should help sales team understand prospect needs
+      cy.contains('Choose your industry profile').should('be.visible')
+      EnterpriseDemoUtils.startInteractiveDemo()
+    })
+
+    it('should demonstrate platform capabilities convincingly', () => {
+      EnterpriseDemoUtils.startInteractiveDemo()
+      EnterpriseDemoUtils.selectWorkload()
+      EnterpriseDemoUtils.verifyGeneratingScreen()
+      EnterpriseDemoUtils.verifyAnalyzingScreen()
+      // Should show real AI processing capabilities
+      EnterpriseDemoUtils.verifyAgentStatusPanel()
+    })
+
+    it('should provide concrete business justification', () => {
+      EnterpriseDemoUtils.completeFullDemoFlow()
+      // Results should support business case development
+      cy.contains('Cost Reduction').should('be.visible')
+      cy.contains('Monthly Savings').should('be.visible')
+      cy.contains('Response Time').should('be.visible')
+      cy.contains('Reliability').should('be.visible')
+    })
+
+    it('should enable technical validation conversations', () => {
+      EnterpriseDemoUtils.completeFullDemoFlow()
+      // Technical details should satisfy technical stakeholders
+      cy.contains('62ms → 19ms p50').should('be.visible')
+      cy.contains('GPU Utilization').should('be.visible')
+      cy.contains('From 45%').should('be.visible')
+    })
+
+    it('should support pilot program discussions', () => {
+      EnterpriseDemoUtils.verifyWelcomeScreen()
+      cy.contains('BETA').should('be.visible')
+      cy.contains('Start with your industry-specific workload').should('be.visible')
+    })
+
+    it('should complete full enterprise sales demo narrative', () => {
+      // Full demo should tell complete enterprise story
+      EnterpriseDemoUtils.verifyWelcomeScreen() // Problem/solution fit
+      EnterpriseDemoUtils.startInteractiveDemo() // Platform engagement
+      EnterpriseDemoUtils.selectWorkload() // Relevance and customization
+      EnterpriseDemoUtils.verifyGeneratingScreen() // Technical capabilities
+      EnterpriseDemoUtils.verifyAnalyzingScreen() // AI sophistication
+      EnterpriseDemoUtils.verifyResultsScreen() // Business value delivery
+    })
+  })
+
+  describe('Demo Conversion Analytics', () => {
+    it('should track demo initiation', () => {
       EnterpriseDemoUtils.verifyAnalyticsTracking()
+      EnterpriseDemoUtils.startInteractiveDemo()
+      // Should track when prospects start the demo
     })
 
-    it('should track demo form submissions', () => {
-      EnterpriseDemoUtils.trackAnalyticsEvent('demo_form_submit')
-      EnterpriseDemoUtils.openDemoForm()
-      EnterpriseDemoUtils.fillDemoForm()
-      EnterpriseDemoUtils.submitDemoForm()
+    it('should track workload selection', () => {
+      EnterpriseDemoUtils.startInteractiveDemo()
+      EnterpriseDemoUtils.selectWorkload()
+      // Should track which workloads prospects choose
     })
 
-    it('should track sales contact interactions', () => {
-      EnterpriseDemoUtils.trackAnalyticsEvent('sales_contact')
-      cy.contains('Contact Sales').click()
-      cy.get(ENTERPRISE_SELECTORS.salesModal).should('be.visible')
+    it('should track demo completion', () => {
+      EnterpriseDemoUtils.completeFullDemoFlow()
+      // Should track full demo completion for conversion analysis
+      cy.contains('Optimization Complete').should('be.visible')
+    })
+
+    it('should support conversion funnel analysis', () => {
+      // Demo should provide data for sales funnel optimization
+      EnterpriseDemoUtils.verifyPageLoad() // Landing
+      EnterpriseDemoUtils.startInteractiveDemo() // Engagement
+      EnterpriseDemoUtils.selectWorkload() // Interaction
+      EnterpriseDemoUtils.verifyResultsScreen() // Completion
     })
   })
 })

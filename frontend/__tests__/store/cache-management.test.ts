@@ -1,10 +1,9 @@
-/**
- * Cache Management Tests - State Caching & Invalidation
- * 
- * BVJ (Business Value Justification):
- * - Segment: Growth & Enterprise (performance features)
- * - Business Goal: Optimize performance to reduce churn
- * - Value Impact: 2x faster load times increase conversion by 15%
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { useChatStore } from '@/store/chat';
+import { useCorpusStore } from '@/store/corpusStore';
+import { GlobalTestUtils } from './store-test-utils';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ - Value Impact: 2x faster load times increase conversion by 15%
  * - Revenue Impact: Performance directly affects user retention
  * 
  * Tests: Cache updates, invalidation strategies, memory management
@@ -35,6 +34,7 @@ const createMockCorpus = (id: string, name: string = 'Test Corpus') => ({
 });
 
 describe('Cache Management Tests', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     GlobalTestUtils.setupStoreTestEnvironment();
     // Clear any existing cache state
@@ -43,9 +43,15 @@ describe('Cache Management Tests', () => {
 
   afterEach(() => {
     GlobalTestUtils.cleanupStoreTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Memory Cache Management', () => {
+      jest.setTimeout(10000);
     it('should cache message data in memory', () => {
       const { result } = renderHook(() => useChatStore());
       const message = createMockMessage('cached-msg-1');
@@ -113,6 +119,7 @@ describe('Cache Management Tests', () => {
   });
 
   describe('Cache Invalidation Strategies', () => {
+      jest.setTimeout(10000);
     it('should invalidate cache on data updates', () => {
       const result = renderHook(() => useChatStore());
       const message = createMockMessage('update-msg');
@@ -197,6 +204,7 @@ describe('Cache Management Tests', () => {
   });
 
   describe('Cache Synchronization', () => {
+      jest.setTimeout(10000);
     it('should sync cache with external updates', () => {
       const result = renderHook(() => useChatStore());
       
@@ -266,6 +274,7 @@ describe('Cache Management Tests', () => {
   });
 
   describe('Cache Performance Optimization', () => {
+      jest.setTimeout(10000);
     it('should batch cache updates for performance', () => {
       const result = renderHook(() => useChatStore());
       const messages = Array.from({ length: 50 }, (_, i) => 
@@ -327,6 +336,7 @@ describe('Cache Management Tests', () => {
   });
 
   describe('Cache Cleanup and Garbage Collection', () => {
+      jest.setTimeout(10000);
     it('should clean up unused cache entries', () => {
       const result = renderHook(() => useChatStore());
       const message = createMockMessage('cleanup-msg');

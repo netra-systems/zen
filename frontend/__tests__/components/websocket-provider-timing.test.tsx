@@ -20,6 +20,7 @@ import { reconciliationService } from '@/services/reconciliation';
 import { unifiedAuthService } from '@/lib/unified-auth-service';
 import { config as appConfig } from '@/config';
 import { logger } from '@/lib/logger';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock all dependencies
 jest.mock('@/services/webSocketService');
@@ -27,7 +28,6 @@ jest.mock('@/services/reconciliation');
 jest.mock('@/lib/unified-auth-service');
 jest.mock('@/config');
 jest.mock('@/lib/logger');
-jest.mock('@/utils/debug-logger');
 
 // Test component to consume WebSocket context and monitor timing
 const TimingTestConsumer: React.FC<{ 
@@ -103,6 +103,8 @@ const useTokenController = () => {
 };
 
 describe('WebSocketProvider Timing Tests', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   const mockWebSocketService = {
     onStatusChange: null,
     onMessage: null,
@@ -142,6 +144,12 @@ describe('WebSocketProvider Timing Tests', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   /**

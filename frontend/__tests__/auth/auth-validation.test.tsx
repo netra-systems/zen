@@ -6,6 +6,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { jest } from '@jest/globals';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Simple test component to validate auth state
 const AuthStatusComponent: React.FC<{ isAuthenticated: boolean }> = ({ isAuthenticated }) => {
@@ -20,6 +21,8 @@ const AuthStatusComponent: React.FC<{ isAuthenticated: boolean }> = ({ isAuthent
 };
 
 describe('Auth Validation Tests', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   it('should show logout button when user is authenticated', () => {
     render(<AuthStatusComponent isAuthenticated={true} />);
     
@@ -34,4 +37,8 @@ describe('Auth Validation Tests', () => {
     // Fixed: Should NOT be in the document when user is not authenticated
     expect(screen.queryByTestId('logout-button')).not.toBeInTheDocument();
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

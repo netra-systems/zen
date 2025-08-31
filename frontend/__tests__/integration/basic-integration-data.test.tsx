@@ -1,9 +1,9 @@
-/**
- * Data Flow Integration Tests
- * Tests for WebSocket, chat, threads, and agent integration
- */
-// Unmock auth service for proper service functionality
-jest.unmock('@/auth/service');
+import React from 'react';
+import { render, fireEvent, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import WS from 'jest-websocket-mock';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+k('@/auth/service');
 
 
 import React from 'react';
@@ -20,6 +20,7 @@ import { assertTextContent, assertMessageCount, assertThreadCount } from './help
 import { waitForConnection, sendMessage, sendStreamChunk, sendAgentStart, sendAgentMessage, sendAgentComplete, createActWrapper } from './helpers/websocket-helpers';
 
 describe('Data Flow Integration Tests', () => {
+    jest.setTimeout(10000);
   let server: WS;
   
   beforeEach(() => {
@@ -30,15 +31,21 @@ describe('Data Flow Integration Tests', () => {
 
   afterEach(() => {
     cleanupWebSocket();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('WebSocket Connection', () => {
+      jest.setTimeout(10000);
     it('should establish WebSocket connection', async () => {
       const TestComponent = () => {
         const [connected, setConnected] = React.useState(false);
         
         React.useEffect(() => {
-          const ws = new WebSocket('ws://localhost:8000/ws');
+          const ws = new WebSocket('ws://localhost:3001/test'));
           ws.onopen = createActWrapper(() => setConnected(true));
           ws.onclose = createActWrapper(() => setConnected(false));
           return () => ws.close();
@@ -62,7 +69,7 @@ describe('Data Flow Integration Tests', () => {
         const [message, setMessage] = React.useState('');
         
         React.useEffect(() => {
-          const ws = new WebSocket('ws://localhost:8000/ws');
+          const ws = new WebSocket('ws://localhost:3001/test'));
           ws.onmessage = createActWrapper((event) => {
             const data = JSON.parse(event.data);
             setMessage(data.data?.content || data.content);
@@ -83,6 +90,7 @@ describe('Data Flow Integration Tests', () => {
   });
 
   describe('Chat Functionality', () => {
+      jest.setTimeout(10000);
     it('should send and receive messages', async () => {
       const { getByText, getByTestId } = render(<ChatComponent />);
       
@@ -101,7 +109,7 @@ describe('Data Flow Integration Tests', () => {
         const [streamingContent, setStreamingContent] = React.useState('');
         
         React.useEffect(() => {
-          const ws = new WebSocket('ws://localhost:8000/ws');
+          const ws = new WebSocket('ws://localhost:3001/test'));
           ws.onmessage = createActWrapper((event) => {
             const data = JSON.parse(event.data);
             if (data.type === 'stream_chunk') {
@@ -129,6 +137,7 @@ describe('Data Flow Integration Tests', () => {
   });
 
   describe('Thread Management', () => {
+      jest.setTimeout(10000);
     it('should create and switch threads', async () => {
       const { getByText, getByTestId } = render(<ThreadComponent />);
       
@@ -175,13 +184,14 @@ describe('Data Flow Integration Tests', () => {
   });
 
   describe('Agent Integration', () => {
+      jest.setTimeout(10000);
     it('should handle agent messages through WebSocket', async () => {
       const AgentComponent = () => {
         const [agentStatus, setAgentStatus] = React.useState('idle');
         const [agentMessage, setAgentMessage] = React.useState('');
         
         React.useEffect(() => {
-          const ws = new WebSocket('ws://localhost:8000/ws');
+          const ws = new WebSocket('ws://localhost:3001/test'));
           
           ws.onmessage = createActWrapper((event) => {
             const data = JSON.parse(event.data);
@@ -232,6 +242,7 @@ describe('Data Flow Integration Tests', () => {
   });
 
   describe('State Synchronization', () => {
+      jest.setTimeout(10000);
     it('should sync state between components', async () => {
       const ComponentA = () => {
         const { messages, addMessage } = useChatStore();

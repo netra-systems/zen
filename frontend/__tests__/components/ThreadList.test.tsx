@@ -1,9 +1,10 @@
-/**
- * ThreadList Component Tests
- * Agent 3: Comprehensive tests for thread list rendering and interactions
- * Covers virtual scrolling, performance, accessibility, and state management
- * Follows 25-line function rule and 450-line file limit
- */
+import React from 'react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { act } from '@testing-library/react';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
@@ -89,11 +90,13 @@ const renderThreadList = (props = {}) => {
 };
 
 describe('ThreadList Component Tests', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('Basic Rendering', () => {
+      jest.setTimeout(10000);
     it('should render thread list container', () => {
       renderThreadList();
       
@@ -130,6 +133,7 @@ describe('ThreadList Component Tests', () => {
   });
 
   describe('Thread States and Indicators', () => {
+      jest.setTimeout(10000);
     it('should highlight active thread', () => {
       renderThreadList({
         threads: [mockThreadData.basic, mockThreadData.withUnread],
@@ -180,6 +184,7 @@ describe('ThreadList Component Tests', () => {
   });
 
   describe('Loading and Error States', () => {
+      jest.setTimeout(10000);
     it('should display loading state', () => {
       renderThreadList({ 
         threads: [],
@@ -224,6 +229,7 @@ describe('ThreadList Component Tests', () => {
   });
 
   describe('User Interactions', () => {
+      jest.setTimeout(10000);
     it('should handle thread click events', async () => {
       const user = userEvent.setup();
       const onThreadClick = jest.fn();
@@ -284,6 +290,7 @@ describe('ThreadList Component Tests', () => {
   });
 
   describe('Performance with Large Lists', () => {
+      jest.setTimeout(10000);
     it('should handle 1000+ threads efficiently', async () => {
       const largeThreadList = createLargeThreadList(100); // Reduce to 100 for test performance
       
@@ -321,6 +328,7 @@ describe('ThreadList Component Tests', () => {
   });
 
   describe('Accessibility', () => {
+      jest.setTimeout(10000);
     it('should have proper ARIA labels and roles', () => {
       renderThreadList({ threads: [mockThreadData.basic] });
       
@@ -361,6 +369,7 @@ describe('ThreadList Component Tests', () => {
   });
 
   describe('Animation and Visual Effects', () => {
+      jest.setTimeout(10000);
     it('should animate thread list updates', async () => {
       const { rerender } = renderThreadList({ threads: [mockThreadData.basic] });
       

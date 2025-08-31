@@ -1,8 +1,9 @@
-/**
- * First-Time User Authentication Error Recovery Tests - Business Critical
- * 
- * BUSINESS VALUE JUSTIFICATION:
- * - Segment: Free → Early (Critical error recovery for conversions)
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+s)
  * - Business Goal: Reduce 15-20% user drop-off from auth failures
  * - Value Impact: Each recovered user = potential $1K+ ARR
  * - Revenue Impact: 10% improvement = $75K+ annually
@@ -40,6 +41,7 @@ setupNextJSMocks();
 setupAuthMocks();
 
 describe('First-Time User Authentication Error Recovery Tests', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     setupCleanState();
     setupSimpleWebSocketMock();
@@ -49,9 +51,15 @@ describe('First-Time User Authentication Error Recovery Tests', () => {
   afterEach(() => {
     clearAuthState();
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Authentication Error Handling', () => {
+      jest.setTimeout(10000);
     it('displays clear error messages with retry option', async () => {
       await renderAuthErrorPage('OAuth consent denied');
       
@@ -92,6 +100,7 @@ describe('First-Time User Authentication Error Recovery Tests', () => {
   });
 
   describe('Network Error Recovery', () => {
+      jest.setTimeout(10000);
     it('detects offline state and shows appropriate message', async () => {
       Object.defineProperty(navigator, 'onLine', { value: false, writable: true });
       mockAuthService.error = 'Network error';
@@ -122,6 +131,7 @@ describe('First-Time User Authentication Error Recovery Tests', () => {
   });
 
   describe('Service Availability Recovery', () => {
+      jest.setTimeout(10000);
     it('handles server errors with retry options', async () => {
       await renderAuthErrorPage('Internal server error (500)');
       
@@ -145,6 +155,7 @@ describe('First-Time User Authentication Error Recovery Tests', () => {
   });
 
   describe('User Experience During Errors', () => {
+      jest.setTimeout(10000);
     it('maintains professional appearance during errors', async () => {
       await renderAuthErrorPage('Authentication failed');
       
@@ -179,6 +190,7 @@ describe('First-Time User Authentication Error Recovery Tests', () => {
   });
 
   describe('Error Message Quality', () => {
+      jest.setTimeout(10000);
     it('shows user-friendly error messages', async () => {
       await renderAuthErrorPage('Invalid client configuration');
       

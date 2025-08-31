@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react';
 import { Thread, ThreadService } from '@/services/threadService';
 import { ChatSidebarState, FilterType } from './ChatSidebarTypes';
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 import { useAuthStore } from '@/store/authStore';
 
 export const useChatSidebarState = () => {

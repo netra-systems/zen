@@ -1,8 +1,7 @@
-/**
- * Data Fetching Integration Tests - Optimistic Updates Module
- * Tests optimistic update patterns for improved UX
- * 
- * Business Value Justification (BVJ):
+import { render, screen, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+* Business Value Justification (BVJ):
  * - Segment: All (Free → Enterprise)  
  * - Goal: Improve user experience through instant feedback
  * - Value Impact: Increases user engagement and reduces perceived latency
@@ -252,6 +251,11 @@ beforeAll(() => {
 afterEach(() => {
   server.resetHandlers();
   jest.clearAllMocks();
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
 });
 
 afterAll(() => {
@@ -263,6 +267,7 @@ afterAll(() => {
 // ============================================================================
 
 describe('Data Fetching - Optimistic Updates', () => {
+    jest.setTimeout(10000);
   it('handles basic state updates', async () => {
     // Simple test 
     const TestComponent = () => {

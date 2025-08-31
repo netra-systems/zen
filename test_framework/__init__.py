@@ -47,7 +47,8 @@ from test_framework.report_manager import print_summary, save_test_report
 from test_framework.test_quality_analyzer import TestQualityAnalyzer, TestQualityIssue
 
 # Import essential utilities
-from test_framework.mock_utils import mock_justified
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 from test_framework.feature_flags import FeatureFlagManager, FeatureStatus
 from test_framework.decorators import feature_flag, requires_feature, tdd_test
 

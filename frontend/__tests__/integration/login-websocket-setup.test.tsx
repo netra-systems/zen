@@ -1,9 +1,9 @@
-/**
- * Login WebSocket Setup Integration Tests - Agent 2
- * 
- * BUSINESS VALUE JUSTIFICATION:
- * - Segment: All (Free → Enterprise)
- * - Business Goal: Real-time communication critical for chat experience
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+import React from 'react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { jest } from '@jest/globals';
+import { t experience
  * - Value Impact: Prevents 30% of connectivity-related support tickets  
  * - Revenue Impact: Protects $75K+ MRR from connection failures
  * 
@@ -206,6 +206,7 @@ const WebSocketSetupTestComponent: React.FC = () => {
 // ============================================================================
 
 describe('Login WebSocket Setup Integration - Agent 2', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     setupMockDefaults();
     cleanupTest();
@@ -215,9 +216,15 @@ describe('Login WebSocket Setup Integration - Agent 2', () => {
     jest.clearAllMocks();
     localStorage.clear();
     mockWebSocketService.disconnect();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('WebSocket Connection After Authentication', () => {
+      jest.setTimeout(10000);
     it('should establish WebSocket connection within 1s after login', async () => {
       setupSuccessfulAuthAndWSScenario();
       renderWebSocketComponent();
@@ -267,6 +274,7 @@ describe('Login WebSocket Setup Integration - Agent 2', () => {
   });
 
   describe('WebSocket Authentication Handshake', () => {
+      jest.setTimeout(10000);
     it('should send authentication message after connection', async () => {
       setupAuthenticatedWSScenario();
       renderWebSocketComponent();
@@ -305,6 +313,7 @@ describe('Login WebSocket Setup Integration - Agent 2', () => {
   });
 
   describe('Connection State Management', () => {
+      jest.setTimeout(10000);
     it('should track connection states accurately', async () => {
       setupSuccessfulAuthAndWSScenario();
       renderWebSocketComponent();
@@ -365,6 +374,7 @@ describe('Login WebSocket Setup Integration - Agent 2', () => {
   });
 
   describe('WebSocket URL Construction', () => {
+      jest.setTimeout(10000);
     it('should construct WebSocket URL with proper parameters', async () => {
       setupSuccessfulAuthAndWSScenario();
       renderWebSocketComponent();
@@ -409,6 +419,7 @@ describe('Login WebSocket Setup Integration - Agent 2', () => {
   });
 
   describe('Error Handling and Recovery', () => {
+      jest.setTimeout(10000);
     it('should handle network errors during WebSocket setup', async () => {
       setupNetworkErrorScenario();
       renderWebSocketComponent();

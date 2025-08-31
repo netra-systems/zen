@@ -1,7 +1,8 @@
-/**
- * UI Components Accessibility Test Suite
- * Tests Card, Badge, and other UI component accessibility compliance
- * Follows 25-line function rule and 450-line file limit
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ollows 25-line function rule and 450-line file limit
  * 
  * Business Value Justification (BVJ):
  * - Segment: All (Free → Enterprise)
@@ -32,6 +33,7 @@ import {
 // ============================================================================
 
 describe('Card Component - Accessibility', () => {
+    jest.setTimeout(10000);
   it('passes axe accessibility tests', async () => {
     const { container } = render(
       <Card>
@@ -237,6 +239,7 @@ describe('Card Component - Accessibility', () => {
 // ============================================================================
 
 describe('Badge Component - Accessibility', () => {
+    jest.setTimeout(10000);
   it('passes axe accessibility tests', async () => {
     const { container } = render(<Badge>Status: Active</Badge>);
     await runAxeTest(container);

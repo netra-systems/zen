@@ -58,7 +58,7 @@ jest.mock('@/components/chat/EventDiagnosticsPanel', () => ({
   EventDiagnosticsPanel: () => React.createElement('div', { 'data-testid': 'diagnostics-panel' }, 'Diagnostics Panel')
 }));
 
-jest.mock('@/utils/debug-logger', () => ({
+jest.mock('@/lib/logger', () => ({
   logger: {
     debug: jest.fn(),
     error: jest.fn()
@@ -67,8 +67,11 @@ jest.mock('@/utils/debug-logger', () => ({
 
 // Import components after mocks
 import MainChat from '@/components/chat/MainChat';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('First-Time User Tutorial Help System', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     
@@ -265,4 +268,8 @@ describe('First-Time User Tutorial Help System', () => {
       expect(screen.getByTestId('message-list')).toBeInTheDocument();
     }
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

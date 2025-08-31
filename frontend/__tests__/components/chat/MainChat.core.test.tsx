@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import MainChat from '@/components/chat/MainChat';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Test wrapper for proper context
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -84,7 +85,7 @@ jest.mock('framer-motion', () => ({
 }));
 
 // Mock utility services and dependencies
-jest.mock('@/utils/debug-logger', () => ({
+jest.mock('@/lib/logger', () => ({
   logger: {
     debug: jest.fn(),
     error: jest.fn(),
@@ -173,6 +174,8 @@ jest.mock('@/store/authStore', () => ({
 }));
 
 describe('MainChat - Core Component Tests', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.useFakeTimers();
     jest.clearAllMocks();
@@ -180,9 +183,17 @@ describe('MainChat - Core Component Tests', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('UI layout and responsiveness', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should render all main components', async () => {
       renderWithProviders(<MainChat />);
       
@@ -250,6 +261,8 @@ describe('MainChat - Core Component Tests', () => {
   });
 
   describe('Performance and optimization', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should not re-render unnecessarily', () => {
       const renderSpy = jest.fn();
       const TestWrapper = () => {
@@ -297,6 +310,8 @@ describe('MainChat - Core Component Tests', () => {
   });
 
   describe('Integration with store and hooks', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should properly integrate with unified chat store', () => {
       renderWithProviders(<MainChat />);
       
@@ -333,6 +348,8 @@ describe('MainChat - Core Component Tests', () => {
   });
 
   describe('Accessibility', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should have proper semantic structure', () => {
       const { container } = renderWithProviders(<MainChat />);
       

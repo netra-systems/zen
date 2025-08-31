@@ -502,8 +502,7 @@ def mock_justified(reason: str, level: str = "L1"):
         level: Test spectrum level (L1, L2, L3, etc.)
         
     Usage:
-        @mock_justified("L1 Unit Test: Mocking DatabaseRepository to isolate UserService logic")
-        def test_user_service_logic():
+                def test_user_service_logic():
             # Test with justified mocking
             pass
     """

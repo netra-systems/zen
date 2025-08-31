@@ -117,7 +117,7 @@ def validate_enum_value(value: Any, enum_class: type, field_name: str) -> Any:
     return value
 
 
-def validate_json_serializable(value: Any, field_name: str) -> Any:
+def backend_json_handler.validate_json_string(value: Any, field_name: str) -> Any:
     """Validate value is JSON serializable."""
     try:
         _test_json_serialization(value)
@@ -206,7 +206,7 @@ def validate_metadata_structure(metadata: Dict[str, Any]) -> Dict[str, Any]:
     if not isinstance(metadata, dict):
         raise ValueError('metadata must be a dictionary')
     # Ensure all values are JSON serializable
-    return validate_json_serializable(metadata, 'metadata')
+    return backend_json_handler.validate_json_string(metadata, 'metadata')
 
 
 def create_default_metadata() -> Dict[str, Any]:

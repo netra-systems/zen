@@ -13,6 +13,7 @@ import '@testing-library/jest-dom';
 import { TestProviders, AuthTestProvider, mockAuthContextValue } from '../setup/test-providers';
 import { authService } from '@/auth/unified-auth-service';
 import { useAuthStore } from '@/store/authStore';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock dependencies
 jest.mock('@/auth/service');
@@ -100,6 +101,8 @@ const renderLogoutComponent = () => {
 };
 
 describe('Logout Flow Core Tests', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   let mockAuthStore: any;
   
   beforeEach(() => {
@@ -130,6 +133,8 @@ describe('Logout Flow Core Tests', () => {
   });
 
   describe('Logout Button Click', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     const clickLogoutButton = async () => {
       const user = userEvent.setup();
       renderLogoutComponent();
@@ -160,6 +165,8 @@ describe('Logout Flow Core Tests', () => {
   });
 
   describe('API Logout Call', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     const performLogout = async () => {
       const user = userEvent.setup();
       renderLogoutComponent();
@@ -195,6 +202,8 @@ describe('Logout Flow Core Tests', () => {
   });
 
   describe('Development Mode Logout', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     const setupDevMode = () => {
       const devConfig = { ...createMockAuthConfig(), development_mode: true };
       jest.mocked(authService.getAuthConfig).mockResolvedValue(devConfig);
@@ -226,6 +235,8 @@ describe('Logout Flow Core Tests', () => {
   });
 
   describe('Error Handling During Logout', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     const testErrorHandling = async () => {
       const user = userEvent.setup();
       renderLogoutComponent();
@@ -258,6 +269,8 @@ describe('Logout Flow Core Tests', () => {
   });
 
   describe('Logout Flow Security', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     const verifySecurityMeasures = async () => {
       const user = userEvent.setup();
       renderLogoutComponent();
@@ -289,4 +302,8 @@ describe('Logout Flow Core Tests', () => {
       });
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

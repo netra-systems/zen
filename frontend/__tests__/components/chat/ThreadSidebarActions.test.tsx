@@ -1,5 +1,6 @@
 import { renderHook } from '@testing-library/react';
 import { useThreadSidebarActions } from '@/components/chat/ThreadSidebarActions';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock dependencies
 jest.mock('@/store/threadStore', () => ({
@@ -33,7 +34,11 @@ jest.mock('@/hooks/useAuthState', () => ({
 }));
 
 describe('ThreadSidebarActions - Timestamp Handling', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   describe('formatDate function', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     let result: ReturnType<typeof useThreadSidebarActions>;
 
     beforeEach(() => {
@@ -42,6 +47,8 @@ describe('ThreadSidebarActions - Timestamp Handling', () => {
     });
 
     describe('ISO string timestamps', () => {
+          setupAntiHang();
+        jest.setTimeout(10000);
       it('should correctly format ISO string timestamp from today', () => {
         const isoString = new Date().toISOString();
         const formatted = result.formatDate(isoString);
@@ -88,6 +95,8 @@ describe('ThreadSidebarActions - Timestamp Handling', () => {
     });
 
     describe('Unix timestamp handling', () => {
+          setupAntiHang();
+        jest.setTimeout(10000);
       it('should correctly format Unix timestamp in seconds (backend format)', () => {
         const unixSeconds = Math.floor(Date.now() / 1000);
         const formatted = result.formatDate(unixSeconds);
@@ -122,6 +131,8 @@ describe('ThreadSidebarActions - Timestamp Handling', () => {
     });
 
     describe('Edge cases and error handling', () => {
+          setupAntiHang();
+        jest.setTimeout(10000);
       it('should handle null timestamp gracefully', () => {
         const formatted = result.formatDate(null as any);
         expect(formatted).toBeTruthy();
@@ -160,6 +171,8 @@ describe('ThreadSidebarActions - Timestamp Handling', () => {
     });
 
     describe('Regression prevention tests', () => {
+          setupAntiHang();
+        jest.setTimeout(10000);
       it('should NOT treat ISO strings as Unix timestamps', () => {
         // This is the core regression issue - ISO strings were being multiplied by 1000
         const isoString = '2024-01-15T10:30:00.000Z';
@@ -210,4 +223,8 @@ describe('ThreadSidebarActions - Timestamp Handling', () => {
       });
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

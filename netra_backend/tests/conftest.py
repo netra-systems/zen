@@ -1,9 +1,73 @@
 """
 Backend-specific test configuration.
 Uses consolidated test framework infrastructure with backend-specific customizations.
+
+REAL SERVICES ENABLED: This conftest now uses real PostgreSQL, Redis, ClickHouse
+and other services instead of mocks for more reliable integration testing.
 """
 
 import pytest
+
+# Import get_env early for pytest_configure
+try:
+    from dev_launcher.isolated_environment import get_env
+except ImportError:
+    # Fallback if dev_launcher is not available
+    from netra_backend.app.core.isolated_environment import get_env
+
+# REAL SERVICES INTEGRATION
+# Import all real service fixtures to replace backend mocks
+# Skip real services for smoke tests to ensure they work without external dependencies
+import sys
+import os
+
+def _is_smoke_test_run():
+    """Check if we're running smoke tests specifically."""
+    
+    # Check environment variable set by unified test runner or other callers
+    if os.environ.get("PYTEST_CURRENT_CATEGORY") == "smoke":
+        return True
+    
+    # Check command line args for smoke test patterns
+    if hasattr(sys, 'argv'):
+        cmd_args = ' '.join(sys.argv)
+        
+        # Be more aggressive in smoke detection - if any smoke reference exists, treat as smoke test
+        smoke_patterns = [
+            '-m smoke',
+            '--markers smoke', 
+            'test_dev_smoke_test.py',
+            '--category smoke'
+        ]
+        
+        # Check for exact patterns
+        for pattern in smoke_patterns:
+            if pattern in cmd_args:
+                return True
+        
+        # Check for adjacent -m and smoke args (unified test runner pattern)
+        for i in range(len(sys.argv) - 1):
+            if sys.argv[i] == '-m' and sys.argv[i+1] == 'smoke':
+                return True
+                
+        # Check if any argument contains "smoke"
+        if any('smoke' in str(arg).lower() for arg in sys.argv):
+            return True
+            
+    return False
+
+# Only import real services if not running smoke tests
+if not _is_smoke_test_run():
+    from test_framework.conftest_real_services import *
+else:
+    # For smoke tests, skip real services and use lightweight setup
+    env = get_env()
+    env.set("USE_REAL_SERVICES", "false", source="smoke_test_conftest")
+    env.set("SKIP_SERVICE_HEALTH_CHECK", "true", source="smoke_test_conftest")
+    env.set("TEST_DISABLE_CLICKHOUSE", "true", source="smoke_test_conftest")
+    env.set("TEST_DISABLE_REDIS", "true", source="smoke_test_conftest")
+    env.set("TEST_DISABLE_POSTGRES", "true", source="smoke_test_conftest")
+    print("Smoke test mode: Real services disabled for lightweight testing")
 
 def pytest_addoption(parser):
     """Add command line options for backend tests."""
@@ -32,30 +96,31 @@ def pytest_configure(config):
     """Configure the test session."""
     # Configure real LLM testing if --real-llm flag is provided
     if hasattr(config.option, 'real_llm') and config.option.real_llm:
-        import os
+        # Use IsolatedEnvironment for all environment variable configuration
+        env = get_env()
         
         # Set environment variables for real LLM testing
-        os.environ["TEST_USE_REAL_LLM"] = "true"
-        os.environ["ENABLE_REAL_LLM_TESTING"] = "true"
+        env.set("TEST_USE_REAL_LLM", "true", source="pytest_configure_real_llm")
+        env.set("ENABLE_REAL_LLM_TESTING", "true", source="pytest_configure_real_llm")
         
         # Set model if provided
         if hasattr(config.option, 'llm_model') and config.option.llm_model:
-            os.environ["TEST_LLM_MODEL"] = config.option.llm_model
+            env.set("TEST_LLM_MODEL", config.option.llm_model, source="pytest_configure_model")
         
         # Set timeout if provided
         if hasattr(config.option, 'llm_timeout') and config.option.llm_timeout:
-            os.environ["TEST_LLM_TIMEOUT"] = str(config.option.llm_timeout)
+            env.set("TEST_LLM_TIMEOUT", str(config.option.llm_timeout), source="pytest_configure_timeout")
         
         # Configure real services (override the in-memory database setting)
-        os.environ["USE_REAL_SERVICES"] = "true"
-        os.environ["DATABASE_URL"] = "postgresql://netra:netra123@localhost:5432/netra_dev"
-        os.environ["REDIS_URL"] = "redis://localhost:6379/0"
-        os.environ["CLICKHOUSE_URL"] = "http://localhost:8123"
+        env.set("USE_REAL_SERVICES", "true", source="pytest_configure_real_services")
+        env.set("DATABASE_URL", "postgresql://netra:netra123@localhost:5432/netra_dev", source="pytest_configure_real_db")
+        env.set("REDIS_URL", "redis://localhost:6379/0", source="pytest_configure_real_redis")
+        env.set("CLICKHOUSE_URL", "http://localhost:8123", source="pytest_configure_real_clickhouse")
         
         # Disable test-only database isolation for real service testing
-        os.environ.pop("TEST_DISABLE_REDIS", None)
-        os.environ["CLICKHOUSE_ENABLED"] = "true"
-        os.environ.pop("DEV_MODE_DISABLE_CLICKHOUSE", None)
+        env.delete("TEST_DISABLE_REDIS", source="pytest_configure_real_services")
+        env.set("CLICKHOUSE_ENABLED", "true", source="pytest_configure_real_clickhouse")
+        env.delete("DEV_MODE_DISABLE_CLICKHOUSE", source="pytest_configure_real_clickhouse")
         
         print(f"Real LLM testing enabled with model: {config.option.llm_model if hasattr(config.option, 'llm_model') else 'default'}")
         print(f"LLM timeout: {config.option.llm_timeout if hasattr(config.option, 'llm_timeout') else 60} seconds")
@@ -64,12 +129,7 @@ def pytest_configure(config):
 # Import all common fixtures from the consolidated base FIRST
 from test_framework.conftest_base import *
 
-# Use the SAME get_env from the test framework to avoid multiple instances
-try:
-    from dev_launcher.isolated_environment import get_env
-except ImportError:
-    # Fallback if dev_launcher is not available
-    from netra_backend.app.core.isolated_environment import get_env
+# get_env already imported at the top of the file
 
 # Import backend-specific utilities
 from test_framework.fixtures.database_fixtures import *

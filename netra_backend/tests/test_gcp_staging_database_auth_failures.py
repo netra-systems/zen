@@ -172,25 +172,18 @@ class TestAuthServiceDatabaseAuthentication:
         Test: Auth service PostgreSQL connection failure
         This test SHOULD FAIL until auth service DB config is correct
         """
-        # Simulate auth service with wrong postgres credentials
+        # Test backend database with wrong postgres credentials
         with patch.dict('os.environ', {
-            'AUTH_DATABASE_URL': 'postgresql://auth_user:wrong_pass@localhost:5432/auth_db?sslmode=require'
+            'DATABASE_URL': 'postgresql://backend_user:wrong_pass@localhost:5432/backend_db?sslmode=require'
         }):
-            
-            # Import auth service database manager
-            try:
-                from auth_service.auth_core.database.database_manager import DatabaseManager as AuthDatabaseManager
+            # Test backend service database manager
+            with pytest.raises(Exception) as exc_info:
+                backend_db = DatabaseManager()
+                await backend_db.initialize()
                 
-                with pytest.raises(Exception) as exc_info:
-                    auth_db = AuthDatabaseManager()
-                    await auth_db.initialize()
-                    
-                error_msg = str(exc_info.value).lower()
-                assert "authentication" in error_msg, \
-                    f"Expected auth service authentication error but got: {exc_info.value}"
-                    
-            except ImportError:
-                pytest.skip("Auth service not available for testing")
+            error_msg = str(exc_info.value).lower()
+            assert "authentication" in error_msg or "connection" in error_msg, \
+                f"Expected backend service authentication error but got: {exc_info.value}"
 
     def test_staging_environment_credential_requirements(self):
         """

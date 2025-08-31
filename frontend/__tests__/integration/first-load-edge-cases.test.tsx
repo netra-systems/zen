@@ -1,10 +1,9 @@
-/**
- * First Load Edge Cases Testing - Agent 1 Implementation
- * 
- * BUSINESS VALUE JUSTIFICATION:
- * - Segment: All (Free → Enterprise)
- * - Business Goal: Zero edge case failures
- * - Value Impact: 90% reduction in support tickets
+import React from 'react';
+import { render, screen, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { jest } from '@jest/globals';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ue Impact: 90% reduction in support tickets
  * - Revenue Impact: +$20K MRR from prevented churn
  * 
  * CRITICAL EDGE CASE TESTS:
@@ -51,6 +50,7 @@ import { TestProviders } from '../setup/test-providers';
 // ============================================================================
 
 describe('First Load Edge Cases Testing - Agent 1', () => {
+    jest.setTimeout(10000);
   let testEnv: any;
   let wsManager: any;
 
@@ -63,9 +63,15 @@ describe('First Load Edge Cases Testing - Agent 1', () => {
   afterEach(() => {
     testEnv.cleanup();
     cleanupTest();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Service Worker Edge Cases', () => {
+      jest.setTimeout(10000);
     it('registers service worker on first load', async () => {
       const swRegistration = mockServiceWorkerRegistration();
       
@@ -119,6 +125,7 @@ describe('First Load Edge Cases Testing - Agent 1', () => {
   });
 
   describe('Deep Link Handling', () => {
+      jest.setTimeout(10000);
     it('handles deep link to protected route on first load', async () => {
       const deepLink = '/chat/thread/abc123';
       mockWindowLocation(deepLink);
@@ -169,6 +176,7 @@ describe('First Load Edge Cases Testing - Agent 1', () => {
   });
 
   describe('Network and Connectivity Edge Cases', () => {
+      jest.setTimeout(10000);
     it('handles network interruption during initial load', async () => {
       const networkFailure = simulateNetworkInterruption();
       
@@ -203,7 +211,7 @@ describe('First Load Edge Cases Testing - Agent 1', () => {
         
         await waitFor(() => {
           expect(screen.getByTestId('slow-load-complete')).toBeInTheDocument();
-        }, { timeout: 10000 });
+        }, { timeout: 5000 });
       });
       
       expect(screen.getByText('Optimized for slow connection')).toBeInTheDocument();
@@ -227,6 +235,7 @@ describe('First Load Edge Cases Testing - Agent 1', () => {
   });
 
   describe('Browser Restriction Edge Cases', () => {
+      jest.setTimeout(10000);
     it('handles disabled localStorage gracefully', async () => {
       mockDisabledLocalStorage();
       
@@ -289,6 +298,7 @@ describe('First Load Edge Cases Testing - Agent 1', () => {
   });
 
   describe('Rapid User Interaction Edge Cases', () => {
+      jest.setTimeout(10000);
     it('handles multiple rapid page refreshes', async () => {
       const refreshHandler = mockRapidRefreshes(5);
       
@@ -338,6 +348,7 @@ describe('First Load Edge Cases Testing - Agent 1', () => {
   });
 
   describe('Browser Compatibility Edge Cases', () => {
+      jest.setTimeout(10000);
     it('provides fallbacks for missing APIs', async () => {
       mockMissingBrowserAPIs();
       

@@ -1,10 +1,9 @@
-/**
- * Middleware Behavior Tests - Store Middleware Integration
- * 
- * BVJ (Business Value Justification):
- * - Segment: All (core infrastructure)
- * - Business Goal: Ensure reliable store middleware for all features
- * - Value Impact: Middleware stability ensures 100% feature reliability
+import { act, renderHook } from '@testing-library/react';
+import { useAppStore } from '@/store/app';
+import { useAuthStore } from '@/store/authStore';
+import { useChatStore } from '@/store/chat';
+import { AuthStoreTestUtils, ChatStoreTestUtils, GlobalTestUtils } from './store-test-utils';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
  * - Revenue Impact: Core infrastructure must be bulletproof for business continuity
  * 
  * Tests: Persistence middleware, immer integration, custom middleware functionality
@@ -68,6 +67,7 @@ class MockImmerMiddleware {
 }
 
 describe('Middleware Behavior Tests', () => {
+    jest.setTimeout(10000);
   let mockStorage: ReturnType<typeof GlobalTestUtils.setupStoreTestEnvironment>['mockStorage'];
   let persistenceMiddleware: MockPersistenceMiddleware;
   let immerMiddleware: MockImmerMiddleware;
@@ -81,9 +81,15 @@ describe('Middleware Behavior Tests', () => {
 
   afterEach(() => {
     GlobalTestUtils.cleanupStoreTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Persistence Middleware', () => {
+      jest.setTimeout(10000);
     it('should persist app state changes automatically', () => {
       const { result } = renderHook(() => useAppStore());
 
@@ -172,6 +178,7 @@ describe('Middleware Behavior Tests', () => {
   });
 
   describe('Immer Middleware Integration', () => {
+      jest.setTimeout(10000);
     it('should enable immutable state updates', () => {
       const result = AuthStoreTestUtils.initializeStore();
       const user = AuthStoreTestUtils.createMockUser('immer_user');
@@ -280,6 +287,7 @@ describe('Middleware Behavior Tests', () => {
   });
 
   describe('Custom Middleware', () => {
+      jest.setTimeout(10000);
     it('should support logging middleware for debugging', () => {
       const logs: any[] = [];
       
@@ -438,6 +446,7 @@ describe('Middleware Behavior Tests', () => {
   });
 
   describe('Middleware Composition', () => {
+      jest.setTimeout(10000);
     it('should compose multiple middleware correctly', () => {
       const middlewareStack: string[] = [];
       
@@ -516,6 +525,7 @@ describe('Middleware Behavior Tests', () => {
   });
 
   describe('Middleware Error Handling', () => {
+      jest.setTimeout(10000);
     it('should handle middleware failures without crashing', () => {
       const result = ChatStoreTestUtils.initializeStore();
       

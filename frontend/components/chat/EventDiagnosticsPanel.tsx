@@ -10,7 +10,7 @@
 
 import React from 'react';
 import { websocketDebugger } from '@/services/websocketDebugger';
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 
 // ============================================
 // Helper Functions (8 lines max each)

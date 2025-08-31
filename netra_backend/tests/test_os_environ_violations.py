@@ -131,6 +131,7 @@ class TestOSEnvironViolations:
     @pytest.fixture
     def project_root(self):
         """Get project root directory."""
+        return Path(__file__).parent.parent.parent
         
     @pytest.fixture
     def allowed_files(self):

@@ -219,6 +219,11 @@ export function createAuthenticatedState(user?: MockUser): MockAuthState {
 }
 
 /**
+ * Alias for createAuthenticatedState for backward compatibility
+ */
+export const createMockAuthenticatedState = createAuthenticatedState;
+
+/**
  * Create unauthenticated auth state
  */
 export function createUnauthenticatedState(): MockAuthState {
@@ -230,6 +235,11 @@ export function createUnauthenticatedState(): MockAuthState {
     error: null
   };
 }
+
+/**
+ * Alias for createUnauthenticatedState for backward compatibility
+ */
+export const createMockUnauthenticatedState = createUnauthenticatedState;
 
 /**
  * Create loading auth state

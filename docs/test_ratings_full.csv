@@ -1,0 +1,101 @@
+Rank,Test File,Usefulness,Difficulty,Business Impact,Overall Score,Category,Revenue Protection
+1,tests/e2e/critical/test_auth_jwt_critical.py,10,8,10,9.3,Authentication,$100K+ security breach
+2,netra_backend/tests/critical/test_authentication_middleware_security_cycles_41_45.py,10,8,10,9.3,Security,$4.1M annual
+3,netra_backend/tests/critical/test_database_connection_pool_resilience_cycles_26_30.py,9,9,10,9.3,Database,$2.1M annual
+4,tests/e2e/test_critical_websocket_agent_events.py,10,8,9,9.0,WebSocket,Core chat UI
+5,netra_backend/tests/critical/test_agent_workflow_reliability_cycles_56_60.py,8,9,9,8.7,Agents,Agent reliability
+6,netra_backend/tests/critical/test_database_transaction_integrity_cycles_11_15.py,8,8,10,8.7,Database,$2.3M corruption
+7,netra_backend/tests/critical/test_database_migration_state_recovery_cycles_21_25.py,8,9,9,8.7,Database,$1.2M deployment
+8,tests/e2e/test_critical_agent_chat_flow.py,9,7,10,8.7,E2E,$500K+ ARR
+9,netra_backend/tests/critical/test_cross_service_auth_security_cycles_46_50.py,9,9,8,8.7,Security,$3.6M compliance
+10,netra_backend/tests/agents/business_logic/test_optimization_value.py,9,8,10,8.7,Business Logic,$10K-100K+ value
+11,netra_backend/tests/critical/test_database_connection_leak_fix.py,9,6,9,8.0,Database,Connection exhaustion
+12,auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py,9,6,10,8.3,Auth,$75K+ MRR
+13,tests/e2e/critical/test_websocket_critical.py,9,7,9,8.3,WebSocket,Real-time features
+14,netra_backend/tests/critical/test_clickhouse_connection_timeout_staging_regression.py,9,7,8,8.0,ClickHouse,$50K+ MRR
+15,netra_backend/tests/critical/test_agent_state_consistency_cycles_51_55.py,8,8,8,8.0,Agents,State management
+16,netra_backend/tests/critical/test_agent_communication_cycles_61_70.py,8,8,8,8.0,Agents,Communication
+17,netra_backend/tests/critical/test_agent_recovery_strategies.py,8,7,9,8.0,Agents,Recovery
+18,netra_backend/tests/agents/test_agent_e2e_critical_core.py,8,7,9,8.0,Agents,Core functionality
+19,netra_backend/tests/agents/test_agent_e2e_critical_performance.py,8,8,8,8.0,Performance,Agent performance
+20,netra_backend/tests/critical/test_websocket_auth_regression.py,8,7,9,8.0,WebSocket,Auth integration
+21,netra_backend/tests/agents/test_supervisor_consolidated_core.py,8,7,8,7.7,Agents,Supervisor
+22,netra_backend/tests/agents/test_llm_agent_e2e_core.py,8,7,8,7.7,Agents,LLM integration
+23,tests/e2e/integration/test_agent_orchestration_real_llm.py,8,8,7,7.7,Integration,Real LLM
+24,tests/e2e/integration/test_agent_pipeline_real.py,8,8,7,7.7,Integration,Pipeline
+25,tests/e2e/frontend/test_frontend_auth_complete_journey.py,8,7,8,7.7,Frontend,Auth journey
+26,tests/e2e/frontend/test_frontend_first_time_user.py,8,7,8,7.7,Frontend,Onboarding
+27,tests/e2e/frontend/test_frontend_login_journeys.py,8,7,8,7.7,Frontend,Login
+28,tests/e2e/frontend/test_frontend_websocket_reliability.py,8,8,7,7.7,Frontend,WebSocket
+29,tests/e2e/frontend/test_frontend_chat_interactions.py,8,7,8,7.7,Frontend,Chat UI
+30,tests/e2e/frontend/test_frontend_error_handling.py,7,8,8,7.7,Frontend,Error handling
+31,tests/e2e/frontend/test_frontend_performance_reliability.py,7,8,8,7.7,Frontend,Performance
+32,tests/e2e/critical/test_dev_launcher_critical_path.py,8,7,8,7.7,Infrastructure,Dev launcher
+33,tests/e2e/critical/test_service_health_critical.py,8,6,9,7.7,Infrastructure,Health checks
+34,dev_launcher/tests/test_launcher_critical_mainline.py,7,7,8,7.3,Infrastructure,Launcher
+35,tests/e2e/integration/test_authentication_comprehensive_e2e.py,8,8,7,7.7,Integration,Auth E2E
+36,tests/e2e/integration/test_auth_jwt_generation.py,8,6,8,7.3,Integration,JWT generation
+37,tests/e2e/integration/test_auth_jwt_refresh.py,8,6,8,7.3,Integration,JWT refresh
+38,tests/e2e/integration/test_auth_oauth_flows.py,8,7,8,7.7,Integration,OAuth
+39,tests/e2e/integration/test_agent_billing_flow.py,7,7,9,7.7,Integration,Billing
+40,tests/e2e/integration/test_subscription_management.py,7,7,9,7.7,Integration,Subscriptions
+41,tests/e2e/integration/test_usage_tracking_comprehensive.py,7,8,8,7.7,Integration,Usage tracking
+42,tests/e2e/integration/test_api_key_lifecycle.py,7,6,8,7.0,Integration,API keys
+43,tests/e2e/integration/test_organization_management.py,7,6,8,7.0,Integration,Organizations
+44,tests/e2e/integration/test_admin_user_management.py,7,6,8,7.0,Integration,Admin
+45,netra_backend/tests/clickhouse/test_clickhouse_connection.py,8,6,7,7.0,ClickHouse,Connection
+46,netra_backend/tests/clickhouse/test_corpus_lifecycle.py,7,7,7,7.0,ClickHouse,Corpus
+47,netra_backend/tests/clickhouse/test_llm_metrics_aggregation.py,7,7,8,7.3,ClickHouse,Metrics
+48,netra_backend/tests/clickhouse/test_performance_metrics_extraction.py,7,7,8,7.3,ClickHouse,Performance
+49,netra_backend/tests/clickhouse/test_realistic_data_volumes.py,7,8,7,7.3,ClickHouse,Data volumes
+50,netra_backend/tests/critical/test_clickhouse_reliability_cycles_16_20.py,8,7,8,7.7,ClickHouse,Reliability
+51,netra_backend/tests/clickhouse/test_time_series_analysis.py,7,7,7,7.0,ClickHouse,Time series
+52,netra_backend/tests/clickhouse/test_query_correctness.py,7,6,7,6.7,ClickHouse,Query validation
+53,netra_backend/tests/clickhouse/test_workload_events_operations.py,7,6,7,6.7,ClickHouse,Workload
+54,netra_backend/tests/clickhouse/test_multi_source_aggregation.py,7,7,7,7.0,ClickHouse,Aggregation
+55,netra_backend/tests/critical/test_websocket_resilience_cycles_71_90.py,8,8,8,8.0,WebSocket,Resilience
+56,netra_backend/tests/critical/test_circuit_breaker_cascade_fix.py,8,7,8,7.7,Infrastructure,Circuit breaker
+57,netra_backend/tests/critical/test_third_party_api_quota_cascade_failure.py,7,8,8,7.7,Integration,API quotas
+58,netra_backend/tests/core/test_health_checks.py,7,5,8,6.7,Infrastructure,Health
+59,netra_backend/tests/core/test_circuit_breaker.py,7,6,7,6.7,Infrastructure,Circuit breaker
+60,netra_backend/tests/core/test_rate_limiting.py,7,6,8,7.0,Infrastructure,Rate limits
+61,netra_backend/tests/core/test_retry_logic.py,7,6,7,6.7,Infrastructure,Retries
+62,tests/e2e/integration/test_service_discovery.py,7,7,7,7.0,Integration,Discovery
+63,tests/e2e/integration/test_load_balancing.py,7,7,7,7.0,Integration,Load balancing
+64,tests/e2e/integration/test_graceful_shutdown.py,7,6,8,7.0,Integration,Shutdown
+65,auth_service/tests/test_oauth_security_vulnerabilities.py,9,7,9,8.3,Security,OAuth security
+66,auth_service/tests/test_oauth_state_validation.py,8,6,9,7.7,Security,OAuth state
+67,auth_service/tests/test_token_validation_security_cycles_31_35.py,8,7,9,8.0,Security,Token validation
+68,auth_service/tests/test_session_security_cycles_36_40.py,8,7,9,8.0,Security,Session security
+69,netra_backend/tests/auth_integration/test_auth_security_comprehensive.py,8,8,9,8.3,Security,Auth comprehensive
+70,netra_backend/tests/compliance/test_claude_md_compliance.py,7,5,8,6.7,Compliance,CLAUDE.md
+71,tests/e2e/integration/test_auth_jwt_security.py,8,7,9,8.0,Security,JWT security
+72,tests/e2e/integration/test_data_privacy_compliance.py,7,7,9,7.7,Compliance,Privacy
+73,tests/e2e/integration/test_api_security_comprehensive.py,8,8,9,8.3,Security,API security
+74,tests/e2e/integration/test_audit_logging.py,7,6,8,7.0,Compliance,Audit logs
+75,netra_backend/tests/agents/test_agent_e2e_critical_performance.py,8,8,8,8.0,Performance,Agent perf
+76,netra_backend/tests/clickhouse/test_clickhouse_performance.py,7,7,7,7.0,Performance,ClickHouse perf
+77,netra_backend/tests/e2e/test_agent_scaling_load_testing.py,7,8,8,7.7,Performance,Load testing
+78,netra_backend/tests/e2e/test_latency_optimization_workflows_core.py,7,8,8,7.7,Performance,Latency
+79,netra_backend/tests/e2e/test_capacity_planning.py,7,7,8,7.3,Performance,Capacity
+80,tests/e2e/performance/test_concurrent_users.py,7,8,8,7.7,Performance,Concurrency
+81,tests/e2e/performance/test_message_throughput.py,7,7,7,7.0,Performance,Throughput
+82,tests/e2e/performance/test_database_query_optimization.py,7,7,7,7.0,Performance,DB queries
+83,tests/e2e/performance/test_cache_effectiveness.py,6,6,7,6.3,Performance,Cache
+84,tests/e2e/performance/test_memory_leak_detection.py,7,8,7,7.3,Performance,Memory leaks
+85,netra_backend/tests/critical/test_business_critical_gaps.py,8,7,9,8.0,Business Logic,Critical gaps
+86,netra_backend/tests/agents/business_logic/test_triage_decisions.py,8,6,8,7.3,Business Logic,Triage
+87,netra_backend/tests/e2e/test_cost_optimization_workflows.py,7,7,9,7.7,Business Logic,Cost optimization
+88,netra_backend/tests/e2e/test_model_effectiveness_workflows.py,7,7,8,7.3,Business Logic,Model effectiveness
+89,netra_backend/tests/e2e/test_usage_increase_analysis.py,7,6,8,7.0,Business Logic,Usage analysis
+90,netra_backend/tests/e2e/test_rate_limit_analysis.py,7,6,8,7.0,Business Logic,Rate limits
+91,netra_backend/tests/e2e/first_time_user/test_conversion_flow_e2e.py,7,7,9,7.7,Business Logic,Conversion
+92,netra_backend/tests/e2e/first_time_user/test_onboarding_e2e.py,7,7,9,7.7,Business Logic,Onboarding
+93,netra_backend/tests/critical/test_configuration_deployment_cycles_91_100.py,7,8,8,7.7,Configuration,Deployment
+94,netra_backend/tests/critical/test_staging_config_loading.py,8,6,7,7.0,Configuration,Staging
+95,netra_backend/tests/critical/test_config_loader_core.py,7,4,8,6.3,Configuration,Core config
+96,netra_backend/tests/critical/test_config_environment_detection.py,7,4,8,6.3,Configuration,Environment
+97,netra_backend/tests/critical/test_redis_connection_warnings_staging_regression.py,7,5,6,6.0,Cache,Redis
+98,netra_backend/tests/critical/test_websocket_execution_engine.py,7,4,6,5.7,WebSocket,Execution
+99,netra_backend/tests/critical/test_postgres_settings_regression.py,6,3,7,5.3,Database,Postgres
+100,tests/e2e/test_primary_chat_websocket_flow.py,8,5,9,7.3,WebSocket,Primary flow

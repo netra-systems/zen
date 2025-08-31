@@ -3,6 +3,7 @@
  */
 
 import { ExportService, ExportFormat } from '@/utils/exportService';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock the dependencies
 jest.mock('html2canvas', () => {
@@ -48,6 +49,8 @@ jest.mock('papaparse', () => ({
 }));
 
 describe('ExportService', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   // Mock DOM methods
   let createElementSpy: jest.SpyInstance;
   let createObjectURLSpy: jest.SpyInstance;
@@ -113,9 +116,17 @@ describe('ExportService', () => {
   afterEach(() => {
     // Restore all mocks
     jest.restoreAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('exportReport', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     const mockReportData = {
       title: 'Test Report',
       summary: 'This is a test summary',
@@ -129,6 +140,8 @@ describe('ExportService', () => {
     };
 
     describe('JSON export', () => {
+          setupAntiHang();
+        jest.setTimeout(10000);
       it('should export report as JSON', async () => {
         await ExportService.exportReport(mockReportData, {
           format: 'json',
@@ -172,6 +185,8 @@ describe('ExportService', () => {
     });
 
     describe('CSV export', () => {
+          setupAntiHang();
+        jest.setTimeout(10000);
       it('should export report as CSV', async () => {
         await ExportService.exportReport(mockReportData, {
           format: 'csv',
@@ -237,6 +252,8 @@ describe('ExportService', () => {
     });
 
     describe('Markdown export', () => {
+          setupAntiHang();
+        jest.setTimeout(10000);
       it('should export report as Markdown', async () => {
         await ExportService.exportReport(mockReportData, {
           format: 'markdown',
@@ -325,6 +342,10 @@ describe('ExportService', () => {
 
     describe('PDF export', () => {
 
+          setupAntiHang();
+
+        jest.setTimeout(10000);
+
       it('should export report as PDF', async () => {
         // Clear previous calls
         mockJsPDFConstructor.mockClear();
@@ -372,6 +393,8 @@ describe('ExportService', () => {
     });
 
     describe('Error handling', () => {
+          setupAntiHang();
+        jest.setTimeout(10000);
       it('should throw error for unsupported format', async () => {
         await expect(
           ExportService.exportReport(mockReportData, {
@@ -420,6 +443,10 @@ describe('ExportService', () => {
 
   describe('exportElementAsImage', () => {
 
+        setupAntiHang();
+
+      jest.setTimeout(10000);
+
     it('should export element as image', async () => {
       const mockElement = document.createElement('div');
       mockElement.id = 'test-element';
@@ -464,6 +491,8 @@ describe('ExportService', () => {
   });
 
   describe('Utility methods', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle download cleanup properly', async () => {
       await ExportService.exportReport(
         { title: 'Test' },

@@ -106,14 +106,15 @@ export function setupThreadMocks(): void {
   }).as('getThreads');
 }
 
-// Open thread sidebar helper
+// Open thread sidebar helper - sidebar is already visible in layout
 export function openThreadSidebar(): void {
-  cy.get('button').contains('Threads').click({ timeout: 10000 });
+  // The sidebar is always visible in the current implementation
+  cy.get('[data-testid="chat-sidebar"]', { timeout: 10000 }).should('be.visible');
 }
 
 // Create new thread helper
 export function createNewThread(): void {
-  cy.get('button').contains('New').click({ timeout: 10000 });
+  cy.get('[data-testid="new-chat-button"]').click({ timeout: 10000 });
 }
 
 // Mock thread messages for specific thread
@@ -126,8 +127,8 @@ export function mockThreadMessages(threadId: string, messages: MockMessage[]): v
 
 // Send message helper
 export function sendMessage(message: string): void {
-  cy.get('input[placeholder*="message"]', { timeout: 10000 }).type(message);
-  cy.get('button').contains('Send').click();
+  cy.get('[data-testid="message-input"] textarea', { timeout: 10000 }).type(message);
+  cy.get('[data-testid="send-button"]').click();
 }
 
 // Simulate agent response via WebSocket

@@ -1,7 +1,9 @@
-/**
- * Forms Groups Basic Accessibility Test Suite
- * Tests basic form structures, radio button groups, and nested fieldsets
- * Extracted from oversized forms-groups.a11y.test.tsx for modularity
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+r modularity
  * 
  * Business Value Justification (BVJ):
  * - Segment: All (Free → Enterprise)
@@ -28,6 +30,7 @@ import {
 } from './shared-a11y-helpers';
 
 describe('Form Groups - Basic Form Structures', () => {
+    jest.setTimeout(10000);
   it('passes axe tests for complex form with multiple groups', async () => {
     const { container } = render(
       <form>

@@ -1,14 +1,14 @@
-/**
- * Offline Mode and Navigation Integration Tests
- * Tests for offline functionality and complex navigation flows
- */
-
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react';
 import { createTestSetup, mockFetch } from './setup';
 import { useAuthStore } from '@/store/authStore';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+g-library/react';
+import { createTestSetup, mockFetch } from './setup';
+import { useAuthStore } from '@/store/authStore';
 
 describe('Offline Mode and Navigation Integration', () => {
+    jest.setTimeout(10000);
   const testSetup = createTestSetup();
 
   beforeEach(() => {
@@ -17,9 +17,15 @@ describe('Offline Mode and Navigation Integration', () => {
 
   afterEach(() => {
     testSetup.afterEach();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Offline Mode', () => {
+      jest.setTimeout(10000);
     it('should queue actions when offline and sync when online', async () => {
       const actionQueue: any[] = [];
       
@@ -155,6 +161,7 @@ describe('Offline Mode and Navigation Integration', () => {
   });
 
   describe('Complex Navigation Flows', () => {
+      jest.setTimeout(10000);
     it('should handle deep linking with state preservation', async () => {
       const router = require('next/navigation').useRouter();
       

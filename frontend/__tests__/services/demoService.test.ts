@@ -11,6 +11,7 @@
  */
 
 import { demoService, DemoChatRequest, DemoChatResponse, ROICalculationRequest, ROICalculationResponse, IndustryTemplate, DemoMetrics, ExportReportRequest, SessionStatus } from '@/services/demoService';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock API configuration
 jest.mock('@/services/apiConfig', () => ({
@@ -113,12 +114,16 @@ const setupUnauthenticatedTest = () => {
 };
 
 describe('DemoService', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     localStorageMock.getItem.mockReturnValue(null);
   });
 
   describe('Authentication Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should include auth header when token exists', async () => {
       setupAuthenticatedTest();
       const mockResponse = createMockChatResponse();
@@ -178,6 +183,8 @@ describe('DemoService', () => {
   });
 
   describe('Chat Message Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should send chat message successfully', async () => {
       setupAuthenticatedTest();
       const mockRequest = createMockChatRequest();
@@ -226,6 +233,8 @@ describe('DemoService', () => {
   });
 
   describe('ROI Calculation - Business Critical', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should calculate ROI accurately for enterprise prospects', async () => {
       setupAuthenticatedTest();
       const mockRequest = createMockROIRequest();
@@ -284,6 +293,8 @@ describe('DemoService', () => {
   });
 
   describe('Industry Templates', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should fetch industry templates successfully', async () => {
       setupAuthenticatedTest();
       const mockTemplates = [createMockIndustryTemplate()];
@@ -322,6 +333,8 @@ describe('DemoService', () => {
   });
 
   describe('Synthetic Metrics Generation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should generate synthetic metrics with default parameters', async () => {
       setupAuthenticatedTest();
       const mockMetrics = createMockDemoMetrics();
@@ -366,6 +379,8 @@ describe('DemoService', () => {
   });
 
   describe('Report Export - Enterprise Feature', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should export report successfully', async () => {
       setupAuthenticatedTest();
       const exportRequest: ExportReportRequest = {
@@ -426,6 +441,8 @@ describe('DemoService', () => {
   });
 
   describe('Session Management', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should get session status successfully', async () => {
       setupAuthenticatedTest();
       const mockStatus = createMockSessionStatus();
@@ -468,6 +485,8 @@ describe('DemoService', () => {
   });
 
   describe('Analytics Summary', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should get analytics summary with default period', async () => {
       setupAuthenticatedTest();
       const mockAnalytics = { total_sessions: 150, conversion_rate: 12.5, avg_session_duration: 420 };
@@ -516,6 +535,8 @@ describe('DemoService', () => {
   });
 
   describe('Error Handling and Edge Cases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle network timeouts gracefully', async () => {
       setupAuthenticatedTest();
       (fetch as jest.Mock).mockRejectedValue(new Error('Request timeout'));
@@ -557,4 +578,8 @@ describe('DemoService', () => {
       expect(fetch).toHaveBeenCalledTimes(2);
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

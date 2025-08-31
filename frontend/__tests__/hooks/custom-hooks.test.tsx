@@ -7,6 +7,7 @@ import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Custom hook for local storage
 const useLocalStorage = <T,>(key: string, initialValue: T) => {
@@ -110,6 +111,8 @@ const useCounter = (initialValue: number = 0, min?: number, max?: number) => {
 };
 
 describe('Custom Hooks', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     localStorage.clear();
   });
@@ -320,4 +323,8 @@ describe('Custom Hooks', () => {
     fireEvent.click(screen.getByTestId('reset-counter'));
     expect(screen.getByTestId('counter-value')).toHaveTextContent('Count: 0');
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 
 export default function AuthCallbackClient() {
   const router = useRouter();

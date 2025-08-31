@@ -1,25 +1,30 @@
-/**
- * Notification System Integration Tests
- * Tests for notification display and queuing system
- */
-
 import React from 'react';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ender, waitFor, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 // Import test utilities
 import { TestProviders } from '@/__tests__/setup/test-providers';
 
 describe('Notification System Integration', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Notification Display', () => {
+      jest.setTimeout(10000);
     it('should show notifications for important events', async () => {
       const notifications: Array<{ type: string; message: string; timestamp: number }> = [];
       

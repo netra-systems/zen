@@ -35,7 +35,8 @@ from netra_backend.app.agents.triage_sub_agent.models import (
 )
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.schemas.shared_types import DataAnalysisResponse
-from test_framework.mocks import MockRedisClient
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
 
 # ==================== Mock Agents for Testing ====================

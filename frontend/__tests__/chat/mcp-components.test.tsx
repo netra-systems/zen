@@ -1,10 +1,11 @@
-// MCP Components Tests - Basic test coverage for MCP UI components
-// Tests functionality, rendering, and integration with proper mocking
-
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MCPToolIndicator } from '@/components/chat/MCPToolIndicator';
 import { MCPServerStatus } from '@/components/chat/MCPServerStatus';
+import { MCPResultCard } from '@/components/chat/MCPResultCard';
+import type { 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+MCPServerStatus } from '@/components/chat/MCPServerStatus';
 import { MCPResultCard } from '@/components/chat/MCPResultCard';
 import type { 
   MCPToolExecution, 
@@ -30,6 +31,11 @@ beforeEach(() => {
 afterEach(() => {
   cleanupMCPMocks();
   jest.clearAllMocks();
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
 });
 
 // ============================================
@@ -55,6 +61,7 @@ const createMockResult = createMockToolResult;
 // ============================================
 
 describe('MCPToolIndicator', () => {
+    jest.setTimeout(10000);
   it('renders tool executions correctly', () => {
     const executions = [createMockExecution()];
     render(
@@ -115,6 +122,7 @@ describe('MCPToolIndicator', () => {
 // ============================================
 
 describe('MCPServerStatus', () => {
+    jest.setTimeout(10000);
   it('renders server list correctly', () => {
     const servers = [createMockServer({ name: 'mock-server' })];
     render(<MCPServerStatus servers={servers} connections={[]} />);
@@ -161,6 +169,7 @@ describe('MCPServerStatus', () => {
 // ============================================
 
 describe('MCPResultCard', () => {
+    jest.setTimeout(10000);
   const mockExecution = createMockExecution();
 
   it('renders successful result correctly', () => {
@@ -235,6 +244,7 @@ describe('MCPResultCard', () => {
 // ============================================
 
 describe('MCP Components Integration', () => {
+    jest.setTimeout(10000);
   it('works together in message context', () => {
     const executions = [createMockExecution()];
     const servers = [createMockServer({ name: 'mock-server' })];

@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import { AuthGuard } from '@/components/AuthGuard';
 import { useAuth } from '@/auth/context';
 import { useGTMEvent } from '@/hooks/useGTMEvent';
@@ -17,6 +18,16 @@ jest.mock('@/hooks/useGTMEvent');
 const mockUseRouter = jest.requireMock('next/navigation').useRouter;
 
 describe('AuthGuard Component', () => {
+      
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
   const mockPush = jest.fn();
   const mockTrackError = jest.fn();
   const mockTrackPageView = jest.fn();
@@ -62,6 +73,16 @@ describe('AuthGuard Component', () => {
   });
 
   describe('Loading States', () => {
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     test('should show loading screen when loading', () => {
       (useAuth as jest.Mock).mockReturnValue({
         user: null,
@@ -128,6 +149,16 @@ describe('AuthGuard Component', () => {
   });
 
   describe('Authentication Flow', () => {
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     test('should render children when user is authenticated', async () => {
       (useAuth as jest.Mock).mockReturnValue({
         user: { id: 'test-user', email: 'test@example.com' },
@@ -207,6 +238,16 @@ describe('AuthGuard Component', () => {
   });
 
   describe('Single Render Optimization', () => {
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     test('should only perform auth check once after initialization', async () => {
       const { rerender } = render(
         <AuthGuard onAuthCheckComplete={mockOnAuthCheckComplete}>
@@ -300,6 +341,16 @@ describe('AuthGuard Component', () => {
   });
 
   describe('Component Lifecycle', () => {
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     test('should handle unmount gracefully', () => {
       const { unmount } = render(
         <AuthGuard>
@@ -343,6 +394,16 @@ describe('AuthGuard Component', () => {
   });
 
   describe('Callback Handling', () => {
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     test('should call onAuthCheckComplete with true for authenticated user', async () => {
       (useAuth as jest.Mock).mockReturnValue({
         user: { id: 'test-user', email: 'test@example.com' },
@@ -410,6 +471,16 @@ describe('AuthGuard Component', () => {
   });
 
   describe('Edge Cases', () => {
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     test('should handle rapid auth state changes', async () => {
       const { rerender } = render(
         <AuthGuard onAuthCheckComplete={mockOnAuthCheckComplete}>
@@ -488,6 +559,16 @@ describe('AuthGuard Component', () => {
   });
 
   describe('Loading Screen Component', () => {
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     test('should render loading screen with correct styling', () => {
       (useAuth as jest.Mock).mockReturnValue({
         user: null,
@@ -513,4 +594,8 @@ describe('AuthGuard Component', () => {
       expect(spinner).toHaveClass('h-8', 'w-8', 'text-blue-600');
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

@@ -1,17 +1,28 @@
 """
 Secret loader for auth service.
-Handles loading secrets from environment variables and Google Secret Manager.
-Ensures consistency with main backend service.
+Handles loading secrets using the central configuration validator (SSOT).
 
-**UPDATED**: Now uses auth_service's own IsolatedEnvironment for unified environment management.
-Follows SPEC/unified_environment_management.xml and SPEC/independent_services.xml for consistent 
-environment access while maintaining complete microservice independence.
+**UPDATED**: Uses central configuration validation for consistency across all services.
+Maintains auth service independence while using shared validation logic.
 """
 import logging
+import sys
+from pathlib import Path
 from typing import Optional
 
 # Use auth_service's own isolated environment management - NEVER import from dev_launcher or netra_backend
 from auth_service.auth_core.isolated_environment import get_env
+
+# SSOT: Import central configuration validator
+project_root = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
+
+try:
+    from shared.configuration import get_central_validator
+except ImportError as e:
+    logger.error(f"Failed to import central configuration validator: {e}")
+    # Fallback for development - can be removed once all environments have shared module
+    get_central_validator = None
 
 logger = logging.getLogger(__name__)
 
@@ -44,16 +55,27 @@ class AuthSecretLoader:
     @staticmethod
     def get_jwt_secret() -> str:
         """
-        Get JWT secret with proper fallback chain.
-        CRITICAL: Must match backend service secret loading for token validation consistency.
+        Get JWT secret using central configuration validator (SSOT).
         
-        Priority order:
-        1. Environment-specific env vars (JWT_SECRET_STAGING, JWT_SECRET_PRODUCTION) 
-        2. Environment-specific Google Secret Manager (staging/production)
-        3. PRIMARY: JWT_SECRET_KEY (shared with backend service)
-        4. DEPRECATED: JWT_SECRET (auth service legacy) - only for backward compatibility
-        5. Development fallback (only in development)
+        This method now delegates to the central validator to ensure consistency
+        across all services and eliminate duplicate validation logic.
         """
+        if get_central_validator is not None:
+            # Use central validator (SSOT)
+            try:
+                validator = get_central_validator(lambda key, default=None: get_env().get(key, default))
+                return validator.get_jwt_secret()
+            except Exception as e:
+                logger.error(f"Central validator failed: {e}")
+                # Fall through to legacy logic temporarily
+        
+        # LEGACY: Fallback to original logic (can be removed once central validator is deployed)
+        logger.warning("Using legacy JWT secret loading - central validator not available")
+        return AuthSecretLoader._legacy_get_jwt_secret()
+    
+    @staticmethod
+    def _legacy_get_jwt_secret() -> str:
+        """Legacy JWT secret loading logic - DEPRECATED."""
         env_manager = get_env()
         env = env_manager.get("ENVIRONMENT", "development").lower()
         
@@ -71,6 +93,12 @@ class AuthSecretLoader:
                 logger.info("Using staging-jwt-secret from Secret Manager")
                 return secret
                 
+            # HARD STOP: No fallback in staging
+            raise ValueError(
+                f"JWT secret not configured for staging environment. "
+                "Set JWT_SECRET_STAGING environment variable or configure staging-jwt-secret in Secret Manager."
+            )
+                
         elif env == "production":
             # In production, check for production-specific secret first
             secret = env_manager.get("JWT_SECRET_PRODUCTION")
@@ -83,18 +111,30 @@ class AuthSecretLoader:
             if secret:
                 logger.info("Using prod-jwt-secret from Secret Manager")
                 return secret
+                
+            # HARD STOP: No fallback in production
+            raise ValueError(
+                f"JWT secret not configured for production environment. "
+                "Set JWT_SECRET_PRODUCTION environment variable or configure prod-jwt-secret in Secret Manager."
+            )
         
-        # CRITICAL: Check JWT_SECRET_KEY as primary secret for consistency with backend service
-        # This ensures both services use the same secret when environment-specific secrets are not available
-        secret = env_manager.get("JWT_SECRET_KEY")
-        if secret:
-            logger.info("Using JWT_SECRET_KEY from environment (shared with backend)")
-            return secret
+        elif env == "development" or env == "test":
+            # Development/Test only: allow JWT_SECRET_KEY as primary secret
+            secret = env_manager.get("JWT_SECRET_KEY")
+            if secret:
+                logger.info(f"Using JWT_SECRET_KEY from environment ({env} only)")
+                return secret
+            
+            # HARD STOP: No fallback in development/test
+            raise ValueError(
+                f"JWT secret not configured for {env} environment. "
+                "Set JWT_SECRET_KEY environment variable."
+            )
         
-        # No fallback in any environment - require explicit JWT secret configuration
+        # HARD STOP: Environment-specific secrets are required, no fallbacks
         raise ValueError(
             f"JWT secret not configured for {env} environment. "
-            "Set JWT_SECRET_KEY environment variable."
+            f"Set JWT_SECRET_{env.upper()} environment variable or configure {env}-jwt-secret in Secret Manager."
         )
     
     @staticmethod

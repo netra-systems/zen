@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>Docker Desktop Windows Crash Prevention and Fixes</title>
+  <date>2025-08-31</date>
+  <category>infrastructure</category>
+  <tags>docker, windows, stability, memory-management, performance</tags>
+  
+  <problem>
+    <description>Docker Desktop crashes on Windows under load or during tests</description>
+    <symptoms>
+      - Docker Desktop becomes unresponsive
+      - Entire Docker daemon crashes
+      - High memory consumption leading to system instability
+      - Containers failing to start or randomly stopping
+    </symptoms>
+    <root_causes>
+      - No memory limits on containers (unlimited memory consumption)
+      - Aggressive file watching and polling (every 1 second)
+      - Excessive reload delay (60 seconds) causing request queuing
+      - Volume mount performance flags incompatible with Windows
+      - Too frequent healthchecks creating overhead
+    </root_causes>
+  </problem>
+  
+  <solution>
+    <summary>Implemented comprehensive Docker stability fixes for Windows</summary>
+    
+    <changes>
+      <change type="memory-limits">
+        <description>Added memory limits to all containers</description>
+        <details>
+          - PostgreSQL: 512MB limit, 256MB reservation
+          - Redis: 256MB limit, 128MB reservation  
+          - ClickHouse: 1GB limit, 512MB reservation
+          - Auth Service: 512MB limit, 256MB reservation
+          - Analytics Service: 512MB limit, 256MB reservation
+          - Backend: 1GB limit, 512MB reservation
+          - Frontend: 1GB limit, 512MB reservation
+        </details>
+      </change>
+      
+      <change type="reload-configuration">
+        <description>Fixed reload delay from 60s to 0.5s</description>
+        <details>
+          - Prevents request queuing during reloads
+          - Reduces memory pressure from pending requests
+          - Makes hot reload actually responsive
+        </details>
+      </change>
+      
+      <change type="volume-mounts">
+        <description>Removed problematic volume mount flags</description>
+        <details>
+          - Removed :delegated and :cached flags
+          - These flags can cause sync issues on Windows
+          - Simplified volume mounts for better compatibility
+        </details>
+      </change>
+      
+      <change type="healthchecks">
+        <description>Optimized healthcheck intervals</description>
+        <details>
+          - Increased intervals from 10-30s to 30-60s
+          - Reduces CPU overhead from constant health checking
+          - Prevents healthcheck pile-up during high load
+        </details>
+      </change>
+      
+      <change type="windows-config">
+        <description>Created Windows-specific configuration</description>
+        <details>
+          - docker-compose.windows.yml with Windows optimizations
+          - Disabled problematic file watching on Windows
+          - More conservative resource limits
+          - Adjusted network MTU for Windows compatibility
+        </details>
+      </change>
+      
+      <change type="helper-script">
+        <description>Created Docker Windows helper script</description>
+        <details>
+          - Health check functionality
+          - Resource monitoring
+          - Automatic crashed container restart
+          - Memory cleanup utilities
+        </details>
+      </change>
+    </changes>
+  </solution>
+  
+  <usage>
+    <windows_development>
+      <!-- Use Windows-optimized configuration -->
+      docker-compose -f docker-compose.yml -f docker-compose.windows.yml --profile dev up
+      
+      <!-- Or use the helper script -->
+      python scripts/docker_windows_helper.py start
+    </windows_development>
+    
+    <monitoring>
+      <!-- Monitor resource usage -->
+      python scripts/docker_windows_helper.py monitor
+      
+      <!-- Run health check -->
+      python scripts/docker_windows_helper.py health-check
+    </monitoring>
+    
+    <troubleshooting>
+      <!-- Clean up Docker resources if crashes occur -->
+      python scripts/docker_windows_helper.py clean
+      
+      <!-- Restart crashed containers -->
+      python scripts/docker_windows_helper.py restart-crashed
+    </troubleshooting>
+  </usage>
+  
+  <best_practices>
+    <practice>Always use memory limits in production and development</practice>
+    <practice>Keep healthcheck intervals reasonable (30-60s minimum)</practice>
+    <practice>Avoid aggressive file polling on Windows</practice>
+    <practice>Monitor Docker Desktop memory allocation (should be at least 4GB)</practice>
+    <practice>Use Windows-specific configuration on Windows hosts</practice>
+    <practice>Regularly clean up unused Docker resources</practice>
+  </best_practices>
+  
+  <docker_desktop_settings>
+    <recommended>
+      <memory>4096 MB minimum, 8192 MB recommended</memory>
+      <cpus>4 CPUs minimum</cpus>
+      <disk>60 GB minimum</disk>
+    </recommended>
+    <location>Settings -> Resources -> Advanced</location>
+  </docker_desktop_settings>
+  
+  <related_files>
+    <file>docker-compose.yml</file>
+    <file>docker-compose.override.yml</file>
+    <file>docker-compose.windows.yml</file>
+    <file>scripts/docker_windows_helper.py</file>
+  </related_files>
+</learning>

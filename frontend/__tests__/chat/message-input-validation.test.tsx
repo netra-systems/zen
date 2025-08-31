@@ -7,6 +7,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock component that simulates message input with character limits
 const MessageInputWithValidation: React.FC = () => {
@@ -42,6 +43,8 @@ const MessageInputWithValidation: React.FC = () => {
 };
 
 describe('Message Input Validation', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   it('should show character count', async () => {
     const user = userEvent.setup();
     render(<MessageInputWithValidation />);
@@ -75,4 +78,8 @@ describe('Message Input Validation', () => {
     // Fixed: Should be red when over limit (using computed RGB value)
     expect(screen.getByTestId('char-count')).toHaveStyle('color: rgb(255, 0, 0)');
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

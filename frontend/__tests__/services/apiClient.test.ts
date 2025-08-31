@@ -5,6 +5,7 @@
  */
 
 import { CircuitBreaker } from '@/lib/circuit-breaker';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock dependencies first
 jest.mock('@/lib/secure-api-config', () => ({
@@ -14,7 +15,7 @@ jest.mock('@/lib/secure-api-config', () => ({
   }
 }));
 
-jest.mock('@/utils/debug-logger', () => ({
+jest.mock('@/lib/logger', () => ({
   logger: {
     error: jest.fn(),
     warn: jest.fn(),
@@ -43,6 +44,8 @@ Object.defineProperty(window, 'localStorage', { value: mockLocalStorage });
 Object.defineProperty(window, 'sessionStorage', { value: mockSessionStorage });
 
 describe('ApiClient Infrastructure Tests', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   let apiClient: any;
 
   beforeEach(async () => {
@@ -132,6 +135,8 @@ describe('ApiClient Infrastructure Tests', () => {
   });
 
   describe('Authentication Management', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('includes auth token from localStorage', async () => {
       mockFetch.mockResolvedValue(createMockResponse({ success: true }));
       await apiClient.get('/test');
@@ -168,6 +173,8 @@ describe('ApiClient Infrastructure Tests', () => {
   });
 
   describe('HTTP Method Support', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('GET requests with query parameters', async () => {
       mockFetch.mockResolvedValue(createMockResponse({ data: 'test' }));
       
@@ -206,6 +213,8 @@ describe('ApiClient Infrastructure Tests', () => {
   });
 
   describe('Connection Health Management', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('performs health check on initialization', async () => {
       // Reset fetch call count
       mockFetch.mockClear();
@@ -264,6 +273,8 @@ describe('ApiClient Infrastructure Tests', () => {
   });
 
   describe('Retry Logic with Exponential Backoff', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('retries failed requests with exponential delay', async () => {
       const delays = setupDelayTracking();
       setupRetryMocks();
@@ -395,6 +406,8 @@ describe('ApiClient Infrastructure Tests', () => {
   });
 
   describe('Error Response Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('parses JSON error responses', async () => {
       const errorData = { detail: 'Validation failed', code: 'INVALID_INPUT' };
       mockFetch.mockResolvedValue(createMockResponse(errorData, 400));
@@ -447,6 +460,8 @@ describe('ApiClient Infrastructure Tests', () => {
   });
 
   describe('Concurrent Request Management', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('handles multiple simultaneous requests', async () => {
       mockFetch
         .mockResolvedValueOnce(createMockResponse({ id: 1 }))
@@ -477,6 +492,8 @@ describe('ApiClient Infrastructure Tests', () => {
   });
 
   describe('Timeout and Rate Limiting', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('handles request timeouts gracefully', async () => {
       const timeoutError = new Error('Request timeout');
       mockFetch.mockRejectedValue(timeoutError);
@@ -502,6 +519,8 @@ describe('ApiClient Infrastructure Tests', () => {
   });
 
   describe('Security and Data Protection', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('includes credentials for authentication', async () => {
       mockFetch.mockResolvedValue(createMockResponse({ success: true }));
       

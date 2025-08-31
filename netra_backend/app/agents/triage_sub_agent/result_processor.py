@@ -10,7 +10,7 @@ from netra_backend.app.agents.triage_sub_agent.models import (
     ExtractedEntities,
     TriageResult,
 )
-from netra_backend.app.core.json_parsing_utils import (
+from netra_backend.app.core.serialization.unified_json_handler import (
     comprehensive_json_fix,
     ensure_agent_response_is_json,
 )
@@ -40,7 +40,7 @@ class TriageResultProcessor:
             return self._convert_dict_to_triage_result(result)
         else:
             # Fix non-JSON responses before processing
-            fixed_result = ensure_agent_response_is_json(result)
+            fixed_result = llm_parser.ensure_agent_response_is_json(result)
             return self._convert_dict_to_triage_result(fixed_result)
     
     def _convert_dict_to_triage_result(self, result_dict: dict) -> TriageResult:

@@ -1,0 +1,740 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "user_behavior_001",
+    "title": "User Behavior Analytics - Journey & Engagement",
+    "tags": ["analytics", "user-behavior", "journey", "engagement"],
+    "timezone": "browser",
+    "schemaVersion": 30,
+    "version": 1,
+    "refresh": "2m",
+    "time": {
+      "from": "now-7d",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": [
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+      ]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "User Journey Flow (Sankey)",
+        "type": "sankey",
+        "gridPos": {
+          "x": 0,
+          "y": 0,
+          "w": 24,
+          "h": 10
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "WITH user_events AS (SELECT user_id, event_type, timestamp, ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY timestamp) as event_order FROM frontend_events WHERE timestamp >= now() - INTERVAL 7 DAY), event_pairs AS (SELECT CONCAT('Step ', toString(event_order), ': ', event_type) as source, CONCAT('Step ', toString(event_order + 1), ': ', LEAD(event_type) OVER (PARTITION BY user_id ORDER BY event_order)) as target FROM user_events) SELECT source, target, count() as value FROM event_pairs WHERE target != '' GROUP BY source, target HAVING value > 5 ORDER BY value DESC LIMIT 50",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "hideFrom": {
+                "tooltip": false,
+                "vis": false,
+                "legend": false
+              }
+            },
+            "displayName": "User Flow"
+          }
+        },
+        "options": {
+          "displayMode": "gradient",
+          "orientation": "horizontal"
+        }
+      },
+      {
+        "id": 2,
+        "title": "Daily Active Users",
+        "type": "timeseries",
+        "gridPos": {
+          "x": 0,
+          "y": 10,
+          "w": 8,
+          "h": 8
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT toDate(timestamp) as date, count(DISTINCT user_id) as dau FROM frontend_events WHERE timestamp >= $__timeFrom() AND timestamp <= $__timeTo() GROUP BY date ORDER BY date",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisPlacement": "auto",
+              "axisLabel": "Active Users",
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "lineWidth": 3,
+              "fillOpacity": 20,
+              "gradientMode": "opacity",
+              "spanNulls": false,
+              "insertNulls": false,
+              "showPoints": "auto",
+              "pointSize": 5,
+              "stacking": {
+                "mode": "none"
+              }
+            },
+            "unit": "short",
+            "displayName": "Daily Active Users"
+          }
+        },
+        "options": {
+          "tooltip": {
+            "mode": "single"
+          },
+          "legend": {
+            "displayMode": "hidden"
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Average Session Duration",
+        "type": "stat",
+        "gridPos": {
+          "x": 8,
+          "y": 10,
+          "w": 8,
+          "h": 4
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "WITH session_durations AS (SELECT user_id, session_id, max(timestamp) - min(timestamp) as duration FROM frontend_events WHERE timestamp >= now() - INTERVAL 24 HOUR GROUP BY user_id, session_id HAVING duration > 0) SELECT avg(duration) as avg_session_duration FROM session_durations",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "red",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 180
+                },
+                {
+                  "color": "green",
+                  "value": 300
+                }
+              ]
+            },
+            "unit": "s",
+            "displayName": "Avg Session Duration"
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": [
+              "lastNotNull"
+            ]
+          },
+          "orientation": "auto",
+          "textMode": "value",
+          "colorMode": "background"
+        }
+      },
+      {
+        "id": 4,
+        "title": "Session Count (24h)",
+        "type": "stat",
+        "gridPos": {
+          "x": 16,
+          "y": 10,
+          "w": 8,
+          "h": 4
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT count(DISTINCT session_id) as session_count FROM frontend_events WHERE timestamp >= now() - INTERVAL 24 HOUR",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "unit": "short",
+            "displayName": "Sessions (24h)"
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": [
+              "lastNotNull"
+            ]
+          },
+          "orientation": "auto",
+          "textMode": "value",
+          "colorMode": "value",
+          "graphMode": "area"
+        }
+      },
+      {
+        "id": 5,
+        "title": "User Engagement Score",
+        "type": "gauge",
+        "gridPos": {
+          "x": 8,
+          "y": 14,
+          "w": 16,
+          "h": 4
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "WITH user_metrics AS (SELECT user_id, count() as total_events, countIf(event_type = 'chat_interaction') as chat_events, countIf(event_type = 'feature_usage') as feature_events FROM frontend_events WHERE timestamp >= now() - INTERVAL 24 HOUR GROUP BY user_id), engagement_scores AS (SELECT user_id, (chat_events * 2 + feature_events * 1.5 + total_events * 0.1) as score FROM user_metrics) SELECT avg(score) as avg_engagement_score FROM engagement_scores",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "red",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 20
+                },
+                {
+                  "color": "green",
+                  "value": 50
+                }
+              ]
+            },
+            "min": 0,
+            "max": 100,
+            "unit": "short",
+            "displayName": "Engagement Score"
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": [
+              "lastNotNull"
+            ]
+          },
+          "orientation": "auto",
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true
+        }
+      },
+      {
+        "id": 6,
+        "title": "User Segmentation",
+        "type": "piechart",
+        "gridPos": {
+          "x": 0,
+          "y": 18,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "WITH user_activity AS (SELECT user_id, count() as total_events, countIf(event_type = 'chat_interaction') as chat_events FROM frontend_events WHERE timestamp >= now() - INTERVAL 7 DAY GROUP BY user_id) SELECT CASE WHEN chat_events >= 50 THEN 'Power Users' WHEN chat_events >= 10 THEN 'Regular Users' WHEN chat_events >= 3 THEN 'Casual Users' WHEN total_events > 0 THEN 'New/Exploring' ELSE 'Inactive' END as segment, count() as user_count FROM user_activity GROUP BY segment ORDER BY user_count DESC",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "hideFrom": {
+                "tooltip": false,
+                "vis": false,
+                "legend": false
+              }
+            },
+            "displayName": "User Segments"
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": [
+              "lastNotNull"
+            ]
+          },
+          "pieType": "donut",
+          "displayLabels": [
+            "name",
+            "percent"
+          ],
+          "legend": {
+            "displayMode": "list",
+            "placement": "right"
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Cohort Retention Analysis",
+        "type": "heatmap",
+        "gridPos": {
+          "x": 12,
+          "y": 18,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "WITH user_first_seen AS (SELECT user_id, toMonday(min(timestamp)) as cohort_week FROM frontend_events GROUP BY user_id), user_activity AS (SELECT user_id, toMonday(timestamp) as activity_week FROM frontend_events GROUP BY user_id, activity_week), cohort_data AS (SELECT f.cohort_week, a.activity_week, dateDiff('week', f.cohort_week, a.activity_week) as week_offset, count(DISTINCT f.user_id) as retained_users FROM user_first_seen f JOIN user_activity a ON f.user_id = a.user_id WHERE week_offset >= 0 AND week_offset <= 12 GROUP BY cohort_week, activity_week, week_offset), cohort_sizes AS (SELECT cohort_week, count(DISTINCT user_id) as cohort_size FROM user_first_seen GROUP BY cohort_week) SELECT cd.cohort_week as time, cd.week_offset, (cd.retained_users / cs.cohort_size) * 100 as retention_rate FROM cohort_data cd JOIN cohort_sizes cs ON cd.cohort_week = cs.cohort_week ORDER BY cohort_week, week_offset",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "spectrum",
+              "scheme": "Greens"
+            },
+            "custom": {
+              "hideFrom": {
+                "tooltip": false,
+                "vis": false,
+                "legend": false
+              }
+            },
+            "unit": "percent",
+            "displayName": "Retention %"
+          }
+        },
+        "options": {
+          "calculate": false,
+          "cellGap": 2,
+          "cellRadius": 0,
+          "color": {
+            "exponent": 0.5,
+            "fill": "dark-orange",
+            "mode": "spectrum",
+            "reverse": false,
+            "scale": "exponential",
+            "scheme": "Greens",
+            "steps": 128
+          },
+          "exemplars": {
+            "color": "rgba(255,0,255,0.7)"
+          },
+          "filterValues": {
+            "le": 1e-9
+          },
+          "legend": {
+            "show": false
+          },
+          "rowsFrame": {
+            "layout": "auto"
+          },
+          "showValue": "never",
+          "tooltip": {
+            "show": true,
+            "yHistogram": false
+          },
+          "yAxis": {
+            "axisPlacement": "left",
+            "reverse": false
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "Feature Adoption Funnel",
+        "type": "table",
+        "gridPos": {
+          "x": 0,
+          "y": 26,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "WITH feature_funnel AS (SELECT user_id, extractJSON(properties, 'feature_name') as feature, count() as interactions, min(timestamp) as first_use FROM frontend_events WHERE event_type = 'feature_usage' AND timestamp >= now() - INTERVAL 7 DAY GROUP BY user_id, feature) SELECT feature, count(DISTINCT user_id) as unique_users, sum(interactions) as total_interactions, avg(interactions) as avg_interactions_per_user FROM feature_funnel GROUP BY feature ORDER BY unique_users DESC",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "left",
+              "displayMode": "auto",
+              "filterable": false
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "unique_users"
+              },
+              "properties": [
+                {
+                  "id": "custom.displayMode",
+                  "value": "color-background"
+                },
+                {
+                  "id": "displayName",
+                  "value": "Unique Users"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "total_interactions"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "Total Interactions"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "avg_interactions_per_user"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "Avg per User"
+                },
+                {
+                  "id": "unit",
+                  "value": "short"
+                },
+                {
+                  "id": "decimals",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "feature"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "Feature Name"
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "showHeader": true,
+          "sortBy": [
+            {
+              "desc": true,
+              "displayName": "Unique Users"
+            }
+          ]
+        }
+      },
+      {
+        "id": 9,
+        "title": "User Activity Heatmap (Hourly)",
+        "type": "heatmap",
+        "gridPos": {
+          "x": 12,
+          "y": 26,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT toDayOfWeek(timestamp) as day_of_week, toHour(timestamp) as hour_of_day, count() as activity_count FROM frontend_events WHERE timestamp >= now() - INTERVAL 7 DAY GROUP BY day_of_week, hour_of_day ORDER BY day_of_week, hour_of_day",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "spectrum",
+              "scheme": "Blues"
+            },
+            "custom": {
+              "hideFrom": {
+                "tooltip": false,
+                "vis": false,
+                "legend": false
+              }
+            },
+            "unit": "short",
+            "displayName": "Activity Count"
+          }
+        },
+        "options": {
+          "calculate": false,
+          "cellGap": 1,
+          "cellRadius": 0,
+          "color": {
+            "exponent": 0.5,
+            "fill": "dark-blue",
+            "mode": "spectrum",
+            "reverse": false,
+            "scale": "exponential",
+            "scheme": "Blues",
+            "steps": 64
+          },
+          "filterValues": {
+            "le": 1e-9
+          },
+          "legend": {
+            "show": true
+          },
+          "rowsFrame": {
+            "layout": "auto"
+          },
+          "showValue": "auto",
+          "tooltip": {
+            "show": true,
+            "yHistogram": true
+          },
+          "yAxis": {
+            "axisPlacement": "left",
+            "reverse": false,
+            "unit": "short"
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Top User Journeys",
+        "type": "table",
+        "gridPos": {
+          "x": 0,
+          "y": 34,
+          "w": 24,
+          "h": 8
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "WITH user_journeys AS (SELECT user_id, groupArray(event_type ORDER BY timestamp) as journey, count() as total_events FROM frontend_events WHERE timestamp >= now() - INTERVAL 24 HOUR GROUP BY user_id), journey_patterns AS (SELECT arrayStringConcat(arraySlice(journey, 1, 5), ' -> ') as journey_pattern, count() as pattern_frequency FROM user_journeys WHERE length(journey) >= 3 GROUP BY journey_pattern HAVING pattern_frequency >= 3) SELECT journey_pattern, pattern_frequency FROM journey_patterns ORDER BY pattern_frequency DESC LIMIT 15",
+            "datasource": {
+              "uid": "clickhouse_analytics"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "left",
+              "displayMode": "auto",
+              "filterable": false
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "journey_pattern"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "Journey Pattern"
+                },
+                {
+                  "id": "custom.width",
+                  "value": 500
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "pattern_frequency"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "Frequency"
+                },
+                {
+                  "id": "custom.displayMode",
+                  "value": "color-background"
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "showHeader": true,
+          "sortBy": [
+            {
+              "desc": true,
+              "displayName": "Frequency"
+            }
+          ]
+        }
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "current": {
+            "selected": false,
+            "text": "7d",
+            "value": "7d"
+          },
+          "hide": 0,
+          "includeAll": false,
+          "label": "Time Period",
+          "multi": false,
+          "name": "time_period",
+          "options": [
+            {
+              "selected": false,
+              "text": "1d",
+              "value": "1d"
+            },
+            {
+              "selected": false,
+              "text": "3d",
+              "value": "3d"
+            },
+            {
+              "selected": true,
+              "text": "7d",
+              "value": "7d"
+            },
+            {
+              "selected": false,
+              "text": "30d",
+              "value": "30d"
+            }
+          ],
+          "query": "1d,3d,7d,30d",
+          "queryValue": "",
+          "skipUrlSync": false,
+          "type": "custom"
+        },
+        {
+          "current": {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          },
+          "datasource": {
+            "uid": "clickhouse_analytics"
+          },
+          "definition": "SELECT DISTINCT user_id FROM frontend_events WHERE timestamp >= now() - INTERVAL 7 DAY ORDER BY user_id LIMIT 100",
+          "hide": 0,
+          "includeAll": true,
+          "label": "User Filter",
+          "multi": true,
+          "name": "user_cohort",
+          "options": [],
+          "query": "SELECT DISTINCT user_id FROM frontend_events WHERE timestamp >= now() - INTERVAL 7 DAY ORDER BY user_id LIMIT 100",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 1,
+          "type": "query"
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": {
+            "type": "grafana",
+            "uid": "-- Grafana --"
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        },
+        {
+          "datasource": {
+            "uid": "clickhouse_analytics"
+          },
+          "enable": true,
+          "iconColor": "red",
+          "name": "Product Events",
+          "rawQuery": "SELECT timestamp as time, extractJSON(properties, 'feature_name') as title, 'Feature Launch' as text FROM frontend_events WHERE event_type = 'feature_usage' AND timestamp >= $__timeFrom() AND timestamp <= $__timeTo() GROUP BY time, title, text ORDER BY time",
+          "showIn": 0,
+          "tags": [
+            "product"
+          ]
+        }
+      ]
+    }
+  },
+  "overwrite": true,
+  "message": "User Behavior Analytics Dashboard - Journey analysis and engagement metrics"
+}

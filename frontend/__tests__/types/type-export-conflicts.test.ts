@@ -20,6 +20,7 @@ import * as path from 'path';
 import * as ts from 'typescript';
 import { parse } from '@babel/parser';
 import traverse from '@babel/traverse';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 interface ExportInfo {
   name: string;
@@ -36,6 +37,8 @@ interface ExportConflict {
 }
 
 describe('Type-Only vs Runtime Export Conflicts', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   /**
    * This test ensures no type-only exports conflict with runtime exports
    * Uses mocked data to ensure consistent test results

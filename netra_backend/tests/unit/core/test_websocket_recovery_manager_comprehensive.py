@@ -30,7 +30,9 @@ class TestWebSocketManagerRecoveryInitialization:
         assert hasattr(manager, 'connections')
         assert hasattr(manager, 'user_connections')
         assert hasattr(manager, 'connection_stats')
-        assert isinstance(manager.connections, dict)
+        # connections is a TTLCache, not a dict
+        from cachetools import TTLCache
+        assert isinstance(manager.connections, TTLCache)
         assert len(manager.connections) == 0
         
     def test_manager_singleton_pattern(self):
@@ -85,10 +87,11 @@ class TestWebSocketRecoveryConnectionManagement:
         assert hasattr(self.manager, 'user_connections') 
         assert hasattr(self.manager, 'room_memberships')
         
-        # These should be properly typed for recovery operations
-        assert isinstance(self.manager.connections, dict)
-        assert isinstance(self.manager.user_connections, dict)
-        assert isinstance(self.manager.room_memberships, dict)
+        # These should be properly typed for recovery operations - using TTLCache not dict
+        from cachetools import TTLCache
+        assert isinstance(self.manager.connections, TTLCache)
+        assert isinstance(self.manager.user_connections, TTLCache)
+        assert isinstance(self.manager.room_memberships, TTLCache)
     
     @pytest.mark.asyncio
     async def test_remove_connection_compatibility(self):

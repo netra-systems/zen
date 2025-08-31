@@ -1,15 +1,14 @@
-/**
- * Navigation Flow Integration Tests
- */
-
 import React from 'react';
 import { render, waitFor, screen, fireEvent, act } from '@testing-library/react';
 import WS from 'jest-websocket-mock';
 import { safeWebSocketCleanup } from '../../helpers/websocket-test-manager';
 import { setupTestEnvironment } from './test-setup';
 import { useAuthStore } from '@/store/authStore';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+rt { useAuthStore } from '@/store/authStore';
 
 describe('Advanced Frontend Integration Tests - Navigation', () => {
+    jest.setTimeout(10000);
   let server: WS;
   
   setupTestEnvironment();
@@ -20,9 +19,15 @@ describe('Advanced Frontend Integration Tests - Navigation', () => {
 
   afterEach(() => {
     safeWebSocketCleanup();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('20. Complex Navigation Flows', () => {
+      jest.setTimeout(10000);
     it('should handle deep linking with state preservation', async () => {
       const router = require('next/navigation').useRouter();
       

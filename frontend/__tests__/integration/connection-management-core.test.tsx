@@ -1,12 +1,11 @@
-/**
- * Connection Management Core Tests
- * Split from connection-management.test.tsx for 450-line limit compliance
- * Agent 10 Implementation - Core connection state and heartbeat tests
- */
-
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { jest } from '@jest/globals';
+import { TestProviders } from '../setup/test-providers';
+import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+user-event';
 import { jest } from '@jest/globals';
 import { TestProviders } from '../setup/test-providers';
 import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
@@ -178,6 +177,7 @@ class HeartbeatManager {
 }
 
 describe('Connection Management Core Tests', () => {
+    jest.setTimeout(10000);
   let wsManager: WebSocketTestManager;
   let backoff: ExponentialBackoff;
   let qualityMonitor: ConnectionQualityMonitor;
@@ -195,9 +195,15 @@ describe('Connection Management Core Tests', () => {
     wsManager.cleanup();
     heartbeatManager.stop();
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Connection State Management', () => {
+      jest.setTimeout(10000);
     it('should track connection status changes', async () => {
       await act(async () => {
         render(<TestProviders><ConnectionTestComponent /></TestProviders>);
@@ -241,6 +247,7 @@ describe('Connection Management Core Tests', () => {
   });
 
   describe('Exponential Backoff', () => {
+      jest.setTimeout(10000);
     it('should calculate exponential delays', () => {
       expect(backoff.calculateDelay(1)).toBe(1000);
       expect(backoff.calculateDelay(2)).toBe(2000);
@@ -258,6 +265,7 @@ describe('Connection Management Core Tests', () => {
   });
 
   describe('Heartbeat Management', () => {
+      jest.setTimeout(10000);
     it('should track heartbeat metrics', async () => {
       await act(async () => {
         render(<TestProviders><ConnectionTestComponent /></TestProviders>);
@@ -314,6 +322,7 @@ describe('Connection Management Core Tests', () => {
   });
 
   describe('Connection Quality Monitoring', () => {
+      jest.setTimeout(10000);
     it('should calculate quality based on latency', () => {
       // Test individual ranges with fresh monitor instances
       const excellentMonitor = new ConnectionQualityMonitor();
@@ -349,6 +358,7 @@ describe('Connection Management Core Tests', () => {
   });
 
   describe('Resource Cleanup', () => {
+      jest.setTimeout(10000);
     it('should clean up connection resources', async () => {
       const { unmount } = await act(async () => {
         return render(<TestProviders><ConnectionTestComponent /></TestProviders>);

@@ -50,7 +50,8 @@ class WebSocketTestSession:
     conversation_data: Dict[str, Any]
     agent_state: Dict[str, Any]
 
-class MockWebSocket:
+# COMMENTED OUT: MockWebSocket class - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
+# class MockWebSocket:
     """Mock WebSocket for testing with realistic behavior."""
     
     def __init__(self, user_id: str):

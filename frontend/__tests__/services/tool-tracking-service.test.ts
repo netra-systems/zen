@@ -1,13 +1,15 @@
 // Tool tracking service tests
 // Testing the enhanced tool tracking service functionality
 
-import { 
-  ToolTrackingService,
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+import { ToolTrackingService,
   createToolTrackingService,
   DEFAULT_TOOL_TRACKING_CONFIG
 } from '@/services/tool-tracking-service';
 
 describe('ToolTrackingService', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   let service: ToolTrackingService;
   let onToolsUpdated: jest.Mock;
 
@@ -26,9 +28,17 @@ describe('ToolTrackingService', () => {
   afterEach(() => {
     service.cleanup();
     jest.useRealTimers();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('startTool', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should start a new tool and notify listeners', () => {
       service.startTool('test-tool');
       
@@ -56,6 +66,8 @@ describe('ToolTrackingService', () => {
   });
 
   describe('completeTool', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should complete a tool and notify listeners', () => {
       service.startTool('test-tool');
       onToolsUpdated.mockClear();
@@ -75,6 +87,8 @@ describe('ToolTrackingService', () => {
   });
 
   describe('auto-removal timeout', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should auto-remove tools after timeout', () => {
       service.startTool('test-tool');
       expect(service.getActiveTools()).toContain('test-tool');
@@ -100,6 +114,8 @@ describe('ToolTrackingService', () => {
   });
 
   describe('cleanup interval', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should periodically cleanup expired tools', () => {
       service.startTool('tool1');
       
@@ -118,6 +134,8 @@ describe('ToolTrackingService', () => {
   });
 
   describe('service cleanup', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should cleanup all timeouts on service cleanup', () => {
       service.startTool('tool1');
       service.startTool('tool2');
@@ -134,6 +152,8 @@ describe('ToolTrackingService', () => {
   });
 
   describe('configuration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should use default configuration when not provided', () => {
       const defaultService = createToolTrackingService();
       

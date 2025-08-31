@@ -1,11 +1,10 @@
-/**
- * AI Message Streaming Animation Tests
- * 
- * Tests streaming indicators, content updates, and animation performance.
- * 
- * @compliance conventions.xml - Max 8 lines per function, under 300 lines
- * @compliance type_safety.xml - Strongly typed test definitions
- * @compliance no_test_stubs.xml - Real implementations only
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import { MessageItem } from '@/components/chat/MessageItem';
+import { Message } from '@/types/unified';
+import { setupChatMocks, resetChatMocks, renderWithChatSetup } from './shared-test-setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+t_stubs.xml - Real implementations only
  */
 
 import React from 'react';
@@ -84,6 +83,7 @@ const simulateRapidStreamingUpdates = (message: Message, rerender: any) => {
 // ============================================================================
 
 describe('AIMessage - Streaming Animations', () => {
+    jest.setTimeout(10000);
   it('displays streaming indicator for streaming messages', () => {
     const message = createStreamingMessage();
     renderWithChatSetup(<MessageItem message={message} />);

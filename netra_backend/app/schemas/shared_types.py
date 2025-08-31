@@ -22,9 +22,9 @@ from typing import (
 
 from pydantic import BaseModel, Field, field_validator
 
-from netra_backend.app.core.json_parsing_utils import (
+from netra_backend.app.core.serialization.unified_json_handler import (
     parse_dict_field,
-    parse_string_list_field,
+    parse_list_field as parse_string_list_field,
 )
 
 if TYPE_CHECKING:
@@ -403,7 +403,7 @@ class DataAnalysisResponse(BaseModel):
     @classmethod
     def parse_recommendations(cls, v: Any) -> List[str]:
         """Parse recommendations field, converting dicts to strings"""
-        return parse_string_list_field(v)
+        return parse_list_field(v)
     
     # Enhanced structured fields
     performance_metrics: Optional[PerformanceMetrics] = None

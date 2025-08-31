@@ -24,7 +24,6 @@ Usage:
 """
 import base64
 import json
-import os
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional
@@ -33,20 +32,11 @@ import httpx
 import jwt
 import pytest
 
+# Use absolute imports per CLAUDE.md standards
+from netra_backend.app.core.auth_constants import HeaderConstants, JWTConstants
+from netra_backend.app.core.network_constants import HostConstants, ServicePorts, URLConstants
+from test_framework.environment_isolation import get_test_env_manager
 
-class JWTConstants:
-    """JWT-related constants."""
-    SUBJECT = "sub"
-    EMAIL = "email"
-    PERMISSIONS = "permissions"
-    ISSUED_AT = "iat"
-    EXPIRES_AT = "exp"
-    TOKEN_TYPE = "type"
-    ACCESS_TOKEN_TYPE = "access"
-    REFRESH_TOKEN_TYPE = "refresh"
-    ISSUER = "iss"
-    NETRA_AUTH_SERVICE = "netra-auth-service"
-    HS256_ALGORITHM = "HS256"
 
 
 class JWTTestHelper:
@@ -68,16 +58,20 @@ class JWTTestHelper:
         if override_env:
             return override_env.lower()
         
+        # Use IsolatedEnvironment for ALL environment access per CLAUDE.md
+        env_manager = get_test_env_manager()
+        env = env_manager.env
+        
         # Check explicit environment variable
-        env_var = os.environ.get("ENVIRONMENT", "").lower()
+        env_var = env.get("ENVIRONMENT", "").lower()
         if env_var in ["test", "testing"]:
             return "test"
         elif env_var in ["dev", "development"]:
             return "dev"
         
         # Check for test context
-        if (os.environ.get("TESTING") or 
-            os.environ.get("PYTEST_CURRENT_TEST")):
+        if (env.get("TESTING") or 
+            env.get("PYTEST_CURRENT_TEST")):
             return "test"
         
         # Default to test for JWT test helpers
@@ -107,8 +101,12 @@ class JWTTestHelper:
     
     def _configure_secret(self) -> None:
         """Configure JWT secret based on environment."""
+        # Use IsolatedEnvironment for ALL environment access per CLAUDE.md
+        env_manager = get_test_env_manager()
+        env = env_manager.env
+        
         # Try to get from environment first
-        self.test_secret = os.environ.get("JWT_SECRET_KEY")
+        self.test_secret = env.get(JWTConstants.JWT_SECRET_KEY)
         
         if not self.test_secret:
             # Use environment-specific defaults
@@ -315,9 +313,20 @@ class JWTSecurityTester:
         backend_result = await self.helper.make_backend_request("/api/users/profile", token)
         results["backend_service"] = backend_result["status"]
         
-        # Test WebSocket
-        ws_success = await self.helper.test_websocket_connection(token, should_succeed=False)
-        results["websocket"] = 200 if ws_success else 401
+        # Test WebSocket - for security tests, we expect connection to fail with invalid token
+        try:
+            # Try to connect with the token - if connection succeeds, that's a security issue
+            import websockets
+            async with websockets.connect(
+                f"{self.helper.websocket_url}/ws?token={token}",
+                timeout=5
+            ) as websocket:
+                await websocket.ping()
+                # If we get here, the connection succeeded - that's bad for a tampered token
+                results["websocket"] = 200
+        except Exception:
+            # Connection failed - that's good, it properly rejected the invalid token
+            results["websocket"] = 401
         
         return results
     
@@ -360,16 +369,20 @@ class JWTTokenTestHelper:
         if override_env:
             return override_env.lower()
         
+        # Use IsolatedEnvironment for ALL environment access per CLAUDE.md
+        env_manager = get_test_env_manager()
+        env = env_manager.env
+        
         # Check explicit environment variable
-        env_var = os.environ.get("ENVIRONMENT", "").lower()
+        env_var = env.get("ENVIRONMENT", "").lower()
         if env_var in ["test", "testing"]:
             return "test"
         elif env_var in ["dev", "development"]:
             return "dev"
         
         # Check for test context
-        if (os.environ.get("TESTING") or 
-            os.environ.get("PYTEST_CURRENT_TEST")):
+        if (env.get("TESTING") or 
+            env.get("PYTEST_CURRENT_TEST")):
             return "test"
         
         # Default to test for JWT test helpers
@@ -377,8 +390,12 @@ class JWTTokenTestHelper:
     
     def _configure_secret(self) -> None:
         """Configure JWT secret based on environment."""
+        # Use IsolatedEnvironment for ALL environment access per CLAUDE.md
+        env_manager = get_test_env_manager()
+        env = env_manager.env
+        
         # Try to get from environment first
-        self.test_secret = os.environ.get("JWT_SECRET_KEY")
+        self.test_secret = env.get(JWTConstants.JWT_SECRET_KEY)
         
         if not self.test_secret:
             # Use environment-specific defaults

@@ -17,7 +17,7 @@ import {
   useBrowserHistorySync, 
   validateThreadId 
 } from '@/services/urlSyncService';
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 
 /**
  * Thread navigation configuration

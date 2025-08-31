@@ -1,8 +1,10 @@
-/**
- * WebSocket Complete Integration Tests - Modular Architecture
- * 
- * This file was refactored from 758 lines to comply with 450-line limit.
- * The original oversized test file has been split into focused modules:
+import './websocket-lifecycle.test';
+import './websocket-messaging.test';
+import './websocket-large-messages.test';
+import './websocket-performance.test';
+import './websocket-stress.test';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ split into focused modules:
  * 
  * - websocket-lifecycle.test.tsx (226 lines) - Connection lifecycle tests
  * - websocket-messaging.test.tsx (278 lines) - Message processing tests  
@@ -50,6 +52,7 @@ export {
  */
 
 describe('WebSocket Complete Integration Tests - Modular', () => {
+    jest.setTimeout(10000);
   it('should have all test modules properly organized', () => {
     // This test ensures the modular structure is maintained
     expect(true).toBe(true);

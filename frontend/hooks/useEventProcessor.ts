@@ -239,7 +239,9 @@ function convertToUnifiedEvent(message: WebSocketMessage): UnifiedWebSocketEvent
     const unifiedEventTypes = [
       // Agent lifecycle events
       'agent_started', 'agent_completed', 'agent_stopped', 'agent_error',
-      'agent_update', 'agent_thinking', 'agent_log',
+      'agent_update', 'agent_thinking', 'agent_log', 'agent_registered',
+      'agent_failed', 'agent_cancelled', 'agent_metrics_updated',
+      'agent_unregistered', 'agent_status_changed', 'agent_manager_shutdown',
       
       // Tool events  
       'tool_executing', 'tool_started', 'tool_completed', 'tool_call', 'tool_result',
@@ -293,15 +295,18 @@ function detectLayerUpdates(event: UnifiedWebSocketEvent): {
 } {
   const fastLayerEvents = [
     'agent_started', 'tool_executing', 'tool_started', 'tool_call', 
-    'tool_completed', 'tool_result', 'agent_update'
+    'tool_completed', 'tool_result', 'agent_update', 'agent_registered',
+    'agent_status_changed'
   ];
   
   const mediumLayerEvents = [
-    'agent_thinking', 'partial_result', 'stream_chunk', 'sub_agent_update'
+    'agent_thinking', 'partial_result', 'stream_chunk', 'sub_agent_update',
+    'agent_metrics_updated'
   ];
   
   const slowLayerEvents = [
-    'agent_completed', 'final_report', 'subagent_completed', 'stream_complete'
+    'agent_completed', 'final_report', 'subagent_completed', 'stream_complete',
+    'agent_failed', 'agent_cancelled', 'agent_unregistered', 'agent_manager_shutdown'
   ];
   
   return {

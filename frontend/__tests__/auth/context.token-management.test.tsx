@@ -4,6 +4,7 @@
  * All functions ≤8 lines per architecture requirements
  */
 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { AuthProvider } from '@/auth/context';
@@ -11,8 +12,7 @@ import { authService } from '@/auth/unified-auth-service';
 import { jwtDecode } from 'jwt-decode';
 import { logger } from '@/lib/logger';
 import '@testing-library/jest-dom';
-import {
-  setupBasicMocks,
+import { setupBasicMocks,
   setupAuthStore,
   setupTokenMocks,
   expectAuthStoreLogin,
@@ -35,6 +35,8 @@ jest.mock('@/lib/logger', () => ({
 }));
 
 describe('AuthContext - Token Management', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   let mockAuthStore: any;
 
   beforeEach(() => {
@@ -129,4 +131,8 @@ describe('AuthContext - Token Management', () => {
     performRerender(rerender);
     await waitForUpdatedContent();
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

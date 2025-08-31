@@ -18,6 +18,7 @@ import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useThreadStore } from '@/store/threadStore';
 import { useAuthStore } from '@/store/authStore';
 import { optimisticMessageManager } from '@/services/optimistic-updates';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock all dependencies
 jest.mock('@/store/unified-chat');
@@ -85,6 +86,8 @@ const { useMessageHistory } = require('@/components/chat/hooks/useMessageHistory
 const { useTextareaResize } = require('@/components/chat/hooks/useTextareaResize');
 
 describe('MessageInput Pipeline Tests', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   const mockHandleSend = jest.fn();
   const mockAddToHistory = jest.fn();
   const mockNavigateHistory = jest.fn();
@@ -125,6 +128,8 @@ describe('MessageInput Pipeline Tests', () => {
   });
 
   describe('Happy Path - Complete Message Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle complete message sending flow', async () => {
       const user = userEvent.setup();
       render(<MessageInput />);
@@ -192,6 +197,8 @@ describe('MessageInput Pipeline Tests', () => {
   });
 
   describe('Authentication States', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should show login prompt when not authenticated', () => {
       (useAuthStore as jest.Mock).mockReturnValue({
         isAuthenticated: false
@@ -214,6 +221,8 @@ describe('MessageInput Pipeline Tests', () => {
   });
 
   describe('Processing States', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should show processing state when AI is responding', () => {
       (useUnifiedChatStore as jest.Mock).mockReturnValue({
         activeThreadId: 'thread-123',
@@ -242,6 +251,8 @@ describe('MessageInput Pipeline Tests', () => {
   });
 
   describe('Message History Navigation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should navigate message history with arrow keys', async () => {
       const user = userEvent.setup();
       
@@ -297,6 +308,8 @@ describe('MessageInput Pipeline Tests', () => {
   });
 
   describe('Message Validation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should not send empty messages', async () => {
       const user = userEvent.setup();
       render(<MessageInput />);
@@ -346,6 +359,8 @@ describe('MessageInput Pipeline Tests', () => {
   });
 
   describe('Character Count and Limits', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should show character count when approaching limit', async () => {
       const user = userEvent.setup();
       render(<MessageInput />);
@@ -376,6 +391,8 @@ describe('MessageInput Pipeline Tests', () => {
   });
 
   describe('Error Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle send failures gracefully', async () => {
       const user = userEvent.setup();
       
@@ -417,6 +434,8 @@ describe('MessageInput Pipeline Tests', () => {
   });
 
   describe('Thread Management Integration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should work with no active thread', async () => {
       const user = userEvent.setup();
       
@@ -487,6 +506,8 @@ describe('MessageInput Pipeline Tests', () => {
   });
 
   describe('Accessibility', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should have proper ARIA labels', () => {
       render(<MessageInput />);
       
@@ -516,4 +537,8 @@ describe('MessageInput Pipeline Tests', () => {
       expect(textarea).toHaveFocus();
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

@@ -8,7 +8,7 @@
  * @compliance type_safety.xml - Strongly typed retry management
  */
 
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 
 /**
  * Frontend retry configuration options

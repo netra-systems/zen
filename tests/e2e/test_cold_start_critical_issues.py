@@ -181,7 +181,7 @@ class TestColdStartCriticalIssues:
         })
         
         # Try to validate with backend secret
-        from netra_backend.app.auth.jwt_handler import JWTHandler
+        from auth_service.auth_core.core.jwt_handler import JWTHandler
         jwt_handler = JWTHandler()
         
         with pytest.raises(Exception) as exc_info:

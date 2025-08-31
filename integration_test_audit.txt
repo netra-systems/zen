@@ -1,0 +1,2290 @@
+DETAILED INTEGRATION TEST AUDIT
+================================================================================
+
+MOCK-ONLY TESTS (candidates for deletion or conversion):
+
+netra_backend\tests\integration\test_adaptive_workflow.py
+  Tests: 13
+  Has BVJ: False
+
+netra_backend\tests\integration\test_admin_agent_integration.py
+  Tests: 10
+  Has BVJ: False
+
+netra_backend\tests\integration\test_advanced_analytics_export.py
+  Tests: 5
+  Has BVJ: True
+
+netra_backend\tests\integration\test_agent_circuit_breaker_integration.py
+  Tests: 12
+  Has BVJ: False
+
+netra_backend\tests\integration\test_agent_failure_propagation.py
+  Tests: 11
+  Has BVJ: True
+
+netra_backend\tests\integration\test_agent_health_and_quality_gates.py
+  Tests: 9
+  Has BVJ: False
+
+netra_backend\tests\integration\test_agent_initialization_integration.py
+  Tests: 10
+  Has BVJ: False
+
+netra_backend\tests\integration\test_agent_pipeline_performance.py
+  Tests: 3
+  Has BVJ: True
+
+netra_backend\tests\integration\test_agent_reliability_integration.py
+  Tests: 3
+  Has BVJ: False
+
+netra_backend\tests\integration\test_agent_service_singleton.py
+  Tests: 8
+  Has BVJ: False
+
+netra_backend\tests\integration\test_agent_state_persistence_recovery.py
+  Tests: 5
+  Has BVJ: True
+
+netra_backend\tests\integration\test_agent_tool_loading_validation.py
+  Tests: 6
+  Has BVJ: True
+
+netra_backend\tests\integration\test_agent_websocket_communication.py
+  Tests: 7
+  Has BVJ: False
+
+netra_backend\tests\integration\test_auth_service_session_validation.py
+  Tests: 7
+  Has BVJ: True
+
+netra_backend\tests\integration\test_auth_websocket_integration.py
+  Tests: 7
+  Has BVJ: True
+
+netra_backend\tests\integration\test_cache_invalidation_basic.py
+  Tests: 6
+  Has BVJ: False
+
+netra_backend\tests\integration\test_cache_ratelimit_error_handling.py
+  Tests: 9
+  Has BVJ: False
+
+netra_backend\tests\integration\test_checkpoint_recovery.py
+  Tests: 7
+  Has BVJ: True
+
+netra_backend\tests\integration\test_circuit_breaker_recovery_paths.py
+  Tests: 26
+  Has BVJ: True
+
+netra_backend\tests\integration\test_circuit_breaker_triggers.py
+  Tests: 38
+  Has BVJ: False
+
+netra_backend\tests\integration\test_concurrent_agent_execution.py
+  Tests: 12
+  Has BVJ: False
+
+netra_backend\tests\integration\test_configuration_integration.py
+  Tests: 10
+  Has BVJ: False
+
+netra_backend\tests\integration\test_critical_agent_collaboration.py
+  Tests: 4
+  Has BVJ: False
+
+netra_backend\tests\integration\test_critical_analytics_compliance.py
+  Tests: 3
+  Has BVJ: False
+
+netra_backend\tests\integration\test_critical_auth_integration.py
+  Tests: 3
+  Has BVJ: True
+
+netra_backend\tests\integration\test_critical_auth_session.py
+  Tests: 3
+  Has BVJ: False
+
+netra_backend\tests\integration\test_critical_circuit_breaker_compensation.py
+  Tests: 3
+  Has BVJ: False
+
+netra_backend\tests\integration\test_critical_message_health.py
+  Tests: 2
+  Has BVJ: False
+
+netra_backend\tests\integration\test_critical_path_integration.py
+  Tests: 2
+  Has BVJ: False
+
+netra_backend\tests\integration\test_critical_search_quality.py
+  Tests: 2
+  Has BVJ: False
+
+netra_backend\tests\integration\test_enterprise_domain_network.py
+  Tests: 2
+  Has BVJ: True
+
+netra_backend\tests\integration\test_enterprise_resource_health.py
+  Tests: 2
+  Has BVJ: True
+
+netra_backend\tests\integration\test_error_handling_integration.py
+  Tests: 8
+  Has BVJ: True
+
+netra_backend\tests\integration\test_first_message_auth_flow.py
+  Tests: 8
+  Has BVJ: True
+
+netra_backend\tests\integration\test_first_message_error_recovery.py
+  Tests: 8
+  Has BVJ: True
+
+netra_backend\tests\integration\test_first_message_streaming.py
+  Tests: 8
+  Has BVJ: True
+
+netra_backend\tests\integration\test_first_time_user_errors.py
+  Tests: 10
+  Has BVJ: True
+
+netra_backend\tests\integration\test_free_tier_value_demonstration_integration_core_1.py
+  Tests: 0
+  Has BVJ: False
+
+netra_backend\tests\integration\test_free_tier_value_demonstration_integration_core_2.py
+  Tests: 0
+  Has BVJ: False
+
+netra_backend\tests\integration\test_gcp_monitoring_routes.py
+  Tests: 12
+  Has BVJ: True
+
+netra_backend\tests\integration\test_gemini_optimization.py
+  Tests: 24
+  Has BVJ: False
+
+netra_backend\tests\integration\test_logging_audit_integration_core.py
+  Tests: 1
+  Has BVJ: False
+
+netra_backend\tests\integration\test_message_flow_auth_core.py
+  Tests: 0
+  Has BVJ: False
+
+netra_backend\tests\integration\test_message_flow_errors_core.py
+  Tests: 0
+  Has BVJ: False
+
+netra_backend\tests\integration\test_message_flow_performance_core.py
+  Tests: 0
+  Has BVJ: False
+
+netra_backend\tests\integration\test_message_flow_routing_core.py
+  Tests: 0
+  Has BVJ: False
+
+netra_backend\tests\integration\test_message_persistence_and_coordination.py
+  Tests: 9
+  Has BVJ: False
+
+netra_backend\tests\integration\test_metrics_pipeline_integration.py
+  Tests: 11
+  Has BVJ: False
+
+netra_backend\tests\integration\test_migration_state_recovery_integration.py
+  Tests: 7
+  Has BVJ: True
+
+netra_backend\tests\integration\test_oauth_staging_redirect_flow.py
+  Tests: 5
+  Has BVJ: False
+
+netra_backend\tests\integration\test_payment_gateway_integration.py
+  Tests: 6
+  Has BVJ: True
+
+netra_backend\tests\integration\test_rate_limiting_backpressure.py
+  Tests: 13
+  Has BVJ: True
+
+netra_backend\tests\integration\test_secret_manager_staging_resilience.py
+  Tests: 16
+  Has BVJ: True
+
+netra_backend\tests\integration\test_service_health_integration.py
+  Tests: 7
+  Has BVJ: False
+
+netra_backend\tests\integration\test_sla_compliance_monitoring.py
+  Tests: 11
+  Has BVJ: True
+
+netra_backend\tests\integration\test_staging_user_auto_creation.py
+  Tests: 5
+  Has BVJ: False
+
+netra_backend\tests\integration\test_sub_agent_registry_discovery.py
+  Tests: 5
+  Has BVJ: True
+
+netra_backend\tests\integration\test_supervisor_agent_initialization_chain.py
+  Tests: 5
+  Has BVJ: True
+
+netra_backend\tests\integration\test_supervisor_observability.py
+  Tests: 10
+  Has BVJ: False
+
+netra_backend\tests\integration\test_system_component_integration.py
+  Tests: 3
+  Has BVJ: False
+
+netra_backend\tests\integration\test_system_resilience.py
+  Tests: 2
+  Has BVJ: False
+
+netra_backend\tests\integration\test_system_startup_integration.py
+  Tests: 7
+  Has BVJ: False
+
+netra_backend\tests\integration\test_thread_initialization.py
+  Tests: 7
+  Has BVJ: True
+
+netra_backend\tests\integration\test_thread_management_critical.py
+  Tests: 15
+  Has BVJ: False
+
+netra_backend\tests\integration\test_thread_performance_regression.py
+  Tests: 6
+  Has BVJ: True
+
+netra_backend\tests\integration\test_transaction_coordination_integration.py
+  Tests: 8
+  Has BVJ: True
+
+netra_backend\tests\integration\test_triage_circuit_breaker.py
+  Tests: 12
+  Has BVJ: False
+
+netra_backend\tests\integration\test_unified_message_flow_core.py
+  Tests: 1
+  Has BVJ: False
+
+netra_backend\tests\integration\test_unified_tools_api.py
+  Tests: 21
+  Has BVJ: True
+
+netra_backend\tests\integration\test_usage_metering_billing_core.py
+  Tests: 0
+  Has BVJ: True
+
+netra_backend\tests\integration\test_user_flows_main.py
+  Tests: 5
+  Has BVJ: True
+
+netra_backend\tests\integration\test_user_onboarding_flow.py
+  Tests: 5
+  Has BVJ: True
+
+netra_backend\tests\integration\test_user_registration_flow.py
+  Tests: 6
+  Has BVJ: True
+
+netra_backend\tests\integration\test_user_signin_basic_fixed.py
+  Tests: 4
+  Has BVJ: True
+
+netra_backend\tests\integration\test_user_signin_password_validation.py
+  Tests: 5
+  Has BVJ: True
+
+netra_backend\tests\integration\test_user_tier_management.py
+  Tests: 3
+  Has BVJ: True
+
+netra_backend\tests\integration\test_user_websocket_lifecycle.py
+  Tests: 4
+  Has BVJ: True
+
+netra_backend\tests\integration\test_websocket_agent_integration.py
+  Tests: 5
+  Has BVJ: False
+
+netra_backend\tests\integration\test_websocket_auth_token_refresh.py
+  Tests: 6
+  Has BVJ: True
+
+netra_backend\tests\integration\test_websocket_connection_leak_detection.py
+  Tests: 8
+  Has BVJ: True
+
+netra_backend\tests\integration\test_websocket_initialization.py
+  Tests: 9
+  Has BVJ: True
+
+netra_backend\tests\integration\test_websocket_routing_regression.py
+  Tests: 11
+  Has BVJ: True
+
+netra_backend\tests\integration\test_websocket_subprotocol_negotiation_regression.py
+  Tests: 7
+  Has BVJ: False
+
+netra_backend\tests\integration\test_websocket_thread_validation.py
+  Tests: 4
+  Has BVJ: False
+
+netra_backend\tests\integration\critical_paths\test_2fa_verification.py
+  Tests: 10
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_agent_caching_strategy.py
+  Tests: 12
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_agent_config_hot_reload.py
+  Tests: 9
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_agent_context_window.py
+  Tests: 11
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_agent_cost_optimization.py
+  Tests: 9
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_agent_error_propagation.py
+  Tests: 11
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_agent_fallback_strategies.py
+  Tests: 12
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_agent_metrics_collection.py
+  Tests: 11
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_agent_orchestration_business_outcomes.py
+  Tests: 10
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_agent_priority_queue.py
+  Tests: 11
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_agent_quality_gate.py
+  Tests: 12
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_agent_resource_allocation.py
+  Tests: 10
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_agent_result_aggregation.py
+  Tests: 11
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_agent_state_persistence.py
+  Tests: 10
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_agent_timeout_cancellation.py
+  Tests: 11
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_agent_tool_loading.py
+  Tests: 11
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_agent_version_compatibility.py
+  Tests: 9
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_api_key_user_mapping.py
+  Tests: 10
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_api_request_lifecycle_complete_l4.py
+  Tests: 11
+  Has BVJ: False
+
+netra_backend\tests\integration\critical_paths\test_authentication_authorization.py
+  Tests: 2
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_auth_cache_invalidation.py
+  Tests: 9
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_auth_service_failover_complete_l4.py
+  Tests: 9
+  Has BVJ: False
+
+netra_backend\tests\integration\critical_paths\test_auth_service_initialization_health_l4.py
+  Tests: 10
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_billing_usage_accuracy.py
+  Tests: 2
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_binary_message_handling.py
+  Tests: 9
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_business_critical_flows_l2.py
+  Tests: 9
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_cache_coherence_l4.py
+  Tests: 12
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_cache_state_management_l2.py
+  Tests: 10
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_complex_multi_agent_chains.py
+  Tests: 9
+  Has BVJ: False
+
+netra_backend\tests\integration\critical_paths\test_complex_multi_agent_workflows.py
+  Tests: 8
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_concurrent_session_management_l4.py
+  Tests: 8
+  Has BVJ: False
+
+netra_backend\tests\integration\critical_paths\test_configuration_hot_reload.py
+  Tests: 6
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_config_hot_reload_l4.py
+  Tests: 8
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_connection_pool_management.py
+  Tests: 11
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_core_system_initialization.py
+  Tests: 5
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_cross_service_auth_propagation_complete_l4.py
+  Tests: 10
+  Has BVJ: False
+
+netra_backend\tests\integration\critical_paths\test_data_migration_integrity_l4.py
+  Tests: 1
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_distributed_auth_state_sync_l4.py
+  Tests: 7
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_distributed_tracing.py
+  Tests: 5
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_error_circuit_breakers.py
+  Tests: 10
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_free_to_paid_conversion_flow.py
+  Tests: 10
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_graceful_websocket_shutdown.py
+  Tests: 11
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_health_check_cascade.py
+  Tests: 6
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_heartbeat_mechanism.py
+  Tests: 11
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_message_compression.py
+  Tests: 11
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_message_ordering_guarantees.py
+  Tests: 9
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_message_pipeline_l4.py
+  Tests: 9
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_message_processing_pipeline.py
+  Tests: 6
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_message_queue_flow.py
+  Tests: 3
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_message_queue_websocket_broadcast.py
+  Tests: 10
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_metrics_observability.py
+  Tests: 3
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_metrics_prometheus.py
+  Tests: 5
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_migration_rollback.py
+  Tests: 4
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_multi_agent_workflow.py
+  Tests: 8
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_multi_device_session_sync_l4.py
+  Tests: 9
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_multi_tenant_workspace_isolation.py
+  Tests: 9
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_oauth_provider_failover_l4.py
+  Tests: 5
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_payment_processing_e2e_l4.py
+  Tests: 1
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_performance_scalability_l2.py
+  Tests: 10
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_rate_limiting.py
+  Tests: 7
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_rate_limiting_l4.py
+  Tests: 4
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_rate_limiting_per_tier.py
+  Tests: 9
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_rate_limiting_resources.py
+  Tests: 7
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_redis_state_persistence.py
+  Tests: 24
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_saml_sso_integration.py
+  Tests: 10
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_service_discovery.py
+  Tests: 6
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_service_mesh_communication.py
+  Tests: 2
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_staging_secrets_loading.py
+  Tests: 15
+  Has BVJ: False
+
+netra_backend\tests\integration\critical_paths\test_supervisor_subagent_communication.py
+  Tests: 17
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_token_validation_chain_complete_l4.py
+  Tests: 11
+  Has BVJ: False
+
+netra_backend\tests\integration\critical_paths\test_user_state_persistence_complete_l4.py
+  Tests: 10
+  Has BVJ: False
+
+netra_backend\tests\integration\critical_paths\test_websocket_circuit_breaker.py
+  Tests: 10
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_websocket_health_check.py
+  Tests: 9
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_websocket_jwt_validation_failure.py
+  Tests: 8
+  Has BVJ: False
+
+netra_backend\tests\integration\critical_paths\test_websocket_load_balancing.py
+  Tests: 15
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_websocket_message_delivery_guarantees_l4.py
+  Tests: 10
+  Has BVJ: False
+
+netra_backend\tests\integration\critical_paths\test_websocket_rate_limiting.py
+  Tests: 11
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_websocket_reconnection_resilience_l4.py
+  Tests: 10
+  Has BVJ: False
+
+netra_backend\tests\integration\critical_paths\test_websocket_reconnection_state.py
+  Tests: 10
+  Has BVJ: True
+
+netra_backend\tests\integration\critical_paths\test_websocket_resilience_recovery.py
+  Tests: 8
+  Has BVJ: True
+
+netra_backend\tests\integration\operational\test_admin_operations.py
+  Tests: 10
+  Has BVJ: True
+
+netra_backend\tests\integration\operational\test_error_recovery.py
+  Tests: 9
+  Has BVJ: True
+
+netra_backend\tests\integration\operational\test_mcp_tools.py
+  Tests: 8
+  Has BVJ: True
+
+netra_backend\tests\integration\operational\test_monitoring.py
+  Tests: 10
+  Has BVJ: True
+
+netra_backend\tests\integration\security\test_compliance_reporting.py
+  Tests: 10
+  Has BVJ: True
+
+netra_backend\tests\integration\staging\test_clickhouse_connection_failures.py
+  Tests: 12
+  Has BVJ: True
+
+netra_backend\tests\integration\staging\test_clickhouse_infrastructure_edge_cases.py
+  Tests: 9
+  Has BVJ: True
+
+netra_backend\tests\integration\staging\test_redis_environment_edge_cases.py
+  Tests: 6
+  Has BVJ: True
+
+netra_backend\tests\integration\staging\test_redis_initialization_failures.py
+  Tests: 9
+  Has BVJ: True
+
+netra_backend\tests\integration\staging\test_staging_auth_service_sync.py
+  Tests: 4
+  Has BVJ: True
+
+netra_backend\tests\integration\staging\test_staging_secrets_manager_integration.py
+  Tests: 9
+  Has BVJ: True
+
+netra_backend\tests\integration\staging\test_staging_startup_configuration_validation.py
+  Tests: 9
+  Has BVJ: True
+
+netra_backend\tests\integration\staging_config\test_environment_precedence.py
+  Tests: 6
+  Has BVJ: False
+
+netra_backend\tests\integration\staging_config\test_staging_startup.py
+  Tests: 7
+  Has BVJ: False
+
+netra_backend\tests\integration\user_flows\test_early_tier_flows.py
+  Tests: 8
+  Has BVJ: True
+
+netra_backend\tests\integration\user_flows\test_enterprise_flows.py
+  Tests: 6
+  Has BVJ: True
+
+netra_backend\tests\integration\user_flows\test_mid_tier_flows.py
+  Tests: 6
+  Has BVJ: True
+
+netra_backend\tests\integration\red_team\tier1_catastrophic\test_api_gateway_rate_limiting_accuracy.py
+  Tests: 5
+  Has BVJ: False
+
+netra_backend\tests\integration\red_team\tier1_catastrophic\test_service_discovery_failure_cascades.py
+  Tests: 5
+  Has BVJ: False
+
+netra_backend\tests\integration\red_team\tier1_catastrophic\test_thread_crud_operations_data_consistency.py
+  Tests: 6
+  Has BVJ: False
+
+netra_backend\tests\integration\red_team\tier4_business_operations\test_analytics_tax_compliance.py
+  Tests: 3
+  Has BVJ: True
+
+netra_backend\tests\integration\red_team\tier4_business_operations\test_billing_data_isolation.py
+  Tests: 3
+  Has BVJ: True
+
+netra_backend\tests\integration\red_team\tier4_business_operations\test_plan_enforcement_billing.py
+  Tests: 3
+  Has BVJ: True
+
+netra_backend\tests\integration\red_team\tier4_business_operations\test_subscription_disaster_recovery.py
+  Tests: 2
+  Has BVJ: True
+
+netra_backend\tests\integration\red_team\tier4_business_operations\test_subscription_tier_management.py
+  Tests: 5
+  Has BVJ: True
+
+netra_backend\tests\integration\red_team\tier4_core_operations\test_api_reliability_operations.py
+  Tests: 5
+  Has BVJ: True
+
+netra_backend\tests\integration\red_team\tier4_core_operations\test_communication_notifications.py
+  Tests: 10
+  Has BVJ: True
+
+netra_backend\tests\integration\red_team\tier4_core_operations\test_data_operations_integrity.py
+  Tests: 5
+  Has BVJ: True
+
+netra_backend\tests\integration\red_team\tier4_user_management\test_gdpr_compliance.py
+  Tests: 7
+  Has BVJ: True
+
+netra_backend\tests\integration\red_team\tier4_user_management\test_organization_management.py
+  Tests: 7
+  Has BVJ: True
+
+auth_service\tests\integration\test_refresh_integration.py
+  Tests: 11
+  Has BVJ: True
+
+
+MIXED TESTS (need review):
+
+netra_backend\tests\integration\test_actions_to_meet_goals_agent_real_llm.py
+  Real score: 1
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\test_agent_registry_initialization_validation.py
+  Real score: 2
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\test_agent_state_propagation.py
+  Real score: 1
+  Mock score: 1
+  Tests: 14
+
+netra_backend\tests\integration\test_auth_edge_cases.py
+  Real score: 1
+  Mock score: 1
+  Tests: 25
+
+netra_backend\tests\integration\test_auth_jwt_redis_session.py
+  Real score: 2
+  Mock score: 1
+  Tests: 9
+
+netra_backend\tests\integration\test_basic_user_signin_chat.py
+  Real score: 1
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\test_cache_service_cascade.py
+  Real score: 0
+  Mock score: 0
+  Tests: 5
+
+netra_backend\tests\integration\test_chat_orchestrator_nacis_real_llm.py
+  Real score: 0
+  Mock score: 0
+  Tests: 5
+
+netra_backend\tests\integration\test_circuit_breaker_cascade_prevention.py
+  Real score: 1
+  Mock score: 1
+  Tests: 15
+
+netra_backend\tests\integration\test_clickhouse_migration.py
+  Real score: 1
+  Mock score: 1
+  Tests: 6
+
+netra_backend\tests\integration\test_clickhouse_schema_validation_comprehensive.py
+  Real score: 2
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\test_compensation_engine_e2e.py
+  Real score: 1
+  Mock score: 1
+  Tests: 3
+
+netra_backend\tests\integration\test_configuration_validation_environment_parity.py
+  Real score: 2
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\test_critical_functionality_demo.py
+  Real score: 0
+  Mock score: 0
+  Tests: 7
+
+netra_backend\tests\integration\test_cross_service_transactions.py
+  Real score: 1
+  Mock score: 1
+  Tests: 7
+
+netra_backend\tests\integration\test_distributed_tracing_otel.py
+  Real score: 2
+  Mock score: 1
+  Tests: 7
+
+netra_backend\tests\integration\test_enterprise_environment_config.py
+  Real score: 1
+  Mock score: 1
+  Tests: 2
+
+netra_backend\tests\integration\test_environment_secrets_loading_validation.py
+  Real score: 2
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\test_error_recovery_startup_resilience_validation.py
+  Real score: 2
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\test_first_time_user_advanced.py
+  Real score: 0
+  Mock score: 0
+  Tests: 4
+
+netra_backend\tests\integration\test_first_time_user_billing.py
+  Real score: 1
+  Mock score: 1
+  Tests: 9
+
+netra_backend\tests\integration\test_first_time_user_core.py
+  Real score: 0
+  Mock score: 0
+  Tests: 3
+
+netra_backend\tests\integration\test_first_time_user_experience.py
+  Real score: 0
+  Mock score: 0
+  Tests: 3
+
+netra_backend\tests\integration\test_first_time_user_integration.py
+  Real score: 0
+  Mock score: 0
+  Tests: 3
+
+netra_backend\tests\integration\test_first_time_user_journey_advanced.py
+  Real score: 1
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\test_first_time_user_journey_core.py
+  Real score: 1
+  Mock score: 1
+  Tests: 3
+
+netra_backend\tests\integration\test_first_time_user_journey_e2e.py
+  Real score: 1
+  Mock score: 1
+  Tests: 2
+
+netra_backend\tests\integration\test_first_time_user_permissions.py
+  Real score: 1
+  Mock score: 1
+  Tests: 10
+
+netra_backend\tests\integration\test_first_time_user_workspace.py
+  Real score: 0
+  Mock score: 0
+  Tests: 8
+
+netra_backend\tests\integration\test_free_to_paid_conversion.py
+  Real score: 1
+  Mock score: 1
+  Tests: 6
+
+netra_backend\tests\integration\test_frontend_startup_issues.py
+  Real score: 0
+  Mock score: 0
+  Tests: 8
+
+netra_backend\tests\integration\test_llm_api_connectivity_validation_all_providers.py
+  Real score: 2
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\test_message_queue_redis_streams.py
+  Real score: 3
+  Mock score: 1
+  Tests: 11
+
+netra_backend\tests\integration\test_metric_collection_initialization_validation.py
+  Real score: 2
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\test_migration_rollback_recovery.py
+  Real score: 2
+  Mock score: 1
+  Tests: 4
+
+netra_backend\tests\integration\test_multi_service_startup_orchestration.py
+  Real score: 2
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\test_rate_limiting_redis.py
+  Real score: 3
+  Mock score: 1
+  Tests: 10
+
+netra_backend\tests\integration\test_redis_session_core.py
+  Real score: 0
+  Mock score: 0
+  Tests: 3
+
+netra_backend\tests\integration\test_redis_session_performance.py
+  Real score: 0
+  Mock score: 0
+  Tests: 3
+
+netra_backend\tests\integration\test_redis_session_store_initialization_validation.py
+  Real score: 2
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\test_service_discovery_health_checks.py
+  Real score: 0
+  Mock score: 0
+  Tests: 3
+
+netra_backend\tests\integration\test_sso_saml_error_scenarios.py
+  Real score: 0
+  Mock score: 0
+  Tests: 10
+
+netra_backend\tests\integration\test_sso_saml_integration.py
+  Real score: 0
+  Mock score: 0
+  Tests: 10
+
+netra_backend\tests\integration\test_staging_production_parity_validation.py
+  Real score: 2
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\test_startup_health_check_comprehensive_validation.py
+  Real score: 2
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\test_startup_performance_timing_validation.py
+  Real score: 2
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\test_state_persistence_foreign_key_fix.py
+  Real score: 0
+  Mock score: 0
+  Tests: 5
+
+netra_backend\tests\integration\test_team_collaboration_permissions.py
+  Real score: 0
+  Mock score: 0
+  Tests: 0
+
+netra_backend\tests\integration\test_thread_auto_creation.py
+  Real score: 2
+  Mock score: 1
+  Tests: 9
+
+netra_backend\tests\integration\test_timing_integration.py
+  Real score: 0
+  Mock score: 0
+  Tests: 6
+
+netra_backend\tests\integration\test_triage_advanced_real_scenarios.py
+  Real score: 1
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\test_user_login_flows.py
+  Real score: 1
+  Mock score: 1
+  Tests: 20
+
+netra_backend\tests\integration\test_websocket_agent_flow.py
+  Real score: 1
+  Mock score: 1
+  Tests: 14
+
+netra_backend\tests\integration\test_websocket_auth_cold_start_extended.py
+  Real score: 2
+  Mock score: 1
+  Tests: 60
+
+netra_backend\tests\integration\test_websocket_connection_recovery.py
+  Real score: 0
+  Mock score: 0
+  Tests: 5
+
+netra_backend\tests\integration\test_websocket_error_recovery.py
+  Real score: 0
+  Mock score: 0
+  Tests: 7
+
+netra_backend\tests\integration\test_websocket_infrastructure_startup_validation.py
+  Real score: 2
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\test_websocket_reconnection_core.py
+  Real score: 1
+  Mock score: 1
+  Tests: 6
+
+netra_backend\tests\integration\test_websocket_redis_pubsub.py
+  Real score: 2
+  Mock score: 1
+  Tests: 7
+
+netra_backend\tests\integration\test_websocket_state_persistence.py
+  Real score: 0
+  Mock score: 0
+  Tests: 6
+
+netra_backend\tests\integration\coordination\test_agent_initialization.py
+  Real score: 0
+  Mock score: 0
+  Tests: 10
+
+netra_backend\tests\integration\coordination\test_communication.py
+  Real score: 0
+  Mock score: 0
+  Tests: 10
+
+netra_backend\tests\integration\coordination\test_coordination_protocols.py
+  Real score: 0
+  Mock score: 0
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_agent_cost_tracking.py
+  Real score: 1
+  Mock score: 1
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_agent_cost_tracking_l3.py
+  Real score: 1
+  Mock score: 1
+  Tests: 11
+
+netra_backend\tests\integration\critical_paths\test_agent_dependency_resolution.py
+  Real score: 1
+  Mock score: 1
+  Tests: 14
+
+netra_backend\tests\integration\critical_paths\test_agent_orchestration_revenue_path_l4.py
+  Real score: 1
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\critical_paths\test_agent_pipeline_circuit_breaking.py
+  Real score: 1
+  Mock score: 1
+  Tests: 9
+
+netra_backend\tests\integration\critical_paths\test_agent_quality_gate_pipeline.py
+  Real score: 1
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\critical_paths\test_agent_resource_pool.py
+  Real score: 1
+  Mock score: 1
+  Tests: 7
+
+netra_backend\tests\integration\critical_paths\test_agent_state_recovery.py
+  Real score: 1
+  Mock score: 1
+  Tests: 6
+
+netra_backend\tests\integration\critical_paths\test_agent_tool_authorization.py
+  Real score: 1
+  Mock score: 1
+  Tests: 7
+
+netra_backend\tests\integration\critical_paths\test_alert_routing_escalation.py
+  Real score: 1
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\critical_paths\test_api_authentication.py
+  Real score: 1
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_api_cors_policy_enforcement.py
+  Real score: 1
+  Mock score: 1
+  Tests: 11
+
+netra_backend\tests\integration\critical_paths\test_api_crud_operations.py
+  Real score: 1
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_api_gateway_load_distribution.py
+  Real score: 0
+  Mock score: 0
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_api_gateway_orchestration_l4.py
+  Real score: 1
+  Mock score: 1
+  Tests: 11
+
+netra_backend\tests\integration\critical_paths\test_api_gateway_rate_limiting.py
+  Real score: 1
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\critical_paths\test_api_rate_limiting_enforcement.py
+  Real score: 0
+  Mock score: 0
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_api_rate_limiting_first_requests.py
+  Real score: 2
+  Mock score: 1
+  Tests: 12
+
+netra_backend\tests\integration\critical_paths\test_api_request_routing_rules.py
+  Real score: 1
+  Mock score: 1
+  Tests: 11
+
+netra_backend\tests\integration\critical_paths\test_api_request_transformation.py
+  Real score: 1
+  Mock score: 1
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_api_response_caching.py
+  Real score: 1
+  Mock score: 1
+  Tests: 13
+
+netra_backend\tests\integration\critical_paths\test_authentication_session_expiry.py
+  Real score: 0
+  Mock score: 0
+  Tests: 9
+
+netra_backend\tests\integration\critical_paths\test_auth_audit_trail_integrity_l4.py
+  Real score: 0
+  Mock score: 0
+  Tests: 7
+
+netra_backend\tests\integration\critical_paths\test_auth_brute_force_protection.py
+  Real score: 1
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_auth_failover_scenarios_l4.py
+  Real score: 0
+  Mock score: 0
+  Tests: 8
+
+netra_backend\tests\integration\critical_paths\test_auth_middleware_chain_validation.py
+  Real score: 2
+  Mock score: 1
+  Tests: 7
+
+netra_backend\tests\integration\critical_paths\test_auth_service_recovery_crash.py
+  Real score: 1
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_auth_session_lifecycle_complete_l4.py
+  Real score: 1
+  Mock score: 1
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_auth_session_persistence.py
+  Real score: 1
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_auth_token_refresh_high_load.py
+  Real score: 1
+  Mock score: 1
+  Tests: 4
+
+netra_backend\tests\integration\critical_paths\test_background_job_orchestration.py
+  Real score: 0
+  Mock score: 0
+  Tests: 9
+
+netra_backend\tests\integration\critical_paths\test_basic_system_cold_startup.py
+  Real score: 1
+  Mock score: 1
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_cache_consistency_across_regions.py
+  Real score: 2
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\critical_paths\test_cache_invalidation.py
+  Real score: 1
+  Mock score: 1
+  Tests: 6
+
+netra_backend\tests\integration\critical_paths\test_cache_key_collision_handling.py
+  Real score: 2
+  Mock score: 1
+  Tests: 9
+
+netra_backend\tests\integration\critical_paths\test_cache_serialization_performance.py
+  Real score: 2
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\critical_paths\test_cache_ttl_expiration_accuracy.py
+  Real score: 2
+  Mock score: 1
+  Tests: 11
+
+netra_backend\tests\integration\critical_paths\test_cache_warming_strategy.py
+  Real score: 2
+  Mock score: 1
+  Tests: 9
+
+netra_backend\tests\integration\critical_paths\test_circuit_breaker_cascade.py
+  Real score: 1
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_circuit_breaker_l4.py
+  Real score: 1
+  Mock score: 1
+  Tests: 11
+
+netra_backend\tests\integration\critical_paths\test_circuit_breaker_orchestration.py
+  Real score: 2
+  Mock score: 1
+  Tests: 11
+
+netra_backend\tests\integration\critical_paths\test_cold_startup_readiness_detection.py
+  Real score: 1
+  Mock score: 1
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_compliance_audit_trail_l4.py
+  Real score: 0
+  Mock score: 0
+  Tests: 1
+
+netra_backend\tests\integration\critical_paths\test_concurrent_editing_performance.py
+  Real score: 0
+  Mock score: 0
+  Tests: 8
+
+netra_backend\tests\integration\critical_paths\test_concurrent_user_login_sessions.py
+  Real score: 1
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_configuration_hot_reload_l3.py
+  Real score: 1
+  Mock score: 1
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_configuration_validation_pipeline.py
+  Real score: 2
+  Mock score: 1
+  Tests: 9
+
+netra_backend\tests\integration\critical_paths\test_corpus_admin_concurrent_operations.py
+  Real score: 1
+  Mock score: 1
+  Tests: 6
+
+netra_backend\tests\integration\critical_paths\test_corpus_admin_concurrent_operations_fixed.py
+  Real score: 1
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\critical_paths\test_corpus_admin_orchestration_flows.py
+  Real score: 1
+  Mock score: 1
+  Tests: 6
+
+netra_backend\tests\integration\critical_paths\test_corpus_admin_orchestration_flows_fixed.py
+  Real score: 1
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\critical_paths\test_cost_optimization_workflow_l4.py
+  Real score: 1
+  Mock score: 1
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_cross_service_config_consistency.py
+  Real score: 2
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\critical_paths\test_custom_metrics_registration.py
+  Real score: 1
+  Mock score: 1
+  Tests: 9
+
+netra_backend\tests\integration\critical_paths\test_dashboard_query_performance.py
+  Real score: 1
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\critical_paths\test_data_consistency_cross_db.py
+  Real score: 1
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_data_persistence_postgres.py
+  Real score: 1
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_data_persistence_redis.py
+  Real score: 1
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_dev_login_cold_start.py
+  Real score: 1
+  Mock score: 1
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_distributed_lock_contention.py
+  Real score: 2
+  Mock score: 1
+  Tests: 9
+
+netra_backend\tests\integration\critical_paths\test_distributed_tracing_propagation.py
+  Real score: 1
+  Mock score: 1
+  Tests: 6
+
+netra_backend\tests\integration\critical_paths\test_enterprise_auth_integration_l4.py
+  Real score: 0
+  Mock score: 0
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_enterprise_resource_isolation_l4.py
+  Real score: 1
+  Mock score: 1
+  Tests: 3
+
+netra_backend\tests\integration\critical_paths\test_error_network_failures.py
+  Real score: 1
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_existing_user_login_flow.py
+  Real score: 1
+  Mock score: 1
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_health_check_cascade_failure.py
+  Real score: 0
+  Mock score: 0
+  Tests: 6
+
+netra_backend\tests\integration\critical_paths\test_health_check_cascade_initialization.py
+  Real score: 1
+  Mock score: 1
+  Tests: 11
+
+netra_backend\tests\integration\critical_paths\test_high_performance_websocket_stress.py
+  Real score: 1
+  Mock score: 1
+  Tests: 11
+
+netra_backend\tests\integration\critical_paths\test_integration_failures_audit.py
+  Real score: 3
+  Mock score: 1
+  Tests: 30
+
+netra_backend\tests\integration\critical_paths\test_jwt_refresh_websocket.py
+  Real score: 2
+  Mock score: 1
+  Tests: 6
+
+netra_backend\tests\integration\critical_paths\test_llm_agent_orchestration_l4.py
+  Real score: 1
+  Mock score: 1
+  Tests: 2
+
+netra_backend\tests\integration\critical_paths\test_llm_provider_failover.py
+  Real score: 1
+  Mock score: 1
+  Tests: 11
+
+netra_backend\tests\integration\critical_paths\test_log_aggregation_pipeline.py
+  Real score: 1
+  Mock score: 1
+  Tests: 6
+
+netra_backend\tests\integration\critical_paths\test_message_processing_dlq.py
+  Real score: 1
+  Mock score: 1
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_message_queue_overflow_recovery.py
+  Real score: 0
+  Mock score: 0
+  Tests: 7
+
+netra_backend\tests\integration\critical_paths\test_message_queue_processing_pipeline.py
+  Real score: 0
+  Mock score: 0
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_metrics_aggregation_pipeline_l4.py
+  Real score: 1
+  Mock score: 1
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_metrics_cardinality_explosion.py
+  Real score: 1
+  Mock score: 1
+  Tests: 7
+
+netra_backend\tests\integration\critical_paths\test_metrics_retention_policy.py
+  Real score: 1
+  Mock score: 1
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_multitab_websocket_sync.py
+  Real score: 1
+  Mock score: 1
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_multi_agent_collaboration_l4.py
+  Real score: 1
+  Mock score: 1
+  Tests: 6
+
+netra_backend\tests\integration\critical_paths\test_multi_agent_orchestration.py
+  Real score: 2
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\critical_paths\test_multi_device_session_sync.py
+  Real score: 2
+  Mock score: 1
+  Tests: 6
+
+netra_backend\tests\integration\critical_paths\test_multi_service_token_propagation.py
+  Real score: 1
+  Mock score: 1
+  Tests: 9
+
+netra_backend\tests\integration\critical_paths\test_multi_tenant_isolation.py
+  Real score: 1
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\critical_paths\test_new_user_registration_flow.py
+  Real score: 1
+  Mock score: 1
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_oauth_jwt_websocket_flow.py
+  Real score: 1
+  Mock score: 1
+  Tests: 6
+
+netra_backend\tests\integration\critical_paths\test_oauth_jwt_websocket_flow_l4.py
+  Real score: 1
+  Mock score: 1
+  Tests: 4
+
+netra_backend\tests\integration\critical_paths\test_oauth_staging_url_consistency_l4.py
+  Real score: 1
+  Mock score: 1
+  Tests: 7
+
+netra_backend\tests\integration\critical_paths\test_peak_load_autoscaling_l4.py
+  Real score: 1
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_prometheus_metrics_accuracy.py
+  Real score: 1
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_prometheus_metrics_collection.py
+  Real score: 0
+  Mock score: 0
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_redis_cache_invalidation_cascade.py
+  Real score: 2
+  Mock score: 1
+  Tests: 9
+
+netra_backend\tests\integration\critical_paths\test_redis_cache_warming_startup.py
+  Real score: 3
+  Mock score: 1
+  Tests: 12
+
+netra_backend\tests\integration\critical_paths\test_redis_cluster_resharding.py
+  Real score: 2
+  Mock score: 1
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_redis_websocket_state_sync.py
+  Real score: 2
+  Mock score: 1
+  Tests: 6
+
+netra_backend\tests\integration\critical_paths\test_session_cleanup.py
+  Real score: 1
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_session_creation.py
+  Real score: 1
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_session_invalidation_cascade.py
+  Real score: 2
+  Mock score: 1
+  Tests: 6
+
+netra_backend\tests\integration\critical_paths\test_session_persistence_restart.py
+  Real score: 2
+  Mock score: 1
+  Tests: 7
+
+netra_backend\tests\integration\critical_paths\test_session_sharing.py
+  Real score: 1
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_session_validation.py
+  Real score: 1
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_slo_calculation_accuracy.py
+  Real score: 1
+  Mock score: 1
+  Tests: 9
+
+netra_backend\tests\integration\critical_paths\test_staging_environment_imports.py
+  Real score: 1
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\critical_paths\test_staging_worker_startup_validation.py
+  Real score: 2
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\critical_paths\test_startup_manager_integration.py
+  Real score: 1
+  Mock score: 1
+  Tests: 11
+
+netra_backend\tests\integration\critical_paths\test_system_startup_sequences_l4.py
+  Real score: 1
+  Mock score: 1
+  Tests: 20
+
+netra_backend\tests\integration\critical_paths\test_team_creation_permissions.py
+  Real score: 0
+  Mock score: 0
+  Tests: 4
+
+netra_backend\tests\integration\critical_paths\test_team_isolation_security.py
+  Real score: 0
+  Mock score: 0
+  Tests: 9
+
+netra_backend\tests\integration\critical_paths\test_trace_sampling_accuracy.py
+  Real score: 1
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\critical_paths\test_user_invitation_flow.py
+  Real score: 0
+  Mock score: 0
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_webhook_delivery_reliability.py
+  Real score: 0
+  Mock score: 0
+  Tests: 9
+
+netra_backend\tests\integration\critical_paths\test_websocket_auth_handshake.py
+  Real score: 2
+  Mock score: 1
+  Tests: 15
+
+netra_backend\tests\integration\critical_paths\test_websocket_binary_message_handling.py
+  Real score: 2
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\critical_paths\test_websocket_broadcast_performance.py
+  Real score: 2
+  Mock score: 1
+  Tests: 6
+
+netra_backend\tests\integration\critical_paths\test_websocket_concurrency.py
+  Real score: 2
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_websocket_connection_draining.py
+  Real score: 2
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\critical_paths\test_websocket_connection_pooling.py
+  Real score: 2
+  Mock score: 1
+  Tests: 7
+
+netra_backend\tests\integration\critical_paths\test_websocket_first_load.py
+  Real score: 3
+  Mock score: 1
+  Tests: 9
+
+netra_backend\tests\integration\critical_paths\test_websocket_heartbeat_monitoring.py
+  Real score: 2
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\critical_paths\test_websocket_heartbeat_zombie.py
+  Real score: 2
+  Mock score: 1
+  Tests: 9
+
+netra_backend\tests\integration\critical_paths\test_websocket_jwt_encoding.py
+  Real score: 1
+  Mock score: 1
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_websocket_message_compression.py
+  Real score: 2
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\critical_paths\test_websocket_message_delivery.py
+  Real score: 2
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_websocket_message_delivery_guarantee.py
+  Real score: 2
+  Mock score: 1
+  Tests: 11
+
+netra_backend\tests\integration\critical_paths\test_websocket_rate_limiting_per_client.py
+  Real score: 2
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\critical_paths\test_websocket_reconnection_state_recovery.py
+  Real score: 2
+  Mock score: 1
+  Tests: 7
+
+netra_backend\tests\integration\critical_paths\test_websocket_resilience_l4.py
+  Real score: 2
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_websocket_unified_critical.py
+  Real score: 1
+  Mock score: 1
+  Tests: 34
+
+netra_backend\tests\integration\critical_paths\test_workspace_resource_sharing.py
+  Real score: 0
+  Mock score: 0
+  Tests: 6
+
+netra_backend\tests\integration\llm\test_error_recovery.py
+  Real score: 1
+  Mock score: 1
+  Tests: 10
+
+netra_backend\tests\integration\llm\test_llm_providers.py
+  Real score: 0
+  Mock score: 0
+  Tests: 10
+
+netra_backend\tests\integration\llm\test_response_handling.py
+  Real score: 1
+  Mock score: 1
+  Tests: 10
+
+netra_backend\tests\integration\metrics\test_metrics_pipeline.py
+  Real score: 0
+  Mock score: 0
+  Tests: 8
+
+netra_backend\tests\integration\metrics\test_metric_aggregation.py
+  Real score: 0
+  Mock score: 0
+  Tests: 8
+
+netra_backend\tests\integration\metrics\test_metric_collection.py
+  Real score: 0
+  Mock score: 0
+  Tests: 7
+
+netra_backend\tests\integration\metrics\test_metric_storage.py
+  Real score: 0
+  Mock score: 0
+  Tests: 9
+
+netra_backend\tests\integration\security\test_auth_audit.py
+  Real score: 0
+  Mock score: 0
+  Tests: 9
+
+netra_backend\tests\integration\security\test_data_access_audit.py
+  Real score: 0
+  Mock score: 0
+  Tests: 9
+
+netra_backend\tests\integration\staging_config\test_cloud_sql_proxy.py
+  Real score: 0
+  Mock score: 0
+  Tests: 6
+
+netra_backend\tests\integration\staging_config\test_cors_configuration.py
+  Real score: 0
+  Mock score: 0
+  Tests: 7
+
+netra_backend\tests\integration\staging_config\test_health_checks.py
+  Real score: 0
+  Mock score: 0
+  Tests: 8
+
+netra_backend\tests\integration\staging_config\test_observability_pipeline.py
+  Real score: 0
+  Mock score: 0
+  Tests: 8
+
+netra_backend\tests\integration\staging_config\test_resource_limits.py
+  Real score: 0
+  Mock score: 0
+  Tests: 9
+
+netra_backend\tests\integration\user_flows\test_conversion_paths.py
+  Real score: 1
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\user_flows\test_free_tier_onboarding.py
+  Real score: 1
+  Mock score: 1
+  Tests: 10
+
+netra_backend\tests\integration\critical_missing\tier1_critical\test_agent_tool_execution_pipeline.py
+  Real score: 2
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\red_team\tier1_catastrophic\test_websocket_authentication_integration.py
+  Real score: 1
+  Mock score: 1
+  Tests: 6
+
+netra_backend\tests\integration\red_team\tier2_3_security_performance\test_input_validation_security.py
+  Real score: 1
+  Mock score: 1
+  Tests: 6
+
+netra_backend\tests\integration\red_team\tier2_3_security_performance\test_monitoring_observability.py
+  Real score: 1
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\red_team\tier2_major_failures\test_background_job_processing.py
+  Real score: 2
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\red_team\tier2_major_failures\test_file_upload_and_storage.py
+  Real score: 1
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\red_team\tier2_major_failures\test_transaction_rollback_coordination.py
+  Real score: 2
+  Mock score: 1
+  Tests: 5
+
+netra_backend\tests\integration\red_team\tier4_user_management\test_advanced_user_management.py
+  Real score: 1
+  Mock score: 1
+  Tests: 6
+
+netra_backend\tests\integration\red_team\tier4_user_management\test_authentication_security.py
+  Real score: 1
+  Mock score: 1
+  Tests: 8
+
+netra_backend\tests\integration\red_team\tier4_user_management\test_user_role_propagation.py
+  Real score: 1
+  Mock score: 1
+  Tests: 7
+
+analytics_service\tests\integration\test_api_endpoints.py
+  Real score: 0
+  Mock score: 0
+  Tests: 24
+
+
+REAL TESTS (keep as-is):
+
+netra_backend\tests\integration\test_agent_pipeline_core.py
+  Real score: 1
+  Tests: 3
+
+netra_backend\tests\integration\test_background_jobs_redis_queue.py
+  Real score: 2
+  Tests: 10
+
+netra_backend\tests\integration\test_cache_edge_cases.py
+  Real score: 1
+  Tests: 7
+
+netra_backend\tests\integration\test_cache_redis_invalidation.py
+  Real score: 1
+  Tests: 5
+
+netra_backend\tests\integration\test_circuit_breaker_service_failures.py
+  Real score: 2
+  Tests: 5
+
+netra_backend\tests\integration\test_corpus_admin_agent_real_llm.py
+  Real score: 1
+  Tests: 5
+
+netra_backend\tests\integration\test_first_time_user_onboarding.py
+  Real score: 1
+  Tests: 6
+
+netra_backend\tests\integration\test_first_time_user_signup.py
+  Real score: 1
+  Tests: 7
+
+netra_backend\tests\integration\test_llm_response_caching_redis.py
+  Real score: 3
+  Tests: 9
+
+netra_backend\tests\integration\test_metrics_pipeline_prometheus.py
+  Real score: 2
+  Tests: 5
+
+netra_backend\tests\integration\test_model_cascade_real_selection.py
+  Real score: 1
+  Tests: 5
+
+netra_backend\tests\integration\test_multi_tenant_isolation.py
+  Real score: 2
+  Tests: 8
+
+netra_backend\tests\integration\test_optimizations_core_agent_real_llm.py
+  Real score: 1
+  Tests: 5
+
+netra_backend\tests\integration\test_payment_gateway_sandbox.py
+  Real score: 2
+  Tests: 9
+
+netra_backend\tests\integration\test_performance_analyzer_real_data.py
+  Real score: 1
+  Tests: 5
+
+netra_backend\tests\integration\test_reporting_agent_real_llm.py
+  Real score: 1
+  Tests: 5
+
+netra_backend\tests\integration\test_supply_researcher_agent_real_llm.py
+  Real score: 1
+  Tests: 5
+
+netra_backend\tests\integration\test_triage_agent_real_llm.py
+  Real score: 1
+  Tests: 5
+
+netra_backend\tests\integration\test_triage_real_services.py
+  Real score: 1
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_agent_context_isolation_boundaries.py
+  Real score: 2
+  Tests: 8
+
+netra_backend\tests\integration\critical_paths\test_agent_failover_recovery_l4.py
+  Real score: 1
+  Tests: 8
+
+netra_backend\tests\integration\critical_paths\test_agent_failure_recovery_cascade.py
+  Real score: 3
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_agent_lifecycle_end_to_end.py
+  Real score: 1
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_agent_lifecycle_management.py
+  Real score: 1
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_agent_resource_pool_management.py
+  Real score: 3
+  Tests: 11
+
+netra_backend\tests\integration\critical_paths\test_agent_supervisor_initialization.py
+  Real score: 2
+  Tests: 2
+
+netra_backend\tests\integration\critical_paths\test_agent_tool_execution.py
+  Real score: 1
+  Tests: 6
+
+netra_backend\tests\integration\critical_paths\test_agent_websocket_communication.py
+  Real score: 2
+  Tests: 7
+
+netra_backend\tests\integration\critical_paths\test_api_circuit_breaker_per_endpoint.py
+  Real score: 1
+  Tests: 2
+
+netra_backend\tests\integration\critical_paths\test_api_request_validation.py
+  Real score: 1
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_api_response_compression.py
+  Real score: 2
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_api_response_handling.py
+  Real score: 1
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_api_timeout_cascade.py
+  Real score: 1
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_api_versioning_compatibility.py
+  Real score: 1
+  Tests: 9
+
+netra_backend\tests\integration\critical_paths\test_auth_config_availability.py
+  Real score: 2
+  Tests: 11
+
+netra_backend\tests\integration\critical_paths\test_auth_config_hot_reload.py
+  Real score: 2
+  Tests: 6
+
+netra_backend\tests\integration\critical_paths\test_auth_service_circuit_breaker_cascade.py
+  Real score: 2
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_auth_service_health_dependencies.py
+  Real score: 2
+  Tests: 18
+
+netra_backend\tests\integration\critical_paths\test_billing_accuracy_l4.py
+  Real score: 1
+  Tests: 4
+
+netra_backend\tests\integration\critical_paths\test_cache_invalidation_cascade.py
+  Real score: 2
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_cache_stampede_prevention.py
+  Real score: 3
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_clickhouse_batch_insertion_performance.py
+  Real score: 2
+  Tests: 9
+
+netra_backend\tests\integration\critical_paths\test_clickhouse_postgres_coordination.py
+  Real score: 1
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_concurrent_auth_rate_limiting.py
+  Real score: 3
+  Tests: 7
+
+netra_backend\tests\integration\critical_paths\test_cors_auth_service_l4.py
+  Real score: 1
+  Tests: 1
+
+netra_backend\tests\integration\critical_paths\test_cost_tracking_billing_pipeline.py
+  Real score: 1
+  Tests: 3
+
+netra_backend\tests\integration\critical_paths\test_cross_region_consistency_l4.py
+  Real score: 1
+  Tests: 9
+
+netra_backend\tests\integration\critical_paths\test_dev_environment_agent_response_flow_l4.py
+  Real score: 1
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_dev_environment_auth_login_complete_l4.py
+  Real score: 1
+  Tests: 9
+
+netra_backend\tests\integration\critical_paths\test_dev_environment_chat_initialization_l4.py
+  Real score: 1
+  Tests: 7
+
+netra_backend\tests\integration\critical_paths\test_dev_environment_concurrent_users_l4.py
+  Real score: 1
+  Tests: 3
+
+netra_backend\tests\integration\critical_paths\test_dev_environment_full_flow.py
+  Real score: 1
+  Tests: 7
+
+netra_backend\tests\integration\critical_paths\test_dev_environment_websocket_connection_l4.py
+  Real score: 1
+  Tests: 7
+
+netra_backend\tests\integration\critical_paths\test_disaster_recovery_failover_l4.py
+  Real score: 1
+  Tests: 1
+
+netra_backend\tests\integration\critical_paths\test_error_handling_recovery.py
+  Real score: 1
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_free_tier_limitations_enforcement.py
+  Real score: 1
+  Tests: 9
+
+netra_backend\tests\integration\critical_paths\test_frontend_initial_auth_flow_l4.py
+  Real score: 1
+  Tests: 3
+
+netra_backend\tests\integration\critical_paths\test_job_concurrency_limits.py
+  Real score: 1
+  Tests: 6
+
+netra_backend\tests\integration\critical_paths\test_job_progress_tracking.py
+  Real score: 1
+  Tests: 7
+
+netra_backend\tests\integration\critical_paths\test_job_queue_priority_processing.py
+  Real score: 1
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_job_retry_with_dead_letter.py
+  Real score: 1
+  Tests: 6
+
+netra_backend\tests\integration\critical_paths\test_job_scheduling_accuracy.py
+  Real score: 1
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_jwt_token_propagation_l4.py
+  Real score: 2
+  Tests: 2
+
+netra_backend\tests\integration\critical_paths\test_multi_service_auth_token_propagation.py
+  Real score: 3
+  Tests: 9
+
+netra_backend\tests\integration\critical_paths\test_multi_service_startup_sequence.py
+  Real score: 2
+  Tests: 1
+
+netra_backend\tests\integration\critical_paths\test_multi_tenant_config_isolation.py
+  Real score: 1
+  Tests: 13
+
+netra_backend\tests\integration\critical_paths\test_multi_tenant_data_isolation_l4.py
+  Real score: 2
+  Tests: 8
+
+netra_backend\tests\integration\critical_paths\test_multi_tenant_isolation_l4.py
+  Real score: 1
+  Tests: 6
+
+netra_backend\tests\integration\critical_paths\test_multi_tenant_session_isolation.py
+  Real score: 1
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_postgres_connection_pool_exhaustion.py
+  Real score: 2
+  Tests: 8
+
+netra_backend\tests\integration\critical_paths\test_rate_limiting_load_protection.py
+  Real score: 1
+  Tests: 3
+
+netra_backend\tests\integration\critical_paths\test_redis_cluster_coordination_l4.py
+  Real score: 1
+  Tests: 8
+
+netra_backend\tests\integration\critical_paths\test_redis_memory_pressure_eviction.py
+  Real score: 3
+  Tests: 11
+
+netra_backend\tests\integration\critical_paths\test_redis_session_management_flow.py
+  Real score: 1
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_security_breach_response_l4.py
+  Real score: 2
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_service_discovery_bootstrap.py
+  Real score: 1
+  Tests: 7
+
+netra_backend\tests\integration\critical_paths\test_session_invalidation_across_services_l4.py
+  Real score: 2
+  Tests: 4
+
+netra_backend\tests\integration\critical_paths\test_session_management_basic.py
+  Real score: 2
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_subscription_tier_enforcement.py
+  Real score: 1
+  Tests: 13
+
+netra_backend\tests\integration\critical_paths\test_supervisor_to_subagent_delegation.py
+  Real score: 3
+  Tests: 6
+
+netra_backend\tests\integration\critical_paths\test_thread_management_basic.py
+  Real score: 1
+  Tests: 10
+
+netra_backend\tests\integration\critical_paths\test_transaction_atomicity_l4.py
+  Real score: 1
+  Tests: 1
+
+netra_backend\tests\integration\critical_paths\test_user_onboarding_complete_flow.py
+  Real score: 1
+  Tests: 11
+
+netra_backend\tests\integration\critical_paths\test_websocket_basic_connectivity.py
+  Real score: 2
+  Tests: 3
+
+netra_backend\tests\integration\critical_paths\test_websocket_connection_lifecycle.py
+  Real score: 2
+  Tests: 5
+
+netra_backend\tests\integration\critical_paths\test_websocket_state_recovery_restart.py
+  Real score: 2
+  Tests: 3
+
+netra_backend\tests\integration\staging_config\test_llm_integration.py
+  Real score: 1
+  Tests: 7
+
+netra_backend\tests\integration\staging_config\test_multi_service_secrets.py
+  Real score: 1
+  Tests: 5
+
+netra_backend\tests\integration\staging_config\test_redis_lifecycle.py
+  Real score: 1
+  Tests: 6
+
+netra_backend\tests\integration\staging_config\test_secret_manager_integration.py
+  Real score: 1
+  Tests: 6
+
+netra_backend\tests\integration\staging_config\test_websocket_load_balancer.py
+  Real score: 1
+  Tests: 7
+
+netra_backend\tests\integration\critical_missing\tier1_critical\test_subscription_tier_enforcement.py
+  Real score: 1
+  Tests: 9
+
+netra_backend\tests\integration\red_team\tier1_catastrophic\test_cross_service_auth_token_validation.py
+  Real score: 1
+  Tests: 8
+
+netra_backend\tests\integration\red_team\tier1_catastrophic\test_message_persistence_and_retrieval.py
+  Real score: 1
+  Tests: 9
+
+netra_backend\tests\integration\red_team\tier1_catastrophic\test_postgresql_connection_pool_exhaustion.py
+  Real score: 1
+  Tests: 9
+
+netra_backend\tests\integration\red_team\tier2_major_failures\test_circuit_breaker_state_management.py
+  Real score: 2
+  Tests: 5
+
+netra_backend\tests\integration\red_team\tier2_major_failures\test_error_response_consistency.py
+  Real score: 1
+  Tests: 5
+
+netra_backend\tests\integration\red_team\tier2_major_failures\test_graceful_degradation.py
+  Real score: 1
+  Tests: 4
+
+netra_backend\tests\integration\red_team\tier2_major_failures\test_redis_session_store_consistency.py
+  Real score: 2
+  Tests: 5
+
+netra_backend\tests\integration\red_team\tier2_major_failures\test_retry_logic_coordination.py
+  Real score: 1
+  Tests: 5

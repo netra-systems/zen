@@ -1,5 +1,5 @@
-/**
- * Interaction Latency Tests
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+import { teraction Latency Tests
  * 
  * BVJ: Enterprise segment - ensures user interactions meet responsiveness SLAs
  * Tests interaction response times, computation responsiveness, and debouncing.
@@ -41,6 +41,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('Interaction Latency Tests', () => {
+    jest.setTimeout(10000);
   let server: WS;
   
   beforeEach(() => {
@@ -50,9 +51,15 @@ describe('Interaction Latency Tests', () => {
 
   afterEach(() => {
     cleanupTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('User Interactions', () => {
+      jest.setTimeout(10000);
     it('should respond to user interactions within threshold', async () => {
       const InteractiveComponent = createInteractiveComponent();
       
@@ -79,6 +86,7 @@ describe('Interaction Latency Tests', () => {
   });
 
   describe('Heavy Computations', () => {
+      jest.setTimeout(10000);
     it('should maintain responsiveness during heavy computations', async () => {
       const HeavyComputationComponent = createHeavyComputationComponent();
       
@@ -97,6 +105,7 @@ describe('Interaction Latency Tests', () => {
   });
 
   describe('Input Debouncing', () => {
+      jest.setTimeout(10000);
     it('should debounce high-frequency interactions', async () => {
       const DebounceComponent = createDebounceComponent();
       

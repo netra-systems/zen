@@ -1,8 +1,11 @@
 import { act, renderHook } from '@testing-library/react';
 import { useChatStore } from '@/store/chat';
 import { Message } from '@/types/unified';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('useChatStore', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     // Reset store state before each test
     const { result } = renderHook(() => useChatStore());
@@ -13,6 +16,8 @@ describe('useChatStore', () => {
   });
 
   describe('Message Management', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should add a message to the store', () => {
       const { result } = renderHook(() => useChatStore());
       
@@ -117,6 +122,8 @@ describe('useChatStore', () => {
   });
 
   describe('Processing State', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should update processing state', () => {
       const { result } = renderHook(() => useChatStore());
       
@@ -137,6 +144,8 @@ describe('useChatStore', () => {
   });
 
   describe('Sub-Agent State', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should update sub-agent information', () => {
       const { result } = renderHook(() => useChatStore());
       
@@ -170,6 +179,8 @@ describe('useChatStore', () => {
   });
 
   describe('Thread Management', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should set active thread', () => {
       const { result } = renderHook(() => useChatStore());
       
@@ -211,6 +222,8 @@ describe('useChatStore', () => {
   });
 
   describe('Error Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should add error message', () => {
       const { result } = renderHook(() => useChatStore());
       
@@ -226,4 +239,8 @@ describe('useChatStore', () => {
       expect(result.current.messages[0].error).toBe(errorMessage);
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

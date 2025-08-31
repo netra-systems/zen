@@ -24,7 +24,7 @@ jest.mock('@/hooks/useEventProcessor', () => ({
 }));
 
 // Mock utility services but NOT UI components
-jest.mock('@/utils/debug-logger', () => ({
+jest.mock('@/lib/logger', () => ({
   logger: {
     debug: jest.fn(),
     error: jest.fn(),
@@ -99,6 +99,7 @@ import { useLoadingState } from '@/hooks/useLoadingState';
 import { useThreadNavigation } from '@/hooks/useThreadNavigation';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useEventProcessor } from '@/hooks/useEventProcessor';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Get the mocked functions
 const mockUseUnifiedChatStore = useUnifiedChatStore as jest.MockedFunction<typeof useUnifiedChatStore>;
@@ -124,6 +125,8 @@ const mockStore = {
 };
 
 describe('MainChat - Agent Status Tests', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
@@ -161,9 +164,17 @@ describe('MainChat - Agent Status Tests', () => {
   afterEach(() => {
     jest.useRealTimers();
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Agent status updates', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should show response card when processing', () => {
       mockUseUnifiedChatStore.mockReturnValue({
         ...mockStore,

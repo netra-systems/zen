@@ -237,7 +237,7 @@ async def isolated_db(real_services):
     <variable name="ENABLE_REAL_LLM_TESTING" default="false">
       <description>Use real LLM APIs (costs money)</description>
     </variable>
-    <variable name="TEST_DATABASE_URL" default="postgresql://test:test@localhost:5432/netra_test">
+    <variable name="TEST_DATABASE_URL" default="postgresql://test_user:test_pass@localhost:5434/netra_test">
       <description>Test database connection string</description>
     </variable>
   </environment_variables>

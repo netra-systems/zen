@@ -6,7 +6,7 @@ import { Message } from '@/types/unified';
 import { ThreadService } from '@/services/threadService';
 import { generateUniqueId } from '@/lib/utils';
 import { MESSAGE_INPUT_CONSTANTS } from '../constants';
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 
 const { CHAR_LIMIT } = MESSAGE_INPUT_CONSTANTS;
 

@@ -12,9 +12,20 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import { useError } from '@/hooks/useError';
 
 describe('useError', () => {
+      
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -222,4 +233,8 @@ describe('useError', () => {
     
     jest.useRealTimers();
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

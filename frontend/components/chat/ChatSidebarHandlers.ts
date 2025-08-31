@@ -6,7 +6,7 @@
 import { ThreadService } from '@/services/threadService';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { WebSocketMessage } from '@/types/unified';
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 
 interface WebSocketSender {
   sendMessage: (message: WebSocketMessage) => void;

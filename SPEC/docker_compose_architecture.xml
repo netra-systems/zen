@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <metadata>
+    <title>Docker Compose Architecture</title>
+    <category>Infrastructure</category>
+    <version>1.0.0</version>
+    <last_updated>2025-08-30</last_updated>
+    <status>Active</status>
+  </metadata>
+
+  <purpose>
+    <description>
+      Defines the Docker Compose architecture for Netra local development and testing.
+      Ensures clean separation between dev and test environments with proper dependency chains.
+    </description>
+  </purpose>
+
+  <architecture>
+    <principle>
+      <name>Environment Separation</name>
+      <description>
+        Dev and test environments are completely separate with different service names, ports, and volumes.
+        No production or staging references in local Docker Compose files.
+      </description>
+    </principle>
+
+    <principle>
+      <name>Profile-Based Isolation</name>
+      <description>
+        Use Docker Compose profiles to run dev or test environments independently:
+        - docker-compose --profile dev up   # Start development environment
+        - docker-compose --profile test up  # Start test environment
+        - Both can run simultaneously on different ports
+      </description>
+    </principle>
+
+    <principle>
+      <name>Dependency Chain</name>
+      <description>
+        Services start in the following order:
+        1. Dependencies: PostgreSQL, Redis, ClickHouse
+        2. Auth Service (depends on PostgreSQL and Redis)
+        3. Backend Service (depends on all dependencies and Auth)
+        4. Frontend Service (depends on Backend and Auth)
+      </description>
+    </principle>
+  </architecture>
+
+  <service_configuration>
+    <environment name="development">
+      <service_prefix>dev-</service_prefix>
+      <ports>
+        <service name="postgres" port="5433"/>
+        <service name="redis" port="6380"/>
+        <service name="clickhouse_http" port="8124"/>
+        <service name="clickhouse_tcp" port="9001"/>
+        <service name="auth" port="8081"/>
+        <service name="backend" port="8000"/>
+        <service name="frontend" port="3000"/>
+      </ports>
+      <volumes>
+        <volume>dev_postgres_data</volume>
+        <volume>dev_redis_data</volume>
+        <volume>dev_clickhouse_data</volume>
+      </volumes>
+    </environment>
+
+    <environment name="test">
+      <service_prefix>test-</service_prefix>
+      <ports>
+        <service name="postgres" port="5434"/>
+        <service name="redis" port="6381"/>
+        <service name="clickhouse_http" port="8123"/>
+        <service name="clickhouse_tcp" port="9000"/>
+        <service name="auth" port="8082"/>
+        <service name="backend" port="8001"/>
+        <service name="frontend" port="3001"/>
+      </ports>
+      <volumes>
+        <volume>test_postgres_data</volume>
+        <volume>test_redis_data</volume>
+        <volume>test_clickhouse_data</volume>
+      </volumes>
+    </environment>
+  </service_configuration>
+
+  <file_structure>
+    <file>
+      <name>docker-compose.yml</name>
+      <purpose>Main configuration with dev and test profiles</purpose>
+      <note>NO production or staging configurations in this file</note>
+    </file>
+    <file>
+      <name>docker-compose.override.yml</name>
+      <purpose>Developer-specific overrides for performance optimization</purpose>
+      <note>Automatically loaded, contains Mac/Windows optimizations</note>
+    </file>
+    <deleted_files>
+      <file>docker-compose.dev.yml - REMOVED (consolidated into main file)</file>
+      <file>docker-compose.test.yml - REMOVED (consolidated into main file)</file>
+      <file>docker-compose.all.yml - REMOVED (use profiles instead)</file>
+      <file>docker-compose.staging.yml - REMOVED (no staging in local)</file>
+    </deleted_files>
+  </file_structure>
+
+  <usage_commands>
+    <command>
+      <description>Start development environment</description>
+      <code>docker-compose --profile dev up -d</code>
+    </command>
+    <command>
+      <description>Start test environment</description>
+      <code>docker-compose --profile test up -d</code>
+    </command>
+    <command>
+      <description>Stop all services</description>
+      <code>docker-compose down</code>
+    </command>
+    <command>
+      <description>View dev services</description>
+      <code>docker-compose --profile dev ps</code>
+    </command>
+    <command>
+      <description>View test services</description>
+      <code>docker-compose --profile test ps</code>
+    </command>
+  </usage_commands>
+
+  <important_notes>
+    <note>
+      <title>No Production/Staging in Local</title>
+      <description>
+        Local Docker Compose MUST only contain dev and test environments.
+        Production and staging deployments use separate configurations in GCP.
+      </description>
+    </note>
+    <note>
+      <title>Service Dependencies</title>
+      <description>
+        All Netra services depend on their infrastructure services being healthy.
+        The dependency chain ensures proper startup order.
+      </description>
+    </note>
+    <note>
+      <title>Port Conflicts</title>
+      <description>
+        Dev and test use different ports to allow simultaneous operation.
+        Ensure no port conflicts with other local services.
+      </description>
+    </note>
+  </important_notes>
+
+  <compliance>
+    <rule>No production or staging references in local Docker Compose</rule>
+    <rule>Dev and test environments must be separately controllable</rule>
+    <rule>Services must start in dependency order</rule>
+    <rule>All services must have health checks</rule>
+    <rule>Environment-specific configuration via profiles</rule>
+  </compliance>
+</spec>

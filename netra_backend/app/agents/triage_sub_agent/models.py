@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
-from netra_backend.app.core.json_parsing_utils import parse_dict_field
+from netra_backend.app.core.serialization.unified_json_handler import parse_dict_field
 
 
 class Priority(str, Enum):

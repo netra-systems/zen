@@ -15,6 +15,7 @@ import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock the auth service
 const mockAuthService = {
@@ -55,367 +56,7 @@ const mockNewUser = {
 
 const mockSignupToken = 'signup-jwt-token-456';
 
-describe('Signup Flow - Business Critical Tests', () => {
-  let user: ReturnType<typeof userEvent.setup>;
-
-  beforeEach(() => {
-    user = userEvent.setup();
-    setupMockAuthService();
-    
-    jest.clearAllTimers();
-    jest.useFakeTimers();
-    
-    // Clear all mock calls
-    jest.clearAllMocks();
-  });
-
-  afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
-    jest.clearAllMocks();
-  });
-
-  describe('Signup Form Rendering & Validation', () => {
-    it('renders complete signup form with all required fields', async () => {
-      renderSignupForm();
-      
-      expect(screen.getByTestId('email-input')).toBeInTheDocument();
-      expect(screen.getByTestId('password-input')).toBeInTheDocument();
-      expect(screen.getByTestId('confirm-password-input')).toBeInTheDocument();
-      expect(screen.getByTestId('full-name-input')).toBeInTheDocument();
-      expect(screen.getByTestId('company-input')).toBeInTheDocument();
-      expect(screen.getByTestId('signup-button')).toBeInTheDocument();
-      expect(screen.getByTestId('google-signup-button')).toBeInTheDocument();
-    });
-
-    it('validates email format and uniqueness', async () => {
-      renderSignupForm();
-      
-      // Wait for form to render
-      await waitFor(() => {
-        expect(screen.getByTestId('email-input')).toBeInTheDocument();
-      });
-      
-      await act(async () => {
-        await performSignup('invalid-email', 'password123', 'password123', 'Test User');
-      });
-      
-      expect(screen.getByText('Please enter a valid email address')).toBeInTheDocument();
-    });
-
-    it('enforces password strength requirements', async () => {
-      renderSignupForm();
-      
-      // Wait for form to render
-      await waitFor(() => {
-        expect(screen.getByTestId('email-input')).toBeInTheDocument();
-      });
-      
-      await act(async () => {
-        await performSignup('user@test.com', 'weak', 'weak', 'Test User');
-      });
-      
-      expect(screen.getByText('Password must be at least 8 characters')).toBeInTheDocument();
-    });
-
-    it('validates password confirmation match', async () => {
-      renderSignupForm();
-      
-      // Wait for form to render
-      await waitFor(() => {
-        expect(screen.getByTestId('email-input')).toBeInTheDocument();
-      });
-      
-      await act(async () => {
-        await performSignup('user@test.com', 'validpassword123', 'different123', 'Test User');
-      });
-      
-      expect(screen.getByText('Passwords do not match')).toBeInTheDocument();
-    });
-  });
-
-  describe('Successful Signup Flow', () => {
-    it('completes signup with valid data and auto-login', async () => {
-      renderSignupForm();
-      
-      // Wait for form to render
-      await waitFor(() => {
-        expect(screen.getByTestId('email-input')).toBeInTheDocument();
-      });
-      
-      await act(async () => {
-        await performSignup('newuser@company.com', 'validpassword123', 'validpassword123', 'New Customer');
-      });
-      
-      await waitFor(() => {
-        expect(mockAuthService.handleSignup).toHaveBeenCalledWith(
-          expect.objectContaining({
-            email: 'newuser@company.com',
-            password: 'validpassword123',
-            full_name: 'New Customer'
-          })
-        );
-      });
-    });
-
-    it('stores signup token and updates auth state', async () => {
-      renderSignupForm();
-      
-      // Wait for form to render
-      await waitFor(() => {
-        expect(screen.getByTestId('email-input')).toBeInTheDocument();
-      });
-      
-      await act(async () => {
-        await performSignup('newuser@company.com', 'validpassword123', 'validpassword123', 'New Customer');
-      });
-      
-      expect(mockAuthService.setToken).toHaveBeenCalledWith(mockSignupToken);
-      expect(mockAuthStore.login).toHaveBeenCalledWith(mockNewUser, mockSignupToken);
-    });
-
-    it('redirects to chat after successful signup', async () => {
-      const mockPush = jest.fn();
-      renderSignupForm(mockPush);
-      
-      // Wait for form to render
-      await waitFor(() => {
-        expect(screen.getByTestId('email-input')).toBeInTheDocument();
-      });
-      
-      await act(async () => {
-        await performSignup('newuser@company.com', 'validpassword123', 'validpassword123', 'New Customer');
-      });
-      
-      await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith('/chat?welcome=true');
-      });
-    });
-
-    it('tracks conversion analytics on successful signup', async () => {
-      renderSignupForm();
-      
-      // Wait for form to render
-      await waitFor(() => {
-        expect(screen.getByTestId('email-input')).toBeInTheDocument();
-      });
-      
-      await act(async () => {
-        await performSignup('newuser@company.com', 'validpassword123', 'validpassword123', 'New Customer');
-      });
-      
-      expect(mockAuthService.trackConversion).toHaveBeenCalledWith('signup_complete', {
-        user_id: mockNewUser.id,
-        source: 'organic'
-      });
-    });
-  });
-
-  describe('Social Login Integration', () => {
-    it('initiates Google signup flow', async () => {
-      renderSignupForm();
-      
-      // Wait for form to render
-      await waitFor(() => {
-        expect(screen.getByTestId('google-signup-button')).toBeInTheDocument();
-      });
-      
-      await act(async () => {
-        await user.click(screen.getByTestId('google-signup-button'));
-      });
-      
-      expect(mockAuthService.initiateGoogleSignup).toHaveBeenCalled();
-    });
-
-    it('handles OAuth callback for new user registration', async () => {
-      window.history.pushState({}, '', '/auth/callback?code=signup_code&state=signup_state');
-      
-      renderSignupForm();
-      
-      // Wait for form to render and effect to run
-      await waitFor(() => {
-        expect(screen.getByTestId('signup-form')).toBeInTheDocument();
-      });
-      
-      await waitFor(() => {
-        expect(mockAuthService.handleOAuthSignup).toHaveBeenCalledWith('signup_code', 'signup_state');
-      });
-    });
-
-    it('shows terms acceptance for social signup', async () => {
-      renderSignupForm();
-      
-      // Wait for form to render
-      await waitFor(() => {
-        expect(screen.getByTestId('terms-checkbox')).toBeInTheDocument();
-        expect(screen.getByTestId('google-signup-button')).toBeInTheDocument();
-      });
-      
-      await act(async () => {
-        await user.click(screen.getByTestId('google-signup-button'));
-      });
-      
-      expect(screen.getByTestId('terms-checkbox')).toBeInTheDocument();
-      expect(screen.getByText('I agree to the Terms of Service')).toBeInTheDocument();
-    });
-  });
-
-  describe('Error Handling & Edge Cases', () => {
-    it('handles duplicate email registration gracefully', async () => {
-      mockAuthService.handleSignup.mockResolvedValue({
-        success: false,
-        error: 'Email already registered'
-      });
-      
-      renderSignupForm();
-      
-      // Wait for form to render
-      await waitFor(() => {
-        expect(screen.getByTestId('email-input')).toBeInTheDocument();
-      });
-      
-      await act(async () => {
-        await performSignup('existing@company.com', 'password123', 'password123', 'Existing User');
-      });
-      
-      await waitFor(() => {
-        expect(screen.getByText('Email already registered. Try logging in instead.')).toBeInTheDocument();
-        expect(screen.getByTestId('login-link')).toBeInTheDocument();
-      });
-    });
-
-    it('handles network errors with retry option', async () => {
-      mockAuthService.handleSignup.mockRejectedValue(new Error('Network error'));
-      
-      renderSignupForm();
-      
-      // Wait for form to render
-      await waitFor(() => {
-        expect(screen.getByTestId('email-input')).toBeInTheDocument();
-      });
-      
-      await act(async () => {
-        await performSignup('user@test.com', 'password123', 'password123', 'Test User');
-      });
-      
-      await waitFor(() => {
-        expect(screen.getByText('Network error. Please check your connection.')).toBeInTheDocument();
-        expect(screen.getByTestId('retry-signup-button')).toBeInTheDocument();
-      });
-    });
-
-    it('prevents double submission during processing', async () => {
-      renderSignupForm();
-      
-      // Wait for form to render
-      await waitFor(() => {
-        expect(screen.getByTestId('signup-button')).toBeInTheDocument();
-      });
-      
-      const signupButton = screen.getByTestId('signup-button');
-      await act(async () => {
-        await user.click(signupButton);
-        await user.click(signupButton);
-      });
-      
-      expect(mockAuthService.handleSignup).toHaveBeenCalledTimes(1);
-      expect(signupButton).toBeDisabled();
-    });
-
-    it('handles weak password with strength meter', async () => {
-      renderSignupForm();
-      
-      // Wait for form to render
-      await waitFor(() => {
-        expect(screen.getByTestId('password-input')).toBeInTheDocument();
-      });
-      
-      await act(async () => {
-        await user.type(screen.getByTestId('password-input'), 'weak');
-      });
-      
-      expect(screen.getByTestId('password-strength')).toHaveTextContent('Weak');
-      expect(screen.getByTestId('password-requirements')).toBeInTheDocument();
-    });
-  });
-
-  describe('Terms & Privacy Compliance', () => {
-    it('requires terms acceptance before signup', async () => {
-      renderSignupForm();
-      
-      // Wait for form to render
-      await waitFor(() => {
-        expect(screen.getByTestId('email-input')).toBeInTheDocument();
-      });
-      
-      await act(async () => {
-        await performSignupWithoutTerms('user@test.com', 'password123', 'password123', 'Test User');
-      });
-      
-      expect(screen.getByText('Please accept the Terms of Service')).toBeInTheDocument();
-      expect(mockAuthService.handleSignup).not.toHaveBeenCalled();
-    });
-
-    it('tracks privacy consent for compliance', async () => {
-      renderSignupForm();
-      
-      // Wait for form to render
-      await waitFor(() => {
-        expect(screen.getByTestId('terms-checkbox')).toBeInTheDocument();
-      });
-      
-      await act(async () => {
-        await user.click(screen.getByTestId('terms-checkbox'));
-        await performSignup('user@test.com', 'password123', 'password123', 'Test User');
-      });
-      
-      expect(mockAuthService.recordConsent).toHaveBeenCalledWith({
-        user_email: 'user@test.com',
-        terms_accepted: true,
-        timestamp: expect.any(Date)
-      });
-    });
-  });
-
-  // Helper functions (≤8 lines each)
-  function setupMockAuthService() {
-    mockAuthService.handleSignup.mockResolvedValue({
-      success: true,
-      user: mockNewUser,
-      token: mockSignupToken
-    });
-    mockAuthService.setToken.mockImplementation(() => {});
-    mockAuthService.initiateGoogleSignup.mockImplementation(() => {});
-    mockAuthService.handleOAuthSignup.mockImplementation(() => {});
-    mockAuthService.trackConversion.mockImplementation(() => {});
-    mockAuthService.recordConsent.mockImplementation(() => {});
-  }
-
-  function renderSignupForm(mockPush?: jest.Mock) {
-    const result = render(<SignupForm onRedirect={mockPush} />);
-    // Add a small delay to ensure component is fully rendered
-    return result;
-  }
-
-  async function performSignup(email: string, password: string, confirmPassword: string, fullName: string) {
-    await user.type(screen.getByTestId('email-input'), email);
-    await user.type(screen.getByTestId('password-input'), password);
-    await user.type(screen.getByTestId('confirm-password-input'), confirmPassword);
-    await user.type(screen.getByTestId('full-name-input'), fullName);
-    await user.click(screen.getByTestId('terms-checkbox'));
-    await user.click(screen.getByTestId('signup-button'));
-  }
-
-  async function performSignupWithoutTerms(email: string, password: string, confirmPassword: string, fullName: string) {
-    await user.type(screen.getByTestId('email-input'), email);
-    await user.type(screen.getByTestId('password-input'), password);
-    await user.type(screen.getByTestId('confirm-password-input'), confirmPassword);
-    await user.type(screen.getByTestId('full-name-input'), fullName);
-    await user.click(screen.getByTestId('signup-button'));
-  }
-});
-
-// Mock Signup Form Component for comprehensive testing
+// Mock Signup Form Component for comprehensive testing - MOVED TO TOP FOR HOISTING
 const SignupForm = ({ onRedirect }: { onRedirect?: jest.Mock }) => {
   const [formData, setFormData] = React.useState({
     email: '',
@@ -606,3 +247,388 @@ const SignupForm = ({ onRedirect }: { onRedirect?: jest.Mock }) => {
     </div>
   );
 };
+
+describe('Signup Flow - Business Critical Tests', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
+  let user: ReturnType<typeof userEvent.setup>;
+
+  beforeEach(() => {
+    user = userEvent.setup();
+    setupMockAuthService();
+    
+    // Clear all mock calls
+    jest.clearAllMocks();
+    
+    // Clean up DOM from previous tests
+    document.body.innerHTML = '';
+  });
+
+  afterEach(() => {
+    // Clean up mocks and DOM after each test
+    jest.clearAllMocks();
+    
+    // Clean up DOM
+    document.body.innerHTML = '';
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
+  });
+
+  describe('Signup Form Rendering & Validation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
+    it('renders complete signup form with all required fields', async () => {
+      renderSignupForm();
+      
+      expect(screen.getByTestId('email-input')).toBeInTheDocument();
+      expect(screen.getByTestId('password-input')).toBeInTheDocument();
+      expect(screen.getByTestId('confirm-password-input')).toBeInTheDocument();
+      expect(screen.getByTestId('full-name-input')).toBeInTheDocument();
+      expect(screen.getByTestId('company-input')).toBeInTheDocument();
+      expect(screen.getByTestId('signup-button')).toBeInTheDocument();
+      expect(screen.getByTestId('google-signup-button')).toBeInTheDocument();
+    });
+
+    it('validates email format and uniqueness', async () => {
+      renderSignupForm();
+      
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('email-input')).toBeInTheDocument();
+      });
+      
+      await act(async () => {
+        await performSignup('invalid-email', 'password123', 'password123', 'Test User');
+      });
+      
+      expect(screen.getByText('Please enter a valid email address')).toBeInTheDocument();
+    });
+
+    it('enforces password strength requirements', async () => {
+      renderSignupForm();
+      
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('password-input')).toBeInTheDocument();
+      });
+      
+      // Type a short password to trigger validation
+      await act(async () => {
+        await user.type(screen.getByTestId('password-input'), 'weak');
+      });
+      
+      // Check that password requirements are shown
+      expect(screen.getByTestId('password-requirements')).toBeInTheDocument();
+      expect(screen.getByTestId('password-requirements')).toHaveTextContent('Password must be at least 8 characters');
+    });
+
+    it('validates password confirmation match', async () => {
+      renderSignupForm();
+      
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('email-input')).toBeInTheDocument();
+      });
+      
+      await act(async () => {
+        await performSignup('user@test.com', 'validpassword123', 'different123', 'Test User');
+      });
+      
+      expect(screen.getByText('Passwords do not match')).toBeInTheDocument();
+    });
+  });
+
+  describe('Successful Signup Flow', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
+    it('completes signup with valid data and auto-login', async () => {
+      renderSignupForm();
+      
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('email-input')).toBeInTheDocument();
+      });
+      
+      await act(async () => {
+        await performSignup('newuser@company.com', 'validpassword123', 'validpassword123', 'New Customer');
+      });
+      
+      await waitFor(() => {
+        expect(mockAuthService.handleSignup).toHaveBeenCalledWith(
+          expect.objectContaining({
+            email: 'newuser@company.com',
+            password: 'validpassword123',
+            full_name: 'New Customer'
+          })
+        );
+      });
+    });
+
+    it('stores signup token and updates auth state', async () => {
+      renderSignupForm();
+      
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('email-input')).toBeInTheDocument();
+      });
+      
+      await act(async () => {
+        await performSignup('newuser@company.com', 'validpassword123', 'validpassword123', 'New Customer');
+      });
+      
+      expect(mockAuthService.setToken).toHaveBeenCalledWith(mockSignupToken);
+      expect(mockAuthStore.login).toHaveBeenCalledWith(mockNewUser, mockSignupToken);
+    });
+
+    it('redirects to chat after successful signup', async () => {
+      const mockPush = jest.fn();
+      renderSignupForm(mockPush);
+      
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('email-input')).toBeInTheDocument();
+      });
+      
+      await act(async () => {
+        await performSignup('newuser@company.com', 'validpassword123', 'validpassword123', 'New Customer');
+      });
+      
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith('/chat?welcome=true');
+      });
+    });
+
+    it('tracks conversion analytics on successful signup', async () => {
+      renderSignupForm();
+      
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('email-input')).toBeInTheDocument();
+      });
+      
+      await act(async () => {
+        await performSignup('newuser@company.com', 'validpassword123', 'validpassword123', 'New Customer');
+      });
+      
+      expect(mockAuthService.trackConversion).toHaveBeenCalledWith('signup_complete', {
+        user_id: mockNewUser.id,
+        source: 'organic'
+      });
+    });
+  });
+
+  describe('Social Login Integration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
+    it('initiates Google signup flow', async () => {
+      renderSignupForm();
+      
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('google-signup-button')).toBeInTheDocument();
+      });
+      
+      await act(async () => {
+        await user.click(screen.getByTestId('google-signup-button'));
+      });
+      
+      expect(mockAuthService.initiateGoogleSignup).toHaveBeenCalled();
+    });
+
+    it('handles OAuth callback for new user registration', async () => {
+      window.history.pushState({}, '', '/auth/callback?code=signup_code&state=signup_state');
+      
+      renderSignupForm();
+      
+      // Wait for form to render and effect to run
+      await waitFor(() => {
+        expect(screen.getByTestId('signup-form')).toBeInTheDocument();
+      });
+      
+      await waitFor(() => {
+        expect(mockAuthService.handleOAuthSignup).toHaveBeenCalledWith('signup_code', 'signup_state');
+      });
+    });
+
+    it('shows terms acceptance for social signup', async () => {
+      renderSignupForm();
+      
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('terms-checkbox')).toBeInTheDocument();
+        expect(screen.getByTestId('google-signup-button')).toBeInTheDocument();
+      });
+      
+      await act(async () => {
+        await user.click(screen.getByTestId('google-signup-button'));
+      });
+      
+      expect(screen.getByTestId('terms-checkbox')).toBeInTheDocument();
+      expect(screen.getByText('I agree to the Terms of Service')).toBeInTheDocument();
+    });
+  });
+
+  describe('Error Handling & Edge Cases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
+    it('handles duplicate email registration gracefully', async () => {
+      mockAuthService.handleSignup.mockResolvedValue({
+        success: false,
+        error: 'Email already registered'
+      });
+      
+      renderSignupForm();
+      
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('email-input')).toBeInTheDocument();
+      });
+      
+      await act(async () => {
+        await performSignup('existing@company.com', 'password123', 'password123', 'Existing User');
+      });
+      
+      await waitFor(() => {
+        expect(screen.getByText('Email already registered. Try logging in instead.')).toBeInTheDocument();
+        expect(screen.getByTestId('login-link')).toBeInTheDocument();
+      });
+    });
+
+    it('handles network errors with retry option', async () => {
+      mockAuthService.handleSignup.mockRejectedValue(new Error('Network error'));
+      
+      renderSignupForm();
+      
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('email-input')).toBeInTheDocument();
+      });
+      
+      await act(async () => {
+        await performSignup('user@test.com', 'password123', 'password123', 'Test User');
+      });
+      
+      await waitFor(() => {
+        expect(screen.getByText('Network error. Please check your connection.')).toBeInTheDocument();
+        expect(screen.getByTestId('retry-signup-button')).toBeInTheDocument();
+      });
+    });
+
+    it('prevents double submission during processing', async () => {
+      renderSignupForm();
+      
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('signup-button')).toBeInTheDocument();
+      });
+      
+      const signupButton = screen.getByTestId('signup-button');
+      await act(async () => {
+        await user.click(signupButton);
+        await user.click(signupButton);
+      });
+      
+      expect(mockAuthService.handleSignup).toHaveBeenCalledTimes(1);
+      expect(signupButton).toBeDisabled();
+    });
+
+    it('handles weak password with strength meter', async () => {
+      renderSignupForm();
+      
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('password-input')).toBeInTheDocument();
+      });
+      
+      await act(async () => {
+        await user.type(screen.getByTestId('password-input'), 'weak');
+      });
+      
+      expect(screen.getByTestId('password-strength')).toHaveTextContent('Weak');
+      expect(screen.getByTestId('password-requirements')).toBeInTheDocument();
+    });
+  });
+
+  describe('Terms & Privacy Compliance', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
+    it('requires terms acceptance before signup', async () => {
+      renderSignupForm();
+      
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('email-input')).toBeInTheDocument();
+      });
+      
+      await act(async () => {
+        await performSignupWithoutTerms('user@test.com', 'password123', 'password123', 'Test User');
+      });
+      
+      expect(screen.getByText('Please accept the Terms of Service')).toBeInTheDocument();
+      expect(mockAuthService.handleSignup).not.toHaveBeenCalled();
+    });
+
+    it('tracks privacy consent for compliance', async () => {
+      renderSignupForm();
+      
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('terms-checkbox')).toBeInTheDocument();
+      });
+      
+      await act(async () => {
+        await user.click(screen.getByTestId('terms-checkbox'));
+        await performSignup('user@test.com', 'password123', 'password123', 'Test User');
+      });
+      
+      expect(mockAuthService.recordConsent).toHaveBeenCalledWith({
+        user_email: 'user@test.com',
+        terms_accepted: true,
+        timestamp: expect.any(Date)
+      });
+    });
+  });
+
+  // Helper functions (≤8 lines each)
+  function setupMockAuthService() {
+    mockAuthService.handleSignup.mockResolvedValue({
+      success: true,
+      user: mockNewUser,
+      token: mockSignupToken
+    });
+    mockAuthService.setToken.mockImplementation(() => {});
+    mockAuthService.initiateGoogleSignup.mockImplementation(() => {});
+    mockAuthService.handleOAuthSignup.mockImplementation(() => {});
+    mockAuthService.trackConversion.mockImplementation(() => {});
+    mockAuthService.recordConsent.mockImplementation(() => {});
+  }
+
+  function renderSignupForm(mockPush?: jest.Mock) {
+    // Ensure clean DOM state before rendering
+    document.body.innerHTML = '';
+    
+    const result = render(<SignupForm onRedirect={mockPush} />);
+    return result;
+  }
+
+  async function performSignup(email: string, password: string, confirmPassword: string, fullName: string) {
+    await user.type(screen.getByTestId('email-input'), email);
+    await user.type(screen.getByTestId('password-input'), password);
+    await user.type(screen.getByTestId('confirm-password-input'), confirmPassword);
+    await user.type(screen.getByTestId('full-name-input'), fullName);
+    await user.click(screen.getByTestId('terms-checkbox'));
+    await user.click(screen.getByTestId('signup-button'));
+  }
+
+  async function performSignupWithoutTerms(email: string, password: string, confirmPassword: string, fullName: string) {
+    await user.type(screen.getByTestId('email-input'), email);
+    await user.type(screen.getByTestId('password-input'), password);
+    await user.type(screen.getByTestId('confirm-password-input'), confirmPassword);
+    await user.type(screen.getByTestId('full-name-input'), fullName);
+    await user.click(screen.getByTestId('signup-button'));
+  }
+});

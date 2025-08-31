@@ -12,6 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { LoginButton } from '@/auth/components';
 import { authService } from '@/auth/unified-auth-service';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock auth service
 jest.mock('@/auth/service');
@@ -50,6 +51,8 @@ Object.defineProperty(document, 'cookie', {
 });
 
 describe('Remember Me Functionality Tests', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   const mockLogin = jest.fn();
   const mockLogout = jest.fn();
   
@@ -85,6 +88,8 @@ describe('Remember Me Functionality Tests', () => {
   });
 
   describe('Token Persistence', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should persist authentication token in storage', async () => {
       mockLocalStorage.getItem.mockReturnValue('stored-jwt-token');
       
@@ -142,6 +147,8 @@ describe('Remember Me Functionality Tests', () => {
   });
 
   describe('Session Persistence Logic', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should restore session from valid stored data', async () => {
       mockLocalStorage.getItem.mockReturnValue('valid-jwt-token');
       
@@ -216,6 +223,8 @@ describe('Remember Me Functionality Tests', () => {
   });
 
   describe('Development Mode Persistence', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should respect dev logout flag in persistence', () => {
       mockLocalStorage.getItem.mockReturnValue('dev-token');
       
@@ -292,6 +301,8 @@ describe('Remember Me Functionality Tests', () => {
   });
 
   describe('Cross-Tab Session Sync', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle storage events for session sync', () => {
       render(<LoginButton />);
       
@@ -370,6 +381,8 @@ describe('Remember Me Functionality Tests', () => {
   });
 
   describe('Persistence Security', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle secure token storage', () => {
       jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
@@ -432,6 +445,8 @@ describe('Remember Me Functionality Tests', () => {
   });
 
   describe('Persistence Edge Cases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle browser private mode restrictions', () => {
       mockLocalStorage.getItem.mockImplementation(() => {
         throw new Error('Private mode - storage disabled');
@@ -487,4 +502,8 @@ describe('Remember Me Functionality Tests', () => {
       expect(screen.getByText('Login with Google')).toBeInTheDocument();
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

@@ -6,6 +6,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock console.error to prevent error output in tests
 const originalError = console.error;
@@ -60,6 +61,8 @@ class TestErrorBoundary extends React.Component<
 }
 
 describe('Error Boundary', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -209,4 +212,8 @@ describe('Error Boundary', () => {
     expect(screen.getByTestId('event-error')).toBeInTheDocument();
     expect(screen.queryByTestId('error-fallback')).not.toBeInTheDocument();
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

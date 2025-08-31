@@ -67,6 +67,24 @@ class FrontendLogger {
     this.currentLevel = this.parseLogLevel(envLevel) ?? (
       this.isProduction ? LogLevel.WARN : LogLevel.DEBUG
     );
+    
+    // Bind all public methods to ensure 'this' context is preserved
+    // when methods are passed as callbacks
+    this.debug = this.debug.bind(this);
+    this.info = this.info.bind(this);
+    this.warn = this.warn.bind(this);
+    this.error = this.error.bind(this);
+    this.performance = this.performance.bind(this);
+    this.apiCall = this.apiCall.bind(this);
+    this.websocketEvent = this.websocketEvent.bind(this);
+    this.userAction = this.userAction.bind(this);
+    this.errorBoundary = this.errorBoundary.bind(this);
+    this.getLogBuffer = this.getLogBuffer.bind(this);
+    this.clearLogBuffer = this.clearLogBuffer.bind(this);
+    this.setLogLevel = this.setLogLevel.bind(this);
+    this.isEnabled = this.isEnabled.bind(this);
+    this.group = this.group.bind(this);
+    this.groupEnd = this.groupEnd.bind(this);
   }
 
   private parseLogLevel(level?: string): LogLevel | null {
@@ -134,19 +152,22 @@ class FrontendLogger {
     if (this.isDevelopment || level >= LogLevel.ERROR) {
       const formattedMessage = this.formatMessage(levelName, sanitizedMessage, sanitizedContext);
       
-      switch (level) {
-        case LogLevel.DEBUG:
-          console.debug(formattedMessage, sanitizedContext);
-          break;
-        case LogLevel.INFO:
-          console.info(formattedMessage, sanitizedContext);
-          break;
-        case LogLevel.WARN:
-          console.warn(formattedMessage, sanitizedContext);
-          break;
-        case LogLevel.ERROR:
-          console.error(formattedMessage, error || sanitizedContext);
-          break;
+      // Guard against environments where console might not be available
+      if (typeof console !== 'undefined' && console) {
+        switch (level) {
+          case LogLevel.DEBUG:
+            if (console.debug) console.debug(formattedMessage, sanitizedContext);
+            break;
+          case LogLevel.INFO:
+            if (console.info) console.info(formattedMessage, sanitizedContext);
+            break;
+          case LogLevel.WARN:
+            if (console.warn) console.warn(formattedMessage, sanitizedContext);
+            break;
+          case LogLevel.ERROR:
+            if (console.error) console.error(formattedMessage, error || sanitizedContext);
+            break;
+        }
       }
     }
   }
@@ -302,13 +323,17 @@ class FrontendLogger {
   // Console group methods for development debugging
   group(label: string): void {
     if ((this.isDevelopment || process.env.NODE_ENV === 'test') && this.shouldLog(LogLevel.DEBUG)) {
-      console.group(label);
+      if (typeof console !== 'undefined' && console?.group) {
+        console.group(label);
+      }
     }
   }
 
   groupEnd(): void {
     if ((this.isDevelopment || process.env.NODE_ENV === 'test') && this.shouldLog(LogLevel.DEBUG)) {
-      console.groupEnd();
+      if (typeof console !== 'undefined' && console?.groupEnd) {
+        console.groupEnd();
+      }
     }
   }
 }

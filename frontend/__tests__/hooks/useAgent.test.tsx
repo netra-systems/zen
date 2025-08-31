@@ -1,8 +1,8 @@
-/**
- * AI AGENT MODIFICATION METADATA
- * ================================
- * Timestamp: 2025-08-10T14:32:00Z
- * Agent: Claude Opus 4.1 (claude-opus-4-1-20250805) via claude-code
+import { renderHook, act } from '@testing-library/react';
+import React from 'react';
+import { AuthContext } from '@/auth/context';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+4.1 (claude-opus-4-1-20250805) via claude-code
  * Context: Create comprehensive test suite for useAgent hook
  * Git: v6 | 88345b5 | dirty
  * Change: Test | Scope: Component | Risk: Low
@@ -33,6 +33,7 @@ jest.mock('@/hooks/useWebSocket', () => ({
 import { useAgent } from '@/hooks/useAgent';
 
 describe('useAgent (Agent Management)', () => {
+    jest.setTimeout(10000);
   const mockAuthValue = {
     token: 'test-token',
     user: null,
@@ -57,6 +58,11 @@ describe('useAgent (Agent Management)', () => {
   afterEach(() => {
     jest.restoreAllMocks();
     localStorage.clear();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   it('should initialize with default state', () => {

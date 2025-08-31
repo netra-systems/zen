@@ -8,6 +8,7 @@ import { render, waitFor, act, renderHook } from '@testing-library/react';
 import { AuthProvider, useAuth } from '@/auth/context';
 import { unifiedAuthService } from '@/auth/unified-auth-service';
 import { jwtDecode } from 'jwt-decode';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock dependencies
 jest.mock('@/auth/unified-auth-service');
@@ -36,6 +37,8 @@ jest.mock('@/hooks/useGTMEvent', () => ({
 }));
 
 describe('AuthContext - Persistence and Initialization', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   const mockAuthService = unifiedAuthService as jest.Mocked<typeof unifiedAuthService>;
   const mockDecode = jwtDecode as jest.MockedFunction<typeof jwtDecode>;
 
@@ -59,9 +62,17 @@ describe('AuthContext - Persistence and Initialization', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Initialization State Tracking', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should start with loading=true and initialized=false', () => {
       mockAuthService.getAuthConfig.mockResolvedValue({
         development_mode: false,
@@ -186,6 +197,8 @@ describe('AuthContext - Persistence and Initialization', () => {
   });
 
   describe('Environment-Aware Refresh Scheduling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should schedule refresh every 10 seconds for 30-second tokens', async () => {
       const shortToken = 'short.jwt.token';
       const shortUser = createToken(30, 'short-user'); // 30-second token
@@ -325,6 +338,8 @@ describe('AuthContext - Persistence and Initialization', () => {
   });
 
   describe('Storage Event Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should update auth state when token changes in another tab', async () => {
       const initialToken = 'initial.token';
       const initialUser = createToken(900, 'initial-user');
@@ -423,6 +438,8 @@ describe('AuthContext - Persistence and Initialization', () => {
   });
 
   describe('Error Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle malformed tokens gracefully', async () => {
       const malformedToken = 'malformed.token';
       

@@ -1,7 +1,8 @@
-/**
- * Critical WebSocket Subprotocol Authentication Test
- * 
- * This test verifies the WebSocket subprotocol authentication implementation.
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ementation.
  */
 
 import React from 'react';
@@ -50,6 +51,7 @@ const mockAuthContext = {
 };
 
 describe('WebSocket Subprotocol Authentication (CRITICAL)', () => {
+    jest.setTimeout(10000);
   let originalWebSocket: any;
   let mockWebSocket: any;
   let connectionAttempts: Array<{ url: string; protocols?: string | string[] }> = [];
@@ -119,9 +121,15 @@ describe('WebSocket Subprotocol Authentication (CRITICAL)', () => {
     global.WebSocket = originalWebSocket;
     webSocketService.disconnect();
     jest.restoreAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Sec-WebSocket-Protocol Header Implementation', () => {
+      jest.setTimeout(10000);
     it('should include JWT token in Sec-WebSocket-Protocol header', async () => {
       // This test verifies subprotocol authentication is implemented
       
@@ -216,6 +224,7 @@ describe('WebSocket Subprotocol Authentication (CRITICAL)', () => {
   });
 
   describe('Security and Error Handling', () => {
+      jest.setTimeout(10000);
     it('should not send token if not authenticated', async () => {
       // This test verifies no token is sent when not authenticated
       

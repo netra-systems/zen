@@ -1,5 +1,6 @@
-/**
- * Frontend System Startup - System Tests
+import '../setup/startup-setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+System Tests
  * Tests for Environment, Error Boundary, Performance, Dependencies, and First-Time Run
  */
 
@@ -59,6 +60,7 @@ import {
 } from './helpers/startup-test-mocks';
 
 describe('Frontend System Startup - System Tests', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     setupTestEnvironment();
     jest.clearAllMocks();
@@ -69,9 +71,15 @@ describe('Frontend System Startup - System Tests', () => {
     // Restore console methods
     console.error = originalConsoleError;
     console.log = originalConsoleLog;
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Environment Validation', () => {
+      jest.setTimeout(10000);
     it('should validate required environment variables', () => {
       testRequiredEnvironmentVariables();
     });
@@ -126,6 +134,7 @@ describe('Frontend System Startup - System Tests', () => {
   });
 
   describe('Error Boundary', () => {
+      jest.setTimeout(10000);
     it('should catch and handle startup errors', () => {
       testErrorBoundary();
     });
@@ -235,6 +244,7 @@ describe('Frontend System Startup - System Tests', () => {
   });
 
   describe('Performance Monitoring', () => {
+      jest.setTimeout(10000);
     it('should measure startup performance', async () => {
       await testStartupPerformance();
     });
@@ -303,6 +313,7 @@ describe('Frontend System Startup - System Tests', () => {
   });
 
   describe('Dependency Loading', () => {
+      jest.setTimeout(10000);
     it('should load required dependencies', () => {
       testRequiredDependencies();
     });
@@ -353,6 +364,7 @@ describe('Frontend System Startup - System Tests', () => {
   });
 
   describe('First-Time Run', () => {
+      jest.setTimeout(10000);
     beforeEach(() => {
       clearStorage();
     });
@@ -437,6 +449,7 @@ describe('Frontend System Startup - System Tests', () => {
   });
 
   describe('System Health Checks', () => {
+      jest.setTimeout(10000);
     it('should perform comprehensive health check', () => {
       testSystemHealthCheck();
     });

@@ -52,7 +52,7 @@ jest.mock('@/lib/utils', () => ({
   generateUniqueId: jest.fn(() => 'test-id-123')
 }));
 
-jest.mock('@/utils/debug-logger', () => ({
+jest.mock('@/lib/logger', () => ({
   logger: {
     info: jest.fn(),
     error: jest.fn()
@@ -102,6 +102,7 @@ jest.mock('@/store/authStore', () => ({
 }));
 
 import { ExamplePrompts } from '@/components/chat/ExamplePrompts';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 const resetMocks = () => {
   jest.clearAllMocks();
@@ -114,6 +115,8 @@ beforeEach(() => {
 });
 
 describe('ExamplePrompts', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   it('sends a message when an example prompt is clicked', () => {
     mockAuthStore.isAuthenticated = true;
 
@@ -153,4 +156,8 @@ describe('ExamplePrompts', () => {
     
     consoleErrorSpy.mockRestore();
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

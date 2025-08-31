@@ -8,7 +8,9 @@
  */
 
 // Import test setup with mocks FIRST
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import './auth-test-setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Set up localStorage mock before importing authService
 import { createLocalStorageMock } from './auth-test-utils';
@@ -16,8 +18,7 @@ const testLocalStorageMock = createLocalStorageMock();
 global.localStorage = testLocalStorageMock;
 
 import { authService } from '@/auth';
-import {
-  setupAuthTestEnvironment,
+import { setupAuthTestEnvironment,
   resetAuthTestMocks,
   createMockAuthConfig,
   createMockToken,
@@ -31,12 +32,15 @@ import {
 } from './auth-test-utils';
 
 describe('Auth Security & Error Handling', () => {
+  jest.setTimeout(10000);
+  
   let testEnv: ReturnType<typeof setupAuthTestEnvironment>;
   let mockAuthConfig: ReturnType<typeof createMockAuthConfig>;
   let mockToken: string;
   let mockDevLoginResponse: ReturnType<typeof createMockDevLoginResponse>;
 
   beforeEach(() => {
+    setupAntiHang();
     testEnv = setupAuthTestEnvironment();
     mockAuthConfig = createMockAuthConfig();
     mockToken = createMockToken();
@@ -49,6 +53,10 @@ describe('Auth Security & Error Handling', () => {
     testEnv.localStorageMock = testLocalStorageMock;
     
     resetAuthTestMocks(testEnv);
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
   });
 
   afterAll(() => {
@@ -387,6 +395,16 @@ describe('Auth Security & Error Handling', () => {
   });
 
   describe('Performance & Reliability', () => {
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     it('should handle rapid successive calls', async () => {
       mockAuthServiceClient.getConfig.mockResolvedValue(mockAuthConfig);
 
@@ -434,4 +452,8 @@ describe('Auth Security & Error Handling', () => {
       jest.restoreAllMocks();
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

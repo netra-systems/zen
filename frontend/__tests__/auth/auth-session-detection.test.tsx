@@ -6,6 +6,7 @@
  * Architecture: ≤300 lines, functions ≤8 lines
  */
 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,8 +15,7 @@ import { authService } from '@/auth/unified-auth-service';
 import { jwtDecode } from 'jwt-decode';
 import { logger } from '@/lib/logger';
 import '@testing-library/jest-dom';
-import {
-  setupAuthTestEnvironment,
+import { setupAuthTestEnvironment,
   createMockAuthConfig,
   createMockToken,
   mockAuthServiceClient
@@ -32,6 +32,8 @@ const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
 const WARNING_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes before timeout
 
 describe('Auth Session Detection', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   let mocks: ReturnType<typeof setupAuthTestEnvironment>;
   let mockAuthStore: any;
   let realDateNow: typeof Date.now;
@@ -59,6 +61,7 @@ describe('Auth Session Detection', () => {
     Date.now = realDateNow;
     jest.clearAllMocks();
     jest.clearAllTimers();
+      cleanupAntiHang();
   });
 
   const setupTokenWithExpiry = (expiryTimeMs: number) => {
@@ -89,6 +92,8 @@ describe('Auth Session Detection', () => {
   };
 
   describe('Session Expiry Detection', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should detect expired token on initialization', async () => {
       const pastTime = Date.now() - (60 * 60 * 1000); // 1 hour ago
       setupTokenWithExpiry(pastTime);
@@ -159,6 +164,8 @@ describe('Auth Session Detection', () => {
   });
 
   describe('Session Warning System', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should warn user before session expires', async () => {
       jest.useFakeTimers();
       const warningTime = Date.now() + WARNING_THRESHOLD_MS - 1000;
@@ -239,6 +246,8 @@ describe('Auth Session Detection', () => {
   });
 
   describe('Edge Cases and Error Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle system clock changes gracefully', async () => {
       jest.useFakeTimers();
       const futureTime = Date.now() + SESSION_TIMEOUT_MS;

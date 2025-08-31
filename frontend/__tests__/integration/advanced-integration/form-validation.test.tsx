@@ -6,8 +6,11 @@
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react';
 import { createTestSetup, waitForAnimation } from './setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Complex Form Validation Integration', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   const testSetup = createTestSetup();
 
   beforeEach(() => {
@@ -16,6 +19,12 @@ describe('Complex Form Validation Integration', () => {
 
   afterEach(() => {
     testSetup.afterEach();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   it('should validate multi-step forms with dependencies', async () => {

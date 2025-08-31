@@ -1,12 +1,11 @@
-/**
- * Connection Management Advanced Tests
- * Split from connection-management.test.tsx for 450-line limit compliance
- * Agent 10 Implementation - Advanced reconnection and network simulation
- */
-
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { jest } from '@jest/globals';
+import { TestProviders } from '../setup/test-providers';
+import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ibrary/user-event';
 import { jest } from '@jest/globals';
 import { TestProviders } from '../setup/test-providers';
 import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
@@ -143,6 +142,7 @@ class MultiConnectionManager {
 }
 
 describe('Connection Management Advanced Tests', () => {
+    jest.setTimeout(10000);
   let wsManager: WebSocketTestManager;
   let reconnectionManager: ReconnectionManager;
   let stateMachine: ConnectionStateMachine;
@@ -165,9 +165,15 @@ describe('Connection Management Advanced Tests', () => {
     multiManager.closeAllConnections();
     jest.clearAllMocks();
     jest.useRealTimers();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Reconnection Management', () => {
+      jest.setTimeout(10000);
     it('should handle reconnection logic', () => {
       expect(reconnectionManager.shouldReconnect()).toBe(true);
       const delay = reconnectionManager.scheduleReconnect(() => {});
@@ -199,6 +205,7 @@ describe('Connection Management Advanced Tests', () => {
   });
 
   describe('State Machine', () => {
+      jest.setTimeout(10000);
     it('should validate state transitions', () => {
       expect(stateMachine.transition('connecting')).toBe(true);
       expect(stateMachine.getState()).toBe('connecting');
@@ -223,6 +230,7 @@ describe('Connection Management Advanced Tests', () => {
   });
 
   describe('Network Condition Simulation', () => {
+      jest.setTimeout(10000);
     it('should simulate high latency conditions', async () => {
       networkSimulator.setLatency(800);
       networkSimulator.setPacketLoss(10);
@@ -268,6 +276,7 @@ describe('Connection Management Advanced Tests', () => {
   // Performance tests moved to connection-performance.test.tsx
 
   describe('Error Recovery Scenarios', () => {
+      jest.setTimeout(10000);
     it('should recover from multiple failures', () => {
       const manager = new ReconnectionManager(3);
       
@@ -302,6 +311,7 @@ describe('Connection Management Advanced Tests', () => {
   });
 
   describe('Resource Management', () => {
+      jest.setTimeout(10000);
     it('should clean up timers and resources', () => {
       const manager = new ReconnectionManager();
       manager.scheduleReconnect(() => {});

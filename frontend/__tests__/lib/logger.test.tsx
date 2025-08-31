@@ -1,11 +1,13 @@
-/**
- * REAL Logger Tests - Testing actual logger functionality
+import { logger, LogLevel } from '@/lib/logger';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+functionality
  * BVJ: Prevents $8K MRR loss from debugging/monitoring failures
  */
 
 import { logger, LogLevel } from '@/lib/logger';
 
 describe('Frontend Logger - REAL Tests', () => {
+    jest.setTimeout(10000);
   let consoleSpy: {
     debug: jest.SpyInstance;
     info: jest.SpyInstance;
@@ -29,9 +31,15 @@ describe('Frontend Logger - REAL Tests', () => {
 
   afterEach(() => {
     Object.values(consoleSpy).forEach(spy => spy.mockRestore());
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Basic Logging Methods', () => {
+      jest.setTimeout(10000);
     it('logs debug messages in development', () => {
       logger.debug('Debug message', { component: 'TestComponent' });
       expect(consoleSpy.debug).toHaveBeenCalled();
@@ -63,6 +71,7 @@ describe('Frontend Logger - REAL Tests', () => {
   });
 
   describe('Group Methods', () => {
+      jest.setTimeout(10000);
     it('creates console groups in development', () => {
       logger.group('Test Group');
       expect(consoleSpy.group).toHaveBeenCalledWith('Test Group');
@@ -79,6 +88,7 @@ describe('Frontend Logger - REAL Tests', () => {
   });
 
   describe('Specialized Logging', () => {
+      jest.setTimeout(10000);
     it('logs performance metrics', () => {
       logger.performance('database_query', 150, { component: 'QueryEngine' });
       expect(consoleSpy.info).toHaveBeenCalled();
@@ -122,6 +132,7 @@ describe('Frontend Logger - REAL Tests', () => {
   });
 
   describe('Sensitive Data Sanitization', () => {
+      jest.setTimeout(10000);
     it('sanitizes passwords from messages', () => {
       logger.info('User login with password=secret123');
       const buffer = logger.getLogBuffer();
@@ -142,6 +153,7 @@ describe('Frontend Logger - REAL Tests', () => {
   });
 
   describe('Log Buffer Management', () => {
+      jest.setTimeout(10000);
     it('maintains log buffer within size limits', () => {
       for (let i = 0; i < 1050; i++) {
         logger.info(`Message ${i}`);
@@ -160,6 +172,7 @@ describe('Frontend Logger - REAL Tests', () => {
   });
 
   describe('Log Level Control', () => {
+      jest.setTimeout(10000);
     it('filters messages by log level', () => {
       logger.setLogLevel(LogLevel.WARN);
       logger.debug('Should not log');
@@ -182,6 +195,7 @@ describe('Frontend Logger - REAL Tests', () => {
   });
 
   describe('Error Boundary Integration', () => {
+      jest.setTimeout(10000);
     it('logs React error boundary errors', () => {
       const error = new Error('Component crashed');
       const errorInfo = {

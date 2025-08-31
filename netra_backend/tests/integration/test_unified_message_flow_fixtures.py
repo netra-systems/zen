@@ -21,13 +21,19 @@ from starlette.websockets import WebSocketDisconnect
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.schemas.core_enums import AgentStatus, WebSocketMessageType
-from netra_backend.tests.integration.test_ws_connection_mocks import MockWebSocket
+# Removed WebSocket mock import - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
 from netra_backend.tests.integration.jwt_token_helpers import JWTTestHelper
+from test_framework.fixtures.message_flow import MessageFlowTracker
 
 def flow_tracker():
     """Create message flow tracker."""
     return MessageFlowTracker()
+
+def jwt_helper():
+    """Create JWT test helper."""
+    return JWTTestHelper()
 
 def mock_websocket():
     """Create mock WebSocket connection."""
@@ -62,4 +68,3 @@ def mock_agent_service():
     # Mock: Generic component isolation for controlled unit testing
     service.handle_websocket_message = AsyncMock()
     return service
-# )  # Orphaned closing parenthesis

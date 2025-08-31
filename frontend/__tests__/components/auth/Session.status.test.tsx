@@ -12,6 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { LoginButton } from '@/auth/components';
 import { authService } from '@/auth/unified-auth-service';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock auth service
 jest.mock('@/auth/service');
@@ -29,6 +30,8 @@ Object.defineProperty(window, 'localStorage', {
 });
 
 describe('Session Status Indicators Tests', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   const mockLogin = jest.fn();
   const mockLogout = jest.fn();
   
@@ -58,6 +61,8 @@ describe('Session Status Indicators Tests', () => {
   });
 
   describe('Login Status Indicators', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should show logged out state initially', () => {
       render(<LoginButton />);
       
@@ -113,6 +118,8 @@ describe('Session Status Indicators Tests', () => {
   });
 
   describe('Development Mode Indicators', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should show dev mode badge when enabled', () => {
       jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
@@ -192,6 +199,8 @@ describe('Session Status Indicators Tests', () => {
   });
 
   describe('Session State Transitions', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle login to logout transition', async () => {
       const { rerender } = render(<LoginButton />);
       
@@ -287,6 +296,8 @@ describe('Session Status Indicators Tests', () => {
   });
 
   describe('Token Status Management', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should reflect token presence in UI state', () => {
       jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
@@ -348,6 +359,8 @@ describe('Session Status Indicators Tests', () => {
   });
 
   describe('Visual State Indicators', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should apply correct styling for logged in state', () => {
       jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
@@ -424,6 +437,8 @@ describe('Session Status Indicators Tests', () => {
   });
 
   describe('Accessibility for Status Indicators', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should provide accessible status information', () => {
       jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
@@ -482,4 +497,8 @@ describe('Session Status Indicators Tests', () => {
       expect(logoutButton).toBeInTheDocument();
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

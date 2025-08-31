@@ -1,0 +1,11 @@
+
+Use multi agent team to action this new independent service
+name: Analytics
+as per SPEC\frontend_analytics_microservice.md
+Carefully architect the overall system, following all claude.md principles.
+Then spawn multi agent implmentation and audit team.
+Using at least 10 subagents to build each part OPUS model
+THink carefully grafana this is a new service to be added as dependency
+carefully look at existing patterns, e.g. for ports, central env etc.
+carefully take the best of all existing patterns
+Iterate on tests and fixing test at least 30 times

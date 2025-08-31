@@ -6,8 +6,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Data Transformation Utilities', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   it('should format dates correctly', () => {
     const DateFormattingComponent: React.FC = () => {
       const formatDate = (date: Date | string | number): string => {
@@ -37,7 +40,7 @@ describe('Data Transformation Utilities', () => {
       };
       
       const testDates = [
-        new Date('2023-12-25'),
+        new Date('2023-12-25T12:00:00Z'), // Use explicit UTC time to avoid timezone issues
         '2023-06-15T10:30:00Z',
         1640995200000, // Unix timestamp
         'invalid-date'
@@ -220,4 +223,8 @@ describe('Data Transformation Utilities', () => {
     expect(screen.getByTestId('formatted-percentage-1')).toHaveTextContent('12.3%');
     expect(screen.getByTestId('formatted-number-2')).toHaveTextContent('1,234,567');
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

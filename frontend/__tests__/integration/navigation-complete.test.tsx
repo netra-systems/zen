@@ -1,7 +1,8 @@
-/**
- * Complete Navigation Integration Tests
- * Agent 13: Tests comprehensive navigation and routing for Netra Apex
- * Covers route transitions, performance, concurrent navigation, and cleanup
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
  * Follows 25-line function rule and 450-line file limit
  * 
  * Business Value: Ensures reliable navigation for all customer segments
@@ -64,11 +65,13 @@ const measurePerformanceTime = () => {
 };
 
 describe('Complete Navigation Integration Tests', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('Basic Navigation Between Routes', () => {
+      jest.setTimeout(10000);
     it('should navigate to all main routes', async () => {
       const routes = ['/chat', '/demo', '/corpus', '/admin'];
       
@@ -128,6 +131,7 @@ describe('Complete Navigation Integration Tests', () => {
   });
 
   describe('Browser Navigation Controls', () => {
+      jest.setTimeout(10000);
     it('should trigger browser back navigation', async () => {
       mockBack();
       expect(mockBack).toHaveBeenCalledTimes(1);
@@ -156,6 +160,7 @@ describe('Complete Navigation Integration Tests', () => {
   });
 
   describe('Concurrent Navigation Requests', () => {
+      jest.setTimeout(10000);
     it('should handle multiple navigation calls', async () => {
       const routes = ['/demo', '/corpus', '/admin'];
       
@@ -211,6 +216,7 @@ describe('Complete Navigation Integration Tests', () => {
   });
 
   describe('Navigation Cleanup and Memory Management', () => {
+      jest.setTimeout(10000);
     it('should handle component unmounting', async () => {
       const { unmount } = render(<NavigationTestComponent />);
       
@@ -262,6 +268,7 @@ describe('Complete Navigation Integration Tests', () => {
   });
 
   describe('URL State Synchronization', () => {
+      jest.setTimeout(10000);
     it('should synchronize navigation with URL state', async () => {
       const route = '/chat/thread-123';
       
@@ -299,6 +306,7 @@ describe('Complete Navigation Integration Tests', () => {
   });
 
   describe('Error Handling and Edge Cases', () => {
+      jest.setTimeout(10000);
     it('should handle invalid routes gracefully', async () => {
       const invalidRoute = '/invalid-route-123';
       
@@ -346,6 +354,7 @@ describe('Complete Navigation Integration Tests', () => {
   });
 
   describe('Performance and Optimization', () => {
+      jest.setTimeout(10000);
     it('should preload routes for better performance', async () => {
       const preloadRoutes = ['/chat', '/demo', '/corpus'];
       

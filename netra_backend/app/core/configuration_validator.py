@@ -25,8 +25,7 @@ from typing import Any, Callable, Dict, List, Optional, Pattern, Set, Union
 from urllib.parse import urlparse
 import json
 
-from netra_backend.app.core.error_types import ConfigurationError
-from netra_backend.app.core.exceptions_config import ConfigValidationError
+from netra_backend.app.core.exceptions_config import ConfigurationError, ValidationError
 from netra_backend.app.core.unified_logging import get_logger
 
 

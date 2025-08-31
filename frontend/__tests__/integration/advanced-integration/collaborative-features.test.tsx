@@ -1,13 +1,12 @@
-/**
- * Collaborative Features Integration Tests
- * Tests for real-time cursor tracking, presence, and collaborative editing
- */
-
 import React from 'react';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import { createTestSetup, createWebSocketMessage } from './setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+, waitFor, screen, fireEvent } from '@testing-library/react';
+import { createTestSetup, createWebSocketMessage } from './setup';
 
 describe('Collaborative Features Integration', () => {
+    jest.setTimeout(10000);
   const testSetup = createTestSetup({ enableWebSocket: true });
 
   beforeEach(() => {
@@ -16,6 +15,11 @@ describe('Collaborative Features Integration', () => {
 
   afterEach(() => {
     testSetup.afterEach();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   it('should sync cursor positions in real-time', async () => {
@@ -23,7 +27,7 @@ describe('Collaborative Features Integration', () => {
       const [otherCursors, setOtherCursors] = React.useState<Map<string, { x: number, y: number }>>(new Map());
       
       React.useEffect(() => {
-        const ws = new WebSocket('ws://localhost:8000/ws');
+        const ws = new WebSocket('ws://localhost:3001/test'));
         
         ws.onmessage = (event) => {
           const message = JSON.parse(event.data);
@@ -84,7 +88,7 @@ describe('Collaborative Features Integration', () => {
       const [typingUsers, setTypingUsers] = React.useState<Set<string>>(new Set());
       
       React.useEffect(() => {
-        const ws = new WebSocket('ws://localhost:8000/ws');
+        const ws = new WebSocket('ws://localhost:3001/test'));
         
         ws.onmessage = (event) => {
           const message = JSON.parse(event.data);

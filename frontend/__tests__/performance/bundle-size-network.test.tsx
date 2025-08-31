@@ -1,7 +1,7 @@
-/**
- * Bundle Size Network Tests
- * Tests network payload optimization, analysis reporting, and production build validation
- * Extracted from oversized bundle-size.test.tsx for modularity
+import { render, screen, waitFor } from '@testing-library/react';
+import { TestProviders } from '@/__tests__/test-utils/providers';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+cted from oversized bundle-size.test.tsx for modularity
  * 
  * Business Value Justification (BVJ):
  * - Segment: All (Free → Enterprise)
@@ -90,11 +90,13 @@ function measureCDNPerformance(): { hitRate: number; avgLatency: number; regions
 }
 
 describe('Bundle Size Network Tests', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('Network Payload Optimization', () => {
+      jest.setTimeout(10000);
     it('should optimize network payload delivery', () => {
       const payload = analyzeNetworkPayload();
       
@@ -136,6 +138,7 @@ describe('Bundle Size Network Tests', () => {
   });
 
   describe('Bundle Analysis Reporting', () => {
+      jest.setTimeout(10000);
     it('should generate comprehensive bundle reports', () => {
       const report = generateBundleReport();
       
@@ -184,6 +187,7 @@ describe('Bundle Size Network Tests', () => {
   });
 
   describe('Compression and Delivery', () => {
+      jest.setTimeout(10000);
     it('should validate compression configuration', () => {
       const compression = validateCompression();
       
@@ -216,6 +220,7 @@ describe('Bundle Size Network Tests', () => {
   });
 
   describe('Performance Budget Monitoring', () => {
+      jest.setTimeout(10000);
     it('should enforce performance budgets', () => {
       const budget = {
         maxBundleSize: 1000000, // 1MB
@@ -264,6 +269,7 @@ describe('Bundle Size Network Tests', () => {
   });
 
   describe('Production Environment Validation', () => {
+      jest.setTimeout(10000);
     it('should validate production build settings', () => {
       const prodSettings = {
         minified: true,

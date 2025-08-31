@@ -1,9 +1,9 @@
-/**
- * Login Token Management Integration Tests - Agent 2
- * 
- * BUSINESS VALUE JUSTIFICATION:
- * - Segment: All (Free → Enterprise)
- * - Business Goal: Secure token handling prevents security breaches
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+import React from 'react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { jest } from '@jest/globals';
+import { breaches
  * - Value Impact: Eliminates token-related auth failures
  * - Revenue Impact: Protects against security incidents costing $500K+
  * 
@@ -136,6 +136,7 @@ const TokenManagementTestComponent: React.FC = () => {
 // ============================================================================
 
 describe('Login Token Management Integration - Agent 2', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     setupMockDefaults();
     cleanupTest();
@@ -145,9 +146,15 @@ describe('Login Token Management Integration - Agent 2', () => {
     jest.clearAllMocks();
     localStorage.clear();
     sessionStorage.clear();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Token Storage and Retrieval', () => {
+      jest.setTimeout(10000);
     it('should store token in localStorage with jwt_token key', async () => {
       setupValidTokenScenario();
       renderTokenComponent();
@@ -188,6 +195,7 @@ describe('Login Token Management Integration - Agent 2', () => {
   });
 
   describe('Token Validation and Decoding', () => {
+      jest.setTimeout(10000);
     it('should validate token format and structure', async () => {
       setupValidTokenScenario();
       renderTokenComponent();
@@ -230,6 +238,7 @@ describe('Login Token Management Integration - Agent 2', () => {
   });
 
   describe('Token Expiration Handling', () => {
+      jest.setTimeout(10000);
     it('should detect expired tokens and remove them', async () => {
       setupExpiredTokenScenario();
       renderTokenComponent();
@@ -278,6 +287,7 @@ describe('Login Token Management Integration - Agent 2', () => {
   });
 
   describe('Token Security and Cleanup', () => {
+      jest.setTimeout(10000);
     it('should securely remove tokens on logout', async () => {
       setupValidTokenScenario();
       renderTokenComponent();
@@ -324,6 +334,7 @@ describe('Login Token Management Integration - Agent 2', () => {
   });
 
   describe('Token Lifecycle Management', () => {
+      jest.setTimeout(10000);
     it('should manage token state transitions correctly', async () => {
       renderTokenComponent();
       

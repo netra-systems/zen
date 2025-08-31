@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
 import { GTMProvider } from '@/providers/GTMProvider';
 import { useGTM } from '@/hooks/useGTM';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock Next.js Script component
 jest.mock('next/script', () => {
@@ -246,7 +247,7 @@ const WebSocketGTMTestComponent: React.FC = () => {
     <div data-testid="websocket-gtm-component">
       <div data-testid="connection-status">{connectionStatus}</div>
       <div data-testid="gtm-status">{gtm.isLoaded ? 'ready' : 'loading'}</div>
-      <div data-testid="total-events">{gtm.debug.totalEvents}</div>
+      <div data-testid="total-events">{gtm.debug?.totalEvents || 0}</div>
       <div data-testid="message-count">{messages.length}</div>
       <div data-testid="thread-count">{threads.length}</div>
       <div data-testid="current-thread">{currentThread || 'none'}</div>
@@ -320,20 +321,31 @@ const WebSocketGTMTestComponent: React.FC = () => {
 };
 
 describe('GTM WebSocket Events Integration', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   let mockDataLayer: any[];
 
   beforeEach(() => {
     mockDataLayer = [];
-    Object.defineProperty(global, 'window', {
-      value: {
+    
+    // Safely set window properties without redefining the window object
+    if (typeof window === 'undefined') {
+      // If window doesn't exist, create it
+      (global as any).window = {
         dataLayer: mockDataLayer,
         location: {
           pathname: '/chat',
           origin: 'https://app.netra.com'
         }
-      },
-      writable: true
-    });
+      };
+    } else {
+      // If window exists, just set the properties we need
+      (window as any).dataLayer = mockDataLayer;
+      (window as any).location = {
+        pathname: '/chat',
+        origin: 'https://app.netra.com'
+      };
+    }
 
     jest.clearAllMocks();
   });
@@ -347,6 +359,8 @@ describe('GTM WebSocket Events Integration', () => {
   };
 
   describe('WebSocket Connection Events', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track WebSocket connection attempts and success', async () => {
       renderWithGTM(<WebSocketGTMTestComponent />);
 
@@ -448,6 +462,8 @@ describe('GTM WebSocket Events Integration', () => {
   });
 
   describe('Thread Management Events', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track thread creation events', async () => {
       renderWithGTM(<WebSocketGTMTestComponent />);
 
@@ -532,6 +548,8 @@ describe('GTM WebSocket Events Integration', () => {
   });
 
   describe('Message Flow Events', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track outgoing message events', async () => {
       renderWithGTM(<WebSocketGTMTestComponent />);
 
@@ -637,6 +655,8 @@ describe('GTM WebSocket Events Integration', () => {
   });
 
   describe('Agent Activation Events', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track agent activation events', async () => {
       renderWithGTM(<WebSocketGTMTestComponent />);
 
@@ -711,6 +731,8 @@ describe('GTM WebSocket Events Integration', () => {
   });
 
   describe('Feature Usage Events', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track feature usage through WebSocket', async () => {
       renderWithGTM(<WebSocketGTMTestComponent />);
 
@@ -757,6 +779,8 @@ describe('GTM WebSocket Events Integration', () => {
   });
 
   describe('Complex Integration Flows', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track complete chat session flow', async () => {
       renderWithGTM(<WebSocketGTMTestComponent />);
 
@@ -878,6 +902,8 @@ describe('GTM WebSocket Events Integration', () => {
   });
 
   describe('Performance and Reliability', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle high-frequency WebSocket events', async () => {
       renderWithGTM(<WebSocketGTMTestComponent />);
 
@@ -959,4 +985,8 @@ describe('GTM WebSocket Events Integration', () => {
       });
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

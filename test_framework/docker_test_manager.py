@@ -159,14 +159,29 @@ class DockerTestManager:
                 for profile in profiles:
                     cmd.extend(["--profile", profile])
             
-            cmd.extend(["up", "-d", "--remove-orphans"])
+            # Check if services are already running before starting
+            existing_check = subprocess.run(
+                ["docker", "compose", "-f", str(self.compose_file), "-p", self.project_name, "ps", "--services", "--filter", "status=running"],
+                capture_output=True,
+                text=True
+            )
             
-            # Add specific services if requested
-            if services:
-                cmd.extend(services)
-            else:
-                # Default to core test services
-                cmd.extend(["postgres-test", "redis-test"])
+            running_services = set(existing_check.stdout.strip().split('\n')) if existing_check.stdout.strip() else set()
+            requested_services = set(services if services else ["postgres-test", "redis-test"])
+            
+            # Only start services that aren't already running
+            services_to_start = requested_services - running_services
+            
+            if not services_to_start:
+                print(f"[TEST] All requested services already running: {', '.join(requested_services)}")
+                self._running_services.update(requested_services)
+                return True
+            
+            cmd.extend(["up", "-d"])
+            # Note: Removed --remove-orphans flag to prevent killing unrelated containers
+            
+            # Add specific services to start
+            cmd.extend(list(services_to_start))
             
             print(f"[TEST] Starting Docker services: {' '.join(cmd)}")
             

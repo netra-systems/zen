@@ -147,6 +147,13 @@ class PipelineExecutor:
                                            state: DeepAgentState,
                                            context: AgentExecutionContext) -> None:
         """Process execution results with optimized batched state merging and persistence."""
+        # Send orchestration notification about combining results
+        await self._send_orchestration_notification(
+            context.thread_id, context.run_id, 
+            "orchestration_combining", 
+            f"Combining results from {len(results)} agents..."
+        )
+        
         # Collect all successful state changes to merge in batch
         state_changes = []
         for result in results:
@@ -303,3 +310,36 @@ class PipelineExecutor:
         return WebSocketMessage(
             type="agent_completed", payload=content.model_dump(mode='json')
         )
+    
+    async def _send_orchestration_notification(self, thread_id: str, run_id: str, 
+                                             event_type: str, message: str) -> None:
+        """Send orchestration-level WebSocket notification."""
+        try:
+            if not self.websocket_manager:
+                logger.debug(f"No WebSocket manager available for orchestration event: {event_type}")
+                return
+            
+            # Create orchestration notification payload
+            payload = {
+                "run_id": run_id,
+                "event_type": event_type,
+                "message": message,
+                "timestamp": self._get_current_timestamp(),
+                "agent_name": "supervisor",
+                "orchestration_level": True
+            }
+            
+            # Send notification
+            from netra_backend.app.schemas.websocket_models import WebSocketMessage
+            notification = WebSocketMessage(type=event_type, payload=payload)
+            await self.websocket_manager.send_to_thread(thread_id, notification.model_dump())
+            
+            logger.info(f"Sent orchestration notification: {event_type} - {message[:50]}...")
+            
+        except Exception as e:
+            logger.warning(f"Failed to send orchestration notification {event_type}: {e}")
+    
+    def _get_current_timestamp(self) -> float:
+        """Get current timestamp."""
+        from datetime import datetime, timezone
+        return datetime.now(timezone.utc).timestamp()

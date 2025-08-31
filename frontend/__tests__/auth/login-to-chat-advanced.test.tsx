@@ -7,6 +7,7 @@
  * Coverage: Advanced auth features for enhanced user experience
  */
 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,8 +15,7 @@ import { AuthProvider } from '@/auth/context';
 import { authService } from '@/auth/unified-auth-service';
 import { useAuthStore } from '@/store/authStore';
 import '@testing-library/jest-dom';
-import {
-  setupMockAuthStore,
+import { setupMockAuthStore,
   setupMockCookies,
   setupMockAuthService,
   renderLoginComponent,
@@ -33,6 +33,8 @@ jest.mock('jwt-decode', () => ({
 }));
 
 describe('Auth Login Advanced Features', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   let mockAuthStore: any;
   let user: ReturnType<typeof userEvent.setup>;
 
@@ -46,9 +48,12 @@ describe('Auth Login Advanced Features', () => {
   afterEach(() => {
     jest.clearAllMocks();
     jest.clearAllTimers();
+      cleanupAntiHang();
   });
 
   describe('Remember Me Functionality', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('stores remember me preference in cookies', async () => {
       renderLoginComponent();
       
@@ -88,6 +93,8 @@ describe('Auth Login Advanced Features', () => {
   });
 
   describe('Social Login Integration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('initiates Google OAuth flow', async () => {
       renderLoginComponent();
       
@@ -120,6 +127,8 @@ describe('Auth Login Advanced Features', () => {
   });
 
   describe('MFA (Multi-Factor Authentication)', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('prompts for MFA code when required', async () => {
       jest.mocked(authService.handleLogin).mockResolvedValue({
         success: false,

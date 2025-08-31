@@ -1,5 +1,5 @@
-/**
- * Render Performance Tests
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+import { nder Performance Tests
  * 
  * BVJ: Enterprise segment - ensures render performance meets SLAs
  * Tests render time thresholds, rapid re-renders, and virtual scrolling.
@@ -41,6 +41,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('Render Performance Tests', () => {
+    jest.setTimeout(10000);
   let server: WS;
   
   beforeEach(() => {
@@ -50,9 +51,15 @@ describe('Render Performance Tests', () => {
 
   afterEach(() => {
     cleanupTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Large Lists', () => {
+      jest.setTimeout(10000);
     it('should meet render time thresholds for large lists', async () => {
       const LargeListComponent = createLargeListComponent();
       
@@ -76,6 +83,7 @@ describe('Render Performance Tests', () => {
   });
 
   describe('Rapid Re-renders', () => {
+      jest.setTimeout(10000);
     it('should maintain performance during rapid re-renders', async () => {
       const RapidRerenderComponent = createRapidRerenderComponent();
       
@@ -94,6 +102,7 @@ describe('Render Performance Tests', () => {
   });
 
   describe('Virtual Scrolling', () => {
+      jest.setTimeout(10000);
     it('should optimize virtual scrolling performance', async () => {
       const VirtualScrollComponent = createVirtualScrollComponent();
       

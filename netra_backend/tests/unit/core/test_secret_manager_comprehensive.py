@@ -47,6 +47,7 @@ class TestSecretManagerInitialization:
         assert manager._project_id == '304612253870'
         
     @patch('netra_backend.app.core.secret_manager.config_manager')
+    @patch.dict('os.environ', {'ENVIRONMENT': 'development'}, clear=False)
     def test_initialization_with_development_fallback(self, mock_config_manager):
         """Test initialization uses production defaults for development."""
         mock_config = Mock()

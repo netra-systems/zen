@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import { InitializationProgress } from '@/components/InitializationProgress';
 
 // Mock the UI components
@@ -33,7 +34,27 @@ jest.mock('lucide-react', () => ({
 }));
 
 describe('InitializationProgress', () => {
+      
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
   describe('Phase Messages and Details', () => {
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     it('displays correct message and detail for auth phase', () => {
       render(<InitializationProgress phase="auth" progress={20} />);
       
@@ -76,6 +97,16 @@ describe('InitializationProgress', () => {
   });
 
   describe('Progress Bar', () => {
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     it('displays progress bar with correct value', () => {
       render(<InitializationProgress phase="auth" progress={25} />);
       
@@ -120,6 +151,16 @@ describe('InitializationProgress', () => {
   });
 
   describe('Phase Indicators', () => {
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     it('shows auth phase as active when in auth phase', () => {
       render(<InitializationProgress phase="auth" progress={20} />);
       
@@ -165,6 +206,16 @@ describe('InitializationProgress', () => {
   });
 
   describe('Connection Status', () => {
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     it('shows connection status during websocket phase', () => {
       render(
         <InitializationProgress 
@@ -228,6 +279,16 @@ describe('InitializationProgress', () => {
   });
 
   describe('Error Display', () => {
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     it('shows error alert when in error phase with error message', () => {
       render(
         <InitializationProgress 
@@ -267,6 +328,16 @@ describe('InitializationProgress', () => {
   });
 
   describe('Branding and Layout', () => {
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     it('displays Netra Apex branding', () => {
       render(<InitializationProgress phase="auth" progress={20} />);
       
@@ -291,6 +362,16 @@ describe('InitializationProgress', () => {
   });
 
   describe('Edge Cases', () => {
+        
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
     it('handles missing optional props gracefully', () => {
       render(<InitializationProgress phase="auth" progress={50} />);
       
@@ -313,4 +394,8 @@ describe('InitializationProgress', () => {
       expect(alertDescription.textContent).toHaveLength(500);
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

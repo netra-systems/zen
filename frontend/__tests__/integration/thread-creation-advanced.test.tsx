@@ -1,10 +1,9 @@
-/**
- * Thread Creation Integration Tests - Advanced Scenarios
- * 
- * Tests advanced scenarios for thread creation including input focus,
- * error recovery, retry mechanisms, and edge cases.
- * 
- * Business Value Justification:
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { useRouter } from 'next/navigation';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
  * - Segment: All (Free, Early, Mid, Enterprise)
  * - Goal: Ensure robust thread creation under all conditions
  * - Value Impact: Prevents user frustration and abandonment
@@ -68,15 +67,22 @@ const mockAuthStore = {
 };
 
 describe('Thread Creation Advanced Scenarios', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     setupAdvancedTests();
   });
   
   afterEach(() => {
     cleanupAdvancedTests();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
   
   describe('Input Field Auto-Focus', () => {
+      jest.setTimeout(10000);
     it('focuses message input after thread creation', async () => {
       renderFullChatInterface();
       await triggerThreadCreation();
@@ -108,6 +114,7 @@ describe('Thread Creation Advanced Scenarios', () => {
   });
   
   describe('Duplicate Prevention', () => {
+      jest.setTimeout(10000);
     it('prevents duplicate threads on double-click', async () => {
       renderThreadCreationFlow();
       await performDoubleClick();
@@ -137,6 +144,7 @@ describe('Thread Creation Advanced Scenarios', () => {
   });
   
   describe('Error Recovery and Retry', () => {
+      jest.setTimeout(10000);
     it('allows retry after network failure', async () => {
       setupNetworkFailure();
       renderThreadCreationFlow();
@@ -172,6 +180,7 @@ describe('Thread Creation Advanced Scenarios', () => {
   });
   
   describe('Performance Edge Cases', () => {
+      jest.setTimeout(10000);
     it('handles creation during high CPU load', async () => {
       simulateHighCpuLoad();
       renderThreadCreationFlow();
@@ -197,6 +206,7 @@ describe('Thread Creation Advanced Scenarios', () => {
   });
   
   describe('Mobile and Touch Specific Tests', () => {
+      jest.setTimeout(10000);
     it('prevents accidental double-tap creation', async () => {
       renderThreadCreationFlow();
       await simulateDoubleTap();

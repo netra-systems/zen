@@ -17,6 +17,7 @@
 
 import { getUnifiedApiConfig } from '@/lib/unified-api-config';
 import { apiClient } from '@/services/apiClientWrapper';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock Next.js router for tests
 jest.mock('next/navigation', () => ({
@@ -25,6 +26,8 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('Missing API Routes 404 Errors - Staging Replication', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   const originalEnv = process.env;
   
   beforeAll(() => {
@@ -44,6 +47,8 @@ describe('Missing API Routes 404 Errors - Staging Replication', () => {
   });
 
   describe('Missing /api/config/public Endpoint', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: /api/config/public returns 404 in staging
@@ -124,6 +129,8 @@ describe('Missing API Routes 404 Errors - Staging Replication', () => {
   });
 
   describe('Missing /api/threads Endpoints', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: Threads API endpoint returns 404 in staging
@@ -194,6 +201,8 @@ describe('Missing API Routes 404 Errors - Staging Replication', () => {
   });
 
   describe('API Client Wrapper Integration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: API client making requests to wrong URLs
@@ -244,6 +253,8 @@ describe('Missing API Routes 404 Errors - Staging Replication', () => {
   });
 
   describe('Backend Service Availability', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: Backend service might not be running in staging
@@ -285,6 +296,8 @@ describe('Missing API Routes 404 Errors - Staging Replication', () => {
   });
 
   describe('Ingress/Load Balancer Configuration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: Ingress routing API calls to wrong service
@@ -320,6 +333,8 @@ describe('Missing API Routes 404 Errors - Staging Replication', () => {
   });
 
   describe('Environment-Specific Route Configuration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: Route configuration not accounting for staging environment
@@ -350,6 +365,8 @@ describe('Missing API Routes 404 Errors - Staging Replication', () => {
   });
 
   describe('API Versioning and Path Structure', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: API version paths not matching backend implementation
@@ -381,4 +398,8 @@ describe('Missing API Routes 404 Errors - Staging Replication', () => {
       expect(threadsPath).not.toBe('/threads'); // Missing api prefix
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

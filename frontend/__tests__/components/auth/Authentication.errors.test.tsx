@@ -13,6 +13,7 @@ import { LoginButton } from '@/auth/components';
 import { AuthProvider, AuthContext } from '@/auth/context';
 import { authService } from '@/auth/unified-auth-service';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock auth service
 jest.mock('@/auth/service');
@@ -48,6 +49,8 @@ const mockAuthContext = {
 };
 
 describe('Authentication Error Message Tests', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     // Mock authService.useAuth to return our mock context
@@ -55,6 +58,8 @@ describe('Authentication Error Message Tests', () => {
   });
 
   describe('Invalid Credentials Errors', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle invalid login credentials gracefully', async () => {
       mockLogin.mockImplementation(() => {
         throw new Error('Invalid credentials');
@@ -107,6 +112,8 @@ describe('Authentication Error Message Tests', () => {
   });
 
   describe('Network Error Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle network connection errors', async () => {
       mockLogin.mockRejectedValueOnce(new Error('Network error'));
       
@@ -154,6 +161,8 @@ describe('Authentication Error Message Tests', () => {
   });
 
   describe('OAuth Provider Errors', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle Google OAuth errors', async () => {
       mockLogin.mockRejectedValueOnce(new Error('Google OAuth error'));
       
@@ -200,6 +209,8 @@ describe('Authentication Error Message Tests', () => {
   });
 
   describe('Configuration Error Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle missing auth configuration', () => {
       jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
@@ -262,6 +273,8 @@ describe('Authentication Error Message Tests', () => {
   });
 
   describe('Token Management Errors', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle corrupted token storage', () => {
       // Mock corrupted token scenario
       jest.mocked(authService.useAuth).mockReturnValue({
@@ -314,6 +327,8 @@ describe('Authentication Error Message Tests', () => {
   });
 
   describe('Error Recovery Mechanisms', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should allow retry after authentication error', async () => {
       mockLogin.mockRejectedValueOnce(new Error('Network error'))
                .mockResolvedValueOnce(undefined);
@@ -384,6 +399,8 @@ describe('Authentication Error Message Tests', () => {
   });
 
   describe('Error Message Accessibility', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should maintain accessible error communication', async () => {
       mockLogin.mockRejectedValueOnce(new Error('Authentication failed'));
       
@@ -430,4 +447,8 @@ describe('Authentication Error Message Tests', () => {
       expect(button).toHaveTextContent('Login with Google');
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

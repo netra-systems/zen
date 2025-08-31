@@ -43,7 +43,7 @@ function useLoadingState(onView?: () => void) {
 
 function LoadingCard() {
   return (
-    <Card>
+    <Card data-testid="loading-indicator">
       <CardContent className="flex items-center justify-center h-[400px]">
         <div className="text-center space-y-4">
           <RefreshCw className="w-8 h-8 animate-spin mx-auto text-primary" />
@@ -61,11 +61,11 @@ function HeaderCard({ industry, autoRefresh, setAutoRefresh, lastUpdated }: {
   lastUpdated: Date
 }) {
   return (
-    <Card>
+    <Card data-testid="metrics-header">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2" data-testid="metrics-title">
               <BarChart3 className="w-5 h-5" />
               Performance Metrics Dashboard
             </CardTitle>
@@ -73,8 +73,8 @@ function HeaderCard({ industry, autoRefresh, setAutoRefresh, lastUpdated }: {
               Real-time optimization metrics for {industry}
             </CardDescription>
           </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-xs">
+          <div className="flex items-center gap-2" data-testid="control-panel">
+            <Badge variant="outline" className="text-xs" data-testid="last-refresh">
               <Clock className="w-3 h-3 mr-1" />
               Updated {lastUpdated.toLocaleTimeString()}
             </Badge>
@@ -82,6 +82,7 @@ function HeaderCard({ industry, autoRefresh, setAutoRefresh, lastUpdated }: {
               variant={autoRefresh ? 'default' : 'outline'}
               size="sm"
               onClick={() => setAutoRefresh(!autoRefresh)}
+              data-testid="refresh-button"
             >
               <RefreshCw className={cn("w-4 h-4 mr-1", autoRefresh && "animate-spin")} />
               {autoRefresh ? 'Auto' : 'Manual'}
@@ -117,7 +118,7 @@ export default function PerformanceMetrics({ industry, onView }: PerformanceMetr
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="performance-metrics">
       <HeaderCard 
         industry={industry} 
         autoRefresh={autoRefresh} 

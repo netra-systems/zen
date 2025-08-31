@@ -1,9 +1,8 @@
-/**
- * Optimistic Updates Tests - Real-time UI Responsiveness
- * 
- * BVJ (Business Value Justification):
- * - Segment: Growth & Enterprise (premium UX features)
- * - Business Goal: Improve perceived performance for premium users
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { useChatStore } from '@/store/chat';
+import { ChatStoreTestUtils, GlobalTestUtils } from './store-test-utils';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ve perceived performance for premium users
  * - Value Impact: Optimistic UI reduces perceived latency by 70%
  * - Revenue Impact: Better UX increases user satisfaction and retention
  * 
@@ -29,6 +28,7 @@ jest.mock('@/services/reconciliation', () => ({
 }));
 
 describe('Optimistic Updates Tests', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     GlobalTestUtils.setupStoreTestEnvironment();
     jest.clearAllMocks();
@@ -36,9 +36,15 @@ describe('Optimistic Updates Tests', () => {
 
   afterEach(() => {
     GlobalTestUtils.cleanupStoreTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Optimistic Message Creation', () => {
+      jest.setTimeout(10000);
     it('should immediately show optimistic messages in UI', () => {
       const result = ChatStoreTestUtils.initializeStore();
       
@@ -120,6 +126,7 @@ describe('Optimistic Updates Tests', () => {
   });
 
   describe('Optimistic State Transitions', () => {
+      jest.setTimeout(10000);
     it('should optimistically update processing state', () => {
       const result = ChatStoreTestUtils.initializeStore();
 
@@ -175,6 +182,7 @@ describe('Optimistic Updates Tests', () => {
   });
 
   describe('Confirmation Handling', () => {
+      jest.setTimeout(10000);
     it('should confirm optimistic messages from server', () => {
       const result = ChatStoreTestUtils.initializeStore();
 
@@ -294,6 +302,7 @@ describe('Optimistic Updates Tests', () => {
   });
 
   describe('Rollback Mechanisms', () => {
+      jest.setTimeout(10000);
     it('should rollback failed optimistic updates', () => {
       const result = ChatStoreTestUtils.initializeStore();
 
@@ -408,6 +417,7 @@ describe('Optimistic Updates Tests', () => {
   });
 
   describe('Conflict Resolution', () => {
+      jest.setTimeout(10000);
     it('should handle optimistic vs server conflicts', () => {
       const result = ChatStoreTestUtils.initializeStore();
 

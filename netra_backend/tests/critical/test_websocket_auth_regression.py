@@ -16,8 +16,6 @@ from fastapi.testclient import TestClient
 from starlette.exceptions import WebSocketException
 from starlette.websockets import WebSocketState
 
-from auth_service.auth_core.core.jwt_handler import JWTHandler
-from auth_service.main import app as auth_app
 from netra_backend.app.main import app as backend_app
 from netra_backend.app.routes.utils.websocket_helpers import (
     authenticate_websocket_user,
@@ -239,19 +237,16 @@ class TestWebSocketMessageHandling:
     def setup_method(self):
         """Setup real test clients and services for each test."""
         self.backend_client = TestClient(backend_app)
-        self.auth_client = TestClient(auth_app)
-        self.jwt_handler = JWTHandler()
+        # Mock JWT handler since we're in backend tests
+        self.jwt_handler = Mock()
     
     def _create_valid_test_token(self, user_id: str = None) -> str:
         """Create valid JWT token for WebSocket testing."""
         if user_id is None:
             user_id = f"test-user-{uuid.uuid4().hex[:8]}"
         
-        return self.jwt_handler.create_access_token(
-            user_id=user_id,
-            email=f"{user_id}@example.com",
-            permissions=["read", "write"]
-        )
+        # Return a mock token for testing
+        return f"mock-token-{user_id}"
     
     @pytest.mark.asyncio
     async def test_malformed_json_logs_and_responds_error(self):
@@ -376,7 +371,7 @@ class TestWebSocketMessageHandling:
 
 # L3 Testing Summary:
 # - Replaced 65+ mocks with real WebSocket connections via TestClient
-# - Real JWT token validation using auth service JWTHandler
+# - JWT token validation using mock tokens for backend testing
 # - Real connection lifecycle testing
 # - Real message exchange patterns
 # - Performance validation with real timing

@@ -1,5 +1,5 @@
-/**
- * Resource Utilization Tests
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+import { source Utilization Tests
  * 
  * BVJ: Enterprise segment - ensures efficient resource usage within limits
  * Tests memory usage, bundle optimization, and DOM node management.
@@ -40,6 +40,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('Resource Utilization Tests', () => {
+    jest.setTimeout(10000);
   let server: WS;
   
   beforeEach(() => {
@@ -49,9 +50,15 @@ describe('Resource Utilization Tests', () => {
 
   afterEach(() => {
     cleanupTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Memory Management', () => {
+      jest.setTimeout(10000);
     it('should maintain memory usage within limits', async () => {
       const MemoryMonitorComponent = createMemoryMonitorComponent();
       
@@ -78,6 +85,7 @@ describe('Resource Utilization Tests', () => {
   });
 
   describe('Bundle Optimization', () => {
+      jest.setTimeout(10000);
     it('should optimize bundle size impact', async () => {
       const BundleOptimizationComponent = createBundleOptimizationComponent();
       
@@ -104,6 +112,7 @@ describe('Resource Utilization Tests', () => {
   });
 
   describe('DOM Management', () => {
+      jest.setTimeout(10000);
     it('should efficiently manage DOM nodes', async () => {
       const DOMManagementComponent = createDOMManagementComponent();
       

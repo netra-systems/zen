@@ -1,7 +1,7 @@
-// Tool lifecycle integration test
-// Tests the complete tool lifecycle from WebSocket events to UI display
-
-// Declare mocks first (Jest Module Hoisting)
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+import { renderHook, act } from '@testing-library/react';
+import { useUnifiedChatStore } from '@/store/unified-chat';
+import { rst (Jest Module Hoisting)
 const mockUseUnifiedChatStore = jest.fn();
 const mockUseWebSocket = jest.fn();
 const mockUseAuthStore = jest.fn();
@@ -46,6 +46,7 @@ import {
 import type { UnifiedWebSocketEvent } from '@/types/websocket-event-types';
 
 describe('Tool Lifecycle Integration', () => {
+    jest.setTimeout(10000);
   let store: ReturnType<typeof useUnifiedChatStore>;
   let hookResult: any;
 

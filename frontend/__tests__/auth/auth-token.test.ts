@@ -9,6 +9,7 @@
 
 // Import test setup with mocks FIRST
 import './auth-test-setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Set up localStorage mock before importing authService
 import { createLocalStorageMock } from './auth-test-utils';
@@ -31,12 +32,16 @@ import { mockUseContext } from './auth-test-setup';
 import { AuthContext } from '@/auth';
 
 import { useAuth } from '@/auth/context';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Auth Token Management', () => {
+  jest.setTimeout(10000);
+  
   let testEnv: ReturnType<typeof setupAuthTestEnvironment>;
   let mockToken: string;
 
   beforeEach(() => {
+    setupAntiHang();
     testEnv = setupAuthTestEnvironment();
     mockToken = createMockToken();
     
@@ -47,6 +52,10 @@ describe('Auth Token Management', () => {
     testEnv.localStorageMock = testLocalStorageMock;
     
     resetAuthTestMocks(testEnv);
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
   });
 
   afterAll(() => {

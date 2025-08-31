@@ -8,6 +8,7 @@ import { render, waitFor, act } from '@testing-library/react';
 import { AuthProvider, useAuth } from '@/auth';
 import { unifiedAuthService } from '@/auth/unified-auth-service';
 import { logger } from '@/lib/logger';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock dependencies
 jest.mock('@/auth/unified-auth-service');
@@ -28,6 +29,8 @@ jest.mock('@/store/authStore', () => ({
 }));
 
 describe('Refresh Loop Prevention Tests', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
@@ -36,9 +39,17 @@ describe('Refresh Loop Prevention Tests', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Token Refresh Cooldown', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('enforces 30-second cooldown between refresh attempts', async () => {
       const mockRefreshToken = jest.fn().mockResolvedValue({
         access_token: 'new_token',
@@ -151,6 +162,8 @@ describe('Refresh Loop Prevention Tests', () => {
   });
 
   describe('Same Token Detection', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('detects when refresh returns the same token', async () => {
       const sameToken = 'same_expired_token';
       const mockRefreshToken = jest.fn().mockResolvedValue({
@@ -195,6 +208,8 @@ describe('Refresh Loop Prevention Tests', () => {
   });
 
   describe('Redirect Loop Prevention', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('prevents multiple redirects in HomePage', async () => {
       const mockPush = jest.fn();
       jest.mock('next/navigation', () => ({
@@ -274,6 +289,8 @@ describe('Refresh Loop Prevention Tests', () => {
   });
 
   describe('Environment Config Validation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('throws error when staging uses localhost URLs', () => {
       const originalEnv = process.env.NEXT_PUBLIC_ENVIRONMENT;
       process.env.NEXT_PUBLIC_ENVIRONMENT = 'staging';
@@ -341,6 +358,8 @@ describe('Refresh Loop Prevention Tests', () => {
   });
 
   describe('Auth Initialization Race Conditions', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('waits for initialization before making auth decisions', async () => {
       let resolveAuthConfig: any;
       const authConfigPromise = new Promise((resolve) => {

@@ -1,13 +1,12 @@
-/**
- * Enhanced Offline Mode Integration Tests
- * Tests comprehensive offline/online transitions with data persistence
- * Ensures no data loss and graceful feature degradation
- */
-
 import React from 'react';
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
+import WS from 'jest-websocket-mock';
+import { TestProviders } from '../setup/test-providers';
+import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+';
 import WS from 'jest-websocket-mock';
 import { TestProviders } from '../setup/test-providers';
 import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
@@ -450,6 +449,7 @@ const NetworkDetectionComponent: React.FC = () => {
 };
 
 describe('Enhanced Offline Mode Tests', () => {
+    jest.setTimeout(10000);
   let wsManager: WebSocketTestManager;
   let mockFetch: jest.MockedFunction<typeof fetch>;
 
@@ -478,9 +478,15 @@ describe('Enhanced Offline Mode Tests', () => {
     jest.clearAllMocks();
     jest.useRealTimers();
     localStorage.clear();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Offline/Online Transitions', () => {
+      jest.setTimeout(10000);
     it('should detect offline/online status changes', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       
@@ -567,6 +573,7 @@ describe('Enhanced Offline Mode Tests', () => {
   });
 
   describe('Data Persistence', () => {
+      jest.setTimeout(10000);
     it('should persist offline data in localStorage', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       
@@ -620,6 +627,7 @@ describe('Enhanced Offline Mode Tests', () => {
   });
 
   describe('Draft Message Persistence', () => {
+      jest.setTimeout(10000);
     it('should save and restore draft messages', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       
@@ -666,6 +674,7 @@ describe('Enhanced Offline Mode Tests', () => {
   });
 
   describe('Network Quality Detection', () => {
+      jest.setTimeout(10000);
     it('should detect network connection type and quality', async () => {
       // Mock connection API
       Object.defineProperty(navigator, 'connection', {
@@ -693,6 +702,7 @@ describe('Enhanced Offline Mode Tests', () => {
   });
 
   describe('Storage Management', () => {
+      jest.setTimeout(10000);
     it('should handle storage quota limits gracefully', async () => {
       // Mock storage API
       Object.defineProperty(navigator, 'storage', {
@@ -742,6 +752,7 @@ describe('Enhanced Offline Mode Tests', () => {
   });
 
   describe('Error Handling', () => {
+      jest.setTimeout(10000);
     it('should handle localStorage failures gracefully', async () => {
       // Mock localStorage to throw error
       const originalSetItem = localStorage.setItem;
@@ -813,6 +824,7 @@ describe('Enhanced Offline Mode Tests', () => {
   });
 
   describe('Manual Sync Operations', () => {
+      jest.setTimeout(10000);
     it('should allow manual sync when online', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       

@@ -40,8 +40,7 @@ class MockSubAgentLogger:
         logger = SubAgentLogger(enabled=False)
         assert logger.enabled is False
     
-    @mock_justified("L1: Unit test isolating SubAgentLogger communication logic. Mocking logger to test message formatting without external logging dependencies.")
-    # Mock: Component isolation for testing without external dependencies
+        # Mock: Component isolation for testing without external dependencies
     @patch('app.llm.observability.logger')
     def test_log_agent_communication_enabled(self, mock_logger):
         """Test agent communication logging when enabled."""
@@ -54,8 +53,7 @@ class MockSubAgentLogger:
         assert "agent_a" in call_args
         assert "agent_b" in call_args
     
-    @mock_justified("L1: Unit test verifying logging disabled state. Mock prevents actual log output during testing.")
-    # Mock: Component isolation for testing without external dependencies
+        # Mock: Component isolation for testing without external dependencies
     @patch('app.llm.observability.logger')
     def test_log_agent_communication_disabled(self, mock_logger):
         """Test agent communication logging when disabled."""
@@ -64,8 +62,7 @@ class MockSubAgentLogger:
         
         mock_logger.info.assert_not_called()
     
-    @mock_justified("L1: Unit test for agent input logging format. Mock isolates logging logic testing.")
-    # Mock: Component isolation for testing without external dependencies
+        # Mock: Component isolation for testing without external dependencies
     @patch('app.llm.observability.logger')
     def test_log_agent_input(self, mock_logger):
         """Test agent input logging."""
@@ -77,8 +74,7 @@ class MockSubAgentLogger:
         assert "Agent input:" in call_args
         assert "1024" in call_args
     
-    @mock_justified("L1: Unit test for agent output logging format. Mock isolates logging logic testing.")
-    # Mock: Component isolation for testing without external dependencies
+        # Mock: Component isolation for testing without external dependencies
     @patch('app.llm.observability.logger')
     def test_log_agent_output(self, mock_logger):
         """Test agent output logging."""
@@ -144,8 +140,7 @@ class TestBaseSubAgentLogging:
         size = test_agent._calculate_data_size(data)
         assert size == 0
     
-    @mock_justified("L1: Unit test for agent start event logging. Mock isolates start event logic without external dependencies.")
-    # Mock: Component isolation for testing without external dependencies
+        # Mock: Component isolation for testing without external dependencies
     @patch('app.llm.observability.SubAgentLogger._log_communication_json')
     def test_log_agent_start(self, mock_log_comm, test_agent):
         """Test agent start logging."""
@@ -156,8 +151,7 @@ class TestBaseSubAgentLogging:
             "system", test_agent.name, test_agent.correlation_id, "agent_start"
         )
     
-    @mock_justified("L1: Unit test verifying disabled logging prevents calls. Mock verifies no logging occurs when disabled.")
-    # Mock: Component isolation for testing without external dependencies
+        # Mock: Component isolation for testing without external dependencies
     @patch('app.llm.observability.SubAgentLogger._log_communication_json')
     def test_log_agent_start_disabled(self, mock_log_comm, test_agent):
         """Test agent start logging when disabled."""
@@ -166,8 +160,7 @@ class TestBaseSubAgentLogging:
         
         mock_log_comm.assert_not_called()
     
-    @mock_justified("L1: Unit test for agent completion event logging. Mock isolates completion event logic.")
-    # Mock: Component isolation for testing without external dependencies
+        # Mock: Component isolation for testing without external dependencies
     @patch('app.llm.observability.SubAgentLogger._log_communication_json')
     def test_log_agent_completion(self, mock_log_comm, test_agent):
         """Test agent completion logging."""
@@ -178,8 +171,7 @@ class TestBaseSubAgentLogging:
             test_agent.name, "system", test_agent.correlation_id, "agent_completed"
         )
     
-    @mock_justified("L1: Unit test for inter-agent input logging. Mock isolates input logging logic testing.")
-    # Mock: Component isolation for testing without external dependencies
+        # Mock: Component isolation for testing without external dependencies
     @patch('app.llm.observability.SubAgentLogger._log_input_json')
     def test_log_input_from_agent(self, mock_log_input, test_agent):
         """Test logging input from another agent."""
@@ -193,8 +185,7 @@ class TestBaseSubAgentLogging:
         assert args[2] == len("test data")
         assert args[3] == test_agent.correlation_id
     
-    @mock_justified("L1: Unit test for inter-agent output logging. Mock isolates output logging logic testing.")
-    # Mock: Component isolation for testing without external dependencies
+        # Mock: Component isolation for testing without external dependencies
     @patch('app.llm.observability.SubAgentLogger._log_output_json')
     def test_log_output_to_agent(self, mock_log_output, test_agent):
         """Test logging output to another agent."""
@@ -209,8 +200,7 @@ class TestBaseSubAgentLogging:
         assert args[3] == "success"
         assert args[4] == test_agent.correlation_id
     
-    @mock_justified("L1: Unit test for pre-run logging integration. Mock config and logger to test initialization logging flow.")
-    # Mock: Component isolation for testing without external dependencies
+        # Mock: Component isolation for testing without external dependencies
     @patch('app.llm.observability.SubAgentLogger._log_communication_json')
     # Mock: Component isolation for testing without external dependencies
     @patch('app.config.get_config')

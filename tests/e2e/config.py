@@ -24,6 +24,9 @@ from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, Optional
 
+# Import IsolatedEnvironment per CLAUDE.md requirements
+from test_framework.environment_isolation import get_env
+
 # Import dynamic port manager for port allocation
 try:
     from tests.e2e.dynamic_port_manager import get_port_manager, TestMode
@@ -120,10 +123,14 @@ class UnifiedTestConfig:
         return self.endpoints.api_base
     
     def _setup_environment(self) -> None:
-        """Setup test environment variables"""
+        """Setup test environment variables using IsolatedEnvironment"""
+        # Use IsolatedEnvironment per CLAUDE.md unified_environment_management.xml
+        env = get_env()
+        env.enable_isolation()
+        
         test_env = self._get_base_test_env()
         for key, value in test_env.items():
-            os.environ[key] = value
+            env.set(key, value, source="unified_test_config")
     
     def _get_base_test_env(self) -> Dict[str, str]:
         """Get base test environment variables"""
@@ -154,21 +161,23 @@ class UnifiedTestConfig:
     
     def _create_test_secrets(self) -> TestSecrets:
         """Create test JWT and encryption secrets"""
-        # Use the backend JWT secret if set, otherwise use test default
-        jwt_secret = os.environ.get("JWT_SECRET_KEY", "rsWwwvq8X6mCSuNv-TMXHDCfb96Xc-Dbay9MZy6EDCU")
+        # Use the backend JWT secret if set, otherwise use test default - via IsolatedEnvironment
+        env = get_env()
+        jwt_secret = env.get("JWT_SECRET_KEY", "rsWwwvq8X6mCSuNv-TMXHDCfb96Xc-Dbay9MZy6EDCU")
         fernet_key = "cYpHdJm0e-zt3SWz-9h0gC_kh0Z7c3H6mRQPbPLFdao="
         encryption_key = "test-encryption-key-32-chars-long"
         self._set_secret_env_vars(jwt_secret, fernet_key, encryption_key)
         return TestSecrets(jwt_secret, fernet_key, encryption_key)
     
     def _set_secret_env_vars(self, jwt: str, fernet: str, encrypt: str) -> None:
-        """Set secret environment variables"""
-        os.environ["JWT_SECRET_KEY"] = jwt
-        os.environ["FERNET_KEY"] = fernet
-        os.environ["ENCRYPTION_KEY"] = encrypt
+        """Set secret environment variables using IsolatedEnvironment"""
+        env = get_env()
+        env.set("JWT_SECRET_KEY", jwt, source="test_secrets")
+        env.set("FERNET_KEY", fernet, source="test_secrets")
+        env.set("ENCRYPTION_KEY", encrypt, source="test_secrets")
         # Set additional test secrets
-        os.environ["GOOGLE_CLIENT_ID"] = "test-google-client-id"
-        os.environ["GOOGLE_CLIENT_SECRET"] = "test-google-client-secret"
+        env.set("GOOGLE_CLIENT_ID", "test-google-client-id", source="test_secrets")
+        env.set("GOOGLE_CLIENT_SECRET", "test-google-client-secret", source="test_secrets")
         
         # REMOVED: Mock API key fallbacks are forbidden per CLAUDE.md
         # Configuration must require real API keys from environment
@@ -185,14 +194,16 @@ class UnifiedTestConfig:
             auth_base = urls["auth"]
         else:
             # Fallback to environment or defaults (Docker uses 8081 for auth)
-            backend_port = os.environ.get("TEST_BACKEND_PORT", "8000")
-            auth_port = os.environ.get("TEST_AUTH_PORT", "8081")  # Docker default
+            env = get_env()
+            backend_port = env.get("TEST_BACKEND_PORT", "8000")
+            auth_port = env.get("TEST_AUTH_PORT", "8081")  # Docker default
             ws_url = f"ws://localhost:{backend_port}/ws"
             api_base = f"http://localhost:{backend_port}"
             auth_base = f"http://localhost:{auth_port}"
-        # Set environment variables for service discovery
-        os.environ["AUTH_SERVICE_URL"] = auth_base
-        os.environ["BACKEND_SERVICE_URL"] = api_base
+        # Set environment variables for service discovery using IsolatedEnvironment
+        env = get_env()
+        env.set("AUTH_SERVICE_URL", auth_base, source="test_endpoints")
+        env.set("BACKEND_SERVICE_URL", api_base, source="test_endpoints")
         return TestEndpoints(ws_url, api_base, auth_base)
     
     def _create_test_users(self) -> Dict[str, TestUser]:
@@ -381,9 +392,10 @@ def get_test_environment_config(env_type: TestEnvironmentType = TestEnvironmentT
             )
         else:
             # Fallback to defaults (Docker uses 8081 for auth)
-            backend_port = int(os.environ.get("TEST_BACKEND_PORT", "8000"))
-            auth_port = int(os.environ.get("TEST_AUTH_PORT", "8081"))  # Docker default
-            frontend_port = int(os.environ.get("TEST_FRONTEND_PORT", "3000"))
+            env = get_env()
+            backend_port = int(env.get("TEST_BACKEND_PORT", "8000"))
+            auth_port = int(env.get("TEST_AUTH_PORT", "8081"))  # Docker default
+            frontend_port = int(env.get("TEST_FRONTEND_PORT", "3000"))
             return TestEnvironmentConfig(
                 environment_type=TestEnvironmentType.LOCAL,
                 base_url=f"http://localhost:{backend_port}",
@@ -425,31 +437,37 @@ def get_test_environment_config(env_type: TestEnvironmentType = TestEnvironmentT
 
 def get_auth_service_url() -> str:
     """Get the auth service URL."""
-    # Check if already set in environment
-    if "AUTH_SERVICE_URL" in os.environ:
-        return os.environ["AUTH_SERVICE_URL"]
+    # Check if already set in environment via IsolatedEnvironment
+    env = get_env()
+    auth_url = env.get("AUTH_SERVICE_URL")
+    if auth_url:
+        return auth_url
     # Try to get from port manager
     if get_port_manager:
         port_mgr = get_port_manager()
         urls = port_mgr.get_service_urls()
         return urls["auth"]
     # Fallback to default (Docker uses 8081 for auth)
-    auth_port = os.environ.get("TEST_AUTH_PORT", "8081")  # Docker default
+    env = get_env()
+    auth_port = env.get("TEST_AUTH_PORT", "8081")  # Docker default
     return f"http://localhost:{auth_port}"
 
 
 def get_backend_service_url() -> str:
     """Get the backend service URL."""
-    # Check if already set in environment
-    if "BACKEND_SERVICE_URL" in os.environ:
-        return os.environ["BACKEND_SERVICE_URL"]
+    # Check if already set in environment via IsolatedEnvironment
+    env = get_env()
+    backend_url = env.get("BACKEND_SERVICE_URL")
+    if backend_url:
+        return backend_url
     # Try to get from port manager
     if get_port_manager:
         port_mgr = get_port_manager()
         urls = port_mgr.get_service_urls()
         return urls["backend"]
     # Fallback to default
-    backend_port = os.environ.get("TEST_BACKEND_PORT", "8000")
+    env = get_env()
+    backend_port = env.get("TEST_BACKEND_PORT", "8000")
     return f"http://localhost:{backend_port}"
 
 

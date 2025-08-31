@@ -35,6 +35,7 @@ import { jwtDecode } from 'jwt-decode';
 import { useAuthStore } from '@/store/authStore';
 import { logger } from '@/lib/logger';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Test component to access auth context with comprehensive state tracking
 const TestComponent = ({ onAuthChange }: { onAuthChange?: (authState: any) => void }) => {
@@ -112,6 +113,8 @@ const mockAuthConfig = {
 };
 
 describe('AuthContext Token Initialization - Critical Race Condition Tests', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   let mockAuthStore: any;
   let mockUnifiedAuthService: jest.Mocked<typeof unifiedAuthService>;
   let mockJwtDecode: jest.MockedFunction<typeof jwtDecode>;
@@ -182,6 +185,7 @@ describe('AuthContext Token Initialization - Critical Race Condition Tests', () 
     
     jest.clearAllTimers();
     jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   /**

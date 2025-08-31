@@ -124,7 +124,38 @@ class AgentRegistry:
             self.llm_manager, self.tool_dispatcher))
 
     def set_websocket_manager(self, manager: 'WebSocketManager') -> None:
-        """Set websocket manager for all agents"""
+        """Set websocket manager for all agents and enhance tool dispatcher with concurrency optimization."""
         self.websocket_manager = manager
-        for agent in self.agents.values():
-            agent.websocket_manager = manager
+        
+        # CRITICAL: Enhance tool dispatcher with WebSocket notifications
+        # This enables real-time tool execution events
+        if self.tool_dispatcher and manager:
+            from netra_backend.app.agents.enhanced_tool_execution import (
+                enhance_tool_dispatcher_with_notifications
+            )
+            logger.info("Enhancing tool dispatcher with WebSocket notifications")
+            enhance_tool_dispatcher_with_notifications(self.tool_dispatcher, manager)
+            
+            # CONCURRENCY OPTIMIZATION: Verify enhancement succeeded
+            if not getattr(self.tool_dispatcher, '_websocket_enhanced', False):
+                logger.error("CRITICAL: Tool dispatcher enhancement failed - WebSocket events will not work")
+                raise RuntimeError("Tool dispatcher WebSocket enhancement failed")
+            else:
+                logger.info("✅ Tool dispatcher WebSocket enhancement verified")
+        elif manager is None:
+            # Graceful degradation when manager is None - log but don't fail
+            logger.warning("WebSocket manager is None - agent events will not be available")
+        
+        # Set WebSocket manager for all registered agents with verification
+        agent_count = 0
+        for agent_name, agent in self.agents.items():
+            try:
+                agent.websocket_manager = manager
+                agent_count += 1
+            except Exception as e:
+                logger.warning(f"Failed to set WebSocket manager for agent {agent_name}: {e}")
+        
+        if manager is not None:
+            logger.info(f"✅ WebSocket manager set for {agent_count}/{len(self.agents)} agents")
+        else:
+            logger.info(f"WebSocket manager set to None for {agent_count}/{len(self.agents)} agents")

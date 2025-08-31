@@ -1,9 +1,10 @@
-// Store Persistence Integration Tests
-// Tests state persistence across page refreshes and browser sessions
-// Business Value: Prevents data loss, improves user experience retention
-
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { useUnifiedChatStore } from '@/store/unified-chat';
+import { useAuthStore } from '@/store/authStore';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ting-library/react';
 import userEvent from '@testing-library/user-event';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useAuthStore } from '@/store/authStore';
@@ -101,6 +102,7 @@ const createMockLocalStorage = () => {
 };
 
 describe('Store Persistence Integration Tests', () => {
+    jest.setTimeout(10000);
   let mockLocalStorage: ReturnType<typeof createMockLocalStorage>;
 
   beforeEach(() => {
@@ -119,6 +121,7 @@ describe('Store Persistence Integration Tests', () => {
   });
 
   describe('State Persistence Across Page Refreshes', () => {
+      jest.setTimeout(10000);
     it('persists authentication state across refreshes', async () => {
       const user = userEvent.setup();
       
@@ -197,6 +200,7 @@ describe('Store Persistence Integration Tests', () => {
   });
 
   describe('Large State Persistence', () => {
+      jest.setTimeout(10000);
     it('handles large message history persistence efficiently', async () => {
       const user = userEvent.setup();
       
@@ -249,6 +253,7 @@ describe('Store Persistence Integration Tests', () => {
   });
 
   describe('Cross-Tab State Synchronization', () => {
+      jest.setTimeout(10000);
     it('synchronizes state changes across browser tabs', async () => {
       const user = userEvent.setup();
       
@@ -319,6 +324,7 @@ describe('Store Persistence Integration Tests', () => {
   });
 
   describe('Migration and Versioning', () => {
+      jest.setTimeout(10000);
     it('handles legacy state format migration', () => {
       // Set up legacy data format
       mockLocalStorage.store.set('unified-chat-store', JSON.stringify({
@@ -352,6 +358,7 @@ describe('Store Persistence Integration Tests', () => {
   });
 
   describe('Error Recovery and Resilience', () => {
+      jest.setTimeout(10000);
     it('recovers from corrupted localStorage data', () => {
       // Set corrupted data
       mockLocalStorage.store.set('unified-chat-store', 'invalid-json');

@@ -45,6 +45,32 @@ except ImportError:
     # Hard failure - IsolatedEnvironment is required for test runner
     raise RuntimeError("IsolatedEnvironment required for test runner. Cannot import from dev_launcher.isolated_environment")
 
+# Import enhanced process cleanup utilities
+try:
+    from shared.enhanced_process_cleanup import (
+        EnhancedProcessCleanup, 
+        cleanup_subprocess,
+        track_subprocess,
+        managed_subprocess,
+        get_cleanup_instance
+    )
+    # Initialize cleanup instance early to register atexit handlers
+    cleanup_manager = get_cleanup_instance()
+except ImportError:
+    try:
+        # Fall back to basic Windows cleanup if enhanced not available
+        from shared.windows_process_cleanup import WindowsProcessCleanup, cleanup_subprocess
+        cleanup_manager = None
+        track_subprocess = lambda p: None
+        managed_subprocess = None
+    except ImportError:
+        # Create dummy functions if import fails
+        WindowsProcessCleanup = None
+        cleanup_subprocess = lambda p, t=10: True
+        cleanup_manager = None
+        track_subprocess = lambda p: None
+        managed_subprocess = None
+
 # Import test framework - using absolute imports from project root
 from test_framework.runner import UnifiedTestRunner as FrameworkRunner
 from test_framework.test_config import configure_dev_environment, configure_mock_environment, configure_test_environment
@@ -89,6 +115,9 @@ class UnifiedTestRunner:
         self.auth_path = self.project_root / "auth_service"
         self.frontend_path = self.project_root / "frontend"
         
+        # Detect the correct Python command for cross-platform compatibility
+        self.python_command = self._detect_python_command()
+        
         # Initialize category system components
         self.config_loader = CategoryConfigLoader(self.project_root)
         config = self.config_loader.load_config()
@@ -118,13 +147,13 @@ class UnifiedTestRunner:
                 "path": self.project_root,  # Changed from backend_path to project_root
                 "test_dir": "netra_backend/tests",  # Updated to full path from root
                 "config": "netra_backend/pytest.ini",  # Updated to full path from root
-                "command": "pytest"
+                "command": f"{self.python_command} -m pytest"
             },
             "auth": {
                 "path": self.project_root,  # Changed from auth_path to project_root
                 "test_dir": "auth_service/tests",  # Updated to full path from root
                 "config": "auth_service/pytest.ini",  # Updated to full path from root
-                "command": "pytest"
+                "command": f"{self.python_command} -m pytest"
             },
             "frontend": {
                 "path": self.frontend_path,  # Frontend can stay as-is since it uses npm
@@ -133,6 +162,32 @@ class UnifiedTestRunner:
                 "command": "npm test"
             }
         }
+    
+    def _detect_python_command(self) -> str:
+        """Detect the correct Python command for the current platform."""
+        import shutil
+        
+        # Try Python commands in order of preference
+        commands_to_try = ['python3', 'python', 'py']
+        
+        for cmd in commands_to_try:
+            if shutil.which(cmd):
+                # Verify it's actually Python 3
+                try:
+                    result = subprocess.run(
+                        [cmd, '--version'],
+                        capture_output=True,
+                        text=True,
+                        timeout=5
+                    )
+                    if result.returncode == 0 and 'Python 3' in result.stdout:
+                        return cmd
+                except (subprocess.TimeoutExpired, Exception):
+                    continue
+        
+        # Fallback to python3 if nothing found (will error later if not available)
+        print("[WARNING] Could not detect Python 3 command, defaulting to 'python3'")
+        return 'python3'
     
     def initialize_components(self, args: argparse.Namespace):
         """Initialize test execution components based on arguments."""
@@ -415,6 +470,13 @@ class UnifiedTestRunner:
     
     def _check_service_availability(self, args: argparse.Namespace):
         """Check availability of required real services before running tests."""
+        
+        # Skip service availability check for tests that specifically test service startup/resilience
+        test_pattern = getattr(args, 'pattern', '') or ''
+        if 'dev_launcher_critical_path' in test_pattern or 'startup' in test_pattern:
+            print("[INFO] Skipping service availability check for dev launcher/startup resilience test")
+            return
+            
         print("Checking real service availability...")
         
         # Determine categories to check for LLM requirements
@@ -712,18 +774,56 @@ class UnifiedTestRunner:
             subprocess_env = env_manager.get_subprocess_env()
             subprocess_env.update({'PYTHONUNBUFFERED': '1', 'PYTHONUTF8': '1'})
             
-            # Use subprocess.run with proper buffering for Windows
-            result = subprocess.run(
-                cmd,
-                cwd=config["path"],
-                capture_output=True,
-                text=True,
-                shell=True,
-                encoding='utf-8',
-                errors='replace',
-                timeout=timeout_seconds,
-                env=subprocess_env
-            )
+            # Use subprocess.Popen for better process control on Windows with Node.js
+            if sys.platform == "win32" and service == "frontend":
+                # Special handling for Node.js processes on Windows
+                process = subprocess.Popen(
+                    cmd,
+                    cwd=config["path"],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    shell=True,
+                    text=True,
+                    encoding='utf-8',
+                    errors='replace',
+                    env=subprocess_env,
+                    # Use CREATE_NEW_PROCESS_GROUP on Windows to isolate process tree
+                    creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0
+                )
+                
+                # Track the process for automatic cleanup
+                track_subprocess(process)
+                
+                try:
+                    stdout, stderr = process.communicate(timeout=timeout_seconds)
+                    returncode = process.returncode
+                except subprocess.TimeoutExpired:
+                    # Clean up hanging process on timeout
+                    cleanup_subprocess(process, timeout=5, force=True)
+                    raise
+                finally:
+                    # Always ensure process is cleaned up
+                    cleanup_subprocess(process, timeout=2)
+                
+                result = subprocess.CompletedProcess(
+                    args=cmd,
+                    returncode=returncode,
+                    stdout=stdout,
+                    stderr=stderr
+                )
+            else:
+                # Use standard subprocess.run for other cases
+                result = subprocess.run(
+                    cmd,
+                    cwd=config["path"],
+                    capture_output=True,
+                    text=True,
+                    shell=True,
+                    encoding='utf-8',
+                    errors='replace',
+                    timeout=timeout_seconds,
+                    env=subprocess_env
+                )
             # Handle unicode encoding issues by cleaning the output
             if result.stdout:
                 result.stdout = result.stdout.encode('utf-8', errors='replace').decode('utf-8', errors='replace')
@@ -733,6 +833,13 @@ class UnifiedTestRunner:
         except subprocess.TimeoutExpired:
             print(f"[ERROR] {service} tests timed out after {timeout_seconds} seconds")
             print(f"[ERROR] Command: {cmd}")
+            
+            # Clean up any hanging processes after timeout
+            if cleanup_manager:
+                stats = cleanup_manager.cleanup_all()
+                if stats["total_cleaned"] > 0:
+                    print(f"[INFO] Cleaned up {stats['total_cleaned']} hanging processes after timeout")
+            
             success = False
             result = subprocess.CompletedProcess(
                 args=cmd, 
@@ -928,25 +1035,48 @@ class UnifiedTestRunner:
         """Build pytest command for backend/auth services."""
         config = self.test_configs[service]
         
-        cmd_parts = ["pytest"]
+        cmd_parts = [self.python_command, "-m", "pytest"]
         
-        # Add category-specific selection (simplified to avoid marker hang issues)
-        category_markers = {
-            "smoke": [str(config["test_dir"]), "-k", "smoke"],
-            "unit": ["netra_backend/tests/unit", "netra_backend/tests/core"],
-            "integration": ["netra_backend/tests/integration", "netra_backend/tests/startup"],
-            "api": ["netra_backend/tests/test_api_core_critical.py", "netra_backend/tests/test_api_error_handling_critical.py", "netra_backend/tests/test_api_threads_messages_critical.py", "netra_backend/tests/test_api_agent_generation_critical.py", "netra_backend/tests/test_api_endpoints_critical.py"],
-            "database": ["netra_backend/tests/test_database_connections.py", "netra_backend/tests/test_database_manager_managers.py", "netra_backend/tests/clickhouse"],
-            "post_deployment": ["tests/post_deployment"],
-            "websocket": [str(config["test_dir"]), "-k", '"websocket or ws"'],
-            "agent": ["netra_backend/tests/agents"],
-            "security": [str(config["test_dir"]), "-k", '"auth or security"'],
-            # FIXED: E2E category now points only to actual e2e tests
-            "e2e_critical": ["tests/e2e/critical"],  # Curated critical e2e tests
-            "e2e": ["tests/e2e/integration"],  # Actual e2e integration tests only
-            "e2e_full": ["tests/e2e"],  # Full e2e suite (use with caution - may timeout),
-            "performance": [str(config["test_dir"]), "-k", "performance"]
-        }
+        # Add category-specific selection (service-aware paths)
+        # FIXED: Use service-specific paths instead of hardcoded backend paths
+        if service == "backend":
+            category_markers = {
+                "smoke": [str(config["test_dir"]), "-m", "smoke"],
+                "unit": ["netra_backend/tests/unit", "netra_backend/tests/core"],
+                "integration": ["netra_backend/tests/integration", "netra_backend/tests/startup"],
+                "api": ["netra_backend/tests/test_api_core_critical.py", "netra_backend/tests/test_api_error_handling_critical.py", "netra_backend/tests/test_api_threads_messages_critical.py", "netra_backend/tests/test_api_agent_generation_critical.py", "netra_backend/tests/test_api_endpoints_critical.py"],
+                "database": ["netra_backend/tests/test_database_connections.py", "netra_backend/tests/test_database_manager_managers.py", "netra_backend/tests/clickhouse"],
+                "post_deployment": ["tests/post_deployment"],
+                "websocket": [str(config["test_dir"]), "-k", '"websocket or ws"'],
+                "agent": ["netra_backend/tests/agents"],
+                "security": [str(config["test_dir"]), "-k", '"auth or security"'],
+                # FIXED: E2E category now points only to actual e2e tests
+                "e2e_critical": ["tests/e2e/critical"],  # Curated critical e2e tests
+                "e2e": ["tests/e2e/integration"],  # Actual e2e integration tests only
+                "e2e_full": ["tests/e2e"],  # Full e2e suite (use with caution - may timeout),
+                "performance": [str(config["test_dir"]), "-k", "performance"]
+            }
+        elif service == "auth":
+            category_markers = {
+                "smoke": [str(config["test_dir"]), "-m", "smoke"],
+                "unit": ["auth_service/tests", "-m", "unit"],
+                "integration": ["auth_service/tests", "-m", "integration"],
+                "security": ["auth_service/tests", "-m", "security"],
+                "performance": ["auth_service/tests", "-m", "performance"]
+            }
+        else:
+            # Fallback for unknown services
+            category_markers = {
+                "smoke": [str(config["test_dir"]), "-m", "smoke"],
+                "unit": [str(config["test_dir"]), "-m", "unit"],
+                "integration": [str(config["test_dir"]), "-m", "integration"],
+                "security": [str(config["test_dir"]), "-m", "security"],
+                "performance": [str(config["test_dir"]), "-m", "performance"]
+            }
+        
+        # Add service-specific configuration file
+        if "config" in config:
+            cmd_parts.extend(["-c", str(config["config"])])
         
         if category_name in category_markers:
             cmd_parts.extend(category_markers[category_name])

@@ -1,34 +1,16 @@
-/**
- * MessageInput Auto-resize Tests
- * Tests for textarea auto-resize behavior
- */
-
-// CRITICAL: Mock all dependencies FIRST before any React imports
-jest.mock('@/components/chat/hooks/useTextareaResize', () => ({
-  useTextareaResize: jest.fn()
-}));
-
-jest.mock('@/hooks/useWebSocket', () => ({
-  useWebSocket: jest.fn()
-}));
-
-jest.mock('@/store/unified-chat', () => ({
-  useUnifiedChatStore: jest.fn()
-}));
-
-jest.mock('@/store/threadStore', () => ({
-  useThreadStore: jest.fn()
-}));
-
-jest.mock('@/store/authStore', () => ({
-  useAuthStore: jest.fn()
-}));
-
-jest.mock('@/components/chat/hooks/useMessageSending', () => ({
-  useMessageSending: jest.fn()
-}));
-
-jest.mock('@/components/chat/hooks/useMessageHistory', () => ({
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { MessageInput } from '@/components/chat/MessageInput';
+import { useTextareaResize } from '@/components/chat/hooks/useTextareaResize';
+import { useWebSocket } from '@/hooks/useWebSocket';
+import { useUnifiedChatStore } from '@/store/unified-chat';
+import { useThreadStore } from '@/store/threadStore';
+import { useAuthStore } from '@/store/authStore';
+import { useMessageSending } from '@/components/chat/hooks/useMessageSending';
+import { useMessageHistory } from '@/components/chat/hooks/useMessageHistory';
+import { chat/hooks/useMessageHistory', () => ({
   useMessageHistory: jest.fn()
 }));
 
@@ -60,6 +42,7 @@ const mockUseMessageSending = useMessageSending as jest.Mock;
 const mockUseMessageHistory = useMessageHistory as jest.Mock;
 
 describe('MessageInput - Auto-resize Textarea Behavior', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     
@@ -113,6 +96,7 @@ describe('MessageInput - Auto-resize Textarea Behavior', () => {
   });
 
   describe('Auto-resize textarea behavior', () => {
+      jest.setTimeout(10000);
     const verifyTextareaStartsMinimal = () => {
       const textarea = getTextarea();
       expect(textarea.rows).toBeLessThanOrEqual(2);

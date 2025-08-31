@@ -1,6 +1,6 @@
 import React from 'react';
 import type { ErrorHandlerHookReturn } from './error-boundary-types';
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 
 export const useErrorHandler = (): ErrorHandlerHookReturn => {
   const [error, setError] = React.useState<Error | null>(null);

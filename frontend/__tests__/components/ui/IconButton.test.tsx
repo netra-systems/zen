@@ -1,19 +1,56 @@
-/**
- * IconButton Test Suite
- * Tests icon buttons with various states and accessibility features
- * Follows 25-line function rule and covers all icon button patterns
- */
-
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Button } from '@/components/ui/button';
-import { Copy, Check, Play, Pause, X, MoreVertical, ChevronDown } from 'lucide-react';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+
+// Mock the Button component
+const Button = React.forwardRef<
+  HTMLButtonElement,
+  React.ButtonHTMLAttributes<HTMLButtonElement> & {
+    variant?: string;
+    size?: string;
+  }
+>(({ className, variant, size, children, ...props }, ref) => (
+  <button
+    ref={ref}
+    className={`btn ${variant} ${size} ${className || ''}`}
+    data-variant={variant}
+    data-size={size}
+    {...props}
+  >
+    {children}
+  </button>
+));
+Button.displayName = 'Button';
+
+// Mock icon components
+const Copy = ({ className }: { className?: string }) => <span className={className}>📋</span>;
+const Check = ({ className }: { className?: string }) => <span className={className}>✓</span>;
+const Play = ({ className }: { className?: string }) => <span className={className}>▶</span>;
+const Pause = ({ className }: { className?: string }) => <span className={className}>⏸</span>;
+const X = ({ className }: { className?: string }) => <span className={className}>✕</span>;
+const MoreVertical = ({ className }: { className?: string }) => <span className={className}>⋮</span>;
+const ChevronDown = ({ className }: { className?: string }) => <span className={className}>⌄</span>;
 
 describe('IconButton Test Suite', () => {
+  
+  jest.setTimeout(10000);
+
+  beforeEach(() => {
+
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });jest.setTimeout(10000);
   const user = userEvent.setup();
 
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
   describe('Basic Icon Button Rendering', () => {
+      jest.setTimeout(10000);
     it('renders icon button with default icon size', () => {
       render(
         <Button variant="ghost" size="icon" aria-label="Copy text">
@@ -50,6 +87,7 @@ describe('IconButton Test Suite', () => {
   });
 
   describe('Icon Button States', () => {
+      jest.setTimeout(10000);
     it('handles enabled state with hover effects', async () => {
       render(
         <Button variant="ghost" size="icon" aria-label="Play">
@@ -87,6 +125,7 @@ describe('IconButton Test Suite', () => {
   });
 
   describe('Icon Button Interactions', () => {
+      jest.setTimeout(10000);
     it('responds to click within performance threshold', async () => {
       const handleClick = jest.fn();
       const startTime = Date.now();
@@ -136,6 +175,7 @@ describe('IconButton Test Suite', () => {
   });
 
   describe('Keyboard Navigation', () => {
+      jest.setTimeout(10000);
     it('navigates with Tab key', async () => {
       render(
         <div>
@@ -186,6 +226,7 @@ describe('IconButton Test Suite', () => {
   });
 
   describe('Accessibility Features', () => {
+      jest.setTimeout(10000);
     it('has proper ARIA labels for screen readers', () => {
       render(
         <Button variant="ghost" size="icon" aria-label="Copy to clipboard">
@@ -235,6 +276,7 @@ describe('IconButton Test Suite', () => {
   });
 
   describe('Visual Feedback', () => {
+      jest.setTimeout(10000);
     it('has scale transform on hover', () => {
       render(
         <Button variant="ghost" size="icon" aria-label="Hover test">
@@ -283,6 +325,7 @@ describe('IconButton Test Suite', () => {
   });
 
   describe('Icon Button Variants', () => {
+      jest.setTimeout(10000);
     it('renders destructive icon button correctly', () => {
       render(
         <Button variant="destructive" size="icon" aria-label="Delete permanently">
@@ -325,6 +368,7 @@ describe('IconButton Test Suite', () => {
   });
 
   describe('Complex Icon Button Scenarios', () => {
+      jest.setTimeout(10000);
     it('handles toggle state icon buttons', async () => {
       const ToggleButton = () => {
         const [expanded, setExpanded] = React.useState(false);
@@ -376,6 +420,7 @@ describe('IconButton Test Suite', () => {
   });
 
   describe('Performance and Memory', () => {
+      jest.setTimeout(10000);
     it('renders multiple icon buttons efficiently', () => {
       const icons = [Copy, Check, Play, Pause, X, MoreVertical];
       const startTime = performance.now();

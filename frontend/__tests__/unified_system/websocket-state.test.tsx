@@ -1,8 +1,7 @@
-/**
- * WebSocket State Management Tests - Frontend Implementation
- * 
- * BVJ (Business Value Justification):
- * - Segment: Enterprise, Mid, Early - All customer tiers depend on connection reliability  
+import { act, renderHook, waitFor } from '@testing-library/react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+mer tiers depend on connection reliability  
  * - Business Goal: User Experience - Seamless reconnection worth $18K MRR
  * - Value Impact: Prevents workflow interruption during expensive AI operations
  * - Revenue Impact: Connection drops = 20% customer frustration = potential churn prevention
@@ -401,6 +400,7 @@ const useWebSocket = () => {
 };
 
 describe('WebSocket State Management Tests', () => {
+    jest.setTimeout(10000);
   let originalWebSocket: typeof WebSocket;
   let mockWebSocketInstance: MockWebSocket | null = null;
 
@@ -418,6 +418,11 @@ describe('WebSocket State Management Tests', () => {
   afterEach(() => {
     global.WebSocket = originalWebSocket;
     mockWebSocketInstance = null;
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   test('WebSocket auto-reconnects on disconnect', async () => {

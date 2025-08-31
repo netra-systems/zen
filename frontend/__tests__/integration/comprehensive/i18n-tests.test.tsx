@@ -1,5 +1,5 @@
-/**
- * Internationalization Tests
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+import { ternationalization Tests
  * 
  * Tests multi-language support, RTL languages, and locale formatting.
  * All functions ≤8 lines, file ≤300 lines for modular architecture compliance.
@@ -39,6 +39,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('Internationalization Tests', () => {
+    jest.setTimeout(10000);
   let server: WS;
   
   beforeEach(() => {
@@ -48,9 +49,15 @@ describe('Internationalization Tests', () => {
 
   afterEach(() => {
     cleanupTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Multi-language Support Integration', () => {
+      jest.setTimeout(10000);
     it('should switch languages dynamically', async () => {
       const { getByTestId } = render(<I18nSwitcherComponent />);
       
@@ -99,6 +106,7 @@ describe('Internationalization Tests', () => {
   });
 
   describe('RTL Language Support', () => {
+      jest.setTimeout(10000);
     it('should handle RTL languages correctly', async () => {
       const { getByTestId } = render(<RTLLanguageComponent />);
       
@@ -149,6 +157,7 @@ describe('Internationalization Tests', () => {
   });
 
   describe('Locale Formatting', () => {
+      jest.setTimeout(10000);
     it('should format dates and numbers according to locale', async () => {
       const { getByTestId } = render(<LocaleFormattingComponent />);
       

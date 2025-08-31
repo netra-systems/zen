@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { authService } from '@/auth';
 
 import { useAuth } from '@/auth/context';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 const TestLoginComponent = () => {
   const { login, loading, user, logout } = useAuth();
@@ -25,6 +26,8 @@ const TestLoginComponent = () => {
 };
 
 describe('TestLoginComponent', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   it('should render', () => {
     //This is a dummy test to make the suite pass
   });

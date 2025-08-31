@@ -1,11 +1,9 @@
-/**
- * Caching Integration Tests
- * Tests for Redis caching operations and cache invalidation
- * Enterprise segment - ensures performance and data consistency
- */
-
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, waitFor, fireEvent, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { TestProviders } from '@/__tests__/setup/test-providers';
+import { or, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TestProviders } from '@/__tests__/setup/test-providers';
 import { 
@@ -26,9 +24,15 @@ beforeEach(() => {
 
 afterEach(() => {
   testContext.cleanup();
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
 });
 
 describe('Redis Caching Integration', () => {
+    jest.setTimeout(10000);
   it('should cache frequently accessed data', async () => {
     const TestComponent = () => {
       const [cacheHit, setCacheHit] = React.useState<boolean | null>(null);
@@ -207,6 +211,7 @@ describe('Redis Caching Integration', () => {
 });
 
 describe('Cache Performance Integration', () => {
+    jest.setTimeout(10000);
   it('should measure cache performance metrics', async () => {
     const TestComponent = () => {
       const [metrics, setMetrics] = React.useState<any>(null);

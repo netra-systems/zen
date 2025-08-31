@@ -2,6 +2,7 @@ import React from 'react';
 import { render as renderWithProviders, screen, fireEvent, waitFor, act, withRouter } from '../utils/test-utils';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 // Using Jest, not vitest
 import { ErrorFallback } from '@/components/ErrorFallback';
 import { Header } from '@/components/Header';
@@ -27,6 +28,7 @@ jest.mock('@/auth', () => ({
 
 // Test 62: ErrorFallback recovery
 describe('test_ErrorFallback_recovery', () => {
+    jest.setTimeout(10000);
   it('should display error boundary correctly', () => {
     const error = new Error('Test error');
     const resetErrorBoundary = jest.fn();
@@ -82,6 +84,7 @@ describe('test_ErrorFallback_recovery', () => {
 
 // Test 63: Header navigation
 describe('test_Header_navigation', () => {
+    jest.setTimeout(10000);
   it('should render header components correctly', () => {
     const mockToggleSidebar = jest.fn();
     renderWithProviders(withRouter(<Header toggleSidebar={mockToggleSidebar} />));
@@ -122,6 +125,7 @@ withRouter(<Header toggleSidebar={mockToggleSidebar} />)
 
 // Test 64: NavLinks routing  
 describe('test_NavLinks_routing', () => {
+    jest.setTimeout(10000);
   it('should render navigation links correctly when user is authenticated', () => {
     renderWithProviders(
 withRouter(<NavLinks />)

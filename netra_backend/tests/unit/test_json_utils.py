@@ -6,7 +6,7 @@ Business Value: Long-term maintainability
 
 import pytest
 from unittest.mock import Mock, patch, MagicMock
-from netra_backend.app.utils.json_utils import JsonUtils
+from netra_backend.app.core.serialization.unified_json_handler import CircularReferenceHandler
 
 class TestJsonUtils:
     """Test suite for JsonUtils"""
@@ -14,7 +14,7 @@ class TestJsonUtils:
     @pytest.fixture
     def instance(self):
         """Create test instance"""
-        return JsonUtils()
+        return CircularReferenceHandler()
     
     def test_initialization(self, instance):
         """Test proper initialization"""

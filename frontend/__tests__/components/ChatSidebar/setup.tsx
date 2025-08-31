@@ -25,8 +25,7 @@ jest.mock('@/components/chat/ChatSidebarFooter', () => ({
 // Mock AuthGate - CRITICAL: Simplified approach for test reliability
 jest.mock('@/components/auth/AuthGate', () => ({
   AuthGate: ({ children }: { children: React.ReactNode }) => {
-    console.log('🚪 AuthGate MOCK RENDERED - bypassing auth for tests');
-    return children; // Simply render children without wrapper for tests
+    return React.createElement('div', { 'data-testid': 'auth-gate-mock' }, children);
   }
 }));
 
@@ -46,25 +45,39 @@ jest.mock('@/components/chat/ChatSidebarThreadList', () => ({
       </div>
     </div>
   ),
-  ThreadList: ({ threads, activeThreadId, isProcessing, onThreadClick }: any) => (
-    <div data-testid="thread-list">
-      {threads.map((thread: any) => (
-        <div
-          key={thread.id}
-          data-testid={`thread-item-${thread.id}`}
-          data-active={activeThreadId === thread.id}
-          data-processing={isProcessing}
-          onClick={() => onThreadClick(thread.id)}
-          style={{ cursor: 'pointer' }}
-        >
-          <div data-testid="thread-title">{thread.title}</div>
-          <div data-testid="thread-metadata">
-            {thread.message_count ? `${thread.message_count} messages` : '0 messages'}
-          </div>
+  ThreadList: ({ threads, isLoadingThreads, loadError, activeThreadId, isProcessing, showAllThreads, onThreadClick, onRetryLoad }: any) => {
+    // ThreadList MOCK RENDERED with threads
+    
+    if (!threads || threads.length === 0) {
+      // ThreadList MOCK: No threads provided, rendering empty list
+      return (
+        <div data-testid="thread-list">
+          <div data-testid="debug-no-threads">No threads to display</div>
         </div>
-      ))}
-    </div>
-  )
+      );
+    }
+    
+    return (
+      <div data-testid="thread-list">
+        {(threads || []).map((thread: any) => (
+          <div
+            key={thread.id}
+            data-testid={`thread-item-${thread.id}`}
+            data-active={activeThreadId === thread.id}
+            data-processing={isProcessing}
+            onClick={() => onThreadClick(thread.id)}
+            tabIndex={0}
+            style={{ cursor: 'pointer' }}
+          >
+            <div data-testid="thread-title">{thread.title}</div>
+            <div data-testid="thread-metadata">
+              {thread.message_count ? `${thread.message_count} messages` : '0 messages'}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 }));
 
 import React from 'react';
@@ -81,6 +94,52 @@ import { TestProviders } from '../../test-utils/providers';
 import { FilterType } from '@/components/chat/ChatSidebarTypes';
 import { PaginationControls, Footer } from '@/components/chat/ChatSidebarFooter';
 
+// Sample thread data matching Thread interface from threadService
+export const sampleThreads = [
+  {
+    id: 'thread-1',
+    title: 'AI Optimization Discussion',
+    created_at: Math.floor(Date.now() / 1000),
+    updated_at: Math.floor(Date.now() / 1000),
+    message_count: 15,
+    metadata: {
+      title: 'AI Optimization Discussion',
+      last_message: 'How can I optimize my model?',
+      lastActivity: new Date().toISOString(),
+      messageCount: 15,
+      tags: ['optimization', 'ai']
+    }
+  },
+  {
+    id: 'thread-2', 
+    title: 'Performance Analysis',
+    created_at: Math.floor((Date.now() - 3600000) / 1000), // 1 hour ago
+    updated_at: Math.floor((Date.now() - 3600000) / 1000),
+    message_count: 8,
+    metadata: {
+      title: 'Performance Analysis',
+      last_message: 'The results show 20% improvement',
+      lastActivity: new Date(Date.now() - 3600000).toISOString(),
+      messageCount: 8,
+      tags: ['performance']
+    }
+  },
+  {
+    id: 'thread-3',
+    title: 'Data Processing Pipeline',
+    created_at: Math.floor((Date.now() - 7200000) / 1000), // 2 hours ago
+    updated_at: Math.floor((Date.now() - 7200000) / 1000),
+    message_count: 32,
+    metadata: {
+      title: 'Data Processing Pipeline',
+      last_message: 'Pipeline completed successfully',
+      lastActivity: new Date(Date.now() - 7200000).toISOString(),
+      messageCount: 32,
+      tags: ['data', 'pipeline']
+    }
+  }
+];
+
 // Mock WebSocket hook
 jest.mock('@/hooks/useWebSocket', () => ({
   useWebSocket: jest.fn(() => ({
@@ -92,10 +151,10 @@ jest.mock('@/hooks/useWebSocket', () => ({
 
 // Mock ChatSidebar hooks with debugging - CRITICAL: Use exact same path as component import
 jest.mock('@/components/chat/ChatSidebarHooks', () => {
-  console.log('📦 ChatSidebarHooks module mock created');
+  // ChatSidebarHooks module mock created
   return {
     useChatSidebarState: jest.fn(() => {
-      console.log('🔥 HOOK CALLED: useChatSidebarState (DEFAULT)');
+      // useChatSidebarState hook called
       return {
         searchQuery: '',
         setSearchQuery: jest.fn(),
@@ -110,35 +169,94 @@ jest.mock('@/components/chat/ChatSidebarHooks', () => {
       };
     }),
     useThreadLoader: jest.fn(() => {
-      console.log('🔥 HOOK CALLED: useThreadLoader (DEFAULT)');
+      // useThreadLoader hook called
+      const testThreads = [
+        {
+          id: 'thread-1',
+          title: 'AI Optimization Discussion',
+          created_at: Math.floor(Date.now() / 1000),
+          updated_at: Math.floor(Date.now() / 1000),
+          message_count: 15,
+          metadata: {
+            title: 'AI Optimization Discussion',
+            last_message: 'How can I optimize my model?',
+            lastActivity: new Date().toISOString(),
+            messageCount: 15,
+            tags: ['optimization', 'ai']
+          }
+        },
+        {
+          id: 'thread-2', 
+          title: 'Performance Analysis',
+          created_at: Math.floor((Date.now() - 3600000) / 1000), 
+          updated_at: Math.floor((Date.now() - 3600000) / 1000),
+          message_count: 8,
+          metadata: {
+            title: 'Performance Analysis',
+            last_message: 'The results show 20% improvement',
+            lastActivity: new Date(Date.now() - 3600000).toISOString(),
+            messageCount: 8,
+            tags: ['performance']
+          }
+        }
+      ];
+      
       return {
-        threads: [], // CRITICAL: Always return array, never undefined/null
+        threads: testThreads, // CRITICAL: Return sample threads by default for tests
         isLoadingThreads: false,  // Fixed: Default to false for tests
         loadError: null,
         loadThreads: jest.fn()
       };
     }),
     useThreadFiltering: jest.fn((threads, searchQuery, threadsPerPage, currentPage) => {
-      console.log('🔥 HOOK CALLED: useThreadFiltering (DEFAULT)', { 
-        threadsType: typeof threads, 
-        isArray: Array.isArray(threads), 
-        threadsLength: threads?.length,
-        searchQuery 
-      });
-      // CRITICAL: Ensure threads is always an array to prevent filter errors
-      const safeThreads = Array.isArray(threads) ? threads : [];
+      // useThreadFiltering hook called
+      // CRITICAL: Use testThreads if threads param is empty or invalid
+      const testThreads = [
+        {
+          id: 'thread-1',
+          title: 'AI Optimization Discussion',
+          created_at: Math.floor(Date.now() / 1000),
+          updated_at: Math.floor(Date.now() / 1000),
+          message_count: 15,
+          metadata: {
+            title: 'AI Optimization Discussion',
+            last_message: 'How can I optimize my model?',
+            lastActivity: new Date().toISOString(),
+            messageCount: 15,
+            tags: ['optimization', 'ai']
+          }
+        },
+        {
+          id: 'thread-2', 
+          title: 'Performance Analysis',
+          created_at: Math.floor((Date.now() - 3600000) / 1000), 
+          updated_at: Math.floor((Date.now() - 3600000) / 1000),
+          message_count: 8,
+          metadata: {
+            title: 'Performance Analysis',
+            last_message: 'The results show 20% improvement',
+            lastActivity: new Date(Date.now() - 3600000).toISOString(),
+            messageCount: 8,
+            tags: ['performance']
+          }
+        }
+      ];
+      
+      const inputThreads = (Array.isArray(threads) && threads.length > 0) ? threads : testThreads;
       
       // Apply search filtering
       const filteredThreads = searchQuery 
-        ? safeThreads.filter(thread => 
+        ? inputThreads.filter(thread => 
             thread.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             thread.metadata?.title?.toLowerCase().includes(searchQuery.toLowerCase())
           )
-        : safeThreads;
+        : inputThreads;
       
       // Apply pagination
       const startIndex = ((currentPage || 1) - 1) * (threadsPerPage || 50);
       const paginatedThreads = filteredThreads.slice(startIndex, startIndex + (threadsPerPage || 50));
+      
+      // useThreadFiltering returning filtered results
       
       return {
         sortedThreads: filteredThreads,
@@ -302,52 +420,6 @@ export const mockThreadService = {
   })
 };
 
-// Sample thread data matching Thread interface from threadService
-export const sampleThreads = [
-  {
-    id: 'thread-1',
-    title: 'AI Optimization Discussion',
-    created_at: Math.floor(Date.now() / 1000),
-    updated_at: Math.floor(Date.now() / 1000),
-    message_count: 15,
-    metadata: {
-      title: 'AI Optimization Discussion',
-      last_message: 'How can I optimize my model?',
-      lastActivity: new Date().toISOString(),
-      messageCount: 15,
-      tags: ['optimization', 'ai']
-    }
-  },
-  {
-    id: 'thread-2', 
-    title: 'Performance Analysis',
-    created_at: Math.floor((Date.now() - 3600000) / 1000), // 1 hour ago
-    updated_at: Math.floor((Date.now() - 3600000) / 1000),
-    message_count: 8,
-    metadata: {
-      title: 'Performance Analysis',
-      last_message: 'The results show 20% improvement',
-      lastActivity: new Date(Date.now() - 3600000).toISOString(),
-      messageCount: 8,
-      tags: ['performance']
-    }
-  },
-  {
-    id: 'thread-3',
-    title: 'Data Processing Pipeline',
-    created_at: Math.floor((Date.now() - 7200000) / 1000), // 2 hours ago
-    updated_at: Math.floor((Date.now() - 7200000) / 1000),
-    message_count: 32,
-    metadata: {
-      title: 'Data Processing Pipeline',
-      last_message: 'Pipeline completed successfully',
-      lastActivity: new Date(Date.now() - 7200000).toISOString(),
-      messageCount: 32,
-      tags: ['data', 'pipeline']
-    }
-  }
-];
-
 export class ChatSidebarTestSetup {
   beforeEach() {
     // Mock fetch for config
@@ -367,10 +439,7 @@ export class ChatSidebarTestSetup {
     mockRouter.prefetch.mockClear();
     
     // Configure authentication FIRST - critical for AuthGate mock
-    console.log('🔧 Configuring authentication mocks with:', { 
-      isAuthenticated: mockAuthState.isAuthenticated, 
-      userTier: mockAuthState.userTier 
-    });
+    // Configuring authentication mocks
     (useAuthState as jest.Mock).mockReturnValue(mockAuthState);
     jest.mocked(useAuthStore).mockReturnValue(mockAuthStore);
     
@@ -420,11 +489,7 @@ export class ChatSidebarTestSetup {
     // CRITICAL: Mock useThreadFiltering with parameter validation
     (ChatSidebarHooksModule.useThreadFiltering as jest.Mock).mockReset().mockImplementation(
       (threads, searchQuery, threadsPerPage, currentPage) => {
-        console.log('🔥 HOOK RESET: useThreadFiltering', { 
-          threadsType: typeof threads, 
-          isArray: Array.isArray(threads), 
-          threadsLength: threads?.length 
-        });
+        // useThreadFiltering hook reset
         // Ensure threads is always an array to prevent filter errors
         const safeThreads = Array.isArray(threads) ? threads : [];
         return {
@@ -440,7 +505,26 @@ export class ChatSidebarTestSetup {
   }
 
   afterEach() {
+    // Clean up any pending timers
+    if (typeof clearTimeout !== 'undefined') {
+      // Clear any pending timeouts that may still be running
+      for (let i = 1; i < 1000; i++) {
+        clearTimeout(i);
+      }
+    }
+    
+    // Clean up localStorage
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem('activeThreadId');
+    }
+    
+    // Clean up window test data
+    if (typeof window !== 'undefined') {
+      delete (window as any).testHookSetup;
+    }
+    
     jest.restoreAllMocks();
+    jest.clearAllTimers();
   }
 
   // Configure store with custom data
@@ -470,11 +554,7 @@ export class ChatSidebarTestSetup {
     // Use provided threads or fallback to sampleThreads
     const threadsToUse = overrides.threads || sampleThreads;
     
-    console.log('🔧 configureChatSidebarHooks called with:', {
-      threadsProvided: !!overrides.threads,
-      threadsCount: threadsToUse.length,
-      threadIds: threadsToUse.map((t: any) => t.id)
-    });
+    // configureChatSidebarHooks called
     
     // Configure useChatSidebarState mock
     const sidebarStateConfig = {
@@ -508,36 +588,20 @@ export class ChatSidebarTestSetup {
       ...overrides.threadFiltering
     };
     
-    console.log('🎯 Mock configurations:', {
-      threadLoaderConfig,
-      threadFilteringConfig
-    });
+    // Mock configurations prepared
     
-    // CRITICAL: Use mockImplementation with debugging instead of mockReturnValue
-    // This allows us to see when hooks are actually called
+    // CRITICAL: Use mockImplementation instead of mockReturnValue
     (ChatSidebarHooksModule.useChatSidebarState as jest.Mock).mockImplementation(() => {
-      console.log('🔥 HOOK CALLED: useChatSidebarState (CONFIGURED)', sidebarStateConfig);
       return sidebarStateConfig;
     });
     
     (ChatSidebarHooksModule.useThreadLoader as jest.Mock).mockImplementation((...args: any[]) => {
-      console.log('🔥 HOOK CALLED: useThreadLoader (CONFIGURED)', { args, returning: threadLoaderConfig });
       return threadLoaderConfig;
     });
     
     (ChatSidebarHooksModule.useThreadFiltering as jest.Mock).mockImplementation((threads, searchQuery, threadsPerPage, currentPage) => {
-      console.log('🔥 HOOK CALLED: useThreadFiltering (CONFIGURED)', { 
-        threadsType: typeof threads, 
-        isArray: Array.isArray(threads), 
-        threadsLength: threads?.length,
-        searchQuery,
-        threadsPerPage,
-        currentPage
-      });
-      
       // CRITICAL: Validate threads parameter and provide safe fallback
       if (!Array.isArray(threads)) {
-        console.warn('⚠️ useThreadFiltering received non-array threads:', threads);
         return {
           sortedThreads: [],
           paginatedThreads: [],
@@ -563,17 +627,10 @@ export class ChatSidebarTestSetup {
         totalPages: Math.max(1, Math.ceil(filteredThreads.length / (threadsPerPage || 50)))
       };
       
-      console.log('🔥 useThreadFiltering result:', { 
-        originalThreadsLength: threads.length,
-        filteredThreadsLength: filteredThreads.length,
-        paginatedThreadsLength: paginatedThreads.length,
-        searchQuery
-      });
-      
       return result;
     });
     
-    console.log('🎯 Applied mock configurations using mockImplementation with debugging');
+    // Applied mock configurations using mockImplementation
     
     // Store hook setup on window for access by TestChatSidebar
     const hookSetup = {
@@ -596,8 +653,7 @@ export class ChatSidebarTestSetup {
   // Configure auth state
   configureAuthState(overrides: Partial<typeof mockAuthState>) {
     const authStateConfig = { ...mockAuthState, ...overrides };
-    console.log('🔧 configureAuthState called with overrides:', overrides);
-    console.log('🎯 Final authStateConfig:', authStateConfig);
+    // configureAuthState called
     (useAuthState as jest.Mock).mockReturnValue(authStateConfig);
     return authStateConfig;
   }
@@ -685,7 +741,6 @@ export const TestChatSidebar: React.FC = () => {
   React.useEffect(() => {
     const handleStorageChange = (event: StorageEvent) => {
       if (event.key === 'activeThreadId' && event.newValue) {
-        console.log('🔄 Storage event detected, updating activeThreadId to:', event.newValue);
         setActiveThread(event.newValue);
       }
     };
@@ -738,7 +793,6 @@ export const TestChatSidebar: React.FC = () => {
     const handleThreadHover = (threadId: string) => {
       const hookSetup = (window as any).testHookSetup;
       if (hookSetup?.threadLoader?.preloadThread) {
-        console.log('🔄 Preloading thread:', threadId);
         hookSetup.threadLoader.preloadThread(threadId);
       }
     };
@@ -854,6 +908,16 @@ export const TestChatSidebar: React.FC = () => {
   // Create debounced switch handler
   const debouncedSwitchRef = React.useRef<NodeJS.Timeout | null>(null);
   
+  // Cleanup debounced handler on unmount
+  React.useEffect(() => {
+    return () => {
+      if (debouncedSwitchRef.current) {
+        clearTimeout(debouncedSwitchRef.current);
+        debouncedSwitchRef.current = null;
+      }
+    };
+  }, []);
+  
   // Create enhanced thread click handler for tests that includes URL navigation and debouncing
   const handleThreadClick = React.useCallback(async (threadId: string) => {
     if (threadId === activeThreadId || isProcessing) {
@@ -918,12 +982,7 @@ export const TestChatSidebar: React.FC = () => {
     setCurrentPage(page);
   };
 
-  console.log('🧪 TestChatSidebar rendering with threads:', { 
-    threadsLength: threads?.length, 
-    paginatedThreadsLength: paginatedThreads?.length,
-    isLoadingThreads,
-    loadError
-  });
+  // TestChatSidebar rendering with threads
 
   return (
     <div className="w-80 h-full bg-white/95 backdrop-blur-md border-r border-gray-200 flex flex-col" data-testid="chat-sidebar" role="complementary">

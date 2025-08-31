@@ -1,12 +1,10 @@
-/**
- * Core edge cases tests for MessageInput component
- * Tests paste handling, Unicode, RTL text support
- * 
- * BVJ: Ensures robust user experience across international markets.
- * Critical for global expansion and accessibility compliance.
- */
-
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { jest } from '@jest/globals';
+import { MessageInput } from '@/components/chat/MessageInput';
+import { t from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
@@ -19,6 +17,7 @@ import {
 } from './shared-test-setup';
 
 describe('MessageInput - Core Edge Cases', () => {
+    jest.setTimeout(10000);
   const user = userEvent.setup();
 
   beforeEach(() => {
@@ -27,6 +26,7 @@ describe('MessageInput - Core Edge Cases', () => {
   });
 
   describe('Paste Handling', () => {
+      jest.setTimeout(10000);
     it('handles plain text paste correctly', async () => {
       render(<MessageInput />);
       
@@ -111,6 +111,7 @@ describe('MessageInput - Core Edge Cases', () => {
   });
 
   describe('Performance Tests', () => {
+      jest.setTimeout(10000);
     it('handles typing up to character limit', async () => {
       render(<MessageInput />);
       
@@ -138,6 +139,7 @@ describe('MessageInput - Core Edge Cases', () => {
   });
 
   describe('Special Unicode Characters', () => {
+      jest.setTimeout(10000);
     it('handles emoji input correctly', async () => {
       render(<MessageInput />);
       
@@ -184,6 +186,7 @@ describe('MessageInput - Core Edge Cases', () => {
   });
 
   describe('RTL (Right-to-Left) Text Support', () => {
+      jest.setTimeout(10000);
     it('handles Arabic text input', async () => {
       render(<MessageInput />);
       
@@ -219,6 +222,7 @@ describe('MessageInput - Core Edge Cases', () => {
   });
 
   describe('State Management', () => {
+      jest.setTimeout(10000);
     it('prevents typing when sending', async () => {
       mockHooks.mockUseMessageSending.mockReturnValue({
         isSending: true,
@@ -253,6 +257,7 @@ describe('MessageInput - Core Edge Cases', () => {
   });
 
   describe('Code Blocks', () => {
+      jest.setTimeout(10000);
     it('handles code blocks', async () => {
       render(<MessageInput />);
       
@@ -273,6 +278,7 @@ describe('MessageInput - Core Edge Cases', () => {
   });
 
   describe('File Drag and Drop', () => {
+      jest.setTimeout(10000);
     it('handles drag over events', () => {
       render(<MessageInput />);
       

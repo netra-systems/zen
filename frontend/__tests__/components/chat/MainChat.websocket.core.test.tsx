@@ -20,7 +20,7 @@ jest.mock('@/hooks/useThreadNavigation', () => ({
 }));
 
 // Mock utility services but NOT UI components
-jest.mock('@/utils/debug-logger', () => ({
+jest.mock('@/lib/logger', () => ({
   logger: {
     debug: jest.fn(),
     error: jest.fn(),
@@ -37,11 +37,11 @@ jest.mock('framer-motion', () => ({
   AnimatePresence: ({ children }: any) => children,
 }));
 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import MainChat from '@/components/chat/MainChat';
-import { 
-  setupMocks, 
+import { setupMocks, 
   cleanupMocks, 
   mockStore,
   mockUseUnifiedChatStore,
@@ -49,15 +49,25 @@ import {
 } from './MainChat.websocket.test-utils';
 
 describe('MainChat - WebSocket Core Connection Tests', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     setupMocks();
   });
 
   afterEach(() => {
     cleanupMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('WebSocket connection management', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should initialize WebSocket connection on mount', () => {
       render(<MainChat />);
       

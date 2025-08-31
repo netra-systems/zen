@@ -86,6 +86,9 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
         """Initialize component helpers for delegation and operations."""
         self.helpers = DataSubAgentHelpers(self)
         self._setup_delegation_support()
+        # Initialize WebSocket context tracking
+        self._current_run_id = None
+        self._current_thread_id = None
         
     def _setup_delegation_support(self) -> None:
         """Setup delegation support for backward compatibility."""
@@ -113,8 +116,41 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
             return False
             
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
-        """Execute data analysis core logic with modern patterns."""
+        """Execute data analysis core logic with modern patterns and WebSocket notifications."""
+        # Set WebSocket context in state for tool execution notifications
+        if hasattr(context.state, '__dict__'):
+            context.state._websocket_context = self._create_websocket_context(context)
+        
+        # Send agent thinking notification
+        if self.websocket_manager:
+            notifier = self._get_websocket_notifier()
+            ws_context = self._create_websocket_context(context)
+            await notifier.send_agent_thinking(
+                ws_context, 
+                "Initializing data analysis and preparing database queries..."
+            )
+        
         return await self.core.execute_data_analysis(context)
+    
+    def _get_websocket_notifier(self):
+        """Get WebSocket notifier instance."""
+        if not hasattr(self, '_websocket_notifier'):
+            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+            self._websocket_notifier = WebSocketNotifier(self.websocket_manager)
+        return self._websocket_notifier
+    
+    def _create_websocket_context(self, context: ExecutionContext):
+        """Create WebSocket execution context."""
+        from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+        from netra_backend.app.agents.utils import extract_thread_id
+        
+        thread_id = extract_thread_id(context.state, context.run_id)
+        return AgentExecutionContext(
+            agent_name=self.agent_name,
+            run_id=context.run_id,
+            thread_id=thread_id,
+            user_id=getattr(context.state, 'user_id', context.run_id)
+        )
     
     # Main execution methods for backward compatibility
     @validate_agent_input('DataSubAgent')
@@ -133,12 +169,51 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
     def _create_execution_context(self, state: DeepAgentState, run_id: str,
                                 stream_updates: bool) -> ExecutionContext:
         """Create execution context for modern patterns."""
+        # Store context info for notifications
+        self._current_run_id = run_id
+        from netra_backend.app.agents.utils import extract_thread_id
+        self._current_thread_id = extract_thread_id(state, run_id)
+        self._current_user_id = getattr(state, 'user_id', run_id)
+        
         return ExecutionContext(run_id, self.agent_name, state, stream_updates)
     
     # Data operations delegation to helpers
     async def _fetch_clickhouse_data(self, query: str, cache_key: Optional[str] = None):
-        """Execute ClickHouse query with caching support."""
-        return await self.helpers.fetch_clickhouse_data(query, cache_key)
+        """Execute ClickHouse query with caching support and WebSocket notifications."""
+        # Send tool executing notification for database queries
+        if self.websocket_manager:
+            try:
+                notifier = self._get_websocket_notifier()
+                # Create minimal context for tool notifications
+                from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+                context = AgentExecutionContext(
+                    agent_name=self.agent_name,
+                    run_id=getattr(self, '_current_run_id', 'unknown'),
+                    thread_id=getattr(self, '_current_thread_id', 'unknown'),
+                    user_id=getattr(self, '_current_user_id', 'unknown')
+                )
+                await notifier.send_tool_executing(
+                    context, "database_query", "Executing ClickHouse query", 3000
+                )
+                
+                result = await self.helpers.fetch_clickhouse_data(query, cache_key)
+                
+                # Send tool completed notification
+                await notifier.send_tool_completed(
+                    context, "database_query", 
+                    {"status": "success", "rows_returned": len(result) if result else 0}
+                )
+                return result
+            except Exception as e:
+                # Send error notification
+                if 'notifier' in locals() and 'context' in locals():
+                    await notifier.send_tool_completed(
+                        context, "database_query",
+                        {"status": "error", "error": str(e)}
+                    )
+                raise
+        else:
+            return await self.helpers.fetch_clickhouse_data(query, cache_key)
         
     def cache_clear(self) -> None:
         """Clear cache for test compatibility."""
@@ -149,7 +224,10 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
         await self.helpers.send_websocket_update(run_id, update)
     
     async def _analyze_performance_metrics(self, user_id: int, workload_id: str, time_range) -> Dict[str, Any]:
-        """Analyze performance metrics for given parameters."""
+        """Analyze performance metrics for given parameters with WebSocket notifications."""
+        # Send thinking notification about starting analysis
+        await self._send_thinking_notification("Retrieving performance metrics from database...")
+        
         try:
             data = await self._fetch_clickhouse_data(
                 f"SELECT * FROM performance_metrics WHERE user_id = {user_id} AND workload_id = '{workload_id}'",
@@ -157,6 +235,9 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
             )
             if not data:
                 return {"status": "no_data", "message": "No performance data found for the specified parameters"}
+            
+            # Send progress notification about analyzing data
+            await self._send_thinking_notification("Analyzing performance patterns and calculating metrics...")
             
             # Determine aggregation level based on time range
             aggregation_level = self._determine_aggregation_level(time_range)
@@ -191,14 +272,17 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
             
             # Add trend analysis for sufficient data points
             if len(data) >= 10:  # Need sufficient data for trend analysis
+                await self._send_thinking_notification("Calculating trend analysis...")
                 result["trends"] = self._calculate_trends(data)
                 
             # Add seasonality analysis for full day data (24 hours)
             if len(data) >= 24:  
+                await self._send_thinking_notification("Detecting seasonal patterns...")
                 result["seasonality"] = self._calculate_seasonality(data)
             
             # Add outlier detection for sufficient data points
             if len(data) >= 5:  # Need at least 5 data points for meaningful outlier detection
+                await self._send_thinking_notification("Detecting performance outliers...")
                 result["outliers"] = self._detect_outliers(data)
                 
             return result
@@ -725,6 +809,22 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
         if hasattr(self.helpers, 'clear_cache'):
             self.helpers.clear_cache()
         logger.debug("DataSubAgent cache cleared")
+    
+    async def _send_thinking_notification(self, thought: str) -> None:
+        """Send thinking notification if WebSocket manager available."""
+        if self.websocket_manager:
+            try:
+                notifier = self._get_websocket_notifier()
+                from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+                context = AgentExecutionContext(
+                    agent_name=self.agent_name,
+                    run_id=self._current_run_id or 'unknown',
+                    thread_id=self._current_thread_id or 'unknown',
+                    user_id=getattr(self, '_current_user_id', 'unknown')
+                )
+                await notifier.send_agent_thinking(context, thought)
+            except Exception as e:
+                logger.debug(f"Failed to send thinking notification: {e}")
 
     # Dynamic delegation for backward compatibility
     def __getattr__(self, name: str):

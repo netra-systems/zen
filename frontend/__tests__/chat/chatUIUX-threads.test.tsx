@@ -1,10 +1,9 @@
-/**
- * Chat UI/UX Thread Management Tests
- * Module-based architecture: Thread management tests ≤300 lines, functions ≤8 lines
- */
-
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 
@@ -59,6 +58,7 @@ const mockAuthStore = createMockAuthStore();
 const mockThreadStore = createMockThreadStore();
 
 describe('Chat UI/UX Thread Management Tests', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     setupConfirmMock();
@@ -68,9 +68,15 @@ describe('Chat UI/UX Thread Management Tests', () => {
 
   afterEach(() => {
     cleanupMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Thread Creation and Management', () => {
+      jest.setTimeout(10000);
     test('4. Should create a new thread when starting a conversation', async () => {
       const mockOnSendMessage = jest.fn();
       

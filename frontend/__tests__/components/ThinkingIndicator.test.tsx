@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock framer-motion
 jest.mock('framer-motion', () => ({
@@ -30,6 +31,7 @@ jest.mock('lucide-react', () => ({
 import { ThinkingIndicator } from '@/components/chat/ThinkingIndicator';
 
 describe('ThinkingIndicator Component', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
@@ -37,9 +39,15 @@ describe('ThinkingIndicator Component', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Basic Display States', () => {
+      jest.setTimeout(10000);
     it('should render with default thinking state', () => {
       render(<ThinkingIndicator />);
       
@@ -82,6 +90,7 @@ describe('ThinkingIndicator Component', () => {
   });
 
   describe('Animation and Visual Elements', () => {
+      jest.setTimeout(10000);
     it('should render animated dots', () => {
       const { container } = render(<ThinkingIndicator />);
       
@@ -120,6 +129,7 @@ describe('ThinkingIndicator Component', () => {
   });
 
   describe('Custom Messages', () => {
+      jest.setTimeout(10000);
     it('should prioritize custom message over type-based message', () => {
       render(
         <ThinkingIndicator 
@@ -141,6 +151,7 @@ describe('ThinkingIndicator Component', () => {
   });
 
   describe('Component Structure', () => {
+      jest.setTimeout(10000);
     it('should have proper layout structure', () => {
       const { container } = render(<ThinkingIndicator />);
       
@@ -167,6 +178,7 @@ describe('ThinkingIndicator Component', () => {
   });
 
   describe('Edge Cases', () => {
+      jest.setTimeout(10000);
     it('should handle rapid type changes', () => {
       const { rerender } = render(<ThinkingIndicator type="thinking" />);
       

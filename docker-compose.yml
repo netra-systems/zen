@@ -1,25 +1,35 @@
+# Netra Docker Compose Configuration
+# Use profiles to run dev or test environments independently:
+# - docker-compose --profile dev up     # Start development environment  
+# - docker-compose --profile test up    # Start test environment
+# - docker-compose down                 # Stop all services
+
 version: '3.8'
 
 services:
-  # PostgreSQL Database
-  postgres:
+  # ============================================
+  # DEVELOPMENT ENVIRONMENT
+  # ============================================
+  
+  # Dev PostgreSQL Database
+  dev-postgres:
     image: postgres:15-alpine
-    container_name: netra-postgres
-    restart: unless-stopped
+    container_name: netra-dev-postgres
+    profiles: ["dev"]
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-netra}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB:-netra}
-      POSTGRES_HOST_AUTH_METHOD: scram-sha-256
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-netra123}
+      POSTGRES_DB: ${POSTGRES_DB:-netra_dev}
+      POSTGRES_HOST_AUTH_METHOD: trust
       POSTGRES_INITDB_ARGS: "--data-checksums"
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${DEV_POSTGRES_PORT:-5433}:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./database_scripts:/docker-entrypoint-initdb.d:ro
+      - dev_postgres_data:/var/lib/postgresql/data
+      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-netra} -d ${POSTGRES_DB:-netra}"]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-netra} && psql -U ${POSTGRES_USER:-netra} -d ${POSTGRES_DB:-netra_dev} -c 'SELECT 1' > /dev/null 2>&1"]
+      interval: 30s
       timeout: 5s
       retries: 5
       start_period: 30s
@@ -27,401 +37,731 @@ services:
     stop_grace_period: 30s
     networks:
       - netra-network
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+
+  # Dev Redis Cache
+  dev-redis:
+    image: redis:7-alpine
+    container_name: netra-dev-redis
+    profiles: ["dev"]
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "${DEV_REDIS_PORT:-6380}:6379"
+    volumes:
+      - dev_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    networks:
+      - netra-network
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+        reservations:
+          memory: 128M
+
+  # Dev ClickHouse Analytics
+  dev-clickhouse:
+    image: clickhouse/clickhouse-server:23-alpine
+    container_name: netra-dev-clickhouse
+    profiles: ["dev"]
+    environment:
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-netra_analytics}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-netra}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-netra123}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    ports:
+      - "${DEV_CLICKHOUSE_HTTP_PORT:-8124}:8123"
+      - "${DEV_CLICKHOUSE_TCP_PORT:-9001}:9000"
+    volumes:
+      - dev_clickhouse_data:/var/lib/clickhouse
+      - ./scripts/init_clickhouse.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8123/ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    networks:
+      - netra-network
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
     deploy:
       resources:
         limits:
           memory: 1G
-        reservations:
-          memory: 256M
-
-  # Redis Cache
-  redis:
-    image: redis:7-alpine
-    container_name: netra-redis
-    restart: unless-stopped
-    command: >
-      redis-server
-      --appendonly yes
-      --maxmemory 256mb
-      --maxmemory-policy allkeys-lru
-      --requirepass ${REDIS_PASSWORD:-}
-    ports:
-      - "${REDIS_PORT:-6379}:6379"
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "--no-auth-warning", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - netra-network
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-        reservations:
-          memory: 128M
-
-  # ClickHouse Analytics
-  clickhouse:
-    image: clickhouse/clickhouse-server:23-alpine
-    container_name: netra-clickhouse
-    restart: unless-stopped
-    environment:
-      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-netra_analytics}
-      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-netra}
-      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
-      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
-      CLICKHOUSE_MAX_MEMORY_USAGE: 2000000000
-    ports:
-      - "${CLICKHOUSE_HTTP_PORT:-8125}:8123"
-      - "${CLICKHOUSE_TCP_PORT:-9002}:9000"
-    volumes:
-      - clickhouse_data:/var/lib/clickhouse
-      - clickhouse_logs:/var/log/clickhouse-server
-      - ./scripts/init_clickhouse.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8123/ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - netra-network
-    ulimits:
-      nofile:
-        soft: 262144
-        hard: 262144
-    deploy:
-      resources:
-        limits:
-          memory: 2G
+          cpus: '0.5'
         reservations:
           memory: 512M
 
-  # Backend Service (Main Netra Application)
-  backend:
-    image: netra-backend:${VERSION:-latest}
+  # Dev Auth Service (starts first among Netra services)
+  dev-auth:
     build:
       context: .
-      dockerfile: ./docker/backend.Dockerfile
-    container_name: netra-backend
-    restart: unless-stopped
+      dockerfile: ./docker/auth.development.Dockerfile
+    container_name: netra-dev-auth
+    profiles: ["dev"]
+    env_file:
+      - .env.development
     environment:
       # Database
-      DATABASE_URL: postgresql://${POSTGRES_USER:-netra}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-netra}
+      POSTGRES_HOST: dev-postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-netra}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-netra123}
+      POSTGRES_DB: ${POSTGRES_DB:-netra_dev}
       
       # Redis
-      REDIS_URL: redis://:${REDIS_PASSWORD:-}@redis:6379/0
-      
-      # ClickHouse
-      CLICKHOUSE_HOST: clickhouse
-      CLICKHOUSE_PORT: 8123
-      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-netra}
-      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
-      
-      # Auth Service
-      AUTH_SERVICE_URL: http://auth:8081
+      REDIS_HOST: dev-redis
+      REDIS_PORT: 6379
+      REDIS_URL: redis://dev-redis:6379/1
       
       # Server Config
       PORT: 8000
       HOST: 0.0.0.0
       ENVIRONMENT: ${ENVIRONMENT:-development}
-      WORKERS: ${BACKEND_WORKERS:-4}
+      # Uvicorn specific config
+      UVICORN_HOST: 0.0.0.0
+      UVICORN_PORT: 8000
       
-      # Security
-      SECRET_KEY: ${SECRET_KEY}
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
-      FERNET_KEY: ${FERNET_KEY}
-      SERVICE_SECRET: ${SERVICE_SECRET}
-      
-      # API Keys
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      NETRA_API_KEY: ${NETRA_API_KEY}
-      GEMINI_API_KEY: ${GEMINI_API_KEY}
-      
-      # Frontend URL
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
-      
-      # Monitoring
-      ENABLE_METRICS: true
-      ENABLE_TRACING: ${ENABLE_TRACING:-false}
-      
-      # WebSocket Configuration (staging-optimized)
-      WEBSOCKET_HEARTBEAT_INTERVAL: ${WEBSOCKET_HEARTBEAT_INTERVAL:-30}
-      WEBSOCKET_HEARTBEAT_TIMEOUT: ${WEBSOCKET_HEARTBEAT_TIMEOUT:-90}
-      WEBSOCKET_CONNECTION_TIMEOUT: ${WEBSOCKET_CONNECTION_TIMEOUT:-600}
-      WEBSOCKET_MAX_RECONNECT_ATTEMPTS: ${WEBSOCKET_MAX_RECONNECT_ATTEMPTS:-5}
-      
+      # Auth Config
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-zZyIqeCZia66c1NxEgNowZFWbwMGROFg}
+      JWT_ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      SERVICE_SECRET: ${SERVICE_SECRET:-xNp9hKjT5mQ8w2fE7vR4yU3iO6aS1gL9cB0zZ8tN6wX2eR4vY7uI0pQ3s9dF5gH8}
+      SERVICE_ID: auth
     ports:
-      - "${BACKEND_PORT:-8000}:8000"
+      - "${AUTH_PORT:-8081}:8000"
     volumes:
+      - ./auth_service:/app/auth_service
+      - ./shared:/app/shared
       - ./logs:/app/logs
-      - ./SPEC:/app/SPEC:ro
     depends_on:
-      postgres:
+      dev-postgres:
         condition: service_healthy
-      redis:
+      dev-redis:
         condition: service_healthy
-      clickhouse:
-        condition: service_started
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
+      interval: 60s
       timeout: 10s
       retries: 3
       start_period: 40s
     networks:
       - netra-network
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
     deploy:
       resources:
         limits:
-          memory: 2G
-        reservations:
           memory: 512M
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "50m"
-        max-file: "3"
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+    command: >
+      sh -c "
+        echo 'Starting auth service...' &&
+        uvicorn auth_service.main:app --host \$HOST --port \$PORT --reload --reload-dir /app/auth_service --reload-dir /app/shared --reload-include '*.py'
+      "
 
-  # Auth Service
-  auth:
-    image: netra-auth:${VERSION:-latest}
+  # Dev Analytics Service (depends on redis and clickhouse)
+  dev-analytics:
     build:
       context: .
-      dockerfile: ./docker/auth.Dockerfile
-    container_name: netra-auth
-    restart: unless-stopped
+      dockerfile: ./docker/analytics.development.Dockerfile
+    container_name: netra-dev-analytics
+    profiles: ["dev"]
+    env_file:
+      - .env.development
     environment:
-      # Database
-      DATABASE_URL: postgresql://${POSTGRES_USER:-netra}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-netra}
+      # Database connections
+      CLICKHOUSE_HOST: dev-clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-netra}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-netra123}
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-netra_analytics}
       
       # Redis
-      REDIS_URL: redis://:${REDIS_PASSWORD:-}@redis:6379/1
+      REDIS_HOST: dev-redis
+      REDIS_PORT: 6379
+      REDIS_URL: redis://dev-redis:6379/2
       
       # Server Config
-      PORT: 8081
+      PORT: 8090
       HOST: 0.0.0.0
       ENVIRONMENT: ${ENVIRONMENT:-development}
-      WORKERS: ${AUTH_WORKERS:-2}
+      # Uvicorn specific config
+      UVICORN_HOST: 0.0.0.0
+      UVICORN_PORT: 8090
       
-      # Auth Config
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
-      JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
-      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
-      REFRESH_TOKEN_EXPIRE_DAYS: ${REFRESH_TOKEN_EXPIRE_DAYS:-30}
-      SERVICE_SECRET: ${SERVICE_SECRET}
-      SERVICE_ID: auth
+      # Analytics-specific configuration
+      ANALYTICS_SERVICE_PORT: 8090
+      EVENT_BATCH_SIZE: 100
+      EVENT_FLUSH_INTERVAL_MS: 5000
+      MAX_EVENTS_PER_USER_PER_MINUTE: 1000
       
-      # OAuth Configuration
-      GOOGLE_OAUTH_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID}
-      GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET}
-      GITHUB_OAUTH_CLIENT_ID: ${GITHUB_OAUTH_CLIENT_ID}
-      GITHUB_OAUTH_CLIENT_SECRET: ${GITHUB_OAUTH_CLIENT_SECRET}
-      
-      # Security
-      ENABLE_RATE_LIMITING: true
-      MAX_LOGIN_ATTEMPTS: ${MAX_LOGIN_ATTEMPTS:-5}
-      
+      # Service authentication
+      SERVICE_SECRET: ${SERVICE_SECRET:-xNp9hKjT5mQ8w2fE7vR4yU3iO6aS1gL9cB0zZ8tN6wX2eR4vY7uI0pQ3s9dF5gH8}
+      SERVICE_ID: analytics
     ports:
-      - "${AUTH_PORT:-8081}:8081"
+      - "${ANALYTICS_PORT:-8090}:8090"
     volumes:
+      - ./analytics_service:/app/analytics_service
+      - ./shared:/app/shared
       - ./logs:/app/logs
     depends_on:
-      postgres:
+      dev-redis:
         condition: service_healthy
-      redis:
+      dev-clickhouse:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
-      interval: 30s
+      test: ["CMD", "curl", "-f", "http://localhost:8090/health"]
+      interval: 60s
       timeout: 10s
       retries: 3
       start_period: 40s
     networks:
       - netra-network
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+    command: >
+      sh -c "
+        echo 'Starting analytics service...' &&
+        uvicorn analytics_service.main:app --host 0.0.0.0 --port 8090 --reload --reload-dir /app/analytics_service --reload-dir /app/shared --reload-include '*.py'
+      "
+
+  # Dev Backend Service (depends on auth)
+  dev-backend:
+    build:
+      context: .
+      dockerfile: ./docker/backend.development.Dockerfile
+    container_name: netra-dev-backend
+    profiles: ["dev"]
+    env_file:
+      - .env.development
+    environment:
+      # Database
+      POSTGRES_HOST: dev-postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-netra}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-netra123}
+      POSTGRES_DB: ${POSTGRES_DB:-netra_dev}
+      
+      # Redis
+      REDIS_HOST: dev-redis
+      REDIS_PORT: 6379
+      REDIS_URL: redis://dev-redis:6379/0
+      
+      # ClickHouse
+      CLICKHOUSE_HOST: dev-clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-netra}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-netra123}
+      
+      # Auth Service
+      AUTH_SERVICE_URL: http://dev-auth:8000
+      
+      # Server Config
+      PORT: 8000
+      HOST: 0.0.0.0
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      # Uvicorn specific config  
+      UVICORN_HOST: 0.0.0.0
+      UVICORN_PORT: 8000
+      
+      # Security
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-change-in-production-must-be-at-least-32-chars}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev-secret-key-change-in-production-must-be-at-least-32-chars}
+      FERNET_KEY: ${FERNET_KEY:-dev-fernet-key-change-in-production}
+      SERVICE_SECRET: ${SERVICE_SECRET}
+      
+      # Frontend URL
+      FRONTEND_URL: http://localhost:3000
+      
+      # Development Auth Bypass
+      ALLOW_DEV_AUTH_BYPASS: true
+      WEBSOCKET_AUTH_BYPASS: true
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - ./netra_backend:/app/netra_backend
+      - ./shared:/app/shared
+      - ./SPEC:/app/SPEC
+      - ./scripts:/app/scripts
+      - ./logs:/app/logs
+    depends_on:
+      dev-postgres:
+        condition: service_healthy
+      dev-redis:
+        condition: service_healthy
+      dev-clickhouse:
+        condition: service_healthy
+      dev-auth:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - netra-network
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
     deploy:
       resources:
         limits:
           memory: 1G
+          cpus: '1.0'
         reservations:
-          memory: 256M
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "50m"
-        max-file: "3"
+          memory: 512M
+    command: >
+      sh -c "
+        echo 'Waiting for database...' &&
+        python scripts/wait_for_db.py &&
+        echo 'Running migrations...' &&
+        alembic -c netra_backend/alembic.ini upgrade head &&
+        echo 'Starting backend...' &&
+        uvicorn netra_backend.app.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir /app/netra_backend --reload-dir /app/shared --reload-include '*.py'
+      "
 
-  # Frontend Service
-  frontend:
-    image: netra-frontend:${VERSION:-latest}
+  # Dev Frontend Service (depends on backend)
+  dev-frontend:
     build:
-      context: ./frontend
-      dockerfile: ../docker/frontend.Dockerfile
+      context: .
+      dockerfile: ./docker/frontend.development.Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
-        NEXT_PUBLIC_AUTH_URL: ${NEXT_PUBLIC_AUTH_URL:-http://localhost:8081}
-        NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-ws://localhost:8000}
-    container_name: netra-frontend
-    restart: unless-stopped
+        BUILD_MODE: development
+    container_name: netra-dev-frontend
+    profiles: ["dev"]
+    env_file:
+      - .env.development
     environment:
-      # API URLs
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
-      NEXT_PUBLIC_AUTH_URL: ${NEXT_PUBLIC_AUTH_URL:-http://localhost:8081}
-      NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-ws://localhost:8000}
-      NEXT_PUBLIC_WEBSOCKET_URL: ${NEXT_PUBLIC_WEBSOCKET_URL:-ws://localhost:8000/ws}
+      # API URLs (External - for browser)
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      NEXT_PUBLIC_AUTH_URL: http://localhost:8081
+      NEXT_PUBLIC_WS_URL: ws://localhost:8000
+      NEXT_PUBLIC_WEBSOCKET_URL: ws://localhost:8000/ws
       
       # Internal API URLs (for SSR)
-      API_URL: ${API_URL:-http://backend:8000}
-      AUTH_URL: ${AUTH_URL:-http://auth:8081}
+      API_URL: http://dev-backend:8000
+      AUTH_URL: http://dev-auth:8081
+      WS_URL: ws://dev-backend:8000
       
       # Next.js Config
       NODE_ENV: development
       NEXT_TELEMETRY_DISABLED: 1
+      DOCKER_ENV: 1
       
       # Feature Flags
       NEXT_PUBLIC_ENVIRONMENT: ${ENVIRONMENT:-development}
-      NEXT_PUBLIC_ENABLE_ANALYTICS: ${ENABLE_ANALYTICS:-true}
-      NEXT_PUBLIC_GTM_ID: ${GTM_ID}
-      NEXT_PUBLIC_GA_MEASUREMENT_ID: ${GA_MEASUREMENT_ID}
-      
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/app:/app/app
+      - ./frontend/auth:/app/auth
+      - ./frontend/components:/app/components
+      - ./frontend/hooks:/app/hooks
+      - ./frontend/lib:/app/lib
+      - ./frontend/services:/app/services
+      - ./frontend/store:/app/store
+      - ./frontend/styles:/app/styles
+      - ./frontend/types:/app/types
+      - ./frontend/utils:/app/utils
+      - ./frontend/providers:/app/providers
+      - ./frontend/scripts:/app/scripts
+      - ./frontend/next.config.ts:/app/next.config.ts
+      - ./frontend/next.config.turbopack.ts:/app/next.config.turbopack.ts
+      - ./frontend/tsconfig.json:/app/tsconfig.json
+      - ./frontend/tailwind.config.ts:/app/tailwind.config.ts
+      - ./frontend/postcss.config.mjs:/app/postcss.config.mjs
+      - ./frontend/package.json:/app/package.json
+      - /app/node_modules
+      - /app/.next
     depends_on:
-      - backend
-      - auth
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      dev-backend:
+        condition: service_healthy
+      dev-auth:
+        condition: service_healthy
     networks:
       - netra-network
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
     deploy:
       resources:
         limits:
           memory: 1G
+          cpus: '1.0'
         reservations:
-          memory: 256M
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "50m"
-        max-file: "3"
-
-  # Nginx Reverse Proxy (Optional)
-  nginx:
-    image: nginx:alpine
-    container_name: netra-nginx
-    restart: unless-stopped
-    profiles: ["proxy"]
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
-      - nginx_cache:/var/cache/nginx
-    depends_on:
-      - backend
-      - auth
-      - frontend
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    networks:
-      - netra-network
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-        reservations:
-          memory: 64M
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "50m"
-        max-file: "3"
-
-  # Prometheus Monitoring (Optional)
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: netra-prometheus
-    profiles: ["monitoring"]
-    restart: unless-stopped
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
-      - '--web.enable-lifecycle'
-    ports:
-      - "${PROMETHEUS_PORT:-9090}:9090"
-    volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus_data:/prometheus
-    networks:
-      - netra-network
-    deploy:
-      resources:
-        limits:
           memory: 512M
-        reservations:
-          memory: 128M
+    command: >
+      sh -c "
+        echo '🚀 Starting frontend with pre-compilation...' &&
+        npm run dev &
+        sleep 15 &&
+        if [ -f scripts/docker-precompile.js ]; then
+          node scripts/docker-precompile.js
+        fi &&
+        wait
+      "
 
-  # Grafana Dashboard (Optional)
-  grafana:
-    image: grafana/grafana:latest
-    container_name: netra-grafana
-    profiles: ["monitoring"]
-    restart: unless-stopped
+  # ============================================
+  # TEST ENVIRONMENT
+  # ============================================
+
+  # Test PostgreSQL Database
+  test-postgres:
+    image: postgres:15-alpine
+    container_name: netra-test-postgres
+    profiles: ["test"]
     environment:
-      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
-      GF_INSTALL_PLUGINS: ${GRAFANA_PLUGINS:-}
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: netra_test
+      POSTGRES_HOST_AUTH_METHOD: trust
     ports:
-      - "${GRAFANA_PORT:-3001}:3000"
+      - "${TEST_POSTGRES_PORT:-5434}:5432"
     volumes:
-      - grafana_data:/var/lib/grafana
-      - ./grafana/provisioning:/etc/grafana/provisioning:ro
-    depends_on:
-      - prometheus
+      - test_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
     networks:
       - netra-network
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-        reservations:
-          memory: 128M
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
 
+  # Test Redis Cache
+  test-redis:
+    image: redis:7-alpine
+    container_name: netra-test-redis
+    profiles: ["test"]
+    command: redis-server --appendonly no --save ""
+    ports:
+      - "${TEST_REDIS_PORT:-6381}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - netra-network
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
+
+  # Test ClickHouse Analytics
+  test-clickhouse:
+    image: clickhouse/clickhouse-server:23-alpine
+    container_name: netra-test-clickhouse
+    profiles: ["test"]
+    environment:
+      CLICKHOUSE_DB: netra_test_analytics
+      CLICKHOUSE_USER: test
+      CLICKHOUSE_PASSWORD: test
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    ports:
+      - "${TEST_CLICKHOUSE_HTTP_PORT:-8123}:8123"
+      - "${TEST_CLICKHOUSE_TCP_PORT:-9000}:9000"
+    volumes:
+      - test_clickhouse_data:/var/lib/clickhouse
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8123/ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - netra-network
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
+
+  # Test Auth Service (starts first among Netra services)
+  test-auth:
+    build:
+      context: .
+      dockerfile: ./docker/auth.test.Dockerfile
+      args:
+        BUILD_MODE: test
+    container_name: netra-test-auth
+    profiles: ["test"]
+    environment:
+      # Test Environment
+      TESTING: "1"
+      ENVIRONMENT: testing
+      LOG_LEVEL: ERROR
+      
+      # Database
+      POSTGRES_HOST: test-postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: netra_test
+      
+      # Redis
+      REDIS_HOST: test-redis
+      REDIS_PORT: 6379
+      REDIS_URL: redis://test-redis:6379/1
+      
+      # Server Config
+      PORT: 8082
+      HOST: 0.0.0.0
+      
+      # Auth Config
+      JWT_SECRET_KEY: test-jwt-secret-key-for-testing-only-must-be-32-chars
+      JWT_ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+    ports:
+      - "${TEST_AUTH_PORT:-8082}:8082"
+    volumes:
+      - ./auth_service:/app/auth_service:ro
+      - ./shared:/app/shared:ro
+      - ./test_framework:/app/test_framework:ro
+      - ./logs:/app/logs
+    depends_on:
+      test-postgres:
+        condition: service_healthy
+      test-redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - netra-network
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
+
+  # Test Analytics Service (depends on redis and clickhouse)
+  test-analytics:
+    build:
+      context: .
+      dockerfile: ./docker/analytics.development.Dockerfile
+      args:
+        BUILD_MODE: test
+    container_name: netra-test-analytics
+    profiles: ["test"]
+    environment:
+      # Test Environment
+      TESTING: "1"
+      ENVIRONMENT: testing
+      LOG_LEVEL: ERROR
+      
+      # Database connections
+      CLICKHOUSE_HOST: test-clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USER: test
+      CLICKHOUSE_PASSWORD: test
+      CLICKHOUSE_DB: netra_test_analytics
+      
+      # Redis
+      REDIS_HOST: test-redis
+      REDIS_PORT: 6379
+      REDIS_URL: redis://test-redis:6379/2
+      
+      # Server Config
+      PORT: 8091
+      HOST: 0.0.0.0
+      
+      # Analytics-specific configuration
+      ANALYTICS_SERVICE_PORT: 8091
+      EVENT_BATCH_SIZE: 50
+      EVENT_FLUSH_INTERVAL_MS: 1000
+      MAX_EVENTS_PER_USER_PER_MINUTE: 500
+    ports:
+      - "${TEST_ANALYTICS_PORT:-8091}:8091"
+    volumes:
+      - ./analytics_service:/app/analytics_service:ro
+      - ./shared:/app/shared:ro
+      - ./test_framework:/app/test_framework:ro
+      - ./logs:/app/logs
+    depends_on:
+      test-redis:
+        condition: service_healthy
+      test-clickhouse:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8091/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - netra-network
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
+
+  # Test Backend Service (depends on auth)
+  test-backend:
+    build:
+      context: .
+      dockerfile: ./docker/backend.development.Dockerfile
+      args:
+        BUILD_MODE: test
+    container_name: netra-test-backend
+    profiles: ["test"]
+    environment:
+      # Test Environment
+      TESTING: "1"
+      ENVIRONMENT: testing
+      LOG_LEVEL: ERROR
+      
+      # Database
+      POSTGRES_HOST: test-postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: netra_test
+      
+      # Redis
+      REDIS_HOST: test-redis
+      REDIS_PORT: 6379
+      REDIS_URL: redis://test-redis:6379/0
+      TEST_DISABLE_REDIS: "false"
+      
+      # ClickHouse
+      DEV_MODE_DISABLE_CLICKHOUSE: "false"
+      CLICKHOUSE_ENABLED: "true"
+      CLICKHOUSE_HOST: test-clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USER: test
+      CLICKHOUSE_PASSWORD: test
+      CLICKHOUSE_DB: netra_test_analytics
+      
+      # Auth Service
+      AUTH_SERVICE_URL: http://test-auth:8082
+      
+      # Server Config
+      PORT: 8001
+      HOST: 0.0.0.0
+      
+      # Test Secrets
+      JWT_SECRET_KEY: test-jwt-secret-key-for-testing-only-must-be-32-chars
+      SERVICE_SECRET: test-service-secret-for-cross-service-auth-32-chars-minimum-length
+      FERNET_KEY: iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw=
+      SECRET_KEY: test-secret-key-for-testing-only
+      
+      # Frontend URL
+      FRONTEND_URL: http://localhost:3001
+      CORS_ORIGINS: '["http://localhost:3001", "http://test-frontend:3001"]'
+    ports:
+      - "${TEST_BACKEND_PORT:-8001}:8001"
+    volumes:
+      - ./netra_backend:/app/netra_backend:ro
+      - ./shared:/app/shared:ro
+      - ./test_framework:/app/test_framework:ro
+      - ./tests:/app/tests:ro
+      - ./SPEC:/app/SPEC:ro
+      - ./scripts:/app/scripts:ro
+      - ./logs:/app/logs
+    depends_on:
+      test-postgres:
+        condition: service_healthy
+      test-redis:
+        condition: service_healthy
+      test-clickhouse:
+        condition: service_healthy
+      test-auth:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - netra-network
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
+    command: >
+      sh -c "
+        echo 'Test Backend: Waiting for database...' &&
+        python scripts/wait_for_db.py &&
+        echo 'Test Backend: Running migrations...' &&
+        alembic -c netra_backend/alembic.ini upgrade head &&
+        echo 'Test Backend: Starting...' &&
+        uvicorn netra_backend.app.main:app --host 0.0.0.0 --port 8001 --reload-dir /app/netra_backend
+      "
+
+  # Test Frontend Service (depends on backend)
+  test-frontend:
+    build:
+      context: .
+      dockerfile: ./docker/frontend.test.Dockerfile
+      args:
+        BUILD_MODE: test
+    container_name: netra-test-frontend
+    profiles: ["test"]
+    environment:
+      # Test Environment
+      NODE_ENV: test
+      NEXT_TELEMETRY_DISABLED: 1
+      
+      # API URLs
+      NEXT_PUBLIC_API_URL: http://test-backend:8001
+      NEXT_PUBLIC_AUTH_URL: http://test-auth:8082
+      NEXT_PUBLIC_WEBSOCKET_URL: ws://test-backend:8001
+      
+      # Test Configuration
+      NEXT_PUBLIC_ENVIRONMENT: testing
+      
+      # Server Config
+      PORT: 3001
+      HOSTNAME: 0.0.0.0
+    ports:
+      - "${TEST_FRONTEND_PORT:-3001}:3001"
+    volumes:
+      - ./frontend:/app
+    depends_on:
+      test-backend:
+        condition: service_healthy
+      test-auth:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    networks:
+      - netra-network
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
+    command: >
+      sh -c "
+        echo 'Test Frontend: Starting Next.js server...' &&
+        npm run start
+      "
+
+# Shared network for all services
 networks:
   netra-network:
     driver: bridge
     name: netra-network
-    ipam:
-      driver: default
-      config:
-        - subnet: 172.20.0.0/16
 
+# Volumes for persistent data
 volumes:
-  postgres_data:
-    name: netra-postgres-data
-  redis_data:
-    name: netra-redis-data
-  clickhouse_data:
-    name: netra-clickhouse-data
-  clickhouse_logs:
-    name: netra-clickhouse-logs
-  nginx_cache:
-    name: netra-nginx-cache
-  prometheus_data:
-    name: netra-prometheus-data
-  grafana_data:
-    name: netra-grafana-data
+  # Dev volumes
+  dev_postgres_data:
+    name: netra-dev-postgres-data
+  dev_redis_data:
+    name: netra-dev-redis-data
+  dev_clickhouse_data:
+    name: netra-dev-clickhouse-data
+  # Test volumes
+  test_postgres_data:
+    name: netra-test-postgres-data
+  test_redis_data:
+    name: netra-test-redis-data
+  test_clickhouse_data:
+    name: netra-test-clickhouse-data

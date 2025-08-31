@@ -12,8 +12,11 @@
  */
 
 import { AuthStoreTestUtils, GlobalTestUtils } from './store-test-utils';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('AuthStore - Authentication Flow', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   let mockStorage: ReturnType<typeof GlobalTestUtils.setupStoreTestEnvironment>['mockStorage'];
   let storeResult: ReturnType<typeof AuthStoreTestUtils.initializeStore>;
 
@@ -36,6 +39,8 @@ describe('AuthStore - Authentication Flow', () => {
   });
 
   describe('Initial State - Security Defaults', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should initialize with secure defaults', () => {
       expect(storeResult.current.isAuthenticated).toBe(false);
       expect(storeResult.current.user).toBeNull();
@@ -64,6 +69,8 @@ describe('AuthStore - Authentication Flow', () => {
   });
 
   describe('Login Flow - Revenue Critical Tiers', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should authenticate free tier user correctly', () => {
       const freeUser = AuthStoreTestUtils.createMockUser('standard_user', []);
       const token = AuthStoreTestUtils.createTestToken('free');
@@ -118,6 +125,8 @@ describe('AuthStore - Authentication Flow', () => {
   });
 
   describe('Token Management - Security Critical', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should store token securely in localStorage', () => {
       const token = AuthStoreTestUtils.createTestToken('secure');
       const user = AuthStoreTestUtils.createMockUser('standard_user');
@@ -183,6 +192,8 @@ describe('AuthStore - Authentication Flow', () => {
   });
 
   describe('Authentication State Transitions', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle unauthenticated to authenticated transition', () => {
       expect(storeResult.current.isAuthenticated).toBe(false);
       
@@ -223,4 +234,8 @@ describe('AuthStore - Authentication Flow', () => {
       expect(storeResult.current.user?.id).toBe('user-user2');
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

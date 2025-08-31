@@ -9,30 +9,26 @@
 export class SyntheticDataPageObject {
   // Page selectors
   static readonly selectors = {
-    // Main components
-    page: '[data-testid="synthetic-data-generator"]',
-    configPanel: 'text=Configuration',
-    parametersPanel: 'text=Parameters',
+    // Main components - updated to match actual SyntheticDataGenerator component
+    page: '.max-w-2xl',
+    cardHeader: 'Generate Synthetic Data',
+    configForm: '.space-y-4',
     
-    // Input fields
-    tracesInput: 'input[name="traces"]',
-    usersInput: 'input[name="users"]',
-    errorRateInput: 'input[name="errorRate"]',
-    errorRateSlider: 'input[type="range"][name="errorRate"]',
+    // Input fields - updated to match actual field names and IDs
+    tracesInput: '#num_traces',
+    usersInput: '#num_users', 
+    errorRateInput: '#error_rate',
+    eventTypesInput: '#event_types',
     
-    // Tooltips
-    tracesTooltip: '[data-testid="traces-tooltip"]',
+    // Workload pattern selection - using Select component
+    workloadPatternTrigger: '[data-testid="select-trigger"]',
     
-    // Table management
-    targetTableSelect: 'select[name="targetTable"]',
-    newTableModal: '[data-testid="new-table-modal"]',
-    tableNameInput: 'input[name="tableName"]',
+    // Source table selection
+    sourceTableSelect: '#source_table',
     
     // Generation process
     generateButton: 'button:contains("Generate Data")',
-    cancelButton: 'button:contains("Cancel")',
-    progressBar: '[data-testid="progress-bar"]',
-    progressPercentage: '[data-testid="progress-percentage"]',
+    generatingButton: 'button:contains("Generating...")',
     
     // Preview and validation
     previewTable: '[data-testid="data-preview-table"]',
@@ -77,7 +73,7 @@ export class SyntheticDataPageObject {
 
   static verifyPageLoad(): void {
     cy.url().should('include', '/synthetic-data-generation')
-    cy.contains('Synthetic Data Generation').should('be.visible')
+    cy.contains('Generate Synthetic Data').should('be.visible')
   }
 
   // Configuration actions
@@ -89,24 +85,28 @@ export class SyntheticDataPageObject {
     cy.get(this.selectors.usersInput).clear().type(count)
   }
 
-  static setErrorRate(rate: number): void {
-    cy.get(this.selectors.errorRateSlider)
-      .invoke('val', rate)
-      .trigger('input')
+  static setErrorRate(rate: string): void {
+    cy.get(this.selectors.errorRateInput).clear().type(rate)
+  }
+
+  static setEventTypes(eventTypes: string): void {
+    cy.get(this.selectors.eventTypesInput).clear().type(eventTypes)
   }
 
   // Pattern selection actions
   static selectWorkloadPattern(pattern: string): void {
+    cy.get(this.selectors.workloadPatternTrigger).click()
     cy.contains(pattern).click()
+    cy.get('body').click(0, 0) // Close dropdown
   }
 
   static verifyPatternSelected(pattern: string): void {
-    cy.contains(pattern).parent().should('have.class', 'ring-2')
+    cy.get(this.selectors.workloadPatternTrigger).should('contain', pattern)
   }
 
-  // Table management actions
-  static selectTable(tableName: string): void {
-    cy.get(this.selectors.targetTableSelect).select(tableName)
+  // Source table management actions
+  static selectSourceTable(tableName: string): void {
+    cy.get(this.selectors.sourceTableSelect).select(tableName)
   }
 
   static createNewTable(tableName: string): void {
@@ -186,14 +186,15 @@ export class SyntheticDataPageObject {
 
   // Validation utilities
   static verifyDefaultValues(): void {
-    cy.get(this.selectors.tracesInput).should('have.value', '1000')
-    cy.get(this.selectors.usersInput).should('have.value', '100')
-    cy.get(this.selectors.errorRateInput).should('have.value', '5')
+    cy.get(this.selectors.tracesInput).should('have.value', '100')
+    cy.get(this.selectors.usersInput).should('have.value', '10')
+    cy.get(this.selectors.errorRateInput).should('have.value', '0.1')
+    cy.get(this.selectors.eventTypesInput).should('have.value', 'search,login')
   }
 
   static verifyGenerationInProgress(): void {
-    cy.contains('Generating').should('be.visible')
-    cy.get(this.selectors.progressBar).should('be.visible')
+    cy.contains('Generating...').should('be.visible')
+    cy.get(this.selectors.generatingButton).should('be.disabled')
   }
 
   static verifyPreviewData(): void {
@@ -234,14 +235,14 @@ export class SyntheticDataPageObject {
   }
 }
 
-// Export workload patterns for reuse
+// Export workload patterns for reuse - updated to match actual implementation
 export const WORKLOAD_PATTERNS = [
-  'Steady', 'Burst', 'Growth', 'Periodic', 'Random'
+  'Default Workload', 'Cost-Sensitive', 'Latency-Sensitive', 'High Error Rate'
 ] as const
 
-// Export table options for reuse
+// Export table options for reuse - these are dynamically loaded from API
 export const TABLE_OPTIONS = [
-  'traces_synthetic', 'metrics_synthetic', 'logs_synthetic'
+  // These are fetched dynamically from /api/generation/clickhouse_tables
 ] as const
 
 // Export validation messages for reuse

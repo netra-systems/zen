@@ -20,6 +20,7 @@ import { optimisticMessageManager } from '@/services/optimistic-updates';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { reconciliationService } from '@/services/reconciliation';
 import type { ChatMessage } from '@/types/unified';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Test component that visualizes optimistic updates
 const OptimisticUpdateVisualizer: React.FC<{
@@ -186,6 +187,8 @@ jest.mock('@/services/reconciliation');
 jest.mock('@/store/unified-chat');
 
 describe('Optimistic UI Updates and Reconciliation Pipeline Tests', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   const mockReconciliationService = {
     processConfirmation: jest.fn((msg) => msg),
     addOptimisticMessage: jest.fn((msg) => ({ ...msg, tempId: 'temp-123' })),
@@ -217,9 +220,17 @@ describe('Optimistic UI Updates and Reconciliation Pipeline Tests', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Immediate Optimistic Updates', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should show user message immediately on send', async () => {
       render(<OptimisticTestHarness />);
 
@@ -311,6 +322,8 @@ describe('Optimistic UI Updates and Reconciliation Pipeline Tests', () => {
   });
 
   describe('Message Status Transitions', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should transition from pending to confirmed on backend success', async () => {
       const stateChanges: any[] = [];
       
@@ -446,6 +459,8 @@ describe('Optimistic UI Updates and Reconciliation Pipeline Tests', () => {
   });
 
   describe('Backend Reconciliation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should reconcile multiple messages correctly', async () => {
       const stateChanges: any[] = [];
       
@@ -566,6 +581,8 @@ describe('Optimistic UI Updates and Reconciliation Pipeline Tests', () => {
   });
 
   describe('Streaming Response Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle streaming AI responses with real-time updates', async () => {
       render(<OptimisticTestHarness simulateStreamingResponse={true} />);
 
@@ -682,6 +699,8 @@ describe('Optimistic UI Updates and Reconciliation Pipeline Tests', () => {
   });
 
   describe('Performance and Memory Optimization', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle large numbers of optimistic updates efficiently', async () => {
       render(<OptimisticTestHarness />);
 
@@ -774,6 +793,8 @@ describe('Optimistic UI Updates and Reconciliation Pipeline Tests', () => {
   });
 
   describe('UI State Synchronization', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should synchronize UI state across components', async () => {
       const stateChanges: any[] = [];
       

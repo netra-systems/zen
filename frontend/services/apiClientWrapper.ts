@@ -5,7 +5,7 @@
 
 import { unifiedApiConfig } from '@/lib/unified-api-config';
 import { authInterceptor } from '@/lib/auth-interceptor';
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 import { CircuitBreaker } from '@/lib/circuit-breaker';
 
 interface ApiResponse<T = any> {

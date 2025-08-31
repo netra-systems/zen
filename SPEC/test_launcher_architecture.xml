@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<specification>
+  <metadata>
+    <name>Test Launcher Architecture</name>
+    <version>1.0.0</version>
+    <created>2024-01-15</created>
+    <last_updated>2024-01-15</last_updated>
+    <status>implemented</status>
+  </metadata>
+  
+  <description>
+    Test-focused launcher system that replaces dev_launcher for testing scenarios.
+    Optimized for CI/CD, test isolation, and resource management.
+    Provides profile-based configurations for different test types.
+  </description>
+  
+  <architecture>
+    <principle id="ARCH-001" priority="CRITICAL">
+      <name>Separation of Concerns</name>
+      <description>Test launcher focuses exclusively on testing, dev_launcher on development</description>
+      <rationale>Clear boundaries prevent feature creep and maintain optimization focus</rationale>
+    </principle>
+    
+    <principle id="ARCH-002" priority="HIGH">
+      <name>Profile-Based Configuration</name>
+      <description>Predefined profiles for unit, integration, E2E, performance, security tests</description>
+      <rationale>Eliminates configuration complexity and ensures optimal settings</rationale>
+    </principle>
+    
+    <principle id="ARCH-003" priority="HIGH">
+      <name>Isolation Levels</name>
+      <description>Three levels: none (mocked), partial (DB only), full (complete isolation)</description>
+      <rationale>Balance between test isolation and execution speed</rationale>
+    </principle>
+  </architecture>
+  
+  <components>
+    <component name="TestLauncher" path="test_launcher/launcher.py">
+      <responsibility>Main orchestrator for test environment setup and teardown</responsibility>
+      <max_lines>400</max_lines>
+      <interfaces>
+        <interface>run() -> int</interface>
+        <interface>cleanup() -> None</interface>
+        <interface>get_service_status() -> Dict</interface>
+        <interface>for_profile(profile: TestProfile) -> TestLauncher</interface>
+      </interfaces>
+    </component>
+    
+    <component name="TestConfig" path="test_launcher/config/test_profiles.py">
+      <responsibility>Configuration management and profile definitions</responsibility>
+      <max_lines>600</max_lines>
+      <profiles>
+        <profile name="UNIT" isolation="none" services="none" />
+        <profile name="INTEGRATION" isolation="partial" services="postgres,redis" />
+        <profile name="E2E" isolation="full" services="all" />
+        <profile name="PERFORMANCE" isolation="partial" services="postgres,redis,clickhouse" />
+        <profile name="SECURITY" isolation="full" services="postgres,auth" />
+        <profile name="SMOKE" isolation="none" services="postgres,redis" />
+        <profile name="FULL" isolation="full" services="all" />
+      </profiles>
+    </component>
+    
+    <component name="TestServiceManager" path="test_launcher/test_services.py">
+      <responsibility>Service lifecycle management including Docker containers</responsibility>
+      <max_lines>500</max_lines>
+      <capabilities>
+        <capability>Docker container management</capability>
+        <capability>Application process management</capability>
+        <capability>Health checking (HTTP, PostgreSQL, Redis)</capability>
+        <capability>Service discovery and port allocation</capability>
+      </capabilities>
+    </component>
+    
+    <component name="TestEnvironmentManager" path="test_launcher/isolation/environment.py">
+      <responsibility>Environment variable isolation and test-specific configuration</responsibility>
+      <max_lines>300</max_lines>
+      <features>
+        <feature>Test ID generation for isolation</feature>
+        <feature>Profile-specific environment setup</feature>
+        <feature>Service URL generation</feature>
+        <feature>Secret generation for tests</feature>
+        <feature>Cleanup and restoration</feature>
+      </features>
+    </component>
+  </components>
+  
+  <port_allocation>
+    <service name="PostgreSQL" dev_port="5432" test_port="5434" />
+    <service name="Redis" dev_port="6379" test_port="6381" />
+    <service name="ClickHouse" dev_port="8123" test_port="8124" />
+    <service name="Backend" dev_port="8000" test_port="8001" />
+    <service name="Auth" dev_port="8081" test_port="8082" />
+    <service name="Frontend" dev_port="3000" test_port="3001" />
+  </port_allocation>
+  
+  <environment_assumptions>
+    <assumption id="ENV-001" environment="test">
+      <description>Docker available, test ports, ephemeral data, cleanup mandatory</description>
+    </assumption>
+    <assumption id="ENV-002" environment="development">
+      <description>Docker Desktop, dev ports shared with dev_launcher, persistent data</description>
+    </assumption>
+    <assumption id="ENV-003" environment="ci_cd">
+      <description>Docker-in-Docker or K8s, dynamic ports, resource limits, parallel execution</description>
+    </assumption>
+    <assumption id="ENV-004" environment="staging">
+      <description>Cloud services, production-like config, real LLM required, monitoring enabled</description>
+    </assumption>
+  </environment_assumptions>
+  
+  <critical_requirements>
+    <requirement id="REQ-001" priority="CRITICAL">
+      <description>Real LLM required for all non-unit tests per CLAUDE.md</description>
+      <reference>CLAUDE.md Section 3.4: "Mocks are forbidden in E2E testing"</reference>
+    </requirement>
+    <requirement id="REQ-002" priority="CRITICAL">
+      <description>Complete cleanup on exit including containers, networks, and temp files</description>
+    </requirement>
+    <requirement id="REQ-003" priority="HIGH">
+      <description>No browser auto-open or hot-reload features</description>
+    </requirement>
+    <requirement id="REQ-004" priority="HIGH">
+      <description>Test-specific ports to avoid conflicts with development</description>
+    </requirement>
+  </critical_requirements>
+  
+  <performance_targets>
+    <target id="PERF-001">
+      <metric>Startup time for unit tests</metric>
+      <value>&lt; 2 seconds</value>
+    </target>
+    <target id="PERF-002">
+      <metric>Startup time for integration tests</metric>
+      <value>&lt; 10 seconds</value>
+    </target>
+    <target id="PERF-003">
+      <metric>Cleanup time</metric>
+      <value>&lt; 5 seconds</value>
+    </target>
+    <target id="PERF-004">
+      <metric>Test execution improvement vs dev_launcher</metric>
+      <value>30-40% faster</value>
+    </target>
+  </performance_targets>
+  
+  <migration_strategy>
+    <phase number="1" name="Coexistence">
+      <description>Test launcher created alongside dev_launcher</description>
+      <duration>1 week</duration>
+    </phase>
+    <phase number="2" name="Migration">
+      <description>Update test infrastructure to use test_launcher</description>
+      <duration>2 weeks</duration>
+    </phase>
+    <phase number="3" name="Cleanup">
+      <description>Remove test code from dev_launcher</description>
+      <duration>1 week</duration>
+    </phase>
+  </migration_strategy>
+  
+  <testing>
+    <test_file>test_launcher/tests/test_launcher.py</test_file>
+    <test_file>test_launcher/tests/test_profiles.py</test_file>
+    <test_file>test_launcher/tests/test_service_manager.py</test_file>
+    <test_file>test_launcher/tests/test_isolation.py</test_file>
+    <scenarios>
+      <scenario>Profile-based configuration loading</scenario>
+      <scenario>Service startup and health checking</scenario>
+      <scenario>Environment isolation and cleanup</scenario>
+      <scenario>Port conflict resolution</scenario>
+      <scenario>Docker container management</scenario>
+      <scenario>Timeout and failure handling</scenario>
+      <scenario>Parallel test execution support</scenario>
+    </scenarios>
+  </testing>
+</specification>

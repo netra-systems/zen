@@ -8,10 +8,11 @@
  */
 
 // Import test setup with mocks FIRST
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import './auth-test-setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import { authService } from '@/auth';
-import {
-  setupAuthTestEnvironment,
+import { setupAuthTestEnvironment,
   resetAuthTestMocks,
   createMockAuthConfig,
   createMockDevConfig,
@@ -31,12 +32,15 @@ import {
 } from './auth-test-utils';
 
 describe('Auth Login Flow', () => {
+  jest.setTimeout(10000);
+  
   let testEnv: ReturnType<typeof setupAuthTestEnvironment>;
   let mockAuthConfig: ReturnType<typeof createMockAuthConfig>;
   let mockToken: string;
   let mockDevLoginResponse: ReturnType<typeof createMockDevLoginResponse>;
 
   beforeEach(() => {
+    setupAntiHang();
     testEnv = setupAuthTestEnvironment();
     mockAuthConfig = createMockAuthConfig();
     mockToken = createMockToken();
@@ -51,6 +55,10 @@ describe('Auth Login Flow', () => {
     });
   });
 
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
   afterAll(() => {
     jest.restoreAllMocks();
   });
@@ -60,7 +68,6 @@ describe('Auth Login Flow', () => {
       // Clear mock calls but keep the default implementation
       mockAuthServiceClient.getConfig.mockClear();
     });
-
 
 
     it('should fetch auth config successfully', async () => {

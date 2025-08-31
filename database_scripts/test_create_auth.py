@@ -36,7 +36,8 @@ from netra_backend.app.core.cross_service_auth import (
     setup_authentication
 )
 from netra_backend.app.clients.auth_client import AuthClient
-from test_framework.mock_utils import mock_justified
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
 
 class TestStagingCrossServiceAuthPropagation:
@@ -79,8 +80,7 @@ class TestStagingCrossServiceAuthPropagation:
             }
         }
 
-    @mock_justified("JWT validation requires controlled token generation not available in test environment")
-    def test_jwt_validation_in_each_service(self, staging_services_config, test_user_credentials):
+    async def test_jwt_validation_in_each_service(self, staging_services_config, test_user_credentials):
         \"\"\"Test JWT validation logic in Auth, Backend, and Frontend services.\"\"\"
         jwt_secret = staging_services_config["jwt_secret"]
         
@@ -118,7 +118,6 @@ class TestStagingCrossServiceAuthPropagation:
             assert auth_token.scopes == test_user_credentials["scopes"]
             assert not auth_token.is_expired
 
-    @mock_justified("Environment configuration testing requires controlled environment variables")
     async def test_staging_specific_auth_configuration_propagation(self, staging_services_config):
         \"\"\"Test staging-specific authentication configuration propagation.\"\"\"
         staging_env = {

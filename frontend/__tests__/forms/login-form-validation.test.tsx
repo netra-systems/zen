@@ -7,6 +7,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock login form component
 const LoginForm: React.FC<{ onSubmit: (data: { email: string; password: string }) => void }> = ({ onSubmit }) => {
@@ -72,6 +73,8 @@ const LoginForm: React.FC<{ onSubmit: (data: { email: string; password: string }
 };
 
 describe('Login Form Validation', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   it('should show validation errors for empty fields', async () => {
     const mockOnSubmit = jest.fn();
     const user = userEvent.setup();
@@ -103,4 +106,8 @@ describe('Login Form Validation', () => {
       password: 'password123'
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

@@ -1,10 +1,10 @@
-/**
- * API Calls Integration Tests - Advanced Features
- * Tests request interceptors, API versioning, and response handling
- * 
- * Business Value Justification (BVJ):
- * - Segment: All (Free → Enterprise)
- * - Goal: Ensure reliable API communication patterns for all customer segments
+import { render, screen, waitFor } from '@testing-library/react';
+import { setupServer } from 'msw/node';
+import { http, HttpResponse } from 'msw';
+import { apiClient } from '@/services/apiClient';
+import { getApiUrl } from '@/services/api';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ication patterns for all customer segments
  * - Value Impact: Prevents API-related bugs that could cause customer churn
  * - Revenue Impact: +$50K MRR from improved reliability
  */
@@ -130,6 +130,11 @@ beforeEach(() => {
 afterEach(() => {
   server.resetHandlers();
   jest.clearAllMocks();
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
 });
 
 afterAll(() => {
@@ -141,6 +146,7 @@ afterAll(() => {
 // ============================================================================
 
 describe('API Calls - Request Interceptors', () => {
+    jest.setTimeout(10000);
   it('handles API spec fetching for endpoint resolution', async () => {
     // The apiClient.get() call should first fetch the OpenAPI spec
     const result = await apiClient.get('get_threads', 'test-token');
@@ -234,6 +240,7 @@ describe('API Calls - Request Interceptors', () => {
 // ============================================================================
 
 describe('API Calls - API Versioning', () => {
+    jest.setTimeout(10000);
   it('supports clean API endpoints without versioning', async () => {
     const url = getApiUrl('/api/threads');
     const response = await fetch(url);
@@ -289,6 +296,7 @@ describe('API Calls - API Versioning', () => {
 // ============================================================================
 
 describe('API Calls - Response Interceptors', () => {
+    jest.setTimeout(10000);
   it('parses JSON responses correctly', async () => {
     const response = await apiClient.get('get_threads', 'test-token');
     
@@ -393,6 +401,7 @@ describe('API Calls - Response Interceptors', () => {
 // ============================================================================
 
 describe('API Calls - Performance', () => {
+    jest.setTimeout(10000);
   it('handles concurrent requests efficiently', async () => {
     const promises = Array.from({ length: 10 }, (_, i) => 
       apiClient.get('get_threads', `token-${i}`)

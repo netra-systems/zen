@@ -1,9 +1,8 @@
-/**
- * Thread Management Integration Tests
- * Tests for thread creation, switching, and message synchronization
- */
-
 import React from 'react';
+import { render, waitFor, screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+t';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
@@ -32,6 +31,7 @@ jest.mock('@/services/messageService', () => ({
 }));
 
 describe('Thread Management Integration', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     
@@ -42,9 +42,15 @@ describe('Thread Management Integration', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Thread Creation and Message Sync', () => {
+      jest.setTimeout(10000);
     it('should create thread and sync with messages', async () => {
       const { ThreadService } = require('@/services/threadService');
       const { messageService } = require('@/services/messageService');

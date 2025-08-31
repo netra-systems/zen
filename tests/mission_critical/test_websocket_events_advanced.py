@@ -1,0 +1,912 @@
+#!/usr/bin/env python
+"""ADVANCED WEBSOCKET EVENT TESTS - Extended Coverage
+
+These tests provide deep validation of WebSocket event handling under
+extreme conditions, edge cases, and failure scenarios.
+
+CRITICAL: These tests ensure the chat UI remains functional under ALL conditions.
+"""
+
+import asyncio
+import json
+import time
+import random
+import uuid
+from collections import defaultdict, deque
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timedelta
+from typing import Dict, List, Set, Any, Optional, Tuple
+from unittest.mock import AsyncMock, MagicMock, patch, call
+import threading
+import weakref
+import gc
+
+import pytest
+from loguru import logger
+
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.enhanced_tool_execution import (
+    EnhancedToolExecutionEngine,
+    enhance_tool_dispatcher_with_notifications
+)
+from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.agents.state import DeepAgentState
+
+# Import test helpers
+from tests.mission_critical.test_helpers import SimpleWebSocketNotifier
+
+
+# ============================================================================
+# ADVANCED EVENT VALIDATORS
+# ============================================================================
+
+class EventOrderValidator:
+    """Validates complex event ordering requirements."""
+    
+    # Define valid state transitions
+    STATE_TRANSITIONS = {
+        None: ["agent_started"],
+        "agent_started": ["agent_thinking", "tool_executing", "agent_completed", "agent_fallback"],
+        "agent_thinking": ["agent_thinking", "tool_executing", "partial_result", "agent_completed"],
+        "tool_executing": ["tool_completed"],
+        "tool_completed": ["tool_executing", "agent_thinking", "partial_result", "agent_completed"],
+        "partial_result": ["partial_result", "tool_executing", "agent_thinking", "agent_completed"],
+        "agent_completed": [],  # Terminal state
+        "agent_fallback": ["agent_completed"],  # Error recovery
+        "final_report": ["agent_completed"]
+    }
+    
+    def __init__(self):
+        self.state_history: List[Tuple[float, str, str]] = []  # (timestamp, event_type, request_id)
+        self.current_states: Dict[str, str] = {}  # request_id -> current_state
+        self.violations: List[str] = []
+        self.start_time = time.time()
+    
+    def record_event(self, event: Dict) -> bool:
+        """Record event and validate state transition."""
+        timestamp = time.time() - self.start_time
+        event_type = event.get("type", "unknown")
+        request_id = event.get("request_id", event.get("data", {}).get("request_id", "unknown"))
+        
+        self.state_history.append((timestamp, event_type, request_id))
+        
+        # Get current state for this request
+        current_state = self.current_states.get(request_id)
+        
+        # Validate transition
+        valid_transitions = self.STATE_TRANSITIONS.get(current_state, [])
+        
+        if event_type not in valid_transitions:
+            violation = f"Invalid transition: {current_state} -> {event_type} for request {request_id}"
+            self.violations.append(violation)
+            logger.error(violation)
+            return False
+        
+        # Update state
+        self.current_states[request_id] = event_type
+        return True
+    
+    def validate_complete_flow(self, request_id: str) -> Tuple[bool, List[str]]:
+        """Validate that a request had a complete, valid flow."""
+        events = [e for e in self.state_history if e[2] == request_id]
+        
+        if not events:
+            return False, ["No events found for request"]
+        
+        errors = []
+        
+        # Must start with agent_started
+        if events[0][1] != "agent_started":
+            errors.append(f"Flow didn't start with agent_started: {events[0][1]}")
+        
+        # Must end with completion
+        last_event = events[-1][1]
+        if last_event not in ["agent_completed", "final_report"]:
+            errors.append(f"Flow didn't end with completion: {last_event}")
+        
+        # Check for orphaned tool executions
+        tool_starts = sum(1 for e in events if e[1] == "tool_executing")
+        tool_ends = sum(1 for e in events if e[1] == "tool_completed")
+        if tool_starts != tool_ends:
+            errors.append(f"Unpaired tool events: {tool_starts} starts, {tool_ends} ends")
+        
+        return len(errors) == 0, errors
+
+
+class EventTimingAnalyzer:
+    """Analyzes timing patterns and detects anomalies."""
+    
+    def __init__(self, max_latency_ms: float = 100):
+        self.max_latency_ms = max_latency_ms
+        self.event_times: Dict[str, List[float]] = defaultdict(list)
+        self.event_intervals: Dict[str, deque] = defaultdict(lambda: deque(maxlen=100))
+        self.anomalies: List[Dict] = []
+    
+    def record_event(self, event: Dict) -> None:
+        """Record event timing."""
+        event_type = event.get("type", "unknown")
+        timestamp = time.time()
+        
+        self.event_times[event_type].append(timestamp)
+        
+        # Calculate interval since last event of same type
+        if len(self.event_times[event_type]) > 1:
+            interval = (timestamp - self.event_times[event_type][-2]) * 1000  # ms
+            self.event_intervals[event_type].append(interval)
+            
+            # Detect timing anomalies
+            if interval > self.max_latency_ms:
+                self.anomalies.append({
+                    "event_type": event_type,
+                    "interval_ms": interval,
+                    "timestamp": timestamp,
+                    "severity": "high" if interval > self.max_latency_ms * 10 else "medium"
+                })
+    
+    def get_statistics(self) -> Dict[str, Any]:
+        """Get timing statistics."""
+        stats = {}
+        
+        for event_type, intervals in self.event_intervals.items():
+            if intervals:
+                stats[event_type] = {
+                    "count": len(self.event_times[event_type]),
+                    "avg_interval_ms": sum(intervals) / len(intervals),
+                    "max_interval_ms": max(intervals),
+                    "min_interval_ms": min(intervals),
+                    "p95_interval_ms": sorted(intervals)[int(len(intervals) * 0.95)] if len(intervals) > 1 else 0
+                }
+        
+        stats["anomalies"] = len(self.anomalies)
+        stats["high_severity_anomalies"] = sum(1 for a in self.anomalies if a["severity"] == "high")
+        
+        return stats
+
+
+class EventContentValidator:
+    """Validates event content and data integrity."""
+    
+    REQUIRED_FIELDS = {
+        "agent_started": ["type", "timestamp", "data"],
+        "agent_thinking": ["type", "timestamp", "data", "data.message"],
+        "tool_executing": ["type", "timestamp", "data", "data.tool_name"],
+        "tool_completed": ["type", "timestamp", "data", "data.tool_name", "data.result"],
+        "partial_result": ["type", "timestamp", "data", "data.content"],
+        "agent_completed": ["type", "timestamp", "data"]
+    }
+    
+    def __init__(self):
+        self.validation_errors: List[Dict] = []
+        self.event_sizes: Dict[str, List[int]] = defaultdict(list)
+    
+    def validate_event(self, event: Dict) -> bool:
+        """Validate event has required fields and proper structure."""
+        event_type = event.get("type", "unknown")
+        
+        # Track event size
+        event_size = len(json.dumps(event))
+        self.event_sizes[event_type].append(event_size)
+        
+        # Check size limits (WebSocket frame limit)
+        if event_size > 65536:  # 64KB limit
+            self.validation_errors.append({
+                "event_type": event_type,
+                "error": f"Event too large: {event_size} bytes",
+                "severity": "critical"
+            })
+            return False
+        
+        # Validate required fields
+        required = self.REQUIRED_FIELDS.get(event_type, ["type", "timestamp"])
+        
+        for field_path in required:
+            if not self._check_field_path(event, field_path):
+                self.validation_errors.append({
+                    "event_type": event_type,
+                    "error": f"Missing required field: {field_path}",
+                    "severity": "high"
+                })
+                return False
+        
+        return True
+    
+    def _check_field_path(self, obj: Dict, path: str) -> bool:
+        """Check if a nested field path exists."""
+        parts = path.split(".")
+        current = obj
+        
+        for part in parts:
+            if not isinstance(current, dict) or part not in current:
+                return False
+            current = current[part]
+        
+        return True
+
+
+# ============================================================================
+# ADVANCED TEST SCENARIOS
+# ============================================================================
+
+class TestAdvancedEventOrdering:
+    """Tests for complex event ordering scenarios."""
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_parallel_tool_execution_ordering(self):
+        """Test that parallel tool executions maintain proper event pairing."""
+        ws_manager = WebSocketManager()
+        order_validator = EventOrderValidator()
+        
+        conn_id = "parallel-tools"
+        mock_ws = MagicMock()
+        
+        async def capture(message):
+            data = json.loads(message) if isinstance(message, str) else message
+            order_validator.record_event(data)
+        
+        mock_ws.send_json = AsyncMock(side_effect=capture)
+        await ws_manager.connect_user(conn_id, mock_ws, conn_id)
+        
+        # Create enhanced tool dispatcher
+        dispatcher = ToolDispatcher()
+        enhance_tool_dispatcher_with_notifications(dispatcher, ws_manager)
+        
+        # Register multiple tools using the registry
+        from langchain_core.tools import Tool
+        
+        async def tool_a(data):
+            await asyncio.sleep(random.uniform(0.01, 0.05))
+            return {"tool_a_result": data}
+        
+        async def tool_b(data):
+            await asyncio.sleep(random.uniform(0.01, 0.05))
+            return {"tool_b_result": data}
+        
+        async def tool_c(data):
+            await asyncio.sleep(random.uniform(0.01, 0.05))
+            return {"tool_c_result": data}
+        
+        # Create tool objects and register them
+        tool_a_obj = Tool(name="tool_a", func=tool_a, description="Tool A")
+        tool_b_obj = Tool(name="tool_b", func=tool_b, description="Tool B")
+        tool_c_obj = Tool(name="tool_c", func=tool_c, description="Tool C")
+        
+        dispatcher.registry.register_tool(tool_a_obj)
+        dispatcher.registry.register_tool(tool_b_obj)
+        dispatcher.registry.register_tool(tool_c_obj)
+        
+        # Execute tools in parallel
+        state = DeepAgentState()
+        state.thread_id = conn_id
+        
+        tasks = [
+            dispatcher.executor.execute_with_state(tool_a, "tool_a", {"data": "a"}, state, "run-a"),
+            dispatcher.executor.execute_with_state(tool_b, "tool_b", {"data": "b"}, state, "run-b"),
+            dispatcher.executor.execute_with_state(tool_c, "tool_c", {"data": "c"}, state, "run-c")
+        ]
+        
+        await asyncio.gather(*tasks)
+        await asyncio.sleep(0.2)
+        
+        # Validate ordering
+        assert len(order_validator.violations) == 0, \
+            f"Event ordering violations: {order_validator.violations}"
+        
+        # Verify each tool had proper pairing
+        tool_events = [e for e in order_validator.state_history if "tool" in e[1]]
+        tool_starts = [e for e in tool_events if e[1] == "tool_executing"]
+        tool_ends = [e for e in tool_events if e[1] == "tool_completed"]
+        
+        assert len(tool_starts) == 3, f"Expected 3 tool starts, got {len(tool_starts)}"
+        assert len(tool_ends) == 3, f"Expected 3 tool completions, got {len(tool_ends)}"
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_nested_agent_execution_events(self):
+        """Test event ordering with nested agent executions."""
+        ws_manager = WebSocketManager()
+        order_validator = EventOrderValidator()
+        
+        conn_id = "nested-agents"
+        mock_ws = MagicMock()
+        
+        async def capture(message):
+            data = json.loads(message) if isinstance(message, str) else message
+            order_validator.record_event(data)
+        
+        mock_ws.send_json = AsyncMock(side_effect=capture)
+        await ws_manager.connect_user(conn_id, mock_ws, conn_id)
+        
+        notifier = SimpleWebSocketNotifier(ws_manager)
+        
+        # Simulate nested agent execution
+        async def execute_nested_agents():
+            # Parent agent starts
+            await notifier.send_agent_started(conn_id, "parent-req", "parent_agent")
+            await notifier.send_agent_thinking(conn_id, "parent-req", "Starting sub-agents...")
+            
+            # Execute child agents in parallel
+            child_tasks = []
+            for i in range(3):
+                async def execute_child(child_id=i):
+                    req_id = f"child-{child_id}"
+                    await notifier.send_agent_started(conn_id, req_id, f"child_{child_id}")
+                    await asyncio.sleep(random.uniform(0.01, 0.03))
+                    await notifier.send_agent_thinking(conn_id, req_id, f"Child {child_id} processing...")
+                    await asyncio.sleep(random.uniform(0.01, 0.03))
+                    await notifier.send_agent_completed(conn_id, req_id, {"child_result": child_id})
+                
+                child_tasks.append(execute_child())
+            
+            await asyncio.gather(*child_tasks)
+            
+            # Parent completes
+            await notifier.send_agent_completed(conn_id, "parent-req", {"all_children_done": True})
+        
+        await execute_nested_agents()
+        await asyncio.sleep(0.2)
+        
+        # Validate each request flow
+        for req_id in ["parent-req", "child-0", "child-1", "child-2"]:
+            is_valid, errors = order_validator.validate_complete_flow(req_id)
+            assert is_valid, f"Request {req_id} flow invalid: {errors}"
+
+
+class TestFailureInjection:
+    """Tests with injected failures and recovery scenarios."""
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_websocket_disconnection_during_execution(self):
+        """Test that execution handles WebSocket disconnection gracefully."""
+        ws_manager = WebSocketManager()
+        events_before = []
+        events_after = []
+        
+        conn_id = "disconnect-test"
+        
+        # First connection
+        mock_ws1 = MagicMock()
+        
+        async def capture1(message):
+            data = json.loads(message) if isinstance(message, str) else message
+            events_before.append(data)
+        
+        mock_ws1.send_json = AsyncMock(side_effect=capture1)
+        await ws_manager.connect_user(conn_id, mock_ws1, conn_id)
+        
+        notifier = SimpleWebSocketNotifier(ws_manager)
+        
+        # Start execution
+        request_id = "disconnect-req"
+        await notifier.send_agent_started(conn_id, request_id, "agent")
+        await notifier.send_agent_thinking(conn_id, request_id, "Processing...")
+        
+        # Disconnect during execution
+        await ws_manager.disconnect_user(conn_id, mock_ws1, conn_id)
+        
+        # Continue sending events (should handle gracefully)
+        await notifier.send_tool_executing(conn_id, request_id, "tool", {})
+        await notifier.send_tool_completed(conn_id, request_id, "tool", {"result": "done"})
+        
+        # Reconnect
+        mock_ws2 = MagicMock()
+        
+        async def capture2(message):
+            data = json.loads(message) if isinstance(message, str) else message
+            events_after.append(data)
+        
+        mock_ws2.send_json = AsyncMock(side_effect=capture2)
+        await ws_manager.connect_user(conn_id, mock_ws2, conn_id)
+        
+        # Complete execution
+        await notifier.send_agent_completed(conn_id, request_id, {"success": True})
+        
+        await asyncio.sleep(0.2)
+        
+        # Verify events were captured appropriately
+        assert len(events_before) >= 2, "Should have events before disconnect"
+        assert len(events_after) >= 1, "Should have completion after reconnect"
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_random_failure_injection(self):
+        """Test system resilience with random failures injected."""
+        ws_manager = WebSocketManager()
+        timing_analyzer = EventTimingAnalyzer(max_latency_ms=500)
+        
+        conn_id = "chaos-test"
+        mock_ws = MagicMock()
+        
+        failure_count = 0
+        
+        async def capture_with_failures(message):
+            nonlocal failure_count
+            
+            # Randomly inject failures (10% chance)
+            if random.random() < 0.1:
+                failure_count += 1
+                raise Exception("Simulated send failure")
+            
+            data = json.loads(message) if isinstance(message, str) else message
+            timing_analyzer.record_event(data)
+        
+        mock_ws.send_json = AsyncMock(side_effect=capture_with_failures)
+        await ws_manager.connect_user(conn_id, mock_ws, conn_id)
+        
+        notifier = SimpleWebSocketNotifier(ws_manager)
+        
+        # Send many events with potential failures
+        for i in range(50):
+            request_id = f"chaos-{i}"
+            
+            try:
+                await notifier.send_agent_started(conn_id, request_id, "agent")
+                await asyncio.sleep(random.uniform(0.001, 0.01))
+                
+                await notifier.send_agent_thinking(conn_id, request_id, f"Thinking {i}")
+                await asyncio.sleep(random.uniform(0.001, 0.01))
+                
+                if random.random() > 0.5:
+                    await notifier.send_tool_executing(conn_id, request_id, "tool", {})
+                    await asyncio.sleep(random.uniform(0.001, 0.01))
+                    await notifier.send_tool_completed(conn_id, request_id, "tool", {"ok": True})
+                
+                await notifier.send_agent_completed(conn_id, request_id, {"iteration": i})
+            except Exception:
+                # Should handle failures gracefully
+                pass
+        
+        await asyncio.sleep(0.5)
+        
+        # Get statistics
+        stats = timing_analyzer.get_statistics()
+        
+        logger.info(f"Chaos test stats: {failure_count} failures injected")
+        logger.info(f"Timing anomalies: {stats.get('anomalies', 0)}")
+        
+        # System should have handled failures
+        assert stats.get("agent_completed", {}).get("count", 0) > 0, \
+            "System should complete some executions despite failures"
+
+
+class TestPerformanceBenchmarks:
+    """Performance and throughput benchmarks."""
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    @pytest.mark.timeout(60)
+    async def test_high_frequency_event_throughput(self):
+        """Test WebSocket can handle high-frequency event streams."""
+        ws_manager = WebSocketManager()
+        
+        # Track metrics
+        events_sent = 0
+        events_received = 0
+        latencies = []
+        
+        conn_id = "throughput-test"
+        mock_ws = MagicMock()
+        
+        async def capture(message):
+            nonlocal events_received
+            events_received += 1
+        
+        mock_ws.send_json = AsyncMock(side_effect=capture)
+        await ws_manager.connect_user(conn_id, mock_ws, conn_id)
+        
+        notifier = SimpleWebSocketNotifier(ws_manager)
+        
+        # Send events at maximum rate
+        start_time = time.time()
+        target_events = 1000
+        
+        async def send_burst():
+            nonlocal events_sent
+            for i in range(100):
+                await notifier.send_agent_thinking(conn_id, f"burst-{i}", f"Message {i}")
+                events_sent += 1
+                # No delay - maximum throughput
+        
+        # Send 10 bursts in parallel
+        tasks = [send_burst() for _ in range(10)]
+        await asyncio.gather(*tasks)
+        
+        duration = time.time() - start_time
+        
+        # Allow processing
+        await asyncio.sleep(0.5)
+        
+        # Calculate metrics
+        throughput = events_received / duration
+        success_rate = (events_received / events_sent) * 100 if events_sent > 0 else 0
+        
+        logger.info(f"Throughput test results:")
+        logger.info(f"  Events sent: {events_sent}")
+        logger.info(f"  Events received: {events_received}")
+        logger.info(f"  Duration: {duration:.2f}s")
+        logger.info(f"  Throughput: {throughput:.0f} events/sec")
+        logger.info(f"  Success rate: {success_rate:.1f}%")
+        
+        # Performance requirements
+        assert throughput > 500, f"Throughput too low: {throughput:.0f} events/sec (expected >500)"
+        assert success_rate > 95, f"Success rate too low: {success_rate:.1f}% (expected >95%)"
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_memory_leak_prevention(self):
+        """Test that WebSocket events don't cause memory leaks."""
+        ws_manager = WebSocketManager()
+        
+        # Track object references
+        initial_objects = len(gc.get_objects())
+        
+        # Create and destroy many connections
+        for i in range(10):
+            conn_id = f"memory-test-{i}"
+            mock_ws = MagicMock()
+            mock_ws.send_json = AsyncMock()
+            
+            await ws_manager.connect_user(conn_id, mock_ws, conn_id)
+            
+            notifier = SimpleWebSocketNotifier(ws_manager)
+            
+            # Send many events
+            for j in range(100):
+                await notifier.send_agent_thinking(conn_id, f"req-{j}", f"Message {j}")
+            
+            # Disconnect and cleanup
+            await ws_manager.disconnect_user(conn_id, mock_ws, conn_id)
+            
+            # Force garbage collection
+            gc.collect()
+        
+        # Final garbage collection
+        gc.collect()
+        await asyncio.sleep(0.5)
+        gc.collect()
+        
+        # Check for memory leaks
+        final_objects = len(gc.get_objects())
+        object_growth = final_objects - initial_objects
+        
+        logger.info(f"Memory test: Initial objects: {initial_objects}, Final: {final_objects}, Growth: {object_growth}")
+        
+        # Allow some growth but not excessive
+        assert object_growth < 1000, f"Potential memory leak: {object_growth} objects not freed"
+
+
+class TestEdgeCasesAndBoundaries:
+    """Tests for edge cases and boundary conditions."""
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_extremely_large_event_payload(self):
+        """Test handling of very large event payloads."""
+        ws_manager = WebSocketManager()
+        content_validator = EventContentValidator()
+        
+        conn_id = "large-payload"
+        mock_ws = MagicMock()
+        
+        async def capture(message):
+            data = json.loads(message) if isinstance(message, str) else message
+            content_validator.validate_event(data)
+        
+        mock_ws.send_json = AsyncMock(side_effect=capture)
+        await ws_manager.connect_user(conn_id, mock_ws, conn_id)
+        
+        notifier = SimpleWebSocketNotifier(ws_manager)
+        
+        # Create large payload (just under 64KB limit)
+        large_content = "x" * 60000  # 60KB of data
+        
+        await notifier.send_partial_result(conn_id, "large-req", large_content)
+        
+        await asyncio.sleep(0.1)
+        
+        # Should handle large payload
+        assert len(content_validator.validation_errors) == 0, \
+            f"Large payload validation failed: {content_validator.validation_errors}"
+        
+        # Test oversized payload (should fail gracefully)
+        oversized_content = "x" * 70000  # 70KB - too large
+        
+        try:
+            await notifier.send_partial_result(conn_id, "oversized-req", oversized_content)
+        except Exception:
+            pass  # Expected to fail
+        
+        await asyncio.sleep(0.1)
+        
+        # Should have recorded the error
+        assert any(e["error"].startswith("Event too large") for e in content_validator.validation_errors), \
+            "Should detect oversized events"
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_rapid_connection_cycling(self):
+        """Test rapid connect/disconnect cycles."""
+        ws_manager = WebSocketManager()
+        
+        events_by_connection = defaultdict(list)
+        
+        # Rapidly cycle connections
+        for cycle in range(10):
+            conn_id = f"cycle-{cycle}"
+            mock_ws = MagicMock()
+            
+            async def capture(message, conn=conn_id):
+                data = json.loads(message) if isinstance(message, str) else message
+                events_by_connection[conn].append(data)
+            
+            mock_ws.send_json = AsyncMock(side_effect=capture)
+            
+            # Connect
+            await ws_manager.connect_user(conn_id, mock_ws, conn_id)
+            
+            # Send event immediately
+            notifier = SimpleWebSocketNotifier(ws_manager)
+            await notifier.send_agent_started(conn_id, f"req-{cycle}", "agent")
+            
+            # Disconnect immediately
+            await ws_manager.disconnect_user(conn_id, mock_ws, conn_id)
+            
+            # No delay between cycles - stress test
+        
+        await asyncio.sleep(0.5)
+        
+        # Each connection should have received its event
+        successful_cycles = sum(1 for events in events_by_connection.values() if len(events) > 0)
+        
+        assert successful_cycles >= 8, \
+            f"Too many failed cycles: {successful_cycles}/10 successful"
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_unicode_and_special_characters(self):
+        """Test handling of Unicode and special characters in events."""
+        ws_manager = WebSocketManager()
+        received_events = []
+        
+        conn_id = "unicode-test"
+        mock_ws = MagicMock()
+        
+        async def capture(message):
+            data = json.loads(message) if isinstance(message, str) else message
+            received_events.append(data)
+        
+        mock_ws.send_json = AsyncMock(side_effect=capture)
+        await ws_manager.connect_user(conn_id, mock_ws, conn_id)
+        
+        notifier = SimpleWebSocketNotifier(ws_manager)
+        
+        # Test various Unicode and special characters
+        test_strings = [
+            "Hello 世界 🌍",  # Emoji and Chinese
+            "Привет мир",  # Cyrillic
+            "مرحبا بالعالم",  # Arabic (RTL)
+            "\n\t\r",  # Control characters
+            "null\x00byte",  # Null byte
+            '{"nested": "json"}',  # JSON in string
+            "<script>alert('xss')</script>",  # HTML/XSS attempt
+            "'; DROP TABLE users; --",  # SQL injection attempt
+        ]
+        
+        for i, test_str in enumerate(test_strings):
+            await notifier.send_agent_thinking(conn_id, f"unicode-{i}", test_str)
+        
+        await asyncio.sleep(0.2)
+        
+        # All events should be received and properly encoded
+        assert len(received_events) == len(test_strings), \
+            f"Lost events with special characters: {len(received_events)}/{len(test_strings)}"
+        
+        # Verify content integrity
+        for i, event in enumerate(received_events):
+            content = event.get("data", {}).get("message", "")
+            # Content should be preserved (possibly sanitized)
+            assert content, f"Content lost for test string {i}"
+
+
+class TestSecurityAndIsolation:
+    """Security and isolation tests for WebSocket events."""
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_user_event_isolation(self):
+        """Test that events for one user don't leak to another."""
+        ws_manager = WebSocketManager()
+        
+        user1_events = []
+        user2_events = []
+        
+        # Create two user connections
+        user1_id = "user-1"
+        user2_id = "user-2"
+        
+        mock_ws1 = MagicMock()
+        async def capture1(message):
+            data = json.loads(message) if isinstance(message, str) else message
+            user1_events.append(data)
+        mock_ws1.send_json = AsyncMock(side_effect=capture1)
+        
+        mock_ws2 = MagicMock()
+        async def capture2(message):
+            data = json.loads(message) if isinstance(message, str) else message
+            user2_events.append(data)
+        mock_ws2.send_json = AsyncMock(side_effect=capture2)
+        
+        await ws_manager.connect_user(user1_id, mock_ws1, user1_id)
+        await ws_manager.connect_user(user2_id, mock_ws2, user2_id)
+        
+        notifier = SimpleWebSocketNotifier(ws_manager)
+        
+        # Send events to different users
+        await notifier.send_agent_started(user1_id, "req-1", "agent")
+        await notifier.send_agent_thinking(user1_id, "req-1", "User 1 data")
+        
+        await notifier.send_agent_started(user2_id, "req-2", "agent")
+        await notifier.send_agent_thinking(user2_id, "req-2", "User 2 data")
+        
+        await asyncio.sleep(0.2)
+        
+        # Verify isolation
+        assert len(user1_events) > 0, "User 1 should have events"
+        assert len(user2_events) > 0, "User 2 should have events"
+        
+        # Check no cross-contamination
+        for event in user1_events:
+            data_str = json.dumps(event)
+            assert "User 2" not in data_str, "User 1 received User 2 data!"
+        
+        for event in user2_events:
+            data_str = json.dumps(event)
+            assert "User 1" not in data_str, "User 2 received User 1 data!"
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_request_id_isolation(self):
+        """Test that events are properly isolated by request ID."""
+        ws_manager = WebSocketManager()
+        events_by_request = defaultdict(list)
+        
+        conn_id = "request-isolation"
+        mock_ws = MagicMock()
+        
+        async def capture(message):
+            data = json.loads(message) if isinstance(message, str) else message
+            req_id = data.get("request_id", data.get("data", {}).get("request_id", "unknown"))
+            events_by_request[req_id].append(data)
+        
+        mock_ws.send_json = AsyncMock(side_effect=capture)
+        await ws_manager.connect_user(conn_id, mock_ws, conn_id)
+        
+        notifier = SimpleWebSocketNotifier(ws_manager)
+        
+        # Execute multiple requests in parallel
+        async def execute_request(req_id):
+            await notifier.send_agent_started(conn_id, req_id, f"agent_{req_id}")
+            await asyncio.sleep(random.uniform(0.01, 0.03))
+            await notifier.send_agent_thinking(conn_id, req_id, f"Processing {req_id}")
+            await asyncio.sleep(random.uniform(0.01, 0.03))
+            await notifier.send_agent_completed(conn_id, req_id, {"request": req_id})
+        
+        # Run 10 parallel requests
+        tasks = [execute_request(f"req-{i}") for i in range(10)]
+        await asyncio.gather(*tasks)
+        
+        await asyncio.sleep(0.2)
+        
+        # Verify each request has its own events
+        for req_id in [f"req-{i}" for i in range(10)]:
+            events = events_by_request.get(req_id, [])
+            assert len(events) >= 3, f"Request {req_id} missing events"
+            
+            # Verify all events belong to this request
+            for event in events:
+                event_req_id = event.get("request_id", event.get("data", {}).get("request_id"))
+                assert event_req_id == req_id, f"Event mix-up: {event_req_id} in {req_id} events"
+
+
+# ============================================================================
+# MULTI-AGENT COORDINATION TESTS  
+# ============================================================================
+
+class TestMultiAgentCoordination:
+    """Tests for multi-agent coordination and event flow."""
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    @pytest.mark.timeout(30)
+    async def test_supervisor_with_multiple_subagents(self):
+        """Test supervisor coordinating multiple sub-agents."""
+        ws_manager = WebSocketManager()
+        order_validator = EventOrderValidator()
+        
+        conn_id = "multi-agent"
+        mock_ws = MagicMock()
+        
+        async def capture(message):
+            data = json.loads(message) if isinstance(message, str) else message
+            order_validator.record_event(data)
+        
+        mock_ws.send_json = AsyncMock(side_effect=capture)
+        await ws_manager.connect_user(conn_id, mock_ws, conn_id)
+        
+        # Create mock LLM and tools
+        class MockLLM:
+            async def generate(self, *args, **kwargs):
+                return {"content": "Response", "reasoning": "Reasoning"}
+        
+        # Setup components
+        tool_dispatcher = ToolDispatcher()
+        registry = AgentRegistry(MockLLM(), tool_dispatcher)
+        registry.set_websocket_manager(ws_manager)
+        
+        engine = ExecutionEngine(registry, ws_manager)
+        
+        # Simulate supervisor with sub-agents
+        async def run_multi_agent_flow():
+            supervisor_ctx = AgentExecutionContext(
+                agent_name="supervisor",
+                request_id="supervisor-main",
+                connection_id=conn_id,
+                start_time=time.time(),
+                retry_count=0,
+                max_retries=1
+            )
+            
+            # Supervisor starts
+            await engine.websocket_notifier.send_agent_started(supervisor_ctx)
+            await engine.send_agent_thinking(supervisor_ctx, "Delegating to sub-agents...", 1)
+            
+            # Execute sub-agents in parallel
+            sub_agent_tasks = []
+            
+            for i in range(3):
+                async def execute_subagent(agent_id=i):
+                    sub_ctx = AgentExecutionContext(
+                        agent_name=f"subagent_{agent_id}",
+                        request_id=f"sub-{agent_id}",
+                        connection_id=conn_id,
+                        start_time=time.time(),
+                        retry_count=0,
+                        max_retries=1
+                    )
+                    
+                    await engine.websocket_notifier.send_agent_started(sub_ctx)
+                    await asyncio.sleep(random.uniform(0.01, 0.05))
+                    await engine.send_agent_thinking(sub_ctx, f"Sub-agent {agent_id} processing...", 1)
+                    await asyncio.sleep(random.uniform(0.01, 0.05))
+                    await engine.websocket_notifier.send_agent_completed(sub_ctx)
+                    
+                    return f"Result from agent {agent_id}"
+                
+                sub_agent_tasks.append(execute_subagent())
+            
+            results = await asyncio.gather(*sub_agent_tasks)
+            
+            # Supervisor completes
+            await engine.send_partial_result(supervisor_ctx, f"Collected {len(results)} results", True)
+            await engine.websocket_notifier.send_agent_completed(supervisor_ctx)
+        
+        await run_multi_agent_flow()
+        await asyncio.sleep(0.5)
+        
+        # Validate flows
+        for req_id in ["supervisor-main", "sub-0", "sub-1", "sub-2"]:
+            is_valid, errors = order_validator.validate_complete_flow(req_id)
+            assert is_valid, f"Agent {req_id} flow invalid: {errors}"
+        
+        # Verify no ordering violations
+        assert len(order_validator.violations) == 0, \
+            f"Event ordering violations in multi-agent flow: {order_validator.violations}"
+
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v", "--tb=short", "-x"])

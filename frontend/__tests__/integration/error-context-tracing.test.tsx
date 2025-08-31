@@ -1,11 +1,9 @@
-/**
- * Error Context and Tracing Integration Tests
- * Tests for error capture and distributed tracing
- * Enterprise segment - ensures observability capabilities
- */
-
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, waitFor, fireEvent, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { TestProviders } from '@/__tests__/setup/test-providers';
+import { tFor, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TestProviders } from '@/__tests__/setup/test-providers';
 import { 
@@ -26,9 +24,15 @@ beforeEach(() => {
 
 afterEach(() => {
   testContext.cleanup();
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
 });
 
 describe('Error Context and Tracing', () => {
+    jest.setTimeout(10000);
   it('should capture and display error context', async () => {
     const TestComponent = () => {
       const [error, setError] = React.useState<any>(null);

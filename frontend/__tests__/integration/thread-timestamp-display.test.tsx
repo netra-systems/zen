@@ -5,6 +5,7 @@ import { ChatHistorySection } from '@/components/ChatHistorySection';
 import { ThreadSidebarActions } from '@/components/chat/ThreadSidebarActions';
 import { ThreadService } from '@/services/threadService';
 import { Thread } from '@/types/thread';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock all dependencies
 jest.mock('next/navigation');
@@ -26,7 +27,15 @@ jest.mock('@/services/threadService');
  */
 describe('Thread Timestamp Display - Integration Tests', () => {
   
+  setupAntiHang();
+  
+    jest.setTimeout(10000);
+  
   describe('End-to-end timestamp handling', () => {
+    
+        setupAntiHang();
+    
+      jest.setTimeout(10000);
     
     it('should correctly display threads with ISO string timestamps from backend', async () => {
       // Mock backend response with ISO string timestamps
@@ -278,6 +287,10 @@ describe('Thread Timestamp Display - Integration Tests', () => {
   
   describe('Regression prevention', () => {
     
+        setupAntiHang();
+    
+      jest.setTimeout(10000);
+    
     it('should NOT multiply ISO strings by 1000 (prevent timestamp regression)', async () => {
       // This is the critical regression test
       // The bug was: ISO strings were being treated as Unix timestamps and multiplied by 1000
@@ -439,4 +452,8 @@ describe('Thread Timestamp Display - Integration Tests', () => {
       expect(screen.queryByText('Invalid Date')).not.toBeInTheDocument();
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

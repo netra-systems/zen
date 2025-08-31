@@ -6,7 +6,7 @@ Business Value: Customer-facing functionality
 
 import pytest
 import asyncio
-from netra_backend.app.websocket.broadcast_manager import BroadcastManager
+from netra_backend.app.services.websocket.broadcast_manager import BroadcastManager
 
 @pytest.mark.asyncio
 class TestBroadcastManagerAsync:

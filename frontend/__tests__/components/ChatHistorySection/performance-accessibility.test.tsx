@@ -12,45 +12,52 @@ const mockUseThreadNavigation = jest.fn();
 const mockUseAuthStore = jest.fn();
 
 jest.mock('@/store/unified-chat', () => ({
-  useUnifiedChatStore: mockUseUnifiedChatStore
+  useUnifiedChatStore: () => mockUseUnifiedChatStore()
 }));
 
 jest.mock('@/hooks/useLoadingState', () => ({
-  useLoadingState: mockUseLoadingState
+  useLoadingState: () => mockUseLoadingState()
 }));
 
 jest.mock('@/hooks/useThreadNavigation', () => ({
-  useThreadNavigation: mockUseThreadNavigation
+  useThreadNavigation: () => mockUseThreadNavigation()
 }));
 
 jest.mock('@/store/authStore', () => ({
-  useAuthStore: mockUseAuthStore
+  useAuthStore: () => mockUseAuthStore()
 }));
 
 jest.mock('@/store/threadStore', () => ({
-  useThreadStore: mockUseThreadStore
+  useThreadStore: () => mockUseThreadStore()
 }));
 
 jest.mock('@/store/chat', () => ({
-  useChatStore: mockUseChatStore
+  useChatStore: () => mockUseChatStore()
 }));
 
 // AuthGate mock - always render children
-jest.mock('@/components/auth/AuthGate', () => ({
-  AuthGate: ({ children }: { children: React.ReactNode }) => children
-}));
+jest.mock('@/components/auth/AuthGate', () => {
+  const React = require('react');
+  return {
+    AuthGate: ({ children }: { children: React.ReactNode }) => children
+  };
+});
 
-jest.mock('framer-motion', () => ({
-  motion: {
-    div: ({ children, ...props }: any) => React.createElement('div', props, children),
-  },
-  AnimatePresence: ({ children }: any) => children,
-}));
+jest.mock('framer-motion', () => {
+  const React = require('react');
+  return {
+    motion: {
+      div: ({ children, ...props }: any) => React.createElement('div', props, children),
+    },
+    AnimatePresence: ({ children }: any) => children,
+  };
+});
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ChatHistorySection } from '@/components/ChatHistorySection';
 import { mockThreads } from './setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 const mockStore = {
   isProcessing: false,
@@ -77,6 +84,8 @@ const createMockThread = (overrides: any = {}) => ({
 });
 
 describe('ChatHistorySection - Performance & Accessibility', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     // Clear only call history, not implementations
     mockUseUnifiedChatStore.mockClear();
@@ -139,9 +148,17 @@ describe('ChatHistorySection - Performance & Accessibility', () => {
     mockUseAuthStore.mockClear();
     mockUseThreadStore.mockClear();
     mockUseChatStore.mockClear();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Performance Tests', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should render efficiently with large datasets', () => {
       // Create large dataset
       const largeThreadSet = Array.from({ length: 500 }, (_, i) => ({
@@ -297,6 +314,8 @@ describe('ChatHistorySection - Performance & Accessibility', () => {
   });
 
   describe('Accessibility Tests', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should have proper ARIA roles and labels', () => {
       render(<ChatHistorySection />);
 
@@ -519,6 +538,8 @@ describe('ChatHistorySection - Performance & Accessibility', () => {
   });
 
   describe('Responsive Design', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should adapt to small screen sizes', () => {
       // Mock small screen
       Object.defineProperty(window, 'innerWidth', { value: 320 });

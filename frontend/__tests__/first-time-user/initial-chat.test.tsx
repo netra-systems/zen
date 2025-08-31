@@ -202,7 +202,7 @@ jest.mock('@/components/chat/components/MessageActionButtons', () => ({
 // No mock needed for KeyboardShortcutsHint - using simple icon replacement
 
 
-jest.mock('@/utils/debug-logger', () => ({
+jest.mock('@/lib/logger', () => ({
   logger: {
     debug: jest.fn(),
     error: jest.fn()
@@ -224,8 +224,11 @@ jest.mock('@/components/chat/types', () => ({
 // Import components after mocks
 import MainChat from '@/components/chat/MainChat';
 import { MessageInput } from '@/components/chat/MessageInput';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('First-Time User Initial Chat', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   const mockHandleSend = jest.fn();
 
   beforeEach(() => {
@@ -515,4 +518,8 @@ describe('First-Time User Initial Chat', () => {
     console.log('Disabled test - isDisabled:', textarea.hasAttribute('disabled'));
     expect(textarea).toBeDisabled();
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

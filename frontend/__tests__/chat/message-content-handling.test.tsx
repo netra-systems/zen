@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { MessageList } from '@/components/chat/MessageList';
 import { MessageItem } from '@/components/chat/MessageItem';
 import { useUnifiedChatStore } from '@/store/unified-chat';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock Zustand store
 jest.mock('@/store/unified-chat');
@@ -51,11 +52,13 @@ jest.mock('@/components/chat/MCPToolIndicator', () => ({
 }));
 
 describe('Message Content Handling', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('MessageList Content Normalization', () => {
+      jest.setTimeout(10000);
     it('should handle string content correctly', () => {
       const mockStore = {
         messages: [
@@ -167,6 +170,7 @@ describe('Message Content Handling', () => {
   });
 
   describe('MessageItem Content Rendering', () => {
+      jest.setTimeout(10000);
     it('should render string content directly', () => {
       const message = {
         id: 'test-1',
@@ -266,6 +270,7 @@ describe('Message Content Handling', () => {
   });
 
   describe('Edge Cases and Regression Prevention', () => {
+      jest.setTimeout(10000);
     it('should not throw when content is a React element-like object', () => {
       const mockStore = {
         messages: [

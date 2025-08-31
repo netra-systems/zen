@@ -1,271 +1,238 @@
+# Netra Real Services Test Infrastructure
+# Optimized for fast, reliable real service testing
+# Usage: docker-compose -f docker-compose.test.yml up
+
 version: '3.8'
 
 services:
-  # PostgreSQL Test Database
-  postgres-test:
+  # ============================================
+  # CORE TEST SERVICES
+  # ============================================
+  
+  # Test PostgreSQL Database - Optimized for fast testing
+  test-postgres:
     image: postgres:15-alpine
     container_name: netra-test-postgres
     environment:
-      POSTGRES_USER: test
-      POSTGRES_PASSWORD: test
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_pass
       POSTGRES_DB: netra_test
       POSTGRES_HOST_AUTH_METHOD: trust
+      # Performance optimizations for testing
+      POSTGRES_INITDB_ARGS: "--data-checksums"
     ports:
       - "${TEST_POSTGRES_PORT:-5434}:5432"
     volumes:
-      - postgres_test_data:/var/lib/postgresql/data
+      # Use tmpfs for ultra-fast test database (data is lost on restart - perfect for tests)
+      - type: tmpfs
+        target: /var/lib/postgresql/data
+        tmpfs:
+          size: 1G
+      # Initialize test schema
+      - ./scripts/test_init_db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    command: |
+      postgres
+        -c shared_buffers=256MB
+        -c effective_cache_size=1GB
+        -c maintenance_work_mem=64MB
+        -c checkpoint_completion_target=0.9
+        -c wal_buffers=16MB
+        -c default_statistics_target=100
+        -c random_page_cost=1.1
+        -c effective_io_concurrency=200
+        -c work_mem=4MB
+        -c min_wal_size=1GB
+        -c max_wal_size=4GB
+        -c max_connections=200
+        -c log_statement=none
+        -c log_min_duration_statement=-1
+        -c fsync=off
+        -c synchronous_commit=off
+        -c full_page_writes=off
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U test"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
+      test: ["CMD-SHELL", "pg_isready -U test_user -d netra_test"]
+      interval: 2s
+      timeout: 1s
+      retries: 10
+      start_period: 10s
     networks:
-      - netra-test-network
-    restart: unless-stopped
+      - test-network
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
 
-  # Redis Test Cache
-  redis-test:
+  # Test Redis Cache - Optimized for testing
+  test-redis:
     image: redis:7-alpine
     container_name: netra-test-redis
-    command: redis-server --appendonly no --save ""
+    command: |
+      redis-server
+        --appendonly no
+        --save ""
+        --maxmemory 512mb
+        --maxmemory-policy allkeys-lru
+        --tcp-keepalive 60
+        --timeout 300
     ports:
       - "${TEST_REDIS_PORT:-6381}:6379"
+    volumes:
+      # Use tmpfs for ultra-fast test cache
+      - type: tmpfs
+        target: /data
+        tmpfs:
+          size: 512M
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
+      interval: 2s
+      timeout: 1s
       retries: 5
+      start_period: 5s
     networks:
-      - netra-test-network
-    restart: unless-stopped
+      - test-network
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
 
-  # ClickHouse Test Analytics (Optional - disabled by default)
-  clickhouse-test:
+  # Test ClickHouse Analytics - Optimized for testing
+  test-clickhouse:
     image: clickhouse/clickhouse-server:23-alpine
     container_name: netra-test-clickhouse
     environment:
       CLICKHOUSE_DB: netra_test_analytics
-      CLICKHOUSE_USER: test
-      CLICKHOUSE_PASSWORD: test
+      CLICKHOUSE_USER: test_user
+      CLICKHOUSE_PASSWORD: test_pass
       CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
     ports:
-      - "${TEST_CLICKHOUSE_HTTP_PORT:-8123}:8123"
-      - "${TEST_CLICKHOUSE_TCP_PORT:-9000}:9000"
+      - "${TEST_CLICKHOUSE_HTTP_PORT:-8125}:8123"
+      - "${TEST_CLICKHOUSE_TCP_PORT:-9002}:9000"
     volumes:
-      - clickhouse_test_data:/var/lib/clickhouse
+      # Use tmpfs for ultra-fast test analytics
+      - type: tmpfs
+        target: /var/lib/clickhouse
+        tmpfs:
+          size: 1G
+      # Initialize test schema
+      - ./scripts/test_init_clickhouse.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    # Performance optimizations for testing
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8123/ping"]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+      start_period: 15s
+    networks:
+      - test-network
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
+
+  # ============================================
+  # SUPPORTING TEST SERVICES
+  # ============================================
+
+  # Test Message Queue (RabbitMQ) - If needed for async testing
+  test-rabbitmq:
+    image: rabbitmq:3-alpine
+    container_name: netra-test-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: test_user
+      RABBITMQ_DEFAULT_PASS: test_pass
+    ports:
+      - "${TEST_RABBITMQ_PORT:-5673}:5672"
+      - "${TEST_RABBITMQ_MGMT_PORT:-15673}:15672"
+    volumes:
+      - type: tmpfs
+        target: /var/lib/rabbitmq
+        tmpfs:
+          size: 256M
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
+      start_period: 10s
     networks:
-      - netra-test-network
-    restart: unless-stopped
+      - test-network
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
 
-  # Test Backend Service (for E2E tests)
-  backend-test:
+  # Test SMTP Server - For email testing
+  test-mailhog:
+    image: mailhog/mailhog:latest
+    container_name: netra-test-mailhog
+    ports:
+      - "${TEST_SMTP_PORT:-1026}:1025"
+      - "${TEST_SMTP_WEB_PORT:-8026}:8025"
+    networks:
+      - test-network
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
+
+  # ============================================
+  # TEST UTILITIES
+  # ============================================
+
+  # Test data seeder - Loads test fixtures
+  test-seeder:
     build:
       context: .
-      dockerfile: ./docker/backend.development.Dockerfile
-      args:
-        BUILD_MODE: test
-    container_name: netra-test-backend
+      dockerfile: ./docker/test-seeder.Dockerfile
+    container_name: netra-test-seeder
     environment:
-      # Test Environment
-      TESTING: "1"
-      ENVIRONMENT: testing
-      LOG_LEVEL: ERROR
-      
-      # Database
-      DATABASE_URL: postgresql://test:test@postgres-test:5432/netra_test
-      POSTGRES_HOST: postgres-test
+      POSTGRES_HOST: test-postgres
       POSTGRES_PORT: 5432
-      POSTGRES_USER: test
-      POSTGRES_PASSWORD: test
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_pass
       POSTGRES_DB: netra_test
-      
-      # Redis
-      REDIS_HOST: redis-test
+      REDIS_HOST: test-redis
       REDIS_PORT: 6379
-      REDIS_URL: redis://redis-test:6379/0
-      TEST_DISABLE_REDIS: "false"
-      
-      # ClickHouse (enabled for tests - use real service)
-      DEV_MODE_DISABLE_CLICKHOUSE: "false"
-      CLICKHOUSE_ENABLED: "true"
-      CLICKHOUSE_HOST: clickhouse-test
+      CLICKHOUSE_HOST: test-clickhouse
       CLICKHOUSE_PORT: 8123
-      CLICKHOUSE_USER: test
-      CLICKHOUSE_PASSWORD: test
+      CLICKHOUSE_USER: test_user
+      CLICKHOUSE_PASSWORD: test_pass
       CLICKHOUSE_DB: netra_test_analytics
-      
-      # Auth Service
-      AUTH_SERVICE_URL: http://auth-test:8082
-      
-      # Server Config
-      PORT: 8001
-      HOST: 0.0.0.0
-      
-      # Test Secrets
-      JWT_SECRET_KEY: test-jwt-secret-key-for-testing-only-must-be-32-chars
-      SERVICE_SECRET: test-service-secret-for-cross-service-auth-32-chars-minimum-length
-      FERNET_KEY: iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw=
-      SECRET_KEY: test-secret-key-for-testing-only
-      
-      # Mock API Keys for testing
-      ANTHROPIC_API_KEY: ${TEST_ANTHROPIC_API_KEY:-test-anthropic-api-key}
-      OPENAI_API_KEY: ${TEST_OPENAI_API_KEY:-test-openai-api-key}
-      GEMINI_API_KEY: ${TEST_GEMINI_API_KEY:-test-gemini-api-key}
-      GOOGLE_API_KEY: ${TEST_GOOGLE_API_KEY:-test-google-api-key}
-      
-      # Frontend URL
-      FRONTEND_URL: http://localhost:3001
-      CORS_ORIGINS: '["http://localhost:3001", "http://frontend-test:3001"]'
-    ports:
-      - "${TEST_BACKEND_PORT:-8001}:8001"
     volumes:
-      - ./netra_backend:/app/netra_backend:ro
-      - ./shared:/app/shared:ro
-      - ./test_framework:/app/test_framework:ro
-      - ./tests:/app/tests:ro
-      - ./SPEC:/app/SPEC:ro
-      - ./scripts:/app/scripts:ro
-      - ./logs:/app/logs
+      - ./test_framework/fixtures:/app/fixtures:ro
+      - ./scripts/test_seed_data.py:/app/seed_data.py:ro
     depends_on:
-      postgres-test:
+      test-postgres:
         condition: service_healthy
-      redis-test:
+      test-redis:
         condition: service_healthy
-      clickhouse-test:
+      test-clickhouse:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 20s
     networks:
-      - netra-test-network
-    command: >
-      sh -c "
-        echo 'Test Backend: Waiting for database...' &&
-        python scripts/wait_for_db.py &&
-        echo 'Test Backend: Running migrations...' &&
-        alembic -c netra_backend/alembic.ini upgrade head &&
-        echo 'Test Backend: Starting...' &&
-        uvicorn netra_backend.app.main:app --host 0.0.0.0 --port 8001 --reload-dir /app/netra_backend
-      "
+      - test-network
+    command: python seed_data.py
 
-  # Test Auth Service (for E2E tests)
-  auth-test:
+  # Test health monitor - Monitors service health during tests
+  test-monitor:
     build:
       context: .
-      dockerfile: ./docker/auth.test.Dockerfile
-      args:
-        BUILD_MODE: test
-    container_name: netra-test-auth
+      dockerfile: ./docker/test-monitor.Dockerfile
+    container_name: netra-test-monitor
     environment:
-      # Test Environment
-      TESTING: "1"
-      ENVIRONMENT: testing
-      LOG_LEVEL: ERROR
-      
-      # Database
-      DATABASE_URL: postgresql://test:test@postgres-test:5432/netra_test
-      POSTGRES_HOST: postgres-test
-      POSTGRES_PORT: 5432
-      
-      # Redis
-      REDIS_HOST: redis-test
-      REDIS_PORT: 6379
-      REDIS_URL: redis://redis-test:6379/1
-      
-      # Server Config
-      PORT: 8082
-      HOST: 0.0.0.0
-      
-      # Auth Config
-      JWT_SECRET_KEY: test-jwt-secret-key-for-testing-only-must-be-32-chars
-      JWT_ALGORITHM: HS256
-      ACCESS_TOKEN_EXPIRE_MINUTES: 30
-      
-      # Test OAuth Config - using environment-specific variables
-      GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT: test-google-client-id-for-integration-testing
-      GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT: test-google-client-secret-for-integration-testing
+      SERVICES_TO_MONITOR: "test-postgres,test-redis,test-clickhouse"
+      CHECK_INTERVAL: 5
+      HEALTH_ENDPOINT: /health-status
     ports:
-      - "${TEST_AUTH_PORT:-8082}:8082"
-    volumes:
-      - ./auth_service:/app/auth_service:ro
-      - ./shared:/app/shared:ro
-      - ./test_framework:/app/test_framework:ro
-      - ./logs:/app/logs
+      - "${TEST_MONITOR_PORT:-9090}:8080"
     depends_on:
-      postgres-test:
-        condition: service_healthy
-      redis-test:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8082/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 20s
+      - test-postgres
+      - test-redis
+      - test-clickhouse
     networks:
-      - netra-test-network
+      - test-network
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
 
-  # Test Frontend Service (for E2E tests)
-  frontend-test:
-    build:
-      context: .
-      dockerfile: ./docker/frontend.test.Dockerfile
-      args:
-        BUILD_MODE: test
-    container_name: netra-test-frontend
-    environment:
-      # Test Environment
-      NODE_ENV: test
-      NEXT_TELEMETRY_DISABLED: 1
-      
-      # API URLs
-      NEXT_PUBLIC_API_URL: http://backend-test:8001
-      NEXT_PUBLIC_AUTH_URL: http://auth-test:8082
-      NEXT_PUBLIC_WEBSOCKET_URL: ws://backend-test:8001
-      
-      # Test Configuration
-      NEXT_PUBLIC_ENVIRONMENT: testing
-      
-      # Server Config
-      PORT: 3001
-      HOSTNAME: 0.0.0.0
-    ports:
-      - "${TEST_FRONTEND_PORT:-3001}:3001"
-    volumes:
-      - ./frontend:/app
-    depends_on:
-      - auth-test
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
-    networks:
-      - netra-test-network
-    command: >
-      sh -c "
-        echo 'Test Frontend: Starting Next.js server...' &&
-        npm run start
-      "
-
+# Optimized test network
 networks:
-  netra-test-network:
+  test-network:
     driver: bridge
     name: netra-test-network
+    driver_opts:
+      com.docker.network.bridge.name: netra-test-br0
+      com.docker.network.driver.mtu: 1500
 
+# Test volumes (mostly tmpfs for speed)
 volumes:
-  postgres_test_data:
-    name: netra-postgres-test-data
-  redis_test_data:
-    name: netra-redis-test-data
-  clickhouse_test_data:
-    name: netra-clickhouse-test-data
+  test_postgres_logs:
+    driver: local
+  test_clickhouse_logs:
+    driver: local

@@ -10,7 +10,8 @@ from functools import wraps
 from typing import Any, Callable
 
 # Re-export all centralized mocks for backward compatibility
-from test_framework.mocks import *
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
 
 def mock_justified(reason: str) -> Callable:
@@ -22,13 +23,11 @@ def mock_justified(reason: str) -> Callable:
         reason: Explicit justification for why this mock is necessary
     
     Usage:
-        @mock_justified("External Stripe API not available in test environment")
-        @patch('app.services.payment.stripe_client')
-        def test_payment_processing(self, mock_stripe):
-            ...
-    
-        @mock_justified("Database connection would make test non-deterministic")
-        @patch('app.models.user.User.save')
+                @patch('app.services.payment.stripe_client')
+# COMMENTED OUT: Mock-dependent test -         def test_payment_processing(self, mock_stripe):
+# COMMENTED OUT: Mock-dependent test -             ...
+# COMMENTED OUT: Mock-dependent test -     
+# COMMENTED OUT: Mock-dependent test -                 @patch('app.models.user.User.save')
         def test_user_creation(self, mock_save):
             ...
     

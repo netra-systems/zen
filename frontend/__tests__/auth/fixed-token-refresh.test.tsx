@@ -10,6 +10,7 @@ jest.unmock('@/lib/auth-service-client');
 
 import { unifiedAuthService } from '@/auth/unified-auth-service';
 import { jwtDecode } from 'jwt-decode';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock jwt-decode at the module level
 jest.mock('jwt-decode', () => ({
@@ -17,6 +18,8 @@ jest.mock('jwt-decode', () => ({
 }));
 
 describe('Token Refresh Fixed Tests', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   const mockJwtDecode = jwtDecode as jest.MockedFunction<typeof jwtDecode>;
   
   beforeEach(() => {
@@ -96,4 +99,8 @@ describe('Token Refresh Fixed Tests', () => {
     // Restore Date.now
     jest.restoreAllMocks();
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

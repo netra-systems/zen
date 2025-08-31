@@ -83,11 +83,6 @@ jest.mock('@/lib/logger', () => ({
   logger: mockLogger
 }));
 
-// Mock debug logger used in auth-service-config
-jest.mock('@/utils/debug-logger', () => ({
-  logger: mockLogger
-}));
-
 // Mock configuration
 jest.mock('@/config', () => ({
   config: {

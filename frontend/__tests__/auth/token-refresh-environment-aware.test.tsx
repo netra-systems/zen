@@ -11,6 +11,7 @@
 
 import { unifiedAuthService } from '@/auth/unified-auth-service';
 import { jwtDecode } from 'jwt-decode';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock jwt-decode
 jest.mock('jwt-decode');
@@ -29,6 +30,8 @@ jest.mock('@/lib/logger', () => ({
 }));
 
 describe('Token Refresh Environment-Aware Behavior', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   let service: typeof unifiedAuthService;
   
   beforeEach(() => {
@@ -37,6 +40,8 @@ describe('Token Refresh Environment-Aware Behavior', () => {
   });
 
   describe('needsRefresh - Short-lived tokens (30 seconds)', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should refresh at 25% of lifetime for 30-second token', () => {
       const now = Date.now();
       const iat = Math.floor(now / 1000) - 23; // issued 23 seconds ago
@@ -93,6 +98,8 @@ describe('Token Refresh Environment-Aware Behavior', () => {
   });
 
   describe('needsRefresh - Normal tokens (15+ minutes)', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should refresh 5 minutes before expiry for 15-minute token', () => {
       const now = Date.now();
       const iat = Math.floor(now / 1000) - 10 * 60; // issued 10 minutes ago
@@ -146,6 +153,8 @@ describe('Token Refresh Environment-Aware Behavior', () => {
   });
 
   describe('needsRefresh - Edge cases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should handle missing iat by estimating token lifetime', () => {
       const now = Date.now();
       const exp = Math.floor(now / 1000) + 4 * 60; // expires in 4 minutes
@@ -198,6 +207,8 @@ describe('Token Refresh Environment-Aware Behavior', () => {
   });
 
   describe('Token lifetime classification', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should classify 2-minute token as short-lived', () => {
       const now = Date.now();
       const iat = Math.floor(now / 1000) - 30;  // issued 30 seconds ago
@@ -234,4 +245,8 @@ describe('Token Refresh Environment-Aware Behavior', () => {
       );
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

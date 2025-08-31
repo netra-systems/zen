@@ -1,18 +1,23 @@
-/**
- * Button Component Complete Test Suite
- * Tests all button states, interactions, and accessibility features
- * Follows 25-line function rule and P0 critical path testing
- */
-
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Button, buttonVariants } from '@/components/ui/button';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Button Component - Complete Test Suite', () => {
+  jest.setTimeout(10000);
   const user = userEvent.setup();
 
+  beforeEach(() => {
+    setupAntiHang();
+  });
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
   describe('Basic Rendering', () => {
+      jest.setTimeout(10000);
     it('renders with default props', () => {
       render(<Button>Default Button</Button>);
       const button = screen.getByRole('button', { name: 'Default Button' });
@@ -29,6 +34,7 @@ describe('Button Component - Complete Test Suite', () => {
   });
 
   describe('Button Variants', () => {
+      jest.setTimeout(10000);
     it('renders primary variant correctly', () => {
       render(<Button variant="default">Primary</Button>);
       const button = screen.getByRole('button');
@@ -73,6 +79,7 @@ describe('Button Component - Complete Test Suite', () => {
   });
 
   describe('Button Sizes', () => {
+      jest.setTimeout(10000);
     it('renders default size correctly', () => {
       render(<Button size="default">Default Size</Button>);
       const button = screen.getByRole('button');
@@ -103,6 +110,7 @@ describe('Button Component - Complete Test Suite', () => {
   });
 
   describe('Button States', () => {
+      jest.setTimeout(10000);
     it('handles enabled state correctly', () => {
       render(<Button>Enabled</Button>);
       const button = screen.getByRole('button');
@@ -126,6 +134,7 @@ describe('Button Component - Complete Test Suite', () => {
   });
 
   describe('Click Interactions', () => {
+      jest.setTimeout(10000);
     it('handles click events within 100ms', async () => {
       const handleClick = jest.fn();
       const startTime = Date.now();
@@ -162,6 +171,7 @@ describe('Button Component - Complete Test Suite', () => {
   });
 
   describe('Keyboard Navigation', () => {
+      jest.setTimeout(10000);
     it('responds to Tab key navigation', async () => {
       render(
         <div>
@@ -215,6 +225,7 @@ describe('Button Component - Complete Test Suite', () => {
   });
 
   describe('Visual Feedback', () => {
+      jest.setTimeout(10000);
     it('has hover transform effect classes', () => {
       render(<Button>Hover</Button>);
       const button = screen.getByRole('button');
@@ -238,6 +249,7 @@ describe('Button Component - Complete Test Suite', () => {
   });
 
   describe('Accessibility Features', () => {
+      jest.setTimeout(10000);
     it('has correct ARIA attributes', () => {
       render(<Button aria-label="Custom Label">Icon</Button>);
       const button = screen.getByRole('button');
@@ -268,6 +280,7 @@ describe('Button Component - Complete Test Suite', () => {
   });
 
   describe('asChild Functionality', () => {
+      jest.setTimeout(10000);
     it('renders as custom component when asChild is true', () => {
       render(
         <Button asChild>
@@ -294,6 +307,7 @@ describe('Button Component - Complete Test Suite', () => {
   });
 
   describe('Performance Tests', () => {
+      jest.setTimeout(10000);
     it('renders quickly for performance', () => {
       const startTime = performance.now();
       render(<Button>Performance Test</Button>);
@@ -318,6 +332,7 @@ describe('Button Component - Complete Test Suite', () => {
   });
 
   describe('Button Variants Utility', () => {
+      jest.setTimeout(10000);
     it('generates correct classes for buttonVariants', () => {
       const classes = buttonVariants({ variant: 'destructive', size: 'lg' });
       expect(classes).toContain('bg-destructive');

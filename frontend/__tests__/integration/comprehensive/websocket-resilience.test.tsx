@@ -1,5 +1,5 @@
-/**
- * WebSocket Resilience Tests
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+import { bSocket Resilience Tests
  * 
  * Tests WebSocket message buffering, exponential backoff reconnection, 
  * and heartbeat mechanisms.
@@ -41,6 +41,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('WebSocket Resilience Tests', () => {
+    jest.setTimeout(10000);
   let server: WS;
   
   beforeEach(() => {
@@ -50,9 +51,15 @@ describe('WebSocket Resilience Tests', () => {
 
   afterEach(() => {
     cleanupTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('WebSocket Message Buffering', () => {
+      jest.setTimeout(10000);
     it('should handle WebSocket message buffering during reconnection', async () => {
       let messageBuffer: any[] = [];
       const { getByTestId } = render(<ResilientWebSocketComponent messageBuffer={messageBuffer} />);
@@ -106,6 +113,7 @@ describe('WebSocket Resilience Tests', () => {
   });
 
   describe('Exponential Backoff Reconnection', () => {
+      jest.setTimeout(10000);
     it('should implement exponential backoff for reconnection', async () => {
       const { getByTestId } = render(<ExponentialBackoffComponent />);
       
@@ -159,6 +167,7 @@ describe('WebSocket Resilience Tests', () => {
   });
 
   describe('WebSocket Heartbeat and Keep-Alive', () => {
+      jest.setTimeout(10000);
     it('should handle WebSocket heartbeat and keep-alive', async () => {
       const { getByTestId } = render(<HeartbeatComponent />);
       

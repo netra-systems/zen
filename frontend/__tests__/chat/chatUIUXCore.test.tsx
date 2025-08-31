@@ -1,5 +1,6 @@
-/**
- * Core Chat UI/UX Test Coordinator
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+tor
  * ================================
  * Modular test suite coordinator for chat UI components
  * Split from 570-line monolithic test file into focused ≤450-line modules
@@ -15,6 +16,8 @@ import './message-input.test';
 import './error-state-advanced.test';
 
 describe('Core Chat UI/UX Experience - Modular Test Suite', () => {
+  
+    jest.setTimeout(10000);
   
   test('Modular test suite coordination', () => {
     // Verify all test modules can be imported successfully

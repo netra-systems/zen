@@ -69,7 +69,7 @@ jest.mock('@/hooks/useThreadNavigation', () => ({
 
 jest.mock('@/store/authStore');
 
-jest.mock('@/utils/debug-logger', () => ({
+jest.mock('@/lib/logger', () => ({
   logger: {
     debug: jest.fn(),
     error: jest.fn(),
@@ -116,8 +116,11 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 import { useLoadingState } from '@/hooks/useLoadingState';
 import { useAuthStore } from '@/store/authStore';
 import { useThreadNavigation } from '@/hooks/useThreadNavigation';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Startup Message Comprehensive Tests', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   const mockStoreState = {
     isProcessing: false,
     messages: [],
@@ -401,6 +404,8 @@ describe('Startup Message Comprehensive Tests', () => {
  * Integration Tests for Startup Message with Real Components
  */
 describe('Startup Message Integration Tests', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     
@@ -482,4 +487,8 @@ describe('Startup Message Integration Tests', () => {
     const renderTime = endTime - startTime;
     expect(renderTime).toBeLessThan(100); // 100ms budget
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

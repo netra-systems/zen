@@ -9,7 +9,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Button } from '@/components/ui/button';
 import { ChevronDown, Send, Sparkles, Zap, TrendingUp, Shield, Database, Brain } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 
 export const ExamplePrompts: React.FC = () => {
   const { sendMessage } = useWebSocket();

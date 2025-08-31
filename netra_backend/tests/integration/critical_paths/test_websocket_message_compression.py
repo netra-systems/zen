@@ -32,7 +32,8 @@ import redis.asyncio as redis
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.schemas import User
-from test_framework.mock_utils import mock_justified
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
 from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 
@@ -647,8 +648,6 @@ class TestWebSocketMessageCompressionL3:
 
         assert successful_decompressions >= len(decompression_tasks) * 0.95  # 95% success rate
     
-    @mock_justified("L3: Message compression testing with real Redis storage")
-
     @pytest.mark.asyncio
     async def test_compression_bandwidth_savings(self, redis_client, message_compressor, test_users):
 

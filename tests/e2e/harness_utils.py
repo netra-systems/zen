@@ -317,7 +317,7 @@ class UnifiedTestHarnessComplete(UnifiedE2ETestHarness):
             "auth_service": ServiceConfig(
                 name="auth_service", 
                 host="localhost", 
-                port=8001, 
+                port=8081, 
                 health_endpoint="/health",
                 startup_timeout=30
             ),

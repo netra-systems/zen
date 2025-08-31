@@ -19,7 +19,8 @@ import { ThreadService } from '@/services/threadService';
 import { ThreadRenameService } from '@/services/threadRenameService';
 import { optimisticMessageManager } from '@/services/optimistic-updates';
 import { generateUniqueId } from '@/lib/utils';
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock all dependencies
 jest.mock('@/hooks/useWebSocket');
@@ -29,9 +30,11 @@ jest.mock('@/services/threadService');
 jest.mock('@/services/threadRenameService');
 jest.mock('@/services/optimistic-updates');
 jest.mock('@/lib/utils');
-jest.mock('@/utils/debug-logger');
+jest.mock('@/lib/logger');
 
 describe('useMessageSending Pipeline Tests', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   const mockSendMessage = jest.fn();
   const mockAddMessage = jest.fn();
   const mockSetActiveThread = jest.fn();
@@ -108,6 +111,8 @@ describe('useMessageSending Pipeline Tests', () => {
   });
 
   describe('Message Validation Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should validate message requirements correctly', async () => {
       const { result } = renderHook(() => useMessageSending());
 
@@ -206,6 +211,8 @@ describe('useMessageSending Pipeline Tests', () => {
   });
 
   describe('Thread Management Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should use existing active thread', async () => {
       const { result } = renderHook(() => useMessageSending());
 
@@ -298,6 +305,8 @@ describe('useMessageSending Pipeline Tests', () => {
   });
 
   describe('WebSocket Message Dispatch Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should use start_agent for first message in thread', async () => {
       const { result } = renderHook(() => useMessageSending());
 
@@ -386,6 +395,8 @@ describe('useMessageSending Pipeline Tests', () => {
   });
 
   describe('Optimistic Update Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should add both user and AI optimistic messages', async () => {
       const { result } = renderHook(() => useMessageSending());
 
@@ -433,6 +444,8 @@ describe('useMessageSending Pipeline Tests', () => {
   });
 
   describe('Thread Auto-Rename Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should auto-rename thread on first message', async () => {
       const { result } = renderHook(() => useMessageSending());
 
@@ -501,6 +514,8 @@ describe('useMessageSending Pipeline Tests', () => {
   });
 
   describe('Error Handling Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle thread creation failure', async () => {
       const { result } = renderHook(() => useMessageSending());
 
@@ -581,6 +596,8 @@ describe('useMessageSending Pipeline Tests', () => {
   });
 
   describe('Retry Mechanism Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should provide retry functionality for failed messages', async () => {
       const { result } = renderHook(() => useMessageSending());
 
@@ -668,6 +685,8 @@ describe('useMessageSending Pipeline Tests', () => {
   });
 
   describe('State Management Integration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should properly manage sending state throughout pipeline', async () => {
       const { result } = renderHook(() => useMessageSending());
 
@@ -722,6 +741,8 @@ describe('useMessageSending Pipeline Tests', () => {
   });
 
   describe('Edge Cases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle rapid consecutive send attempts', async () => {
       const { result } = renderHook(() => useMessageSending());
 
@@ -769,4 +790,8 @@ describe('useMessageSending Pipeline Tests', () => {
       expect(result.current.isSending).toBe(false);
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

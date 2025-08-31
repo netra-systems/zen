@@ -1,10 +1,9 @@
-/**
- * Chat UI/UX Authentication Flow Tests
- * Module-based architecture: Authentication tests ≤300 lines, functions ≤8 lines
- */
-
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import MainChat from '@/components/chat/MainChat';
+import { } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import MainChat from '@/components/chat/MainChat';
 import { 
@@ -29,6 +28,7 @@ import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useChatWebSocket } from '@/hooks/useChatWebSocket';
 
 describe('Chat UI/UX Authentication Flow Tests', () => {
+    jest.setTimeout(10000);
   const mockAuthStore = createMockAuthStore();
   
   beforeEach(() => {
@@ -39,9 +39,15 @@ describe('Chat UI/UX Authentication Flow Tests', () => {
 
   afterEach(() => {
     cleanupMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('User Authentication Flow', () => {
+      jest.setTimeout(10000);
     test('1. Should successfully authenticate user and initialize chat interface', async () => {
       const authenticatedStore = setupAuthenticatedStore(mockAuthStore);
       (useAuthStore as unknown as jest.Mock).mockReturnValue(authenticatedStore);

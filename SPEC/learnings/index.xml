@@ -17,13 +17,121 @@
             <step>4. If necessary, retrieve the detailed learning file using the `path` attribute.</step>
         </workflow>
     </retrieval-protocol>
+    
+    <learning id="jwt-secret-standardization-hard-requirements-2025-08-30">
+        <title>JWT Secret Standardization with Hard Requirements (No Fallbacks)</title>
+        <category>Authentication Security</category>
+        <keywords>jwt, authentication, secrets, staging, production, fallback elimination, hard requirements</keywords>
+        <path>jwt_secret_standardization_hard_requirements.xml</path>
+        <critical-takeaway>
+            Fallback mechanisms in authentication create false confidence and mask configuration errors.
+            Environment-specific JWT secrets MUST be enforced with immediate hard failure when missing.
+            Single GSM secret source per environment prevents cross-service token validation mismatches.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Authentication failures blocking user access and damaging platform reliability</business-impact>
+        <prevention>Eliminate ALL fallback logic in authentication. Require environment-specific secrets: JWT_SECRET_STAGING, JWT_SECRET_PRODUCTION, JWT_SECRET_KEY (dev/test only).</prevention>
+    </learning>
+    
+    <learning id="configuration-hardening-patterns-no-fallbacks-2025-08-30">
+        <title>Configuration Hardening: Eliminate Dangerous Fallback Patterns</title>
+        <category>Security Configuration</category>
+        <keywords>configuration, secrets, fallbacks, hardening, security, database passwords, api keys</keywords>
+        <path>configuration_hardening_patterns_no_fallbacks.xml</path>
+        <critical-takeaway>
+            Empty string defaults for secrets enable unauthorized access. Localhost defaults enable production misconfigurations.
+            Graceful degradation is an anti-pattern for configuration - fail fast and loud at startup.
+            Critical targets: DATABASE_PASSWORD, REDIS_PASSWORD, LLM API keys, infrastructure hosts.
+        </critical-takeaway>
+        <severity>HIGH</severity>
+        <business-impact>Security vulnerabilities from misconfigured production systems</business-impact>
+        <prevention>Apply environment-specific hard requirements to all critical configuration. Remove empty defaults for secrets.</prevention>
+    </learning>
+    
+    <learning id="central-configuration-validator-ssot-implementation-2025-08-31">
+        <title>Central Configuration Validator: SSOT Implementation for Platform Security</title>
+        <category>Platform Security, Configuration Management</category>
+        <keywords>central validator, ssot, configuration, security, jwt, database, redis, llm, validation, hard requirements</keywords>
+        <path>central_configuration_validator_ssot_implementation.xml</path>
+        <critical-takeaway>
+            Single Source of Truth for all configuration validation eliminates drift and inconsistencies.
+            Central validator in shared/configuration enforces environment-specific hard requirements.
+            Both auth and backend services now delegate all critical secret validation to central validator.
+            Dangerous empty string defaults eliminated across all services.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Platform Security, Operational Reliability, Compliance (SOC 2, PCI DSS, ISO 27001)</business-impact>
+        <prevention>Use CentralConfigurationValidator for ALL configuration validation. Call validate_platform_configuration() at service startup.</prevention>
+        <implementation-status>FULLY IMPLEMENTED AND TESTED</implementation-status>
+        <documentation>docs/central_configuration_validator.md</documentation>
+    </learning>
+    
+    <learning id="websocket-logger-dual-import-2025-08-31">
+        <title>WebSocket Logger Dual Import Context Binding Issue</title>
+        <category>Runtime Error Resolution</category>
+        <keywords>websocket, logger, context binding, dual imports, test infrastructure failure</keywords>
+        <path>websocket_logger_dual_import_context_binding_issue.xml</path>
+        <critical-takeaway>
+            Dual imports of singletons (import { x } from 'y'; import { x as z } from 'y') 
+            create separate references that lose context binding in browser webpack environments.
+            Test infrastructure that suppresses WebSocket errors creates dangerous false confidence.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>WebSocket communication failures causing chat functionality breakdown</business-impact>
+        <prevention>Never create dual imports of singleton services. Always use single import reference.</prevention>
+    </learning>
 
     <categories>
+        <category name="WebSocket/AgentEvents" path="SPEC/learnings/websocket_agent_integration_critical.xml" keywords="WebSocket, Agent Events, Chat UI, Tool Execution, Frontend, Real-time, Mission Critical, Tool Dispatcher, Enhancement, Agent Registry">
+            <critical-takeaway>MISSION CRITICAL: AgentRegistry.set_websocket_manager() MUST enhance tool dispatcher or chat UI breaks - $500K+ ARR impact (websocket_agent_integration_critical.xml).</critical-takeaway>
+            <critical-takeaway>Tool dispatcher MUST be wrapped with EnhancedToolExecutionEngine to send tool_executing/tool_completed events (websocket_agent_integration_critical.xml).</critical-takeaway>
+            <critical-takeaway>5 required events for chat: agent_started, agent_thinking, tool_executing, tool_completed, agent_completed (websocket_agent_integration_critical.xml).</critical-takeaway>
+            <critical-takeaway>Run tests/mission_critical/test_websocket_agent_events_suite.py before ANY deployment (websocket_agent_integration_critical.xml).</critical-takeaway>
+        </category>
+        
+        <category name="WebSocket/DependencyInjection" path="SPEC/learnings/websocket_injection_fix_comprehensive.xml" keywords="WebSocket, Dependency Injection, MessageHandlerService, Real-time Events, Chat UI, Mission Critical, Service Creation, Graceful Fallback">
+            <critical-takeaway>CRITICAL FIX: MessageHandlerService created via dependency injection was missing WebSocket manager, causing real-time agent events to be silently dropped (websocket_injection_fix_comprehensive.xml).</critical-takeaway>
+            <critical-takeaway>ALL MessageHandlerService creation paths MUST inject WebSocket manager: dependencies.py, service_factory.py, agent_service_core.py (websocket_injection_fix_comprehensive.xml).</critical-takeaway>
+            <critical-takeaway>Graceful fallback pattern required: try WebSocket injection, catch exceptions, log clearly, continue without WebSocket support (websocket_injection_fix_comprehensive.xml).</critical-takeaway>
+            <critical-takeaway>Run tests/mission_critical/test_websocket_injection_fix_comprehensive.py to validate injection works and prevent regression (websocket_injection_fix_comprehensive.xml).</critical-takeaway>
+            <critical-takeaway>$500K+ ARR impact: "blank screen" during AI processing fixed by ensuring real-time progress updates reach users (websocket_injection_fix_comprehensive.xml).</critical-takeaway>
+        </category>
+        
+        <category name="WebSocket/SubAgentPatterns" path="SPEC/learnings/websocket_subagent_enhancement_patterns.xml" keywords="Sub-Agents, WebSocket Events, TriageSubAgent, DataSubAgent, ValidationSubAgent, WebSocketContextMixin, Real-time Feedback, User Experience, Event Emission">
+            <critical-takeaway>WebSocketContextMixin provides standardized pattern for sub-agents to emit real-time events during execution (websocket_subagent_enhancement_patterns.xml).</critical-takeaway>
+            <critical-takeaway>All sub-agents MUST emit 5 critical events: agent_started, agent_thinking, tool_executing, tool_completed, agent_completed for proper UX (websocket_subagent_enhancement_patterns.xml).</critical-takeaway>
+            <critical-takeaway>Thread ID extraction in tool execution must check chat_thread_id > thread_id > run_id to match WebSocket connections (websocket_subagent_enhancement_patterns.xml).</critical-takeaway>
+            <critical-takeaway>Sub-agents must support both modern (BaseExecutionInterface) and legacy execution patterns with WebSocket events (websocket_subagent_enhancement_patterns.xml).</critical-takeaway>
+        </category>
+        
+        <category name="WebSocket/AgentLifecycle" path="SPEC/learnings/agent_manager_lifecycle_events.xml" keywords="Agent Manager, WebSocket, Lifecycle Events, Agent Registration, Agent Failure, Agent Cancellation, Metrics Updates, Real-time Monitoring, System Observability">
+            <critical-takeaway>Agent Manager MUST emit WebSocket events for all lifecycle transitions: registration, failure, cancellation, metrics (agent_manager_lifecycle_events.xml).</critical-takeaway>
+            <critical-takeaway>WebSocket notifier is optional in AgentManager - wrap all calls in try/except to maintain backward compatibility (agent_manager_lifecycle_events.xml).</critical-takeaway>
+            <critical-takeaway>Frontend expects 7 new lifecycle events: agent_registered, agent_failed, agent_cancelled, agent_metrics_updated, agent_unregistered, agent_status_changed, agent_manager_shutdown (agent_manager_lifecycle_events.xml).</critical-takeaway>
+            <critical-takeaway>Run tests/mission_critical/test_agent_manager_lifecycle_events.py to verify lifecycle event emission (agent_manager_lifecycle_events.xml).</critical-takeaway>
+        </category>
+        
         <category name="WebSocket/Routing" path="SPEC/learnings/websocket_routing_regression.xml" keywords="WebSocket, Message Routing, Run ID, Agent Updates, Privacy, Security, Regression, Broadcasting, Connection Management">
             <critical-takeaway>CRITICAL: WebSocket send_agent_update MUST route by run_id, NEVER broadcast to all users - severe privacy/security issue (websocket_routing_regression.xml).</critical-takeaway>
             <critical-takeaway>Always implement proper message routing from the start - broadcasting is almost never correct for user-specific data (websocket_routing_regression.xml).</critical-takeaway>
             <critical-takeaway>WebSocket manager must maintain run_id_connections mapping and clean up on disconnect (websocket_routing_regression.xml).</critical-takeaway>
             <critical-takeaway>Create regression tests IMMEDIATELY when fixing critical bugs to ensure they never resurface (websocket_routing_regression.xml).</critical-takeaway>
+        </category>
+        
+        <category name="WebSocket/TimeoutRetry" path="SPEC/learnings/websocket_timeout_retry_implementation.xml" keywords="WebSocket, Timeout, Retry, Exponential Backoff, Reliability, Message Delivery, Silent Failures, Performance, Circuit Breaker, Monitoring">
+            <critical-takeaway>CRITICAL: WebSocket sends MUST have timeouts (5 seconds default) to prevent indefinite hanging - affects 90% of value delivery (websocket_timeout_retry_implementation.xml).</critical-takeaway>
+            <critical-takeaway>Exponential backoff retry (1s, 2s, 4s) with max 3 attempts prevents cascade failures from retry storms (websocket_timeout_retry_implementation.xml).</critical-takeaway>
+            <critical-takeaway>asyncio.wait_for provides deterministic timeout behavior for WebSocket operations (websocket_timeout_retry_implementation.xml).</critical-takeaway>
+            <critical-takeaway>Track send_timeouts, timeout_retries, and timeout_failures metrics for monitoring WebSocket health (websocket_timeout_retry_implementation.xml).</critical-takeaway>
+            <critical-takeaway>Timeout implementation MUST maintain backward compatibility with existing WebSocket API (websocket_timeout_retry_implementation.xml).</critical-takeaway>
+        </category>
+        
+        <category name="Authentication/MultiSystem" path="SPEC/multi_system_authentication_architecture.xml" keywords="Authentication, SSOT, JWT, OAuth, Multi-System, Auth Service, Token Management, Service-to-Service, Architecture">
+            <critical-takeaway>CRITICAL: auth_service is the SOLE authentication authority - all JWT validation must go through auth_service (multi_system_authentication_architecture.xml).</critical-takeaway>
+            <critical-takeaway>Multiple authentication patterns violate SSOT - 3x maintenance burden and security risk (multi_system_authentication_architecture.xml).</critical-takeaway>
+            <critical-takeaway>Frontend must use UnifiedAuthService exclusively for token management (multi_system_authentication_architecture.xml).</critical-takeaway>
+            <critical-takeaway>Remove ALL OAuth implementations from netra_backend - auth_service handles all OAuth flows (multi_system_authentication_architecture.xml).</critical-takeaway>
+            <critical-takeaway>Service-to-service auth standardized on service account tokens with API keys as emergency fallback only (multi_system_authentication_architecture.xml).</critical-takeaway>
         </category>
         
         <category name="Testing/Performance" path="SPEC/learnings/test_collection_optimization.xml" keywords="Test Collection, PyTest, Test Discovery, Test Performance, Test Audit, Test Markers, Test Organization, Collection Optimization">
@@ -39,7 +147,7 @@
             <critical-takeaway>Each service needs its own SERVICE_ID - auth-service not netra-backend (environment_loading_race_condition.xml).</critical-takeaway>
         </category>
         
-        <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session, OAuth, Token, CORS, OAUTH_ENV, OAuth Environment Variables, OAuth Validation, OAuth Startup, OAuth Secrets, Secret Naming, Service Independence, Logout, JWT_SECRET_KEY, Docker Compose, Dev Login, Development Mode, Auto-Login, Dev Auto-Login, Token Persistence, Token Initialization">
+        <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session, OAuth, Token, CORS, OAUTH_ENV, OAuth Environment Variables, OAuth Validation, OAuth Startup, OAuth Secrets, Secret Naming, Service Independence, Logout, JWT_SECRET_KEY, Docker Compose, Dev Login, Development Mode, Auto-Login, Dev Auto-Login, Token Persistence, Token Initialization, Refresh Token, Token Refresh, Refresh Loop, Same Token, Hardcoded Values">
             <critical-takeaway>MANDATORY: All services must integrate with the shared auth service (SPEC/shared_auth_integration.xml).</critical-takeaway>
             <critical-takeaway>CRITICAL: Use JWT_SECRET_KEY exclusively - JWT_SECRET is deprecated (jwt_secret_standardization.xml).</critical-takeaway>
             <critical-takeaway>Ensure consistent JWT secret configuration across services - both auth and backend MUST use JWT_SECRET_KEY (jwt_secret_standardization.xml).</critical-takeaway>
@@ -48,6 +156,9 @@
             <critical-takeaway>Frontend pages receiving OAuth tokens via URL must handle token extraction and storage (oauth_token_persistence.xml).</critical-takeaway>
             <critical-takeaway>Always verify OAuth configuration matches between code and provider console (oauth_deployment_verification.xml).</critical-takeaway>
             <critical-takeaway>Next.js proxy rewrites must be disabled in production - frontend should call services directly (oauth_staging_issues.xml).</critical-takeaway>
+            <critical-takeaway>CRITICAL: Token refresh returning same token is ALWAYS a bug - indicates hardcoded placeholders (auth_token_refresh_root_cause.xml).</critical-takeaway>
+            <critical-takeaway>Never use placeholder values in production code paths - they will reach production (auth_token_refresh_root_cause.xml).</critical-takeaway>
+            <critical-takeaway>Implement cooldown and max failure limits for token refresh to prevent loops (frontend_refresh_loop_fix.xml).</critical-takeaway>
             <critical-takeaway>Auth service routes ALWAYS use /auth/* prefix - frontend must include this (frontend_auth_urls.xml).</critical-takeaway>
             <critical-takeaway>Run python scripts/validate_oauth_configuration.py before every deployment to prevent OAuth redirect URI misconfigurations.</critical-takeaway>
             <critical-takeaway>Database connection args must be conditional on database type - 'command_timeout' fails with SQLite (auth_service_endpoint_fixes.xml).</critical-takeaway>
@@ -742,6 +853,14 @@
             <critical-takeaway>Auth service is UserAuthService not AuthService - import as: from netra_backend.app.services.user_auth_service import UserAuthService as AuthService.</critical-takeaway>
             <critical-takeaway>Metrics collector is at netra_backend.app.monitoring.metrics_collector not core.monitoring.</critical-takeaway>
             <critical-takeaway>Test config is at netra_backend.tests.integration.config not tests.config.</critical-takeaway>
+        </category>
+        
+        <category name="Test Collection Import Errors" path="SPEC/learnings/test_collection_import_errors.xml" keywords="Import Errors, Test Collection, ModuleNotFoundError, MockWebSocket, Test Mocks, Absolute Imports, File Structure">
+            <critical-takeaway>CRITICAL: Test collection fails with ModuleNotFoundError when imports point to wrong directories - blocks ALL systematic test fixing.</critical-takeaway>
+            <critical-takeaway>MockWebSocket class is in netra_backend.tests.services.test_ws_connection_mocks, NOT netra_backend.tests.integration.test_ws_connection_mocks.</critical-takeaway>
+            <critical-takeaway>Always verify import paths against actual file locations using find command before fixing imports.</critical-takeaway>
+            <critical-takeaway>Import errors during collection prevent pytest from discovering ANY tests in affected files - highest priority fixes.</critical-takeaway>
+            <critical-takeaway>Use absolute imports as per SPEC/import_management_architecture.xml - relative imports forbidden.</critical-takeaway>
         </category>
         
         <category name="Test Imports" path="SPEC/learnings/test_import_fixes.xml" keywords="Imports, ModuleNotFoundError, PYTHONPATH, Test Setup">
@@ -1529,6 +1648,17 @@
             <critical-takeaway>Configuration validation pipeline prevents deployment failures - check secret lengths before deployment</critical-takeaway>
         </category>
         
+        <category name="Architecture/UnusedCode" path="SPEC/learnings/audit_unused_code_analysis.xml" keywords="Audit, Unused Code, Broken Pipes, Dead Code, Architecture Cleanup, Code Quality, SSOT, Legacy Code, Technical Debt">
+            <critical-takeaway>WebSocket large message handling system (764 lines) defined but never used - significant complexity without usage (audit_unused_code_analysis.xml).</critical-takeaway>
+            <critical-takeaway>Admin API endpoints exist in backend with no frontend implementation - 6 endpoints inaccessible to users (audit_unused_code_analysis.xml).</critical-takeaway>
+            <critical-takeaway>Multiple authentication patterns violate SSOT - auth_service, netra_backend, and frontend each implement separately (audit_unused_code_analysis.xml).</critical-takeaway>
+            <critical-takeaway>Agent registry contains unimplemented agents: GitHubAnalyzerAgent, SyntheticDataAgent, SupplyChainAgent (audit_unused_code_analysis.xml).</critical-takeaway>
+            <critical-takeaway>Database models without usage: WorkflowTemplate, AgentMetrics, SystemAudit - tables created but never queried (audit_unused_code_analysis.xml).</critical-takeaway>
+            <critical-takeaway>15-20% codebase reduction possible through cleanup - ~2,500 lines of unused code identified (audit_unused_code_analysis.xml).</critical-takeaway>
+            <critical-takeaway>Regular audits using scripts/audit_unused_code.py prevent accumulation of dead code (audit_unused_code_analysis.xml).</critical-takeaway>
+            <critical-takeaway>Test coverage gaps are strong indicators of unused code - code without tests often unused (audit_unused_code_analysis.xml).</critical-takeaway>
+        </category>
+        
     </categories>
     
     <recent_major_fixes>
@@ -1825,4 +1955,17 @@
             <critical-takeaway>Use .env.staging.example as template - actual .env.staging should never contain localhost or test flags</critical-takeaway>
         </category>
     </environment_security>
+
+    <testing_methodology>
+        <category name="Cypress Test Suite Systematic Upgrade" path="SPEC/learnings/cypress_test_upgrade_systematic.xml" keywords="Cypress, E2E Testing, Test Upgrade, Sub-Agent Methodology, WebSocket Events, Test Reliability, CI/CD, False Failures, SUT Alignment, Demo Flow, ROI Calculator, Authentication">
+            <critical-takeaway>Use systematic sub-agent approach with 1-3 focused tests per agent to prevent context overflow and ensure thorough analysis</critical-takeaway>
+            <critical-takeaway>ALL WebSocket tests MUST use UnifiedWebSocketEvent structure with 5 critical events: agent_started, agent_thinking, tool_executing, tool_completed, agent_completed</critical-takeaway>
+            <critical-takeaway>Demo navigation changed from direct routes to /demo → industry selection → feature tabs pattern - update all demo tests accordingly</critical-takeaway>
+            <critical-takeaway>Current implementation uses semantic selectors (CSS classes, IDs) not data-testid attributes - update selectors to match reality</critical-takeaway>
+            <critical-takeaway>Use "Quick Dev Login" button in development mode authentication, not manual localStorage manipulation</critical-takeaway>
+            <critical-takeaway>File upload moved from chat to /ingestion; no /settings page exists; API key management not implemented - skip tests until features exist</critical-takeaway>
+            <critical-takeaway>Mark missing functionality tests as .skip() with clear TODO comments rather than deleting test infrastructure</critical-takeaway>
+            <critical-takeaway>Message input changed from input element to textarea within [data-testid="message-input"] wrapper</critical-takeaway>
+        </category>
+    </testing_methodology>
 </specification>

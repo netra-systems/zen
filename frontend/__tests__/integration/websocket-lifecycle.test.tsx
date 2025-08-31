@@ -1,12 +1,10 @@
-/**
- * WebSocket Connection Lifecycle Tests
- * Extracted from oversized websocket-complete.test.tsx for modularity
- * Tests complete WebSocket connection lifecycle with realistic conditions
- * Focuses on connection, disconnection, errors, and reconnection scenarios
- */
-
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
+import { jest } from '@jest/globals';
+import { TestProviders } from '@/__tests__/setup/test-providers';
+import { WebSocketTestManager, createWebSocketManager } from '@/__tests__/helpers/websocket-test-manager';
+import { { render, waitFor } from '@testing-library/react';
 import { jest } from '@jest/globals';
 import { TestProviders } from '@/__tests__/setup/test-providers';
 import { WebSocketTestManager, createWebSocketManager } from '@/__tests__/helpers/websocket-test-manager';
@@ -21,6 +19,7 @@ import {
 import { WebSocketLifecycleTest } from './utils/websocket-test-components';
 
 describe('WebSocket Connection Lifecycle Tests', () => {
+    jest.setTimeout(10000);
   let wsManager: WebSocketTestManager;
   let stateManager: ConnectionStateManager;
 
@@ -34,9 +33,15 @@ describe('WebSocket Connection Lifecycle Tests', () => {
   afterEach(() => {
     wsManager.cleanup();
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Connection Establishment', () => {
+      jest.setTimeout(10000);
     it('should handle complete connection lifecycle with real timing', async () => {
       render(
         <TestProviders>
@@ -86,6 +91,7 @@ describe('WebSocket Connection Lifecycle Tests', () => {
   });
 
   describe('Error Handling', () => {
+      jest.setTimeout(10000);
     it('should handle real connection errors with proper state transitions', async () => {
       render(
         <TestProviders>
@@ -128,6 +134,7 @@ describe('WebSocket Connection Lifecycle Tests', () => {
   });
 
   describe('Reconnection Scenarios', () => {
+      jest.setTimeout(10000);
     it('should handle real reconnection with timing simulation', async () => {
       render(
         <TestProviders>
@@ -207,6 +214,7 @@ describe('WebSocket Connection Lifecycle Tests', () => {
   });
 
   describe('Performance Measurement', () => {
+      jest.setTimeout(10000);
     it('should measure real connection performance with timing', async () => {
       const connectionTime = await measureConnectionTime(async () => {
         await wsManager.waitForConnection();

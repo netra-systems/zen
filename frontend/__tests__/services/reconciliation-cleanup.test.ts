@@ -4,8 +4,11 @@
  */
 
 import { CoreReconciliationService } from '@/services/reconciliation/core';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Reconciliation Cleanup Fix', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   let service: CoreReconciliationService;
 
   beforeEach(() => {
@@ -20,6 +23,7 @@ describe('Reconciliation Cleanup Fix', () => {
     service.shutdown();
     jest.clearAllTimers();
     jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   it('should execute cleanup without "this.cleanup is not a function" error', () => {

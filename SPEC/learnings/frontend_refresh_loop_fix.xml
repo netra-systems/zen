@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Frontend Refresh Loop Fix - Staging Environment</title>
+    <date>2025-08-30</date>
+    <severity>CRITICAL</severity>
+    <components>
+      <component>frontend/auth</component>
+      <component>auth_service</component>
+      <component>staging_environment</component>
+    </components>
+  </metadata>
+
+  <problem>
+    <description>
+      Staging environment experienced infinite refresh loops where the frontend kept refreshing the page continuously.
+      This made the staging environment completely unusable.
+    </description>
+    <symptoms>
+      <symptom>Page refreshes infinitely in a loop</symptom>
+      <symptom>Auth token refresh returns same expired token</symptom>
+      <symptom>Login/logout redirects create loops</symptom>
+      <symptom>Staging uses localhost URLs causing CORS errors</symptom>
+    </symptoms>
+  </problem>
+
+  <root_causes>
+    <cause priority="1">
+      <title>Auth Service Returns Same Token on Refresh</title>
+      <description>
+        The auth service had hardcoded placeholder values in token refresh logic:
+        - email = "user@example.com" (hardcoded)
+        - permissions = [] (empty)
+        This caused every refresh to generate identical tokens.
+      </description>
+      <location>auth_service/auth_core/services/auth_service.py:325-326</location>
+      <location>auth_service/auth_core/core/jwt_handler.py:291-292</location>
+      <type>CORE_SYSTEM_BUG</type>
+    </cause>
+
+    <cause priority="2">
+      <title>Missing Refresh Loop Prevention</title>
+      <description>
+        Frontend lacked defensive measures:
+        - No cooldown between refresh attempts
+        - No max failure limit
+        - No detection of same-token returns
+        - No redirect loop prevention
+      </description>
+      <location>frontend/auth/context.tsx</location>
+      <type>MISSING_DEFENSIVE_CODE</type>
+    </cause>
+
+    <cause priority="3">
+      <title>Staging Environment Config Issues</title>
+      <description>
+        Staging configurations contained localhost URLs:
+        - Docker compose had localhost fallbacks
+        - Environment variables not properly set
+        - No validation to prevent localhost in staging
+      </description>
+      <location>docker-compose.yml</location>
+      <location>frontend/lib/unified-api-config.ts</location>
+      <type>CONFIGURATION_ERROR</type>
+    </cause>
+
+    <cause priority="4">
+      <title>Race Conditions in Auth Initialization</title>
+      <description>
+        Multiple components checking auth state simultaneously without coordination:
+        - HomePage and LoginPage both redirect based on auth
+        - No hasRedirected flag to prevent multiple redirects
+        - Auth context initialized flag not checked
+      </description>
+      <location>frontend/app/page.tsx</location>
+      <location>frontend/app/login/page.tsx</location>
+      <type>RACE_CONDITION</type>
+    </cause>
+  </root_causes>
+
+  <fixes_applied>
+    <fix component="auth_service">
+      <title>Fixed Token Refresh to Use Real User Data</title>
+      <changes>
+        <change>Extract email and permissions from token payload instead of hardcoded values</change>
+        <change>Enhanced refresh tokens to contain user data</change>
+        <change>Added database lookup fallback for user data</change>
+        <change>Ensure new unique tokens are generated on each refresh</change>
+      </changes>
+      <files>
+        <file>auth_service/auth_core/services/auth_service.py</file>
+        <file>auth_service/auth_core/core/jwt_handler.py</file>
+      </files>
+    </fix>
+
+    <fix component="frontend">
+      <title>Added Refresh Loop Prevention</title>
+      <changes>
+        <change>Added 30-second cooldown between refresh attempts</change>
+        <change>Added max 3 failure limit before clearing token</change>
+        <change>Added same-token detection to increment failure count</change>
+        <change>Added hasRedirectedRef to prevent multiple redirects</change>
+        <change>Added initialized check before auth decisions</change>
+      </changes>
+      <files>
+        <file>frontend/auth/context.tsx</file>
+        <file>frontend/app/page.tsx</file>
+        <file>frontend/app/login/page.tsx</file>
+      </files>
+    </fix>
+
+    <fix component="staging_config">
+      <title>Fixed Staging Environment Configuration</title>
+      <changes>
+        <change>Created staging-specific nginx and docker compose configs</change>
+        <change>Added validation to reject localhost URLs in staging/production</change>
+        <change>Created validation scripts for deployment</change>
+        <change>Fixed environment variables to use proper staging domains</change>
+      </changes>
+      <files>
+        <file>nginx/nginx.staging.conf</file>
+        <file>docker-compose.staging.yml</file>
+        <file>scripts/validate_staging_urls.py</file>
+        <file>frontend/lib/unified-api-config.ts</file>
+      </files>
+    </fix>
+  </fixes_applied>
+
+  <tests_added>
+    <test>frontend/__tests__/auth/staging-refresh-loop.test.tsx</test>
+    <test>frontend/__tests__/auth/refresh-loop-prevention.test.tsx</test>
+    <test>auth_service/tests/test_refresh_critical_fix.py</test>
+    <test>auth_service/tests/test_refresh_token_fix.py</test>
+  </tests_added>
+
+  <lessons_learned>
+    <lesson>
+      NEVER use placeholder values in production code - they will eventually reach production.
+      Always extract real data from the appropriate source.
+    </lesson>
+    <lesson>
+      Defensive programming is essential but not sufficient - must fix root causes in core systems.
+      The frontend defensive measures would not have been needed if auth service worked correctly.
+    </lesson>
+    <lesson>
+      Environment-specific configurations must be strictly validated. A single localhost URL in 
+      staging can break the entire authentication flow.
+    </lesson>
+    <lesson>
+      Refresh tokens returning the same token is NEVER normal behavior - it indicates a bug.
+      Proper refresh should always generate new unique tokens.
+    </lesson>
+    <lesson>
+      Multi-layer validation is necessary: pre-deployment, runtime, and application-level checks
+      all play important roles in preventing configuration errors.
+    </lesson>
+  </lessons_learned>
+
+  <prevention>
+    <measure>Always test token refresh in staging environment before production</measure>
+    <measure>Add automated tests that verify tokens are unique on refresh</measure>
+    <measure>Use environment validation scripts in CI/CD pipeline</measure>
+    <measure>Never use placeholder values - use proper defaults or fail explicitly</measure>
+    <measure>Implement rate limiting and cooldowns for all retry operations</measure>
+  </prevention>
+
+  <impact>
+    <item>Staging environment now fully functional</item>
+    <item>No more infinite refresh loops</item>
+    <item>Improved security with real user data in tokens</item>
+    <item>Better performance without wasted refresh requests</item>
+    <item>Comprehensive test coverage prevents regression</item>
+  </impact>
+</learning>

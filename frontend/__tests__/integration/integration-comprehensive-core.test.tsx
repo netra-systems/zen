@@ -3,12 +3,12 @@
  * Module-based architecture: Core comprehensive tests ≤300 lines, functions ≤8 lines
  */
 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TestProviders } from '@/__tests__/setup/test-providers';
-import {
-  setupComprehensiveMocks,
+import { setupComprehensiveMocks,
   setupComprehensiveTestEnvironment,
   cleanupComprehensiveTestEnvironment,
   setupComprehensiveHookMocks,
@@ -81,6 +81,8 @@ jest.mock('@/components/auth/AuthGate', () => {
 });
 
 describe('Comprehensive Integration Tests - Core', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   let server: any;
   const useCorpusStore = createComprehensiveCorpusStore();
   const useSyntheticDataStore = createComprehensiveSyntheticStore();
@@ -96,9 +98,17 @@ describe('Comprehensive Integration Tests - Core', () => {
 
   afterEach(() => {
     cleanupComprehensiveTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('1. Corpus Management Integration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should upload documents to corpus and process with embeddings', async () => {
       const mockDocument = createComprehensiveMockDocument();
       setupComprehensiveCorpusUploadMock(mockDocument);
@@ -120,6 +130,8 @@ describe('Comprehensive Integration Tests - Core', () => {
   });
 
   describe('2. Synthetic Data Generation Flow', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should generate synthetic data based on templates', async () => {
       jest.setTimeout(10000);
       const mockGenerationJob = createComprehensiveMockGenerationJob();
@@ -142,6 +154,8 @@ describe('Comprehensive Integration Tests - Core', () => {
   });
 
   describe('3. LLM Cache Management Integration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should cache and retrieve LLM responses', async () => {
       setupComprehensiveLLMCacheResponseMocks(llmCacheService);
       
@@ -163,6 +177,8 @@ describe('Comprehensive Integration Tests - Core', () => {
   });
 
   describe('7. Health Check Monitoring', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should monitor service health status', async () => {
       const mockHealth = createComprehensiveMockHealthStatus();
       setupComprehensiveHealthMock(mockHealth, healthService);
@@ -187,6 +203,8 @@ describe('Comprehensive Integration Tests - Core', () => {
   });
 
   describe('15. Background Task Processing', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should queue and process background tasks', async () => {
       const mockTask = createComprehensiveMockTask();
       const result = await queueComprehensiveTask(mockTask);

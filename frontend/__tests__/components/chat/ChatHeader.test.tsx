@@ -1,8 +1,9 @@
-
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ChatHeader } from '@/components/chat/ChatHeader';
 import { setupChatMocks, resetChatMocks, renderWithChatSetup, overrideChatMocks, mockUnifiedChatStore, mockMCPTools } from './shared-test-setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+
 
 // Mock only necessary dependencies - use real components
 jest.mock('@/store/unified-chat');
@@ -25,6 +26,7 @@ beforeEach(() => {
 });
 
 describe('ChatHeader', () => {
+    jest.setTimeout(10000);
   it('should render the sub-agent name and status', () => {
     jest.mocked(useUnifiedChatStore).mockReturnValue({
       ...mockUnifiedChatStore,

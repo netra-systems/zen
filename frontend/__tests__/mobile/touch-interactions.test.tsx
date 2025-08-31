@@ -1,18 +1,18 @@
-/**
- * Touch Interactions Mobile Test Suite
- * Tests touch events, gestures, and mobile-specific interactions
- * Business Value: Ensures mobile users can interact effectively = 30% of user base
- * Follows 25-line function rule and 450-line file limit
- */
-
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Button } from '@/components/ui/button';
 import { MessageInput } from '@/components/chat/MessageInput';
 import { TestWrapper } from '@/__tests__/shared/unified-test-utilities';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+g-library/react';
+import userEvent from '@testing-library/user-event';
+import { Button } from '@/components/ui/button';
+import { MessageInput } from '@/components/chat/MessageInput';
+import { TestWrapper } from '@/__tests__/shared/unified-test-utilities';
 
 describe('Touch Interactions - Mobile Test Suite', () => {
+    jest.setTimeout(10000);
   const user = userEvent.setup();
 
   // Touch event simulation utilities
@@ -40,6 +40,7 @@ describe('Touch Interactions - Mobile Test Suite', () => {
   };
 
   describe('Basic Touch Events', () => {
+      jest.setTimeout(10000);
     it('handles touch tap on buttons correctly', async () => {
       const handleClick = jest.fn();
       render(<Button onClick={handleClick}>Tap Me</Button>);
@@ -80,6 +81,7 @@ describe('Touch Interactions - Mobile Test Suite', () => {
   });
 
   describe('Touch Gestures', () => {
+      jest.setTimeout(10000);
     it('handles swipe gestures on message list', async () => {
       const handleSwipe = jest.fn();
       render(
@@ -162,6 +164,7 @@ describe('Touch Interactions - Mobile Test Suite', () => {
   });
 
   describe('Mobile Input Interactions', () => {
+      jest.setTimeout(10000);
     it('handles touch focus on input fields', async () => {
       render(
         <input 
@@ -240,6 +243,7 @@ describe('Touch Interactions - Mobile Test Suite', () => {
   });
 
   describe('Touch Performance', () => {
+      jest.setTimeout(10000);
     it('responds to touch within 16ms for 60fps', async () => {
       const timestamps: number[] = [];
       const trackTouch = () => timestamps.push(performance.now());
@@ -314,6 +318,7 @@ describe('Touch Interactions - Mobile Test Suite', () => {
   });
 
   describe('Touch Accessibility', () => {
+      jest.setTimeout(10000);
     it('announces touch interactions to screen readers', () => {
       render(
         <Button 

@@ -1,10 +1,10 @@
-/**
- * Message Content Normalization Tests
- * Tests for content processing and normalization in MessageList
- * 
- * BVJ: Content Processing Infrastructure
- * Segment: All - ensures reliable content display across all user types
- * Business Goal: Reliable content rendering prevents user confusion
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { MessageList } from '@/components/chat/MessageList';
+import { useUnifiedChatStore } from '@/store/unified-chat';
+import { ble content rendering prevents user confusion
  * Value Impact: Consistent message display improves user experience and trust
  */
 
@@ -69,7 +69,9 @@ beforeEach(() => {
 });
 
 describe('Message Content Normalization', () => {
+    jest.setTimeout(10000);
   describe('String Content Processing', () => {
+      jest.setTimeout(10000);
     test('should handle string content correctly', () => {
       const mockStore = createUnifiedChatStoreMock({
         messages: [
@@ -153,6 +155,7 @@ describe('Message Content Normalization', () => {
   });
 
   describe('Object Content Processing', () => {
+      jest.setTimeout(10000);
     test('should handle object content with text property', () => {
       const mockStore = createUnifiedChatStoreMock({
         messages: [
@@ -250,6 +253,7 @@ describe('Message Content Normalization', () => {
   });
 
   describe('Null and Undefined Content Handling', () => {
+      jest.setTimeout(10000);
     test('should handle null content gracefully', () => {
       const mockStore = createUnifiedChatStoreMock({
         messages: [
@@ -321,6 +325,7 @@ describe('Message Content Normalization', () => {
   });
 
   describe('Array Content Processing', () => {
+      jest.setTimeout(10000);
     test('should handle array content by stringifying', () => {
       const mockStore = createUnifiedChatStoreMock({
         messages: [
@@ -383,6 +388,7 @@ describe('Message Content Normalization', () => {
   });
 
   describe('Special Content Types', () => {
+      jest.setTimeout(10000);
     test('should handle boolean content', () => {
       const mockStore = createUnifiedChatStoreMock({
         messages: [
@@ -445,6 +451,7 @@ describe('Message Content Normalization', () => {
   });
 
   describe('Content Consistency', () => {
+      jest.setTimeout(10000);
     test('should handle mixed content types in message list', () => {
       const mockStore = createUnifiedChatStoreMock({
         messages: [

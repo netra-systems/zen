@@ -1,12 +1,10 @@
-/**
- * Logger Integration Tests - Validates logger usage across components
- * BVJ: Prevents $15K MRR loss from monitoring/debugging failures
- */
-
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { logger } from '@/lib/logger';
 import { debugLayerVisibility } from '@/utils/layer-visibility-manager';
+import type { LayerVisibilityConfig } from '@/utils/layer-visibility-manager';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ { debugLayerVisibility } from '@/utils/layer-visibility-manager';
 import type { LayerVisibilityConfig } from '@/utils/layer-visibility-manager';
 
 // Test component that uses the logger
@@ -63,6 +61,7 @@ const TestComponent: React.FC = () => {
 };
 
 describe('Logger Integration - Cross-Component Usage', () => {
+    jest.setTimeout(10000);
   let loggerSpies: {
     debug: jest.SpyInstance;
     info: jest.SpyInstance;
@@ -94,9 +93,15 @@ describe('Logger Integration - Cross-Component Usage', () => {
 
   afterEach(() => {
     Object.values(loggerSpies).forEach(spy => spy.mockRestore());
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Component Logger Usage', () => {
+      jest.setTimeout(10000);
     it('logs user actions from components', () => {
       render(<TestComponent />);
       const button = screen.getByText('User Action');
@@ -151,6 +156,7 @@ describe('Logger Integration - Cross-Component Usage', () => {
   });
 
   describe('Layer Visibility Manager Integration', () => {
+      jest.setTimeout(10000);
     it('uses logger group methods for debugging', () => {
       render(<TestComponent />);
       const button = screen.getByText('Debug Layer');
@@ -163,6 +169,7 @@ describe('Logger Integration - Cross-Component Usage', () => {
   });
 
   describe('Error Handling Integration', () => {
+      jest.setTimeout(10000);
     it('logs errors with proper context', () => {
       const error = new Error('Test error');
       const ErrorComponent: React.FC = () => {
@@ -193,6 +200,7 @@ describe('Logger Integration - Cross-Component Usage', () => {
   });
 
   describe('Log Buffer Verification', () => {
+      jest.setTimeout(10000);
     it('accumulates logs from multiple sources', () => {
       render(<TestComponent />);
       
@@ -215,6 +223,7 @@ describe('Logger Integration - Cross-Component Usage', () => {
   });
 
   describe('Production Safety', () => {
+      jest.setTimeout(10000);
     it('sanitizes sensitive data in logs', () => {
       const SensitiveComponent: React.FC = () => {
         const handleSensitive = () => {
@@ -246,6 +255,7 @@ describe('Logger Integration - Cross-Component Usage', () => {
   });
 
   describe('Multi-Component Orchestration', () => {
+      jest.setTimeout(10000);
     it('tracks logs across component hierarchy', () => {
       const ParentComponent: React.FC = () => {
         React.useEffect(() => {

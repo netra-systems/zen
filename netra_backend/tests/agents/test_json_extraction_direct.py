@@ -16,7 +16,7 @@ def test_extract_json_with_trailing_comma():
     """Test extract_json_from_response with trailing comma"""
     response = '{"category": "Test", "priority": "high",}'
     
-    result = extract_json_from_response(response)
+    result = llm_parser.extract_json_from_response(response)
     
     assert result is not None, "extract_json_from_response should return a result"
     assert isinstance(result, dict), f"Result should be dict, got {type(result)}"

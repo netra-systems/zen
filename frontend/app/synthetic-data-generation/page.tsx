@@ -2,7 +2,7 @@
 
 import { SyntheticDataGenerator } from '@/components/synthetic-data-generator';
 import { AuthGuard } from '@/components/AuthGuard';
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 
 export default function SyntheticDataGeneratorPage() {
   const handleGenerationComplete = () => {

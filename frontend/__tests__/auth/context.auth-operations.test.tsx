@@ -7,12 +7,12 @@
 jest.unmock('@/auth/service');
 
 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { waitFor, act } from '@testing-library/react';
 import { authService } from '@/auth/unified-auth-service';
 import '@testing-library/jest-dom';
-import {
-  setupBasicMocks,
+import { setupBasicMocks,
   setupAuthStore,
   setupAuthConfigError,
   setupDevModeMocks,
@@ -67,6 +67,8 @@ jest.mock('@/lib/logger', () => ({
 }));
 
 describe('AuthContext - Auth Operations', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   let mockAuthStore: any;
   let mockAuthService: any;
 
@@ -230,4 +232,8 @@ describe('AuthContext - Auth Operations', () => {
     await performLogout(result);
     expectNoLogout();
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

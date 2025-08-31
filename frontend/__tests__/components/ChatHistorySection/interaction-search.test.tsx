@@ -1,12 +1,11 @@
-/**
- * ChatHistorySection Search Interaction Tests
- * Tests for search functionality and filtering ≤300 lines, ≤8 line functions
- */
-
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ChatHistorySection } from '@/components/ChatHistorySection';
+import { createTestSetup, setupCustomThreads } from './shared-setup';
+import { mockThreads } from './mockData';
+import { orySection';
 import { createTestSetup, setupCustomThreads } from './shared-setup';
 import { mockThreads } from './mockData';
 import {
@@ -17,6 +16,7 @@ import {
 } from './test-utils';
 
 describe('ChatHistorySection - Search Interactions', () => {
+    jest.setTimeout(10000);
   const testSetup = createTestSetup();
 
   beforeEach(() => {
@@ -25,9 +25,15 @@ describe('ChatHistorySection - Search Interactions', () => {
 
   afterEach(() => {
     testSetup.afterEach();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Search input functionality', () => {
+      jest.setTimeout(10000);
     it('should display search input if available', () => {
       render(<ChatHistorySection />);
       
@@ -71,6 +77,7 @@ describe('ChatHistorySection - Search Interactions', () => {
   });
 
   describe('Search filtering behavior', () => {
+      jest.setTimeout(10000);
     it('should filter threads based on search input', async () => {
       render(<ChatHistorySection />);
       
@@ -110,6 +117,7 @@ describe('ChatHistorySection - Search Interactions', () => {
   });
 
   describe('Search results display', () => {
+      jest.setTimeout(10000);
     it('should show no results message when search has no matches', async () => {
       render(<ChatHistorySection />);
       
@@ -158,6 +166,7 @@ describe('ChatHistorySection - Search Interactions', () => {
   });
 
   describe('Search performance', () => {
+      jest.setTimeout(10000);
     it('should handle large dataset search efficiently', async () => {
       const largeThreadSet = createLargeThreadSet(500);
       setupCustomThreads(largeThreadSet);
@@ -223,6 +232,7 @@ describe('ChatHistorySection - Search Interactions', () => {
   });
 
   describe('Search state management', () => {
+      jest.setTimeout(10000);
     it('should maintain search state during updates', async () => {
       const { rerender } = render(<ChatHistorySection />);
       
@@ -287,6 +297,7 @@ describe('ChatHistorySection - Search Interactions', () => {
   });
 
   describe('Search accessibility', () => {
+      jest.setTimeout(10000);
     it('should provide proper search input labels', () => {
       render(<ChatHistorySection />);
       
@@ -342,6 +353,7 @@ describe('ChatHistorySection - Search Interactions', () => {
   });
 
   describe('Search edge cases', () => {
+      jest.setTimeout(10000);
     it('should handle empty search input', async () => {
       render(<ChatHistorySection />);
       

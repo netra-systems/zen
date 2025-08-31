@@ -69,8 +69,7 @@ class TestHealthCheckersCore:
         return mock_manager, mock_client
     
     # Unit test with mocked dependencies
-    @mock_justified("L1 Unit Test: Mocking database manager to isolate health check logic. Real database connectivity tested in L3 integration tests.", "L1")
-    # Mock: Component isolation for testing without external dependencies
+        # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.db.database_manager.DatabaseManager')
     @pytest.mark.asyncio
     async def test_check_postgres_health_success(self, mock_db_manager_class, mock_postgres_engine):
@@ -94,8 +93,7 @@ class TestHealthCheckersCore:
         assert result.details["success"] is True
     
     # Unit test with mocked dependencies
-    @mock_justified("L1 Unit Test: Mocking database manager to test error handling paths. Real database testing in L3 integration tests.", "L1")
-    # Mock: Component isolation for testing without external dependencies
+        # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.db.database_manager.DatabaseManager')
     @pytest.mark.asyncio
     async def test_check_postgres_health_no_engine(self, mock_db_manager_class):
@@ -116,8 +114,7 @@ class TestHealthCheckersCore:
         assert "Connection failed" in error_msg or "Database engine not initialized" in error_msg
     
     # Unit test with mocked dependencies
-    @mock_justified("L1 Unit Test: Mocking postgres query execution to test connection failure scenarios.", "L1")
-    # Mock: Component isolation for testing without external dependencies
+        # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.core.health_checkers._execute_postgres_query')
     @pytest.mark.asyncio
     async def test_check_postgres_health_connection_error(self, mock_execute_query):
@@ -135,8 +132,7 @@ class TestHealthCheckersCore:
         assert "Connection failed" in error_msg
     
     # Unit test with mocked dependencies
-    @mock_justified("L1 Unit Test: Mocking ClickHouse client and environment detection to isolate health check logic. Real ClickHouse tested in L3 integration tests.", "L1")
-    # Mock: Component isolation for testing without external dependencies
+        # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.database.get_clickhouse_client')
     # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.core.health_checkers._is_development_mode')
@@ -157,8 +153,7 @@ class TestHealthCheckersCore:
         mock_clickhouse_client.execute.assert_called_once_with("SELECT 1")
     
     # Unit test with mocked dependencies
-    @mock_justified("L1 Unit Test: Mocking environment detection to test disabled ClickHouse scenario. Real environment testing in L3 integration tests.", "L1")
-    # Mock: Component isolation for testing without external dependencies
+        # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.core.health_checkers._is_development_mode')
     # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.core.health_checkers._is_clickhouse_disabled')
@@ -175,7 +170,6 @@ class TestHealthCheckersCore:
         assert "ClickHouse disabled in development" in result.details["reason"]
     
     # Unit test with direct error handler testing to avoid mock isolation issues
-    @mock_justified("L1 Unit Test: Direct testing of ClickHouse error handler logic to avoid complex mock isolation issues.", "L1")
     def test_check_clickhouse_health_connection_error_direct(self):
         """Test ClickHouse error handler directly with critical priority in non-development environment."""
         from netra_backend.app.core.health_checkers import _handle_clickhouse_error, ServicePriority
@@ -200,8 +194,7 @@ class TestHealthCheckersCore:
             assert "ClickHouse connection failed" in result.details["error_message"]
             assert result.response_time_ms == response_time
     
-    @mock_justified("L1 Unit Test: Mocking Redis manager to isolate health check logic. Real Redis connectivity tested in L3 integration tests.", "L1")
-    # Mock: Component isolation for testing without external dependencies
+        # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.redis_manager.redis_manager')
     @pytest.mark.asyncio
     async def test_check_redis_health_success(self, mock_manager, mock_redis_manager):
@@ -344,7 +337,6 @@ class TestHealthCheckersCore:
         assert "component_name" in result.details
         assert "success" in result.details
 
-    @mock_justified("L1 Unit Test: Mocking multiple dependencies to simulate cascading failures during major system outages. Critical for understanding system behavior during catastrophic infrastructure failures.", "L1")
     @patch('netra_backend.app.core.health_checkers.check_postgres_health')
     @patch('netra_backend.app.core.health_checkers.check_redis_health')
     @patch('netra_backend.app.core.health_checkers.check_clickhouse_health')

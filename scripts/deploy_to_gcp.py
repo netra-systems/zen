@@ -231,10 +231,27 @@ class GCPDeployer:
             print("     Set these variables before deploying to staging")
             return False
         
-        # Validate database URL format (prevent localhost in staging)
-        database_url = os.getenv("DATABASE_URL", "")
-        if "localhost" in database_url:
-            print("  ⚠️ DATABASE_URL contains localhost - will use staging default")
+        # CRITICAL: Validate no localhost URLs in staging/production
+        localhost_vars = []
+        url_vars_to_check = [
+            "API_URL", "NEXT_PUBLIC_API_URL", "BACKEND_URL",
+            "AUTH_URL", "NEXT_PUBLIC_AUTH_URL", "AUTH_SERVICE_URL", 
+            "FRONTEND_URL", "NEXT_PUBLIC_FRONTEND_URL",
+            "WS_URL", "NEXT_PUBLIC_WS_URL", "WEBSOCKET_URL", "NEXT_PUBLIC_WEBSOCKET_URL"
+        ]
+        
+        for var_name in url_vars_to_check:
+            var_value = os.getenv(var_name, "")
+            if "localhost" in var_value:
+                localhost_vars.append(f"{var_name}={var_value}")
+        
+        if localhost_vars:
+            print(f"  ❌ Found localhost URLs in {self.project_id} environment:")
+            for var in localhost_vars:
+                print(f"     {var}")
+            print("  This will cause CORS and authentication failures in staging!")
+            print("  Run: python scripts/validate_staging_urls.py --environment staging --fix")
+            return False
         
         print("  ✅ Deployment configuration valid")
         return True
@@ -248,6 +265,18 @@ class GCPDeployer:
             return False
         
         checks = [
+            {
+                "name": "MISSION CRITICAL: WebSocket Event Tests",
+                "command": [sys.executable, "-m", "pytest", "tests/mission_critical/test_final_validation.py", "-v"],
+                "required": True,
+                "critical": True  # This MUST pass or deployment is blocked
+            },
+            {
+                "name": "WebSocket Regression Prevention",
+                "command": [sys.executable, "-m", "pytest", "tests/mission_critical/test_websocket_agent_events_suite.py::TestRegressionPrevention", "-v"],
+                "required": True,
+                "critical": True
+            },
             {
                 "name": "Architecture Compliance",
                 "command": [sys.executable, "scripts/check_architecture_compliance.py"],
@@ -266,6 +295,8 @@ class GCPDeployer:
         ]
         
         all_passed = True
+        critical_failed = False
+        
         for check in checks:
             print(f"\n  Running {check['name']}...")
             try:
@@ -281,6 +312,16 @@ class GCPDeployer:
                     print(f"  ✅ {check['name']} passed")
                 else:
                     print(f"  ❌ {check['name']} failed")
+                    
+                    # Check if this is a critical failure
+                    if check.get("critical", False):
+                        print("\n" + "🚨" * 10)
+                        print("  CRITICAL FAILURE: WebSocket agent events not working!")
+                        print("  Basic chat functionality will be BROKEN in production!")
+                        print("  This MUST be fixed before ANY deployment!")
+                        print("🚨" * 10 + "\n")
+                        critical_failed = True
+                        
                     if check["required"]:
                         print(f"     Error: {result.stderr[:500]}")
                         all_passed = False
@@ -292,6 +333,13 @@ class GCPDeployer:
                 if check["required"]:
                     all_passed = False
                     
+        if critical_failed:
+            print("\n❌ MISSION CRITICAL tests failed!")
+            print("   WebSocket agent events are NOT working!")
+            print("   See DEPLOYMENT_CHECKLIST.md for troubleshooting.")
+            print("   See SPEC/learnings/websocket_agent_integration_critical.xml for fix details.")
+            return False
+            
         if not all_passed:
             print("\n❌ Required checks failed. Please fix issues before deploying.")
             print("   See SPEC/gcp_deployment.xml for deployment guidelines.")
@@ -621,14 +669,14 @@ CMD ["npm", "start"]
             # Backend needs connections to databases and all required secrets from GSM
             cmd.extend([
                 "--add-cloudsql-instances", f"{self.project_id}:us-central1:staging-shared-postgres,{self.project_id}:us-central1:netra-postgres",
-                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,SECRET_KEY=secret-key-staging:latest,OPENAI_API_KEY=openai-api-key-staging:latest,FERNET_KEY=fernet-key-staging:latest,GEMINI_API_KEY=gemini-api-key-staging:latest,GOOGLE_OAUTH_CLIENT_ID_STAGING=google-oauth-client-id-staging:latest,GOOGLE_OAUTH_CLIENT_SECRET_STAGING=google-oauth-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,CLICKHOUSE_USER=clickhouse-user-staging:latest,CLICKHOUSE_DB=clickhouse-db-staging:latest,CLICKHOUSE_PASSWORD=clickhouse-password-staging:latest,REDIS_URL=redis-url-staging:latest,REDIS_PASSWORD=redis-password-staging:latest,CLICKHOUSE_HOST=clickhouse-host-staging:latest,CLICKHOUSE_PORT=clickhouse-port-staging:latest,CLICKHOUSE_URL=clickhouse-url-staging:latest,ANTHROPIC_API_KEY=anthropic-api-key-staging:latest"
+                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_STAGING=jwt-secret-staging:latest,SECRET_KEY=secret-key-staging:latest,OPENAI_API_KEY=openai-api-key-staging:latest,FERNET_KEY=fernet-key-staging:latest,GEMINI_API_KEY=gemini-api-key-staging:latest,GOOGLE_OAUTH_CLIENT_ID_STAGING=google-oauth-client-id-staging:latest,GOOGLE_OAUTH_CLIENT_SECRET_STAGING=google-oauth-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,CLICKHOUSE_USER=clickhouse-user-staging:latest,CLICKHOUSE_DB=clickhouse-db-staging:latest,CLICKHOUSE_PASSWORD=clickhouse-password-staging:latest,REDIS_URL=redis-url-staging:latest,REDIS_PASSWORD=redis-password-staging:latest,CLICKHOUSE_HOST=clickhouse-host-staging:latest,CLICKHOUSE_PORT=clickhouse-port-staging:latest,CLICKHOUSE_URL=clickhouse-url-staging:latest,ANTHROPIC_API_KEY=anthropic-api-key-staging:latest"
             ])
         elif service.name == "auth":
             # Auth service needs database, JWT secrets, OAuth credentials from GSM only
             # CRITICAL FIX: Use correct OAuth environment variable names expected by auth service
             cmd.extend([
                 "--add-cloudsql-instances", f"{self.project_id}:us-central1:staging-shared-postgres,{self.project_id}:us-central1:netra-postgres",
-                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,JWT_SECRET=jwt-secret-staging:latest,GOOGLE_OAUTH_CLIENT_ID_STAGING=google-oauth-client-id-staging:latest,GOOGLE_OAUTH_CLIENT_SECRET_STAGING=google-oauth-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,SERVICE_ID=service-id-staging:latest,OAUTH_HMAC_SECRET=oauth-hmac-secret-staging:latest,REDIS_URL=redis-url-staging:latest,REDIS_PASSWORD=redis-password-staging:latest"
+                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_STAGING=jwt-secret-staging:latest,GOOGLE_OAUTH_CLIENT_ID_STAGING=google-oauth-client-id-staging:latest,GOOGLE_OAUTH_CLIENT_SECRET_STAGING=google-oauth-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,SERVICE_ID=service-id-staging:latest,OAUTH_HMAC_SECRET=oauth-hmac-secret-staging:latest,REDIS_URL=redis-url-staging:latest,REDIS_PASSWORD=redis-password-staging:latest"
             ])
         
         try:
@@ -942,12 +990,11 @@ CMD ["npm", "start"]
             "postgres-db-staging": "netra_dev",
             "postgres-user-staging": "postgres",
             "postgres-password-staging": "qNdlZRHu(Mlc#)6K8LHm-lYi[7sc}25K",  # version 2
-            "jwt-secret-key-staging": jwt_secret_value,  # Backend uses JWT_SECRET_KEY
             "secret-key-staging": "your-secure-secret-key-for-backend-staging-32-chars-minimum-required",  # Backend SECRET_KEY
             "session-secret-key-staging": "your-secure-session-secret-key-staging-32-chars-minimum", 
             "openai-api-key-staging": "sk-REPLACE_WITH_REAL_OPENAI_KEY",
             "fernet-key-staging": "REPLACE_WITH_REAL_FERNET_KEY_BASE64_32_BYTES",
-            "jwt-secret-staging": jwt_secret_value,  # Auth service uses JWT_SECRET - MUST BE SAME VALUE!
+            "jwt-secret-staging": jwt_secret_value,  # Both backend and auth service use JWT_SECRET_STAGING
             # TOMBSTONE: google-client-id-staging and google-client-secret-staging
             # These should be configured using environment-specific OAuth variables
             "google-oauth-client-id-staging": os.getenv("GOOGLE_OAUTH_CLIENT_ID_STAGING", "REPLACE_WITH_REAL_OAUTH_CLIENT_ID"),

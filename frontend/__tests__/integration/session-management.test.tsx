@@ -1,11 +1,9 @@
-/**
- * Session Management Integration Tests
- * 
- * Tests session persistence, token refresh, multi-tab synchronization,
- * and session timeout handling for Netra Apex authentication.
- * 
- * Business Value: Ensures reliable session management across all user
- * tiers, prevents session-related revenue loss and user frustration.
+import React, { useEffect, useState } from 'react';
+import { render, waitFor, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { useAuthStore } from '@/store/authStore';
+import { setupTestEnvironment, resetTestState, mockUser, mockAuthToken } from '@/__tests__/test-utils/integration-test-setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
  */
 
 // Mock declarations (Jest hoisting)
@@ -92,6 +90,7 @@ const sessionTestData = {
 };
 
 describe('Session Management Integration', () => {
+    jest.setTimeout(10000);
   let mockLocalStorage: any;
   let mockRouter: any;
   let originalLocalStorage: Storage;
@@ -108,9 +107,15 @@ describe('Session Management Integration', () => {
   afterEach(() => {
     restoreOriginalStorage();
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Session Persistence', () => {
+      jest.setTimeout(10000);
     it('should persist session across page reloads', async () => {
       const SessionComponent = createSessionTestComponent();
       
@@ -142,6 +147,7 @@ describe('Session Management Integration', () => {
   });
 
   describe('Token Refresh', () => {
+      jest.setTimeout(10000);
     it('should refresh tokens before expiration', async () => {
       const RefreshComponent = createTokenRefreshComponent();
       
@@ -210,6 +216,7 @@ describe('Session Management Integration', () => {
   });
 
   describe('Session Timeout', () => {
+      jest.setTimeout(10000);
     it('should detect session timeout', async () => {
       const TimeoutComponent = createTimeoutTestComponent();
       

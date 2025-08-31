@@ -44,6 +44,33 @@ from dev_launcher.utils import check_emoji_support, print_with_emoji
 from dev_launcher.websocket_validator import WebSocketValidator
 from dev_launcher.windows_process_manager import WindowsProcessManager
 
+# Import enhanced process cleanup utilities
+try:
+    from shared.enhanced_process_cleanup import (
+        EnhancedProcessCleanup,
+        cleanup_subprocess,
+        track_subprocess,
+        get_cleanup_instance
+    )
+    cleanup_manager = get_cleanup_instance()
+    WindowsProcessCleanup = EnhancedProcessCleanup  # Compatibility alias
+except ImportError:
+    # Fall back to basic Windows cleanup
+    if sys.platform == "win32":
+        try:
+            from shared.windows_process_cleanup import WindowsProcessCleanup
+            cleanup_manager = None
+            cleanup_subprocess = lambda p, t=10: True
+            track_subprocess = lambda p: None
+        except ImportError:
+            WindowsProcessCleanup = None
+            cleanup_manager = None
+    else:
+        WindowsProcessCleanup = None
+        cleanup_manager = None
+        cleanup_subprocess = lambda p, t=10: True
+        track_subprocess = lambda p: None
+
 # Configure unified logging for dev launcher
 configure_service_logging({
     'service_name': 'dev-launcher',
@@ -115,11 +142,19 @@ class DevLauncher:
         self.race_condition_manager = RaceConditionManager()
         self.signal_handler = SignalHandler()
         
-        # Initialize Windows-specific process manager if on Windows
+        # Initialize Windows-specific process managers if on Windows
         if sys.platform == "win32":
             self.windows_process_manager = WindowsProcessManager()
+            # Initialize Windows cleanup utility if available
+            if WindowsProcessCleanup:
+                self.windows_cleanup = WindowsProcessCleanup()
+                # Register cleanup handler for process exit
+                self.windows_cleanup.register_cleanup_handler()
+            else:
+                self.windows_cleanup = None
         else:
             self.windows_process_manager = None
+            self.windows_cleanup = None
     
     def _setup_components(self):
         """Setup component instances."""
@@ -369,6 +404,16 @@ class DevLauncher:
                         terminated_services.append(service_name)
                     except Exception as e:
                         logger.error(f"Failed to force kill {service_name}: {e}")
+                
+                # Clean up any hanging Node.js processes on Windows after frontend termination
+                if service_name == "frontend" and sys.platform == "win32" and WindowsProcessCleanup:
+                    try:
+                        cleanup_instance = WindowsProcessCleanup() if not hasattr(self, 'windows_cleanup') else self.windows_cleanup
+                        cleaned = cleanup_instance.cleanup_node_processes()
+                        if cleaned > 0:
+                            self._print("🧹", "CLEANUP", f"Cleaned {cleaned} hanging Node.js processes")
+                    except Exception as e:
+                        logger.debug(f"Node.js cleanup error: {e}")
                 
                 # Brief pause between service terminations to allow clean shutdown
                 if service_name != services_order[-1][0]:  # Don't wait after last service

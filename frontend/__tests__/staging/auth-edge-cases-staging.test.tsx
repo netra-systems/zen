@@ -15,6 +15,7 @@ import { jest } from '@jest/globals';
 import { authService } from '@/auth/service';
 import { authInterceptor } from '@/lib/auth-interceptor';
 import { unifiedAuthService } from '@/lib/unified-auth-service';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Test environment validation
 if (process.env.NODE_ENV !== 'test' && process.env.NEXT_PUBLIC_ENVIRONMENT !== 'staging') {
@@ -22,6 +23,8 @@ if (process.env.NODE_ENV !== 'test' && process.env.NEXT_PUBLIC_ENVIRONMENT !== '
 }
 
 describe('Authentication Edge Cases - Staging Environment', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   let mockFetch: jest.MockedFunction<typeof fetch>;
   const originalLocation = window.location;
 
@@ -44,9 +47,17 @@ describe('Authentication Edge Cases - Staging Environment', () => {
   afterEach(() => {
     window.location = originalLocation;
     jest.restoreAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Expired Token Scenarios', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should detect and handle truly expired tokens', async () => {
       // Token with past expiration (expired 1 hour ago)
       const expiredTime = Math.floor(Date.now() / 1000) - 3600;
@@ -141,6 +152,8 @@ describe('Authentication Edge Cases - Staging Environment', () => {
   });
 
   describe('Invalid Token Rejection', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should reject malformed JWT tokens', () => {
       const malformedTokens = [
         'not-a-jwt-token',
@@ -220,6 +233,8 @@ describe('Authentication Edge Cases - Staging Environment', () => {
   });
 
   describe('Network Failure Recovery', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should handle network connectivity issues during auth', async () => {
       localStorage.setItem('jwt_token', 'some-token');
 
@@ -279,6 +294,8 @@ describe('Authentication Edge Cases - Staging Environment', () => {
   });
 
   describe('Concurrent Request Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should handle multiple simultaneous authenticated requests', async () => {
       const validToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiZW1haWwiOiJ0ZXN0QGV4YW1wbGUuY29tIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjk5OTk5OTk5OTl9.Lmb5qHhYXKLMfCgH1FoWm4GKuJzD4MkX9sEfH0a6N7Q';
       localStorage.setItem('jwt_token', validToken);
@@ -365,6 +382,8 @@ describe('Authentication Edge Cases - Staging Environment', () => {
   });
 
   describe('Rate Limiting and Retry Logic', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should handle 429 rate limiting responses', async () => {
       localStorage.setItem('jwt_token', 'valid-token');
 
@@ -431,6 +450,8 @@ describe('Authentication Edge Cases - Staging Environment', () => {
   });
 
   describe('Cross-Origin and Security Edge Cases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should handle CORS preflight failures', async () => {
       localStorage.setItem('jwt_token', 'valid-token');
 
@@ -484,6 +505,8 @@ describe('Authentication Edge Cases - Staging Environment', () => {
   });
 
   describe('Browser Compatibility Edge Cases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should handle localStorage unavailability', () => {
       // Mock localStorage being unavailable
       const originalLocalStorage = window.localStorage;
@@ -554,6 +577,8 @@ describe('Authentication Edge Cases - Staging Environment', () => {
   });
 
   describe('Memory Leak Prevention', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should clean up event listeners on auth context unmount', () => {
       // Mock event listener tracking
       const addEventListenerSpy = jest.spyOn(window, 'addEventListener');

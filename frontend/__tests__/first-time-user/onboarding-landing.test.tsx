@@ -1,9 +1,9 @@
-/**
- * First-Time User Landing Page Tests - Business Critical
- * 
- * BUSINESS VALUE JUSTIFICATION:
- * - Segment: Free → Early (Critical first impression)
- * - Business Goal: Optimize landing page conversion rate
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ landing page conversion rate
  * - Value Impact: 5% improvement = $50K+ annually
  * - Revenue Impact: First impression drives 30% of conversions
  * 
@@ -47,6 +47,7 @@ setupNextJSMocks();
 setupAuthMocks();
 
 describe('First-Time User Landing Page Tests', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     setupCleanState();
     setupSimpleWebSocketMock();
@@ -56,9 +57,15 @@ describe('First-Time User Landing Page Tests', () => {
   afterEach(() => {
     clearAuthState();
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Initial Landing Experience', () => {
+      jest.setTimeout(10000);
     it('renders login page with clear value proposition', async () => {
       await renderLoginPage();
       
@@ -104,6 +111,7 @@ describe('First-Time User Landing Page Tests', () => {
   });
 
   describe('Mobile Responsive Experience', () => {
+      jest.setTimeout(10000);
     it('adapts login page for mobile viewport', async () => {
       mockViewport(375, 667); // iPhone SE
       await renderLoginPage();
@@ -132,6 +140,7 @@ describe('First-Time User Landing Page Tests', () => {
   });
 
   describe('Performance and Loading States', () => {
+      jest.setTimeout(10000);
     it('loads login page under 2 seconds', async () => {
       const loadTime = await measurePerformance(async () => {
         await renderLoginPage();
@@ -167,6 +176,7 @@ describe('First-Time User Landing Page Tests', () => {
   });
 
   describe('Visual Design and UX', () => {
+      jest.setTimeout(10000);
     it('centers content for professional appearance', async () => {
       await renderLoginPage();
       

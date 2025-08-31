@@ -12,6 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { LoginButton } from '@/auth/components';
 import { authService } from '@/auth/unified-auth-service';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock auth service
 jest.mock('@/auth/service');
@@ -50,6 +51,8 @@ Object.defineProperty(document, 'cookie', {
 });
 
 describe('Logout Flow and Cleanup Tests', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   const mockLogin = jest.fn();
   const mockLogout = jest.fn();
   
@@ -85,6 +88,8 @@ describe('Logout Flow and Cleanup Tests', () => {
   });
 
   describe('Basic Logout Flow', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should trigger logout when button clicked', async () => {
       jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
@@ -181,6 +186,8 @@ describe('Logout Flow and Cleanup Tests', () => {
   });
 
   describe('Development Mode Logout', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle dev mode logout with flag setting', async () => {
       jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
@@ -284,6 +291,8 @@ describe('Logout Flow and Cleanup Tests', () => {
   });
 
   describe('Logout Error Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle logout service errors gracefully', async () => {
       mockLogout.mockRejectedValueOnce(new Error('Logout service error'));
       
@@ -370,6 +379,8 @@ describe('Logout Flow and Cleanup Tests', () => {
   });
 
   describe('Session Data Cleanup', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should clear user data on logout', async () => {
       jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
@@ -470,6 +481,8 @@ describe('Logout Flow and Cleanup Tests', () => {
   });
 
   describe('Multiple Session Logout', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle rapid logout attempts', async () => {
       jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
@@ -571,4 +584,8 @@ describe('Logout Flow and Cleanup Tests', () => {
       expect(screen.queryByText('Test User')).not.toBeInTheDocument();
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

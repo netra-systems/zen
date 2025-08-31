@@ -14,6 +14,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { getUnifiedApiConfig } from '@/lib/unified-api-config';
 import { apiClient } from '@/services/apiClientWrapper';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock Next.js router and environment
 jest.mock('next/navigation', () => ({
@@ -29,6 +30,8 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('GCP Staging Issues Replication', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   const originalEnv = process.env;
   const originalFetch = global.fetch;
 
@@ -52,6 +55,12 @@ describe('GCP Staging Issues Replication', () => {
   afterEach(() => {
     global.fetch = originalFetch;
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   afterAll(() => {
@@ -59,6 +68,8 @@ describe('GCP Staging Issues Replication', () => {
   });
 
   describe('Issue #1: API Proxy Configuration Failures', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: Frontend incorrectly trying to use localhost:8000 URLs in staging
@@ -139,6 +150,8 @@ describe('GCP Staging Issues Replication', () => {
   });
 
   describe('Issue #2: Missing Health Endpoints (404 errors)', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: Health endpoints return 404 in staging
@@ -215,6 +228,8 @@ describe('GCP Staging Issues Replication', () => {
   });
 
   describe('Issue #3: Missing API Routes (404 errors)', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: /api/config/public endpoint returns 404
@@ -286,6 +301,8 @@ describe('GCP Staging Issues Replication', () => {
   });
 
   describe('Issue #4: Missing Static Assets', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: favicon.ico returns 404 in staging
@@ -325,6 +342,8 @@ describe('GCP Staging Issues Replication', () => {
   });
 
   describe('Additional Staging Configuration Issues', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: Environment detection might be incorrect

@@ -81,6 +81,95 @@ export const mapPartialResultPayload = (backendPayload: any) => {
 };
 
 /**
+ * Maps backend agent_registered payload to frontend expected structure
+ */
+export const mapAgentRegisteredPayload = (backendPayload: any) => {
+  return {
+    agent_id: backendPayload.agent_id,
+    agent_type: backendPayload.agent_type || 'unknown',
+    timestamp: backendPayload.timestamp || Date.now(),
+    status: 'registered',
+    message: `Agent ${backendPayload.agent_id} registered`
+  };
+};
+
+/**
+ * Maps backend agent_failed payload to frontend expected structure
+ */
+export const mapAgentFailedPayload = (backendPayload: any) => {
+  return {
+    agent_id: backendPayload.agent_id || backendPayload.agent_name,
+    agent_type: backendPayload.agent_type || backendPayload.agent_name,
+    error: backendPayload.error || backendPayload.message,
+    timestamp: backendPayload.timestamp || Date.now(),
+    status: 'failed'
+  };
+};
+
+/**
+ * Maps backend agent_cancelled payload to frontend expected structure
+ */
+export const mapAgentCancelledPayload = (backendPayload: any) => {
+  return {
+    agent_id: backendPayload.agent_id || backendPayload.agent_name,
+    agent_type: backendPayload.agent_type || backendPayload.agent_name,
+    reason: backendPayload.reason || 'User cancelled',
+    timestamp: backendPayload.timestamp || Date.now(),
+    status: 'cancelled'
+  };
+};
+
+/**
+ * Maps backend agent_metrics_updated payload to frontend expected structure
+ */
+export const mapAgentMetricsUpdatedPayload = (backendPayload: any) => {
+  return {
+    agent_id: backendPayload.agent_id || backendPayload.agent_name,
+    agent_type: backendPayload.agent_type || backendPayload.agent_name,
+    metrics: backendPayload.metrics || {},
+    timestamp: backendPayload.timestamp || Date.now()
+  };
+};
+
+/**
+ * Maps backend agent_unregistered payload to frontend expected structure
+ */
+export const mapAgentUnregisteredPayload = (backendPayload: any) => {
+  return {
+    agent_id: backendPayload.agent_id,
+    agent_type: backendPayload.agent_type || 'unknown',
+    timestamp: backendPayload.timestamp || Date.now(),
+    status: 'unregistered',
+    message: `Agent ${backendPayload.agent_id} unregistered`
+  };
+};
+
+/**
+ * Maps backend agent_status_changed payload to frontend expected structure
+ */
+export const mapAgentStatusChangedPayload = (backendPayload: any) => {
+  return {
+    agent_id: backendPayload.agent_id || backendPayload.agent_name,
+    agent_type: backendPayload.agent_type || backendPayload.agent_name,
+    old_status: backendPayload.old_status,
+    new_status: backendPayload.new_status,
+    timestamp: backendPayload.timestamp || Date.now()
+  };
+};
+
+/**
+ * Maps backend agent_manager_shutdown payload to frontend expected structure
+ */
+export const mapAgentManagerShutdownPayload = (backendPayload: any) => {
+  return {
+    reason: backendPayload.reason || 'System shutdown',
+    timestamp: backendPayload.timestamp || Date.now(),
+    active_agents_count: backendPayload.active_agents_count || 0,
+    message: 'Agent manager shutting down'
+  };
+};
+
+/**
  * Main payload mapper - routes events to specific mappers
  */
 export const mapEventPayload = (eventType: string, backendPayload: any) => {
@@ -90,7 +179,14 @@ export const mapEventPayload = (eventType: string, backendPayload: any) => {
     'agent_thinking': mapAgentThinkingPayload,
     'tool_executing': mapToolExecutingPayload,
     'tool_completed': mapToolCompletedPayload,
-    'partial_result': mapPartialResultPayload
+    'partial_result': mapPartialResultPayload,
+    'agent_registered': mapAgentRegisteredPayload,
+    'agent_failed': mapAgentFailedPayload,
+    'agent_cancelled': mapAgentCancelledPayload,
+    'agent_metrics_updated': mapAgentMetricsUpdatedPayload,
+    'agent_unregistered': mapAgentUnregisteredPayload,
+    'agent_status_changed': mapAgentStatusChangedPayload,
+    'agent_manager_shutdown': mapAgentManagerShutdownPayload
   };
   
   const mapper = mappers[eventType];

@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<audit_specification>
+  <meta>
+    <title>Unused Code Detection Audit</title>
+    <purpose>Identify all defined but never called functions, methods, and event handlers</purpose>
+    <created>2025-08-30</created>
+    <priority>CRITICAL</priority>
+  </meta>
+
+  <scope>
+    <description>
+      Comprehensive audit to detect "orphaned" code - functions, methods, classes, and event handlers
+      that are defined but never invoked anywhere in the codebase. This includes:
+      - WebSocket event emitters that are never triggered
+      - API endpoints with no routes
+      - Database methods with no callers
+      - Utility functions that are unused
+      - Event handlers with no corresponding emitters
+    </description>
+  </scope>
+
+  <audit_targets>
+    <target priority="CRITICAL">
+      <name>WebSocket Event Chain</name>
+      <locations>
+        <backend>/netra_backend/app/services/websocket_manager.py</backend>
+        <backend>/netra_backend/app/services/agent_manager.py</backend>
+        <backend>/netra_backend/app/services/agent_registry.py</backend>
+        <frontend>/frontend/src/services/websocket.js</frontend>
+        <frontend>/frontend/src/stores/agentStore.js</frontend>
+      </locations>
+      <patterns>
+        <emitter>notify_.*\(|emit\(|send_json\(|broadcast\(</emitter>
+        <handler>on\(|addEventListener\(|handle.*Event</handler>
+      </patterns>
+    </target>
+
+    <target priority="HIGH">
+      <name>API Endpoints</name>
+      <locations>
+        <backend>/netra_backend/app/api/</backend>
+        <backend>/auth_service/app/api/</backend>
+      </locations>
+      <patterns>
+        <definition>@router\.|@app\.|\.post\(|\.get\(|\.put\(|\.delete\(</definition>
+        <usage>fetch\(|axios\.|api\.|http\.</usage>
+      </patterns>
+    </target>
+
+    <target priority="HIGH">
+      <name>Database Operations</name>
+      <locations>
+        <backend>/netra_backend/app/services/database_manager.py</backend>
+        <backend>/netra_backend/app/repositories/</backend>
+      </locations>
+      <patterns>
+        <definition>async def .*\(.*db.*\)|def .*query|def .*insert|def .*update</definition>
+        <usage>await .*\(|\.query\(|\.execute\(</usage>
+      </patterns>
+    </target>
+
+    <target priority="MEDIUM">
+      <name>Service Methods</name>
+      <locations>
+        <backend>/netra_backend/app/services/</backend>
+        <auth>/auth_service/app/services/</auth>
+      </locations>
+      <patterns>
+        <definition>def |async def </definition>
+        <exclude>__init__|__.*__</exclude>
+      </patterns>
+    </target>
+
+    <target priority="MEDIUM">
+      <name>Frontend Store Actions</name>
+      <locations>
+        <frontend>/frontend/src/stores/</frontend>
+      </locations>
+      <patterns>
+        <definition>action\(|\.define\(|export const.*=</definition>
+        <usage>dispatch\(|store\.|useStore\(</usage>
+      </patterns>
+    </target>
+  </audit_targets>
+
+  <detection_rules>
+    <rule id="R001">
+      <name>Orphaned Function Detection</name>
+      <description>Find functions defined but never called</description>
+      <algorithm>
+        1. Extract all function/method definitions
+        2. Search for all invocations of each function
+        3. Flag functions with zero invocations (excluding entry points)
+      </algorithm>
+    </rule>
+
+    <rule id="R002">
+      <name>WebSocket Event Asymmetry</name>
+      <description>Find WebSocket events that are emitted but not handled, or vice versa</description>
+      <algorithm>
+        1. Map all WebSocket emit calls in backend
+        2. Map all WebSocket event listeners in frontend
+        3. Identify mismatches where events are sent but not received
+        4. Identify handlers waiting for events that are never sent
+      </algorithm>
+    </rule>
+
+    <rule id="R003">
+      <name>Dead Import Detection</name>
+      <description>Find imported modules/functions that are never used</description>
+      <algorithm>
+        1. Parse all import statements
+        2. Search for usage of imported items in the file
+        3. Flag imports with no references
+      </algorithm>
+    </rule>
+
+    <rule id="R004">
+      <name>Unreachable Code Paths</name>
+      <description>Find code blocks that can never be executed</description>
+      <algorithm>
+        1. Analyze control flow
+        2. Identify conditions that are always false
+        3. Find code after unconditional returns
+      </algorithm>
+    </rule>
+
+    <rule id="R005">
+      <name>Circular Reference Detection</name>
+      <description>Find circular dependencies that might hide unused code</description>
+      <algorithm>
+        1. Build dependency graph
+        2. Detect cycles
+        3. Analyze if cycles are actually used
+      </algorithm>
+    </rule>
+  </detection_rules>
+
+  <known_issues>
+    <issue>
+      <type>WebSocket Events Not Sent</type>
+      <description>
+        Backend WebSocket manager has methods defined for:
+        - agent_thinking
+        - partial_result
+        - tool_executing
+        - tool_completed
+        - final_report
+        But these are never called during agent execution
+      </description>
+      <impact>Frontend receives no real-time updates during agent operations</impact>
+    </issue>
+  </known_issues>
+
+  <audit_outputs>
+    <report>
+      <format>JSON</format>
+      <structure>
+        {
+          "timestamp": "ISO-8601",
+          "summary": {
+            "total_unused_functions": 0,
+            "total_missing_connections": 0,
+            "critical_issues": []
+          },
+          "findings": [
+            {
+              "type": "unused_function|missing_event|dead_import",
+              "severity": "CRITICAL|HIGH|MEDIUM|LOW",
+              "location": {
+                "file": "path",
+                "line": 0,
+                "function": "name"
+              },
+              "description": "string",
+              "suggested_action": "string"
+            }
+          ],
+          "websocket_analysis": {
+            "backend_events_defined": [],
+            "backend_events_emitted": [],
+            "frontend_handlers_defined": [],
+            "missing_emissions": [],
+            "orphaned_handlers": []
+          }
+        }
+      </structure>
+    </report>
+  </audit_outputs>
+
+  <execution_plan>
+    <step order="1">
+      <action>Run AST-based static analysis</action>
+      <tool>Python AST parser for Python files</tool>
+      <tool>TypeScript parser for JS/TS files</tool>
+    </step>
+    <step order="2">
+      <action>Perform grep-based usage search</action>
+      <tool>ripgrep with context</tool>
+    </step>
+    <step order="3">
+      <action>Cross-reference findings</action>
+      <tool>Custom correlation script</tool>
+    </step>
+    <step order="4">
+      <action>Generate report</action>
+      <output>audit_report_unused_code.json</output>
+    </step>
+  </execution_plan>
+</audit_specification>

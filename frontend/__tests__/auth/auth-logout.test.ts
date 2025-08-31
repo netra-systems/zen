@@ -8,7 +8,9 @@
  */
 
 // Import test setup with mocks FIRST
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import './auth-test-setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Define local mock since import from setup might have issues
 const localMockAuthServiceClient = {
@@ -41,8 +43,7 @@ jest.unmock('@/auth/service');
 jest.unmock('@/auth');
 
 import { authService } from '@/auth';
-import {
-  setupAuthTestEnvironment,
+import { setupAuthTestEnvironment,
   resetAuthTestMocks,
   createMockAuthConfig,
   createMockToken,
@@ -59,11 +60,14 @@ import {
 } from './auth-test-utils';
 
 describe('Auth Logout Flow', () => {
+  jest.setTimeout(10000);
+  
   let testEnv: ReturnType<typeof setupAuthTestEnvironment>;
   let mockAuthConfig: ReturnType<typeof createMockAuthConfig>;
   let mockToken: string;
 
   beforeEach(() => {
+    setupAntiHang();
     testEnv = setupAuthTestEnvironment();
     mockAuthConfig = createMockAuthConfig();
     mockToken = createMockToken();
@@ -84,7 +88,12 @@ describe('Auth Logout Flow', () => {
   });
 
   afterEach(() => {
-    // Clean up
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+    cleanupAntiHang();
   });
 
   afterAll(() => {

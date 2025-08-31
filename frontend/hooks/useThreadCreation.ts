@@ -13,7 +13,7 @@ import { ThreadService } from '@/services/threadService';
 import { useThreadSwitching } from './useThreadSwitching';
 import { createThreadCreatedEvent } from '@/utils/threadEventHandler';
 import { useUnifiedChatStore } from '@/store/unified-chat';
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 
 /**
  * Thread creation state

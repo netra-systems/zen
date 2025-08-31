@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useChatStore } from '@/store/chat';
 import { useThreadStore } from '@/store/threadStore';
@@ -102,8 +102,8 @@ export const useKeyboardShortcuts = () => {
     }
   }, [messages]);
 
-  // Define shortcuts
-  const shortcuts: ShortcutHandler[] = [
+  // Define shortcuts with useMemo for stability
+  const shortcuts: ShortcutHandler[] = useMemo(() => [
     // Navigation
     { key: 'k', ctrl: true, handler: openCommandPalette, description: 'Open command palette' },
     { key: 'b', ctrl: true, handler: toggleSidebar, description: 'Toggle sidebar' },
@@ -132,7 +132,7 @@ export const useKeyboardShortcuts = () => {
       const event = new CustomEvent('toggleDebugPanel');
       window.dispatchEvent(event);
     }, description: 'Toggle debug panel' },
-  ];
+  ], [openCommandPalette, toggleSidebar, navigateThread, isProcessing, setProcessing, focusMessageInput, copyLastMessage, scrollMessages, toggleCompactMode, router]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -176,7 +176,7 @@ export const useKeyboardShortcuts = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [shortcuts, focusMessageInput, isProcessing]);
+  }, [shortcuts]);
 
   return {
     shortcuts,

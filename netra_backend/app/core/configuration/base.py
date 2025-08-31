@@ -204,13 +204,20 @@ class UnifiedConfigManager:
         **CRITICAL**: This is the ONLY way to access configuration.
         All other access methods are deprecated.
         """
-        # CRITICAL TEST INTEGRATION: Disable caching in test context
-        # This ensures test environment changes are immediately reflected
+        # CRITICAL TEST INTEGRATION: Use time-based cache invalidation in test context
+        # This ensures test environment changes are reflected while maintaining performance
         if self._is_test_context():
-            # Clear all caches to ensure fresh configuration load
-            self._clear_all_caches()
-            # Always reload configuration in test context
-            return self._load_complete_configuration()
+            # Check if cache is stale (invalidate every 30 seconds instead of every request)
+            if (self._config_cache is None or 
+                self._load_timestamp is None or 
+                (datetime.now() - self._load_timestamp).total_seconds() > 30):
+                # Clear all caches only when stale
+                self._clear_all_caches()
+                # Reload configuration
+                return self._load_complete_configuration()
+            
+            # Return cached config if still fresh
+            return self._config_cache
         
         # Use caching for non-test environments
         if self._config_cache is None:

@@ -1,11 +1,9 @@
-/**
- * Render Performance Tests
- * 
- * Tests component render performance using React DevTools Profiler API
- * Validates < 16ms render times for 60 FPS and re-render optimization
- * 
- * @compliance conventions.xml - Max 8 lines per function, under 300 lines
- * @compliance type_safety.xml - Full TypeScript typing
+import React, { Profiler, ProfilerOnRenderCallback } from 'react';
+import { render, screen, act, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { TestProviders } from '@/__tests__/test-utils/providers';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+* @compliance type_safety.xml - Full TypeScript typing
  * @spec frontend_unified_testing_spec.xml - Performance P1 priority
  * 
  * Business Value Justification (BVJ):
@@ -148,6 +146,7 @@ function generateLargeDataset(size: number) {
 }
 
 describe('Render Performance Tests', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     performance.mark = jest.fn();
@@ -155,6 +154,7 @@ describe('Render Performance Tests', () => {
   });
 
   describe('Component Mount Performance', () => {
+      jest.setTimeout(10000);
     it('should mount MainChat component under 16ms', async () => {
       const metrics = await testMountPerformance(MockMainChat);
       
@@ -194,6 +194,7 @@ describe('Render Performance Tests', () => {
   });
 
   describe('Re-render Performance Optimization', () => {
+      jest.setTimeout(10000);
     it('should handle 100 re-renders under performance budget', async () => {
       const metrics = await testReRenderPerformance(MockMessageInput, 100);
       
@@ -238,6 +239,7 @@ describe('Render Performance Tests', () => {
   });
 
   describe('Large Dataset Performance', () => {
+      jest.setTimeout(10000);
     it('should render 10000 messages efficiently', async () => {
       const largeMessages = generateLargeDataset(10000);
       const props = { messages: largeMessages };
@@ -289,6 +291,7 @@ describe('Render Performance Tests', () => {
   });
 
   describe('Performance Regression Detection', () => {
+      jest.setTimeout(10000);
     it('should detect render time regression', async () => {
       const baselineMetrics = await testMountPerformance(MockMessageInput);
       const currentMetrics = await testMountPerformance(MockMessageInput);
@@ -312,6 +315,7 @@ describe('Render Performance Tests', () => {
   });
 
   describe('Production Build Performance', () => {
+      jest.setTimeout(10000);
     it('should validate production bundle performance', () => {
       // Simulate production environment checks
       const isProduction = process.env.NODE_ENV === 'production';

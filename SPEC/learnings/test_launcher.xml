@@ -1,0 +1,560 @@
+<?xml version='1.0' encoding='utf-8'?>
+<learnings category="test-launcher" priority="high">
+  <metadata>
+    <last_edited>2025-08-30T10:00:00.000000</last_edited>
+    <legacy_status is_legacy="false">
+      <reasons>
+        <reason>Comprehensive documentation of test launcher architecture and design decisions</reason>
+        <reason>Key differences from dev launcher implementation</reason>
+        <reason>Test profile system and isolation strategies</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
+  <title>Test Launcher Architecture and Implementation Learnings</title>
+  <description>Complete guide to the test-focused launcher implementation, covering architecture decisions, profile system, service management, and migration strategies from dev_launcher</description>
+  <last_updated>2025-08-30</last_updated>
+
+  <section name="Architecture Overview">
+    <learning id="test-focused-design-principles">
+      <problem>Need for testing-optimized launcher separate from development environment launcher</problem>
+      <solution>
+        Created dedicated test_launcher package with:
+        - TestLauncher class optimized for CI/CD and automated testing
+        - Test profile system (unit, integration, e2e, performance, security, smoke, full)
+        - Service isolation levels (none, partial, full)
+        - Enhanced environment management for test scenarios
+      </solution>
+      <rationale>
+        Separating test and dev launchers provides:
+        1. Clear separation of concerns between development and testing
+        2. Optimized performance for automated test execution
+        3. Reduced complexity in configuration for specific use cases
+        4. Better isolation and cleanup for test environments
+      </rationale>
+      <files_affected>
+        test_launcher/launcher.py,
+        test_launcher/config/test_profiles.py,
+        test_launcher/test_services.py,
+        test_launcher/isolation/environment.py
+      </files_affected>
+    </learning>
+
+    <learning id="key-architectural-differences-from-dev-launcher">
+      <problem>Dev launcher has features inappropriate for testing scenarios</problem>
+      <solution>
+        Test launcher excludes development-specific features:
+        - No browser auto-open functionality
+        - No hot-reload by default
+        - No interactive debugging features
+        - Simplified logging optimized for test output
+        - Fast startup and shutdown cycles
+        - Enhanced cleanup and isolation
+      </solution>
+      <benefits>
+        - Faster test execution (no unnecessary UI operations)
+        - Better CI/CD compatibility (no desktop dependencies)
+        - Cleaner test output (reduced noise)
+        - More predictable behavior (no file watchers)
+        - Better resource management (aggressive cleanup)
+      </benefits>
+    </learning>
+
+    <learning id="modular-design-pattern">
+      <problem>Need for maintainable and extensible test infrastructure</problem>
+      <solution>
+        Implemented modular architecture with clear separation:
+        - test_launcher/launcher.py: Core orchestration logic
+        - test_launcher/config/: Configuration and profile management
+        - test_launcher/isolation/: Environment isolation utilities
+        - test_launcher/test_services.py: Service lifecycle management
+      </solution>
+      <design_principles>
+        - Single Responsibility: Each module has one clear purpose
+        - Dependency Injection: Configuration passed to components
+        - Composition over Inheritance: Services composed rather than extended
+        - Interface-First: Clear contracts between components
+      </design_principles>
+    </learning>
+  </section>
+
+  <section name="Test Profile System">
+    <learning id="profile-based-configuration-strategy">
+      <problem>Different test types require different service configurations and isolation levels</problem>
+      <solution>
+        Implemented TestProfile enum with optimized configurations:
+        - UNIT: No external services, in-memory databases, fastest execution
+        - INTEGRATION: Database + cache services, partial isolation
+        - E2E: Full stack with all services, complete isolation
+        - PERFORMANCE: Optimized for metrics collection, resource limits
+        - SECURITY: Security-focused configuration with strict validation
+        - SMOKE: Quick validation with minimal services
+        - FULL: Everything enabled for comprehensive testing
+      </solution>
+      <configuration_details>
+        Each profile defines:
+        - Required services and their configurations
+        - Isolation level (none/partial/full)
+        - Resource limits and timeouts
+        - Environment variables and feature flags
+        - Parallel execution settings
+      </configuration_details>
+      <usage_pattern>
+        launcher = TestLauncher.for_profile(TestProfile.E2E, verbose=True)
+        exit_code = await launcher.run()
+      </usage_pattern>
+    </learning>
+
+    <learning id="service-configuration-per-profile">
+      <problem>Services need different configurations and ports for different test scenarios</problem>
+      <solution>
+        ServiceConfig dataclass provides per-service configuration:
+        - Test-specific ports (5434 for postgres, 6381 for redis, 8124 for clickhouse)
+        - Container names with test prefixes (netra-test-postgres)
+        - Custom healthcheck endpoints and timeouts
+        - Environment variables specific to test scenarios
+        - Startup timeout configurations
+      </solution>
+      <port_strategy>
+        Test services use different ports from dev to avoid conflicts:
+        - Production: postgres:5432, redis:6379, clickhouse:8123
+        - Development: postgres:5433, redis:6380, clickhouse:8123
+        - Testing: postgres:5434, redis:6381, clickhouse:8124
+      </port_strategy>
+      <container_naming>
+        Test containers use "netra-test-" prefix for easy identification and cleanup
+      </container_naming>
+    </learning>
+
+    <learning id="isolation-levels-implementation">
+      <problem>Different tests require different levels of service isolation</problem>
+      <solution>
+        Three isolation levels implemented:
+        
+        NONE (IsolationLevel.NONE):
+        - No service isolation
+        - Uses shared or mocked services
+        - Fastest execution, used for unit tests
+        - In-memory databases where possible
+        
+        PARTIAL (IsolationLevel.PARTIAL):
+        - Isolates databases and caches only
+        - Shared application services
+        - Used for integration tests
+        - Balance between isolation and performance
+        
+        FULL (IsolationLevel.FULL):
+        - Complete service isolation
+        - Separate containers for all services
+        - Used for E2E and security tests
+        - Maximum isolation at cost of performance
+      </solution>
+      <implementation_details>
+        - Docker networks created per isolation level
+        - Container cleanup based on isolation level
+        - Environment variables adjusted per level
+        - Service discovery configured accordingly
+      </implementation_details>
+    </learning>
+  </section>
+
+  <section name="Service Management">
+    <learning id="test-service-manager-architecture">
+      <problem>Need reliable service lifecycle management for testing</problem>
+      <solution>
+        TestServiceManager handles:
+        - Docker-based services (postgres, redis, clickhouse)
+        - Application services (backend, auth, frontend)
+        - Service health monitoring and readiness checks
+        - Graceful startup and shutdown procedures
+        - Log collection for debugging
+      </solution>
+      <docker_service_management>
+        - Checks for existing containers before creating new ones
+        - Supports container reuse for faster test cycles
+        - Automatic network configuration
+        - Resource limits enforcement
+        - Cleanup strategies based on isolation level
+      </docker_service_management>
+      <application_service_management>
+        - Subprocess management with proper cleanup
+        - Service-specific command generation
+        - Health check implementations (HTTP, database connections)
+        - Log capture and streaming
+        - Process monitoring and restart capabilities
+      </application_service_management>
+    </learning>
+
+    <learning id="health-check-implementation">
+      <problem>Tests need to wait for services to be fully ready before proceeding</problem>
+      <solution>
+        Multi-layered health checking:
+        
+        Port-based checks:
+        - Socket connection tests for basic availability
+        
+        Protocol-specific checks:
+        - HTTP endpoints with status code validation
+        - PostgreSQL connection and query tests
+        - Redis ping commands
+        - ClickHouse HTTP interface checks
+        
+        Application-level checks:
+        - Service-specific health endpoints (/health/ready)
+        - Database migration status validation
+        - Configuration validation
+      </solution>
+      <timeout_strategy>
+        - Service-specific timeouts (10s for redis, 30s for postgres, 60s for backend)
+        - Exponential backoff for retry attempts
+        - Maximum wait time based on profile requirements
+        - Parallel health checking where possible
+      </timeout_strategy>
+    </learning>
+
+    <learning id="service-startup-coordination">
+      <problem>Services have dependencies and must start in correct order</problem>
+      <solution>
+        Phased startup approach:
+        
+        Phase 1: Environment setup
+        - Load test environment variables
+        - Create necessary directories
+        - Apply configuration overrides
+        
+        Phase 2: Start required services
+        - Parallel startup where possible (databases)
+        - Sequential startup for dependent services
+        - Error handling with early termination
+        
+        Phase 3: Wait for service readiness
+        - Health check coordination
+        - Timeout management
+        - Failure reporting and cleanup
+        
+        Phase 4: Pre-test setup
+        - Database seeding for E2E tests
+        - Migration execution for integration tests
+        - Configuration validation
+      </solution>
+      <dependency_management>
+        Services can be started in parallel when no dependencies exist,
+        but must be started sequentially when dependencies are present.
+        Current dependency chain: databases -> application services -> frontend
+      </dependency_management>
+    </learning>
+  </section>
+
+  <section name="Environment Management">
+    <learning id="test-environment-isolation">
+      <problem>Tests need isolated environment configuration to prevent interference</problem>
+      <solution>
+        TestEnvironmentManager provides:
+        - Unique test ID generation for resource isolation
+        - Profile-specific environment variable configuration
+        - Service URL generation based on test configuration
+        - Environment cleanup and restoration
+        - Test data directory management
+      </solution>
+      <environment_variables>
+        Base test environment always includes:
+        - TESTING=1 (global test flag)
+        - TEST_PROFILE=profile_name
+        - TEST_ID=unique_8char_id
+        - ENVIRONMENT=test
+        - LOG_LEVEL=DEBUG/INFO based on verbosity
+      </environment_variables>
+      <profile_specific_environment>
+        Each profile adds specific variables:
+        - Unit tests: Mock service URLs, in-memory databases
+        - Integration/E2E: Real service URLs with test ports
+        - Performance: Disable rate limiting, cache warming
+        - Security: Enable strict mode, security logging
+      </profile_specific_environment>
+    </learning>
+
+    <learning id="service-url-generation">
+      <problem>Tests need correct service URLs based on configuration</problem>
+      <solution>
+        Dynamic service URL generation based on:
+        - Service configuration and enabled status
+        - Port assignments from test profiles
+        - Protocol selection (http/https, ws/wss)
+        - Host configuration (localhost for local tests)
+      </solution>
+      <url_patterns>
+        Generated URLs follow consistent patterns:
+        - BACKEND_URL=http://localhost:8001
+        - AUTH_SERVICE_URL=http://localhost:8082
+        - FRONTEND_URL=http://localhost:3001
+        - WEBSOCKET_URL=ws://localhost:8001
+        - DATABASE_URL=postgresql://test:test@localhost:5434/netra_test
+        - REDIS_URL=redis://localhost:6381/1
+        - CLICKHOUSE_URL=http://localhost:8124
+      </url_patterns>
+    </learning>
+
+    <learning id="test-secrets-management">
+      <problem>Tests need consistent but safe secret values</problem>
+      <solution>
+        Test-specific secrets generated with test ID:
+        - JWT_SECRET_KEY with minimum 32 characters + test ID
+        - SERVICE_SECRET with test ID for uniqueness
+        - Static FERNET_KEY for encryption consistency
+        - Mock OAuth credentials with test ID prefix
+        - Never use real production secrets in tests
+      </solution>
+      <security_considerations>
+        - Test secrets are deterministic but unique per test run
+        - No real API keys or production credentials in test environment
+        - Secrets include test ID to prevent cross-test contamination
+        - Minimum length requirements enforced for compatibility
+      </security_considerations>
+    </learning>
+  </section>
+
+  <section name="Migration Strategy">
+    <learning id="migration-from-dev-launcher">
+      <problem>Existing tests may depend on dev_launcher functionality</problem>
+      <solution>
+        Gradual migration strategy:
+        
+        Phase 1: Coexistence
+        - Both launchers available simultaneously
+        - No breaking changes to existing tests
+        - New tests use test_launcher by default
+        
+        Phase 2: Test migration
+        - Update test fixtures to use TestLauncher.for_profile()
+        - Replace dev_launcher imports in test files
+        - Update CI/CD configurations to use test_launcher
+        
+        Phase 3: Cleanup
+        - Remove dev_launcher dependencies from test code
+        - Archive or remove unused dev_launcher test-specific code
+        - Update documentation and examples
+      </solution>
+      <compatibility_considerations>
+        - TestLauncher provides similar interface to DevLauncher for easy migration
+        - Configuration objects are compatible where possible
+        - Service management APIs maintain similar patterns
+      </compatibility_considerations>
+    </learning>
+
+    <learning id="unified-test-runner-integration">
+      <problem>Test runner needs to work with both launchers during transition</problem>
+      <solution>
+        Enhanced unified_test_runner.py integration:
+        - Detect test type and choose appropriate launcher
+        - Support for --test-launcher flag to force test launcher usage
+        - Backward compatibility with existing test invocations
+        - Profile mapping from test categories to TestProfile enum
+      </solution>
+      <integration_points>
+        Test runner integration points:
+        - Profile selection based on test category
+        - Service management coordination
+        - Environment setup and cleanup
+        - Result reporting and status codes
+      </integration_points>
+    </learning>
+
+    <learning id="configuration-consolidation">
+      <problem>Avoid configuration duplication between dev and test launchers</problem>
+      <solution>
+        Shared configuration patterns:
+        - Common service definitions in shared modules
+        - Environment variable naming consistency
+        - Port allocation coordination
+        - Docker container naming conventions
+      </solution>
+      <future_considerations>
+        - Consider unified configuration system for both launchers
+        - Shared service management utilities
+        - Common health check implementations
+        - Coordinated cleanup strategies
+      </future_considerations>
+    </learning>
+  </section>
+
+  <section name="Best Practices and Patterns">
+    <learning id="test-launcher-usage-patterns">
+      <problem>Developers need clear patterns for using test launcher effectively</problem>
+      <solution>
+        Recommended usage patterns:
+        
+        Quick unit tests:
+        launcher = TestLauncher.for_profile(TestProfile.UNIT)
+        
+        Integration tests with database:
+        launcher = TestLauncher.for_profile(TestProfile.INTEGRATION, real_services=True)
+        
+        Full E2E testing:
+        launcher = TestLauncher.for_profile(TestProfile.E2E, verbose=True, real_llm=True)
+        
+        Performance testing:
+        launcher = TestLauncher.for_profile(TestProfile.PERFORMANCE, timeout_seconds=3600)
+        
+        Security testing:
+        launcher = TestLauncher.for_profile(TestProfile.SECURITY, cleanup_on_exit=True)
+      </solution>
+      <error_handling>
+        Always use try/finally or async context managers for cleanup:
+        try:
+            exit_code = await launcher.run()
+        finally:
+            await launcher.cleanup()
+      </error_handling>
+    </learning>
+
+    <learning id="debugging-test-failures">
+      <problem>Test failures need effective debugging capabilities</problem>
+      <solution>
+        Debugging features implemented:
+        - Verbose logging with --verbose flag
+        - Service log collection via get_service_logs()
+        - Health status reporting via get_service_status()
+        - Test data directory preservation
+        - Container inspection capabilities
+      </solution>
+      <debugging_workflow>
+        1. Run with verbose logging: launcher.config.verbose = True
+        2. Check service status: await launcher.get_service_status()
+        3. Collect service logs: launcher.service_manager.get_service_logs()
+        4. Inspect test data: launcher.env_manager.get_test_data_dir()
+        5. Manual container inspection if needed
+      </debugging_workflow>
+    </learning>
+
+    <learning id="performance-optimization">
+      <problem>Test launcher performance critical for CI/CD efficiency</problem>
+      <solution>
+        Performance optimization strategies:
+        - Container reuse when possible (check existing before creating)
+        - Parallel service startup where dependencies allow
+        - Optimized health check intervals and timeouts
+        - Aggressive cleanup with configurable retention
+        - Minimal logging in non-verbose mode
+      </solution>
+      <measurement_points>
+        Key performance metrics:
+        - Service startup time per profile
+        - Health check response times
+        - Container creation vs reuse ratios
+        - Total test environment setup time
+        - Cleanup execution time
+      </measurement_points>
+    </learning>
+
+    <learning id="resource-management">
+      <problem>Test environments can consume significant system resources</problem>
+      <solution>
+        Resource management features:
+        - Configurable resource limits per profile
+        - Docker container resource constraints
+        - Memory and CPU limits for performance testing
+        - Disk usage monitoring for test data
+        - Network bandwidth considerations
+      </solution>
+      <cleanup_strategy>
+        Multi-level cleanup approach:
+        - Process termination with graceful and forceful options
+        - Container stopping and optional removal
+        - Network cleanup for isolated environments
+        - Test data directory cleanup based on retention policy
+        - Environment variable restoration
+      </cleanup_strategy>
+    </learning>
+  </section>
+
+  <section name="Future Considerations">
+    <learning id="test-launcher-evolution">
+      <problem>Test launcher will need to evolve with testing requirements</problem>
+      <solution>
+        Planned enhancements:
+        - Kubernetes-based service management for cloud testing
+        - Advanced test data seeding and fixture management
+        - Integration with observability tools (metrics, tracing)
+        - Support for distributed testing scenarios
+        - Enhanced security testing capabilities
+      </solution>
+      <extension_points>
+        Architecture designed for extensibility:
+        - Plugin system for custom service types
+        - Configurable health check implementations
+        - Pluggable environment management strategies
+        - Custom cleanup handlers registration
+        - Profile inheritance and composition
+      </extension_points>
+    </learning>
+
+    <learning id="integration-opportunities">
+      <problem>Test launcher should integrate with broader testing ecosystem</problem>
+      <solution>
+        Integration opportunities:
+        - pytest plugin for automatic launcher management
+        - Docker Compose integration for complex scenarios
+        - CI/CD pipeline optimizations
+        - Test reporting and analytics integration
+        - Development IDE integration
+      </solution>
+      <standardization>
+        Follow established patterns:
+        - Standard exit codes for different failure types
+        - Consistent logging formats for parsing
+        - Health check endpoint standardization
+        - Configuration file format alignment
+      </standardization>
+    </learning>
+  </section>
+
+  <section name="Critical Success Factors">
+    <learning id="test-launcher-success-metrics">
+      <problem>Need measurable criteria for test launcher success</problem>
+      <solution>
+        Success metrics defined:
+        - Reduction in test environment setup time (target: &lt;60s for E2E)
+        - Improved test reliability (target: &lt;1% flaky test rate due to environment)
+        - Resource utilization efficiency (target: &lt;80% CPU/memory usage)
+        - Developer adoption rate (target: 100% of new tests use test launcher)
+        - CI/CD pipeline performance improvement (target: 20% faster test execution)
+      </solution>
+      <monitoring_approach>
+        Continuous monitoring through:
+        - Automated performance regression testing
+        - Resource usage tracking and alerting
+        - Test failure rate analysis by launcher type
+        - Developer feedback and usage analytics
+        - CI/CD pipeline metrics comparison
+      </monitoring_approach>
+    </learning>
+
+    <learning id="maintenance-requirements">
+      <problem>Test launcher requires ongoing maintenance and updates</problem>
+      <solution>
+        Maintenance strategy:
+        - Regular dependency updates and security patches
+        - Performance monitoring and optimization cycles
+        - Documentation updates with usage patterns
+        - Integration testing with new service versions
+        - Community feedback incorporation
+      </solution>
+      <documentation_requirements>
+        Maintain comprehensive documentation:
+        - API documentation with examples
+        - Configuration reference with all options
+        - Troubleshooting guide with common issues
+        - Performance tuning recommendations
+        - Migration guides for version updates
+      </documentation_requirements>
+    </learning>
+  </section>
+
+  <related_files>
+    <file path="test_launcher/launcher.py" description="Core TestLauncher implementation"/>
+    <file path="test_launcher/config/test_profiles.py" description="Test profile configurations and service definitions"/>
+    <file path="test_launcher/test_services.py" description="Service lifecycle management"/>
+    <file path="test_launcher/isolation/environment.py" description="Environment isolation and management"/>
+    <file path="scripts/unified_test_runner.py" description="Integration point with existing test infrastructure"/>
+    <file path="dev_launcher/launcher.py" description="Development launcher for comparison"/>
+  </related_files>
+</learnings>

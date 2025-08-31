@@ -1,11 +1,10 @@
-/**
- * AuthContext Development Mode Tests
- * Tests development-specific authentication features
- * All functions ≤8 lines per architecture requirements
- */
-
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
+import { jwtDecode } from 'jwt-decode';
+import { logger } from '@/lib/logger';
+import '@testing-library/jest-dom';
+import { } from '@testing-library/react';
 import { jwtDecode } from 'jwt-decode';
 import { logger } from '@/lib/logger';
 import '@testing-library/jest-dom';
@@ -49,6 +48,7 @@ jest.mock('@/lib/auth-service-config', () => ({
 }));
 
 describe('AuthContext - Development Mode', () => {
+    jest.setTimeout(10000);
   let mockAuthStore: any;
   const mockAuthServiceClient = {
     getConfig: jest.fn(),

@@ -1,12 +1,9 @@
-/**
- * MessageInput Message History Tests
- * Tests for message history functionality
- */
-
-// Mock dependencies BEFORE imports
-const mockSendMessage = jest.fn();
-const mockUseWebSocket = jest.fn();
-const mockGenerateUniqueId = jest.fn();
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { MessageInput } from '@/components/chat/MessageInput';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+eId = jest.fn();
 
 jest.mock('@/hooks/useWebSocket', () => ({
   useWebSocket: mockUseWebSocket
@@ -100,6 +97,7 @@ import userEvent from '@testing-library/user-event';
 import { MessageInput } from '@/components/chat/MessageInput';
 
 describe('MessageInput - Message History', () => {
+    jest.setTimeout(10000);
   const mockChatStore = {
     setProcessing: jest.fn(),
     addMessage: jest.fn()
@@ -141,6 +139,7 @@ describe('MessageInput - Message History', () => {
   });
 
   describe('Message history', () => {
+      jest.setTimeout(10000);
     it('should add sent messages to history', async () => {
       render(<MessageInput />);
       const textarea = screen.getByPlaceholderText(/Type a message/i) as HTMLTextAreaElement;

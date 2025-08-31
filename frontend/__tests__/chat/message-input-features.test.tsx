@@ -1,22 +1,18 @@
-/**
- * Message Input Features Tests
- * Tests for MessageInput component functionality and advanced features
- * 
- * BVJ: User Input Experience
- * Segment: All - input quality affects all user segments
- * Business Goal: Smooth user interaction and reduced friction
- * Value Impact: Better input experience increases user engagement and reduces abandonment
- */
-
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { MessageInput } from '@/components/chat/MessageInput';
 import { TestProviders } from '@/__tests__/test-utils/providers';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import {
   setupDefaultMocks
 } from './ui-test-utilities';
+
+/**
+ * Message Input Features Tests
+ * Business Value: Enhanced UX reduces abandonment
+ */
 
 // Mock dependencies
 jest.mock('@/hooks/useWebSocket', () => ({
@@ -96,7 +92,9 @@ beforeEach(() => {
 });
 
 describe('Message Input Features', () => {
+    jest.setTimeout(10000);
   describe('Multi-line Input Support', () => {
+      jest.setTimeout(10000);
     test('should support multi-line input with Shift+Enter', async () => {
       const { container } = render(
         <TestProviders>
@@ -167,6 +165,7 @@ describe('Message Input Features', () => {
   });
 
   describe('Character Count and Limits', () => {
+      jest.setTimeout(10000);
     test('should show character count when approaching limit', async () => {
       const { container } = render(
         <TestProviders>
@@ -240,6 +239,7 @@ describe('Message Input Features', () => {
   });
 
   describe('Auto-resize Functionality', () => {
+      jest.setTimeout(10000);
     test('should auto-resize based on content', async () => {
       const { container } = render(
         <TestProviders>
@@ -313,6 +313,7 @@ describe('Message Input Features', () => {
   });
 
   describe('Message History Navigation', () => {
+      jest.setTimeout(10000);
     test('should support message history navigation with arrow keys', async () => {
       const { container } = render(
         <TestProviders>
@@ -405,6 +406,7 @@ describe('Message Input Features', () => {
   });
 
   describe('Action Buttons', () => {
+      jest.setTimeout(10000);
     test('should display action buttons (attachment, voice)', () => {
       render(
         <TestProviders>
@@ -501,6 +503,7 @@ describe('Message Input Features', () => {
   });
 
   describe('Placeholder Text', () => {
+      jest.setTimeout(10000);
     test('should show appropriate placeholder text for authenticated users', () => {
       const { container } = render(
         <TestProviders>

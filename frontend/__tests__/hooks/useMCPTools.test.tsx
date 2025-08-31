@@ -1,11 +1,11 @@
 // useMCPTools Hook Tests - Comprehensive testing with proper MCP service mocking
 // Tests hook functionality, error handling, and API integration without 404 errors
 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useMCPTools } from '@/hooks/useMCPTools';
-import {
-  setupMCPMocks,
+import { setupMCPMocks,
   cleanupMCPMocks,
   mcpMockState,
   createMockServer,
@@ -27,6 +27,12 @@ beforeEach(() => {
 afterEach(() => {
   cleanupMCPMocks();
   jest.clearAllMocks();
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+    cleanupAntiHang();
 });
 
 // Mock the unified chat store to prevent dependency issues
@@ -43,6 +49,8 @@ jest.mock('@/store/unified-chat', () => ({
 // ============================================
 
 describe('useMCPTools', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   it('should initialize with default mock data', async () => {
     const { result } = renderHook(() => useMCPTools());
 
@@ -144,6 +152,8 @@ describe('useMCPTools', () => {
 // ============================================
 
 describe('useMCPTools - Server Management', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   it('should get server status correctly', async () => {
     const connectedServer = createMockServer({ name: 'mock-server', status: 'CONNECTED' });
     mcpMockState.setServers([connectedServer]);
@@ -201,6 +211,8 @@ describe('useMCPTools - Server Management', () => {
 // ============================================
 
 describe('useMCPTools - Error Handling', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   it('should handle tool execution errors gracefully', async () => {
     // Mock the service to throw an error
     const mockExecuteTool = jest.fn().mockRejectedValue(new Error('Execution failed'));
@@ -251,6 +263,8 @@ describe('useMCPTools - Error Handling', () => {
 // ============================================
 
 describe('useMCPTools - Integration', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   it('should refresh tools and servers together', async () => {
     const { result } = renderHook(() => useMCPTools());
 
@@ -313,6 +327,8 @@ describe('useMCPTools - Integration', () => {
 // ============================================
 
 describe('useMCPTools - Performance', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   it('should not cause unnecessary re-renders', async () => {
     let renderCount = 0;
     

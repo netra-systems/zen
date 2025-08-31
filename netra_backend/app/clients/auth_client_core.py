@@ -264,8 +264,15 @@ class AuthServiceClient:
         return await self.validate_token_jwt(token)
     
     async def _build_validation_request(self, token: str) -> Dict:
-        """Build validation request payload."""
-        return {"token": token}
+        """Build validation request payload.
+        
+        CRITICAL FIX: Auth service expects token_type field per TokenRequest model.
+        Default to 'access' token type for standard API authentication.
+        """
+        return {
+            "token": token,
+            "token_type": "access"  # Required by auth service TokenRequest model
+        }
     
     async def _parse_validation_response(self, data: Dict) -> Dict:
         """Parse validation response data."""

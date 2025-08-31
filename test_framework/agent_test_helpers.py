@@ -10,6 +10,7 @@ reducing test maintenance burden and improving test reliability.
 
 import asyncio
 import time
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Type, Union, Callable, TypeVar
 from dataclasses import dataclass
 from enum import Enum
@@ -407,6 +408,65 @@ def create_standard_validation_config(
         optional_fields=[],
         business_validators=business_validators or {},
         allow_partial=allow_partial
+    )
+
+
+# Execution Context for Testing
+@dataclass
+class TestExecutionContext:
+    """Test execution context that matches regression test expectations."""
+    user_id: str
+    thread_id: str
+    message_id: str
+    session_id: str
+    metadata: Dict[str, Any] = None
+    created_at: Optional[datetime] = None
+
+    def __post_init__(self):
+        """Initialize default values."""
+        if self.metadata is None:
+            self.metadata = {}
+        if self.created_at is None:
+            self.created_at = datetime.now()
+
+    def dict(self) -> Dict[str, Any]:
+        """Return dict representation for backward compatibility."""
+        return {
+            'user_id': self.user_id,
+            'thread_id': self.thread_id,
+            'message_id': self.message_id,
+            'session_id': self.session_id,
+            'metadata': self.metadata,
+            'created_at': self.created_at
+        }
+
+
+def create_test_execution_context(
+    user_id: str = "test-user-123",
+    thread_id: str = "test-thread-456", 
+    message_id: str = "test-message-789",
+    session_id: str = "test-session-000",
+    metadata: Optional[Dict[str, Any]] = None
+) -> TestExecutionContext:
+    """
+    Create a test execution context for regression tests.
+    
+    Args:
+        user_id: User identifier
+        thread_id: Thread identifier
+        message_id: Message identifier
+        session_id: Session identifier
+        metadata: Optional metadata dictionary
+        
+    Returns:
+        TestExecutionContext instance
+    """
+    return TestExecutionContext(
+        user_id=user_id,
+        thread_id=thread_id,
+        message_id=message_id,
+        session_id=session_id,
+        metadata=metadata or {}
     )
 
 

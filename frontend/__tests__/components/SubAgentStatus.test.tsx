@@ -2,10 +2,12 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { SubAgentStatus } from '@/components/SubAgentStatus';
 import { useUnifiedChatStore } from '@/store/unified-chat';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 jest.mock('@/store/unified-chat');
 
 describe('SubAgentStatus', () => {
+    jest.setTimeout(10000);
   const mockUseChatStore = useUnifiedChatStore as jest.Mock;
 
   beforeEach(() => {

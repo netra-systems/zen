@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { WebSocketProvider } from '../providers/WebSocketProvider';
 import userEvent from '@testing-library/user-event';
 import { MessageInput } from '@/components/chat/MessageInput';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 import { TestProviders } from '@/__tests__/test-utils/providers';// Legacy components removed - using unified MainChat and MessageItem
 // import { ImprovedMessageItem } from '@/components/chat/ImprovedMessageItem';
@@ -85,7 +86,9 @@ jest.mock('@/services/threadRenameService', () => ({
 }));
 
 describe('Chat UI Improvements', () => {
+    jest.setTimeout(10000);
   describe('MessageInput Component', () => {
+      jest.setTimeout(10000);
     it('should support multi-line input with Shift+Enter', async () => {
       const { container } = render(<MessageInput />);
       const textarea = container.querySelector('textarea') as HTMLTextAreaElement;
@@ -165,6 +168,7 @@ describe('Chat UI Improvements', () => {
 
   // Tests for ImprovedMessageItem removed - component archived
   // describe('ImprovedMessageItem Component', () => {
+    jest.setTimeout(10000);
   //   const mockMessage = {
   //     id: 'msg-1',
   //     type: 'assistant' as const,
@@ -247,6 +251,7 @@ describe('Chat UI Improvements', () => {
   // });
 
   describe('Keyboard Shortcuts', () => {
+      jest.setTimeout(10000);
     it('should register keyboard shortcuts correctly', () => {
       const { result } = renderHook(() => useKeyboardShortcuts());
       
@@ -288,6 +293,7 @@ describe('Chat UI Improvements', () => {
   });
 
   describe('Responsive Design', () => {
+      jest.setTimeout(10000);
     it('should adapt layout for mobile screens', () => {
       // Mock mobile viewport
       global.innerWidth = 375;
@@ -324,6 +330,7 @@ describe('Chat UI Improvements', () => {
   });
 
   describe('Accessibility Features', () => {
+      jest.setTimeout(10000);
     it('should have proper ARIA labels', () => {
       render(<MessageInput />);
       

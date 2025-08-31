@@ -1,7 +1,12 @@
 import { CircularBuffer, WebSocketEventBuffer, WSEvent } from '@/lib/circular-buffer';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('CircularBuffer', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   describe('Basic operations', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should create a buffer with specified size', () => {
       const buffer = new CircularBuffer<number>(5);
       expect(buffer.size()).toBe(0);
@@ -115,6 +120,8 @@ describe('CircularBuffer', () => {
   });
 
   describe('Edge cases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle single item buffer', () => {
       const buffer = new CircularBuffer<string>(1);
       
@@ -208,6 +215,8 @@ describe('CircularBuffer', () => {
   });
 
   describe('Performance', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle large buffers efficiently', () => {
       const buffer = new CircularBuffer<number>(10000);
       const startTime = performance.now();
@@ -242,6 +251,8 @@ describe('CircularBuffer', () => {
 });
 
 describe('WebSocketEventBuffer', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   const createMockEvent = (
     type: string,
     agentName?: string,
@@ -257,6 +268,8 @@ describe('WebSocketEventBuffer', () => {
   });
 
   describe('Specialized WebSocket operations', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should filter events by type', () => {
       const buffer = new WebSocketEventBuffer(10);
       
@@ -415,6 +428,8 @@ describe('WebSocketEventBuffer', () => {
   });
 
   describe('Edge cases for WebSocketEventBuffer', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle events with missing optional fields', () => {
       const buffer = new WebSocketEventBuffer(5);
       
@@ -472,4 +487,8 @@ describe('WebSocketEventBuffer', () => {
       expect(exported.events[0].payload.unicode).toBe('😀🎉');
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

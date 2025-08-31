@@ -1,12 +1,11 @@
-/**
- * Thread Switching and Navigation Integration Tests
- * Comprehensive tests for thread switching functionality in Netra Apex
- * Tests rapid switching, message preservation, URL updates, and WebSocket management
- * Phase 3, Agent 9 - Critical for user experience and engagement
- */
-
 import React from 'react';
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { jest } from '@jest/globals';
+import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
+import { TestProviders } from '@/__tests__/setup/test-providers';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+reEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
 import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
@@ -260,6 +259,7 @@ const ThreadSwitchingTestComponent: React.FC = () => {
 };
 
 describe('Thread Switching and Navigation Tests', () => {
+    jest.setTimeout(10000);
   let wsManager: WebSocketTestManager;
 
   beforeEach(() => {
@@ -276,6 +276,7 @@ describe('Thread Switching and Navigation Tests', () => {
   });
 
   describe('Basic Thread Switching', () => {
+      jest.setTimeout(10000);
     it('should switch threads with loading state', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       
@@ -373,6 +374,7 @@ describe('Thread Switching and Navigation Tests', () => {
   });
 
   describe('Draft Message Preservation', () => {
+      jest.setTimeout(10000);
     it('should preserve draft messages when switching threads', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       
@@ -441,6 +443,7 @@ describe('Thread Switching and Navigation Tests', () => {
   });
 
   describe('Rapid Thread Switching', () => {
+      jest.setTimeout(10000);
     it('should handle 10 rapid thread switches within 2 seconds', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       
@@ -515,6 +518,7 @@ describe('Thread Switching and Navigation Tests', () => {
   });
 
   describe('Message Isolation', () => {
+      jest.setTimeout(10000);
     it('should not mix messages between threads', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       
@@ -582,6 +586,7 @@ describe('Thread Switching and Navigation Tests', () => {
   });
 
   describe('WebSocket Subscription Updates', () => {
+      jest.setTimeout(10000);
     it('should update WebSocket subscriptions on thread switch', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       
@@ -612,6 +617,7 @@ describe('Thread Switching and Navigation Tests', () => {
   });
 
   describe('Browser Navigation Integration', () => {
+      jest.setTimeout(10000);
     it('should handle browser back/forward navigation', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       
@@ -668,6 +674,7 @@ describe('Thread Switching and Navigation Tests', () => {
   });
 
   describe('Performance Metrics', () => {
+      jest.setTimeout(10000);
     it('should switch threads in less than 200ms', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       

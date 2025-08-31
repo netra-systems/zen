@@ -105,7 +105,6 @@ module.exports = async () => {
         esModuleInterop: true,
         allowSyntheticDefaultImports: true,
       },
-      isolatedModules: true,
       useESM: false
     }],
     '^.+\\.(js|jsx)$': ['babel-jest', { presets: ['next/babel'] }],

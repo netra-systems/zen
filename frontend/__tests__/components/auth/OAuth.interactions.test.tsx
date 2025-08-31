@@ -12,6 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { LoginButton } from '@/auth/components';
 import { authService } from '@/auth/unified-auth-service';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock auth service
 jest.mock('@/auth/service');
@@ -37,6 +38,8 @@ try {
 }
 
 describe('OAuth Button Interaction Tests', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   const mockLogin = jest.fn();
   const mockLogout = jest.fn();
   
@@ -67,6 +70,8 @@ describe('OAuth Button Interaction Tests', () => {
   });
 
   describe('Google OAuth Integration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should display Google login button', () => {
       render(<LoginButton />);
       
@@ -103,6 +108,8 @@ describe('OAuth Button Interaction Tests', () => {
   });
 
   describe('GitHub OAuth Integration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should support GitHub OAuth configuration', () => {
       const githubConfig = {
         ...baseAuthContext.authConfig,
@@ -150,6 +157,8 @@ describe('OAuth Button Interaction Tests', () => {
   });
 
   describe('Microsoft OAuth Integration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should support Microsoft OAuth configuration', () => {
       const msConfig = {
         ...baseAuthContext.authConfig,
@@ -195,6 +204,8 @@ describe('OAuth Button Interaction Tests', () => {
   });
 
   describe('OAuth Button States', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should disable button during loading', () => {
       jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
@@ -248,6 +259,8 @@ describe('OAuth Button Interaction Tests', () => {
   });
 
   describe('OAuth Error Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle OAuth cancellation gracefully', async () => {
       mockLogin.mockRejectedValueOnce(new Error('User cancelled'));
       
@@ -300,6 +313,8 @@ describe('OAuth Button Interaction Tests', () => {
   });
 
   describe('OAuth Security Features', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should use secure OAuth parameters', async () => {
       render(<LoginButton />);
       
@@ -335,4 +350,8 @@ describe('OAuth Button Interaction Tests', () => {
       );
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

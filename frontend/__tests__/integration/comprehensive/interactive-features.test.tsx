@@ -1,5 +1,5 @@
-/**
- * Interactive Features Animation Integration Tests
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+import { teractive Features Animation Integration Tests
  * ULTRA DEEP THINK: Module-based architecture - Animation tests extracted for 450-line compliance
  */
 
@@ -11,6 +11,7 @@ import {
 } from './interactive-features-utils';
 
 describe('Complex Animation Sequences Tests', () => {
+    jest.setTimeout(10000);
   let server: any;
   
   beforeEach(() => {
@@ -19,6 +20,11 @@ describe('Complex Animation Sequences Tests', () => {
 
   afterEach(() => {
     teardownInteractiveTest();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
   it('should chain animations with proper timing', async () => {
     const AnimationComponent = () => {

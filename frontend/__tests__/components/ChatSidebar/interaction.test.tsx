@@ -87,6 +87,7 @@ jest.mock('@/hooks/useWebSocket', () => ({
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import * as ChatSidebarHooksModule from '@/components/chat/ChatSidebarHooks';
 import { useUnifiedChatStore } from '@/store/unified-chat';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import { 
   createTestSetup, 
   renderWithProvider, 
@@ -96,6 +97,8 @@ import {
 } from './setup';
 
 describe('ChatSidebar - Interactions', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   const testSetup = createTestSetup();
 
   beforeEach(() => {
@@ -131,9 +134,17 @@ describe('ChatSidebar - Interactions', () => {
 
   afterEach(() => {
     testSetup.afterEach();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Thread Navigation and Switching', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should navigate to thread when clicked', async () => {
       // CRITICAL: Configure all mocks BEFORE rendering
       // Ensure authenticated state for thread rendering
@@ -186,6 +197,17 @@ describe('ChatSidebar - Interactions', () => {
       });
       
       renderWithProvider(<ChatSidebar />);
+      
+      // Debug: Print the entire DOM to see what's actually rendered
+      console.log('🔍 Full DOM structure:', document.body.innerHTML);
+      
+      // Check if our debug element exists
+      const debugElement = screen.queryByTestId('debug-no-threads');
+      if (debugElement) {
+        console.log('🚫 Found debug element - ThreadList received no threads');
+      } else {
+        console.log('✅ Debug element not found - ThreadList should have threads');
+      }
       
       // Debug: Check what threads are actually rendered
       const thread1 = screen.getByTestId('thread-item-thread-1');
@@ -375,6 +397,8 @@ describe('ChatSidebar - Interactions', () => {
   });
 
   describe('Thread Management Operations', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should create new thread when new thread button is clicked', async () => {
       // CRITICAL: Configure all mocks BEFORE rendering
       // Ensure authenticated state for UI interactions
@@ -579,6 +603,8 @@ describe('ChatSidebar - Interactions', () => {
   });
 
   describe('Thread Search and Filtering', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should filter threads based on search query', async () => {
       // CRITICAL: Configure all mocks BEFORE rendering
       // Ensure authenticated state for thread rendering
@@ -806,6 +832,8 @@ describe('ChatSidebar - Interactions', () => {
   });
 
   describe('Context Menu Operations', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should show context menu on right click', () => {
       // CRITICAL: Configure all mocks BEFORE rendering
       // Ensure authenticated state for thread rendering
@@ -905,6 +933,8 @@ describe('ChatSidebar - Interactions', () => {
   });
 
   describe('Drag and Drop Operations', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should support drag to reorder threads', () => {
       // CRITICAL: Configure all mocks BEFORE rendering
       // Ensure authenticated state for thread rendering

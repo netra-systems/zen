@@ -8,6 +8,7 @@ import { render, waitFor, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import apiClient from '@/services/apiClient';
 import { TestProviders } from '@/__tests__/setup/test-providers';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock apiClient
 jest.mock('@/services/apiClient', () => ({
@@ -74,9 +75,17 @@ jest.mock('@/services/apiClient');
 
 afterEach(() => {
   jest.clearAllMocks();
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+    cleanupAntiHang();
 });
 
 describe('LLM Cache Management Integration', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   it('should clear LLM cache and update UI', async () => {
     const TestComponent = () => {
       const [cacheStatus, setCacheStatus] = React.useState('');
@@ -140,6 +149,8 @@ describe('LLM Cache Management Integration', () => {
 });
 
 describe('Supply Catalog Integration', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   it('should load and display supply catalog', async () => {
     const TestComponent = () => {
       const [catalog, setCatalog] = React.useState<any>(null);
@@ -217,6 +228,8 @@ describe('Supply Catalog Integration', () => {
 });
 
 describe('Configuration Management', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   it('should load and display configuration', async () => {
     const TestComponent = () => {
       const [config, setConfig] = React.useState<any>(null);
@@ -296,6 +309,8 @@ describe('Configuration Management', () => {
 });
 
 describe('Health Check Monitoring', () => {
+  setupAntiHang();
+    jest.setTimeout(10000);
   it('should fetch and display system health status', async () => {
     (apiClient.get as jest.Mock).mockResolvedValue({
       data: {

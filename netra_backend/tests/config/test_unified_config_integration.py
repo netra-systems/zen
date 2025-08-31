@@ -25,7 +25,6 @@ from netra_backend.app.db.cache_core import QueryCache
 class TestDatabaseManagerIntegration:
     """Integration tests for DatabaseManager with unified config."""
     
-    @mock_justified("L1 Unit Test: Mocking environment variables to test URL retrieval logic without real database. Real database configuration tested in L3 integration tests.", "L1")
     def test_database_url_retrieval_from_config(self):
         """Test DatabaseManager retrieves URL from unified config."""
         # Use environment variable directly since DatabaseManager checks environment in pytest mode
@@ -34,7 +33,6 @@ class TestDatabaseManagerIntegration:
             assert 'postgresql://' in url
             assert 'testdb' in url
     
-    @mock_justified("L1 Unit Test: Mocking unified config to test engine creation logic without real configuration dependencies. Real engine creation tested in L3 integration tests.", "L1")
     def test_sync_engine_creation_uses_config(self):
         """Test sync engine creation uses unified config settings."""
         # Mock: Component isolation for testing without external dependencies
@@ -55,7 +53,6 @@ class TestDatabaseManagerIntegration:
                 call_kwargs = mock_create.call_args[1]
                 assert call_kwargs['echo'] is True  # DEBUG level enables echo
     
-    @mock_justified("L1 Unit Test: Mocking unified config to test async engine creation logic. Real async engines tested in L3 integration tests with real databases.", "L1")
     def test_async_engine_creation_uses_config(self):
         """Test async engine creation uses unified config settings."""
         # Mock: Component isolation for testing without external dependencies
