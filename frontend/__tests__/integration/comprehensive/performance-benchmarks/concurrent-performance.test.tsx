@@ -1,6 +1,5 @@
-import {
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-ncurrent Performance Tests
+import { ncurrent Performance Tests
  * 
  * BVJ: Enterprise segment - ensures concurrent operations perform efficiently
  * Tests concurrent updates, priority handling, and React 18 features.

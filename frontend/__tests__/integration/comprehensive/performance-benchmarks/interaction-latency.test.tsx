@@ -1,6 +1,5 @@
-import {
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-teraction Latency Tests
+import { teraction Latency Tests
  * 
  * BVJ: Enterprise segment - ensures user interactions meet responsiveness SLAs
  * Tests interaction response times, computation responsiveness, and debouncing.

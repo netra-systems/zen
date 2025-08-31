@@ -13,6 +13,7 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import '@testing-library/jest-dom';
 import { MockWebSocket } from '../helpers/websocket-test-helpers';
 import { mockWebSocketConnection } from '../helpers/websocket-test-helpers';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Test component that uses WebSocket
 const WebSocketTestComponent: React.FC = () => {
@@ -76,7 +77,7 @@ const WebSocketTestComponent: React.FC = () => {
 };
 
 describe('WebSocket Mock Validation Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();

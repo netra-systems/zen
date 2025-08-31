@@ -1,8 +1,7 @@
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import { waitFor } from '@testing-library/react';
 import { jest } from '@jest/globals';
-import { 
-import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-t.tsx for modularity  
+import { t.tsx for modularity  
  * Tests performance monitoring, connection pools, broadcasting, and benchmarking
  * Focuses on advanced WebSocket scenarios and performance measurement
  */

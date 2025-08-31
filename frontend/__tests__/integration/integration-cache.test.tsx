@@ -3,11 +3,11 @@
  * Module-based architecture: Cache tests ≤300 lines, functions ≤8 lines
  */
 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import {
-  setupIntegrationTest,
+import { setupIntegrationTest,
   teardownIntegrationTest,
   createLLMCacheStore,
   createLLMCacheService,
@@ -46,7 +46,7 @@ jest.mock('@/hooks/useAgent', () => ({
 }));
 
 describe('LLM Cache Management Integration Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let server: any;
   const useLLMCacheStore = createLLMCacheStore();

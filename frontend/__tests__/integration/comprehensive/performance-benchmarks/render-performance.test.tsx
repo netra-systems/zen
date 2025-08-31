@@ -1,6 +1,5 @@
-import {
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-nder Performance Tests
+import { nder Performance Tests
  * 
  * BVJ: Enterprise segment - ensures render performance meets SLAs
  * Tests render time thresholds, rapid re-renders, and virtual scrolling.

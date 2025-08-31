@@ -1,6 +1,5 @@
-import {
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-source Utilization Tests
+import { source Utilization Tests
  * 
  * BVJ: Enterprise segment - ensures efficient resource usage within limits
  * Tests memory usage, bundle optimization, and DOM node management.

@@ -4,12 +4,12 @@
  * Enterprise segment - ensures data consistency and reliability
  */
 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, waitFor, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TestProviders } from '@/__tests__/setup/test-providers';
-import { 
-  initInfrastructureTest,
+import { initInfrastructureTest,
   setupFetchMock,
   createMockTransactionResponse,
   InfrastructureTestContext
@@ -35,7 +35,7 @@ afterEach(() => {
 });
 
 describe('Database Repository Pattern Integration', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   it('should perform CRUD operations through repositories', async () => {
     const TestComponent = () => {
@@ -225,7 +225,7 @@ describe('Database Repository Pattern Integration', () => {
 });
 
 describe('Database Transaction Integration', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   it('should handle database transactions', async () => {
     const TestComponent = () => {

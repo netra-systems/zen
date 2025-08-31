@@ -6,9 +6,10 @@
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react';
 import { createTestSetup, waitForAnimation } from './setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Complex Form Validation Integration', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const testSetup = createTestSetup();
 

@@ -1,6 +1,5 @@
-import {
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-rformance and Memory Management Test Suite Index
+import { rformance and Memory Management Test Suite Index
  * 
  * BVJ: Enterprise segment - ensures platform scalability, reduces infrastructure costs
  * Modular test orchestration for performance, memory, collaboration, and error recovery.

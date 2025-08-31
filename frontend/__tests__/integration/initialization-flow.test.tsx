@@ -6,6 +6,7 @@ import { WebSocketProvider, useWebSocket } from '@/providers/WebSocketProvider';
 import { useInitializationCoordinator } from '@/hooks/useInitializationCoordinator';
 import { useAuth } from '@/hooks/useAuth';
 import webSocketService from '@/services/webSocketService';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock dependencies
 jest.mock('@/hooks/useAuth');
@@ -56,7 +57,7 @@ const InitializationFlowTestComponent = ({ onPhaseChange }: { onPhaseChange?: (p
 };
 
 describe('Initialization Flow Integration', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let mockAuth: jest.Mocked<ReturnType<typeof useAuth>>;
   let mockWebSocketService: jest.Mocked<typeof webSocketService>;

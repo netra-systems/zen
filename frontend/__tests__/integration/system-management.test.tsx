@@ -8,6 +8,7 @@ import { render, waitFor, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import apiClient from '@/services/apiClient';
 import { TestProviders } from '@/__tests__/setup/test-providers';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock apiClient
 jest.mock('@/services/apiClient', () => ({
@@ -83,7 +84,7 @@ afterEach(() => {
 });
 
 describe('LLM Cache Management Integration', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   it('should clear LLM cache and update UI', async () => {
     const TestComponent = () => {
@@ -148,7 +149,7 @@ describe('LLM Cache Management Integration', () => {
 });
 
 describe('Supply Catalog Integration', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   it('should load and display supply catalog', async () => {
     const TestComponent = () => {
@@ -227,7 +228,7 @@ describe('Supply Catalog Integration', () => {
 });
 
 describe('Configuration Management', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   it('should load and display configuration', async () => {
     const TestComponent = () => {
@@ -308,7 +309,7 @@ describe('Configuration Management', () => {
 });
 
 describe('Health Check Monitoring', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   it('should fetch and display system health status', async () => {
     (apiClient.get as jest.Mock).mockResolvedValue({

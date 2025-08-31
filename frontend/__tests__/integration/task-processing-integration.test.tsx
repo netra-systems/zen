@@ -10,7 +10,7 @@
  */
 
 describe('Task Processing Integration Test Suite', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   it('should reference modular task processing architecture', () => {
     const taskModules = [

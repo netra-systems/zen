@@ -10,6 +10,7 @@
 import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
 import { act } from 'react';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock Next.js router
 jest.mock('next/navigation', () => ({
@@ -55,7 +56,7 @@ class MockWebSocket {
 global.WebSocket = MockWebSocket as any;
 
 describe('Frontend Initialization', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   beforeEach(() => {
     // Clear localStorage

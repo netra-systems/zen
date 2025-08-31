@@ -1,6 +1,5 @@
-import {
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-teractive Features Advanced Drag and Drop Integration Tests
+import { teractive Features Advanced Drag and Drop Integration Tests
  * ULTRA DEEP THINK: Module-based architecture - Advanced drag-drop tests extracted for 450-line compliance
  */
 

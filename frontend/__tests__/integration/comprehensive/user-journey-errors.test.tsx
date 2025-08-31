@@ -1,6 +1,5 @@
-import {
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-er Journey Error Scenarios Integration Tests
+import { er Journey Error Scenarios Integration Tests
  * ULTRA DEEP THINK: Module-based architecture - Error tests extracted for 450-line compliance
  */
 

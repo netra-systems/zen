@@ -10,7 +10,7 @@
  */
 
 describe('Analytics Integration Test Suite', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   it('should reference modular analytics architecture', () => {
     const analyticsModules = [

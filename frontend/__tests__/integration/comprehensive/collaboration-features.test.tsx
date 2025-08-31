@@ -1,6 +1,5 @@
-import {
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-llaboration Features Integration Tests
+import { llaboration Features Integration Tests
  * 
  * Tests real-time cursor synchronization, presence awareness,
  * offline mode functionality, and collaborative editing features.

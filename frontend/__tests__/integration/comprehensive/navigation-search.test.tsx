@@ -1,6 +1,5 @@
-import {
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-vigation and Search Integration Tests
+import { vigation and Search Integration Tests
  * 
  * Tests complex navigation flows, deep linking, state preservation,
  * protected routes, and advanced search functionality with filters.
