@@ -504,6 +504,15 @@ class UnifiedSecretManager:
     def clear_cache(self):
         """Clear the secret cache."""
         self._cache.clear()
+        
+        # Also clear central validator cache in test contexts
+        # This ensures environment changes via test patching are respected
+        try:
+            from shared.configuration import clear_central_validator_cache
+            clear_central_validator_cache()
+        except ImportError:
+            # Central validator not available - ignore
+            pass
     
     def populate_secrets(self, config) -> None:
         """Populate secrets into configuration object using central validator.

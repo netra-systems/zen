@@ -223,6 +223,13 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
         self.monitor.start_operation(f"supervisor_execution_{context.run_id}")
         await self.send_status_update(context, "executing", "Starting orchestration...")
         
+        # Send high-level orchestration start notification
+        await self._send_orchestration_notification(
+            context.thread_id, context.run_id, 
+            "supervisor_starting", 
+            f"Supervisor starting to orchestrate your request..."
+        )
+        
         result = await self._execute_orchestration_workflow(context)
         
         self.monitor.complete_operation(f"supervisor_execution_{context.run_id}")
@@ -385,3 +392,36 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
     def get_circuit_breaker_status(self) -> Dict[str, Any]:
         """Get circuit breaker status from reliability manager."""
         return self.completion_helpers.get_reliability_status()
+    
+    async def _send_orchestration_notification(self, thread_id: str, run_id: str, 
+                                             event_type: str, message: str) -> None:
+        """Send orchestration-level WebSocket notification."""
+        try:
+            if not self.websocket_manager:
+                logger.debug(f"No WebSocket manager available for orchestration event: {event_type}")
+                return
+            
+            # Create orchestration notification payload
+            payload = {
+                "run_id": run_id,
+                "event_type": event_type,
+                "message": message,
+                "timestamp": self._get_current_timestamp(),
+                "agent_name": "supervisor",
+                "orchestration_level": True
+            }
+            
+            # Send notification
+            from netra_backend.app.schemas.websocket_models import WebSocketMessage
+            notification = WebSocketMessage(type=event_type, payload=payload)
+            await self.websocket_manager.send_to_thread(thread_id, notification.model_dump())
+            
+            logger.info(f"Supervisor sent orchestration notification: {event_type} - {message[:50]}...")
+            
+        except Exception as e:
+            logger.warning(f"Failed to send supervisor orchestration notification {event_type}: {e}")
+    
+    def _get_current_timestamp(self) -> float:
+        """Get current timestamp."""
+        from datetime import datetime, timezone
+        return datetime.now(timezone.utc).timestamp()

@@ -4,6 +4,7 @@ Business Value: Standardized execution patterns with improved reliability,
 comprehensive monitoring, and 40% better error handling.
 """
 
+import time
 import uuid
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
@@ -119,10 +120,46 @@ class TriageSubAgent(BaseExecutionInterface, BaseSubAgent):
         return await self.executor.check_entry_conditions(state, run_id)
 
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
-        """Execute triage using modern execution pattern."""
+        """Execute triage using modern execution pattern with WebSocket notifications."""
         context = self._create_execution_context(state, run_id, stream_updates)
-        result = await self.execution_engine.execute(self, context)
-        await self._process_execution_result(state, result)
+        
+        # Send agent started notification
+        if self.websocket_manager:
+            notifier = self._get_websocket_notifier()
+            ws_context = self._create_websocket_context(context)
+            await notifier.send_agent_started(ws_context)
+        
+        start_time = time.time()
+        try:
+            result = await self.execution_engine.execute(self, context)
+            await self._process_execution_result(state, result)
+            
+            # Send agent completed notification
+            if self.websocket_manager:
+                duration_ms = (time.time() - start_time) * 1000
+                result_dict = self._extract_completion_result(state)
+                await notifier.send_agent_completed(
+                    ws_context, result_dict, duration_ms
+                )
+        except Exception as e:
+            # Send agent error notification
+            if self.websocket_manager:
+                await notifier.send_agent_failed(
+                    ws_context, str(e), {"error_type": type(e).__name__}
+                )
+            raise
+    
+    def _extract_completion_result(self, state: DeepAgentState) -> Dict[str, Any]:
+        """Extract completion result for WebSocket notification."""
+        if hasattr(state, 'triage_result') and state.triage_result:
+            if isinstance(state.triage_result, dict):
+                return {
+                    "category": state.triage_result.get("category", "Unknown"),
+                    "confidence_score": state.triage_result.get("confidence_score", 0.0),
+                    "status": state.triage_result.get("status", "success")
+                }
+            return {"status": "completed", "result": str(state.triage_result)}
+        return {"status": "completed"}
     
     def _create_execution_context(self, state: DeepAgentState, run_id: str, 
                                  stream_updates: bool) -> ExecutionContext:
@@ -160,11 +197,44 @@ class TriageSubAgent(BaseExecutionInterface, BaseSubAgent):
         return await self.executor.check_entry_conditions(context.state, context.run_id)
     
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
-        """Execute triage core logic."""
+        """Execute triage core logic with WebSocket notifications."""
+        # Set WebSocket context in state for tool execution notifications
+        if hasattr(context.state, '__dict__'):
+            context.state._websocket_context = self._create_websocket_context(context)
+        
+        # Send agent thinking notification
+        if self.websocket_manager:
+            notifier = self._get_websocket_notifier()
+            ws_context = self._create_websocket_context(context)
+            await notifier.send_agent_thinking(
+                ws_context, 
+                "Analyzing your request to determine the best approach..."
+            )
+        
         result = await self.executor.execute_triage_workflow(
             context.state, context.run_id, context.stream_updates
         )
         return self._extract_result_data(result, context.state)
+    
+    def _get_websocket_notifier(self):
+        """Get WebSocket notifier instance."""
+        if not hasattr(self, '_websocket_notifier'):
+            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+            self._websocket_notifier = WebSocketNotifier(self.websocket_manager)
+        return self._websocket_notifier
+    
+    def _create_websocket_context(self, context: ExecutionContext):
+        """Create WebSocket execution context."""
+        from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+        from netra_backend.app.agents.utils import extract_thread_id
+        
+        thread_id = extract_thread_id(context.state, context.run_id)
+        return AgentExecutionContext(
+            agent_name=self.name,
+            run_id=context.run_id,
+            thread_id=thread_id,
+            user_id=getattr(context.state, 'user_id', context.run_id)
+        )
     
     def _extract_result_data(self, result: Any, state: DeepAgentState) -> Dict[str, Any]:
         """Extract result data for execution interface."""
