@@ -10,6 +10,24 @@ from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 from netra_backend.app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
 from netra_backend.app.core.isolated_environment import get_env
 
+# CRITICAL: Set ClickHouse configuration BEFORE any imports that trigger config loading
+env = get_env()
+# Override test framework's disabled ClickHouse for these specific tests using Docker credentials 
+env.set("CLICKHOUSE_HOST", env.get("TEST_CLICKHOUSE_HOST", "localhost"), source="clickhouse_conftest_setup")
+env.set("CLICKHOUSE_HTTP_PORT", env.get("TEST_CLICKHOUSE_HTTP_PORT", "8125"), source="clickhouse_conftest_setup") 
+env.set("CLICKHOUSE_USER", env.get("TEST_CLICKHOUSE_USER", "test_user"), source="clickhouse_conftest_setup")
+env.set("CLICKHOUSE_PASSWORD", env.get("TEST_CLICKHOUSE_PASSWORD", "test_pass"), source="clickhouse_conftest_setup")
+env.set("CLICKHOUSE_DB", env.get("TEST_CLICKHOUSE_DB", "netra_test_analytics"), source="clickhouse_conftest_setup")
+# Enable ClickHouse for these specific tests
+env.set("CLICKHOUSE_ENABLED", "true", source="clickhouse_conftest_setup")
+env.set("DEV_MODE_DISABLE_CLICKHOUSE", "false", source="clickhouse_conftest_setup")
+# Force configuration reload after setting environment variables
+try:
+    from netra_backend.app.config import reload_config
+    reload_config(force=True)
+except ImportError:
+    pass
+
 
 def pytest_collection_modifyitems(config, items):
     """Configure ClickHouse test collection - respects test framework settings."""
@@ -33,16 +51,33 @@ def _get_clickhouse_config():
 
 def _create_clickhouse_client(config):
     """Create ClickHouse client with given configuration"""
+    # OVERRIDE: For test environment, use Docker container settings directly
+    # This bypasses configuration caching issues during testing
+    env = get_env()
+    test_host = env.get("TEST_CLICKHOUSE_HOST")
+    test_port = env.get("TEST_CLICKHOUSE_HTTP_PORT") 
+    test_user = env.get("TEST_CLICKHOUSE_USER")
+    test_password = env.get("TEST_CLICKHOUSE_PASSWORD")
+    test_database = env.get("TEST_CLICKHOUSE_DB")
+    
+    # Use test settings if available, otherwise fall back to config
+    host = test_host or config.host or "localhost"
+    port = int(test_port or config.port or 8125)
+    user = test_user or config.user or "test_user"  
+    password = test_password or config.password or "test_pass"
+    database = test_database or config.database or "netra_test_analytics"
+    
     # Never use HTTPS for localhost connections to avoid SSL errors
-    is_localhost = config.host in ["localhost", "127.0.0.1", "::1"]
+    is_localhost = host in ["localhost", "127.0.0.1", "::1"]
     # Use secure connection only for remote hosts on HTTPS port (8443)
-    use_secure = not is_localhost and config.port == 8443
+    use_secure = not is_localhost and port == 8443
+    
     return ClickHouseDatabase(
-        host=config.host, 
-        port=config.port, 
-        user=config.user,
-        password=config.password, 
-        database=config.database, 
+        host=host, 
+        port=port, 
+        user=user,
+        password=password, 
+        database=database, 
         secure=use_secure
     )
 
@@ -51,20 +86,31 @@ def _check_clickhouse_availability():
     """Check if ClickHouse is available and accessible (simplified version)"""
     env = get_env()
     
-    # First check if ClickHouse is disabled by test framework settings
-    clickhouse_disabled = (
-        env.get("DEV_MODE_DISABLE_CLICKHOUSE", "").lower() == "true" or
-        env.get("CLICKHOUSE_ENABLED", "").lower() == "false"
-    )
-    
-    if clickhouse_disabled:
-        return False
+    # Override disabled ClickHouse for these specific tests by setting the necessary env vars
+    # This allows ClickHouse-specific tests to run even when globally disabled
+    if not env.get("CLICKHOUSE_HOST"):
+        # Use Docker container configuration for ClickHouse tests
+        env.set("CLICKHOUSE_HOST", env.get("TEST_CLICKHOUSE_HOST", "localhost"), source="clickhouse_conftest")
+        env.set("CLICKHOUSE_HTTP_PORT", env.get("TEST_CLICKHOUSE_HTTP_PORT", "8125"), source="clickhouse_conftest") 
+        env.set("CLICKHOUSE_USER", env.get("TEST_CLICKHOUSE_USER", "test_user"), source="clickhouse_conftest")
+        env.set("CLICKHOUSE_PASSWORD", env.get("TEST_CLICKHOUSE_PASSWORD", "test_pass"), source="clickhouse_conftest")
+        env.set("CLICKHOUSE_DB", env.get("TEST_CLICKHOUSE_DB", "netra_test_analytics"), source="clickhouse_conftest")
+        # Enable ClickHouse for these specific tests
+        env.set("CLICKHOUSE_ENABLED", "true", source="clickhouse_conftest")
+        env.set("DEV_MODE_DISABLE_CLICKHOUSE", "false", source="clickhouse_conftest")
+        
+        # Force configuration reload to pick up the new environment variables
+        try:
+            from netra_backend.app.config import reload_config
+            reload_config(force=True)
+        except ImportError:
+            # Fallback if reload function not available
+            pass
     
     try:
-        # Don't try to get actual config if it's disabled - this can cause connection attempts
-        # Just check if basic environment variables are set
+        # Check if basic environment variables are set
         clickhouse_host = env.get("CLICKHOUSE_HOST", "localhost")
-        clickhouse_port = env.get("CLICKHOUSE_HTTP_PORT", "8123")
+        clickhouse_port = env.get("CLICKHOUSE_HTTP_PORT", "8125")
         clickhouse_user = env.get("CLICKHOUSE_USER", "default")
         return bool(clickhouse_host and clickhouse_port and clickhouse_user)
     except Exception:
@@ -82,22 +128,16 @@ def real_clickhouse_client():
     """Create a real ClickHouse client using appropriate configuration.
     
     This fixture:
-    - Checks if ClickHouse is disabled by test framework settings
-    - Uses HTTP on port 8123 for localhost connections
-    - Uses correct credentials (user: default, password: netra_dev_password)
+    - Overrides disabled ClickHouse settings for ClickHouse-specific tests
+    - Uses HTTP on port 8125 for Docker container connections
+    - Uses correct credentials (user: default, password: test_password)
     - Is available to all ClickHouse tests through pytest fixture discovery
     """
     env = get_env()
     
-    # Check if ClickHouse should be disabled based on test framework settings
-    # These variables are set after test collection, so check them in the fixture
-    clickhouse_disabled_by_framework = (
-        env.get("DEV_MODE_DISABLE_CLICKHOUSE", "").lower() == "true" or
-        env.get("CLICKHOUSE_ENABLED", "").lower() == "false"
-    )
-    
-    if clickhouse_disabled_by_framework:
-        pytest.skip("ClickHouse disabled by test framework (DEV_MODE_DISABLE_CLICKHOUSE=true or CLICKHOUSE_ENABLED=false)")
+    # OVERRIDE: For ClickHouse-specific tests, always enable ClickHouse
+    # This ensures these tests can run even when ClickHouse is globally disabled
+    _check_clickhouse_availability()  # This sets the necessary environment variables
     
     # Check basic availability BEFORE trying to get config or create client
     if not _check_clickhouse_availability():
@@ -125,14 +165,8 @@ async def async_real_clickhouse_client():
     """Async version of real_clickhouse_client for async test contexts"""
     env = get_env()
     
-    # Check if ClickHouse should be disabled based on test framework settings
-    clickhouse_disabled_by_framework = (
-        env.get("DEV_MODE_DISABLE_CLICKHOUSE", "").lower() == "true" or
-        env.get("CLICKHOUSE_ENABLED", "").lower() == "false"
-    )
-    
-    if clickhouse_disabled_by_framework:
-        pytest.skip("ClickHouse disabled by test framework (DEV_MODE_DISABLE_CLICKHOUSE=true or CLICKHOUSE_ENABLED=false)")
+    # OVERRIDE: For ClickHouse-specific tests, always enable ClickHouse
+    _check_clickhouse_availability()  # This sets the necessary environment variables
     
     # Check basic availability
     if not _check_clickhouse_availability():
@@ -161,14 +195,8 @@ def real_clickhouse_client_with_interceptor():
     """Create a real ClickHouse client with query interceptor for advanced testing"""
     env = get_env()
     
-    # Check if ClickHouse should be disabled based on test framework settings
-    clickhouse_disabled_by_framework = (
-        env.get("DEV_MODE_DISABLE_CLICKHOUSE", "").lower() == "true" or
-        env.get("CLICKHOUSE_ENABLED", "").lower() == "false"
-    )
-    
-    if clickhouse_disabled_by_framework:
-        pytest.skip("ClickHouse disabled by test framework (DEV_MODE_DISABLE_CLICKHOUSE=true or CLICKHOUSE_ENABLED=false)")
+    # OVERRIDE: For ClickHouse-specific tests, always enable ClickHouse
+    _check_clickhouse_availability()  # This sets the necessary environment variables
     
     # Check basic availability
     if not _check_clickhouse_availability():

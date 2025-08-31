@@ -25,13 +25,13 @@ from netra_backend.app.agents.triage_sub_agent.models import (
     ExtractedEntities,
     TriageResult,
 )
-from netra_backend.app.auth.auth_client import AuthServiceClient
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from netra_backend.app.core.isolated_environment import IsolatedEnvironment
 from netra_backend.app.database import get_db_session
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 logger = central_logger.get_logger(__name__)
 

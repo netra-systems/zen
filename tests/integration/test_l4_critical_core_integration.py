@@ -27,7 +27,7 @@ class TestL4CriticalAuthIntegration:
     @pytest.mark.asyncio
     async def test_01_concurrent_login_race_condition(self):
         """Test: Multiple simultaneous login attempts from same user"""
-        from netra_backend.app.auth_integration.auth_client import AuthServiceClient
+        from netra_backend.app.clients.auth_client_core import AuthServiceClient
         from netra_backend.app.core.config import settings
         
         auth_client = AuthServiceClient(settings.AUTH_SERVICE_URL)

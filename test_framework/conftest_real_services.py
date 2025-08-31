@@ -66,13 +66,20 @@ if "pytest" in sys.modules or get_test_env_manager().env.get("PYTEST_CURRENT_TES
     env.set("TESTING", "1", source="real_services_conftest") 
     env.set("SKIP_MOCKS", "true", source="real_services_conftest")
     
-    # Service endpoints for real testing
+    # Service endpoints for real testing (Docker containers)
     env.set("TEST_POSTGRES_HOST", "localhost", source="real_services_conftest")
     env.set("TEST_POSTGRES_PORT", "5434", source="real_services_conftest")
+    env.set("TEST_POSTGRES_USER", "test_user", source="real_services_conftest")
+    env.set("TEST_POSTGRES_PASSWORD", "test_pass", source="real_services_conftest")
+    env.set("TEST_POSTGRES_DB", "netra_test", source="real_services_conftest")
     env.set("TEST_REDIS_HOST", "localhost", source="real_services_conftest") 
     env.set("TEST_REDIS_PORT", "6381", source="real_services_conftest")
     env.set("TEST_CLICKHOUSE_HOST", "localhost", source="real_services_conftest")
     env.set("TEST_CLICKHOUSE_HTTP_PORT", "8125", source="real_services_conftest")
+    env.set("TEST_CLICKHOUSE_TCP_PORT", "9002", source="real_services_conftest")
+    env.set("TEST_CLICKHOUSE_USER", "test_user", source="real_services_conftest")
+    env.set("TEST_CLICKHOUSE_PASSWORD", "test_pass", source="real_services_conftest")
+    env.set("TEST_CLICKHOUSE_DB", "netra_test_analytics", source="real_services_conftest")
 
 
 # =============================================================================

@@ -361,7 +361,7 @@ class TestSecurityIntegration:
 
         """Test JWT token rotation without disrupting active sessions"""
         # Will fail - no token rotation mechanism
-        from netra_backend.app.auth.jwt_handler import JWTHandler
+        from auth_service.auth_core.core.jwt_handler import JWTHandler
         
         handler = JWTHandler()
 

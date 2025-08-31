@@ -732,7 +732,8 @@ class E2EEnvironmentValidator:
         """Validate required environment variables are set."""
         required_vars = [
             "GOOGLE_API_KEY",  # For real LLM testing
-            "JWT_SECRET_KEY",  # For authentication
+            "JWT_SECRET_KEY",  # For authentication (development/generic)
+            "JWT_SECRET_STAGING",  # For staging authentication  
             "FERNET_KEY"       # For encryption
         ]
         
