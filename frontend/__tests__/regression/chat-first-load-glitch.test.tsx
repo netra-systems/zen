@@ -156,12 +156,7 @@ describe('Chat First-Time Page Load Glitch Detection', () => {
     consoleErrorSpy.mockRestore();
     consoleWarnSpy.mockRestore();
     jest.clearAllMocks();
-      // Clean up timers to prevent hanging
-      jest.clearAllTimers();
-      jest.useFakeTimers();
-      jest.runOnlyPendingTimers();
-      jest.useRealTimers();
-      cleanupAntiHang();
+    cleanupAntiHang();
   });
 
   /**
@@ -622,8 +617,6 @@ describe('Chat First-Time Page Load Glitch Detection', () => {
  * Integration Test Suite - Full Page Load Scenario
  */
 describe('Chat Page Full Load Integration', () => {
-  setupAntiHang();
-    jest.setTimeout(10000);
   /**
    * Test 9: Complete first-time user flow
    * EXPECTED TO FAIL: Multiple issues in complete flow
