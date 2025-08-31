@@ -3,7 +3,13 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
- flawless chat experience for conversion and retention
+
+/**
+ * COMPREHENSIVE CHAT INTERFACE TESTS
+ * Business Value Justification (BVJ): 
+ * 1. Segment: All tiers (Free, Early, Mid, Enterprise)
+ * 2. Business Goal: Retention and Conversion through
+ * flawless chat experience for conversion and retention
  * 3. Value Impact: 95% reduction in chat-related user friction and abandonment
  * 4. Revenue Impact: +$50K MRR from improved user experience and conversion rates
  * 
@@ -181,14 +187,16 @@ describe('Comprehensive Chat Interface Tests', () => {
         id: 'msg1',
         content: 'Hello, how can I help you today?',
         role: 'user',
-        timestamp: new Date().toISOString(),
+        timestamp: Date.now() - 2000,
+        created_at: new Date(Date.now() - 2000).toISOString(),
         threadId: 'thread1'
       },
       {
         id: 'msg2', 
         content: 'I need help with my AI optimization.',
         role: 'assistant',
-        timestamp: new Date().toISOString(),
+        timestamp: Date.now(),
+        created_at: new Date().toISOString(),
         threadId: 'thread1'
       }
     ];
