@@ -44,18 +44,17 @@ class AuthConfig:
     
     @staticmethod
     def get_jwt_secret() -> str:
-        """Get JWT secret key using unified secret loader"""
-        secret = AuthSecretLoader.get_jwt_secret()
-        env = AuthConfig.get_environment()
+        """
+        Get JWT secret key using SHARED secret manager.
         
-        # Validate secret in staging/production
-        if env in ["staging", "production"] and not secret:
-            raise ValueError(f"JWT_SECRET_KEY must be set in {env} environment")
+        CRITICAL: This now uses SharedJWTSecretManager to ensure
+        the EXACT same JWT secret is used by both auth service and backend.
+        This is REQUIRED for cross-service authentication to work.
+        """
+        from shared.jwt_secret_manager import SharedJWTSecretManager
         
-        if env in ["staging", "production"] and len(secret) < 32:
-            raise ValueError(f"JWT_SECRET_KEY must be at least 32 characters in {env} environment")
-        
-        return secret
+        # Use the SINGLE source of truth for JWT secrets
+        return SharedJWTSecretManager.get_jwt_secret()
     
     @staticmethod
     def get_service_secret() -> str:
