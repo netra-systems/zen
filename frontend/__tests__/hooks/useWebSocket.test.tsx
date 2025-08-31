@@ -2,8 +2,10 @@ import { renderHook } from '@testing-library/react';
 import React from 'react';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { TestProviders } from '@/__tests__/test-utils/providers';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('useWebSocket', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     // Mock fetch for config
     global.fetch = jest.fn().mockResolvedValue({

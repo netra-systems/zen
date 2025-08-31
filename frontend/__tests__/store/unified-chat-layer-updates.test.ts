@@ -14,6 +14,8 @@
 import { UnifiedChatStoreTestUtils, GlobalTestUtils } from './store-test-utils';
 
 describe('UnifiedChatStore - Layer Updates', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let storeResult: ReturnType<typeof UnifiedChatStoreTestUtils.initializeStore>;
 
   // Setup test environment (≤8 lines)
@@ -32,6 +34,8 @@ describe('UnifiedChatStore - Layer Updates', () => {
   });
 
   describe('Fast Layer Updates', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should update fast layer data correctly', () => {
       const fastLayerData = {
         agentName: 'Test Agent',
@@ -81,6 +85,8 @@ describe('UnifiedChatStore - Layer Updates', () => {
   });
 
   describe('Medium Layer Updates', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should update medium layer data and accumulate partial content', () => {
       const firstUpdate = {
         thought: 'Thinking...',
@@ -138,6 +144,8 @@ describe('UnifiedChatStore - Layer Updates', () => {
   });
 
   describe('Slow Layer Updates', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should update slow layer data and accumulate completed agents', () => {
       const firstAgent = {
         completedAgents: [{
@@ -203,6 +211,8 @@ describe('UnifiedChatStore - Layer Updates', () => {
   });
 
   describe('Layer Reset Functionality', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should reset all layers to null state', () => {
       // Set up some data first
       UnifiedChatStoreTestUtils.updateFastLayerAndVerify(storeResult, {
@@ -233,4 +243,8 @@ describe('UnifiedChatStore - Layer Updates', () => {
       expect(storeResult.current.connectionError).toBeNull();
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

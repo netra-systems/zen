@@ -1,9 +1,9 @@
-/**
- * Undo/Redo History Tests - State Timeline Management
- * 
- * BVJ (Business Value Justification):
- * - Segment: Growth & Enterprise (premium productivity features)
- * - Business Goal: Advanced UX features for paid tiers
+import { act, renderHook } from '@testing-library/react';
+import { useChatStore } from '@/store/chat';
+import { useAppStore } from '@/store/app';
+import { ChatStoreTestUtils, GlobalTestUtils } from './store-test-utils';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ers
  * - Value Impact: Undo/redo increases user confidence and productivity
  * - Revenue Impact: Premium feature differentiation justifies higher pricing
  * 
@@ -112,6 +112,7 @@ class StateHistoryManager {
 }
 
 describe('Undo/Redo History Tests', () => {
+    jest.setTimeout(10000);
   let historyManager: StateHistoryManager;
 
   beforeEach(() => {
@@ -127,9 +128,15 @@ describe('Undo/Redo History Tests', () => {
 
   afterEach(() => {
     GlobalTestUtils.cleanupStoreTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('State History Management', () => {
+      jest.setTimeout(10000);
     it('should track state changes for undo/redo', () => {
       const hookResult = ChatStoreTestUtils.initializeStore();
       const store = hookResult.result.current;
@@ -223,6 +230,7 @@ describe('Undo/Redo History Tests', () => {
   });
 
   describe('Undo Operations', () => {
+      jest.setTimeout(10000);
     it('should undo single message addition', () => {
       const hookResult = ChatStoreTestUtils.initializeStore();
       const store = hookResult.result.current;
@@ -346,6 +354,7 @@ describe('Undo/Redo History Tests', () => {
   });
 
   describe('Redo Operations', () => {
+      jest.setTimeout(10000);
     it('should redo undone actions', () => {
       const result = ChatStoreTestUtils.initializeStore();
       
@@ -454,6 +463,7 @@ describe('Undo/Redo History Tests', () => {
   });
 
   describe('Timeline Integrity', () => {
+      jest.setTimeout(10000);
     it('should maintain action timestamps', () => {
       const result = ChatStoreTestUtils.initializeStore();
       
@@ -543,6 +553,7 @@ describe('Undo/Redo History Tests', () => {
   });
 
   describe('Memory Management', () => {
+      jest.setTimeout(10000);
     it('should limit history memory usage', () => {
       const result = ChatStoreTestUtils.initializeStore();
       

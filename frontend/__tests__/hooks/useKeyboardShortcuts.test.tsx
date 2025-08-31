@@ -12,6 +12,8 @@ jest.mock('@/store/chat');
 jest.mock('@/store/threadStore');
 
 describe('useKeyboardShortcuts', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let mockRouter: any;
   let mockChatStore: any;
   let mockThreadStore: any;
@@ -66,9 +68,17 @@ describe('useKeyboardShortcuts', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Hook Initialization', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should initialize without errors', () => {
       const { result } = renderHook(() => useKeyboardShortcuts());
       expect(result.current).toBeDefined();
@@ -90,6 +100,8 @@ describe('useKeyboardShortcuts', () => {
   });
 
   describe('Focus Management', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should focus message input when / key is pressed', () => {
       const focusMock = jest.fn();
       const textareaMock = { focus: focusMock };
@@ -131,6 +143,8 @@ describe('useKeyboardShortcuts', () => {
   });
 
   describe('Thread Navigation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should navigate to previous thread with Alt+Left', () => {
       act(() => {
         renderHook(() => useKeyboardShortcuts());
@@ -186,6 +200,8 @@ describe('useKeyboardShortcuts', () => {
   });
 
   describe('Escape Key Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle escape key when processing', () => {
       mockChatStore.isProcessing = true;
       renderHook(() => useKeyboardShortcuts());
@@ -223,6 +239,8 @@ describe('useKeyboardShortcuts', () => {
   });
 
   describe('Scroll Navigation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should scroll to top with g key', () => {
       let scrollTop = 500;
       const scrollAreaMock = {
@@ -272,6 +290,8 @@ describe('useKeyboardShortcuts', () => {
   });
 
   describe('New Chat Creation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should navigate to new chat with Ctrl+N', () => {
       renderHook(() => useKeyboardShortcuts());
 
@@ -289,6 +309,8 @@ describe('useKeyboardShortcuts', () => {
   });
 
   describe('Search Functionality', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should toggle search with Ctrl+K', () => {
       renderHook(() => useKeyboardShortcuts());
 

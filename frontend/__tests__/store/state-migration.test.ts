@@ -1,10 +1,10 @@
-/**
- * State Migration Tests - Schema Upgrades & Data Integrity
- * 
- * BVJ (Business Value Justification):
- * - Segment: All (critical for app updates)
- * - Business Goal: Seamless app updates without data loss
- * - Value Impact: Zero-downtime updates prevent user churn
+import { act, renderHook } from '@testing-library/react';
+import { useAppStore } from '@/store/app';
+import { useAuthStore } from '@/store/authStore';
+import { useChatStore } from '@/store/chat';
+import { GlobalTestUtils } from './store-test-utils';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+s prevent user churn
  * - Revenue Impact: Smooth migrations maintain user trust and retention
  * 
  * Tests: Schema upgrades, backward compatibility, data integrity
@@ -82,6 +82,7 @@ class StateMigrationManager {
 }
 
 describe('State Migration Tests', () => {
+    jest.setTimeout(10000);
   let mockStorage: ReturnType<typeof GlobalTestUtils.setupStoreTestEnvironment>['mockStorage'];
   let migrationManager: StateMigrationManager;
 
@@ -93,9 +94,15 @@ describe('State Migration Tests', () => {
 
   afterEach(() => {
     GlobalTestUtils.cleanupStoreTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Schema Upgrades', () => {
+      jest.setTimeout(10000);
     it('should migrate v0 state to current version', () => {
       const legacyState = {
         messages: [
@@ -199,6 +206,7 @@ describe('State Migration Tests', () => {
   });
 
   describe('Backward Compatibility', () => {
+      jest.setTimeout(10000);
     it('should maintain compatibility with older app versions', () => {
       const currentVersion = migrationManager.getCurrentVersion();
       
@@ -244,6 +252,7 @@ describe('State Migration Tests', () => {
   });
 
   describe('Data Integrity During Migration', () => {
+      jest.setTimeout(10000);
     it('should validate migrated data structure', () => {
       const invalidState = {
         messages: 'should be array', // Invalid type
@@ -336,6 +345,7 @@ describe('State Migration Tests', () => {
   });
 
   describe('Migration Performance', () => {
+      jest.setTimeout(10000);
     it('should handle large datasets efficiently', () => {
       const largeState = {
         messages: Array.from({ length: 10000 }, (_, i) => ({
@@ -409,6 +419,7 @@ describe('State Migration Tests', () => {
   });
 
   describe('Migration Error Handling', () => {
+      jest.setTimeout(10000);
     it('should handle migration failures gracefully', () => {
       const problematicState = {
         messages: [

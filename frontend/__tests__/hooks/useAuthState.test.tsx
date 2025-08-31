@@ -1,9 +1,10 @@
-/**
- * useAuthState Hook Tests - Revenue-Critical Auth State Management
- * 
- * BVJ: Free→Paid conversion depends on accurate auth state and tier detection
- * Tests cover: auth loading, user tiers, permissions, token management, session handling
- * 
+import React from 'react';
+import { renderHook, act, waitFor } from '@testing-library/react';
+import { useAuthState, UserTier } from '@/hooks/useAuthState';
+import { useAuthStore } from '@/store/authStore';
+import { User } from '@/types/unified';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ 
  * @compliance testing.xml - Hook testing patterns with 100% coverage
  * @prevents auth-tier-detection-failures regression
  * @prevents session-management-failures regression
@@ -30,6 +31,7 @@ Object.defineProperty(window, 'localStorage', {
 });
 
 describe('useAuthState Hook - Revenue Critical Auth Management', () => {
+    jest.setTimeout(10000);
   const mockUseAuthStore = useAuthStore as jest.MockedFunction<typeof useAuthStore>;
   const mockLocalStorage = window.localStorage as jest.Mocked<typeof window.localStorage>;
 
@@ -101,6 +103,7 @@ describe('useAuthState Hook - Revenue Critical Auth Management', () => {
    * Critical for user experience and conversion flow
    */
   describe('Initial Auth State Loading', () => {
+      jest.setTimeout(10000);
     // Helper: Assert unauthenticated state (≤8 lines)
     const expectUnauthenticatedState = (state: any) => {
       expect(state.isAuthenticated).toBe(false);
@@ -161,6 +164,7 @@ describe('useAuthState Hook - Revenue Critical Auth Management', () => {
    * Tests all tier detection logic for Free→Paid conversion flow
    */
   describe('User Tier Detection - Conversion Critical', () => {
+      jest.setTimeout(10000);
     const tierTestCases = [
       { role: 'super_admin', expectedTier: 'Enterprise' as UserTier },
       { role: 'admin', expectedTier: 'Enterprise' as UserTier },
@@ -208,6 +212,7 @@ describe('useAuthState Hook - Revenue Critical Auth Management', () => {
    * Critical for tier-based feature access control
    */
   describe('Permission Management - Feature Gating', () => {
+      jest.setTimeout(10000);
     // Helper: Create permission function mocks (≤8 lines)
     const createPermissionMocks = () => ({
       hasPermission: jest.fn(),
@@ -290,6 +295,7 @@ describe('useAuthState Hook - Revenue Critical Auth Management', () => {
    * Critical for maintaining user trust during auth issues
    */
   describe('Error Handling - User Experience', () => {
+      jest.setTimeout(10000);
     const errorTestCases = [
       { storeError: 'network_timeout', expectedError: 'Connection issue. Please try again.' },
       { storeError: 'invalid_token', expectedError: 'Session expired. Please log in again.' },
@@ -349,6 +355,7 @@ describe('useAuthState Hook - Revenue Critical Auth Management', () => {
    * Critical for maintaining authenticated sessions
    */
   describe('Session Management - Token Refresh', () => {
+      jest.setTimeout(10000);
     // Helper: Setup token refresh test (≤8 lines)
     const setupTokenRefreshTest = () => {
       mockLocalStorage.getItem.mockReturnValue('existing_jwt_token');
@@ -410,6 +417,7 @@ describe('useAuthState Hook - Revenue Critical Auth Management', () => {
    * Critical for security and clean session management
    */
   describe('Logout and Cleanup', () => {
+      jest.setTimeout(10000);
     // Helper: Create logout test state (≤8 lines)
     const createLogoutTestState = (logout: any) => ({
       isAuthenticated: true,

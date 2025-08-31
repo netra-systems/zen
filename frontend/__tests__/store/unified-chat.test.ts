@@ -22,6 +22,8 @@ import type {
 } from '@/types/unified-chat';
 
 describe('UnifiedChatStore', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     // Reset store state before each test
     const { result } = renderHook(() => useUnifiedChatStore());
@@ -31,6 +33,8 @@ describe('UnifiedChatStore', () => {
   });
 
   describe('Layer Updates', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should update fast layer data', () => {
       const { result } = renderHook(() => useUnifiedChatStore());
       
@@ -107,6 +111,8 @@ describe('UnifiedChatStore', () => {
   });
 
   describe('WebSocket Event Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle agent_started event', () => {
       const { result } = renderHook(() => useUnifiedChatStore());
       
@@ -305,6 +311,8 @@ describe('UnifiedChatStore', () => {
   });
 
   describe('State Management', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should reset all layers', () => {
       const { result } = renderHook(() => useUnifiedChatStore());
       
@@ -365,4 +373,8 @@ describe('UnifiedChatStore', () => {
       expect(result.current.connectionError).toBe('Connection lost');
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

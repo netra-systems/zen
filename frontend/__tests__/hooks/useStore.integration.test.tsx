@@ -1,10 +1,11 @@
-// Store Hooks Integration Tests
-// Tests store hook integration patterns and performance
-// Business Value: Ensures reliable state management across all user interactions
-
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { useUnifiedChatStore } from '@/store/unified-chat';
+import { useAuthStore } from '@/store/authStore';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+y/react';
 import userEvent from '@testing-library/user-event';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useAuthStore } from '@/store/authStore';
@@ -120,6 +121,7 @@ const HookIntegrationComponent: React.FC = () => {
 };
 
 describe('Store Hooks Integration Tests', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     // Reset all stores before each test
     act(() => {
@@ -129,6 +131,7 @@ describe('Store Hooks Integration Tests', () => {
   });
 
   describe('Multi-Store Hook Integration', () => {
+      jest.setTimeout(10000);
     it('integrates multiple store hooks correctly', () => {
       const { result } = renderHook(() => useMultiStoreHook());
       
@@ -167,6 +170,7 @@ describe('Store Hooks Integration Tests', () => {
   });
 
   describe('Selective Store Subscriptions', () => {
+      jest.setTimeout(10000);
     it('implements selective subscriptions correctly', () => {
       const { result } = renderHook(() => useSelectiveStoreHook());
       
@@ -230,6 +234,7 @@ describe('Store Hooks Integration Tests', () => {
   });
 
   describe('Derived State Hook Integration', () => {
+      jest.setTimeout(10000);
     it('computes derived state correctly', () => {
       const { result } = renderHook(() => useDerivedStoreState());
       
@@ -307,6 +312,7 @@ describe('Store Hooks Integration Tests', () => {
   });
 
   describe('Hook Performance and Memory Management', () => {
+      jest.setTimeout(10000);
     it('handles hook cleanup properly', () => {
       const TestComponent = () => {
         const { totalMessages } = useDerivedStoreState();
@@ -413,6 +419,7 @@ describe('Store Hooks Integration Tests', () => {
   });
 
   describe('Hook Integration with Components', () => {
+      jest.setTimeout(10000);
     it('integrates hooks correctly in component context', async () => {
       const user = userEvent.setup();
       

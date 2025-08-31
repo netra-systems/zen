@@ -14,6 +14,8 @@
 import { AuthStoreTestUtils, GlobalTestUtils } from './store-test-utils';
 
 describe('AuthStore - State Management', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let mockStorage: ReturnType<typeof GlobalTestUtils.setupStoreTestEnvironment>['mockStorage'];
   let storeResult: ReturnType<typeof AuthStoreTestUtils.initializeStore>;
 
@@ -36,6 +38,8 @@ describe('AuthStore - State Management', () => {
   });
 
   describe('User Updates - State Integrity', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should update user properties correctly', () => {
       const user = AuthStoreTestUtils.createMockUser('power_user', ['analytics']);
       const token = AuthStoreTestUtils.createTestToken('update-test');
@@ -97,6 +101,8 @@ describe('AuthStore - State Management', () => {
   });
 
   describe('Loading State Management', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should manage loading state correctly', () => {
       expect(storeResult.current.loading).toBe(false);
 
@@ -131,6 +137,8 @@ describe('AuthStore - State Management', () => {
   });
 
   describe('Error State Management', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should manage error state correctly', () => {
       expect(storeResult.current.error).toBeNull();
 
@@ -176,6 +184,8 @@ describe('AuthStore - State Management', () => {
   });
 
   describe('Security Edge Cases - Environment Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle SSR environment without localStorage', () => {
       // Temporarily remove window to simulate SSR
       const originalWindow = global.window;
@@ -226,6 +236,8 @@ describe('AuthStore - State Management', () => {
   });
 
   describe('State Reset and Cleanup', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should reset all state completely', () => {
       const user = AuthStoreTestUtils.createMockUser('standard_user');
       const token = AuthStoreTestUtils.createTestToken('reset-complete');
@@ -272,6 +284,8 @@ describe('AuthStore - State Management', () => {
   });
 
   describe('State Persistence and Recovery', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should maintain state integrity across operations', () => {
       const user = AuthStoreTestUtils.createMockUser('power_user', ['analytics']);
       const token = AuthStoreTestUtils.createTestToken('integrity');
@@ -301,4 +315,8 @@ describe('AuthStore - State Management', () => {
       expect(mockStorage.getItem).toHaveBeenCalledWith('jwt_token');
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

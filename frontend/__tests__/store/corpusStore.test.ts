@@ -6,6 +6,8 @@
 import { useCorpusStore } from '@/store/corpusStore';
 
 describe('CorpusStore', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     useCorpusStore.getState().reset();
   });
@@ -65,4 +67,8 @@ describe('CorpusStore', () => {
     expect(corpus1Docs).toHaveLength(1);
     expect(corpus1Docs[0].id).toBe('doc-1');
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

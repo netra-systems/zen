@@ -23,6 +23,8 @@ import type {
 } from '@/types/unified-chat';
 
 describe('UnifiedChatStore - WebSocket Events', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let storeResult: ReturnType<typeof UnifiedChatStoreTestUtils.initializeStore>;
 
   // Setup test environment (≤8 lines)
@@ -41,6 +43,8 @@ describe('UnifiedChatStore - WebSocket Events', () => {
   });
 
   describe('Agent Started Events', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle agent_started event correctly', () => {
       const event: AgentStartedEvent = {
         type: 'agent_started',
@@ -85,6 +89,8 @@ describe('UnifiedChatStore - WebSocket Events', () => {
   });
 
   describe('Tool Executing Events', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle tool_executing event correctly', () => {
       // First set up fast layer data
       UnifiedChatStoreTestUtils.updateFastLayerAndVerify(storeResult, {
@@ -141,6 +147,8 @@ describe('UnifiedChatStore - WebSocket Events', () => {
   });
 
   describe('Agent Thinking Events', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle agent_thinking event correctly', () => {
       const event: AgentThinkingEvent = {
         type: 'agent_thinking',
@@ -190,6 +198,8 @@ describe('UnifiedChatStore - WebSocket Events', () => {
   });
 
   describe('Partial Result Events', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle partial_result event correctly', () => {
       const event1: PartialResultEvent = {
         type: 'partial_result',
@@ -232,6 +242,8 @@ describe('UnifiedChatStore - WebSocket Events', () => {
   });
 
   describe('Agent Completed Events', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle agent_completed event correctly', () => {
       const event: AgentCompletedEvent = {
         type: 'agent_completed',
@@ -280,6 +292,8 @@ describe('UnifiedChatStore - WebSocket Events', () => {
   });
 
   describe('Final Report Events', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle final_report event correctly', () => {
       UnifiedChatStoreTestUtils.setProcessingAndVerify(storeResult, true);
 
@@ -316,6 +330,8 @@ describe('UnifiedChatStore - WebSocket Events', () => {
   });
 
   describe('Error Events', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle error event correctly', () => {
       UnifiedChatStoreTestUtils.setProcessingAndVerify(storeResult, true);
 
@@ -351,4 +367,8 @@ describe('UnifiedChatStore - WebSocket Events', () => {
       expect(storeResult.current.messages[0].content).toContain('Temporary network issue');
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

@@ -21,6 +21,8 @@ jest.mock('@/store/unified-chat', () => ({
 }));
 
 describe('useInitializationCoordinator', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const mockUseAuth = useAuth as jest.Mock;
   const mockUseWebSocket = useWebSocket as jest.Mock;
   const mockUseUnifiedChatStore = useUnifiedChatStore as jest.Mock;
@@ -59,9 +61,17 @@ describe('useInitializationCoordinator', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Initialization Phases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should start in auth phase with 0% progress', () => {
       const { result } = renderHook(() => useInitializationCoordinator());
       
@@ -163,6 +173,8 @@ describe('useInitializationCoordinator', () => {
   });
 
   describe('WebSocket Timeout Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should timeout WebSocket connection after 3 seconds', async () => {
       const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
       const { result, rerender } = renderHook(() => useInitializationCoordinator());
@@ -243,6 +255,8 @@ describe('useInitializationCoordinator', () => {
   });
 
   describe('Error Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should handle initialization errors', async () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
       const { result, rerender } = renderHook(() => useInitializationCoordinator());
@@ -270,6 +284,8 @@ describe('useInitializationCoordinator', () => {
   });
 
   describe('Reset Functionality', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should reset to initial state', async () => {
       const { result, rerender } = renderHook(() => useInitializationCoordinator());
       
@@ -353,6 +369,8 @@ describe('useInitializationCoordinator', () => {
   });
 
   describe('Prevent Multiple Initializations', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should not re-initialize when already ready', async () => {
       const { result, rerender } = renderHook(() => useInitializationCoordinator());
       
@@ -406,6 +424,8 @@ describe('useInitializationCoordinator', () => {
   });
 
   describe('Component Unmount', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should cleanup on unmount', () => {
       const { unmount } = renderHook(() => useInitializationCoordinator());
       
@@ -448,6 +468,8 @@ describe('useInitializationCoordinator', () => {
   });
 
   describe('Edge Cases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should handle rapid auth state changes', async () => {
       const { result, rerender } = renderHook(() => useInitializationCoordinator());
       

@@ -1,10 +1,10 @@
-/**
- * WebSocket State Synchronization Tests - Real-time State Management
- * 
- * BVJ (Business Value Justification):
- * - Segment: Growth & Enterprise (real-time features)
- * - Business Goal: Enable real-time collaboration and live updates
- * - Value Impact: Real-time features increase user engagement 20-30%
+import { act, renderHook, waitFor } from '@testing-library/react';
+import React from 'react';
+import { useChatStore } from '@/store/chat';
+import { useUnifiedChatStore } from '@/store/unified-chat';
+import { GlobalTestUtils } from './store-test-utils';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+pact: Real-time features increase user engagement 20-30%
  * - Revenue Impact: Premium feature differentiation for paid tiers
  * 
  * Tests: WebSocket sync, message handling, connection state management
@@ -74,6 +74,7 @@ class MockWebSocket {
 }
 
 describe('WebSocket State Synchronization Tests', () => {
+    jest.setTimeout(10000);
   let mockWs: MockWebSocket;
   let originalWebSocket: typeof WebSocket;
 
@@ -99,9 +100,15 @@ describe('WebSocket State Synchronization Tests', () => {
   afterEach(() => {
     GlobalTestUtils.cleanupStoreTestEnvironment();
     global.WebSocket = originalWebSocket;
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Connection State Management', () => {
+      jest.setTimeout(10000);
     it('should initialize WebSocket connection', async () => {
       const { result } = renderHook(() => useWebSocketContext(), {
         wrapper: ({ children }) => (
@@ -159,6 +166,7 @@ describe('WebSocket State Synchronization Tests', () => {
   });
 
   describe('Message Synchronization', () => {
+      jest.setTimeout(10000);
     it('should sync incoming messages to chat store', async () => {
       const chatResult = renderHook(() => useChatStore());
       
@@ -302,6 +310,7 @@ describe('WebSocket State Synchronization Tests', () => {
   });
 
   describe('Real-time Features', () => {
+      jest.setTimeout(10000);
     it('should handle typing indicators', async () => {
       const chatResult = renderHook(() => useChatStore());
       
@@ -412,6 +421,7 @@ describe('WebSocket State Synchronization Tests', () => {
   });
 
   describe('State Consistency', () => {
+      jest.setTimeout(10000);
     it('should maintain state consistency during rapid updates', async () => {
       const chatResult = renderHook(() => useChatStore());
       

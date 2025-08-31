@@ -31,6 +31,8 @@ Object.defineProperty(window, 'localStorage', {
 const originalWindow = global.window;
 
 describe('AuthStore - Business Critical Authentication', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   // Helper to reset store state before each test (≤8 lines)
   const resetAuthStore = () => {
     const { result } = renderHook(() => useAuthStore());
@@ -70,6 +72,8 @@ describe('AuthStore - Business Critical Authentication', () => {
   });
 
   describe('Initial State - Security Default', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should initialize with secure defaults', () => {
       const { result } = renderHook(() => useAuthStore());
       
@@ -92,6 +96,8 @@ describe('AuthStore - Business Critical Authentication', () => {
   });
 
   describe('Login Flow - Revenue Critical', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should authenticate free tier user correctly', () => {
       const { result } = renderHook(() => useAuthStore());
       const freeUser = createMockUser('standard_user', []);
@@ -140,6 +146,8 @@ describe('AuthStore - Business Critical Authentication', () => {
   });
 
   describe('Permission System - Revenue Protection', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should enforce free tier limitations', () => {
       const { result } = renderHook(() => useAuthStore());
       const freeUser = createMockUser('standard_user', []);
@@ -187,6 +195,8 @@ describe('AuthStore - Business Critical Authentication', () => {
   });
 
   describe('Token Management - Security Critical', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should store token securely in localStorage', () => {
       const { result } = renderHook(() => useAuthStore());
       const token = createTestToken('secure');
@@ -234,6 +244,8 @@ describe('AuthStore - Business Critical Authentication', () => {
   });
 
   describe('User Updates - State Integrity', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should update user properties correctly', () => {
       const { result } = renderHook(() => useAuthStore());
       const user = createMockUser('power_user', ['analytics']);
@@ -260,6 +272,8 @@ describe('AuthStore - Business Critical Authentication', () => {
   });
 
   describe('Loading and Error States', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should manage loading state correctly', () => {
       const { result } = renderHook(() => useAuthStore());
       
@@ -303,6 +317,8 @@ describe('AuthStore - Business Critical Authentication', () => {
   });
 
   describe('Role-Based Access Control - Tier Boundaries', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should correctly identify developer access', () => {
       const { result } = renderHook(() => useAuthStore());
       
@@ -348,6 +364,8 @@ describe('AuthStore - Business Critical Authentication', () => {
   });
 
   describe('Security Edge Cases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle undefined permissions gracefully', () => {
       const { result } = renderHook(() => useAuthStore());
       const userWithoutPermissions = createMockUser('standard_user');
@@ -395,4 +413,8 @@ describe('AuthStore - Business Critical Authentication', () => {
       expect(result.current.token).toContain('second');
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

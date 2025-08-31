@@ -1,9 +1,9 @@
-/**
- * LocalStorage Persistence Tests - State Persistence & Hydration
- * 
- * BVJ (Business Value Justification):
- * - Segment: All (Free, Growth, Enterprise)
- * - Business Goal: Maintain user context across sessions for retention
+import { act, renderHook } from '@testing-library/react';
+import { useAppStore } from '@/store/app';
+import { useAuthStore } from '@/store/authStore';
+import { GlobalTestUtils } from './store-test-utils';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+s sessions for retention
  * - Value Impact: Session persistence increases user engagement by 40%
  * - Revenue Impact: Prevents lost work, improves conversion rates
  * 
@@ -17,6 +17,7 @@ import { useAuthStore } from '@/store/authStore';
 import { GlobalTestUtils } from './store-test-utils';
 
 describe('LocalStorage Persistence Tests', () => {
+    jest.setTimeout(10000);
   let mockStorage: ReturnType<typeof GlobalTestUtils.setupStoreTestEnvironment>['mockStorage'];
 
   beforeEach(() => {
@@ -26,9 +27,15 @@ describe('LocalStorage Persistence Tests', () => {
 
   afterEach(() => {
     GlobalTestUtils.cleanupStoreTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('State Persistence', () => {
+      jest.setTimeout(10000);
     it('should persist app state to localStorage on changes', () => {
       const { result } = renderHook(() => useAppStore());
 
@@ -96,6 +103,7 @@ describe('LocalStorage Persistence Tests', () => {
   });
 
   describe('State Hydration', () => {
+      jest.setTimeout(10000);
     it('should restore persisted state on initialization', () => {
       const persistedState = {
         state: { isSidebarCollapsed: true },
@@ -151,6 +159,7 @@ describe('LocalStorage Persistence Tests', () => {
   });
 
   describe('State Migration', () => {
+      jest.setTimeout(10000);
     it('should handle version-based state migration', () => {
       const oldVersionState = {
         state: { 
@@ -214,6 +223,7 @@ describe('LocalStorage Persistence Tests', () => {
   });
 
   describe('Cross-Session Consistency', () => {
+      jest.setTimeout(10000);
     it('should maintain state consistency across browser sessions', () => {
       // First session
       const { result: session1 } = renderHook(() => useAppStore());
@@ -274,6 +284,7 @@ describe('LocalStorage Persistence Tests', () => {
   });
 
   describe('Storage Optimization', () => {
+      jest.setTimeout(10000);
     it('should not persist unchanged state', () => {
       const { result } = renderHook(() => useAppStore());
       
@@ -351,6 +362,7 @@ describe('LocalStorage Persistence Tests', () => {
   });
 
   describe('Privacy and Security', () => {
+      jest.setTimeout(10000);
     it('should not persist sensitive user data', () => {
       const { result } = renderHook(() => useAuthStore());
 

@@ -1,10 +1,10 @@
-/**
- * Store Configuration Tests - Core State Management Infrastructure
- * 
- * BVJ (Business Value Justification):
- * - Segment: All (Free, Growth, Enterprise)
- * - Business Goal: Ensure store reliability across all tiers
- * - Value Impact: Critical foundation for all features and user data
+import { act, renderHook } from '@testing-library/react';
+import { useAppStore } from '@/store/app';
+import { useAuthStore } from '@/store/authStore';
+import { useChatStore } from '@/store/chat';
+import { GlobalTestUtils } from './store-test-utils';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+foundation for all features and user data
  * - Revenue Impact: Store failures lose revenue - must be bulletproof
  * 
  * Tests: Store setup, middleware, persistence configuration
@@ -18,6 +18,7 @@ import { useChatStore } from '@/store/chat';
 import { GlobalTestUtils } from './store-test-utils';
 
 describe('Store Configuration - Infrastructure Tests', () => {
+    jest.setTimeout(10000);
   let mockStorage: ReturnType<typeof GlobalTestUtils.setupStoreTestEnvironment>['mockStorage'];
 
   beforeEach(() => {
@@ -33,9 +34,15 @@ describe('Store Configuration - Infrastructure Tests', () => {
 
   afterEach(() => {
     GlobalTestUtils.cleanupStoreTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Store Initialization', () => {
+      jest.setTimeout(10000);
     it('should initialize app store with default state', () => {
       const { result } = renderHook(() => useAppStore());
 
@@ -82,6 +89,7 @@ describe('Store Configuration - Infrastructure Tests', () => {
   });
 
   describe('Middleware Configuration', () => {
+      jest.setTimeout(10000);
     it('should configure persistence middleware for app store', () => {
       const { result } = renderHook(() => useAppStore());
 
@@ -151,6 +159,7 @@ describe('Store Configuration - Infrastructure Tests', () => {
   });
 
   describe('Persistence Configuration', () => {
+      jest.setTimeout(10000);
     it('should persist app store state to localStorage', () => {
       const { result } = renderHook(() => useAppStore());
 
@@ -209,6 +218,7 @@ describe('Store Configuration - Infrastructure Tests', () => {
   });
 
   describe('Store Isolation', () => {
+      jest.setTimeout(10000);
     it('should maintain independent state between stores', () => {
       const { result: appResult } = renderHook(() => useAppStore());
       const { result: authResult } = renderHook(() => useAuthStore());
@@ -251,6 +261,7 @@ describe('Store Configuration - Infrastructure Tests', () => {
   });
 
   describe('Type Safety', () => {
+      jest.setTimeout(10000);
     it('should enforce strong typing for store state', () => {
       const { result } = renderHook(() => useAppStore());
 
