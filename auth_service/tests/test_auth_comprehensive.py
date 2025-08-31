@@ -40,9 +40,9 @@ from sqlalchemy.exc import IntegrityError, OperationalError
 
 from auth_service.auth_core.models.auth_models import AuthProvider, LoginRequest
 from auth_service.auth_core.config import AuthConfig
-from auth_service.auth_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from auth_service.main import app
-from test_framework.environment_markers import env, dev_and_staging, env_requires
+from test_framework.environment_markers import env, dev_and_staging, env_requires, skip_unless_environment
 
 # Test client for auth service
 client = TestClient(app)
@@ -252,7 +252,7 @@ class TestOAuthFlows:
         })
         assert response.status_code in [400, 401, 403, 422]  # Authentication/authorization error
     
-    @pytest.mark.skipif(not env_requires("staging"), reason="Staging-specific test")
+    @pytest.mark.skipif(skip_unless_environment("staging"), reason="Staging-specific test")
     def test_oauth_staging_configuration(self):
         """Test OAuth configuration in staging environment."""
         env_vars = get_env()
@@ -511,7 +511,7 @@ class TestEnvironmentCompatibility:
             response = client.get("/health")
             assert response.status_code == 200
     
-    @pytest.mark.skipif(not env_requires("staging"), reason="Staging-specific test")
+    @pytest.mark.skipif(skip_unless_environment("staging"), reason="Staging-specific test")
     def test_staging_environment_features(self):
         """Test staging-specific features."""
         env_vars = get_env()

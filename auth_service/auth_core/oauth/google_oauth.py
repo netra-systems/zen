@@ -15,7 +15,7 @@ from typing import Dict, Optional, Any
 from urllib.parse import urlencode
 
 from auth_service.auth_core.secret_loader import AuthSecretLoader
-from auth_service.auth_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 

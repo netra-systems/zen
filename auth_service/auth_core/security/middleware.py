@@ -7,7 +7,7 @@ from typing import Optional, Dict, Any
 from fastapi import Request
 from fastapi.responses import JSONResponse
 
-from auth_service.auth_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 

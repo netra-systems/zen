@@ -17,7 +17,7 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 
 from auth_service.auth_core.core.jwt_handler import JWTHandler
-from auth_service.auth_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from auth_service.auth_core.core.session_manager import SessionManager
 from auth_service.auth_core.database.repository import (
     AuthAuditRepository,

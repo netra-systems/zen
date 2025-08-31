@@ -10,7 +10,7 @@ import asyncio
 
 # REAL SERVICES ONLY - No mock imports
 from test_framework.real_services import get_real_services
-from auth_service.auth_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 @pytest.mark.asyncio

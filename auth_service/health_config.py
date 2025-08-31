@@ -6,7 +6,7 @@ Simplified standalone health checks for auth service.
 import os
 from typing import Dict, Any
 from enum import Enum
-from auth_service.auth_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 class HealthStatus(Enum):

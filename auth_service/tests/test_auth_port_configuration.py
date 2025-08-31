@@ -18,7 +18,7 @@ import os
 import asyncio
 from unittest.mock import patch, MagicMock
 from auth_service.auth_core.config import AuthConfig
-from auth_service.auth_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 class TestAuthPortConfigurationConsistency:

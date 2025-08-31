@@ -20,7 +20,7 @@ setup_test_path()
 from auth_service.auth_core.database.connection import AuthDatabaseConnection
 from auth_service.auth_core.database.database_manager import AuthDatabaseManager
 from auth_service.auth_core.config import AuthConfig
-from auth_service.auth_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 class TestAuthDatabaseConnection:

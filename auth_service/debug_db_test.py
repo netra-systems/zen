@@ -4,7 +4,7 @@
 import asyncio
 import sys
 
-from auth_service.auth_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 # Set environment variables 
 env = get_env()

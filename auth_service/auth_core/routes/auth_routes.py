@@ -14,7 +14,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth_service.auth_core.config import AuthConfig
-from auth_service.auth_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from auth_service.auth_core.secret_loader import AuthSecretLoader
 from auth_service.auth_core.security.oauth_security import (
     OAuthSecurityManager, 

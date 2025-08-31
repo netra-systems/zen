@@ -59,7 +59,7 @@ class TestOAuthConfigurationMissingRegression:
         
         Expected behavior: OAuth client ID loading should return None/empty when not configured
         """
-        from auth_service.auth_core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         # Arrange - Simulate staging environment without OAuth client ID
         env_manager = get_env()
@@ -96,7 +96,7 @@ class TestOAuthConfigurationMissingRegression:
         
         Expected behavior: OAuth client secret loading should return None/empty when not configured
         """
-        from auth_service.auth_core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         # Arrange - Simulate staging environment without OAuth client secret
         env_manager = get_env()
@@ -133,7 +133,7 @@ class TestOAuthConfigurationMissingRegression:
         
         Expected behavior: OAuth provider should fail to initialize or have empty credentials
         """
-        from auth_service.auth_core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         from auth_service.auth_core.oauth.google_oauth import GoogleOAuthError
         
         # Arrange - Simulate staging environment without OAuth credentials
@@ -186,7 +186,7 @@ class TestOAuthConfigurationMissingRegression:
         
         Expected behavior: OAuth provider should initialize successfully with valid credentials
         """
-        from auth_service.auth_core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         # Arrange - Simulate staging environment with proper OAuth credentials
         env_manager = get_env()
@@ -256,7 +256,7 @@ class TestOAuthConfigurationMissingRegression:
         
         Expected behavior: OAuth manager should report healthy status with configured providers
         """
-        from auth_service.auth_core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         from auth_service.auth_core.oauth_manager import OAuthManager
         
         # Arrange - Simulate staging environment with proper OAuth credentials
@@ -317,7 +317,7 @@ class TestOAuthServiceIntegrationRegression:
         This test confirms that when OAuth is properly configured, the auth service
         reports OAuth providers as available and healthy.
         """
-        from auth_service.auth_core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         from auth_service.auth_core.oauth_manager import OAuthManager
         
         # Arrange - Simulate staging environment with OAuth configuration
@@ -356,7 +356,7 @@ class TestOAuthServiceIntegrationRegression:
         This test confirms that OAuth login URL generation works correctly
         when proper credentials are configured in staging.
         """
-        from auth_service.auth_core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         from auth_service.auth_core.oauth.google_oauth import GoogleOAuthProvider
         
         # Arrange - Simulate staging environment with OAuth credentials
@@ -399,7 +399,7 @@ class TestOAuthServiceIntegrationRegression:
         This test confirms that OAuth callback processing works correctly
         when proper credentials are configured in staging.
         """
-        from auth_service.auth_core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         from auth_service.auth_core.oauth.google_oauth import GoogleOAuthProvider
         
         # Arrange - Simulate staging environment with OAuth credentials

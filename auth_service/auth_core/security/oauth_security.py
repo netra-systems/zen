@@ -13,7 +13,7 @@ import time
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Optional, Tuple
 from auth_service.auth_core.redis_manager import auth_redis_manager
-from auth_service.auth_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 

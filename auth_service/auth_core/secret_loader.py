@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Optional
 
 # Use auth_service's own isolated environment management - NEVER import from dev_launcher or netra_backend
-from auth_service.auth_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 # SSOT: Import central configuration validator
 project_root = Path(__file__).parent.parent.parent.parent

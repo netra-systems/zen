@@ -8,7 +8,7 @@ import time
 from typing import Dict, List, Optional, Callable, Any
 from dataclasses import dataclass
 from concurrent.futures import ThreadPoolExecutor
-from auth_service.auth_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 

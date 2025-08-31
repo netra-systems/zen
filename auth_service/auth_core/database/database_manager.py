@@ -15,7 +15,7 @@ from typing import Optional
 from urllib.parse import urlparse, urlunparse
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from sqlalchemy.pool import NullPool, AsyncAdaptedQueuePool
-from auth_service.auth_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
@@ -109,14 +109,14 @@ class AuthDatabaseManager:
     @staticmethod
     def is_cloud_sql_environment() -> bool:
         """Check if running in Cloud SQL environment"""
-        from auth_service.auth_core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         env = get_env().get("ENVIRONMENT", "development").lower()
         return env in ["staging", "production"]
     
     @staticmethod
     def is_test_environment() -> bool:
         """Check if running in test environment"""
-        from auth_service.auth_core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         env = get_env().get("ENVIRONMENT", "development").lower()
         return env == "test" or get_env().get("AUTH_FAST_TEST_MODE") == "true"
     
@@ -140,7 +140,7 @@ class AuthDatabaseManager:
         """
         try:
             from auth_service.auth_core.database.staging_validation import StagingDatabaseValidator
-            from auth_service.auth_core.isolated_environment import get_env
+            from shared.isolated_environment import get_env
             
             logger.info("Validating auth service for staging deployment...")
             
@@ -189,7 +189,7 @@ class AuthDatabaseManager:
         Returns:
             Dictionary with validation results
         """
-        from auth_service.auth_core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         env_manager = get_env()
         current_env = environment or env_manager.get("ENVIRONMENT", "development").lower()
