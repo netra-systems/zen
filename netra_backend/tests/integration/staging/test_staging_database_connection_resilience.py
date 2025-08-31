@@ -84,7 +84,6 @@ class TestStagingDatabaseConnectionResilience:
     """Test database connection resilience in staging environment."""
     
     @pytest.mark.asyncio
-        @pytest.mark.asyncio
     async def test_postgresql_connection_pooling_and_failover(self, staging_db_resilience, connection_pool):
         """Test PostgreSQL connection pooling and failover mechanisms."""
         # Test initial pool creation
@@ -120,7 +119,6 @@ class TestStagingDatabaseConnectionResilience:
         assert staging_db_resilience.recovery_attempts["postgres"] == 1
     
     @pytest.mark.asyncio
-        @pytest.mark.asyncio
     async def test_clickhouse_connection_handling_staging_ports(self, staging_db_resilience):
         """Test ClickHouse connection handling with staging-specific port configuration."""
         # Test HTTP connection on port 8123
@@ -164,7 +162,6 @@ class TestStagingDatabaseConnectionResilience:
         assert staging_db_resilience.recovery_attempts["clickhouse"] == 1
     
     @pytest.mark.asyncio
-        @pytest.mark.asyncio
     async def test_redis_connection_pooling_and_clustering(self, staging_db_resilience):
         """Test Redis connection pooling and clustering in staging."""
         # Test Redis connection pool creation
@@ -190,7 +187,6 @@ class TestStagingDatabaseConnectionResilience:
         assert staging_db_resilience.recovery_attempts["redis"] == 1
     
     @pytest.mark.asyncio
-        @pytest.mark.asyncio
     async def test_database_migration_execution_staging(self, staging_db_resilience):
         """Test database migration execution in staging environment."""
         # Test critical migrations for staging
@@ -219,7 +215,6 @@ class TestStagingDatabaseConnectionResilience:
         assert len(successful_migrations) == 5
     
     @pytest.mark.asyncio
-        @pytest.mark.asyncio
 # COMMENTED OUT: Mock-dependent test -     async def test_connection_recovery_after_network_issues(self, staging_db_resilience, async_session_mock):
 # COMMENTED OUT: Mock-dependent test -         """Test connection recovery after network failures."""
         # Simulate network disconnection
@@ -244,7 +239,6 @@ class TestStagingDatabaseConnectionResilience:
 # COMMENTED OUT: Mock-dependent test -         assert postgres_test is True
 # COMMENTED OUT: Mock-dependent test -     
 # COMMENTED OUT: Mock-dependent test -     @pytest.mark.asyncio
-# COMMENTED OUT: Mock-dependent test -         @pytest.mark.asyncio
     async def test_transaction_rollback_on_connection_loss(self, staging_db_resilience, transaction_session_mock):
         """Test transaction rollback on connection loss."""
         # Start transaction
@@ -279,7 +273,6 @@ class TestStagingDatabaseConnectionResilience:
         assert len(transaction_session_mock.commit.call_args_list) >= 1
     
     @pytest.mark.asyncio
-        @pytest.mark.asyncio
     async def test_database_health_monitoring_staging(self, staging_db_resilience):
         """Test database health monitoring and alerting in staging."""
         # Test health check for all database types
@@ -309,7 +302,6 @@ class TestStagingDatabaseConnectionResilience:
         assert isinstance(metrics["connection_pools"], int)
     
     @pytest.mark.asyncio
-        @pytest.mark.asyncio
 # COMMENTED OUT: Mock-dependent test -     async def test_connection_timeout_and_retry_logic(self, staging_db_resilience, async_session_mock):
 # COMMENTED OUT: Mock-dependent test -         """Test connection timeout handling and retry logic."""
         # Simulate timeout error
@@ -339,7 +331,6 @@ class TestStagingDatabaseConnectionResilience:
 # COMMENTED OUT: Mock-dependent test -         assert result is not None
 # COMMENTED OUT: Mock-dependent test -     
 # COMMENTED OUT: Mock-dependent test -     @pytest.mark.asyncio
-# COMMENTED OUT: Mock-dependent test -         @pytest.mark.asyncio
     async def test_connection_performance_monitoring_staging(self, staging_db_resilience):
         """Test connection performance monitoring in staging environment."""
         # Test connection performance metrics

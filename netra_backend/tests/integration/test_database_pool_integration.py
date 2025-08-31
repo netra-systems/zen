@@ -387,7 +387,7 @@ class TestDatabasePoolIntegration:
         except:
             return 0
 
-        @pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_pool_configuration_validation(self):
         """Test database pool configuration validation and error handling."""
         # For this mock implementation, we'll validate configuration in initialize
