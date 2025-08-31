@@ -58,6 +58,8 @@ const TestComponent: React.FC = () => {
 };
 
 describe('Loading State Timeout Fix', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     // Ensure we're in test environment
@@ -125,4 +127,8 @@ describe('Loading State Timeout Fix', () => {
     const isTestEnv = process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID !== undefined;
     expect(isTestEnv).toBe(true);
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

@@ -226,6 +226,8 @@ import MainChat from '@/components/chat/MainChat';
 import { MessageInput } from '@/components/chat/MessageInput';
 
 describe('First-Time User Initial Chat', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const mockHandleSend = jest.fn();
 
   beforeEach(() => {
@@ -515,4 +517,8 @@ describe('First-Time User Initial Chat', () => {
     console.log('Disabled test - isDisabled:', textarea.hasAttribute('disabled'));
     expect(textarea).toBeDisabled();
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

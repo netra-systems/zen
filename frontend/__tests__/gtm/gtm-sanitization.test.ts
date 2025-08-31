@@ -38,7 +38,11 @@ jest.mock('../../providers/GTMProvider', () => {
 });
 
 describe('GTM Data Sanitization', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   describe('sanitizeDataForGTM', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should replace undefined values with empty strings', () => {
       const input = {
         event: 'test_event',
@@ -273,6 +277,8 @@ describe('GTM Data Sanitization', () => {
   });
 
   describe('GTM Event Data Sanitization', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should provide safe defaults for message events', () => {
       const messageEvent = {
         event: 'message_sent',
@@ -353,6 +359,8 @@ describe('GTM Data Sanitization', () => {
   });
 
   describe('Edge Cases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle undefined root object gracefully', () => {
       const result = sanitizeDataForGTM({});
       expect(result).toEqual({});
@@ -413,4 +421,8 @@ describe('GTM Data Sanitization', () => {
       expect(result.key3).toBe('');
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

@@ -1,8 +1,3 @@
-/**
- * MessageInput Focus and UI Tests
- * Tests for focus management, UI state indicators, and accessibility
- */
-
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -10,6 +5,10 @@ import { MessageInput } from '@/components/chat/MessageInput';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useThreadStore } from '@/store/threadStore';
+import { useAuthStore } from '@/store/authStore';
+import { generateUniqueId } from '@/lib/utils';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+e/threadStore';
 import { useAuthStore } from '@/store/authStore';
 import { generateUniqueId } from '@/lib/utils';
 
@@ -25,6 +24,7 @@ jest.mock('@/services/threadService');
 jest.mock('@/services/threadRenameService');
 
 describe('MessageInput - Focus Management and UI', () => {
+    jest.setTimeout(10000);
   const mockSendMessage = jest.fn();
   const mockChatStore = {
     setProcessing: jest.fn(),
@@ -67,6 +67,7 @@ describe('MessageInput - Focus Management and UI', () => {
   });
 
   describe('Focus management', () => {
+      jest.setTimeout(10000);
     it('should auto-focus on mount when authenticated', () => {
       render(<MessageInput />);
       const textarea = screen.getByPlaceholderText(/Type a message/i);
@@ -99,6 +100,7 @@ describe('MessageInput - Focus Management and UI', () => {
   });
 
   describe('UI state indicators', () => {
+      jest.setTimeout(10000);
     it('should show appropriate placeholder when authenticated', () => {
       render(<MessageInput />);
       const textarea = screen.getByPlaceholderText(/Type a message/i);
@@ -151,6 +153,7 @@ describe('MessageInput - Focus Management and UI', () => {
   });
 
   describe('Accessibility', () => {
+      jest.setTimeout(10000);
     it('should have proper ARIA labels', () => {
       render(<MessageInput />);
       

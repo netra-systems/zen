@@ -7,6 +7,8 @@
 import { getUnifiedApiConfig } from '../../lib/unified-api-config';
 
 describe('Security - Endpoint Protection (Staging)', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const config = getUnifiedApiConfig();
   const frontendUrl = config.urls.frontend;
   
@@ -53,6 +55,8 @@ describe('Security - Endpoint Protection (Staging)', () => {
   ];
 
   describe('Sensitive File Protection', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test.each(sensitiveFiles)(
       'should return 404 (not 302 redirect) for sensitive file: %s',
       async (sensitiveFile) => {
@@ -82,6 +86,8 @@ describe('Security - Endpoint Protection (Staging)', () => {
   });
 
   describe('HTTP Method Security', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     const sensitivePaths = ['.env', '.git/index', 'phpinfo.php'];
     const methods = ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS'];
 
@@ -111,6 +117,8 @@ describe('Security - Endpoint Protection (Staging)', () => {
   });
 
   describe('Information Disclosure Prevention', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should not expose server information in error responses', async () => {
       try {
         const response = await fetch(`${frontendUrl}/nonexistent-path-${Date.now()}`, {
@@ -135,6 +143,8 @@ describe('Security - Endpoint Protection (Staging)', () => {
   });
 
   describe('Rate Limiting and Security Headers', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should implement proper security headers', async () => {
       try {
         const response = await fetch(`${frontendUrl}/health`);
@@ -163,6 +173,8 @@ describe('Security - Endpoint Protection (Staging)', () => {
   });
 
   describe('Configuration File Security', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should not expose configuration through URL manipulation', async () => {
       const configTestPaths = [
         '../.env',
@@ -192,4 +204,8 @@ describe('Security - Endpoint Protection (Staging)', () => {
       }
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

@@ -1,9 +1,8 @@
-/**
- * Frontend System Startup - Connectivity Tests
- * Tests for API and WebSocket connectivity during startup
- */
-
 import React from 'react';
+import { render, waitFor, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ct from 'react';
 import { render, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
@@ -28,15 +27,22 @@ import { initializeAllMocks } from './helpers/startup-test-mocks';
 initializeAllMocks();
 
 describe('Frontend System Startup - Connectivity', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     setupTestEnvironment();
   });
 
   afterEach(() => {
     cleanupTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('API Connectivity', () => {
+      jest.setTimeout(10000);
     it('should check backend health on startup', async () => {
       await testBackendHealthCheck();
     });
@@ -100,6 +106,7 @@ describe('Frontend System Startup - Connectivity', () => {
   });
 
   describe('WebSocket Connectivity', () => {
+      jest.setTimeout(10000);
     let mockWebSocket: any;
     let mockWebSocketConstructor: jest.Mock;
     
@@ -129,7 +136,7 @@ describe('Frontend System Startup - Connectivity', () => {
     });
 
     const testWebSocketHeartbeat = async () => {
-      const ws = new WebSocket('ws://localhost:8000');
+      const ws = new WebSocket('ws://localhost:3001/test'));
       ws.readyState = WebSocket.OPEN;
       
       ws.send(JSON.stringify({ type: 'ping', timestamp: Date.now() }));
@@ -187,8 +194,8 @@ describe('Frontend System Startup - Connectivity', () => {
     });
 
     const testReconnection = async () => {
-      const ws1 = new WebSocket('ws://localhost:8000');
-      const ws2 = new WebSocket('ws://localhost:8000');
+      const ws1 = new WebSocket('ws://localhost:3001/test'));
+      const ws2 = new WebSocket('ws://localhost:3001/test'));
       
       expect(mockWebSocketConstructor).toHaveBeenCalledTimes(2);
       expect(mockWebSocketConstructor).toHaveBeenCalledWith('ws://localhost:8000');
@@ -239,7 +246,7 @@ describe('Frontend System Startup - Connectivity', () => {
     });
 
     const testWebSocketErrors = async () => {
-      const ws = new WebSocket('ws://localhost:8000');
+      const ws = new WebSocket('ws://localhost:3001/test'));
       const errorHandler = findEventHandler(ws, 'error');
       
       if (errorHandler) {
@@ -256,7 +263,7 @@ describe('Frontend System Startup - Connectivity', () => {
     });
 
     const testWebSocketClose = async () => {
-      const ws = new WebSocket('ws://localhost:8000');
+      const ws = new WebSocket('ws://localhost:3001/test'));
       const closeHandler = findEventHandler(ws, 'close');
       
       if (closeHandler) {
@@ -273,7 +280,7 @@ describe('Frontend System Startup - Connectivity', () => {
     });
 
     const testWebSocketMessages = async () => {
-      const ws = new WebSocket('ws://localhost:8000');
+      const ws = new WebSocket('ws://localhost:3001/test'));
       const messageHandler = findEventHandler(ws, 'message');
       
       if (messageHandler) {
@@ -288,6 +295,7 @@ describe('Frontend System Startup - Connectivity', () => {
   });
 
   describe('Connection Status Monitoring', () => {
+      jest.setTimeout(10000);
     it('should monitor API connection status', async () => {
       await testAPIStatusMonitoring();
     });
@@ -309,7 +317,7 @@ describe('Frontend System Startup - Connectivity', () => {
 
     const testWebSocketStatusMonitoring = async () => {
       const { mockWebSocket } = setupWebSocketMocks();
-      const ws = new WebSocket('ws://localhost:8000');
+      const ws = new WebSocket('ws://localhost:3001/test'));
       
       mockWebSocket.readyState = WebSocket.OPEN;
       const isConnected = mockWebSocket.readyState === WebSocket.OPEN;

@@ -1,9 +1,9 @@
-/**
- * WebSocket & Error Handling Tests
- * =================================
- * 
- * Tests WebSocket message handling and error recovery mechanisms
- * Critical for real-time chat functionality and user experience
+import React from 'react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+er experience
  * 
  * Business Value: Reliable real-time communication drives user trust
  * Revenue Impact: +$15K MRR from reduced user abandonment due to connection issues
@@ -58,6 +58,7 @@ const mockUseEventProcessor = useEventProcessor as jest.MockedFunction<typeof us
 const mockUseThreadNavigation = useThreadNavigation as jest.MockedFunction<typeof useThreadNavigation>;
 
 describe('WebSocket & Error Handling', () => {
+    jest.setTimeout(10000);
   let mockStore: any;
   let mockWebSocket: any;
   let user: ReturnType<typeof userEvent.setup>;
@@ -114,6 +115,7 @@ describe('WebSocket & Error Handling', () => {
   });
 
   describe('11. WebSocket Message Handling', () => {
+      jest.setTimeout(10000);
     it('should establish WebSocket connection on component mount', async () => {
       render(
         <TestProviders>
@@ -305,6 +307,7 @@ describe('WebSocket & Error Handling', () => {
   });
 
   describe('12. Real-time UI Updates', () => {
+      jest.setTimeout(10000);
     it('should update message list immediately when new message arrives', async () => {
       mockStore.messages = [];
       
@@ -389,6 +392,7 @@ describe('WebSocket & Error Handling', () => {
   });
 
   describe('13. Message Persistence', () => {
+      jest.setTimeout(10000);
     it('should persist messages to localStorage', async () => {
       const localStorageMock = jest.fn();
       Object.defineProperty(window, 'localStorage', {
@@ -478,6 +482,7 @@ describe('WebSocket & Error Handling', () => {
   });
 
   describe('14. Error States and Recovery', () => {
+      jest.setTimeout(10000);
     it('should show error message when WebSocket connection fails', async () => {
       render(
         <TestProviders>

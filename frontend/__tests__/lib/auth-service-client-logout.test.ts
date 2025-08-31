@@ -56,6 +56,8 @@ jest.mock('@/lib/unified-api-config', () => ({
 import { AuthServiceClient } from '@/lib/auth-service-client';
 
 describe('AuthServiceClient Logout', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let authClient: AuthServiceClient;
   const mockToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
 
@@ -68,9 +70,17 @@ describe('AuthServiceClient Logout', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('logout method', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should send Authorization header with token when available', async () => {
       // Setup: token exists in localStorage
       mockLocalStorage.getItem.mockReturnValue(mockToken);

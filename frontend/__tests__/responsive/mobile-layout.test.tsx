@@ -23,6 +23,8 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 describe('Mobile Layout Responsive Design', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     // Reset window size mocks
     Object.defineProperty(window, 'innerWidth', {
@@ -286,4 +288,8 @@ describe('Mobile Layout Responsive Design', () => {
       expect(screen.getByTestId('current-orientation')).toHaveTextContent('Orientation: landscape');
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

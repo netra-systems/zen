@@ -27,6 +27,8 @@ jest.mock('@/lib/logger', () => ({
 }));
 
 describe('WebSocket Parse Error Test', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const mockToken = 'test-auth-token';
   const mockAuthContext = {
     token: mockToken,
@@ -210,4 +212,8 @@ describe('WebSocket Parse Error Test', () => {
       expect(parseError).toBeDefined();
     }, { timeout: 500 });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

@@ -30,6 +30,8 @@ jest.mock('@/hooks/useGTMEvent', () => ({
 }));
 
 describe('GTM Infinite Loop Prevention', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let mockPush: jest.Mock;
   let mockTrackError: jest.Mock;
   let mockTrackPageView: jest.Mock;
@@ -69,9 +71,12 @@ describe('GTM Infinite Loop Prevention', () => {
     jest.clearAllMocks();
     jest.clearAllTimers();
     dataLayerSpy.mockRestore();
+      cleanupAntiHang();
   });
 
   describe('AuthGuard Event Deduplication', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should only fire auth_required event once when user is not authenticated', async () => {
       // Mock unauthenticated state
       mockUseAuth.mockReturnValue({
@@ -200,6 +205,8 @@ describe('GTM Infinite Loop Prevention', () => {
   });
 
   describe('Circuit Breaker Protection', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should prevent event storms using circuit breaker', async () => {
       const circuitBreaker = getGTMCircuitBreaker();
       const events: boolean[] = [];
@@ -288,6 +295,8 @@ describe('GTM Infinite Loop Prevention', () => {
   });
 
   describe('Loading State Transitions', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should not fire events while loading', async () => {
       // Start with loading state
       mockUseAuth.mockReturnValue({
@@ -358,6 +367,8 @@ describe('GTM Infinite Loop Prevention', () => {
   });
 
   describe('Memory and Performance', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should not cause memory leaks with many events', () => {
       const circuitBreaker = getGTMCircuitBreaker();
       const initialMemory = process.memoryUsage().heapUsed;
@@ -411,6 +422,8 @@ describe('GTM Infinite Loop Prevention', () => {
   });
 
   describe('Integration with GTMProvider', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should integrate circuit breaker with GTMProvider', async () => {
       window.dataLayer = [];
       const circuitBreaker = getGTMCircuitBreaker();
@@ -457,6 +470,8 @@ describe('GTM Infinite Loop Prevention', () => {
   });
 
   describe('Edge Cases and Error Scenarios', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle undefined window.dataLayer gracefully', () => {
       delete (window as any).dataLayer;
       

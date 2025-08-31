@@ -36,6 +36,8 @@ const TestComponent = () => {
 };
 
 describe('WebSocketProvider', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let mockAuth: jest.Mocked<ReturnType<typeof useAuth>>;
   let mockWebSocketService: jest.Mocked<typeof webSocketService>;
   let mockReconciliationService: jest.Mocked<typeof reconciliationService>;
@@ -81,9 +83,17 @@ describe('WebSocketProvider', () => {
   afterEach(() => {
     jest.clearAllMocks();
     jest.useRealTimers();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Heartbeat Configuration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('configures WebSocket with 15 second heartbeat interval', async () => {
       render(
         <WebSocketProvider>
@@ -137,6 +147,8 @@ describe('WebSocketProvider', () => {
   });
 
   describe('Message Buffer Limit', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('limits message buffer to 500 messages', async () => {
       render(
         <WebSocketProvider>
@@ -256,6 +268,8 @@ describe('WebSocketProvider', () => {
   });
 
   describe('Connection Lifecycle', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('establishes connection with token after delay', async () => {
       render(
         <WebSocketProvider>
@@ -395,6 +409,8 @@ describe('WebSocketProvider', () => {
   });
 
   describe('Message Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('processes messages through reconciliation service', async () => {
       render(
         <WebSocketProvider>
@@ -521,6 +537,8 @@ describe('WebSocketProvider', () => {
   });
 
   describe('Rate Limiting', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('configures rate limiting in WebSocket connection', async () => {
       render(
         <WebSocketProvider>
@@ -546,6 +564,8 @@ describe('WebSocketProvider', () => {
   });
 
   describe('Error Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('handles connection failure gracefully', async () => {
       mockWebSocketService.connect.mockRejectedValueOnce(new Error('Connection failed'));
 

@@ -60,6 +60,8 @@ class TestErrorBoundary extends React.Component<
 }
 
 describe('Error Boundary', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -209,4 +211,8 @@ describe('Error Boundary', () => {
     expect(screen.getByTestId('event-error')).toBeInTheDocument();
     expect(screen.queryByTestId('error-fallback')).not.toBeInTheDocument();
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

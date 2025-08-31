@@ -27,6 +27,8 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('Staging Integration Failures - End-to-End', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const originalEnv = process.env;
   const originalFetch = global.fetch;
 
@@ -47,6 +49,12 @@ describe('Staging Integration Failures - End-to-End', () => {
   afterEach(() => {
     global.fetch = originalFetch;
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   afterAll(() => {
@@ -54,6 +62,8 @@ describe('Staging Integration Failures - End-to-End', () => {
   });
 
   describe('Complete Application Startup Flow', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: Multiple integration failures prevent successful app startup
@@ -147,6 +157,8 @@ describe('Staging Integration Failures - End-to-End', () => {
   });
 
   describe('User Authentication Flow Integration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: Auth service integration broken due to routing issues
@@ -193,6 +205,8 @@ describe('Staging Integration Failures - End-to-End', () => {
   });
 
   describe('Chat Functionality Integration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: Chat requires multiple backend services that are returning 404
@@ -279,6 +293,8 @@ describe('Staging Integration Failures - End-to-End', () => {
   });
 
   describe('Static Asset Loading Integration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: Static assets not properly served in staging
@@ -314,6 +330,8 @@ describe('Staging Integration Failures - End-to-End', () => {
   });
 
   describe('Environment Configuration Consistency', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO PASS (but validates critical configuration)
      * Ensures configuration is consistent across all components
@@ -368,6 +386,8 @@ describe('Staging Integration Failures - End-to-End', () => {
   });
 
   describe('Error Handling and Recovery', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: Error handling not graceful when services are unavailable
@@ -427,6 +447,8 @@ describe('Staging Integration Failures - End-to-End', () => {
   });
 
   describe('Performance and Reliability', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: Performance degraded by 404 errors and failed requests

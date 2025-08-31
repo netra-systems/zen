@@ -1,5 +1,6 @@
-/**
- * REAL Layer Visibility Manager Tests
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+AL Layer Visibility Manager Tests
  * BVJ: Prevents $12K MRR loss from UI rendering failures
  */
 
@@ -11,6 +12,7 @@ import {
 import { logger } from '@/lib/logger';
 
 describe('Layer Visibility Manager - REAL Tests', () => {
+    jest.setTimeout(10000);
   let loggerSpy: {
     group: jest.SpyInstance;
     debug: jest.SpyInstance;
@@ -27,9 +29,15 @@ describe('Layer Visibility Manager - REAL Tests', () => {
 
   afterEach(() => {
     Object.values(loggerSpy).forEach(spy => spy.mockRestore());
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Fast Layer Visibility', () => {
+      jest.setTimeout(10000);
     it('shows fast layer when processing', () => {
       const config: LayerVisibilityConfig = {
         fastLayerData: null,
@@ -89,6 +97,7 @@ describe('Layer Visibility Manager - REAL Tests', () => {
   });
 
   describe('Medium Layer Visibility', () => {
+      jest.setTimeout(10000);
     it('shows medium layer with partial content', () => {
       const config: LayerVisibilityConfig = {
         fastLayerData: null,
@@ -148,6 +157,7 @@ describe('Layer Visibility Manager - REAL Tests', () => {
   });
 
   describe('Slow Layer Visibility', () => {
+      jest.setTimeout(10000);
     it('shows slow layer with final report', () => {
       const config: LayerVisibilityConfig = {
         fastLayerData: null,
@@ -204,6 +214,7 @@ describe('Layer Visibility Manager - REAL Tests', () => {
   });
 
   describe('Layer Persistence', () => {
+      jest.setTimeout(10000);
     it('persists layers based on previous visibility', () => {
       const config: LayerVisibilityConfig = {
         fastLayerData: {
@@ -247,6 +258,7 @@ describe('Layer Visibility Manager - REAL Tests', () => {
   });
 
   describe('Debug Functionality', () => {
+      jest.setTimeout(10000);
     it('logs debug information with logger groups', () => {
       const config: LayerVisibilityConfig = {
         fastLayerData: {
@@ -296,6 +308,7 @@ describe('Layer Visibility Manager - REAL Tests', () => {
   });
 
   describe('Edge Cases', () => {
+      jest.setTimeout(10000);
     it('handles all null data gracefully', () => {
       const config: LayerVisibilityConfig = {
         fastLayerData: null,

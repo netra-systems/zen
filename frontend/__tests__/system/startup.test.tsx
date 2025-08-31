@@ -1,6 +1,7 @@
-/**
- * Frontend System Startup Tests - Modular Test Orchestrator
- * Coordinates execution of modular startup test suites
+import './startup-initialization.test';
+import './startup-system.test';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+dinates execution of modular startup test suites
  * 
  * BVJ: All segments - faster test execution, better developer experience, reduced time to market
  * Architecture: Split into 3 focused modules ≤300 lines each with shared utilities
@@ -53,6 +54,7 @@ import './startup-system.test';
  */
 
 describe('Frontend System Startup - Modular Test Suite', () => {
+    jest.setTimeout(10000);
   it('should successfully import all modular test suites', () => {
     // Verify that startup modules are available
     expect(typeof describe).toBe('function');

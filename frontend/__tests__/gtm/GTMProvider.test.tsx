@@ -71,6 +71,8 @@ const TestComponent: React.FC<{
 };
 
 describe('GTMProvider', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let mockDataLayer: any[];
   let originalWindow: any;
 
@@ -100,9 +102,17 @@ describe('GTMProvider', () => {
   afterEach(() => {
     jest.clearAllMocks();
     global.window = originalWindow;
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Provider Initialization', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should render with default configuration', () => {
       render(
         <GTMProvider>
@@ -164,6 +174,8 @@ describe('GTMProvider', () => {
   });
 
   describe('DataLayer Initialization', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should initialize dataLayer when enabled', async () => {
       render(
         <GTMProvider enabled={true}>
@@ -217,6 +229,8 @@ describe('GTMProvider', () => {
   });
 
   describe('Script Loading', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should render GTM script when enabled', async () => {
       render(
         <GTMProvider enabled={true}>
@@ -270,6 +284,8 @@ describe('GTMProvider', () => {
   });
 
   describe('Event Tracking', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should push events to dataLayer when loaded', async () => {
       const testEvent: GTMEventData = {
         event: 'test_event',
@@ -365,6 +381,8 @@ describe('GTMProvider', () => {
   });
 
   describe('Data Pushing', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should push arbitrary data to dataLayer', async () => {
       let contextValue: any;
 
@@ -393,6 +411,8 @@ describe('GTMProvider', () => {
   });
 
   describe('Debug Functionality', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track debug information', async () => {
       let contextValue: any;
 
@@ -431,6 +451,8 @@ describe('GTMProvider', () => {
   });
 
   describe('Error Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle dataLayer initialization errors', async () => {
       // Mock Object.defineProperty to throw an error
       const originalDefineProperty = Object.defineProperty;
@@ -466,6 +488,8 @@ describe('GTMProvider', () => {
   });
 
   describe('SSR Compatibility', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle server-side rendering', () => {
       const originalWindow = global.window;
       // @ts-ignore

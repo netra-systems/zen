@@ -11,11 +11,15 @@ import { websocketDebugger } from '@/services/websocketDebugger';
 import { WebSocketMessage } from '@/types/websocket.types';
 
 describe('WebSocketDebugger - Defensive Programming', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     websocketDebugger.reset();
   });
 
   describe('traceEvent', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle undefined event gracefully', () => {
       const result = websocketDebugger.traceEvent(undefined as any);
       expect(result.isValid).toBe(false);
@@ -69,6 +73,8 @@ describe('WebSocketDebugger - Defensive Programming', () => {
   });
 
   describe('generateEventId (private method via traceEvent)', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should generate fallback ID for event without message_id', () => {
       const event: WebSocketMessage = {
         type: 'test_event',
@@ -128,6 +134,8 @@ describe('WebSocketDebugger - Defensive Programming', () => {
   });
 
   describe('markEventProcessed', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle undefined eventId gracefully', () => {
       expect(() => {
         websocketDebugger.markEventProcessed(undefined as any, {});
@@ -154,6 +162,8 @@ describe('WebSocketDebugger - Defensive Programming', () => {
   });
 
   describe('markEventFailed', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle undefined eventId gracefully', () => {
       // Suppress console.error for this test
       const originalError = console.error;
@@ -204,6 +214,8 @@ describe('WebSocketDebugger - Defensive Programming', () => {
   });
 
   describe('getStats', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should return valid stats even with malformed events', () => {
       // Process various malformed events
       websocketDebugger.traceEvent(undefined as any);
@@ -224,6 +236,8 @@ describe('WebSocketDebugger - Defensive Programming', () => {
   });
 
   describe('generateDebugReport', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should generate report even with malformed events', () => {
       // Process various malformed events
       websocketDebugger.traceEvent(undefined as any);
@@ -238,6 +252,8 @@ describe('WebSocketDebugger - Defensive Programming', () => {
   });
 
   describe('Validation Rules', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle agent events with missing agent identification', () => {
       const agentEvent: WebSocketMessage = {
         type: 'agent_started',
@@ -274,6 +290,8 @@ describe('WebSocketDebugger - Defensive Programming', () => {
   });
 
   describe('Edge Cases from Production', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle GTM-like undefined property access', () => {
       // Simulate the exact error pattern from production
       const gtmLikeEvent = {
@@ -344,6 +362,8 @@ describe('WebSocketDebugger - Defensive Programming', () => {
   });
 
   describe('Concurrency and Race Conditions', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle rapid successive calls with malformed events', () => {
       const promises = [];
       for (let i = 0; i < 100; i++) {
@@ -363,4 +383,8 @@ describe('WebSocketDebugger - Defensive Programming', () => {
       });
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

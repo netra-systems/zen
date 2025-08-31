@@ -1,8 +1,9 @@
-/**
- * MessageInput Validation Tests - FIXED VERSION
- * Tests for input validation, sanitization, and character limits
- * 
- * This file addresses the failing validation tests by working with the component
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { jest } from '@jest/globals';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+component
  * in its actual state and testing what can be reliably tested.
  */
 
@@ -91,11 +92,13 @@ const simulateEnterKey = (textarea: HTMLTextAreaElement) => {
 };
 
 describe('MessageInput - Input Validation and Sanitization (FIXED)', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('Input validation and sanitization', () => {
+      jest.setTimeout(10000);
     test('should trim whitespace from messages before sending', async () => {
       renderMessageInput();
       const textarea = setTextareaValue('  Hello World  ');

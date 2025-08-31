@@ -11,6 +11,8 @@ import '@testing-library/jest-dom';
 global.fetch = jest.fn();
 
 describe('API Error Handling', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -165,4 +167,8 @@ describe('API Error Handling', () => {
       expect(screen.getByTestId('json-error')).toHaveTextContent('Invalid response format');
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

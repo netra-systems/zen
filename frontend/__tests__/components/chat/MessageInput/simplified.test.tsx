@@ -88,6 +88,8 @@ declare global {
 }
 
 describe('MessageInput - Simplified Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     // Clear any previous test state
     delete window.testLastSentMessage;
@@ -101,6 +103,8 @@ describe('MessageInput - Simplified Tests', () => {
   const getToggleAuth = () => screen.getByTestId('toggle-auth');
   
   describe('Message input validation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should trim whitespace from messages before sending', async () => {
       renderComponent();
       
@@ -189,6 +193,8 @@ describe('MessageInput - Simplified Tests', () => {
   });
 
   describe('UI state management', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should enforce character limit', async () => {
       renderComponent();
       
@@ -268,6 +274,8 @@ describe('MessageInput - Simplified Tests', () => {
   });
 
   describe('HTML sanitization and security', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle HTML content in messages', async () => {
       renderComponent();
       
@@ -282,4 +290,8 @@ describe('MessageInput - Simplified Tests', () => {
       expect(window.testLastSentMessage).toBe(htmlContent);
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

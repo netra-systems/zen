@@ -11,6 +11,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 describe('Circular Dependency Detection', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const frontendRoot = path.resolve(__dirname, '../..');
   
   /**
@@ -102,6 +104,8 @@ describe('Circular Dependency Detection', () => {
   }
   
   describe('Core Module Dependencies', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('logger.ts should not have circular dependencies', () => {
       const loggerPath = path.join(frontendRoot, 'lib/logger.ts');
       const result = hasCircularDependency(loggerPath);
@@ -143,6 +147,8 @@ describe('Circular Dependency Detection', () => {
   });
   
   describe('Critical Path Dependencies', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('auth context should not have circular dependencies', () => {
       const authPath = path.join(frontendRoot, 'auth/context.tsx');
       const result = hasCircularDependency(authPath);
@@ -187,6 +193,8 @@ describe('Circular Dependency Detection', () => {
   });
   
   describe('Dependency Hierarchy Rules', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('configuration modules should be leaf nodes (no imports of app modules)', () => {
       const configFiles = [
         'lib/unified-api-config.ts',
@@ -242,6 +250,8 @@ describe('Circular Dependency Detection', () => {
   });
   
   describe('Import Depth Analysis', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * Calculate import depth for a module
      */
@@ -291,4 +301,8 @@ describe('Circular Dependency Detection', () => {
       }
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

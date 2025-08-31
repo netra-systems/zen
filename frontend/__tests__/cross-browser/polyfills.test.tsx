@@ -1,8 +1,8 @@
-/**
- * Polyfill Effectiveness Tests
- * 
- * Tests polyfill implementations for missing browser features
- * Ensures graceful degradation and consistent functionality
+import { render, screen, act, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ and consistent functionality
  * 
  * Business Value: Extends browser support, reduces churn from compatibility issues
  * Target: Free and Early tier users with older browsers
@@ -68,15 +68,22 @@ const polyfills = {
 };
 
 describe('Polyfill Effectiveness', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     setupTestEnvironment();
   });
 
   afterEach(() => {
     cleanupTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Animation Polyfills', () => {
+      jest.setTimeout(10000);
     it('should polyfill requestAnimationFrame with setTimeout', async () => {
       // Simulate missing requestAnimationFrame
       const originalRAF = window.requestAnimationFrame;
@@ -162,6 +169,7 @@ describe('Polyfill Effectiveness', () => {
   });
 
   describe('Media Query Polyfills', () => {
+      jest.setTimeout(10000);
     it('should polyfill matchMedia API', () => {
       const originalMatchMedia = window.matchMedia;
       delete (window as any).matchMedia;
@@ -203,6 +211,7 @@ describe('Polyfill Effectiveness', () => {
   });
 
   describe('Observer API Polyfills', () => {
+      jest.setTimeout(10000);
     it('should polyfill IntersectionObserver', () => {
       const originalIO = window.IntersectionObserver;
       delete (window as any).IntersectionObserver;
@@ -249,6 +258,7 @@ describe('Polyfill Effectiveness', () => {
   });
 
   describe('Storage Polyfills', () => {
+      jest.setTimeout(10000);
     it('should polyfill localStorage with cookies fallback', () => {
       const cookieStorage = {
         getItem: (key: string) => {
@@ -324,6 +334,7 @@ describe('Polyfill Effectiveness', () => {
   });
 
   describe('Network API Polyfills', () => {
+      jest.setTimeout(10000);
     it('should polyfill fetch with XMLHttpRequest', async () => {
       const originalFetch = window.fetch;
       delete (window as any).fetch;
@@ -378,6 +389,7 @@ describe('Polyfill Effectiveness', () => {
   });
 
   describe('CSS Feature Polyfills', () => {
+      jest.setTimeout(10000);
     it('should polyfill CSS Grid with Flexbox fallback', () => {
       const element = document.createElement('div');
       
@@ -433,6 +445,7 @@ describe('Polyfill Effectiveness', () => {
   });
 
   describe('Event Handling Polyfills', () => {
+      jest.setTimeout(10000);
     it('should polyfill CustomEvent constructor', () => {
       const customEventPolyfill = (type: string, params: CustomEventInit = {}) => {
         const event = document.createEvent('CustomEvent');

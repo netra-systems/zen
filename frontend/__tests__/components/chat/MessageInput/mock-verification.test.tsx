@@ -1,6 +1,7 @@
-/**
- * Verification test for ThreadService.getThread mock fix
- * This test specifically verifies that all ThreadService methods are properly mocked
+import { ThreadService } from '@/services/threadService';
+import { ThreadRenameService } from '@/services/threadRenameService';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+are properly mocked
  */
 
 import { ThreadService } from '@/services/threadService';
@@ -43,7 +44,9 @@ jest.mock('@/services/threadRenameService', () => ({
 }));
 
 describe('ThreadService Mock Verification', () => {
+    jest.setTimeout(10000);
   describe('ThreadService methods', () => {
+      jest.setTimeout(10000);
     it('should have all required methods defined as functions', () => {
       expect(ThreadService.listThreads).toBeDefined();
       expect(typeof ThreadService.listThreads).toBe('function');
@@ -90,6 +93,7 @@ describe('ThreadService Mock Verification', () => {
   });
 
   describe('ThreadRenameService methods', () => {
+      jest.setTimeout(10000);
     it('should have autoRenameThread method defined', () => {
       expect(ThreadRenameService.autoRenameThread).toBeDefined();
       expect(typeof ThreadRenameService.autoRenameThread).toBe('function');
@@ -97,6 +101,7 @@ describe('ThreadService Mock Verification', () => {
   });
 
   describe('Original error reproduction', () => {
+      jest.setTimeout(10000);
     it('should NOT throw "ThreadService.getThread is not a function" error', async () => {
       // This test reproduces the exact scenario that was causing the original error
       expect(() => {

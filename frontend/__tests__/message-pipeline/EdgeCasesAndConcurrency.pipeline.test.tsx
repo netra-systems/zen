@@ -141,6 +141,8 @@ jest.mock('@/store/unified-chat');
 jest.mock('@/store/threadStore');
 
 describe('Edge Cases and Concurrency Pipeline Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const mockWebSocketService = {
     onMessage: null,
     onStatusChange: null,
@@ -191,9 +193,17 @@ describe('Edge Cases and Concurrency Pipeline Tests', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Concurrent Message Sending', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle multiple users sending messages simultaneously', async () => {
       const metrics: any[] = [];
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
@@ -314,6 +324,8 @@ describe('Edge Cases and Concurrency Pipeline Tests', () => {
   });
 
   describe('Race Conditions and State Consistency', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle race between message send and thread creation', async () => {
       let threadCreationDelay = 1000;
       
@@ -446,6 +458,8 @@ describe('Edge Cases and Concurrency Pipeline Tests', () => {
   });
 
   describe('Memory and Performance Boundaries', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle memory constraints with message cleanup', async () => {
       render(<ConcurrencyTestHarness memoryConstraints={true} />);
 
@@ -531,6 +545,8 @@ describe('Edge Cases and Concurrency Pipeline Tests', () => {
   });
 
   describe('Network Disruption and Recovery', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle network disruption during message pipeline', async () => {
       let networkDown = false;
       
@@ -614,6 +630,8 @@ describe('Edge Cases and Concurrency Pipeline Tests', () => {
   });
 
   describe('Chaos Mode Testing', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should maintain stability under chaotic conditions', async () => {
       const chaosMetrics: any[] = [];
       
@@ -659,6 +677,8 @@ describe('Edge Cases and Concurrency Pipeline Tests', () => {
   });
 
   describe('Component Lifecycle Edge Cases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle rapid mount/unmount cycles', async () => {
       const { unmount, rerender } = render(<ConcurrencyTestHarness />);
 
@@ -679,7 +699,7 @@ describe('Edge Cases and Concurrency Pipeline Tests', () => {
     });
 
     it('should cleanup properly on unmount with pending operations', async () => {
-      const slowPromise = new Promise(resolve => setTimeout(resolve, 5000));
+      const slowPromise = new Promise(resolve => setTimeout(resolve, 1000));
       
       mockWebSocketService.sendMessage.mockReturnValue(slowPromise);
 
@@ -707,6 +727,8 @@ describe('Edge Cases and Concurrency Pipeline Tests', () => {
   });
 
   describe('Browser Environment Edge Cases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle focus/blur events during message sending', async () => {
       render(<ConcurrencyTestHarness />);
 

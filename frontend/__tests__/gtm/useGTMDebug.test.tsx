@@ -34,6 +34,8 @@ const createWrapper = (enabled = true, debug = true) => {
 };
 
 describe('useGTMDebug Hook', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let mockDataLayer: any[];
   let consoleSpy: jest.SpyInstance;
 
@@ -61,9 +63,17 @@ describe('useGTMDebug Hook', () => {
   afterEach(() => {
     jest.clearAllMocks();
     consoleSpy.mockRestore();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Hook Initialization', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should provide debug functionality', async () => {
       const { result } = renderHook(() => useGTMDebug(), {
         wrapper: createWrapper()
@@ -103,6 +113,8 @@ describe('useGTMDebug Hook', () => {
   });
 
   describe('Debug Mode Toggle', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should enable debug mode and push debug event', async () => {
       const { result } = renderHook(() => useGTMDebug(), {
         wrapper: createWrapper()
@@ -147,6 +159,8 @@ describe('useGTMDebug Hook', () => {
   });
 
   describe('Debug Information', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should provide comprehensive debug info', async () => {
       const { result } = renderHook(() => useGTMDebug(), {
         wrapper: createWrapper()
@@ -186,6 +200,8 @@ describe('useGTMDebug Hook', () => {
   });
 
   describe('DataLayer Snapshot', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should provide current dataLayer snapshot', async () => {
       const { result } = renderHook(() => useGTMDebug(), {
         wrapper: createWrapper()
@@ -250,6 +266,8 @@ describe('useGTMDebug Hook', () => {
   });
 
   describe('Event Validation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should validate well-formed events', async () => {
       const { result } = renderHook(() => useGTMDebug(), {
         wrapper: createWrapper()
@@ -325,6 +343,8 @@ describe('useGTMDebug Hook', () => {
   });
 
   describe('Performance Metrics', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should provide detailed performance metrics', async () => {
       const { result } = renderHook(() => useGTMDebug(), {
         wrapper: createWrapper()
@@ -387,6 +407,8 @@ describe('useGTMDebug Hook', () => {
   });
 
   describe('Debug Data Export', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should export comprehensive debug data', async () => {
       const { result } = renderHook(() => useGTMDebug(), {
         wrapper: createWrapper()
@@ -468,6 +490,8 @@ describe('useGTMDebug Hook', () => {
   });
 
   describe('Real-time Monitoring', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should provide real-time event monitoring', async () => {
       const { result } = renderHook(() => useGTMDebug(), {
         wrapper: createWrapper()
@@ -522,6 +546,8 @@ describe('useGTMDebug Hook', () => {
   });
 
   describe('Error Handling and Edge Cases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle missing window object', () => {
       const originalWindow = global.window;
       // @ts-ignore

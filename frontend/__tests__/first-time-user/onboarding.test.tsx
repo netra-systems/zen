@@ -1,8 +1,8 @@
-/**
- * First-Time User Onboarding Flow Tests - Master Test Suite
- * 
- * BUSINESS VALUE JUSTIFICATION:
- * - Segment: Free → Early (Critical conversion funnel)
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+(Critical conversion funnel)
  * - Business Goal: Prevent 15-20% conversion loss from poor UX
  * - Value Impact: Each successful onboard = potential $1K+ ARR
  * - Revenue Impact: 5% improvement = $100K+ annually
@@ -46,6 +46,7 @@ setupNextJSMocks();
 setupAuthMocks();
 
 describe('First-Time User Onboarding Flow - Integration Tests', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     setupCleanState();
     setupSimpleWebSocketMock();
@@ -55,9 +56,15 @@ describe('First-Time User Onboarding Flow - Integration Tests', () => {
   afterEach(() => {
     clearAuthState();
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('End-to-End Onboarding Flow', () => {
+      jest.setTimeout(10000);
     it('completes full user journey from landing to chat', async () => {
       // Step 1: Land on login page
       await renderLoginPage();
@@ -109,6 +116,7 @@ describe('First-Time User Onboarding Flow - Integration Tests', () => {
   });
 
   describe('Critical User Experience Validation', () => {
+      jest.setTimeout(10000);
     it('ensures smooth user flow without jarring transitions', async () => {
       const startTime = performance.now();
       
@@ -142,6 +150,7 @@ describe('First-Time User Onboarding Flow - Integration Tests', () => {
   });
 
   describe('Business Conversion Metrics', () => {
+      jest.setTimeout(10000);
     it('minimizes friction in signup process', async () => {
       await renderLoginPage();
       

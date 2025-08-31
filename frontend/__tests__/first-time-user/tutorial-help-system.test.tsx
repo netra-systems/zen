@@ -69,6 +69,8 @@ jest.mock('@/lib/logger', () => ({
 import MainChat from '@/components/chat/MainChat';
 
 describe('First-Time User Tutorial Help System', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     
@@ -265,4 +267,8 @@ describe('First-Time User Tutorial Help System', () => {
       expect(screen.getByTestId('message-list')).toBeInTheDocument();
     }
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

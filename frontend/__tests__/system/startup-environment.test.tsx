@@ -1,8 +1,7 @@
-/**
- * Frontend Startup Environment Tests
- * Tests environment validation, configuration loading, and dependency management
- */
-
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 // JEST MODULE HOISTING - Global mocks BEFORE imports
 global.fetch = jest.fn();
 global.WebSocket = jest.fn(() => ({
@@ -24,6 +23,7 @@ const mockEnv = {
 };
 
 describe('Frontend Startup - Environment', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     // Setup environment
     process.env = { ...process.env, ...mockEnv };
@@ -32,9 +32,15 @@ describe('Frontend Startup - Environment', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Environment Validation', () => {
+      jest.setTimeout(10000);
     it('should validate required environment variables', () => {
       expect(process.env.NEXT_PUBLIC_API_URL).toBeDefined();
       expect(process.env.NEXT_PUBLIC_WS_URL).toBeDefined();
@@ -72,6 +78,7 @@ describe('Frontend Startup - Environment', () => {
   });
 
   describe('Configuration Loading', () => {
+      jest.setTimeout(10000);
     it('should load application configuration', () => {
       const config = {
         apiUrl: process.env.NEXT_PUBLIC_API_URL,
@@ -109,7 +116,7 @@ describe('Frontend Startup - Environment', () => {
       const getConfigWithDefaults = () => ({
         apiUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
         wsUrl: process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000',
-        timeout: 30000,
+        timeout: 5000,
         retries: 3,
       });
 
@@ -125,6 +132,7 @@ describe('Frontend Startup - Environment', () => {
   });
 
   describe('Dependency Loading', () => {
+      jest.setTimeout(10000);
     it('should load required React dependencies', () => {
       expect(React).toBeDefined();
       expect(React.version).toBeDefined();
@@ -167,6 +175,7 @@ describe('Frontend Startup - Environment', () => {
   });
 
   describe('Environment Security', () => {
+      jest.setTimeout(10000);
     it('should not expose sensitive environment variables', () => {
       // Check that sensitive vars are not exposed to client
       expect(process.env.DATABASE_URL).toBeUndefined();

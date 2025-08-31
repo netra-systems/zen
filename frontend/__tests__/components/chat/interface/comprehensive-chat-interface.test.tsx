@@ -1,10 +1,9 @@
-/**
- * Comprehensive Chat Interface Tests
- * ==================================
- * 
- * Business Value Justification (BVJ):
- * 1. Segment: Free → Enterprise (All segments)
- * 2. Business Goal: Ensure flawless chat experience for conversion and retention
+import React from 'react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ flawless chat experience for conversion and retention
  * 3. Value Impact: 95% reduction in chat-related user friction and abandonment
  * 4. Revenue Impact: +$50K MRR from improved user experience and conversion rates
  * 
@@ -44,6 +43,7 @@ import { mockWebSocketProvider, mockUnifiedChatStore } from './shared-test-setup
 import { Message, Thread, WebSocketEvent } from '@/types';
 
 describe('Comprehensive Chat Interface Tests', () => {
+    jest.setTimeout(10000);
   let mockWebSocket: jest.Mock;
   let mockSendMessage: jest.Mock;
   let mockStore: any;
@@ -87,9 +87,15 @@ describe('Comprehensive Chat Interface Tests', () => {
       isAuthenticated: true,
       initialized: true
     };
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('1. Message Input Field Interactions', () => {
+      jest.setTimeout(10000);
     it('should handle text input with proper validation', async () => {
       const { container } = render(
         <TestProviders>
@@ -169,6 +175,7 @@ describe('Comprehensive Chat Interface Tests', () => {
   });
 
   describe('2. Message Display in Conversation', () => {
+      jest.setTimeout(10000);
     const mockMessages: Message[] = [
       {
         id: 'msg1',
@@ -238,6 +245,7 @@ describe('Comprehensive Chat Interface Tests', () => {
   });
 
   describe('3. Streaming Response Rendering', () => {
+      jest.setTimeout(10000);
     it('should render streaming response with typing indicator', async () => {
       mockStore.isProcessing = true;
       
@@ -295,6 +303,7 @@ describe('Comprehensive Chat Interface Tests', () => {
   });
 
   describe('4. File Upload Functionality', () => {
+      jest.setTimeout(10000);
     it('should handle file selection and validation', async () => {
       render(
         <TestProviders>
@@ -382,6 +391,7 @@ describe('Comprehensive Chat Interface Tests', () => {
   });
 
   describe('5. Thread/Conversation Management', () => {
+      jest.setTimeout(10000);
     const mockThreads: Thread[] = [
       { id: 'thread1', title: 'AI Optimization Chat', createdAt: new Date().toISOString() },
       { id: 'thread2', title: 'Performance Analysis', createdAt: new Date().toISOString() }

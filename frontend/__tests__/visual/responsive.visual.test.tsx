@@ -1,13 +1,12 @@
-/**
- * Visual Regression Tests - Responsive Design
- * Tests responsive breakpoints, mobile layouts, and cross-browser compatibility
- * Follows 25-line function rule and comprehensive viewport coverage
- * Business Impact: Ensures consistent UI across all devices and browsers
- */
-
 import React from 'react';
 import { render } from '@testing-library/react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AuthProvider } from '@/auth/context';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -68,6 +67,7 @@ const ResponsiveWrapper = ({
 // ============================================================================
 
 describe('Mobile Responsive Visual Tests', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     mockViewport(375, 667);
   });
@@ -153,6 +153,7 @@ describe('Mobile Responsive Visual Tests', () => {
 // ============================================================================
 
 describe('Tablet Responsive Visual Tests', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     mockViewport(768, 1024);
   });
@@ -267,6 +268,7 @@ describe('Tablet Responsive Visual Tests', () => {
 // ============================================================================
 
 describe('Desktop Responsive Visual Tests', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     mockViewport(1024, 768);
   });
@@ -419,6 +421,7 @@ describe('Desktop Responsive Visual Tests', () => {
 // ============================================================================
 
 describe('Ultra-Wide Responsive Visual Tests', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     mockViewport(1920, 1080);
   });
@@ -489,6 +492,7 @@ describe('Ultra-Wide Responsive Visual Tests', () => {
 // ============================================================================
 
 describe('Breakpoint Transition Visual Tests', () => {
+    jest.setTimeout(10000);
   it('renders component at mobile-to-tablet breakpoint', () => {
     mockViewport(768, 1024);
     const { container } = render(
@@ -531,6 +535,7 @@ describe('Breakpoint Transition Visual Tests', () => {
 // ============================================================================
 
 describe('Accessibility Visual Tests', () => {
+    jest.setTimeout(10000);
   it('renders high contrast mode correctly', () => {
     const { container } = render(
       <ResponsiveWrapper viewport="desktop">

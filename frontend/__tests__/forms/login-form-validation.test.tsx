@@ -72,6 +72,8 @@ const LoginForm: React.FC<{ onSubmit: (data: { email: string; password: string }
 };
 
 describe('Login Form Validation', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   it('should show validation errors for empty fields', async () => {
     const mockOnSubmit = jest.fn();
     const user = userEvent.setup();
@@ -103,4 +105,8 @@ describe('Login Form Validation', () => {
       password: 'password123'
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

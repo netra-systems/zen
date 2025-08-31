@@ -1,9 +1,9 @@
-/**
- * Mobile Experience Tests for First-Time Users - Business Critical
- * 
- * BUSINESS VALUE JUSTIFICATION:
- * - Segment: Free → Early (60% mobile traffic conversion funnel)
- * - Business Goal: Prevent 20%+ mobile conversion loss from poor UX
+import React from 'react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+vent 20%+ mobile conversion loss from poor UX
  * - Value Impact: Each mobile conversion = $1K+ potential ARR
  * - Revenue Impact: 15% mobile UX improvement = $150K+ annually
  * 
@@ -61,6 +61,7 @@ jest.mock('@/auth', () => ({
 }));
 
 describe('Mobile Experience for First-Time Users', () => {
+    jest.setTimeout(10000);
   const user = userEvent.setup();
 
   beforeEach(() => {
@@ -71,9 +72,15 @@ describe('Mobile Experience for First-Time Users', () => {
   afterEach(() => {
     clearAuthState();
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Touch Target Optimization', () => {
+      jest.setTimeout(10000);
     it('ensures login button meets 44px minimum touch target', () => {
       simulatePortraitOrientation();
       render(<LoginPage />);
@@ -115,6 +122,7 @@ describe('Mobile Experience for First-Time Users', () => {
   });
 
   describe('Responsive Design Validation', () => {
+      jest.setTimeout(10000);
     it('adapts layout for mobile portrait orientation', async () => {
       setMobileViewport(375, 667);
       render(<LoginPage />);
@@ -150,6 +158,7 @@ describe('Mobile Experience for First-Time Users', () => {
   });
 
   describe('Mobile Keyboard Handling', () => {
+      jest.setTimeout(10000);
     it('renders message input with proper mobile attributes', () => {
       render(<TestProviders><MessageInput /></TestProviders>);
       
@@ -182,6 +191,7 @@ describe('Mobile Experience for First-Time Users', () => {
   });
 
   describe('Touch Gestures and Navigation', () => {
+      jest.setTimeout(10000);
     it('handles swipe gestures for navigation', async () => {
       render(<LoginPage />);
       
@@ -232,6 +242,7 @@ describe('Mobile Experience for First-Time Users', () => {
   });
 
   describe('Viewport and Orientation Adaptations', () => {
+      jest.setTimeout(10000);
     it('adapts to various mobile orientations and densities', () => {
       simulatePortraitOrientation();
       render(<LoginPage />);
@@ -250,6 +261,7 @@ describe('Mobile Experience for First-Time Users', () => {
   });
 
   describe('Performance on Mobile Devices', () => {
+      jest.setTimeout(10000);
     it('handles rapid touch events efficiently', async () => {
       const touchCount = { value: 0 };
       const handleTouch = () => touchCount.value++;
@@ -274,6 +286,7 @@ describe('Mobile Experience for First-Time Users', () => {
   });
 
   describe('Accessibility on Mobile', () => {
+      jest.setTimeout(10000);
     it('provides comprehensive mobile accessibility support', () => {
       setupMockVibration();
       setupMockMatchMedia();

@@ -1,11 +1,10 @@
-/**
- * Bundle Size Optimization Tests
- * Tests code splitting, lazy loading, and tree shaking effectiveness
- * Extracted from oversized bundle-size.test.tsx for modularity
- * 
- * Business Value Justification (BVJ):
- * - Segment: Growth & Enterprise
- * - Business Goal: Optimize bundle delivery for performance
+import React from 'react';
+import { render, screen, act, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import dynamic from 'next/dynamic';
+import { TestProviders } from '@/__tests__/test-utils/providers';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ Business Goal: Optimize bundle delivery for performance
  * - Value Impact: 25% faster initial page loads
  * - Revenue Impact: +$20K MRR from improved user experience
  */
@@ -85,11 +84,13 @@ function optimizeBundleSplitting(): { strategy: string; improvement: number } {
 }
 
 describe('Bundle Size Optimization Tests', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('Code Splitting Effectiveness', () => {
+      jest.setTimeout(10000);
     it('should properly split code into chunks', () => {
       const metrics = analyzeCodeSplitting();
       
@@ -125,6 +126,7 @@ describe('Bundle Size Optimization Tests', () => {
   });
 
   describe('Lazy Loading Validation', () => {
+      jest.setTimeout(10000);
     it('should load dynamic components on demand', async () => {
       render(
         <TestProviders>
@@ -197,6 +199,7 @@ describe('Bundle Size Optimization Tests', () => {
   });
 
   describe('Tree Shaking and Dead Code Elimination', () => {
+      jest.setTimeout(10000);
     it('should validate tree shaking effectiveness', () => {
       const result = validateTreeShaking();
       
@@ -228,6 +231,7 @@ describe('Bundle Size Optimization Tests', () => {
   });
 
   describe('Bundle Splitting Strategies', () => {
+      jest.setTimeout(10000);
     it('should optimize vendor chunk separation', () => {
       const optimization = optimizeBundleSplitting();
       
@@ -263,6 +267,7 @@ describe('Bundle Size Optimization Tests', () => {
   });
 
   describe('Production Build Optimization', () => {
+      jest.setTimeout(10000);
     it('should validate minification effectiveness', () => {
       const minificationResult = {
         originalSize: 500000,

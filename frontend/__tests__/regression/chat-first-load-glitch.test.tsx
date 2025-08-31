@@ -108,6 +108,8 @@ const createLifecycleTracker = (): LifecycleTracker => ({
 });
 
 describe('Chat First-Time Page Load Glitch Detection', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let lifecycleTracker: LifecycleTracker;
   let mockWebSocket: any;
   let consoleErrorSpy: jest.SpyInstance;
@@ -153,6 +155,12 @@ describe('Chat First-Time Page Load Glitch Detection', () => {
     consoleErrorSpy.mockRestore();
     consoleWarnSpy.mockRestore();
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   /**
@@ -613,6 +621,8 @@ describe('Chat First-Time Page Load Glitch Detection', () => {
  * Integration Test Suite - Full Page Load Scenario
  */
 describe('Chat Page Full Load Integration', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   /**
    * Test 9: Complete first-time user flow
    * EXPECTED TO FAIL: Multiple issues in complete flow

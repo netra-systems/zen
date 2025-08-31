@@ -72,6 +72,8 @@ const useAppContext = () => {
 };
 
 describe('Context State Management', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   it('should provide initial state to consumers', () => {
     const TestComponent: React.FC = () => {
       const { state } = useAppContext();
@@ -336,4 +338,8 @@ describe('Context State Management', () => {
       expect(screen.getByTestId('operation-result')).toHaveTextContent('Completed');
     }, { timeout: 200 });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

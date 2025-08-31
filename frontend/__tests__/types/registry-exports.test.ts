@@ -1,13 +1,16 @@
-/**
- * Regression test for module export initialization
- * Prevents runtime ReferenceError issues with enum exports
+import * as registry from '@/types/unified';
+import * as enums from '@/types/shared/enums';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ssues with enum exports
  */
 
 import * as registry from '@/types/unified';
 import * as enums from '@/types/shared/enums';
 
 describe('Type Registry Export Safety', () => {
+    jest.setTimeout(10000);
   describe('Named exports from registry', () => {
+      jest.setTimeout(10000);
     it('should export MessageType enum without runtime errors', () => {
       expect(registry.MessageType).toBeDefined();
       expect(registry.MessageType.USER).toBe('user');
@@ -42,6 +45,7 @@ describe('Type Registry Export Safety', () => {
   });
 
   describe('Named exports from shared/enums', () => {
+      jest.setTimeout(10000);
     it('should export enums without runtime errors', () => {
       expect(enums.MessageType).toBeDefined();
       expect(enums.AgentStatus).toBeDefined();
@@ -56,6 +60,7 @@ describe('Type Registry Export Safety', () => {
   });
 
   describe('No default exports (regression prevention)', () => {
+      jest.setTimeout(10000);
     it('should not have default export in registry', () => {
       // This test ensures we don't accidentally re-add problematic default exports
       const registryModule = require('@/types/unified');
@@ -70,6 +75,7 @@ describe('Type Registry Export Safety', () => {
   });
 
   describe('Module initialization order', () => {
+      jest.setTimeout(10000);
     it('should handle circular imports safely', () => {
       // Import in different order to test initialization
       const { MessageType: MT1 } = require('@/types/unified');

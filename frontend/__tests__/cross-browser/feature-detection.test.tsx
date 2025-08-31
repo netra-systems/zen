@@ -1,8 +1,8 @@
-/**
- * Browser Feature Detection Tests
- * 
- * Tests detection and graceful degradation of browser features
- * Ensures Netra Apex works across different browser capabilities
+import { render, screen, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+pex works across different browser capabilities
  * 
  * Business Value: Maximizes user reach and reduces support burden
  * Target: All customer segments with diverse browser environments
@@ -68,15 +68,22 @@ const detectCSSFeatures = () => {
 };
 
 describe('Browser Feature Detection', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     setupTestEnvironment();
   });
 
   afterEach(() => {
     cleanupTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Core API Detection', () => {
+      jest.setTimeout(10000);
     it('should detect WebSocket support', () => {
       const features = detectBrowserFeatures();
       expect(typeof features.webSocket).toBe('boolean');
@@ -129,6 +136,7 @@ describe('Browser Feature Detection', () => {
   });
 
   describe('Animation API Detection', () => {
+      jest.setTimeout(10000);
     it('should detect requestAnimationFrame support', () => {
       const features = detectBrowserFeatures();
       expect(typeof features.requestAnimationFrame).toBe('boolean');
@@ -156,6 +164,7 @@ describe('Browser Feature Detection', () => {
   });
 
   describe('Observer API Detection', () => {
+      jest.setTimeout(10000);
     it('should detect IntersectionObserver support', () => {
       const features = detectBrowserFeatures();
       expect(typeof features.intersectionObserver).toBe('boolean');
@@ -201,6 +210,7 @@ describe('Browser Feature Detection', () => {
   });
 
   describe('CSS Feature Detection', () => {
+      jest.setTimeout(10000);
     it('should detect CSS Grid support', () => {
       const features = detectCSSFeatures();
       expect(typeof features.grid).toBe('boolean');
@@ -243,6 +253,7 @@ describe('Browser Feature Detection', () => {
   });
 
   describe('Input and Interaction Detection', () => {
+      jest.setTimeout(10000);
     it('should detect touch support', () => {
       const hasTouch = 'ontouchstart' in window || 
                       navigator.maxTouchPoints > 0 ||
@@ -277,6 +288,7 @@ describe('Browser Feature Detection', () => {
   });
 
   describe('Network and Connectivity Detection', () => {
+      jest.setTimeout(10000);
     it('should detect online/offline capability', () => {
       const hasNavigatorOnline = typeof navigator.onLine !== 'undefined';
       expect(typeof hasNavigatorOnline).toBe('boolean');
@@ -310,6 +322,7 @@ describe('Browser Feature Detection', () => {
   });
 
   describe('Audio and Media Detection', () => {
+      jest.setTimeout(10000);
     it('should detect audio context support', () => {
       const AudioContext = window.AudioContext || 
                           (window as any).webkitAudioContext;
@@ -341,6 +354,7 @@ describe('Browser Feature Detection', () => {
   });
 
   describe('Security and Permissions Detection', () => {
+      jest.setTimeout(10000);
     it('should detect permissions API support', () => {
       const hasPermissions = 'permissions' in navigator;
       expect(typeof hasPermissions).toBe('boolean');

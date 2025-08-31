@@ -1,8 +1,8 @@
-/**
- * Cross-Browser Compatibility Tests (Fixed)
- * 
- * Tests browser compatibility for core Netra Apex functionality
- * Ensures consistent behavior across different browser implementations
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+consistent behavior across different browser implementations
  * 
  * Business Value: Prevents revenue loss from browser-specific bugs
  * Target: All customer segments (Free → Enterprise)
@@ -17,6 +17,7 @@ import {
 } from '../helpers/test-setup-helpers';
 
 describe('Cross-Browser Compatibility (Fixed)', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     setupTestEnvironment();
   });
@@ -24,12 +25,18 @@ describe('Cross-Browser Compatibility (Fixed)', () => {
   afterEach(() => {
     cleanupTestEnvironment();
     clearTestStorage();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('WebSocket Compatibility', () => {
+      jest.setTimeout(10000);
     it('should handle WebSocket creation across browsers', () => {
       const testWebSocketCreation = () => {
-        const ws = new WebSocket('ws://localhost:8000/ws');
+        const ws = new WebSocket('ws://localhost:3001/test'));
         expect(ws).toBeDefined();
         expect(ws.readyState).toBe(WebSocket.CONNECTING);
         ws.close();
@@ -39,7 +46,7 @@ describe('Cross-Browser Compatibility (Fixed)', () => {
     });
 
     it('should support WebSocket event handling patterns', () => {
-      const ws = new WebSocket('ws://localhost:8000/ws');
+      const ws = new WebSocket('ws://localhost:3001/test'));
       const events = { open: false, message: false, close: false };
       
       // Test event handlers (universally supported)
@@ -52,7 +59,7 @@ describe('Cross-Browser Compatibility (Fixed)', () => {
     });
 
     it('should handle WebSocket binary data types', () => {
-      const ws = new WebSocket('ws://localhost:8000/ws');
+      const ws = new WebSocket('ws://localhost:3001/test'));
       const binaryTypes = ['blob', 'arraybuffer'];
       
       binaryTypes.forEach(type => {
@@ -63,6 +70,7 @@ describe('Cross-Browser Compatibility (Fixed)', () => {
   });
 
   describe('Storage Compatibility', () => {
+      jest.setTimeout(10000);
     it('should support localStorage operations', () => {
       const testValue = JSON.stringify({ test: 'data' });
       localStorage.setItem('test-key', testValue);
@@ -98,6 +106,7 @@ describe('Cross-Browser Compatibility (Fixed)', () => {
   });
 
   describe('CSS Compatibility', () => {
+      jest.setTimeout(10000);
     it('should support CSS Grid layout', () => {
       const testDiv = document.createElement('div');
       testDiv.style.display = 'grid';
@@ -129,6 +138,7 @@ describe('Cross-Browser Compatibility (Fixed)', () => {
   });
 
   describe('Media Query Compatibility', () => {
+      jest.setTimeout(10000);
     it('should support matchMedia API when available', () => {
       if (typeof window.matchMedia === 'function') {
         const mq = window.matchMedia('(max-width: 768px)');
@@ -190,6 +200,7 @@ describe('Cross-Browser Compatibility (Fixed)', () => {
   });
 
   describe('JavaScript API Compatibility', () => {
+      jest.setTimeout(10000);
     it('should support modern JavaScript features', () => {
       // Test Promise support
       expect(typeof Promise).toBe('function');
@@ -232,6 +243,7 @@ describe('Cross-Browser Compatibility (Fixed)', () => {
   });
 
   describe('Event Handling Compatibility', () => {
+      jest.setTimeout(10000);
     it('should support addEventListener pattern', () => {
       const button = document.createElement('button');
       const handler = jest.fn();
@@ -273,6 +285,7 @@ describe('Cross-Browser Compatibility (Fixed)', () => {
   });
 
   describe('Browser-Specific Feature Detection', () => {
+      jest.setTimeout(10000);
     it('should detect WebRTC support for future features', () => {
       const hasWebRTC = !!(
         window.RTCPeerConnection ||

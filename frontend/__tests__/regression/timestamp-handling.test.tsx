@@ -7,11 +7,19 @@
 
 describe('Timestamp Handling Regression Tests', () => {
   
+      setupAntiHang();
+  
+    jest.setTimeout(10000);
+  
   /**
    * The core issue: ISO strings were being multiplied by 1000
    * when they should be parsed directly as dates
    */
   describe('ISO String vs Unix Timestamp Differentiation', () => {
+    
+        setupAntiHang();
+    
+      jest.setTimeout(10000);
     
     // Helper function that mirrors the fixed implementation
     const formatTimestamp = (timestamp: number | string): Date => {
@@ -86,6 +94,10 @@ describe('Timestamp Handling Regression Tests', () => {
    */
   describe('Date Display Formatting', () => {
     
+        setupAntiHang();
+    
+      jest.setTimeout(10000);
+    
     const formatDateDisplay = (timestamp: number | string): string => {
       const date = typeof timestamp === 'string' 
         ? new Date(timestamp) 
@@ -153,6 +165,10 @@ describe('Timestamp Handling Regression Tests', () => {
    * Test edge cases that could cause issues
    */
   describe('Edge Cases', () => {
+    
+        setupAntiHang();
+    
+      jest.setTimeout(10000);
     
     const isValidDate = (timestamp: any): boolean => {
       if (!timestamp) return false;
@@ -231,6 +247,10 @@ describe('Timestamp Handling Regression Tests', () => {
    */
   describe('Performance Considerations', () => {
     
+        setupAntiHang();
+    
+      jest.setTimeout(10000);
+    
     it('should handle large batches of timestamps efficiently', () => {
       const timestamps = [];
       const now = Date.now();
@@ -264,4 +284,8 @@ describe('Timestamp Handling Regression Tests', () => {
       expect(duration).toBeLessThan(100);
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

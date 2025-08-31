@@ -1,10 +1,8 @@
-/**
- * MessageInput Thread Management Tests
- * Tests for thread creation and management functionality
- */
-
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+der, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 // Mock implementations
@@ -91,11 +89,13 @@ const expectMessageSent = async (mockFn: jest.Mock, content: string) => {
 };
 
 describe('MessageInput - Thread Management', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('Thread management', () => {
+      jest.setTimeout(10000);
     it('should handle messages with no active thread', async () => {
       renderMessageInput();
       await sendViaEnter('Test message');

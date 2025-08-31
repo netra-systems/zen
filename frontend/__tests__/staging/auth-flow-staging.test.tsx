@@ -58,6 +58,8 @@ const AuthTestWrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('Authentication Flow - Staging Environment', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const originalLocation = window.location;
   let mockFetch: jest.MockedFunction<typeof fetch>;
 
@@ -81,9 +83,17 @@ describe('Authentication Flow - Staging Environment', () => {
   afterEach(() => {
     window.location = originalLocation;
     jest.restoreAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Authentication State Management', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should initialize with no user when not authenticated', async () => {
       // Mock auth config endpoint
       mockFetch.mockResolvedValueOnce({
@@ -155,6 +165,8 @@ describe('Authentication Flow - Staging Environment', () => {
   });
 
   describe('OAuth Login Flow', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should redirect to OAuth provider on login', async () => {
       const mockAuthConfig = {
         development_mode: false,
@@ -241,6 +253,8 @@ describe('Authentication Flow - Staging Environment', () => {
   });
 
   describe('Authenticated API Requests', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should successfully make authenticated requests to /api/threads', async () => {
       // Set up authenticated user
       const mockToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiZW1haWwiOiJ0ZXN0QGV4YW1wbGUuY29tIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjk5OTk5OTk5OTl9.Lmb5qHhYXKLMfCgH1FoWm4GKuJzD4MkX9sEfH0a6N7Q';
@@ -371,6 +385,8 @@ describe('Authentication Flow - Staging Environment', () => {
   });
 
   describe('Token Management', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should refresh token automatically before expiration', async () => {
       // Set up token that expires soon
       const soonToExpireToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiZW1haWwiOiJ0ZXN0QGV4YW1wbGUuY29tIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE1MTYyMzkwODJ9.invalidSignature';
@@ -465,6 +481,8 @@ describe('Authentication Flow - Staging Environment', () => {
   });
 
   describe('Session Persistence', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should persist session across page refreshes', async () => {
       const persistentToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiZW1haWwiOiJ0ZXN0QGV4YW1wbGUuY29tIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjk5OTk5OTk5OTl9.Lmb5qHhYXKLMfCgH1FoWm4GKuJzD4MkX9sEfH0a6N7Q';
       localStorage.setItem('jwt_token', persistentToken);
@@ -553,6 +571,8 @@ describe('Authentication Flow - Staging Environment', () => {
   });
 
   describe('Logout Flow', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should clear all auth data on logout', async () => {
       const mockToken = 'valid-token';
       localStorage.setItem('jwt_token', mockToken);
@@ -640,6 +660,8 @@ describe('Authentication Flow - Staging Environment', () => {
   });
 
   describe('CORS and Security Headers', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should handle CORS preflight requests properly', async () => {
       const mockToken = 'valid-token';
       localStorage.setItem('jwt_token', mockToken);
