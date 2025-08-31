@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning id="docker-configuration-cache-loop-critical-fix" criticality="CRITICAL" date="2025-08-31">
+    <title>Docker Configuration Cache Loop Critical Fix - Memory/CPU Exhaustion</title>
+    
+    <incident>
+        <description>
+            Docker Desktop crashed during dev environment startup due to excessive memory/CPU usage caused by 
+            configuration cache clearing loop in the backend service.
+        </description>
+        
+        <symptoms>
+            <symptom>Docker Desktop completely crashed and died</symptom>
+            <symptom>Backend service logs showing hundreds of "All configuration caches cleared for test context" messages</symptom>
+            <symptom>Excessive CPU/memory usage pattern in backend container</symptom>
+            <symptom>All Docker containers stopped unexpectedly</symptom>
+        </symptoms>
+    </incident>
+
+    <root_cause_analysis>
+        <five_whys>
+            <why level="1">
+                <question>Why did Docker Desktop crash?</question>
+                <answer>Excessive memory/CPU usage from the backend service caused system resource exhaustion</answer>
+            </why>
+            <why level="2">
+                <question>Why was the backend service using excessive resources?</question>
+                <answer>Configuration cache clearing was happening in a tight loop with constant logging</answer>
+            </why>
+            <why level="3">
+                <question>Why was configuration cache clearing happening in a loop?</question>
+                <answer>The system detected it was in "test context" and cleared caches on every config access</answer>
+            </why>
+            <why level="4">
+                <question>Why did the system think it was in test context?</question>
+                <answer>The _is_test_context() method detected 'pytest' in sys.modules and returned True</answer>
+            </why>
+            <why level="5">
+                <question>Why was pytest in sys.modules in production/dev environment?</question>
+                <answer>Pytest was imported as a dependency somewhere in the codebase, making it available in sys.modules even when not actively running tests</answer>
+            </why>
+        </five_whys>
+
+        <technical_details>
+            <problem_code>
+                <file>/netra_backend/app/core/configuration/base.py</file>
+                <method>_is_test_context()</method>
+                <issue>Line 177: if 'pytest' in sys.modules: return True</issue>
+                <explanation>
+                    This check was too broad - it triggered test mode whenever pytest was imported as a dependency,
+                    not just when pytest was actively running tests.
+                </explanation>
+            </problem_code>
+            
+            <cascading_effect>
+                <step>1. pytest detected in sys.modules → _is_test_context() returns True</step>
+                <step>2. get_config() enters test mode path → calls _clear_all_caches()</step>
+                <step>3. _clear_all_caches() logs "All configuration caches cleared for test context"</step>
+                <step>4. Every subsequent config access repeats this cycle</step>
+                <step>5. Hundreds of log messages + cache clearing operations consume CPU/memory</step>
+                <step>6. Docker Desktop resource limits exceeded → system crash</step>
+            </cascading_effect>
+        </technical_details>
+    </root_cause_analysis>
+
+    <mermaid_diagram>
+        ```mermaid
+        graph TD
+            A[Backend Service Starts] --> B[Configuration Access]
+            B --> C{Check _is_test_context()}
+            C --> D[Check: 'pytest' in sys.modules]
+            D --> E{pytest found?}
+            E -->|YES| F[Return True - Test Context]
+            E -->|NO| G[Check other test indicators]
+            
+            F --> H[get_config() Test Path]
+            H --> I[Call _clear_all_caches()]
+            I --> J[Log: 'All configuration caches cleared for test context']
+            I --> K[Clear all configuration caches]
+            I --> L[Clear database manager caches]
+            
+            K --> M[Next Configuration Access]
+            L --> M
+            J --> M
+            M --> B
+            
+            style A fill:#e1f5fe
+            style F fill:#ffcdd2
+            style I fill:#ffcdd2
+            style J fill:#ff5722,color:#fff
+            style M fill:#ffcdd2
+            
+            classDef criticalPath stroke:#f44336,stroke-width:3px
+            class B,C,D,E,F,H,I,M criticalPath
+        ```
+    </mermaid_diagram>
+
+    <solution>
+        <immediate_fix>
+            <description>Modified _is_test_context() to be more precise about pytest detection</description>
+            <file>/netra_backend/app/core/configuration/base.py</file>
+            <change>
+                <from>if 'pytest' in sys.modules: return True</from>
+                <to>
+                    if 'pytest' in sys.modules and hasattr(sys.modules['pytest'], 'main'):
+                        # Only consider it a test if pytest is actively running
+                        if hasattr(sys, '_pytest_running') or get_env().get('PYTEST_CURRENT_TEST'):
+                            return True
+                </to>
+            </change>
+            <rationale>
+                Only trigger test mode when pytest is actively running tests, not just when it's imported as a dependency.
+                This prevents false positive test context detection in dev/production environments.
+            </rationale>
+        </immediate_fix>
+
+        <additional_fixes>
+            <fix>Fixed Docker service hostnames in .env.development to match docker-compose.yml service names</fix>
+            <fix>Updated POSTGRES_HOST from 'postgres' to 'dev-postgres'</fix>
+            <fix>Updated REDIS_HOST from 'redis' to 'dev-redis'</fix>
+            <fix>Updated CLICKHOUSE_HOST from 'clickhouse' to 'dev-clickhouse'</fix>
+            <fix>Updated AUTH_SERVICE_URL to use correct dev-auth service name and port</fix>
+        </additional_fixes>
+    </solution>
+
+    <prevention_measures>
+        <measure>
+            <rule>Test context detection must be precise and only trigger during active test execution</rule>
+            <implementation>Use explicit test markers rather than module import detection</implementation>
+        </measure>
+        
+        <measure>
+            <rule>Docker service names in .env files must exactly match docker-compose.yml service names</rule>
+            <implementation>Automated validation in CI/CD pipeline to check env file consistency</implementation>
+        </measure>
+        
+        <measure>
+            <rule>Configuration caching in production/dev must never clear on every access</rule>
+            <implementation>Implement environment-specific caching strategies with appropriate invalidation</implementation>
+        </measure>
+        
+        <measure>
+            <rule>Resource usage monitoring for Docker containers to detect runaway processes early</rule>
+            <implementation>Add container resource limits and monitoring alerts</implementation>
+        </measure>
+    </prevention_measures>
+
+    <cross_references>
+        <reference file="SPEC/learnings/configuration.xml" relation="extends"/>
+        <reference file="SPEC/learnings/docker_development_environment.xml" relation="created_by_this"/>
+        <reference file="SPEC/docker_development_setup.xml" relation="impacts"/>
+        <reference file="netra_backend/app/core/configuration/base.py" relation="fixed_in"/>
+        <reference file=".env.development" relation="fixed_in"/>
+    </cross_references>
+
+    <impact>
+        <severity>CRITICAL</severity>
+        <business_impact>Development environment completely unusable, blocking all local development</business_impact>
+        <technical_impact>Docker Desktop crashes, excessive resource consumption, development workflow disruption</technical_impact>
+        <time_to_fix>45 minutes</time_to_fix>
+        <affected_environments>Local Development Docker Compose</affected_environments>
+    </impact>
+
+    <verification>
+        <test>Start Docker Compose dev environment and verify no excessive cache clearing logs</test>
+        <test>Monitor backend container resource usage stays within normal limits</test>
+        <test>Verify all services start successfully and maintain stable resource usage</test>
+        <test>Confirm configuration caching works properly in dev environment</test>
+    </verification>
+</learning>

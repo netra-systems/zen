@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning id="docker-daemon-persistent-failure" criticality="BLOCKING" date="2025-08-31">
+    <title>Docker Daemon Persistent Failure - System-Level Corruption</title>
+    
+    <incident>
+        <description>
+            Docker daemon continues to crash even after fixing configuration issues and reducing 
+            resource allocation by 48%. This indicates system-level Docker corruption or 
+            fundamental incompatibility.
+        </description>
+        
+        <failed_attempts>
+            <attempt>Fixed configuration cache clearing loop - partial success</attempt>
+            <attempt>Corrected hostname mismatches in .env.development - successful</attempt>
+            <attempt>Fixed database name inconsistencies - successful</attempt>
+            <attempt>Reduced resource allocation from 4.25GB to 2.2GB memory - still crashing</attempt>
+            <attempt>Used minimal docker-compose configuration - still crashing</attempt>
+        </failed_attempts>
+        
+        <symptoms>
+            <symptom>Persistent "Cannot connect to the Docker daemon" errors</symptom>
+            <symptom>Complete Docker Desktop failure within seconds of startup</symptom>
+            <symptom>Services start successfully but daemon dies immediately after</symptom>
+            <symptom>No error logs visible in container output before crash</symptom>
+            <symptom>System-wide Docker service failure, affecting all containers</symptom>
+        </symptoms>
+    </incident>
+
+    <root_cause_analysis>
+        <hypothesis priority="1">
+            <title>Docker Desktop Corruption from Previous Cache Loop</title>
+            <evidence>
+                - Initial configuration cache loop created excessive CPU/memory pressure
+                - Docker internal state may be corrupted or damaged
+                - Normal resource reduction not resolving the issue
+            </evidence>
+        </hypothesis>
+        
+        <hypothesis priority="2">
+            <title>macOS Docker Desktop Version Incompatibility</title>
+            <evidence>
+                - Complex multi-service Docker Compose may exceed macOS Docker capabilities
+                - Named volumes and networking creating overhead
+                - Platform-specific resource handling issues
+            </evidence>
+        </hypothesis>
+        
+        <hypothesis priority="3">
+            <title>Hardware Resource Exhaustion</title>
+            <evidence>
+                - Total system memory may be insufficient
+                - Docker Desktop memory allocation may be too low
+                - CPU cores may be inadequate for virtualization overhead
+            </evidence>
+        </hypothesis>
+    </root_cause_analysis>
+
+    <mermaid_diagram>
+        ```mermaid
+        graph TD
+            A[Configuration Loop Fixed] --> B[Reduce Resources 48%]
+            B --> C[Docker Compose Up]
+            C --> D[Services Start Successfully]
+            D --> E[Daemon Crash Within Seconds]
+            
+            E --> F{Root Cause?}
+            F -->|Docker Corruption| G[Internal State Damaged]
+            F -->|System Limits| H[macOS Resource Exhaustion]
+            F -->|Version Issue| I[Docker Desktop Bug]
+            
+            G --> J[Complete Reset Required]
+            H --> K[Hardware Upgrade Needed]
+            I --> L[Alternative Deployment Strategy]
+            
+            J --> M[Factory Reset Docker]
+            K --> N[Local Development Setup]
+            L --> O[Individual Service Startup]
+            
+            style A fill:#4caf50
+            style B fill:#4caf50
+            style C fill:#4caf50
+            style D fill:#4caf50
+            style E fill:#ff5722,color:#fff
+            style F fill:#ff9800
+            style G fill:#ffcdd2
+            style H fill:#ffcdd2
+            style I fill:#ffcdd2
+            
+            classDef solution stroke:#4caf50,stroke-width:2px
+            class M,N,O solution
+        ```
+    </mermaid_diagram>
+
+    <immediate_solutions>
+        <solution priority="1">
+            <title>Complete Docker Desktop Factory Reset</title>
+            <steps>
+                <step>1. Quit Docker Desktop completely (Command+Q)</step>
+                <step>2. Open Docker Desktop Settings → Troubleshoot</step>
+                <step>3. Click "Clean / Purge data" - removes all containers, images, volumes</step>
+                <step>4. Increase Docker Desktop resources:
+                    - Memory: 8GB minimum
+                    - CPUs: 4-6 cores
+                    - Disk: 100GB+</step>
+                <step>5. Restart Docker Desktop</step>
+                <step>6. Try ultra-minimal startup (just postgres + redis)</step>
+            </steps>
+        </solution>
+
+        <solution priority="2">
+            <title>Ultra-Minimal Docker Startup</title>
+            <implementation>
+                Start only 2 essential services to test Docker stability:
+                ```bash
+                # Test with absolute minimum
+                docker run -d --name test-postgres -p 5433:5432 -e POSTGRES_PASSWORD=test postgres:15-alpine
+                docker run -d --name test-redis -p 6380:6379 redis:7-alpine
+                ```
+                If this works, gradually add services one by one.
+            </implementation>
+        </solution>
+
+        <solution priority="3">
+            <title>Local Development Without Docker</title>
+            <implementation>
+                Bypass Docker entirely for development:
+                - Install PostgreSQL locally (Homebrew: brew install postgresql)
+                - Install Redis locally (Homebrew: brew install redis)
+                - Run backend with: uvicorn netra_backend.app.main:app --reload
+                - Run frontend with: npm run dev
+                - Use cloud services for ClickHouse/Analytics
+            </implementation>
+        </solution>
+
+        <solution priority="4">
+            <title>Individual Service Docker Containers</title>
+            <implementation>
+                Run each service in separate Docker containers instead of docker-compose:
+                ```bash
+                # Start infrastructure only
+                docker run -d --name netra-postgres -p 5433:5432 -e POSTGRES_PASSWORD=netra123 postgres:15-alpine
+                docker run -d --name netra-redis -p 6380:6379 redis:7-alpine
+                
+                # Run backend/frontend locally
+                cd netra_backend && uvicorn app.main:app --reload --port 8000
+                cd frontend && npm run dev
+                ```
+            </implementation>
+        </solution>
+    </immediate_solutions>
+
+    <diagnostic_commands>
+        <command purpose="Check Docker Desktop status">docker version</command>
+        <command purpose="Check Docker daemon logs">~/Library/Containers/com.docker.docker/Data/log/</command>
+        <command purpose="Check system resources">top -l 1 | grep "PhysMem"</command>
+        <command purpose="Test minimal container">docker run hello-world</command>
+        <command purpose="Check Docker Desktop settings">Docker Desktop → Settings → Resources</command>
+    </diagnostic_commands>
+
+    <prevention_measures>
+        <measure>
+            <rule>Test Docker stability with single containers before complex compose stacks</rule>
+            <implementation>Always start with docker run hello-world and individual containers</implementation>
+        </measure>
+        
+        <measure>
+            <rule>Implement graceful fallback to local development</rule>
+            <implementation>Maintain non-Docker development instructions and scripts</implementation>
+        </measure>
+        
+        <measure>
+            <rule>Monitor Docker Desktop resource usage and health</rule>
+            <implementation>Regular checks of Docker Desktop stats and log files</implementation>
+        </measure>
+        
+        <measure>
+            <rule>Version control Docker Desktop configuration</rule>
+            <implementation>Document working Docker Desktop settings and versions</implementation>
+        </measure>
+    </prevention_measures>
+
+    <business_impact>
+        <severity>BLOCKING</severity>
+        <impact>Complete development environment failure, no local development possible with Docker</impact>
+        <workaround_available>Yes - local development without Docker containers</workaround_available>
+        <time_to_resolve>2-4 hours including Docker reset and alternative setup</time_to_resolve>
+    </business_impact>
+
+    <next_steps>
+        <step priority="immediate">Attempt Docker Desktop factory reset with increased resources</step>
+        <step priority="short_term">Set up local development environment without Docker</step>
+        <step priority="medium_term">Investigate Docker Desktop version compatibility</step>
+        <step priority="long_term">Consider alternative containerization solutions (Podman, etc.)</step>
+    </next_steps>
+</learning>

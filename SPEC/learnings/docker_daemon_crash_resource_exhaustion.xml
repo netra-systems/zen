@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning id="docker-daemon-crash-resource-exhaustion" criticality="CRITICAL" date="2025-08-31">
+    <title>Docker Daemon Crashes Due to Resource Exhaustion - System-Level Failure</title>
+    
+    <incident>
+        <description>
+            Docker daemon itself is crashing when attempting to run the full development stack,
+            causing complete Docker Desktop failure and inability to run any containers.
+        </description>
+        
+        <symptoms>
+            <symptom>Error: "Cannot connect to the Docker daemon at unix:///Users/anthony/.docker/run/docker.sock"</symptom>
+            <symptom>Docker daemon completely stops responding</symptom>
+            <symptom>All Docker containers terminate unexpectedly</symptom>
+            <symptom>Docker Desktop requires full restart to function</symptom>
+            <symptom>System-wide Docker service failure, not just container failure</symptom>
+        </symptoms>
+    </incident>
+
+    <root_cause_analysis>
+        <immediate_cause>
+            Docker daemon resource exhaustion from running too many resource-intensive containers simultaneously
+        </immediate_cause>
+        
+        <contributing_factors>
+            <factor>Excessive resource allocation in docker-compose.yml (4.25GB memory, 3.75 CPU total)</factor>
+            <factor>macOS Docker Desktop resource limits may be exceeded</factor>
+            <factor>Multiple large containers (Backend: 1GB, Frontend: 1GB, ClickHouse: 1GB)</factor>
+            <factor>Previous configuration cache loop may have damaged Docker state</factor>
+            <factor>Named volumes and complex networking increasing overhead</factor>
+        </contributing_factors>
+
+        <resource_analysis>
+            <service name="dev-postgres" memory="512M" cpu="0.5"/>
+            <service name="dev-redis" memory="256M" cpu="0.25"/>
+            <service name="dev-clickhouse" memory="1G" cpu="0.5"/>
+            <service name="dev-auth" memory="512M" cpu="0.5"/>
+            <service name="dev-backend" memory="1G" cpu="1.0"/>
+            <service name="dev-frontend" memory="1G" cpu="1.0"/>
+            <total memory="4.25GB" cpu="3.75"/>
+        </resource_analysis>
+    </root_cause_analysis>
+
+    <mermaid_diagram>
+        ```mermaid
+        graph TD
+            A[Docker Compose Up] --> B[6 Services Starting]
+            B --> C[Resource Allocation]
+            C --> D[4.25GB Memory + 3.75 CPU]
+            D --> E{Docker Desktop Limits?}
+            
+            E -->|EXCEEDED| F[Docker Daemon Overload]
+            E -->|OK| G[Services Start]
+            
+            F --> H[System Resource Exhaustion]
+            H --> I[Docker Daemon Crash]
+            I --> J[Complete Docker Failure]
+            
+            G --> K[Memory Pressure]
+            K --> L[Performance Degradation]
+            L --> M[Potential Cascade Failure]
+            
+            style A fill:#e1f5fe
+            style F fill:#ffcdd2
+            style H fill:#ff5722,color:#fff
+            style I fill:#ff5722,color:#fff
+            style J fill:#ff5722,color:#fff
+            
+            classDef criticalPath stroke:#f44336,stroke-width:3px
+            class A,B,C,D,E,F,H,I,J criticalPath
+        ```
+    </mermaid_diagram>
+
+    <immediate_solutions>
+        <solution priority="1">
+            <title>Reduce Resource Limits Significantly</title>
+            <implementation>
+                Cut all memory limits by 50-75% and CPU limits by 50%
+                - Backend: 1GB → 512MB, 1.0 CPU → 0.5 CPU
+                - Frontend: 1GB → 512MB, 1.0 CPU → 0.5 CPU  
+                - ClickHouse: 1GB → 512MB, 0.5 CPU → 0.25 CPU
+                - Auth: 512MB → 256MB, 0.5 CPU → 0.25 CPU
+                - Postgres: 512MB → 256MB, 0.5 CPU → 0.25 CPU
+                - Redis: 256MB → 128MB, 0.25 CPU → 0.125 CPU
+            </implementation>
+            <new_total memory="2GB" cpu="1.625"/>
+        </solution>
+
+        <solution priority="2">
+            <title>Staged Startup Approach</title>
+            <implementation>
+                Start services in stages to prevent simultaneous resource allocation:
+                1. Infrastructure: postgres, redis, clickhouse
+                2. Services: auth, backend  
+                3. Frontend: frontend
+            </implementation>
+        </solution>
+
+        <solution priority="3">
+            <title>Disable Non-Essential Services</title>
+            <implementation>
+                Temporarily disable ClickHouse and Analytics service for basic development:
+                - Comment out dev-clickhouse service
+                - Set DEV_MODE_CLICKHOUSE_ENABLED=false
+                - Reduce to 4 services instead of 6
+            </implementation>
+        </solution>
+    </immediate_solutions>
+
+    <prevention_measures>
+        <measure>
+            <rule>Never allocate more than 50% of system resources to Docker containers</rule>
+            <implementation>Monitor total resource allocation in docker-compose.yml</implementation>
+        </measure>
+        
+        <measure>
+            <rule>Implement resource monitoring and alerts for Docker Desktop</rule>
+            <implementation>Add healthchecks that monitor resource usage</implementation>
+        </measure>
+        
+        <measure>
+            <rule>Use development-optimized resource limits, not production-level</rule>
+            <implementation>Separate resource configs for dev vs staging/prod</implementation>
+        </measure>
+        
+        <measure>
+            <rule>Test Docker stack startup under resource constraints</rule>
+            <implementation>CI tests should verify startup with limited resources</implementation>
+        </measure>
+    </prevention_measures>
+
+    <docker_desktop_recommendations>
+        <setting name="Memory">Increase Docker Desktop memory allocation to 8GB minimum</setting>
+        <setting name="CPUs">Allocate 4-6 CPU cores to Docker Desktop</setting>
+        <setting name="Swap">Enable virtual memory swap for containers</setting>
+        <setting name="Disk">Ensure sufficient disk space for volumes and images</setting>
+    </docker_desktop_recommendations>
+
+    <emergency_recovery>
+        <step>1. Force quit Docker Desktop completely</step>
+        <step>2. Clear Docker system: docker system prune -a --volumes</step>
+        <step>3. Restart Docker Desktop with increased resource allocation</step>
+        <step>4. Start services individually to test stability</step>
+        <step>5. Use minimal docker-compose profile for basic functionality</step>
+    </emergency_recovery>
+
+    <business_impact>
+        <severity>CRITICAL</severity>
+        <impact>Complete development environment failure, blocking all local development work</impact>
+        <affected_workflows>Local development, testing, debugging, docker-based CI/CD</affected_workflows>
+    </business_impact>
+
+    <cross_references>
+        <reference file="SPEC/learnings/docker_configuration_cache_loop_critical_fix.xml" relation="preceded_by"/>
+        <reference file="docker-compose.yml" relation="root_cause"/>
+        <reference file="SPEC/docker_resource_optimization.xml" relation="solution"/>
+    </cross_references>
+</learning>
