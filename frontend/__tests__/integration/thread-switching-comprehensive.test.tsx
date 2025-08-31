@@ -19,14 +19,9 @@ import { render, screen, fireEvent, waitFor, act, renderHook } from '@testing-li
 import userEvent from '@testing-library/user-event';
 import { useThreadSwitching } from '@/hooks/useThreadSwitching';
 import { ThreadSidebar } from '@/components/chat/ThreadSidebar';
-import { threadLoadingService } from '@/services/threadLoadingService';
-import { ThreadService } from '@/services/threadService';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useThreadStore } from '@/store/threadStore';
 import { useAuthStore } from '@/store/authStore';
-import { globalCleanupManager } from '@/lib/operation-cleanup';
-import { executeWithRetry } from '@/lib/retry-manager';
-import { logger } from '@/lib/logger';
 import type { Thread } from '@/types/unified';
 
 // Mock external dependencies only
@@ -65,6 +60,14 @@ jest.mock('@/services/urlSyncService', () => ({
   useURLSync: () => ({ updateUrl: jest.fn() }),
   useBrowserHistorySync: () => ({ syncToHistory: jest.fn() })
 }));
+
+// Get mocked services for use in tests
+const getMockedServices = () => {
+  const { ThreadService } = require('@/services/threadService');
+  const { threadLoadingService } = require('@/services/threadLoadingService');
+  const { executeWithRetry } = require('@/lib/retry-manager');
+  return { ThreadService, threadLoadingService, executeWithRetry };
+};
 
 describe('Thread Switching Comprehensive Test Suite', () => {
   const mockThreads: Thread[] = [
@@ -121,9 +124,7 @@ describe('Thread Switching Comprehensive Test Suite', () => {
     });
 
     // Setup default mocks
-    const { ThreadService } = require('@/services/threadService');
-    const { threadLoadingService } = require('@/services/threadLoadingService');
-    const { executeWithRetry } = require('@/lib/retry-manager');
+    const { ThreadService, threadLoadingService, executeWithRetry } = getMockedServices();
     
     ThreadService.listThreads.mockResolvedValue(mockThreads);
     ThreadService.getThread.mockResolvedValue(mockThreads[0]);
@@ -201,8 +202,9 @@ describe('Thread Switching Comprehensive Test Suite', () => {
 
   describe('Loading States and Indicators', () => {
     it('should show loading state during thread switch', async () => {
-      (threadLoadingService.loadThread as jest.Mock).mockImplementation(() => 
-        new Promise(resolve => setTimeout(() => resolve({ success: true, messages: mockMessages }), 100))
+      const { threadLoadingService } = getMockedServices();
+      threadLoadingService.loadThread.mockImplementation(() => 
+        new Promise(resolve => setTimeout(() => resolve({ success: true, messages: mockMessages, threadId: 'thread-1' }), 100))
       );
       
       const { result } = renderHook(() => useThreadSwitching());
@@ -222,8 +224,9 @@ describe('Thread Switching Comprehensive Test Suite', () => {
     });
 
     it('should show loading indicator in ThreadSidebar', async () => {
-      (threadLoadingService.loadThread as jest.Mock).mockImplementation(() => 
-        new Promise(resolve => setTimeout(() => resolve({ success: true, messages: mockMessages }), 100))
+      const { threadLoadingService } = getMockedServices();
+      threadLoadingService.loadThread.mockImplementation(() => 
+        new Promise(resolve => setTimeout(() => resolve({ success: true, messages: mockMessages, threadId: 'thread-1' }), 100))
       );
       
       render(<ThreadSidebar />);
@@ -263,7 +266,8 @@ describe('Thread Switching Comprehensive Test Suite', () => {
   describe('Error Handling and Recovery', () => {
     it('should handle thread loading failure', async () => {
       const error = new Error('Failed to load thread');
-      (threadLoadingService.loadThread as jest.Mock).mockRejectedValue(error);
+      const { threadLoadingService } = getMockedServices();
+      threadLoadingService.loadThread.mockRejectedValue(error);
       
       const { result } = renderHook(() => useThreadSwitching());
       
@@ -280,7 +284,8 @@ describe('Thread Switching Comprehensive Test Suite', () => {
 
     it('should retry failed thread loading', async () => {
       let attempts = 0;
-      (threadLoadingService.loadThread as jest.Mock).mockImplementation(() => {
+      const { threadLoadingService } = getMockedServices();
+      threadLoadingService.loadThread.mockImplementation(() => {
         attempts++;
         if (attempts === 1) {
           return Promise.reject(new Error('First attempt failed'));
@@ -308,7 +313,8 @@ describe('Thread Switching Comprehensive Test Suite', () => {
     });
 
     it('should allow manual retry after failure', async () => {
-      (threadLoadingService.loadThread as jest.Mock)
+      const { threadLoadingService } = getMockedServices();
+      threadLoadingService.loadThread
         .mockRejectedValueOnce(new Error('Failed'))
         .mockResolvedValueOnce({ success: true, messages: mockMessages });
       
@@ -331,7 +337,8 @@ describe('Thread Switching Comprehensive Test Suite', () => {
     });
 
     it('should track retry count', async () => {
-      (threadLoadingService.loadThread as jest.Mock).mockRejectedValue(new Error('Failed'));
+      const { threadLoadingService } = getMockedServices();
+      threadLoadingService.loadThread.mockRejectedValue(new Error('Failed'));
       
       const { result } = renderHook(() => useThreadSwitching());
       
@@ -352,7 +359,8 @@ describe('Thread Switching Comprehensive Test Suite', () => {
       let resolveFirst: any;
       let resolveSecond: any;
       
-      (threadLoadingService.loadThread as jest.Mock)
+      const { threadLoadingService } = getMockedServices();
+      threadLoadingService.loadThread
         .mockImplementationOnce(() => new Promise(resolve => { resolveFirst = resolve; }))
         .mockImplementationOnce(() => new Promise(resolve => { resolveSecond = resolve; }));
       
@@ -385,7 +393,8 @@ describe('Thread Switching Comprehensive Test Suite', () => {
       const { result } = renderHook(() => useThreadSwitching());
       
       // Start first switch (won't complete)
-      (threadLoadingService.loadThread as jest.Mock).mockImplementation(
+      const { threadLoadingService } = getMockedServices();
+      threadLoadingService.loadThread.mockImplementation(
         () => new Promise(() => {})
       );
       
@@ -394,7 +403,8 @@ describe('Thread Switching Comprehensive Test Suite', () => {
       });
       
       // Switch to another thread
-      (threadLoadingService.loadThread as jest.Mock).mockResolvedValue({
+      const { threadLoadingService } = getMockedServices();
+      threadLoadingService.loadThread.mockResolvedValue({
         success: true,
         messages: mockMessages
       });
@@ -496,7 +506,8 @@ describe('Thread Switching Comprehensive Test Suite', () => {
 
   describe('Cancel Operations', () => {
     it('should cancel loading when requested', async () => {
-      (threadLoadingService.loadThread as jest.Mock).mockImplementation(
+      const { threadLoadingService } = getMockedServices();
+      threadLoadingService.loadThread.mockImplementation(
         () => new Promise(() => {}) // Never resolves
       );
       
@@ -539,7 +550,8 @@ describe('Thread Switching Comprehensive Test Suite', () => {
     it('should timeout long-running thread loads', async () => {
       jest.useFakeTimers();
       
-      (threadLoadingService.loadThread as jest.Mock).mockImplementation(
+      const { threadLoadingService } = getMockedServices();
+      threadLoadingService.loadThread.mockImplementation(
         () => new Promise(() => {}) // Never resolves
       );
       
@@ -577,7 +589,8 @@ describe('Thread Switching Comprehensive Test Suite', () => {
       expect(result.current.state.lastLoadedThreadId).toBe('thread-1');
       
       // Fail to switch to thread 2
-      (threadLoadingService.loadThread as jest.Mock).mockRejectedValueOnce(new Error('Failed'));
+      const { threadLoadingService } = getMockedServices();
+      threadLoadingService.loadThread.mockRejectedValueOnce(new Error('Failed'));
       await act(async () => {
         await result.current.switchToThread('thread-2');
       });
@@ -586,7 +599,8 @@ describe('Thread Switching Comprehensive Test Suite', () => {
       expect(result.current.state.error?.threadId).toBe('thread-2');
       
       // Successfully switch to thread 3
-      (threadLoadingService.loadThread as jest.Mock).mockResolvedValueOnce({
+      const { threadLoadingService } = getMockedServices();
+      threadLoadingService.loadThread.mockResolvedValueOnce({
         success: true,
         messages: mockMessages
       });
@@ -630,7 +644,8 @@ describe('Thread Switching Comprehensive Test Suite', () => {
     });
 
     it('should show error state in sidebar on failure', async () => {
-      (threadLoadingService.loadThread as jest.Mock).mockRejectedValue(new Error('Load failed'));
+      const { threadLoadingService } = getMockedServices();
+      threadLoadingService.loadThread.mockRejectedValue(new Error('Load failed'));
       
       render(<ThreadSidebar />);
       
@@ -643,7 +658,8 @@ describe('Thread Switching Comprehensive Test Suite', () => {
     });
 
     it('should allow retry from sidebar error state', async () => {
-      (threadLoadingService.loadThread as jest.Mock)
+      const { threadLoadingService } = getMockedServices();
+      threadLoadingService.loadThread
         .mockRejectedValueOnce(new Error('Failed'))
         .mockResolvedValueOnce({ success: true, messages: mockMessages });
       
