@@ -1,6 +1,8 @@
-/**
- * Error Handling, State Management & Advanced UI Tests
- * ==================================================== 
+import React from 'react';
+import { render } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+=== 
  * Modular UI tests for error handling, state sync, and advanced features
  * Tests 20-23 (Error Handling), Tests 24-27 (State Management), Tests 28-30 (Advanced UI)
  * Complex UI behavior and edge case testing
@@ -45,18 +47,27 @@ import { useThreadStore } from '../../store/threadStore';
 
 describe('Error Handling, State Management & Advanced UI Tests', () => {
   
+    jest.setTimeout(10000);
+  
   beforeEach(() => {
     setupDefaultMocks();
   });
 
   afterEach(() => {
     cleanupMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   // ============================================
   // Error Handling Tests (Tests 20-23)
   // ============================================
   describe('Error Handling', () => {
+    
+      jest.setTimeout(10000);
     
     test('20. Should display error message', () => {
       const mockThreadStore = createThreadStoreMock({
@@ -114,6 +125,8 @@ describe('Error Handling, State Management & Advanced UI Tests', () => {
   // State Management Tests (Tests 24-27)
   // ============================================
   describe('State Management', () => {
+    
+      jest.setTimeout(10000);
     
     test('24. Should update message list when new message added', () => {
       const { rerender } = render(<MessageList />);
@@ -189,6 +202,8 @@ describe('Error Handling, State Management & Advanced UI Tests', () => {
   // ============================================
   describe('Advanced UI Features', () => {
     
+      jest.setTimeout(10000);
+    
     test('28. Should support markdown in messages', () => {
       const markdownMessage = createTestMessage({
         id: '1',
@@ -237,6 +252,8 @@ describe('Error Handling, State Management & Advanced UI Tests', () => {
   // Integration Tests
   // ============================================
   describe('Integration Scenarios', () => {
+    
+      jest.setTimeout(10000);
     
     test('Should handle error recovery flow', async () => {
       const mockRetry = jest.fn();

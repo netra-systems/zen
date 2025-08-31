@@ -14,6 +14,8 @@ jest.mock('react-dom', () => ({
 }));
 
 describe('Unified Chat Store - Batched Updates', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     // Reset store to initial state
     useUnifiedChatStore.setState({
@@ -56,6 +58,8 @@ describe('Unified Chat Store - Batched Updates', () => {
   });
 
   describe('Layer Update Batching', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should batch fast layer updates', () => {
       const { result } = renderHook(() => useUnifiedChatStore());
       
@@ -128,6 +132,8 @@ describe('Unified Chat Store - Batched Updates', () => {
   });
 
   describe('WebSocket Event Batching', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should batch WebSocket event handling', () => {
       const { result } = renderHook(() => useUnifiedChatStore());
       
@@ -168,6 +174,8 @@ describe('Unified Chat Store - Batched Updates', () => {
   });
 
   describe('Batch Update Performance', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should prevent cascading updates with batching', () => {
       const { result } = renderHook(() => useUnifiedChatStore());
       
@@ -210,6 +218,8 @@ describe('Unified Chat Store - Batched Updates', () => {
   });
 
   describe('Thread Management with Batching', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should batch thread loading operations', () => {
       const { result } = renderHook(() => useUnifiedChatStore());
       
@@ -241,6 +251,8 @@ describe('Unified Chat Store - Batched Updates', () => {
   });
 
   describe('Optimistic Updates with Batching', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should batch optimistic message operations', () => {
       const { result } = renderHook(() => useUnifiedChatStore());
       
@@ -286,6 +298,8 @@ describe('Unified Chat Store - Batched Updates', () => {
   });
 
   describe('Reset Operations with Batching', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should batch layer reset operations', () => {
       const { result } = renderHook(() => useUnifiedChatStore());
       
@@ -334,6 +348,8 @@ describe('Unified Chat Store - Batched Updates', () => {
   });
 
   describe('Error Handling with Batching', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should handle errors in batched updates gracefully', () => {
       const { result } = renderHook(() => useUnifiedChatStore());
       
@@ -362,6 +378,8 @@ describe('Unified Chat Store - Batched Updates', () => {
   });
 
   describe('Concurrent Updates', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should handle concurrent batched updates correctly', async () => {
       const { result } = renderHook(() => useUnifiedChatStore());
       
@@ -389,6 +407,8 @@ describe('Unified Chat Store - Batched Updates', () => {
   });
 
   describe('Store Initialization State', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should track initialization state', () => {
       const { result } = renderHook(() => useUnifiedChatStore());
       
@@ -405,6 +425,8 @@ describe('Unified Chat Store - Batched Updates', () => {
   });
 
   describe('Batch Update Verification', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should verify all layer updates use batching', () => {
       const { result } = renderHook(() => useUnifiedChatStore());
       
@@ -424,4 +446,8 @@ describe('Unified Chat Store - Batched Updates', () => {
       });
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

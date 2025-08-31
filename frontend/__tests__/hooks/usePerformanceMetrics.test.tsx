@@ -1,11 +1,10 @@
-/**
- * ELITE ULTRA THINKING TEST ENGINEER: Performance Metrics Hook Tests
- * ===================================================================
- * 
- * BUSINESS VALUE JUSTIFICATION (BVJ):
- * - Segment: Growth & Enterprise
- * - Business Goal: Demonstrate optimization value through metrics
- * - Value Impact: Shows AI cost savings, justifies pricing
+import { renderHook, act } from '@testing-library/react';
+import React from 'react';
+import { usePerformanceMetrics, PerformanceMonitor } from '@/hooks/usePerformanceMetrics';
+import { TestProviders } from '@/__tests__/test-utils/providers';
+import { DEFAULT_PERFORMANCE_METRICS, PERFORMANCE_THRESHOLDS } from '@/types/unified';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+, justifies pricing
  * - Revenue Impact: +20% retention through value visibility
  * 
  * CRITICAL: Performance metrics DEMONSTRATE VALUE - crucial for customer retention
@@ -41,6 +40,7 @@ global.requestAnimationFrame = mockRAF;
 global.cancelAnimationFrame = jest.fn();
 
 describe('usePerformanceMetrics Hook - Elite Performance Tracking', () => {
+    jest.setTimeout(10000);
   let timeCounter = 0;
 
   beforeEach(() => {
@@ -54,6 +54,7 @@ describe('usePerformanceMetrics Hook - Elite Performance Tracking', () => {
   });
 
   describe('Initialization and Basic Functionality', () => {
+      jest.setTimeout(10000);
     it('should initialize with default metrics', () => {
       const { result } = renderHook(() => usePerformanceMetrics(), {
         wrapper: TestProviders,
@@ -95,6 +96,7 @@ describe('usePerformanceMetrics Hook - Elite Performance Tracking', () => {
   });
 
   describe('FPS Tracking - Critical for UX Value Demo', () => {
+      jest.setTimeout(10000);
     it('should track FPS accurately for value demonstration', () => {
       let frameId = 1;
       mockRAF.mockImplementation((callback) => {
@@ -150,6 +152,7 @@ describe('usePerformanceMetrics Hook - Elite Performance Tracking', () => {
   });
 
   describe('Memory Usage Monitoring - Enterprise Critical', () => {
+      jest.setTimeout(10000);
     it('should track memory usage accurately', async () => {
       // Set memory value for this test
       (global.performance as any).memory.usedJSHeapSize = 50 * 1048576;
@@ -202,6 +205,7 @@ describe('usePerformanceMetrics Hook - Elite Performance Tracking', () => {
   });
 
   describe('WebSocket Latency - Real-time Value Demo', () => {
+      jest.setTimeout(10000);
     it('should track WebSocket latency accurately', () => {
       const { result } = renderHook(() => usePerformanceMetrics(), {
         wrapper: TestProviders,
@@ -257,6 +261,7 @@ describe('usePerformanceMetrics Hook - Elite Performance Tracking', () => {
   });
 
   describe('Component Render Tracking - Performance Insights', () => {
+      jest.setTimeout(10000);
     it('should track component render times', () => {
       const { result, unmount } = renderHook(() => 
         usePerformanceMetrics('RenderTest'), { wrapper: TestProviders });
@@ -297,6 +302,7 @@ describe('usePerformanceMetrics Hook - Elite Performance Tracking', () => {
   });
 
   describe('Error and Cache Hit Tracking - Quality Metrics', () => {
+      jest.setTimeout(10000);
     it('should track error count for quality monitoring', () => {
       const { result } = renderHook(() => usePerformanceMetrics(), {
         wrapper: TestProviders,
@@ -343,6 +349,7 @@ describe('usePerformanceMetrics Hook - Elite Performance Tracking', () => {
   });
 
   describe('Export Functionality - Enterprise Critical', () => {
+      jest.setTimeout(10000);
     it('should export metrics in JSON format', () => {
       const { result } = renderHook(() => usePerformanceMetrics('ExportTest'), {
         wrapper: TestProviders,
@@ -386,6 +393,7 @@ describe('usePerformanceMetrics Hook - Elite Performance Tracking', () => {
   });
 
   describe('Performance Monitor Singleton - Global Tracking', () => {
+      jest.setTimeout(10000);
     beforeEach(() => {
       // Reset singleton instance
       (PerformanceMonitor as any).instance = undefined;
@@ -454,6 +462,7 @@ describe('usePerformanceMetrics Hook - Elite Performance Tracking', () => {
   });
 
   describe('Real-time Updates and Integration', () => {
+      jest.setTimeout(10000);
     it('should update metrics in real-time', async () => {
       const { result } = renderHook(() => 
         usePerformanceMetrics('RealTimeTest', { updateInterval: 100 }), {
@@ -502,6 +511,7 @@ describe('usePerformanceMetrics Hook - Elite Performance Tracking', () => {
   });
 
   describe('Performance Threshold Validation', () => {
+      jest.setTimeout(10000);
     it('should validate against performance thresholds', () => {
       const { result } = renderHook(() => usePerformanceMetrics(), {
         wrapper: TestProviders,

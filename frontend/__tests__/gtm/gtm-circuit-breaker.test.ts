@@ -6,6 +6,8 @@
 import { GTMCircuitBreaker } from '@/lib/gtm-circuit-breaker';
 
 describe('GTMCircuitBreaker', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let circuitBreaker: GTMCircuitBreaker;
 
   beforeEach(() => {
@@ -16,9 +18,17 @@ describe('GTMCircuitBreaker', () => {
   afterEach(() => {
     circuitBreaker.destroy();
     jest.useRealTimers();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Event Deduplication', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should prevent duplicate events within deduplication window', () => {
       const eventKey = {
         event: 'exception',
@@ -63,6 +73,8 @@ describe('GTMCircuitBreaker', () => {
   });
 
   describe('Rate Limiting', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should enforce rate limits per event type', () => {
       const eventKey = {
         event: 'exception',
@@ -93,6 +105,8 @@ describe('GTMCircuitBreaker', () => {
   });
 
   describe('Circuit Breaker Trip', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should trip circuit after threshold failures', () => {
       const eventKey = {
         event: 'exception',
@@ -135,6 +149,8 @@ describe('GTMCircuitBreaker', () => {
   });
 
   describe('Statistics', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track event statistics correctly', () => {
       const event1 = {
         event: 'exception',
@@ -164,6 +180,8 @@ describe('GTMCircuitBreaker', () => {
   });
 
   describe('Cleanup', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should clean up old events periodically', () => {
       const eventKey = {
         event: 'exception',
@@ -188,6 +206,8 @@ describe('GTMCircuitBreaker', () => {
   });
 
   describe('AuthGuard Infinite Loop Prevention', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should prevent auth_required event spam', () => {
       const authErrorEvent = {
         event: 'exception',

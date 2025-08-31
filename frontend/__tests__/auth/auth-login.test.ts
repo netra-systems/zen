@@ -31,6 +31,8 @@ import {
 } from './auth-test-utils';
 
 describe('Auth Login Flow', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let testEnv: ReturnType<typeof setupAuthTestEnvironment>;
   let mockAuthConfig: ReturnType<typeof createMockAuthConfig>;
   let mockToken: string;
@@ -56,6 +58,8 @@ describe('Auth Login Flow', () => {
   });
 
   describe('getAuthConfig', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     beforeEach(() => {
       // Clear mock calls but keep the default implementation
       mockAuthServiceClient.getConfig.mockClear();
@@ -115,6 +119,8 @@ describe('Auth Login Flow', () => {
   });
 
   describe('handleDevLogin', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should perform dev login successfully', async () => {
       setupSuccessfulDevLogin();
       const result = await authService.handleDevLogin(mockAuthConfig);
@@ -156,6 +162,8 @@ describe('Auth Login Flow', () => {
   });
 
   describe('handleLogin', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     beforeEach(() => {
       mockAuthServiceClient.initiateLogin.mockClear();
     });
@@ -191,6 +199,8 @@ describe('Auth Login Flow', () => {
   });
 
   describe('Login Flow Integration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle complete login flow', async () => {
       setupCompleteLoginFlow();
       const config = await authService.getAuthConfig();
@@ -361,4 +371,8 @@ describe('Auth Login Flow', () => {
     // The exact number of mock calls may vary due to retry/fallback logic
     expect(true).toBe(true);
   }
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

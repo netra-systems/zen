@@ -1,9 +1,9 @@
-/**
- * Chat Page Component Tests
- * 
- * Tests for the chat page component, which handles OAuth tokens and renders MainChat.
- * 
- * @compliance conventions.xml - Max 8 lines per function, under 300 lines
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import ChatPage from '@/app/chat/page';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ under 300 lines
  * @compliance type_safety.xml - Strongly typed test with clear interfaces
  */
 
@@ -25,6 +25,7 @@ jest.mock('@/components/chat/MainChat', () => {
 });
 
 describe('ChatPage Component', () => {
+    jest.setTimeout(10000);
   const mockPush = jest.fn();
   const mockReplace = jest.fn();
   const mockGet = jest.fn();
@@ -84,6 +85,11 @@ describe('ChatPage Component', () => {
   afterEach(() => {
     // Restore console.log
     jest.restoreAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
   
   /**

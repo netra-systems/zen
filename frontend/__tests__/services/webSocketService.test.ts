@@ -1,9 +1,11 @@
-// Unmock auth service for proper service functionality
-jest.unmock('@/auth/service');
+import { webSocketService } from '@/services/webSocketService';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ock('@/auth/service');
 
 import { webSocketService } from '@/services/webSocketService';
 
 describe('webSocketService', () => {
+    jest.setTimeout(10000);
   let mockWebSocket: Partial<WebSocket>;
 
   beforeEach(() => {
@@ -40,9 +42,15 @@ describe('webSocketService', () => {
   afterEach(() => {
     jest.useRealTimers();
     webSocketService.disconnect();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Connection Management', () => {
+      jest.setTimeout(10000);
     it('should establish WebSocket connection', () => {
       const onStatusChange = jest.fn();
       webSocketService.onStatusChange = onStatusChange;
@@ -173,6 +181,7 @@ describe('webSocketService', () => {
   });
 
   describe('Message Sending and Receiving', () => {
+      jest.setTimeout(10000);
     beforeEach(() => {
       webSocketService.connect('ws://localhost:8000/ws');
       mockWebSocket.readyState = WebSocket.OPEN;
@@ -306,6 +315,7 @@ describe('webSocketService', () => {
   });
 
   describe('Reconnection Logic', () => {
+      jest.setTimeout(10000);
     it('should attempt reconnection when onReconnect is provided', () => {
       const onReconnect = jest.fn();
       
@@ -358,6 +368,7 @@ describe('webSocketService', () => {
   });
 
   describe('Heartbeat Mechanism', () => {
+      jest.setTimeout(10000);
     it('should send heartbeat messages at configured interval', () => {
       webSocketService.connect('ws://localhost:8000/ws', { heartbeatInterval: 30000 });
       mockWebSocket.readyState = WebSocket.OPEN;
@@ -393,6 +404,7 @@ describe('webSocketService', () => {
   });
 
   describe('Rate Limiting', () => {
+      jest.setTimeout(10000);
     it('should enforce rate limits when configured', () => {
       const onRateLimit = jest.fn();
       const rateLimit = { messages: 3, window: 1000 };
@@ -441,6 +453,7 @@ describe('webSocketService', () => {
   });
 
   describe('Error Handling', () => {
+      jest.setTimeout(10000);
     it('should handle WebSocket errors gracefully', () => {
       const onError = jest.fn();
       const onStatusChange = jest.fn();
@@ -486,6 +499,7 @@ describe('webSocketService', () => {
   });
 
   describe('State Management', () => {
+      jest.setTimeout(10000);
     it('should track connection state accurately', () => {
       expect(webSocketService.getState()).toBe('disconnected');
       

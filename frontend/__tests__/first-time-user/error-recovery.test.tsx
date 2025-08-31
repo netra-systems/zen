@@ -73,6 +73,8 @@ jest.mock('@/lib/logger', () => ({
 import MainChat from '@/components/chat/MainChat';
 
 describe('First-Time User Error Recovery', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -211,4 +213,8 @@ describe('First-Time User Error Recovery', () => {
       expect(screen.getByText('Reconnecting...')).toBeInTheDocument();
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

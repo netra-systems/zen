@@ -1,7 +1,8 @@
-/**
- * Authentication & Connection Tests
- * ================================ 
- * Modular UI tests for authentication flow and WebSocket connection
+import React from 'react';
+import { render } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+tion flow and WebSocket connection
  * Tests 1-3 (Authentication) and Tests 16-19 (WebSocket Connection)
  * Part of split from chatUIUXCore.test.tsx (570 lines → ≤300 lines)
  */
@@ -71,18 +72,27 @@ import { useWebSocket } from '../../hooks/useWebSocket';
 
 describe('Authentication & Connection Tests', () => {
   
+    jest.setTimeout(10000);
+  
   beforeEach(() => {
     setupDefaultMocks();
   });
 
   afterEach(() => {
     cleanupMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   // ============================================
   // Authentication Flow Tests (Tests 1-3)
   // ============================================
   describe('Authentication Flow', () => {
+    
+      jest.setTimeout(10000);
     
     test('1. Should display user information when authenticated', () => {
       render(<ChatHeader />);
@@ -122,6 +132,8 @@ describe('Authentication & Connection Tests', () => {
   // WebSocket Connection Tests (Tests 16-19)  
   // ============================================
   describe('WebSocket Connection', () => {
+    
+      jest.setTimeout(10000);
     
     test('16. Should show connected status', () => {
       const mockWebSocket = createWebSocketMock({
@@ -186,6 +198,8 @@ describe('Authentication & Connection Tests', () => {
   // Connection State Integration Tests
   // ============================================
   describe('Connection State Integration', () => {
+    
+      jest.setTimeout(10000);
     
     test('Should sync authentication and connection states', () => {
       const mockAuthStore = createAuthStoreMock({

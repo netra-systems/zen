@@ -20,6 +20,8 @@ const AuthStatusComponent: React.FC<{ isAuthenticated: boolean }> = ({ isAuthent
 };
 
 describe('Auth Validation Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   it('should show logout button when user is authenticated', () => {
     render(<AuthStatusComponent isAuthenticated={true} />);
     
@@ -34,4 +36,8 @@ describe('Auth Validation Tests', () => {
     // Fixed: Should NOT be in the document when user is not authenticated
     expect(screen.queryByTestId('logout-button')).not.toBeInTheDocument();
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

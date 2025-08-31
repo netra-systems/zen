@@ -1,9 +1,9 @@
-/**
- * Synthetic Data Generation Integration Tests
- * Module-based architecture: Data generation tests ≤300 lines, functions ≤8 lines
- */
-
 import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ct from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import {
@@ -48,6 +48,7 @@ jest.mock('@/hooks/useAgent', () => ({
 }));
 
 describe('Synthetic Data Generation Integration Tests', () => {
+    jest.setTimeout(10000);
   let server: any;
   const useSyntheticDataStore = createSyntheticDataStore();
   const syntheticDataService = createSyntheticDataService();
@@ -59,9 +60,15 @@ describe('Synthetic Data Generation Integration Tests', () => {
 
   afterEach(() => {
     teardownIntegrationTest();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('2. Synthetic Data Generation Flow', () => {
+      jest.setTimeout(10000);
     it('should generate synthetic data based on templates', async () => {
       jest.setTimeout(10000);
       const mockGenerationJob = createMockGenerationJob();

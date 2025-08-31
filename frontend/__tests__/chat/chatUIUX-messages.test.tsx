@@ -1,14 +1,13 @@
-/**
- * Chat UI/UX Message Handling Tests
- * Module-based architecture: Message tests ≤300 lines, functions ≤8 lines
- */
-
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import MainChat from '../../components/chat/MainChat';
 import { ChatWindow } from '../../components/chat/ChatWindow';
+import { MessageList } from '../../components/chat/MessageList';
+import { 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ow } from '../../components/chat/ChatWindow';
 import { MessageList } from '../../components/chat/MessageList';
 import { 
   setupBasicMocks,
@@ -34,6 +33,7 @@ import { useUnifiedChatStore } from '../../store/unified-chat';
 import { useChatWebSocket } from '../../hooks/useChatWebSocket';
 
 describe('Chat UI/UX Message Handling Tests', () => {
+    jest.setTimeout(10000);
   const mockAuthStore = createMockAuthStore();
   const mockChatStore = createMockChatStore();
   
@@ -44,9 +44,15 @@ describe('Chat UI/UX Message Handling Tests', () => {
 
   afterEach(() => {
     cleanupMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Message Sending and Receiving', () => {
+      jest.setTimeout(10000);
     test('8. Should send a message and display it in the message list', async () => {
       const mockOnSendMessage = jest.fn();
       

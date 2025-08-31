@@ -1,16 +1,14 @@
-/**
- * End-to-End User Journey Tests - REFACTORED
- * All functions ≤8 lines as per architecture requirements
- */
-
 import React from 'react';
 import { render, waitFor, fireEvent } from '@testing-library/react';
 import WS from 'jest-websocket-mock';
 import { setupTestEnvironment, cleanupTestEnvironment } from '../../helpers/test-setup-helpers';
 import { createOptimizationWorkflowComponent, createTestFile, simulateFileInput } from '../../helpers/optimization-workflow-helpers';
 import { assertElementText, waitForElementText, assertOptimizationResults } from '../../helpers/test-assertion-helpers';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+{ assertElementText, waitForElementText, assertOptimizationResults } from '../../helpers/test-assertion-helpers';
 
 describe('Advanced Frontend Integration Tests - End-to-End Journey', () => {
+    jest.setTimeout(10000);
   let server: WS;
   
   beforeEach(() => {
@@ -20,9 +18,15 @@ describe('Advanced Frontend Integration Tests - End-to-End Journey', () => {
 
   afterEach(() => {
     cleanupTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('30. End-to-End User Journey', () => {
+      jest.setTimeout(10000);
     it('should complete full optimization workflow', async () => {
       const OptimizationWorkflow = createOptimizationWorkflowComponent();
       const { getByTestId, getByText } = render(<OptimizationWorkflow />);

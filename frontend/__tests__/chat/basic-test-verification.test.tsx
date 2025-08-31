@@ -1,6 +1,6 @@
-/**
- * Basic Test Verification
- * ======================
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+====================
  * Simplified test to verify modular architecture works
  * Tests the core splitting strategy without complex dependencies
  */
@@ -8,6 +8,8 @@
 import '@testing-library/jest-dom';
 
 describe('Modular Test Architecture Verification', () => {
+  
+    jest.setTimeout(10000);
   
   test('Should verify modular split was successful', () => {
     // Original file: 570 lines

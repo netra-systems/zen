@@ -30,11 +30,12 @@ import logging
 
 from test_framework.environment_isolation import get_test_env_manager
 from test_framework.llm_config_manager import configure_llm_testing, LLMTestMode
-from netra_backend.app.agents.registry import AgentRegistry
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.types import AgentConfig, AgentResult
+from netra_backend.app.agents.config import AgentConfig
+from netra_backend.app.schemas.agent_models import AgentResult
 from netra_backend.app.websocket_core.manager import WebSocketManager
-from netra_backend.app.core.database_manager import DatabaseManager
+from netra_backend.app.db.database_manager import DatabaseManager
 
 
 logger = logging.getLogger(__name__)
@@ -120,7 +121,7 @@ async def real_llm_config():
 @pytest.fixture
 async def real_database():
     """Real database connection for agent tests."""
-    from netra_backend.app.core.database_manager import DatabaseManager
+    from netra_backend.app.db.database_manager import DatabaseManager
     
     env_manager = get_test_env_manager()
     env = env_manager.setup_test_environment(additional_vars={

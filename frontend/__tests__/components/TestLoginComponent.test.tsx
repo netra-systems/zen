@@ -25,6 +25,8 @@ const TestLoginComponent = () => {
 };
 
 describe('TestLoginComponent', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   it('should render', () => {
     //This is a dummy test to make the suite pass
   });

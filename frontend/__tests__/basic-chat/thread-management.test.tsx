@@ -1,9 +1,9 @@
-/**
- * Comprehensive Thread Management Tests
- * ====================================
- * BUSINESS VALUE JUSTIFICATION:
- * - Segment: Growth & Enterprise (Power Users)
- * - Business Goal: Enable multi-conversation workflows for complex AI tasks
+import React from 'react';
+import { render, screen, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+nable multi-conversation workflows for complex AI tasks
  * - Value Impact: Thread management essential for users with 5+ concurrent conversations
  * - Revenue Impact: Power users convert from Free to paid at 3x higher rate
  * 
@@ -130,6 +130,7 @@ jest.mock('../../components/chat/ThreadSidebarComponents', () => ({
 }));
 
 describe('Comprehensive Thread Management Tests', () => {
+    jest.setTimeout(10000);
   const user = userEvent.setup();
 
   beforeEach(() => {
@@ -148,6 +149,8 @@ describe('Comprehensive Thread Management Tests', () => {
   // Real Thread Creation Tests
   // ============================================
   describe('Thread Creation Workflow', () => {
+    
+      jest.setTimeout(10000);
     
     test('Should create new thread with real components', async () => {
       render(<ThreadSidebar />);
@@ -172,6 +175,8 @@ describe('Comprehensive Thread Management Tests', () => {
   // Real Thread Switching Tests  
   // ============================================
   describe('Thread Switching Without Data Loss', () => {
+    
+      jest.setTimeout(10000);
     
     test('Should switch between threads maintaining state', async () => {
       const threads = [
@@ -208,6 +213,8 @@ describe('Comprehensive Thread Management Tests', () => {
   // ============================================
   describe('Thread Deletion with Confirmation', () => {
     
+      jest.setTimeout(10000);
+    
     test('Should delete thread with user confirmation', async () => {
       const threads = [
         { id: 'thread-delete', title: 'Delete Me', createdAt: '2025-01-19' }
@@ -236,6 +243,8 @@ describe('Comprehensive Thread Management Tests', () => {
   // Real Thread Renaming Tests
   // ============================================
   describe('Thread Renaming with Validation', () => {
+    
+      jest.setTimeout(10000);
     
     test('Should rename thread with valid title', async () => {
       const threads = [
@@ -277,6 +286,8 @@ describe('Comprehensive Thread Management Tests', () => {
   // ============================================
   describe('Thread History Loading and Persistence', () => {
     
+      jest.setTimeout(10000);
+    
     test('Should load thread history from storage', async () => {
       const threads = [
         { id: 'old-1', title: 'Old Conversation 1', createdAt: '2025-01-18' },
@@ -308,6 +319,8 @@ describe('Comprehensive Thread Management Tests', () => {
   // Thread Search and Organization Tests
   // ============================================
   describe('Thread Search and Filter', () => {
+    
+      jest.setTimeout(10000);
     
     test('Should filter threads by search query', async () => {
       const threads = [

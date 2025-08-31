@@ -1,8 +1,9 @@
-/**
- * Responsive Layout Mobile Test Suite
- * Tests viewport sizes, breakpoints, and responsive component behavior
- * Business Value: Ensures optimal UX across devices = 60% mobile/tablet traffic
- * Follows 25-line function rule and 450-line file limit
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { Button } from '@/components/ui/button';
+import { TestWrapper } from '@/__tests__/shared/unified-test-utilities';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ 25-line function rule and 450-line file limit
  */
 
 import React from 'react';
@@ -27,6 +28,8 @@ const MockResponsiveComponent: React.FC<{ testId: string }> = ({ testId }) => {
 
 describe('Responsive Layout - Mobile Test Suite', () => {
   
+    jest.setTimeout(10000);
+  
   // Mock window dimensions for testing
   const setWindowSize = (width: number, height: number) => {
     Object.defineProperty(window, 'innerWidth', { value: width, writable: true });
@@ -39,6 +42,7 @@ describe('Responsive Layout - Mobile Test Suite', () => {
   });
 
   describe('Basic Responsive Behavior', () => {
+      jest.setTimeout(10000);
     it('renders mobile-optimized components', () => {
       setWindowSize(320, 568); // iPhone SE size
       
@@ -95,6 +99,7 @@ describe('Responsive Layout - Mobile Test Suite', () => {
   });
 
   describe('Touch Target Optimization', () => {
+      jest.setTimeout(10000);
     it('ensures adequate button sizing for touch', () => {
       render(
         <Button 
@@ -153,6 +158,7 @@ describe('Responsive Layout - Mobile Test Suite', () => {
   });
 
   describe('Layout Patterns', () => {
+      jest.setTimeout(10000);
     it('stacks elements vertically on mobile', () => {
       render(
         <div 
@@ -220,6 +226,7 @@ describe('Responsive Layout - Mobile Test Suite', () => {
   });
 
   describe('Performance Considerations', () => {
+      jest.setTimeout(10000);
     it('uses efficient CSS transforms for animations', () => {
       render(
         <div 
@@ -280,6 +287,7 @@ describe('Responsive Layout - Mobile Test Suite', () => {
   });
 
   describe('Accessibility Features', () => {
+      jest.setTimeout(10000);
     it('maintains focus visibility on mobile', () => {
       render(
         <Button 
@@ -339,6 +347,7 @@ describe('Responsive Layout - Mobile Test Suite', () => {
   });
 
   describe('Viewport and Orientation', () => {
+      jest.setTimeout(10000);
     it('handles viewport meta tag correctly', () => {
       // Test viewport meta presence (would be in document head)
       const viewportMeta = document.querySelector('meta[name="viewport"]');

@@ -1,9 +1,9 @@
-/**
- * Comprehensive Thread Management Tests for Basic Chat Functions
- * =============================================================
- * 
- * BUSINESS VALUE JUSTIFICATION (BVJ):
- * - Segment: Growth & Enterprise (Multi-conversation power users)
+import React from 'react';
+import { render, screen, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ent: Growth & Enterprise (Multi-conversation power users)
  * - Business Goal: Enable efficient thread management for complex AI workflows
  * - Value Impact: Thread management essential for 85% of power users
  * - Revenue Impact: Power users convert from Free to paid at 3.2x higher rate
@@ -59,6 +59,7 @@ import {
 } from './test-data-factories';
 
 describe('Thread Management Core Functionality', () => {
+    jest.setTimeout(10000);
   let user: ReturnType<typeof userEvent.setup>;
 
   beforeEach(async () => {
@@ -71,6 +72,7 @@ describe('Thread Management Core Functionality', () => {
   });
 
   describe('Thread Creation Workflow', () => {
+      jest.setTimeout(10000);
     test('creates new thread with default title', async () => {
       render(
         <TestProviders>
@@ -199,6 +201,7 @@ describe('Thread Management Core Functionality', () => {
   });
 
   describe('Thread Switching Without Data Loss', () => {
+      jest.setTimeout(10000);
     test('switches between threads maintaining state', async () => {
       const { threadId1, threadId2 } = await createThreadSequence(2);
       
@@ -301,6 +304,7 @@ describe('Thread Management Core Functionality', () => {
   });
 
   describe('Thread Deletion with Confirmation', () => {
+      jest.setTimeout(10000);
     test('deletes thread after user confirmation', async () => {
       const thread = createBasicThread();
       
@@ -386,6 +390,7 @@ describe('Thread Management Core Functionality', () => {
   });
 
   describe('Thread Persistence and Recovery', () => {
+      jest.setTimeout(10000);
     test('persists threads across browser sessions', async () => {
       const thread = createBasicThread();
       

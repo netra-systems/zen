@@ -400,6 +400,8 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 import * as ChatSidebarHooks from '@/components/chat/ChatSidebarHooks';
 
 describe('Advanced Chat Features', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let mockStore: any;
   let user: ReturnType<typeof userEvent.setup>;
   let mockSidebarState: any;
@@ -484,6 +486,8 @@ describe('Advanced Chat Features', () => {
   });
 
   describe('6. Search Within Conversations', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     const searchableMessages = [
       createMockMessage('How do I optimize my AI models?', 'user'),
       createMockMessage('To optimize AI models, you should consider...', 'assistant'),
@@ -563,6 +567,8 @@ describe('Advanced Chat Features', () => {
   });
 
   describe('7. Keyboard Shortcuts', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should send message with Enter key', async () => {
       render(
         <TestProviders>
@@ -674,6 +680,8 @@ describe('Advanced Chat Features', () => {
   });
 
   describe('8. Markdown Rendering in Messages', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should render markdown headers correctly', () => {
       const markdownMessage = createMockMessage('# Header 1\n## Header 2\n### Header 3');
       
@@ -752,6 +760,8 @@ describe('Advanced Chat Features', () => {
   });
 
   describe('9. Code Syntax Highlighting', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should render inline code with proper styling', () => {
       const messageWithCode = createMockMessage('Use `console.log()` to debug your code.');
       
@@ -851,6 +861,8 @@ console.log("hello world");
   });
 
   describe('10. Export Conversation Functionality', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     const exportableMessages = [
       createMockMessage('How can I optimize my AI workflow?', 'user'),
       createMockMessage('Here are several strategies for AI optimization:\n\n1. Model selection\n2. Prompt engineering\n3. Caching strategies', 'assistant'),
@@ -959,4 +971,8 @@ console.log("hello world");
       expect(exportData.messages).toHaveLength(4);
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

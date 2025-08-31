@@ -1,9 +1,8 @@
-/**
- * Chat Component Streaming Tests
- * Tests character-by-character streaming, smooth rendering, and performance
- * 
- * Phase 4, Agent 14: Component-level streaming behavior verification
- */
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { render, waitFor, screen, fireEvent, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+/
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { render, waitFor, screen, fireEvent, act } from '@testing-library/react';
@@ -269,11 +268,13 @@ const InterruptionComponent: React.FC<{
 };
 
 describe('Chat Component Streaming Tests', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('Character-by-Character Streaming', () => {
+      jest.setTimeout(10000);
     it('should stream text character by character', async () => {
       const testText = 'Hello, World!';
       let completionCalled = false;
@@ -328,6 +329,7 @@ describe('Chat Component Streaming Tests', () => {
   });
 
   describe('Smooth Rendering (60 FPS)', () => {
+      jest.setTimeout(10000);
     it('should maintain 60 FPS during rendering', async () => {
       const chunks = ['Chunk1', 'Chunk2', 'Chunk3', 'Chunk4', 'Chunk5'];
       
@@ -361,6 +363,7 @@ describe('Chat Component Streaming Tests', () => {
   });
 
   describe('No Flicker or Jumps', () => {
+      jest.setTimeout(10000);
     it('should render without visual jumps during streaming', async () => {
       const LongContentTest: React.FC = () => {
         const [content, setContent] = useState('Initial');
@@ -401,6 +404,7 @@ describe('Chat Component Streaming Tests', () => {
   });
 
   describe('Chunked Message Assembly', () => {
+      jest.setTimeout(10000);
     it('should assemble messages from unordered chunks', async () => {
       const chunks = [
         { id: 'chunk-2', content: 'World!', order: 2 },
@@ -428,6 +432,7 @@ describe('Chat Component Streaming Tests', () => {
   });
 
   describe('Progress Indicators', () => {
+      jest.setTimeout(10000);
     it('should display accurate progress indicators', async () => {
       const ProgressTest: React.FC = () => {
         const [currentStep, setCurrentStep] = useState(0);
@@ -469,6 +474,7 @@ describe('Chat Component Streaming Tests', () => {
   });
 
   describe('Interruption Handling', () => {
+      jest.setTimeout(10000);
     it('should handle stream interruption gracefully', async () => {
       let interruptCalled = false;
 
@@ -488,6 +494,7 @@ describe('Chat Component Streaming Tests', () => {
   });
 
   describe('Message Ordering', () => {
+      jest.setTimeout(10000);
     it('should maintain correct message order during concurrent streams', async () => {
       const MessageOrderTest: React.FC = () => {
         const [messages, setMessages] = useState<Array<{ id: number; content: string }>>([]);

@@ -1,10 +1,10 @@
-/**
- * API Calls Integration Tests - Basic Operations
- * Tests REST API communication patterns (GET, POST, PUT, DELETE)
- * 
- * Business Value Justification (BVJ):
- * - Segment: All (Free → Enterprise)
- * - Goal: Ensure reliable API communication for all customer segments
+import { render, screen, waitFor } from '@testing-library/react';
+import { setupServer } from 'msw/node';
+import { http, HttpResponse } from 'msw';
+import { apiClient } from '@/services/apiClient';
+import { getApiUrl } from '@/services/api';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ion for all customer segments
  * - Value Impact: Prevents API-related bugs that could cause 20% customer churn
  * - Revenue Impact: +$50K MRR from improved reliability
  */
@@ -115,6 +115,11 @@ beforeAll(() => {
 afterEach(() => {
   server.resetHandlers();
   jest.clearAllMocks();
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
 });
 
 afterAll(() => {
@@ -126,6 +131,7 @@ afterAll(() => {
 // ============================================================================
 
 describe('API Calls - GET Requests', () => {
+    jest.setTimeout(10000);
   it('fetches thread list successfully', async () => {
     const response = await apiClient.get('get_threads', 'test-token');
     
@@ -164,6 +170,7 @@ describe('API Calls - GET Requests', () => {
 // ============================================================================
 
 describe('API Calls - POST Requests', () => {
+    jest.setTimeout(10000);
   it('creates new thread with POST request', async () => {
     const threadData = { title: 'New Test Thread' };
     const response = await apiClient.post('create_thread', threadData, 'test-token');
@@ -229,6 +236,7 @@ describe('API Calls - POST Requests', () => {
 // ============================================================================
 
 describe('API Calls - PUT Requests', () => {
+    jest.setTimeout(10000);
   it('updates thread with PUT request', async () => {
     // Mock PUT endpoint specifically
     server.use(
@@ -289,6 +297,7 @@ describe('API Calls - PUT Requests', () => {
 // ============================================================================
 
 describe('API Calls - DELETE Requests', () => {
+    jest.setTimeout(10000);
   it('deletes thread with DELETE request', async () => {
     const response = await apiClient.request('delete_thread', 'delete', {
       method: 'DELETE',

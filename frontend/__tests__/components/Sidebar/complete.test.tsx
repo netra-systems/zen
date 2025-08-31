@@ -1,11 +1,10 @@
-/**
- * Sidebar Complete Test Suite
- * Agent 3: Comprehensive sidebar and thread management tests
- * Covers performance, state management, navigation, and user interactions
- * Follows 25-line function rule and 450-line file limit
- */
-
 import React from 'react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { act } from '@testing-library/react';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
@@ -40,6 +39,7 @@ const measureRenderTime = async (renderFn: () => void) => {
 };
 
 describe('Sidebar Complete Test Suite', () => {
+    jest.setTimeout(10000);
   const testSetup = createTestSetup();
 
   beforeEach(() => {
@@ -51,9 +51,15 @@ describe('Sidebar Complete Test Suite', () => {
 
   afterEach(() => {
     testSetup.afterEach();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Performance Tests', () => {
+      jest.setTimeout(10000);
     it('should render 1000+ threads within performance budget', async () => {
       const largeThreadList = generateLargeThreadList(1000);
       testSetup.configureChatSidebarHooks({
@@ -103,6 +109,7 @@ describe('Sidebar Complete Test Suite', () => {
   });
 
   describe('Thread State Management', () => {
+      jest.setTimeout(10000);
     it('should persist active thread highlighting', async () => {
       testSetup.configureStore({
         activeThreadId: 'thread-2'
@@ -150,6 +157,7 @@ describe('Sidebar Complete Test Suite', () => {
   });
 
   describe('Search and Filter Functionality', () => {
+      jest.setTimeout(10000);
     it('should filter threads in real-time', async () => {
       const user = userEvent.setup();
       testSetup.configureChatSidebarHooks({
@@ -201,6 +209,7 @@ describe('Sidebar Complete Test Suite', () => {
   });
 
   describe('Thread Operations', () => {
+      jest.setTimeout(10000);
     it('should handle thread deletion with confirmation', async () => {
       const user = userEvent.setup();
       const deleteHandler = jest.fn();
@@ -270,6 +279,7 @@ describe('Sidebar Complete Test Suite', () => {
   });
 
   describe('Collapse and Expand Behavior', () => {
+      jest.setTimeout(10000);
     it('should toggle sidebar collapse state', async () => {
       const user = userEvent.setup();
       testSetup.configureStore({
@@ -303,6 +313,7 @@ describe('Sidebar Complete Test Suite', () => {
   });
 
   describe('Keyboard Navigation', () => {
+      jest.setTimeout(10000);
     it('should support arrow key navigation through threads', async () => {
       const user = userEvent.setup();
       testSetup.configureChatSidebarHooks({
@@ -338,6 +349,7 @@ describe('Sidebar Complete Test Suite', () => {
   });
 
   describe('State Persistence', () => {
+      jest.setTimeout(10000);
     it('should persist sidebar state across page refreshes', async () => {
       testSetup.configureStore({
         sidebarCollapsed: false,

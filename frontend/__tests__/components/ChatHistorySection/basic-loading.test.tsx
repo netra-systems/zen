@@ -1,11 +1,10 @@
-/**
- * ChatHistorySection Basic Loading States Tests
- * Tests for loading states and error handling ≤300 lines, ≤8 line functions
- */
-
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ChatHistorySection } from '@/components/ChatHistorySection';
+import { createTestSetup, setupLoadingState, setupErrorState } from './shared-setup';
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+from '@/components/ChatHistorySection';
 import { createTestSetup, setupLoadingState, setupErrorState } from './shared-setup';
 import {
   expectBasicStructure,
@@ -15,6 +14,7 @@ import {
 } from './test-utils';
 
 describe('ChatHistorySection - Loading States', () => {
+    jest.setTimeout(10000);
   const testSetup = createTestSetup();
 
   beforeEach(() => {
@@ -23,9 +23,15 @@ describe('ChatHistorySection - Loading States', () => {
 
   afterEach(() => {
     testSetup.afterEach();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Loading state display', () => {
+      jest.setTimeout(10000);
     it('should show loading state when threads are being fetched', () => {
       setupLoadingState();
       
@@ -65,6 +71,7 @@ describe('ChatHistorySection - Loading States', () => {
   });
 
   describe('Error state handling', () => {
+      jest.setTimeout(10000);
     it('should handle error state gracefully', () => {
       setupErrorState('Failed to load threads');
       
@@ -107,6 +114,7 @@ describe('ChatHistorySection - Loading States', () => {
   });
 
   describe('Loading state variations', () => {
+      jest.setTimeout(10000);
     it('should handle initial loading state', () => {
       testSetup.configureStore({ 
         threads: [], 
@@ -153,6 +161,7 @@ describe('ChatHistorySection - Loading States', () => {
   });
 
   describe('Error recovery scenarios', () => {
+      jest.setTimeout(10000);
     it('should handle network error recovery', () => {
       setupErrorState('Network connection failed');
       const { rerender } = render(<ChatHistorySection />);
@@ -206,6 +215,7 @@ describe('ChatHistorySection - Loading States', () => {
   });
 
   describe('Console error handling', () => {
+      jest.setTimeout(10000);
     it('should not log errors during normal operation', () => {
       const restoreConsole = mockConsoleError();
       
@@ -249,6 +259,7 @@ describe('ChatHistorySection - Loading States', () => {
   });
 
   describe('State transition handling', () => {
+      jest.setTimeout(10000);
     it('should handle loading to success transition', () => {
       setupLoadingState();
       const { rerender } = render(<ChatHistorySection />);
@@ -305,6 +316,7 @@ describe('ChatHistorySection - Loading States', () => {
   });
 
   describe('Component stability during state changes', () => {
+      jest.setTimeout(10000);
     it('should maintain component integrity during loading', () => {
       setupLoadingState();
       

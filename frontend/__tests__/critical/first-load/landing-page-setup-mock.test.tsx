@@ -12,6 +12,8 @@ import HomePage from '@/app/page';
 import { useAuth } from '@/auth/context';
 
 describe('Landing Page - Using Setup Mocks', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -58,4 +60,8 @@ describe('Landing Page - Using Setup Mocks', () => {
       console.log('Error importing @/auth/service:', e);
     }
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

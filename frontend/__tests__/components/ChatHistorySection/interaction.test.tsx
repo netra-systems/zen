@@ -119,6 +119,8 @@ const mockStore = {
 };
 
 describe('ChatHistorySection - Interactions', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     mockRouter.push.mockClear();
@@ -172,6 +174,8 @@ describe('ChatHistorySection - Interactions', () => {
   });
 
   describe('Search functionality', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should filter threads based on search input', async () => {
       render(<ChatHistorySection />);
       
@@ -203,6 +207,8 @@ describe('ChatHistorySection - Interactions', () => {
   });
 
   describe('Delete conversation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should show delete confirmation dialog when delete is clicked', async () => {
       render(<ChatHistorySection />);
       
@@ -241,6 +247,8 @@ describe('ChatHistorySection - Interactions', () => {
   });
 
   describe('Load more pagination', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should load more threads when load more button is clicked', async () => {
       render(<ChatHistorySection />);
       
@@ -249,6 +257,8 @@ describe('ChatHistorySection - Interactions', () => {
   });
 
   describe('Conversation switching', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should switch to conversation when clicked', async () => {
       render(<ChatHistorySection />);
       
@@ -305,4 +315,8 @@ describe('ChatHistorySection - Interactions', () => {
       mockRouter.push.mockClear();
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

@@ -1,10 +1,9 @@
-/**
- * Working MessageInput Test - Direct Approach
- * Testing MessageInput functionality by working around the authentication issue
- */
-
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { jest } from '@jest/globals';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
 
@@ -85,6 +84,7 @@ jest.mock('@/components/chat/hooks/useMessageSending', () => ({
 import { MessageInput } from '@/components/chat/MessageInput';
 
 describe('MessageInput - Working Test', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });

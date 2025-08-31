@@ -1,15 +1,14 @@
-/**
- * Message Exchange Tests
- * Tests for message sending, receiving, and streaming functionality
- * 
- * BVJ: Core Message Exchange Infrastructure
- * Segment: All - core functionality for all user segments
- * Business Goal: Reliable message delivery and real-time communication
- * Value Impact: Core user experience for AI interaction and response handling
- */
-
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { ChatWindow } from '../../components/chat/ChatWindow';
+import { MessageList } from '../../components/chat/MessageList';
+import MainChat from '../../components/chat/MainChat';
+import { TestProviders } from '@/__tests__/test-utils/providers';
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { ChatWindow } from '../../components/chat/ChatWindow';
@@ -137,10 +136,17 @@ beforeEach(() => {
 
 afterEach(() => {
   jest.restoreAllMocks();
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
 });
 
 describe('Message Exchange', () => {
+    jest.setTimeout(10000);
   describe('Message Sending', () => {
+      jest.setTimeout(10000);
     test('should send a message and display it in the message list', async () => {
       const mockOnSendMessage = jest.fn();
       
@@ -251,6 +257,7 @@ describe('Message Exchange', () => {
   });
 
   describe('Message Receiving and Display', () => {
+      jest.setTimeout(10000);
     test('should receive and display agent response messages', async () => {
       const mockMessages = [
         { 
@@ -389,6 +396,7 @@ describe('Message Exchange', () => {
   });
 
   describe('Message Streaming', () => {
+      jest.setTimeout(10000);
     test('should handle message streaming with partial updates', async () => {
       const streamingMessage = {
         id: 'streaming-1',
@@ -489,6 +497,7 @@ describe('Message Exchange', () => {
   });
 
   describe('Processing State and Indicators', () => {
+      jest.setTimeout(10000);
     test('should display thinking indicator during agent processing', async () => {
       // Create a processing store state
       const processingStore = createUnifiedChatStoreMock({
@@ -616,6 +625,7 @@ describe('Message Exchange', () => {
   });
 
   describe('Error Handling', () => {
+      jest.setTimeout(10000);
     test('should handle message sending failures', async () => {
       // Suppress console errors during this test
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});

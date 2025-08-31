@@ -94,6 +94,8 @@ jest.mock('lucide-react', () => ({
 }));
 
 describe('MainChat Loading State Transitions', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const mockUseUnifiedChatStore = useUnifiedChatStore as jest.MockedFunction<typeof useUnifiedChatStore>;
   const mockUseWebSocket = useWebSocket as jest.MockedFunction<typeof useWebSocket>;
   const mockUseLoadingState = useLoadingState as jest.MockedFunction<typeof useLoadingState>;
@@ -205,4 +207,8 @@ describe('MainChat Loading State Transitions', () => {
     expect(screen.queryByText('Loading chat...')).not.toBeInTheDocument();
     expect(screen.getByText(/explore these examples/i)).toBeInTheDocument();
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

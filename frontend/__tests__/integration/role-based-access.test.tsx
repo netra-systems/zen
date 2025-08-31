@@ -1,10 +1,9 @@
-/**
- * Role-Based Access Control Integration Tests
- * 
- * Tests access control for different user tiers (Free, Early, Mid, Enterprise),
- * permission validation, protected routes, and feature access control.
- * 
- * Business Value: Ensures proper monetization through tier-based access,
+import React from 'react';
+import { render, fireEvent, waitFor, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupTestEnvironment, resetTestState } from '@/__tests__/test-utils/integration-test-setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+per monetization through tier-based access,
  * prevents unauthorized feature usage, protects premium functionality.
  */
 
@@ -100,6 +99,7 @@ const userTiers = {
 };
 
 describe('Role-Based Access Control Integration', () => {
+    jest.setTimeout(10000);
   let mockRouter: any;
 
   beforeEach(() => {
@@ -110,9 +110,15 @@ describe('Role-Based Access Control Integration', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Tier-Based Feature Access', () => {
+      jest.setTimeout(10000);
     it('should restrict free users to basic features', async () => {
       const { AccessComponent } = setupFreeUserAccess();
       
@@ -147,6 +153,7 @@ describe('Role-Based Access Control Integration', () => {
   });
 
   describe('Protected Route Navigation', () => {
+      jest.setTimeout(10000);
     it('should redirect unauthorized users from admin routes', async () => {
       const { ProtectedComponent } = setupUnauthorizedUserRoute();
       
@@ -177,6 +184,7 @@ describe('Role-Based Access Control Integration', () => {
   });
 
   describe('Feature Limitations', () => {
+      jest.setTimeout(10000);
     it('should enforce thread creation limits for free users', async () => {
       const { LimitComponent } = setupThreadLimitScenario();
       
@@ -207,6 +215,7 @@ describe('Role-Based Access Control Integration', () => {
   });
 
   describe('Permission Validation', () => {
+      jest.setTimeout(10000);
     it('should validate permissions before feature access', async () => {
       const { ValidationComponent } = setupPermissionValidation();
       
@@ -237,6 +246,7 @@ describe('Role-Based Access Control Integration', () => {
   });
 
   describe('Upgrade Flow Integration', () => {
+      jest.setTimeout(10000);
     it('should trigger upgrade flow for premium features', async () => {
       const { UpgradeComponent } = setupUpgradeFlowTrigger();
       

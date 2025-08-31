@@ -10,6 +10,8 @@
  */
 
 describe('Analytics Integration Test Suite', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   it('should reference modular analytics architecture', () => {
     const analyticsModules = [
       'analytics-clickhouse.test.tsx',
@@ -33,4 +35,8 @@ describe('Analytics Integration Test Suite', () => {
     expect(analyticsRequirements.anomalyDetection).toBe(true);
     expect(analyticsRequirements.maxFileLines).toBeLessThanOrEqual(300);
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

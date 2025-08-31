@@ -1,6 +1,7 @@
-/**
- * Interactive Features Drag and Drop Integration Tests - Main Entry
- * ULTRA DEEP THINK: Module-based architecture - Main coordinator ≤300 lines
+import './interactive-features-drag-drop-basic.test';
+import './interactive-features-drag-drop-advanced.test';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+itecture - Main coordinator ≤300 lines
  * 
  * This file serves as the main entry point for drag-drop tests.
  * Actual test implementations are split into smaller modules for compliance.

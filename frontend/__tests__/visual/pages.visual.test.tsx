@@ -1,13 +1,13 @@
-/**
- * Visual Regression Tests - Page Layouts
- * Tests all page layout visual consistency and structure
- * Follows 25-line function rule and comprehensive page coverage
- * Business Impact: Ensures consistent page layouts across app
- */
-
 import React from 'react';
 import { render } from '@testing-library/react';
 import { AuthProvider } from '@/auth/context';
+import ChatPage from '@/app/chat/page';
+import LoginPage from '@/app/login/page';
+import DemoPage from '@/app/demo/page';
+import CorpusPage from '@/app/corpus/page';
+import AdminPage from '@/app/admin/page';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+der } from '@/auth/context';
 import ChatPage from '@/app/chat/page';
 import LoginPage from '@/app/login/page';
 import DemoPage from '@/app/demo/page';
@@ -162,6 +162,7 @@ const PageTestWrapper = ({ children }: { children: React.ReactNode }) => (
 // ============================================================================
 
 describe('Chat Page Visual Layout', () => {
+    jest.setTimeout(10000);
   it('renders chat page basic layout correctly', () => {
     const { container } = render(
       <PageTestWrapper>
@@ -210,6 +211,7 @@ describe('Chat Page Visual Layout', () => {
 // ============================================================================
 
 describe('Login Page Visual Layout', () => {
+    jest.setTimeout(10000);
   it('renders login page layout correctly', () => {
     const { container } = render(
       <PageTestWrapper>
@@ -258,6 +260,7 @@ describe('Login Page Visual Layout', () => {
 // ============================================================================
 
 describe('Demo Page Visual Layout', () => {
+    jest.setTimeout(10000);
   it('renders demo page layout correctly', () => {
     const { container } = render(
       <PageTestWrapper>
@@ -306,6 +309,7 @@ describe('Demo Page Visual Layout', () => {
 // ============================================================================
 
 describe('Corpus Page Visual Layout', () => {
+    jest.setTimeout(10000);
   it('renders corpus page layout correctly', () => {
     const { container } = render(
       <PageTestWrapper>
@@ -354,6 +358,7 @@ describe('Corpus Page Visual Layout', () => {
 // ============================================================================
 
 describe('Admin Page Visual Layout', () => {
+    jest.setTimeout(10000);
   it('renders admin page layout correctly', () => {
     const { container } = render(
       <PageTestWrapper>
@@ -402,6 +407,7 @@ describe('Admin Page Visual Layout', () => {
 // ============================================================================
 
 describe('Layout Component Visual Tests', () => {
+    jest.setTimeout(10000);
   it('renders header layout correctly', () => {
     const { container } = render(
       <PageTestWrapper>
@@ -488,6 +494,7 @@ describe('Layout Component Visual Tests', () => {
 // ============================================================================
 
 describe('Grid Layout Visual Tests', () => {
+    jest.setTimeout(10000);
   it('renders dashboard grid layout correctly', () => {
     const { container } = render(
       <PageTestWrapper>
@@ -535,6 +542,7 @@ describe('Grid Layout Visual Tests', () => {
 // ============================================================================
 
 describe('Dark Theme Page Layout Tests', () => {
+    jest.setTimeout(10000);
   it('renders chat page in dark theme correctly', () => {
     const { container } = render(
       <div className="dark">

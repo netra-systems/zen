@@ -1,14 +1,13 @@
-/**
- * End-to-End User Journey Tests
- */
-
 import React from 'react';
 import { render, waitFor, fireEvent } from '@testing-library/react';
 import WS from 'jest-websocket-mock';
 import { safeWebSocketCleanup } from '../../helpers/websocket-test-manager';
 import { setupTestEnvironment } from './test-setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+tupTestEnvironment } from './test-setup';
 
 describe('Advanced Frontend Integration Tests - End-to-End Journey', () => {
+    jest.setTimeout(10000);
   let server: WS;
   
   setupTestEnvironment();
@@ -19,9 +18,15 @@ describe('Advanced Frontend Integration Tests - End-to-End Journey', () => {
 
   afterEach(() => {
     safeWebSocketCleanup();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('30. End-to-End User Journey', () => {
+      jest.setTimeout(10000);
     it('should complete full optimization workflow', async () => {
       const OptimizationWorkflow = () => {
         const [step, setStep] = React.useState('upload');

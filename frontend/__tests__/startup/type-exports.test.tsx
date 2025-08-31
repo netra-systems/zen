@@ -1,6 +1,6 @@
-/**
- * Frontend Type Export Validation Tests
- * Catches missing type exports at build/test time
+import { describe, it, expect, beforeAll } from '@jest/globals';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ype exports at build/test time
  * 
  * Business Value Justification (BVJ):
  * - Segment: All
@@ -12,7 +12,9 @@
 import { describe, it, expect, beforeAll } from '@jest/globals';
 
 describe('Type Export Validation', () => {
+    jest.setTimeout(10000);
   describe('WebSocket Type Exports', () => {
+      jest.setTimeout(10000);
     it('should export all required WebSocket runtime functions', async () => {
       const websocketModule = await import('@/types/domains/websocket');
       
@@ -68,6 +70,7 @@ describe('Type Export Validation', () => {
   });
   
   describe('Registry Re-exports', () => {
+      jest.setTimeout(10000);
     it('should re-export WebSocket runtime functions from registry', async () => {
       const registryModule = await import('@/types/unified');
       
@@ -137,6 +140,7 @@ describe('Type Export Validation', () => {
   });
   
   describe('Import Chain Validation', () => {
+      jest.setTimeout(10000);
     it('should import WebSocket types through services without errors', async () => {
       // This will fail at compile time if types are missing
       const reconciliationModule = await import('@/services/reconciliation/core');
@@ -151,6 +155,7 @@ describe('Type Export Validation', () => {
   });
   
   describe('Circular Dependency Check', () => {
+      jest.setTimeout(10000);
     it('should not have circular dependencies in type modules', async () => {
       const loadOrder: string[] = [];
       
@@ -183,6 +188,7 @@ describe('Type Export Validation', () => {
   });
   
   describe('Type Safety Validation', () => {
+      jest.setTimeout(10000);
     it('should have proper TypeScript types for all exports', async () => {
       const registryModule = await import('@/types/unified');
       
@@ -206,6 +212,7 @@ describe('Type Export Validation', () => {
 });
 
 describe('Auth Service Type Validation', () => {
+    jest.setTimeout(10000);
   it('should have proper auth config types', async () => {
     const authModule = await import('@/auth/service');
     

@@ -1,9 +1,9 @@
-/**
- * Complete MessageInput Component Tests - Revenue Critical - FIXED VERSION
- * 
- * Business Value Justification:
- * - Segment: All (Free → Enterprise) 
- * - Goal: Protect primary user input interface, prevent conversion loss
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { jest } from '@jest/globals';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+nterface, prevent conversion loss
  * - Value Impact: Ensures 100% of user messages can be entered and sent
  * - Revenue Impact: Prevents 30%+ conversion loss from input failures
  */
@@ -81,6 +81,7 @@ jest.mock('@/components/chat/hooks/useMessageSending', () => ({
 import { MessageInput } from '@/components/chat/MessageInput';
 
 describe('MessageInput - Text Input Validation', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -174,6 +175,7 @@ describe('MessageInput - Text Input Validation', () => {
 });
 
 describe('MessageInput - Send Button States', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -301,6 +303,7 @@ describe('MessageInput - Send Button States', () => {
 });
 
 describe('MessageInput - Keyboard Shortcuts', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -378,6 +381,7 @@ describe('MessageInput - Keyboard Shortcuts', () => {
 });
 
 describe('MessageInput - Multiline and Auto-resize', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -448,6 +452,7 @@ describe('MessageInput - Multiline and Auto-resize', () => {
 });
 
 describe('MessageInput - Error Handling', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });

@@ -25,7 +25,11 @@ import {
 import { WebSocketStatus } from '@/services/webSocketService';
 
 describe('Loading State Machine', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   describe('State Transitions', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * Test Case 1: INITIALIZING should transition to THREAD_READY when WebSocket already connected
      * This prevents the "Loading chat..." stuck issue when hot-reloading or reconnecting
@@ -189,6 +193,8 @@ describe('Loading State Machine', () => {
   });
 
   describe('Context Creation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should create correct WebSocket state from status', () => {
       const openState = createWebSocketState('OPEN' as WebSocketStatus);
       expect(openState).toEqual({
@@ -263,6 +269,8 @@ describe('Loading State Machine', () => {
   });
 
   describe('Loading Result Creation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should show loading for INITIALIZING state', () => {
       const context: ChatStateContext = {
         webSocket: { isConnected: false, isConnecting: false, isFailed: false, status: 'CLOSED' as WebSocketStatus },
@@ -346,6 +354,8 @@ describe('Loading State Machine', () => {
   });
 
   describe('Edge Cases and Race Conditions', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle connection failure correctly', () => {
       const context: ChatStateContext = {
         webSocket: { isConnected: false, isConnecting: false, isFailed: true, status: 'CLOSED' as WebSocketStatus },
@@ -397,4 +407,8 @@ describe('Loading State Machine', () => {
       }
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

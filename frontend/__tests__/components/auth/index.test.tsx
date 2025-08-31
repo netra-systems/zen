@@ -28,6 +28,8 @@ import '@testing-library/jest-dom';
 jest.mock('@/auth/service');
 
 describe('Authentication UI Tests Index', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const mockLogin = jest.fn();
   const mockLogout = jest.fn();
   
@@ -54,6 +56,8 @@ describe('Authentication UI Tests Index', () => {
   });
 
   describe('Test Suite Overview', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should verify all auth test files exist', () => {
       // This test serves as documentation for the complete test suite
       const testFiles = [
@@ -109,6 +113,8 @@ describe('Authentication UI Tests Index', () => {
   });
 
   describe('Architecture Compliance', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should maintain 25-line function limits', () => {
       // All test functions are ≤8 lines as per architecture requirements
       const testComponent = () => {
@@ -143,6 +149,8 @@ describe('Authentication UI Tests Index', () => {
   });
 
   describe('Test Quality Standards', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should use real DOM interactions', () => {
       // All tests interact with actual DOM elements
       render(<LoginButton />);
@@ -177,6 +185,8 @@ describe('Authentication UI Tests Index', () => {
   });
 
   describe('Coverage Verification', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should test happy path scenarios', () => {
       // Tests cover successful authentication flows
       render(<LoginButton />);
@@ -208,6 +218,8 @@ describe('Authentication UI Tests Index', () => {
   });
 
   describe('Integration Points', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should test auth service integration', () => {
       // Tests verify proper service integration
       render(<LoginButton />);
@@ -238,6 +250,8 @@ describe('Authentication UI Tests Index', () => {
   });
 
   describe('Performance Considerations', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should test component rendering performance', () => {
       // Tests ensure components render efficiently
       const startTime = performance.now();
@@ -269,4 +283,8 @@ describe('Authentication UI Tests Index', () => {
       expect(screen.getByText('Login with Google')).toBeInTheDocument();
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

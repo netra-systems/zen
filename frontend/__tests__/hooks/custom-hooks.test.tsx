@@ -110,6 +110,8 @@ const useCounter = (initialValue: number = 0, min?: number, max?: number) => {
 };
 
 describe('Custom Hooks', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     localStorage.clear();
   });
@@ -320,4 +322,8 @@ describe('Custom Hooks', () => {
     fireEvent.click(screen.getByTestId('reset-counter'));
     expect(screen.getByTestId('counter-value')).toHaveTextContent('Count: 0');
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

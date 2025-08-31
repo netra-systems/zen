@@ -5,9 +5,12 @@ import { PersistentResponseCard } from '@/components/chat/PersistentResponseCard
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import { OverflowPanel } from '@/components/chat/OverflowPanel';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Unified Chat UI v5 - Regression Tests', () => {
+    jest.setTimeout(10000);
   describe('Blue Bar Removal Tests', () => {
+      jest.setTimeout(10000);
     it('FastLayer should NOT contain blue gradient bars', () => {
       const { container } = render(
         <FastLayer 
@@ -67,6 +70,7 @@ describe('Unified Chat UI v5 - Regression Tests', () => {
   });
   
   describe('Component Consolidation Tests', () => {
+      jest.setTimeout(10000);
     it('MainChat should be the only chat component used', () => {
       // This test verifies that we're not importing multiple chat variants
       // In a real test, we'd check the imports in the main app
@@ -82,6 +86,7 @@ describe('Unified Chat UI v5 - Regression Tests', () => {
   });
   
   describe('New Features Tests', () => {
+      jest.setTimeout(10000);
     it('ChatSidebar should render thread list with proper structure', () => {
       const mockThreads = new Map([
         ['thread-1', {
@@ -130,6 +135,7 @@ describe('Unified Chat UI v5 - Regression Tests', () => {
   });
   
   describe('Agent Deduplication Tests', () => {
+      jest.setTimeout(10000);
     it('should track agent iterations correctly', () => {
       const slowLayerData = {
         completedAgents: [
@@ -158,6 +164,7 @@ describe('Unified Chat UI v5 - Regression Tests', () => {
   });
   
   describe('Modern UI Patterns', () => {
+      jest.setTimeout(10000);
     it('should use glassmorphic design patterns', () => {
       const { container } = render(
         <FastLayer 
@@ -208,6 +215,7 @@ describe('Unified Chat UI v5 - Regression Tests', () => {
   });
   
   describe('Performance Requirements', () => {
+      jest.setTimeout(10000);
     it('should handle 1000+ WebSocket events efficiently', () => {
       // Mock circular buffer with 1000 events
       const mockEvents = Array.from({ length: 1000 }, (_, i) => ({

@@ -1,7 +1,8 @@
-/**
- * Corpus Management Integration Tests
- * Module-based architecture: Corpus tests ≤300 lines, functions ≤8 lines
- */
+import React from 'react';
+import { render } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 import React from 'react';
 import { render } from '@testing-library/react';
@@ -65,6 +66,7 @@ jest.mock('@/components/auth/AuthGate', () => {
 });
 
 describe('Corpus Management Integration Tests', () => {
+    jest.setTimeout(10000);
   let server: any;
   const useCorpusStore = createCorpusStore();
   const corpusService = createCorpusService();
@@ -76,9 +78,15 @@ describe('Corpus Management Integration Tests', () => {
 
   afterEach(() => {
     teardownIntegrationTest();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('1. Corpus Management Integration', () => {
+      jest.setTimeout(10000);
     it('should upload documents to corpus and process with embeddings', async () => {
       const mockDocument = createMockDocument();
       setupDocumentUploadMock(mockDocument);

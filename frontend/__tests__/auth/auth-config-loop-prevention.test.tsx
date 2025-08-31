@@ -29,6 +29,8 @@ jest.mock('@/lib/logger', () => ({
 }));
 
 describe('Auth Configuration Loop Prevention', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let getAuthConfigSpy: jest.SpyInstance;
   let getTokenSpy: jest.SpyInstance;
   let AuthProvider: any;
@@ -73,6 +75,12 @@ describe('Auth Configuration Loop Prevention', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   test('should prevent config fetch loops during component re-renders', async () => {

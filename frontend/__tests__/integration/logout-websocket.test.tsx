@@ -1,14 +1,13 @@
-/**
- * Logout WebSocket Disconnection Tests
- * Tests WebSocket disconnection and connection state cleanup
- * BUSINESS VALUE: Security & compliance (enterprise data protection)
- * Following 450-line limit and 25-line function requirements
- */
-
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
+import '@testing-library/jest-dom';
+import { TestProviders } from '../setup/test-providers';
+import { webSocketService } from '@/services/webSocketService';
+import { useAuthStore } from '@/store/authStore';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+port { jest } from '@jest/globals';
 import '@testing-library/jest-dom';
 import { TestProviders } from '../setup/test-providers';
 import { webSocketService } from '@/services/webSocketService';
@@ -68,6 +67,7 @@ const renderLogoutComponent = () => {
 };
 
 describe('Logout WebSocket Disconnection Tests', () => {
+    jest.setTimeout(10000);
   let mockAuthStore: any;
   
   beforeEach(() => {
@@ -77,6 +77,7 @@ describe('Logout WebSocket Disconnection Tests', () => {
   });
 
   describe('WebSocket Disconnection', () => {
+      jest.setTimeout(10000);
     const testWebSocketDisconnection = async () => {
       const user = userEvent.setup();
       renderLogoutComponent();
@@ -117,6 +118,7 @@ describe('Logout WebSocket Disconnection Tests', () => {
   });
 
   describe('WebSocket State Cleanup', () => {
+      jest.setTimeout(10000);
     const verifyWebSocketCleanup = async () => {
       const user = userEvent.setup();
       renderLogoutComponent();
@@ -155,6 +157,7 @@ describe('Logout WebSocket Disconnection Tests', () => {
   });
 
   describe('WebSocket Timing Requirements', () => {
+      jest.setTimeout(10000);
     const measureWebSocketDisconnectTime = async () => {
       const user = userEvent.setup();
       renderLogoutComponent();
@@ -217,6 +220,7 @@ describe('Logout WebSocket Disconnection Tests', () => {
   });
 
   describe('WebSocket Error Handling', () => {
+      jest.setTimeout(10000);
     const testWebSocketErrorHandling = async (errorType: string) => {
       const user = userEvent.setup();
       renderLogoutComponent();
@@ -267,6 +271,7 @@ describe('Logout WebSocket Disconnection Tests', () => {
   });
 
   describe('WebSocket Security Cleanup', () => {
+      jest.setTimeout(10000);
     const verifyWebSocketSecurity = async () => {
       const user = userEvent.setup();
       renderLogoutComponent();

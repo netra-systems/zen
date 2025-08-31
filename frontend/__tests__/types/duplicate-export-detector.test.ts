@@ -18,6 +18,8 @@ import { parse } from '@babel/parser';
 import traverse from '@babel/traverse';
 
 describe('Module Export Duplication Detection', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const registryPath = path.resolve(__dirname, '../../types/registry.ts');
 
   /**

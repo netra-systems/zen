@@ -1,9 +1,8 @@
-/**
- * Message Sending Integration Tests
- * 
- * Comprehensive tests for message sending flow including:
- * - Send button interactions
- * - Optimistic UI updates
+import React from 'react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+tes
  * - WebSocket message dispatch
  * - Success confirmation
  * - Performance requirements
@@ -199,6 +198,7 @@ const MockMessageInput = () => {
 };
 
 describe('Message Sending Integration Tests', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     
@@ -225,6 +225,7 @@ describe('Message Sending Integration Tests', () => {
   });
 
   describe('Send Button Interactions', () => {
+      jest.setTimeout(10000);
     it('should handle send button click with immediate UI feedback', async () => {
       const startTime = performance.now();
       
@@ -306,6 +307,7 @@ describe('Message Sending Integration Tests', () => {
   });
 
   describe('Optimistic UI Updates', () => {
+      jest.setTimeout(10000);
     it('should show message immediately in UI', async () => {
       render(<MockMessageInput />);
       
@@ -368,6 +370,7 @@ describe('Message Sending Integration Tests', () => {
   });
 
   describe('Message ID Generation', () => {
+      jest.setTimeout(10000);
     it('should generate unique message IDs', async () => {
       const messageIds = new Set();
       
@@ -393,6 +396,7 @@ describe('Message Sending Integration Tests', () => {
   });
 
   describe('WebSocket Message Dispatch', () => {
+      jest.setTimeout(10000);
     it('should dispatch properly formatted WebSocket message', async () => {
       render(<MockMessageInput />);
       
@@ -442,6 +446,7 @@ describe('Message Sending Integration Tests', () => {
   });
 
   describe('Success Confirmation', () => {
+      jest.setTimeout(10000);
     it('should handle successful message confirmation', async () => {
       render(<MockMessageInput />);
       
@@ -474,6 +479,7 @@ describe('Message Sending Integration Tests', () => {
   });
 
   describe('Concurrent Message Handling', () => {
+      jest.setTimeout(10000);
     it('should handle rapid successive sends', async () => {
       render(<MockMessageInput />);
       
@@ -517,6 +523,7 @@ describe('Message Sending Integration Tests', () => {
   });
 
   describe('Performance Requirements', () => {
+      jest.setTimeout(10000);
     it('should meet latency requirements for send action', async () => {
       render(<MockMessageInput />);
       

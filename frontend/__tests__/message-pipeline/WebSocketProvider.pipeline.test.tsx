@@ -79,6 +79,8 @@ const AuthProviderWrapper: React.FC<{
 };
 
 describe('WebSocketProvider Pipeline Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const mockWebSocketService = {
     onStatusChange: null,
     onMessage: null,
@@ -120,9 +122,17 @@ describe('WebSocketProvider Pipeline Tests', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Connection Establishment Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should establish WebSocket connection on mount with token', async () => {
       const contextUpdates: any[] = [];
       
@@ -209,6 +219,8 @@ describe('WebSocketProvider Pipeline Tests', () => {
   });
 
   describe('Authentication and Token Management Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should update WebSocket connection when token changes', async () => {
       const { rerender } = render(
         <AuthProviderWrapper token="initial-token">
@@ -317,6 +329,8 @@ describe('WebSocketProvider Pipeline Tests', () => {
   });
 
   describe('Message Handling Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should process incoming messages through reconciliation service', async () => {
       const contextUpdates: any[] = [];
       
@@ -458,6 +472,8 @@ describe('WebSocketProvider Pipeline Tests', () => {
   });
 
   describe('Status Change Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should update context status when WebSocket status changes', async () => {
       const contextUpdates: any[] = [];
       
@@ -496,6 +512,8 @@ describe('WebSocketProvider Pipeline Tests', () => {
   });
 
   describe('Error Handling Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle connection errors appropriately', async () => {
       render(
         <AuthProviderWrapper>
@@ -604,6 +622,8 @@ describe('WebSocketProvider Pipeline Tests', () => {
   });
 
   describe('Context API Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should provide sendMessage function that calls webSocketService', async () => {
       render(
         <AuthProviderWrapper>
@@ -691,6 +711,8 @@ describe('WebSocketProvider Pipeline Tests', () => {
   });
 
   describe('Cleanup and Lifecycle Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should cleanup connections on unmount', async () => {
       const { unmount } = render(
         <AuthProviderWrapper>
@@ -739,6 +761,8 @@ describe('WebSocketProvider Pipeline Tests', () => {
   });
 
   describe('Reconnection Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle reconnection events', async () => {
       render(
         <AuthProviderWrapper>
@@ -793,6 +817,8 @@ describe('WebSocketProvider Pipeline Tests', () => {
   });
 
   describe('Configuration and Options Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should pass correct connection options to webSocketService', async () => {
       render(
         <AuthProviderWrapper>

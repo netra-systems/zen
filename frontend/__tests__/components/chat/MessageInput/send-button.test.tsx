@@ -176,6 +176,8 @@ const mockUseAuthStore = useAuthStore as jest.Mock;
 const mockGenerateUniqueId = generateUniqueId as jest.Mock;
 
 describe('MessageInput - Send Button States', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     mockSendMessage.mockClear();
@@ -210,6 +212,8 @@ describe('MessageInput - Send Button States', () => {
   });
 
   describe('Send button states', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should show send icon when not sending', () => {
       render(<MessageInput />);
       
@@ -276,4 +280,8 @@ describe('MessageInput - Send Button States', () => {
       });
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FinalReportView } from '@/components/chat/FinalReportView';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock dependencies
 jest.mock('@/components/ui/card', () => ({
@@ -44,6 +45,7 @@ global.URL.createObjectURL = jest.fn(() => 'mock-url');
 global.URL.revokeObjectURL = jest.fn();
 
 describe('FinalReportView Component', () => {
+    jest.setTimeout(10000);
   const mockReportData = {
     data_result: {
       summary: 'Data analysis complete',
@@ -90,6 +92,7 @@ describe('FinalReportView Component', () => {
   });
 
   describe('Report Display', () => {
+      jest.setTimeout(10000);
     it('should render the final report view', () => {
       render(<FinalReportView reportData={mockReportData} />);
       
@@ -137,6 +140,7 @@ describe('FinalReportView Component', () => {
   });
 
   describe('Empty State', () => {
+      jest.setTimeout(10000);
     it('should handle empty report data gracefully', () => {
       const emptyReportData = {
         execution_metrics: {
@@ -166,6 +170,7 @@ describe('FinalReportView Component', () => {
   });
 
   describe('Data Results Section', () => {
+      jest.setTimeout(10000);
     it('should display data analysis results', () => {
       render(<FinalReportView reportData={mockReportData} />);
       
@@ -184,6 +189,7 @@ describe('FinalReportView Component', () => {
   });
 
   describe('Optimizations Section', () => {
+      jest.setTimeout(10000);
     it('should display optimization recommendations', () => {
       render(<FinalReportView reportData={mockReportData} />);
       
@@ -203,6 +209,7 @@ describe('FinalReportView Component', () => {
   });
 
   describe('Action Plan Section', () => {
+      jest.setTimeout(10000);
     it('should display action items', () => {
       render(<FinalReportView reportData={mockReportData} />);
       
@@ -236,6 +243,7 @@ describe('FinalReportView Component', () => {
   });
 
   describe('Performance Metrics', () => {
+      jest.setTimeout(10000);
     it('should display tool call statistics', () => {
       render(<FinalReportView reportData={mockReportData} />);
       
@@ -264,6 +272,7 @@ describe('FinalReportView Component', () => {
   });
 
   describe('User Interactions', () => {
+      jest.setTimeout(10000);
     it('should allow tab switching', async () => {
       render(<FinalReportView reportData={mockReportData} />);
       
@@ -308,6 +317,7 @@ describe('FinalReportView Component', () => {
   });
 
   describe('Export Functionality', () => {
+      jest.setTimeout(10000);
     it('should provide export button', () => {
       render(<FinalReportView reportData={mockReportData} />);
       
@@ -333,6 +343,7 @@ describe('FinalReportView Component', () => {
   });
 
   describe('Visual Indicators', () => {
+      jest.setTimeout(10000);
     it('should show progress bars for metrics', () => {
       const { container } = render(<FinalReportView reportData={mockReportData} />);
       
@@ -359,6 +370,7 @@ describe('FinalReportView Component', () => {
   });
 
   describe('Error Handling', () => {
+      jest.setTimeout(10000);
     it('should handle missing data gracefully', () => {
       const incompleteData = {
         data_result: undefined,

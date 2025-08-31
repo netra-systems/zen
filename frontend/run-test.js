@@ -20,12 +20,20 @@ args.forEach(arg => {
   }
 });
 
-// Set up environment
+// Set up environment - CRITICAL: Ensure test environment is properly set
 const env = {
   ...process.env,
   ...envVars,
   NODE_ENV: 'test',
+  NEXT_PUBLIC_ENVIRONMENT: 'test',
+  NEXT_PUBLIC_API_URL: 'http://localhost:8000',
+  NEXT_PUBLIC_WS_URL: 'ws://localhost:8000',
+  NEXT_PUBLIC_AUTH_SERVICE_URL: 'http://localhost:8081',
+  NEXT_PUBLIC_FRONTEND_URL: 'http://localhost:3000',
 };
+
+// Remove any staging environment variables that might be set
+delete env.NEXT_PUBLIC_STAGING;
 
 // Determine Jest path
 const jestPath = path.join(__dirname, 'node_modules', 'jest', 'bin', 'jest.js');

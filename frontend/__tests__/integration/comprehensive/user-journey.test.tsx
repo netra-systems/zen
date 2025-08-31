@@ -1,5 +1,6 @@
-/**
- * User Journey Stateful and Collaborative Tests
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+er Journey Stateful and Collaborative Tests
  * ULTRA DEEP THINK: Module-based architecture - Stateful tests extracted for 450-line compliance
  */
 
@@ -11,6 +12,7 @@ import {
 } from './user-journey-utils';
 
 describe('User Journey State Management Tests', () => {
+    jest.setTimeout(10000);
   let server: any;
   
   beforeEach(() => {
@@ -19,6 +21,11 @@ describe('User Journey State Management Tests', () => {
 
   afterEach(() => {
     teardownUserJourneyTest();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   it('should maintain state across component re-renders', async () => {
@@ -126,7 +133,7 @@ describe('User Journey State Management Tests', () => {
       };
       
       React.useEffect(() => {
-        const ws = new WebSocket('ws://localhost:8000/ws');
+        const ws = new WebSocket('ws://localhost:3001/test'));
         ws.onmessage = (event) => {
           const message = JSON.parse(event.data);
           processWebSocketMessage(message);
@@ -135,7 +142,7 @@ describe('User Journey State Management Tests', () => {
       }, []);
       
       const castVote = (vote: 'approve' | 'reject') => {
-        const ws = new WebSocket('ws://localhost:8000/ws');
+        const ws = new WebSocket('ws://localhost:3001/test'));
         ws.onopen = () => {
           ws.send(JSON.stringify({
             type: 'cast_vote',

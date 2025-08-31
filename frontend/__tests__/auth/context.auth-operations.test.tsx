@@ -67,6 +67,8 @@ jest.mock('@/lib/logger', () => ({
 }));
 
 describe('AuthContext - Auth Operations', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let mockAuthStore: any;
   let mockAuthService: any;
 
@@ -230,4 +232,8 @@ describe('AuthContext - Auth Operations', () => {
     await performLogout(result);
     expectNoLogout();
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

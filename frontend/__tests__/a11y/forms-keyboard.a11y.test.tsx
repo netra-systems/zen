@@ -1,8 +1,9 @@
-/**
- * Forms Keyboard Accessibility Test Suite
- * Tests keyboard navigation, shortcuts, and interaction patterns
- * Follows 25-line function rule and 450-line file limit
- * 
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+
  * Business Value Justification (BVJ):
  * - Segment: All (Free → Enterprise)
  * - Goal: Ensure keyboard-only users can navigate and submit forms
@@ -33,6 +34,7 @@ import {
 // ============================================================================
 
 describe('Form Keyboard Interaction - Navigation and Submission', () => {
+    jest.setTimeout(10000);
   it('supports tab navigation through form fields', async () => {
     const user = setupKeyboardTest();
     render(

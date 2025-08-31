@@ -47,6 +47,8 @@ jest.mock('@/config', () => ({
 }));
 
 describe('Logger Context Binding Regression Test', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const mockAuthContextValue = {
     token: 'test-token',
     user: null,
@@ -78,6 +80,12 @@ describe('Logger Context Binding Regression Test', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   it('should handle WebSocket errors without losing logger context', async () => {
@@ -272,6 +280,8 @@ describe('Logger Context Binding Regression Test', () => {
   });
 
   describe('Logger method binding verification', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should have all public methods bound in constructor', () => {
       // Create a new instance to test constructor binding
       const FrontendLogger = logger.constructor as any;

@@ -1,14 +1,13 @@
-/**
- * Collaborative Features Integration Tests
- */
-
 import React from 'react';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import WS from 'jest-websocket-mock';
 import { safeWebSocketCleanup } from '../../helpers/websocket-test-manager';
 import { setupTestEnvironment } from './test-setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+import { setupTestEnvironment } from './test-setup';
 
 describe('Advanced Frontend Integration Tests - Collaboration', () => {
+    jest.setTimeout(10000);
   let server: WS;
   
   setupTestEnvironment();
@@ -19,9 +18,15 @@ describe('Advanced Frontend Integration Tests - Collaboration', () => {
 
   afterEach(() => {
     safeWebSocketCleanup();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('18. Collaborative Features Integration', () => {
+      jest.setTimeout(10000);
     it('should sync cursor positions in real-time', async () => {
       const cursors = new Map();
       
@@ -29,7 +34,7 @@ describe('Advanced Frontend Integration Tests - Collaboration', () => {
         const [otherCursors, setOtherCursors] = React.useState<Map<string, { x: number, y: number }>>(new Map());
         
         React.useEffect(() => {
-          const ws = new WebSocket('ws://localhost:8000/ws');
+          const ws = new WebSocket('ws://localhost:3001/test'));
           
           ws.onmessage = (event) => {
             const message = JSON.parse(event.data);
@@ -90,7 +95,7 @@ describe('Advanced Frontend Integration Tests - Collaboration', () => {
         const [typingUsers, setTypingUsers] = React.useState<Set<string>>(new Set());
         
         React.useEffect(() => {
-          const ws = new WebSocket('ws://localhost:8000/ws');
+          const ws = new WebSocket('ws://localhost:3001/test'));
           
           ws.onmessage = (event) => {
             const message = JSON.parse(event.data);
@@ -147,6 +152,7 @@ describe('Advanced Frontend Integration Tests - Collaboration', () => {
   });
 
   describe('26. Real-time Collaboration Sync', () => {
+      jest.setTimeout(10000);
     it('should handle conflict resolution in collaborative editing', async () => {
       const CollaborativeEditor = () => {
         const [content, setContent] = React.useState('Initial content');

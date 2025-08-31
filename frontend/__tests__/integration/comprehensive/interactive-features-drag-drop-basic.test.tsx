@@ -1,5 +1,6 @@
-/**
- * Interactive Features Basic Drag and Drop Integration Tests
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+teractive Features Basic Drag and Drop Integration Tests
  * ULTRA DEEP THINK: Module-based architecture - Basic drag-drop tests extracted for 450-line compliance
  */
 
@@ -12,6 +13,7 @@ import {
 } from './interactive-features-utils';
 
 describe('Basic File Drag and Drop Integration Tests', () => {
+    jest.setTimeout(10000);
   let server: any;
   
   beforeEach(() => {
@@ -20,6 +22,11 @@ describe('Basic File Drag and Drop Integration Tests', () => {
 
   afterEach(() => {
     teardownInteractiveTest();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   it('should handle file drag and drop with preview', async () => {

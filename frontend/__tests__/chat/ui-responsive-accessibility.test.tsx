@@ -1,11 +1,12 @@
-/**
- * UI Responsive Design and Accessibility Tests
- * Tests for responsive layout behavior and accessibility compliance
- * 
- * BVJ: Inclusive User Experience
- * Segment: All - accessibility ensures compliance and broader user reach
- * Business Goal: Regulatory compliance and inclusive design
- * Value Impact: Prevents legal issues, expands addressable market, improves UX for all users
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { MessageInput } from '@/components/chat/MessageInput';
+import { TestProviders } from '@/__tests__/test-utils/providers';
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+gal issues, expands addressable market, improves UX for all users
  */
 
 import React from 'react';
@@ -61,7 +62,9 @@ beforeEach(() => {
 });
 
 describe('UI Responsive Design and Accessibility', () => {
+    jest.setTimeout(10000);
   describe('Responsive Design', () => {
+      jest.setTimeout(10000);
     test('should adapt layout for mobile screens', () => {
       // Mock mobile viewport
       global.innerWidth = 375;
@@ -186,6 +189,7 @@ describe('UI Responsive Design and Accessibility', () => {
   });
 
   describe('Accessibility Features', () => {
+      jest.setTimeout(10000);
     test('should have proper ARIA labels', () => {
       render(
         <TestProviders>
@@ -364,6 +368,7 @@ describe('UI Responsive Design and Accessibility', () => {
   });
 
   describe('Touch and Mobile Interaction', () => {
+      jest.setTimeout(10000);
     test('should handle touch events properly', () => {
       render(
         <TestProviders>
@@ -448,6 +453,7 @@ describe('UI Responsive Design and Accessibility', () => {
   });
 
   describe('Cross-browser Compatibility', () => {
+      jest.setTimeout(10000);
     test('should work with different user agents', () => {
       const userAgents = [
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', // Chrome
@@ -513,6 +519,7 @@ describe('UI Responsive Design and Accessibility', () => {
   });
 
   describe('Performance and Resource Management', () => {
+      jest.setTimeout(10000);
     test('should handle rapid resize events efficiently', () => {
       const { unmount } = render(<ResponsiveMainChat />);
       

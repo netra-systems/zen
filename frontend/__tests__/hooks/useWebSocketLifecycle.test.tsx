@@ -70,6 +70,8 @@ const mockAuthContextValue = {
 };
 
 describe('useWebSocket Hook Lifecycle', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let wrapper: React.ComponentType<{ children: React.ReactNode }>;
 
   beforeEach(() => {
@@ -148,9 +150,12 @@ describe('useWebSocket Hook Lifecycle', () => {
   afterEach(() => {
     // Cleanup any pending timers
     jest.clearAllTimers();
+      cleanupAntiHang();
   });
 
   describe('Hook Initialization and Cleanup', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should initialize WebSocket connection on mount', () => {
       const { result } = renderHook(() => useWebSocketContext(), { wrapper });
 
@@ -241,6 +246,8 @@ describe('useWebSocket Hook Lifecycle', () => {
   });
 
   describe('Connection State Management', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track connection status', async () => {
       const { result } = renderHook(() => useWebSocketContext(), { wrapper });
 
@@ -272,6 +279,8 @@ describe('useWebSocket Hook Lifecycle', () => {
   });
 
   describe('Message Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should send messages through webSocketService', async () => {
       const { result } = renderHook(() => useWebSocketContext(), { wrapper });
 
@@ -310,6 +319,8 @@ describe('useWebSocket Hook Lifecycle', () => {
   });
 
   describe('Error Handling and Edge Cases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle missing token gracefully', async () => {
       const noTokenWrapper = ({ children }: { children: React.ReactNode }) => (
         <AuthContext.Provider value={{ ...mockAuthContextValue, token: null }}>

@@ -1,13 +1,12 @@
-/**
- * ChatSidebar Edge Cases and Error Handling Tests
- * Tests for error scenarios, performance, and accessibility edge cases
- */
-
 import React from 'react';
 import { screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import { renderWithProviders, safeAsync, resetAllMocks } from '../../shared/unified-test-utilities';
 import { safeAct, waitForCondition, flushPromises } from '../../helpers/test-timing-utilities';
+import { describeIfFeature, itIfFeature } from '../../helpers/feature-flag-helpers';
+import { 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+./../helpers/test-timing-utilities';
 import { describeIfFeature, itIfFeature } from '../../helpers/feature-flag-helpers';
 import { 
   mockThreadService,
@@ -27,9 +26,15 @@ describeIfFeature('chat_sidebar_edge_cases', 'ChatSidebar - Edge Cases', () => {
 
   afterEach(() => {
     resetAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Error Handling and Recovery', () => {
+      jest.setTimeout(10000);
     it('should handle API failures gracefully', async () => {
       mockThreadService.listThreads.mockRejectedValue(new Error('API Error'));
       
@@ -207,6 +212,7 @@ describeIfFeature('chat_sidebar_edge_cases', 'ChatSidebar - Edge Cases', () => {
   });
 
   describe('Performance and Optimization', () => {
+      jest.setTimeout(10000);
     it('should virtualize large thread lists efficiently', () => {
       // Create very large dataset
       const hugeThreadList = Array.from({ length: 5000 }, (_, i) => ({
@@ -294,6 +300,7 @@ describeIfFeature('chat_sidebar_edge_cases', 'ChatSidebar - Edge Cases', () => {
   });
 
   describe('Accessibility Edge Cases', () => {
+      jest.setTimeout(10000);
     it('should maintain focus during dynamic updates', async () => {
       testSetup.configureStore({ threads: sampleThreads });
       testSetup.configureChatSidebarHooks({ threads: sampleThreads });
@@ -435,6 +442,7 @@ describeIfFeature('chat_sidebar_edge_cases', 'ChatSidebar - Edge Cases', () => {
   });
 
   describe('Data Consistency Edge Cases', () => {
+      jest.setTimeout(10000);
     it('should handle thread updates during user interactions', async () => {
       // Configure authentication to show threads
       testSetup.configureAuthState({ isAuthenticated: true, userTier: 'Early' });

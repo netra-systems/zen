@@ -79,6 +79,8 @@ jest.mock('@/store/unified-chat', () => ({
 }));
 
 describe('Data Agent Flow Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let wsEventHandlers: { [key: string]: Function[] } = {};
   let chatStore: ReturnType<typeof useChatStore>;
   let unifiedStore: ReturnType<typeof useUnifiedChatStore>;
@@ -114,6 +116,8 @@ describe('Data Agent Flow Tests', () => {
   );
 
   describe('Data Collection and Aggregation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should collect and aggregate system metrics', async () => {
       const { result } = renderHook(() => useAgentContext(), { wrapper: createWrapper });
 
@@ -230,6 +234,8 @@ describe('Data Agent Flow Tests', () => {
   });
 
   describe('Data Helper Agent - Missing Data Scenarios', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should request specific missing data from user', async () => {
       const { result } = renderHook(() => useAgentContext(), { wrapper: createWrapper });
 
@@ -368,6 +374,8 @@ describe('Data Agent Flow Tests', () => {
   });
 
   describe('Data Insights and Analysis', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should generate insights from collected data', async () => {
       const { result } = renderHook(() => useAgentContext(), { wrapper: createWrapper });
 
@@ -486,6 +494,8 @@ describe('Data Agent Flow Tests', () => {
   });
 
   describe('Real-time Data Streaming', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle streaming data updates', async () => {
       const { result } = renderHook(() => useAgentContext(), { wrapper: createWrapper });
 
@@ -550,6 +560,8 @@ describe('Data Agent Flow Tests', () => {
   });
 
   describe('Data Export and Formatting', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should format data for different consumption needs', async () => {
       const { result } = renderHook(() => useAgentContext(), { wrapper: createWrapper });
 
@@ -598,6 +610,8 @@ describe('Data Agent Flow Tests', () => {
   });
 
   describe('Error Handling in Data Collection', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle data source connection failures', async () => {
       const { result } = renderHook(() => useAgentContext(), { wrapper: createWrapper });
 
@@ -691,4 +705,8 @@ describe('Data Agent Flow Tests', () => {
       });
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

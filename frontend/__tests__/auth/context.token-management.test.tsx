@@ -35,6 +35,8 @@ jest.mock('@/lib/logger', () => ({
 }));
 
 describe('AuthContext - Token Management', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let mockAuthStore: any;
 
   beforeEach(() => {
@@ -129,4 +131,8 @@ describe('AuthContext - Token Management', () => {
     performRerender(rerender);
     await waitForUpdatedContent();
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

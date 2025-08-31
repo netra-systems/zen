@@ -19,6 +19,8 @@ const mockWebSocket = {
 (global as any).WebSocket = jest.fn(() => mockWebSocket);
 
 describe('WebSocket Error Handling', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     mockWebSocket.readyState = WebSocket.CONNECTING;
@@ -125,4 +127,8 @@ describe('WebSocket Error Handling', () => {
       expect(screen.getByTestId('parse-error')).toHaveTextContent('Failed to parse WebSocket message');
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

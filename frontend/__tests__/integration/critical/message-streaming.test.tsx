@@ -1,10 +1,8 @@
-/**
- * Real-time Message Streaming Tests
- * Tests for streaming agent responses and message interruption
- */
-
 import React from 'react';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ort { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 // Import stores
@@ -14,6 +12,7 @@ import { useChatStore } from '@/store/chatStore';
 import { TestProviders } from '@/__tests__/setup/test-providers';
 
 describe('Real-time Message Streaming', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     
@@ -23,9 +22,15 @@ describe('Real-time Message Streaming', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Streaming Integration', () => {
+      jest.setTimeout(10000);
     it('should stream agent responses to chat', async () => {
       const TestComponent = () => {
         const messages = useChatStore((state) => state.messages);

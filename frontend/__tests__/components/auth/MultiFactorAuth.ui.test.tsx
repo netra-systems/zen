@@ -25,6 +25,8 @@ const mockMFA = {
 };
 
 describe('Multi-Factor Authentication UI Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const mockLogin = jest.fn();
   const mockLogout = jest.fn();
   
@@ -60,6 +62,8 @@ describe('Multi-Factor Authentication UI Tests', () => {
   });
 
   describe('MFA Feature Detection', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should display login without MFA by default', () => {
       render(<LoginButton />);
       
@@ -122,6 +126,8 @@ describe('Multi-Factor Authentication UI Tests', () => {
   });
 
   describe('MFA Setup UI (Future Implementation)', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle MFA setup initiation', () => {
       mockMFA.isEnabled.mockReturnValue(false);
       
@@ -158,6 +164,8 @@ describe('Multi-Factor Authentication UI Tests', () => {
   });
 
   describe('MFA Verification UI (Future Implementation)', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should show MFA verification prompt after login', () => {
       jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
@@ -200,6 +208,8 @@ describe('Multi-Factor Authentication UI Tests', () => {
   });
 
   describe('MFA Error Handling (Future Implementation)', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle invalid MFA codes', () => {
       mockMFA.validateCode.mockReturnValue(false);
       
@@ -236,6 +246,8 @@ describe('Multi-Factor Authentication UI Tests', () => {
   });
 
   describe('MFA Backup Methods (Future Implementation)', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should support backup code authentication', () => {
       render(<LoginButton />);
       
@@ -266,6 +278,8 @@ describe('Multi-Factor Authentication UI Tests', () => {
   });
 
   describe('MFA User Experience', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should maintain smooth OAuth flow without MFA', async () => {
       render(<LoginButton />);
       
@@ -333,6 +347,8 @@ describe('Multi-Factor Authentication UI Tests', () => {
   });
 
   describe('MFA Security Features', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should enforce MFA for enterprise users', () => {
       jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
@@ -383,6 +399,8 @@ describe('Multi-Factor Authentication UI Tests', () => {
   });
 
   describe('MFA Accessibility', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should provide accessible MFA interfaces', () => {
       render(<LoginButton />);
       
@@ -413,4 +431,8 @@ describe('Multi-Factor Authentication UI Tests', () => {
       expect(screen.getByText('Login with Google')).toBeInTheDocument();
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

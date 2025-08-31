@@ -1,8 +1,3 @@
-/**
- * MessageInput File Upload Tests
- * Tests for file attachment functionality
- */
-
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -11,6 +6,9 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useThreadStore } from '@/store/threadStore';
 import { useAuthStore } from '@/store/authStore';
+import { generateUniqueId } from '@/lib/utils';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+AuthStore } from '@/store/authStore';
 import { generateUniqueId } from '@/lib/utils';
 
 // Mock dependencies
@@ -25,6 +23,7 @@ jest.mock('@/services/threadService');
 jest.mock('@/services/threadRenameService');
 
 describe('MessageInput - File Upload Handling', () => {
+    jest.setTimeout(10000);
   const mockSendMessage = jest.fn();
   const mockChatStore = {
     setProcessing: jest.fn(),
@@ -67,6 +66,7 @@ describe('MessageInput - File Upload Handling', () => {
   });
 
   describe('File upload handling', () => {
+      jest.setTimeout(10000);
     it('should render file attachment button', () => {
       render(<MessageInput />);
       

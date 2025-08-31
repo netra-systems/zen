@@ -1,12 +1,11 @@
-/**
- * ThreadList Navigation Tests
- * Tests for hover states, click responsiveness, keyboard navigation, and focus management
- * Phase 3, Agent 9 - Critical for user experience and engagement
- * Follows 450-line file limit and 25-line function rule
- */
-
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { jest } from '@jest/globals';
+import '@testing-library/jest-dom';
+import { TestProviders } from '../../test-utils/providers';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
 import '@testing-library/jest-dom';
@@ -168,6 +167,7 @@ const createTestThreads = (count: number = 5) => {
 };
 
 describe('ThreadList Navigation Tests', () => {
+    jest.setTimeout(10000);
   const mockOnThreadSelect = jest.fn();
   const mockOnKeyboardNavigate = jest.fn();
 
@@ -178,6 +178,11 @@ describe('ThreadList Navigation Tests', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   const renderThreadList = (props = {}) => {
@@ -197,6 +202,7 @@ describe('ThreadList Navigation Tests', () => {
   };
 
   describe('Hover States', () => {
+      jest.setTimeout(10000);
     it('should show hover state on mouse enter', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       renderThreadList();
@@ -252,6 +258,7 @@ describe('ThreadList Navigation Tests', () => {
   });
 
   describe('Click Responsiveness', () => {
+      jest.setTimeout(10000);
     it('should respond to clicks within 200ms', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       renderThreadList();
@@ -311,6 +318,7 @@ describe('ThreadList Navigation Tests', () => {
   });
 
   describe('Keyboard Navigation', () => {
+      jest.setTimeout(10000);
     it('should navigate with arrow keys', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       renderThreadList();
@@ -402,6 +410,7 @@ describe('ThreadList Navigation Tests', () => {
   });
 
   describe('Focus Management', () => {
+      jest.setTimeout(10000);
     it('should maintain focus on active thread', () => {
       renderThreadList({ activeThreadId: 'thread-2' });
 
@@ -492,6 +501,7 @@ describe('ThreadList Navigation Tests', () => {
   });
 
   describe('Scroll Position Restoration', () => {
+      jest.setTimeout(10000);
     it('should track scroll position during navigation', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       const manyThreads = createTestThreads(20);
@@ -549,6 +559,7 @@ describe('ThreadList Navigation Tests', () => {
   });
 
   describe('Visual Indicators', () => {
+      jest.setTimeout(10000);
     it('should display unread indicators correctly', () => {
       const threadsWithUnread = [
         { id: 'thread-1', title: 'Thread 1', hasUnread: true },

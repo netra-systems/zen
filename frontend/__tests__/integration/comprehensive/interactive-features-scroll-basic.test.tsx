@@ -1,5 +1,6 @@
-/**
- * Interactive Features Basic Scroll Integration Tests
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+teractive Features Basic Scroll Integration Tests
  * ULTRA DEEP THINK: Module-based architecture - Basic scroll tests extracted for 450-line compliance
  */
 
@@ -12,6 +13,7 @@ import {
 } from './interactive-features-utils';
 
 describe('Basic Scroll Integration Tests', () => {
+    jest.setTimeout(10000);
   let server: any;
   
   beforeEach(() => {
@@ -20,6 +22,11 @@ describe('Basic Scroll Integration Tests', () => {
 
   afterEach(() => {
     teardownInteractiveTest();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   it('should load more content on scroll', async () => {

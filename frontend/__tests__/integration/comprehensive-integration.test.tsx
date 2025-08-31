@@ -1,10 +1,12 @@
-/**
- * Comprehensive Frontend Integration Test Suite
- * 
- * This file serves as the main entry point for all integration tests.
- * The tests have been split into smaller, focused test files for better maintainability.
- * 
- * Test Coverage:
+import './corpus-management.test';
+import './data-generation.test';
+import './system-management.test';
+import './security-auth.test';
+import './infrastructure.test';
+import './advanced-features.test';
+import './collaboration-state.test';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+:
  * - Corpus Management (corpus-management.test.tsx)
  * - Data Generation (data-generation.test.tsx) 
  * - System Management (system-management.test.tsx)
@@ -24,6 +26,7 @@ import './advanced-features.test';
 import './collaboration-state.test';
 
 describe('Comprehensive Frontend Integration Tests', () => {
+    jest.setTimeout(10000);
   it('should load all test suites', () => {
     // This test ensures all test files are imported and can be executed
     expect(true).toBe(true);

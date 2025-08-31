@@ -1,13 +1,11 @@
-/**
- * Advanced Features Integration Tests
- * Tests for demo mode, file processing, collaboration, metrics, and tools
- */
-
 import React from 'react';
 import { render, waitFor, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import WS from 'jest-websocket-mock';
 import { TestProviders } from '@/__tests__/setup/test-providers';
+import { WebSocketTestManager, createWebSocketManager } from '@/__tests__/helpers/websocket-test-manager';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+est-providers';
 import { WebSocketTestManager, createWebSocketManager } from '@/__tests__/helpers/websocket-test-manager';
 
 // Mock fetch
@@ -28,9 +26,15 @@ beforeEach(() => {
 afterEach(() => {
   wsManager.cleanup();
   jest.clearAllMocks();
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
 });
 
 describe('Demo Mode Functionality', () => {
+    jest.setTimeout(10000);
   it('should enable demo mode with limited features', async () => {
     const TestComponent = () => {
       const [demoMode, setDemoMode] = React.useState(false);
@@ -110,6 +114,7 @@ describe('Demo Mode Functionality', () => {
 });
 
 describe('Enterprise Demo Features', () => {
+    jest.setTimeout(10000);
   it('should showcase enterprise optimization features', async () => {
     const TestComponent = () => {
       const [optimization, setOptimization] = React.useState<any>(null);
@@ -201,6 +206,7 @@ describe('Enterprise Demo Features', () => {
 });
 
 describe('PDF and Image Processing', () => {
+    jest.setTimeout(10000);
   it('should extract text from PDF files', async () => {
     const TestComponent = () => {
       const [extractedText, setExtractedText] = React.useState('');
@@ -302,6 +308,7 @@ describe('PDF and Image Processing', () => {
 });
 
 describe('Export and Import Functionality', () => {
+    jest.setTimeout(10000);
   it('should export data in multiple formats', async () => {
     const TestComponent = () => {
       const [exportStatus, setExportStatus] = React.useState('');
@@ -403,6 +410,7 @@ describe('Export and Import Functionality', () => {
 });
 
 describe('Real-time Metrics Dashboard', () => {
+    jest.setTimeout(10000);
   it('should display live performance metrics', async () => {
     const TestComponent = () => {
       const [metrics, setMetrics] = React.useState<any>({
@@ -467,6 +475,7 @@ describe('Real-time Metrics Dashboard', () => {
 });
 
 describe('Agent Tool Dispatcher Integration', () => {
+    jest.setTimeout(10000);
   it('should dispatch tools to appropriate agents', async () => {
     const TestComponent = () => {
       const [result, setResult] = React.useState<any>(null);

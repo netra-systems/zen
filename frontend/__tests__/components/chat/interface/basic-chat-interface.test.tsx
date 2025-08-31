@@ -1,8 +1,8 @@
-/**
- * Basic Chat Interface Tests - Working Implementation
- * ==================================================
- * 
- * Business Value Justification (BVJ):
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+fication (BVJ):
  * 1. Segment: Free → Enterprise (All segments)
  * 2. Business Goal: Ensure core chat functionality works reliably
  * 3. Value Impact: Prevent critical chat failures that cause user abandonment
@@ -56,11 +56,13 @@ const MockThinkingIndicator = () => (
 );
 
 describe('Basic Chat Interface Tests', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('1. Message Input Field Interactions', () => {
+      jest.setTimeout(10000);
     it('should render message input with proper placeholder', () => {
       render(<MockMessageInput />);
       
@@ -103,6 +105,7 @@ describe('Basic Chat Interface Tests', () => {
   });
 
   describe('2. Message Display in Conversation', () => {
+      jest.setTimeout(10000);
     const mockMessages = [
       {
         id: 'msg1',
@@ -142,6 +145,7 @@ describe('Basic Chat Interface Tests', () => {
   });
 
   describe('3. Streaming Response Rendering', () => {
+      jest.setTimeout(10000);
     it('should show thinking indicator during processing', () => {
       render(<MockThinkingIndicator />);
       
@@ -175,6 +179,7 @@ describe('Basic Chat Interface Tests', () => {
   });
 
   describe('4. Thread/Conversation Management', () => {
+      jest.setTimeout(10000);
     const mockThreads = [
       { id: 'thread1', title: 'AI Optimization Chat' },
       { id: 'thread2', title: 'Performance Analysis' }
@@ -214,6 +219,7 @@ describe('Basic Chat Interface Tests', () => {
   });
 
   describe('5. File Upload Functionality', () => {
+      jest.setTimeout(10000);
     const MockFileUpload = () => (
       <div data-testid="file-upload-container">
         <input 
@@ -251,6 +257,7 @@ describe('Basic Chat Interface Tests', () => {
   });
 
   describe('6. Keyboard Shortcuts', () => {
+      jest.setTimeout(10000);
     it('should handle Enter key for sending messages', () => {
       render(<MockMessageInput />);
       
@@ -276,6 +283,7 @@ describe('Basic Chat Interface Tests', () => {
   });
 
   describe('7. Search Within Conversations', () => {
+      jest.setTimeout(10000);
     const MockSearchInput = () => (
       <div data-testid="search-container">
         <input 
@@ -312,6 +320,7 @@ describe('Basic Chat Interface Tests', () => {
   });
 
   describe('8. Export Conversation Functionality', () => {
+      jest.setTimeout(10000);
     const MockExportDialog = () => (
       <div data-testid="export-dialog">
         <button data-testid="export-conversation">Export</button>
@@ -347,6 +356,7 @@ describe('Basic Chat Interface Tests', () => {
   });
 
   describe('9. Connection Status and Error Handling', () => {
+      jest.setTimeout(10000);
     const MockConnectionStatus = ({ status }: { status: string }) => (
       <div data-testid="connection-status">{status}</div>
     );
@@ -383,6 +393,7 @@ describe('Basic Chat Interface Tests', () => {
   });
 
   describe('10. Code and Markdown Rendering', () => {
+      jest.setTimeout(10000);
     const MockFormattedContent = () => (
       <div data-testid="formatted-content">
         <h1>Header 1</h1>

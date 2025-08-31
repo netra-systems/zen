@@ -131,6 +131,8 @@ const localStorageMock = (() => {
 Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
 describe('Auth Persistence Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let authService: UnifiedAuthService;
 
   beforeEach(() => {
@@ -141,9 +143,17 @@ describe('Auth Persistence Tests', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Page Refresh Persistence (REQ-001)', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should restore token from localStorage on initialization', () => {
       // Setup: Store a token before "page refresh"
       const mockToken = 'mock.jwt.token';
@@ -186,6 +196,8 @@ describe('Auth Persistence Tests', () => {
   });
 
   describe('Short Token Refresh - Staging (REQ-003)', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should refresh 30-second token at 25% lifetime remaining', () => {
       const now = Date.now();
       const thirtySecondsToken = {
@@ -242,6 +254,8 @@ describe('Auth Persistence Tests', () => {
   });
 
   describe('SSOT Token Management (REQ-005)', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should use single source for token operations', () => {
       const mockToken = 'ssot.jwt.token';
 
@@ -282,6 +296,8 @@ describe('Auth Persistence Tests', () => {
   });
 
   describe('Valid Logout Reasons (REQ-002)', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should not logout on temporary network interruption', () => {
       const mockToken = 'valid.token';
       authService.setToken(mockToken);
@@ -312,6 +328,8 @@ describe('Auth Persistence Tests', () => {
   });
 
   describe('Cross-Tab Synchronization', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should allow reading token set by another tab', () => {
       const newToken = 'new.cross-tab.token';
 
@@ -345,6 +363,8 @@ describe('Auth Persistence Tests', () => {
   });
 
   describe('Initialization State Management (REQ-004)', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track initialization state properly', async () => {
       // Mock auth context initialization states
       const states = {

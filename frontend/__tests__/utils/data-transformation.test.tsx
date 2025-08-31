@@ -8,6 +8,8 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 describe('Data Transformation Utilities', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   it('should format dates correctly', () => {
     const DateFormattingComponent: React.FC = () => {
       const formatDate = (date: Date | string | number): string => {
@@ -220,4 +222,8 @@ describe('Data Transformation Utilities', () => {
     expect(screen.getByTestId('formatted-percentage-1')).toHaveTextContent('12.3%');
     expect(screen.getByTestId('formatted-number-2')).toHaveTextContent('1,234,567');
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

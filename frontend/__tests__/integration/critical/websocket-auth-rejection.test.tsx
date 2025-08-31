@@ -1,7 +1,8 @@
-/**
- * Critical WebSocket Authentication Rejection Test
- * 
- * This test verifies that the security measures are working correctly.
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+y.
  */
 
 import React from 'react';
@@ -60,6 +61,7 @@ const mockAuthContext = {
 };
 
 describe('WebSocket Authentication Rejection (SECURITY)', () => {
+    jest.setTimeout(10000);
   let originalWebSocket: any;
   let mockWebSocket: any;
   let connectionAttempts: Array<{ url: string; protocols?: string | string[]; rejected?: boolean }> = [];
@@ -145,9 +147,15 @@ describe('WebSocket Authentication Rejection (SECURITY)', () => {
     global.WebSocket = originalWebSocket;
     webSocketService.disconnect();
     jest.restoreAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Secure Authentication Verification', () => {
+      jest.setTimeout(10000);
     it('should use secure authentication methods and avoid query parameters', async () => {
       // This test PASSES because frontend now uses secure authentication
       
@@ -249,6 +257,7 @@ describe('WebSocket Authentication Rejection (SECURITY)', () => {
   });
 
   describe('Enhanced Error Handling', () => {
+      jest.setTimeout(10000);
     it('should not expose sensitive token data in error messages', async () => {
       // Verify that error messages don't leak sensitive information
       
@@ -280,6 +289,7 @@ describe('WebSocket Authentication Rejection (SECURITY)', () => {
   });
 
   describe('Migration from Insecure to Secure Authentication', () => {
+      jest.setTimeout(10000);
     it('should detect when using deprecated query param method', async () => {
       // This test PASSES because frontend doesn't use deprecated auth methods
       

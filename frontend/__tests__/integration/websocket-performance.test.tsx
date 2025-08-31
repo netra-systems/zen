@@ -1,6 +1,8 @@
-/**
- * WebSocket Performance and Advanced Tests
- * Extracted from oversized websocket-complete.test.tsx for modularity  
+import { waitFor } from '@testing-library/react';
+import { jest } from '@jest/globals';
+import { 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+t.tsx for modularity  
  * Tests performance monitoring, connection pools, broadcasting, and benchmarking
  * Focuses on advanced WebSocket scenarios and performance measurement
  */
@@ -16,6 +18,7 @@ import { measureConnectionTime } from '../setup/websocket-test-utils';
 import { AdvancedWebSocketTester } from '../setup/websocket-test-utils';
 
 describe('WebSocket Performance and Advanced Tests', () => {
+    jest.setTimeout(10000);
   let wsManager: WebSocketTestManager;
   let advancedTester: AdvancedWebSocketTester;
 
@@ -31,9 +34,15 @@ describe('WebSocket Performance and Advanced Tests', () => {
     advancedTester.closeAllConnections();
     advancedTester.clearLog();
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Performance Monitoring', () => {
+      jest.setTimeout(10000);
     it('should measure real connection performance with timing', async () => {
       const connectionTime = await measureConnectionTime(async () => {
         await wsManager.waitForConnection();
@@ -91,6 +100,7 @@ describe('WebSocket Performance and Advanced Tests', () => {
   });
 
   describe('Connection Pooling', () => {
+      jest.setTimeout(10000);
     it('should handle real concurrent connections with load testing', async () => {
       const connectionCount = 3;
       const connections = [];
@@ -182,6 +192,7 @@ describe('WebSocket Performance and Advanced Tests', () => {
   });
 
   describe('Broadcasting', () => {
+      jest.setTimeout(10000);
     it('should test real multi-connection broadcasting', async () => {
       const connection1 = advancedTester.createConnection('ws://localhost:8001/ws');
       const connection2 = advancedTester.createConnection('ws://localhost:8002/ws');
@@ -227,6 +238,7 @@ describe('WebSocket Performance and Advanced Tests', () => {
   });
 
   describe('Benchmarking', () => {
+      jest.setTimeout(10000);
     it('should benchmark real vs mock WebSocket test performance', async () => {
       const iterations = 100;
       

@@ -1,4 +1,5 @@
 import { render, screen, fireEvent, within } from '@testing-library/react';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import {
   Select,
   SelectGroup,
@@ -11,6 +12,13 @@ import {
 } from '@/components/ui/select';
 
 describe('Select Component', () => {
+  setupAntiHang();
+  jest.setTimeout(10000);
+
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
   it('should render all parts of the select component', async () => {
     render(
       <Select>

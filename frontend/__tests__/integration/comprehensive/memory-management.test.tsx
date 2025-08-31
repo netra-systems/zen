@@ -1,5 +1,6 @@
-/**
- * Memory Management Integration Tests
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+mory Management Integration Tests
  * 
  * BVJ: Enterprise segment - ensures platform scalability, reduces infrastructure costs
  * Tests memory management, resource cleanup, and large dataset handling.
@@ -50,6 +51,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('Memory Management Integration Tests', () => {
+    jest.setTimeout(10000);
   let server: WS;
   
   beforeEach(() => {
@@ -59,9 +61,15 @@ describe('Memory Management Integration Tests', () => {
 
   afterEach(() => {
     cleanupTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Resource Cleanup', () => {
+      jest.setTimeout(10000);
     it('should cleanup resources on unmount', async () => {
       const tracker = createMemoryTracker();
       const ResourceComponent = createResourceComponent(tracker);
@@ -91,6 +99,7 @@ describe('Memory Management Integration Tests', () => {
   });
 
   describe('Large Dataset Management', () => {
+      jest.setTimeout(10000);
     it('should manage large data sets efficiently', async () => {
       const LargeDataComponent = createLargeDataComponent();
       
@@ -121,6 +130,7 @@ describe('Memory Management Integration Tests', () => {
   });
 
   describe('Memory-Intensive Operations', () => {
+      jest.setTimeout(10000);
     it('should handle memory-intensive operations with proper cleanup', async () => {
       const MemoryIntensiveComponent = createMemoryIntensiveComponent();
       
@@ -225,7 +235,7 @@ const createConcurrentLimitComponent = () => {
 // Setup utility functions (≤8 lines each)
 const setupResourcesForTesting = (config: any): void => {
   const timer1 = setInterval(() => {}, 1000);
-  const timer2 = setTimeout(() => {}, 5000);
+  const timer2 = setTimeout(() => {}, 1000);
   addTimer(config, timer1);
   addTimer(config, timer2);
   

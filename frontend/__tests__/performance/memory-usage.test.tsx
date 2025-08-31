@@ -1,10 +1,9 @@
-/**
- * Memory Usage Tests
- * 
- * Tests memory leak detection, memory optimization, and resource cleanup
- * Validates memory usage patterns and prevents memory leaks
- * 
- * @compliance conventions.xml - Max 8 lines per function, under 300 lines
+import React, { useState, useEffect } from 'react';
+import { render, cleanup, act, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { TestProviders } from '@/__tests__/test-utils/providers';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+s
  * @compliance type_safety.xml - Full TypeScript typing
  * @spec frontend_unified_testing_spec.xml - Performance P1 priority
  * 
@@ -199,6 +198,7 @@ async function simulateHeavyDataOperations(): Promise<void> {
 }
 
 describe('Memory Usage Tests', () => {
+    jest.setTimeout(10000);
   // Mock performance.memory for consistent testing
   beforeAll(() => {
     if (!(performance as any).memory) {
@@ -218,9 +218,15 @@ describe('Memory Usage Tests', () => {
 
   afterEach(() => {
     cleanup();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Memory Leak Detection', () => {
+      jest.setTimeout(10000);
     it('should detect memory leaks in components', async () => {
       const LeakyComponent = createLeakyComponent();
       const metrics = await testComponentCleanup(LeakyComponent);
@@ -281,6 +287,7 @@ describe('Memory Usage Tests', () => {
   });
 
   describe('Memory Usage Optimization', () => {
+      jest.setTimeout(10000);
     it('should maintain memory usage under 100MB for large datasets', async () => {
       const monitor = new MemoryMonitor();
       monitor.start();
@@ -365,6 +372,7 @@ describe('Memory Usage Tests', () => {
   });
 
   describe('Resource Management', () => {
+      jest.setTimeout(10000);
     it('should properly manage timer and interval cleanup', async () => {
       const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
       const setIntervalSpy = jest.spyOn(global, 'setInterval');
@@ -420,6 +428,7 @@ describe('Memory Usage Tests', () => {
   });
 
   describe('Memory Performance Monitoring', () => {
+      jest.setTimeout(10000);
     it('should track memory usage patterns over time', async () => {
       const monitor = new MemoryMonitor();
       monitor.start(50); // Sample every 50ms

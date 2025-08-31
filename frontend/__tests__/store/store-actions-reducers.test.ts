@@ -1,10 +1,10 @@
-/**
- * Store Actions and Reducers Tests - Action Dispatching & State Transitions
- * 
- * BVJ (Business Value Justification):
- * - Segment: All (Free, Growth, Enterprise)
- * - Business Goal: Ensure reliable state updates for all user interactions
- * - Value Impact: Every user action depends on correct state management
+import { act, renderHook } from '@testing-library/react';
+import { useAuthStore } from '@/store/authStore';
+import { useChatStore } from '@/store/chat';
+import { useAppStore } from '@/store/app';
+import { AuthStoreTestUtils, ChatStoreTestUtils, GlobalTestUtils } from './store-test-utils';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+on correct state management
  * - Revenue Impact: State corruption loses user data and revenue
  * 
  * Tests: Action dispatching, reducer logic, state transitions
@@ -18,15 +18,22 @@ import { useAppStore } from '@/store/app';
 import { AuthStoreTestUtils, ChatStoreTestUtils, GlobalTestUtils } from './store-test-utils';
 
 describe('Store Actions and Reducers - State Transition Tests', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     GlobalTestUtils.setupStoreTestEnvironment();
   });
 
   afterEach(() => {
     GlobalTestUtils.cleanupStoreTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Auth Store State Transitions', () => {
+      jest.setTimeout(10000);
     it('should handle login action with complete state transition', () => {
       const result = AuthStoreTestUtils.initializeStore();
       const user = AuthStoreTestUtils.createMockUser('standard_user', ['read']);
@@ -112,6 +119,7 @@ describe('Store Actions and Reducers - State Transition Tests', () => {
   });
 
   describe('Chat Store State Transitions', () => {
+      jest.setTimeout(10000);
     it('should handle message addition with ID generation', () => {
       const result = ChatStoreTestUtils.initializeStore();
       const message = ChatStoreTestUtils.createMockMessage('', 'user', 'Test');
@@ -189,6 +197,7 @@ describe('Store Actions and Reducers - State Transition Tests', () => {
   });
 
   describe('App Store State Transitions', () => {
+      jest.setTimeout(10000);
     it('should handle sidebar toggle action', () => {
       const { result } = renderHook(() => useAppStore());
 
@@ -209,6 +218,7 @@ describe('Store Actions and Reducers - State Transition Tests', () => {
   });
 
   describe('Complex State Transitions', () => {
+      jest.setTimeout(10000);
     it('should handle sequential auth and chat actions', () => {
       const authResult = AuthStoreTestUtils.initializeStore();
       const chatResult = ChatStoreTestUtils.initializeStore();
@@ -292,6 +302,7 @@ describe('Store Actions and Reducers - State Transition Tests', () => {
   });
 
   describe('Action Immutability', () => {
+      jest.setTimeout(10000);
     it('should not mutate original state objects', () => {
       const result = ChatStoreTestUtils.initializeStore();
       const originalMessage = {

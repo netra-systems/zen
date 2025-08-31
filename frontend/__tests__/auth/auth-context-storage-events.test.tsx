@@ -139,6 +139,8 @@ const mockAuthConfig = {
 };
 
 describe('AuthContext Storage Event Listener - Critical Cross-Tab & Security Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let mockAuthStore: any;
   let mockUnifiedAuthService: jest.Mocked<typeof unifiedAuthService>;
   let mockJwtDecode: jest.MockedFunction<typeof jwtDecode>;
@@ -263,6 +265,7 @@ describe('AuthContext Storage Event Listener - Critical Cross-Tab & Security Tes
     
     jest.clearAllTimers();
     jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   /**

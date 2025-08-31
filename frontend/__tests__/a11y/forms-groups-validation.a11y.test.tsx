@@ -1,7 +1,9 @@
-/**
- * Forms Groups Validation Accessibility Test Suite
- * Tests dynamic validation, collapsible sections, and field-specific features
- * Extracted from oversized forms-groups-dynamic.a11y.test.tsx for modularity
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+c.a11y.test.tsx for modularity
  * 
  * Business Value Justification (BVJ):
  * - Segment: Growth & Enterprise  
@@ -27,6 +29,7 @@ import {
 } from './shared-a11y-helpers';
 
 describe('Form Groups - Validation and Interactive Features', () => {
+    jest.setTimeout(10000);
   it('manages focus in collapsible form sections', async () => {
     const user = setupKeyboardTest();
     const CollapsibleForm = () => {

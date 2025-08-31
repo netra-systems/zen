@@ -8,6 +8,8 @@
 import { webSocketService } from '../services/webSocketService';
 
 describe('WebSocket Message Type Alignment', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let mockWebSocket: any;
   let onMessageCallback: jest.Mock;
   let onErrorCallback: jest.Mock;
@@ -33,9 +35,17 @@ describe('WebSocket Message Type Alignment', () => {
 
   afterEach(() => {
     webSocketService.disconnect();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Backend Message Types from MessageType Enum', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     // All message types from backend's MessageType enum
     const backendMessageTypes = [
       // Connection lifecycle
@@ -104,6 +114,8 @@ describe('WebSocket Message Type Alignment', () => {
   });
 
   describe('Frontend-Specific Message Types', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     // Message types that frontend expects but might not be in backend enum
     const frontendSpecificTypes = [
       // Agent messages (some overlap but with different format expectations)
@@ -154,6 +166,8 @@ describe('WebSocket Message Type Alignment', () => {
   });
 
   describe('Message Field Alignment', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should handle messages with "data" field instead of "payload"', () => {
       const messageWithData = {
         type: 'system_message',
@@ -214,6 +228,8 @@ describe('WebSocket Message Type Alignment', () => {
   });
 
   describe('Error Handling for Unknown Message Types', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should handle completely unknown message types gracefully', () => {
       const unknownMessage = {
         type: 'completely_unknown_type',
@@ -268,6 +284,8 @@ describe('WebSocket Message Type Alignment', () => {
   });
 
   describe('Large Message Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('should handle large messages with chunks', () => {
       const largeMessage = {
         type: 'agent_response',

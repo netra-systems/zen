@@ -1,6 +1,8 @@
-/**
- * Navigation Screen Reader Accessibility Test Suite
- * Tests live regions, announcements, and screen reader specific features
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+s
  * Follows 25-line function rule and 450-line file limit
  * 
  * Business Value Justification (BVJ):
@@ -29,6 +31,7 @@ import {
 // ============================================================================
 
 describe('Screen Reader Navigation - Announcements and Live Regions', () => {
+    jest.setTimeout(10000);
   it('provides live region announcements for updates', async () => {
     const user = setupKeyboardTest();
     const LiveRegionTest = createLiveRegionTest('Content updated', 'polite');

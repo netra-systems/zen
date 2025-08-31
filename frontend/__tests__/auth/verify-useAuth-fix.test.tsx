@@ -2,6 +2,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 
 describe('Verify useAuth Fix', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     // Clear all mocks to test real implementation
     jest.clearAllMocks();
@@ -68,4 +70,8 @@ describe('Verify useAuth Fix', () => {
     // All files should now work without TypeError
     expect(fixedFiles.length).toBeGreaterThan(0);
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

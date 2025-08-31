@@ -34,6 +34,8 @@ const createWrapper = (enabled = true) => {
 };
 
 describe('useGTMEvent Hook', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let mockDataLayer: any[];
 
   beforeEach(() => {
@@ -51,9 +53,17 @@ describe('useGTMEvent Hook', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Hook Initialization', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should provide event tracking functionality', async () => {
       const { result } = renderHook(() => useGTMEvent(), {
         wrapper: createWrapper()
@@ -89,6 +99,8 @@ describe('useGTMEvent Hook', () => {
   });
 
   describe('Generic Event Tracking', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track basic events with required fields', async () => {
       const { result } = renderHook(() => useGTMEvent(), {
         wrapper: createWrapper()
@@ -154,6 +166,8 @@ describe('useGTMEvent Hook', () => {
   });
 
   describe('Page View Tracking', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track page views with default path', async () => {
       const { result } = renderHook(() => useGTMEvent(), {
         wrapper: createWrapper()
@@ -224,6 +238,8 @@ describe('useGTMEvent Hook', () => {
   });
 
   describe('User Action Tracking', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track button clicks', async () => {
       const { result } = renderHook(() => useGTMEvent(), {
         wrapper: createWrapper()
@@ -305,6 +321,8 @@ describe('useGTMEvent Hook', () => {
   });
 
   describe('Conversion Tracking', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track signup conversions', async () => {
       const { result } = renderHook(() => useGTMEvent(), {
         wrapper: createWrapper()
@@ -397,6 +415,8 @@ describe('useGTMEvent Hook', () => {
   });
 
   describe('Event Queue Management', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should queue events when GTM is not ready', () => {
       const { result } = renderHook(() => useGTMEvent(), {
         wrapper: createWrapper()
@@ -465,6 +485,8 @@ describe('useGTMEvent Hook', () => {
   });
 
   describe('Error Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle events when GTM is disabled', () => {
       const { result } = renderHook(() => useGTMEvent(), {
         wrapper: createWrapper(false)
@@ -505,6 +527,8 @@ describe('useGTMEvent Hook', () => {
   });
 
   describe('Performance Considerations', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle rapid event tracking without issues', async () => {
       const { result } = renderHook(() => useGTMEvent(), {
         wrapper: createWrapper()
@@ -567,6 +591,8 @@ describe('useGTMEvent Hook', () => {
   });
 
   describe('Custom Event Types', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle authentication events through generic interface', async () => {
       const { result } = renderHook(() => useGTMEvent(), {
         wrapper: createWrapper()

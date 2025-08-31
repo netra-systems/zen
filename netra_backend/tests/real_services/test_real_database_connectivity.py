@@ -29,9 +29,9 @@ import asyncpg
 from contextlib import asynccontextmanager
 
 from test_framework.environment_isolation import get_test_env_manager
-from netra_backend.app.core.database_manager import DatabaseManager
-from netra_backend.app.core.database_url_builder import DatabaseURLBuilder
-from netra_backend.app.models.chat import ChatThread, ChatMessage
+from netra_backend.app.db.database_manager import DatabaseManager
+from shared.database_url_builder import DatabaseURLBuilder
+from netra_backend.app.schemas.core_models import Thread, Message
 from netra_backend.app.models.user import User
 
 

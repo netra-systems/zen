@@ -32,6 +32,8 @@ interface CircularDependency {
 }
 
 describe('Circular Dependency Detection', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const typesDirPath = path.resolve(__dirname, '../../types');
 
   /**

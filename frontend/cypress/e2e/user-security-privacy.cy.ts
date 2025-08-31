@@ -1,22 +1,17 @@
+import { TestDataFactory, TestSetup, MockEndpoints, TestAssertions, FormHelpers, ErrorScenarios } from '../support/user-settings-helpers';
+
 describe('User Security and Privacy Settings', () => {
   beforeEach(() => {
-    // Setup authenticated state
-    cy.window().then((win) => {
-      win.localStorage.setItem('jwt_token', 'test-jwt-token');
-    });
-
-    cy.visit('/');
+    TestSetup.clearUserState();
+    TestSetup.setupAuthenticatedUser();
   });
 
   it('should handle password change', () => {
     // Navigate to security settings
-    cy.visit('/settings');
-    cy.get('button').contains('Security').click();
+    TestSetup.navigateToSection('Security');
 
-    // Fill in password change form
-    cy.get('input[name="current_password"]').type('currentPassword123');
-    cy.get('input[name="new_password"]').type('newSecurePassword456!');
-    cy.get('input[name="confirm_password"]').type('newSecurePassword456!');
+    // Fill in password change form using helper
+    FormHelpers.fillPasswordForm('currentPassword123', 'newSecurePassword456!', 'newSecurePassword456!');
 
     // Mock password change endpoint
     cy.intercept('POST', '/api/users/change-password', {
@@ -28,48 +23,45 @@ describe('User Security and Privacy Settings', () => {
     }).as('changePassword');
 
     // Submit password change
-    cy.get('button').contains('Change Password').click();
+    FormHelpers.submitForm('Change Password');
     cy.wait('@changePassword');
 
     // Verify success message
-    cy.contains('Password changed successfully').should('be.visible');
+    TestAssertions.verifySuccessMessage('Password changed successfully');
 
     // Verify form is cleared
-    cy.get('input[name="current_password"]').should('have.value', '');
-    cy.get('input[name="new_password"]').should('have.value', '');
-    cy.get('input[name="confirm_password"]').should('have.value', '');
+    TestAssertions.verifyFieldValue('current_password', '');
+    TestAssertions.verifyFieldValue('new_password', '');
+    TestAssertions.verifyFieldValue('confirm_password', '');
   });
 
   it('should validate password requirements', () => {
-    cy.visit('/settings');
-    cy.get('button').contains('Security').click();
+    TestSetup.navigateToSection('Security');
 
     // Test weak password validation
-    cy.get('input[name="current_password"]').type('currentPassword123');
-    cy.get('input[name="new_password"]').type('weak');
-    cy.get('input[name="confirm_password"]').type('weak');
+    FormHelpers.fillPasswordForm('currentPassword123', 'weak', 'weak');
 
-    // Verify validation error
-    cy.contains('Password must be at least 8 characters').should('be.visible');
-    cy.contains('Password must contain uppercase and lowercase letters').should('be.visible');
-    cy.contains('Password must contain at least one number').should('be.visible');
-    cy.contains('Password must contain at least one special character').should('be.visible');
+    // Verify validation errors appear
+    TestAssertions.verifyErrorMessage('Password must be at least 8 characters');
+    TestAssertions.verifyErrorMessage('Password must contain uppercase and lowercase letters');
+    TestAssertions.verifyErrorMessage('Password must contain at least one number');
+    TestAssertions.verifyErrorMessage('Password must contain at least one special character');
 
     // Test password mismatch
-    cy.get('input[name="new_password"]').clear().type('StrongPassword123!');
-    cy.get('input[name="confirm_password"]').clear().type('DifferentPassword456!');
-    cy.get('button').contains('Change Password').click();
+    FormHelpers.clearAndType('new_password', 'StrongPassword123!');
+    FormHelpers.clearAndType('confirm_password', 'DifferentPassword456!');
+    FormHelpers.submitForm('Change Password');
 
     // Verify mismatch error
-    cy.contains('Passwords do not match').should('be.visible');
+    TestAssertions.verifyErrorMessage('Passwords do not match');
   });
 
   it('should manage two-factor authentication', () => {
-    // Navigate to security settings
-    cy.visit('/settings');
-    cy.get('button').contains('Security').click();
+    // Navigate to security settings and 2FA tab
+    TestSetup.navigateToSection('Security');
+    cy.get('button').contains('Two-Factor Authentication').click();
 
-    // Mock 2FA status
+    // Mock 2FA status as disabled
     cy.intercept('GET', '/api/users/2fa/status', {
       statusCode: 200,
       body: {
@@ -80,7 +72,8 @@ describe('User Security and Privacy Settings', () => {
 
     cy.wait('@get2FAStatus');
 
-    // Enable 2FA
+    // Acknowledge requirements and enable 2FA
+    FormHelpers.toggleCheckbox('acknowledge_requirements', true);
     cy.get('button').contains('Enable Two-Factor Authentication').click();
 
     // Mock 2FA setup
@@ -101,18 +94,16 @@ describe('User Security and Privacy Settings', () => {
 
     cy.wait('@setup2FA');
 
-    // Verify QR code is displayed
-    cy.get('img[alt="2FA QR Code"]').should('be.visible');
-    cy.contains('JBSWY3DPEHPK3PXP').should('be.visible');
-
-    // Verify backup codes
-    cy.contains('Backup Codes').should('be.visible');
-    cy.contains('backup-code-1').should('be.visible');
+    // Verify QR code and setup elements are displayed
+    TestAssertions.verifyElementVisible('img[alt="2FA QR Code"]');
+    TestAssertions.verifyElementText('JBSWY3DPEHPK3PXP');
+    TestAssertions.verifyElementText('Backup Codes');
+    TestAssertions.verifyElementText('backup-code-1');
 
     // Enter verification code
-    cy.get('input[name="verification_code"]').type('123456');
+    FormHelpers.clearAndType('verification_code', '123456');
 
-    // Mock verification
+    // Mock verification success
     cy.intercept('POST', '/api/users/2fa/verify', {
       statusCode: 200,
       body: {
@@ -122,14 +113,12 @@ describe('User Security and Privacy Settings', () => {
     }).as('verify2FA');
 
     // Complete setup
-    cy.get('button').contains('Verify and Enable').click();
+    FormHelpers.submitForm('Verify and Enable');
     cy.wait('@verify2FA');
 
     // Verify success
-    cy.contains('Two-factor authentication enabled successfully').should('be.visible');
-
-    // Verify 2FA is now shown as enabled
-    cy.contains('Two-Factor Authentication: Enabled').should('be.visible');
+    TestAssertions.verifySuccessMessage('Two-factor authentication enabled successfully');
+    TestAssertions.verifyElementText('Two-Factor Authentication: Enabled');
   });
 
   it('should disable two-factor authentication', () => {

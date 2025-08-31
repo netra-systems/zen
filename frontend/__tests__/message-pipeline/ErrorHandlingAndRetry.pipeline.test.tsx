@@ -120,6 +120,8 @@ jest.mock('@/services/threadRenameService');
 jest.mock('@/lib/logger');
 
 describe('Error Handling and Retry Pipeline Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const mockWebSocketService = {
     onMessage: null,
     onStatusChange: null,
@@ -150,9 +152,17 @@ describe('Error Handling and Retry Pipeline Tests', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Network Failure Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle WebSocket connection failures gracefully', async () => {
       const connectionError = new Error('WebSocket connection failed');
       mockWebSocketService.connect.mockImplementation(() => {
@@ -238,6 +248,8 @@ describe('Error Handling and Retry Pipeline Tests', () => {
   });
 
   describe('Authentication Failure Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle expired token during message send', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       
@@ -310,6 +322,8 @@ describe('Error Handling and Retry Pipeline Tests', () => {
   });
 
   describe('Backend Service Error Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle thread creation service errors', async () => {
       const serviceError = new Error('Thread service unavailable');
       (ThreadService.createThread as jest.Mock).mockRejectedValue(serviceError);
@@ -390,6 +404,8 @@ describe('Error Handling and Retry Pipeline Tests', () => {
   });
 
   describe('Optimistic Update Error Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle optimistic message creation failures', async () => {
       // Mock optimistic manager failure
       const originalAddOptimistic = optimisticMessageManager.addOptimisticUserMessage;
@@ -467,6 +483,8 @@ describe('Error Handling and Retry Pipeline Tests', () => {
   });
 
   describe('Retry Mechanism Testing', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should implement exponential backoff for retries', async () => {
       let retryCount = 0;
       const retryDelays: number[] = [];
@@ -563,6 +581,8 @@ describe('Error Handling and Retry Pipeline Tests', () => {
   });
 
   describe('Error Recovery and User Feedback', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should provide clear error messages to users', async () => {
       const errorHandler = jest.fn();
       
@@ -651,6 +671,8 @@ describe('Error Handling and Retry Pipeline Tests', () => {
   });
 
   describe('Edge Cases and Boundary Conditions', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle rapid error and recovery cycles', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       

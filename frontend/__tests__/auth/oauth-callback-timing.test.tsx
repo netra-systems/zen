@@ -129,6 +129,8 @@ const mockSetTimeout = jest.fn((callback: () => void, delay: number): NodeJS.Tim
 }) as unknown as typeof setTimeout;
 
 describe('OAuth Callback Timing - Challenging Edge Cases', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   // Set timeout for all tests in this suite
   jest.setTimeout(30000);
   beforeEach(() => {
@@ -153,6 +155,12 @@ describe('OAuth Callback Timing - Challenging Edge Cases', () => {
     mockSetTimeoutCallbacks.clear();
     // Restore real timers
     jest.useRealTimers();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   afterAll(() => {

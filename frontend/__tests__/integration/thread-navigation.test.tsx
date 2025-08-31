@@ -1,8 +1,9 @@
-/**
- * Thread Navigation Integration Tests
- * Agent 3: Tests complete thread navigation flow and state management
- * Covers thread switching, URL sync, state persistence, and error recovery
- * Follows 25-line function rule and 450-line file limit
+import React from 'react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ws 25-line function rule and 450-line file limit
  */
 
 import React from 'react';
@@ -30,6 +31,7 @@ const simulateNetworkDelay = (ms: number = 100) => {
 };
 
 describe('Thread Navigation Integration Tests', () => {
+    jest.setTimeout(10000);
   const { testSetup, mockNavigation } = createThreadNavigationSetup();
 
   beforeEach(() => {
@@ -45,9 +47,15 @@ describe('Thread Navigation Integration Tests', () => {
 
   afterEach(() => {
     testSetup.afterEach();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Thread Switching Performance', () => {
+      jest.setTimeout(10000);
     it('should switch threads under 200ms performance target', async () => {
       const user = userEvent.setup();
       testSetup.configureChatSidebarHooks({
@@ -174,6 +182,7 @@ describe('Thread Navigation Integration Tests', () => {
   });
 
   describe('URL Synchronization', () => {
+      jest.setTimeout(10000);
     it('should update URL when thread is selected', async () => {
       const user = userEvent.setup();
       testSetup.configureChatSidebarHooks({
@@ -232,6 +241,7 @@ describe('Thread Navigation Integration Tests', () => {
   });
 
   describe('State Persistence', () => {
+      jest.setTimeout(10000);
     it('should restore active thread on page refresh', async () => {
       testSetup.configureChatSidebarHooks({
         threads: sampleThreads
@@ -280,6 +290,7 @@ describe('Thread Navigation Integration Tests', () => {
   });
 
   describe('Error Recovery', () => {
+      jest.setTimeout(10000);
     it('should handle thread loading failures gracefully', async () => {
       testSetup.configureChatSidebarHooks({
         threadLoader: {
@@ -341,6 +352,7 @@ describe('Thread Navigation Integration Tests', () => {
   });
 
   describe('Multi-Session Synchronization', () => {
+      jest.setTimeout(10000);
     it('should sync thread updates across multiple tabs', async () => {
       const user = userEvent.setup();
       testSetup.configureChatSidebarHooks({
@@ -391,6 +403,7 @@ describe('Thread Navigation Integration Tests', () => {
   });
 
   describe('Navigation Performance Optimization', () => {
+      jest.setTimeout(10000);
     it('should preload adjacent threads for faster navigation', async () => {
       const preloadHandler = jest.fn();
       testSetup.configureChatSidebarHooks({

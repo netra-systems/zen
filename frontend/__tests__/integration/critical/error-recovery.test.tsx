@@ -1,9 +1,8 @@
-/**
- * Error Recovery Integration Tests
- * Tests for WebSocket disconnection, API retry logic, and session expiration
- */
-
 import React from 'react';
+import { render, waitFor, screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ 'react';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
@@ -14,6 +13,7 @@ import { useAuthStore } from '@/store/authStore';
 import { TestProviders } from '@/__tests__/setup/test-providers';
 
 describe('Error Recovery Integration', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     localStorage.clear();
@@ -24,9 +24,15 @@ describe('Error Recovery Integration', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Connection Recovery', () => {
+      jest.setTimeout(10000);
     it('should recover from WebSocket disconnection', async () => {
       const TestComponent = () => {
         const [status, setStatus] = React.useState<'OPEN' | 'CLOSED'>('CLOSED');

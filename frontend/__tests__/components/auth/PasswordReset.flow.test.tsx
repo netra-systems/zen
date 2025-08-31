@@ -23,6 +23,8 @@ const mockEmailValidation = {
 };
 
 describe('Password Reset Flow Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const mockLogin = jest.fn();
   const mockLogout = jest.fn();
   const mockPasswordReset = jest.fn();
@@ -54,6 +56,8 @@ describe('Password Reset Flow Tests', () => {
   });
 
   describe('Password Reset UI Presence', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should show login button by default', () => {
       render(<LoginButton />);
       
@@ -99,6 +103,8 @@ describe('Password Reset Flow Tests', () => {
   });
 
   describe('Password Reset Configuration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle password reset endpoint configuration', () => {
       jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
@@ -167,6 +173,8 @@ describe('Password Reset Flow Tests', () => {
   });
 
   describe('Future Password Reset Flow', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should support email-based password reset', async () => {
       // Simulating future email-based reset functionality
       const mockResetRequest = jest.fn();
@@ -212,6 +220,8 @@ describe('Password Reset Flow Tests', () => {
   });
 
   describe('Password Reset Security', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should validate password reset tokens', () => {
       const mockToken = 'valid-reset-token';
       
@@ -248,6 +258,8 @@ describe('Password Reset Flow Tests', () => {
   });
 
   describe('OAuth Password Reset Integration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle Google account password reset', () => {
       render(<LoginButton />);
       
@@ -285,6 +297,8 @@ describe('Password Reset Flow Tests', () => {
   });
 
   describe('Password Reset Error Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle reset service unavailable', async () => {
       mockPasswordReset.mockRejectedValueOnce(new Error('Service unavailable'));
       
@@ -321,6 +335,8 @@ describe('Password Reset Flow Tests', () => {
   });
 
   describe('Password Reset Accessibility', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should provide accessible reset flow navigation', () => {
       render(<LoginButton />);
       
@@ -356,6 +372,8 @@ describe('Password Reset Flow Tests', () => {
   });
 
   describe('Password Reset Mobile Support', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle mobile-friendly reset interface', () => {
       render(<LoginButton />);
       
@@ -387,4 +405,8 @@ describe('Password Reset Flow Tests', () => {
       expect(screen.getByText('Login with Google')).toBeInTheDocument();
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

@@ -1,13 +1,14 @@
-// Unmock auth service for proper service functionality
-jest.unmock('@/auth/service');
-
 import { messageService } from '@/services/messageService';
+import { Message } from '@/types/unified';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+eService } from '@/services/messageService';
 import { Message } from '@/types/unified';
 
 // Mock fetch
 global.fetch = jest.fn();
 
 describe('MessageService', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     setupTestEnvironment();
   });
@@ -36,6 +37,7 @@ describe('MessageService', () => {
   }
 
   describe('Thread Management', () => {
+      jest.setTimeout(10000);
     it('should create a new thread', async () => {
       const mockThread = {
         id: 'thread-123',
@@ -96,6 +98,7 @@ describe('MessageService', () => {
   });
 
   describe('Message Persistence', () => {
+      jest.setTimeout(10000);
     it('should save a message to the server', async () => {
       const message: Message = {
         id: 'msg-123',
@@ -207,6 +210,7 @@ describe('MessageService', () => {
   });
 
   describe('Local Cache Management', () => {
+      jest.setTimeout(10000);
     it('should cache messages locally', async () => {
       const messages: Message[] = [
         {
@@ -348,6 +352,7 @@ describe('MessageService', () => {
   });
 
   describe('Thread State Management', () => {
+      jest.setTimeout(10000);
     it('should save thread state', async () => {
       const threadState = {
         thread_id: 'thread-123',

@@ -1,9 +1,10 @@
-// Store Synchronization Integration Tests
-// Tests store synchronization across components and tabs
-// Business Value: Ensures consistent state for all user segments
-
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { useUnifiedChatStore } from '@/store/unified-chat';
+import { useAuthStore } from '@/store/authStore';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ct';
 import userEvent from '@testing-library/user-event';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useAuthStore } from '@/store/authStore';
@@ -100,6 +101,7 @@ const StoreSubscriberComponent: React.FC = () => {
 };
 
 describe('Store Synchronization Integration Tests', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     // Reset all stores before each test
     act(() => {
@@ -109,6 +111,7 @@ describe('Store Synchronization Integration Tests', () => {
   });
 
   describe('Cross-Component Store Synchronization', () => {
+      jest.setTimeout(10000);
     it('synchronizes store updates across components', async () => {
       const user = userEvent.setup();
       
@@ -181,6 +184,7 @@ describe('Store Synchronization Integration Tests', () => {
   });
 
   describe('Store State Isolation', () => {
+      jest.setTimeout(10000);
     it('maintains state isolation between different stores', async () => {
       const user = userEvent.setup();
       
@@ -226,6 +230,7 @@ describe('Store Synchronization Integration Tests', () => {
   });
 
   describe('Complex State Transactions', () => {
+      jest.setTimeout(10000);
     it('handles complex multi-store state updates atomically', async () => {
       const user = userEvent.setup();
       
@@ -282,6 +287,7 @@ describe('Store Synchronization Integration Tests', () => {
   });
 
   describe('Memory Management', () => {
+      jest.setTimeout(10000);
     it('prevents memory leaks with large state objects', async () => {
       // Create large state object directly without component
       const largeData = {
@@ -336,6 +342,7 @@ describe('Store Synchronization Integration Tests', () => {
   });
 
   describe('DevTools Integration', () => {
+      jest.setTimeout(10000);
     it('maintains devtools integration with store updates', async () => {
       // Update state directly
       await act(async () => {

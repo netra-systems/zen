@@ -1,5 +1,6 @@
-/**
- * User Journey Error Scenarios Integration Tests
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+er Journey Error Scenarios Integration Tests
  * ULTRA DEEP THINK: Module-based architecture - Error tests extracted for 450-line compliance
  */
 
@@ -10,6 +11,7 @@ import {
 } from './user-journey-utils';
 
 describe('Error Scenarios in User Journey', () => {
+    jest.setTimeout(10000);
   let server: any;
   
   beforeEach(() => {
@@ -18,6 +20,11 @@ describe('Error Scenarios in User Journey', () => {
 
   afterEach(() => {
     teardownUserJourneyTest();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   it('should handle error scenarios in the workflow', async () => {

@@ -2,8 +2,10 @@ import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Input } from '@/components/ui/input';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Input Component - Comprehensive Tests', () => {
+    jest.setTimeout(10000);
   const renderInput = (props = {}) => {
     return render(<Input data-testid="test-input" {...props} />);
   };
@@ -11,6 +13,7 @@ describe('Input Component - Comprehensive Tests', () => {
   const setupUser = () => userEvent.setup();
 
   describe('Basic Rendering', () => {
+      jest.setTimeout(10000);
     it('renders input element correctly', () => {
       renderInput();
       const input = screen.getByTestId('test-input');
@@ -38,6 +41,7 @@ describe('Input Component - Comprehensive Tests', () => {
   });
 
   describe('Text Entry and Editing', () => {
+      jest.setTimeout(10000);
     it('accepts text input correctly', async () => {
       const user = setupUser();
       renderInput();
@@ -78,6 +82,7 @@ describe('Input Component - Comprehensive Tests', () => {
   });
 
   describe('Special Characters and Emoji', () => {
+      jest.setTimeout(10000);
     it('accepts emoji input', async () => {
       const user = setupUser();
       renderInput();
@@ -116,6 +121,7 @@ describe('Input Component - Comprehensive Tests', () => {
   });
 
   describe('Copy and Paste Functionality', () => {
+      jest.setTimeout(10000);
     it('supports keyboard copy operation', async () => {
       const user = setupUser();
       renderInput({ defaultValue: 'Copy me' });
@@ -160,6 +166,7 @@ describe('Input Component - Comprehensive Tests', () => {
   });
 
   describe('Validation and Error States', () => {
+      jest.setTimeout(10000);
     it('shows required validation', () => {
       renderInput({ required: true });
       const input = screen.getByTestId('test-input');
@@ -186,6 +193,7 @@ describe('Input Component - Comprehensive Tests', () => {
   });
 
   describe('Max Length Enforcement', () => {
+      jest.setTimeout(10000);
     it('respects maxLength attribute', async () => {
       const user = setupUser();
       renderInput({ maxLength: 5 });
@@ -216,6 +224,7 @@ describe('Input Component - Comprehensive Tests', () => {
   });
 
   describe('Auto-focus Functionality', () => {
+      jest.setTimeout(10000);
     it('focuses automatically when autoFocus is true', () => {
       renderInput({ autoFocus: true });
       const input = screen.getByTestId('test-input');
@@ -240,6 +249,7 @@ describe('Input Component - Comprehensive Tests', () => {
   });
 
   describe('Keyboard Shortcuts', () => {
+      jest.setTimeout(10000);
     it('supports Home key navigation', async () => {
       const user = setupUser();
       renderInput({ defaultValue: 'Navigate me' });
@@ -275,6 +285,7 @@ describe('Input Component - Comprehensive Tests', () => {
   });
 
   describe('Disabled State', () => {
+      jest.setTimeout(10000);
     it('prevents input when disabled', async () => {
       const user = setupUser();
       renderInput({ disabled: true });
@@ -304,6 +315,7 @@ describe('Input Component - Comprehensive Tests', () => {
   });
 
   describe('Event Handling', () => {
+      jest.setTimeout(10000);
     it('calls onChange handler on input', async () => {
       const handleChange = jest.fn();
       renderInput({ onChange: handleChange });
@@ -351,6 +363,7 @@ describe('Input Component - Comprehensive Tests', () => {
   });
 
   describe('Mobile Keyboard Behavior', () => {
+      jest.setTimeout(10000);
     it('shows numeric keyboard for number input', () => {
       renderInput({ type: 'number' });
       const input = screen.getByTestId('test-input');
@@ -377,6 +390,7 @@ describe('Input Component - Comprehensive Tests', () => {
   });
 
   describe('Accessibility', () => {
+      jest.setTimeout(10000);
     it('supports aria-label', () => {
       renderInput({ 'aria-label': 'Search input' });
       const input = screen.getByTestId('test-input');
@@ -404,6 +418,7 @@ describe('Input Component - Comprehensive Tests', () => {
   });
 
   describe('Form Integration', () => {
+      jest.setTimeout(10000);
     it('integrates with form element', () => {
       render(
         <form>

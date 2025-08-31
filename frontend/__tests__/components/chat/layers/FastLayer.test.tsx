@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { FastLayer } from '@/components/chat/layers/FastLayer';
 import type { FastLayerData } from '@/types/unified-chat';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock framer-motion
 jest.mock('framer-motion', () => ({
@@ -19,6 +20,7 @@ jest.mock('lucide-react', () => ({
 }));
 
 describe('FastLayer', () => {
+    jest.setTimeout(10000);
   const mockData: FastLayerData = {
     agentName: 'Optimization Agent',
     activeTools: ['cost_analyzer', 'latency_profiler'],

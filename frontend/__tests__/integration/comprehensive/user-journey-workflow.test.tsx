@@ -1,5 +1,6 @@
-/**
- * User Journey Workflow Integration Tests
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+er Journey Workflow Integration Tests
  * ULTRA DEEP THINK: Module-based architecture - Workflow tests extracted for 450-line compliance
  */
 
@@ -13,6 +14,7 @@ import {
 } from './user-journey-utils';
 
 describe('Complete Optimization Workflow Tests', () => {
+    jest.setTimeout(10000);
   let server: any;
   
   beforeEach(() => {
@@ -21,6 +23,11 @@ describe('Complete Optimization Workflow Tests', () => {
 
   afterEach(() => {
     teardownUserJourneyTest();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   it('should complete full optimization workflow', async () => {

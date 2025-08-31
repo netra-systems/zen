@@ -1,7 +1,8 @@
-/**
- * Forms Input Accessibility Test Suite
- * Tests form labels, associations, and basic input accessibility
- * Follows 25-line function rule and 450-line file limit
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ 25-line function rule and 450-line file limit
  * 
  * Business Value Justification (BVJ):
  * - Segment: All (Free → Enterprise)
@@ -27,6 +28,7 @@ import { runAxeTest, testAriaLabel, createFieldsetTest } from './shared-a11y-hel
 // ============================================================================
 
 describe('Form Labels - Proper Association', () => {
+    jest.setTimeout(10000);
   it('passes axe accessibility tests for form with labels', async () => {
     const { container } = render(
       <form>

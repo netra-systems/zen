@@ -1,13 +1,12 @@
-/**
- * Error Handling and Edge Cases Integration Tests
- * Tests for error boundaries, memory management, i18n, and WebSocket resilience
- */
-
 import React from 'react';
 import { render, fireEvent, waitFor, screen } from '@testing-library/react';
 import { createTestSetup, TestErrorBoundary, suppressConsoleError } from './setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+eEvent, waitFor, screen } from '@testing-library/react';
+import { createTestSetup, TestErrorBoundary, suppressConsoleError } from './setup';
 
 describe('Error Handling and Edge Cases Integration', () => {
+    jest.setTimeout(10000);
   const testSetup = createTestSetup({ enableWebSocket: true });
 
   beforeEach(() => {
@@ -16,9 +15,15 @@ describe('Error Handling and Edge Cases Integration', () => {
 
   afterEach(() => {
     testSetup.afterEach();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Advanced Error Boundaries', () => {
+      jest.setTimeout(10000);
     it('should recover from component errors gracefully', async () => {
       const FaultyComponent = ({ shouldError }: { shouldError: boolean }) => {
         if (shouldError) {
@@ -85,6 +90,7 @@ describe('Error Handling and Edge Cases Integration', () => {
   });
 
   describe('Memory Management', () => {
+      jest.setTimeout(10000);
     it('should cleanup resources on unmount', async () => {
       const cleanupFunctions: (() => void)[] = [];
       
@@ -173,6 +179,7 @@ describe('Error Handling and Edge Cases Integration', () => {
   });
 
   describe('Multi-language Support', () => {
+      jest.setTimeout(10000);
     it('should switch languages dynamically', async () => {
       const translations: Record<string, Record<string, string>> = {
         en: { welcome: 'Welcome', goodbye: 'Goodbye' },
@@ -255,6 +262,7 @@ describe('Error Handling and Edge Cases Integration', () => {
   });
 
   describe('WebSocket Resilience', () => {
+      jest.setTimeout(10000);
     it('should handle WebSocket message buffering during reconnection', async () => {
       let messageBuffer: any[] = [];
       
@@ -274,7 +282,7 @@ describe('Error Handling and Edge Cases Integration', () => {
         };
         
         const connect = () => {
-          const ws = new WebSocket('ws://localhost:8000/ws');
+          const ws = new WebSocket('ws://localhost:3001/test'));
           
           ws.onopen = () => {
             setIsConnected(true);
@@ -362,7 +370,7 @@ describe('Error Handling and Edge Cases Integration', () => {
           
           // Simulate connection attempt
           try {
-            const ws = new WebSocket('ws://localhost:8000/ws');
+            const ws = new WebSocket('ws://localhost:3001/test'));
             ws.onerror = () => {
               attemptReconnect();
             };

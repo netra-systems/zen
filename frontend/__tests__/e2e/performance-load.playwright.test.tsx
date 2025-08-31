@@ -1,7 +1,7 @@
-/**
- * End-to-End Performance Load Test
- * 
- * Tests application performance under heavy load conditions
+import { test, expect, Page, BrowserContext } from '@playwright/test';
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+er heavy load conditions
  * Validates smooth operation with 1000+ threads and 10000+ messages
  * 
  * @compliance conventions.xml - Max 8 lines per function, under 300 lines
@@ -83,6 +83,7 @@ async function testMixedLoadConditions(page: Page): Promise<PerformanceMetrics[]
 }
 
 test.describe('Performance Load E2E', () => {
+    jest.setTimeout(10000);
   let context: BrowserContext;
   let page: Page;
 
@@ -158,7 +159,7 @@ test.describe('Performance Load E2E', () => {
     await sendMessage(page, largeContent);
     
     await expect(page.locator('.user-message'))
-      .toContainText('AAAA', { timeout: 10000 });
+      .toContainText('AAAA', { timeout: 5000 });
     
     // Test recovery
     await sendMessage(page, 'Recovery test');

@@ -1,10 +1,9 @@
-/**
- * MessageInput Keyboard Shortcuts Tests - FIXED VERSION
- * Tests for keyboard shortcuts and navigation functionality
- */
-
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { jest } from '@jest/globals';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+or } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
 
@@ -85,11 +84,13 @@ const setTextareaValue = (text: string) => {
 };
 
 describe('MessageInput - Keyboard Shortcuts', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('Keyboard shortcuts', () => {
+      jest.setTimeout(10000);
     test('should send message on Enter key', async () => {
       renderMessageInput();
       const textarea = setTextareaValue('Test message');

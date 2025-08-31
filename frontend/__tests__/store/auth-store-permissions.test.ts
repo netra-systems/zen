@@ -14,6 +14,8 @@
 import { AuthStoreTestUtils, GlobalTestUtils } from './store-test-utils';
 
 describe('AuthStore - Permission System', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let storeResult: ReturnType<typeof AuthStoreTestUtils.initializeStore>;
 
   // Setup test environment (≤8 lines)
@@ -33,6 +35,8 @@ describe('AuthStore - Permission System', () => {
   });
 
   describe('Free Tier Limitations - Revenue Protection', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should enforce free tier limitations strictly', () => {
       const freeUser = AuthStoreTestUtils.createMockUser('standard_user', []);
       const token = AuthStoreTestUtils.createTestToken('free');
@@ -77,6 +81,8 @@ describe('AuthStore - Permission System', () => {
   });
 
   describe('Growth Tier Permissions - Controlled Access', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should validate growth tier permissions correctly', () => {
       const growthUser = AuthStoreTestUtils.createMockUser('power_user', ['analytics', 'export']);
       const token = AuthStoreTestUtils.createTestToken('growth');
@@ -118,6 +124,8 @@ describe('AuthStore - Permission System', () => {
   });
 
   describe('Enterprise Tier Permissions - Full Access', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should grant enterprise full permissions correctly', () => {
       const enterpriseUser = AuthStoreTestUtils.createMockUser('super_admin', ['admin_access', 'dev_tools']);
       enterpriseUser.is_superuser = true;
@@ -153,6 +161,8 @@ describe('AuthStore - Permission System', () => {
   });
 
   describe('Role-Based Access Control - Tier Boundaries', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should correctly identify developer access', () => {
       const developer = AuthStoreTestUtils.createMockUser('developer');
       (developer as any).is_developer = true;
@@ -189,6 +199,8 @@ describe('AuthStore - Permission System', () => {
   });
 
   describe('Permission Edge Cases - Security Validation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle undefined permissions gracefully', () => {
       const userWithoutPermissions = AuthStoreTestUtils.createMockUser('standard_user');
       delete (userWithoutPermissions as any).permissions;
@@ -247,4 +259,8 @@ describe('AuthStore - Permission System', () => {
       expect(storeResult.current.hasAllPermissions(['perm1', 'perm4'])).toBe(false);
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

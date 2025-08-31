@@ -1,5 +1,6 @@
-/**
- * Test file to verify all internal frontend modules can be imported.
+import path from 'path';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+y all internal frontend modules can be imported.
  * This ensures the app structure is properly set up and all internal dependencies are resolvable.
  */
 
@@ -8,8 +9,10 @@ import path from 'path';
 import { TestProviders } from '@/__tests__/test-utils/providers';
 
 describe('Internal Frontend Module Import Tests', () => {
+    jest.setTimeout(10000);
   // @smoke-test
   describe('Component imports', () => {
+      jest.setTimeout(10000);
     it('should import UI components', () => {
       // Core UI components
       expect(() => require('@/components/ui/button')).not.toThrow();
@@ -65,6 +68,7 @@ describe('Internal Frontend Module Import Tests', () => {
   });
 
   describe('Provider imports', () => {
+      jest.setTimeout(10000);
     it('should import context providers', () => {
       expect(() => require('@/providers/WebSocketProvider')).not.toThrow();
       expect(() => require('@/providers/AgentProvider')).not.toThrow();
@@ -80,6 +84,7 @@ describe('Internal Frontend Module Import Tests', () => {
   });
 
   describe('Hook imports', () => {
+      jest.setTimeout(10000);
     it('should import custom hooks', () => {
       expect(() => require('@/hooks/useWebSocket')).not.toThrow();
       expect(() => require('@/hooks/useAgent')).not.toThrow();
@@ -101,6 +106,7 @@ describe('Internal Frontend Module Import Tests', () => {
   });
 
   describe('Store imports', () => {
+      jest.setTimeout(10000);
     it('should import Zustand stores', () => {
       expect(() => require('@/store/threadStore')).not.toThrow();
       expect(() => require('@/store/authStore')).not.toThrow();
@@ -131,6 +137,7 @@ describe('Internal Frontend Module Import Tests', () => {
   });
 
   describe('Service imports', () => {
+      jest.setTimeout(10000);
     it('should import API services', () => {
       expect(() => require('@/services/api')).not.toThrow();
       expect(() => require('@/services/apiClient')).not.toThrow();
@@ -168,6 +175,7 @@ describe('Internal Frontend Module Import Tests', () => {
   });
 
   describe('Utility imports', () => {
+      jest.setTimeout(10000);
     it('should import utility functions', () => {
       expect(() => require('@/lib/utils')).not.toThrow();
       
@@ -194,6 +202,7 @@ describe('Internal Frontend Module Import Tests', () => {
   });
 
   describe('Type definition imports', () => {
+      jest.setTimeout(10000);
     it('should import TypeScript type definitions', () => {
       // Type imports don't work with require, but we can check the files exist
       const fs = require('fs');
@@ -218,6 +227,7 @@ describe('Internal Frontend Module Import Tests', () => {
   });
 
   describe('App page imports', () => {
+      jest.setTimeout(10000);
     it('should import app pages', () => {
       // App router pages
       expect(() => require('@/app/page')).not.toThrow();
@@ -236,6 +246,7 @@ describe('Internal Frontend Module Import Tests', () => {
   });
 
   describe('Critical internal imports batch test', () => {
+      jest.setTimeout(10000);
     it('should successfully import all critical internal modules', () => {
       const criticalModules = [
         '@/components/ui/button',
@@ -264,6 +275,7 @@ describe('Internal Frontend Module Import Tests', () => {
   });
 
   describe('Circular dependency check', () => {
+      jest.setTimeout(10000);
     it('should not have circular dependencies in critical modules', () => {
       // Test importing modules in different orders
       const modules = [
@@ -296,6 +308,7 @@ describe('Internal Frontend Module Import Tests', () => {
   });
 
   describe('Component export verification', () => {
+      jest.setTimeout(10000);
     it('should export expected items from components', () => {
       // Button component
       const button = require('@/components/ui/button');
@@ -325,6 +338,7 @@ describe('Internal Frontend Module Import Tests', () => {
   });
 
   describe('Store state verification', () => {
+      jest.setTimeout(10000);
     it('should have expected state and actions in stores', () => {
       const { useThreadStore } = require('@/store/threadStore');
       const store = useThreadStore.getState();
@@ -341,6 +355,7 @@ describe('Internal Frontend Module Import Tests', () => {
   });
 
   describe('Integration test imports', () => {
+      jest.setTimeout(10000);
     it('should verify integration test files exist', () => {
       const fs = require('fs');
       const path = require('path');

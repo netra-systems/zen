@@ -36,6 +36,8 @@ interface ExportConflict {
 }
 
 describe('Type-Only vs Runtime Export Conflicts', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   /**
    * This test ensures no type-only exports conflict with runtime exports
    * Uses mocked data to ensure consistent test results

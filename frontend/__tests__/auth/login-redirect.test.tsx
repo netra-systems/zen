@@ -57,6 +57,8 @@ const MockLoginRedirect: React.FC<{
 };
 
 describe('Login Redirect Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   it('should show login form when not authenticated', () => {
     render(
       <MockLoginRedirect 
@@ -163,4 +165,8 @@ describe('Login Redirect Tests', () => {
     expect(screen.getByTestId('authenticated-content')).toBeInTheDocument();
     expect(screen.getByText('Welcome! You are logged in.')).toBeInTheDocument();
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

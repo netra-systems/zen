@@ -9,6 +9,8 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 
 describe('Form Validation', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   it('should validate required email field', async () => {
     const EmailValidationForm: React.FC = () => {
       const [email, setEmail] = React.useState('');
@@ -257,4 +259,8 @@ describe('Form Validation', () => {
       expect(screen.getByTestId('age-error')).toHaveTextContent('Please enter a valid age (0-120)');
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

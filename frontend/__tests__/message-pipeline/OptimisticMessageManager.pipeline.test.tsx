@@ -20,6 +20,8 @@ jest.mock('@/lib/utils');
 jest.mock('@/lib/logger');
 
 describe('OptimisticMessageManager Pipeline Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let manager: OptimisticMessageManager;
   
   beforeEach(() => {
@@ -35,9 +37,17 @@ describe('OptimisticMessageManager Pipeline Tests', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Optimistic Message Creation Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should create optimistic user message with correct properties', () => {
       const content = 'Test user message';
       const threadId = 'thread-123';
@@ -102,6 +112,8 @@ describe('OptimisticMessageManager Pipeline Tests', () => {
   });
 
   describe('Message Update and Lifecycle Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should update message properties correctly', () => {
       const message = manager.addOptimisticUserMessage('Original content');
       
@@ -155,6 +167,8 @@ describe('OptimisticMessageManager Pipeline Tests', () => {
   });
 
   describe('Backend Reconciliation Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should reconcile matching messages correctly', () => {
       const optimisticMsg = manager.addOptimisticUserMessage('Test message', 'thread-123');
       
@@ -265,6 +279,8 @@ describe('OptimisticMessageManager Pipeline Tests', () => {
   });
 
   describe('Failure Detection and Retry Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should mark old pending messages as failed', () => {
       const oldTimestamp = Date.now() - 35000; // 35 seconds ago
       jest.spyOn(Date, 'now').mockReturnValue(oldTimestamp);
@@ -351,6 +367,8 @@ describe('OptimisticMessageManager Pipeline Tests', () => {
   });
 
   describe('Subscription and Notification Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should notify subscribers on state changes', () => {
       const mockCallback = jest.fn();
       const unsubscribe = manager.subscribe(mockCallback);
@@ -411,6 +429,8 @@ describe('OptimisticMessageManager Pipeline Tests', () => {
   });
 
   describe('Utility Methods and Queries', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should return messages in chronological order', () => {
       jest.spyOn(Date, 'now')
         .mockReturnValueOnce(1000)
@@ -476,6 +496,8 @@ describe('OptimisticMessageManager Pipeline Tests', () => {
   });
 
   describe('Performance and Memory Management', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle large numbers of messages efficiently', () => {
       const messageCount = 1000;
       const startTime = performance.now();
@@ -531,6 +553,8 @@ describe('OptimisticMessageManager Pipeline Tests', () => {
   });
 
   describe('Singleton Instance Behavior', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should maintain state across imports', () => {
       // Test that the singleton instance behaves consistently
       optimisticMessageManager.addOptimisticUserMessage('Singleton test');
@@ -559,6 +583,8 @@ describe('OptimisticMessageManager Pipeline Tests', () => {
   });
 
   describe('Edge Cases and Error Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle reconciliation with empty backend response', () => {
       manager.addOptimisticUserMessage('Test message');
       

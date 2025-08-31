@@ -1,8 +1,9 @@
-/**
- * Deep Linking Integration Tests
- * Agent 13: Tests deep linking, URL parameters, and state restoration
- * Covers thread deep links, query parameters, hash routing, and SEO
- * Follows 25-line function rule and 450-line file limit
+import React from 'react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+unction rule and 450-line file limit
  * 
  * Business Value: Enables sharing and bookmarking for improved user retention
  * Revenue Impact: Facilitates collaboration features driving Enterprise sales
@@ -78,6 +79,7 @@ const simulateDirectNavigation = (url: string) => {
 };
 
 describe('Deep Linking Integration Tests', () => {
+    jest.setTimeout(10000);
   const { urlStates } = createDeepLinkSetup();
 
   beforeEach(() => {
@@ -95,6 +97,7 @@ describe('Deep Linking Integration Tests', () => {
   });
 
   describe('Thread Deep Linking', () => {
+      jest.setTimeout(10000);
     it('should navigate to specific thread via deep link', async () => {
       simulateDirectNavigation(urlStates.basicThread);
       mockUrlSync.getThreadFromUrl.mockReturnValue('thread-123');
@@ -139,6 +142,7 @@ describe('Deep Linking Integration Tests', () => {
   });
 
   describe('Query Parameter Handling', () => {
+      jest.setTimeout(10000);
     it('should parse and apply search query parameters', async () => {
       const searchUrl = '/corpus?query=AI%20optimization&type=document';
       simulateDirectNavigation(searchUrl);
@@ -184,6 +188,7 @@ describe('Deep Linking Integration Tests', () => {
   });
 
   describe('Hash Navigation and Anchors', () => {
+      jest.setTimeout(10000);
     it('should navigate to page sections via hash', async () => {
       simulateDirectNavigation(urlStates.hashNavigation);
       
@@ -221,6 +226,7 @@ describe('Deep Linking Integration Tests', () => {
   });
 
   describe('Complex URL State Management', () => {
+      jest.setTimeout(10000);
     it('should handle URLs with multiple parameter types', async () => {
       simulateDirectNavigation(urlStates.complexUrl);
       
@@ -267,6 +273,7 @@ describe('Deep Linking Integration Tests', () => {
   });
 
   describe('Browser History and State Restoration', () => {
+      jest.setTimeout(10000);
     it('should restore application state from browser history', async () => {
       const historyState = { activeTab: 'metrics', viewMode: 'grid' };
       
@@ -309,6 +316,7 @@ describe('Deep Linking Integration Tests', () => {
   });
 
   describe('URL Validation and Security', () => {
+      jest.setTimeout(10000);
     it('should validate URL parameters for security', async () => {
       const maliciousUrl = '/search?query=<script>alert("xss")</script>';
       

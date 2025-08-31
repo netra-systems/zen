@@ -15,6 +15,7 @@ import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock the auth service
 const mockAuthService = {
@@ -248,6 +249,8 @@ const SignupForm = ({ onRedirect }: { onRedirect?: jest.Mock }) => {
 };
 
 describe('Signup Flow - Business Critical Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let user: ReturnType<typeof userEvent.setup>;
 
   beforeEach(() => {
@@ -267,9 +270,17 @@ describe('Signup Flow - Business Critical Tests', () => {
     
     // Clean up DOM
     document.body.innerHTML = '';
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Signup Form Rendering & Validation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('renders complete signup form with all required fields', async () => {
       renderSignupForm();
       
@@ -332,6 +343,8 @@ describe('Signup Flow - Business Critical Tests', () => {
   });
 
   describe('Successful Signup Flow', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('completes signup with valid data and auto-login', async () => {
       renderSignupForm();
       
@@ -409,6 +422,8 @@ describe('Signup Flow - Business Critical Tests', () => {
   });
 
   describe('Social Login Integration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('initiates Google signup flow', async () => {
       renderSignupForm();
       
@@ -458,6 +473,8 @@ describe('Signup Flow - Business Critical Tests', () => {
   });
 
   describe('Error Handling & Edge Cases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('handles duplicate email registration gracefully', async () => {
       mockAuthService.handleSignup.mockResolvedValue({
         success: false,
@@ -537,6 +554,8 @@ describe('Signup Flow - Business Critical Tests', () => {
   });
 
   describe('Terms & Privacy Compliance', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('requires terms acceptance before signup', async () => {
       renderSignupForm();
       

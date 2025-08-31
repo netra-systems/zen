@@ -123,6 +123,8 @@ const MockWebSocketComponent: React.FC = () => {
 };
 
 describe('OAuth Flow Integration Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let mockAuthService: jest.Mocked<typeof authService>;
   let mockAuthStore: any;
 
@@ -171,6 +173,8 @@ describe('OAuth Flow Integration Tests', () => {
   });
 
   describe('OAuth Login Button Initiation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('OAuth login button initiates flow', async () => {
       // Mock auth config response
       const mockAuthConfig = {
@@ -272,6 +276,8 @@ describe('OAuth Flow Integration Tests', () => {
   });
 
   describe('OAuth Token Management', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('OAuth token stored correctly', async () => {
       const mockToken = 'valid_jwt_token';
       
@@ -348,6 +354,8 @@ describe('OAuth Flow Integration Tests', () => {
   });
 
   describe('OAuth Error Handling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('OAuth error handling displays error message', async () => {
       // Mock auth config fetch failure
       mockAuthService.getAuthConfig.mockRejectedValue(new Error('OAuth provider unavailable'));
@@ -453,6 +461,8 @@ describe('OAuth Flow Integration Tests', () => {
   });
 
   describe('Development Mode OAuth', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('Development mode auto-login flow', async () => {
       const mockDevToken = 'dev_jwt_token';
       const mockAuthConfig = {
@@ -538,6 +548,8 @@ describe('OAuth Flow Integration Tests', () => {
   });
 
   describe('OAuth Token Refresh', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('Token refresh on expiration', async () => {
       // Simulate expired token scenario
       const expiredToken = 'expired_jwt_token';
@@ -592,6 +604,8 @@ describe('OAuth Flow Integration Tests', () => {
   });
 
   describe('OAuth Logout Flow', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('OAuth logout clears tokens and redirects', async () => {
       const mockToken = 'valid_jwt_token';
       const mockUser = { email: 'test@example.com', name: 'Test User' };
@@ -645,6 +659,8 @@ describe('OAuth Flow Integration Tests', () => {
   });
 
   describe('Cross-Service Authentication', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('Token validates across all services', async () => {
       const mockToken = 'cross_service_token';
       mockAuthService.getToken.mockReturnValue(mockToken);
@@ -674,6 +690,8 @@ describe('OAuth Flow Integration Tests', () => {
 });
 
 describe('OAuth WebSocket Integration', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   test('WebSocket connection uses OAuth token', async () => {
     const mockToken = 'websocket_auth_token';
     const mockAuthService = authService as jest.Mocked<typeof authService>;
@@ -698,4 +716,8 @@ describe('OAuth WebSocket Integration', () => {
     expect(screen.getByTestId('connection-status')).toHaveTextContent('Connected');
     expect(screen.getByTestId('auth-status')).toHaveTextContent('Authenticated');
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

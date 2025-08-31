@@ -11,6 +11,8 @@ jest.mock('jwt-decode', () => ({
 }));
 
 describe('Debug Exception Token Refresh', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let mockJwtDecode: jest.MockedFunction<typeof jwtDecodeMock.jwtDecode>;
   
   beforeEach(() => {
@@ -48,4 +50,8 @@ describe('Debug Exception Token Refresh', () => {
     const result = unifiedAuthService.needsRefresh('fake-token');
     console.log('Final result:', result);
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

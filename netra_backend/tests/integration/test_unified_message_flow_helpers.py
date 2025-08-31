@@ -25,14 +25,19 @@ from netra_backend.app.schemas.core_enums import AgentStatus, WebSocketMessageTy
 from test_framework.real_services import get_real_services
 
 from netra_backend.tests.integration.jwt_token_helpers import JWTTestHelper
+from test_framework.fixtures.message_flow import MessageFlowTracker
 
-class TestSyntaxFix:
-    """Test class for orphaned methods"""
+# Global JWT helper instance
+jwt_helper = JWTTestHelper()
+logger = central_logger
 
 def create_test_token(user_id: str) -> str:
     """Create a valid test token."""
-    return jwt_helper.create_access_token(user_id, f"{user_id}@example.com")
+    return jwt_helper.create_test_token(user_id, f"{user_id}@example.com")
 
+class MessageFlowTestHelper:
+    """Helper class for testing message flows."""
+    
     def __init__(self):
         self.flow_log: List[Dict[str, Any]] = []
         self.performance_metrics: Dict[str, float] = {}
@@ -82,7 +87,10 @@ def create_test_token(user_id: str) -> str:
         for step in expected_steps:
             assert step in actual_steps, f"Missing flow step: {step}"
 
-        def __init__(self, user_id=None):
-            self.user_id = user_id
-            self.sent_messages = []
-# )  # Orphaned closing parenthesis
+class TestWebSocketMock(MockWebSocket):
+    """Extended mock WebSocket for testing."""
+    
+    def __init__(self, user_id=None):
+        super().__init__()
+        self.user_id = user_id or self._generate_user_id()
+        self.sent_messages = []

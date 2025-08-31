@@ -2,6 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { AppWithLayout } from '@/components/AppWithLayout';
 import { Header } from '@/components/Header';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock the store
 jest.mock('@/store', () => ({
@@ -47,6 +48,7 @@ jest.mock('@/components/LoginButton', () => ({
 }));
 
 describe('AppWithLayout', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     const { useAppStore } = require('@/store');
     jest.mocked(useAppStore).mockReturnValue({

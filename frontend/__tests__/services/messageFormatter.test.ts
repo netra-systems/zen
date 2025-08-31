@@ -18,7 +18,15 @@ import type { Message } from '@/types/unified';
 
 describe('MessageFormatter Service', () => {
   
+      setupAntiHang();
+  
+    jest.setTimeout(10000);
+  
   describe('Content Type Detection', () => {
+    
+        setupAntiHang();
+    
+      jest.setTimeout(10000);
     
     test('detects markdown content correctly', () => {
       const markdownContent = '# Header\n\n**Bold text** and *italic text*';
@@ -58,6 +66,10 @@ describe('MessageFormatter Service', () => {
 
   describe('Formatting Metadata Creation', () => {
     
+        setupAntiHang();
+    
+      jest.setTimeout(10000);
+    
     test('creates metadata for markdown content', () => {
       const content = '# Header\n\n- List item\n- Another item';
       const metadata = createFormattingMetadata(content);
@@ -81,6 +93,10 @@ describe('MessageFormatter Service', () => {
 
   describe('Content Processing', () => {
     
+        setupAntiHang();
+    
+      jest.setTimeout(10000);
+    
     test('processes markdown content correctly', () => {
       const content = '# Test\n\nSome **bold** text';
       const processed = processMessageContent(content);
@@ -102,6 +118,10 @@ describe('MessageFormatter Service', () => {
 
   describe('Message Enhancement', () => {
     
+        setupAntiHang();
+    
+      jest.setTimeout(10000);
+    
     test('enhances message with formatting metadata', () => {
       const message: Message = {
         id: 'test-1',
@@ -121,6 +141,10 @@ describe('MessageFormatter Service', () => {
   });
 
   describe('MessageFormatterService', () => {
+    
+        setupAntiHang();
+    
+      jest.setTimeout(10000);
     
     test('formats single message', () => {
       const message: Message = {
@@ -226,5 +250,9 @@ describe('MessageFormatter Service', () => {
     });
 
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 
 });

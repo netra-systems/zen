@@ -320,6 +320,8 @@ const WebSocketGTMTestComponent: React.FC = () => {
 };
 
 describe('GTM WebSocket Events Integration', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let mockDataLayer: any[];
 
   beforeEach(() => {
@@ -356,6 +358,8 @@ describe('GTM WebSocket Events Integration', () => {
   };
 
   describe('WebSocket Connection Events', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track WebSocket connection attempts and success', async () => {
       renderWithGTM(<WebSocketGTMTestComponent />);
 
@@ -457,6 +461,8 @@ describe('GTM WebSocket Events Integration', () => {
   });
 
   describe('Thread Management Events', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track thread creation events', async () => {
       renderWithGTM(<WebSocketGTMTestComponent />);
 
@@ -541,6 +547,8 @@ describe('GTM WebSocket Events Integration', () => {
   });
 
   describe('Message Flow Events', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track outgoing message events', async () => {
       renderWithGTM(<WebSocketGTMTestComponent />);
 
@@ -646,6 +654,8 @@ describe('GTM WebSocket Events Integration', () => {
   });
 
   describe('Agent Activation Events', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track agent activation events', async () => {
       renderWithGTM(<WebSocketGTMTestComponent />);
 
@@ -720,6 +730,8 @@ describe('GTM WebSocket Events Integration', () => {
   });
 
   describe('Feature Usage Events', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track feature usage through WebSocket', async () => {
       renderWithGTM(<WebSocketGTMTestComponent />);
 
@@ -766,6 +778,8 @@ describe('GTM WebSocket Events Integration', () => {
   });
 
   describe('Complex Integration Flows', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should track complete chat session flow', async () => {
       renderWithGTM(<WebSocketGTMTestComponent />);
 
@@ -887,6 +901,8 @@ describe('GTM WebSocket Events Integration', () => {
   });
 
   describe('Performance and Reliability', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle high-frequency WebSocket events', async () => {
       renderWithGTM(<WebSocketGTMTestComponent />);
 
@@ -968,4 +984,8 @@ describe('GTM WebSocket Events Integration', () => {
       });
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

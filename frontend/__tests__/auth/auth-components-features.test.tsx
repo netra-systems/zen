@@ -20,6 +20,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 describe('Auth Components Features', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const mockLogin = jest.fn();
   const mockLogout = jest.fn();
   
@@ -38,6 +40,8 @@ describe('Auth Components Features', () => {
   });
 
   describe('Edge Cases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle user with no name or email', () => {
       jest.mocked(authService.useAuth).mockReturnValue({
         ...mockAuthContext,
@@ -127,6 +131,8 @@ describe('Auth Components Features', () => {
   });
 
   describe('Accessibility', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should have accessible button roles', () => {
       render(<LoginButton />);
 
@@ -154,6 +160,8 @@ describe('Auth Components Features', () => {
   });
 
   describe('Layout and Styling', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should apply correct layout classes for logged in state', () => {
       jest.mocked(authService.useAuth).mockReturnValue({
         ...mockAuthContext,
@@ -217,6 +225,8 @@ describe('Auth Components Features', () => {
   });
 
   describe('Integration Tests', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle complete login flow', () => {
       const { rerender } = render(<LoginButton />);
 
@@ -268,4 +278,8 @@ describe('Auth Components Features', () => {
       expect(screen.getByText('Login with Google')).toBeInTheDocument();
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

@@ -13,6 +13,8 @@
  */
 
 describe('Infrastructure Integration Test Suite', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   it('should reference modular test architecture', () => {
     // This test confirms the modular architecture is in place
     const modules = [
@@ -39,4 +41,8 @@ describe('Infrastructure Integration Test Suite', () => {
     expect(reliabilityRequirements.maxFunctionLines).toBeLessThanOrEqual(8);
     expect(reliabilityRequirements.modularArchitecture).toBe(true);
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

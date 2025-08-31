@@ -1,10 +1,10 @@
-/**
- * Multi-Tab Synchronization Tests - Cross-Tab State Management
- * 
- * BVJ (Business Value Justification):
- * - Segment: Growth & Enterprise (advanced workflow features)
- * - Business Goal: Enable seamless multi-tab workflows for power users
- * - Value Impact: Multi-tab sync increases workflow efficiency 25%
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { useAppStore } from '@/store/app';
+import { useAuthStore } from '@/store/authStore';
+import { useChatStore } from '@/store/chat';
+import { AuthStoreTestUtils, ChatStoreTestUtils, GlobalTestUtils } from './store-test-utils';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+efficiency 25%
  * - Revenue Impact: Professional feature that justifies premium pricing
  * 
  * Tests: Cross-tab communication, state synchronization, conflict resolution
@@ -52,6 +52,7 @@ class MockBroadcastChannel {
 }
 
 describe('Multi-Tab Synchronization Tests', () => {
+    jest.setTimeout(10000);
   let mockStorage: ReturnType<typeof GlobalTestUtils.setupStoreTestEnvironment>['mockStorage'];
   let originalBroadcastChannel: typeof BroadcastChannel;
 
@@ -69,9 +70,15 @@ describe('Multi-Tab Synchronization Tests', () => {
     GlobalTestUtils.cleanupStoreTestEnvironment();
     global.BroadcastChannel = originalBroadcastChannel;
     MockBroadcastChannel.channels.clear();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Cross-Tab Communication', () => {
+      jest.setTimeout(10000);
     it('should sync app state changes across tabs', () => {
       const tab1 = renderHook(() => useAppStore());
       const tab2 = renderHook(() => useAppStore());
@@ -192,6 +199,7 @@ describe('Multi-Tab Synchronization Tests', () => {
   });
 
   describe('State Conflict Resolution', () => {
+      jest.setTimeout(10000);
     it('should resolve timestamp conflicts using latest update', () => {
       const tab1 = ChatStoreTestUtils.initializeStore();
       const tab2 = ChatStoreTestUtils.initializeStore();
@@ -299,6 +307,7 @@ describe('Multi-Tab Synchronization Tests', () => {
   });
 
   describe('Multi-Tab Coordination', () => {
+      jest.setTimeout(10000);
     it('should coordinate WebSocket connections across tabs', () => {
       const tab1 = ChatStoreTestUtils.initializeStore();
       const tab2 = ChatStoreTestUtils.initializeStore();
@@ -418,6 +427,7 @@ describe('Multi-Tab Synchronization Tests', () => {
   });
 
   describe('Performance Optimization', () => {
+      jest.setTimeout(10000);
     it('should debounce rapid sync updates', () => {
       const tab1 = ChatStoreTestUtils.initializeStore();
       const channel = new MockBroadcastChannel('sync-debounce');

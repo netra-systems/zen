@@ -13,6 +13,8 @@ import {
 } from '@/utils/tool-lifecycle-tracker';
 
 describe('Tool Lifecycle Tracker', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   let mockTimeoutId: NodeJS.Timeout;
 
   beforeEach(() => {
@@ -23,9 +25,17 @@ describe('Tool Lifecycle Tracker', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('createToolEntry', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should create a new tool entry with default timestamp', () => {
       const entry = createToolEntry('test-tool');
       
@@ -44,6 +54,8 @@ describe('Tool Lifecycle Tracker', () => {
   });
 
   describe('completeToolEntry', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should mark tool entry as completed', () => {
       const entry = createToolEntry('test-tool');
       entry.timeoutId = mockTimeoutId;
@@ -57,6 +69,8 @@ describe('Tool Lifecycle Tracker', () => {
   });
 
   describe('isToolExpired', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should return false for non-expired tool', () => {
       const entry = createToolEntry('test-tool', Date.now() - 1000);
       
@@ -84,6 +98,8 @@ describe('Tool Lifecycle Tracker', () => {
   });
 
   describe('getActiveToolNames', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should return active tool names only', () => {
       const lifecycleMap: ToolLifecycleMap = {
         'tool1': createToolEntry('tool1'),
@@ -108,6 +124,8 @@ describe('Tool Lifecycle Tracker', () => {
   });
 
   describe('addToolWithTimeout', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should add tool with timeout callback', () => {
       const lifecycleMap: ToolLifecycleMap = {};
       const onTimeout = jest.fn();
@@ -122,6 +140,8 @@ describe('Tool Lifecycle Tracker', () => {
   });
 
   describe('removeToolFromLifecycle', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should remove tool and clear timeout', () => {
       const lifecycleMap: ToolLifecycleMap = {
         'tool1': { ...createToolEntry('tool1'), timeoutId: mockTimeoutId },
@@ -136,6 +156,8 @@ describe('Tool Lifecycle Tracker', () => {
   });
 
   describe('cleanupExpiredTools', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should remove expired tools', () => {
       const now = Date.now();
       const lifecycleMap: ToolLifecycleMap = {

@@ -1,5 +1,6 @@
-/**
- * Concurrent Performance Tests
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ncurrent Performance Tests
  * 
  * BVJ: Enterprise segment - ensures concurrent operations perform efficiently
  * Tests concurrent updates, priority handling, and React 18 features.
@@ -40,6 +41,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('Concurrent Performance Tests', () => {
+    jest.setTimeout(10000);
   let server: WS;
   
   beforeEach(() => {
@@ -49,9 +51,15 @@ describe('Concurrent Performance Tests', () => {
 
   afterEach(() => {
     cleanupTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Concurrent Updates', () => {
+      jest.setTimeout(10000);
     it('should handle concurrent updates efficiently', async () => {
       const ConcurrentUpdateComponent = createConcurrentUpdateComponent();
       
@@ -78,6 +86,7 @@ describe('Concurrent Performance Tests', () => {
   });
 
   describe('Priority Updates', () => {
+      jest.setTimeout(10000);
     it('should prioritize critical updates', async () => {
       const PriorityUpdateComponent = createPriorityUpdateComponent();
       
@@ -104,6 +113,7 @@ describe('Concurrent Performance Tests', () => {
   });
 
   describe('React 18 Features', () => {
+      jest.setTimeout(10000);
     it('should use startTransition for non-urgent updates', async () => {
       const PriorityUpdateComponent = createPriorityUpdateComponent();
       

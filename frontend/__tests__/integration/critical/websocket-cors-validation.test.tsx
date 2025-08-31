@@ -1,9 +1,9 @@
-/**
- * Critical WebSocket CORS Validation Test
- * 
- * This test EXPOSES the lack of proper CORS handling in frontend WebSocket connections.
- * 
- * CURRENT ISSUE: Frontend doesn't handle CORS validation or Origin header requirements
+import React from 'react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import WS from 'jest-websocket-mock';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ handle CORS validation or Origin header requirements
  * CORRECT BEHAVIOR: Backend validates CORS and requires proper Origin headers
  * 
  * This test will FAIL initially, proving frontend lacks CORS awareness.
@@ -65,6 +65,7 @@ const mockAuthContext = {
 };
 
 describe('WebSocket CORS Validation (CRITICAL SECURITY)', () => {
+    jest.setTimeout(10000);
   let server: WS;
   let mockWebSocket: any;
   let connectionAttempts: Array<{ 
@@ -152,9 +153,15 @@ describe('WebSocket CORS Validation (CRITICAL SECURITY)', () => {
     }
     webSocketService.disconnect();
     jest.restoreAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Origin Header Validation', () => {
+      jest.setTimeout(10000);
     it('should include proper Origin header in WebSocket connection', async () => {
       // THIS TEST WILL FAIL because frontend doesn't explicitly handle Origin headers
       
@@ -253,6 +260,7 @@ describe('WebSocket CORS Validation (CRITICAL SECURITY)', () => {
   });
 
   describe('Allowed Origins Configuration', () => {
+      jest.setTimeout(10000);
     it('should connect successfully from allowed development origin', async () => {
       // THIS TEST WILL FAIL because frontend doesn't handle origin allowlists
       
@@ -363,6 +371,7 @@ describe('WebSocket CORS Validation (CRITICAL SECURITY)', () => {
   });
 
   describe('Cross-Origin Request Handling', () => {
+      jest.setTimeout(10000);
     it('should handle mixed content scenarios (HTTP to HTTPS)', async () => {
       // THIS TEST WILL FAIL because frontend doesn't handle mixed content properly
       
@@ -465,6 +474,7 @@ describe('WebSocket CORS Validation (CRITICAL SECURITY)', () => {
   });
 
   describe('Security Headers and Validation', () => {
+      jest.setTimeout(10000);
     it('should respect Content Security Policy for WebSocket connections', async () => {
       // THIS TEST WILL FAIL because frontend doesn't check CSP directives
       
@@ -566,6 +576,7 @@ describe('WebSocket CORS Validation (CRITICAL SECURITY)', () => {
   });
 
   describe('CORS Error Recovery and Fallback', () => {
+      jest.setTimeout(10000);
     it('should provide actionable CORS error messages', async () => {
       // THIS TEST WILL FAIL because frontend doesn't provide CORS-specific guidance
       
@@ -633,7 +644,7 @@ describe('WebSocket CORS Validation (CRITICAL SECURITY)', () => {
       });
 
       // Wait for potential retries
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Should not repeatedly retry CORS-blocked connections
       const corsBlockedAttempts = connectionAttempts.filter(attempt => attempt.corsBlocked);

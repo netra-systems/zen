@@ -37,11 +37,15 @@ import { apiClient } from '@/services/apiClientWrapper';
 const mockApiClient = apiClient as jest.Mocked<typeof apiClient>;
 
 describe('ThreadService Revenue-Critical Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('Thread Listing - User Activation Critical', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('lists threads with default pagination', async () => {
       const mockThreads = createMockThreads(2);
       mockApiClient.get.mockResolvedValue({ data: mockThreads });
@@ -88,6 +92,8 @@ describe('ThreadService Revenue-Critical Tests', () => {
   });
 
   describe('Thread Retrieval - Returning User Flow', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('retrieves specific thread successfully', async () => {
       const mockThread = createMockThread('thread-1', 'Important Chat');
       mockApiClient.get.mockResolvedValue({ data: mockThread });
@@ -112,6 +118,8 @@ describe('ThreadService Revenue-Critical Tests', () => {
   });
 
   describe('Thread Creation - Activation Moment', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('creates thread with title only', async () => {
       const mockThread = createMockThread('new-id', 'New Chat');
       mockApiClient.post.mockResolvedValue({ data: mockThread });
@@ -153,6 +161,8 @@ describe('ThreadService Revenue-Critical Tests', () => {
   });
 
   describe('Thread Updates - User Engagement', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('updates thread title', async () => {
       const mockThread = createMockThread('thread-1', 'Updated Title');
       mockApiClient.put.mockResolvedValue({ data: mockThread });
@@ -201,6 +211,8 @@ describe('ThreadService Revenue-Critical Tests', () => {
   });
 
   describe('Thread Deletion - Data Integrity', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('deletes thread successfully', async () => {
       mockApiClient.delete.mockResolvedValue({ data: undefined });
 
@@ -223,6 +235,8 @@ describe('ThreadService Revenue-Critical Tests', () => {
   });
 
   describe('Thread Messages - Content Loading Critical', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('retrieves messages with default pagination', async () => {
       const mockResponse = createMockMessagesResponse('thread-1', 3);
       mockApiClient.get.mockResolvedValue({ data: mockResponse });
@@ -261,6 +275,8 @@ describe('ThreadService Revenue-Critical Tests', () => {
   });
 
   describe('Concurrent Operations - System Resilience', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('handles multiple thread operations simultaneously', async () => {
       const mockThreads = setupConcurrentOperationMocks();
       const results = await executeConcurrentOperations();
@@ -335,6 +351,8 @@ describe('ThreadService Revenue-Critical Tests', () => {
   });
 
   describe('Edge Cases and Error Resilience', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     test('handles malformed API responses', async () => {
       setupMalformedResponseMock();
       await expectMalformedResponseError();

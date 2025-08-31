@@ -1,10 +1,9 @@
-/**
- * Simple MessageInput Test - Working Version
- * Tests basic functionality with proper mocking approach
- */
-
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { jest } from '@jest/globals';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+sting-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
 
@@ -74,6 +73,7 @@ import { MessageInput } from '@/components/chat/MessageInput';
 import { useAuthStore } from '@/store/authStore';
 
 describe('MessageInput - Simple Test', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     

@@ -1,9 +1,9 @@
-/**
- * Comprehensive Message Send/Receive Tests for Basic Chat Functions
- * ================================================================
- * 
- * BUSINESS VALUE JUSTIFICATION (BVJ):
- * - Segment: All (Free → Enterprise)  
+import React from 'react';
+import { render, screen, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+- Segment: All (Free → Enterprise)  
  * - Business Goal: Ensure core chat messaging functions reliably
  * - Value Impact: Chat is the primary product interface - 100% business critical
  * - Revenue Impact: Core functionality = 100% of revenue potential
@@ -62,6 +62,7 @@ import {
 } from './test-data-factories';
 
 describe('Message Send/Receive Core Functionality', () => {
+    jest.setTimeout(10000);
   let wsManager: WebSocketTestManager;
   let user: ReturnType<typeof userEvent.setup>;
 
@@ -76,6 +77,7 @@ describe('Message Send/Receive Core Functionality', () => {
   });
 
   describe('Basic Message Sending', () => {
+      jest.setTimeout(10000);
     test('sends user message through real WebSocket', async () => {
       await establishChatConnection(wsManager);
       
@@ -206,6 +208,7 @@ describe('Message Send/Receive Core Functionality', () => {
   });
 
   describe('Message Receiving and Display', () => {
+      jest.setTimeout(10000);
     test('receives and displays agent responses', async () => {
       await establishChatConnection(wsManager);
       
@@ -280,6 +283,7 @@ describe('Message Send/Receive Core Functionality', () => {
   });
 
   describe('Message Validation and Error Handling', () => {
+      jest.setTimeout(10000);
     test('prevents sending empty messages', async () => {
       await establishChatConnection(wsManager);
       

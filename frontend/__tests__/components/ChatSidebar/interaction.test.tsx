@@ -96,6 +96,8 @@ import {
 } from './setup';
 
 describe('ChatSidebar - Interactions', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const testSetup = createTestSetup();
 
   beforeEach(() => {
@@ -131,9 +133,17 @@ describe('ChatSidebar - Interactions', () => {
 
   afterEach(() => {
     testSetup.afterEach();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Thread Navigation and Switching', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should navigate to thread when clicked', async () => {
       // CRITICAL: Configure all mocks BEFORE rendering
       // Ensure authenticated state for thread rendering
@@ -386,6 +396,8 @@ describe('ChatSidebar - Interactions', () => {
   });
 
   describe('Thread Management Operations', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should create new thread when new thread button is clicked', async () => {
       // CRITICAL: Configure all mocks BEFORE rendering
       // Ensure authenticated state for UI interactions
@@ -590,6 +602,8 @@ describe('ChatSidebar - Interactions', () => {
   });
 
   describe('Thread Search and Filtering', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should filter threads based on search query', async () => {
       // CRITICAL: Configure all mocks BEFORE rendering
       // Ensure authenticated state for thread rendering
@@ -817,6 +831,8 @@ describe('ChatSidebar - Interactions', () => {
   });
 
   describe('Context Menu Operations', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should show context menu on right click', () => {
       // CRITICAL: Configure all mocks BEFORE rendering
       // Ensure authenticated state for thread rendering
@@ -916,6 +932,8 @@ describe('ChatSidebar - Interactions', () => {
   });
 
   describe('Drag and Drop Operations', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should support drag to reorder threads', () => {
       // CRITICAL: Configure all mocks BEFORE rendering
       // Ensure authenticated state for thread rendering

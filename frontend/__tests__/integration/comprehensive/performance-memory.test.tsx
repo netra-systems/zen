@@ -1,5 +1,6 @@
-/**
- * Performance and Memory Management Test Suite Index
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+rformance and Memory Management Test Suite Index
  * 
  * BVJ: Enterprise segment - ensures platform scalability, reduces infrastructure costs
  * Modular test orchestration for performance, memory, collaboration, and error recovery.
@@ -37,6 +38,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('Performance and Memory Management Test Suite', () => {
+    jest.setTimeout(10000);
   let server: WS;
   
   beforeEach(() => {
@@ -46,9 +48,15 @@ describe('Performance and Memory Management Test Suite', () => {
 
   afterEach(() => {
     cleanupTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Test Suite Overview', () => {
+      jest.setTimeout(10000);
     it('should document performance thresholds for Enterprise segment', () => {
       expect(PERFORMANCE_THRESHOLDS.MEMORY_LEAK_THRESHOLD_MB).toBe(50);
       expect(PERFORMANCE_THRESHOLDS.MAX_RENDER_TIME_MS).toBe(100);
@@ -74,6 +82,7 @@ describe('Performance and Memory Management Test Suite', () => {
   });
 
   describe('Performance Threshold Documentation', () => {
+      jest.setTimeout(10000);
     it('should define Enterprise SLA requirements', () => {
       const slaRequirements = {
         memoryLeakThreshold: '50MB - Prevents memory bloat in long-running sessions',
@@ -107,6 +116,7 @@ describe('Performance and Memory Management Test Suite', () => {
   });
 
   describe('Test Module Integration', () => {
+      jest.setTimeout(10000);
     it('should integrate with memory management tests', () => {
       // Memory management tests are in ./memory-management.test.tsx
       // Tests: Resource cleanup, large dataset handling, memory-intensive operations
@@ -139,6 +149,7 @@ describe('Performance and Memory Management Test Suite', () => {
   });
 
   describe('Business Value Justification Validation', () => {
+      jest.setTimeout(10000);
     it('should validate Enterprise segment value creation', () => {
       const bvjMetrics = {
         platformScalability: 'Ensures 99.9% uptime under load',
@@ -171,6 +182,7 @@ describe('Performance and Memory Management Test Suite', () => {
   });
 
   describe('Test Execution Strategy', () => {
+      jest.setTimeout(10000);
     it('should support selective test execution', () => {
       const testCategories = [
         'memory-management',

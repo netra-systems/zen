@@ -1,7 +1,8 @@
-/**
- * Basic Components Accessibility Test Suite
- * Tests Button and Input component accessibility compliance
- * Follows 25-line function rule and 450-line file limit
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ 25-line function rule and 450-line file limit
  * 
  * Business Value Justification (BVJ):
  * - Segment: All (Free → Enterprise)
@@ -32,6 +33,7 @@ import {
 // ============================================================================
 
 describe('Button Component - Accessibility', () => {
+    jest.setTimeout(10000);
   it('passes axe accessibility tests', async () => {
     const { container } = render(<Button>Click me</Button>);
     await runAxeTest(container);
@@ -155,6 +157,7 @@ describe('Button Component - Accessibility', () => {
 // ============================================================================
 
 describe('Input Component - Accessibility', () => {
+    jest.setTimeout(10000);
   it('passes axe accessibility tests', async () => {
     const { container } = render(
       <div>

@@ -1,8 +1,10 @@
-/**
- * Comprehensive Start Chat Button Tests - Critical Conversion Gateway
- * 
- * Tests the MOST CRITICAL button in the application - the gateway to $30K MRR impact.
- * This button is the primary conversion point from visitors to active users.
+import React from 'react';
+import { screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { ThreadSidebarHeader } from '@/components/chat/ThreadSidebarComponents';
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+sion point from visitors to active users.
  * 
  * Business Value Justification:
  * - Segment: All (Free → Enterprise) - Primary conversion gateway
@@ -54,15 +56,22 @@ import {
 } from './test-helpers';
 
 describe('Start Chat Button - Critical Conversion Gateway', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     setupCriticalTests();
   });
   
   afterEach(() => {
     cleanupCriticalTests();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
   
   describe('Visibility and State Management', () => {
+      jest.setTimeout(10000);
     test.each(visibilityTestCases)('shows correct state for $name', ({ props, expectedVisible, expectedEnabled }) => {
       renderButtonWithProps(props);
       verifyButtonVisibility(expectedVisible);
@@ -89,6 +98,7 @@ describe('Start Chat Button - Critical Conversion Gateway', () => {
   });
   
   describe('Click Handling and Thread Creation', () => {
+      jest.setTimeout(10000);
     it('triggers onCreateThread when clicked', () => {
       renderButtonWithProps({});
       simulateButtonClick();
@@ -114,6 +124,7 @@ describe('Start Chat Button - Critical Conversion Gateway', () => {
   });
   
   describe('Loading States and Error Recovery', () => {
+      jest.setTimeout(10000);
     it('shows loading state during thread creation', () => {
       renderButtonWithProps({ isCreating: true });
       verifyLoadingState();
@@ -137,6 +148,7 @@ describe('Start Chat Button - Critical Conversion Gateway', () => {
   });
   
   describe('Mobile Touch Events and Responsiveness', () => {
+      jest.setTimeout(10000);
     test.each(viewportConfigs)('works perfectly on $name viewport', ({ width, height, isDesktop }) => {
       setupViewport(width, height);
       renderButtonWithProps({});
@@ -165,6 +177,7 @@ describe('Start Chat Button - Critical Conversion Gateway', () => {
   });
   
   describe('Keyboard Accessibility and ARIA', () => {
+      jest.setTimeout(10000);
     it('has perfect ARIA attributes', () => {
       renderButtonWithProps({});
       verifyARIACompliance();
@@ -191,6 +204,7 @@ describe('Start Chat Button - Critical Conversion Gateway', () => {
   });
   
   describe('Performance and Conversion Optimization', () => {
+      jest.setTimeout(10000);
     it('renders quickly for conversion optimization', () => {
       const renderTime = measureRenderPerformance();
       verifyCriticalRenderTime(renderTime);

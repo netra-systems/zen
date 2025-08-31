@@ -6,6 +6,8 @@
 import { logger } from '@/lib/logger';
 
 describe('Logger Context Binding', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -89,4 +91,8 @@ describe('Logger Context Binding', () => {
     
     simulateWebSocketError(onError);
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

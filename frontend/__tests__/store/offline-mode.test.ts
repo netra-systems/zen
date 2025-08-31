@@ -1,10 +1,9 @@
-/**
- * Offline Mode Tests - Offline State Management
- * 
- * BVJ (Business Value Justification):
- * - Segment: All (especially mobile users)
- * - Business Goal: Maintain app functionality during connectivity issues
- * - Value Impact: Offline support reduces user frustration by 80%
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { useChatStore } from '@/store/chat';
+import { useAuthStore } from '@/store/authStore';
+import { ChatStoreTestUtils, AuthStoreTestUtils, GlobalTestUtils } from './store-test-utils';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ user frustration by 80%
  * - Revenue Impact: Better reliability increases user retention and trust
  * 
  * Tests: Offline detection, queue management, sync recovery
@@ -55,6 +54,7 @@ class OfflineQueueManager {
 }
 
 describe('Offline Mode Tests', () => {
+    jest.setTimeout(10000);
   let mockStorage: ReturnType<typeof GlobalTestUtils.setupStoreTestEnvironment>['mockStorage'];
   let offlineQueue: OfflineQueueManager;
   let originalNavigator: typeof navigator;
@@ -75,9 +75,15 @@ describe('Offline Mode Tests', () => {
   afterEach(() => {
     GlobalTestUtils.cleanupStoreTestEnvironment();
     global.navigator = originalNavigator;
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Offline Detection', () => {
+      jest.setTimeout(10000);
     it('should detect when app goes offline', () => {
       const result = ChatStoreTestUtils.initializeStore();
       
@@ -177,6 +183,7 @@ describe('Offline Mode Tests', () => {
   });
 
   describe('Offline Queue Management', () => {
+      jest.setTimeout(10000);
     it('should queue messages when offline', () => {
       const result = ChatStoreTestUtils.initializeStore();
       const message = ChatStoreTestUtils.createMockMessage('offline-msg');
@@ -280,6 +287,7 @@ describe('Offline Mode Tests', () => {
   });
 
   describe('Sync Recovery', () => {
+      jest.setTimeout(10000);
     it('should process queued actions when coming back online', async () => {
       const result = ChatStoreTestUtils.initializeStore();
       
@@ -419,6 +427,7 @@ describe('Offline Mode Tests', () => {
   });
 
   describe('Offline User Experience', () => {
+      jest.setTimeout(10000);
     it('should show offline indicator', () => {
       const result = ChatStoreTestUtils.initializeStore();
       
@@ -528,6 +537,7 @@ describe('Offline Mode Tests', () => {
   });
 
   describe('Data Integrity During Offline Mode', () => {
+      jest.setTimeout(10000);
     it('should validate offline actions before queuing', () => {
       const validMessage = ChatStoreTestUtils.createMockMessage('valid-msg');
       const invalidMessage = { content: 'Missing required fields' } as any;

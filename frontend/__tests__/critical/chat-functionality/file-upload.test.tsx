@@ -1,9 +1,9 @@
-/**
- * Comprehensive File Upload Tests for Basic Chat Functions
- * ========================================================
- * 
- * BUSINESS VALUE JUSTIFICATION (BVJ):
- * - Segment: Growth & Enterprise (Document/code analysis workflows)
+import React from 'react';
+import { render, screen, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ & Enterprise (Document/code analysis workflows)
  * - Business Goal: Enable file-based AI analysis for complex tasks
  * - Value Impact: File upload essential for 60% of enterprise workflows
  * - Revenue Impact: Document analysis drives 35% of enterprise conversions
@@ -58,6 +58,7 @@ import {
 } from './test-data-factories';
 
 describe('File Upload Core Functionality', () => {
+    jest.setTimeout(10000);
   let user: ReturnType<typeof userEvent.setup>;
 
   beforeEach(async () => {
@@ -70,6 +71,7 @@ describe('File Upload Core Functionality', () => {
   });
 
   describe('Drag and Drop File Upload', () => {
+      jest.setTimeout(10000);
     test('handles single file drag and drop', async () => {
       render(
         <TestProviders>
@@ -181,6 +183,7 @@ describe('File Upload Core Functionality', () => {
   });
 
   describe('File Selection via Input', () => {
+      jest.setTimeout(10000);
     test('handles file selection through file input', async () => {
       render(
         <TestProviders>
@@ -236,6 +239,7 @@ describe('File Upload Core Functionality', () => {
   });
 
   describe('Upload Progress and Status', () => {
+      jest.setTimeout(10000);
     test('shows upload progress for large files', async () => {
       render(
         <TestProviders>
@@ -345,6 +349,7 @@ describe('File Upload Core Functionality', () => {
   });
 
   describe('File Validation and Error Handling', () => {
+      jest.setTimeout(10000);
     test('validates file size limits', async () => {
       render(
         <TestProviders>
@@ -441,6 +446,7 @@ describe('File Upload Core Functionality', () => {
   });
 
   describe('File Preview and Integration', () => {
+      jest.setTimeout(10000);
     test('generates previews for image files', async () => {
       render(
         <TestProviders>

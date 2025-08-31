@@ -1,10 +1,10 @@
-/**
- * Data Fetching Integration Tests - Pagination Module
- * Tests pagination and infinite scrolling patterns
- * 
- * Business Value Justification (BVJ):
- * - Segment: Mid and Enterprise (handling large datasets)  
- * - Goal: Enable efficient handling of large data volumes
+import { render, screen, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { setupServer } from 'msw/node';
+import { http, HttpResponse } from 'msw';
+import React, { useState, useEffect } from 'react';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ge data volumes
  * - Value Impact: Improves performance for power users
  * - Revenue Impact: +$50K MRR from enhanced enterprise features
  */
@@ -270,6 +270,11 @@ afterEach(() => {
   jest.clearAllMocks();
   act(() => {
     jest.runAllTimers();
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
   });
 });
 
@@ -283,6 +288,7 @@ afterAll(() => {
 // ============================================================================
 
 describe('Data Fetching - Pagination', () => {
+    jest.setTimeout(10000);
   it('loads first page by default', async () => {
     render(<PaginatedThreads />);
     
@@ -387,6 +393,7 @@ describe('Data Fetching - Pagination', () => {
 // ============================================================================
 
 describe('Data Fetching - Infinite Scrolling', () => {
+    jest.setTimeout(10000);
   it('loads more data when scrolling to bottom', async () => {
     render(<InfiniteScrollComponent />);
     

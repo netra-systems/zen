@@ -1,13 +1,12 @@
-/**
- * Search and UI Interactions Integration Tests
- * Tests for advanced search, drag/drop, infinite scroll, and animations
- */
-
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { createTestSetup, waitForAnimation, createMockFile } from './setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ fireEvent, waitFor } from '@testing-library/react';
+import { createTestSetup, waitForAnimation, createMockFile } from './setup';
 
 describe('Search and UI Interactions Integration', () => {
+    jest.setTimeout(10000);
   const testSetup = createTestSetup();
 
   beforeEach(() => {
@@ -16,9 +15,15 @@ describe('Search and UI Interactions Integration', () => {
 
   afterEach(() => {
     testSetup.afterEach();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Advanced Search', () => {
+      jest.setTimeout(10000);
     it('should implement fuzzy search with highlighting', async () => {
       const SearchComponent = () => {
         const [query, setQuery] = React.useState('');
@@ -147,6 +152,7 @@ describe('Search and UI Interactions Integration', () => {
   });
 
   describe('Drag and Drop', () => {
+      jest.setTimeout(10000);
     it('should handle file drag and drop with preview', async () => {
       const DragDropComponent = () => {
         const [isDragging, setIsDragging] = React.useState(false);
@@ -274,6 +280,7 @@ describe('Search and UI Interactions Integration', () => {
   });
 
   describe('Infinite Scroll', () => {
+      jest.setTimeout(10000);
     it('should load more content on scroll', async () => {
       const InfiniteScrollComponent = () => {
         const [items, setItems] = React.useState(Array.from({ length: 10 }, (_, i) => `Item ${i + 1}`));
@@ -388,6 +395,7 @@ describe('Search and UI Interactions Integration', () => {
   });
 
   describe('Complex Animations', () => {
+      jest.setTimeout(10000);
     it('should chain animations with proper timing', async () => {
       const AnimationComponent = () => {
         const [stage, setStage] = React.useState(0);

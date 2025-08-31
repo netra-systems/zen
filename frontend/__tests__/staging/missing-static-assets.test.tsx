@@ -20,6 +20,8 @@ import path from 'path';
 import fs from 'fs';
 
 describe('Missing Static Assets 404 Errors - Staging Replication', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const originalEnv = process.env;
   
   beforeAll(() => {
@@ -35,6 +37,8 @@ describe('Missing Static Assets 404 Errors - Staging Replication', () => {
   });
 
   describe('Missing favicon.ico', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: favicon.ico returns 404 in staging
@@ -107,6 +111,8 @@ describe('Missing Static Assets 404 Errors - Staging Replication', () => {
   });
 
   describe('Missing Standard Web Assets', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: robots.txt might be missing
@@ -192,6 +198,8 @@ describe('Missing Static Assets 404 Errors - Staging Replication', () => {
   });
 
   describe('Next.js Static Asset Generation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: _next/static files not properly generated or served
@@ -240,6 +248,8 @@ describe('Missing Static Assets 404 Errors - Staging Replication', () => {
   });
 
   describe('CDN and Static File Serving Configuration', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: Static asset serving not configured correctly for staging
@@ -295,6 +305,8 @@ describe('Missing Static Assets 404 Errors - Staging Replication', () => {
   });
 
   describe('Deployment-Specific Static Asset Issues', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: Docker build not copying static assets correctly
@@ -339,6 +351,8 @@ describe('Missing Static Assets 404 Errors - Staging Replication', () => {
   });
 
   describe('Browser Asset Request Patterns', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: Browsers requesting standard assets that don't exist
@@ -396,6 +410,8 @@ describe('Missing Static Assets 404 Errors - Staging Replication', () => {
   });
 
   describe('Performance Impact of Missing Assets', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     /**
      * EXPECTED TO FAIL
      * Root cause: 404 errors for assets impact page load performance
@@ -430,4 +446,8 @@ describe('Missing Static Assets 404 Errors - Staging Replication', () => {
       expect(shouldFix).toBe(true);
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

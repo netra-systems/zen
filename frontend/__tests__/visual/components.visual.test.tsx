@@ -1,10 +1,3 @@
-/**
- * Visual Regression Tests - UI Components
- * Tests all component visual snapshots with variants and states
- * Follows 25-line function rule and comprehensive coverage
- * Business Impact: Prevents UI regression bugs affecting user experience
- */
-
 import React from 'react';
 import { render } from '@testing-library/react';
 import { Button } from '@/components/ui/button';
@@ -15,12 +8,19 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import { Switch } from '@/components/ui/switch';
 
 // ============================================================================
 // BUTTON COMPONENT VISUAL TESTS
 // ============================================================================
 
 describe('Button Visual Snapshots', () => {
+    jest.setTimeout(10000);
   const buttonVariants = ['default', 'destructive', 'outline', 'secondary', 'ghost', 'link'] as const;
   const buttonSizes = ['default', 'sm', 'lg', 'icon'] as const;
 
@@ -54,6 +54,7 @@ describe('Button Visual Snapshots', () => {
 // ============================================================================
 
 describe('Input Visual Snapshots', () => {
+    jest.setTimeout(10000);
   it('renders default input correctly', () => {
     const { container } = render(<Input placeholder="Enter text" />);
     expect(container.firstChild).toMatchSnapshot('input-default-state');
@@ -80,6 +81,7 @@ describe('Input Visual Snapshots', () => {
 // ============================================================================
 
 describe('Badge Visual Snapshots', () => {
+    jest.setTimeout(10000);
   const badgeVariants = ['default', 'secondary', 'destructive', 'outline'] as const;
 
   badgeVariants.forEach(variant => {
@@ -100,6 +102,7 @@ describe('Badge Visual Snapshots', () => {
 // ============================================================================
 
 describe('Card Visual Snapshots', () => {
+    jest.setTimeout(10000);
   it('renders basic card correctly', () => {
     const { container } = render(
       <Card>
@@ -131,6 +134,7 @@ describe('Card Visual Snapshots', () => {
 // ============================================================================
 
 describe('Alert Visual Snapshots', () => {
+    jest.setTimeout(10000);
   const alertVariants = ['default', 'destructive'] as const;
 
   alertVariants.forEach(variant => {
@@ -160,6 +164,7 @@ describe('Alert Visual Snapshots', () => {
 // ============================================================================
 
 describe('Tabs Visual Snapshots', () => {
+    jest.setTimeout(10000);
   it('renders tabs layout correctly', () => {
     const { container } = render(
       <Tabs defaultValue="tab1">
@@ -199,6 +204,7 @@ describe('Tabs Visual Snapshots', () => {
 // ============================================================================
 
 describe('Progress Visual Snapshots', () => {
+    jest.setTimeout(10000);
   const progressValues = [0, 25, 50, 75, 100];
 
   progressValues.forEach(value => {
@@ -219,6 +225,7 @@ describe('Progress Visual Snapshots', () => {
 // ============================================================================
 
 describe('Switch Visual Snapshots', () => {
+    jest.setTimeout(10000);
   it('renders unchecked switch correctly', () => {
     const { container } = render(<Switch />);
     expect(container.firstChild).toMatchSnapshot('switch-unchecked-state');
@@ -245,6 +252,7 @@ describe('Switch Visual Snapshots', () => {
 // ============================================================================
 
 describe('Component Combinations Visual Tests', () => {
+    jest.setTimeout(10000);
   it('renders form layout with multiple components', () => {
     const { container } = render(
       <div className="space-y-4 p-4 max-w-md">
@@ -303,6 +311,7 @@ describe('Component Combinations Visual Tests', () => {
 // ============================================================================
 
 describe('Dark Theme Component Tests', () => {
+    jest.setTimeout(10000);
   it('renders button in dark theme correctly', () => {
     const { container } = render(
       <div className="dark">

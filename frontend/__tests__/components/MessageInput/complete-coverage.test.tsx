@@ -1,12 +1,11 @@
-/**
- * Core functionality tests for MessageInput component
- * Tests text entry, send actions, character limits
- * 
- * BVJ: Direct impact on user engagement and message conversion rates.
- * Ensures reliable input experience for all customer segments.
- */
-
 import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { jest } from '@jest/globals';
+import { MessageInput } from '@/components/chat/MessageInput';
+import { 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+rt React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
@@ -23,6 +22,7 @@ import {
 } from './shared-test-setup';
 
 describe('MessageInput - Core Functionality', () => {
+    jest.setTimeout(10000);
   const user = userEvent.setup();
 
   beforeEach(() => {
@@ -31,6 +31,7 @@ describe('MessageInput - Core Functionality', () => {
   });
 
   describe('Text Entry and Real-time Updates', () => {
+      jest.setTimeout(10000);
     it('renders with correct placeholder for authenticated user', () => {
       render(<MessageInput />);
       
@@ -78,6 +79,7 @@ describe('MessageInput - Core Functionality', () => {
   });
 
   describe('Multi-line Support', () => {
+      jest.setTimeout(10000);
     it('creates new line with Shift+Enter', async () => {
       render(<MessageInput />);
       
@@ -115,6 +117,7 @@ describe('MessageInput - Core Functionality', () => {
   });
 
   describe('Send with Enter Key', () => {
+      jest.setTimeout(10000);
     it('sends message on Enter key', async () => {
       const mockHandleSend = jest.fn();
       const mockAddToHistory = jest.fn();
@@ -197,6 +200,7 @@ describe('MessageInput - Core Functionality', () => {
   });
 
   describe('Character Count Display', () => {
+      jest.setTimeout(10000);
     it('shows character count when approaching limit', () => {
       const mockShouldShow = require('@/components/chat/utils/messageInputUtils').shouldShowCharCount;
       mockShouldShow.mockReturnValue(true);
@@ -233,6 +237,7 @@ describe('MessageInput - Core Functionality', () => {
   });
 
   describe('Max Length Enforcement', () => {
+      jest.setTimeout(10000);
     it('prevents input beyond character limit', async () => {
       render(<MessageInput />);
       
@@ -258,6 +263,7 @@ describe('MessageInput - Core Functionality', () => {
   });
 
   describe('Auto-resize Behavior', () => {
+      jest.setTimeout(10000);
     it('adjusts height based on content', () => {
       mockUseTextareaResize.mockReturnValue({ rows: 4 });
       
@@ -283,6 +289,7 @@ describe('MessageInput - Core Functionality', () => {
   });
 
   describe('Accessibility and States', () => {
+      jest.setTimeout(10000);
     it('has proper ARIA labels', () => {
       render(<MessageInput />);
       

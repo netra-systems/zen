@@ -4,8 +4,12 @@
  */
 
 describe('External NPM Dependencies Import Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   // @smoke-test
   describe('Core React and Next.js imports', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should import React', () => {
       const React = require('react');
       expect(React).toBeDefined();
@@ -51,6 +55,8 @@ describe('External NPM Dependencies Import Tests', () => {
   });
 
   describe('State management imports', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should import Zustand', () => {
       const zustand = require('zustand');
       expect(zustand).toBeDefined();
@@ -66,6 +72,8 @@ describe('External NPM Dependencies Import Tests', () => {
   });
 
   describe('UI library imports', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should import Radix UI components', () => {
       // Note: Some Radix UI components may not be installed
       try {
@@ -153,6 +161,8 @@ describe('External NPM Dependencies Import Tests', () => {
   });
 
   describe('Form and validation imports', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should import React Hook Form', () => {
       const rhf = require('react-hook-form');
       expect(rhf).toBeDefined();
@@ -181,6 +191,8 @@ describe('External NPM Dependencies Import Tests', () => {
   });
 
   describe('Data visualization imports', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should import Recharts', () => {
       const recharts = require('recharts');
       expect(recharts).toBeDefined();
@@ -199,6 +211,8 @@ describe('External NPM Dependencies Import Tests', () => {
   });
 
   describe('Markdown and code highlighting imports', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should import React Markdown', () => {
       try {
         const reactMarkdown = require('react-markdown');
@@ -255,6 +269,8 @@ describe('External NPM Dependencies Import Tests', () => {
   });
 
   describe('Utility library imports', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should import date-fns', () => {
       const dateFns = require('date-fns');
       expect(dateFns).toBeDefined();
@@ -280,6 +296,8 @@ describe('External NPM Dependencies Import Tests', () => {
   });
 
   describe('Development and testing imports', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should import Jest DOM matchers', () => {
       const jestDom = require('@testing-library/jest-dom');
       expect(jestDom).toBeDefined();
@@ -325,6 +343,8 @@ describe('External NPM Dependencies Import Tests', () => {
   });
 
   describe('TypeScript type imports', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should import TypeScript type packages', () => {
       // Type packages may not be directly importable
       const fs = require('fs');
@@ -344,6 +364,8 @@ describe('External NPM Dependencies Import Tests', () => {
   });
 
   describe('Tailwind CSS imports', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should import Tailwind CSS animate', () => {
       const tailwindAnimate = require('tailwindcss-animate');
       expect(tailwindAnimate).toBeDefined();
@@ -351,6 +373,8 @@ describe('External NPM Dependencies Import Tests', () => {
   });
 
   describe('ESLint and Prettier imports', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should have ESLint configuration packages', () => {
       // These are typically dev dependencies
       try {
@@ -363,6 +387,8 @@ describe('External NPM Dependencies Import Tests', () => {
   });
 
   describe('Critical imports batch test', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should successfully import all critical dependencies', () => {
       const criticalDeps = [
         'react',
@@ -393,6 +419,8 @@ describe('External NPM Dependencies Import Tests', () => {
   });
 
   describe('Optional imports', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should check for optional dependencies', () => {
       const optionalDeps = [
         '@tanstack/react-query',
@@ -417,4 +445,8 @@ describe('External NPM Dependencies Import Tests', () => {
       }
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

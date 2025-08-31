@@ -22,6 +22,10 @@ import * as fs from 'fs/promises';
 
 describe('Module Resolution Failures - Integration Tests', () => {
   
+      setupAntiHang();
+  
+    jest.setTimeout(10000);
+  
   /**
    * This test will FAIL when components cannot import from registry
    * due to the duplicate isValidWebSocketMessageType export

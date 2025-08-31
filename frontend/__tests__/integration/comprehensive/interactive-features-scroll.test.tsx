@@ -1,6 +1,7 @@
-/**
- * Interactive Features Scroll Integration Tests - Main Entry
- * ULTRA DEEP THINK: Module-based architecture - Main coordinator ≤300 lines
+import './interactive-features-scroll-basic.test';
+import './interactive-features-scroll-advanced.test';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+tecture - Main coordinator ≤300 lines
  * 
  * This file serves as the main entry point for scroll tests.
  * Actual test implementations are split into smaller modules for compliance.

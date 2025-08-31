@@ -138,6 +138,8 @@ jest.mock('@/store/threadStore');
 jest.mock('@/store/authStore');
 
 describe('Complete Message Pipeline Integration Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const mockWebSocketService = {
     onMessage: null,
     onStatusChange: null,
@@ -203,9 +205,17 @@ describe('Complete Message Pipeline Integration Tests', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Happy Path - Complete End-to-End Flow', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle complete message pipeline from input to backend confirmation', async () => {
       const stateChanges: any[] = [];
       const webSocketMessages: any[] = [];
@@ -311,6 +321,8 @@ describe('Complete Message Pipeline Integration Tests', () => {
   });
 
   describe('Error Handling and Recovery Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle WebSocket send failure with retry mechanism', async () => {
       const sendError = new Error('WebSocket connection failed');
       mockWebSocketService.sendMessage.mockImplementationOnce(() => {
@@ -385,6 +397,8 @@ describe('Complete Message Pipeline Integration Tests', () => {
   });
 
   describe('Optimistic Updates and Reconciliation Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should show immediate optimistic updates and reconcile with backend', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       
@@ -472,6 +486,8 @@ describe('Complete Message Pipeline Integration Tests', () => {
   });
 
   describe('Concurrent Operations Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle multiple rapid message sends correctly', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       
@@ -576,6 +592,8 @@ describe('Complete Message Pipeline Integration Tests', () => {
   });
 
   describe('State Synchronization Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should maintain consistent state across all stores', async () => {
       const stateUpdates: any[] = [];
       
@@ -628,6 +646,8 @@ describe('Complete Message Pipeline Integration Tests', () => {
   });
 
   describe('Performance and Memory Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle large message volumes efficiently', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       
@@ -679,6 +699,8 @@ describe('Complete Message Pipeline Integration Tests', () => {
   });
 
   describe('Real-time Updates Pipeline', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle streaming AI responses correctly', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       

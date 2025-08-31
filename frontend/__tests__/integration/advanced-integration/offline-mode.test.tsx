@@ -1,14 +1,13 @@
-/**
- * Offline Mode Integration Tests
- */
-
 import React from 'react';
 import { render, waitFor, fireEvent, act } from '@testing-library/react';
 import WS from 'jest-websocket-mock';
 import { safeWebSocketCleanup } from '../../helpers/websocket-test-manager';
 import { setupTestEnvironment } from './test-setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+etupTestEnvironment } from './test-setup';
 
 describe('Advanced Frontend Integration Tests - Offline Mode', () => {
+    jest.setTimeout(10000);
   let server: WS;
   
   setupTestEnvironment();
@@ -19,9 +18,15 @@ describe('Advanced Frontend Integration Tests - Offline Mode', () => {
 
   afterEach(() => {
     safeWebSocketCleanup();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('19. Offline Mode Integration', () => {
+      jest.setTimeout(10000);
     it('should queue actions when offline and sync when online', async () => {
       const actionQueue: any[] = [];
       

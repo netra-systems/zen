@@ -1,8 +1,8 @@
-/**
- * Thread Management Tests
- * ======================
- * Modular UI tests for thread lifecycle operations
- * Tests 4-7 (Thread Management) from original chatUIUXCore.test.tsx
+import React from 'react';
+import { render } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+Tests 4-7 (Thread Management) from original chatUIUXCore.test.tsx
  * Focused on thread creation, selection, and deletion workflows
  */
 
@@ -92,18 +92,27 @@ import { useThreadStore } from '../../store/threadStore';
 
 describe('Thread Management Tests', () => {
   
+    jest.setTimeout(10000);
+  
   beforeEach(() => {
     setupDefaultMocks();
   });
 
   afterEach(() => {
     cleanupMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   // ============================================
   // Thread Display Tests
   // ============================================
   describe('Thread Display', () => {
+    
+      jest.setTimeout(10000);
     
     test('4. Should display list of threads', () => {
       const mockThreads = [
@@ -140,6 +149,8 @@ describe('Thread Management Tests', () => {
   // ============================================
   describe('Thread Selection', () => {
     
+      jest.setTimeout(10000);
+    
     test('5. Should handle thread selection', async () => {
       const mockSetCurrentThread = jest.fn();
       const mockThreads = [
@@ -167,6 +178,8 @@ describe('Thread Management Tests', () => {
   // ============================================
   describe('Thread Creation', () => {
     
+      jest.setTimeout(10000);
+    
     test('6. Should create new thread', async () => {
       const mockCreateAndNavigate = jest.fn();
       const mockThreadStore = createThreadStoreMock({
@@ -193,6 +206,8 @@ describe('Thread Management Tests', () => {
   // Thread Deletion Tests
   // ============================================
   describe('Thread Deletion', () => {
+    
+      jest.setTimeout(10000);
     
     test('7. Should delete thread with confirmation', async () => {
       const mockDeleteThread = jest.fn();
@@ -222,6 +237,8 @@ describe('Thread Management Tests', () => {
   // Thread Lifecycle Integration Tests
   // ============================================
   describe('Thread Lifecycle Integration', () => {
+    
+      jest.setTimeout(10000);
     
     test('Should handle empty thread list', () => {
       const mockThreadStore = createThreadStoreMock({

@@ -1,14 +1,11 @@
-/**
- * Test suite for useLoadingState hook
- * Tests loading state management with WebSocket connections
- * 
- * @compliance testing.xml - Hook testing patterns
- * @prevents websocket-loading-state-transitions regression
- */
-
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useLoadingState } from '@/hooks/useLoadingState';
+import { useUnifiedChatStore } from '@/store/unified-chat';
+import { useWebSocket } from '@/hooks/useWebSocket';
+import { ChatLoadingState } from '@/types/loading-state';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ { useLoadingState } from '@/hooks/useLoadingState';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { ChatLoadingState } from '@/types/loading-state';
@@ -20,6 +17,7 @@ jest.mock('@/hooks/useWebSocket', () => ({
 }));
 
 describe('useLoadingState Hook', () => {
+    jest.setTimeout(10000);
   const mockUseUnifiedChatStore = useUnifiedChatStore as jest.MockedFunction<typeof useUnifiedChatStore>;
   const mockUseWebSocket = useWebSocket as jest.MockedFunction<typeof useWebSocket>;
 

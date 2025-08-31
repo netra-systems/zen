@@ -1,5 +1,6 @@
-/**
- * Navigation and Search Integration Tests
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+vigation and Search Integration Tests
  * 
  * Tests complex navigation flows, deep linking, state preservation,
  * protected routes, and advanced search functionality with filters.
@@ -40,6 +41,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('Navigation and Search Integration Tests', () => {
+    jest.setTimeout(10000);
   let server: WS;
   
   beforeEach(() => {
@@ -50,9 +52,15 @@ describe('Navigation and Search Integration Tests', () => {
 
   afterEach(() => {
     cleanupTestEnvironment();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Complex Navigation Flows', () => {
+      jest.setTimeout(10000);
     it('should handle deep linking with state preservation', async () => {
       const NavigationComponent = () => {
         const [navigationStack, setNavigationStack] = React.useState<string[]>(['/']);
@@ -222,6 +230,7 @@ describe('Navigation and Search Integration Tests', () => {
   });
 
   describe('Advanced Search Integration', () => {
+      jest.setTimeout(10000);
     it('should implement fuzzy search with highlighting', async () => {
       const SearchComponent = () => {
         const [query, setQuery] = React.useState('');

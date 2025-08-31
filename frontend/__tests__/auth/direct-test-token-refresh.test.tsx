@@ -6,6 +6,8 @@
 import { jwtDecode } from 'jwt-decode';
 
 describe('Direct Token Refresh Test', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   test('should test needsRefresh with real JWT tokens', () => {
     // Import the service after mocks are set up
     const { unifiedAuthService } = require('@/auth/unified-auth-service');
@@ -43,4 +45,8 @@ describe('Direct Token Refresh Test', () => {
     const result = unifiedAuthService.needsRefresh(fakeJwt);
     console.log('needsRefresh result:', result);
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

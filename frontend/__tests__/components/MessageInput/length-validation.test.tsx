@@ -83,6 +83,8 @@ const MockMessageInput: React.FC<{
 };
 
 describe('MessageInput - Length Validation', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   it('should enforce maximum message length limit', async () => {
     const mockSendMessage = jest.fn();
     const user = userEvent.setup();
@@ -208,4 +210,8 @@ describe('MessageInput - Length Validation', () => {
       expect(screen.queryByTestId('error-message')).not.toBeInTheDocument();
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

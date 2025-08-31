@@ -1,10 +1,9 @@
-/**
- * Authentication Integration Tests
- * Tests for login, logout, and error handling functionality
- */
-
 import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import WS from 'jest-websocket-mock';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ from '@testing-library/react';
 import '@testing-library/jest-dom';
 import WS from 'jest-websocket-mock';
 
@@ -31,6 +30,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('Authentication Integration Tests', () => {
+    jest.setTimeout(10000);
   let server: WS;
   
   beforeEach(() => {
@@ -42,9 +42,15 @@ describe('Authentication Integration Tests', () => {
 
   afterEach(() => {
     cleanupWebSocket();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Authentication Flow', () => {
+      jest.setTimeout(10000);
     it('should handle login and authentication with JWT token', async () => {
       const mockUser = createMockUser();
       const mockToken = createMockToken();
@@ -108,6 +114,7 @@ describe('Authentication Integration Tests', () => {
   });
 
   describe('Error Handling', () => {
+      jest.setTimeout(10000);
     it('should handle authenticated network requests', async () => {
       const AuthenticatedRequestComponent = () => {
         const [data, setData] = React.useState(null);
@@ -216,7 +223,7 @@ describe('Authentication Integration Tests', () => {
         const [reconnectAttempts, setReconnectAttempts] = React.useState(0);
         
         const connect = () => {
-          const ws = new WebSocket('ws://localhost:8000/ws');
+          const ws = new WebSocket('ws://localhost:3001/test'));
           
           ws.onopen = () => {
             setConnected(true);

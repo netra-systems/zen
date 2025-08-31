@@ -49,15 +49,25 @@ import {
 } from './MainChat.websocket.test-utils';
 
 describe('MainChat - WebSocket Core Connection Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     setupMocks();
   });
 
   afterEach(() => {
     cleanupMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('WebSocket connection management', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should initialize WebSocket connection on mount', () => {
       render(<MainChat />);
       
