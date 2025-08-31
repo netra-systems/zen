@@ -152,19 +152,22 @@ class FrontendLogger {
     if (this.isDevelopment || level >= LogLevel.ERROR) {
       const formattedMessage = this.formatMessage(levelName, sanitizedMessage, sanitizedContext);
       
-      switch (level) {
-        case LogLevel.DEBUG:
-          console.debug(formattedMessage, sanitizedContext);
-          break;
-        case LogLevel.INFO:
-          console.info(formattedMessage, sanitizedContext);
-          break;
-        case LogLevel.WARN:
-          console.warn(formattedMessage, sanitizedContext);
-          break;
-        case LogLevel.ERROR:
-          console.error(formattedMessage, error || sanitizedContext);
-          break;
+      // Guard against environments where console might not be available
+      if (typeof console !== 'undefined' && console) {
+        switch (level) {
+          case LogLevel.DEBUG:
+            if (console.debug) console.debug(formattedMessage, sanitizedContext);
+            break;
+          case LogLevel.INFO:
+            if (console.info) console.info(formattedMessage, sanitizedContext);
+            break;
+          case LogLevel.WARN:
+            if (console.warn) console.warn(formattedMessage, sanitizedContext);
+            break;
+          case LogLevel.ERROR:
+            if (console.error) console.error(formattedMessage, error || sanitizedContext);
+            break;
+        }
       }
     }
   }
@@ -320,13 +323,17 @@ class FrontendLogger {
   // Console group methods for development debugging
   group(label: string): void {
     if ((this.isDevelopment || process.env.NODE_ENV === 'test') && this.shouldLog(LogLevel.DEBUG)) {
-      console.group(label);
+      if (typeof console !== 'undefined' && console?.group) {
+        console.group(label);
+      }
     }
   }
 
   groupEnd(): void {
     if ((this.isDevelopment || process.env.NODE_ENV === 'test') && this.shouldLog(LogLevel.DEBUG)) {
-      console.groupEnd();
+      if (typeof console !== 'undefined' && console?.groupEnd) {
+        console.groupEnd();
+      }
     }
   }
 }
