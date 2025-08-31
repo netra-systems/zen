@@ -78,137 +78,137 @@ logger = MockLogger()
 # COMMENTED OUT: MockWebSocket class - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
 # class MockWebSocket:
 #     """Mock WebSocket that simulates real behavior without external services."""
-    
-    def __init__(self, connection_id: str):
-        self.connection_id = connection_id
-        self.is_connected = True
-        self.sent_messages: List[Dict] = []
-        self.send_delay = 0.001  # 1ms default delay
-        self.failure_rate = 0.0  # No failures by default
-        self.timeout_used = None  # Track timeout parameter
-        
-    async def send_json(self, message: Dict, timeout: float = None) -> None:
-        """Mock send_json with realistic behavior."""
-        if timeout:
-            self.timeout_used = timeout
+#     
+#     def __init__(self, connection_id: str):
+#         self.connection_id = connection_id
+#         self.is_connected = True
+#         self.sent_messages: List[Dict] = []
+#         self.send_delay = 0.001  # 1ms default delay
+#         self.failure_rate = 0.0  # No failures by default
+#         self.timeout_used = None  # Track timeout parameter
+#        
+#    async def send_json(self, message: Dict, timeout: float = None) -> None:
+#        """Mock send_json with realistic behavior."""
+#        if timeout:
+#            self.timeout_used = timeout
             
         # Simulate network delay
-        await asyncio.sleep(self.send_delay)
+#        await asyncio.sleep(self.send_delay)
         
         # Simulate occasional failures
-        if random.random() < self.failure_rate:
-            raise Exception("Simulated network failure")
+#        if random.random() < self.failure_rate:
+#            raise Exception("Simulated network failure")
             
         # Record message
-        self.sent_messages.append({
-            "timestamp": time.time(),
-            "message": message,
-            "connection_id": self.connection_id
-        })
+#        self.sent_messages.append({
+#            "timestamp": time.time(),
+#            "message": message,
+#            "connection_id": self.connection_id
+#        })
         
-    async def close(self, code: int = 1000, reason: str = "Normal closure") -> None:
-        """Mock close method."""
-        self.is_connected = False
+#    async def close(self, code: int = 1000, reason: str = "Normal closure") -> None:
+#        """Mock close method."""
+#        self.is_connected = False
         
-    def get_messages_by_type(self, message_type: str) -> List[Dict]:
-        """Get all sent messages of a specific type."""
-        return [
-            msg["message"] for msg in self.sent_messages 
-            if msg["message"].get("type") == message_type
-        ]
+#    def get_messages_by_type(self, message_type: str) -> List[Dict]:
+#        """Get all sent messages of a specific type."""
+#        return [
+#            msg["message"] for msg in self.sent_messages 
+#            if msg["message"].get("type") == message_type
+#        ]
         
-    def get_all_message_types(self) -> Set[str]:
-        """Get all message types that were sent."""
-        return {
-            msg["message"].get("type", "unknown") 
-            for msg in self.sent_messages
-        }
+#    def get_all_message_types(self) -> Set[str]:
+#        """Get all message types that were sent."""
+#        return {
+#            msg["message"].get("type", "unknown") 
+#            for msg in self.sent_messages
+#        }
         
-    def clear_messages(self) -> None:
-        """Clear message history."""
-        self.sent_messages.clear()
+#    def clear_messages(self) -> None:
+#        """Clear message history."""
+#        self.sent_messages.clear()
 
 
 # COMMENTED OUT: MockWebSocket class - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
 # class MockWebSocketManager:
-    """Mock WebSocket Manager that simulates connection management."""
+#    """Mock WebSocket Manager that simulates connection management."""
     
-    def __init__(self):
-        self.connections: Dict[str, MockWebSocket] = {}
-        self.user_connections: Dict[str, Set[str]] = defaultdict(set)
-        self.thread_connections: Dict[str, Set[str]] = defaultdict(set)
-        self.stats = {
-            "total_connections": 0,
-            "active_connections": 0,
-            "messages_sent": 0,
-            "send_failures": 0
-        }
+#    def __init__(self):
+#        self.connections: Dict[str, MockWebSocket] = {}
+#        self.user_connections: Dict[str, Set[str]] = defaultdict(set)
+#        self.thread_connections: Dict[str, Set[str]] = defaultdict(set)
+#        self.stats = {
+#            "total_connections": 0,
+#            "active_connections": 0,
+#            "messages_sent": 0,
+#            "send_failures": 0
+#        }
         
-    async def connect_user(self, user_id: str, websocket: MockWebSocket, 
-                          thread_id: Optional[str] = None) -> str:
-        """Connect a user with mock WebSocket."""
-        connection_id = f"conn_{user_id}_{uuid.uuid4().hex[:8]}"
+#    async def connect_user(self, user_id: str, websocket: MockWebSocket, 
+#                          thread_id: Optional[str] = None) -> str:
+#        """Connect a user with mock WebSocket."""
+#        connection_id = f"conn_{user_id}_{uuid.uuid4().hex[:8]}"
         
-        self.connections[connection_id] = websocket
-        self.user_connections[user_id].add(connection_id)
+#        self.connections[connection_id] = websocket
+#        self.user_connections[user_id].add(connection_id)
         
-        if thread_id:
-            self.thread_connections[thread_id].add(connection_id)
+#        if thread_id:
+#            self.thread_connections[thread_id].add(connection_id)
             
-        self.stats["total_connections"] += 1
-        self.stats["active_connections"] += 1
+#        self.stats["total_connections"] += 1
+#        self.stats["active_connections"] += 1
         
-        return connection_id
+#        return connection_id
         
-    async def disconnect_user(self, user_id: str, websocket: MockWebSocket, 
-                             connection_id: str = None) -> None:
-        """Disconnect user."""
+#    async def disconnect_user(self, user_id: str, websocket: MockWebSocket, 
+#                             connection_id: str = None) -> None:
+#        """Disconnect user."""
         # Find connection to remove
-        for conn_id, ws in list(self.connections.items()):
-            if ws is websocket:
-                await ws.close()
-                del self.connections[conn_id]
-                self.user_connections[user_id].discard(conn_id)
-                self.stats["active_connections"] -= 1
-                break
+#        for conn_id, ws in list(self.connections.items()):
+#            if ws is websocket:
+#                await ws.close()
+#                del self.connections[conn_id]
+#                self.user_connections[user_id].discard(conn_id)
+#                self.stats["active_connections"] -= 1
+#                break
                 
-    async def send_to_thread(self, thread_id: str, message: Dict) -> bool:
-        """Send message to all connections in a thread."""
-        connections = self.thread_connections.get(thread_id, set())
+#    async def send_to_thread(self, thread_id: str, message: Dict) -> bool:
+#        """Send message to all connections in a thread."""
+#        connections = self.thread_connections.get(thread_id, set())
         
-        if not connections:
-            return False
+#        if not connections:
+#            return False
             
-        success_count = 0
-        for conn_id in list(connections):  # Copy to avoid modification during iteration
-            if conn_id in self.connections:
-                try:
-                    await self.connections[conn_id].send_json(message)
-                    success_count += 1
-                    self.stats["messages_sent"] += 1
-                except Exception:
-                    self.stats["send_failures"] += 1
+#        success_count = 0
+#        for conn_id in list(connections):  # Copy to avoid modification during iteration
+#            if conn_id in self.connections:
+#                try:
+#                    await self.connections[conn_id].send_json(message)
+#                    success_count += 1
+#                    self.stats["messages_sent"] += 1
+#                except Exception:
+#                    self.stats["send_failures"] += 1
                     
-        return success_count > 0
+#        return success_count > 0
         
-    async def send_to_user(self, user_id: str, message: Dict) -> bool:
-        """Send message to all user connections."""
-        connections = self.user_connections.get(user_id, set())
+#    async def send_to_user(self, user_id: str, message: Dict) -> bool:
+#        """Send message to all user connections."""
+#        connections = self.user_connections.get(user_id, set())
         
-        if not connections:
-            return False
+#        if not connections:
+#            return False
             
-        success_count = 0
-        for conn_id in list(connections):
-            if conn_id in self.connections:
-                try:
-                    await self.connections[conn_id].send_json(message)
-                    success_count += 1
-                    self.stats["messages_sent"] += 1
-                except Exception:
-                    self.stats["send_failures"] += 1
+#        success_count = 0
+#        for conn_id in list(connections):
+#            if conn_id in self.connections:
+#                try:
+#                    await self.connections[conn_id].send_json(message)
+#                    success_count += 1
+#                    self.stats["messages_sent"] += 1
+#                except Exception:
+#                    self.stats["send_failures"] += 1
                     
-        return success_count > 0
+#        return success_count > 0
 
 
 class MockAgentExecutionContext:
