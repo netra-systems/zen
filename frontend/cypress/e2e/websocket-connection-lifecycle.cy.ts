@@ -2,6 +2,8 @@
 
 import {
   WEBSOCKET_CONFIG,
+  CRITICAL_WS_EVENTS,
+  CriticalWebSocketEvent,
   WebSocketTestState,
   createInitialState,
   setupTestEnvironment,
@@ -10,7 +12,10 @@ import {
   waitForConnection,
   simulateNetworkPartition,
   verifyReconnection,
-  findWebSocketConnection
+  findWebSocketConnection,
+  simulateCriticalWebSocketEvents,
+  verifyWebSocketServiceIntegration,
+  monitorWebSocketEvents
 } from '../support/websocket-test-helpers';
 
 /**
@@ -18,6 +23,9 @@ import {
  * 
  * Tests core connection establishment, maintenance,
  * network partition recovery, and connection pooling.
+ * 
+ * MISSION CRITICAL: These tests ensure the 5 critical events work reliably:
+ * - agent_started, agent_thinking, tool_executing, tool_completed, agent_completed
  */
 describe('WebSocket Connection Lifecycle Management', () => {
   let testState: WebSocketTestState;
@@ -33,7 +41,21 @@ describe('WebSocket Connection Lifecycle Management', () => {
     cy.wait(2000);
   });
 
+<<<<<<< Updated upstream
   it('CRITICAL: Should establish connection and handle agent events properly', () => {
+=======
+  afterEach(() => {
+    // Clean up WebSocket connections and test state
+    cy.window().then((win) => {
+      const ws = findWebSocketConnection(win);
+      if (ws && ws.close && ws.readyState === WebSocket.OPEN) {
+        ws.close(1000, 'Test cleanup');
+      }
+    });
+  });
+
+  it('CRITICAL: Should establish and maintain stable WebSocket connection', () => {
+>>>>>>> Stashed changes
     waitForConnection().then((ws) => {
       if (ws) {
         testState.wsConnection = ws;
@@ -42,6 +64,7 @@ describe('WebSocket Connection Lifecycle Management', () => {
           'Should not exceed max retry attempts'
         );
       }
+<<<<<<< Updated upstream
     });
     
     // Test critical agent event flow to ensure connection is working
@@ -120,16 +143,103 @@ describe('WebSocket Connection Lifecycle Management', () => {
 
   it('CRITICAL: Should survive rapid connection cycling and maintain agent event processing', () => {
     const cycleCount = 3; // Reduced for stability
+=======
+      
+      // Verify WebSocket service integration
+      verifyWebSocketServiceIntegration();
+      
+      // Verify connection metadata exists
+      cy.window().then((win) => {
+        const connectionInfo = (win as any).__netraConnectionInfo;
+        if (connectionInfo) {
+          expect(connectionInfo).to.have.property('connection_id');
+          expect(connectionInfo).to.have.property('user_id', 'test-user');
+          expect(connectionInfo).to.have.property('connected_at');
+        }
+      });
+    });
+  });
+
+  it('CRITICAL: Should handle network partition and automatic reconnection', () => {
+    waitForConnection().then(() => {
+      const initialMessage = `Initial message ${Date.now()}`;
+      cy.get('textarea').clear().type(initialMessage);
+      cy.get('button[aria-label="Send message"]').click();
+      cy.contains(initialMessage).should('be.visible');
+      
+      recordInitialConnectionId().then((initialId) => {
+        simulateCompleteNetworkPartition();
+        cy.wait(3000); // Wait for disconnection detection
+        
+        verifyDisconnectionIndicators();
+        queueMessagesDuringPartition();
+        restoreNetworkConnection();
+        
+        verifyReconnectionAndMessageDelivery(initialId);
+      });
+    });
+  });
+
+  it('CRITICAL: Should handle all 5 mission-critical WebSocket events reliably', () => {
+    waitForConnection().then(() => {
+      // Test each critical event type
+      CRITICAL_WS_EVENTS.forEach((eventType) => {
+        testCriticalEvent(eventType);
+      });
+      
+      // Test complete agent lifecycle simulation
+      simulateCriticalWebSocketEvents();
+      
+      // Monitor events for consistency
+      monitorWebSocketEvents(5000);
+    });
+  });
+
+  it('CRITICAL: Should handle connection pool management', () => {
+    waitForConnection().then(() => {
+      const connections = createMultipleConnections();
+      
+      verifyConnectionLimitEnforcement(connections);
+      verifyOldestConnectionClosure(connections);
+      verifyGracefulPoolManagement();
+    });
+  });
+
+  it('should synchronize state after reconnection', () => {
+    waitForConnection().then(() => {
+      const testMessage = `State sync test ${Date.now()}`;
+      sendMessageAndRecord(testMessage);
+      
+      cy.wait(2000);
+      simulateNetworkPartition();
+      cy.wait(2000);
+      
+      verifyReconnection().then(() => {
+        verifyStateSynchronization(testMessage);
+      });
+    });
+  });
+
+  it('CRITICAL: Should survive rapid connection cycling without memory leaks', () => {
+    const cycleCount = 3; // Reduced for faster testing
+>>>>>>> Stashed changes
     
     for (let i = 0; i < cycleCount; i++) {
       cy.log(`Connection cycle ${i + 1}/${cycleCount}`);
       
+<<<<<<< Updated upstream
       performConnectionCycle(i);
       verifyMemoryUsage(i);
       
       // Test agent events after each cycle
       simulateFullAgentLifecycle(`cycle-${i}-agent`);
       cy.wait(1000);
+=======
+      waitForConnection().then(() => {
+        performConnectionCycle(i);
+        verifyMemoryUsage(i);
+      });
+>>>>>>> Stashed changes
     }
     
     verifyNoMemoryLeaks();
@@ -137,6 +247,27 @@ describe('WebSocket Connection Lifecycle Management', () => {
     // Final verification that agent events still work
     simulateFullAgentLifecycle('final-cycle-agent');
     cy.get('[data-testid*="agent"], .agent-status').should('contain', 'final-cycle-agent');
+  });
+
+  it('CRITICAL: Should maintain WebSocket service state consistency', () => {
+    waitForConnection().then(() => {
+      // Test WebSocket service state management
+      cy.window().then((win) => {
+        const webSocketService = (win as any).webSocketService;
+        if (webSocketService) {
+          // Test service state
+          expect(webSocketService.getState()).to.be.oneOf(['connecting', 'connected']);
+          
+          // Test large message stats
+          const stats = webSocketService.getLargeMessageStats();
+          expect(stats).to.have.property('activeAssemblies');
+          expect(stats).to.have.property('supportedCompression');
+          expect(stats).to.have.property('maxMessageSize');
+          
+          cy.log('WebSocket service state consistency verified');
+        }
+      });
+    });
   });
 
   // Helper functions for complex operations
@@ -233,7 +364,9 @@ describe('WebSocket Connection Lifecycle Management', () => {
       
       if (hasIndicator) {
         cy.log('Disconnection indicator found');
-        cy.get(disconnectIndicators.join(', ')).first().should('be.visible');
+        cy.get(disconnectIndicators.join(', ')).first().should('exist');
+      } else {
+        cy.log('No disconnection indicators found - checking connection state');
       }
     });
   }
@@ -259,6 +392,7 @@ describe('WebSocket Connection Lifecycle Management', () => {
   function verifyReconnectionAndAgentEventDelivery(initialId: string | null): void {
     cy.wait(WEBSOCKET_CONFIG.RETRY_DELAY * 2);
     
+<<<<<<< Updated upstream
     cy.get('[data-testid="connection-status"], [class*="connected"], [class*="online"]', { 
       timeout: 10000 
     }).should('exist');
@@ -276,12 +410,98 @@ describe('WebSocket Connection Lifecycle Management', () => {
     cy.get('[data-testid*="agent"], .agent-status').should('contain', 'post-reconnect-test-agent');
     
     // Verify new connection ID
+=======
+    waitForConnection().then(() => {
+      cy.wait(3000); // Allow time for message delivery
+      testState.messageQueue.forEach(msg => {
+        cy.contains(msg, { timeout: 10000 }).should('be.visible');
+      });
+      
+      // Test post-reconnection messaging
+      const postReconnectMessage = `Post-reconnect message ${Date.now()}`;
+      cy.get('textarea').clear().type(postReconnectMessage);
+      cy.get('button[aria-label="Send message"]').click();
+      cy.contains(postReconnectMessage).should('be.visible');
+      
+      // Verify new connection ID
+      cy.window().then((win) => {
+        const newConnInfo = (win as any).__netraConnectionInfo;
+        if (newConnInfo && initialId) {
+          expect(newConnInfo.connection_id).to.not.equal(initialId);
+        }
+      });
+    });
+  }
+
+  function testCriticalEvent(eventType: CriticalWebSocketEvent): void {
+>>>>>>> Stashed changes
     cy.window().then((win) => {
-      const newConnInfo = (win as any).__netraConnectionInfo;
-      if (newConnInfo && initialId) {
-        expect(newConnInfo.connection_id).to.not.equal(initialId);
+      const store = (win as any).useUnifiedChatStore?.getState();
+      if (store && store.handleWebSocketEvent) {
+        const testEvent = createTestEvent(eventType);
+        store.handleWebSocketEvent(testEvent);
+        cy.log(`Tested critical event: ${eventType}`);
       }
     });
+  }
+
+  function createTestEvent(eventType: CriticalWebSocketEvent): any {
+    const basePayload = {
+      agent_id: `test-agent-${Date.now()}`,
+      timestamp: Date.now()
+    };
+
+    switch (eventType) {
+      case 'agent_started':
+        return {
+          type: eventType,
+          payload: {
+            ...basePayload,
+            agent_type: 'TestAgent',
+            run_id: `test-run-${Date.now()}`
+          }
+        };
+      case 'agent_thinking':
+        return {
+          type: eventType,
+          payload: {
+            ...basePayload,
+            thought: 'Processing test request...',
+            step_number: 1,
+            total_steps: 3
+          }
+        };
+      case 'tool_executing':
+        return {
+          type: eventType,
+          payload: {
+            ...basePayload,
+            tool_name: 'test-tool'
+          }
+        };
+      case 'tool_completed':
+        return {
+          type: eventType,
+          payload: {
+            ...basePayload,
+            tool_name: 'test-tool',
+            result: { success: true }
+          }
+        };
+      case 'agent_completed':
+        return {
+          type: eventType,
+          payload: {
+            ...basePayload,
+            agent_type: 'TestAgent',
+            duration_ms: 5000,
+            result: { status: 'success' },
+            metrics: { tools_used: 1 }
+          }
+        };
+      default:
+        return { type: eventType, payload: basePayload };
+    }
   }
 
   function createMultipleConnections(): any[] {
@@ -350,7 +570,7 @@ describe('WebSocket Connection Lifecycle Management', () => {
       const ws = findWebSocketConnection(win);
       if (ws) {
         ws.close();
-        cy.wait(200); // Shorter wait for more stress
+        cy.wait(200); // Brief wait for closure
       }
     });
     

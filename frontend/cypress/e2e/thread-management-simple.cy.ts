@@ -15,7 +15,7 @@ describe('Thread Management - Simplified', () => {
     
     // Type and send a message with correct selectors
     const testMessage = 'Test thread message';
-    cy.get('[data-testid="message-input"]').type(testMessage, { force: true });
+    cy.get('[data-testid="message-input"] textarea').type(testMessage, { force: true });
     cy.get('[data-testid="send-button"]').click({ force: true });
     
     // Verify message appears
@@ -28,14 +28,14 @@ describe('Thread Management - Simplified', () => {
     
     // Send first message
     const firstMessage = 'First message in thread';
-    cy.get('[data-testid="message-input"]').type(firstMessage, { force: true });
+    cy.get('[data-testid="message-input"] textarea').type(firstMessage, { force: true });
     cy.get('[data-testid="send-button"]').click({ force: true });
     
     cy.contains(firstMessage, { timeout: 5000 }).should('be.visible');
     
     // Send second message
     const secondMessage = 'Second message in thread';
-    cy.get('[data-testid="message-input"]').clear({ force: true }).type(secondMessage, { force: true });
+    cy.get('[data-testid="message-input"] textarea').clear({ force: true }).type(secondMessage, { force: true });
     cy.get('[data-testid="send-button"]').click({ force: true });
     
     cy.contains(secondMessage, { timeout: 5000 }).should('be.visible');
@@ -65,7 +65,7 @@ describe('Thread Management - Simplified', () => {
     
     // Send a message in new thread
     const testMessage = 'Start new conversation';
-    cy.get('[data-testid="message-input"]', { timeout: 10000 }).type(testMessage, { force: true });
+    cy.get('[data-testid="message-input"] textarea', { timeout: 10000 }).type(testMessage, { force: true });
     cy.get('[data-testid="send-button"]').click({ force: true });
     
     // Verify message appears
@@ -87,7 +87,7 @@ describe('Thread Management - Simplified', () => {
     
     // Send an optimization request
     const request = 'Optimize my LLM pipeline';
-    cy.get('[data-testid="message-input"]', { timeout: 10000 }).type(request, { force: true });
+    cy.get('[data-testid="message-input"] textarea', { timeout: 10000 }).type(request, { force: true });
     cy.get('[data-testid="send-button"]').click({ force: true });
     
     cy.contains(request, { timeout: 5000 }).should('be.visible');

@@ -9,14 +9,15 @@ describe('Basic UI Test', () => {
       return false;
     });
     
-    // Setup authenticated state with current JWT structure
+    // Setup authenticated state with UnifiedAuthService structure
     cy.window().then((win) => {
       win.localStorage.setItem('jwt_token', 'test-jwt-token-basic-ui');
       win.localStorage.setItem('user_data', JSON.stringify({
         id: 'test-user-id',
         email: 'test@netrasystems.ai',
         full_name: 'Test User',
-        role: 'user'
+        role: 'user',
+        permissions: ['read', 'write']
       }));
     });
     

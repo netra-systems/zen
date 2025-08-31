@@ -5,10 +5,10 @@ import { EnterpriseDemoUtils, ENTERPRISE_SELECTORS } from './utils/enterprise-de
 /**
  * Enterprise Demo Core Features Tests
  * 
- * BVJ: Enterprise segment - Core platform capability validation
- * Business Goal: Validate core enterprise features for sales demos
- * Value Impact: Ensures enterprise prospects see working platform capabilities
- * Revenue Impact: Supports enterprise conversion pipeline
+ * BVJ: Enterprise segment - Step-based interactive demo validation
+ * Business Goal: Validate interactive demo flow for enterprise prospects
+ * Value Impact: Ensures enterprise prospects experience working AI optimization demo
+ * Revenue Impact: Supports enterprise conversion through hands-on demo experience
  */
 
 describe('Enterprise Demo - Core Features', () => {
@@ -16,156 +16,182 @@ describe('Enterprise Demo - Core Features', () => {
     EnterpriseDemoUtils.setupDemoPage()
   })
 
-  describe('Page Load and Authentication', () => {
+  describe('Page Load and Welcome Screen', () => {
     it('should load the enterprise demo page', () => {
       EnterpriseDemoUtils.verifyPageLoad()
     })
 
-    it('should display executive-level messaging', () => {
-      EnterpriseDemoUtils.verifyExecutiveMessaging()
+    it('should display welcome screen with value proposition', () => {
+      EnterpriseDemoUtils.verifyWelcomeScreen()
     })
 
-    it('should show authentication gate for protected features', () => {
-      cy.contains('Schedule Executive Briefing').click()
-      cy.contains('Authentication Required').should('be.visible')
+    it('should show demo progress steps in header', () => {
+      EnterpriseDemoUtils.verifyDemoProgressSteps()
     })
 
-    it('should display enterprise security badges', () => {
-      EnterpriseDemoUtils.verifySecurityBadges()
+    it('should display enterprise branding and badges', () => {
+      cy.contains('Enterprise Demo').should('be.visible')
+      cy.contains('BETA').should('be.visible')
+    })
+
+    it('should show compelling metrics on welcome screen', () => {
+      cy.contains('$2.4M').should('be.visible')
+      cy.contains('3.2x').should('be.visible')
+      cy.contains('99.9%').should('be.visible')
     })
   })
 
-  describe('Live Performance Metrics Dashboard', () => {
-    it('should display real-time metrics', () => {
-      cy.contains('Live Performance').should('be.visible')
-      EnterpriseDemoUtils.verifyMetricCards()
+  describe('Interactive Demo Flow', () => {
+    it('should start demo from welcome screen', () => {
+      EnterpriseDemoUtils.startInteractiveDemo()
     })
 
-    it('should show cost savings metrics', () => {
+    it('should display workload selection options', () => {
+      EnterpriseDemoUtils.startInteractiveDemo()
+      cy.contains('Choose your industry profile').should('be.visible')
+      cy.get(ENTERPRISE_SELECTORS.workloadOption).should('exist')
+    })
+
+    it('should proceed to data generation step', () => {
+      EnterpriseDemoUtils.startInteractiveDemo()
+      EnterpriseDemoUtils.selectWorkload()
+      EnterpriseDemoUtils.verifyGeneratingScreen()
+    })
+
+    it('should show analyzing phase', () => {
+      EnterpriseDemoUtils.startInteractiveDemo()
+      EnterpriseDemoUtils.selectWorkload()
+      EnterpriseDemoUtils.verifyGeneratingScreen()
+      EnterpriseDemoUtils.verifyAnalyzingScreen()
+    })
+
+    it('should display final results', () => {
+      EnterpriseDemoUtils.startInteractiveDemo()
+      EnterpriseDemoUtils.selectWorkload()
+      EnterpriseDemoUtils.verifyGeneratingScreen()
+      EnterpriseDemoUtils.verifyAnalyzingScreen()
+      EnterpriseDemoUtils.verifyResultsScreen()
+    })
+
+    it('should complete full demo flow', () => {
+      EnterpriseDemoUtils.completeFullDemoFlow()
+    })
+  })
+
+  describe('Demo Results and Metrics', () => {
+    beforeEach(() => {
+      // Complete demo flow to results screen for these tests
+      EnterpriseDemoUtils.completeFullDemoFlow()
+    })
+
+    it('should display optimization results', () => {
+      cy.contains('Optimization Complete').should('be.visible')
       cy.contains('Cost Reduction').should('be.visible')
-      cy.contains('$').should('be.visible')
-      cy.contains('%').should('be.visible')
+      cy.contains('42%').should('be.visible')
     })
 
-    it('should display latency improvements', () => {
+    it('should show performance improvements', () => {
+      cy.contains('Response Time').should('be.visible')
+      cy.contains('3.2x').should('be.visible')
       cy.contains('Latency').should('be.visible')
-      cy.contains('ms').should('be.visible')
-      cy.contains('reduction').should('be.visible')
+      cy.contains('62ms → 19ms').should('be.visible')
     })
 
-    it('should show throughput metrics', () => {
-      cy.contains('Throughput').should('be.visible')
-      cy.contains('requests/sec').should('be.visible')
+    it('should display reliability metrics', () => {
+      cy.contains('Reliability').should('be.visible')
+      cy.contains('99.9%').should('be.visible')
+      cy.contains('From 97.2%').should('be.visible')
     })
 
-    it('should auto-refresh metrics', () => {
-      cy.get('[data-testid="metric-value"]').then($initial => {
-        const initialValue = $initial.text()
-        cy.wait(5000)
-        cy.get('[data-testid="metric-value"]').should($updated => {
-          expect($updated.text()).to.not.equal(initialValue)
-        })
-      })
+    it('should show GPU utilization improvements', () => {
+      cy.contains('GPU Utilization').should('be.visible')
+      cy.contains('85%').should('be.visible')
+      cy.contains('From 45%').should('be.visible')
     })
 
-    it('should display metric trends with charts', () => {
-      cy.get('[data-testid="trend-chart"]').should('be.visible')
-      cy.get('svg').should('exist')
+    it('should display monthly savings calculation', () => {
+      cy.contains('Monthly Savings').should('be.visible')
+      cy.contains('$124K').should('be.visible')
     })
   })
 
-  describe('Feature Showcase', () => {
-    it('should display enterprise features grid', () => {
-      cy.contains('Enterprise Features').should('be.visible')
-      EnterpriseDemoUtils.verifyFeatureTiles()
+  describe('Agent Integration and Processing', () => {
+    it('should show agent status during processing', () => {
+      EnterpriseDemoUtils.startInteractiveDemo()
+      EnterpriseDemoUtils.selectWorkload()
+      // Agent status panel should appear during processing
+      EnterpriseDemoUtils.verifyAgentStatusPanel()
     })
 
-    it('should highlight multi-agent orchestration', () => {
-      cy.contains('Multi-Agent Orchestration').should('be.visible')
-      cy.contains('Coordinate multiple AI agents').should('be.visible')
+    it('should display loading animations during steps', () => {
+      EnterpriseDemoUtils.startInteractiveDemo()
+      EnterpriseDemoUtils.selectWorkload()
+      // Verify loading animations appear
+      cy.get(ENTERPRISE_SELECTORS.loadingSpinner, { timeout: 10000 }).should('be.visible')
     })
 
-    it('should showcase security features', () => {
-      cy.contains('Enterprise Security').should('be.visible')
-      cy.contains('End-to-end encryption').should('be.visible')
-      cy.contains('Role-based access').should('be.visible')
+    it('should handle step transitions smoothly', () => {
+      EnterpriseDemoUtils.startInteractiveDemo()
+      EnterpriseDemoUtils.selectWorkload()
+      EnterpriseDemoUtils.waitForStepTransition('Generating synthetic workload data')
+      EnterpriseDemoUtils.waitForStepTransition('Analyzing workload patterns')
+      EnterpriseDemoUtils.waitForStepTransition('Optimization Complete')
     })
 
-    it('should display integration capabilities', () => {
-      cy.contains('Seamless Integration').should('be.visible')
-      cy.contains('API').should('be.visible')
-      cy.contains('SDK').should('be.visible')
-    })
-
-    it('should show feature details on hover', () => {
-      cy.contains('Multi-Agent Orchestration').trigger('mouseenter')
-      cy.contains('Learn More').should('be.visible')
-    })
-
-    it('should open feature modal on click', () => {
-      cy.contains('Enterprise Security').click()
-      cy.get('[data-testid="feature-modal"]').should('be.visible')
-      cy.contains('Advanced Security Features').should('be.visible')
+    it('should maintain progress state through steps', () => {
+      EnterpriseDemoUtils.startInteractiveDemo()
+      EnterpriseDemoUtils.selectWorkload()
+      // Verify progress is maintained in header
+      EnterpriseDemoUtils.verifyDemoProgressSteps()
     })
   })
 
-  describe('Executive Dashboard Preview', () => {
-    it('should display dashboard preview section', () => {
-      cy.contains('Executive Dashboard').should('be.visible')
-      cy.get(ENTERPRISE_SELECTORS.dashboardPreview).should('be.visible')
+  describe('Enterprise Value Demonstration', () => {
+    it('should demonstrate complete ROI story through demo flow', () => {
+      // Welcome screen shows high-level value proposition
+      EnterpriseDemoUtils.verifyWelcomeScreen()
+      
+      // Interactive flow demonstrates platform capabilities
+      EnterpriseDemoUtils.startInteractiveDemo()
+      EnterpriseDemoUtils.selectWorkload()
+      
+      // Results screen provides concrete value metrics
+      EnterpriseDemoUtils.verifyResultsScreen()
     })
 
-    it('should show KPI widgets', () => {
-      cy.contains('Key Performance Indicators').should('be.visible')
-      cy.get('[data-testid="kpi-widget"]').should('have.length.at.least', 4)
+    it('should maintain enterprise branding throughout flow', () => {
+      EnterpriseDemoUtils.verifyPageLoad()
+      EnterpriseDemoUtils.startInteractiveDemo()
+      EnterpriseDemoUtils.selectWorkload()
+      
+      // Verify enterprise branding persists
+      cy.contains('Enterprise Demo').should('be.visible')
+      cy.contains('Netra AI Optimization Platform').should('be.visible')
     })
 
-    it('should display cost analysis chart', () => {
-      cy.contains('Cost Analysis').should('be.visible')
-      cy.get('[data-testid="cost-chart"]').should('be.visible')
+    it('should provide measurable business impact data', () => {
+      EnterpriseDemoUtils.completeFullDemoFlow()
+      
+      // Verify specific business metrics are shown
+      cy.contains('42%').should('be.visible') // Cost reduction
+      cy.contains('$124K').should('be.visible') // Monthly savings
+      cy.contains('99.9%').should('be.visible') // Reliability
     })
 
-    it('should show ROI projections', () => {
-      cy.contains('ROI Projection').should('be.visible')
-      cy.contains('3-Year').should('be.visible')
-      cy.contains('5-Year').should('be.visible')
+    it('should support different workload scenarios', () => {
+      EnterpriseDemoUtils.startInteractiveDemo()
+      
+      // Verify multiple workload options are available
+      cy.get(ENTERPRISE_SELECTORS.workloadOption).should('have.length.at.least', 1)
     })
 
-    it('should have interactive dashboard elements', () => {
-      EnterpriseDemoUtils.verifyDashboardInteractivity()
-    })
-  })
-
-  describe('Core Feature Integration', () => {
-    it('should validate feature flow from metrics to dashboard', () => {
-      EnterpriseDemoUtils.verifyMetricCards()
-      cy.get(ENTERPRISE_SELECTORS.dashboardPreview).scrollIntoView()
-      EnterpriseDemoUtils.verifyDashboardInteractivity()
-    })
-
-    it('should support enterprise authentication workflow', () => {
-      cy.contains('Enterprise Security').click()
-      cy.get('[data-testid="feature-modal"]').should('be.visible')
-      cy.contains('Schedule Demo').should('be.visible')
-    })
-
-    it('should demonstrate real-time data flow', () => {
-      cy.contains('Live Performance').should('be.visible')
-      cy.get('[data-testid="trend-chart"]').should('be.visible')
-      cy.contains('Executive Dashboard').should('be.visible')
-    })
-
-    it('should validate enterprise security messaging consistency', () => {
-      EnterpriseDemoUtils.verifySecurityBadges()
-      cy.contains('Enterprise Security').should('be.visible')
-      cy.contains('End-to-end encryption').should('be.visible')
-    })
-
-    it('should ensure smooth feature navigation', () => {
-      cy.contains('Enterprise Features').scrollIntoView()
-      EnterpriseDemoUtils.verifyFeatureTiles()
-      cy.contains('Executive Dashboard').scrollIntoView()
-      cy.get(ENTERPRISE_SELECTORS.dashboardPreview).should('be.visible')
+    it('should demonstrate end-to-end platform capability', () => {
+      // Complete full flow validates the entire platform story
+      EnterpriseDemoUtils.completeFullDemoFlow()
+      
+      // Verify all key elements are shown
+      cy.contains('Experience AI Optimization in Action').should('be.visible')
+      cy.contains('Optimization Complete').should('be.visible')
     })
   })
 })

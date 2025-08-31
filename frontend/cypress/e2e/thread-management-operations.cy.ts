@@ -54,9 +54,9 @@ describe('Thread Management Operations', () => {
 
   // Search operation helpers
   function performThreadSearch(): void {
-    cy.get('input[placeholder="Search threads..."]').type('optimization');
+    cy.get('[data-testid="search-input"]').type('optimization');
     setupSearchMock();
-    cy.get('button[aria-label="Search"]').click();
+    // In current implementation, search is triggered on input change
     waitForThreadOperation('searchThreads');
   }
 
@@ -72,8 +72,8 @@ describe('Thread Management Operations', () => {
   }
 
   function clearSearchAndVerifyAll(): void {
-    cy.get('input[placeholder="Search threads..."]').clear();
-    cy.get('button[aria-label="Search"]').click();
+    cy.get('[data-testid="search-input"]').clear();
+    // Search clears automatically in current implementation
     waitForThreadOperation('getThreads');
     verifyAllThreadsVisible();
   }

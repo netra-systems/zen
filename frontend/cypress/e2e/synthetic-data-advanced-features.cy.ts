@@ -9,32 +9,33 @@ import { SyntheticDataPageObject } from './utils/synthetic-data-page-object'
 
 describe('Synthetic Data Generation - Advanced Features', () => {
   beforeEach(() => {
-    SyntheticDataPageObject.visitPage()
+    cy.viewport(1920, 1080)
+    cy.visit('/synthetic-data-generation')
+    cy.wait(1000)
   })
 
   describe('Advanced Configuration', () => {
-    it('should show advanced options toggle', () => {
-      cy.contains('Advanced Options').should('be.visible')
+    it('should show event types configuration', () => {
+      cy.contains('Event Types').should('be.visible')
+      cy.get('input[name="event_types"]').should('have.value', 'search,login')
     })
 
-    it('should expand advanced configuration', () => {
-      SyntheticDataPageObject.openAdvancedOptions()
-      cy.contains('Latency Distribution').should('be.visible')
-      cy.contains('Service Names').should('be.visible')
-      cy.contains('Custom Fields').should('be.visible')
+    it('should allow customizing event types', () => {
+      cy.get('input[name="event_types"]').clear().type('purchase,view,click')
+      cy.get('input[name="event_types"]').should('have.value', 'purchase,view,click')
     })
 
-    it('should allow configuring latency distribution', () => {
-      SyntheticDataPageObject.openAdvancedOptions()
-      SyntheticDataPageObject.setLatencyRange('10', '1000')
-      cy.get(SyntheticDataPageObject.selectors.distributionSelect)
-        .select('normal')
+    it('should show destination table configuration', () => {
+      cy.get('input').should('exist')
+      // Destination table is auto-generated with timestamp
+      cy.get('body').should('contain.text', 'synthetic_data_')
     })
 
-    it('should allow adding custom service names', () => {
-      SyntheticDataPageObject.openAdvancedOptions()
-      SyntheticDataPageObject.addServiceName('api-gateway')
-      cy.contains('api-gateway').should('be.visible')
+    it('should handle multiple workload patterns', () => {
+      cy.get('button[role="combobox"]').click()
+      cy.contains('Cost-Sensitive').should('be.visible')
+      cy.contains('Latency-Sensitive').should('be.visible')
+      cy.contains('High Error Rate').should('be.visible')
     })
 
     it('should allow defining custom fields', () => {

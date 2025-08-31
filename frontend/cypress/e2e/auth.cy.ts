@@ -1,4 +1,4 @@
-describe('Authentication Flow', () => {
+describe('Authentication Flow - UnifiedAuthService', () => {
   beforeEach(() => {
     // Clear localStorage and cookies before each test
     cy.clearLocalStorage();

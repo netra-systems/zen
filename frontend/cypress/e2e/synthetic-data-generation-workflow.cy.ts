@@ -12,22 +12,20 @@ import {
 
 describe('Synthetic Data Generation - Workflow', () => {
   beforeEach(() => {
-    SyntheticDataPageObject.visitPage()
+    cy.viewport(1920, 1080)
+    cy.visit('/synthetic-data-generation')
+    cy.wait(1000)
   })
 
   describe('Data Generation Process', () => {
     it('should start generation on button click', () => {
-      SyntheticDataPageObject.startGeneration()
-      cy.contains('Generating').should('be.visible')
-      cy.get(SyntheticDataPageObject.selectors.progressBar)
-        .should('be.visible')
+      cy.contains('button', 'Generate Data').click()
+      cy.contains('Generating...').should('be.visible')
     })
 
-    it('should show progress during generation', () => {
-      SyntheticDataPageObject.startGeneration()
-      cy.get(SyntheticDataPageObject.selectors.progressPercentage)
-        .should('be.visible')
-      cy.contains('%').should('be.visible')
+    it('should disable button during generation', () => {
+      cy.contains('button', 'Generate Data').click()
+      cy.contains('button', 'Generating...').should('be.disabled')
     })
 
     it('should display estimated time', () => {

@@ -12,33 +12,34 @@ export class SyntheticDataTestUtils {
 
   static visitComponent(): void {
     cy.visit('/synthetic-data-generation')
-    cy.wait(500)
+    cy.wait(1000) // Increased wait for component loading
   }
 
   static getGenerator(): Cypress.Chainable {
-    return cy.get('[data-testid="synthetic-data-generator"]')
+    return cy.get('[class*="card"]') // Updated to match actual card class
   }
 
   static getGenerateButton(): Cypress.Chainable {
-    return cy.get('[data-testid="generate-btn"]')
+    return cy.contains('button', 'Generate Data')
   }
 }
 
 export class ConfigurationFactory {
   static setTraceCount(count: number): void {
-    cy.get('input[name="traceCount"]').clear().type(count.toString())
+    cy.get('input[name="num_traces"]').clear().type(count.toString())
   }
 
   static setUserCount(count: number): void {
-    cy.get('input[name="userCount"]').clear().type(count.toString())
+    cy.get('input[name="num_users"]').clear().type(count.toString())
   }
 
   static setErrorRate(rate: number): void {
-    cy.get('input[type="range"][name="errorRate"]').invoke('val', rate).trigger('input')
+    cy.get('input[name="error_rate"]').clear().type(rate.toString())
   }
 
   static setWorkloadPattern(pattern: string): void {
-    cy.get('select[name="workloadPattern"]').select(pattern)
+    cy.get('button[role="combobox"]').click()
+    cy.contains(pattern).click()
   }
 }
 
@@ -49,16 +50,12 @@ export class GenerationActions {
 
   static waitForCompletion(timeout = 3000): void {
     cy.wait(timeout)
-    cy.contains('Generation Complete').should('be.visible')
+    // Generation completion is handled internally, no visible success message
+    cy.contains('button', 'Generate Data').should('not.be.disabled')
   }
 
-  static cancelGeneration(): void {
-    cy.get('[data-testid="cancel-btn"]').click()
-  }
-
-  static verifyProgress(): void {
-    cy.get('[data-testid="progress-bar"]').should('be.visible')
-    cy.get('[data-testid="progress-percent"]').should('contain', '%')
+  static verifyGenerationInProgress(): void {
+    cy.contains('button', 'Generating...').should('be.visible')
   }
 }
 
@@ -118,24 +115,24 @@ export class UIHelpers {
 }
 
 export const TestData = {
-  defaultTraceCount: 1000,
-  defaultUserCount: 100,
+  defaultTraceCount: 100, // Updated to match actual defaults
+  defaultUserCount: 10,
+  defaultErrorRate: 0.1,
   smallDataset: 10,
-  largeDataset: 100000,
-  workloadPatterns: ['Steady', 'Burst', 'Growth', 'Periodic', 'Random', 'Custom'],
-  exportFormats: ['CSV', 'JSON', 'Parquet'],
-  presets: ['E-commerce', 'IoT Sensors', 'API Gateway']
+  largeDataset: 10000,
+  workloadPatterns: ['Default Workload', 'Cost-Sensitive', 'Latency-Sensitive', 'High Error Rate'],
+  eventTypes: 'search,login',
+  destinationTable: 'default.synthetic_data_'
 } as const
 
 export const Selectors = {
-  generator: '[data-testid="synthetic-data-generator"]',
-  generateBtn: '[data-testid="generate-btn"]',
-  configSection: '[data-testid="config-section"]',
-  outputSection: '[data-testid="output-section"]',
-  progressBar: '[data-testid="progress-bar"]',
-  previewTable: '[data-testid="preview-table"]',
-  validateBtn: '[data-testid="validate-btn"]',
-  exportMenu: '[data-testid="export-menu"]',
-  advancedToggle: '[data-testid="advanced-toggle"]',
-  presetSelector: '[data-testid="preset-selector"]'
+  generator: '[class*="card"]',
+  generateBtn: 'button:contains("Generate Data")',
+  tracesInput: 'input[name="num_traces"]',
+  usersInput: 'input[name="num_users"]',
+  errorRateInput: 'input[name="error_rate"]',
+  workloadSelect: 'button[role="combobox"]',
+  eventTypesInput: 'input[name="event_types"]',
+  sourceTableSelect: 'button[role="combobox"]',
+  errorAlert: '[class*="alert"]'
 } as const
