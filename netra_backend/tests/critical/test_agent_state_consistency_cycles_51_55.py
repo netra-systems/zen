@@ -19,7 +19,7 @@ from unittest.mock import patch, MagicMock, AsyncMock
 from datetime import datetime, timedelta, timezone
 
 from netra_backend.app.agents.base_sub_agent import BaseSubAgent
-from netra_backend.app.agents.supervisor_agent import SupervisorAgent
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
 from netra_backend.app.core.unified_logging import get_logger
 
