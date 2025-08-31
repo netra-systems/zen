@@ -1,0 +1,507 @@
+# Schema Definition for Test Layer Configuration
+# Defines the structure and validation rules for test_layers.yaml
+
+schema_version: "1.0.0"
+description: "Schema for Netra Apex test layer configuration system"
+
+# Root schema definition
+root_schema:
+  type: "object"
+  required: ["metadata", "layers", "execution_config"]
+  properties:
+    metadata:
+      $ref: "#/definitions/metadata"
+    layers:
+      $ref: "#/definitions/layers"
+    execution_config:
+      $ref: "#/definitions/execution_config"
+    environments:
+      $ref: "#/definitions/environments"
+    service_dependencies:
+      $ref: "#/definitions/service_dependencies"
+    monitoring:
+      $ref: "#/definitions/monitoring"
+
+# Schema definitions
+definitions:
+  metadata:
+    type: "object"
+    required: ["version", "description"]
+    properties:
+      version:
+        type: "string"
+        pattern: "^\\d+\\.\\d+\\.\\d+$"
+      description:
+        type: "string"
+        minLength: 10
+      created_at:
+        type: "string"
+        format: "date"
+      config_schema_version:
+        type: "string"
+        pattern: "^\\d+\\.\\d+$"
+
+  layers:
+    type: "object"
+    patternProperties:
+      "^[a-z_]+$":
+        $ref: "#/definitions/layer"
+    minProperties: 1
+
+  layer:
+    type: "object"
+    required: ["name", "description", "priority", "execution_order", "max_duration_minutes", "execution_mode", "categories"]
+    properties:
+      name:
+        type: "string"
+        minLength: 3
+        maxLength: 50
+      description:
+        type: "string"
+        minLength: 10
+        maxLength: 200
+      priority:
+        type: "integer"
+        minimum: 1
+        maximum: 5
+      execution_order:
+        type: "integer"
+        minimum: 1
+        maximum: 10
+      max_duration_minutes:
+        type: "integer"
+        minimum: 1
+        maximum: 180
+      execution_mode:
+        type: "string"
+        enum: ["sequential", "parallel", "hybrid"]
+      fail_fast:
+        type: "boolean"
+        default: false
+      background_execution:
+        type: "boolean"
+        default: false
+      resource_limits:
+        $ref: "#/definitions/resource_limits"
+      categories:
+        type: "array"
+        minItems: 1
+        items:
+          $ref: "#/definitions/category_config"
+      dependencies:
+        type: "array"
+        items:
+          type: "string"
+        uniqueItems: true
+      conflicts:
+        type: "array"
+        items:
+          type: "string"
+        uniqueItems: true
+      success_criteria:
+        $ref: "#/definitions/success_criteria"
+      required_services:
+        type: "array"
+        items:
+          type: "string"
+        uniqueItems: true
+      llm_requirements:
+        $ref: "#/definitions/llm_requirements"
+      environment_overrides:
+        type: "object"
+        patternProperties:
+          "^[a-z]+$":
+            type: "object"
+
+  resource_limits:
+    type: "object"
+    properties:
+      max_memory_mb:
+        type: "integer"
+        minimum: 128
+        maximum: 8192
+      max_cpu_percent:
+        type: "integer"
+        minimum: 10
+        maximum: 100
+      max_parallel_instances:
+        type: "integer"
+        minimum: 1
+        maximum: 16
+
+  category_config:
+    type: "object"
+    required: ["name", "timeout_seconds", "max_parallel_instances", "priority_order"]
+    properties:
+      name:
+        type: "string"
+        pattern: "^[a-z0-9_]+$"
+      timeout_seconds:
+        type: "integer"
+        minimum: 30
+        maximum: 3600
+      max_parallel_instances:
+        type: "integer"
+        minimum: 1
+        maximum: 8
+      priority_order:
+        type: "integer"
+        minimum: 1
+        maximum: 10
+      resource_requirements:
+        $ref: "#/definitions/resource_requirements"
+      filters:
+        $ref: "#/definitions/test_filters"
+
+  resource_requirements:
+    type: "object"
+    properties:
+      requires_postgresql:
+        type: "boolean"
+        default: false
+      requires_redis:
+        type: "boolean"
+        default: false
+      requires_backend_service:
+        type: "boolean"
+        default: false
+      requires_auth_service:
+        type: "boolean"
+        default: false
+      requires_frontend_service:
+        type: "boolean"
+        default: false
+      requires_real_llm:
+        type: "boolean"
+        default: false
+      requires_real_services:
+        type: "boolean"
+        default: false
+      requires_websocket_server:
+        type: "boolean"
+        default: false
+      requires_node_runtime:
+        type: "boolean"
+        default: false
+      requires_frontend_build:
+        type: "boolean"
+        default: false
+      min_memory_mb:
+        type: "integer"
+        minimum: 64
+        maximum: 2048
+      dedicated_resources:
+        type: "boolean"
+        default: false
+
+  test_filters:
+    type: "object"
+    properties:
+      include_patterns:
+        type: "array"
+        items:
+          type: "string"
+        uniqueItems: true
+      exclude_patterns:
+        type: "array"
+        items:
+          type: "string"
+        uniqueItems: true
+
+  success_criteria:
+    type: "object"
+    properties:
+      min_pass_rate:
+        type: "number"
+        minimum: 0.0
+        maximum: 1.0
+        default: 0.95
+      max_failures:
+        type: "integer"
+        minimum: 0
+        maximum: 100
+        default: 5
+      critical_tests_must_pass:
+        type: "boolean"
+        default: true
+      allow_partial_success:
+        type: "boolean"
+        default: false
+
+  llm_requirements:
+    type: "object"
+    properties:
+      mode:
+        type: "string"
+        enum: ["real", "mock", "hybrid"]
+        default: "mock"
+      timeout_seconds:
+        type: "integer"
+        minimum: 30
+        maximum: 300
+        default: 60
+      fallback_to_mock:
+        type: "boolean"
+        default: true
+
+  execution_config:
+    type: "object"
+    required: ["layer_execution_mode", "global_timeout_minutes", "max_global_parallel_tests"]
+    properties:
+      layer_execution_mode:
+        type: "string"
+        enum: ["sequential", "waterfall", "waterfall_with_background", "parallel"]
+        default: "waterfall_with_background"
+      global_timeout_minutes:
+        type: "integer"
+        minimum: 10
+        maximum: 300
+        default: 90
+      layer_startup_timeout_seconds:
+        type: "integer"
+        minimum: 5
+        maximum: 120
+        default: 30
+      inter_layer_delay_seconds:
+        type: "integer"
+        minimum: 0
+        maximum: 60
+        default: 5
+      max_global_parallel_tests:
+        type: "integer"
+        minimum: 1
+        maximum: 32
+        default: 8
+      max_memory_usage_mb:
+        type: "integer"
+        minimum: 512
+        maximum: 16384
+        default: 6144
+      max_cpu_usage_percent:
+        type: "integer"
+        minimum: 50
+        maximum: 100
+        default: 90
+      fail_fast_strategy:
+        type: "object"
+        patternProperties:
+          "^[a-z_]+$":
+            type: "string"
+            enum: ["immediate", "category", "layer", "disabled"]
+      resource_conflict_resolution:
+        type: "string"
+        enum: ["priority_based", "first_come_first_serve", "round_robin"]
+        default: "priority_based"
+      background_execution:
+        $ref: "#/definitions/background_execution"
+
+  background_execution:
+    type: "object"
+    properties:
+      enabled:
+        type: "boolean"
+        default: true
+      max_background_layers:
+        type: "integer"
+        minimum: 0
+        maximum: 3
+        default: 1
+      background_layers:
+        type: "array"
+        items:
+          type: "string"
+        uniqueItems: true
+      monitoring_interval_seconds:
+        type: "integer"
+        minimum: 10
+        maximum: 300
+        default: 30
+
+  environments:
+    type: "object"
+    patternProperties:
+      "^[a-z]+$":
+        $ref: "#/definitions/environment_config"
+
+  environment_config:
+    type: "object"
+    properties:
+      layer_overrides:
+        type: "object"
+        patternProperties:
+          "^[a-z_]+$":
+            type: "object"
+
+  service_dependencies:
+    type: "object"
+    patternProperties:
+      "^[a-z_]+$":
+        $ref: "#/definitions/service_dependency"
+
+  service_dependency:
+    type: "object"
+    required: ["startup_timeout_seconds", "required_for_layers"]
+    properties:
+      startup_timeout_seconds:
+        type: "integer"
+        minimum: 5
+        maximum: 300
+      health_check_endpoint:
+        type: "string"
+        pattern: "^/"
+      health_check_command:
+        type: "string"
+      required_for_layers:
+        type: "array"
+        items:
+          type: "string"
+        uniqueItems: true
+        minItems: 1
+      depends_on:
+        type: "array"
+        items:
+          type: "string"
+        uniqueItems: true
+      build_required:
+        type: "boolean"
+        default: false
+
+  monitoring:
+    type: "object"
+    properties:
+      progress_tracking:
+        $ref: "#/definitions/progress_tracking"
+      performance_monitoring:
+        $ref: "#/definitions/performance_monitoring"
+      reporting:
+        $ref: "#/definitions/reporting"
+
+  progress_tracking:
+    type: "object"
+    properties:
+      enabled:
+        type: "boolean"
+        default: true
+      granularity:
+        type: "string"
+        enum: ["layer", "category", "test"]
+        default: "category"
+      persist_progress:
+        type: "boolean"
+        default: true
+      checkpoint_interval_seconds:
+        type: "integer"
+        minimum: 10
+        maximum: 300
+        default: 30
+
+  performance_monitoring:
+    type: "object"
+    properties:
+      enabled:
+        type: "boolean"
+        default: true
+      memory_monitoring:
+        type: "boolean"
+        default: true
+      cpu_monitoring:
+        type: "boolean"
+        default: true
+      network_monitoring:
+        type: "boolean"
+        default: false
+      disk_monitoring:
+        type: "boolean"
+        default: false
+
+  reporting:
+    type: "object"
+    properties:
+      layer_reports:
+        type: "boolean"
+        default: true
+      timing_analysis:
+        type: "boolean"
+        default: true
+      resource_usage_reports:
+        type: "boolean"
+        default: true
+      dependency_analysis:
+        type: "boolean"
+        default: true
+      report_formats:
+        type: "array"
+        items:
+          type: "string"
+          enum: ["json", "html", "junit", "xml", "csv"]
+        uniqueItems: true
+        default: ["json", "html"]
+      report_output_dir:
+        type: "string"
+        default: "test_reports/layers"
+
+# Validation rules
+validation_rules:
+  layer_dependencies:
+    description: "Layer dependencies must form a valid DAG (no cycles)"
+    rule: "acyclic_dependencies"
+  
+  execution_order:
+    description: "Execution order must match dependency constraints"
+    rule: "execution_order_respects_dependencies"
+  
+  resource_limits:
+    description: "Sum of layer resource limits should not exceed global limits"
+    rule: "resource_limits_within_global_bounds"
+  
+  category_uniqueness:
+    description: "Each category should appear in only one layer"
+    rule: "unique_categories_across_layers"
+  
+  service_dependency_consistency:
+    description: "Service dependencies must be consistent across layers"
+    rule: "consistent_service_dependencies"
+
+# Default values for common configurations
+defaults:
+  timeout_seconds:
+    smoke: 60
+    unit: 300
+    integration: 600
+    database: 300
+    api: 300
+    websocket: 300
+    agent: 600
+    frontend: 300
+    e2e_critical: 300
+    cypress: 1800
+    e2e: 1800
+    performance: 1800
+
+  resource_requirements:
+    light:
+      max_memory_mb: 256
+      max_cpu_percent: 30
+      max_parallel_instances: 4
+    medium:
+      max_memory_mb: 512
+      max_cpu_percent: 50
+      max_parallel_instances: 2
+    heavy:
+      max_memory_mb: 1024
+      max_cpu_percent: 80
+      max_parallel_instances: 1
+
+  layer_profiles:
+    fast:
+      max_duration_minutes: 2
+      execution_mode: "parallel"
+      fail_fast: true
+    standard:
+      max_duration_minutes: 10
+      execution_mode: "parallel"
+      fail_fast: false
+    comprehensive:
+      max_duration_minutes: 30
+      execution_mode: "sequential"
+      fail_fast: false
