@@ -134,6 +134,9 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
       updateOptimisticMessage: (localId, updates) => updateOptimisticMessageAction(localId, updates, set),
       removeOptimisticMessage: (localId) => removeOptimisticMessageAction(localId, set),
       clearOptimisticMessages: () => clearOptimisticMessagesAction(set),
+      
+      // Comprehensive reset for logout
+      resetStore: () => resetEntireStore(set),
     }),
     { name: 'unified-chat-store' }
   )
@@ -361,5 +364,57 @@ const clearOptimisticMessagesAction = (set: (partial: Partial<UnifiedChatState>)
     optimisticMessages: new Map(),
     pendingUserMessage: null,
     pendingAiMessage: null
+  });
+};
+
+// Comprehensive store reset for logout
+const resetEntireStore = (set: (partial: Partial<UnifiedChatState>) => void): void => {
+  set({
+    // Reset all layer data
+    fastLayerData: null,
+    mediumLayerData: null,
+    slowLayerData: null,
+    
+    // Reset processing state
+    isProcessing: false,
+    currentRunId: null,
+    
+    // Reset thread management
+    activeThreadId: null,
+    threads: new Map(),
+    isThreadLoading: false,
+    threadLoadingState: null,
+    messages: [],
+    
+    // Reset WebSocket connection
+    isConnected: false,
+    connectionError: null,
+    
+    // Reset initialization state
+    initialized: false,
+    
+    // Reset agent tracking
+    executedAgents: new Map(),
+    agentIterations: new Map(),
+    
+    // Reset optimistic updates
+    optimisticMessages: new Map(),
+    pendingUserMessage: null,
+    pendingAiMessage: null,
+    
+    // Reset debug and performance
+    wsEventBuffer: new WebSocketEventBuffer(1000),
+    wsEventBufferVersion: 0,
+    performanceMetrics: createInitialPerformanceMetrics(),
+    
+    // Reset legacy compatibility
+    subAgentName: null,
+    subAgentStatus: null,
+    subAgentTools: [],
+    subAgentProgress: null,
+    subAgentError: null,
+    subAgentDescription: null,
+    subAgentExecutionTime: null,
+    queuedSubAgents: []
   });
 };
