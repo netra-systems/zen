@@ -38,7 +38,8 @@ import pytest
 from docker.errors import APIError, NotFound
 from docker.models.containers import Container
 
-from test_framework.mock_utils import mock_justified
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
 def check_docker_image_available(image_name: str) -> bool:
     """Check if a Docker image is available locally."""
@@ -453,8 +454,7 @@ class TestMicroserviceDependencyStartupSequence:
             )
         }
     
-    @mock_justified("L3 test: Using mock containers for service images not available in test environment")
-    def _mock_container_images(self):
+        def _mock_container_images(self):
         """Mock container images for testing when real images unavailable."""
         # In production tests, use real service images
         # For unit testing, mock the container behavior

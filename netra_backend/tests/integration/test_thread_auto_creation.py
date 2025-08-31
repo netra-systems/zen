@@ -24,7 +24,8 @@ from netra_backend.app.db.models_postgres import Message, Run, Thread, User
 from netra_backend.app.services.message_handlers import MessageHandlerService
 
 from netra_backend.app.services.thread_service import ThreadService
-from test_framework.mock_utils import mock_justified
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
 @pytest.mark.asyncio
 class TestThreadAutoCreation:

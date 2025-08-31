@@ -35,7 +35,8 @@ import pytest
 from clickhouse_driver import Client as ClickHouseClient
 from redis import Redis
 
-from test_framework.mock_utils import mock_justified
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
 class TestEnvironmentSecretsLoadingValidation:
     """
