@@ -778,8 +778,6 @@ describe('Multi-Agent Orchestration Tests', () => {
   });
 
   describe('Agent Coordination and Handoff', () => {
-        setupAntiHang();
-      jest.setTimeout(10000);
     it('should properly transfer context between agents', async () => {
       const { result } = renderHook(() => useAgentContext(), { wrapper: createWrapper });
 
@@ -844,8 +842,6 @@ describe('Multi-Agent Orchestration Tests', () => {
   });
 
   describe('Performance and Timing', () => {
-        setupAntiHang();
-      jest.setTimeout(10000);
     it('should track agent execution times', async () => {
       const { result } = renderHook(() => useAgentContext(), { wrapper: createWrapper });
 
@@ -924,8 +920,13 @@ describe('Multi-Agent Orchestration Tests', () => {
       });
     });
   });
+  
   afterEach(() => {
     cleanupAntiHang();
+    // Additional cleanup
+    jest.clearAllMocks();
+    jest.clearAllTimers();
+    wsEventHandlers = {};
   });
 
 });
