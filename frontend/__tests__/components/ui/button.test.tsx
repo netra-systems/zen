@@ -6,6 +6,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '../../utils/anti-hanging-test-utilities';
 
 // Mock button component
 const MockButton: React.FC<{
