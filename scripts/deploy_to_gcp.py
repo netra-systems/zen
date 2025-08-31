@@ -664,6 +664,11 @@ CMD ["npm", "start"]
         if env_vars:
             cmd.extend(["--set-env-vars", ",".join(env_vars)])
         
+        # Add VPC connector for services that need Redis/database access
+        if service.name in ["backend", "auth"]:
+            # CRITICAL: VPC connector required for Redis and Cloud SQL connectivity
+            cmd.extend(["--vpc-connector", "staging-connector"])
+        
         # Add service-specific configurations
         if service.name == "backend":
             # Backend needs connections to databases and all required secrets from GSM
