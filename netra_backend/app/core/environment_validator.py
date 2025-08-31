@@ -51,7 +51,7 @@ class EnvironmentValidator:
     # Variables that should not have localhost in staging/production
     LOCALHOST_SENSITIVE_VARS = [
         "AUTH_SERVICE_URL",
-        "DATABASE_URL",
+        "POSTGRES_HOST",  # Check POSTGRES_HOST instead of DATABASE_URL
         "CLICKHOUSE_HOST",
         "REDIS_URL",
         "WEBSOCKET_URL",
@@ -60,16 +60,25 @@ class EnvironmentValidator:
     ]
     
     # Required variables for each environment
+    # Note: DATABASE_URL is constructed from POSTGRES_* variables in staging/production
     REQUIRED_VARS = {
         "production": [
-            "JWT_SECRET",
-            "DATABASE_URL",
+            "JWT_SECRET_PRODUCTION",  # Production uses JWT_SECRET_PRODUCTION
+            "POSTGRES_HOST",
+            "POSTGRES_PORT",
+            "POSTGRES_DB",
+            "POSTGRES_USER",
+            "POSTGRES_PASSWORD",
             "AUTH_SERVICE_URL",
             "ENVIRONMENT"
         ],
         "staging": [
-            "JWT_SECRET",
-            "DATABASE_URL", 
+            "JWT_SECRET_STAGING",  # Staging uses JWT_SECRET_STAGING per jwt_secret_standardization_hard_requirements.xml
+            "POSTGRES_HOST",
+            "POSTGRES_PORT",
+            "POSTGRES_DB",
+            "POSTGRES_USER",
+            "POSTGRES_PASSWORD",
             "AUTH_SERVICE_URL",
             "ENVIRONMENT"
         ],
