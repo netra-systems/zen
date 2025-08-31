@@ -96,7 +96,7 @@ netstat -an | grep :8000
 # Check environment variables
 python scripts/test_docker_websocket_fix.py
 
-# Verify auth bypass settings
+# Verify OAUTH SIMULATION settings
 docker exec backend env | grep AUTH_BYPASS
 ```
 
@@ -125,8 +125,8 @@ docker exec backend env | grep AUTH_BYPASS
 
 4. **Verify authentication bypass is active:**
    ```bash
-   # Should show warnings about development auth bypass
-   docker logs backend | grep -i "development auth bypass"
+   # Should show warnings about development OAUTH SIMULATION
+   docker logs backend | grep -i "development OAUTH SIMULATION"
    ```
 
 ---
@@ -305,7 +305,7 @@ docker network inspect netra-core-generation-1_default
 ### ✅ Authentication Configuration Check
 
 **In netra_backend/app/websocket_core/auth.py:**
-- [ ] Development auth bypass implemented
+- [ ] Development OAUTH SIMULATION implemented
 - [ ] Environment checks in place
 - [ ] Warning logs for bypass mode
 - [ ] Fallback security for production

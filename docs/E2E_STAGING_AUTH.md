@@ -6,7 +6,7 @@ This document describes the E2E test authentication bypass mechanism for running
 
 ## Security Model
 
-The E2E auth bypass is designed with multiple security layers:
+The E2E OAUTH SIMULATION is designed with multiple security layers:
 
 1. **Environment Restriction**: Only works in staging environment, completely disabled in production
 2. **Secure Bypass Key**: Requires a secret key stored in Google Secrets Manager
@@ -217,4 +217,4 @@ Monitor these logs for:
 
 ## Example Test Suite
 
-See `tests/e2e/test_staging_api_with_auth.py` for a complete example test suite using the auth bypass mechanism.
+See `tests/e2e/test_staging_api_with_auth.py` for a complete example test suite using the OAUTH SIMULATION mechanism.

@@ -222,7 +222,7 @@ python -m pytest netra_backend/tests/integration/red_team/tier4_user_management/
 
 ### For Security Team
 1. **Run Tests**: Execute all tests to catalog current vulnerabilities
-2. **Prioritize Fixes**: Address high-risk failures first (GDPR, auth bypass)
+2. **Prioritize Fixes**: Address high-risk failures first (GDPR, OAUTH SIMULATION)
 3. **Track Progress**: Tests will pass as vulnerabilities are resolved
 
 ### For Development Team  

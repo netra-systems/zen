@@ -4,7 +4,7 @@
 
 This guide documents the E2E testing system for the deployed staging environment. These tests make **real API and WebSocket calls** directly to the deployed staging services on GCP Cloud Run.
 
-**IMPORTANT**: The auth bypass mechanism **ONLY simulates the Google OAuth flow** for testing purposes. It does not bypass authentication - valid JWT tokens are still required for all API and WebSocket calls.
+**IMPORTANT**: The OAUTH SIMULATION mechanism **ONLY simulates the Google OAuth flow** for testing purposes. It does not bypass authentication - valid JWT tokens are still required for all API and WebSocket calls.
 
 ## Architecture
 
@@ -122,9 +122,9 @@ ENVIRONMENT=staging pytest -m "staging and not slow" tests/e2e/
 - Error recovery
 - Rate limiting
 
-## How Auth Bypass Works
+## How OAUTH SIMULATION Works
 
-The auth bypass mechanism **simulates** what happens after a successful Google OAuth login:
+The OAUTH SIMULATION mechanism **simulates** what happens after a successful Google OAuth login:
 
 1. **Test Request**: Test sends request to `/auth/e2e/test-auth` with bypass key
 2. **User Creation**: Auth service creates/retrieves a test user as if they logged in via OAuth
@@ -239,7 +239,7 @@ Monitor staging test results:
 ## Best Practices
 
 1. **Always test against deployed services** - Never mock staging endpoints
-2. **Use real authentication flow** - Auth bypass only simulates OAuth provider
+2. **Use real authentication flow** - OAUTH SIMULATION only simulates OAuth provider
 3. **Handle cold starts** - Staging services may have cold start delays
 4. **Clean up resources** - Always disconnect WebSockets and logout
 5. **Test incrementally** - Run quick tests first, then comprehensive

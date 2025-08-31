@@ -305,18 +305,6 @@ For testing closer to production:
 
 **IMPORTANT: Docker Compose is for LOCAL development only. Staging refers to GCP Cloud Run deployment.**
 
-Create environment-specific compose files for different LOCAL configurations:
-
-```yaml
-# docker-compose.override.yml (for local customization)
-version: '3.8'
-services:
-  backend:
-    environment:
-      ENVIRONMENT: dev
-      LOG_LEVEL: debug
-```
-
 Use with: `docker compose --profile dev up` or `docker compose --profile test up`
 
 For actual staging environment testing, use:

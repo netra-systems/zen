@@ -55,7 +55,7 @@ Identified and resolved WebSocket connection instability causing rapid connect/d
 
 ### 3. Development Mode Clarity
 
-- Backend automatically enables auth bypass in development
+- Backend automatically enables OAUTH SIMULATION in development
 - Creates temporary users (`dev-temp-*`) for unauthenticated connections
 - Frontend WebSocketService handles null tokens correctly
 - Clear warning logs for development mode operations
@@ -77,7 +77,7 @@ Identified and resolved WebSocket connection instability causing rapid connect/d
 
 ### Backend (Development Mode)
 ```python
-# Automatic auth bypass in development
+# Automatic OAUTH SIMULATION in development
 if environment == 'development':
     allow_unauthenticated = True
     create_temp_user = "dev-temp-{uuid}"
