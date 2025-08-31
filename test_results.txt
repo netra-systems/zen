@@ -1,0 +1,31 @@
+[32m2025-08-31 09:24:23.752[0m | [1mINFO    [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [1mInitialized BackgroundE2EAgent with ID: background_e2e_1756657463[0m
+[32m2025-08-31 09:24:24.373[0m | [33m[1mWARNING [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [33m[1mUsing production OPENAI API key - consider using TEST_OPENAI_API_KEY[0m
+[32m2025-08-31 09:24:24.373[0m | [33m[1mWARNING [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [33m[1mUsing production ANTHROPIC API key - consider using TEST_ANTHROPIC_API_KEY[0m
+[32m2025-08-31 09:24:24.373[0m | [33m[1mWARNING [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [33m[1mUsing production GOOGLE API key - consider using TEST_GEMINI_API_KEY[0m
+[32m2025-08-31 09:24:24.373[0m | [1mINFO    [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [1mLLM testing configured: mode=mock, model=gemini-2.5-pro, parallel=8[0m
+[32m2025-08-31 09:24:24.847[0m | [33m[1mWARNING [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [33m[1mDocker not available, using default ports[0m
+[WARNING] PostgreSQL service not found via port discovery, using configured defaults
+[INFO] LLM Configuration: real_llm=False, running_e2e=False, env=test
+
+============================================================
+EXECUTION PLAN
+============================================================
+Total Categories: 3
+Execution Phases: 2
+Estimated Duration: 0:15:00
+
+Phase 1: 2 categories
+  - database (HIGH, ~0:05:00)
+  - unit (HIGH, ~0:05:00)
+
+Phase 2: 1 categories
+  - integration (MEDIUM, ~0:10:00)
+
+============================================================
+
+
+========================================
+PHASE 1: 2 categories
+========================================
+
+Executing category: database
