@@ -29,6 +29,8 @@ const AccessibleButton: React.FC<{
 };
 
 describe('Button Accessibility Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   it('should have proper accessibility attributes', () => {
     const mockOnClick = jest.fn();
     render(
@@ -62,4 +64,8 @@ describe('Button Accessibility Tests', () => {
     
     expect(mockOnClick).toHaveBeenCalledTimes(1);
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

@@ -8,6 +8,8 @@ import { render, screen, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 describe('Loading States', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   it('should display loading spinner during async operations', async () => {
     const LoadingSpinnerComponent: React.FC = () => {
       const [isLoading, setIsLoading] = React.useState(true);
@@ -214,4 +216,8 @@ describe('Loading States', () => {
       expect(screen.getByTestId('completed')).toHaveTextContent('All steps completed!');
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

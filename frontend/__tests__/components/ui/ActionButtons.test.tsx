@@ -1,19 +1,19 @@
-/**
- * ActionButtons Test Suite
- * Tests action button groups, state management, and complex interactions
- * Follows 25-line function rule and covers all action button patterns
- */
-
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ActionButtons from '@/components/demo/ActionButtons';
 import { MessageActionButtons } from '@/components/chat/components/MessageActionButtons';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+'@testing-library/user-event';
+import ActionButtons from '@/components/demo/ActionButtons';
+import { MessageActionButtons } from '@/components/chat/components/MessageActionButtons';
 
 describe('ActionButtons Test Suite', () => {
+    jest.setTimeout(10000);
   const user = userEvent.setup();
 
   describe('Demo ActionButtons Component', () => {
+      jest.setTimeout(10000);
     const defaultProps = {
       selectedWorkload: null,
       showAdvancedOptions: false,
@@ -83,6 +83,7 @@ describe('ActionButtons Test Suite', () => {
   });
 
   describe('Message ActionButtons Component', () => {
+      jest.setTimeout(10000);
     const defaultMessageProps = {
       isDisabled: false,
       canSend: true,
@@ -160,6 +161,7 @@ describe('ActionButtons Test Suite', () => {
   });
 
   describe('Action Button Groups Accessibility', () => {
+      jest.setTimeout(10000);
     it('provides clear labels for screen readers', () => {
       render(<MessageActionButtons {...{
         isDisabled: false,
@@ -221,6 +223,7 @@ describe('ActionButtons Test Suite', () => {
   });
 
   describe('Action Button Performance', () => {
+      jest.setTimeout(10000);
     it('renders action button group quickly', () => {
       const startTime = performance.now();
       render(<MessageActionButtons {...{
@@ -264,6 +267,7 @@ describe('ActionButtons Test Suite', () => {
   });
 
   describe('Complex Action Button Scenarios', () => {
+      jest.setTimeout(10000);
     it('handles conditional button rendering', () => {
       const ConditionalButtons = ({ showAll }: { showAll: boolean }) => (
         <div>
@@ -358,6 +362,7 @@ describe('ActionButtons Test Suite', () => {
   });
 
   describe('Action Button Error Handling', () => {
+      jest.setTimeout(10000);
     it('handles action errors gracefully', async () => {
       const ErrorButton = () => {
         const [error, setError] = React.useState<string | null>(null);

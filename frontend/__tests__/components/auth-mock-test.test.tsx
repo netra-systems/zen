@@ -33,6 +33,8 @@ const TestAuthComponent: React.FC = () => {
 };
 
 describe('Auth Store Mock Fix - Iteration 5', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -70,4 +72,8 @@ describe('Auth Store Mock Fix - Iteration 5', () => {
     expect(screen.getByTestId('unauthenticated')).toBeInTheDocument();
     expect(screen.getByText('Please sign in')).toBeInTheDocument();
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

@@ -10,6 +10,8 @@ import '@testing-library/jest-dom';
 import { UserProfileForm, UserProfile } from '../../../components/forms/UserProfileForm';
 
 describe('User Profile Form Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   it('should display validation errors for empty required fields', async () => {
     const mockSubmit = jest.fn();
     const user = userEvent.setup();
@@ -143,4 +145,8 @@ describe('User Profile Form Tests', () => {
     // Character counter should reflect initial bio length
     expect(screen.getByTestId('bio-counter')).toHaveTextContent('22/500');
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

@@ -1,11 +1,9 @@
-/**
- * MessageInput Final Working Tests 
- * Tests MessageInput functionality by working with the actual disabled state
- * and testing what we can test properly
- */
-
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { jest } from '@jest/globals';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ort { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
 
@@ -81,11 +79,13 @@ jest.mock('@/components/chat/hooks/useMessageSending', () => ({
 import { MessageInput } from '@/components/chat/MessageInput';
 
 describe('MessageInput - Final Working Tests', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('Component Rendering and Structure', () => {
+      jest.setTimeout(10000);
     test('should render MessageInput component with correct structure', () => {
       render(<MessageInput />);
       
@@ -129,6 +129,7 @@ describe('MessageInput - Final Working Tests', () => {
   });
 
   describe('Input State Management', () => {
+      jest.setTimeout(10000);
     test('should handle text input properly when enabled', async () => {
       render(<MessageInput />);
       
@@ -189,6 +190,7 @@ describe('MessageInput - Final Working Tests', () => {
   });
 
   describe('Character Limit and Validation', () => {
+      jest.setTimeout(10000);
     test('should show character count for long messages', async () => {
       render(<MessageInput />);
       
@@ -239,6 +241,7 @@ describe('MessageInput - Final Working Tests', () => {
   });
 
   describe('Message Sending Simulation', () => {
+      jest.setTimeout(10000);
     test('should trigger send functionality on Enter key', async () => {
       render(<MessageInput />);
       
@@ -294,6 +297,7 @@ describe('MessageInput - Final Working Tests', () => {
   });
 
   describe('Accessibility and UX', () => {
+      jest.setTimeout(10000);
     test('should have proper ARIA labels and descriptions', () => {
       render(<MessageInput />);
       

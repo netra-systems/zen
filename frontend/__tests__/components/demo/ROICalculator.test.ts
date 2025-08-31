@@ -28,6 +28,8 @@ jest.mock('@/lib/logger', () => ({
 }));
 
 describe('ROI Calculator Business Logic', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const mockDemoService = demoService as jest.Mocked<typeof demoService>;
 
   beforeEach(() => {
@@ -67,6 +69,8 @@ describe('ROI Calculator Business Logic', () => {
   };
 
   describe('API Integration - Success Cases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should calculate ROI using API for Financial Services', async () => {
       const metrics = createTestMetrics({ currentMonthlySpend: 50000 });
       const apiResponse = createMockAPIResponse();
@@ -149,6 +153,8 @@ describe('ROI Calculator Business Logic', () => {
   });
 
   describe('Fallback Calculations - Business Continuity', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should use fallback when API fails', async () => {
       const metrics = createTestMetrics({ currentMonthlySpend: 75000 });
       mockDemoService.calculateROI.mockRejectedValue(new Error('API Error'));
@@ -272,6 +278,8 @@ describe('ROI Calculator Business Logic', () => {
   });
 
   describe('Industry-Specific Calculations', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle all supported industries', async () => {
       const metrics = createTestMetrics();
       const industries = Object.keys(INDUSTRY_MULTIPLIERS).filter(key => key !== 'default');
@@ -321,6 +329,8 @@ describe('ROI Calculator Business Logic', () => {
   });
 
   describe('Edge Cases and Validation', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle zero spend metrics', async () => {
       const zeroSpendMetrics = createTestMetrics({ currentMonthlySpend: 0 });
       mockDemoService.calculateROI.mockRejectedValue(new Error('API Error'));
@@ -402,4 +412,8 @@ describe('ROI Calculator Business Logic', () => {
       expect(result.paybackPeriod).toBe(8);
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

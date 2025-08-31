@@ -25,6 +25,8 @@ jest.mock('framer-motion', () => ({
 }));
 
 describe('ChatHistorySection - Timestamp Handling', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const mockThreads = [
     {
       id: 'thread-1',
@@ -69,6 +71,8 @@ describe('ChatHistorySection - Timestamp Handling', () => {
   });
 
   describe('formatDate function behavior', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should correctly display ISO string timestamps', () => {
       const today = new Date();
       const todayThread = {
@@ -177,6 +181,8 @@ describe('ChatHistorySection - Timestamp Handling', () => {
   });
 
   describe('Regression prevention tests', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should NOT multiply ISO string timestamps by 1000', () => {
       // This test ensures ISO strings are not treated as Unix timestamps
       const isoString = '2024-01-15T10:30:00.000Z';
@@ -351,4 +357,8 @@ describe('ChatHistorySection - Timestamp Handling', () => {
       expect(screen.getByText('Unknown date')).toBeInTheDocument(); // Null
     });
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

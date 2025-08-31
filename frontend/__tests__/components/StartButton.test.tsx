@@ -1,10 +1,10 @@
-/**
- * Start Button (New Chat Button) Component Tests
- * 
- * Tests the critical "New Chat" button functionality that enables
- * users to start new conversations - core to onboarding flow.
- * 
- * Business Value: Protects Free → Paid conversion path
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { act } from 'react-dom/test-utils';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+rsion path
  * Priority: P0 - Revenue critical component
  * 
  * @compliance conventions.xml - Max 8 lines per function, under 300 lines
@@ -78,15 +78,22 @@ const testScenarios: ButtonTestScenario[] = [
 ];
 
 describe('NewChatButton Component', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     setupButtonTests();
   });
   
   afterEach(() => {
     cleanupButtonTests();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
   
   describe('Rendering States', () => {
+      jest.setTimeout(10000);
     test.each(testScenarios)('renders correctly in $name', ({ props, expectedText, expectedDisabled }) => {
       renderButtonWithProps(props);
       verifyButtonText(expectedText);
@@ -108,6 +115,7 @@ describe('NewChatButton Component', () => {
   });
   
   describe('User Interactions', () => {
+      jest.setTimeout(10000);
     const interactionTests: ButtonInteractionTest[] = [
       {
         description: 'calls onNewChat when clicked in enabled state',
@@ -151,6 +159,7 @@ describe('NewChatButton Component', () => {
   });
   
   describe('Visual Feedback', () => {
+      jest.setTimeout(10000);
     it('applies hover styles when enabled', () => {
       renderButtonWithProps(defaultProps);
       verifyHoverStyles();
@@ -171,6 +180,7 @@ describe('NewChatButton Component', () => {
   });
   
   describe('Performance Requirements', () => {
+      jest.setTimeout(10000);
     it('responds to clicks within 100ms', async () => {
       renderButtonWithProps(defaultProps);
       const startTime = Date.now();

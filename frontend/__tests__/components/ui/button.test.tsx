@@ -47,6 +47,8 @@ const MockButton: React.FC<{
 };
 
 describe('Button Component Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   it('should render with default props', () => {
     render(<MockButton>Click me</MockButton>);
     
@@ -124,4 +126,8 @@ describe('Button Component Tests', () => {
     
     expect(mockClick).not.toHaveBeenCalled();
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

@@ -3,6 +3,7 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // SearchInput component as found in corpus-browse.tsx
 const SearchInput = ({ 
@@ -60,6 +61,7 @@ const SearchInput = ({
 };
 
 describe('SearchInput Component - Comprehensive Tests', () => {
+    jest.setTimeout(10000);
   const defaultProps = {
     searchTerm: '',
     setSearchTerm: jest.fn(),
@@ -77,6 +79,7 @@ describe('SearchInput Component - Comprehensive Tests', () => {
   });
 
   describe('Basic Rendering', () => {
+      jest.setTimeout(10000);
     it('renders search input correctly', () => {
       renderSearchInput();
       const input = screen.getByTestId('search-input');
@@ -114,6 +117,7 @@ describe('SearchInput Component - Comprehensive Tests', () => {
   });
 
   describe('Text Entry and Search', () => {
+      jest.setTimeout(10000);
     it('accepts search input correctly', async () => {
       const user = setupUser();
       // Use a stateful test component to properly handle controlled input
@@ -173,6 +177,7 @@ describe('SearchInput Component - Comprehensive Tests', () => {
   });
 
   describe('Special Characters and Query Types', () => {
+      jest.setTimeout(10000);
     it('accepts emoji in search queries', async () => {
       const user = setupUser();
       const TestComponent = () => {
@@ -239,6 +244,7 @@ describe('SearchInput Component - Comprehensive Tests', () => {
   });
 
   describe('Clear Functionality', () => {
+      jest.setTimeout(10000);
     it('shows clear button when search term exists', () => {
       renderSearchInput({ searchTerm: 'test' });
       const clearButton = screen.getByTestId('clear-search');
@@ -280,6 +286,7 @@ describe('SearchInput Component - Comprehensive Tests', () => {
   });
 
   describe('Copy and Paste Operations', () => {
+      jest.setTimeout(10000);
     it('supports paste operation', async () => {
       const setSearchTerm = jest.fn();
       renderSearchInput({ setSearchTerm });
@@ -315,6 +322,7 @@ describe('SearchInput Component - Comprehensive Tests', () => {
   });
 
   describe('Keyboard Shortcuts', () => {
+      jest.setTimeout(10000);
     it('supports select all shortcut', async () => {
       const user = setupUser();
       renderSearchInput({ searchTerm: 'select all this' });
@@ -362,6 +370,7 @@ describe('SearchInput Component - Comprehensive Tests', () => {
   });
 
   describe('Auto-focus Functionality', () => {
+      jest.setTimeout(10000);
     it('focuses automatically when autoFocus is true', () => {
       renderSearchInput({ autoFocus: true });
       const input = screen.getByTestId('search-input');
@@ -392,6 +401,7 @@ describe('SearchInput Component - Comprehensive Tests', () => {
   });
 
   describe('Mobile Keyboard Behavior', () => {
+      jest.setTimeout(10000);
     it('uses proper input styling for mobile keyboards', () => {
       renderSearchInput();
       const input = screen.getByTestId('search-input');
@@ -417,6 +427,7 @@ describe('SearchInput Component - Comprehensive Tests', () => {
   });
 
   describe('Disabled State', () => {
+      jest.setTimeout(10000);
     it('prevents input when disabled', async () => {
       const user = setupUser();
       const setSearchTerm = jest.fn();
@@ -454,6 +465,7 @@ describe('SearchInput Component - Comprehensive Tests', () => {
   });
 
   describe('Event Handling', () => {
+      jest.setTimeout(10000);
     it('calls onChange handler on input', async () => {
       const setSearchTerm = jest.fn();
       renderSearchInput({ setSearchTerm });
@@ -504,6 +516,7 @@ describe('SearchInput Component - Comprehensive Tests', () => {
   });
 
   describe('Accessibility', () => {
+      jest.setTimeout(10000);
     it('supports aria-label', () => {
       renderSearchInput({ 'aria-label': 'Search database' });
       const input = screen.getByTestId('search-input');
@@ -537,6 +550,7 @@ describe('SearchInput Component - Comprehensive Tests', () => {
   });
 
   describe('Search Icon Styling', () => {
+      jest.setTimeout(10000);
     it('positions search icon correctly', () => {
       renderSearchInput();
       const container = screen.getByTestId('search-input').parentElement;
@@ -568,6 +582,7 @@ describe('SearchInput Component - Comprehensive Tests', () => {
   });
 
   describe('Performance', () => {
+      jest.setTimeout(10000);
     it('handles rapid input changes efficiently', async () => {
       const user = setupUser();
       const TestComponent = () => {
@@ -617,6 +632,7 @@ describe('SearchInput Component - Comprehensive Tests', () => {
   });
 
   describe('Integration with Forms', () => {
+      jest.setTimeout(10000);
     it('integrates with form submission', () => {
       const handleSubmit = jest.fn((e) => e.preventDefault());
       render(

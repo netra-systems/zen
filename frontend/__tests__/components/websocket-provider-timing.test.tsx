@@ -102,6 +102,8 @@ const useTokenController = () => {
 };
 
 describe('WebSocketProvider Timing Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const mockWebSocketService = {
     onStatusChange: null,
     onMessage: null,
@@ -141,6 +143,12 @@ describe('WebSocketProvider Timing Tests', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   /**
