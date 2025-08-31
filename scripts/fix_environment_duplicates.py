@@ -54,7 +54,7 @@ def fix_environment_access(file_path: str) -> bool:
         original_content = content
         
         # Skip files that already have proper imports
-        if 'from dev_launcher.isolated_environment import get_env' in content:
+        if 'from shared.isolated_environment import get_env' in content:
             return False
         
         # Skip test files and documentation
@@ -103,7 +103,7 @@ def fix_environment_access(file_path: str) -> bool:
                     break
             
             # Insert the import
-            import_line = 'from dev_launcher.isolated_environment import get_env'
+            import_line = 'from shared.isolated_environment import get_env'
             if import_line not in content:
                 lines.insert(import_insert_index, import_line)
                 content = '\n'.join(lines)

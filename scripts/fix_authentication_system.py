@@ -30,7 +30,7 @@ import psutil
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 logging.basicConfig(
     level=logging.INFO,

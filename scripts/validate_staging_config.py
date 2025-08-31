@@ -32,7 +32,7 @@ def validate_staging_configuration():
     os.environ['ENVIRONMENT'] = 'staging'
     
     # Now import and override the singleton
-    from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+    from shared.isolated_environment import IsolatedEnvironment
     
     # Get the singleton instance and override the environment
     env_instance = IsolatedEnvironment.get_instance()

@@ -15,7 +15,7 @@ sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment, get_env
+from shared.isolated_environment import IsolatedEnvironment, get_env
 from netra_backend.app.db.clickhouse import get_clickhouse_client, use_mock_clickhouse
 from netra_backend.app.core.configuration import get_configuration
 

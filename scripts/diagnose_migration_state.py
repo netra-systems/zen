@@ -35,7 +35,7 @@ from netra_backend.app.db.alembic_state_recovery import (
     ensure_migration_state_healthy,
     analyze_migration_state
 )
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class MigrationStateDiagnostic:

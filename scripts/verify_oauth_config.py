@@ -104,7 +104,7 @@ def verify_oauth_configuration():
         print("\n4. Checking environment variables...")
         print("-" * 40)
         
-        from auth_service.auth_core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         env_manager = get_env()
         
         oauth_vars = {

@@ -76,7 +76,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Use centralized environment management
 try:
-    from dev_launcher.isolated_environment import get_env
+    from shared.isolated_environment import get_env
 except ImportError:
     # Hard failure - IsolatedEnvironment is required for test runner
     raise RuntimeError("IsolatedEnvironment required for test runner. Cannot import from dev_launcher.isolated_environment")

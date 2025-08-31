@@ -123,7 +123,7 @@ def validate_jwt_environment():
     print("\nValidating JWT Environment Configuration:")
     
     # Check environment variables
-    from netra_backend.app.core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
     env = get_env()
     
     jwt_secret = env.get("JWT_SECRET_KEY")
