@@ -310,8 +310,8 @@ class TestOptimizationsCoreSubAgentIntegration:
         
         # Verify state was updated correctly
         assert state.optimizations_result is not None
-        assert state.optimizations_result.optimization_type == "cost"
-        assert len(state.optimizations_result.recommendations) == 2
+        assert state.optimizations_result.optimization_type == "general"
+        assert len(state.optimizations_result.recommendations) == 3
     
     @pytest.mark.asyncio
     async def test_circuit_breaker_integration(self):

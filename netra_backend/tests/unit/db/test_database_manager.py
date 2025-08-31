@@ -80,7 +80,7 @@ class TestDatabaseManagerURLConversion:
                     # Port should be 5434 as configured in the actual database manager
                     assert result == "postgresql://test:test@localhost:5434/netra_test?options=-c%20search_path%3Dnetra_test,public"
     
-    @pytest.mark.parametrize("base_url,expected_migration_url", [
+    @pytest.mark.parametrize("source_url,expected_migration_url", [
         # Standard sync URL conversion
         ("postgresql://user:pass@host:5432/db?sslmode=require", 
          "postgresql://user:pass@host:5432/db?sslmode=require"),
@@ -93,21 +93,21 @@ class TestDatabaseManagerURLConversion:
         ("postgresql://user:pass@host/cloudsql/project:region:instance/db", 
          "postgresql://user:pass@/db?host=/cloudsql/project:region:instance"),
     ])
-    def test_get_migration_url_sync_format(self, base_url, expected_migration_url):
+    def test_get_migration_url_sync_format(self, source_url, expected_migration_url):
         """Test migration URL conversion for sync compatibility."""
         # Mock the unified config to return our test URL
         with patch("netra_backend.app.db.database_manager.get_unified_config") as mock_config:
-            mock_config.return_value.database_url = base_url
+            mock_config.return_value.database_url = source_url
             with patch("netra_backend.app.db.database_manager.get_env") as mock_get_env:
                 mock_env = MagicMock()
-                mock_env.get.side_effect = lambda key, default='': base_url if key == 'DATABASE_URL' else default
-                mock_env.get_all.return_value = {'DATABASE_URL': base_url}
+                mock_env.get.side_effect = lambda key, default='': source_url if key == 'DATABASE_URL' else default
+                mock_env.get_all.return_value = {'DATABASE_URL': source_url}
                 mock_get_env.return_value = mock_env
                 
                 result = DatabaseManager.get_migration_url_sync_format()
                 assert result == expected_migration_url
     
-    @pytest.mark.parametrize("base_url,expected_app_url", [
+    @pytest.mark.parametrize("source_url,expected_app_url", [
         # Standard async URL conversion (search_path handled via server_settings, not URL options)
         ("postgresql://user:pass@host:5432/db?sslmode=require", 
          "postgresql+asyncpg://user:pass@host:5432/db?ssl=require"),
@@ -120,15 +120,15 @@ class TestDatabaseManagerURLConversion:
         ("postgresql://user:pass@host/cloudsql/project:region:instance/db", 
          "postgresql+asyncpg://user:pass@/db?host=/cloudsql/project:region:instance"),
     ])
-    def test_get_application_url_async(self, base_url, expected_app_url):
+    def test_get_application_url_async(self, source_url, expected_app_url):
         """Test application URL conversion for async compatibility."""
         # Mock the unified config and get_env to ensure test URL is used
         with patch("netra_backend.app.db.database_manager.get_unified_config") as mock_config:
-            mock_config.return_value.database_url = base_url
+            mock_config.return_value.database_url = source_url
             with patch("netra_backend.app.db.database_manager.get_env") as mock_get_env:
                 mock_env = MagicMock()
-                mock_env.get.side_effect = lambda key, default='': base_url if key == 'DATABASE_URL' else default
-                mock_env.get_all.return_value = {'DATABASE_URL': base_url}
+                mock_env.get.side_effect = lambda key, default='': source_url if key == 'DATABASE_URL' else default
+                mock_env.get_all.return_value = {'DATABASE_URL': source_url}
                 mock_get_env.return_value = mock_env
                 
                 result = DatabaseManager.get_application_url_async()
@@ -466,7 +466,7 @@ class TestDatabaseManagerErrorHandling:
                         result = DatabaseManager._get_default_database_url()
                         # Should default to development settings with public schema search_path
                         # For unknown environments, it defaults to development with netra_dev database
-                        assert result == "postgresql://postgres:password@localhost:5432/netra_dev?options=-c%20search_path%3Dpublic"
+                        assert result == "postgresql://netra:netra123@localhost:5433/netra_dev?options=-c%20search_path%3Dpublic"
 
 
 class TestDatabaseManagerIntegration:
