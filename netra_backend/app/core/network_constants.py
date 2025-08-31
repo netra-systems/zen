@@ -235,8 +235,14 @@ class URLConstants:
     # Production domains
     PRODUCTION_FRONTEND: Final[str] = "https://netrasystems.ai"
     PRODUCTION_APP: Final[str] = "https://app.netrasystems.ai"
-    STAGING_FRONTEND: Final[str] = "https://app.staging.netrasystems.ai"
-    STAGING_APP: Final[str] = "https://app.staging.netrasystems.ai"
+    STAGING_FRONTEND: Final[str] = "https://netra-frontend-staging-pnovr5vsba-uc.a.run.app"
+    STAGING_APP: Final[str] = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
+    
+    # GCP Staging Service URLs - SSOT for all staging services
+    STAGING_BACKEND_URL: Final[str] = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
+    STAGING_AUTH_URL: Final[str] = "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
+    STAGING_FRONTEND_URL: Final[str] = "https://netra-frontend-staging-pnovr5vsba-uc.a.run.app"
+    STAGING_WEBSOCKET_URL: Final[str] = "wss://netra-backend-staging-pnovr5vsba-uc.a.run.app/ws"
     
     @classmethod
     def build_http_url(cls, 
@@ -441,9 +447,9 @@ class NetworkEnvironmentHelper:
             }
         elif environment == "staging":
             return {
-                "frontend": env.get(URLConstants.FRONTEND_URL, URLConstants.STAGING_FRONTEND),
-                "backend": env.get(URLConstants.BACKEND_SERVICE_URL, URLConstants.STAGING_APP),
-                "auth_service": env.get(URLConstants.AUTH_SERVICE_URL, "")
+                "frontend": env.get(URLConstants.FRONTEND_URL, URLConstants.STAGING_FRONTEND_URL),
+                "backend": env.get(URLConstants.BACKEND_SERVICE_URL, URLConstants.STAGING_BACKEND_URL),
+                "auth_service": env.get(URLConstants.AUTH_SERVICE_URL, URLConstants.STAGING_AUTH_URL)
             }
         else:
             # Development URLs

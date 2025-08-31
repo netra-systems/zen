@@ -35,7 +35,9 @@ class StagingAuthHelper:
             bypass_key: E2E bypass key. If not provided, will try to load from environment.
         """
         self.bypass_key = bypass_key or os.getenv("E2E_BYPASS_KEY")
-        self.staging_auth_url = os.getenv("STAGING_AUTH_URL", "https://api.staging.netrasystems.ai")
+        # Use SSOT for staging auth URL
+        from netra_backend.app.core.network_constants import URLConstants
+        self.staging_auth_url = os.getenv("STAGING_AUTH_URL", URLConstants.STAGING_AUTH_URL)
         self.token_cache: Optional[str] = None
         self.token_expiry: Optional[datetime] = None
         
