@@ -46,11 +46,19 @@ def audit_jwt_secrets():
         full_path = PROJECT_ROOT / file_path
         if full_path.exists():
             env_vars = load_env_file(full_path)
-            jwt_secret = env_vars.get('JWT_SECRET_KEY', 'NOT_FOUND')
+            # Check environment-specific JWT secret first, then fallback to generic
+            if 'staging' in env_name.lower():
+                jwt_secret = env_vars.get('JWT_SECRET_STAGING', env_vars.get('JWT_SECRET_KEY', 'NOT_FOUND'))
+            elif 'production' in env_name.lower():
+                jwt_secret = env_vars.get('JWT_SECRET_PRODUCTION', env_vars.get('JWT_SECRET_KEY', 'NOT_FOUND'))
+            else:
+                jwt_secret = env_vars.get('JWT_SECRET_KEY', 'NOT_FOUND')
             service_secret = env_vars.get('SERVICE_SECRET', 'NOT_FOUND')
             
             print(f"\n📁 {env_name.upper()} ({file_path}):")
-            print(f"  JWT_SECRET_KEY: {jwt_secret[:20]}...{jwt_secret[-10:] if len(jwt_secret) > 30 else jwt_secret}")
+            # Display appropriate secret name based on environment
+            secret_name = "JWT_SECRET_STAGING" if 'staging' in env_name.lower() else "JWT_SECRET_PRODUCTION" if 'production' in env_name.lower() else "JWT_SECRET_KEY"
+            print(f"  {secret_name}: {jwt_secret[:20]}...{jwt_secret[-10:] if len(jwt_secret) > 30 else jwt_secret}")
             print(f"  SERVICE_SECRET: {service_secret[:20]}...{service_secret[-10:] if len(service_secret) > 30 else service_secret}")
             print(f"  JWT Secret Length: {len(jwt_secret) if jwt_secret != 'NOT_FOUND' else 0}")
             

@@ -318,8 +318,8 @@ Direct OS.env access is FORBIDDEN except in each services canonical env config S
 ### 9.1 Git Commit Standards.
 **All commits follow [`SPEC/git_commit_atomic_units.xml`](SPEC/git_commit_atomic_units.xml).**
 **Windows Unicode/emoji issues: See [`SPEC/windows_unicode_handling.xml`](SPEC/windows_unicode_handling.xml).**
-
-  * **ATOMIC:** Commits must be small, focused, and complete units.
+A user asking for "git commit" means: For EACH group of work that's related do a commit. e.g. 1-10 commits as per need.
+  * **GROUP CONCEPTS - LIMIT COUNT OF FILES:** Commits must be small, focused, and conceptually similar units.
   * **CONCEPT-BASED:** Group changes by concept, not by file count (e.g., one conceptual change across up to 50 files is one commit; three conceptual changes in one file are three commits) NEVER bulk commit massive changes without express orders.
   * **REVIEWABLE:** Each commit must be reviewable in under one minute.
 

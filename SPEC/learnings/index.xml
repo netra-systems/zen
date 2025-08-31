@@ -17,6 +17,21 @@
             <step>4. If necessary, retrieve the detailed learning file using the `path` attribute.</step>
         </workflow>
     </retrieval-protocol>
+    
+    <learning id="websocket-logger-dual-import-2025-08-31">
+        <title>WebSocket Logger Dual Import Context Binding Issue</title>
+        <category>Runtime Error Resolution</category>
+        <keywords>websocket, logger, context binding, dual imports, test infrastructure failure</keywords>
+        <path>websocket_logger_dual_import_context_binding_issue.xml</path>
+        <critical-takeaway>
+            Dual imports of singletons (import { x } from 'y'; import { x as z } from 'y') 
+            create separate references that lose context binding in browser webpack environments.
+            Test infrastructure that suppresses WebSocket errors creates dangerous false confidence.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>WebSocket communication failures causing chat functionality breakdown</business-impact>
+        <prevention>Never create dual imports of singleton services. Always use single import reference.</prevention>
+    </learning>
 
     <categories>
         <category name="WebSocket/AgentEvents" path="SPEC/learnings/websocket_agent_integration_critical.xml" keywords="WebSocket, Agent Events, Chat UI, Tool Execution, Frontend, Real-time, Mission Critical, Tool Dispatcher, Enhancement, Agent Registry">
@@ -782,6 +797,14 @@
             <critical-takeaway>Auth service is UserAuthService not AuthService - import as: from netra_backend.app.services.user_auth_service import UserAuthService as AuthService.</critical-takeaway>
             <critical-takeaway>Metrics collector is at netra_backend.app.monitoring.metrics_collector not core.monitoring.</critical-takeaway>
             <critical-takeaway>Test config is at netra_backend.tests.integration.config not tests.config.</critical-takeaway>
+        </category>
+        
+        <category name="Test Collection Import Errors" path="SPEC/learnings/test_collection_import_errors.xml" keywords="Import Errors, Test Collection, ModuleNotFoundError, MockWebSocket, Test Mocks, Absolute Imports, File Structure">
+            <critical-takeaway>CRITICAL: Test collection fails with ModuleNotFoundError when imports point to wrong directories - blocks ALL systematic test fixing.</critical-takeaway>
+            <critical-takeaway>MockWebSocket class is in netra_backend.tests.services.test_ws_connection_mocks, NOT netra_backend.tests.integration.test_ws_connection_mocks.</critical-takeaway>
+            <critical-takeaway>Always verify import paths against actual file locations using find command before fixing imports.</critical-takeaway>
+            <critical-takeaway>Import errors during collection prevent pytest from discovering ANY tests in affected files - highest priority fixes.</critical-takeaway>
+            <critical-takeaway>Use absolute imports as per SPEC/import_management_architecture.xml - relative imports forbidden.</critical-takeaway>
         </category>
         
         <category name="Test Imports" path="SPEC/learnings/test_import_fixes.xml" keywords="Imports, ModuleNotFoundError, PYTHONPATH, Test Setup">
@@ -1876,5 +1899,17 @@
             <critical-takeaway>Use .env.staging.example as template - actual .env.staging should never contain localhost or test flags</critical-takeaway>
         </category>
     </environment_security>
+
+    <testing_methodology>
+        <category name="Cypress Test Suite Systematic Upgrade" path="SPEC/learnings/cypress_test_upgrade_systematic.xml" keywords="Cypress, E2E Testing, Test Upgrade, Sub-Agent Methodology, WebSocket Events, Test Reliability, CI/CD, False Failures, SUT Alignment, Demo Flow, ROI Calculator, Authentication">
+            <critical-takeaway>Use systematic sub-agent approach with 1-3 focused tests per agent to prevent context overflow and ensure thorough analysis</critical-takeaway>
+            <critical-takeaway>ALL WebSocket tests MUST use UnifiedWebSocketEvent structure with 5 critical events: agent_started, agent_thinking, tool_executing, tool_completed, agent_completed</critical-takeaway>
+            <critical-takeaway>Demo navigation changed from direct routes to /demo → industry selection → feature tabs pattern - update all demo tests accordingly</critical-takeaway>
+            <critical-takeaway>Current implementation uses semantic selectors (CSS classes, IDs) not data-testid attributes - update selectors to match reality</critical-takeaway>
+            <critical-takeaway>Use "Quick Dev Login" button in development mode authentication, not manual localStorage manipulation</critical-takeaway>
+            <critical-takeaway>File upload moved from chat to /ingestion; no /settings page exists; API key management not implemented - skip tests until features exist</critical-takeaway>
+            <critical-takeaway>Mark missing functionality tests as .skip() with clear TODO comments rather than deleting test infrastructure</critical-takeaway>
+            <critical-takeaway>Message input changed from input element to textarea within [data-testid="message-input"] wrapper</critical-takeaway>
+        </category>
+    </testing_methodology>
 </specification>
-    <auth_refresh_loops>
