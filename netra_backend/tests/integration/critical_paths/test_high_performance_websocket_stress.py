@@ -1307,13 +1307,10 @@ class TestHighPerformanceWebSocketStress:
 
         assert global_metrics["total_queued_messages"] > 0
     
-        @pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_comprehensive_stress_scenario(self, high_performance_broadcaster,
-
                                                load_balanced_manager, enhanced_rate_limiter,
-
                                                optimized_processor, large_user_pool, stress_metrics):
-
         """Comprehensive stress test combining all enhanced systems."""
         # Configuration
 

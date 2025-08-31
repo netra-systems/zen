@@ -72,59 +72,50 @@ def test_staging_logs_no_ansi(monkeypatch):
     # Force staging environment
     monkeypatch.setenv('ENVIRONMENT', 'staging')
     monkeypatch.setenv('TESTING', '0')
+    # Override LOG_LEVEL to ensure our messages are captured
+    monkeypatch.setenv('LOG_LEVEL', 'INFO')
     
-    # Clear any existing handlers
-    logger.remove()
+    # Create a fresh logger instance to avoid any global configuration issues
+    import loguru
+    import io
+    fresh_logger = loguru.logger.opt(depth=1)
     
-    # Capture stderr with a real file-like object
-    import tempfile
-    temp_file = tempfile.NamedTemporaryFile(mode='w+', delete=False, encoding='utf-8')
+    # Clear any existing handlers from the fresh logger
+    fresh_logger.remove()
     
-    try:
-        # Mock should_log_func
-        def should_log_func(record):
-            return True
-        
-        # Create fresh config instance
-        from netra_backend.app.core.logging_formatters import LogHandlerConfig
-        
-        # Add handler directly to temp file
-        logger.add(
-            temp_file,
-            format="{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} | {message}",
-            level="INFO",
-            filter=should_log_func,
-            colorize=False,  # Should be False in staging
-            enqueue=False,  # Synchronous for testing
-            backtrace=False,
-            diagnose=False
-        )
-        
-        # Log various messages
-        logger.info("Info message for staging test")
-        logger.warning("Warning message for staging test")
-        logger.error("Error message for staging test")
-        
-        # Force flush
-        temp_file.flush()
-        temp_file.seek(0)
-        
-        # Read the output
-        output = temp_file.read()
-        
-        # Verify no ANSI codes
-        assert not has_ansi_codes(output), f"Found ANSI codes in staging logs: {repr(output[:200])}"
-        
-        # Verify the messages are still there
-        assert "Info message for staging test" in output
-        assert "Warning message for staging test" in output
-        assert "Error message for staging test" in output
-    finally:
-        temp_file.close()
-        os.unlink(temp_file.name)
+    # Use a simple string buffer to capture log output
+    log_output = io.StringIO()
+    
+    # Add handler with staging-appropriate configuration
+    handler_id = fresh_logger.add(
+        log_output,
+        format="{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} | {message}",
+        level="INFO",
+        colorize=False,  # This should be False in staging - the key test point
+        enqueue=False,  # Synchronous for testing
+        backtrace=False,
+        diagnose=False
+    )
+    
+    # Log test messages
+    fresh_logger.error("Error message for staging test")
+    fresh_logger.warning("Warning message for staging test") 
+    fresh_logger.info("Info message for staging test")
+    
+    # Get the output and clean up
+    output = log_output.getvalue()
+    fresh_logger.remove(handler_id)
+    
+    # Verify no ANSI codes - this is the main purpose of the test
+    assert not has_ansi_codes(output), f"Found ANSI codes in staging logs: {repr(output[:200])}"
+    
+    # Verify the messages were actually captured
+    assert "Error message for staging test" in output
+    assert "Warning message for staging test" in output
+    assert "Info message for staging test" in output
 
 
 if __name__ == "__main__":
-    # Run tests
-    test_staging_logs_no_ansi()
-    print("✓ Staging logs have no ANSI color codes")
+    # Run tests with pytest
+    import pytest
+    pytest.main([__file__])
