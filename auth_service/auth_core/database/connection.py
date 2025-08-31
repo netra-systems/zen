@@ -225,6 +225,23 @@ class AuthDatabaseConnection:
             # For SQLite :memory: databases, we need to use connect() not begin()
             # to avoid the transaction being rolled back when connection closes
             async with self.engine.connect() as conn:
+                # First check if tables already exist before attempting creation
+                # This avoids PostgreSQL type system conflicts
+                if not self.engine.url.drivername.startswith('sqlite'):
+                    # For PostgreSQL, check if our main table exists
+                    result = await conn.execute(text("""
+                        SELECT EXISTS (
+                            SELECT FROM information_schema.tables 
+                            WHERE table_schema = 'public' 
+                            AND table_name = 'auth_users'
+                        );
+                    """))
+                    table_exists = result.scalar()
+                    
+                    if table_exists:
+                        logger.info("Auth tables already exist in database - skipping creation")
+                        return
+                
                 # SQLAlchemy's create_all is already idempotent - it checks for table existence
                 # But we wrap in try/catch to handle any constraint-related issues gracefully
                 await conn.run_sync(Base.metadata.create_all, checkfirst=True)
@@ -235,14 +252,16 @@ class AuthDatabaseConnection:
             error_msg = str(e).lower()
             
             # Handle common idempotency issues gracefully
+            # These errors indicate tables/types already exist, which is expected
             if any(msg in error_msg for msg in [
                 "already exists", 
                 "duplicate key", 
                 "constraint already exists",
                 "unique constraint",
-                "table already exists"
+                "table already exists",
+                "pg_type_typname_nsp_index"  # PostgreSQL specific type conflict
             ]):
-                logger.info(f"Tables/constraints already exist - this is expected on re-initialization: {e}")
+                logger.info(f"Tables/constraints already exist - this is expected on re-initialization")
                 # This is not an error for idempotent operations
                 return
             else:
