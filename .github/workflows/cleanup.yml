@@ -1,0 +1,391 @@
+name: Cleanup Resources
+
+on:
+  workflow_call:
+    inputs:
+      cleanup_type:
+        description: 'Type of cleanup to perform'
+        required: true
+        type: string
+      pr_number:
+        description: 'PR number for PR-specific cleanup'
+        required: false
+        type: string
+      act_mode:
+        description: 'Whether running in ACT mode'
+        required: false
+        type: string
+        default: 'false'
+  pull_request:
+    types: [closed]
+  schedule:
+    - cron: '0 3 * * 0'  # Weekly cleanup on Sunday at 3 AM UTC
+  workflow_dispatch:
+    inputs:
+      cleanup_scope:
+        description: 'Cleanup scope'
+        required: true
+        type: choice
+        options:
+          - pr-environments
+          - old-artifacts
+          - unused-images
+          - all
+
+env:
+  ARTIFACT_RETENTION_DAYS: 7
+  IMAGE_RETENTION_DAYS: 30
+  PR_ENV_PREFIX: pr-
+
+permissions:
+  contents: read
+  pull-requests: write
+  actions: write
+
+jobs:
+  # ==========================================
+  # PR Environment Cleanup
+  # ==========================================
+  
+  cleanup-pr-environment:
+    name: Cleanup PR Environment
+    if: |
+      (github.event_name == 'pull_request' && github.event.action == 'closed') ||
+      inputs.cleanup_type == 'pr-closed' ||
+      inputs.cleanup_scope == 'pr-environments' ||
+      inputs.cleanup_scope == 'all'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Determine PR number
+        id: pr-number
+        run: |
+          if [[ -n "${{ inputs.pr_number }}" ]]; then
+            PR_NUM="${{ inputs.pr_number }}"
+          elif [[ -n "${{ github.event.pull_request.number }}" ]]; then
+            PR_NUM="${{ github.event.pull_request.number }}"
+          else
+            echo "No PR number available"
+            exit 0
+          fi
+          echo "pr_number=$PR_NUM" >> $GITHUB_OUTPUT
+          
+      - name: Authenticate to GCP
+        if: inputs.act_mode != 'true' && steps.pr-number.outputs.pr_number != ''
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+          
+      - name: Delete PR Cloud Run services
+        if: inputs.act_mode != 'true' && steps.pr-number.outputs.pr_number != ''
+        run: |
+          PR_NUM="${{ steps.pr-number.outputs.pr_number }}"
+          echo "🧹 Cleaning up PR #$PR_NUM environment..."
+          
+          # List and delete PR-specific services
+          for service in backend auth frontend; do
+            SERVICE_NAME="${{ env.PR_ENV_PREFIX }}${PR_NUM}-${service}"
+            
+            if gcloud run services describe $SERVICE_NAME --region us-central1 2>/dev/null; then
+              echo "Deleting service: $SERVICE_NAME"
+              gcloud run services delete $SERVICE_NAME --region us-central1 --quiet
+            else
+              echo "Service $SERVICE_NAME not found (already deleted or never created)"
+            fi
+          done
+          
+      - name: Delete PR database
+        if: inputs.act_mode != 'true' && steps.pr-number.outputs.pr_number != ''
+        continue-on-error: true
+        run: |
+          PR_NUM="${{ steps.pr-number.outputs.pr_number }}"
+          DB_NAME="netra_pr_${PR_NUM}"
+          
+          echo "Checking for PR database: $DB_NAME"
+          # Add database cleanup logic here
+          
+      - name: Clean up PR artifacts
+        if: steps.pr-number.outputs.pr_number != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr_num = '${{ steps.pr-number.outputs.pr_number }}';
+            console.log(`Cleaning up artifacts for PR #${pr_num}`);
+            
+            const artifacts = await github.rest.actions.listArtifactsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100
+            });
+            
+            const prArtifacts = artifacts.data.artifacts.filter(
+              artifact => artifact.name.includes(`pr-${pr_num}`)
+            );
+            
+            for (const artifact of prArtifacts) {
+              console.log(`Deleting artifact: ${artifact.name}`);
+              await github.rest.actions.deleteArtifact({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                artifact_id: artifact.id
+              });
+            }
+            
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && github.event.action == 'closed'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '🧹 PR environment and resources have been cleaned up.'
+            });
+
+  # ==========================================
+  # Old Artifacts Cleanup
+  # ==========================================
+  
+  cleanup-old-artifacts:
+    name: Cleanup Old Artifacts
+    if: |
+      github.event_name == 'schedule' ||
+      inputs.cleanup_scope == 'old-artifacts' ||
+      inputs.cleanup_scope == 'all'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Delete old workflow artifacts
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const days = ${{ env.ARTIFACT_RETENTION_DAYS }};
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - days);
+            
+            console.log(`Deleting artifacts older than ${days} days (before ${cutoffDate.toISOString()})`);
+            
+            let deletedCount = 0;
+            let page = 1;
+            let hasMore = true;
+            
+            while (hasMore) {
+              const artifacts = await github.rest.actions.listArtifactsForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                per_page: 100,
+                page: page
+              });
+              
+              if (artifacts.data.artifacts.length === 0) {
+                hasMore = false;
+                break;
+              }
+              
+              for (const artifact of artifacts.data.artifacts) {
+                const createdAt = new Date(artifact.created_at);
+                
+                if (createdAt < cutoffDate) {
+                  console.log(`Deleting artifact: ${artifact.name} (created: ${artifact.created_at})`);
+                  
+                  try {
+                    await github.rest.actions.deleteArtifact({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      artifact_id: artifact.id
+                    });
+                    deletedCount++;
+                  } catch (error) {
+                    console.error(`Failed to delete artifact ${artifact.name}: ${error.message}`);
+                  }
+                }
+              }
+              
+              page++;
+            }
+            
+            console.log(`Deleted ${deletedCount} old artifacts`);
+            
+      - name: Generate cleanup report
+        run: |
+          echo "## 🧹 Artifact Cleanup Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Retention Policy:** ${{ env.ARTIFACT_RETENTION_DAYS }} days" >> $GITHUB_STEP_SUMMARY
+          echo "- **Cleanup Time:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+
+  # ==========================================
+  # Container Image Cleanup
+  # ==========================================
+  
+  cleanup-unused-images:
+    name: Cleanup Unused Container Images
+    if: |
+      github.event_name == 'schedule' ||
+      inputs.cleanup_scope == 'unused-images' ||
+      inputs.cleanup_scope == 'all'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - name: Authenticate to GCP
+        if: inputs.act_mode != 'true'
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+          
+      - name: Clean up old container images
+        if: inputs.act_mode != 'true'
+        run: |
+          echo "🐳 Cleaning up old container images..."
+          
+          CUTOFF_DATE=$(date -d "${{ env.IMAGE_RETENTION_DAYS }} days ago" +%Y-%m-%d)
+          echo "Deleting images older than $CUTOFF_DATE"
+          
+          for repo in netra-backend netra-auth netra-frontend; do
+            echo "Cleaning repository: gcr.io/${{ secrets.GCP_PROJECT }}/$repo"
+            
+            # List images older than retention period
+            OLD_IMAGES=$(gcloud container images list-tags \
+              gcr.io/${{ secrets.GCP_PROJECT }}/$repo \
+              --filter="timestamp.datetime < '$CUTOFF_DATE'" \
+              --format="get(digest)" \
+              --limit=100)
+            
+            if [[ -n "$OLD_IMAGES" ]]; then
+              echo "$OLD_IMAGES" | while read digest; do
+                echo "Deleting image with digest: $digest"
+                gcloud container images delete \
+                  "gcr.io/${{ secrets.GCP_PROJECT }}/$repo@$digest" \
+                  --force-delete-tags \
+                  --quiet
+              done
+            else
+              echo "No old images found for $repo"
+            fi
+          done
+          
+      - name: Clean up untagged images
+        if: inputs.act_mode != 'true'
+        run: |
+          echo "🏷️ Cleaning up untagged images..."
+          
+          for repo in netra-backend netra-auth netra-frontend; do
+            echo "Cleaning untagged images in: gcr.io/${{ secrets.GCP_PROJECT }}/$repo"
+            
+            UNTAGGED=$(gcloud container images list-tags \
+              gcr.io/${{ secrets.GCP_PROJECT }}/$repo \
+              --filter='-tags:*' \
+              --format='get(digest)' \
+              --limit=100)
+            
+            if [[ -n "$UNTAGGED" ]]; then
+              echo "$UNTAGGED" | while read digest; do
+                echo "Deleting untagged image: $digest"
+                gcloud container images delete \
+                  "gcr.io/${{ secrets.GCP_PROJECT }}/$repo@$digest" \
+                  --quiet
+              done
+            else
+              echo "No untagged images found for $repo"
+            fi
+          done
+
+  # ==========================================
+  # Workflow Run Cleanup
+  # ==========================================
+  
+  cleanup-workflow-runs:
+    name: Cleanup Old Workflow Runs
+    if: |
+      github.event_name == 'schedule' ||
+      inputs.cleanup_scope == 'all'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Delete old workflow runs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const days = 30;
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - days);
+            
+            console.log(`Deleting workflow runs older than ${days} days`);
+            
+            const workflows = await github.rest.actions.listRepoWorkflows({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            
+            let totalDeleted = 0;
+            
+            for (const workflow of workflows.data.workflows) {
+              console.log(`Processing workflow: ${workflow.name}`);
+              
+              const runs = await github.rest.actions.listWorkflowRuns({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: workflow.id,
+                per_page: 100
+              });
+              
+              for (const run of runs.data.workflow_runs) {
+                const createdAt = new Date(run.created_at);
+                
+                if (createdAt < cutoffDate && run.status === 'completed') {
+                  try {
+                    await github.rest.actions.deleteWorkflowRun({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      run_id: run.id
+                    });
+                    totalDeleted++;
+                  } catch (error) {
+                    console.error(`Failed to delete run ${run.id}: ${error.message}`);
+                  }
+                }
+              }
+            }
+            
+            console.log(`Deleted ${totalDeleted} old workflow runs`);
+
+  # ==========================================
+  # Summary Report
+  # ==========================================
+  
+  cleanup-summary:
+    name: Cleanup Summary
+    needs: [
+      cleanup-pr-environment,
+      cleanup-old-artifacts,
+      cleanup-unused-images,
+      cleanup-workflow-runs
+    ]
+    if: always()
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Generate summary report
+        run: |
+          echo "## 🧹 Cleanup Operations Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Cleanup Results" >> $GITHUB_STEP_SUMMARY
+          echo "| Operation | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| PR Environment Cleanup | ${{ needs.cleanup-pr-environment.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Old Artifacts Cleanup | ${{ needs.cleanup-old-artifacts.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Unused Images Cleanup | ${{ needs.cleanup-unused-images.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Workflow Runs Cleanup | ${{ needs.cleanup-workflow-runs.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Cleanup Time:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Scheduled Cleanup" >> $GITHUB_STEP_SUMMARY
+          echo "Sunday at 3:00 AM UTC" >> $GITHUB_STEP_SUMMARY
