@@ -735,12 +735,24 @@ def _build_supervisor_agent(app: FastAPI):
     from netra_backend.app.logging_config import central_logger
     logger = central_logger.get_logger(__name__)
     
+    # Log current app.state attributes for debugging
+    logger.info("Checking supervisor dependencies in app.state...")
+    app_state_attrs = [attr for attr in dir(app.state) if not attr.startswith('_')]
+    logger.info(f"Current app.state attributes: {app_state_attrs}")
+    
     # Check required dependencies
     required_attrs = ['db_session_factory', 'llm_manager', 'tool_dispatcher']
     missing = [attr for attr in required_attrs if not hasattr(app.state, attr)]
     
     if missing:
         logger.error(f"Missing required app state attributes for supervisor: {missing}")
+        # Log detailed state of each required attribute
+        for attr in required_attrs:
+            if hasattr(app.state, attr):
+                value = getattr(app.state, attr)
+                logger.info(f"  {attr}: {value is not None} (type: {type(value).__name__})")
+            else:
+                logger.error(f"  {attr}: NOT SET")
         raise RuntimeError(f"Cannot create supervisor - missing dependencies: {missing}")
     
     websocket_manager = get_websocket_manager()
@@ -954,10 +966,45 @@ async def _run_startup_phase_one(app: FastAPI) -> Tuple[float, logging.Logger]:
 
 async def _run_startup_phase_two(app: FastAPI, logger: logging.Logger) -> None:
     """Run service initialization phase."""
-    await setup_database_connections(app)  # Move database setup first
-    key_manager = initialize_core_services(app, logger)
-    setup_security_services(app, key_manager)
-    await initialize_clickhouse(logger)
+    logger.info("Starting Phase 2: Service initialization")
+    
+    try:
+        logger.info("Setting up database connections...")
+        await setup_database_connections(app)  # Move database setup first
+        logger.info("Database connections established successfully")
+    except Exception as e:
+        logger.error(f"Failed to setup database connections: {e}", exc_info=True)
+        raise
+    
+    try:
+        logger.info("Initializing core services...")
+        key_manager = initialize_core_services(app, logger)
+        logger.info("Core services initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize core services: {e}", exc_info=True)
+        raise
+    
+    try:
+        logger.info("Setting up security services and LLM manager...")
+        setup_security_services(app, key_manager)
+        logger.info(f"Security services initialized - LLM manager: {app.state.llm_manager is not None}")
+    except Exception as e:
+        logger.error(f"Failed to setup security services: {e}", exc_info=True)
+        raise
+    
+    try:
+        logger.info("Initializing ClickHouse...")
+        await initialize_clickhouse(logger)
+        logger.info("ClickHouse initialization completed")
+    except Exception as e:
+        logger.error(f"Failed to initialize ClickHouse: {e}", exc_info=True)
+        # ClickHouse failures are non-critical in some environments
+        from netra_backend.app.core.isolated_environment import get_env
+        environment = get_env().get("ENVIRONMENT", "development").lower()
+        if environment not in ["staging", "production"]:
+            logger.warning(f"Continuing without ClickHouse in {environment}")
+        else:
+            raise
     
     # FIX: Initialize background task manager to prevent 4-minute crash
     logger.info("Initializing background task manager with 2-minute timeout...")
@@ -1099,8 +1146,55 @@ async def _run_legacy_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
         app.state.startup_error = None
         app.state.startup_start_time = start_time
         logger.info("Legacy startup in progress flags set")
-    await _run_startup_phase_two(app, logger)
-    await _run_startup_phase_three(app, logger)
+    
+    try:
+        await _run_startup_phase_two(app, logger)
+        logger.info("Phase 2 completed successfully - core services initialized")
+    except Exception as e:
+        error_msg = f"Phase 2 (service initialization) failed: {e}"
+        logger.error(error_msg, exc_info=True)
+        
+        # Check environment for critical failure handling
+        from netra_backend.app.core.isolated_environment import get_env
+        environment = get_env().get("ENVIRONMENT", "development").lower()
+        
+        if environment in ["staging", "production"]:
+            # In staging/production, Phase 2 failure is critical
+            app.state.startup_complete = False
+            app.state.startup_in_progress = False
+            app.state.startup_failed = True
+            app.state.startup_error = error_msg
+            raise RuntimeError(error_msg) from e
+        else:
+            # In development, log but continue with degraded functionality
+            logger.warning(f"Continuing with degraded functionality in {environment} after Phase 2 failure")
+            # Set minimal state to prevent complete failure
+            if not hasattr(app.state, 'llm_manager'):
+                app.state.llm_manager = None
+            if not hasattr(app.state, 'db_session_factory'):
+                app.state.db_session_factory = None
+    
+    try:
+        await _run_startup_phase_three(app, logger)
+        logger.info("Phase 3 completed successfully - agent supervisor initialized")
+    except Exception as e:
+        error_msg = f"Phase 3 (agent supervisor) failed: {e}"
+        logger.error(error_msg, exc_info=True)
+        
+        # Check environment for critical failure handling
+        from netra_backend.app.core.isolated_environment import get_env
+        environment = get_env().get("ENVIRONMENT", "development").lower()
+        
+        if environment in ["staging", "production"]:
+            # In staging/production, Phase 3 failure is critical
+            app.state.startup_complete = False
+            app.state.startup_in_progress = False
+            app.state.startup_failed = True
+            app.state.startup_error = error_msg
+            raise RuntimeError(error_msg) from e
+        else:
+            # In development, log but continue with degraded functionality
+            logger.warning(f"Continuing with degraded functionality in {environment} after Phase 3 failure")
     
     # CRITICAL: Set startup_complete flag for health endpoint
     app.state.startup_complete = True

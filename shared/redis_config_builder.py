@@ -15,15 +15,12 @@ critical outages in production. This builder eliminates 30+ duplicate Redis conf
 with different fallback behaviors, SSL settings, and connection pooling.
 """
 
-import os
 import ssl
 import logging
-import re
 from dataclasses import dataclass
-from datetime import datetime, timezone
 from enum import Enum
-from typing import Dict, List, Optional, Set, Tuple, Union, Any
-from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+from typing import Dict, List, Optional, Tuple, Union, Any
+from urllib.parse import urlparse, parse_qs, urlencode
 
 from shared.config_builder_base import ConfigBuilderBase, ConfigLoggingMixin
 
@@ -352,10 +349,8 @@ class RedisConfigurationBuilder(ConfigBuilderBase, ConfigLoggingMixin):
                 
             config = {
                 "max_connections": max_connections,
-                "connection_pool_class_kwargs": {
-                    "retry_on_error": [ConnectionError, TimeoutError],  # Add retry on connection/timeout errors
-                }
                 # Note: retry_on_timeout removed due to deprecation in redis-py 6.0+
+                # Note: connection_pool_class_kwargs not supported by redis-py directly
             }
             
             # Only add connection_class if we have one
@@ -626,10 +621,6 @@ class RedisConfigurationBuilder(ConfigBuilderBase, ConfigLoggingMixin):
                 "max_connections": 25,  # Increased connection pool
                 # Note: retry_on_timeout removed due to deprecation in redis-py 6.0+
                 "health_check_interval": 60,  # Less frequent health checks
-                "retry_on_error": [ConnectionError, TimeoutError],  # Retry on connection/timeout errors
-                "retry_delay": 1.0,  # Base retry delay in seconds
-                "retry_backoff": 1.5,  # Exponential backoff multiplier
-                "retry_jitter": 0.1  # Add jitter to prevent thundering herd
             }
             
             base_config.update(staging_overrides)

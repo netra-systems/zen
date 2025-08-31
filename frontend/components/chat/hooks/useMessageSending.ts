@@ -9,6 +9,7 @@ import { ChatMessage, MessageSendingParams, MESSAGE_INPUT_CONSTANTS } from '../t
 import { optimisticMessageManager } from '@/services/optimistic-updates';
 import { logger } from '@/lib/logger';
 import { useGTMEvent } from '@/hooks/useGTMEvent';
+import { getUnifiedApiConfig } from '@/lib/unified-api-config';
 
 // Constants for error handling and recovery
 const MESSAGE_TIMEOUT = 15000; // 15 second timeout
@@ -130,6 +131,10 @@ export const useMessageSending = () => {
   };
 
   const sendRestApiMessage = async (message: string, threadId: string): Promise<void> => {
+    // Get API configuration
+    const config = getUnifiedApiConfig();
+    const apiUrl = config.urls.api;
+    
     // Use REST API for testing scenarios
     const isTestMode = message.toLowerCase().includes('test') || 
                       message.toLowerCase().includes('analyze') ||
@@ -145,7 +150,7 @@ export const useMessageSending = () => {
         agentType = 'optimization';
       }
 
-      const response = await fetch(`/api/agents/${agentType}`, {
+      const response = await fetch(`${apiUrl}/api/agents/${agentType}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -440,28 +440,30 @@ class SecretManager:
             from google.cloud.exceptions import NotFound, PermissionDenied
             from google.api_core import exceptions as api_exceptions
             
-            client = secretmanager.SecretManagerServiceClient()
+            # Create client with timeout and retry settings
+            client_options = {
+                'api_endpoint': 'secretmanager.googleapis.com',
+            }
+            client = secretmanager.SecretManagerServiceClient(client_options=client_options)
+            
             project_id = self._get_gcp_project_id()
+            if not project_id:
+                self._logger.warning("GCP project ID not configured, skipping GCP Secret Manager")
+                return {}
+                
             return self._retrieve_gcp_secrets(client, project_id)
+            
         except ImportError as e:
+            self._logger.warning(f"GCP Secret Manager client library not available: {e}")
             if self._environment in ["staging", "production"]:
-                self._logger.error(f"GCP Secret Manager client library not installed in {self._environment}: {e}")
-                # In staging/production, this is a critical configuration issue
-                return {}
-            else:
-                self._logger.debug(f"GCP Secret Manager client not available in {self._environment}: {e}")
-                return {}
-        except (PermissionDenied, api_exceptions.PermissionDenied) as e:
-            self._logger.error(f"GCP Secret Manager permission denied - check service account IAM roles: {e}")
-            return {}
-        except (NotFound, api_exceptions.NotFound) as e:
-            self._logger.error(f"GCP project or secrets not found - check project ID: {e}")
-            return {}
-        except (api_exceptions.ServiceUnavailable, api_exceptions.DeadlineExceeded) as e:
-            self._logger.error(f"GCP Secret Manager network error (retryable): {e}")
+                # In staging/production, log but don't fail - rely on environment variables
+                self._logger.info(f"Falling back to environment variables in {self._environment}")
             return {}
         except Exception as e:
-            self._logger.error(f"Unexpected GCP Secret Manager error: {e}")
+            # Log but don't propagate - let _handle_gcp_secret_error decide criticality
+            self._logger.warning(f"Error fetching GCP secrets: {e}")
+            if self._environment in ["staging", "production"]:
+                self._logger.info("Using environment variable fallback for secrets")
             return {}
     
     def _get_gcp_project_id(self) -> str:

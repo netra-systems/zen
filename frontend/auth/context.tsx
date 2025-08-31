@@ -102,6 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       unifiedAuthService.removeToken();
       setToken(null);
       setUser(null);
+      // Explicitly pass null values to ensure consistency
       syncAuthStore(null, null);
       return;
     }
@@ -144,10 +145,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           // Reset failure count on successful refresh with new token
           refreshFailureCountRef.current = 0;
-          setToken(newToken);
           
           const decodedUser = jwtDecode(newToken) as User;
+          
+          // Update all auth state atomically
+          setToken(newToken);
           setUser(decodedUser);
+          // Use the actual values we're setting, not stale state
           syncAuthStore(decodedUser, newToken);
           
           logger.info('Automatic token refresh successful', {
@@ -218,6 +222,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [handleTokenRefresh]);
 
   const fetchAuthConfig = useCallback(async () => {
+    // Track the actual user that will be set for monitoring
+    let actualUser: User | null = null;
+    let actualToken: string | null = token;
+    
     try {
       const data = await unifiedAuthService.getAuthConfig();
       setAuthConfig(data);
@@ -226,6 +234,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // But prefer the token already in state if it exists (from initialization)
       const currentToken = token;
       const storedToken = currentToken || unifiedAuthService.getToken();
+      actualToken = storedToken;
       
       if (storedToken) {
         // Process the token if we have one
@@ -257,11 +266,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               logger.warn('Could not refresh expired token', refreshError as Error);
               unifiedAuthService.removeToken();
               syncAuthStore(null, null);
+              actualUser = null;
+              actualToken = null;
             }
           } else {
             // CRITICAL: Always set user even if token was already in state
             // This fixes the page refresh logout issue
             setUser(decodedUser);
+            actualUser = decodedUser; // Track the user we're setting
             // Sync with Zustand store
             syncAuthStore(decodedUser, storedToken);
             // Start automatic token refresh cycle
@@ -274,6 +286,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           });
           unifiedAuthService.removeToken();
           syncAuthStore(null, null);
+          actualUser = null;
+          actualToken = null;
         }
       } else if (data.development_mode) {
         // Check if user explicitly logged out in dev mode
@@ -301,8 +315,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const devLoginResponse = await Promise.race([devLoginPromise, timeoutPromise]);
             if (devLoginResponse) {
               setToken(devLoginResponse.access_token);
+              actualToken = devLoginResponse.access_token;
               const decodedUser = jwtDecode(devLoginResponse.access_token) as User;
               setUser(decodedUser);
+              actualUser = decodedUser; // Track the user we're setting
               // Sync with Zustand store
               syncAuthStore(decodedUser, devLoginResponse.access_token);
               // Start automatic token refresh cycle
@@ -362,16 +378,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       logger.info('[AUTH INIT] Auth context initialization finished', {
         component: 'AuthContext',
         action: 'init_finished',
-        hasUser: !!user,
-        hasToken: !!token,
+        hasUser: !!actualUser,
+        hasToken: !!actualToken,
         initialized: true,
         timestamp: new Date().toISOString()
       });
       
-      // Monitor auth state for consistency
-      monitorAuthState(token, user, true, 'auth_init_complete');
+      // Monitor auth state for consistency - use actual values that were set
+      monitorAuthState(actualToken, actualUser, true, 'auth_init_complete');
     }
-  }, [syncAuthStore, scheduleTokenRefreshCheck, handleTokenRefresh]);
+  }, [syncAuthStore, scheduleTokenRefreshCheck, handleTokenRefresh, token]);
 
   const hasMountedRef = useRef(false);
 
@@ -394,10 +410,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
         
         // Update token immediately when detected via storage event
-        setToken(e.newValue);
         try {
           const decodedUser = jwtDecode(e.newValue) as User;
+          // Update state atomically
+          setToken(e.newValue);
           setUser(decodedUser);
+          // Use actual values being set
           syncAuthStore(decodedUser, e.newValue);
           scheduleTokenRefreshCheck(e.newValue);
         } catch (error) {

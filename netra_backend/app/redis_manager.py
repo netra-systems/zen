@@ -4,7 +4,7 @@
 
 import asyncio
 import redis.asyncio as redis
-from typing import Dict, Optional
+from typing import Dict
 
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.core.isolated_environment import get_env
@@ -109,18 +109,31 @@ class RedisManager:
             # Get client configuration from Redis builder
             client_config = self._redis_builder.get_config_for_environment()
             
+            # Log configuration for debugging (without sensitive data)
+            safe_config = {k: v for k, v in client_config.items() if k not in ['password', 'username']}
+            logger.debug(f"Creating Redis client with config: {safe_config}")
+            
             # Create Redis client with configuration
             return redis.Redis(**client_config)
+            
+        except AttributeError as e:
+            # Handle case where RedisConfigurationBuilder might not be properly initialized
+            logger.error(f"Redis configuration builder not properly initialized: {e}")
+            if self.test_mode or (hasattr(self._redis_builder, 'environment') and self._redis_builder.environment == "development"):
+                logger.warning("Using minimal fallback Redis configuration")
+                return redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+            raise
             
         except Exception as e:
             logger.error(f"Failed to create Redis client from builder: {e}")
             
             # Fallback for development mode only
-            if self._redis_builder.environment == "development" and self._redis_builder.development.should_allow_fallback():
-                logger.warning("Using fallback Redis configuration for development")
-                fallback_config = self._redis_builder.development.get_fallback_config()
-                if fallback_config:
-                    return redis.Redis(**fallback_config)
+            if hasattr(self._redis_builder, 'environment') and self._redis_builder.environment == "development":
+                if hasattr(self._redis_builder, 'development') and self._redis_builder.development.should_allow_fallback():
+                    logger.warning("Using fallback Redis configuration for development")
+                    fallback_config = self._redis_builder.development.get_fallback_config()
+                    if fallback_config:
+                        return redis.Redis(**fallback_config)
             
             raise
 
