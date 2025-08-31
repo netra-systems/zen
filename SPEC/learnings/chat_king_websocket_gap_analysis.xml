@@ -383,4 +383,302 @@
       - High abandonment rates during agent processing
     </monitoring>
   </regression_prevention>
+
+  <detailed_technical_analysis>
+    <for_junior_engineers>
+      <problem_explanation>
+        Think of the WebSocket system like a live sports broadcast:
+        - The game (agent execution) is happening
+        - The TV cameras (WebSocket components) are working
+        - BUT the broadcast truck (MessageHandlerService) isn't connected to the cameras
+        - So viewers (users) see a blank screen while the game plays
+        
+        We need to connect the broadcast truck to the cameras so viewers can watch the game live.
+      </problem_explanation>
+      
+      <step_by_step_fix>
+        1. Find where chat messages enter the system (AgentMessageHandler)
+        2. Look for where it creates MessageHandlerService
+        3. Pass the WebSocket manager as a parameter (like passing a walkie-talkie)
+        4. MessageHandlerService passes it to Supervisor (relay the walkie-talkie)
+        5. Supervisor uses it to broadcast updates (talk on the walkie-talkie)
+        6. Users see real-time updates (hear the broadcast)
+      </step_by_step_fix>
+    </for_junior_engineers>
+    
+    <for_senior_engineers>
+      <architectural_context>
+        The WebSocket event architecture follows a publisher-subscriber pattern with these key components:
+        
+        1. WebSocketNotifier: Event publisher that formats and sends WebSocket messages
+        2. EnhancedToolExecutionEngine: Wraps tool execution with event notifications
+        3. ExecutionEngine: Orchestrates agent lifecycle with integrated event publishing
+        4. AgentRegistry: Enhances tool dispatchers with WebSocket capabilities
+        
+        The integration gap occurs at the service boundary where MessageHandlerService 
+        instantiates supervisors without dependency injection of the WebSocket manager.
+        This violates the Dependency Inversion Principle and breaks the event flow.
+      </architectural_context>
+      
+      <design_patterns>
+        <pattern name="Dependency Injection">
+          Current: Supervisor created with hardcoded dependencies
+          Required: Constructor injection of WebSocket manager through service layers
+        </pattern>
+        
+        <pattern name="Decorator Pattern">
+          The EnhancedToolExecutionEngine decorates base tool execution with notifications.
+          This pattern is correctly implemented but not utilized in the chat flow.
+        </pattern>
+        
+        <pattern name="Observer Pattern">
+          WebSocketNotifier acts as the subject, WebSocket connections as observers.
+          The pattern is complete but disconnected from the execution context.
+        </pattern>
+      </design_patterns>
+    </for_senior_engineers>
+  </detailed_technical_analysis>
+
+  <testing_guide>
+    <unit_tests>
+      <test name="test_message_handler_websocket_injection">
+        ```python
+        def test_message_handler_receives_websocket_manager():
+            websocket_manager = Mock(spec=WebSocketManager)
+            message_handler = MessageHandlerService(
+                llm_service=mock_llm,
+                db_manager=mock_db,
+                websocket_manager=websocket_manager
+            )
+            assert message_handler.websocket_manager is not None
+            assert message_handler.websocket_manager == websocket_manager
+        ```
+      </test>
+      
+      <test name="test_supervisor_created_with_websocket">
+        ```python
+        def test_supervisor_receives_websocket_from_message_handler():
+            websocket_manager = Mock(spec=WebSocketManager)
+            message_handler = MessageHandlerService(
+                llm_service=mock_llm,
+                db_manager=mock_db,
+                websocket_manager=websocket_manager
+            )
+            # Mock supervisor creation
+            with patch('netra_backend.app.agents.supervisor_consolidated.SupervisorConsolidated') as mock_supervisor:
+                message_handler._execute_supervisor(query="test", context={})
+                mock_supervisor.assert_called_with(
+                    llm_service=ANY,
+                    db_manager=ANY,
+                    websocket_manager=websocket_manager
+                )
+        ```
+      </test>
+    </unit_tests>
+    
+    <integration_tests>
+      <test name="test_websocket_events_in_chat_flow">
+        ```python
+        async def test_full_chat_flow_sends_all_events():
+            """Mission-critical test: Verify all 7 WebSocket events sent during chat"""
+            events_received = []
+            
+            async with websocket_connect("/ws") as websocket:
+                # Set up event capture
+                async def capture_events():
+                    while True:
+                        msg = await websocket.receive_json()
+                        events_received.append(msg["type"])
+                
+                # Send chat message
+                await websocket.send_json({
+                    "type": "agent_message",
+                    "content": "Analyze my code performance"
+                })
+                
+                # Wait for completion
+                await asyncio.wait_for(capture_events(), timeout=30)
+                
+                # Verify all critical events received
+                assert "agent_started" in events_received
+                assert "agent_thinking" in events_received
+                assert "tool_executing" in events_received
+                assert "tool_completed" in events_received
+                assert "agent_completed" in events_received
+        ```
+      </test>
+    </integration_tests>
+    
+    <e2e_tests>
+      <location>tests/mission_critical/test_websocket_agent_events_suite.py</location>
+      <command>python tests/mission_critical/test_websocket_agent_events_suite.py</command>
+      <expected_output>
+        All 7 WebSocket events detected in chat flow:
+        ✓ agent_started
+        ✓ agent_thinking
+        ✓ tool_executing
+        ✓ tool_completed
+        ✓ agent_completed
+        ✓ final_response
+        ✓ error (when applicable)
+      </expected_output>
+    </e2e_tests>
+  </testing_guide>
+
+  <implementation_checklist>
+    <phase_1 name="Immediate Fix">
+      <task priority="1">Update MessageHandlerService.__init__ to accept websocket_manager</task>
+      <task priority="2">Update AgentMessageHandler to pass websocket_manager</task>
+      <task priority="3">Update SupervisorConsolidated to accept and use websocket_manager</task>
+      <task priority="4">Verify ExecutionEngine receives WebSocketNotifier</task>
+      <time_estimate>2-4 hours</time_estimate>
+    </phase_1>
+    
+    <phase_2 name="Validation">
+      <task priority="1">Run mission-critical WebSocket event tests</task>
+      <task priority="2">Manual testing with real chat scenarios</task>
+      <task priority="3">Verify all 7 event types are sent</task>
+      <task priority="4">Load test with multiple concurrent chats</task>
+      <time_estimate>1-2 hours</time_estimate>
+    </phase_2>
+    
+    <phase_3 name="Monitoring">
+      <task priority="1">Add logging for WebSocket event dispatch</task>
+      <task priority="2">Create dashboard for event flow monitoring</task>
+      <task priority="3">Set up alerts for missing events</task>
+      <task priority="4">Track user engagement metrics</task>
+      <time_estimate>2-3 hours</time_estimate>
+    </phase_3>
+  </implementation_checklist>
+
+  <example_user_experiences>
+    <broken_experience>
+      ```
+      User: "Analyze my database performance"
+      System: [No visible feedback for 30 seconds]
+      User: "Hello? Is this working?"
+      User: "Maybe I should refresh..."
+      System: [Finally shows result after 45 seconds]
+      User: "Oh, it was working... but how was I supposed to know?"
+      ```
+    </broken_experience>
+    
+    <working_experience>
+      ```
+      User: "Analyze my database performance"
+      System: "🚀 Agent starting..."
+      System: "🤔 Analyzing your request..."
+      System: "🔧 Connecting to database..."
+      System: "📊 Running performance analysis..."
+      System: "✅ Analysis complete! Here are your results..."
+      User: "Great! I could see exactly what was happening!"
+      ```
+    </working_experience>
+  </example_user_experiences>
+
+  <websocket_event_reference>
+    <event name="agent_started">
+      <purpose>Notify user that agent processing has begun</purpose>
+      <payload>
+        ```json
+        {
+          "type": "agent_started",
+          "agent_id": "supervisor_123",
+          "message": "Agent is starting to process your request",
+          "timestamp": "2025-08-31T10:00:00Z"
+        }
+        ```
+      </payload>
+    </event>
+    
+    <event name="agent_thinking">
+      <purpose>Show agent's reasoning process to user</purpose>
+      <payload>
+        ```json
+        {
+          "type": "agent_thinking",
+          "thought": "I need to analyze the database schema first...",
+          "timestamp": "2025-08-31T10:00:01Z"
+        }
+        ```
+      </payload>
+    </event>
+    
+    <event name="tool_executing">
+      <purpose>Inform user that a specific tool is being used</purpose>
+      <payload>
+        ```json
+        {
+          "type": "tool_executing",
+          "tool_name": "database_analyzer",
+          "description": "Analyzing database performance metrics",
+          "timestamp": "2025-08-31T10:00:02Z"
+        }
+        ```
+      </payload>
+    </event>
+    
+    <event name="tool_completed">
+      <purpose>Show tool execution results</purpose>
+      <payload>
+        ```json
+        {
+          "type": "tool_completed",
+          "tool_name": "database_analyzer",
+          "result_summary": "Found 3 slow queries",
+          "timestamp": "2025-08-31T10:00:05Z"
+        }
+        ```
+      </payload>
+    </event>
+    
+    <event name="agent_completed">
+      <purpose>Signal that agent has finished processing</purpose>
+      <payload>
+        ```json
+        {
+          "type": "agent_completed",
+          "agent_id": "supervisor_123",
+          "status": "success",
+          "message": "Analysis complete",
+          "timestamp": "2025-08-31T10:00:10Z"
+        }
+        ```
+      </payload>
+    </event>
+  </websocket_event_reference>
+
+  <references>
+    <spec>SPEC/learnings/websocket_agent_integration_critical.xml</spec>
+    <spec>SPEC/independent_services.xml</spec>
+    <spec>SPEC/type_safety.xml</spec>
+    <code>netra_backend/app/services/message_handlers.py</code>
+    <code>netra_backend/app/websocket_core/agent_handler.py</code>
+    <code>netra_backend/app/agents/supervisor_consolidated.py</code>
+    <code>netra_backend/app/core/websocket_notifier.py</code>
+    <code>netra_backend/app/agents/supervisor/execution_engine.py</code>
+    <test>tests/mission_critical/test_websocket_agent_events_suite.py</test>
+  </references>
+
+  <summary>
+    <for_executives>
+      Our chat system - the primary value delivery channel - has a critical integration gap that makes 
+      it appear broken to users. The fix is straightforward (2-4 hours) and will immediately restore 
+      user confidence, reduce support burden, and improve conversion rates. This is our #1 priority.
+    </for_executives>
+    
+    <for_product_managers>
+      Users currently experience a "blank screen" effect during AI processing, leading to confusion, 
+      frustration, and abandonment. The technical components for real-time feedback exist but aren't 
+      connected. Once fixed, users will see live updates about what the AI is doing, creating a 
+      responsive, engaging chat experience that builds trust and demonstrates value.
+    </for_product_managers>
+    
+    <for_engineers>
+      The WebSocket event architecture is complete and well-designed. The gap is purely at the 
+      integration layer where MessageHandlerService creates supervisors without WebSocket dependency 
+      injection. This is a simple plumbing fix - pass the WebSocket manager through the service 
+      layers to the supervisor. No new components needed, just connecting existing ones.
+    </for_engineers>
+  </summary>
 </learning>
