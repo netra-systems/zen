@@ -18,6 +18,21 @@
         </workflow>
     </retrieval-protocol>
     
+    <learning id="jwt-secret-standardization-hard-requirements-2025-08-30">
+        <title>JWT Secret Standardization with Hard Requirements (No Fallbacks)</title>
+        <category>Authentication Security</category>
+        <keywords>jwt, authentication, secrets, staging, production, fallback elimination, hard requirements</keywords>
+        <path>jwt_secret_standardization_hard_requirements.xml</path>
+        <critical-takeaway>
+            Fallback mechanisms in authentication create false confidence and mask configuration errors.
+            Environment-specific JWT secrets MUST be enforced with immediate hard failure when missing.
+            Single GSM secret source per environment prevents cross-service token validation mismatches.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Authentication failures blocking user access and damaging platform reliability</business-impact>
+        <prevention>Eliminate ALL fallback logic in authentication. Require environment-specific secrets: JWT_SECRET_STAGING, JWT_SECRET_PRODUCTION, JWT_SECRET_KEY (dev/test only).</prevention>
+    </learning>
+    
     <learning id="websocket-logger-dual-import-2025-08-31">
         <title>WebSocket Logger Dual Import Context Binding Issue</title>
         <category>Runtime Error Resolution</category>
