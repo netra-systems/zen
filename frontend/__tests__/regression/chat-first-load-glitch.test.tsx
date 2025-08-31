@@ -110,7 +110,7 @@ const createLifecycleTracker = (): LifecycleTracker => ({
 
 describe('Chat First-Time Page Load Glitch Detection', () => {
   setupAntiHang();
-    jest.setTimeout(10000);
+  
   let lifecycleTracker: LifecycleTracker;
   let mockWebSocket: any;
   let consoleErrorSpy: jest.SpyInstance;
