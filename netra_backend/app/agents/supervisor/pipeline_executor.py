@@ -22,7 +22,6 @@ from netra_backend.app.schemas.agent_state import (
     StatePersistenceRequest,
 )
 from netra_backend.app.services.state_persistence import state_persistence_service
-from netra_backend.app.services.state_persistence_optimized import optimized_state_persistence
 
 if TYPE_CHECKING:
     from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
@@ -43,18 +42,13 @@ class PipelineExecutor:
         self.flow_logger = get_supervisor_flow_logger()
     
     def _get_persistence_service(self):
-        """Get appropriate persistence service based on feature flag."""
-        from netra_backend.app.core.isolated_environment import get_env
+        """Get the unified state persistence service.
         
-        # Check if optimized persistence is enabled
-        optimized_enabled = get_env().get("ENABLE_OPTIMIZED_PERSISTENCE", "false").lower() == "true"
-        
-        if optimized_enabled:
-            logger.info("Using optimized state persistence service")
-            return optimized_state_persistence
-        else:
-            logger.debug("Using standard state persistence service")
-            return state_persistence_service
+        The service internally handles optimization based on environment configuration.
+        """
+        # The service now handles optimizations internally based on environment
+        logger.debug("Using unified state persistence service")
+        return state_persistence_service
     
     async def execute_pipeline(self, pipeline: List[PipelineStep],
                               state: DeepAgentState, run_id: str,
