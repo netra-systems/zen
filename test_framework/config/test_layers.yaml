@@ -1,64 +1,86 @@
-# Netra Apex Test Layer Configuration
-# Layered test execution system for optimal timing and dependency management
+# Test Layer Configuration for Netra Apex Orchestration System
+# This file defines the hierarchical layer structure for test execution
 
 metadata:
   version: "1.0.0"
-  description: "Comprehensive layered test configuration for Netra Apex platform"
-  created_at: "2025-01-01"
+  description: "Layered test execution configuration for Netra Apex platform"
+  created_at: "2025-01-08T00:00:00Z"
   config_schema_version: "1.0"
 
-# Test layer definitions with execution order and dependencies
+# Layer Definitions
 layers:
-  # LAYER 1: Fast Feedback (< 2 min) - Critical path validation
   fast_feedback:
     name: "Fast Feedback"
     description: "Quick validation tests for immediate developer feedback"
     priority: 1
     execution_order: 1
     max_duration_minutes: 2
-    execution_mode: "sequential"  # Run in order for fastest feedback
+    execution_mode: "sequential"
     fail_fast: true
     background_execution: false
     
-    # Resource requirements
     resource_limits:
       max_memory_mb: 512
       max_cpu_percent: 50
       max_parallel_instances: 2
-    
-    # Categories in this layer
+      
     categories:
       - name: "smoke"
         timeout_seconds: 60
         max_parallel_instances: 2
         priority_order: 1
+        resource_requirements:
+          requires_postgresql: false
+          requires_redis: false
+          requires_backend_service: false
+          requires_real_llm: false
+          requires_real_services: false
+          min_memory_mb: 64
+          dedicated_resources: false
+        filters:
+          include_patterns: ["smoke", "critical"]
+          exclude_patterns: ["slow", "external"]
+          
       - name: "unit"
         timeout_seconds: 120
         max_parallel_instances: 4
         priority_order: 2
+        resource_requirements:
+          requires_postgresql: false
+          requires_redis: false
+          requires_backend_service: false
+          requires_real_llm: false
+          requires_real_services: false
+          min_memory_mb: 128
+          dedicated_resources: false
         filters:
-          include_patterns: ["**/test_*.py", "**/unit/**"]
-          exclude_patterns: ["**/slow_*", "**/integration/**"]
-    
-    # Layer dependencies (must complete before this layer starts)
+          include_patterns: ["unit", "component"]
+          exclude_patterns: ["integration", "e2e"]
+          
     dependencies: []
-    conflicts: ["e2e_performance"]
+    conflicts: []
+    required_services: []
     
-    # Success criteria
     success_criteria:
       min_pass_rate: 0.98
-      max_failures: 1
+      max_failures: 2
       critical_tests_must_pass: true
-    
-    # Environment overrides
+      allow_partial_success: false
+      
+    llm_requirements:
+      mode: "mock"
+      timeout_seconds: 30
+      fallback_to_mock: true
+      
     environment_overrides:
-      ci:
-        max_duration_minutes: 1
-        execution_mode: "parallel"
-      dev:
+      staging:
+        max_duration_minutes: 3
+        llm_requirements:
+          mode: "real"
+      production:
+        max_duration_minutes: 5
         fail_fast: false
 
-  # LAYER 2: Core Integration (< 10 min) - Service validation  
   core_integration:
     name: "Core Integration"
     description: "Database, API, and core service integration tests"
@@ -73,7 +95,7 @@ layers:
       max_memory_mb: 1024
       max_cpu_percent: 70
       max_parallel_instances: 4
-    
+      
     categories:
       - name: "database"
         timeout_seconds: 300
@@ -81,59 +103,98 @@ layers:
         priority_order: 1
         resource_requirements:
           requires_postgresql: true
-          requires_redis: false
+          requires_redis: true
+          requires_backend_service: false
+          requires_real_llm: false
+          requires_real_services: true
+          min_memory_mb: 256
+          dedicated_resources: false
+        filters:
+          include_patterns: ["database", "db", "persistence"]
+          exclude_patterns: ["mock", "fake"]
+          
       - name: "api"
         timeout_seconds: 300
         max_parallel_instances: 3
         priority_order: 2
         resource_requirements:
+          requires_postgresql: true
+          requires_redis: true
           requires_backend_service: true
+          requires_real_llm: false
+          requires_real_services: true
+          min_memory_mb: 256
+          dedicated_resources: false
+        filters:
+          include_patterns: ["api", "endpoint", "route"]
+          exclude_patterns: ["frontend", "ui"]
+          
       - name: "websocket"
         timeout_seconds: 300
         max_parallel_instances: 2
         priority_order: 3
         resource_requirements:
+          requires_postgresql: false
+          requires_redis: true
           requires_backend_service: true
           requires_websocket_server: true
+          requires_real_llm: false
+          requires_real_services: true
+          min_memory_mb: 192
+          dedicated_resources: false
+        filters:
+          include_patterns: ["websocket", "ws", "realtime"]
+          exclude_patterns: ["mock", "simulation"]
+          
       - name: "integration"
         timeout_seconds: 600
         max_parallel_instances: 2
         priority_order: 4
+        resource_requirements:
+          requires_postgresql: true
+          requires_redis: true
+          requires_backend_service: true
+          requires_real_llm: false
+          requires_real_services: true
+          min_memory_mb: 384
+          dedicated_resources: false
         filters:
-          include_patterns: ["**/integration/**", "**/test_integration_*.py"]
-          exclude_patterns: ["**/e2e/**", "**/cypress/**"]
-    
+          include_patterns: ["integration", "service"]
+          exclude_patterns: ["unit", "e2e"]
+          
     dependencies: ["fast_feedback"]
-    conflicts: ["e2e_performance"]
+    conflicts: []
+    required_services: ["postgresql", "redis", "backend_service"]
     
     success_criteria:
       min_pass_rate: 0.95
-      max_failures: 3
-      critical_tests_must_pass: false
-    
-    # Service availability requirements
-    required_services:
-      - postgresql
-      - redis
-      - backend_service
-    
+      max_failures: 5
+      critical_tests_must_pass: true
+      allow_partial_success: false
+      
+    llm_requirements:
+      mode: "mock"
+      timeout_seconds: 60
+      fallback_to_mock: true
+      
     environment_overrides:
       staging:
-        timeout_multiplier: 1.5
-        required_services:
-          - postgresql
-          - redis
-          - backend_service
-          - auth_service
+        llm_requirements:
+          mode: "real"
+        required_services: ["postgresql", "redis", "backend_service", "auth_service"]
+      production:
+        max_duration_minutes: 15
+        llm_requirements:
+          mode: "real"
+          fallback_to_mock: false
 
-  # LAYER 3: Service Integration (< 20 min) - Cross-service validation
   service_integration:
     name: "Service Integration"
     description: "Backend integration, agent workflows, and cross-service tests"
     priority: 3
     execution_order: 3
     max_duration_minutes: 20
-    execution_mode: "hybrid"  # Mix of parallel and sequential based on dependencies
+    execution_mode: "hybrid"
     fail_fast: false
     background_execution: false
     
@@ -141,255 +202,229 @@ layers:
       max_memory_mb: 2048
       max_cpu_percent: 80
       max_parallel_instances: 3
-    
+      
     categories:
       - name: "agent"
         timeout_seconds: 600
         max_parallel_instances: 2
         priority_order: 1
         resource_requirements:
-          requires_real_llm: true
-          requires_backend_service: true
           requires_postgresql: true
+          requires_redis: true
+          requires_backend_service: true
+          requires_auth_service: true
+          requires_real_llm: true
+          requires_real_services: true
           min_memory_mb: 512
+          dedicated_resources: true
+        filters:
+          include_patterns: ["agent", "workflow", "ai"]
+          exclude_patterns: ["mock", "fake"]
+          
       - name: "e2e_critical"
         timeout_seconds: 300
         max_parallel_instances: 2
         priority_order: 2
         resource_requirements:
+          requires_postgresql: true
+          requires_redis: true
+          requires_backend_service: true
+          requires_auth_service: true
+          requires_frontend_service: false
+          requires_real_llm: true
           requires_real_services: true
+          min_memory_mb: 384
+          dedicated_resources: false
+        filters:
+          include_patterns: ["e2e", "critical", "essential"]
+          exclude_patterns: ["performance", "load"]
+          
       - name: "frontend"
         timeout_seconds: 300
         max_parallel_instances: 3
         priority_order: 3
         resource_requirements:
+          requires_postgresql: false
+          requires_redis: false
+          requires_backend_service: true
+          requires_frontend_service: false
           requires_node_runtime: true
-    
+          requires_frontend_build: true
+          requires_real_llm: false
+          requires_real_services: false
+          min_memory_mb: 256
+          dedicated_resources: false
+        filters:
+          include_patterns: ["frontend", "react", "ui", "component"]
+          exclude_patterns: ["backend", "api"]
+          
     dependencies: ["core_integration"]
-    conflicts: []
+    conflicts: ["performance", "cypress"]
+    required_services: ["postgresql", "redis", "backend_service", "auth_service"]
     
     success_criteria:
       min_pass_rate: 0.90
-      max_failures: 5
-      critical_tests_must_pass: false
-    
-    required_services:
-      - postgresql
-      - redis
-      - backend_service
-      - auth_service
-    
-    # LLM requirements for this layer
+      max_failures: 8
+      critical_tests_must_pass: true
+      allow_partial_success: true
+      
     llm_requirements:
       mode: "real"
       timeout_seconds: 60
       fallback_to_mock: false
-    
+      
     environment_overrides:
-      dev:
-        execution_mode: "parallel"
-        required_services:
-          - postgresql
-          - redis
-          - backend_service
+      test:
+        llm_requirements:
+          mode: "mock"
+          fallback_to_mock: true
+      development:
+        max_duration_minutes: 25
+        success_criteria:
+          allow_partial_success: true
 
-  # LAYER 4: End-to-End & Performance (background) - Full system validation
-  e2e_performance:
+  e2e_background:
     name: "E2E & Performance"
-    description: "Full end-to-end tests and performance validation"
+    description: "Full end-to-end tests and performance validation (background execution)"
     priority: 4
     execution_order: 4
     max_duration_minutes: 60
-    execution_mode: "sequential"  # Long-running tests run one at a time
+    execution_mode: "sequential"
     fail_fast: false
-    background_execution: true  # Can run in background after core layers
+    background_execution: true
     
     resource_limits:
       max_memory_mb: 4096
       max_cpu_percent: 90
-      max_parallel_instances: 1  # Resource-intensive tests
-    
+      max_parallel_instances: 1
+      
     categories:
       - name: "cypress"
         timeout_seconds: 1800
         max_parallel_instances: 1
         priority_order: 1
         resource_requirements:
-          requires_real_services: true
-          requires_real_llm: true
-          requires_frontend_build: true
           requires_postgresql: true
           requires_redis: true
+          requires_backend_service: true
+          requires_auth_service: true
+          requires_frontend_service: true
+          requires_node_runtime: true
+          requires_real_llm: true
+          requires_real_services: true
+          min_memory_mb: 1024
+          dedicated_resources: true
+        filters:
+          include_patterns: ["cypress", "e2e", "browser"]
+          exclude_patterns: ["unit", "mock"]
+          
       - name: "e2e"
         timeout_seconds: 1800
         max_parallel_instances: 1
         priority_order: 2
         resource_requirements:
-          requires_real_services: true
+          requires_postgresql: true
+          requires_redis: true
+          requires_backend_service: true
+          requires_auth_service: true
+          requires_frontend_service: true
           requires_real_llm: true
+          requires_real_services: true
+          min_memory_mb: 768
+          dedicated_resources: true
+        filters:
+          include_patterns: ["e2e", "integration", "full"]
+          exclude_patterns: ["unit", "mock", "performance"]
+          
       - name: "performance"
         timeout_seconds: 1800
         max_parallel_instances: 1
         priority_order: 3
         resource_requirements:
+          requires_postgresql: true
+          requires_redis: true
+          requires_backend_service: true
+          requires_auth_service: true
+          requires_frontend_service: false
+          requires_real_llm: false
           requires_real_services: true
+          min_memory_mb: 1024
           dedicated_resources: true
-    
+        filters:
+          include_patterns: ["performance", "load", "stress", "benchmark"]
+          exclude_patterns: ["unit", "mock"]
+          
     dependencies: ["service_integration"]
-    conflicts: []
+    conflicts: ["fast_feedback", "core_integration"]
+    required_services: ["postgresql", "redis", "backend_service", "auth_service", "frontend_service"]
     
     success_criteria:
       min_pass_rate: 0.85
       max_failures: 10
       critical_tests_must_pass: false
       allow_partial_success: true
-    
-    required_services:
-      - postgresql
-      - redis
-      - backend_service
-      - auth_service
-      - frontend_service
-    
+      
     llm_requirements:
       mode: "real"
       timeout_seconds: 120
       fallback_to_mock: false
-    
+      
     environment_overrides:
-      ci:
-        background_execution: true
-        max_duration_minutes: 45
-      staging:
+      test:
         background_execution: false
-        max_duration_minutes: 90
+        max_duration_minutes: 30
+      development:
+        success_criteria:
+          min_pass_rate: 0.75
+          allow_partial_success: true
 
-# Global execution configuration
+# Global Execution Configuration
 execution_config:
-  # Layer execution strategy
-  layer_execution_mode: "waterfall_with_background"  # Execute layers in order, allow background for layer 4
-  
-  # Timeout and retry configuration
-  global_timeout_minutes: 120
+  layer_execution_mode: "waterfall_with_background"
+  global_timeout_minutes: 90
   layer_startup_timeout_seconds: 30
   inter_layer_delay_seconds: 5
-  
-  # Parallel execution limits
   max_global_parallel_tests: 8
   max_memory_usage_mb: 6144
   max_cpu_usage_percent: 90
+  resource_conflict_resolution: "priority_based"
   
-  # Fail-fast configuration per layer
+  # Fail-fast strategies per layer
   fail_fast_strategy:
-    fast_feedback: "immediate"      # Stop immediately on failure
-    core_integration: "category"    # Stop layer on category failure
-    service_integration: "disabled" # Continue all tests in layer
-    e2e_performance: "disabled"     # Continue all tests (background)
+    fast_feedback: "immediate"
+    core_integration: "category"
+    service_integration: "layer"
+    e2e_background: "disabled"
   
-  # Resource conflict resolution
-  resource_conflict_resolution: "priority_based"  # Higher priority layers get resources first
-  
-  # Background execution
+  # Background execution settings
   background_execution:
     enabled: true
     max_background_layers: 1
-    background_layers: ["e2e_performance"]
-    monitoring_interval_seconds: 30
+    background_layers: ["e2e_background"]
 
-# Environment-specific layer configurations
-environments:
-  # Development environment - focus on fast feedback
-  dev:
-    layer_overrides:
-      fast_feedback:
-        max_duration_minutes: 3
-        execution_mode: "parallel"
-      e2e_performance:
-        background_execution: true
-        skip_performance_tests: true
-  
-  # CI environment - optimize for speed and reliability
-  ci:
-    layer_overrides:
-      fast_feedback:
-        max_duration_minutes: 1
-        max_parallel_instances: 4
-      core_integration:
-        max_duration_minutes: 8
-        execution_mode: "parallel"
-      service_integration:
-        max_duration_minutes: 15
-      e2e_performance:
-        background_execution: true
-        max_duration_minutes: 30
-  
-  # Staging environment - full validation
-  staging:
-    layer_overrides:
-      fast_feedback:
-        max_duration_minutes: 3
-      core_integration:
-        max_duration_minutes: 12
-        timeout_multiplier: 1.5
-      service_integration:
-        max_duration_minutes: 25
-      e2e_performance:
-        background_execution: false
-        max_duration_minutes: 90
-        
-# Service dependency matrix
+# Service Dependencies and Startup Order
 service_dependencies:
   postgresql:
     startup_timeout_seconds: 30
-    health_check_endpoint: "/health"
-    required_for_layers: ["core_integration", "service_integration", "e2e_performance"]
-  
+    health_check_endpoint: "localhost:5432"
+    depends_on: []
+    
   redis:
-    startup_timeout_seconds: 15
-    health_check_command: "redis-cli ping"
-    required_for_layers: ["core_integration", "service_integration", "e2e_performance"]
-  
+    startup_timeout_seconds: 10
+    health_check_endpoint: "localhost:6379"
+    depends_on: []
+    
   backend_service:
     startup_timeout_seconds: 45
-    health_check_endpoint: "/api/health"
-    required_for_layers: ["core_integration", "service_integration", "e2e_performance"]
+    health_check_endpoint: "localhost:8000/health"
     depends_on: ["postgresql", "redis"]
-  
+    
   auth_service:
     startup_timeout_seconds: 30
-    health_check_endpoint: "/auth/health"
-    required_for_layers: ["service_integration", "e2e_performance"]
-    depends_on: ["postgresql"]
-  
+    health_check_endpoint: "localhost:8081/health"
+    depends_on: ["postgresql", "redis"]
+    
   frontend_service:
     startup_timeout_seconds: 60
-    health_check_endpoint: "/"
-    required_for_layers: ["e2e_performance"]
-    build_required: true
-
-# Monitoring and reporting configuration
-monitoring:
-  # Progress tracking per layer
-  progress_tracking:
-    enabled: true
-    granularity: "test"  # Track individual test progress
-    persist_progress: true
-    checkpoint_interval_seconds: 30
-  
-  # Performance monitoring
-  performance_monitoring:
-    enabled: true
-    memory_monitoring: true
-    cpu_monitoring: true
-    network_monitoring: false
-    disk_monitoring: false
-  
-  # Reporting configuration
-  reporting:
-    layer_reports: true
-    timing_analysis: true
-    resource_usage_reports: true
-    dependency_analysis: true
-    
-    report_formats: ["json", "html", "junit"]
-    report_output_dir: "test_reports/layers"
+    health_check_endpoint: "localhost:3000"
+    depends_on: ["backend_service", "auth_service"]
