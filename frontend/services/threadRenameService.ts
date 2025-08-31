@@ -69,7 +69,7 @@ export class ThreadRenameService {
       logger.error('Failed to auto-rename thread', error as Error, {
         component: 'ThreadRenameService',
         action: 'auto_rename_failed',
-        metadata: { threadId, messageContent: message.content.substring(0, 100) }
+        metadata: { threadId, messageContent: firstMessage.substring(0, 100) }
       });
       return this.getFallbackTitle();
     } finally {
