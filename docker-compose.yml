@@ -4,8 +4,10 @@
 # CRITICAL: Maximum 10 named volumes to prevent Docker Desktop crashes
 # Code is baked into images - no code volumes needed
 #
-# Use profiles to run dev or test environments independently:
-# - docker-compose --profile dev up     # Start development environment
+# DEFAULT: Development environment (dev profile) launches by default
+# Usage:
+# - docker-compose up                   # Start development environment (DEFAULT)
+# - docker-compose --profile dev up     # Explicitly start development environment
 # - docker-compose --profile test up    # Start test environment
 # - docker-compose down                 # Stop all services
 
@@ -20,7 +22,7 @@ services:
   dev-postgres:
     image: postgres:15-alpine
     container_name: netra-dev-postgres
-    profiles: ["dev"]
+    # No profile specified - runs by default
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-netra}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-netra123}
@@ -53,7 +55,7 @@ services:
   dev-redis:
     image: redis:7-alpine
     container_name: netra-dev-redis
-    profiles: ["dev"]
+    # No profile specified - runs by default
     command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
     ports:
       - "${DEV_REDIS_PORT:-6380}:6379"
@@ -78,7 +80,7 @@ services:
   dev-clickhouse:
     image: clickhouse/clickhouse-server:23-alpine
     container_name: netra-dev-clickhouse
-    profiles: ["dev"]
+    # No profile specified - runs by default
     environment:
       CLICKHOUSE_DB: ${CLICKHOUSE_DB:-netra_analytics}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER:-netra}
@@ -113,7 +115,7 @@ services:
       args:
         BUILD_ENV: development
     container_name: netra-dev-auth
-    profiles: ["dev"]
+    # No profile specified - runs by default
     environment:
       ENVIRONMENT: development
       LOG_LEVEL: DEBUG
@@ -143,6 +145,9 @@ services:
       # Google OAuth Configuration
       GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT: ${GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT}
       GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT: ${GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT}
+      
+      # E2E Test Configuration
+      E2E_OAUTH_SIMULATION_KEY: ${E2E_OAUTH_SIMULATION_KEY}
     ports:
       - "${DEV_AUTH_PORT:-8081}:8081"
     volumes:
@@ -176,7 +181,7 @@ services:
       args:
         BUILD_ENV: development
     container_name: netra-dev-backend
-    profiles: ["dev"]
+    # No profile specified - runs by default
     environment:
       ENVIRONMENT: development
       LOG_LEVEL: DEBUG
@@ -257,7 +262,7 @@ services:
         NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-ws://localhost:8000}
         NEXT_PUBLIC_ENVIRONMENT: development
     container_name: netra-dev-frontend
-    profiles: ["dev"]
+    # No profile specified - runs by default
     environment:
       NODE_ENV: development
       PORT: 3000

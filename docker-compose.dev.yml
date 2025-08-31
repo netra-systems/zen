@@ -89,6 +89,8 @@ services:
       DATABASE_URL: postgresql://netra:netra123@postgres:5432/netra_dev
       PORT: 8081
       HOST: 0.0.0.0
+      # E2E Test Configuration - explicitly set for auth service
+      E2E_OAUTH_SIMULATION_KEY: ${E2E_OAUTH_SIMULATION_KEY}
     ports:
       - "8081:8081"
     volumes:
