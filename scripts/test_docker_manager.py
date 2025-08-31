@@ -129,34 +129,63 @@ class TestDockerManager:
         return True
     
     def get_service_urls(self) -> dict:
-        """Get service URLs for test configuration."""
-        # Use port discovery to get actual ports
-        try:
-            postgres_inspect = subprocess.run([
-                "docker", "port", "netra-test-postgres", "5432"
-            ], capture_output=True, text=True)
-            
-            redis_inspect = subprocess.run([
-                "docker", "port", "netra-test-redis", "6379"  
-            ], capture_output=True, text=True)
-            
-            pg_port = postgres_inspect.stdout.strip().split(':')[-1] if postgres_inspect.returncode == 0 else "5434"
-            redis_port = redis_inspect.stdout.strip().split(':')[-1] if redis_inspect.returncode == 0 else "6381"
-            
-            return {
-                "DATABASE_URL": f"postgresql://test_user:test_pass@localhost:{pg_port}/netra_test",
-                "REDIS_URL": f"redis://localhost:{redis_port}/1",
-                "TEST_POSTGRES_PORT": pg_port,
-                "TEST_REDIS_PORT": redis_port
-            }
-        except Exception as e:
-            print(f"[TEST-DOCKER] Warning: Could not discover ports: {e}")
-            return {
-                "DATABASE_URL": "postgresql://test_user:test_pass@localhost:5434/netra_test",
-                "REDIS_URL": "redis://localhost:6381/1",
-                "TEST_POSTGRES_PORT": "5434",
-                "TEST_REDIS_PORT": "6381"
-            }
+        """Get service URLs for configuration."""
+        if self.environment == "dev":
+            # Dev environment configuration
+            try:
+                postgres_inspect = subprocess.run([
+                    "docker", "port", "netra-dev-postgres", "5432"
+                ], capture_output=True, text=True)
+                
+                redis_inspect = subprocess.run([
+                    "docker", "port", "netra-dev-redis", "6379"  
+                ], capture_output=True, text=True)
+                
+                pg_port = postgres_inspect.stdout.strip().split(':')[-1] if postgres_inspect.returncode == 0 else "5433"
+                redis_port = redis_inspect.stdout.strip().split(':')[-1] if redis_inspect.returncode == 0 else "6380"
+                
+                return {
+                    "DATABASE_URL": f"postgresql://netra:netra123@localhost:{pg_port}/netra",
+                    "REDIS_URL": f"redis://localhost:{redis_port}",
+                    "DEV_POSTGRES_PORT": pg_port,
+                    "DEV_REDIS_PORT": redis_port
+                }
+            except Exception as e:
+                print(f"[DEV-DOCKER] Warning: Could not discover ports: {e}")
+                return {
+                    "DATABASE_URL": "postgresql://netra:netra123@localhost:5433/netra",
+                    "REDIS_URL": "redis://localhost:6380",
+                    "DEV_POSTGRES_PORT": "5433",
+                    "DEV_REDIS_PORT": "6380"
+                }
+        else:
+            # Test environment configuration  
+            try:
+                postgres_inspect = subprocess.run([
+                    "docker", "port", "netra-test-postgres", "5432"
+                ], capture_output=True, text=True)
+                
+                redis_inspect = subprocess.run([
+                    "docker", "port", "netra-test-redis", "6379"  
+                ], capture_output=True, text=True)
+                
+                pg_port = postgres_inspect.stdout.strip().split(':')[-1] if postgres_inspect.returncode == 0 else "5434"
+                redis_port = redis_inspect.stdout.strip().split(':')[-1] if redis_inspect.returncode == 0 else "6381"
+                
+                return {
+                    "DATABASE_URL": f"postgresql://test_user:test_pass@localhost:{pg_port}/netra_test",
+                    "REDIS_URL": f"redis://localhost:{redis_port}/1",
+                    "TEST_POSTGRES_PORT": pg_port,
+                    "TEST_REDIS_PORT": redis_port
+                }
+            except Exception as e:
+                print(f"[TEST-DOCKER] Warning: Could not discover ports: {e}")
+                return {
+                    "DATABASE_URL": "postgresql://test_user:test_pass@localhost:5434/netra_test",
+                    "REDIS_URL": "redis://localhost:6381/1",
+                    "TEST_POSTGRES_PORT": "5434",
+                    "TEST_REDIS_PORT": "6381"
+                }
     
     def status_report(self):
         """Print status report for debugging."""

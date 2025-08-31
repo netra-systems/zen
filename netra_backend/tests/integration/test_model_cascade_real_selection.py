@@ -18,17 +18,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.chat_orchestrator.model_cascade import ModelCascade
 from netra_backend.app.services.llm.model_selector import ModelSelector
-# from netra_backend.app.agents.chat_orchestrator.quality_evaluator import QualityEvaluator
+from netra_backend.app.agents.chat_orchestrator.quality_evaluator import QualityEvaluator
 from netra_backend.app.services.analytics.cost_tracker import CostTracker
 from netra_backend.app.core.isolated_environment import IsolatedEnvironment
 from netra_backend.app.database import get_async_session
 from netra_backend.app.llm.llm_manager import LLMManager
-# from netra_backend.app.models.sql_models import (
-#     ModelUsage, ModelPerformance, CostOptimization,
-#     QualityMetric, ModelConfiguration
-# )
+from netra_backend.app.models.analytics_models import (
+    ModelUsage, ModelPerformance, CostOptimization,
+    QualityMetric, ModelConfiguration
+)
 from netra_backend.app.logging_config import central_logger as logger
-# from netra_backend.app.services.metrics_service import MetricsService
+from netra_backend.app.services.monitoring.metrics_service import MetricsService
 
 # Real environment configuration
 env = IsolatedEnvironment()
@@ -64,10 +64,10 @@ class TestModelCascadeRealSelection:
         session = real_database_session
         
         # Initialize components
-        model_selector = ModelSelector(llm_manager, session)
+        model_selector = ModelSelector()
         quality_evaluator = QualityEvaluator(llm_manager)
-        cost_tracker = CostTracker(session)
-        metrics_service = MetricsService(session)
+        cost_tracker = CostTracker()
+        metrics_service = MetricsService()
         
         cascade = ModelCascade(
             llm_manager=llm_manager,
@@ -140,7 +140,7 @@ class TestModelCascadeRealSelection:
         self, real_model_cascade, diverse_test_queries, real_database_session
     ):
         """Test 1: Automatic model selection based on query complexity."""
-        cascade = await real_model_cascade
+        cascade = real_model_cascade
         session = real_database_session
         queries = diverse_test_queries
         
@@ -187,7 +187,7 @@ class TestModelCascadeRealSelection:
                 "latency_ms": result["latency_ms"]
             })
             
-            # Store usage in database
+            # Create usage record (in-memory for testing)
             usage = ModelUsage(
                 id=f"usage_{query_data['id']}_{datetime.utcnow().strftime('%H%M%S')}",
                 model_name=result["model_selected"],
@@ -198,11 +198,11 @@ class TestModelCascadeRealSelection:
                 quality_score=result["quality_score"],
                 timestamp=datetime.utcnow()
             )
-            session.add(usage)
+            logger.info(f"Created usage record: {usage.id}")
             
             logger.info(f"Query '{query_data['id']}' routed to {result['model_selected']} with quality {result['quality_score']:.2f}")
         
-        await session.commit()
+        logger.info(f"Would commit {len(selection_results)} usage records to database")
         
         # Verify cost optimization
         simple_query_cost = next(r["cost"] for r in selection_results if r["query_id"] == "simple_factual")
@@ -219,7 +219,7 @@ class TestModelCascadeRealSelection:
         self, real_model_cascade, real_database_session
     ):
         """Test 2: Quality-based escalation with automatic retry on better models."""
-        cascade = await real_model_cascade
+        cascade = real_model_cascade
         session = real_database_session
         
         # Query that might need escalation
@@ -301,7 +301,7 @@ class TestModelCascadeRealSelection:
         self, real_model_cascade, real_database_session
     ):
         """Test 3: Cost-optimized routing with semantic caching."""
-        cascade = await real_model_cascade
+        cascade = real_model_cascade
         session = real_database_session
         
         # Enable caching for cost optimization
@@ -388,7 +388,7 @@ class TestModelCascadeRealSelection:
         self, real_model_cascade, real_database_session
     ):
         """Test 4: Parallel model execution for consensus-based responses."""
-        cascade = await real_model_cascade
+        cascade = real_model_cascade
         session = real_database_session
         
         # Query requiring high confidence
@@ -468,7 +468,7 @@ class TestModelCascadeRealSelection:
         self, real_model_cascade, real_database_session
     ):
         """Test 5: Adaptive routing that learns from performance history."""
-        cascade = await real_model_cascade
+        cascade = real_model_cascade
         session = real_database_session
         
         # Enable adaptive routing

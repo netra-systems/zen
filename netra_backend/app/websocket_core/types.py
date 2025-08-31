@@ -96,6 +96,8 @@ class ConnectionInfo(BaseModel):
     connected_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     last_activity: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     message_count: int = 0
+    error_count: int = 0  # Track connection errors
+    last_ping: Optional[datetime] = None  # Last ping timestamp
     is_healthy: bool = True
     is_closing: bool = False
     client_info: Optional[Dict[str, Any]] = None

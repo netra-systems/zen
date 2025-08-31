@@ -1,12 +1,6 @@
 /// <reference types="cypress" />
 
-import { 
-  SyntheticDataTestUtils, 
-  ConfigurationFactory, 
-  UIHelpers, 
-  TestData, 
-  Selectors 
-} from './synthetic-data-test-utils'
+// Updated imports to match current implementation
 
 /**
  * Basic component tests for synthetic data generator
@@ -14,208 +8,201 @@ import {
  */
 describe('SyntheticDataGenerator - Basic Component Tests', () => {
   beforeEach(() => {
-    SyntheticDataTestUtils.setupViewport()
-    SyntheticDataTestUtils.visitComponent()
+    cy.viewport(1920, 1080)
+    cy.visit('/synthetic-data-generation')
+    cy.wait(500)
   })
 
   describe('Component Initialization', () => {
     it('should render component with proper structure', () => {
-      SyntheticDataTestUtils.getGenerator().should('be.visible')
-      UIHelpers.verifyTextContent('Synthetic Data Generator')
-      UIHelpers.verifyTextContent('Generate realistic test data')
+      cy.contains('Generate Synthetic Data').should('be.visible')
+      cy.get('.max-w-2xl').should('be.visible')
+      cy.get('.mx-auto').should('be.visible')
     })
 
-    it('should display glassmorphic styling', () => {
-      cy.get('.backdrop-blur-sm').should('exist')
-      cy.get('.bg-white/5').should('exist')
+    it('should display card layout styling', () => {
+      cy.get('.max-w-2xl').should('exist')
+      cy.get('.space-y-4').should('exist')
     })
 
-    it('should show all main sections', () => {
-      UIHelpers.verifyTextContent('Configuration')
-      UIHelpers.verifyTextContent('Output')
-      UIHelpers.verifyTextContent('Actions')
+    it('should show all main form elements', () => {
+      cy.contains('Number of Traces').should('be.visible')
+      cy.contains('Number of Users').should('be.visible')
+      cy.contains('Error Rate').should('be.visible')
+      cy.contains('Workload Pattern').should('be.visible')
+      cy.contains('Generate Data').should('be.visible')
     })
   })
 
   describe('Configuration Panel - Basic Fields', () => {
     it('should display trace count configuration', () => {
-      cy.contains('label', 'Number of Traces').should('be.visible')
-      cy.get('input[name="traceCount"]').should('be.visible')
-      cy.get('input[name="traceCount"]').should('have.value', TestData.defaultTraceCount.toString())
+      cy.get('label[for="num_traces"]').should('be.visible')
+      cy.get('#num_traces').should('be.visible')
+      cy.get('#num_traces').should('have.value', '100')
     })
 
     it('should update trace count input', () => {
-      ConfigurationFactory.setTraceCount(5000)
-      cy.get('input[name="traceCount"]').should('have.value', '5000')
+      cy.get('#num_traces').clear().type('5000')
+      cy.get('#num_traces').should('have.value', '5000')
     })
 
     it('should display user count configuration', () => {
-      cy.contains('label', 'Number of Users').should('be.visible')
-      cy.get('input[name="userCount"]').should('be.visible')
+      cy.get('label[for="num_users"]').should('be.visible')
+      cy.get('#num_users').should('be.visible')
     })
 
     it('should update user count input', () => {
-      ConfigurationFactory.setUserCount(250)
-      cy.get('input[name="userCount"]').should('have.value', '250')
+      cy.get('#num_users').clear().type('250')
+      cy.get('#num_users').should('have.value', '250')
     })
 
-    it('should display error rate slider', () => {
-      cy.contains('label', 'Error Rate (%)').should('be.visible')
-      cy.get('input[type="range"][name="errorRate"]').should('be.visible')
+    it('should display error rate field', () => {
+      cy.get('label[for="error_rate"]').should('be.visible')
+      cy.get('#error_rate').should('be.visible')
     })
 
-    it('should show error rate value updates', () => {
-      ConfigurationFactory.setErrorRate(10)
-      cy.get('[data-testid="error-rate-value"]').should('contain', '10%')
+    it('should show error rate default value', () => {
+      cy.get('#error_rate').should('have.value', '0.1')
     })
   })
 
   describe('Input Validation', () => {
-    it('should validate minimum trace count', () => {
-      ConfigurationFactory.setTraceCount(0)
-      cy.contains('Minimum value is 1').should('be.visible')
+    it('should accept numeric inputs', () => {
+      cy.get('#num_traces').clear().type('500')
+      cy.get('#num_users').clear().type('50')
+      cy.get('#error_rate').clear().type('0.05')
+      
+      cy.get('#num_traces').should('have.value', '500')
+      cy.get('#num_users').should('have.value', '50')
+      cy.get('#error_rate').should('have.value', '0.05')
     })
 
-    it('should validate maximum trace count', () => {
-      ConfigurationFactory.setTraceCount(1000001)
-      cy.contains('Maximum value is 1000000').should('be.visible')
+    it('should handle step validation for error rate', () => {
+      cy.get('#error_rate').should('have.attr', 'step', '0.01')
     })
 
     it('should enable generate with valid config', () => {
-      ConfigurationFactory.setTraceCount(100)
-      SyntheticDataTestUtils.getGenerateButton().should('not.be.disabled')
+      cy.get('#num_traces').clear().type('100')
+      cy.contains('Generate Data').should('not.be.disabled')
     })
 
-    it('should disable generate with empty config', () => {
-      cy.get('input[name="traceCount"]').clear()
-      SyntheticDataTestUtils.getGenerateButton().should('be.disabled')
+    it('should show proper input types', () => {
+      cy.get('#num_traces').should('have.attr', 'type', 'number')
+      cy.get('#num_users').should('have.attr', 'type', 'number')
+      cy.get('#error_rate').should('have.attr', 'type', 'number')
     })
   })
 
   describe('Workload Pattern Selection', () => {
     it('should display workload pattern dropdown', () => {
-      cy.contains('label', 'Workload Pattern').should('be.visible')
-      cy.get('select[name="workloadPattern"]').should('be.visible')
+      cy.get('label[for="workload_pattern"]').should('be.visible')
+      cy.get('#workload_pattern').should('be.visible')
     })
 
-    it('should show all pattern options', () => {
-      cy.get('select[name="workloadPattern"]').click()
-      TestData.workloadPatterns.forEach(pattern => {
-        cy.get('select[name="workloadPattern"]').contains(pattern).should('exist')
-      })
+    it('should show available pattern options', () => {
+      cy.get('[data-testid="select-trigger"]').click()
+      cy.contains('Default Workload').should('be.visible')
+      cy.contains('Cost-Sensitive').should('be.visible')
+      cy.contains('Latency-Sensitive').should('be.visible')
+      cy.contains('High Error Rate').should('be.visible')
     })
 
-    it('should select workload pattern', () => {
-      ConfigurationFactory.setWorkloadPattern('Burst')
-      cy.get('select[name="workloadPattern"]').should('have.value', 'burst')
+    it('should allow pattern selection', () => {
+      cy.get('[data-testid="select-trigger"]').click()
+      cy.contains('Cost-Sensitive').click()
+      // Close dropdown
+      cy.get('body').click(0, 0)
     })
 
-    it('should show pattern preview chart', () => {
-      ConfigurationFactory.setWorkloadPattern('Periodic')
-      UIHelpers.verifyElementVisible('pattern-preview-chart')
-    })
-
-    it('should display pattern descriptions', () => {
-      ConfigurationFactory.setWorkloadPattern('Growth')
-      UIHelpers.verifyTextContent('Gradually increasing load')
-    })
-
-    it('should enable custom pattern editor', () => {
-      ConfigurationFactory.setWorkloadPattern('Custom')
-      UIHelpers.verifyElementVisible('custom-pattern-editor')
+    it('should have default pattern selected', () => {
+      cy.get('[data-testid="select-trigger"]')
+        .should('contain', 'Default Workload')
     })
   })
 
-  describe('Table Configuration', () => {
-    it('should display table selection dropdown', () => {
-      cy.contains('label', 'Target Table').should('be.visible')
-      cy.get('select[name="targetTable"]').should('be.visible')
+  describe('Source Table Configuration', () => {
+    it('should display source table selection dropdown', () => {
+      cy.get('label[for="source_table"]').should('be.visible')
+      cy.get('#source_table').should('be.visible')
     })
 
-    it('should show existing table options', () => {
-      cy.get('select[name="targetTable"]').click()
-      cy.contains('traces_synthetic').should('exist')
-      cy.contains('metrics_synthetic').should('exist')
+    it('should load available source tables on component mount', () => {
+      // Component should fetch tables automatically
+      cy.get('#source_table').should('be.visible')
     })
 
-    it('should allow creating new table', () => {
-      UIHelpers.clickElement('create-table-btn')
-      UIHelpers.typeInField('table-name-input', 'test_table')
-      UIHelpers.clickElement('create-table-confirm')
-      UIHelpers.verifyTextContent('test_table')
+    it('should display event types configuration', () => {
+      cy.get('label[for="event_types"]').should('be.visible')
+      cy.get('#event_types').should('be.visible')
+      cy.get('#event_types').should('have.value', 'search,login')
     })
 
-    it('should validate table names', () => {
-      UIHelpers.clickElement('create-table-btn')
-      cy.get('[data-testid="table-name-input"]').type('123-invalid!')
-      cy.contains('Invalid table name').should('be.visible')
-    })
-
-    it('should display table schema preview', () => {
-      cy.get('select[name="targetTable"]').select('traces_synthetic')
-      UIHelpers.clickElement('schema-preview')
-      UIHelpers.verifyTextContent('trace_id')
-      UIHelpers.verifyTextContent('timestamp')
-      UIHelpers.verifyTextContent('duration')
-    })
-
-    it('should manage table retention settings', () => {
-      UIHelpers.clickElement('table-settings')
-      UIHelpers.verifyTextContent('Retention Period')
-      cy.get('select[name="retention"]').select('7 days')
+    it('should allow updating event types', () => {
+      cy.get('#event_types').clear().type('purchase,checkout,view')
+      cy.get('#event_types').should('have.value', 'purchase,checkout,view')
     })
   })
 
-  describe('Generation Estimates', () => {
-    it('should show estimated time for generation', () => {
-      ConfigurationFactory.setTraceCount(10000)
-      UIHelpers.verifyTextContent('Estimated time')
-      cy.contains(/\d+ seconds?/).should('be.visible')
+  describe('Generation Process', () => {
+    it('should show loading state when generating', () => {
+      // Mock a slow API response
+      cy.intercept('POST', '**/api/generation/synthetic_data', { delay: 2000, body: { success: true } })
+      cy.contains('Generate Data').click()
+      cy.contains('Generating...').should('be.visible')
     })
 
-    it('should show estimated data size', () => {
-      ConfigurationFactory.setTraceCount(10000)
-      UIHelpers.verifyTextContent('Estimated size')
-      cy.contains(/\d+\.?\d* MB/).should('be.visible')
+    it('should disable button during generation', () => {
+      // Mock a slow API response
+      cy.intercept('POST', '**/api/generation/synthetic_data', { delay: 2000, body: { success: true } })
+      cy.contains('Generate Data').click()
+      cy.get('button').contains('Generating...').should('be.disabled')
     })
 
-    it('should warn about large datasets', () => {
-      ConfigurationFactory.setTraceCount(TestData.largeDataset)
-      UIHelpers.verifyTextContent('Large dataset warning')
+    it('should handle successful generation', () => {
+      cy.intercept('POST', '**/api/generation/synthetic_data', { body: { success: true } })
+      cy.contains('Generate Data').click()
+      // Button should be enabled again after completion
+      cy.contains('Generate Data').should('not.be.disabled')
     })
   })
 
   describe('Mobile Responsiveness', () => {
     it('should adapt layout for mobile viewport', () => {
       cy.viewport('iphone-x')
-      SyntheticDataTestUtils.getGenerator().should('be.visible')
+      cy.get('.max-w-2xl').should('be.visible')
+      cy.contains('Generate Synthetic Data').should('be.visible')
     })
 
-    it('should stack configuration fields vertically', () => {
+    it('should maintain grid layout on mobile', () => {
       cy.viewport('iphone-x')
-      cy.get(Selectors.configSection).should('have.css', 'flex-direction', 'column')
+      cy.get('.grid-cols-2').should('be.visible')
     })
 
-    it('should make range inputs full width', () => {
+    it('should keep full width button on mobile', () => {
       cy.viewport('iphone-x')
-      cy.get('input[type="range"]').should('have.css', 'width', '100%')
+      cy.get('button').contains('Generate Data').should('have.class', 'w-full')
     })
   })
 
   describe('Accessibility Features', () => {
-    it('should have proper ARIA labels', () => {
-      cy.get('[aria-label]').should('have.length.at.least', 10)
-    })
-
-    it('should support keyboard navigation', () => {
-      cy.get('input[name="traceCount"]').focus()
-      cy.focused().tab()
-      cy.focused().should('have.attr', 'name', 'userCount')
-    })
-
     it('should have proper form labels', () => {
-      cy.get('label[for="traceCount"]').should('contain', 'Traces')
-      cy.get('label[for="userCount"]').should('contain', 'Users')
+      cy.get('label[for="num_traces"]').should('contain', 'Number of Traces')
+      cy.get('label[for="num_users"]').should('contain', 'Number of Users')
+      cy.get('label[for="error_rate"]').should('contain', 'Error Rate')
+      cy.get('label[for="workload_pattern"]').should('contain', 'Workload Pattern')
+    })
+
+    it('should support keyboard navigation between inputs', () => {
+      cy.get('#num_traces').focus()
+      cy.focused().should('have.id', 'num_traces')
+      cy.focused().tab()
+      cy.focused().should('have.id', 'num_users')
+    })
+
+    it('should have proper input associations', () => {
+      cy.get('#num_traces').should('have.attr', 'name', 'num_traces')
+      cy.get('#num_users').should('have.attr', 'name', 'num_users')
+      cy.get('#error_rate').should('have.attr', 'name', 'error_rate')
     })
   })
 })

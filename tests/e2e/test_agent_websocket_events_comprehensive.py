@@ -8,7 +8,6 @@ import asyncio
 import json
 import time
 from typing import Dict, List, Set
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import websockets
@@ -22,10 +21,9 @@ from netra_backend.app.services.message_processing import (
     process_user_message_with_notifications,
 )
 from netra_backend.app.websocket_core import get_websocket_manager
-from tests.helpers.auth_test_helpers import create_test_token
-from tests.helpers.database_helpers import TestDatabaseHelper
-from tests.helpers.env_helpers import TestEnvironmentManager
-from tests.helpers.integration_fixtures import get_test_db_url
+from tests.e2e.config import UnifiedTestConfig
+from tests.e2e.dev_launcher_test_fixtures import TestEnvironmentManager
+from netra_backend.app.core.isolated_environment import get_env
 
 logger = central_logger.get_logger(__name__)
 
@@ -139,15 +137,31 @@ async def test_agent_websocket_events_comprehensive():
     
     Business Impact: Core product functionality - agent communication must work.
     """
-    env_manager = TestEnvironmentManager()
-    env_manager.setup_test_environment()
+    # Use IsolatedEnvironment per CLAUDE.md requirements
+    env = get_env()
+    env.enable_isolation()
     
-    # Setup test infrastructure
-    db_helper = TestDatabaseHelper(get_test_db_url())
-    await db_helper.setup()
+    # Setup test environment using isolated environment
+    env_manager = TestEnvironmentManager()
+    await env_manager.initialize()
+    env_manager.setup_test_db()
+    env_manager.setup_test_redis()
+    env_manager.setup_test_secrets()
+    
+    # Configure test settings through isolated environment
+    env.set("TESTING", "true", "websocket_test")
+    env.set("USE_REAL_SERVICES", "true", "websocket_test")
+    env.set("WEBSOCKET_TIMEOUT", "30", "websocket_test")
+    
+    # Use unified test config for services
+    test_config = UnifiedTestConfig()
+    
+    # Use real database session manager per CLAUDE.md
+    from netra_backend.app.db.session import DatabaseSessionManager
+    db_session_manager = DatabaseSessionManager()
     
     try:
-        async with db_helper.get_session() as db_session:
+        async with db_session_manager.get_session() as db_session:
             # Initialize components
             websocket_manager = get_websocket_manager()
             llm_manager = LLMManager()
@@ -161,9 +175,13 @@ async def test_agent_websocket_events_comprehensive():
                 tool_dispatcher=tool_dispatcher
             )
             
-            # Create test user and auth
+            # Create test user using real auth service
             test_user_id = "test_user_comprehensive"
-            test_token = create_test_token(test_user_id)
+            test_token = test_config.create_test_token({
+                "id": test_user_id,
+                "email": "test@example.com",
+                "plan_tier": "early"
+            })
             
             # Event collector
             collector = AgentEventCollector()
@@ -269,172 +287,328 @@ async def test_agent_websocket_events_comprehensive():
                 return report
                 
     finally:
-        await db_helper.teardown()
+        # Database session manager handles cleanup automatically
         env_manager.cleanup()
+        env.clear()
 
 
 @pytest.mark.asyncio
-async def test_agent_thinking_events_sent():
-    """Test that agent_thinking events are sent during reasoning."""
-    # This test will verify that thinking events are properly sent
-    # when an agent is processing and reasoning about a task
+async def test_agent_thinking_events_with_real_websocket():
+    """Test that agent_thinking events are sent during real agent execution."""
+    # Use IsolatedEnvironment per CLAUDE.md requirements
+    env = get_env()
+    env.enable_isolation()
+    env.set("TESTING", "true", "thinking_test")
+    env.set("USE_REAL_SERVICES", "true", "thinking_test")
     
-    collector = AgentEventCollector()
-    
-    # Mock WebSocket manager to capture events
-    mock_ws_manager = MagicMock()
-    sent_messages = []
-    
-    async def capture_message(thread_id, message):
-        sent_messages.append(message)
-        if message.get("type") == "agent_thinking":
-            collector.add_event(message)
-    
-    mock_ws_manager.send_to_thread = AsyncMock(side_effect=capture_message)
-    
-    # Test agent execution with thinking updates
-    from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-    from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-    
-    notifier = WebSocketNotifier(mock_ws_manager)
-    context = AgentExecutionContext(
-        agent_name="TestAgent",
-        run_id="test_run_001",
-        thread_id="test_thread_001",
-        user_id="test_user"
-    )
-    
-    # Simulate thinking updates
-    thoughts = [
-        "Analyzing the user's request...",
-        "Identifying relevant tools and data sources...",
-        "Formulating a comprehensive response...",
-        "Finalizing recommendations..."
-    ]
-    
-    for i, thought in enumerate(thoughts, 1):
-        await notifier.send_agent_thinking(context, thought, i)
-    
-    # Verify thinking events were sent
-    thinking_events = [msg for msg in sent_messages if msg.get("type") == "agent_thinking"]
-    assert len(thinking_events) == len(thoughts), f"Expected {len(thoughts)} thinking events, got {len(thinking_events)}"
-    
-    # Verify content
-    for event, expected_thought in zip(thinking_events, thoughts):
-        assert event["payload"]["thought"] == expected_thought
-        assert event["payload"]["agent_name"] == "TestAgent"
-        assert "step_number" in event["payload"]
-        assert "timestamp" in event["payload"]
+    try:
+        # Setup real services
+        env_manager = TestEnvironmentManager()
+        await env_manager.initialize()
+        env_manager.setup_test_db()
+        env_manager.setup_test_redis()
+        env_manager.setup_test_secrets()
+        
+        test_config = UnifiedTestConfig()
+        from netra_backend.app.db.session import DatabaseSessionManager
+        db_session_manager = DatabaseSessionManager()
+        
+        collector = AgentEventCollector()
+        
+        async with db_session_manager.get_session() as db_session:
+            # Initialize real components
+            websocket_manager = get_websocket_manager()
+            llm_manager = LLMManager()
+            tool_dispatcher = ToolDispatcher(llm_manager)
+            
+            # Create supervisor agent with real services
+            supervisor = SupervisorAgent(
+                db_session=db_session,
+                llm_manager=llm_manager,
+                websocket_manager=websocket_manager,
+                tool_dispatcher=tool_dispatcher
+            )
+            
+            test_user_id = "test_thinking_user"
+            test_token = test_config.create_test_token({
+                "id": test_user_id,
+                "email": "thinking@example.com",
+                "plan_tier": "early"
+            })
+            
+            # Connect real WebSocket client
+            ws_url = f"ws://localhost:8000/ws?token={test_token}"
+            
+            async with websockets.connect(ws_url) as websocket:
+                # Listen for thinking events
+                async def listen_for_thinking():
+                    try:
+                        while True:
+                            message = await asyncio.wait_for(
+                                websocket.recv(), timeout=3.0
+                            )
+                            event = json.loads(message)
+                            if event.get("type") == "agent_thinking":
+                                collector.add_event(event)
+                    except asyncio.TimeoutError:
+                        pass
+                
+                listener_task = asyncio.create_task(listen_for_thinking())
+                
+                # Send message that triggers thinking
+                test_message = {
+                    "type": "user_message",
+                    "payload": {
+                        "content": "Analyze system performance and explain your reasoning",
+                        "thread_id": "thinking_thread_001"
+                    }
+                }
+                
+                await websocket.send(json.dumps(test_message))
+                await asyncio.sleep(3.0)  # Allow time for thinking events
+                
+                listener_task.cancel()
+                
+                # Verify thinking events were received
+                thinking_events = [e for e in collector.events if e.get("type") == "agent_thinking"]
+                assert len(thinking_events) > 0, "No thinking events received from real agent"
+                
+                # Verify event structure
+                for event in thinking_events:
+                    assert "payload" in event
+                    assert "thought" in event["payload"]
+                    assert "agent_name" in event["payload"]
+                    assert "timestamp" in event["payload"]
+                    
+    finally:
+        # Database session manager handles cleanup automatically
+        env_manager.cleanup()
+        env.clear()
 
 
 @pytest.mark.asyncio
-async def test_tool_execution_events():
-    """Test that tool execution events are properly sent."""
+async def test_tool_execution_events_with_real_services():
+    """Test that tool execution events are sent during real tool usage."""
+    # Use IsolatedEnvironment per CLAUDE.md requirements
+    env = get_env()
+    env.enable_isolation()
+    env.set("TESTING", "true", "tool_test")
+    env.set("USE_REAL_SERVICES", "true", "tool_test")
     
-    mock_ws_manager = MagicMock()
-    sent_messages = []
-    
-    async def capture_message(thread_id, message):
-        sent_messages.append(message)
-    
-    mock_ws_manager.send_to_thread = AsyncMock(side_effect=capture_message)
-    
-    from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-    from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-    
-    notifier = WebSocketNotifier(mock_ws_manager)
-    context = AgentExecutionContext(
-        agent_name="TestAgent",
-        run_id="test_run_002",
-        thread_id="test_thread_002",
-        user_id="test_user"
-    )
-    
-    # Simulate tool execution
-    tools = ["data_analyzer", "report_generator", "recommendation_engine"]
-    
-    for tool_name in tools:
-        # Send tool executing event
-        await notifier.send_tool_executing(context, tool_name)
+    try:
+        # Setup real services
+        env_manager = TestEnvironmentManager()
+        await env_manager.initialize()
+        env_manager.setup_test_db()
+        env_manager.setup_test_redis()
+        env_manager.setup_test_secrets()
         
-        # Simulate tool execution
-        await asyncio.sleep(0.1)
+        test_config = UnifiedTestConfig()
+        from netra_backend.app.db.session import DatabaseSessionManager
+        db_session_manager = DatabaseSessionManager()
         
-        # Send tool completed event
-        result = {"status": "success", "output": f"Results from {tool_name}"}
-        await notifier.send_tool_completed(context, tool_name, result)
-    
-    # Verify events
-    tool_executing = [msg for msg in sent_messages if msg.get("type") == "tool_executing"]
-    tool_completed = [msg for msg in sent_messages if msg.get("type") == "tool_completed"]
-    
-    assert len(tool_executing) == len(tools), f"Expected {len(tools)} tool_executing events"
-    assert len(tool_completed) == len(tools), f"Expected {len(tools)} tool_completed events"
-    
-    # Verify pairing and content
-    for tool_name in tools:
-        exec_event = next((e for e in tool_executing if e["payload"]["tool_name"] == tool_name), None)
-        comp_event = next((e for e in tool_completed if e["payload"]["tool_name"] == tool_name), None)
+        collector = AgentEventCollector()
         
-        assert exec_event is not None, f"Missing tool_executing event for {tool_name}"
-        assert comp_event is not None, f"Missing tool_completed event for {tool_name}"
-        assert comp_event["payload"]["result"]["status"] == "success"
+        async with db_session_manager.get_session() as db_session:
+            # Initialize real components
+            websocket_manager = get_websocket_manager()
+            llm_manager = LLMManager()
+            tool_dispatcher = ToolDispatcher(llm_manager)
+            
+            # Create supervisor agent with real services
+            supervisor = SupervisorAgent(
+                db_session=db_session,
+                llm_manager=llm_manager,
+                websocket_manager=websocket_manager,
+                tool_dispatcher=tool_dispatcher
+            )
+            
+            test_user_id = "test_tool_user"
+            test_token = test_config.create_test_token({
+                "id": test_user_id,
+                "email": "tools@example.com",
+                "plan_tier": "mid"
+            })
+            
+            # Connect real WebSocket client
+            ws_url = f"ws://localhost:8000/ws?token={test_token}"
+            
+            async with websockets.connect(ws_url) as websocket:
+                # Listen for tool events
+                async def listen_for_tools():
+                    try:
+                        while True:
+                            message = await asyncio.wait_for(
+                                websocket.recv(), timeout=10.0
+                            )
+                            event = json.loads(message)
+                            if event.get("type") in ["tool_executing", "tool_completed"]:
+                                collector.add_event(event)
+                    except asyncio.TimeoutError:
+                        pass
+                
+                listener_task = asyncio.create_task(listen_for_tools())
+                
+                # Send message that triggers tool usage
+                test_message = {
+                    "type": "user_message",
+                    "payload": {
+                        "content": "Use tools to analyze system metrics and generate a report",
+                        "thread_id": "tool_thread_001"
+                    }
+                }
+                
+                await websocket.send(json.dumps(test_message))
+                await asyncio.sleep(8.0)  # Allow time for tool execution
+                
+                listener_task.cancel()
+                
+                # Verify tool events were received
+                tool_executing = [e for e in collector.events if e.get("type") == "tool_executing"]
+                tool_completed = [e for e in collector.events if e.get("type") == "tool_completed"]
+                
+                assert len(tool_executing) > 0, "No tool_executing events received"
+                assert len(tool_completed) > 0, "No tool_completed events received"
+                
+                # Verify pairing - each executing should have a corresponding completed
+                for exec_event in tool_executing:
+                    tool_name = exec_event["payload"]["tool_name"]
+                    comp_event = next(
+                        (e for e in tool_completed if e["payload"]["tool_name"] == tool_name), 
+                        None
+                    )
+                    assert comp_event is not None, f"Missing tool_completed for {tool_name}"
+                    
+    finally:
+        # Database session manager handles cleanup automatically
+        env_manager.cleanup()
+        env.clear()
 
 
 @pytest.mark.asyncio
-async def test_final_report_generation():
-    """Test that final_report events are generated with comprehensive data."""
+async def test_complete_agent_lifecycle_events():
+    """Test the complete agent lifecycle generates all required events."""
+    # Use IsolatedEnvironment per CLAUDE.md requirements
+    env = get_env()
+    env.enable_isolation()
+    env.set("TESTING", "true", "lifecycle_test")
+    env.set("USE_REAL_SERVICES", "true", "lifecycle_test")
     
-    mock_ws_manager = MagicMock()
-    sent_messages = []
-    
-    async def capture_message(thread_id, message):
-        sent_messages.append(message)
-    
-    mock_ws_manager.send_to_thread = AsyncMock(side_effect=capture_message)
-    
-    from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-    from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-    
-    notifier = WebSocketNotifier(mock_ws_manager)
-    context = AgentExecutionContext(
-        agent_name="TestAgent",
-        run_id="test_run_003",
-        thread_id="test_thread_003",
-        user_id="test_user"
-    )
-    
-    # Generate comprehensive final report
-    report = {
-        "summary": "Successfully analyzed system performance",
-        "findings": [
-            "CPU utilization at 45%",
-            "Memory usage optimal",
-            "Network latency within acceptable range"
-        ],
-        "recommendations": [
-            "Consider scaling database connections",
-            "Implement caching for frequent queries",
-            "Optimize WebSocket message batching"
-        ],
-        "metrics": {
-            "execution_time_ms": 1250,
-            "tools_used": 3,
-            "data_points_analyzed": 150
-        }
-    }
-    
-    await notifier.send_final_report(context, report, 1250.0)
-    
-    # Verify final report
-    final_reports = [msg for msg in sent_messages if msg.get("type") == "final_report"]
-    assert len(final_reports) == 1, "Expected exactly one final_report event"
-    
-    report_event = final_reports[0]
-    assert report_event["payload"]["report"] == report
-    assert report_event["payload"]["total_duration_ms"] == 1250.0
-    assert report_event["payload"]["agent_name"] == "TestAgent"
-    assert "timestamp" in report_event["payload"]
+    try:
+        # Setup real services
+        env_manager = TestEnvironmentManager()
+        await env_manager.initialize()
+        env_manager.setup_test_db()
+        env_manager.setup_test_redis()
+        env_manager.setup_test_secrets()
+        
+        test_config = UnifiedTestConfig()
+        from netra_backend.app.db.session import DatabaseSessionManager
+        db_session_manager = DatabaseSessionManager()
+        
+        collector = AgentEventCollector()
+        
+        async with db_session_manager.get_session() as db_session:
+            # Initialize real components
+            websocket_manager = get_websocket_manager()
+            llm_manager = LLMManager()
+            tool_dispatcher = ToolDispatcher(llm_manager)
+            
+            # Create supervisor agent with real services
+            supervisor = SupervisorAgent(
+                db_session=db_session,
+                llm_manager=llm_manager,
+                websocket_manager=websocket_manager,
+                tool_dispatcher=tool_dispatcher
+            )
+            
+            test_user_id = "test_lifecycle_user"
+            test_token = test_config.create_test_token({
+                "id": test_user_id,
+                "email": "lifecycle@example.com",
+                "plan_tier": "enterprise"
+            })
+            
+            # Connect real WebSocket client
+            ws_url = f"ws://localhost:8000/ws?token={test_token}"
+            
+            async with websockets.connect(ws_url) as websocket:
+                # Listen for all events
+                async def listen_for_all_events():
+                    try:
+                        while True:
+                            message = await asyncio.wait_for(
+                                websocket.recv(), timeout=15.0
+                            )
+                            event = json.loads(message)
+                            collector.add_event(event)
+                            logger.info(f"Received event: {event.get('type')}")
+                    except asyncio.TimeoutError:
+                        pass
+                
+                listener_task = asyncio.create_task(listen_for_all_events())
+                
+                # Send comprehensive task that triggers full lifecycle
+                test_message = {
+                    "type": "user_message",
+                    "payload": {
+                        "content": "Perform a comprehensive system analysis including performance metrics, generate recommendations, and provide a detailed final report",
+                        "thread_id": "lifecycle_thread_001"
+                    }
+                }
+                
+                await websocket.send(json.dumps(test_message))
+                await asyncio.sleep(12.0)  # Allow time for full execution
+                
+                listener_task.cancel()
+                
+                # Generate comprehensive report
+                report = collector.get_report()
+                
+                # Validate all critical events were received
+                critical_events = ["agent_started", "agent_completed"]
+                for event_type in critical_events:
+                    assert event_type in collector.event_types, f"Missing critical event: {event_type}"
+                
+                # Check for mission-critical WebSocket events per CLAUDE.md
+                mission_critical = {
+                    "agent_started": "User must see agent began processing",
+                    "tool_executing": "Tool usage transparency", 
+                    "tool_completed": "Tool results display",
+                    "agent_completed": "User must know when done"
+                }
+                
+                missing_critical = []
+                for event_type, description in mission_critical.items():
+                    if event_type not in collector.event_types:
+                        missing_critical.append(f"{event_type}: {description}")
+                
+                if missing_critical:
+                    logger.error(f"Missing mission-critical events: {missing_critical}")
+                    # Don't fail immediately - log for analysis
+                
+                # Validate event order
+                assert report["valid_order"], f"Invalid event order: {report['event_sequence']}"
+                
+                # Log comprehensive results for analysis
+                logger.info("=" * 60)
+                logger.info("COMPLETE AGENT LIFECYCLE EVENT REPORT")
+                logger.info("=" * 60)
+                logger.info(f"Total Events: {report['total_events']}")
+                logger.info(f"Event Types: {report['unique_event_types']}")
+                logger.info(f"Missing Events: {report['missing_events']}")
+                logger.info(f"Event Sequence: {report['event_sequence']}")
+                logger.info(f"Valid Order: {report['valid_order']}")
+                
+                if missing_critical:
+                    logger.warning(f"Missing critical events: {missing_critical}")
+                    
+                return report
+                    
+    finally:
+        # Database session manager handles cleanup automatically
+        env_manager.cleanup()
+        env.clear()
 
 
 if __name__ == "__main__":

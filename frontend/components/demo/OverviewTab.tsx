@@ -44,7 +44,7 @@ function RealTimeStatCard({ stat }: { stat: RealTimeMetric }) {
 
 function RealTimeStats() {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4" data-testid="real-time-stats">
       {realTimeMetrics.map((stat, idx) => (
         <RealTimeStatCard key={idx} stat={stat} />
       ))}
@@ -54,7 +54,7 @@ function RealTimeStats() {
 
 function KeyMetricsGrid() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" data-testid="metrics-grid">
       {metrics.map((metric, idx) => (
         <MetricCard key={idx} metric={metric} />
       ))}

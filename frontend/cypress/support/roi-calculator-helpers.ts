@@ -21,51 +21,35 @@ export class ROICalculatorHelpers {
     cy.wait(500)
   }
 
-  // Input interaction helpers
+  // Input interaction helpers - Updated for current SUT
   static setMonthlySpend(amount: number) {
-    cy.get('input[type="range"][data-testid="monthly-spend"]')
-      .invoke('val', amount)
+    cy.get('input[id="spend"]')
+      .clear()
+      .type(amount.toString())
+  }
+
+  static setMonthlyRequests(requests: number) {
+    cy.get('input[id="requests"]')
+      .clear()
+      .type(requests.toString())
+  }
+
+  static setTeamSize(size: number) {
+    cy.get('input[id="team"]')
+      .invoke('val', size)
       .trigger('input')
   }
 
-  static setModelCount(count: number) {
-    cy.get('input[type="number"][data-testid="model-count"]')
-      .clear()
-      .type(count.toString())
-  }
-
   static setLatency(ms: number) {
-    cy.get('input[type="range"][data-testid="latency"]')
+    cy.get('input[id="latency"]')
       .invoke('val', ms)
       .trigger('input')
   }
 
-  static setEngineeringHours(hours: number) {
-    cy.get('input[type="range"][data-testid="engineering-hours"]')
-      .invoke('val', hours)
+  static setModelAccuracy(accuracy: number) {
+    cy.get('input[id="accuracy"]')
+      .invoke('val', accuracy)
       .trigger('input')
-  }
-
-  static setTeamSize(size: number) {
-    cy.get('input[type="number"][data-testid="team-size"]')
-      .clear()
-      .type(size.toString())
-  }
-
-  static setRequestsPerDay(requests: number) {
-    cy.get('input[type="range"][data-testid="requests-per-day"]')
-      .invoke('val', requests)
-      .trigger('input')
-  }
-
-  static selectDeploymentFrequency(frequency: string) {
-    cy.get('select[data-testid="deployment-frequency"]')
-      .select(frequency)
-  }
-
-  static selectCloudProvider(provider: string) {
-    cy.get('select[data-testid="cloud-provider"]')
-      .select(provider)
   }
 
   // Model type selection helpers

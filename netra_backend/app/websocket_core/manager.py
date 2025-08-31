@@ -152,6 +152,10 @@ class WebSocketManager:
         )
         self._initialized = True
         
+    def _increment_stat(self, stat_key: str, amount: int = 1) -> None:
+        """Safely increment a connection statistic."""
+        self.connection_stats.setdefault(stat_key, 0)
+        self.connection_stats[stat_key] += amount
         # Start background cleanup task only if event loop is running
         try:
             asyncio.get_running_loop()
@@ -222,7 +226,7 @@ class WebSocketManager:
             
             removed_count = len(stale_connections)
             if removed_count > 0:
-                self.connection_stats["stale_connections_removed"] += removed_count
+                self._increment_stat("stale_connections_removed", removed_count)
                 logger.info(f"Cleaned up {removed_count} stale connections")
             
             return removed_count
@@ -1151,13 +1155,18 @@ class WebSocketManager:
         
         return True
     
-    def get_stats(self) -> Dict[str, Any]:
+    async def get_stats(self) -> Dict[str, Any]:
         """Get comprehensive WebSocket statistics."""
         uptime = time.time() - self.connection_stats["start_time"]
         
-        return {
-            "active_connections": self.connection_stats["active_connections"],
-            "total_connections": self.connection_stats["total_connections"], 
+        # Start with legacy stats format for test compatibility
+        legacy_stats = self._get_legacy_stats()
+        
+        stats = {
+            "active_connections": legacy_stats["active_connections"],
+            "active_users": legacy_stats["active_users"],
+            "total_connections": legacy_stats.get("total_connections", self.connection_stats["total_connections"]),
+            "connections_by_user": legacy_stats.get("connections_by_user", {}),
             "messages_sent": self.connection_stats["messages_sent"],
             "messages_received": self.connection_stats["messages_received"],
             "errors_handled": self.connection_stats["errors_handled"],
@@ -1172,8 +1181,24 @@ class WebSocketManager:
                 "user_connections": len(self.user_connections), 
                 "room_memberships": len(self.room_memberships),
                 "run_id_connections": len(self.run_id_connections)
-            }
+            },
+            "modern_stats": {}
         }
+        
+        # Try to get modern stats from orchestrator if available
+        if hasattr(self, 'orchestrator') and self.orchestrator:
+            try:
+                if hasattr(self.orchestrator, 'get_connection_stats'):
+                    orchestrator_result = await self.orchestrator.get_connection_stats()
+                    if orchestrator_result and getattr(orchestrator_result, 'success', False):
+                        result_data = getattr(orchestrator_result, 'result', {})
+                        connection_stats = result_data.get('connection_stats', {})
+                        stats["modern_stats"] = connection_stats
+            except Exception:
+                # If orchestrator fails, use empty modern_stats
+                pass
+        
+        return stats
     
     async def cleanup_stale_connections(self) -> int:
         """Clean up connections that are no longer healthy."""
@@ -1399,6 +1424,98 @@ class WebSocketManager:
             }
             await self.send_to_user(user_id, error_response)
             return error_response
+
+    # Compatibility methods for test support
+    def get_user_connections(self, user_id: str) -> List[Any]:
+        """Get all connections for a specific user."""
+        return self.active_connections.get(user_id, [])
+    
+    def get_connection_by_id(self, connection_id: str) -> Optional[Any]:
+        """Get connection by ID from registry."""
+        return self.connection_registry.get(connection_id)
+    
+    async def find_connection(self, user_id: str, websocket: Any) -> Optional[Any]:
+        """Find connection for user and websocket."""
+        user_connections = self.get_user_connections(user_id)
+        for conn in user_connections:
+            if hasattr(conn, 'websocket') and conn.websocket is websocket:
+                return conn
+        return None
+    
+    def get_connection_info(self, user_id: str) -> List[Dict[str, Any]]:
+        """Get detailed connection information for a user."""
+        connections = self.get_user_connections(user_id)
+        info_list = []
+        for conn in connections:
+            # Extract state from websocket
+            state = 'unknown'
+            if hasattr(conn, 'websocket') and conn.websocket:
+                if hasattr(conn.websocket, 'client_state'):
+                    state = getattr(conn.websocket.client_state, 'name', 'unknown')
+            
+            info = {
+                "connection_id": getattr(conn, 'connection_id', 'unknown'),
+                "message_count": getattr(conn, 'message_count', 0),
+                "error_count": getattr(conn, 'error_count', 0),
+                "state": state,
+                "connected_at": getattr(conn, 'connected_at', None),
+                "last_ping": getattr(conn, 'last_ping', None)
+            }
+            info_list.append(info)
+        return info_list
+    
+    def is_connection_alive(self, connection_info: Any) -> bool:
+        """Check if connection is alive using ConnectionValidator."""
+        try:
+            # Try the path that the test expects
+            from netra_backend.app.websocket.connection_info import ConnectionValidator
+            return ConnectionValidator.is_websocket_connected(connection_info.websocket)
+        except ImportError:
+            try:
+                # Try alternative path
+                from netra_backend.app.websocket_core.utils import is_websocket_connected
+                return is_websocket_connected(connection_info.websocket)
+            except ImportError:
+                # Fallback - just check if websocket exists and has a connected state
+                if hasattr(connection_info, 'websocket') and connection_info.websocket is not None:
+                    # Check if websocket has a client_state indicating it's connected
+                    if hasattr(connection_info.websocket, 'client_state'):
+                        state = getattr(connection_info.websocket.client_state, 'name', None)
+                        return state == "CONNECTED"
+                    return True
+                return False
+    
+    def _get_legacy_stats(self) -> Dict[str, Any]:
+        """Get legacy-format stats for test compatibility."""
+        total_connections = sum(len(conns) for conns in self.active_connections.values())
+        connections_by_user = {user_id: len(conns) for user_id, conns in self.active_connections.items()}
+        
+        stats = {
+            "active_connections": total_connections,
+            "active_users": len(self.active_connections),
+            "total_connections": getattr(self, '_stats', {}).get('total_connections', total_connections),
+            "connections_by_user": connections_by_user
+        }
+        return stats
+    
+    def get_health_status(self) -> Dict[str, Any]:
+        """Get comprehensive health status."""
+        total_connections = sum(len(conns) for conns in self.active_connections.values())
+        health = {
+            "manager_status": "healthy",
+            "active_connections_count": total_connections,
+            "active_users_count": len(self.active_connections),
+            "orchestrator_health": {}
+        }
+        
+        # Add orchestrator health if available
+        if hasattr(self, 'orchestrator') and self.orchestrator:
+            try:
+                health["orchestrator_health"] = self.orchestrator.get_health_status()
+            except Exception:
+                health["orchestrator_health"] = {"status": "unavailable"}
+        
+        return health
 
     async def shutdown(self) -> None:
         """Gracefully shutdown WebSocket manager."""
