@@ -545,26 +545,10 @@ describe('Chat First-Time Page Load Glitch Detection', () => {
    * EXPECTED TO FAIL: Memory leaks from unmounted components
    */
   test('should not leak memory from unmounted components', async () => {
-    const activeTimers: NodeJS.Timeout[] = [];
-    const activeIntervals: NodeJS.Timeout[] = [];
     const activeListeners: Array<{ type: string; listener: Function }> = [];
     
-    // Mock timers and track them
-    const originalSetTimeout = global.setTimeout;
-    const originalSetInterval = global.setInterval;
+    // Only mock event listeners to avoid conflicts with anti-hanging utilities
     const originalAddEventListener = window.addEventListener;
-    
-    global.setTimeout = jest.fn((fn, delay) => {
-      const timer = originalSetTimeout(fn, delay);
-      activeTimers.push(timer);
-      return timer;
-    }) as any;
-    
-    global.setInterval = jest.fn((fn, delay) => {
-      const interval = originalSetInterval(fn, delay);
-      activeIntervals.push(interval);
-      return interval;
-    }) as any;
     
     window.addEventListener = jest.fn((type, listener) => {
       activeListeners.push({ type, listener });
