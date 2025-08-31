@@ -37,7 +37,7 @@ services:
     stop_grace_period: 30s
     networks:
       - netra-network
-    restart: unless-stopped
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
 
   # Dev Redis Cache
   dev-redis:
@@ -56,7 +56,7 @@ services:
       retries: 5
     networks:
       - netra-network
-    restart: unless-stopped
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
 
   # Dev ClickHouse Analytics
   dev-clickhouse:
@@ -81,7 +81,7 @@ services:
       retries: 5
     networks:
       - netra-network
-    restart: unless-stopped
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
 
   # Dev Auth Service (starts first among Netra services)
   dev-auth:
@@ -138,7 +138,7 @@ services:
       start_period: 40s
     networks:
       - netra-network
-    restart: unless-stopped
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
     command: >
       sh -c "
         echo 'Starting auth service...' &&
@@ -203,7 +203,7 @@ services:
       start_period: 40s
     networks:
       - netra-network
-    restart: unless-stopped
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
     command: >
       sh -c "
         echo 'Starting analytics service...' &&
@@ -286,7 +286,7 @@ services:
       start_period: 40s
     networks:
       - netra-network
-    restart: unless-stopped
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
     command: >
       sh -c "
         echo 'Waiting for database...' &&
@@ -357,7 +357,7 @@ services:
         condition: service_healthy
     networks:
       - netra-network
-    restart: unless-stopped
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
     command: npm run dev
 
   # ============================================
@@ -385,7 +385,7 @@ services:
       retries: 5
     networks:
       - netra-network
-    restart: unless-stopped
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
 
   # Test Redis Cache
   test-redis:
@@ -402,7 +402,7 @@ services:
       retries: 5
     networks:
       - netra-network
-    restart: unless-stopped
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
 
   # Test ClickHouse Analytics
   test-clickhouse:
@@ -426,7 +426,7 @@ services:
       retries: 5
     networks:
       - netra-network
-    restart: unless-stopped
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
 
   # Test Auth Service (starts first among Netra services)
   test-auth:
@@ -483,7 +483,7 @@ services:
       start_period: 20s
     networks:
       - netra-network
-    restart: unless-stopped
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
 
   # Test Analytics Service (depends on redis and clickhouse)
   test-analytics:
@@ -541,7 +541,7 @@ services:
       start_period: 20s
     networks:
       - netra-network
-    restart: unless-stopped
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
 
   # Test Backend Service (depends on auth)
   test-backend:
@@ -623,7 +623,7 @@ services:
       start_period: 20s
     networks:
       - netra-network
-    restart: unless-stopped
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
     command: >
       sh -c "
         echo 'Test Backend: Waiting for database...' &&
@@ -676,7 +676,7 @@ services:
       start_period: 30s
     networks:
       - netra-network
-    restart: unless-stopped
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
     command: >
       sh -c "
         echo 'Test Frontend: Starting Next.js server...' &&

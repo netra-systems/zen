@@ -57,7 +57,7 @@ services:
       start_period: 10s
     networks:
       - test-network
-    restart: unless-stopped
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
 
   # Test Redis Cache - Optimized for testing
   test-redis:
@@ -87,7 +87,7 @@ services:
       start_period: 5s
     networks:
       - test-network
-    restart: unless-stopped
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
 
   # Test ClickHouse Analytics - Optimized for testing
   test-clickhouse:
@@ -122,7 +122,7 @@ services:
       start_period: 15s
     networks:
       - test-network
-    restart: unless-stopped
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
 
   # ============================================
   # SUPPORTING TEST SERVICES
@@ -151,7 +151,7 @@ services:
       start_period: 10s
     networks:
       - test-network
-    restart: unless-stopped
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
 
   # Test SMTP Server - For email testing
   test-mailhog:
@@ -162,7 +162,7 @@ services:
       - "${TEST_SMTP_WEB_PORT:-8026}:8025"
     networks:
       - test-network
-    restart: unless-stopped
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
 
   # ============================================
   # TEST UTILITIES
@@ -219,7 +219,7 @@ services:
       - test-clickhouse
     networks:
       - test-network
-    restart: unless-stopped
+    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
 
 # Optimized test network
 networks:

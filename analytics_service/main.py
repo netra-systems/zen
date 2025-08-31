@@ -44,32 +44,17 @@ async def lifespan(app: FastAPI):
     
     # Initialize services (database connections, etc.)
     try:
-        from analytics_service.analytics_core.database.clickhouse_manager import ClickHouseManager
-        from analytics_service.analytics_core.database.redis_manager import RedisManager
+        from analytics_service.analytics_core.database.connection import (
+            get_clickhouse_manager,
+            get_redis_manager
+        )
         from analytics_service.analytics_core.services.event_processor import EventProcessor, ProcessorConfig
         
-        # Initialize ClickHouse manager
-        clickhouse_params = config.get_clickhouse_connection_params()
-        clickhouse_manager = ClickHouseManager(
-            host=clickhouse_params["host"],
-            port=clickhouse_params["port"],
-            database=clickhouse_params["database"],
-            user=clickhouse_params["user"],
-            password=clickhouse_params["password"],
-            max_connections=config.connection_pool_size,
-            query_timeout=config.query_timeout_seconds
-        )
+        # Get singleton managers from connection module
+        clickhouse_manager = get_clickhouse_manager()
         await clickhouse_manager.initialize()
         
-        # Initialize Redis manager
-        redis_params = config.get_redis_connection_params()
-        redis_manager = RedisManager(
-            host=redis_params["host"],
-            port=redis_params["port"],
-            db=redis_params["db"],
-            password=redis_params.get("password"),
-            max_connections=config.connection_pool_size
-        )
+        redis_manager = get_redis_manager()
         await redis_manager.initialize()
         
         # Initialize event processor
@@ -91,8 +76,8 @@ async def lifespan(app: FastAPI):
         app.state.event_processor = event_processor
         
         logger.info("Service initialization completed successfully")
-        logger.info(f"ClickHouse: {clickhouse_params['host']}:{clickhouse_params['port']}")
-        logger.info(f"Redis: {redis_params['host']}:{redis_params['port']}")
+        logger.info(f"ClickHouse: {config.clickhouse_host}:{config.clickhouse_port}")
+        logger.info(f"Redis: {config.redis_host}:{config.redis_port}")
         
     except Exception as e:
         logger.error(f"Service initialization failed: {e}")
@@ -182,12 +167,50 @@ def create_app() -> FastAPI:
     # Basic health check endpoint
     @app.get("/health")
     async def health():
-        return {
+        """Health check endpoint with real database connectivity tests."""
+        from analytics_service.analytics_core.database.connection import (
+            ClickHouseHealthChecker,
+            RedisHealthChecker
+        )
+        
+        health_status = {
             "status": "healthy",
             "service": config.service_name,
             "version": config.service_version,
-            "uptime_seconds": time.time() - SERVICE_START_TIME
+            "environment": config.environment,
+            "uptime_seconds": time.time() - SERVICE_START_TIME,
+            "checks": {}
         }
+        
+        # Check ClickHouse health
+        try:
+            ch_checker = ClickHouseHealthChecker()
+            ch_health = await ch_checker.check_health()
+            health_status["checks"]["clickhouse"] = ch_health
+            if ch_health.get("status") != "healthy":
+                health_status["status"] = "degraded"
+        except Exception as e:
+            health_status["checks"]["clickhouse"] = {
+                "status": "error",
+                "error": str(e)
+            }
+            health_status["status"] = "unhealthy"
+        
+        # Check Redis health
+        try:
+            redis_checker = RedisHealthChecker()
+            redis_health = await redis_checker.check_health()
+            health_status["checks"]["redis"] = redis_health
+            if redis_health.get("status") != "healthy":
+                health_status["status"] = "degraded" if health_status["status"] == "healthy" else "unhealthy"
+        except Exception as e:
+            health_status["checks"]["redis"] = {
+                "status": "error",
+                "error": str(e)
+            }
+            health_status["status"] = "unhealthy"
+        
+        return health_status
     
     # Placeholder endpoints for analytics
     @app.post("/api/analytics/events")

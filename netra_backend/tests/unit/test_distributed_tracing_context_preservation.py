@@ -5,8 +5,17 @@ Validates trace context integrity under high concurrency and error conditions.
 import pytest
 import asyncio
 from unittest.mock import Mock
-from opentelemetry import trace
-from opentelemetry.sdk.trace import TracerProvider
+
+# Handle optional OpenTelemetry dependency
+try:
+    from opentelemetry import trace
+    from opentelemetry.sdk.trace import TracerProvider
+    OPENTELEMETRY_AVAILABLE = True
+except ImportError:
+    # Mock OpenTelemetry components if not available
+    OPENTELEMETRY_AVAILABLE = False
+    trace = Mock()
+    TracerProvider = Mock
 
 
 class TestDistributedTracingContextPreservation:
@@ -15,11 +24,14 @@ class TestDistributedTracingContextPreservation:
     @pytest.fixture
     def tracer(self):
         """Setup tracer for high-load testing."""
+        if not OPENTELEMETRY_AVAILABLE:
+            pytest.skip("OpenTelemetry not available - skipping tracing tests")
         provider = TracerProvider()
         trace.set_tracer_provider(provider)
         return trace.get_tracer("load_test")
     
     @pytest.mark.asyncio
+    @pytest.mark.skipif(not OPENTELEMETRY_AVAILABLE, reason="OpenTelemetry not available")
     async def test_concurrent_span_context_isolation(self, tracer):
         """Ensures span contexts don't interfere under concurrent load."""
         async def concurrent_operation(operation_id: str):
@@ -36,6 +48,7 @@ class TestDistributedTracingContextPreservation:
         results = await asyncio.gather(*tasks)
         assert len(set(results)) == 10  # All operations completed with unique IDs
     
+    @pytest.mark.skipif(not OPENTELEMETRY_AVAILABLE, reason="OpenTelemetry not available")
     def test_span_context_under_exception_conditions(self, tracer):
         """Validates context preservation when exceptions occur."""
         context_before_exception = None

@@ -54,7 +54,7 @@ class ClickHouseManager:
         
         Args:
             host: ClickHouse server host
-            port: ClickHouse server port
+            port: ClickHouse server port (9000 for native protocol, 8123 for HTTP)
             database: Database name
             user: Username for authentication
             password: Password for authentication
@@ -65,6 +65,14 @@ class ClickHouseManager:
             retry_delay: Base delay between retries in seconds
             health_check_interval: Health check interval in seconds
         """
+        # Validate port - ensure we're using native protocol port
+        if port == 8123:
+            logger.warning(
+                "Port 8123 is HTTP port. Using native protocol port 9000 instead. "
+                "Update CLICKHOUSE_PORT environment variable to 9000."
+            )
+            port = 9000
+        
         self.host = host
         self.port = port
         self.database = database

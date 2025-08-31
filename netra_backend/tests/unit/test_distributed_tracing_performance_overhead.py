@@ -7,8 +7,17 @@ import pytest
 import time
 import statistics
 from unittest.mock import Mock
-from opentelemetry import trace
-from opentelemetry.sdk.trace import TracerProvider
+
+# Handle optional OpenTelemetry dependency
+try:
+    from opentelemetry import trace
+    from opentelemetry.sdk.trace import TracerProvider
+    OPENTELEMETRY_AVAILABLE = True
+except ImportError:
+    # Mock OpenTelemetry components if not available
+    OPENTELEMETRY_AVAILABLE = False
+    trace = Mock()
+    TracerProvider = Mock
 
 
 class TestDistributedTracingPerformanceOverhead:
@@ -17,10 +26,13 @@ class TestDistributedTracingPerformanceOverhead:
     @pytest.fixture
     def performance_tracer(self):
         """Setup tracer optimized for performance testing."""
+        if not OPENTELEMETRY_AVAILABLE:
+            pytest.skip("OpenTelemetry not available - skipping tracing tests")
         provider = TracerProvider()
         trace.set_tracer_provider(provider)
         return trace.get_tracer("performance_monitor")
     
+    @pytest.mark.skipif(not OPENTELEMETRY_AVAILABLE, reason="OpenTelemetry not available")
     def test_tracing_overhead_within_acceptable_limits(self, performance_tracer):
         """Ensures tracing overhead stays below acceptable limits in stable environments."""
         def baseline_operation():
@@ -84,6 +96,7 @@ class TestDistributedTracingPerformanceOverhead:
             f"environment: {'CI' if is_ci else 'local'})"
         )
     
+    @pytest.mark.skipif(not OPENTELEMETRY_AVAILABLE, reason="OpenTelemetry not available")
     def test_span_creation_memory_efficiency(self, performance_tracer):
         """Validates span creation doesn't cause memory leaks or excessive allocation."""
         # Focus on what we can actually measure - span processor stability

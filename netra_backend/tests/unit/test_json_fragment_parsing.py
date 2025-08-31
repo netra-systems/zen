@@ -1,7 +1,7 @@
 """Test JSON fragment parsing improvements."""
 
 import pytest
-from netra_backend.app.core.serialization.unified_json_handler import llm_parser, _is_json_fragment, _handle_json_fragment
+from netra_backend.app.core.serialization.unified_json_handler import llm_parser
 
 
 class TestJSONFragmentParsing:
@@ -13,16 +13,16 @@ class TestJSONFragmentParsing:
         fragment1 = '"model_name": "chatbot"'
         fragment2 = '"target_metric": "response_time", "constraint": "cost"'
         
-        assert _is_json_fragment(fragment1) is True
-        assert _is_json_fragment(fragment2) is True
+        assert llm_parser._is_json_fragment(fragment1) is True
+        assert llm_parser._is_json_fragment(fragment2) is True
         
         # Valid JSON should not be detected as fragment
         valid_json = '{"model_name": "chatbot"}'
-        assert _is_json_fragment(valid_json) is False
+        assert llm_parser._is_json_fragment(valid_json) is False
         
         # Plain text should not be detected as fragment
         plain_text = "just some text"
-        assert _is_json_fragment(plain_text) is False
+        assert llm_parser._is_json_fragment(plain_text) is False
     
     def test_handles_json_fragments_gracefully(self):
         """Test that JSON fragments are handled without warnings."""
@@ -40,17 +40,17 @@ class TestJSONFragmentParsing:
         """Test the JSON fragment wrapping functionality."""
         # Single key-value pair
         fragment1 = '"model_name": "chatbot"'
-        result1 = _handle_json_fragment(fragment1, fallback={})
+        result1 = llm_parser._handle_json_fragment(fragment1, fallback={})
         assert result1 == {"model_name": "chatbot"}
         
         # Multiple key-value pairs
         fragment2 = '"target_metric": "response_time", "constraint": "cost"'
-        result2 = _handle_json_fragment(fragment2, fallback={})
+        result2 = llm_parser._handle_json_fragment(fragment2, fallback={})
         assert result2 == {"target_metric": "response_time", "constraint": "cost"}
         
         # Invalid fragment that can't be wrapped
         invalid = '"incomplete": '
-        result3 = _handle_json_fragment(invalid, fallback={"default": True})
+        result3 = llm_parser._handle_json_fragment(invalid, fallback={"default": True})
         assert result3 == {"default": True}
     
     def test_preserves_valid_json(self):

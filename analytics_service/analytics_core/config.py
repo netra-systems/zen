@@ -52,12 +52,14 @@ class AnalyticsConfig:
         self.environment = self.env.get("ENVIRONMENT", "development")
         
         # Database Configuration - ClickHouse
+        # CRITICAL: Use native protocol port 9000, not HTTP port 8123
         self.clickhouse_url = self.env.get(
             "CLICKHOUSE_ANALYTICS_URL",
-            "clickhouse://localhost:8123/analytics"
+            "clickhouse://localhost:9000/analytics"
         )
         self.clickhouse_host = self.env.get("CLICKHOUSE_HOST", "localhost")
-        self.clickhouse_port = int(self.env.get("CLICKHOUSE_PORT", "8123"))
+        # FIXED: Changed from 8123 (HTTP) to 9000 (native protocol) for clickhouse-driver
+        self.clickhouse_port = int(self.env.get("CLICKHOUSE_PORT", "9000"))
         self.clickhouse_database = self.env.get("CLICKHOUSE_DATABASE", "analytics")
         self.clickhouse_username = self.env.get("CLICKHOUSE_USERNAME", "default")
         self.clickhouse_password = self.env.get("CLICKHOUSE_PASSWORD", "")
