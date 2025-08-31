@@ -13602,8 +13602,8 @@
         "scripts/launch_test_env.py:63"
       ]
     },
-    "Auth Bypass Configuration:": {
-      "value": "Auth Bypass Configuration:",
+    "OAUTH SIMULATION Configuration:": {
+      "value": "OAUTH SIMULATION Configuration:",
       "category": "test_literals",
       "locations": [
         "scripts/test_docker_websocket_fix.py:267"
@@ -13921,8 +13921,8 @@
         "scripts/test_auth_database_sessions.py:247"
       ]
     },
-    "Auth bypass enabled:": {
-      "value": "Auth bypass enabled:",
+    "OAUTH SIMULATION enabled:": {
+      "value": "OAUTH SIMULATION enabled:",
       "category": "test_literals",
       "locations": [
         "scripts/test_docker_websocket_fix.py:271"
@@ -16894,8 +16894,8 @@
         "scripts/test_data_validator_backup.py:1"
       ]
     },
-    "Comprehensive WebSocket CORS Test Script\n\nThis script tests WebSocket connectivity in various scenarios to ensure CORS is properly configured\nfor Docker development environment. It tests connections with different origins and validates\nthat the development auth bypass works properly.\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal\n- Business Goal: Ensure WebSocket reliability in development\n- Value Impact: Prevents connection issues that block development\n- Strategic Impact: Foundation for real-time features": {
-      "value": "Comprehensive WebSocket CORS Test Script\n\nThis script tests WebSocket connectivity in various scenarios to ensure CORS is properly configured\nfor Docker development environment. It tests connections with different origins and validates\nthat the development auth bypass works properly.\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal\n- Business Goal: Ensure WebSocket reliability in development\n- Value Impact: Prevents connection issues that block development\n- Strategic Impact: Foundation for real-time features",
+    "Comprehensive WebSocket CORS Test Script\n\nThis script tests WebSocket connectivity in various scenarios to ensure CORS is properly configured\nfor Docker development environment. It tests connections with different origins and validates\nthat the development OAUTH SIMULATION works properly.\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal\n- Business Goal: Ensure WebSocket reliability in development\n- Value Impact: Prevents connection issues that block development\n- Strategic Impact: Foundation for real-time features": {
+      "value": "Comprehensive WebSocket CORS Test Script\n\nThis script tests WebSocket connectivity in various scenarios to ensure CORS is properly configured\nfor Docker development environment. It tests connections with different origins and validates\nthat the development OAUTH SIMULATION works properly.\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal\n- Business Goal: Ensure WebSocket reliability in development\n- Value Impact: Prevents connection issues that block development\n- Strategic Impact: Foundation for real-time features",
       "category": "test_literals",
       "locations": [
         "scripts/test_websocket_cors_comprehensive.py:2"
@@ -38473,8 +38473,8 @@
         "scripts/test_imports.py:70"
       ]
     },
-    "Testing auth bypass logic...": {
-      "value": "Testing auth bypass logic...",
+    "Testing OAUTH SIMULATION logic...": {
+      "value": "Testing OAUTH SIMULATION logic...",
       "category": "test_literals",
       "locations": [
         "scripts/test_docker_websocket_fix.py:205"
@@ -43015,8 +43015,8 @@
         "auth_service/tests/test_refresh_endpoint_simple.py:118"
       ]
     },
-    "[FAIL] Error testing auth bypass:": {
-      "value": "[FAIL] Error testing auth bypass:",
+    "[FAIL] Error testing OAUTH SIMULATION:": {
+      "value": "[FAIL] Error testing OAUTH SIMULATION:",
       "category": "test_literals",
       "locations": [
         "scripts/test_docker_websocket_fix.py:276"
@@ -76289,8 +76289,8 @@
         "scripts/test_workflows_with_act.py:136"
       ]
     },
-    "⚠️ Auth bypass may not work - check environment variables": {
-      "value": "⚠️ Auth bypass may not work - check environment variables",
+    "⚠️ OAUTH SIMULATION may not work - check environment variables": {
+      "value": "⚠️ OAUTH SIMULATION may not work - check environment variables",
       "category": "test_literals",
       "locations": [
         "scripts/test_docker_websocket_fix.py:227"
@@ -76606,8 +76606,8 @@
         "scripts/rapid_test_consolidation.py:514"
       ]
     },
-    "✅ Auth bypass is properly configured for development": {
-      "value": "✅ Auth bypass is properly configured for development",
+    "✅ OAUTH SIMULATION is properly configured for development": {
+      "value": "✅ OAUTH SIMULATION is properly configured for development",
       "category": "test_literals",
       "locations": [
         "scripts/test_docker_websocket_fix.py:225"
@@ -76718,8 +76718,8 @@
         "scripts/test_staging_clickhouse.py:134"
       ]
     },
-    "✅ Development auth bypass is working!": {
-      "value": "✅ Development auth bypass is working!",
+    "✅ Development OAUTH SIMULATION is working!": {
+      "value": "✅ Development OAUTH SIMULATION is working!",
       "category": "test_literals",
       "locations": [
         "scripts/test_websocket_manual.py:132"

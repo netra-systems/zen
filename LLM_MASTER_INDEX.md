@@ -141,7 +141,7 @@
 | **🔴 CORE WEBSOCKET FILES** | | | |
 | `websocket.py` | `/netra_backend/app/routes/websocket.py` | **WebSocket endpoints (with subprotocol fix)** | websocket_endpoint() with subprotocol negotiation |
 | `manager.py` | `/netra_backend/app/websocket_core/manager.py` | **WebSocket manager (with run_id fix)** | send_to_user(), send_to_thread() with proper ID handling |
-| `websocket_core/auth.py` | `/netra_backend/app/websocket_core/auth.py` | **WebSocket authentication (Docker bypass)** | Development auth bypass, JWT validation |
+| `websocket_core/auth.py` | `/netra_backend/app/websocket_core/auth.py` | **WebSocket authentication (Docker bypass)** | Development OAUTH SIMULATION, JWT validation |
 | **🔴 AGENT INTEGRATION** | | | |
 | `websocket_agent_integration_critical.xml` | `/SPEC/learnings/websocket_agent_integration_critical.xml` | **Critical agent-WebSocket integration** | MUST send events or chat breaks |
 | `test_websocket_agent_events_suite.py` | `/tests/mission_critical/test_websocket_agent_events_suite.py` | **Mission critical WebSocket tests** | Validates all required events |
