@@ -50,7 +50,7 @@ class TestQualityGateResponseValidation:
     """Integration test for quality gate response validation system"""
 
     @pytest.fixture
-        async def redis_manager(self):
+    async def redis_manager(self):
         """Create mocked Redis manager for testing"""
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
         redis_mock = AsyncMock(spec=RedisManager)

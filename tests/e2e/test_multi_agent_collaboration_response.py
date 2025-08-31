@@ -88,7 +88,7 @@ class TestMultiAgentCollaborationResponse:
     """Integration test for multi-agent collaboration and response coordination"""
 
     @pytest.fixture
-        async def llm_manager(self):
+    async def llm_manager(self):
         """Create mocked LLM manager for testing"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_mock = AsyncMock(spec=LLMManager)
@@ -97,7 +97,7 @@ class TestMultiAgentCollaborationResponse:
         return llm_mock
 
     @pytest.fixture
-        async def websocket_manager(self):
+    async def websocket_manager(self):
         """Create mocked WebSocket manager for testing"""
         # Mock: Generic component isolation for controlled unit testing
         ws_mock = AsyncNone  # TODO: Use real service instead of Mock

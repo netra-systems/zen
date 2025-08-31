@@ -272,7 +272,7 @@ class TestSystemResilience:
                     error = httpx.HTTPStatusError(
                         "Rate limited",
                         # Mock: Generic component isolation for controlled unit testing
-                        request=None  # TODO: Use real service instead of Mock,
+                        request=None,  # TODO: Use real service instead of Mock
                         # Mock: Component isolation for controlled unit testing
                         response=Mock(status_code=429, headers={"retry-after": "1"})
                     )

@@ -214,7 +214,7 @@ class TestBackendProcessStability(unittest.TestCase):
         failed_process.poll.return_value = 1
         
         # Mock recovery mechanism (currently non-existent)
-        with patch('subprocess.Popen', side_effect=[failed_process, None  # TODO: Use real service instead of Mock]):
+        with patch('subprocess.Popen', side_effect=[failed_process, None]):  # TODO: Use real service instead of Mock
             # Simulate process failure detection
             if failed_process.poll() == 1:
                 # FAILING ASSERTION: Should attempt automatic recovery

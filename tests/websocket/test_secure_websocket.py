@@ -33,7 +33,7 @@ from test_framework.real_services import get_real_services
 
 # MockWebSocket class removed - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
 
-
+class MockWebSocket:
     def __init__(self, headers: Dict[str, str] = None, query_params: Dict[str, str] = None):
 
         self.headers = headers or {}
@@ -716,11 +716,9 @@ class TestSecureWebSocketEndpoint:
         })
     
 
-        # Mock: Component isolation for testing without external dependencies
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.routes.websocket_secure.check_websocket_cors')
-
-        @patch.object(auth_client, 'validate_token')
-
+    @patch.object(auth_client, 'validate_token')
     async def test_cors_validation_success(self, mock_validate, mock_cors, mock_websocket, mock_db_session):
 
         """Test CORS validation success."""

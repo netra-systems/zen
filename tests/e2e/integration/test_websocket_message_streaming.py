@@ -103,7 +103,7 @@ class TestWebSocketStreaminger:
         # Simulate connection creation
         connection_info = ConnectionInfo(
             # Mock: Generic component isolation for controlled unit testing
-            websocket=MagicNone  # TODO: Use real service instead of Mock,
+            websocket=MagicNone,  # TODO: Use real service instead of Mock
             user_id=user_id,
             connection_time=time.time()
         )

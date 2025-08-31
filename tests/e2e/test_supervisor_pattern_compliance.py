@@ -141,9 +141,9 @@ class TestWorkflowOrchestrator:
     def mock_dependencies(self):
         return {
             # Mock: Generic component isolation for controlled unit testing
-            "agent_registry": None  # TODO: Use real service instead of Mock,
+            "agent_registry": None,  # TODO: Use real service instead of Mock
             # Mock: Generic component isolation for controlled unit testing
-            "execution_engine": AsyncNone  # TODO: Use real service instead of Mock,
+            "execution_engine": AsyncNone,  # TODO: Use real service instead of Mock
             # Mock: WebSocket connection isolation for testing without network overhead
             "websocket_manager": AsyncNone  # TODO: Use real service instead of Mock
         }
@@ -352,11 +352,11 @@ class TestSupervisorAgent:
     def mock_dependencies(self):
         return {
             # Mock: Session isolation for controlled testing without external state
-            "db_session": AsyncNone  # TODO: Use real service instead of Mock,
+            "db_session": AsyncNone,  # TODO: Use real service instead of Mock
             # Mock: LLM provider isolation to prevent external API usage and costs
-            "llm_manager": None  # TODO: Use real service instead of Mock,
+            "llm_manager": None,  # TODO: Use real service instead of Mock
             # Mock: WebSocket connection isolation for testing without network overhead
-            "websocket_manager": AsyncNone  # TODO: Use real service instead of Mock,
+            "websocket_manager": AsyncNone,  # TODO: Use real service instead of Mock
             # Mock: Tool execution isolation for predictable agent testing
             "tool_dispatcher": None  # TODO: Use real service instead of Mock
         }
