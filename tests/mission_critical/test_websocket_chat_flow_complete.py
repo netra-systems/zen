@@ -62,7 +62,7 @@ from netra_backend.app.agents.enhanced_tool_execution import EnhancedToolExecuti
 # EVENT VALIDATION SYSTEM
 # ============================================================================
 
-class WebSocketEventCapture:
+class ChatFlowEventCapture:
     """Captures and validates WebSocket events with millisecond precision."""
     
     CRITICAL_EVENTS = {
@@ -264,14 +264,14 @@ class WebSocketChatTester:
         self.real_services = real_services
         self.websocket: Optional[websockets.WebSocketServerProtocol] = None
         self.connected = False
-        self.event_capture: Optional[WebSocketEventCapture] = None
+        self.event_capture: Optional[ChatFlowEventCapture] = None
         self.connection_id: Optional[str] = None
         self.receive_task: Optional[asyncio.Task] = None
     
     async def connect_with_auth(self, user_id: str, jwt_token: Optional[str] = None) -> str:
         """Connect to WebSocket with authentication."""
         self.connection_id = f"chat-test-{user_id}-{int(time.time())}"
-        self.event_capture = WebSocketEventCapture(self.connection_id)
+        self.event_capture = ChatFlowEventCapture(self.connection_id)
         
         # Build connection URL with auth
         ws_url = "ws://localhost:8000/ws"  # Use real backend WebSocket endpoint
