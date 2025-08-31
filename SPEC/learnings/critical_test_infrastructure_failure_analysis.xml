@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<critical_test_infrastructure_failure>
+  <metadata>
+    <title>Critical Test Infrastructure Failure: Systematic Error Suppression</title>
+    <date>2025-08-31</date>
+    <severity>CRITICAL</severity>
+    <category>Testing Infrastructure</category>
+    <impact>Production bugs reaching users due to test blindness</impact>
+    <investigation_trigger>
+      <error>TypeError: Cannot read properties of undefined (reading 'log')</error>
+      <location>logger.ts:215:10</location>
+      <context>WebSocket error handling in browser environment</context>
+    </investigation_trigger>
+  </metadata>
+
+  <executive_summary>
+    <problem>
+      Tests are systematically suppressing WebSocket errors that occur in production,
+      creating a dangerous false confidence in code quality. The testing infrastructure
+      has been designed to hide the exact class of errors that are causing runtime failures.
+    </problem>
+    
+    <impact>
+      - Critical runtime errors reach production undetected
+      - WebSocket reliability issues are masked in development
+      - Regression tests provide false confidence
+      - Developer debugging is severely hampered
+    </impact>
+    
+    <root_cause>
+      Multi-layered systematic failure in test design that prioritizes test stability
+      over actual error detection and production reliability.
+    </root_cause>
+  </executive_summary>
+
+  <detailed_analysis>
+    <layer_1_mock_deception>
+      <title>API Signature Mismatches</title>
+      <description>
+        Mocked services don't match real implementation signatures, causing
+        tests to fail before they can even test the actual error conditions.
+      </description>
+      
+      <evidence>
+        <file>__tests__/regression/logger-context-binding.regression.test.tsx</file>
+        <line>87</line>
+        <issue>
+          Test expects: webSocketService.connect(url, token, options)
+          Reality is: webSocketService.connect(url, options) where options.token exists
+        </issue>
+        <impact>Test fails with "webSocketService.connect never called" instead of testing logger</impact>
+      </evidence>
+      
+      <pattern>
+        Most tests mock webSocketService entirely, never exercising real code paths:
+        - 23+ files use jest.mock('@/services/webSocketService')
+        - Real integration paths are never tested
+        - Mock APIs diverge from real APIs over time
+      </pattern>
+    </layer_1_mock_deception>
+
+    <layer_2_error_suppression>
+      <title>Systematic Error Hiding</title>
+      <description>
+        The test setup intentionally suppresses WebSocket errors to reduce test noise,
+        but this eliminates critical feedback about real runtime failures.
+      </description>
+      
+      <smoking_gun>
+        <file>jest.setup.js</file>
+        <lines>2351-2352</lines>
+        <code>
+          args[0].includes('Error parsing WebSocket message') ||
+          args[0].includes('WebSocket error occurred') ||
+        </code>
+        <impact>
+          Console.error calls from logger.error() are silently ignored.
+          Tests pass green while runtime would crash.
+        </impact>
+      </smoking_gun>
+      
+      <proof_of_failure>
+        Integration test websocket-auth-headers.test.tsx:
+        - Status: ✓ PASSED
+        - Console output: "ERROR: Authentication failure [WebSocketProvider]"
+        - Result: Test passed despite logger errors occurring
+      </proof_of_failure>
+    </layer_2_error_suppression>
+
+    <layer_3_environment_isolation>
+      <title>Runtime Environment Mismatch</title>
+      <description>
+        Tests run in Node.js while production runs in browser, creating
+        fundamentally different execution contexts that hide environment-specific issues.
+      </description>
+      
+      <evidence>
+        <original_error>intercept-console-error.js:57</original_error>
+        <analysis>
+          - Suggests browser DevTools error interception
+          - File doesn't exist in source, indicates built/bundled code
+          - Different from test environment behavior
+        </analysis>
+        
+        <webpack_implications>
+          - next.config.ts modifies bundling behavior
+          - Production builds exclude test files/mocks
+          - Browser-specific polyfills and error handling
+        </webpack_implications>
+      </evidence>
+    </layer_3_environment_isolation>
+  </detailed_analysis>
+
+  <systemic_failures_identified>
+    <failure type="architectural">
+      <name>Mock-First Testing Culture</name>
+      <description>
+        Default to mocking everything instead of testing real integrations,
+        leading to divergence between test and production code paths.
+      </description>
+      <evidence>23+ files mock webSocketService with different signatures</evidence>
+    </failure>
+    
+    <failure type="observability">
+      <name>Error Suppression for Convenience</name>
+      <description>
+        Suppressing "noisy" errors in tests eliminates critical production feedback.
+        Prioritizes developer convenience over production reliability.
+      </description>
+      <evidence>jest.setup.js suppresses WebSocket errors</evidence>
+    </failure>
+    
+    <failure type="validation">
+      <name>Environment Assumption</name>
+      <description>
+        Assuming test environment behavior matches production without validation.
+        Different JavaScript engines, bundling, and error handling create blind spots.
+      </description>
+      <evidence>Node.js test success vs browser runtime failure</evidence>
+    </failure>
+    
+    <failure type="regression_prevention">
+      <name>Broken Regression Tests</name>
+      <description>
+        Regression tests that are supposed to prevent this exact issue are themselves broken,
+        creating false confidence in the safety net.
+      </description>
+      <evidence>logger-context-binding.regression.test.tsx fails on basic setup</evidence>
+    </failure>
+  </systemic_failures_identified>
+
+  <business_impact>
+    <immediate>
+      - Users experiencing WebSocket connection failures
+      - Logger crashes causing app instability
+      - Development team chasing phantom bugs
+    </immediate>
+    
+    <long_term>
+      - Erosion of confidence in testing infrastructure
+      - Technical debt accumulation from masked issues
+      - Potential data loss or security issues from unhandled errors
+    </long_term>
+    
+    <development_velocity>
+      - Debugging becomes archaeological expedition
+      - Production incidents increase
+      - Developer confidence in deployments decreases
+    </development_velocity>
+  </business_impact>
+
+  <recommended_actions>
+    <immediate priority="1">
+      <action>Remove error suppression in jest.setup.js</action>
+      <justification>
+        Stop hiding the exact errors we need to catch. Accept test noise
+        in exchange for production reliability.
+      </justification>
+    </immediate>
+    
+    <immediate priority="2">
+      <action>Fix regression test API signatures</action>
+      <justification>
+        Make logger-context-binding.regression.test.tsx actually test
+        the real implementation, not a phantom API.
+      </justification>
+    </immediate>
+    
+    <immediate priority="3">
+      <action>Add browser-environment integration tests</action>
+      <justification>
+        Create tests that run in actual browser environment to catch
+        bundling and runtime-specific issues.
+      </justification>
+    </immediate>
+    
+    <architectural priority="4">
+      <action>Implement "Real Services by Default" policy</action>
+      <justification>
+        Default to testing against real implementations. Mock only when
+        absolutely necessary for test isolation or external dependencies.
+      </justification>
+    </architectural>
+    
+    <architectural priority="5">
+      <action>Create production parity test environment</action>
+      <justification>
+        Tests should run as close to production conditions as possible,
+        including bundling, environments, and error handling.
+      </justification>
+    </architectural>
+  </recommended_actions>
+
+  <prevention_measures>
+    <policy name="Error Visibility">
+      Tests must never suppress errors that would crash production.
+      All console.error calls must be visible and cause test failures.
+    </policy>
+    
+    <policy name="API Contract Testing">
+      All mocks must be validated against real implementations.
+      API signature changes must be reflected in all mock consumers.
+    </policy>
+    
+    <policy name="Environment Parity">
+      Critical paths must be tested in production-like environments.
+      Browser-specific code must have browser-specific tests.
+    </policy>
+    
+    <policy name="Regression Test Validation">
+      All regression tests must be validated to actually reproduce
+      the original issue before being considered protective.
+    </policy>
+  </prevention_measures>
+
+  <lessons_learned>
+    <lesson>
+      "Clean" test output that hides errors is more dangerous than
+      "noisy" test output that shows real issues.
+    </lesson>
+    
+    <lesson>
+      Mocks that don't match real implementations create
+      testing theater - appearance of safety without actual protection.
+    </lesson>
+    
+    <lesson>
+      Different runtime environments (Node vs Browser) can hide
+      critical class of bugs that only surface in production.
+    </lesson>
+    
+    <lesson>
+      Regression tests that don't actually test the regression
+      provide false confidence and waste development resources.
+    </lesson>
+  </lessons_learned>
+</critical_test_infrastructure_failure>
