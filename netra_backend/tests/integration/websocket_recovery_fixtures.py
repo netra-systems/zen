@@ -39,8 +39,7 @@ from netra_backend.app.websocket_core.manager import WebSocketManager
 logger = central_logger.get_logger(__name__)
 
 # COMMENTED OUT: MockWebSocket class - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
-# class MockWebSocket:
-
+class MockWebSocket:
     """Mock WebSocket for testing state recovery with realistic connection patterns."""
     
     def __init__(self, user_id: str = None):

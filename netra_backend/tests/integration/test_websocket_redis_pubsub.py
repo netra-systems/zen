@@ -394,7 +394,7 @@ class TestWebSocketRedisPubSubL3:
 
         await websocket_manager.disconnect_user(user2.id, ws2)
     
-        @pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_redis_failover_recovery(self, redis_container, websocket_manager, test_users):
 
         """Test WebSocket resilience during Redis connection issues."""
