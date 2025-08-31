@@ -122,9 +122,12 @@ class IsolatedEnvironment:
         """
         import sys
         
-        # Check for pytest execution
-        if 'pytest' in sys.modules:
-            return True
+        # CRITICAL FIX: Only check for pytest if we're actually running pytest
+        # Don't trigger test mode just because pytest is imported as a dependency
+        if 'pytest' in sys.modules and hasattr(sys.modules['pytest'], 'main'):
+            # Only consider it a test if pytest is actively running
+            if hasattr(sys, '_pytest_running') or os.environ.get('PYTEST_CURRENT_TEST'):
+                return True
         
         # Check for test environment variables using internal access to avoid recursion
         test_indicators = [
@@ -138,7 +141,9 @@ class IsolatedEnvironment:
         env_dict = self._isolated_vars if self._isolation_enabled else os.environ
         
         for indicator in test_indicators:
-            if env_dict.get(indicator):
+            value = env_dict.get(indicator, '').lower()
+            # Only consider it a test context if the value is explicitly true
+            if value in ['true', '1', 'yes', 'on']:
                 return True
         
         # Check if ENVIRONMENT is set to testing

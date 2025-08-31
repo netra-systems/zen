@@ -560,7 +560,7 @@ class DevelopmentConfig(AppConfig):
         if env_db_url:
             data['database_url'] = env_db_url
         elif 'database_url' not in data or data.get('database_url') is None:
-            data['database_url'] = "postgresql+asyncpg://postgres:postgres@localhost:5432/netra"
+            data['database_url'] = "postgresql+asyncpg://postgres:postgres@localhost:5432/netra_dev"
     
     def _get_service_modes_from_unified_config(self) -> dict:
         """Get service modes from environment with fallback.

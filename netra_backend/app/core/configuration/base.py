@@ -173,9 +173,12 @@ class UnifiedConfigManager:
         """
         import sys
         
-        # Check for pytest execution
-        if 'pytest' in sys.modules:
-            return True
+        # CRITICAL FIX: Only check for pytest if we're actually running pytest
+        # Don't trigger test mode just because pytest is imported as a dependency
+        if 'pytest' in sys.modules and hasattr(sys.modules['pytest'], 'main'):
+            # Only consider it a test if pytest is actively running
+            if hasattr(sys, '_pytest_running') or get_env().get('PYTEST_CURRENT_TEST'):
+                return True
         
         # Check for test environment variables using IsolatedEnvironment
         # These should be explicitly true, not just present
