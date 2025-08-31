@@ -113,15 +113,15 @@ class SecretManagerBuilder:
         """Get appropriate environment manager for service following unified_environment_management.xml."""
         try:
             if self.service == "auth_service":
-                from auth_service.auth_core.isolated_environment import get_env
+                from shared.isolated_environment import get_env
                 return get_env()
             elif self.service == "netra_backend":
-                from netra_backend.app.core.isolated_environment import get_env
+                from shared.isolated_environment import get_env
                 return get_env()
             else:
                 # Try dev_launcher for local development contexts
                 try:
-                    from dev_launcher.isolated_environment import get_env
+                    from shared.isolated_environment import get_env
                     return get_env()
                 except ImportError:
                     # Dev launcher not available (e.g., in Docker containers)

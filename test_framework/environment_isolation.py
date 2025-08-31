@@ -51,14 +51,14 @@ def get_env():
         return TestEnvironmentWrapper()
     else:
         # Normal execution, use dev_launcher environment
-        from dev_launcher.isolated_environment import get_env as dev_get_env
+        from shared.isolated_environment import get_env as dev_get_env
         return dev_get_env()
 
 # Import IsolatedEnvironment only when not in pytest to avoid triggering dev setup
 # Create type aliases for better type annotations and prevent TypeError
 try:
     if 'pytest' not in sys.modules and not os.environ.get("PYTEST_CURRENT_TEST"):  # @marked: Test framework detection
-        from dev_launcher.isolated_environment import IsolatedEnvironment
+        from shared.isolated_environment import IsolatedEnvironment
         EnvironmentType = IsolatedEnvironment
     else:
         # Create a substitute IsolatedEnvironment class for tests that prevents TypeError

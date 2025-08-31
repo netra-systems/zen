@@ -66,7 +66,7 @@ except ImportError:
 
 # Environment management
 try:
-    from dev_launcher.isolated_environment import get_env
+    from shared.isolated_environment import get_env
 except ImportError:
     def get_env():
         return os.environ

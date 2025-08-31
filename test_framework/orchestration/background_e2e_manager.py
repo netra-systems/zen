@@ -61,7 +61,7 @@ from test_framework.service_availability import ServiceAvailabilityChecker, requ
 
 # Environment management
 try:
-    from dev_launcher.isolated_environment import get_env
+    from shared.isolated_environment import get_env
 except ImportError:
     get_env = lambda k, d=None: os.environ.get(k, d)
 
