@@ -110,7 +110,7 @@ jest.mock('@/providers/AgentProvider', () => {
 
 describe('Multi-Agent Orchestration Tests', () => {
   setupAntiHang();
-    jest.setTimeout(10000);
+  
   let wsEventHandlers: { [key: string]: Function[] } = {};
   let agentContext: ReturnType<typeof useAgentContext>;
   let chatStore: ReturnType<typeof useChatStore>;
@@ -157,11 +157,7 @@ describe('Multi-Agent Orchestration Tests', () => {
   );
 
   describe('Agent Flow Orchestration', () => {
-        setupAntiHang();
-      jest.setTimeout(10000);
     describe('Standard Workflow - Sufficient Data', () => {
-          setupAntiHang();
-        jest.setTimeout(10000);
       it('should execute complete agent flow: Triage → Optimization → Data → Actions → Report', async () => {
         const { result } = renderHook(() => useAgentContext(), { wrapper: createWrapper });
         
@@ -351,8 +347,6 @@ describe('Multi-Agent Orchestration Tests', () => {
     });
 
     describe('Adaptive Workflow - Insufficient Data', () => {
-          setupAntiHang();
-        jest.setTimeout(10000);
       it('should adapt workflow when data is insufficient: Triage → Data Helper', async () => {
         const { result } = renderHook(() => useAgentContext(), { wrapper: createWrapper });
 
@@ -421,8 +415,6 @@ describe('Multi-Agent Orchestration Tests', () => {
     });
 
     describe('Partial Data Workflow', () => {
-          setupAntiHang();
-        jest.setTimeout(10000);
       it('should handle partial data flow: Triage → Optimization → Actions → Data Helper → Report', async () => {
         const { result } = renderHook(() => useAgentContext(), { wrapper: createWrapper });
 
@@ -513,8 +505,6 @@ describe('Multi-Agent Orchestration Tests', () => {
   });
 
   describe('Agent Error Handling and Recovery', () => {
-        setupAntiHang();
-      jest.setTimeout(10000);
     it('should handle agent failures gracefully', async () => {
       const { result } = renderHook(() => useAgentContext(), { wrapper: createWrapper });
 
@@ -621,8 +611,6 @@ describe('Multi-Agent Orchestration Tests', () => {
   });
 
   describe('Agent State Management', () => {
-        setupAntiHang();
-      jest.setTimeout(10000);
     it('should track sub-agent states correctly', async () => {
       const { result } = renderHook(() => useUnifiedStore());
 
@@ -690,8 +678,6 @@ describe('Multi-Agent Orchestration Tests', () => {
   });
 
   describe('Business Logic Validation', () => {
-        setupAntiHang();
-      jest.setTimeout(10000);
     it('should validate optimization recommendations are actionable', async () => {
       const { result } = renderHook(() => useAgentContext(), { wrapper: createWrapper });
 
