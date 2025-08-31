@@ -26,14 +26,14 @@ from typing import Dict, List, Set, Any, Optional
 import threading
 import random
 
-# Real services infrastructure for mock elimination
-from test_framework.real_services import get_real_services, RealServicesManager
-from test_framework.environment_isolation import IsolatedEnvironment
-
 # CRITICAL: Add project root to Python path for imports
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
+
+# Real services infrastructure for mock elimination
+from test_framework.real_services import get_real_services, RealServicesManager
+from test_framework.environment_isolation import IsolatedEnvironment
 
 import pytest
 from loguru import logger
