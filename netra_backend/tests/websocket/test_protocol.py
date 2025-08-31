@@ -6,7 +6,7 @@ Business Value: Customer-facing functionality
 
 import pytest
 import asyncio
-from netra_backend.app.websocket.protocol import Protocol
+from netra_backend.app.websocket_core.types import WebSocketMessage
 
 @pytest.mark.asyncio
 class TestProtocolAsync:

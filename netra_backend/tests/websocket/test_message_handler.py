@@ -18,7 +18,7 @@ from test_framework.real_services import get_real_services, WebSocketTestClient
 from test_framework.environment_isolation import IsolatedEnvironment
 
 # Production components
-from netra_backend.app.websocket.message_handler import MessageHandler
+from netra_backend.app.services.websocket.message_handler import MessageHandlerService
 from netra_backend.app.websocket_core.manager import WebSocketManager
 
 

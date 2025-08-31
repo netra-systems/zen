@@ -6,7 +6,7 @@ Business Value: Customer-facing functionality
 
 import pytest
 import asyncio
-from netra_backend.app.websocket.event_dispatcher import EventDispatcher
+from netra_backend.app.websocket_core.handlers import MessageRouter
 
 @pytest.mark.asyncio
 class TestEventDispatcherAsync:

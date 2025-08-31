@@ -14,8 +14,7 @@ from pathlib import Path
 from typing import Dict, List, Set, Tuple
 import pytest
 
-from netra_backend.app.agents.base.execution_context import ExecutionContext
-from test_framework.agent_test_helpers import create_test_execution_context
+from test_framework.agent_test_helpers import create_test_execution_context, TestExecutionContext
 
 
 class TestExecutionContextRegression:
@@ -101,7 +100,7 @@ def test_function():
     # Comment with from netra_backend import should not trigger
     x = "string with from netra_backend import should not trigger"
     
-from netra_backend.app.agents.base.execution_context import ExecutionContext  # This SHOULD trigger
+from test_framework.agent_test_helpers import TestExecutionContext  # This SHOULD trigger
         '''
         
         lines = test_code.split('\n')
@@ -115,7 +114,7 @@ from netra_backend.app.agents.base.execution_context import ExecutionContext  # 
         
         # Should only find one actual import line
         assert len(import_lines) == 1
-        assert 'ExecutionContext' in lines[import_lines[0]]
+        assert 'TestExecutionContext' in lines[import_lines[0]]
 
     @pytest.mark.asyncio
     async def test_execution_context_in_async_agent_calls(self, execution_context):
@@ -169,7 +168,7 @@ from netra_backend.app.agents.base.execution_context import ExecutionContext  # 
         assert context1.user_id is not None
         
         # Pattern 2: Direct instantiation
-        context2 = ExecutionContext(
+        context2 = TestExecutionContext(
             user_id="user-2",
             thread_id="thread-2",
             message_id="msg-2",
@@ -189,13 +188,13 @@ from netra_backend.app.agents.base.execution_context import ExecutionContext  # 
         # Sample patterns that should be valid
         valid_patterns = [
             "context = create_test_execution_context()",
-            "context = ExecutionContext(user_id='test', thread_id='test', message_id='test', session_id='test')",
+            "context = TestExecutionContext(user_id='test', thread_id='test', message_id='test', session_id='test')",
             "execution_context = create_test_execution_context(user_id='specific-user')"
         ]
         
         # Sample patterns that should be invalid
         invalid_patterns = [
-            "context = {}  # Using dict instead of ExecutionContext",
+            "context = {}  # Using dict instead of TestExecutionContext",
             "context = None  # Not providing context",
             "context = 'string'  # Wrong type"
         ]

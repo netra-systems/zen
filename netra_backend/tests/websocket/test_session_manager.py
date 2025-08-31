@@ -6,7 +6,7 @@ Business Value: Customer-facing functionality
 
 import pytest
 import asyncio
-from netra_backend.app.websocket.session_manager import SessionManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 @pytest.mark.asyncio
 class TestSessionManagerAsync:

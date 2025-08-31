@@ -21,23 +21,25 @@ from netra_backend.tests.services.test_ws_connection_mocks import MockWebSocket
 
 from netra_backend.tests.integration.jwt_token_helpers import JWTTestHelper
 
+# Global JWT helper instance
+jwt_helper = JWTTestHelper()
+
 def create_test_token(user_id: str) -> str:
     """Create a valid test token."""
-    return jwt_helper.create_access_token(user_id, f"{user_id}@example.com")
+    return jwt_helper.create_test_token(user_id, f"{user_id}@example.com")
 
 def create_expired_token(user_id: str) -> str:
     """Create an expired test token."""
-    payload = jwt_helper.create_expired_payload()
-    payload["sub"] = user_id
-    payload["email"] = f"{user_id}@example.com"
-    return jwt_helper.create_token(payload)
+    return jwt_helper.create_expired_token(user_id)
 
 def create_invalid_token(user_id: str) -> str:
     """Create an invalid test token."""
     return f"invalid_token_{user_id}"
 
+class AuthFlowTracker:
+    """Helper for tracking authentication flows."""
+    
     def __init__(self):
-        super().__init__()
         self.auth_attempts: List[Dict[str, Any]] = []
         self.failed_auth_count = 0
 
@@ -63,6 +65,10 @@ def create_invalid_token(user_id: str) -> str:
         successful = sum(1 for attempt in self.auth_attempts if attempt["token_valid"])
         return successful / len(self.auth_attempts)
 
-        def __init__(self, user_id=None):
-            self.user_id = user_id
-            self.sent_messages = []
+class TestWebSocketAuthMock(MockWebSocket):
+    """Extended mock WebSocket for auth testing."""
+    
+    def __init__(self, user_id=None):
+        super().__init__()
+        self.user_id = user_id or self._generate_user_id()
+        self.sent_messages = []

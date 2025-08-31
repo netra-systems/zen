@@ -207,7 +207,7 @@ async def real_websocket_server():
 @pytest.fixture
 async def test_database_connection():
     """Fixture providing real database connection for tests."""
-    from netra_backend.app.core.database_manager import DatabaseManager
+    from netra_backend.app.db.database_manager import DatabaseManager
     
     # Use test environment manager to setup real database
     env_manager = get_test_env_manager()

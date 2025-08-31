@@ -286,7 +286,7 @@ def memory_profiler():
 @pytest.fixture
 async def real_database():
     """Fixture providing real database connection."""
-    from netra_backend.app.core.database_manager import DatabaseManager
+    from netra_backend.app.db.database_manager import DatabaseManager
     
     env_manager = get_test_env_manager()
     env = env_manager.setup_test_environment(additional_vars={
