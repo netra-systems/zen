@@ -61,7 +61,7 @@ try:
         from dev_launcher.isolated_environment import IsolatedEnvironment
         EnvironmentType = IsolatedEnvironment
     else:
-        # Create a substitute that returns TestEnvironmentWrapper when called
+        # Create a substitute IsolatedEnvironment class for tests that prevents TypeError
         class TestIsolatedEnvironmentSubstitute:
             """Substitute for IsolatedEnvironment during pytest to prevent TypeError."""
             
@@ -72,7 +72,7 @@ try:
         IsolatedEnvironment = TestIsolatedEnvironmentSubstitute
         
         # Create a type alias that represents the actual runtime type during tests
-        from typing import TYPE_CHECKING
+        from typing import TYPE_CHECKING, Any
         if TYPE_CHECKING:
             # For type checking, use forward reference
             EnvironmentType = 'IsolatedEnvironment'

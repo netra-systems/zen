@@ -1236,7 +1236,7 @@ class TestWebSocketHeartbeatZombieL3:
         assert 0.05 <= metrics.average_response_time <= 0.5, \
             f"Average response time {metrics.average_response_time:.3f}s seems unreasonable"
     
-        @pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_comprehensive_zombie_detection_reliability(self, heartbeat_manager, test_users):
 
         """Test comprehensive zombie detection reliability and accuracy."""

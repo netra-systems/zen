@@ -711,7 +711,7 @@ class TestWebSocketBinaryMessageHandlingL3:
         
         # The size limit would be enforced at application level before storage
     
-        @pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_binary_corruption_detection(self, binary_handler):
 
         """Test detection of binary data corruption."""

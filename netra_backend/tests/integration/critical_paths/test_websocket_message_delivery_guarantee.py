@@ -607,7 +607,7 @@ class TestWebSocketMessageDeliveryGuaranteeL3:
 
         assert delivery_tracker.get_delivery_rate() >= 0.99
     
-        @pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_message_delivery_under_load(self, websocket_manager, redis_client, test_users, delivery_tracker):
 
         """Test message delivery guarantees under system load."""

@@ -863,7 +863,7 @@ class TestWebSocketFirstLoadL3:
         
         await asyncio.gather(*cleanup_tasks, return_exceptions=True)
     
-        @pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_websocket_performance_under_load(self, ws_manager, redis_client, connection_tracker, test_users):
 
         """Test WebSocket performance under sustained load."""
