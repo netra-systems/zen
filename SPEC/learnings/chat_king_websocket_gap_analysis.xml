@@ -108,6 +108,120 @@
       7. User sees agent_started, agent_thinking, tool_executing, tool_completed, agent_completed
       8. Chat feels responsive and alive
     </required_working_flow>
+    
+    <mermaid_diagram>
+      <broken_flow>
+        ```mermaid
+        sequenceDiagram
+            participant U as User Browser
+            participant WS as WebSocket Server
+            participant AH as AgentMessageHandler
+            participant MH as MessageHandlerService
+            participant S as Supervisor
+            participant EE as ExecutionEngine
+            participant AI as AI Agent
+            
+            U->>WS: Send chat message
+            WS->>AH: Route message
+            AH->>MH: Process message (NO WebSocket)
+            MH->>S: Create supervisor (NO WebSocket)
+            S->>EE: Execute agent (NO notifications)
+            EE->>AI: Process request
+            Note over U: User sees nothing...
+            Note over U: Is it working?
+            Note over U: Maybe it's broken?
+            AI-->>EE: Complete
+            EE-->>S: Return result
+            S-->>MH: Return response
+            MH-->>AH: Send response
+            AH-->>WS: Send final message
+            WS-->>U: Show result (finally!)
+            Note over U: Oh, it was working...
+        ```
+      </broken_flow>
+      
+      <working_flow>
+        ```mermaid
+        sequenceDiagram
+            participant U as User Browser
+            participant WS as WebSocket Server
+            participant AH as AgentMessageHandler
+            participant MH as MessageHandlerService
+            participant S as Supervisor
+            participant EE as ExecutionEngine
+            participant WN as WebSocketNotifier
+            participant AI as AI Agent
+            
+            U->>WS: Send chat message
+            WS->>AH: Route message
+            AH->>MH: Process message + WebSocket Manager
+            MH->>S: Create supervisor + WebSocket Manager
+            S->>EE: Execute agent + WebSocket Notifier
+            EE->>WN: Send agent_started
+            WN-->>U: "Agent is starting..."
+            EE->>WN: Send agent_thinking
+            WN-->>U: "Analyzing your request..."
+            EE->>AI: Process request
+            AI->>EE: Use tool
+            EE->>WN: Send tool_executing
+            WN-->>U: "Running analysis tool..."
+            AI-->>EE: Tool complete
+            EE->>WN: Send tool_completed
+            WN-->>U: "Analysis complete"
+            AI-->>EE: Complete
+            EE->>WN: Send agent_completed
+            WN-->>U: "Task complete!"
+            EE-->>S: Return result
+            S-->>MH: Return response
+            MH-->>AH: Send response
+            AH-->>WS: Send final message
+            WS-->>U: Show final result
+            Note over U: Great experience!
+        ```
+      </working_flow>
+      
+      <component_interaction>
+        ```mermaid
+        graph TB
+            subgraph "Current (Broken) Architecture"
+                WS1[WebSocket Endpoint]
+                AH1[AgentMessageHandler]
+                MH1[MessageHandlerService]
+                S1[Supervisor - Standalone]
+                EE1[ExecutionEngine - No WebSocket]
+                
+                WS1 --> AH1
+                AH1 --> MH1
+                MH1 --> S1
+                S1 --> EE1
+            end
+            
+            subgraph "Required (Working) Architecture"
+                WS2[WebSocket Endpoint]
+                AH2[AgentMessageHandler]
+                MH2[MessageHandlerService + WebSocket]
+                S2[Supervisor + WebSocket]
+                EE2[ExecutionEngine + WebSocketNotifier]
+                WN[WebSocketNotifier]
+                AR[AgentRegistry + Enhancement]
+                
+                WS2 --> AH2
+                AH2 -.->|Inject WebSocket| MH2
+                MH2 -.->|Pass WebSocket| S2
+                S2 --> EE2
+                EE2 --> WN
+                AR -.->|Enhance Tools| EE2
+                WN -.->|Real-time Events| WS2
+            end
+            
+            style S1 fill:#ff6666
+            style EE1 fill:#ff6666
+            style S2 fill:#66ff66
+            style EE2 fill:#66ff66
+            style WN fill:#66ff66
+        ```
+      </component_interaction>
+    </mermaid_diagram>
   </chat_flow_analysis>
 
   <specific_code_locations>
@@ -115,16 +229,93 @@
       <issue>Line 79: MessageHandlerService.__init__ needs WebSocket manager injection</issue>
       <issue>Line 134: _execute_supervisor needs WebSocket-enhanced supervisor</issue>
       <fix_required>Pass WebSocket manager through to supervisor initialization</fix_required>
+      <code_example>
+        <current>
+          ```python
+          # Line 79 - Current (broken)
+          def __init__(self, llm_service: LLMService, db_manager: DatabaseManager):
+              self.llm_service = llm_service
+              self.db_manager = db_manager
+              # Missing: self.websocket_manager parameter
+          
+          # Line 134 - Current (broken)
+          supervisor = SupervisorConsolidated(
+              llm_service=self.llm_service,
+              db_manager=self.db_manager,
+              # Missing: websocket_manager parameter
+          )
+          ```
+        </current>
+        <fixed>
+          ```python
+          # Line 79 - Fixed
+          def __init__(self, llm_service: LLMService, db_manager: DatabaseManager, 
+                       websocket_manager: Optional[WebSocketManager] = None):
+              self.llm_service = llm_service
+              self.db_manager = db_manager
+              self.websocket_manager = websocket_manager  # Store for supervisor creation
+          
+          # Line 134 - Fixed
+          supervisor = SupervisorConsolidated(
+              llm_service=self.llm_service,
+              db_manager=self.db_manager,
+              websocket_manager=self.websocket_manager,  # Pass through
+          )
+          ```
+        </fixed>
+      </code_example>
     </file>
 
     <file path="netra_backend/app/websocket_core/agent_handler.py">
       <issue>Line 32: AgentMessageHandler doesn't inject WebSocket manager to MessageHandlerService</issue>
       <fix_required>Pass WebSocket manager from handler to service</fix_required>
+      <code_example>
+        <current>
+          ```python
+          # Current (broken) - Line 32
+          async def handle_agent_message(self, message: Dict[str, Any], websocket: WebSocket) -> Dict[str, Any]:
+              message_handler = MessageHandlerService(
+                  llm_service=self.llm_service,
+                  db_manager=self.db_manager
+                  # Missing: WebSocket manager injection
+              )
+          ```
+        </current>
+        <fixed>
+          ```python
+          # Fixed - Line 32
+          async def handle_agent_message(self, message: Dict[str, Any], websocket: WebSocket) -> Dict[str, Any]:
+              message_handler = MessageHandlerService(
+                  llm_service=self.llm_service,
+                  db_manager=self.db_manager,
+                  websocket_manager=self.websocket_manager  # Inject WebSocket manager
+              )
+          ```
+        </fixed>
+      </code_example>
     </file>
 
     <file path="netra_backend/app/agents/supervisor_consolidated.py">
       <issue>Supervisor initialization may not be using WebSocket-enhanced ExecutionEngine</issue>
       <fix_required>Ensure ExecutionEngine is initialized with WebSocket manager</fix_required>
+      <code_example>
+        <verification_needed>
+          ```python
+          # Verify ExecutionEngine initialization includes WebSocketNotifier
+          class SupervisorConsolidated:
+              def __init__(self, ..., websocket_manager: Optional[WebSocketManager] = None):
+                  # Must create WebSocketNotifier if websocket_manager provided
+                  if websocket_manager:
+                      self.websocket_notifier = WebSocketNotifier(websocket_manager)
+                      self.execution_engine = ExecutionEngine(
+                          ...,
+                          websocket_notifier=self.websocket_notifier
+                      )
+                  else:
+                      self.execution_engine = ExecutionEngine(...)
+          ```
+        </verification_needed>
+      </code_example>
     </file>
   </specific_code_locations>
 
