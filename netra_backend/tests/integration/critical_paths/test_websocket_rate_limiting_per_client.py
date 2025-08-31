@@ -633,7 +633,7 @@ class TestWebSocketRateLimitingPerClientL3:
 
         await rate_limiter.reset_rate_limit(user.id)
     
-        @pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_rate_limiting_accuracy_and_performance(self, rate_limiter, test_users):
 
         """Test rate limiting accuracy and performance under load."""

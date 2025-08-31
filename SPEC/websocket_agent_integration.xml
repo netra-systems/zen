@@ -272,5 +272,22 @@
       Message type enums provide type safety and prevent string literal errors
       in message routing
     </learning>
+    <learning>
+      MessageHandlerService created via dependency injection must have WebSocket manager
+      injected to ensure real-time events reach users - critical for chat UI functionality.
+      See: SPEC/learnings/websocket_injection_fix_comprehensive.xml
+    </learning>
   </learnings>
+
+  <related_specifications>
+    <spec path="SPEC/learnings/websocket_injection_fix_comprehensive.xml">
+      WebSocket Manager Injection Fix - Critical for dependency injection scenarios
+    </spec>
+    <spec path="SPEC/learnings/websocket_agent_integration_critical.xml">
+      WebSocket Agent Event Integration - Mission critical WebSocket events  
+    </spec>
+    <spec path="SPEC/learnings/websocket_subagent_enhancement_patterns.xml">
+      Sub-agent WebSocket event emission patterns and best practices
+    </spec>
+  </related_specifications>
 </specification>

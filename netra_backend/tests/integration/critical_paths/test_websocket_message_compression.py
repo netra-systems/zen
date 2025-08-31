@@ -648,7 +648,7 @@ class TestWebSocketMessageCompressionL3:
 
         assert successful_decompressions >= len(decompression_tasks) * 0.95  # 95% success rate
     
-        @pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_compression_bandwidth_savings(self, redis_client, message_compressor, test_users):
 
         """Test bandwidth savings from message compression."""

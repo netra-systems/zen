@@ -1596,7 +1596,7 @@ class TestWebSocketAuthHandshake(L3IntegrationTest):
 
         assert "no supported protocol" in result["error"].lower()
     
-        @pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_complete_handshake_flow_integration(self, auth_handshake, upgrade_handler, test_users):
 
         """Test complete handshake flow integration."""

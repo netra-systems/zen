@@ -89,6 +89,14 @@
             <critical-takeaway>Run tests/mission_critical/test_websocket_agent_events_suite.py before ANY deployment (websocket_agent_integration_critical.xml).</critical-takeaway>
         </category>
         
+        <category name="WebSocket/DependencyInjection" path="SPEC/learnings/websocket_injection_fix_comprehensive.xml" keywords="WebSocket, Dependency Injection, MessageHandlerService, Real-time Events, Chat UI, Mission Critical, Service Creation, Graceful Fallback">
+            <critical-takeaway>CRITICAL FIX: MessageHandlerService created via dependency injection was missing WebSocket manager, causing real-time agent events to be silently dropped (websocket_injection_fix_comprehensive.xml).</critical-takeaway>
+            <critical-takeaway>ALL MessageHandlerService creation paths MUST inject WebSocket manager: dependencies.py, service_factory.py, agent_service_core.py (websocket_injection_fix_comprehensive.xml).</critical-takeaway>
+            <critical-takeaway>Graceful fallback pattern required: try WebSocket injection, catch exceptions, log clearly, continue without WebSocket support (websocket_injection_fix_comprehensive.xml).</critical-takeaway>
+            <critical-takeaway>Run tests/mission_critical/test_websocket_injection_fix_comprehensive.py to validate injection works and prevent regression (websocket_injection_fix_comprehensive.xml).</critical-takeaway>
+            <critical-takeaway>$500K+ ARR impact: "blank screen" during AI processing fixed by ensuring real-time progress updates reach users (websocket_injection_fix_comprehensive.xml).</critical-takeaway>
+        </category>
+        
         <category name="WebSocket/SubAgentPatterns" path="SPEC/learnings/websocket_subagent_enhancement_patterns.xml" keywords="Sub-Agents, WebSocket Events, TriageSubAgent, DataSubAgent, ValidationSubAgent, WebSocketContextMixin, Real-time Feedback, User Experience, Event Emission">
             <critical-takeaway>WebSocketContextMixin provides standardized pattern for sub-agents to emit real-time events during execution (websocket_subagent_enhancement_patterns.xml).</critical-takeaway>
             <critical-takeaway>All sub-agents MUST emit 5 critical events: agent_started, agent_thinking, tool_executing, tool_completed, agent_completed for proper UX (websocket_subagent_enhancement_patterns.xml).</critical-takeaway>

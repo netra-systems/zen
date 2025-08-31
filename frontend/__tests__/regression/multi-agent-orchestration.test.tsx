@@ -15,8 +15,8 @@ import { WebSocketProvider } from '@/providers/WebSocketProvider';
 import { AgentProvider, useAgentContext } from '@/providers/AgentProvider';
 import { useChatStore } from '@/store/chatStore';
 import { useUnifiedChatStore } from '@/store/unified-chat';
-import type { 
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+import type { 
   WebSocketMessage, 
   SubAgentState,
   Message,

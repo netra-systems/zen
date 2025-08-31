@@ -366,7 +366,7 @@ class TestWebSocketConnectionPoolingL3:
 
         await websocket_manager.disconnect_user(user.id, websocket)
     
-        @pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_connection_pool_resource_management(self, websocket_manager, redis_client, test_users):
 
         """Test connection pool resource management and cleanup."""

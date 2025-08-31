@@ -765,7 +765,7 @@ class TestWebSocketBroadcastPerformanceL3:
 
             await websocket_manager.disconnect_user(user.id, websocket)
     
-        @pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_broadcast_memory_efficiency(self, websocket_manager, redis_client, large_user_pool, performance_tracker):
 
         """Test memory efficiency during broadcast operations."""

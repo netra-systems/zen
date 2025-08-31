@@ -587,7 +587,7 @@ class TestWebSocketHeartbeatMonitoringL3:
 
         assert heartbeat_check is None
     
-        @pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_heartbeat_monitoring_reliability(self, websocket_manager, heartbeat_monitor, test_users):
 
         """Test reliability of heartbeat monitoring system."""

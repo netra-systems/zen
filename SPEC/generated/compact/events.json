@@ -23,6 +23,7 @@
     "onSearchChange",
     "ping",
     "pong",
+    "security_event",
     "subscribe",
     "trigger_event",
     "unsubscribe"

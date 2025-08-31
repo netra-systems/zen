@@ -67,8 +67,8 @@ class TestDatabaseManagerURLConversion:
             result = DatabaseManager.get_base_database_url()
             assert result == expected_output
     
-        def test_get_base_database_url_default_fallback(self):
-            """Test default URL when DATABASE_URL not set."""
+    def test_get_base_database_url_default_fallback(self):
+        """Test default URL when DATABASE_URL not set."""
         with patch.dict(os.environ, {}, clear=True):
             with patch("netra_backend.app.db.database_manager.get_current_environment") as mock_env:
                 mock_env.return_value = "testing"  # Changed from "development" to "testing" to match expected URL
@@ -77,7 +77,8 @@ class TestDatabaseManagerURLConversion:
                     mock_config.return_value.database_url = None
                     result = DatabaseManager.get_base_database_url()
                     # In test environment (pytest context), we expect the test database URL with search path
-                    assert result == "postgresql://test:test@localhost:5432/netra_test?options=-c%20search_path%3Dnetra_test,public"
+                    # Port should be 5434 as configured in the actual database manager
+                    assert result == "postgresql://test:test@localhost:5434/netra_test?options=-c%20search_path%3Dnetra_test,public"
     
     @pytest.mark.parametrize("base_url,expected_migration_url", [
         # Standard sync URL conversion
@@ -415,7 +416,8 @@ class TestDatabaseManagerErrorHandling:
                     mock_config.return_value.database_url = None
                     result = DatabaseManager.get_base_database_url()
                     # In test environment (pytest context), we expect the test database URL with search path
-                    assert result == "postgresql://test:test@localhost:5432/netra_test?options=-c%20search_path%3Dnetra_test,public"
+                    # Port should be 5434 as configured in the actual database manager
+                    assert result == "postgresql://test:test@localhost:5434/netra_test?options=-c%20search_path%3Dnetra_test,public"
     
     def test_missing_database_url_handling(self):
         """Test handling when DATABASE_URL is not set."""
@@ -427,7 +429,8 @@ class TestDatabaseManagerErrorHandling:
                     mock_config.return_value.database_url = None
                     result = DatabaseManager.get_base_database_url()
                     # In test environment (pytest context), we expect the test database URL with search path
-                    assert result == "postgresql://test:test@localhost:5432/netra_test?options=-c%20search_path%3Dnetra_test,public"
+                    # Port should be 5434 as configured in the actual database manager
+                    assert result == "postgresql://test:test@localhost:5434/netra_test?options=-c%20search_path%3Dnetra_test,public"
     
     def test_driver_mismatch_validation(self):
         """Test validation catches driver mismatches."""

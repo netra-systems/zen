@@ -632,7 +632,7 @@ class TestWebSocketReconnectionStateRecoveryL3:
 
             await state_manager.clear_state(user.id)
     
-        @pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_state_recovery_performance(self, websocket_manager, state_manager, test_users):
 
         """Test performance of state recovery operations."""

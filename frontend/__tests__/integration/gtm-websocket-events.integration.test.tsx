@@ -247,7 +247,7 @@ const WebSocketGTMTestComponent: React.FC = () => {
     <div data-testid="websocket-gtm-component">
       <div data-testid="connection-status">{connectionStatus}</div>
       <div data-testid="gtm-status">{gtm.isLoaded ? 'ready' : 'loading'}</div>
-      <div data-testid="total-events">{gtm.debug.totalEvents}</div>
+      <div data-testid="total-events">{gtm.debug?.totalEvents || 0}</div>
       <div data-testid="message-count">{messages.length}</div>
       <div data-testid="thread-count">{threads.length}</div>
       <div data-testid="current-thread">{currentThread || 'none'}</div>

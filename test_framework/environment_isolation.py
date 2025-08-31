@@ -55,13 +55,13 @@ def get_env():
         return dev_get_env()
 
 # Import IsolatedEnvironment only when not in pytest to avoid triggering dev setup
-# Create substitute class to prevent TypeError when IsolatedEnvironment() is called
+# Create type aliases for better type annotations and prevent TypeError
 try:
     if 'pytest' not in sys.modules and not os.environ.get("PYTEST_CURRENT_TEST"):  # @marked: Test framework detection
         from dev_launcher.isolated_environment import IsolatedEnvironment
         EnvironmentType = IsolatedEnvironment
     else:
-        # Create a substitute that returns TestEnvironmentWrapper when called
+        # Create a substitute IsolatedEnvironment class for tests that prevents TypeError
         class TestIsolatedEnvironmentSubstitute:
             """Substitute for IsolatedEnvironment during pytest to prevent TypeError."""
             
@@ -72,7 +72,7 @@ try:
         IsolatedEnvironment = TestIsolatedEnvironmentSubstitute
         
         # Create a type alias that represents the actual runtime type during tests
-        from typing import TYPE_CHECKING
+        from typing import TYPE_CHECKING, Any
         if TYPE_CHECKING:
             # For type checking, use forward reference
             EnvironmentType = 'IsolatedEnvironment'
@@ -88,6 +88,7 @@ except ImportError:
             return get_env()
     
     IsolatedEnvironment = TestIsolatedEnvironmentSubstitute
+    from typing import Any
     EnvironmentType = Any
 
 
