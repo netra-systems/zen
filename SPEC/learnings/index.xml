@@ -33,6 +33,21 @@
         <prevention>Eliminate ALL fallback logic in authentication. Require environment-specific secrets: JWT_SECRET_STAGING, JWT_SECRET_PRODUCTION, JWT_SECRET_KEY (dev/test only).</prevention>
     </learning>
     
+    <learning id="supervisor-initialization-dependency-fix-2025-08-30">
+        <title>Supervisor Agent Initialization Dependency Fix</title>
+        <category>Startup Dependencies</category>
+        <keywords>supervisor, dependencies, initialization, llm_manager, startup, agent_supervisor, auth_service</keywords>
+        <path>supervisor_initialization_dependency_fix.xml</path>
+        <critical-takeaway>
+            The agent_supervisor component requires explicit dependency on auth_service for llm_manager.
+            Missing dependency declarations cause initialization failures and race conditions.
+            StartupManager dependencies must include ALL required app.state attributes, not just direct ones.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Complete agent system failure, chat unavailable, WebSocket communication broken</business-impact>
+        <prevention>Always declare ALL dependencies explicitly in StartupManager. Document required app.state attributes. Add dependency validation before component creation.</prevention>
+    </learning>
+    
     <learning id="docker-compose-restart-issues-2025-08-31">
         <title>Docker Compose Service Restart Issues and Resolution</title>
         <category>Docker Infrastructure</category>
