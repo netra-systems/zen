@@ -48,6 +48,22 @@
         <severity>CRITICAL</severity>
         <business-impact>Development environment crashes, hours of downtime, 30GB disk waste per developer</business-impact>
         <prevention>Limit to 10 volumes max. No code in volumes. Add resource limits. Run cleanup regularly.</prevention>
+    </learning>
+    
+    <learning id="backend-startup-windows-fix-2025-08-31">
+        <title>Backend Server Startup Issues on Windows - Module Import Fix</title>
+        <category>Windows Compatibility</category>
+        <keywords>windows, backend, uvicorn, module, import, pythonpath, startup, dev_launcher</keywords>
+        <path>backend_startup_windows_fix.xml</path>
+        <critical-takeaway>
+            Windows backend startup fails with ModuleNotFoundError for 'netra_backend' when using uvicorn.
+            Root cause: Windows PYTHONPATH resolution differs from Unix systems.
+            Solution: Change to netra_backend directory before starting uvicorn, use 'app.main:app' instead of 'netra_backend.app.main:app'.
+            Implementation in dev_launcher/backend_starter.py:140-155.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Backend service completely unavailable, blocking all development on Windows</business-impact>
+        <prevention>Test backend startup on Windows. Run Python modules from their containing directory.</prevention>
         <related-specs>
             <spec href="../docker_volume_optimization.xml">Complete volume optimization specification</spec>
             <spec href="../frontend_docker_optimization.xml">Frontend image size optimization</spec>
