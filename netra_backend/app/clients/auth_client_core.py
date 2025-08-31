@@ -21,7 +21,7 @@ from netra_backend.app.clients.auth_client_config import (
 from netra_backend.app.core.environment_constants import get_current_environment, Environment, is_production
 from netra_backend.app.core.tracing import TracingManager
 from enum import Enum
-import os
+from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +65,8 @@ class AuthServiceClient:
         
         # PRODUCTION SECURITY: Validate auth service requirements in production
         # Check both unified config and environment variable for robust production detection
-        env_var = os.environ.get('ENVIRONMENT', '').lower()
+        env = get_env()
+        env_var = env.get('ENVIRONMENT', '').lower()
         current_env = get_current_environment()
         is_prod_env = (env_var == 'production' or current_env == Environment.PRODUCTION.value or self._is_production_environment())
         

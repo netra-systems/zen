@@ -144,8 +144,10 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
                       websocket_manager: 'WebSocketManager') -> None:
         """Initialize agent registry."""
         self.registry = AgentRegistry(llm_manager, tool_dispatcher)
-        self.registry.set_websocket_manager(websocket_manager)
+        # CRITICAL: Register agents BEFORE setting WebSocket manager
+        # so that agents exist when the manager is set on them
         self.registry.register_default_agents()
+        self.registry.set_websocket_manager(websocket_manager)
         # Add alias for test compatibility
         self.agent_registry = self.registry
 

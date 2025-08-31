@@ -6,12 +6,12 @@ Handles proper cleanup of multiprocessing resources to prevent semaphore leaks.
 import atexit
 import multiprocessing
 import multiprocessing.synchronize
-import os
 import signal
 import sys
 from types import FrameType
 from typing import List, Optional, Union
 
+from shared.isolated_environment import get_env
 from netra_backend.app.core.unified_logging import get_logger
 
 logger = get_logger(__name__)
@@ -75,10 +75,11 @@ class MultiprocessingResourceManager:
         # Prevent any logging during test teardown to avoid I/O errors
         try:
             # Check if we're in a test environment
+            env = get_env()
             is_testing = (
                 hasattr(sys, 'modules') and 'pytest' in sys.modules or
-                os.environ.get('TESTING') == '1' or
-                os.environ.get('ENVIRONMENT') == 'testing'
+                env.get('TESTING') == '1' or
+                env.get('ENVIRONMENT') == 'testing'
             )
             
             # Only log if not in tests and streams are available
