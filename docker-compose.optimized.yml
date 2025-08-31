@@ -71,7 +71,7 @@ services:
       resources:
         limits:
           memory: 128M
-          cpus: '0.1'
+          cpus: '0.125'
 
   # Dev ClickHouse Analytics (Optional - can be ephemeral)
   dev-clickhouse:
@@ -101,7 +101,7 @@ services:
       resources:
         limits:
           memory: 512M
-          cpus: '0.2'
+          cpus: '0.25'
 
   # Dev Auth Service
   dev-auth:
@@ -228,7 +228,7 @@ services:
       resources:
         limits:
           memory: 512M
-          cpus: '0.4'
+          cpus: '0.5'
 
   # Dev Frontend Service
   dev-frontend:
@@ -272,7 +272,7 @@ services:
       resources:
         limits:
           memory: 512M
-          cpus: '0.3'
+          cpus: '0.5'
 
   # ============================================
   # TEST ENVIRONMENT
@@ -304,7 +304,7 @@ services:
       resources:
         limits:
           memory: 256M
-          cpus: '0.2'
+          cpus: '0.25'
 
   # Test Redis Cache
   test-redis:
@@ -327,7 +327,7 @@ services:
       resources:
         limits:
           memory: 64M
-          cpus: '0.1'
+          cpus: '0.125'
 
   # Test ClickHouse Analytics
   test-clickhouse:
@@ -354,7 +354,7 @@ services:
       resources:
         limits:
           memory: 256M
-          cpus: '0.2'
+          cpus: '0.25'
 
 # ============================================
 # VOLUMES - MAXIMUM 10 (Currently 4)
