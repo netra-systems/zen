@@ -8,6 +8,7 @@ import { render, waitFor, act, renderHook } from '@testing-library/react';
 import { AuthProvider, useAuth } from '@/auth/context';
 import { unifiedAuthService } from '@/auth/unified-auth-service';
 import { jwtDecode } from 'jwt-decode';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock dependencies
 jest.mock('@/auth/unified-auth-service');
@@ -36,7 +37,7 @@ jest.mock('@/hooks/useGTMEvent', () => ({
 }));
 
 describe('AuthContext - Persistence and Initialization', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   const mockAuthService = unifiedAuthService as jest.Mocked<typeof unifiedAuthService>;
   const mockDecode = jwtDecode as jest.MockedFunction<typeof jwtDecode>;

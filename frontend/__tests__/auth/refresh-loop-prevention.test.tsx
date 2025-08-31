@@ -8,6 +8,7 @@ import { render, waitFor, act } from '@testing-library/react';
 import { AuthProvider, useAuth } from '@/auth';
 import { unifiedAuthService } from '@/auth/unified-auth-service';
 import { logger } from '@/lib/logger';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock dependencies
 jest.mock('@/auth/unified-auth-service');
@@ -28,7 +29,7 @@ jest.mock('@/store/authStore', () => ({
 }));
 
 describe('Refresh Loop Prevention Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();

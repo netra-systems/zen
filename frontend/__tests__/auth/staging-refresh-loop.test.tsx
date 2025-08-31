@@ -53,7 +53,7 @@ jest.mock('@/lib/auth-service-client', () => ({
 }));
 
 describe('Staging Refresh Loop Tests', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   // Set test timeout to prevent hanging
   jest.setTimeout(8000);

@@ -6,6 +6,7 @@
  * Architecture: ≤300 lines, functions ≤8 lines
  */
 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,8 +15,7 @@ import { authService } from '@/auth/unified-auth-service';
 import { jwtDecode } from 'jwt-decode';
 import { logger } from '@/lib/logger';
 import '@testing-library/jest-dom';
-import {
-  setupAuthTestEnvironment,
+import { setupAuthTestEnvironment,
   createMockAuthConfig,
   createMockToken,
   mockAuthServiceClient
@@ -32,7 +32,7 @@ const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
 const WARNING_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes before timeout
 
 describe('Auth Session Detection', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let mocks: ReturnType<typeof setupAuthTestEnvironment>;
   let mockAuthStore: any;

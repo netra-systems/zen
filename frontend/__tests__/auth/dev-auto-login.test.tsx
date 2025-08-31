@@ -92,7 +92,7 @@ function TestComponent() {
 }
 
 describe('Dev Auto-Login Feature', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   // Set test timeout to prevent hanging
   jest.setTimeout(10000);

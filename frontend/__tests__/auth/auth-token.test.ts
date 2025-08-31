@@ -31,9 +31,10 @@ import { mockUseContext } from './auth-test-setup';
 import { AuthContext } from '@/auth';
 
 import { useAuth } from '@/auth/context';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Auth Token Management', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   let testEnv: ReturnType<typeof setupAuthTestEnvironment>;
   let mockToken: string;

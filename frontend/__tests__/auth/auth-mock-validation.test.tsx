@@ -19,6 +19,7 @@ import {
   mockTestToken
 } from '@/__tests__/test-utils/auth-test-helpers';
 import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Simple test component to display auth state
 const AuthStateDisplay = () => {
@@ -36,7 +37,7 @@ const AuthStateDisplay = () => {
 };
 
 describe('Authentication Mock System', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   beforeEach(() => {
     resetMockAuthState();
@@ -191,7 +192,7 @@ describe('Authentication Mock System', () => {
 });
 
 describe('Global Auth State Management', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   it('should update localStorage when token changes', () => {
     const testToken = 'test-storage-token';

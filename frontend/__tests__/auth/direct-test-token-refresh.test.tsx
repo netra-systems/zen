@@ -4,9 +4,10 @@
 
 // Don't mock jwt-decode, let it work naturally
 import { jwtDecode } from 'jwt-decode';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 describe('Direct Token Refresh Test', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   test('should test needsRefresh with real JWT tokens', () => {
     // Import the service after mocks are set up

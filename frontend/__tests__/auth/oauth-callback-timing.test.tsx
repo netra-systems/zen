@@ -17,6 +17,7 @@ import '@testing-library/jest-dom';
 
 // Import the component to test
 import AuthCallbackClient from '@/app/auth/callback/client';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 
 // Mock Next.js navigation hooks
 const mockPush = jest.fn();
@@ -129,7 +130,7 @@ const mockSetTimeout = jest.fn((callback: () => void, delay: number): NodeJS.Tim
 }) as unknown as typeof setTimeout;
 
 describe('OAuth Callback Timing - Challenging Edge Cases', () => {
-      setupAntiHang();
+  setupAntiHang();
     jest.setTimeout(10000);
   // Set timeout for all tests in this suite
   jest.setTimeout(30000);
