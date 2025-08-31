@@ -32,7 +32,8 @@ import pytest
 
 from netra_backend.app.config import get_config
 from netra_backend.app.redis_manager import RedisManager
-from test_framework.mock_utils import mock_justified
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
 logger = logging.getLogger(__name__)
 
@@ -756,8 +757,7 @@ class TestConfigurationValidationPipelineL3:
             cached_result = json.loads(cached_data)
             assert cached_result["is_valid"] == result1.is_valid
     
-    @mock_justified("L3: Configuration validation pipeline testing with controlled dependency simulation")
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_validation_pipeline_reliability(self, config_validator):
         """Test overall validation pipeline reliability and consistency."""
         # Test configuration with various complexity levels

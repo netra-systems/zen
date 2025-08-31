@@ -42,7 +42,8 @@ from netra_backend.app.core.exceptions_base import (
     StateRecoveryException,
 )
 from netra_backend.app.redis_manager import RedisManager
-from test_framework.mock_utils import mock_justified
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
 logger = logging.getLogger(__name__)
 
@@ -675,8 +676,7 @@ class TestAgentStateRecoveryL3:
         failure_detected = await recovery_manager.detect_agent_failure("test_agent_1")
         assert failure_detected == recoverable_agent.is_crashed
         
-    @mock_justified("L3: State recovery testing with real persistence mechanisms")
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_recovery_performance_under_load(self, recovery_manager):
         """Test recovery performance with multiple agents under load."""
         # Create multiple agents

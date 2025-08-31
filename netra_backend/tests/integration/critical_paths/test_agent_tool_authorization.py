@@ -40,7 +40,8 @@ from netra_backend.app.core.exceptions_base import (
 )
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.services.security_service import SecurityService
-from test_framework.mock_utils import mock_justified
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
 logger = logging.getLogger(__name__)
 
@@ -513,8 +514,7 @@ class TestAgentToolAuthorizationL3:
         
         assert len(cross_service_logs) >= 5  # 5 successful operations
         
-    @mock_justified("L3: Tool authorization testing with real security components")
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_authorization_under_concurrent_load(self, authorization_service, test_agents):
         """Test authorization system under concurrent load."""
         # Create concurrent authorization requests

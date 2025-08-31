@@ -31,7 +31,8 @@ import pytest
 from netra_backend.app.config import get_config
 
 from netra_backend.app.redis_manager import RedisManager
-from test_framework.mock_utils import mock_justified
+# Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
+from test_framework.real_services import get_real_services
 
 logger = logging.getLogger(__name__)
 
@@ -779,8 +780,7 @@ class TestCrossServiceConfigConsistencyL3:
         assert result3.accuracy_percentage >= 99.9
         assert len(result3.drift_results) == 0
     
-    @mock_justified("L3: Cross-service configuration consistency testing with controlled service simulation")
-    @pytest.mark.asyncio
+        @pytest.mark.asyncio
     async def test_consistency_monitoring_reliability(self, consistency_manager):
         """Test reliability and accuracy of consistency monitoring system."""
         # Setup comprehensive test scenario
