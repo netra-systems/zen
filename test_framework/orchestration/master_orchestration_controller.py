@@ -41,8 +41,8 @@ from threading import Lock, Event
 
 # Core orchestration agent imports
 from test_framework.orchestration.test_orchestrator_agent import TestOrchestratorAgent, OrchestrationConfig
-from test_framework.orchestration.layer_execution_agent import LayerExecutionAgent, LayerConfig
-from test_framework.orchestration.background_e2e_agent import BackgroundE2EAgent, BackgroundConfig
+from test_framework.orchestration.layer_execution_agent import LayerExecutionAgent, LayerExecutionConfig
+from test_framework.orchestration.background_e2e_agent import BackgroundE2EAgent, BackgroundTaskConfig
 from test_framework.orchestration.progress_streaming_agent import (
     ProgressStreamingAgent, StreamingConfig, ProgressOutputMode,
     create_progress_streaming_agent, create_console_streaming_agent
@@ -79,6 +79,17 @@ try:
 except ImportError:
     def get_env():
         return os.environ
+
+# Production monitoring integration
+try:
+    from test_framework.orchestration.production_monitoring import (
+        OrchestrationMonitor, create_orchestration_monitor, 
+        create_production_monitor, MonitoredOperation
+    )
+    MONITORING_AVAILABLE = True
+except ImportError:
+    MONITORING_AVAILABLE = False
+    OrchestrationMonitor = None
 
 logger = logging.getLogger(__name__)
 
@@ -169,6 +180,13 @@ class MasterOrchestrationConfig:
     health_check_interval: float = 5.0
     progress_update_interval: float = 1.0
     
+    # NEW: Production monitoring configuration
+    enable_production_monitoring: bool = True
+    enable_metrics_collection: bool = True
+    enable_alerting: bool = True
+    log_level: str = "INFO"
+    metrics_retention_minutes: int = 60
+    
     # Output configuration
     output_mode: ProgressOutputMode = ProgressOutputMode.CONSOLE
     verbose_logging: bool = False
@@ -230,12 +248,33 @@ class MasterOrchestrationController:
             thread_name_prefix="OrchestrationController"
         )
         
-        # Logger
-        self.logger = logging.getLogger(f"MasterOrchestrationController")
-        if config.verbose_logging:
-            self.logger.setLevel(logging.DEBUG)
+        # Production monitoring setup
+        self.monitor: Optional['OrchestrationMonitor'] = None
+        if MONITORING_AVAILABLE and config.enable_production_monitoring:
+            log_dir = self.project_root / "logs" / "orchestration"
+            if config.enable_production_monitoring:
+                self.monitor = create_production_monitor(
+                    component_name="MasterController",
+                    log_dir=log_dir,
+                    metrics_retention_hours=config.metrics_retention_minutes // 60
+                )
+            else:
+                self.monitor = create_orchestration_monitor(
+                    component_name="MasterController",
+                    log_dir=log_dir
+                )
         
-        self.logger.info("Master Orchestration Controller initialized")
+        # Logger (use production monitor logger if available)
+        if self.monitor:
+            self.logger = self.monitor.logger.logger
+        else:
+            self.logger = logging.getLogger(f"MasterOrchestrationController")
+            if config.verbose_logging:
+                self.logger.setLevel(logging.DEBUG)
+        
+        self.logger.info("Master Orchestration Controller initialized",
+                        mode=config.mode.value,
+                        monitoring_enabled=self.monitor is not None)
     
     def _setup_websocket_integration(self):
         """Setup WebSocket integration for real-time updates"""
@@ -301,7 +340,7 @@ class MasterOrchestrationController:
                 self.logger.info("ProgressStreamingAgent initialized")
             
             # Initialize layer execution agent
-            layer_config = LayerConfig(
+            layer_config = LayerExecutionConfig(
                 enable_real_services=True,
                 enable_real_llm=False,  # Default to mock for fast startup
                 max_parallel_layers=2,
@@ -328,7 +367,7 @@ class MasterOrchestrationController:
             
             # Initialize background E2E agent if enabled
             if self.config.enable_background_execution:
-                background_config = BackgroundConfig(
+                background_config = BackgroundTaskConfig(
                     max_concurrent_tasks=1,
                     task_timeout_minutes=60,
                     enable_real_services=True,
@@ -460,7 +499,17 @@ class MasterOrchestrationController:
         Returns:
             Execution results dictionary
         """
-        self.logger.info(f"Starting orchestration execution in mode: {self.config.mode.value}")
+        execution_id = f"orchestration_{int(time.time())}"
+        
+        # Start monitoring
+        execution_metrics = None
+        if self.monitor:
+            execution_metrics = self.monitor.start_execution(execution_id)
+        
+        self.logger.info(f"Starting orchestration execution in mode: {self.config.mode.value}",
+                        execution_id=execution_id,
+                        layers=layers,
+                        categories=categories)
         
         try:
             # Update state
@@ -508,16 +557,29 @@ class MasterOrchestrationController:
                     summary=results
                 )
             
-            self.logger.info(f"Orchestration execution completed: {results.get('success', False)}")
+            # End monitoring
+            if self.monitor:
+                self.monitor.end_execution(results.get("success", False), results.get("summary"))
+            
+            self.logger.info(f"Orchestration execution completed: {results.get('success', False)}",
+                            execution_id=execution_id,
+                            success=results.get("success", False),
+                            duration=self.state.overall_duration.total_seconds())
             return results
             
         except Exception as e:
-            self.logger.error(f"Orchestration execution failed: {e}")
+            self.logger.error(f"Orchestration execution failed: {e}",
+                            execution_id=execution_id,
+                            error_type=type(e).__name__)
             
             # Update error state
             with self._lock:
                 self.state.status = OrchestrationStatus.FAILED
                 self.state.error_summary.append(str(e))
+            
+            # End monitoring with failure
+            if self.monitor:
+                self.monitor.end_execution(success=False, summary={"error": str(e)})
             
             # Stop progress streaming with failure
             if self.progress_streamer:
@@ -527,6 +589,7 @@ class MasterOrchestrationController:
             return {
                 "success": False,
                 "error": str(e),
+                "execution_id": execution_id,
                 "state": self._get_state_dict()
             }
     
