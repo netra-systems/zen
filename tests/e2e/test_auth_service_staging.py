@@ -16,7 +16,7 @@ Auth Service GCP Staging Environment Test - Updated for GCP Secrets Integration
 
 **SUCCESS CRITERIA:**
 - Auth service works with GCP staging URLs
-- E2E_BYPASS_KEY integration from GCP Secrets Manager
+- E2E_OAUTH_SIMULATION_KEY integration from GCP Secrets Manager
 - Proper timeout handling for GCP services (30+ seconds)
 - Graceful handling of GCP service startup delays
 - All flows work with unified test runner staging environment
@@ -56,9 +56,9 @@ class GCPStagingAuthTester:
         self.start_time = time.time()
         logger.info("Setting up GCP staging environment authentication tests")
         
-        # Verify E2E_BYPASS_KEY is available from environment
+        # Verify E2E_OAUTH_SIMULATION_KEY is available from environment
         if not self.auth_helper.bypass_key:
-            raise ValueError("E2E_BYPASS_KEY not found - ensure unified test runner configured it from GCP Secrets")
+            raise ValueError("E2E_OAUTH_SIMULATION_KEY not found - ensure unified test runner configured it from GCP Secrets")
     
     async def test_staging_auth_service_health(self) -> Dict[str, Any]:
         """Test staging auth service health endpoint"""
@@ -248,7 +248,7 @@ async def test_gcp_staging_auth_complete_flow():
         logger.info(f"🎉 GCP staging authentication test PASSED in {results['total_execution_time']:.2f}s")
         
     except ValueError as e:
-        if "E2E_BYPASS_KEY" in str(e):
+        if "E2E_OAUTH_SIMULATION_KEY" in str(e):
             pytest.skip(f"GCP Secrets Manager issue: {e}")
         else:
             raise

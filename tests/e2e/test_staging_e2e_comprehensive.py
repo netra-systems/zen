@@ -382,8 +382,8 @@ if __name__ == "__main__":
     os.environ["ENVIRONMENT"] = "staging"
     
     # Check for E2E bypass key
-    if not os.getenv("E2E_BYPASS_KEY"):
-        print("ERROR: E2E_BYPASS_KEY environment variable not set")
+    if not os.getenv("E2E_OAUTH_SIMULATION_KEY"):
+        print("ERROR: E2E_OAUTH_SIMULATION_KEY environment variable not set")
         print("This key is required to simulate OAuth flow in staging tests")
         sys.exit(1)
     

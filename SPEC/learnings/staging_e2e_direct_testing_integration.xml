@@ -48,7 +48,7 @@ def _configure_staging_e2e_auth(self):
     
     if result.returncode == 0:
         bypass_key = result.stdout.strip()
-        env.set('E2E_BYPASS_KEY', bypass_key, 'staging_e2e_auth')
+        env.set('E2E_OAUTH_SIMULATION_KEY', bypass_key, 'staging_e2e_auth')
         env.set('ENVIRONMENT', 'staging', 'staging_e2e_auth')
         env.set('STAGING_AUTH_URL', 'https://api.staging.netrasystems.ai', 'staging_e2e_auth')
                 ]]>
@@ -108,7 +108,7 @@ def _configure_staging_e2e_auth(self):
     <usage_patterns>
         <command name="Run all E2E tests on staging">
             <syntax>python unified_test_runner.py --categories e2e --env staging --real-llm</syntax>
-            <auto_config>E2E_BYPASS_KEY fetched automatically</auto_config>
+            <auto_config>E2E_OAUTH_SIMULATION_KEY fetched automatically</auto_config>
             <services>Remote staging services only</services>
         </command>
         

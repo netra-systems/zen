@@ -4842,11 +4842,11 @@
         "scripts/deploy_to_gcp.py:340"
       ]
     },
-    "Setup E2E Bypass Key for Staging Environment\n\nThis script helps set up the E2E authentication bypass key in Google Secrets Manager\nfor the staging environment. It generates a secure key and stores it properly.\n\nUsage:\n    python scripts/setup_e2e_bypass_key.py [--project PROJECT_ID]": {
-      "value": "Setup E2E Bypass Key for Staging Environment\n\nThis script helps set up the E2E authentication bypass key in Google Secrets Manager\nfor the staging environment. It generates a secure key and stores it properly.\n\nUsage:\n    python scripts/setup_e2e_bypass_key.py [--project PROJECT_ID]",
+    "Setup E2E Bypass Key for Staging Environment\n\nThis script helps set up the E2E authentication bypass key in Google Secrets Manager\nfor the staging environment. It generates a secure key and stores it properly.\n\nUsage:\n    python scripts/setup_E2E_OAUTH_SIMULATION_KEY.py [--project PROJECT_ID]": {
+      "value": "Setup E2E Bypass Key for Staging Environment\n\nThis script helps set up the E2E authentication bypass key in Google Secrets Manager\nfor the staging environment. It generates a secure key and stores it properly.\n\nUsage:\n    python scripts/setup_E2E_OAUTH_SIMULATION_KEY.py [--project PROJECT_ID]",
       "category": "paths",
       "locations": [
-        "scripts/setup_e2e_bypass_key.py:2"
+        "scripts/setup_E2E_OAUTH_SIMULATION_KEY.py:2"
       ]
     },
     "Staging URL Validation Script\nPrevents localhost URLs from being used in staging/production environments.\n\nThis script validates that:\n1. No localhost references exist in staging/production environment variables\n2. All URLs use appropriate protocols (https/wss for staging/production)\n3. Domain names match expected patterns for each environment\n\nUsage:\n    python scripts/validate_staging_urls.py --environment staging\n    python scripts/validate_staging_urls.py --environment production --fix": {
@@ -7146,7 +7146,7 @@
       "value": "python tests/e2e/staging_auth_bypass.py",
       "category": "paths",
       "locations": [
-        "scripts/setup_e2e_bypass_key.py:234"
+        "scripts/setup_E2E_OAUTH_SIMULATION_KEY.py:234"
       ]
     },
     "python tests/post_deployment/test_auth_integration.py --environment": {

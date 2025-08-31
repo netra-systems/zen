@@ -50,9 +50,9 @@ class GCPStagingOAuthTestHelper:
         if environment != "staging":
             raise ValueError(f"Expected staging environment, got {environment}")
         
-        # Verify E2E_BYPASS_KEY is available
+        # Verify E2E_OAUTH_SIMULATION_KEY is available
         if not self.auth_helper.bypass_key:
-            raise ValueError("E2E_BYPASS_KEY not available - ensure unified test runner configured it")
+            raise ValueError("E2E_OAUTH_SIMULATION_KEY not available - ensure unified test runner configured it")
             
         logger.info("✓ GCP staging environment verified")
 
@@ -238,7 +238,7 @@ async def test_gcp_staging_e2e_token_generation():
         logger.info("[SUCCESS] GCP staging E2E token generation verified")
         
     except Exception as e:
-        if "E2E_BYPASS_KEY" in str(e) or "secret" in str(e).lower():
+        if "E2E_OAUTH_SIMULATION_KEY" in str(e) or "secret" in str(e).lower():
             pytest.skip(f"GCP Secrets Manager issue: {e}")
         elif any(term in str(e).lower() for term in ["gcp", "timeout", "run.app"]):
             pytest.skip(f"GCP service issue: {e}")
@@ -270,7 +270,7 @@ async def test_gcp_staging_token_verification():
         logger.info("[SUCCESS] GCP staging token verification passed")
         
     except Exception as e:
-        if "E2E_BYPASS_KEY" in str(e) or "secret" in str(e).lower():
+        if "E2E_OAUTH_SIMULATION_KEY" in str(e) or "secret" in str(e).lower():
             pytest.skip(f"GCP Secrets Manager issue: {e}")
         elif any(term in str(e).lower() for term in ["gcp", "timeout", "run.app"]):
             pytest.skip(f"GCP service issue: {e}")
@@ -304,7 +304,7 @@ async def test_gcp_staging_authenticated_endpoint_access():
         logger.info("[SUCCESS] GCP staging authenticated endpoint access verified")
         
     except Exception as e:
-        if "E2E_BYPASS_KEY" in str(e) or "secret" in str(e).lower():
+        if "E2E_OAUTH_SIMULATION_KEY" in str(e) or "secret" in str(e).lower():
             pytest.skip(f"GCP Secrets Manager issue: {e}")
         elif any(term in str(e).lower() for term in ["gcp", "timeout", "run.app"]):
             pytest.skip(f"GCP service issue: {e}")
@@ -342,7 +342,7 @@ async def test_gcp_staging_session_management():
         await auth_client.aclose()
         
     except Exception as e:
-        if "E2E_BYPASS_KEY" in str(e) or "secret" in str(e).lower():
+        if "E2E_OAUTH_SIMULATION_KEY" in str(e) or "secret" in str(e).lower():
             pytest.skip(f"GCP Secrets Manager issue: {e}")
         elif any(term in str(e).lower() for term in ["gcp", "timeout", "run.app"]):
             pytest.skip(f"GCP service issue: {e}")
@@ -384,7 +384,7 @@ async def test_gcp_staging_cross_service_token_validation():
     except httpx.TimeoutException:
         pytest.skip("GCP backend service timeout")
     except Exception as e:
-        if "E2E_BYPASS_KEY" in str(e) or "secret" in str(e).lower():
+        if "E2E_OAUTH_SIMULATION_KEY" in str(e) or "secret" in str(e).lower():
             pytest.skip(f"GCP Secrets Manager issue: {e}")
         elif any(term in str(e).lower() for term in ["gcp", "timeout", "run.app"]):
             pytest.skip(f"GCP service issue: {e}")
@@ -431,7 +431,7 @@ async def test_gcp_staging_multiple_concurrent_sessions():
         logger.info(f"[SUCCESS] GCP staging concurrent sessions: {valid_sessions}/{len(session_tokens)} valid")
         
     except Exception as e:
-        if "E2E_BYPASS_KEY" in str(e) or "secret" in str(e).lower():
+        if "E2E_OAUTH_SIMULATION_KEY" in str(e) or "secret" in str(e).lower():
             pytest.skip(f"GCP Secrets Manager issue: {e}")
         elif any(term in str(e).lower() for term in ["gcp", "timeout", "run.app"]):
             pytest.skip(f"GCP service issue: {e}")
@@ -512,7 +512,7 @@ async def test_gcp_staging_oauth_complete_integration():
         assert total_time < 60.0, f"Complete integration too slow: {total_time:.2f}s"
         
     except Exception as e:
-        if "E2E_BYPASS_KEY" in str(e) or "secret" in str(e).lower():
+        if "E2E_OAUTH_SIMULATION_KEY" in str(e) or "secret" in str(e).lower():
             pytest.skip(f"GCP Secrets Manager issue: {e}")
         elif any(term in str(e).lower() for term in ["gcp", "timeout", "run.app"]):
             pytest.skip(f"GCP service issue: {e}")

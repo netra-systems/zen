@@ -11,11 +11,11 @@ Running E2E tests against staging.netrasystems.ai requires specific authenticati
 - Auth Service: `https://netra-auth-service-pnovr5vsba-uc.a.run.app` (172ms response) 
 - Frontend: `https://netra-frontend-staging-pnovr5vsba-uc.a.run.app` (204ms response)
 
-❌ **Authenticated E2E Tests**: Require E2E_BYPASS_KEY environment variable
+❌ **Authenticated E2E Tests**: Require E2E_OAUTH_SIMULATION_KEY environment variable
 
 ## Authentication Requirements
 
-### Why E2E_BYPASS_KEY is Required
+### Why E2E_OAUTH_SIMULATION_KEY is Required
 
 Staging environment uses production-level security. For automated testing without OAuth flow, an E2E bypass mechanism is implemented with:
 
@@ -37,7 +37,7 @@ gcloud secrets versions access latest --secret="e2e-bypass-key" --project="netra
 
 1. **Export the environment variable**:
 ```bash
-export E2E_BYPASS_KEY="your-key-from-secrets-manager"
+export E2E_OAUTH_SIMULATION_KEY="your-key-from-secrets-manager"
 export ENVIRONMENT=staging
 export STAGING_AUTH_URL=https://api.staging.netrasystems.ai
 ```
@@ -47,7 +47,7 @@ export STAGING_AUTH_URL=https://api.staging.netrasystems.ai
 python unified_test_runner.py --categories e2e --env staging --real-llm
 ```
 
-## What Works Without E2E_BYPASS_KEY
+## What Works Without E2E_OAUTH_SIMULATION_KEY
 
 You can run these tests without authentication:
 
@@ -63,7 +63,7 @@ python unified_test_runner.py --categories smoke --env staging
 
 3. **CORS and connectivity tests** (public endpoints)
 
-## What Requires E2E_BYPASS_KEY
+## What Requires E2E_OAUTH_SIMULATION_KEY
 
 These test categories need authentication:
 
@@ -79,7 +79,7 @@ These test categories need authentication:
 Use the provided setup script to configure bypass key:
 
 ```bash
-python scripts/setup_e2e_bypass_key.py --project netra-staging
+python scripts/setup_E2E_OAUTH_SIMULATION_KEY.py --project netra-staging
 ```
 
 This script will:
@@ -95,7 +95,7 @@ This script will:
 python tests/e2e/integration/test_staging_health_validation.py
 
 # Test with bypass key (full E2E)
-export E2E_BYPASS_KEY="your-key"
+export E2E_OAUTH_SIMULATION_KEY="your-key"
 python unified_test_runner.py --categories e2e --env staging --real-llm
 
 # Test bypass mechanism directly
@@ -104,9 +104,9 @@ python tests/e2e/staging_auth_bypass.py
 
 ## Troubleshooting
 
-### "E2E_BYPASS_KEY not provided" Error
+### "E2E_OAUTH_SIMULATION_KEY not provided" Error
 ```bash
-export E2E_BYPASS_KEY="$(gcloud secrets versions access latest --secret=e2e-bypass-key --project=netra-staging)"
+export E2E_OAUTH_SIMULATION_KEY="$(gcloud secrets versions access latest --secret=e2e-bypass-key --project=netra-staging)"
 ```
 
 ### "Invalid E2E bypass key" Error

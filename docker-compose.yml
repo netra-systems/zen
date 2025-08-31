@@ -188,78 +188,77 @@ services:
       "
 
   # Dev Analytics Service
-  # NOTE: Temporarily disabled - may be causing crashes
-  # dev-analytics:
-  #   build:
-  #     context: .
-  #     dockerfile: ./docker/analytics.development.Dockerfile
-  #   container_name: netra-dev-analytics
-  #   profiles: ["dev"]
-  #   env_file:
-  #     - .env.development
-  #   environment:
-  #     # Database connections
-  #     CLICKHOUSE_HOST: dev-clickhouse
-  #     CLICKHOUSE_PORT: 8123
-  #     CLICKHOUSE_USER: ${CLICKHOUSE_USER:-netra}
-  #     CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-netra123}
-  #     CLICKHOUSE_DB: ${CLICKHOUSE_DB:-netra_analytics}
-  #     
-  #     # Redis
-  #     REDIS_HOST: dev-redis
-  #     REDIS_PORT: 6379
-  #     REDIS_URL: redis://dev-redis:6379/2
-  #     
-  #     # Server Config
-  #     PORT: 8090
-  #     HOST: 0.0.0.0
-  #     ENVIRONMENT: ${ENVIRONMENT:-development}
-  #     UVICORN_HOST: 0.0.0.0
-  #     UVICORN_PORT: 8090
-  #     
-  #     # Analytics-specific configuration
-  #     ANALYTICS_SERVICE_PORT: 8090
-  #     EVENT_BATCH_SIZE: 100
-  #     EVENT_FLUSH_INTERVAL_MS: 5000
-  #     MAX_EVENTS_PER_USER_PER_MINUTE: 1000
-  #     
-  #     # Service authentication
-  #     SERVICE_SECRET: ${SERVICE_SECRET:-xNp9hKjT5mQ8w2fE7vR4yU3iO6aS1gL9cB0zZ8tN6wX2eR4vY7uI0pQ3s9dF5gH8}
-  #     SERVICE_ID: analytics
-  #   ports:
-  #     - "${ANALYTICS_PORT:-8090}:8090"
-  #   volumes:
-  #     # Named volumes for code
-  #     - dev_analytics_code:/app/analytics_service
-  #     - dev_shared_code:/app/shared
-  #     - dev_analytics_logs:/app/logs
-  #     - dev_analytics_pycache:/app/.pycache
-  #   depends_on:
-  #     dev-redis:
-  #       condition: service_healthy
-  #     dev-clickhouse:
-  #       condition: service_healthy
-  #   healthcheck:
-  #     test: ["CMD", "curl", "-f", "http://localhost:8090/health"]
-  #     interval: 60s
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 40s
-  #   networks:
-  #     - netra-network
-  #   restart: no
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         memory: 512M
-  #         cpus: '0.5'
-  #       reservations:
-  #         memory: 256M
-  #   command: >
-  #     sh -c "
-  #       echo 'Starting analytics service...' &&
-  #       uvicorn analytics_service.main:app --host 0.0.0.0 --port 8090 --reload
-  #     "
+  dev-analytics:
+    build:
+      context: .
+      dockerfile: ./docker/analytics.development.Dockerfile
+    container_name: netra-dev-analytics
+    profiles: ["dev"]
+    env_file:
+      - .env.development
+    environment:
+      # Database connections
+      CLICKHOUSE_HOST: dev-clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-netra}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-netra123}
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-netra_analytics}
+      
+      # Redis
+      REDIS_HOST: dev-redis
+      REDIS_PORT: 6379
+      REDIS_URL: redis://dev-redis:6379/2
+      
+      # Server Config
+      PORT: 8090
+      HOST: 0.0.0.0
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      UVICORN_HOST: 0.0.0.0
+      UVICORN_PORT: 8090
+      
+      # Analytics-specific configuration
+      ANALYTICS_SERVICE_PORT: 8090
+      EVENT_BATCH_SIZE: 100
+      EVENT_FLUSH_INTERVAL_MS: 5000
+      MAX_EVENTS_PER_USER_PER_MINUTE: 1000
+      
+      # Service authentication
+      SERVICE_SECRET: ${SERVICE_SECRET:-xNp9hKjT5mQ8w2fE7vR4yU3iO6aS1gL9cB0zZ8tN6wX2eR4vY7uI0pQ3s9dF5gH8}
+      SERVICE_ID: analytics
+    ports:
+      - "${ANALYTICS_PORT:-8090}:8090"
+    volumes:
+      # Named volumes for code
+      - dev_analytics_code:/app/analytics_service
+      - dev_shared_code:/app/shared
+      - dev_analytics_logs:/app/logs
+      - dev_analytics_pycache:/app/.pycache
+    depends_on:
+      dev-redis:
+        condition: service_healthy
+      dev-clickhouse:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/health"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - netra-network
+    restart: no
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+    command: >
+      sh -c "
+        echo 'Starting analytics service...' &&
+        uvicorn analytics_service.main:app --host 0.0.0.0 --port 8090 --reload
+      "
 
   # Dev Backend Service
   dev-backend:

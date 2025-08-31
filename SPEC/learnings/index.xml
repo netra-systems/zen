@@ -220,7 +220,7 @@
             <critical-takeaway>OAUTH SIMULATION IS OAUTH SIMULATION - creates valid user sessions as if users completed Google OAuth, NOT a security bypass (staging_e2e_comprehensive_implementation.xml).</critical-takeaway>
             <critical-takeaway>WebSocket event tracking validates 90% of platform value (Chat functionality) in production-like environment (staging_e2e_comprehensive_implementation.xml).</critical-takeaway>
             <critical-takeaway>Proper error handling for Cloud Run cold starts with 30s API timeouts and 60s WebSocket timeouts (staging_e2e_comprehensive_implementation.xml).</critical-takeaway>
-            <critical-takeaway>Run tests/run_staging_tests.py with E2E_BYPASS_KEY for comprehensive staging validation before production deployment (staging_e2e_comprehensive_implementation.xml).</critical-takeaway>
+            <critical-takeaway>Run tests/run_staging_tests.py with E2E_OAUTH_SIMULATION_KEY for comprehensive staging validation before production deployment (staging_e2e_comprehensive_implementation.xml).</critical-takeaway>
         </category>
         
         <category name="WebSocket/AgentLifecycle" path="SPEC/learnings/agent_manager_lifecycle_events.xml" keywords="Agent Manager, WebSocket, Lifecycle Events, Agent Registration, Agent Failure, Agent Cancellation, Metrics Updates, Real-time Monitoring, System Observability">

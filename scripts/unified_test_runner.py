@@ -572,9 +572,9 @@ class UnifiedTestRunner:
         try:
             env = get_env()
             
-            # Check if E2E_BYPASS_KEY is already set
-            if env.get('E2E_BYPASS_KEY'):
-                print("[INFO] E2E_BYPASS_KEY already configured")
+            # Check if E2E_OAUTH_SIMULATION_KEY is already set
+            if env.get('E2E_OAUTH_SIMULATION_KEY'):
+                print("[INFO] E2E_OAUTH_SIMULATION_KEY already configured")
                 return
             
             print("[INFO] Auto-configuring E2E bypass key for staging...")
@@ -589,7 +589,7 @@ class UnifiedTestRunner:
             
             if result.returncode == 0:
                 bypass_key = result.stdout.strip()
-                env.set('E2E_BYPASS_KEY', bypass_key, 'staging_e2e_auth')
+                env.set('E2E_OAUTH_SIMULATION_KEY', bypass_key, 'staging_e2e_auth')
                 env.set('ENVIRONMENT', 'staging', 'staging_e2e_auth')
                 env.set('STAGING_AUTH_URL', 'https://api.staging.netrasystems.ai', 'staging_e2e_auth')
                 print("[INFO] ✅ E2E bypass key configured successfully")

@@ -626,7 +626,7 @@
     "Script to fix invalid secrets in Google Secret Manager for staging environment.\n\nThis script addresses critical issues found in the staging secrets audit:\n1. Invalid Redis URL with placeholder password\n2. Duplicate/orphaned secrets\n3. Missing mappings\n\nRun with: python scripts/fix_staging_secrets.py",
     "See SPEC/gcp_deployment.xml for deployment guidelines.",
     "See SPEC/learnings/websocket_agent_integration_critical.xml for fix details.",
-    "Setup E2E Bypass Key for Staging Environment\n\nThis script helps set up the E2E authentication bypass key in Google Secrets Manager\nfor the staging environment. It generates a secure key and stores it properly.\n\nUsage:\n    python scripts/setup_e2e_bypass_key.py [--project PROJECT_ID]",
+    "Setup E2E Bypass Key for Staging Environment\n\nThis script helps set up the E2E authentication bypass key in Google Secrets Manager\nfor the staging environment. It generates a secure key and stores it properly.\n\nUsage:\n    python scripts/setup_E2E_OAUTH_SIMULATION_KEY.py [--project PROJECT_ID]",
     "Staging URL Validation Script\nPrevents localhost URLs from being used in staging/production environments.\n\nThis script validates that:\n1. No localhost references exist in staging/production environment variables\n2. All URLs use appropriate protocols (https/wss for staging/production)\n3. Domain names match expected patterns for each environment\n\nUsage:\n    python scripts/validate_staging_urls.py --environment staging\n    python scripts/validate_staging_urls.py --environment production --fix",
     "Status:  python scripts/manage_precommit.py status",
     "To re-enable: python scripts/manage_precommit.py enable",

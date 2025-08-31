@@ -25,7 +25,7 @@
       "value": "ACTIVE",
       "category": "configuration",
       "locations": [
-        "scripts/setup_e2e_bypass_key.py:39"
+        "scripts/setup_E2E_OAUTH_SIMULATION_KEY.py:39"
       ]
     },
     "ADD_MESSAGE": {
@@ -1381,8 +1381,8 @@
         "netra_backend/app/services/startup_fixes_integration.py:82"
       ]
     },
-    "E2E_BYPASS_KEY": {
-      "value": "E2E_BYPASS_KEY",
+    "E2E_OAUTH_SIMULATION_KEY": {
+      "value": "E2E_OAUTH_SIMULATION_KEY",
       "category": "configuration",
       "locations": [
         "auth_service/auth_core/secret_loader.py:351"

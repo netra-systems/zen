@@ -116,7 +116,7 @@ def _configure_staging_e2e_auth(self):
     )
     if result.returncode == 0:
         bypass_key = result.stdout.strip()
-        env.set('E2E_BYPASS_KEY', bypass_key, 'staging_e2e_auth')
+        env.set('E2E_OAUTH_SIMULATION_KEY', bypass_key, 'staging_e2e_auth')
 ```
 
 ### Staging Service URLs

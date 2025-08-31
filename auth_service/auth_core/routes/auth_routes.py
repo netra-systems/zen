@@ -824,7 +824,7 @@ db_manager = DBManagerWrapper(auth_service)
 @router.post("/e2e/test-auth")
 async def e2e_test_auth(
     request: Request,
-    x_e2e_bypass_key: Optional[str] = Header(None),
+    x_E2E_OAUTH_SIMULATION_KEY: Optional[str] = Header(None),
     client_info: dict = Depends(get_client_info)
 ):
     """E2E test authentication endpoint for staging environment only.
@@ -850,7 +850,7 @@ async def e2e_test_auth(
         )
     
     # Validate E2E bypass key
-    if not x_e2e_bypass_key:
+    if not x_E2E_OAUTH_SIMULATION_KEY:
         logger.error("E2E test auth attempted without bypass key")
         raise HTTPException(
             status_code=401,
@@ -858,7 +858,7 @@ async def e2e_test_auth(
         )
     
     # Get expected bypass key from secrets
-    expected_key = AuthSecretLoader.get_e2e_bypass_key()
+    expected_key = AuthSecretLoader.get_E2E_OAUTH_SIMULATION_KEY()
     if not expected_key:
         logger.error("E2E bypass key not configured in Google Secrets Manager")
         raise HTTPException(
@@ -868,7 +868,7 @@ async def e2e_test_auth(
     
     # Validate bypass key
     import hmac
-    if not hmac.compare_digest(x_e2e_bypass_key, expected_key):
+    if not hmac.compare_digest(x_E2E_OAUTH_SIMULATION_KEY, expected_key):
         logger.error(f"Invalid E2E bypass key from IP: {client_info.get('ip')}")
         raise HTTPException(
             status_code=401,

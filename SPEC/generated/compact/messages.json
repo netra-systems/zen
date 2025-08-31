@@ -14730,7 +14730,7 @@
     "expert, provide recommendations for:",
     "expert, validate these requirements:\nQuery:",
     "expired sessions,",
-    "export E2E_BYPASS_KEY='",
+    "export E2E_OAUTH_SIMULATION_KEY='",
     "export ENVIRONMENT=staging",
     "export STAGING_AUTH_URL=https://api.staging.netrasystems.ai",
     "export TEST_ANTHROPIC_API_KEY=your_test_key",

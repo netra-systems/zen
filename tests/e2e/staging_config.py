@@ -61,7 +61,7 @@ class StagingTestConfig:
         self.verify_ssl = True
         
         # OAUTH SIMULATION configuration
-        self.e2e_bypass_key = os.getenv("E2E_BYPASS_KEY")
+        self.E2E_OAUTH_SIMULATION_KEY = os.getenv("E2E_OAUTH_SIMULATION_KEY")
         self.test_user_email = "e2e-test@staging.netrasystems.ai"
         self.test_user_name = "E2E Test User"
         
@@ -89,11 +89,11 @@ class StagingTestConfig:
     
     def get_bypass_auth_headers(self) -> Dict[str, str]:
         """Get headers for OAUTH SIMULATION endpoint."""
-        if not self.e2e_bypass_key:
-            raise ValueError("E2E_BYPASS_KEY not set in environment")
+        if not self.E2E_OAUTH_SIMULATION_KEY:
+            raise ValueError("E2E_OAUTH_SIMULATION_KEY not set in environment")
         
         return {
-            "X-E2E-Bypass-Key": self.e2e_bypass_key,
+            "X-E2E-Bypass-Key": self.E2E_OAUTH_SIMULATION_KEY,
             "Content-Type": "application/json"
         }
     
@@ -101,8 +101,8 @@ class StagingTestConfig:
         """Validate that all required configuration is present."""
         issues = []
         
-        if not self.e2e_bypass_key:
-            issues.append("E2E_BYPASS_KEY not set")
+        if not self.E2E_OAUTH_SIMULATION_KEY:
+            issues.append("E2E_OAUTH_SIMULATION_KEY not set")
         
         if not self.urls.backend_url:
             issues.append("Backend URL not configured")

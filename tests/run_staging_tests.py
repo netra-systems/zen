@@ -16,7 +16,7 @@ Options:
     --ws        Run only WebSocket tests
     
 Environment Variables Required:
-    E2E_BYPASS_KEY - Key for OAUTH SIMULATION (simulates OAuth)
+    E2E_OAUTH_SIMULATION_KEY - Key for OAUTH SIMULATION (simulates OAuth)
     ENVIRONMENT    - Must be set to "staging"
 """
 
@@ -65,8 +65,8 @@ class StagingTestRunner:
         issues = []
         
         # Check E2E bypass key
-        if not os.getenv("E2E_BYPASS_KEY"):
-            issues.append("E2E_BYPASS_KEY not set - required for OAUTH SIMULATION")
+        if not os.getenv("E2E_OAUTH_SIMULATION_KEY"):
+            issues.append("E2E_OAUTH_SIMULATION_KEY not set - required for OAUTH SIMULATION")
             
         # Check environment setting
         if os.getenv("ENVIRONMENT") != "staging":
@@ -196,7 +196,7 @@ async def main():
     # Validate environment
     if not runner.validate_environment():
         logger.error("\nPlease set required environment variables:")
-        logger.error("  export E2E_BYPASS_KEY=<your-key>")
+        logger.error("  export E2E_OAUTH_SIMULATION_KEY=<your-key>")
         logger.error("  export ENVIRONMENT=staging")
         return 1
     

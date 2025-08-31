@@ -6,7 +6,7 @@ This script helps set up the E2E authentication bypass key in Google Secrets Man
 for the staging environment. It generates a secure key and stores it properly.
 
 Usage:
-    python scripts/setup_e2e_bypass_key.py [--project PROJECT_ID]
+    python scripts/setup_E2E_OAUTH_SIMULATION_KEY.py [--project PROJECT_ID]
 """
 
 import os
@@ -225,11 +225,11 @@ def main():
     print("SETUP COMPLETE!")
     print("="*60)
     print("\nTo use this key in your E2E tests:")
-    print(f"  export E2E_BYPASS_KEY='{bypass_key}'")
+    print(f"  export E2E_OAUTH_SIMULATION_KEY='{bypass_key}'")
     print(f"  export ENVIRONMENT=staging")
     print(f"  export STAGING_AUTH_URL=https://api.staging.netrasystems.ai")
     print("\nOr add to your .env.staging file:")
-    print(f"  E2E_BYPASS_KEY={bypass_key}")
+    print(f"  E2E_OAUTH_SIMULATION_KEY={bypass_key}")
     print("\nTest the OAUTH SIMULATION:")
     print(f"  python tests/e2e/staging_auth_bypass.py")
     print("\n" + "="*60)

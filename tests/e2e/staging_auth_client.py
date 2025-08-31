@@ -92,7 +92,7 @@ class StagingAuthClient:
                     return tokens
                     
                 elif response.status_code == 401:
-                    raise ValueError(f"Invalid E2E bypass key. Check E2E_BYPASS_KEY environment variable")
+                    raise ValueError(f"Invalid E2E bypass key. Check E2E_OAUTH_SIMULATION_KEY environment variable")
                     
                 elif response.status_code == 503:
                     raise ConnectionError(f"Auth service unavailable (cold start?). Retry in a few seconds")

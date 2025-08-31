@@ -1,0 +1,119 @@
+# Docker Compose Override for Local Development
+# This file provides bind mounts for local development
+# It automatically overrides settings in docker-compose.yml when present
+#
+# Usage:
+# docker-compose --profile dev up     # Will use these overrides automatically
+# docker-compose --profile test up    # Test profile for testing
+#
+# To disable overrides:
+# docker-compose -f docker-compose.yml --profile dev up
+
+version: '3.8'
+
+services:
+  # ============================================
+  # DEVELOPMENT ENVIRONMENT OVERRIDES
+  # ============================================
+  
+  dev-postgres:
+    volumes:
+      - dev_postgres_data:/var/lib/postgresql/data
+      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+
+  dev-auth:
+    volumes:
+      # Bind mount for live code changes
+      - ./auth_service:/app/auth_service:cached
+      - ./shared:/app/shared:cached
+      - ./SPEC:/app/SPEC:ro
+      # Keep logs in named volume to avoid permission issues
+      - dev_auth_logs:/app/logs
+      # Exclude Python cache
+      - /app/__pycache__
+      - /app/.pytest_cache
+
+  dev-analytics:
+    volumes:
+      # Bind mount for live code changes
+      - ./analytics_service:/app/analytics_service:cached
+      - ./shared:/app/shared:cached
+      - ./SPEC:/app/SPEC:ro
+      # Keep logs in named volume
+      - dev_analytics_logs:/app/logs
+      # Exclude Python cache
+      - /app/__pycache__
+      - /app/.pytest_cache
+
+  dev-backend:
+    volumes:
+      # Bind mount for live code changes
+      - ./netra_backend:/app/netra_backend:cached
+      - ./shared:/app/shared:cached
+      - ./SPEC:/app/SPEC:ro
+      - ./scripts:/app/scripts:ro
+      - ./tests:/app/tests:ro
+      - ./test_framework:/app/test_framework:ro
+      # Keep logs in named volume
+      - dev_backend_logs:/app/logs
+      # Exclude Python cache
+      - /app/__pycache__
+      - /app/.pytest_cache
+      - /app/netra_backend/__pycache__
+
+  dev-frontend:
+    volumes:
+      # Bind mount for frontend code
+      - ./frontend:/app:cached
+      # Critical: node_modules must be a named volume
+      - dev_frontend_node_modules:/app/node_modules
+      - dev_frontend_next:/app/.next
+      # Exclude other build artifacts
+      - /app/.next
+      - /app/.cache
+    environment:
+      # Enable fast refresh for Next.js
+      NEXT_PUBLIC_FAST_REFRESH: "true"
+      WATCHPACK_POLLING: "true"
+
+  # ============================================
+  # TEST ENVIRONMENT OVERRIDES
+  # ============================================
+  
+  test-backend:
+    volumes:
+      # Bind mount test files for development
+      - ./netra_backend:/app/netra_backend:ro
+      - ./shared:/app/shared:ro
+      - ./tests:/app/tests:ro
+      - ./test_framework:/app/test_framework:ro
+      - ./scripts:/app/scripts:ro
+      - ./SPEC:/app/SPEC:ro
+      # Keep logs writable
+      - test_backend_logs:/app/logs
+
+  test-auth:
+    volumes:
+      # Read-only bind mounts for testing
+      - ./auth_service:/app/auth_service:ro
+      - ./shared:/app/shared:ro
+      - ./SPEC:/app/SPEC:ro
+      # Keep logs writable
+      - test_auth_logs:/app/logs
+
+  test-analytics:
+    volumes:
+      # Read-only bind mounts for testing
+      - ./analytics_service:/app/analytics_service:ro
+      - ./shared:/app/shared:ro
+      - ./SPEC:/app/SPEC:ro
+      # Keep logs writable
+      - test_analytics_logs:/app/logs
+
+  test-frontend:
+    volumes:
+      # Read-only frontend code for testing
+      - ./frontend:/app:ro
+      # Keep node_modules in volume
+      - test_frontend_node_modules:/app/node_modules
+      - test_frontend_next:/app/.next

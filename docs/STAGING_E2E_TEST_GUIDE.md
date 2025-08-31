@@ -34,7 +34,7 @@ tests/e2e/
 
 ```bash
 # Required: E2E bypass key (stored in GCP Secrets Manager)
-export E2E_BYPASS_KEY="<your-bypass-key>"
+export E2E_OAUTH_SIMULATION_KEY="<your-bypass-key>"
 
 # Set environment to staging
 export ENVIRONMENT="staging"
@@ -177,7 +177,7 @@ If you see connection errors:
 ### Authentication Errors
 
 If authentication fails:
-1. Verify `E2E_BYPASS_KEY` is set correctly
+1. Verify `E2E_OAUTH_SIMULATION_KEY` is set correctly
 2. Check the key exists in GCP Secrets Manager
 3. Ensure auth service is deployed and healthy
 
@@ -204,7 +204,7 @@ Add to your CI/CD pipeline:
 staging-e2e-tests:
   runs-on: ubuntu-latest
   env:
-    E2E_BYPASS_KEY: ${{ secrets.E2E_BYPASS_KEY }}
+    E2E_OAUTH_SIMULATION_KEY: ${{ secrets.E2E_OAUTH_SIMULATION_KEY }}
     ENVIRONMENT: staging
   steps:
     - uses: actions/checkout@v2

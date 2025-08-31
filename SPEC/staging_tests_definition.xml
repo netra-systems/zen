@@ -65,7 +65,7 @@
       <test_location>/tests/e2e/test_staging_*.py</test_location>
       <usage>End-to-end validation before production deployment</usage>
       <environment_variable>ENVIRONMENT=staging</environment_variable>
-      <authentication>E2E_BYPASS_KEY required for test user creation</authentication>
+      <authentication>E2E_OAUTH_SIMULATION_KEY required for test user creation</authentication>
     </environment>
 
     <environment name="production">
@@ -154,7 +154,7 @@
       </usage>
     </variable>
 
-    <variable name="E2E_BYPASS_KEY">
+    <variable name="E2E_OAUTH_SIMULATION_KEY">
       <description>Required for staging authentication bypass</description>
       <environment>staging only</environment>
       <storage>GCP Secrets Manager</storage>
@@ -182,7 +182,7 @@
       <environment>ENVIRONMENT=staging</environment>
       <infrastructure>GCP Cloud Run staging</infrastructure>
       <description>Production-like validation before deployment</description>
-      <requirements>E2E_BYPASS_KEY must be set</requirements>
+      <requirements>E2E_OAUTH_SIMULATION_KEY must be set</requirements>
     </pattern>
 
     <pattern name="Production Smoke Testing">
@@ -224,7 +224,7 @@
     <item>All "staging" test files must test GCP Cloud Run services</item>
     <item>No Docker Compose files should contain "staging" in their name</item>
     <item>Test classes named "Staging*" must use ENVIRONMENT=staging</item>
-    <item>Staging tests must require E2E_BYPASS_KEY for authentication</item>
+    <item>Staging tests must require E2E_OAUTH_SIMULATION_KEY for authentication</item>
     <item>Docker tests must use localhost URLs and Docker Compose ports</item>
     <item>Configuration files must match their target infrastructure</item>
   </validation_checklist>
@@ -234,7 +234,7 @@
       <filename>tests/e2e/test_staging_e2e_comprehensive.py</filename>
       <environment>ENVIRONMENT=staging</environment>
       <target>https://netra-backend-staging-701982941522.us-central1.run.app</target>
-      <authentication>E2E_BYPASS_KEY</authentication>
+      <authentication>E2E_OAUTH_SIMULATION_KEY</authentication>
     </example>
 
     <example name="Correct Docker Test">

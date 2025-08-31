@@ -235,12 +235,12 @@ python tests/run_staging_tests.py --category websocket
 export ENVIRONMENT=staging
 python tests/run_staging_tests.py
             </syntax>
-            <description>Auto-fetches E2E_BYPASS_KEY from environment or prompts</description>
+            <description>Auto-fetches E2E_OAUTH_SIMULATION_KEY from environment or prompts</description>
         </command>
         
         <command name="Run with explicit key">
             <syntax>
-export E2E_BYPASS_KEY=your-key-here
+export E2E_OAUTH_SIMULATION_KEY=your-key-here
 export ENVIRONMENT=staging
 python tests/run_staging_tests.py
             </syntax>
