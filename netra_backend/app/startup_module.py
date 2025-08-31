@@ -1046,9 +1046,17 @@ async def _run_startup_phase_three(app: FastAPI, logger: logging.Logger) -> None
 
 
 async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
-    """Run complete startup sequence with improved initialization handling."""
-    # Use the global startup manager instance
+    """Run complete startup sequence - DETERMINISTIC MODE."""
+    # Check if deterministic mode is enabled (default: YES)
+    config = get_config()
+    use_deterministic = getattr(config, 'deterministic_startup', 'true').lower() == 'true'
     
+    if use_deterministic:
+        # Use the new deterministic startup - NO FALLBACKS, NO GRACEFUL DEGRADATION
+        from netra_backend.app.startup_module_deterministic import run_deterministic_startup
+        return await run_deterministic_startup(app)
+    
+    # Legacy startup (deprecated - will be removed)
     # Initialize logger FIRST - before any logic to ensure it's always available in all scopes
     logger = None
     try:
