@@ -3,7 +3,6 @@ import { UnifiedWebSocketEvent } from '../types/unified-chat';
 import { WebSocketStatus, WebSocketState, WebSocketServiceError } from '../types/domains/websocket';
 import { config } from '@/config';
 import { logger } from '@/lib/logger';
-import { logger as debugLogger } from '@/lib/logger';
 
 interface JWTPayload {
   exp: number;
@@ -233,7 +232,7 @@ class WebSocketService {
   private statusChangeTimer: NodeJS.Timeout | null = null;
 
   private handleConnectionOpen(url: string, options: WebSocketOptions): void {
-    debugLogger.debug('[WebSocketService] Connection opened to:', url);
+    logger.debug('[WebSocketService] Connection opened to:', url);
     this.state = 'connected';
     this.status = 'OPEN';
     // Use immediate status change for connection open

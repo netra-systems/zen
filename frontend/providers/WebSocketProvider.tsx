@@ -4,7 +4,6 @@ import { webSocketService, WebSocketStatus } from '../services/webSocketService'
 import { WebSocketMessage, Message } from '@/types/unified';
 import { config as appConfig } from '@/config';
 import { logger } from '@/lib/logger';
-import { logger as debugLogger } from '@/lib/logger';
 import { WebSocketContextType, WebSocketProviderProps } from '../types/websocket-context-types';
 import { reconciliationService, OptimisticMessage } from '../services/reconciliation';
 
@@ -73,7 +72,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
 
   // Memoized status handler
   const handleStatusChange = useCallback((newStatus: WebSocketStatus) => {
-    debugLogger.debug('[WebSocketProvider] Status changed to:', newStatus);
+    logger.debug('[WebSocketProvider] Status changed to:', newStatus);
     setStatus(newStatus);
   }, []);
 
@@ -84,13 +83,13 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     // Wait for auth to initialize before attempting connection
     // This prevents race conditions and spurious authentication errors
     if (!authInitialized) {
-      debugLogger.debug('[WebSocketProvider] Waiting for auth initialization');
+      logger.debug('[WebSocketProvider] Waiting for auth initialization');
       return;
     }
     
     // Guard: Skip connection if no token is available (unless in development mode)
     if (!token && !isDevelopment) {
-      debugLogger.debug('[WebSocketProvider] WebSocket connection skipped - no token available');
+      logger.debug('[WebSocketProvider] WebSocket connection skipped - no token available');
       return;
     }
     
@@ -110,7 +109,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
           const baseWsUrl = appConfig.wsUrl || `${appConfig.apiUrl.replace(/^http/, 'ws')}/ws`;
           const wsUrl = webSocketService.getSecureUrl(baseWsUrl);
           
-          debugLogger.debug('[WebSocketProvider] Establishing secure WebSocket connection on app load', {
+          logger.debug('[WebSocketProvider] Establishing secure WebSocket connection on app load', {
             baseWsUrl: baseWsUrl,
             finalWsUrl: wsUrl.replace(/jwt\.[^&]+/, 'jwt.***'), // Hide token in logs
             hasToken: !!token,
@@ -146,7 +145,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
               }
             },
             onOpen: () => {
-              debugLogger.debug('[WebSocketProvider] Secure WebSocket connection established');
+              logger.debug('[WebSocketProvider] Secure WebSocket connection established');
             },
             onError: (error) => {
               // Log auth errors appropriately based on context
@@ -197,7 +196,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
               }
             },
             onReconnect: () => {
-              debugLogger.debug('[WebSocketProvider] WebSocket reconnecting with fresh authentication');
+              logger.debug('[WebSocketProvider] WebSocket reconnecting with fresh authentication');
             },
             heartbeatInterval: 15000, // 15 second heartbeat for better responsiveness
             rateLimit: {
