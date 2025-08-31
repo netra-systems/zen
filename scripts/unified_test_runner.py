@@ -106,6 +106,21 @@ except ImportError:
     add_orchestrator_arguments = None
     execute_with_orchestrator = None
 
+# Background E2E Agent integration
+try:
+    from test_framework.orchestration.background_e2e_agent import (
+        BackgroundE2EAgent, E2ETestCategory, BackgroundTaskConfig,
+        add_background_e2e_arguments, handle_background_e2e_commands
+    )
+    BACKGROUND_E2E_AVAILABLE = True
+except ImportError:
+    BACKGROUND_E2E_AVAILABLE = False
+    BackgroundE2EAgent = None
+    E2ETestCategory = None
+    BackgroundTaskConfig = None
+    add_background_e2e_arguments = None
+    handle_background_e2e_commands = None
+
 # Test execution tracking
 try:
     from scripts.test_execution_tracker import TestExecutionTracker, TestRunRecord
@@ -1571,6 +1586,10 @@ def main():
     if ORCHESTRATOR_AVAILABLE:
         add_orchestrator_arguments(parser)
     
+    # Add background E2E arguments if available
+    if BACKGROUND_E2E_AVAILABLE:
+        add_background_e2e_arguments(parser)
+    
     args = parser.parse_args()
     
     # Handle special operations
@@ -1642,6 +1661,12 @@ def main():
     if ORCHESTRATOR_AVAILABLE and hasattr(args, 'show_layers') and args.show_layers:
         import asyncio
         return asyncio.run(execute_with_orchestrator(args))
+    
+    # Handle background E2E commands if requested
+    if BACKGROUND_E2E_AVAILABLE:
+        background_exit_code = handle_background_e2e_commands(args, PROJECT_ROOT)
+        if background_exit_code is not None:
+            return background_exit_code
     
     # Run tests with traditional category system
     runner = UnifiedTestRunner()
