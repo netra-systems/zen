@@ -33,6 +33,21 @@
         <prevention>Eliminate ALL fallback logic in authentication. Require environment-specific secrets: JWT_SECRET_STAGING, JWT_SECRET_PRODUCTION, JWT_SECRET_KEY (dev/test only).</prevention>
     </learning>
     
+    <learning id="auth-state-race-condition-2025-08-31">
+        <title>Authentication State Race Condition During Initialization</title>
+        <category>Frontend Authentication</category>
+        <keywords>auth, race condition, state management, react, frontend, token, user, initialization</keywords>
+        <path>auth_state_race_condition_fix.xml</path>
+        <critical-takeaway>
+            React setState is asynchronous - never assume state has updated immediately after calling setState.
+            Auth state monitoring must use tracked actual values, not React state values during initialization.
+            hasToken=true but hasUser=false breaks chat functionality (90% of platform value).
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Complete chat failure, users appear logged out despite valid tokens, broken user experience</business-impact>
+        <prevention>Track actual values being set in local variables during state updates. Use these tracked values for validation/monitoring instead of React state. Consider useReducer for atomic multi-state updates.</prevention>
+    </learning>
+    
     <learning id="supervisor-initialization-dependency-fix-2025-08-30">
         <title>Supervisor Agent Initialization Dependency Fix</title>
         <category>Startup Dependencies</category>
