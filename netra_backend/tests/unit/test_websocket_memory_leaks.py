@@ -45,7 +45,8 @@ TTL_SECONDS = 300  # 5 minutes
 
 
 # COMMENTED OUT: MockWebSocket class - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
-# class MockWebSocket:
+# However, we still need MockWebSocket for these specific memory leak tests
+class MockWebSocket:
     """Mock WebSocket for testing without actual connections."""
     
     def __init__(self, connection_id: str = None):
