@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>WebSocket Fallback Removal for Staging/Production</title>
+  <date>2025-08-30</date>
+  <category>websocket</category>
+  <priority>critical</priority>
+  
+  <problem>
+    <description>
+      WebSocket endpoint was incorrectly creating fallback agent handlers in staging environment
+      when dependencies were missing, instead of failing properly. The warning message:
+      "WebSocket dependencies not available - creating fallback agent handler for testing"
+      should NEVER appear in staging or production.
+    </description>
+    <symptoms>
+      <symptom>Warning log: "WebSocket dependencies not available - creating fallback agent handler for testing"</symptom>
+      <symptom>Fallback handler being created in staging environment</symptom>
+      <symptom>Missing agent_supervisor and thread_service not causing proper failure</symptom>
+    </symptoms>
+    <root_cause>
+      The WebSocket endpoint did not differentiate between environments when deciding whether
+      to use fallback handlers. It treated all environments the same when dependencies were missing.
+    </root_cause>
+  </problem>
+  
+  <solution>
+    <approach>
+      Modified the WebSocket endpoint to check the environment and TESTING flag before
+      deciding whether to create a fallback handler or raise an error.
+    </approach>
+    <implementation>
+      <change file="netra_backend/app/routes/websocket.py">
+        Added environment checking logic that:
+        1. Gets the current environment from get_env()
+        2. Checks if TESTING flag is set
+        3. If in staging/production and not testing, raises RuntimeError when dependencies are missing
+        4. If in staging/production and not testing, raises RuntimeError when handler registration fails
+        5. Only allows fallback handlers in development or when TESTING=1
+      </change>
+    </implementation>
+    <testing>
+      Created comprehensive unit tests in test_websocket_no_fallback_staging.py to verify:
+      - Staging environment raises RuntimeError when dependencies are missing
+      - Production environment raises RuntimeError when dependencies are missing
+      - Development environment allows fallback handlers
+      - TESTING=1 flag allows fallback even in staging (for E2E tests)
+    </testing>
+  </solution>
+  
+  <key_insights>
+    <insight>
+      Environment-specific behavior is critical for WebSocket initialization.
+      Fallback handlers should NEVER be used in production environments.
+    </insight>
+    <insight>
+      The TESTING flag provides an escape hatch for E2E tests that need to run
+      in staging-like environments but still require fallback behavior.
+    </insight>
+    <insight>
+      Proper error handling in critical paths prevents silent degradation of service
+      quality in production environments.
+    </insight>
+  </key_insights>
+  
+  <prevention>
+    <guideline>
+      Always check environment before deciding on fallback vs failure behavior
+    </guideline>
+    <guideline>
+      Critical dependencies should cause hard failures in staging/production
+    </guideline>
+    <guideline>
+      Use TESTING flag to allow special behavior in test scenarios
+    </guideline>
+    <guideline>
+      Log clear error messages that indicate the environment and missing dependencies
+    </guideline>
+  </prevention>
+  
+  <related_files>
+    <file>netra_backend/app/routes/websocket.py</file>
+    <file>netra_backend/app/startup_module.py</file>
+    <file>netra_backend/tests/unit/test_websocket_no_fallback_staging.py</file>
+  </related_files>
+  
+  <tags>
+    <tag>websocket</tag>
+    <tag>staging</tag>
+    <tag>production</tag>
+    <tag>fallback</tag>
+    <tag>environment</tag>
+    <tag>critical</tag>
+  </tags>
+</learning>

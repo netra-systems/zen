@@ -2,8 +2,8 @@
   "metadata": {
     "version": "3.0.0",
     "category": "states",
-    "generated_at": "2025-08-30T21:09:08.399908",
-    "root_directory": "/Users/anthony/Documents/GitHub/netra-apex",
+    "generated_at": "2025-08-30T22:12:45.134004",
+    "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 29
   },
   "literals": {
@@ -241,9 +241,9 @@
         "netra_backend/app/schemas/core_enums.py:33",
         "netra_backend/app/websocket_core/reconnection_manager.py:32",
         "netra_backend/app/websocket_core/types.py:32",
-        "frontend/components/chat/ExampleMessageFlow.tsx:74",
-        "frontend/components/chat/ExampleMessageFlow.tsx:345",
-        "frontend/components/chat/ExampleMessageFlow.tsx:346"
+        "frontend/components/chat/agent-status/constants.ts:37",
+        "frontend/components/chat/agent-status/utils.tsx:46",
+        "frontend/components/chat/agent-status-panel/AgentStatusPanel.tsx:33"
       ]
     },
     "inactive": {

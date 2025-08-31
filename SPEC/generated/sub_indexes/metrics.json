@@ -2,8 +2,8 @@
   "metadata": {
     "version": "3.0.0",
     "category": "metrics",
-    "generated_at": "2025-08-30T21:09:08.395008",
-    "root_directory": "/Users/anthony/Documents/GitHub/netra-apex",
+    "generated_at": "2025-08-30T22:12:45.123684",
+    "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 186
   },
   "literals": {
@@ -321,6 +321,8 @@
       "category": "metrics",
       "locations": [
         "netra_backend/app/monitoring/resource_monitor.py:539",
+        "scripts/docker_windows_helper.py:61",
+        "scripts/docker_windows_helper.py:148",
         "scripts/startup_environment.py:46",
         "scripts/startup_reporter.py:135"
       ]

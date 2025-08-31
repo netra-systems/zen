@@ -2,8 +2,8 @@
   "metadata": {
     "version": "3.0.0",
     "category": "paths",
-    "generated_at": "2025-08-30T21:09:08.395973",
-    "root_directory": "/Users/anthony/Documents/GitHub/netra-apex",
+    "generated_at": "2025-08-30T22:12:45.125197",
+    "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 1110
   },
   "literals": {
@@ -1545,8 +1545,8 @@
         "netra_backend/app/routes/demo.py:63",
         "frontend/components/ChatHistorySection.tsx:89",
         "frontend/components/ChatHistorySection.tsx:90",
-        "frontend/components/NavLinks.tsx:16",
-        "frontend/components/demo/DemoCompletion.tsx:16"
+        "frontend/components/demo/DemoCompletion.tsx:16",
+        "frontend/components/NavLinks.tsx:16"
       ]
     },
     "/check-blacklist": {
