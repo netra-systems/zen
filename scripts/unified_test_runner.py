@@ -4,22 +4,58 @@ NETRA APEX UNIFIED TEST RUNNER
 ==============================
 Modern test runner with advanced categorization, progress tracking, and intelligent execution planning.
 
-USAGE:
-    python unified_test_runner.py                       # Run default categories
-    python unified_test_runner.py --category unit       # Run specific category
-    python unified_test_runner.py --help                # Show all options
+NEW: ORCHESTRATION SYSTEM
+=========================
+Advanced layer-based test orchestration with 5 specialized agents:
+- Fast Feedback (2-minute cycles)
+- Full Layered Execution (dependency-aware)
+- Background E2E (long-running tests)
+- Real-time Progress Streaming
+- Resource Management & Service Dependencies
 
-CATEGORIES:
+USAGE:
+    # Legacy mode (categories)
+    python unified_test_runner.py --category unit       # Run specific category
+    python unified_test_runner.py --categories unit api # Run multiple categories
+    
+    # NEW: Orchestration mode (layers)
+    python unified_test_runner.py --use-layers --layers fast_feedback
+    python unified_test_runner.py --execution-mode fast_feedback
+    python unified_test_runner.py --execution-mode nightly
+    python unified_test_runner.py --background-e2e
+    python unified_test_runner.py --orchestration-status
+
+CATEGORIES (Legacy Mode):
     CRITICAL: smoke, startup
     HIGH:     unit, security, database
     MEDIUM:   integration, api, websocket, agent
     LOW:      frontend, performance, e2e
 
-EXAMPLES:
+LAYERS (New Orchestration Mode):
+    fast_feedback:        Quick validation (2 min) - smoke, unit
+    core_integration:     Database, API tests (10 min) - database, api, websocket
+    service_integration:  Agent workflows (20 min) - agent, e2e_critical, frontend
+    e2e_background:       Full E2E + performance (60 min) - cypress, e2e, performance
+
+EXECUTION MODES:
+    fast_feedback:  Quick 2-minute feedback cycle
+    nightly:        Full layered execution (default)
+    background:     Background E2E only
+    hybrid:         Foreground layers + background E2E
+
+LEGACY EXAMPLES:
     python unified_test_runner.py --category unit
     python unified_test_runner.py --categories unit api
     python unified_test_runner.py --category performance --window-size 30
     python unified_test_runner.py --list-categories
+
+NEW ORCHESTRATION EXAMPLES:
+    python unified_test_runner.py --use-layers --layers fast_feedback
+    python unified_test_runner.py --execution-mode fast_feedback
+    python unified_test_runner.py --execution-mode nightly --real-services
+    python unified_test_runner.py --execution-mode hybrid --progress-mode json
+    python unified_test_runner.py --background-e2e --real-llm
+    python unified_test_runner.py --orchestration-status
 """
 
 import argparse
@@ -105,6 +141,21 @@ except ImportError:
     ExecutionMode = None
     add_orchestrator_arguments = None
     execute_with_orchestrator = None
+
+# NEW: Master Orchestration Controller integration
+try:
+    from test_framework.orchestration.master_orchestration_controller import (
+        MasterOrchestrationController, MasterOrchestrationConfig, OrchestrationMode,
+        create_fast_feedback_controller, create_full_layered_controller,
+        create_background_only_controller, create_hybrid_controller, create_legacy_controller
+    )
+    from test_framework.orchestration.progress_streaming_agent import ProgressOutputMode
+    MASTER_ORCHESTRATION_AVAILABLE = True
+except ImportError:
+    MASTER_ORCHESTRATION_AVAILABLE = False
+    MasterOrchestrationController = None
+    OrchestrationMode = None
+    ProgressOutputMode = None
 
 # Background E2E Agent integration
 try:
@@ -1463,6 +1514,151 @@ class UnifiedTestRunner:
         print(f"Report: {json_report}")
 
 
+async def execute_orchestration_mode(args) -> int:
+    """
+    Execute tests using the new Master Orchestration Controller system.
+    
+    Args:
+        args: Parsed command line arguments
+        
+    Returns:
+        Exit code (0 for success, non-zero for failure)
+    """
+    if not MASTER_ORCHESTRATION_AVAILABLE:
+        print("❌ Master Orchestration system not available. Please check imports.")
+        print("Falling back to legacy mode...")
+        return 1
+    
+    project_root = PROJECT_ROOT
+    
+    # Handle orchestration status command
+    if args.orchestration_status:
+        print("\n" + "="*60)
+        print("ORCHESTRATION STATUS")
+        print("="*60)
+        print("Feature: Show running orchestration status")
+        print("Status: Not yet implemented - requires persistent orchestration service")
+        print("Available: Run 'python unified_test_runner.py --use-layers --help' for options")
+        print("="*60)
+        return 0
+    
+    # Determine execution mode and create appropriate controller
+    controller = None
+    execution_args = {
+        "env": args.env,
+        "real_llm": args.real_llm,
+        "real_services": args.real_services,
+        "fast_fail": getattr(args, 'fast_fail', False),
+        "timeout": getattr(args, 'timeout', 30),
+        "max_parallel": getattr(args, 'max_parallel', None) or 8
+    }
+    
+    try:
+        # Create controller based on execution mode
+        if args.execution_mode == "fast_feedback" or (args.layers and "fast_feedback" in args.layers and len(args.layers) == 1):
+            print("🚀 Starting Fast Feedback execution (2-minute cycle)")
+            controller = create_fast_feedback_controller(
+                project_root=project_root,
+                thread_id=args.websocket_thread_id
+            )
+            layers = ["fast_feedback"]
+            
+        elif args.execution_mode == "background" or args.background_e2e:
+            print("🔄 Starting Background E2E execution")
+            controller = create_background_only_controller(
+                project_root=project_root,
+                thread_id=args.websocket_thread_id
+            )
+            layers = ["e2e_background"]
+            
+        elif args.execution_mode == "hybrid":
+            print("⚡ Starting Hybrid execution (foreground + background)")
+            controller = create_hybrid_controller(
+                project_root=project_root,
+                thread_id=args.websocket_thread_id
+            )
+            layers = args.layers or ["fast_feedback", "core_integration", "service_integration", "e2e_background"]
+            
+        elif args.execution_mode == "nightly" or not args.execution_mode:
+            print("🌙 Starting Full Layered execution")
+            controller = create_full_layered_controller(
+                project_root=project_root,
+                thread_id=args.websocket_thread_id,
+                enable_background=not getattr(args, 'background_e2e', False)
+            )
+            layers = args.layers or ["fast_feedback", "core_integration", "service_integration"]
+            if not getattr(args, 'background_e2e', False):
+                layers.append("e2e_background")
+        
+        else:
+            print(f"❌ Invalid execution mode: {args.execution_mode}")
+            return 1
+        
+        # Configure progress output mode
+        if hasattr(controller.config, 'output_mode') and ProgressOutputMode:
+            if args.progress_mode == "json":
+                controller.config.output_mode = ProgressOutputMode.JSON
+            elif args.progress_mode == "silent":
+                controller.config.output_mode = ProgressOutputMode.SILENT
+            elif args.progress_mode == "websocket":
+                controller.config.output_mode = ProgressOutputMode.WEBSOCKET
+        
+        print(f"📋 Executing layers: {', '.join(layers)}")
+        print(f"🌍 Environment: {args.env}")
+        print(f"🤖 Real LLM: {'Yes' if args.real_llm else 'No'}")
+        print(f"⚙️  Real Services: {'Yes' if args.real_services else 'No'}")
+        print(f"📊 Progress Mode: {args.progress_mode}")
+        print("-" * 60)
+        
+        # Execute orchestration
+        results = await controller.execute_orchestration(
+            execution_args=execution_args,
+            layers=layers
+        )
+        
+        # Process results
+        success = results.get("success", False)
+        
+        if success:
+            print("\n" + "="*60)
+            print("🎉 Orchestrated test execution completed successfully!")
+            print("="*60)
+            
+            # Show summary if available
+            summary = results.get("summary", {})
+            if summary:
+                test_counts = summary.get("test_counts", {})
+                if test_counts.get("total", 0) > 0:
+                    print(f"📊 Tests: {test_counts.get('total', 0)} total, "
+                          f"{test_counts.get('passed', 0)} passed, "
+                          f"{test_counts.get('failed', 0)} failed")
+                
+                duration = summary.get("total_duration", 0)
+                if duration > 0:
+                    print(f"⏱️  Duration: {duration:.1f} seconds")
+            
+            return 0
+        else:
+            print("\n" + "="*60)
+            print("❌ Orchestrated test execution failed")
+            print("="*60)
+            error = results.get("error")
+            if error:
+                print(f"Error: {error}")
+            return 1
+            
+    except Exception as e:
+        print(f"❌ Orchestration execution failed: {e}")
+        if args.debug:
+            import traceback
+            traceback.print_exc()
+        return 1
+    
+    finally:
+        if controller:
+            await controller.shutdown()
+
+
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(
@@ -1642,6 +1838,61 @@ def main():
     if BACKGROUND_E2E_AVAILABLE:
         add_background_e2e_arguments(parser)
     
+    # NEW: Add Master Orchestration Controller arguments
+    if MASTER_ORCHESTRATION_AVAILABLE:
+        orchestration_group = parser.add_argument_group('Master Orchestration System')
+        
+        orchestration_group.add_argument(
+            "--use-layers",
+            action="store_true",
+            help="Use new layered orchestration system instead of legacy categories"
+        )
+        
+        orchestration_group.add_argument(
+            "--layers",
+            nargs="*",
+            choices=["fast_feedback", "core_integration", "service_integration", "e2e_background"],
+            help="Specific layers to execute (use with --use-layers)"
+        )
+        
+        orchestration_group.add_argument(
+            "--execution-mode",
+            choices=["fast_feedback", "nightly", "background", "hybrid"],
+            help="Predefined execution mode"
+        )
+        
+        orchestration_group.add_argument(
+            "--background-e2e",
+            action="store_true",
+            help="Execute E2E tests in background only"
+        )
+        
+        orchestration_group.add_argument(
+            "--orchestration-status",
+            action="store_true",
+            help="Show current orchestration status and exit"
+        )
+        
+        orchestration_group.add_argument(
+            "--progress-mode",
+            choices=["console", "json", "websocket", "silent"],
+            default="console",
+            help="Progress output mode"
+        )
+        
+        orchestration_group.add_argument(
+            "--enable-monitoring",
+            action="store_true",
+            default=True,
+            help="Enable resource monitoring during execution"
+        )
+        
+        orchestration_group.add_argument(
+            "--websocket-thread-id",
+            type=str,
+            help="WebSocket thread ID for real-time updates"
+        )
+    
     args = parser.parse_args()
     
     # Handle special operations
@@ -1703,13 +1954,24 @@ def main():
         print("Cypress integration completed successfully!")
         return 0
     
-    # Handle orchestrator execution if requested
+    # NEW: Handle Master Orchestration Controller execution first
+    if MASTER_ORCHESTRATION_AVAILABLE and (
+        getattr(args, 'use_layers', False) or 
+        getattr(args, 'execution_mode', None) or
+        getattr(args, 'background_e2e', False) or
+        getattr(args, 'orchestration_status', False)
+    ):
+        # Use new orchestration system
+        import asyncio
+        return asyncio.run(execute_orchestration_mode(args))
+    
+    # Handle orchestrator execution if requested (legacy orchestrator)
     if ORCHESTRATOR_AVAILABLE and hasattr(args, 'use_layers') and args.use_layers:
         # Use async executor for orchestrator
         import asyncio
         return asyncio.run(execute_with_orchestrator(args))
     
-    # Handle orchestrator show commands
+    # Handle orchestrator show commands (legacy orchestrator)
     if ORCHESTRATOR_AVAILABLE and hasattr(args, 'show_layers') and args.show_layers:
         import asyncio
         return asyncio.run(execute_with_orchestrator(args))
