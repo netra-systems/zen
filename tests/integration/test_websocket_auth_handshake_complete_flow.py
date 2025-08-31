@@ -260,7 +260,7 @@ class TestWebSocketAuthHandshakeCompleteFlow(BaseIntegrationTest):
 # COMMENTED OUT: Mock-dependent test -         assert not result.success
 # COMMENTED OUT: Mock-dependent test -         assert result.error_message == "Token expired"
 # COMMENTED OUT: Mock-dependent test -     
-        async def test_token_refresh_during_active_connection(self):
+    async def test_token_refresh_during_active_connection(self):
         """Test token refresh while maintaining WebSocket connection."""
         oauth_result = await self.auth_tester.perform_oauth_flow("testuser", "password123")
         

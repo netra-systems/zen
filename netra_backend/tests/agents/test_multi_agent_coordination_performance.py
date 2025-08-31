@@ -11,7 +11,7 @@ from typing import Dict, Any, List, Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 # from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent  # Mock instead
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher

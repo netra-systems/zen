@@ -1,0 +1,59 @@
+# Minimal Docker Compose - Only Essential Services
+# Use: docker-compose -f docker-compose.minimal.yml up -d
+
+services:
+  # PostgreSQL Database Only
+  postgres:
+    image: postgres:15-alpine
+    container_name: netra-postgres-minimal
+    environment:
+      POSTGRES_USER: netra
+      POSTGRES_PASSWORD: netra123
+      POSTGRES_DB: netra_dev
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U netra"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - netra-network
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+
+  # Redis Cache Only
+  redis:
+    image: redis:7-alpine
+    container_name: netra-redis-minimal
+    command: redis-server --appendonly no --maxmemory 64mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - netra-network
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+          cpus: '0.1'
+
+networks:
+  netra-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

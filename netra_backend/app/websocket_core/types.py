@@ -52,6 +52,12 @@ class MessageType(str, Enum):
     SYSTEM_MESSAGE = "system_message"
     ERROR_MESSAGE = "error_message"
     
+    # Typing indicators
+    USER_TYPING = "user_typing"
+    AGENT_TYPING = "agent_typing"
+    TYPING_STARTED = "typing_started"
+    TYPING_STOPPED = "typing_stopped"
+    
     # Agent communication
     START_AGENT = "start_agent"
     AGENT_REQUEST = "agent_request"
@@ -203,6 +209,37 @@ class RoomInfo(BaseModel):
     last_activity: Optional[datetime] = None
     room_type: str = "general"  # general, thread, broadcast, private
     metadata: Optional[Dict[str, Any]] = None
+
+
+class TypingIndicator(BaseModel):
+    """Typing indicator state."""
+    user_id: str
+    thread_id: str
+    is_typing: bool
+    started_at: Optional[float] = None
+    last_activity: Optional[float] = None
+    timeout_seconds: float = 5.0
+    
+    def is_expired(self) -> bool:
+        """Check if typing indicator has expired."""
+        if not self.is_typing or not self.last_activity:
+            return False
+        return (time.time() - self.last_activity) > self.timeout_seconds
+    
+    def update_activity(self) -> None:
+        """Update activity timestamp."""
+        self.last_activity = time.time()
+        if not self.started_at:
+            self.started_at = self.last_activity
+
+
+class TypingMessage(BaseModel):
+    """Typing indicator WebSocket message."""
+    type: MessageType
+    user_id: str
+    thread_id: str
+    is_typing: bool
+    timestamp: float = Field(default_factory=time.time)
 
 
 class WebSocketConfig(BaseModel):

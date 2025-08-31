@@ -6,6 +6,7 @@ import { config as appConfig } from '@/config';
 import { logger } from '@/lib/logger';
 import { WebSocketContextType, WebSocketProviderProps } from '../types/websocket-context-types';
 import { reconciliationService, OptimisticMessage } from '../services/reconciliation';
+import { chatStatePersistence } from '../services/chatStatePersistence';
 
 const WebSocketContext = createContext<WebSocketContextType | null>(null);
 
@@ -28,11 +29,24 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
   const isConnectingRef = useRef(false);
   const cleanupRef = useRef<() => void>();
   const previousTokenRef = useRef<string | null>(null);
+  const hasRestoredStateRef = useRef(false);
+  const currentThreadIdRef = useRef<string | null>(null);
 
   // Memoized message handler with reconciliation integration
   const handleMessage = useCallback((newMessage: WebSocketMessage) => {
     // Process through reconciliation service first
     const reconciledMessage = reconciliationService.processConfirmation(newMessage);
+    
+    // Handle thread-related messages for state persistence
+    if (newMessage.type === 'thread_created' || newMessage.type === 'thread_loaded') {
+      const threadId = newMessage.payload?.thread_id || newMessage.payload?.threadId;
+      if (threadId) {
+        currentThreadIdRef.current = threadId;
+        chatStatePersistence.updateThread(threadId);
+        // Save session state to WebSocket service
+        webSocketService.saveSessionState(threadId, newMessage.payload?.message_id);
+      }
+    }
     
     setMessages((prevMessages) => {
       // Check for duplicates using message_id
@@ -66,6 +80,22 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
       
       // Add new message and limit to last 500 messages for better data retention
       const updatedMessages = [...prevMessages, newMessage];
+      
+      // Persist chat messages if they are user or assistant messages
+      if (newMessage.type === 'user_message' || newMessage.type === 'assistant_message' || 
+          newMessage.type === 'agent_completed' || newMessage.type === 'final_report') {
+        const chatMessages = updatedMessages
+          .filter(msg => ['user_message', 'assistant_message', 'agent_completed', 'final_report'].includes(msg.type))
+          .map(msg => ({
+            id: msg.payload?.message_id || `msg_${Date.now()}`,
+            content: msg.payload?.content || msg.payload?.result || '',
+            role: msg.type === 'user_message' ? 'user' : 'assistant',
+            timestamp: msg.payload?.timestamp || Date.now()
+          } as Message));
+        
+        chatStatePersistence.updateMessages(chatMessages);
+      }
+      
       return updatedMessages.length > 500 ? updatedMessages.slice(-500) : updatedMessages;
     });
   }, []);
@@ -91,6 +121,40 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     if (!token && !isDevelopment) {
       logger.debug('[WebSocketProvider] WebSocket connection skipped - no token available');
       return;
+    }
+    
+    // Restore chat state on initial mount if available
+    if (!hasRestoredStateRef.current && authInitialized) {
+      const restorable = chatStatePersistence.getRestorableState();
+      if (restorable) {
+        logger.debug('[WebSocketProvider] Restoring chat state after refresh', {
+          component: 'WebSocketProvider',
+          action: 'restore_state',
+          metadata: {
+            threadId: restorable.threadId,
+            messageCount: restorable.messages.length,
+            hasDraft: !!restorable.draftMessage
+          }
+        });
+        
+        // Restore thread ID
+        if (restorable.threadId) {
+          currentThreadIdRef.current = restorable.threadId;
+        }
+        
+        // Restore messages to state
+        const wsMessages = restorable.messages.map(msg => ({
+          type: msg.role === 'user' ? 'user_message' : 'assistant_message',
+          payload: {
+            message_id: msg.id,
+            content: msg.content,
+            timestamp: msg.timestamp
+          }
+        } as WebSocketMessage));
+        
+        setMessages(wsMessages);
+      }
+      hasRestoredStateRef.current = true;
     }
     
     // Add a small delay to ensure auth context is fully initialized after OAuth redirect
@@ -291,6 +355,13 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     return optimisticMsg;
   }, []);
 
+  // Clean up persistence on unmount
+  useEffect(() => {
+    return () => {
+      chatStatePersistence.destroy();
+    };
+  }, []);
+  
   const contextValue = {
     status,
     messages,

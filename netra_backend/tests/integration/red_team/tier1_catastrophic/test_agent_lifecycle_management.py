@@ -120,7 +120,7 @@ class MockAgentService(BaseAgentService):
             }
         }
 
-from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent as SupervisorAgent
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as SupervisorAgent
 from netra_backend.app.database import get_db_session
 
 # Agent models for testing

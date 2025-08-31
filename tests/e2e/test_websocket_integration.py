@@ -202,7 +202,7 @@ class TestWebSocketAuthHandshake:
             try:
                 await websocket.accept()
                 # Mock: Authentication service isolation for testing without real auth flows
-                await mock_auth(websocket, token, None  # TODO: Use real service instead of Mock)
+                await mock_auth(websocket, token, None)  # TODO: Use real service instead of Mock
                 return {"authenticated": True}
             except ValueError as e:
                 return {"authenticated": False, "error": str(e)}

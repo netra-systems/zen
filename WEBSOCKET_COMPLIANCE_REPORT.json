@@ -1,0 +1,69 @@
+{
+  "compliant": false,
+  "score": 73.33333333333333,
+  "required_events": [
+    "tool_executing",
+    "final_report",
+    "agent_thinking",
+    "agent_completed",
+    "partial_result",
+    "agent_started",
+    "tool_completed"
+  ],
+  "critical_events": [
+    "tool_executing",
+    "agent_thinking",
+    "agent_completed",
+    "agent_started",
+    "tool_completed"
+  ],
+  "validations": {
+    "WebSocketNotifier": {
+      "valid": true,
+      "score": 100,
+      "issues": []
+    },
+    "AgentRegistry": {
+      "valid": true,
+      "score": 100,
+      "issues": []
+    },
+    "ExecutionEngine": {
+      "valid": true,
+      "score": 100,
+      "issues": []
+    },
+    "EnhancedToolExecution": {
+      "valid": false,
+      "score": 60,
+      "issues": [
+        "Missing send_tool_executing",
+        "Missing send_tool_completed"
+      ]
+    },
+    "FrontendProvider": {
+      "valid": false,
+      "score": 20,
+      "issues": [
+        "Frontend not handling event: tool_executing",
+        "Frontend not handling event: agent_thinking",
+        "Frontend not handling event: agent_started",
+        "Frontend not handling event: tool_completed"
+      ]
+    },
+    "TestCoverage": {
+      "valid": false,
+      "score": 60,
+      "issues": [
+        "Missing validation: validate_event_ordering",
+        "Missing validation: validate_all_events_sent"
+      ]
+    }
+  },
+  "summary": {
+    "total_validations": 6,
+    "passed": 3,
+    "failed": 3,
+    "total_issues": 8
+  }
+}

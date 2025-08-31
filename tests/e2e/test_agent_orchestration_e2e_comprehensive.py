@@ -41,7 +41,7 @@ from test_framework.environment_isolation import IsolatedEnvironment
 from test_framework.service_availability import check_service_availability
 
 # Production components
-from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier

@@ -130,7 +130,7 @@ class AgentRegistry:
         # CRITICAL: Enhance tool dispatcher with WebSocket notifications
         # This enables real-time tool execution events
         if self.tool_dispatcher and manager:
-            from netra_backend.app.agents.enhanced_tool_execution import (
+            from netra_backend.app.agents.unified_tool_execution import (
                 enhance_tool_dispatcher_with_notifications
             )
             logger.info("Enhancing tool dispatcher with WebSocket notifications")

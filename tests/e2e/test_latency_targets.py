@@ -34,7 +34,7 @@ from tests.e2e.config import TestUser, UnifiedTestConfig
 # Import MockWebSocket from the correct location
 try:
     # Removed WebSocket mock import - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
-from test_framework.real_services import get_real_services
+    from test_framework.real_services import get_real_services
     # Create dummy classes for missing ones
     class WebSocketBuilder:
         def build(self):
@@ -42,6 +42,8 @@ from test_framework.real_services import get_real_services
 except ImportError:
     # Fallback if even this doesn't work
     # MockWebSocket class removed - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
+    pass
+
 class LatencyMeasurer:
     """High-precision latency measurement for performance validation."""
     

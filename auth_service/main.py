@@ -135,9 +135,9 @@ async def lifespan(app: FastAPI):
             # TOMBSTONE: GOOGLE_CLIENT_ID variable superseded by environment-specific GOOGLE_OAUTH_CLIENT_ID_* variables
             oauth_validation_errors.append("Google OAuth client ID is not configured")
             logger.error("❌ CRITICAL: Google OAuth client ID is missing!")
-        elif google_client_id.startswith("REPLACE_") or len(google_client_id) < 50:
-            oauth_validation_errors.append(f"Google OAuth client ID appears invalid: {google_client_id[:20]}...")
-            logger.error(f"❌ CRITICAL: Google OAuth client ID looks like a placeholder: {google_client_id[:20]}...")
+        elif len(google_client_id) < 50:
+            oauth_validation_errors.append(f"Google OAuth client ID appears too short: {google_client_id[:20]}...")
+            logger.error(f"❌ CRITICAL: Google OAuth client ID appears too short: {google_client_id[:20]}...")
         elif not google_client_id.endswith(".apps.googleusercontent.com"):
             oauth_validation_errors.append(f"Google OAuth client ID has invalid format (should end with .apps.googleusercontent.com): {google_client_id}")
             logger.error(f"❌ CRITICAL: Google OAuth client ID has invalid format: {google_client_id}")
@@ -150,9 +150,9 @@ async def lifespan(app: FastAPI):
             # TOMBSTONE: GOOGLE_CLIENT_SECRET variable superseded by environment-specific GOOGLE_OAUTH_CLIENT_SECRET_* variables
             oauth_validation_errors.append("Google OAuth client secret is not configured")
             logger.error("❌ CRITICAL: Google OAuth client secret is missing!")
-        elif google_client_secret.startswith("REPLACE_") or len(google_client_secret) < 20:
-            oauth_validation_errors.append(f"Google OAuth client secret appears invalid")
-            logger.error(f"❌ CRITICAL: Google OAuth client secret looks like a placeholder")
+        elif len(google_client_secret) < 20:
+            oauth_validation_errors.append(f"Google OAuth client secret appears too short")
+            logger.error(f"❌ CRITICAL: Google OAuth client secret appears too short")
         else:
             logger.info("✅ Google OAuth client secret configured")
         

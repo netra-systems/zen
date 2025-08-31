@@ -198,6 +198,14 @@
             <critical-takeaway>Sub-agents must support both modern (BaseExecutionInterface) and legacy execution patterns with WebSocket events (websocket_subagent_enhancement_patterns.xml).</critical-takeaway>
         </category>
         
+        <category name="Staging/E2E-Comprehensive" path="SPEC/learnings/staging_e2e_comprehensive_implementation.xml" keywords="Staging, E2E Testing, WebSocket, OAuth Simulation, Cloud Run, Chat Validation, Auth Client, WebSocket Client, User Journeys">
+            <critical-takeaway>Complete E2E test suite for staging with dedicated clients for Auth, WebSocket, and API - no local dependencies (staging_e2e_comprehensive_implementation.xml).</critical-takeaway>
+            <critical-takeaway>AUTH BYPASS IS OAUTH SIMULATION - creates valid user sessions as if users completed Google OAuth, NOT a security bypass (staging_e2e_comprehensive_implementation.xml).</critical-takeaway>
+            <critical-takeaway>WebSocket event tracking validates 90% of platform value (Chat functionality) in production-like environment (staging_e2e_comprehensive_implementation.xml).</critical-takeaway>
+            <critical-takeaway>Proper error handling for Cloud Run cold starts with 30s API timeouts and 60s WebSocket timeouts (staging_e2e_comprehensive_implementation.xml).</critical-takeaway>
+            <critical-takeaway>Run tests/run_staging_tests.py with E2E_BYPASS_KEY for comprehensive staging validation before production deployment (staging_e2e_comprehensive_implementation.xml).</critical-takeaway>
+        </category>
+        
         <category name="WebSocket/AgentLifecycle" path="SPEC/learnings/agent_manager_lifecycle_events.xml" keywords="Agent Manager, WebSocket, Lifecycle Events, Agent Registration, Agent Failure, Agent Cancellation, Metrics Updates, Real-time Monitoring, System Observability">
             <critical-takeaway>Agent Manager MUST emit WebSocket events for all lifecycle transitions: registration, failure, cancellation, metrics (agent_manager_lifecycle_events.xml).</critical-takeaway>
             <critical-takeaway>WebSocket notifier is optional in AgentManager - wrap all calls in try/except to maintain backward compatibility (agent_manager_lifecycle_events.xml).</critical-takeaway>
@@ -607,7 +615,7 @@
         </category>
         
         <category name="3-Tier Persistence Architecture" path="SPEC/3tier_persistence_architecture.xml" keywords="3-Tier, Three-Tier, Persistence, Redis, PostgreSQL, ClickHouse, Failover, Enterprise, Disaster Recovery, State Management">
-            <critical-takeaway>CRITICAL: 3-tier persistence architecture provides enterprise-grade reliability with Redis → PostgreSQL → ClickHouse failover chain.</critical-takeaway>
+            <critical-takeaway>CRITICAL: 3-tier persistence architecture provides enterprise-grade reliability with Redis to PostgreSQL to ClickHouse failover chain.</critical-takeaway>
             <critical-takeaway>Redis PRIMARY tier must maintain sub-100ms performance for active agent states with version tracking and TTL management.</critical-takeaway>
             <critical-takeaway>PostgreSQL checkpoints required for CRITICAL checkpoint types to ensure disaster recovery capability.</critical-takeaway>
             <critical-takeaway>ClickHouse migration scheduled automatically for completed runs to enable cost optimization analytics.</critical-takeaway>
@@ -856,6 +864,13 @@
             <critical-takeaway>Use DynamicCORSMiddleware when CORS_ORIGINS=* to handle credentials properly (RFC 6454).</critical-takeaway>
         </category>
 
+        <category name="Staging Tests Definition" path="SPEC/staging_tests_definition.xml" keywords="staging, environment, testing, GCP, Docker Compose, naming conventions, test boundaries">
+            <critical-takeaway>CRITICAL: "Staging" ALWAYS means GCP Cloud Run deployed environment, NEVER Docker Compose.</critical-takeaway>
+            <critical-takeaway>Docker Compose is for local development only - use test_docker_*, test_local_*, test_integration_* naming.</critical-takeaway>
+            <critical-takeaway>Staging tests must use ENVIRONMENT=staging and test real GCP URLs, not localhost.</critical-takeaway>
+            <critical-takeaway>Environment confusion leads to false confidence causing $50K+ MRR loss from production incidents.</critical-takeaway>
+        </category>
+
         <category name="Testing" path="SPEC/learnings/testing.xml" keywords="TDD, Feature Flags, Pytest, Jest, Test Discovery, Test Runner, Environment Testing, E2E Tests, Resource Cleanup, AsyncMock, Test Tracking, Test Dashboard, Flaky Tests">
             <critical-takeaway>Adhere to the Feature Flag TDD workflow (feature-flags-tdd-workflow).</critical-takeaway>
             <critical-takeaway>Tests must validate REAL functionality, not mocks (frontend-test-paradox-report).</critical-takeaway>
@@ -996,9 +1011,9 @@
             <critical-takeaway context="Initialization">Use hasMountedRef pattern to prevent multiple initialization calls in auth context (frontend_initialization_patterns.xml).</critical-takeaway>
         </category>
         
-        <category name="Frontend Loading States & UX" path="SPEC/learnings/frontend_loading_states.xml" keywords="Loading, Spinner, Skeleton, UX, UI, User Experience, Initialization, Bootstrap, Auth Loading, Dev Experience">
+        <category name="Frontend Loading States &amp; UX" path="SPEC/learnings/frontend_loading_states.xml" keywords="Loading, Spinner, Skeleton, UX, UI, User Experience, Initialization, Bootstrap, Auth Loading, Dev Experience">
             <critical-takeaway>MANDATORY: Test ALL loading/init changes with __tests__/auth/dev-auto-login.test.tsx - breaking auto-login severely impacts dev productivity.</critical-takeaway>
-            <critical-takeaway>Loading states hierarchy: AuthProvider Loading → Token Processing → Dev Auto-Login - each phase has specific requirements.</critical-takeaway>
+            <critical-takeaway>Loading states hierarchy: AuthProvider Loading to Token Processing to Dev Auto-Login - each phase has specific requirements.</critical-takeaway>
             <critical-takeaway>Never block UI completely for >3 seconds - use progressive enhancement and skeleton screens.</critical-takeaway>
             <critical-takeaway>Auth context token processing MUST handle existing tokens correctly or dev auto-login breaks on page refresh.</critical-takeaway>
             <critical-takeaway>Dev auto-login requires 5+ retries with exponential backoff to handle backend startup delays.</critical-takeaway>
@@ -1258,7 +1273,7 @@
             <critical-takeaway>NEVER import logger directly in configuration modules - use lazy initialization to prevent circular dependencies.</critical-takeaway>
             <critical-takeaway>Always provide print fallbacks for logging during bootstrap phase when logger may not be available.</critical-takeaway>
             <critical-takeaway>Check loading flags (e.g., _loading) to prevent recursive initialization between interdependent systems.</critical-takeaway>
-            <critical-takeaway>Safe logging pattern: Try logger → fallback to print → handle all exceptions with print.</critical-takeaway>
+            <critical-takeaway>Safe logging pattern: Try logger, fallback to print, handle all exceptions with print.</critical-takeaway>
             <critical-takeaway>Test initialization order in staging-like environments to catch circular dependencies early.</critical-takeaway>
         </category>
 
@@ -1487,7 +1502,7 @@
         </category>
         
         <category name="Frontend Port Conflict Resolution" path="SPEC/learnings/frontend_port_conflict_resolution.xml" keywords="Frontend, Port 3000, Port Conflict, Dev Launcher, Fallback, Process Detection, Windows, Race Condition">
-            <critical-takeaway>COMPREHENSIVE FALLBACK STRATEGY: Preferred port → Original range → Extended service range → OS allocation → Emergency range</critical-takeaway>
+            <critical-takeaway>COMPREHENSIVE FALLBACK STRATEGY: Preferred port to Original range to Extended service range to OS allocation to Emergency range</critical-takeaway>
             <critical-takeaway>PROCESS-AWARE DIAGNOSTICS: Identify which process occupies conflicting ports using netstat/lsof for actionable troubleshooting</critical-takeaway>
             <critical-takeaway>INTERFACE CONSISTENCY: Always use 0.0.0.0 for both port checking and binding to prevent Windows race conditions</critical-takeaway>
             <critical-takeaway>SERVICE-SPECIFIC RANGES: Frontend (3000-3099), Backend (8000-8099), Auth (8080-8199) for intelligent fallback</critical-takeaway>
@@ -1569,7 +1584,7 @@
             <critical-takeaway>REDIS_FALLBACK_ENABLED=true in staging masks infrastructure issues - should be false to catch Redis provisioning gaps.</critical-takeaway>
             <critical-takeaway>Staging must enforce production-like strict validation - development fallbacks create dangerous staging/production drift.</critical-takeaway>
             <critical-takeaway>Service health endpoints should return 503 when external dependencies unavailable - health != operational capability.</critical-takeaway>
-            <critical-takeaway>Multiple configuration failures compound exponentially - missing env vars → wrong defaults → connection failures → service degradation.</critical-takeaway>
+            <critical-takeaway>Multiple configuration failures compound exponentially - missing env vars to wrong defaults to connection failures to service degradation.</critical-takeaway>
             <critical-takeaway>External services must be required in staging, not optional - validates infrastructure provisioning for production readiness.</critical-takeaway>
             <critical-takeaway>Silent fallbacks and degraded mode operation in staging hide critical infrastructure issues that break production.</critical-takeaway>
             <critical-takeaway>33 comprehensive failing tests across 4 test files provide complete validation of staging backend service infrastructure.</critical-takeaway>

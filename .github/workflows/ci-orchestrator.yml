@@ -1,0 +1,335 @@
+name: CI Orchestrator
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main, develop, staging]
+  workflow_dispatch:
+    inputs:
+      ci_strategy:
+        description: 'CI execution strategy'
+        required: true
+        type: choice
+        options:
+          - balanced
+          - max-parallel
+          - fail-fast
+        default: balanced
+      deploy_after_success:
+        description: 'Deploy to staging after successful tests'
+        required: false
+        type: boolean
+        default: false
+      skip_non_critical:
+        description: 'Skip non-critical tests'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  DEFAULT_STRATEGY_PR: balanced
+  DEFAULT_STRATEGY_MAIN: fail-fast
+  DEFAULT_STRATEGY_DEVELOP: max-parallel
+
+permissions:
+  contents: read
+  pull-requests: write
+  deployments: write
+  statuses: write
+  checks: write
+
+jobs:
+  # ==========================================
+  # Determine CI Strategy
+  # ==========================================
+  
+  determine-strategy:
+    name: Determine CI Strategy
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      strategy: ${{ steps.select.outputs.strategy }}
+      should_deploy: ${{ steps.select.outputs.should_deploy }}
+      
+    steps:
+      - name: Select CI strategy
+        id: select
+        run: |
+          # Determine strategy based on context
+          if [[ -n "${{ inputs.ci_strategy }}" ]]; then
+            # Manual override via workflow_dispatch
+            STRATEGY="${{ inputs.ci_strategy }}"
+            echo "Using manually selected strategy: $STRATEGY"
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            # PR - use balanced approach
+            STRATEGY="${{ env.DEFAULT_STRATEGY_PR }}"
+            echo "PR detected - using strategy: $STRATEGY"
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            # Main branch - use fail-fast for quick feedback
+            STRATEGY="${{ env.DEFAULT_STRATEGY_MAIN }}"
+            echo "Main branch - using strategy: $STRATEGY"
+          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            # Develop branch - use max parallel
+            STRATEGY="${{ env.DEFAULT_STRATEGY_DEVELOP }}"
+            echo "Develop branch - using strategy: $STRATEGY"
+          else
+            # Default to balanced
+            STRATEGY="balanced"
+            echo "Using default strategy: $STRATEGY"
+          fi
+          
+          # Determine if we should deploy
+          SHOULD_DEPLOY=false
+          if [[ "${{ inputs.deploy_after_success }}" == "true" ]]; then
+            SHOULD_DEPLOY=true
+          elif [[ "${{ github.ref }}" == "refs/heads/main" && "${{ github.event_name }}" == "push" ]]; then
+            SHOULD_DEPLOY=true
+          fi
+          
+          echo "strategy=$STRATEGY" >> $GITHUB_OUTPUT
+          echo "should_deploy=$SHOULD_DEPLOY" >> $GITHUB_OUTPUT
+          
+          # Generate summary
+          echo "## 🎯 CI Strategy Selection" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Selected Strategy:** $STRATEGY" >> $GITHUB_STEP_SUMMARY
+          echo "**Event:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Deploy After Success:** $SHOULD_DEPLOY" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          case "$STRATEGY" in
+            "max-parallel")
+              echo "### Strategy: Maximum Parallelization 🚀" >> $GITHUB_STEP_SUMMARY
+              echo "- All tests run simultaneously" >> $GITHUB_STEP_SUMMARY
+              echo "- Fastest overall completion time" >> $GITHUB_STEP_SUMMARY
+              echo "- Higher resource usage" >> $GITHUB_STEP_SUMMARY
+              ;;
+            "balanced")
+              echo "### Strategy: Balanced Execution ⚖️" >> $GITHUB_STEP_SUMMARY
+              echo "- Smart dependencies between test phases" >> $GITHUB_STEP_SUMMARY
+              echo "- Optimal resource usage" >> $GITHUB_STEP_SUMMARY
+              echo "- Good feedback loop" >> $GITHUB_STEP_SUMMARY
+              ;;
+            "fail-fast")
+              echo "### Strategy: Fail Fast 🛑" >> $GITHUB_STEP_SUMMARY
+              echo "- Sequential execution" >> $GITHUB_STEP_SUMMARY
+              echo "- Stops at first failure" >> $GITHUB_STEP_SUMMARY
+              echo "- Fastest feedback on failures" >> $GITHUB_STEP_SUMMARY
+              ;;
+          esac
+
+  # ==========================================
+  # Execute Selected CI Strategy
+  # ==========================================
+  
+  run-ci-max-parallel:
+    name: CI - Max Parallel
+    needs: determine-strategy
+    if: needs.determine-strategy.outputs.strategy == 'max-parallel'
+    uses: ./.github/workflows/ci-max-parallel.yml
+    with:
+      skip_tests: ${{ inputs.skip_non_critical }}
+    secrets: inherit
+    
+  run-ci-balanced:
+    name: CI - Balanced
+    needs: determine-strategy
+    if: needs.determine-strategy.outputs.strategy == 'balanced'
+    uses: ./.github/workflows/ci-balanced.yml
+    with:
+      skip_non_critical: ${{ inputs.skip_non_critical }}
+    secrets: inherit
+    
+  run-ci-fail-fast:
+    name: CI - Fail Fast
+    needs: determine-strategy
+    if: needs.determine-strategy.outputs.strategy == 'fail-fast'
+    uses: ./.github/workflows/ci-fail-fast.yml
+    with:
+      start_from: beginning
+    secrets: inherit
+
+  # ==========================================
+  # Deploy to Staging (if applicable)
+  # ==========================================
+  
+  deploy-staging:
+    name: Deploy to Staging
+    needs: [determine-strategy, run-ci-max-parallel, run-ci-balanced, run-ci-fail-fast]
+    if: |
+      always() &&
+      needs.determine-strategy.outputs.should_deploy == 'true' &&
+      (needs.run-ci-max-parallel.result == 'success' ||
+       needs.run-ci-balanced.result == 'success' ||
+       needs.run-ci-fail-fast.result == 'success')
+    uses: ./.github/workflows/deploy-staging.yml
+    with:
+      trigger_context: 'ci-orchestrator'
+      skip_tests: true  # Tests already run in CI
+    secrets: inherit
+
+  # ==========================================
+  # PR Cleanup (on close)
+  # ==========================================
+  
+  cleanup-pr:
+    name: Cleanup PR Resources
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    uses: ./.github/workflows/cleanup.yml
+    with:
+      cleanup_type: 'pr-closed'
+      pr_number: ${{ github.event.pull_request.number }}
+    secrets: inherit
+
+  # ==========================================
+  # Final Report
+  # ==========================================
+  
+  final-report:
+    name: Generate Final Report
+    needs: [determine-strategy, run-ci-max-parallel, run-ci-balanced, run-ci-fail-fast, deploy-staging]
+    if: always()
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Calculate execution time
+        id: timing
+        run: |
+          START_TIME="${{ github.run_started_at }}"
+          END_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          
+          # Calculate duration (this is approximate)
+          echo "start_time=$START_TIME" >> $GITHUB_OUTPUT
+          echo "end_time=$END_TIME" >> $GITHUB_OUTPUT
+          
+      - name: Generate comprehensive report
+        run: |
+          echo "## 📊 CI/CD Pipeline Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Strategy information
+          echo "### Execution Details" >> $GITHUB_STEP_SUMMARY
+          echo "- **Strategy Used:** ${{ needs.determine-strategy.outputs.strategy }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Start Time:** ${{ steps.timing.outputs.start_time }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Results
+          echo "### Pipeline Results" >> $GITHUB_STEP_SUMMARY
+          echo "| Stage | Result |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          
+          # CI Results
+          if [[ "${{ needs.determine-strategy.outputs.strategy }}" == "max-parallel" ]]; then
+            echo "| CI Tests (Max Parallel) | ${{ needs.run-ci-max-parallel.result }} |" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ needs.determine-strategy.outputs.strategy }}" == "balanced" ]]; then
+            echo "| CI Tests (Balanced) | ${{ needs.run-ci-balanced.result }} |" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ needs.determine-strategy.outputs.strategy }}" == "fail-fast" ]]; then
+            echo "| CI Tests (Fail Fast) | ${{ needs.run-ci-fail-fast.result }} |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Deployment result
+          if [[ "${{ needs.determine-strategy.outputs.should_deploy }}" == "true" ]]; then
+            echo "| Staging Deployment | ${{ needs.deploy-staging.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Overall status
+          OVERALL_SUCCESS=true
+          if [[ "${{ needs.run-ci-max-parallel.result }}" == "failure" ]] || \
+             [[ "${{ needs.run-ci-balanced.result }}" == "failure" ]] || \
+             [[ "${{ needs.run-ci-fail-fast.result }}" == "failure" ]]; then
+            OVERALL_SUCCESS=false
+          fi
+          
+          if [[ "$OVERALL_SUCCESS" == "true" ]]; then
+            echo "### ✅ Pipeline Status: SUCCESS" >> $GITHUB_STEP_SUMMARY
+            
+            if [[ "${{ needs.determine-strategy.outputs.should_deploy }}" == "true" ]]; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "**Deployment URL:** https://staging.netra.app" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "### ❌ Pipeline Status: FAILED" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Please review the failed tests and fix any issues before merging." >> $GITHUB_STEP_SUMMARY
+          fi
+          
+      - name: Update commit status
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Determine overall status
+            let overallStatus = 'success';
+            let description = 'All checks passed';
+            
+            const results = [
+              '${{ needs.run-ci-max-parallel.result }}',
+              '${{ needs.run-ci-balanced.result }}',
+              '${{ needs.run-ci-fail-fast.result }}'
+            ];
+            
+            if (results.includes('failure')) {
+              overallStatus = 'failure';
+              description = 'Some checks failed';
+            } else if (results.includes('cancelled')) {
+              overallStatus = 'error';
+              description = 'Pipeline was cancelled';
+            }
+            
+            // Create commit status
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: overallStatus,
+              context: 'CI/CD Pipeline',
+              description: description,
+              target_url: `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`
+            });
+            
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const strategy = '${{ needs.determine-strategy.outputs.strategy }}';
+            const shouldDeploy = '${{ needs.determine-strategy.outputs.should_deploy }}' === 'true';
+            
+            // Get the appropriate result
+            let ciResult = 'skipped';
+            if (strategy === 'max-parallel') {
+              ciResult = '${{ needs.run-ci-max-parallel.result }}';
+            } else if (strategy === 'balanced') {
+              ciResult = '${{ needs.run-ci-balanced.result }}';
+            } else if (strategy === 'fail-fast') {
+              ciResult = '${{ needs.run-ci-fail-fast.result }}';
+            }
+            
+            const success = ciResult === 'success';
+            const icon = success ? '✅' : '❌';
+            const status = success ? 'All checks passed' : 'Some checks failed';
+            
+            let comment = `## ${icon} CI Pipeline - ${status}\n\n`;
+            comment += `**Strategy:** ${strategy}\n`;
+            comment += `**Result:** ${ciResult}\n\n`;
+            
+            if (success && shouldDeploy) {
+              comment += `### 🚀 Deployed to Staging\n`;
+              comment += `Preview your changes at: https://staging.netra.app\n\n`;
+            }
+            
+            comment += `[View Full Results](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+            
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });

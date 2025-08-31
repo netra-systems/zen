@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 
 # Absolute imports only (CLAUDE.md requirement)
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
 
 

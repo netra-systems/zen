@@ -224,6 +224,22 @@ def _configure_staging_e2e_auth(self):
         </deployment_confidence>
     </business_impact>
     
+    <cross_references>
+        <related_learning id="staging-e2e-comprehensive-implementation">
+            <relationship>Extended by comprehensive test suite implementation</relationship>
+            <file>staging_e2e_comprehensive_implementation.xml</file>
+            <description>Full implementation with dedicated staging clients for Auth, WebSocket, and API</description>
+        </related_learning>
+        <related_learning id="websocket-agent-integration-critical">
+            <relationship>WebSocket event requirements for Chat functionality</relationship>
+            <file>websocket_agent_integration_critical.xml</file>
+        </related_learning>
+        <related_learning id="deterministic-startup-critical">
+            <relationship>Service startup validation patterns</relationship>
+            <file>deterministic_startup_critical.xml</file>
+        </related_learning>
+    </cross_references>
+    
     <next_steps>
         <immediate>
             <step>Investigate E2E auth endpoint implementation on staging</step>

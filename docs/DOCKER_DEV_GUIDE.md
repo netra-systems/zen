@@ -303,19 +303,27 @@ For testing closer to production:
 
 ### Multi-Environment Setup
 
-Create environment-specific compose files:
+**IMPORTANT: Docker Compose is for LOCAL development only. Staging refers to GCP Cloud Run deployment.**
+
+Create environment-specific compose files for different LOCAL configurations:
 
 ```yaml
-# docker-compose.staging.yml
+# docker-compose.override.yml (for local customization)
 version: '3.8'
 services:
   backend:
     environment:
-      ENVIRONMENT: staging
-      DATABASE_URL: ${STAGING_DATABASE_URL}
+      ENVIRONMENT: dev
+      LOG_LEVEL: debug
 ```
 
-Use with: `docker compose -f docker-compose.dev.yml -f docker-compose.staging.yml up`
+Use with: `docker compose --profile dev up` or `docker compose --profile test up`
+
+For actual staging environment testing, use:
+```bash
+# Test against deployed GCP staging services
+ENVIRONMENT=staging python tests/run_staging_tests.py
+```
 
 ## Comparison: Docker vs Native Dev Launcher
 

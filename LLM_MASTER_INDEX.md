@@ -22,7 +22,7 @@
 | **Review changes** | [`DEFINITION_OF_DONE_CHECKLIST.md`](DEFINITION_OF_DONE_CHECKLIST.md) | Module-specific checklists |
 | **Fix a bug** | [`SPEC/learnings/index.xml`](SPEC/learnings/index.xml) | Check learnings first |
 | **Add new feature** | [`SPEC/core.xml`](SPEC/core.xml) | Architecture patterns |
-| **Fix tests** | [`TESTING.md`](TESTING.md) | Test framework guide |
+| **Fix tests** | [`docs/testing/TESTING_GUIDE.md`](docs/testing/TESTING_GUIDE.md) | Test framework guide |
 | **Deploy changes** | [`scripts/deploy_to_gcp.py`](scripts/deploy_to_gcp.py) | Official deploy script |
 | **Check compliance** | [`scripts/check_architecture_compliance.py`](scripts/check_architecture_compliance.py) | Architecture validator |
 | **WebSocket issues** | [`SPEC/learnings/websocket_agent_integration_critical.xml`](SPEC/learnings/websocket_agent_integration_critical.xml) | Critical fixes |
@@ -365,7 +365,7 @@ python scripts/deploy_to_gcp.py --project netra-production --run-checks
 **Quick Reference:**
 - **Master Control:** `python scripts/docker_env_manager.py status` - Check both environments
 - **Quick Start:** `python scripts/docker_env_manager.py start both` - Launch both environments
-- **Documentation:** [`DOCKER_ENVIRONMENTS.md`](DOCKER_ENVIRONMENTS.md) - Quick reference guide
+- **Documentation:** [`reports/docker/DOCKER_ENVIRONMENTS.md`](reports/docker/DOCKER_ENVIRONMENTS.md) - Quick reference guide
 - **Complete Guide:** [`docs/docker-dual-environment-setup.md`](docs/docker-dual-environment-setup.md) - Full documentation
 
 #### 🐳 Environment-Specific Launchers
@@ -470,7 +470,7 @@ python tests/mission_critical/test_websocket_agent_events_suite.py
 - [`SPEC/pre_deployment_audit.xml`](SPEC/pre_deployment_audit.xml) - **Pre-deployment audit specification**
 - [`SPEC/learnings/test_system_improvements.xml`](SPEC/learnings/test_system_improvements.xml) - **E2E fix & test tracking learnings**
 - [`SPEC/test_infrastructure_architecture.xml`](SPEC/test_infrastructure_architecture.xml) - Test architecture patterns
-- [`E2E_TEST_BLOCKING_AUDIT.md`](E2E_TEST_BLOCKING_AUDIT.md) - E2E test issues documentation
+- [`reports/audit/E2E_TEST_BLOCKING_AUDIT.md`](reports/audit/E2E_TEST_BLOCKING_AUDIT.md) - E2E test issues documentation
 
 ---
 

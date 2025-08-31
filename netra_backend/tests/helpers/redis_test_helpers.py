@@ -240,7 +240,7 @@ async def create_test_redis_client(host="localhost", port=6379, db=1):
     except Exception:
         # Return mock client if Redis not available
         # Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
-from test_framework.real_services import get_real_services
+        from test_framework.real_services import get_real_services
         
         # Use canonical MockRedisClient from test_framework
         return MockRedisClient()

@@ -26,6 +26,7 @@ from netra_backend.tests.helpers.metrics_helpers import (
 )
 # Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
 from test_framework.real_services import get_real_services
+from netra_backend.tests.helpers.mock_helpers import (
     create_metrics_storage_error,
     setup_quality_service_with_large_cache,
     setup_quality_service_with_redis_error,
