@@ -183,8 +183,8 @@ class OAuthURLConsistencyL4TestSuite(L4StagingCriticalPathTestBase):
             "auth_service/main.py", 
             "frontend/lib/auth-service-config.ts",
             "frontend/src/config/auth.ts",
-            "docker-compose.staging.yml",
-            ".env.staging",
+            "docker-compose.yml",  # Local Docker Compose (no staging reference)
+            ".env.staging",        # Actual staging environment variables
             "deployment/staging/values.yaml"
         ]
         
