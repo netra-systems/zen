@@ -183,6 +183,15 @@ async def websocket_endpoint(websocket: WebSocket):
         environment = get_env().get("ENVIRONMENT", "development").lower()
         is_testing = get_env().get("TESTING", "0") == "1"
         
+        # Log dependency status for debugging
+        logger.info(f"WebSocket dependency check - Environment: {environment}, Testing: {is_testing}")
+        logger.info(f"WebSocket dependency check - Supervisor: {supervisor is not None}, ThreadService: {thread_service is not None}")
+        
+        # Check if startup is still in progress
+        startup_complete = getattr(websocket.app.state, 'startup_complete', False)
+        if not startup_complete and environment in ["staging", "production"]:
+            logger.warning(f"WebSocket accessed before startup complete in {environment} - startup_complete={startup_complete}")
+        
         # CRITICAL FIX: If thread_service is missing but supervisor exists, create it
         if supervisor is not None and thread_service is None:
             logger.warning("thread_service missing but supervisor available - creating thread_service")

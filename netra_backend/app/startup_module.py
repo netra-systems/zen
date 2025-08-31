@@ -678,17 +678,54 @@ def _create_tool_dispatcher(tool_registry):
 def _create_agent_supervisor(app: FastAPI) -> None:
     """Create agent supervisor."""
     from netra_backend.app.logging_config import central_logger
+    from netra_backend.app.core.isolated_environment import get_env
     logger = central_logger.get_logger(__name__)
     
+    environment = get_env().get("ENVIRONMENT", "development").lower()
+    
     try:
+        logger.info(f"Creating agent supervisor for {environment} environment...")
         supervisor = _build_supervisor_agent(app)
+        
+        # Verify supervisor was created properly
+        if supervisor is None:
+            raise RuntimeError("Supervisor creation returned None")
+        
+        # Verify WebSocket enhancement happened
+        if hasattr(supervisor, 'registry') and hasattr(supervisor.registry, 'tool_dispatcher'):
+            if not getattr(supervisor.registry.tool_dispatcher, '_websocket_enhanced', False):
+                logger.warning("Tool dispatcher not enhanced with WebSocket - attempting enhancement")
+                # Try to enhance it now
+                from netra_backend.app.websocket_core import get_websocket_manager
+                ws_manager = get_websocket_manager()
+                if ws_manager:
+                    supervisor.registry.set_websocket_manager(ws_manager)
+        
         _setup_agent_state(app, supervisor)
-        logger.info("Agent supervisor created successfully")
+        
+        # Final verification
+        if not hasattr(app.state, 'agent_supervisor') or app.state.agent_supervisor is None:
+            raise RuntimeError("Agent supervisor not set on app.state after setup")
+        
+        if not hasattr(app.state, 'thread_service') or app.state.thread_service is None:
+            raise RuntimeError("Thread service not set on app.state after setup")
+        
+        logger.info(f"✅ Agent supervisor created successfully for {environment}")
+        logger.info(f"✅ WebSocket enhancement status: {getattr(supervisor.registry.tool_dispatcher, '_websocket_enhanced', False) if hasattr(supervisor, 'registry') else 'N/A'}")
+        
     except Exception as e:
-        logger.error(f"Failed to create agent supervisor: {e}")
-        # Set a None supervisor so WebSocket doesn't crash
-        app.state.agent_supervisor = None
-        raise
+        error_msg = f"Failed to create agent supervisor in {environment}: {e}"
+        logger.error(error_msg, exc_info=True)
+        
+        # CRITICAL: In staging/production, this must fail hard
+        if environment in ["staging", "production"]:
+            raise RuntimeError(error_msg) from e
+        else:
+            # Set None for development/testing to allow graceful degradation
+            app.state.agent_supervisor = None
+            app.state.thread_service = None
+            logger.warning(f"Agent supervisor set to None for {environment} after failure")
+            raise
 
 
 def _build_supervisor_agent(app: FastAPI):
