@@ -91,6 +91,21 @@ from test_framework.environment_markers import TestEnvironment, filter_tests_by_
 # Cypress integration
 from test_framework.cypress_runner import CypressTestRunner, CypressExecutionOptions
 
+# Test Orchestrator integration
+try:
+    from test_framework.orchestration.test_orchestrator_agent import (
+        TestOrchestratorAgent, OrchestrationConfig, ExecutionMode,
+        add_orchestrator_arguments, execute_with_orchestrator
+    )
+    ORCHESTRATOR_AVAILABLE = True
+except ImportError:
+    ORCHESTRATOR_AVAILABLE = False
+    TestOrchestratorAgent = None
+    OrchestrationConfig = None
+    ExecutionMode = None
+    add_orchestrator_arguments = None
+    execute_with_orchestrator = None
+
 # Test execution tracking
 try:
     from scripts.test_execution_tracker import TestExecutionTracker, TestRunRecord
@@ -1552,6 +1567,10 @@ def main():
         help="Browser to use for Cypress tests (default: chrome)"
     )
     
+    # Add orchestrator arguments if available
+    if ORCHESTRATOR_AVAILABLE:
+        add_orchestrator_arguments(parser)
+    
     args = parser.parse_args()
     
     # Handle special operations
@@ -1613,7 +1632,18 @@ def main():
         print("Cypress integration completed successfully!")
         return 0
     
-    # Run tests
+    # Handle orchestrator execution if requested
+    if ORCHESTRATOR_AVAILABLE and hasattr(args, 'use_layers') and args.use_layers:
+        # Use async executor for orchestrator
+        import asyncio
+        return asyncio.run(execute_with_orchestrator(args))
+    
+    # Handle orchestrator show commands
+    if ORCHESTRATOR_AVAILABLE and hasattr(args, 'show_layers') and args.show_layers:
+        import asyncio
+        return asyncio.run(execute_with_orchestrator(args))
+    
+    # Run tests with traditional category system
     runner = UnifiedTestRunner()
     return runner.run(args)
 

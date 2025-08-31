@@ -166,10 +166,14 @@ except ImportError:
     pass
 
 # Enhanced collection mode detection and cleanup registration
-if "pytest" in sys.modules and not get_env().get("PYTEST_CURRENT_TEST"):
-    # Only set collection mode if pytest is imported but we're not currently executing a test
-    # PYTEST_CURRENT_TEST is set during test execution but not during collection
-    get_env().set("TEST_COLLECTION_MODE", "1", source="netra_backend_conftest")
+# CRITICAL FIX: Only run this during actual pytest execution, not just when pytest is imported
+if "pytest" in sys.modules and hasattr(sys.modules.get('pytest'), 'main'):
+    # Only set collection mode if pytest is actively running and we're not executing a test
+    if hasattr(sys, '_pytest_running') or get_env().get("PYTEST_CURRENT_TEST"):
+        get_env().set("TEST_COLLECTION_MODE", "1", source="netra_backend_conftest")
+    elif get_env().get("PYTEST_CURRENT_TEST") is None and hasattr(sys, '_pytest_session'):
+        # We're in collection mode
+        get_env().set("TEST_COLLECTION_MODE", "1", source="netra_backend_conftest")
 
 # Register cleanup for async resources at module level
 def _cleanup_async_resources():
@@ -199,7 +203,9 @@ def _cleanup_async_resources():
 atexit.register(_cleanup_async_resources)
 
 # Only set environment variables if we're actually running tests
-if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
+# CRITICAL FIX: More precise pytest detection to avoid false positives in production
+if ("pytest" in sys.modules and hasattr(sys.modules.get('pytest'), 'main') and 
+    (hasattr(sys, '_pytest_running') or get_env().get("PYTEST_CURRENT_TEST"))):
     # Use IsolatedEnvironment for all test configuration
     env = get_env()
     
