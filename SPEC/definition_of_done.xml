@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definition_of_done>
+  <metadata>
+    <created>2025-08-31</created>
+    <purpose>Define the comprehensive checklist for module changes and completion criteria</purpose>
+    <primary_document>DEFINITION_OF_DONE_CHECKLIST.md</primary_document>
+  </metadata>
+
+  <overview>
+    <description>
+      The Definition of Done (DoD) provides a mandatory checklist for reviewing all critical 
+      files when making changes to major modules. This ensures system-wide coherence and 
+      stability as required by CLAUDE.md directives.
+    </description>
+    <location>/DEFINITION_OF_DONE_CHECKLIST.md</location>
+    <enforcement>MANDATORY for all module changes</enforcement>
+  </overview>
+
+  <covered_modules>
+    <module name="WebSocket" critical="true">
+      <value_delivery>90%</value_delivery>
+      <mega_class>/netra_backend/app/websocket_core/manager.py</mega_class>
+      <required_events>
+        <event>agent_started</event>
+        <event>agent_thinking</event>
+        <event>tool_executing</event>
+        <event>tool_completed</event>
+        <event>agent_completed</event>
+      </required_events>
+    </module>
+    
+    <module name="Database" critical="true">
+      <ssot>true</ssot>
+      <mega_class>/netra_backend/app/db/database_manager.py</mega_class>
+      <canonical_implementations>
+        <file>/netra_backend/app/db/clickhouse.py</file>
+        <file>/netra_backend/app/db/postgres.py</file>
+      </canonical_implementations>
+    </module>
+    
+    <module name="Authentication" critical="true">
+      <shared_service>true</shared_service>
+      <mandatory_integration>/netra_backend/app/auth_integration/auth.py</mandatory_integration>
+      <jwt_secret_manager>/shared/jwt_secret_manager.py</jwt_secret_manager>
+    </module>
+    
+    <module name="Configuration" critical="true">
+      <unified_ssot>true</unified_ssot>
+      <main_interface>/netra_backend/app/config.py</main_interface>
+      <unified_cors>/shared/cors_config.py</unified_cors>
+    </module>
+    
+    <module name="Agent_Orchestration">
+      <supervisor>/netra_backend/app/agents/supervisor_agent_modern.py</supervisor>
+      <workflow>/netra_backend/app/agents/supervisor/workflow_orchestrator.py</workflow>
+      <execution>/netra_backend/app/agents/supervisor/execution_engine.py</execution>
+    </module>
+    
+    <module name="Performance_State_Persistence">
+      <three_tier_architecture>true</three_tier_architecture>
+      <tiers>
+        <tier level="1">Redis (Hot cache)</tier>
+        <tier level="2">PostgreSQL (Warm storage)</tier>
+        <tier level="3">ClickHouse (Cold analytics)</tier>
+      </tiers>
+    </module>
+    
+    <module name="Deployment">
+      <mega_class>/scripts/deploy_to_gcp.py</mega_class>
+      <vpc_connector>/terraform-gcp-staging/vpc-connector.tf</vpc_connector>
+    </module>
+    
+    <module name="Testing">
+      <mega_class>/unified_test_runner.py</mega_class>
+      <real_services_only>true</real_services_only>
+      <no_mocks>true</no_mocks>
+    </module>
+  </covered_modules>
+
+  <checklist_sections>
+    <section name="Pre-Change Verification">
+      <step>Check MASTER_WIP_STATUS.md</step>
+      <step>Review SPEC/learnings/index.xml</step>
+      <step>Run mission-critical tests</step>
+      <step>Check architecture compliance</step>
+    </section>
+    
+    <section name="Module-Specific Review">
+      <step>Review all primary files for module</step>
+      <step>Check integration points</step>
+      <step>Verify required configurations</step>
+      <step>Run module-specific tests</step>
+      <step>Review relevant learnings</step>
+    </section>
+    
+    <section name="Post-Change Validation">
+      <step>Run linting and type checking</step>
+      <step>Execute all test categories</step>
+      <step>Update documentation</step>
+      <step>Verify compliance metrics</step>
+      <step>Regenerate system status</step>
+    </section>
+  </checklist_sections>
+
+  <compliance_requirements>
+    <requirement>Architecture compliance > 87.5%</requirement>
+    <requirement>No new SSOT violations</requirement>
+    <requirement>No duplicate implementations</requirement>
+    <requirement>Service independence maintained</requirement>
+    <requirement>All WebSocket events functioning</requirement>
+    <requirement>Real services used for testing (no mocks)</requirement>
+  </compliance_requirements>
+
+  <emergency_procedures>
+    <rollback>
+      <command>python scripts/deploy_to_gcp.py --rollback</command>
+      <verification>Run mission critical tests</verification>
+      <documentation>Create learning document in SPEC/learnings/</documentation>
+    </rollback>
+  </emergency_procedures>
+
+  <business_value_justification>
+    <template>
+      <field>Segment (Free/Early/Mid/Enterprise/Platform)</field>
+      <field>Business Goal (Conversion/Expansion/Retention/Stability)</field>
+      <field>Value Impact (How does this improve AI operations?)</field>
+      <field>Strategic/Revenue Impact (Quantifiable benefit)</field>
+    </template>
+  </business_value_justification>
+
+  <critical_notes>
+    <note priority="1">WebSocket events are mission critical - breaking these breaks 90% of platform value</note>
+    <note priority="2">Always use real services for testing, never mocks</note>
+    <note priority="3">Globally correct > locally correct</note>
+    <note priority="4">Ship for value with rigor enabling long-term velocity</note>
+  </critical_notes>
+</definition_of_done>

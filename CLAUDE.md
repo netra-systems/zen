@@ -45,9 +45,11 @@ Netra Apex succeeds by creating and capturing value from a customer's AI spend.
   * **Lean Development (MVP/YAGNI):** Adhere strictly to Minimum Viable Product (MVP) and "You Ain't Gonna Need It" (YAGNI) principles. Every component must justify its existence with immediate business value.
   * **AI Leverage:** Use the AI Factory and specialized agent workflows as force multipliers to automate and augment processes, maximizing throughput and quality.
   * **COMPLETE YOUR TASKS FULLY** You always "finish the job" even when it takes many hours of work, sub agents, many tools or tasks.
-  * **User Chat is King** The user chat is currently the channel we deliever 90% of our value.
-  It must be responsive, useful and strong. When a user is actively running an agent they must get timely updates.
-  We must protect our IP so messages to the users must proect "secrets" of how the agents work.
+  * **User Chat is King - SUBSTANTIVE VALUE** The user chat is currently the channel we deliver 90% of our value.
+  **"Chat" means the complete value of AI-powered interactions** - agents solving real problems, providing insights, and delivering actionable results. NOT just technical send/receive of messages.
+  It must be responsive, useful and strong. Success is measured by the substance and quality of AI responses.
+  When a user is actively running an agent they must get timely updates AND receive meaningful, problem-solving results.
+  We must protect our IP so messages to the users must protect "secrets" of how the agents work.
   Some agents run slower or faster than others. Updates must be reasonable and contextually useful.
 
 ### 1.1. Revenue-Driven Development: Business Value Justification (BVJ)
@@ -101,6 +103,7 @@ Use Test Runner to discover tests e.g. python unified_test_runner.py. Read testi
 
   * **Type Safety:** Adhere strictly to `SPEC/type_safety.xml`.
   * **Environment:** All environment access MUST go through `IsolatedEnvironment` as defined in [`SPEC/unified_environment_management.xml`](SPEC/unified_environment_management.xml).
+  * **Configuration Architecture:** Follow the comprehensive configuration system documented in [`docs/configuration_architecture.md`](docs/configuration_architecture.md).
   * **Compliance Check:** Run `python scripts/check_architecture_compliance.py` to check status.
 
 ### 2.4. Strategic Trade-offs
@@ -225,19 +228,19 @@ All microservices MUST be 100% independent. See [`SPEC/independent_services.xml`
 
 -----
 
-## 6\. MISSION CRITICAL: WebSocket Agent Events
+## 6\. MISSION CRITICAL: WebSocket Agent Events (Infrastructure for Chat Value)
 
-**CRITICAL: Basic chat functionality depends on WebSocket events. This CANNOT regress.**
+**CRITICAL: WebSocket events enable substantive chat interactions - they serve the business goal of delivering AI value to users.**
 
-### 6.1. Required WebSocket Events for Chat
+### 6.1. Required WebSocket Events for Substantive Chat Value
 
-The following events MUST be sent during agent execution or the chat UI will appear broken:
+The following events MUST be sent during agent execution to enable meaningful AI interactions:
 
-1. **agent_started** - User must see agent began processing
-2. **agent_thinking** - Real-time reasoning visibility
-3. **tool_executing** - Tool usage transparency  
-4. **tool_completed** - Tool results display
-5. **agent_completed** - User must know when done
+1. **agent_started** - User must see agent began processing their problem
+2. **agent_thinking** - Real-time reasoning visibility (shows AI is working on valuable solutions)
+3. **tool_executing** - Tool usage transparency (demonstrates problem-solving approach)
+4. **tool_completed** - Tool results display (delivers actionable insights)
+5. **agent_completed** - User must know when valuable response is ready
 
 ### 6.2. WebSocket Integration Requirements
 
@@ -290,6 +293,7 @@ This is a non-exhaustive list of mission-critical specs.
 | [`mega_class_exceptions.xml`](SPEC/mega_class_exceptions.xml) | **CRITICAL:** Approved exceptions for central SSOT classes up to 2000 lines. |
 | [`git_commit_atomic_units.xml`](SPEC/git_commit_atomic_units.xml) | **CRITICAL:** Git commit standards. |
 | [`import_management_architecture.xml`](SPEC/import_management_architecture.xml) | **CRITICAL:** Absolute import rules. |
+| [`configuration_architecture.md`](docs/configuration_architecture.md) | **CRITICAL:** Configuration and environment management architecture with complete diagrams and flows. |
 
 Direct OS.env access is FORBIDDEN except in each services canonical env config SSOT. Applies to ALL tests too. EACH SERVICE MUST MAINTAIN INDEPENDENCE. Import ONLY from the env of the service.
 
@@ -301,8 +305,10 @@ Direct OS.env access is FORBIDDEN except in each services canonical env config S
 
   * [`MASTER_WIP_STATUS.md`](MASTER_WIP_STATUS.md) provides real-time system health, compliance scores, and critical violations.
   * **[`DEFINITION_OF_DONE_CHECKLIST.md`](DEFINITION_OF_DONE_CHECKLIST.md) - MANDATORY checklist for all module changes. Review ALL files listed for your module.**
-  * Always review these reports first and regenerate status after your work is complete.
+  * Review these reports first and regenerate status after your work is complete.
 
+** YOU MUST USE A **CHECKLIST** EVERYTIME.
+If you ever have a chance to audit or verify or spawn new subagent, even if 10x as much work to improve 1% chance of overall success do it. Success = Complete work at all costs.
 -----
 
 ## 9\. Execution Checklist
