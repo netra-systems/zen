@@ -81,6 +81,12 @@ class MockClickHouseDatabase:
         logger.debug(f"[MOCK ClickHouse] Command: {cmd[:100]}...")
         return None
     
+    async def insert_data(self, table: str, data: List[List[Any]], column_names: Optional[List[str]] = None) -> None:
+        """Mock insert_data method - logs operation (matches clickhouse_base.py signature)."""
+        self.query_count += 1
+        self.last_query_time = time.time()
+        logger.debug(f"[MOCK ClickHouse] Insert data to {table}: {len(data)} rows, columns: {column_names}")
+    
     async def batch_insert(self, table_name: str, data: List[Dict[str, Any]]) -> None:
         """Mock batch insert - logs operation."""
         logger.debug(f"[MOCK ClickHouse] Batch insert to {table_name}: {len(data)} rows")

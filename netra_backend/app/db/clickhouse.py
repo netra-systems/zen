@@ -928,3 +928,17 @@ def _prepare_state_history_record(run_id: str, state_data: dict, metadata: dict)
 ClickHouseManager = ClickHouseService  # Alias for test imports
 ClickHouseClient = ClickHouseService  # Alias for consolidation
 ClickHouseDatabaseClient = ClickHouseService  # Alias for consolidation
+
+# Re-export MockClickHouseDatabase for backward compatibility
+# Tests and database_manager expect this import path to work
+try:
+    from test_framework.fixtures.clickhouse_fixtures import MockClickHouseDatabase
+    # Make it available for import from this module
+    __all__ = ['MockClickHouseDatabase', 'ClickHouseService', 'ClickHouseCache', 'NoOpClickHouseClient', 
+               'get_clickhouse_client', 'get_clickhouse_service', 'create_agent_state_history_table',
+               'insert_agent_state_history', 'ClickHouseManager', 'ClickHouseClient', 'ClickHouseDatabaseClient']
+except ImportError:
+    # If test framework not available, define minimal exports without MockClickHouseDatabase
+    __all__ = ['ClickHouseService', 'ClickHouseCache', 'NoOpClickHouseClient', 
+               'get_clickhouse_client', 'get_clickhouse_service', 'create_agent_state_history_table',
+               'insert_agent_state_history', 'ClickHouseManager', 'ClickHouseClient', 'ClickHouseDatabaseClient']
