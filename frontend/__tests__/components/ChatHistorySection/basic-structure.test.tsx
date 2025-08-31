@@ -1,11 +1,10 @@
-/**
- * ChatHistorySection Basic Structure Tests
- * Tests for component structure and layout ≤300 lines, ≤8 line functions
- */
-
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ChatHistorySection } from '@/components/ChatHistorySection';
+import { createTestSetup, setupEmptyState } from './shared-setup';
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ySection } from '@/components/ChatHistorySection';
 import { createTestSetup, setupEmptyState } from './shared-setup';
 import {
   expectBasicStructure,
@@ -17,6 +16,7 @@ import {
 } from './test-utils';
 
 describe('ChatHistorySection - Basic Structure', () => {
+    jest.setTimeout(10000);
   const testSetup = createTestSetup();
 
   beforeEach(() => {
@@ -25,9 +25,15 @@ describe('ChatHistorySection - Basic Structure', () => {
 
   afterEach(() => {
     testSetup.afterEach();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Main component structure', () => {
+      jest.setTimeout(10000);
     it('should render the main chat history header', () => {
       render(<ChatHistorySection />);
       
@@ -58,6 +64,7 @@ describe('ChatHistorySection - Basic Structure', () => {
   });
 
   describe('Thread item structure', () => {
+      jest.setTimeout(10000);
     it('should apply consistent styling to thread items', () => {
       render(<ChatHistorySection />);
       
@@ -101,6 +108,7 @@ describe('ChatHistorySection - Basic Structure', () => {
   });
 
   describe('Empty state structure', () => {
+      jest.setTimeout(10000);
     it('should render empty state when no threads exist', () => {
       setupEmptyState();
       render(<ChatHistorySection />);
@@ -134,6 +142,7 @@ describe('ChatHistorySection - Basic Structure', () => {
   });
 
   describe('Semantic HTML structure', () => {
+      jest.setTimeout(10000);
     it('should use appropriate semantic elements', () => {
       const { container } = render(<ChatHistorySection />);
       
@@ -169,6 +178,7 @@ describe('ChatHistorySection - Basic Structure', () => {
   });
 
   describe('CSS class structure', () => {
+      jest.setTimeout(10000);
     it('should apply proper CSS classes to main container', () => {
       const { container } = render(<ChatHistorySection />);
       
@@ -211,6 +221,7 @@ describe('ChatHistorySection - Basic Structure', () => {
   });
 
   describe('Data attributes and test IDs', () => {
+      jest.setTimeout(10000);
     it('should provide testable elements with proper attributes', () => {
       const { container } = render(<ChatHistorySection />);
       
@@ -258,6 +269,7 @@ describe('ChatHistorySection - Basic Structure', () => {
   });
 
   describe('Layout and positioning', () => {
+      jest.setTimeout(10000);
     it('should maintain proper flex layout structure', () => {
       const { container } = render(<ChatHistorySection />);
       

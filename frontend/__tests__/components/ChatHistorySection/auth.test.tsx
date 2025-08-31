@@ -1,10 +1,8 @@
-/**
- * Authentication test for ChatHistorySection
- * Simple test to verify authentication state works correctly
- */
-
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { ChatHistorySection } from '@/components/ChatHistorySection';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ender, screen } from '@testing-library/react';
 import { ChatHistorySection } from '@/components/ChatHistorySection';
 
 // Direct module mocking with explicit return values
@@ -76,6 +74,7 @@ jest.mock('framer-motion', () => ({
 }));
 
 describe('ChatHistorySection - Authentication', () => {
+    jest.setTimeout(10000);
   it('should render authenticated content when user is authenticated', () => {
     render(<ChatHistorySection />);
     

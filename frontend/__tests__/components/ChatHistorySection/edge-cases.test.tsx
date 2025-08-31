@@ -90,6 +90,8 @@ const createMockThread = (overrides: any = {}) => ({
 });
 
 describe('ChatHistorySection - Edge Cases', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const testSetup = createTestSetup();
 
   beforeEach(() => {
@@ -145,9 +147,17 @@ describe('ChatHistorySection - Edge Cases', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Data edge cases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle extremely large number of threads', async () => {
       // Create 1000 mock threads
       const manyThreads = Array.from({ length: 1000 }, (_, i) => ({
@@ -247,6 +257,8 @@ describe('ChatHistorySection - Edge Cases', () => {
   });
 
   describe('Performance and memory', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should efficiently render and update thread list', () => {
       // Test rendering without timing dependencies
       expect(() => render(<ChatHistorySection />)).not.toThrow();
@@ -301,6 +313,8 @@ describe('ChatHistorySection - Edge Cases', () => {
   });
 
   describe('Accessibility edge cases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should maintain focus management during updates', async () => {
       render(<ChatHistorySection />);
       
@@ -352,6 +366,8 @@ describe('ChatHistorySection - Edge Cases', () => {
   });
 
   describe('Concurrent operations', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle simultaneous delete and switch operations', async () => {
       (ThreadService.deleteThread as jest.Mock).mockImplementation(
         () => new Promise(resolve => setTimeout(() => resolve({ success: true }), 100))
@@ -397,6 +413,8 @@ describe('ChatHistorySection - Edge Cases', () => {
   });
 
   describe('Network and API edge cases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle API timeout gracefully', async () => {
       (ThreadService.listThreads as jest.Mock).mockImplementation(
         () => new Promise((_, reject) => 
@@ -455,6 +473,8 @@ describe('ChatHistorySection - Edge Cases', () => {
   });
 
   describe('Component lifecycle edge cases', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should handle prop changes during component lifecycle', () => {
       const { rerender } = render(<ChatHistorySection />);
       

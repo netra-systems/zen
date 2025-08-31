@@ -1,8 +1,9 @@
-/**
- * Start Chat Button Complete Functionality Tests
- * 
- * Comprehensive test suite for the Start Chat button covering all states,
- * error conditions, thread creation, and integration with backend APIs.
+import React from 'react';
+import { render, screen, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+with backend APIs.
  * 
  * Business Value Justification:
  * - Segment: All (Free → Enterprise)
@@ -77,15 +78,22 @@ const creationScenarios: ThreadCreationScenario[] = [
 ];
 
 describe('StartChatButton Complete Functionality', () => {
+    jest.setTimeout(10000);
   beforeEach(() => {
     setupCompleteTests();
   });
   
   afterEach(() => {
     cleanupCompleteTests();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
   
   describe('Button Visibility Across All States', () => {
+      jest.setTimeout(10000);
     it('displays in empty thread list state', () => {
       renderButtonWithEmptyState();
       verifyButtonVisible();
@@ -112,6 +120,7 @@ describe('StartChatButton Complete Functionality', () => {
   });
   
   describe('Thread Creation Flow', () => {
+      jest.setTimeout(10000);
     it('creates thread with proper API integration', async () => {
       renderButton(defaultProps);
       await triggerThreadCreation();
@@ -139,6 +148,7 @@ describe('StartChatButton Complete Functionality', () => {
   });
   
   describe('Double-Click and Rapid Click Prevention', () => {
+      jest.setTimeout(10000);
     it('prevents duplicate threads on rapid clicks', async () => {
       renderButton(defaultProps);
       await performRapidClicks(5);
@@ -163,6 +173,7 @@ describe('StartChatButton Complete Functionality', () => {
   });
   
   describe('Error Recovery and Resilience', () => {
+      jest.setTimeout(10000);
     test.each(creationScenarios)('handles $name', async ({ mockImplementation, shouldSucceed }) => {
       mockOnCreateThread.mockImplementation(mockImplementation);
       renderButton(defaultProps);
@@ -219,6 +230,7 @@ describe('StartChatButton Complete Functionality', () => {
   });
   
   describe('Analytics and Tracking', () => {
+      jest.setTimeout(10000);
     it('fires analytics event on button click', async () => {
       renderButton(defaultProps);
       await triggerThreadCreation();

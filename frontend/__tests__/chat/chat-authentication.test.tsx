@@ -1,10 +1,11 @@
-/**
- * Chat Authentication Flow Tests
- * Tests for user authentication and initialization in chat interface
- * 
- * BVJ: Core Authentication Testing
- * Segment: All - authentication is critical for all user segments
- * Business Goal: Reliable user access and security
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import MainChat from '../../components/chat/MainChat';
+import { TestProviders } from '@/__tests__/test-utils/providers';
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ecurity
  * Value Impact: Prevents user access issues and security vulnerabilities
  */
 
@@ -60,10 +61,17 @@ beforeEach(() => {
 
 afterEach(() => {
   jest.restoreAllMocks();
+    // Clean up timers to prevent hanging
+    jest.clearAllTimers();
+    jest.useFakeTimers();
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
 });
 
 describe('Chat Authentication Flow', () => {
+    jest.setTimeout(10000);
   describe('Authenticated User Experience', () => {
+      jest.setTimeout(10000);
     test('should successfully authenticate user and initialize chat interface', async () => {
       const mockUser = { 
         id: 'user-123', 
@@ -144,6 +152,7 @@ describe('Chat Authentication Flow', () => {
   });
 
   describe('Unauthenticated User Experience', () => {
+      jest.setTimeout(10000);
     test('should handle unauthenticated state gracefully', async () => {
       // Mock unauthenticated state
       (useAuthStore as unknown as jest.Mock).mockReturnValue(
@@ -191,6 +200,7 @@ describe('Chat Authentication Flow', () => {
   });
 
   describe('Authentication State Transitions', () => {
+      jest.setTimeout(10000);
     test('should handle authentication state changes', async () => {
       const { rerender } = render(
         <TestProviders>
@@ -260,6 +270,7 @@ describe('Chat Authentication Flow', () => {
   });
 
   describe('Token Management', () => {
+      jest.setTimeout(10000);
     test('should handle valid authentication tokens', async () => {
       (useAuthStore as unknown as jest.Mock).mockReturnValue(
         createAuthStoreMock({

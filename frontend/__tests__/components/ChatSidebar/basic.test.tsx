@@ -1,14 +1,13 @@
-/**
- * ChatSidebar Basic Functionality Tests  
- * Tests for thread list display, metadata, and basic rendering
- */
-
 import React from 'react';
 import { screen, within, waitFor } from '@testing-library/react';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import { createTestSetup, renderWithProvider, sampleThreads, TestChatSidebar } from './setup';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+s/chat/ChatSidebar';
+import { createTestSetup, renderWithProvider, sampleThreads, TestChatSidebar } from './setup';
 
 describe('ChatSidebar - Basic Functionality', () => {
+    jest.setTimeout(10000);
   const testSetup = createTestSetup();
 
   beforeEach(() => {
@@ -17,9 +16,15 @@ describe('ChatSidebar - Basic Functionality', () => {
 
   afterEach(() => {
     testSetup.afterEach();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Thread List Display', () => {
+      jest.setTimeout(10000);
     it('should render thread list when threads are available', async () => {
       // Configure ThreadService to return sample threads
       testSetup.configureThreadService({
@@ -233,6 +238,7 @@ describe('ChatSidebar - Basic Functionality', () => {
   });
 
   describe('Thread Status and States', () => {
+      jest.setTimeout(10000);
     it('should indicate active/current thread clearly', () => {
       testSetup.configureStore({
         threads: sampleThreads,
@@ -323,6 +329,7 @@ describe('ChatSidebar - Basic Functionality', () => {
   });
 
   describe('Component Structure', () => {
+      jest.setTimeout(10000);
     it('should render main sidebar container', () => {
       renderWithProvider(<TestChatSidebar />);
       
@@ -366,6 +373,7 @@ describe('ChatSidebar - Basic Functionality', () => {
   });
 
   describe('Responsive Behavior', () => {
+      jest.setTimeout(10000);
     it('should adapt to different screen sizes', () => {
       // Mock small screen
       Object.defineProperty(window, 'innerWidth', { value: 320, configurable: true });

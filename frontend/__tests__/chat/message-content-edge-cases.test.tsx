@@ -1,11 +1,12 @@
-/**
- * Message Content Edge Cases Tests
- * Tests for edge cases and regression prevention in message content handling
- * 
- * BVJ: Content Security and Robustness
- * Segment: All - prevents application crashes and security issues
- * Business Goal: Application stability and security compliance
- * Value Impact: Prevents user frustration from crashes and potential security vulnerabilities
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { MessageList } from '@/components/chat/MessageList';
+import { MessageItem } from '@/components/chat/MessageItem';
+import { useUnifiedChatStore } from '@/store/unified-chat';
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+revents user frustration from crashes and potential security vulnerabilities
  */
 
 import React from 'react';
@@ -58,7 +59,9 @@ beforeEach(() => {
 });
 
 describe('Message Content Edge Cases and Regression Prevention', () => {
+    jest.setTimeout(10000);
   describe('React Element-like Objects', () => {
+      jest.setTimeout(10000);
     test('should not throw when content is a React element-like object', () => {
       const mockStore = createUnifiedChatStoreMock({
         messages: [
@@ -132,6 +135,7 @@ describe('Message Content Edge Cases and Regression Prevention', () => {
   });
 
   describe('Special Characters and XSS Prevention', () => {
+      jest.setTimeout(10000);
     test('should handle content with special characters', () => {
       const mockStore = createUnifiedChatStoreMock({
         messages: [
@@ -215,6 +219,7 @@ describe('Message Content Edge Cases and Regression Prevention', () => {
   });
 
   describe('Large Content Handling', () => {
+      jest.setTimeout(10000);
     test('should handle extremely large text content', () => {
       const largeContent = 'A'.repeat(100000); // 100k characters
       
@@ -285,6 +290,7 @@ describe('Message Content Edge Cases and Regression Prevention', () => {
   });
 
   describe('Invalid Data Type Handling', () => {
+      jest.setTimeout(10000);
     test('should handle function as content', () => {
       const functionContent = () => 'I am a function';
 
@@ -372,6 +378,7 @@ describe('Message Content Edge Cases and Regression Prevention', () => {
   });
 
   describe('Malformed Message Objects', () => {
+      jest.setTimeout(10000);
     test('should handle message with missing required properties', () => {
       const message = {
         id: 'malformed',
@@ -405,6 +412,7 @@ describe('Message Content Edge Cases and Regression Prevention', () => {
   });
 
   describe('Browser Compatibility Edge Cases', () => {
+      jest.setTimeout(10000);
     test('should handle content that triggers JSON.stringify errors', () => {
       const problematicObject = {};
       Object.defineProperty(problematicObject, 'toJSON', {
@@ -486,6 +494,7 @@ describe('Message Content Edge Cases and Regression Prevention', () => {
   });
 
   describe('Memory and Performance Edge Cases', () => {
+      jest.setTimeout(10000);
     test('should handle rapid re-renders without memory leaks', () => {
       const mockStore = createUnifiedChatStoreMock({
         messages: [

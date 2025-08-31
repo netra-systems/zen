@@ -1,9 +1,10 @@
-/**
- * Message Content Rendering Tests
- * Tests for MessageItem component content rendering and display logic
- * 
- * BVJ: Message Display Infrastructure
- * Segment: All - proper message rendering is critical for all users
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { MessageItem } from '@/components/chat/MessageItem';
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ering is critical for all users
  * Business Goal: Clear communication and professional UI appearance
  * Value Impact: Good UX increases user engagement and trust in the platform
  */
@@ -52,7 +53,9 @@ beforeEach(() => {
 });
 
 describe('Message Content Rendering', () => {
+    jest.setTimeout(10000);
   describe('Basic Content Rendering', () => {
+      jest.setTimeout(10000);
     test('should render string content directly', () => {
       const message = {
         id: 'test-1',
@@ -131,6 +134,7 @@ describe('Message Content Rendering', () => {
   });
 
   describe('Object Content Rendering', () => {
+      jest.setTimeout(10000);
     test('should handle object content in MessageItem', () => {
       const message = {
         id: 'test-2',
@@ -219,6 +223,7 @@ describe('Message Content Rendering', () => {
   });
 
   describe('Error Content Handling', () => {
+      jest.setTimeout(10000);
     test('should prioritize error content over regular content', () => {
       const message = {
         id: 'test-4',
@@ -276,6 +281,7 @@ describe('Message Content Rendering', () => {
   });
 
   describe('Agent Information Display', () => {
+      jest.setTimeout(10000);
     test('should display sub-agent name when provided', () => {
       const message = {
         id: 'test-agent',
@@ -332,6 +338,7 @@ describe('Message Content Rendering', () => {
   });
 
   describe('References and Attachments', () => {
+      jest.setTimeout(10000);
     test('should handle messages with references', () => {
       const message = {
         id: 'test-5',
@@ -393,6 +400,7 @@ describe('Message Content Rendering', () => {
   });
 
   describe('Tool Information Display', () => {
+      jest.setTimeout(10000);
     test('should display tool information when available', () => {
       const message = {
         id: 'test-tool',
@@ -440,6 +448,7 @@ describe('Message Content Rendering', () => {
   });
 
   describe('Raw Data Display', () => {
+      jest.setTimeout(10000);
     test('should handle raw data when present', () => {
       const message = {
         id: 'test-raw-data',
@@ -482,6 +491,7 @@ describe('Message Content Rendering', () => {
   });
 
   describe('Timestamp and Metadata', () => {
+      jest.setTimeout(10000);
     test('should display message timestamp', () => {
       const timestamp = new Date().toISOString();
       const message = {

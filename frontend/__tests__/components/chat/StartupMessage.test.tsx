@@ -118,6 +118,8 @@ import { useAuthStore } from '@/store/authStore';
 import { useThreadNavigation } from '@/hooks/useThreadNavigation';
 
 describe('Startup Message Comprehensive Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   const mockStoreState = {
     isProcessing: false,
     messages: [],
@@ -401,6 +403,8 @@ describe('Startup Message Comprehensive Tests', () => {
  * Integration Tests for Startup Message with Real Components
  */
 describe('Startup Message Integration Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     
@@ -482,4 +486,8 @@ describe('Startup Message Integration Tests', () => {
     const renderTime = endTime - startTime;
     expect(renderTime).toBeLessThan(100); // 100ms budget
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

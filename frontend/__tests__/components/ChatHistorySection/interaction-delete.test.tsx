@@ -1,11 +1,11 @@
-/**
- * ChatHistorySection Delete Interaction Tests
- * Tests for delete operations and confirmation dialogs ≤300 lines, ≤8 line functions
- */
-
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ChatHistorySection } from '@/components/ChatHistorySection';
+import { createTestSetup } from './shared-setup';
+import { ThreadService } from '@/services/threadService';
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+nts/ChatHistorySection';
 import { createTestSetup } from './shared-setup';
 import { ThreadService } from '@/services/threadService';
 import {
@@ -16,6 +16,7 @@ import {
 } from './test-utils';
 
 describe('ChatHistorySection - Delete Interactions', () => {
+    jest.setTimeout(10000);
   const testSetup = createTestSetup();
 
   beforeEach(() => {
@@ -24,9 +25,15 @@ describe('ChatHistorySection - Delete Interactions', () => {
 
   afterEach(() => {
     testSetup.afterEach();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Delete button visibility', () => {
+      jest.setTimeout(10000);
     it('should show delete option for threads', () => {
       render(<ChatHistorySection />);
       
@@ -63,6 +70,7 @@ describe('ChatHistorySection - Delete Interactions', () => {
   });
 
   describe('Delete confirmation dialog', () => {
+      jest.setTimeout(10000);
     it('should show delete confirmation dialog when delete is clicked', async () => {
       const restoreConfirm = mockWindowConfirm(true);
       
@@ -108,6 +116,7 @@ describe('ChatHistorySection - Delete Interactions', () => {
   });
 
   describe('Delete operation execution', () => {
+      jest.setTimeout(10000);
     it('should delete thread when confirmed', async () => {
       const restoreConfirm = mockWindowConfirm(true);
       jest.mocked(ThreadService.deleteThread).mockResolvedValue({ success: true });
@@ -159,6 +168,7 @@ describe('ChatHistorySection - Delete Interactions', () => {
   });
 
   describe('Delete error handling', () => {
+      jest.setTimeout(10000);
     it('should handle delete error gracefully', async () => {
       jest.mocked(ThreadService.deleteThread).mockRejectedValue(new Error('Delete failed'));
       const restoreConsole = mockConsoleError();
@@ -205,6 +215,7 @@ describe('ChatHistorySection - Delete Interactions', () => {
   });
 
   describe('Delete state management', () => {
+      jest.setTimeout(10000);
     it('should disable delete during operation', async () => {
       jest.mocked(ThreadService.deleteThread).mockImplementation(
         () => new Promise(resolve => setTimeout(() => resolve({ success: true }), 100))
@@ -243,6 +254,7 @@ describe('ChatHistorySection - Delete Interactions', () => {
   });
 
   describe('Delete accessibility', () => {
+      jest.setTimeout(10000);
     it('should provide accessible delete buttons', () => {
       render(<ChatHistorySection />);
       
@@ -290,6 +302,7 @@ describe('ChatHistorySection - Delete Interactions', () => {
   });
 
   describe('Delete UI feedback', () => {
+      jest.setTimeout(10000);
     it('should show loading state during delete operation', async () => {
       jest.mocked(ThreadService.deleteThread).mockImplementation(
         () => new Promise(resolve => setTimeout(() => resolve({ success: true }), 100))

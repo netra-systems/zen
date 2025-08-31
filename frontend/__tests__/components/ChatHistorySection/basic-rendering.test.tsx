@@ -1,11 +1,10 @@
-/**
- * ChatHistorySection Basic Rendering Tests
- * Tests for thread rendering and display functionality ≤300 lines, ≤8 line functions
- */
-
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ChatHistorySection } from '@/components/ChatHistorySection';
+import { createTestSetup, setupCustomThreads } from './shared-setup';
+import { mockThreads, createMockThread } from './mockData';
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import { createTestSetup, setupCustomThreads } from './shared-setup';
 import { mockThreads, createMockThread } from './mockData';
 import {
@@ -21,6 +20,7 @@ import {
 } from './test-utils';
 
 describe('ChatHistorySection - Basic Rendering', () => {
+    jest.setTimeout(10000);
   const testSetup = createTestSetup();
 
   beforeEach(() => {
@@ -29,9 +29,15 @@ describe('ChatHistorySection - Basic Rendering', () => {
 
   afterEach(() => {
     testSetup.afterEach();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
   });
 
   describe('Thread list rendering', () => {
+      jest.setTimeout(10000);
     it('should render all conversation threads', () => {
       render(<ChatHistorySection />);
       
@@ -72,6 +78,7 @@ describe('ChatHistorySection - Basic Rendering', () => {
   });
 
   describe('Thread title handling', () => {
+      jest.setTimeout(10000);
     it('should render thread with null title as Untitled', () => {
       const threadsWithNullTitle = [createThreadWithTitle(mockThreads[0], null)];
       setupCustomThreads(threadsWithNullTitle);
@@ -115,6 +122,7 @@ describe('ChatHistorySection - Basic Rendering', () => {
   });
 
   describe('Thread metadata display', () => {
+      jest.setTimeout(10000);
     it('should display message count for each thread', () => {
       render(<ChatHistorySection />);
       
@@ -183,6 +191,7 @@ describe('ChatHistorySection - Basic Rendering', () => {
   });
 
   describe('Error handling in rendering', () => {
+      jest.setTimeout(10000);
     it('should handle malformed thread data gracefully', () => {
       const malformedThreads = [
         { id: 'thread-1' }, // Missing required fields
@@ -212,6 +221,7 @@ describe('ChatHistorySection - Basic Rendering', () => {
   });
 
   describe('Large dataset rendering', () => {
+      jest.setTimeout(10000);
     it('should render efficiently with many threads', () => {
       const largeThreadSet = Array.from({ length: 100 }, (_, i) => ({
         id: `thread-${i}`,

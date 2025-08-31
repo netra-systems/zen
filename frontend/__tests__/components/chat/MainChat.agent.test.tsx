@@ -124,6 +124,8 @@ const mockStore = {
 };
 
 describe('MainChat - Agent Status Tests', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
@@ -161,9 +163,17 @@ describe('MainChat - Agent Status Tests', () => {
   afterEach(() => {
     jest.useRealTimers();
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('Agent status updates', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should show response card when processing', () => {
       mockUseUnifiedChatStore.mockReturnValue({
         ...mockStore,

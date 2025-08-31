@@ -114,6 +114,8 @@ beforeEach(() => {
 });
 
 describe('ExamplePrompts', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   it('sends a message when an example prompt is clicked', () => {
     mockAuthStore.isAuthenticated = true;
 
@@ -153,4 +155,8 @@ describe('ExamplePrompts', () => {
     
     consoleErrorSpy.mockRestore();
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

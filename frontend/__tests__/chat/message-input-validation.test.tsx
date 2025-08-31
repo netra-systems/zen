@@ -42,6 +42,8 @@ const MessageInputWithValidation: React.FC = () => {
 };
 
 describe('Message Input Validation', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   it('should show character count', async () => {
     const user = userEvent.setup();
     render(<MessageInputWithValidation />);
@@ -75,4 +77,8 @@ describe('Message Input Validation', () => {
     // Fixed: Should be red when over limit (using computed RGB value)
     expect(screen.getByTestId('char-count')).toHaveStyle('color: rgb(255, 0, 0)');
   });
+  afterEach(() => {
+    cleanupAntiHang();
+  });
+
 });

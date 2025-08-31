@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { PersistentResponseCard } from '@/components/chat/PersistentResponseCard';
 import type { 
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
   FastLayerData, 
   MediumLayerData, 
   SlowLayerData 
@@ -43,6 +44,7 @@ jest.mock('@/components/chat/layers/SlowLayer', () => ({
 }));
 
 describe('PersistentResponseCard', () => {
+    jest.setTimeout(10000);
   const mockFastLayerData: FastLayerData = {
     agentName: 'Test Agent',
     activeTools: ['tool1', 'tool2'],

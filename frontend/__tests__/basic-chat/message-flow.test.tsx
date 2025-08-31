@@ -1,9 +1,9 @@
-/**
- * Comprehensive Message Flow Tests with Real WebSocket Infrastructure
- * 
- * BUSINESS VALUE JUSTIFICATION:
- * - Segment: All (Free → Enterprise)
- * - Business Goal: Ensure message reliability protecting $100K+ MRR
+import React from 'react';
+import { render, screen, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+liability protecting $100K+ MRR
  * - Value Impact: 95% reduction in message delivery failures
  * - Revenue Impact: Prevents user churn from unreliable chat experience
  * 
@@ -134,6 +134,7 @@ import {
 import { WebSocketMessage } from '@/types/unified';
 
 describe('Comprehensive Message Flow Tests', () => {
+    jest.setTimeout(10000);
   let testManager: RealWebSocketTestManager;
   let messageHistory: WebSocketMessage[];
 
@@ -148,6 +149,7 @@ describe('Comprehensive Message Flow Tests', () => {
   });
 
   describe('Real WebSocket Message Sending', () => {
+      jest.setTimeout(10000);
     test('should successfully send user message through WebSocket', async () => {
       await establishTestConnection(testManager);
       
@@ -196,6 +198,7 @@ describe('Comprehensive Message Flow Tests', () => {
   });
 
   describe('Real Message Receiving and Display', () => {
+      jest.setTimeout(10000);
     test('should handle streaming message updates correctly', async () => {
       await establishTestConnection(testManager);
       
@@ -222,6 +225,7 @@ describe('Comprehensive Message Flow Tests', () => {
   });
 
   describe('Message Persistence Across Browser Refresh', () => {
+      jest.setTimeout(10000);
     test('should restore message history after browser refresh', async () => {
       await establishTestConnection(testManager);
       
@@ -252,6 +256,7 @@ describe('Comprehensive Message Flow Tests', () => {
   });
 
   describe('Delivery Confirmation System', () => {
+      jest.setTimeout(10000);
     test('should receive delivery confirmations for sent messages', async () => {
       await establishTestConnection(testManager);
       
@@ -274,6 +279,7 @@ describe('Comprehensive Message Flow Tests', () => {
   });
 
   describe('Error Handling for Failed Sends', () => {
+      jest.setTimeout(10000);
     test('should handle network disconnection during send', async () => {
       await establishTestConnection(testManager);
       

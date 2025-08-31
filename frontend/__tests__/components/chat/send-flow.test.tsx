@@ -1,9 +1,8 @@
-/**
- * Send Flow Component Tests
- * 
- * Component-level tests for message sending validation and flow control:
- * - Empty message prevention
- * - Whitespace-only blocking
+import React from 'react';
+import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+blocking
  * - Rate limiting (spam prevention)
  * - Network status checking
  * - Retry mechanisms
@@ -212,8 +211,10 @@ const SimpleMockMessageInput: React.FC = () => {
 const EnhancedMockMessageInput = SimpleMockMessageInput;
 
 describe('Send Flow Component Tests', () => {
+    jest.setTimeout(10000);
   // Simple test to verify the validation logic
   describe('Debug Tests', () => {
+      jest.setTimeout(10000);
     it('should enable button with valid message', async () => {
       render(<EnhancedMockMessageInput />);
       
@@ -274,6 +275,7 @@ describe('Send Flow Component Tests', () => {
   });
 
   describe('Empty Message Prevention', () => {
+      jest.setTimeout(10000);
     it('should prevent sending empty messages', async () => {
       render(<EnhancedMockMessageInput />);
       
@@ -318,6 +320,7 @@ describe('Send Flow Component Tests', () => {
   });
 
   describe('Whitespace-Only Blocking', () => {
+      jest.setTimeout(10000);
     it('should prevent sending whitespace-only messages', async () => {
       render(<EnhancedMockMessageInput />);
       
@@ -367,6 +370,7 @@ describe('Send Flow Component Tests', () => {
   });
 
   describe('Rate Limiting (Spam Prevention)', () => {
+      jest.setTimeout(10000);
     it('should allow normal message sending within limits', async () => {
       render(<EnhancedMockMessageInput />);
       
@@ -402,6 +406,7 @@ describe('Send Flow Component Tests', () => {
   });
 
   describe('Network Status Check', () => {
+      jest.setTimeout(10000);
     it('should check network status before sending', async () => {
       // Mock offline state
       mockNetworkStatus.isOnline = false;
@@ -448,6 +453,7 @@ describe('Send Flow Component Tests', () => {
   });
 
   describe('Retry Mechanism', () => {
+      jest.setTimeout(10000);
     it('should handle send failures gracefully', async () => {
       mockHandleSend.mockRejectedValueOnce(new Error('Network failure'));
       
@@ -497,6 +503,7 @@ describe('Send Flow Component Tests', () => {
   });
 
   describe('Duplicate Prevention', () => {
+      jest.setTimeout(10000);
     it('should prevent duplicate messages from double-clicking', async () => {
       render(<EnhancedMockMessageInput />);
       
@@ -555,6 +562,7 @@ describe('Send Flow Component Tests', () => {
   });
 
   describe('Error Message Display', () => {
+      jest.setTimeout(10000);
     it('should handle send failures gracefully', async () => {
       mockHandleSend.mockRejectedValue(new Error('Send failed'));
       

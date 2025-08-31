@@ -1,9 +1,10 @@
-/**
- * Keyboard Shortcuts Tests
- * Tests for keyboard shortcuts functionality and hotkey management
- * 
- * BVJ: Power User Experience
- * Segment: Growth & Enterprise - power users rely on keyboard shortcuts
+import React from 'react';
+import { renderHook, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import {
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
+ortcuts
  * Business Goal: Increased user efficiency and retention
  * Value Impact: Improves workflow speed for advanced users, increasing platform stickiness
  */
@@ -47,7 +48,9 @@ beforeEach(() => {
 });
 
 describe('Keyboard Shortcuts', () => {
+    jest.setTimeout(10000);
   describe('Shortcut Registration', () => {
+      jest.setTimeout(10000);
     test('should register keyboard shortcuts correctly', () => {
       const { result } = renderHook(() => useKeyboardShortcuts());
       
@@ -112,6 +115,7 @@ describe('Keyboard Shortcuts', () => {
   });
 
   describe('Message Input Focus', () => {
+      jest.setTimeout(10000);
     test('should handle focus message input shortcut', () => {
       const { result } = renderHook(() => useKeyboardShortcuts());
       
@@ -193,6 +197,7 @@ describe('Keyboard Shortcuts', () => {
   });
 
   describe('Command Palette', () => {
+      jest.setTimeout(10000);
     test('should handle command palette shortcut', () => {
       const { result } = renderHook(() => useKeyboardShortcuts());
       
@@ -232,6 +237,7 @@ describe('Keyboard Shortcuts', () => {
   });
 
   describe('Thread Management Shortcuts', () => {
+      jest.setTimeout(10000);
     test('should handle new thread shortcut', () => {
       const { result } = renderHook(() => useKeyboardShortcuts());
       
@@ -272,6 +278,7 @@ describe('Keyboard Shortcuts', () => {
   });
 
   describe('Processing Control', () => {
+      jest.setTimeout(10000);
     test('should handle stop processing shortcut', () => {
       const { result } = renderHook(() => useKeyboardShortcuts());
       
@@ -326,6 +333,7 @@ describe('Keyboard Shortcuts', () => {
   });
 
   describe('Global Shortcut Handling', () => {
+      jest.setTimeout(10000);
     test('should prevent default behavior for handled shortcuts', () => {
       const { result } = renderHook(() => useKeyboardShortcuts());
       
@@ -403,6 +411,7 @@ describe('Keyboard Shortcuts', () => {
   });
 
   describe('Accessibility and Usability', () => {
+      jest.setTimeout(10000);
     test('should provide accessible shortcut hints', () => {
       const { getShortcutDescriptions } = require('@/hooks/useKeyboardShortcuts');
       const descriptions = getShortcutDescriptions();

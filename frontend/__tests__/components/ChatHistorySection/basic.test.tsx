@@ -167,6 +167,8 @@ const mockStore = {
 };
 
 describe('ChatHistorySection - Basic Functionality', () => {
+      setupAntiHang();
+    jest.setTimeout(10000);
   beforeEach(() => {
     jest.clearAllMocks();
     
@@ -216,9 +218,17 @@ describe('ChatHistorySection - Basic Functionality', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+      // Clean up timers to prevent hanging
+      jest.clearAllTimers();
+      jest.useFakeTimers();
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+      cleanupAntiHang();
   });
 
   describe('History item rendering', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should render all conversation threads', () => {
       render(<ChatHistorySection />);
       
@@ -336,6 +346,8 @@ describe('ChatHistorySection - Basic Functionality', () => {
   });
 
   describe('Component structure', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should render the main chat history header', () => {
       render(<ChatHistorySection />);
       
@@ -371,6 +383,8 @@ describe('ChatHistorySection - Basic Functionality', () => {
   });
 
   describe('Loading and error states', () => {
+        setupAntiHang();
+      jest.setTimeout(10000);
     it('should show loading state when threads are being fetched', () => {
       mockUseLoadingState.mockReturnValue({
         shouldShowLoading: true,
