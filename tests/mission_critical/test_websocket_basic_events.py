@@ -63,18 +63,18 @@ class TestBasicWebSocketEvents:
         
         # Create a mock WebSocket that captures events
         # COMMENTED OUT: MockWebSocket class - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
-# class MockWebSocket:
-            async def send_json(self, data):
-                validator.record_event(data)
-                
-            async def send_text(self, text):
-                try:
-                    data = json.loads(text)
-                    validator.record_event(data)
-                except json.JSONDecodeError:
-                    logger.warning(f"Non-JSON text: {text}")
+        # class MockWebSocket:
+        #     async def send_json(self, data):
+        #         validator.record_event(data)
+        #         
+        #     async def send_text(self, text):
+        #         try:
+        #             data = json.loads(text)
+        #             validator.record_event(data)
+        #         except json.JSONDecodeError:
+        #             logger.warning(f"Non-JSON text: {text}")
         
-        mock_ws = MockWebSocket()
+        # mock_ws = MockWebSocket()
         
         # Connect user to WebSocket manager
         await ws_manager.connect_user(connection_id, mock_ws, connection_id)

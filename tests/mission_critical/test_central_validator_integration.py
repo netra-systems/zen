@@ -31,9 +31,9 @@ def test_auth_service_uses_central_validator_for_jwt():
     get_env().set("ENVIRONMENT", "staging", "test")
     
     # Clear any existing JWT secrets to force hard failure
-    get_env().clear_key("JWT_SECRET_STAGING")
-    get_env().clear_key("JWT_SECRET_PRODUCTION") 
-    get_env().clear_key("JWT_SECRET_KEY")
+    get_env().delete("JWT_SECRET_STAGING")
+    get_env().delete("JWT_SECRET_PRODUCTION") 
+    get_env().delete("JWT_SECRET_KEY")
     
     try:
         AuthSecretLoader.get_jwt_secret()
@@ -46,7 +46,7 @@ def test_auth_service_uses_central_validator_for_jwt():
         if original_env:
             get_env().set("ENVIRONMENT", original_env, "test")
         else:
-            get_env().clear_key("ENVIRONMENT")
+            get_env().delete("ENVIRONMENT")
 
 
 def test_backend_service_uses_central_validator_for_jwt():
@@ -62,9 +62,9 @@ def test_backend_service_uses_central_validator_for_jwt():
     get_env().set("ENVIRONMENT", "production", "test")
     
     # Clear any existing JWT secrets to force hard failure
-    get_env().clear_key("JWT_SECRET_STAGING")
-    get_env().clear_key("JWT_SECRET_PRODUCTION") 
-    get_env().clear_key("JWT_SECRET_KEY")
+    get_env().delete("JWT_SECRET_STAGING")
+    get_env().delete("JWT_SECRET_PRODUCTION") 
+    get_env().delete("JWT_SECRET_KEY")
     
     secret_manager = UnifiedSecretManager()
     
@@ -79,7 +79,7 @@ def test_backend_service_uses_central_validator_for_jwt():
         if original_env:
             get_env().set("ENVIRONMENT", original_env, "test")
         else:
-            get_env().clear_key("ENVIRONMENT")
+            get_env().delete("ENVIRONMENT")
 
 
 def test_backend_service_uses_central_validator_for_database():
@@ -94,8 +94,8 @@ def test_backend_service_uses_central_validator_for_database():
     get_env().set("ENVIRONMENT", "staging", "test")
     
     # Clear database configuration to force hard failure
-    get_env().clear_key("DATABASE_HOST")
-    get_env().clear_key("DATABASE_PASSWORD")
+    get_env().delete("DATABASE_HOST")
+    get_env().delete("DATABASE_PASSWORD")
     
     secret_manager = UnifiedSecretManager()
     
@@ -110,7 +110,7 @@ def test_backend_service_uses_central_validator_for_database():
         if original_env:
             get_env().set("ENVIRONMENT", original_env, "test")
         else:
-            get_env().clear_key("ENVIRONMENT")
+            get_env().delete("ENVIRONMENT")
 
 
 def test_backend_service_uses_central_validator_for_redis():
@@ -125,8 +125,8 @@ def test_backend_service_uses_central_validator_for_redis():
     get_env().set("ENVIRONMENT", "production", "test")
     
     # Clear Redis configuration to force hard failure
-    get_env().clear_key("REDIS_HOST")
-    get_env().clear_key("REDIS_PASSWORD")
+    get_env().delete("REDIS_HOST")
+    get_env().delete("REDIS_PASSWORD")
     
     secret_manager = UnifiedSecretManager()
     
@@ -141,7 +141,7 @@ def test_backend_service_uses_central_validator_for_redis():
         if original_env:
             get_env().set("ENVIRONMENT", original_env, "test")
         else:
-            get_env().clear_key("ENVIRONMENT")
+            get_env().delete("ENVIRONMENT")
 
 
 def test_backend_service_uses_central_validator_for_llm():
@@ -156,11 +156,11 @@ def test_backend_service_uses_central_validator_for_llm():
     get_env().set("ENVIRONMENT", "staging", "test")
     
     # Clear all LLM API keys to force hard failure
-    get_env().clear_key("ANTHROPIC_API_KEY")
-    get_env().clear_key("OPENAI_API_KEY")
-    get_env().clear_key("GEMINI_API_KEY")
-    get_env().clear_key("GOOGLE_API_KEY")
-    get_env().clear_key("LLM_API_KEY")
+    get_env().delete("ANTHROPIC_API_KEY")
+    get_env().delete("OPENAI_API_KEY")
+    get_env().delete("GEMINI_API_KEY")
+    get_env().delete("GOOGLE_API_KEY")
+    get_env().delete("LLM_API_KEY")
     
     secret_manager = UnifiedSecretManager()
     
@@ -175,7 +175,7 @@ def test_backend_service_uses_central_validator_for_llm():
         if original_env:
             get_env().set("ENVIRONMENT", original_env, "test")
         else:
-            get_env().clear_key("ENVIRONMENT")
+            get_env().delete("ENVIRONMENT")
 
 
 def test_central_validator_eliminates_dangerous_defaults():

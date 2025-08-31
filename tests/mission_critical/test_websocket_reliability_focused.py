@@ -77,7 +77,7 @@ logger = MockLogger()
 
 # COMMENTED OUT: MockWebSocket class - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
 # class MockWebSocket:
-    """Mock WebSocket that simulates real behavior without external services."""
+#     """Mock WebSocket that simulates real behavior without external services."""
     
     def __init__(self, connection_id: str):
         self.connection_id = connection_id
