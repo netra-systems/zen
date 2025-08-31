@@ -1,11 +1,10 @@
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import MainChat from '../../components/chat/MainChat';
 import { TestProviders } from '@/__tests__/test-utils/providers';
-import {
-import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-ecurity
+import { ecurity
  * Value Impact: Prevents user access issues and security vulnerabilities
  */
 

@@ -4,20 +4,15 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { MessageInput } from '@/components/chat/MessageInput';
 import { TestProviders } from '@/__tests__/test-utils/providers';
-import {
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-nd reduces abandonment
- */
-
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import '@testing-library/jest-dom';
-import { MessageInput } from '@/components/chat/MessageInput';
-import { TestProviders } from '@/__tests__/test-utils/providers';
 import {
   setupDefaultMocks
 } from './ui-test-utilities';
+
+/**
+ * Message Input Features Tests
+ * Business Value: Enhanced UX reduces abandonment
+ */
 
 // Mock dependencies
 jest.mock('@/hooks/useWebSocket', () => ({

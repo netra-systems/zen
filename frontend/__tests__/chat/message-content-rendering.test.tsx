@@ -1,10 +1,9 @@
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MessageItem } from '@/components/chat/MessageItem';
-import {
-import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-ering is critical for all users
+import { ering is critical for all users
  * Business Goal: Clear communication and professional UI appearance
  * Value Impact: Good UX increases user engagement and trust in the platform
  */

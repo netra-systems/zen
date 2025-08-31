@@ -1,11 +1,10 @@
+import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MessageList } from '@/components/chat/MessageList';
 import { useUnifiedChatStore } from '@/store/unified-chat';
-import {
-import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-ble content rendering prevents user confusion
+import { ble content rendering prevents user confusion
  * Value Impact: Consistent message display improves user experience and trust
  */
 
