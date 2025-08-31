@@ -37,7 +37,7 @@ from analytics_service.analytics_core.models.events import (
     EventIngestionRequest,
     EventIngestionResponse,
 )
-from analytics_service.analytics_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 class TestDataGenerator:

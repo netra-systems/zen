@@ -271,7 +271,7 @@ class TestClickHouseSSotViolations:
         Uses real ClickHouse connection for authentic integration testing.
         """
         from analytics_service.analytics_core.database.clickhouse_manager import ClickHouseManager
-        from analytics_service.analytics_core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         # Setup test environment for real ClickHouse connection
         env = get_env()
@@ -322,7 +322,7 @@ class TestClickHouseSSotViolations:
         Uses real ClickHouse connection for authentic health monitoring testing.
         """
         from analytics_service.analytics_core.database.clickhouse_manager import ClickHouseManager
-        from analytics_service.analytics_core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         # Setup test environment for real ClickHouse connection
         env = get_env()
@@ -377,7 +377,7 @@ class TestClickHouseSSotViolations:
         from analytics_service.analytics_core.database.clickhouse_manager import (
             ClickHouseManager, ClickHouseConnectionError, ClickHouseQueryError
         )
-        from analytics_service.analytics_core.isolated_environment import get_env
+        from shared.isolated_environment import get_env
         
         # Setup test environment for real ClickHouse connection
         env = get_env()

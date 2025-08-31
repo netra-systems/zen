@@ -14,7 +14,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException, Qu
 from fastapi.websockets import WebSocketState
 
 from analytics_service.analytics_core.config import AnalyticsConfig
-from analytics_service.analytics_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from analytics_service.analytics_core.database.connection import get_redis_connection
 from analytics_service.analytics_core.services.metrics_service import MetricsService
 from analytics_service.analytics_core.services.websocket_auth_service import WebSocketAuthService

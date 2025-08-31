@@ -38,10 +38,10 @@ from test_framework.docker_test_manager import get_test_manager
 
 # Analytics service isolated environment
 try:
-    from analytics_service.analytics_core.isolated_environment import get_env
+    from shared.isolated_environment import get_env
 except ImportError:
     # Use dev launcher environment as fallback
-    from dev_launcher.isolated_environment import get_env
+    from shared.isolated_environment import get_env
 
 # Analytics service imports (to be created)
 # from analytics_service.app import app

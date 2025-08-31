@@ -12,7 +12,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel
 
 from analytics_service.analytics_core.config import AnalyticsConfig
-from analytics_service.analytics_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 from analytics_service.analytics_core.database.connection import (
     get_clickhouse_session,
     get_redis_connection,

@@ -27,7 +27,7 @@ from analytics_service.analytics_core.config import (
     get_environment,
     is_production,
 )
-from analytics_service.analytics_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 class TestAnalyticsConfig:

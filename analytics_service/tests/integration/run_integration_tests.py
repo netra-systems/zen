@@ -44,7 +44,7 @@ from analytics_service.tests.integration.integration_config import (
     create_test_config_for_environment,
     IntegrationTestConfig,
 )
-from analytics_service.analytics_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 class IntegrationTestSuite:

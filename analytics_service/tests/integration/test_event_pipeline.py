@@ -51,7 +51,7 @@ from analytics_service.analytics_core.models.events import (
 from analytics_service.analytics_core.database.clickhouse_manager import ClickHouseManager
 from analytics_service.analytics_core.database.redis_manager import RedisManager
 from analytics_service.analytics_core.config import get_config
-from analytics_service.analytics_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 
 class TestEventIngestionPipeline:

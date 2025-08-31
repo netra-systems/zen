@@ -10,7 +10,7 @@ from typing import Optional
 import logging
 from pathlib import Path
 
-from analytics_service.analytics_core.isolated_environment import get_env
+from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
