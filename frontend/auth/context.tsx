@@ -9,6 +9,8 @@ import { jwtDecode } from 'jwt-decode';
 import { useAuthStore } from '@/store/authStore';
 import { logger } from '@/lib/logger';
 import { useGTMEvent } from '@/hooks/useGTMEvent';
+import { monitorAuthState } from '@/lib/auth-validation';
+import { useUnifiedChatStore } from '@/store/unified-chat';
 export interface AuthContextType {
   user: User | null;
   login: () => Promise<void> | void;
@@ -365,6 +367,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         initialized: true,
         timestamp: new Date().toISOString()
       });
+      
+      // Monitor auth state for consistency
+      monitorAuthState(token, user, true, 'auth_init_complete');
     }
   }, [syncAuthStore, scheduleTokenRefreshCheck, handleTokenRefresh]);
 
@@ -464,16 +469,114 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
-    if (authConfig) {
+    logger.info('[LOGOUT] Starting comprehensive logout process', {
+      component: 'AuthContext',
+      hasAuthConfig: !!authConfig
+    });
+
+    try {
       // Track logout event
       trackLogout();
+      
       // Set dev logout flag in development mode
-      if (authConfig.development_mode) {
+      if (authConfig?.development_mode) {
         unifiedAuthService.setDevLogoutFlag();
       }
-      await unifiedAuthService.handleLogout(authConfig);
-      // Clear Zustand store
+
+      // Clear all chat-related state first
+      const chatStore = useUnifiedChatStore.getState();
+      
+      // Reset all chat layers and data
+      chatStore.resetLayers();
+      chatStore.clearMessages();
+      chatStore.clearOptimisticMessages();
+      chatStore.resetAgentTracking();
+      
+      // Clear WebSocket connection if active
+      if (chatStore.isConnected) {
+        chatStore.setConnectionStatus(false, null);
+      }
+      
+      // Clear active thread
+      chatStore.setActiveThread(null);
+      
+      // Reset processing state
+      chatStore.setProcessing(false);
+
+      // Clear additional localStorage items
+      if (typeof window !== 'undefined') {
+        // Clear all auth and chat related items
+        const itemsToRemove = [
+          'jwt_token',
+          'refresh_token',
+          'user_data',
+          'user_preferences',
+          'active_thread_id',
+          'chat_history',
+          'session_id',
+          'dev_logout_performed'
+        ];
+        
+        itemsToRemove.forEach(item => {
+          try {
+            localStorage.removeItem(item);
+          } catch (e) {
+            logger.warn(`Failed to remove ${item} from localStorage`, e as Error);
+          }
+        });
+
+        // Clear sessionStorage
+        try {
+          sessionStorage.clear();
+        } catch (e) {
+          logger.warn('Failed to clear sessionStorage', e as Error);
+        }
+      }
+
+      // Attempt backend logout (but don't fail if it errors)
+      if (authConfig) {
+        try {
+          await unifiedAuthService.handleLogout(authConfig);
+        } catch (error) {
+          logger.error('[LOGOUT] Backend logout failed, continuing with local cleanup', error as Error);
+        }
+      }
+      
+      // Clear auth state in context
+      setUser(null);
+      setToken(null);
+      
+      // Clear Zustand auth store
       syncAuthStore(null, null);
+      
+      // Cancel any pending token refresh
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current);
+        refreshTimeoutRef.current = null;
+      }
+
+      logger.info('[LOGOUT] Logout process completed successfully', {
+        component: 'AuthContext'
+      });
+      
+      // Navigate to login page
+      if (typeof window !== 'undefined') {
+        // Use window.location for a full page refresh to ensure clean state
+        window.location.href = '/login';
+      }
+    } catch (error) {
+      logger.error('[LOGOUT] Error during logout process', error as Error, {
+        component: 'AuthContext'
+      });
+      
+      // Even on error, ensure we clear local state and redirect
+      setUser(null);
+      setToken(null);
+      syncAuthStore(null, null);
+      
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
     }
   };
 
