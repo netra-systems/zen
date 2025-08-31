@@ -131,4 +131,29 @@ def set_websocket_manager(self, manager: 'WebSocketManager') -> None:
       - Agent execution without completion events
     </monitoring>
   </regression_prevention>
+
+  <related_learnings>
+    <learning path="SPEC/learnings/websocket_injection_fix_comprehensive.xml">
+      <title>WebSocket Injection Fix - Comprehensive Analysis and Implementation</title>
+      <relationship>DEPENDENCY_INJECTION</relationship>
+      <description>
+        Addresses the critical issue where MessageHandlerService created via dependency 
+        injection was missing WebSocket manager, causing the agent events enabled by this 
+        learning to be silently dropped. Essential complement to this agent integration fix.
+      </description>
+      <business_impact>
+        Both learnings together ensure real-time agent events work in ALL scenarios 
+        (WebSocket routes AND dependency injection paths), protecting $500K+ ARR.
+      </business_impact>
+    </learning>
+
+    <learning path="SPEC/learnings/websocket.xml">
+      <title>WebSocket Core Implementation</title>
+      <relationship>FOUNDATION</relationship>
+      <description>
+        Provides the foundational WebSocket patterns and lifecycle management that 
+        this agent integration depends upon.
+      </description>
+    </learning>
+  </related_learnings>
 </learning>
