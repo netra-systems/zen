@@ -33,6 +33,21 @@
         <prevention>Eliminate ALL fallback logic in authentication. Require environment-specific secrets: JWT_SECRET_STAGING, JWT_SECRET_PRODUCTION, JWT_SECRET_KEY (dev/test only).</prevention>
     </learning>
     
+    <learning id="configuration-hardening-patterns-no-fallbacks-2025-08-30">
+        <title>Configuration Hardening: Eliminate Dangerous Fallback Patterns</title>
+        <category>Security Configuration</category>
+        <keywords>configuration, secrets, fallbacks, hardening, security, database passwords, api keys</keywords>
+        <path>configuration_hardening_patterns_no_fallbacks.xml</path>
+        <critical-takeaway>
+            Empty string defaults for secrets enable unauthorized access. Localhost defaults enable production misconfigurations.
+            Graceful degradation is an anti-pattern for configuration - fail fast and loud at startup.
+            Critical targets: DATABASE_PASSWORD, REDIS_PASSWORD, LLM API keys, infrastructure hosts.
+        </critical-takeaway>
+        <severity>HIGH</severity>
+        <business-impact>Security vulnerabilities from misconfigured production systems</business-impact>
+        <prevention>Apply environment-specific hard requirements to all critical configuration. Remove empty defaults for secrets.</prevention>
+    </learning>
+    
     <learning id="websocket-logger-dual-import-2025-08-31">
         <title>WebSocket Logger Dual Import Context Binding Issue</title>
         <category>Runtime Error Resolution</category>
