@@ -161,6 +161,21 @@ def _get_unified_config():
 
 def _extract_clickhouse_config(config):
     """Extract appropriate ClickHouse configuration from unified config based on mode."""
+    # CRITICAL FIX: Handle testing environment with proper Docker ClickHouse configuration
+    if config.environment == "testing":
+        # For testing environment, override the configuration with Docker service values
+        # This ensures compatibility with the Docker Compose test environment
+        class TestClickHouseConfig:
+            def __init__(self):
+                self.host = "localhost"
+                self.port = 8125  # Docker mapped HTTP port
+                self.user = "test_user"  # Docker test user
+                self.password = "test_pass"  # Docker test password  
+                self.database = "netra_test_analytics"  # Docker test database
+                self.secure = False
+        
+        return TestClickHouseConfig()
+    
     # Use HTTP config for local development, HTTPS for production/remote
     if config.clickhouse_mode == "local" or config.environment == "development":
         # Use HTTP port (8123) for local development
@@ -174,6 +189,7 @@ def get_clickhouse_config():
     
     Returns appropriate config for real ClickHouse connection.
     Uses HTTP (port 8123) for local development, HTTPS (port 8443) for production.
+    Testing environment uses Docker-specific configuration.
     """
     config = _get_unified_config()
     return _extract_clickhouse_config(config)
@@ -242,6 +258,14 @@ async def get_clickhouse_client():
     
     # Use real client in development, production, and real database tests
     environment = get_env().get("ENVIRONMENT", "development").lower()
+    
+    # CRITICAL FIX: Use unified config environment for better testing support
+    # The unified config system correctly handles test environment detection
+    from netra_backend.app.core.configuration import get_configuration
+    unified_config = get_configuration()
+    actual_environment = getattr(unified_config, 'environment', environment)
+    environment = actual_environment
+    
     client_timeout = 10.0 if environment in ["staging", "development"] else 30.0
     
     try:

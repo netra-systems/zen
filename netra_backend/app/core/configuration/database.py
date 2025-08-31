@@ -271,10 +271,14 @@ class DatabaseConfigManager:
         
         CONFIG MANAGER: Direct env access required for ClickHouse configuration loading.
         """
+        # DEBUG: Force cache clear during testing to ensure fresh config
+        if self._environment == "testing":
+            self._clickhouse_config_cache = None
+        
         # Return cached configuration if available
         if self._clickhouse_config_cache is not None:
             return self._clickhouse_config_cache
-            
+        
         # CONFIG BOOTSTRAP: Direct env access for ClickHouse configuration
         # Port selection based on environment and security requirements
         secure = self._env.get("CLICKHOUSE_SECURE", "false").lower() == "true"
@@ -285,6 +289,10 @@ class DatabaseConfigManager:
         
         # Get ClickHouse password - try GCP Secret Manager first for staging/production
         password = self._get_clickhouse_password()
+        
+        # Use test-specific password for testing environment
+        if not password and self._environment == "testing":
+            password = "test_pass"  # Docker test container password
         
         # Log warning if no password is set in non-dev environments
         if not password and self._environment not in ["development", "testing"]:
@@ -311,7 +319,11 @@ class DatabaseConfigManager:
                 f"CLICKHOUSE_USER or CLICKHOUSE_USERNAME not configured for {self._environment} environment."
             )
         elif not user:
-            user = "default"  # Safe default for development
+            # Use test-specific defaults for testing environment
+            if self._environment == "testing":
+                user = "test_user"  # Docker test container user
+            else:
+                user = "default"  # Safe default for development
             
         database = self._env.get("CLICKHOUSE_DB")
         if not database and self._environment in ["staging", "production"]:
@@ -319,11 +331,22 @@ class DatabaseConfigManager:
                 f"CLICKHOUSE_DB not configured for {self._environment} environment."
             )
         elif not database:
-            database = "default"  # Safe default for all environments
+            # Use test-specific defaults for testing environment
+            if self._environment == "testing":
+                database = "netra_test_analytics"  # Docker test container database
+            else:
+                database = "default"  # Safe default for all environments
+        
+        # Set port based on environment - testing uses Docker mapped ports
+        if self._environment == "testing":
+            # Use Docker mapped HTTP port for testing
+            port = self._env.get("CLICKHOUSE_HTTP_PORT", "8125")  # Docker mapped port
+        else:
+            port = self._env.get("CLICKHOUSE_PORT") or self._env.get("CLICKHOUSE_HTTP_PORT", default_port)
         
         config = {
             "host": host,
-            "port": self._env.get("CLICKHOUSE_PORT") or self._env.get("CLICKHOUSE_HTTP_PORT", default_port),
+            "port": port,
             "user": user,
             "password": password,
             "database": database
@@ -355,8 +378,14 @@ class DatabaseConfigManager:
         """Apply configuration to ClickHouse HTTP connection."""
         if hasattr(config, 'clickhouse_http'):
             config.clickhouse_http.host = ch_config["host"]
-            # Use HTTP port 8123 for dev launcher compatibility
-            config.clickhouse_http.port = int(self._env.get("CLICKHOUSE_HTTP_PORT", "8123"))
+            # Use environment-specific HTTP port configuration
+            if self._environment == "testing":
+                # Use Docker mapped HTTP port for testing
+                default_http_port = "8125"
+            else:
+                # Use standard HTTP port 8123 for dev launcher compatibility
+                default_http_port = "8123"
+            config.clickhouse_http.port = int(self._env.get("CLICKHOUSE_HTTP_PORT", default_http_port))
             config.clickhouse_http.user = ch_config["user"]
             config.clickhouse_http.password = ch_config["password"]
             config.clickhouse_http.database = ch_config["database"]
