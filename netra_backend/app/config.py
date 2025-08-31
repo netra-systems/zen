@@ -32,14 +32,6 @@ from netra_backend.app.core.configuration.base import (
 )
 from netra_backend.app.schemas.config import AppConfig
 
-# DEPRECATED: Old config manager - kept for backward compatibility only
-try:
-    from netra_backend.app.core.configuration.manager import (
-        ConfigManager as LegacyConfigManager,
-    )
-    _legacy_config_manager = LegacyConfigManager()
-except ImportError:
-    _legacy_config_manager = None
 
 # PRIMARY: Unified configuration access (PREFERRED)
 def get_config() -> AppConfig:
@@ -50,7 +42,7 @@ def get_config() -> AppConfig:
     """
     return get_unified_config()
 
-def reload_config(force: bool = False):
+def reload_config(force: bool = False) -> None:
     """Reload the unified configuration (hot-reload capability)."""
     reload_unified_config(force=force)
 
@@ -58,13 +50,12 @@ def validate_configuration() -> tuple[bool, list]:
     """Validate configuration integrity for Enterprise customers."""
     return validate_config_integrity()
 
-# BACKWARD COMPATIBILITY: Legacy access methods
-config_manager = unified_config_manager  # Export unified manager
+config_manager = unified_config_manager
 
 # LAZY LOADING: Don't auto-load at import time to allow environment setup
 _settings_cache = None
 
-def __getattr__(name):
+def __getattr__(name: str) -> AppConfig:
     """Lazy load settings on first access."""
     global _settings_cache
     if name == "settings":
@@ -73,9 +64,3 @@ def __getattr__(name):
         return _settings_cache
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
-# LEGACY FALLBACK: Only used if unified system fails
-def get_legacy_config() -> AppConfig:
-    """DEPRECATED: Legacy configuration access - use get_config() instead."""
-    if _legacy_config_manager:
-        return _legacy_config_manager.get_config()
-    return get_config()  # Fallback to unified system

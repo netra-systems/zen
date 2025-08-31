@@ -593,33 +593,77 @@ class DevelopmentConfig(AppConfig):
         pass
 
 class ProductionConfig(AppConfig):
-    """Production-specific settings."""
+    """Production-specific settings with MANDATORY services."""
     environment: str = "production"
     debug: bool = False
     log_level: str = "INFO"
+    
+    def __init__(self, **data):
+        """Initialize production config with mandatory service validation."""
+        super().__init__(**data)
+        self._validate_mandatory_services()
+    
+    def _validate_mandatory_services(self):
+        """Validate that all mandatory services are configured for production."""
+        # CRITICAL: ClickHouse is MANDATORY in production
+        if not self.clickhouse_native.host and not self.clickhouse_https.host:
+            raise ValueError(
+                "ClickHouse configuration is MANDATORY in production. "
+                "Set either clickhouse_native.host or clickhouse_https.host"
+            )
+        
+        # CRITICAL: Redis is MANDATORY in production
+        if not self.redis.host:
+            raise ValueError(
+                "Redis configuration is MANDATORY in production. "
+                "Set redis.host with valid Redis server address"
+            )
+        
+        # CRITICAL: JWT secret is MANDATORY in production
+        if not self.jwt_secret_key:
+            raise ValueError(
+                "JWT_SECRET_KEY is MANDATORY in production. "
+                "Set a secure JWT secret of at least 32 characters"
+            )
 
 class StagingConfig(AppConfig):
-    """Staging-specific settings."""
+    """Staging-specific settings with MANDATORY services."""
     environment: str = "staging"
     debug: bool = False
     log_level: str = "INFO"
-    # Staging uses production-like settings but with relaxed validation
     
-    # Pragmatic infrastructure flags for staging (allows graceful degradation)
-    redis_optional_in_staging: bool = True  # Allow staging to run without Redis
-    clickhouse_optional_in_staging: bool = True  # Allow staging to run without ClickHouse
-    skip_redis_init: bool = False  # Still try to initialize Redis but don't fail
-    skip_clickhouse_init: bool = False  # Still try to initialize ClickHouse but don't fail
+    # CRITICAL: Remove optional flags - services are MANDATORY
+    redis_optional_in_staging: bool = False  # Redis is MANDATORY
+    clickhouse_optional_in_staging: bool = False  # ClickHouse is MANDATORY
+    skip_redis_init: bool = False
     
     def __init__(self, **data):
-        """Initialize staging config with environment variables.
-        
-        LEGACY: This method uses direct os.environ access. Consider
-        migration to unified configuration system.
-        """
-        # Migrated from direct env access to unified configuration
-        self._load_database_url_from_unified_config_staging(data)
+        """Initialize staging config with mandatory service validation."""
         super().__init__(**data)
+        self._validate_mandatory_services()
+    
+    def _validate_mandatory_services(self):
+        """Validate that all mandatory services are configured for staging."""
+        # CRITICAL: ClickHouse is MANDATORY in staging
+        if not self.clickhouse_native.host and not self.clickhouse_https.host:
+            raise ValueError(
+                "ClickHouse configuration is MANDATORY in staging. "
+                "Set either clickhouse_native.host or clickhouse_https.host"
+            )
+        
+        # CRITICAL: Redis is MANDATORY in staging
+        if not self.redis.host:
+            raise ValueError(
+                "Redis configuration is MANDATORY in staging. "
+                "Set redis.host with valid Redis server address"
+            )
+        
+        # CRITICAL: JWT secret is MANDATORY in staging
+        if not self.jwt_secret_key:
+            raise ValueError(
+                "JWT_SECRET_KEY is MANDATORY in staging. "
+                "Set a secure JWT secret of at least 32 characters"
+            )
     
     def _load_database_url_from_unified_config_staging(self, data: dict) -> None:
         """Load database URL from environment for staging with fallback.
