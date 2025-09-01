@@ -150,5 +150,8 @@
         <reference file="docker-compose.minimal.yml" relation="working-example"/>
         <reference file="scripts/docker_auto_cleanup.py" relation="automation"/>
         <reference file="DOCKER_CLEANUP_PROCESS.md" relation="documentation"/>
+        <reference file="SPEC/learnings/docker_centralized_management.xml" relation="NEXT-GEN: Complete Docker crash remediation with centralized management"/>
+        <reference file="test_framework/centralized_docker_manager.py" relation="solution-implementation"/>
+        <reference file="DOCKER_CRASH_AUDIT_REPORT.md" relation="comprehensive-remediation-report"/>
     </cross_references>
 </learning>

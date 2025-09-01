@@ -15,19 +15,7 @@ import time
 import json
 from typing import Dict, Any, List, Optional
 from shared.isolated_environment import IsolatedEnvironment
-
-# Test Configuration
-STAGING_URLS = {
-    "backend": "https://netra-backend-staging-701982941522.us-central1.run.app",
-    "auth": "https://netra-auth-service-701982941522.us-central1.run.app",
-    "frontend": "https://netra-frontend-staging-701982941522.us-central1.run.app"
-}
-
-LOCAL_URLS = {
-    "backend": "http://localhost:8000",
-    "auth": "http://localhost:8081",
-    "frontend": "http://localhost:3000"
-}
+from tests.staging.staging_config import StagingConfig
 
 # Critical Frontend-Backend Integration Points
 INTEGRATION_ENDPOINTS = [
@@ -43,9 +31,8 @@ class StagingFrontendBackendIntegrationTestRunner:
     
     def __init__(self):
         self.env = IsolatedEnvironment()
-        self.environment = self.env.get("ENVIRONMENT", "development")
-        self.urls = STAGING_URLS if self.environment == "staging" else LOCAL_URLS
-        self.timeout = 30.0
+        self.environment = StagingConfig.get_environment()
+        self.timeout = StagingConfig.TIMEOUTS["default"]
         self.access_token = None
         
     def get_base_headers(self) -> Dict[str, str]:
@@ -65,7 +52,7 @@ class StagingFrontendBackendIntegrationTestRunner:
                 
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 response = await client.post(
-                    f"{self.urls['auth']}/api/auth/simulate",
+                    f"{StagingConfig.get_service_url('auth')}/api/auth/simulate",
                     headers=self.get_base_headers(),
                     json={
                         "simulation_key": simulation_key,
@@ -91,7 +78,7 @@ class StagingFrontendBackendIntegrationTestRunner:
             async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=True) as client:
                 # Test frontend root endpoint
                 response = await client.get(
-                    self.urls["frontend"],
+                    StagingConfig.get_service_url("frontend"),
                     headers={
                         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                         "User-Agent": "Netra-Staging-Frontend-Test/1.0"
@@ -114,7 +101,7 @@ class StagingFrontendBackendIntegrationTestRunner:
                     "has_react_content": has_react_content,
                     "has_script_tags": has_script_tags,
                     "has_css_links": has_css_links,
-                    "frontend_url": self.urls["frontend"],
+                    "frontend_url": StagingConfig.get_service_url("frontend"),
                     "content_type": response.headers.get("content-type", "")
                 }
                 
@@ -122,7 +109,7 @@ class StagingFrontendBackendIntegrationTestRunner:
             return {
                 "success": False,
                 "error": f"Frontend accessibility test failed: {str(e)}",
-                "frontend_url": self.urls["frontend"]
+                "frontend_url": StagingConfig.get_service_url("frontend")
             }
             
     async def test_cors_frontend_backend(self) -> Dict[str, Any]:
@@ -130,7 +117,7 @@ class StagingFrontendBackendIntegrationTestRunner:
         print("10.2 Testing CORS frontend-backend integration...")
         
         results = {}
-        frontend_origin = self.urls["frontend"]
+        frontend_origin = StagingConfig.get_service_url("frontend")
         
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
@@ -143,7 +130,7 @@ class StagingFrontendBackendIntegrationTestRunner:
                 
                 for endpoint, method in test_endpoints:
                     cors_response = await client.options(
-                        f"{self.urls['backend']}{endpoint}",
+                        f"{StagingConfig.get_service_url('netra_backend')}{endpoint}",
                         headers={
                             "Origin": frontend_origin,
                             "Access-Control-Request-Method": method,
@@ -204,8 +191,8 @@ class StagingFrontendBackendIntegrationTestRunner:
                     headers = {
                         **self.get_base_headers(),
                         "Authorization": f"Bearer {self.access_token}",
-                        "Origin": self.urls["frontend"],
-                        "Referer": self.urls["frontend"]
+                        "Origin": StagingConfig.get_service_url("frontend"),
+                        "Referer": StagingConfig.get_service_url("frontend")
                     }
                     
                     # Prepare test data based on endpoint
@@ -225,7 +212,7 @@ class StagingFrontendBackendIntegrationTestRunner:
                             }
                     
                     # Make request
-                    full_url = f"{self.urls['backend']}{endpoint}"
+                    full_url = f"{StagingConfig.get_service_url('netra_backend')}{endpoint}"
                     
                     if method == "GET":
                         # Add query params for search
@@ -279,12 +266,11 @@ class StagingFrontendBackendIntegrationTestRunner:
             import websockets
             
             # Get WebSocket URL
-            backend_url = self.urls["backend"]
-            ws_url = backend_url.replace("http://", "ws://").replace("https://", "wss://") + "/ws"
+            ws_url = StagingConfig.get_service_url("websocket")
             
             headers = {
                 "Authorization": f"Bearer {self.access_token}",
-                "Origin": self.urls["frontend"],
+                "Origin": StagingConfig.get_service_url("frontend"),
                 "User-Agent": "Netra-Frontend/1.0"
             }
             
@@ -352,12 +338,12 @@ class StagingFrontendBackendIntegrationTestRunner:
                     
                 auth_headers = {
                     **self.get_base_headers(),
-                    "Origin": self.urls["frontend"],
-                    "Referer": f"{self.urls['frontend']}/login"
+                    "Origin": StagingConfig.get_service_url("frontend"),
+                    "Referer": f"{StagingConfig.get_service_url('frontend')}/login"
                 }
                 
                 auth_response = await client.post(
-                    f"{self.urls['auth']}/api/auth/simulate",
+                    f"{StagingConfig.get_service_url('auth')}/api/auth/simulate",
                     headers=auth_headers,
                     json={
                         "simulation_key": simulation_key,
@@ -378,11 +364,11 @@ class StagingFrontendBackendIntegrationTestRunner:
                     profile_headers = {
                         **self.get_base_headers(),
                         "Authorization": f"Bearer {access_token}",
-                        "Origin": self.urls["frontend"]
+                        "Origin": StagingConfig.get_service_url("frontend")
                     }
                     
                     profile_response = await client.get(
-                        f"{self.urls['backend']}/api/user/profile",
+                        f"{StagingConfig.get_service_url('netra_backend')}/api/user/profile",
                         headers=profile_headers
                     )
                     
@@ -397,11 +383,11 @@ class StagingFrontendBackendIntegrationTestRunner:
                 logout_success = False
                 if access_token:
                     logout_response = await client.post(
-                        f"{self.urls['auth']}/api/auth/logout",
+                        f"{StagingConfig.get_service_url('auth')}/api/auth/logout",
                         headers={
                             **self.get_base_headers(),
                             "Authorization": f"Bearer {access_token}",
-                            "Origin": self.urls["frontend"]
+                            "Origin": StagingConfig.get_service_url("frontend")
                         }
                     )
                     logout_success = logout_response.status_code in [200, 204]
@@ -428,9 +414,9 @@ class StagingFrontendBackendIntegrationTestRunner:
         """Run all frontend-backend integration tests."""
         print(f"🌐 Running Frontend-Backend Integration Tests")
         print(f"Environment: {self.environment}")
-        print(f"Frontend URL: {self.urls['frontend']}")
-        print(f"Backend URL: {self.urls['backend']}")
-        print(f"Auth URL: {self.urls['auth']}")
+        print(f"Frontend URL: {StagingConfig.get_service_url('frontend')}")
+        print(f"Backend URL: {StagingConfig.get_service_url('netra_backend')}")
+        print(f"Auth URL: {StagingConfig.get_service_url('auth')}")
         print()
         
         # Get test token first
