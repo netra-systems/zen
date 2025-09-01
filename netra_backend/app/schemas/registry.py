@@ -104,7 +104,8 @@ from netra_backend.app.schemas.websocket_models import (
     ToolResult,
     UserMessage,
     UserMessagePayload,
-    WebSocketError,
+    WebSocketError,  # Backward compatibility alias for WebSocketErrorModel
+    WebSocketErrorModel,
     WebSocketMessage,
     WebSocketMessageIn,
     WebSocketStats,
@@ -141,7 +142,7 @@ __all__ = [
     "DeepAgentState", "AgentState", "AgentResult", "AgentMetadata", "ToolResultData",
     
     # WebSocket models
-    "WebSocketMessage", "WebSocketError", "BaseWebSocketPayload", 
+    "WebSocketMessage", "WebSocketError", "WebSocketErrorModel", "BaseWebSocketPayload", 
     "UserMessagePayload", "AgentUpdatePayload", "MessageToUser", "AnalysisRequest",
     "UserMessage", "AgentMessage", "StopAgent", "StopAgentPayload", "StreamEvent",
     "AgentStarted", "SubAgentUpdate", "AgentCompleted", "StartAgentPayload",
@@ -179,7 +180,8 @@ TYPE_REGISTRY = {
     
     # WebSocket models
     "WebSocketMessage": WebSocketMessage,
-    "WebSocketError": WebSocketError,
+    "WebSocketError": WebSocketError,  # Backward compatibility alias
+    "WebSocketErrorModel": WebSocketErrorModel,
     "BaseWebSocketPayload": BaseWebSocketPayload,
     "UserMessagePayload": UserMessagePayload,
     "AgentUpdatePayload": AgentUpdatePayload,

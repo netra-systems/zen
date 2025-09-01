@@ -418,7 +418,7 @@ from netra_backend.app.schemas.monitoring import (
     ThresholdAlert,
 )
 from netra_backend.app.schemas.monitoring_schemas import (
-    ErrorContext,
+    MonitoringErrorContext,
     ErrorDetailResponse,
     ErrorQuery,
     ErrorResolution,
@@ -705,6 +705,7 @@ from netra_backend.app.schemas.websocket_models import (
     ToolResult,
     UserMessagePayload,
     WebSocketError,
+    WebSocketErrorModel,
     WebSocketMessage,
     WebSocketMessageIn,
     WebSocketStats,
@@ -1006,7 +1007,7 @@ __all__ = [
     "EnvironmentDetectionResult",
     "ErrorCategory",
     "ErrorContext",
-    "ErrorContext",
+    "MonitoringErrorContext",
     "ErrorDetailResponse",
     "ErrorMessage",
     "ErrorPattern",
@@ -1457,6 +1458,7 @@ __all__ = [
     "WebSocketConnectionState",
     "WebSocketConnectionState",
     "WebSocketError",
+    "WebSocketErrorModel",
     "WebSocketMessage",
     "WebSocketMessageIn",
     "WebSocketMessageType",

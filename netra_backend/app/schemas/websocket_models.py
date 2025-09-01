@@ -169,8 +169,12 @@ class AgentCompleted(BaseWebSocketPayload):
     message: Optional[str] = None
 
 
-class WebSocketError(BaseModel):
-    """Unified WebSocket error model."""
+class WebSocketErrorModel(BaseModel):
+    """Unified WebSocket error data model for structured error information in WebSocket messages.
+    
+    Note: This is distinct from WebSocketError exception class in core.exceptions_websocket.
+    This model is used for serializing error information in WebSocket message payloads.
+    """
     message: str
     error_type: Optional[str] = None
     code: Optional[str] = None
@@ -244,6 +248,8 @@ AnalysisRequest = StartAgentPayload
 UserMessage = UserMessagePayload
 AgentMessage = AgentUpdatePayload
 StopAgent = StopAgentPayload
+# DEPRECATED: Use WebSocketErrorModel instead to avoid confusion with WebSocketError exception
+WebSocketError = WebSocketErrorModel
 
 
 class AgentCompletedPayload(TypedDict):
@@ -328,7 +334,8 @@ __all__ = [
     "AgentStarted",
     "SubAgentUpdate", 
     "AgentCompleted",
-    "WebSocketError",
+    "WebSocketErrorModel",
+    "WebSocketError",  # Deprecated alias for WebSocketErrorModel
     "WebSocketMessage",
     "WebSocketMessageIn",
     "QueueMessage",
