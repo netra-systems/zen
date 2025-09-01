@@ -42,18 +42,18 @@ class TestBackendHealthChecks:
     def setup_clickhouse_env(self):
         """Set up ClickHouse environment variables for testing."""
         # Save original values
-        original_password = os.environ.get('CLICKHOUSE_PASSWORD')
+        original_password = env.get('CLICKHOUSE_PASSWORD')
         
         # Set development password for testing
-        os.environ['CLICKHOUSE_PASSWORD'] = 'netra_dev_password'
+        env.set('CLICKHOUSE_PASSWORD', 'netra_dev_password', "test")
         
         yield
         
         # Restore original values
         if original_password is None:
-            os.environ.pop('CLICKHOUSE_PASSWORD', None)
+            env.delete('CLICKHOUSE_PASSWORD', "test")
         else:
-            os.environ['CLICKHOUSE_PASSWORD'] = original_password
+            env.set('CLICKHOUSE_PASSWORD', original_password, "test")
 
     @pytest.fixture
     def health_service(self):

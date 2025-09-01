@@ -3,8 +3,10 @@
 import os
 from unittest.mock import AsyncMock, MagicMock
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+from shared.isolated_environment import get_env
 
 
+env = get_env()
 def _setup_basic_llm_mocks(mock_manager):
     """Setup basic LLM mock methods."""
     # Mock: LLM service isolation for fast testing without API calls or rate limits
@@ -47,7 +49,7 @@ def _setup_websocket_test_mocks(manager):
 def _create_real_tool_dispatcher():
     """Create real tool dispatcher instance."""
     # Skip during collection mode
-    if os.environ.get("TEST_COLLECTION_MODE"):
+    if env.get("TEST_COLLECTION_MODE"):
         # Mock: Generic component isolation for controlled unit testing
         return MagicMock()
     try:
@@ -83,7 +85,7 @@ def _import_agent_classes():
 def _import_base_agent_classes():
     """Import base agent classes."""
     # Skip during collection mode
-    if os.environ.get("TEST_COLLECTION_MODE"):
+    if env.get("TEST_COLLECTION_MODE"):
         return {}
     
     agents = {}
@@ -106,7 +108,7 @@ def _import_base_agent_classes():
 def _import_additional_agent_classes():
     """Import additional agent classes."""
     # Skip during collection mode
-    if os.environ.get("TEST_COLLECTION_MODE"):
+    if env.get("TEST_COLLECTION_MODE"):
         return {}
     
     agents = {}
