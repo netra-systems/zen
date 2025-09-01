@@ -291,34 +291,36 @@ python /Users/anthony/Documents/GitHub/netra-apex/tests/unified_test_runner.py
 
 ### 7.2. Docker Management
 
-**CRITICAL: Use the Docker orchestration system for all service management.**
+**CRITICAL: All Docker operations go through the central UnifiedDockerManager.**
+**See [`docs/docker_orchestration.md`](docs/docker_orchestration.md) for complete architecture and usage.**
 
-#### Basic Docker Operations
+#### Automatic Docker Management (Primary Usage)
 ```bash
-# Start services
-python scripts/docker.py start        # Test environment (default)
-python scripts/docker.py start dev    # Development environment
-python scripts/docker.py start prod   # Production environment
+# Tests automatically handle Docker - just run:
+python tests/unified_test_runner.py --real-services
 
-# Stop services
-python scripts/docker.py stop
-
-# Restart services
-python scripts/docker.py restart
-
-# Check status
-python scripts/docker.py status
-
-# Health check
-python scripts/docker.py health
-
-# View logs
-python scripts/docker.py logs backend
-python scripts/docker.py logs auth -f  # Follow logs in real-time
-
-# Clean up everything
-python scripts/docker.py cleanup
+# Docker starts automatically, conflicts are resolved, services are health-checked
 ```
+
+#### Manual Docker Operations (When Needed)
+```bash
+# Manual control script (uses central UnifiedDockerManager)
+python scripts/docker_manual.py start     # Start test environment
+python scripts/docker_manual.py stop      # Stop all containers  
+python scripts/docker_manual.py restart   # Restart services
+python scripts/docker_manual.py status    # Check status
+python scripts/docker_manual.py clean     # Clean up everything
+python scripts/docker_manual.py test      # Run tests with Docker
+
+# Restart specific services
+python scripts/docker_manual.py restart --services backend auth
+```
+
+**Key Features:**
+- **Automatic Conflict Resolution**: Removes conflicting containers automatically
+- **Health Monitoring**: Comprehensive health checks and reporting
+- **Dynamic Port Allocation**: Avoids port conflicts in parallel runs
+- **Cross-platform**: Works on Windows, macOS, and Linux
 
 #### Alpine-Based Test Orchestration
 **New optimized Alpine Docker images for faster, isolated testing:**
