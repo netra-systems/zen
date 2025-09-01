@@ -1,0 +1,670 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Execution Tracking Architecture</name>
+        <type>Core.ExecutionTracking</type>
+        <version>1.0</version>
+        <description>Comprehensive execution tracking system to prevent and detect agent death scenarios</description>
+        <created>2025-09-01</created>
+        <updated>2025-09-01</updated>
+        <business_value>Critical for preventing silent failures that cause 100% user experience degradation</business_value>
+        <priority>P0 - MISSION CRITICAL</priority>
+    </metadata>
+
+    <executive_summary>
+        <problem>
+            Agents die silently after triage with no detection mechanism, causing infinite loading states
+            and complete service failure without any alerts or recovery. Health checks show "healthy" while
+            the system is completely broken.
+        </problem>
+        <solution>
+            Comprehensive execution tracking system with heartbeat monitoring, timeout detection, failure recovery,
+            and real-time visibility into agent execution state. Integrates with existing WebSocket infrastructure
+            to provide immediate failure detection within 30 seconds.
+        </solution>
+        <business_impact>
+            Prevents 100% failure scenarios, eliminates infinite loading states, provides operational visibility,
+            and enables automatic recovery from agent failures, directly supporting the core chat business value.
+        </business_impact>
+    </executive_summary>
+
+    <core_components>
+        <component name="ExecutionRegistry" criticality="CRITICAL">
+            <purpose>Central registry for tracking all active agent executions with unique IDs</purpose>
+            <location>netra_backend/app/agents/execution/execution_registry.py</location>
+            <responsibilities>
+                <responsibility>Generate unique execution IDs for all agent runs</responsibility>
+                <responsibility>Track execution state transitions (PENDING → RUNNING → SUCCESS/FAILED/TIMEOUT)</responsibility>
+                <responsibility>Maintain registry of active executions with metadata</responsibility>
+                <responsibility>Provide query interface for execution status</responsibility>
+                <responsibility>Clean up completed/expired executions</responsibility>
+            </responsibilities>
+            <interfaces>
+                <method>register_execution(run_id: str, agent_name: str, context: AgentExecutionContext) -> ExecutionRecord</method>
+                <method>update_execution_state(execution_id: str, state: ExecutionState, metadata: Dict[str, Any]) -> bool</method>
+                <method>get_execution(execution_id: str) -> Optional[ExecutionRecord]</method>
+                <method>get_active_executions() -> List[ExecutionRecord]</method>
+                <method>cleanup_expired_executions() -> int</method>
+                <method>get_execution_metrics() -> ExecutionMetrics</method>
+            </interfaces>
+        </component>
+
+        <component name="HeartbeatMonitor" criticality="CRITICAL">
+            <purpose>Monitor agent liveness during execution with periodic heartbeat checks</purpose>
+            <location>netra_backend/app/agents/execution/heartbeat_monitor.py</location>
+            <responsibilities>
+                <responsibility>Track agent heartbeats during execution</responsibility>
+                <responsibility>Detect stuck/dead agents within 30 seconds</responsibility>
+                <responsibility>Trigger recovery mechanisms on heartbeat failure</responsibility>
+                <responsibility>Provide heartbeat health metrics and status</responsibility>
+            </responsibilities>
+            <heartbeat_parameters>
+                <interval>5 seconds</interval>
+                <timeout>30 seconds</timeout>
+                <max_missed_heartbeats>6</max_missed_heartbeats>
+                <recovery_delay>2 seconds</recovery_delay>
+            </heartbeat_parameters>
+            <interfaces>
+                <method>start_monitoring(execution_id: str) -> None</method>
+                <method>send_heartbeat(execution_id: str, metadata: Dict[str, Any]) -> None</method>
+                <method>stop_monitoring(execution_id: str) -> None</method>
+                <method>is_alive(execution_id: str) -> bool</method>
+                <method>get_heartbeat_status(execution_id: str) -> HeartbeatStatus</method>
+            </interfaces>
+        </component>
+
+        <component name="TimeoutManager" criticality="HIGH">
+            <purpose>Enforce execution timeouts and detect hung agents</purpose>
+            <location>netra_backend/app/agents/execution/timeout_manager.py</location>
+            <responsibilities>
+                <responsibility>Set execution timeouts based on agent type and context</responsibility>
+                <responsibility>Monitor execution duration and trigger timeouts</responsibility>
+                <responsibility>Handle timeout scenarios with proper cleanup</responsibility>
+                <responsibility>Provide timeout configuration per agent type</responsibility>
+            </responsibilities>
+            <timeout_configuration>
+                <default_timeout>30 seconds</default_timeout>
+                <triage_timeout>15 seconds</triage_timeout>
+                <data_agent_timeout>60 seconds</data_agent_timeout>
+                <optimization_timeout>45 seconds</optimization_timeout>
+                <max_total_timeout>300 seconds</max_total_timeout>
+            </timeout_configuration>
+            <interfaces>
+                <method>set_timeout(execution_id: str, timeout_seconds: float) -> None</method>
+                <method>extend_timeout(execution_id: str, additional_seconds: float) -> bool</method>
+                <method>clear_timeout(execution_id: str) -> None</method>
+                <method>check_timeouts() -> List[str]</method>
+                <method>get_remaining_time(execution_id: str) -> Optional[float]</method>
+            </interfaces>
+        </component>
+
+        <component name="ExecutionTracker" criticality="CRITICAL">
+            <purpose>Orchestrates execution tracking, monitoring, and recovery</purpose>
+            <location>netra_backend/app/agents/execution/execution_tracker.py</location>
+            <responsibilities>
+                <responsibility>Coordinate between registry, monitor, and timeout manager</responsibility>
+                <responsibility>Provide unified tracking interface for agent execution</responsibility>
+                <responsibility>Handle execution lifecycle events</responsibility>
+                <responsibility>Trigger recovery mechanisms on failures</responsibility>
+                <responsibility>Integrate with existing WebSocket event system</responsibility>
+            </responsibilities>
+            <interfaces>
+                <method>start_execution(run_id: str, agent_name: str, context: AgentExecutionContext) -> str</method>
+                <method>update_execution_progress(execution_id: str, progress: ExecutionProgress) -> None</method>
+                <method>complete_execution(execution_id: str, result: AgentExecutionResult) -> None</method>
+                <method>handle_execution_failure(execution_id: str, error: Exception) -> None</method>
+                <method>get_execution_status(execution_id: str) -> ExecutionStatus</method>
+                <method>get_all_active_executions() -> List[ExecutionStatus]</method>
+            </interfaces>
+        </component>
+
+        <component name="RecoveryManager" criticality="HIGH">
+            <purpose>Handle recovery from agent failures and stuck executions</purpose>
+            <location>netra_backend/app/agents/execution/recovery_manager.py</location>
+            <responsibilities>
+                <responsibility>Detect and classify execution failures</responsibility>
+                <responsibility>Implement recovery strategies (retry, fallback, abort)</responsibility>
+                <responsibility>Cleanup resources from failed executions</responsibility>
+                <responsibility>Send appropriate notifications to users</responsibility>
+            </responsibilities>
+            <recovery_strategies>
+                <strategy name="RETRY">Retry execution with exponential backoff</strategy>
+                <strategy name="FALLBACK">Switch to fallback agent or response</strategy>
+                <strategy name="ABORT_WITH_ERROR">Clean abort with error message to user</strategy>
+                <strategy name="GRACEFUL_DEGRADATION">Continue with partial results</strategy>
+            </recovery_strategies>
+            <interfaces>
+                <method>handle_timeout(execution_id: str) -> RecoveryAction</method>
+                <method>handle_heartbeat_failure(execution_id: str) -> RecoveryAction</method>
+                <method>handle_execution_error(execution_id: str, error: Exception) -> RecoveryAction</method>
+                <method>cleanup_failed_execution(execution_id: str) -> None</method>
+                <method>get_recovery_metrics() -> RecoveryMetrics</method>
+            </interfaces>
+        </component>
+    </core_components>
+
+    <data_models>
+        <model name="ExecutionState">
+            <enum_values>
+                <value>PENDING</value>
+                <value>INITIALIZING</value>
+                <value>RUNNING</value>
+                <value>SUCCESS</value>
+                <value>FAILED</value>
+                <value>TIMEOUT</value>
+                <value>ABORTED</value>
+                <value>RECOVERING</value>
+            </enum_values>
+            <transitions>
+                <transition>PENDING → INITIALIZING</transition>
+                <transition>INITIALIZING → RUNNING</transition>
+                <transition>RUNNING → SUCCESS</transition>
+                <transition>RUNNING → FAILED</transition>
+                <transition>RUNNING → TIMEOUT</transition>
+                <transition>FAILED → RECOVERING</transition>
+                <transition>RECOVERING → RUNNING</transition>
+                <transition>RECOVERING → ABORTED</transition>
+            </transitions>
+        </model>
+
+        <model name="ExecutionRecord">
+            <fields>
+                <field name="execution_id" type="str" required="true">Unique execution identifier</field>
+                <field name="run_id" type="str" required="true">Original run ID from agent execution</field>
+                <field name="agent_name" type="str" required="true">Name of the executing agent</field>
+                <field name="state" type="ExecutionState" required="true">Current execution state</field>
+                <field name="created_at" type="datetime" required="true">Execution start time</field>
+                <field name="updated_at" type="datetime" required="true">Last update time</field>
+                <field name="timeout_at" type="Optional[datetime]">When execution should timeout</field>
+                <field name="heartbeat_at" type="Optional[datetime]">Last heartbeat time</field>
+                <field name="context" type="Dict[str, Any]">Execution context metadata</field>
+                <field name="progress" type="Optional[ExecutionProgress]">Current execution progress</field>
+                <field name="error" type="Optional[str]">Error message if failed</field>
+                <field name="retry_count" type="int" default="0">Number of retry attempts</field>
+                <field name="recovery_actions" type="List[str]" default="[]">Recovery actions taken</field>
+            </fields>
+        </model>
+
+        <model name="ExecutionProgress">
+            <fields>
+                <field name="stage" type="str">Current execution stage</field>
+                <field name="percentage" type="float">Progress percentage (0.0-1.0)</field>
+                <field name="message" type="str">Progress message</field>
+                <field name="details" type="Dict[str, Any]">Additional progress details</field>
+                <field name="tool_executions" type="List[str]" default="[]">Tools executed so far</field>
+            </fields>
+        </model>
+
+        <model name="HeartbeatStatus">
+            <fields>
+                <field name="execution_id" type="str" required="true">Execution identifier</field>
+                <field name="last_heartbeat" type="datetime" required="true">Last heartbeat time</field>
+                <field name="is_alive" type="bool" required="true">Whether agent is considered alive</field>
+                <field name="missed_heartbeats" type="int" required="true">Number of missed heartbeats</field>
+                <field name="heartbeat_interval" type="float" required="true">Expected heartbeat interval</field>
+                <field name="next_expected" type="datetime" required="true">Next expected heartbeat</field>
+            </fields>
+        </model>
+
+        <model name="ExecutionStatus">
+            <fields>
+                <field name="execution_record" type="ExecutionRecord">Core execution data</field>
+                <field name="heartbeat_status" type="Optional[HeartbeatStatus]">Heartbeat monitoring data</field>
+                <field name="timeout_info" type="Optional[TimeoutInfo]">Timeout information</field>
+                <field name="websocket_status" type="Dict[str, Any]">WebSocket event status</field>
+                <field name="health_check" type="HealthStatus">Overall execution health</field>
+            </fields>
+        </model>
+    </data_models>
+
+    <integration_points>
+        <integration name="AgentRegistry" relationship="ENHANCED">
+            <description>Enhance AgentRegistry to integrate with ExecutionTracker</description>
+            <changes>
+                <change>Add execution_tracker property to AgentRegistry</change>
+                <change>Modify agent execution to start tracking before execution</change>
+                <change>Send heartbeats during agent execution</change>
+                <change>Update tracking on completion/failure</change>
+            </changes>
+            <backward_compatibility>MAINTAINED - No breaking changes to existing interfaces</backward_compatibility>
+        </integration>
+
+        <integration name="ExecutionEngine" relationship="ENHANCED">
+            <description>Enhance ExecutionEngine with execution tracking</description>
+            <changes>
+                <change>Initialize ExecutionTracker in constructor</change>
+                <change>Start tracking before agent execution</change>
+                <change>Send periodic heartbeats during execution</change>
+                <change>Handle timeout and heartbeat failures</change>
+                <change>Complete tracking on success/failure</change>
+            </changes>
+            <code_example>
+                <![CDATA[
+async def execute_agent(self, context: AgentExecutionContext, state: DeepAgentState) -> AgentExecutionResult:
+    # Start execution tracking
+    execution_id = await self.execution_tracker.start_execution(
+        context.run_id, context.agent_name, context
+    )
+    
+    try:
+        # Execute with heartbeat monitoring
+        async with self.heartbeat_monitor.monitor_execution(execution_id):
+            result = await self._execute_with_tracking(context, state, execution_id)
+            
+        # Complete tracking
+        await self.execution_tracker.complete_execution(execution_id, result)
+        return result
+        
+    except Exception as e:
+        # Handle failure with recovery
+        await self.execution_tracker.handle_execution_failure(execution_id, e)
+        raise
+                ]]>
+            </code_example>
+        </integration>
+
+        <integration name="WebSocketManager" relationship="ENHANCED">
+            <description>Enhance WebSocket integration with execution status events</description>
+            <changes>
+                <change>Add execution_status event type</change>
+                <change>Send periodic execution status updates</change>
+                <change>Notify on execution state changes</change>
+                <change>Provide execution health dashboard data</change>
+            </changes>
+            <new_events>
+                <event name="execution_started" payload="ExecutionStatus">Agent execution tracking started</event>
+                <event name="execution_progress" payload="ExecutionProgress">Progress update with heartbeat info</event>
+                <event name="execution_timeout" payload="TimeoutInfo">Execution timeout detected</event>
+                <event name="execution_recovered" payload="RecoveryInfo">Execution recovery successful</event>
+                <event name="execution_health" payload="HealthStatus">Periodic health status</event>
+            </new_events>
+        </integration>
+
+        <integration name="HealthService" relationship="ENHANCED">
+            <description>Enhance health checks with execution tracking data</description>
+            <changes>
+                <change>Include execution tracking metrics in health response</change>
+                <change>Add execution health endpoints</change>
+                <change>Provide deep health checks that verify execution capability</change>
+            </changes>
+            <new_endpoints>
+                <endpoint>/health/executions/status" method="GET">Current execution status summary</endpoint>
+                <endpoint>/health/executions/active" method="GET">List of active executions</endpoint>
+                <endpoint>/health/executions/{execution_id}" method="GET">Specific execution status</endpoint>
+                <endpoint>/health/executions/metrics" method="GET">Execution metrics and statistics</endpoint>
+            </new_endpoints>
+        </integration>
+
+        <integration name="AgentWebSocketBridge" relationship="USES">
+            <description>Use existing AgentWebSocketBridge for event delivery</description>
+            <usage>
+                <use>Send execution tracking events through bridge</use>
+                <use>Leverage bridge retry mechanisms for reliable delivery</use>
+                <use>Integrate with bridge health monitoring</use>
+                <use>Use bridge for recovery notifications</use>
+            </usage>
+        </integration>
+    </integration_points>
+
+    <failure_detection_mechanisms>
+        <mechanism name="HeartbeatFailure" detection_time="30s">
+            <trigger>Agent fails to send heartbeat within timeout</trigger>
+            <detection>HeartbeatMonitor checks every 5 seconds</detection>
+            <action>Trigger recovery based on failure type</action>
+            <notification>Send execution_timeout event via WebSocket</notification>
+        </mechanism>
+
+        <mechanism name="ExecutionTimeout" detection_time="immediate">
+            <trigger>Agent execution exceeds configured timeout</trigger>
+            <detection>TimeoutManager enforces timeouts</detection>
+            <action>Abort execution and trigger cleanup</action>
+            <notification>Send execution_timeout event with details</notification>
+        </mechanism>
+
+        <mechanism name="SilentFailure" detection_time="15s">
+            <trigger>Agent stops without error or heartbeat</trigger>
+            <detection>Combination of heartbeat and progress monitoring</detection>
+            <action>Mark as failed and attempt recovery</action>
+            <notification>Send execution_failed event with silent failure flag</notification>
+        </mechanism>
+
+        <mechanism name="ResourceExhaustion" detection_time="10s">
+            <trigger>System resources critically low during execution</trigger>
+            <detection>Monitor system metrics during execution</detection>
+            <action>Pause execution or trigger graceful degradation</action>
+            <notification>Send execution_degraded event</notification>
+        </mechanism>
+
+        <mechanism name="WebSocketDisconnection" detection_time="5s">
+            <trigger>WebSocket connection lost during execution</trigger>
+            <detection>WebSocket connection monitoring</detection>
+            <action>Continue execution but flag communication failure</action>
+            <notification>Attempt reconnection and buffer events</notification>
+        </mechanism>
+    </failure_detection_mechanisms>
+
+    <recovery_strategies>
+        <strategy name="AutomaticRetry" conditions="heartbeat_failure,temporary_error">
+            <description>Automatically retry execution with exponential backoff</description>
+            <parameters>
+                <max_retries>3</max_retries>
+                <base_delay>2 seconds</base_delay>
+                <max_delay>30 seconds</max_delay>
+                <backoff_multiplier>2.0</backoff_multiplier>
+            </parameters>
+            <implementation>
+                <step>Clean up previous execution state</step>
+                <step>Wait for backoff delay</step>
+                <step>Restart execution with new execution_id</step>
+                <step>Monitor for repeated failures</step>
+            </implementation>
+        </strategy>
+
+        <strategy name="FallbackExecution" conditions="max_retries_exceeded,critical_failure">
+            <description>Switch to fallback agent or simple response</description>
+            <fallback_agents>
+                <fallback primary="triage" fallback="simple_triage">Simplified triage response</fallback>
+                <fallback primary="data" fallback="basic_data">Basic data analysis</fallback>
+                <fallback primary="optimization" fallback="general_advice">General optimization advice</fallback>
+            </fallback_agents>
+            <implementation>
+                <step>Identify appropriate fallback</step>
+                <step>Create new execution context</step>
+                <step>Execute fallback with minimal processing</step>
+                <step>Mark original execution as failed with fallback</step>
+            </implementation>
+        </strategy>
+
+        <strategy name="GracefulDegradation" conditions="resource_exhaustion,partial_completion">
+            <description>Continue with partial results or reduced functionality</description>
+            <degradation_levels>
+                <level>Disable non-essential features</level>
+                <level>Use cached responses where possible</level>
+                <level>Provide simplified responses</level>
+                <level>Return partial analysis results</level>
+            </degradation_levels>
+        </strategy>
+
+        <strategy name="CircuitBreaker" conditions="repeated_failures,system_overload">
+            <description>Temporarily stop execution attempts to allow system recovery</description>
+            <parameters>
+                <failure_threshold>5</failure_threshold>
+                <reset_timeout>60 seconds</reset_timeout>
+                <half_open_test_requests>1</half_open_test_requests>
+            </parameters>
+            <states>
+                <state>CLOSED - Normal operation</state>
+                <state>OPEN - Blocking requests</state>
+                <state>HALF_OPEN - Testing recovery</state>
+            </states>
+        </strategy>
+    </recovery_strategies>
+
+    <observability>
+        <metrics>
+            <metric name="active_executions" type="gauge">Number of currently active executions</metric>
+            <metric name="execution_success_rate" type="gauge">Percentage of successful executions</metric>
+            <metric name="average_execution_time" type="gauge">Average execution time in seconds</metric>
+            <metric name="heartbeat_failure_rate" type="counter">Number of heartbeat failures</metric>
+            <metric name="timeout_rate" type="counter">Number of execution timeouts</metric>
+            <metric name="recovery_success_rate" type="gauge">Percentage of successful recoveries</metric>
+            <metric name="execution_queue_depth" type="gauge">Number of pending executions</metric>
+        </metrics>
+
+        <logging>
+            <structured_log_events>
+                <event name="execution.started" fields="execution_id,agent_name,run_id,timeout">Execution started</event>
+                <event name="execution.heartbeat" fields="execution_id,stage,progress">Heartbeat received</event>
+                <event name="execution.timeout" fields="execution_id,timeout_duration,recovery_action">Execution timeout</event>
+                <event name="execution.completed" fields="execution_id,duration,success,error">Execution completed</event>
+                <event name="execution.recovered" fields="execution_id,recovery_strategy,attempts">Recovery successful</event>
+            </structured_log_events>
+        </logging>
+
+        <dashboards>
+            <dashboard name="ExecutionHealth">
+                <widget>Active executions by agent type</widget>
+                <widget>Success/failure rates over time</widget>
+                <widget>Average execution times</widget>
+                <widget>Heartbeat health status</widget>
+                <widget>Recovery success rates</widget>
+            </dashboard>
+            
+            <dashboard name="ExecutionOperations">
+                <widget>Current active executions list</widget>
+                <widget>Recent failures with details</widget>
+                <widget>Timeout and recovery statistics</widget>
+                <widget>System resource usage</widget>
+                <widget>WebSocket event delivery status</widget>
+            </dashboard>
+        </dashboards>
+    </observability>
+
+    <testing_requirements>
+        <test_categories>
+            <category name="Unit Tests">
+                <test>ExecutionRegistry CRUD operations</test>
+                <test>HeartbeatMonitor timeout detection</test>
+                <test>TimeoutManager enforcement</test>
+                <test>RecoveryManager strategy selection</test>
+                <test>ExecutionTracker lifecycle management</test>
+            </category>
+
+            <category name="Integration Tests">
+                <test>End-to-end execution tracking with real agents</test>
+                <test>WebSocket integration with execution events</test>
+                <test>Recovery mechanism integration</test>
+                <test>Health service integration</test>
+                <test>Multi-agent execution tracking</test>
+            </category>
+
+            <category name="Mission Critical Tests">
+                <test>Agent death detection and recovery</test>
+                <test>Silent failure detection</test>
+                <test>Timeout enforcement under load</test>
+                <test>Recovery strategy effectiveness</test>
+                <test>System behavior during execution failures</test>
+            </category>
+
+            <category name="Performance Tests">
+                <test>Tracking overhead on execution performance</test>
+                <test>Concurrent execution tracking</test>
+                <test>Memory usage with long-running executions</test>
+                <test>Recovery time under various failure scenarios</test>
+            </category>
+        </test_categories>
+
+        <test_scenarios>
+            <scenario name="SimulateAgentDeath">
+                <description>Kill agent process during execution to verify detection</description>
+                <expected_behavior>
+                    <step>Detection within 30 seconds via heartbeat failure</step>
+                    <step>Recovery mechanism triggered automatically</step>
+                    <step>User notified of failure and recovery attempt</step>
+                    <step>Execution completed via fallback or retry</step>
+                </expected_behavior>
+            </scenario>
+
+            <scenario name="SimulateSilentFailure">
+                <description>Agent stops responding without error or exception</description>
+                <expected_behavior>
+                    <step>Heartbeat timeout detected</step>
+                    <step>Execution marked as failed</step>
+                    <step>Recovery strategy initiated</step>
+                    <step>WebSocket client receives failure notification</step>
+                </expected_behavior>
+            </scenario>
+
+            <scenario name="SimulateResourceExhaustion">
+                <description>System runs out of resources during execution</description>
+                <expected_behavior>
+                    <step>Resource exhaustion detected</step>
+                    <step>Graceful degradation triggered</step>
+                    <step>Partial results provided to user</step>
+                    <step>System recovers when resources available</step>
+                </expected_behavior>
+            </scenario>
+        </test_scenarios>
+    </testing_requirements>
+
+    <deployment_considerations>
+        <configuration>
+            <env_var name="EXECUTION_TRACKING_ENABLED" default="true">Enable/disable execution tracking</env_var>
+            <env_var name="HEARTBEAT_INTERVAL_SECONDS" default="5">Heartbeat check interval</env_var>
+            <env_var name="EXECUTION_TIMEOUT_SECONDS" default="30">Default execution timeout</env_var>
+            <env_var name="MAX_CONCURRENT_EXECUTIONS" default="10">Maximum concurrent executions</env_var>
+            <env_var name="RECOVERY_MAX_RETRIES" default="3">Maximum retry attempts</env_var>
+            <env_var name="CLEANUP_INTERVAL_SECONDS" default="60">Registry cleanup interval</env_var>
+        </configuration>
+
+        <database_changes>
+            <table name="execution_records">
+                <description>Store execution tracking data</description>
+                <retention_policy>7 days for completed, 30 days for failed</retention_policy>
+                <indexes>execution_id, run_id, created_at, state</indexes>
+            </table>
+            <table name="execution_heartbeats">
+                <description>Store heartbeat history for debugging</description>
+                <retention_policy>24 hours</retention_policy>
+                <indexes>execution_id, created_at</indexes>
+            </table>
+        </database_changes>
+
+        <performance_impact>
+            <overhead>
+                <cpu>~2-3% additional CPU usage during execution</cpu>
+                <memory>~10-50MB depending on concurrent executions</memory>
+                <database>~100-500 records per hour depending on load</database>
+                <network>~1-5KB additional WebSocket traffic per execution</network>
+            </overhead>
+            <mitigations>
+                <mitigation>Async operations to minimize blocking</mitigation>
+                <mitigation>Efficient data structures and minimal logging</mitigation>
+                <mitigation>Automatic cleanup of old records</mitigation>
+                <mitigation>Configurable intervals and timeouts</mitigation>
+            </mitigations>
+        </performance_impact>
+    </deployment_considerations>
+
+    <success_criteria>
+        <criterion name="Detection Speed">
+            <target>Detect agent death within 30 seconds</target>
+            <measurement>Time from failure to detection notification</measurement>
+            <acceptance>95% of failures detected within 30 seconds</acceptance>
+        </criterion>
+
+        <criterion name="Recovery Success">
+            <target>Successfully recover from 80% of failures</target>
+            <measurement>Percentage of failures resulting in successful completion</measurement>
+            <acceptance>80% of failures recover via retry or fallback</acceptance>
+        </criterion>
+
+        <criterion name="Performance Impact">
+            <target>Less than 5% overhead on execution performance</target>
+            <measurement>Execution time with vs without tracking</measurement>
+            <acceptance>Average overhead under 5%</acceptance>
+        </criterion>
+
+        <criterion name="User Experience">
+            <target>No more infinite loading states</target>
+            <measurement>User reports of infinite loading</measurement>
+            <acceptance>Zero infinite loading states in production</acceptance>
+        </criterion>
+
+        <criterion name="Operational Visibility">
+            <target>Complete visibility into execution health</target>
+            <measurement>Ability to diagnose and resolve execution issues</measurement>
+            <acceptance>100% of execution issues can be diagnosed from tracking data</acceptance>
+        </criterion>
+    </success_criteria>
+
+    <implementation_phases>
+        <phase name="Phase 1 - Core Infrastructure" priority="P0">
+            <deliverables>
+                <deliverable>ExecutionRegistry with basic CRUD operations</deliverable>
+                <deliverable>ExecutionState enum and data models</deliverable>
+                <deliverable>TimeoutManager with configurable timeouts</deliverable>
+                <deliverable>Basic integration with ExecutionEngine</deliverable>
+            </deliverables>
+            <success_criteria>
+                <criteria>All executions tracked in registry</criteria>
+                <criteria>Timeouts enforced correctly</criteria>
+                <criteria>No breaking changes to existing functionality</criteria>
+            </success_criteria>
+        </phase>
+
+        <phase name="Phase 2 - Heartbeat Monitoring" priority="P0">
+            <deliverables>
+                <deliverable>HeartbeatMonitor with configurable intervals</deliverable>
+                <deliverable>Integration with agent execution loop</deliverable>
+                <deliverable>Death detection within 30 seconds</deliverable>
+                <deliverable>WebSocket events for heartbeat failures</deliverable>
+            </deliverables>
+            <success_criteria>
+                <criteria>Agent death detected within 30 seconds</criteria>
+                <criteria>No false positives in heartbeat monitoring</criteria>
+                <criteria>WebSocket clients receive failure notifications</criteria>
+            </success_criteria>
+        </phase>
+
+        <phase name="Phase 3 - Recovery Mechanisms" priority="P1">
+            <deliverables>
+                <deliverable>RecoveryManager with multiple strategies</deliverable>
+                <deliverable>Automatic retry with exponential backoff</deliverable>
+                <deliverable>Fallback agent execution</deliverable>
+                <deliverable>Circuit breaker pattern</deliverable>
+            </deliverables>
+            <success_criteria>
+                <criteria>80% of failures recovered successfully</criteria>
+                <criteria>No cascading failures</criteria>
+                <criteria>Users receive meaningful error messages</criteria>
+            </success_criteria>
+        </phase>
+
+        <phase name="Phase 4 - Observability" priority="P1">
+            <deliverables>
+                <deliverable>Comprehensive metrics and logging</deliverable>
+                <deliverable>Health service integration</deliverable>
+                <deliverable>Operational dashboards</deliverable>
+                <deliverable>Alerting on execution failures</deliverable>
+            </deliverables>
+            <success_criteria>
+                <criteria>Complete visibility into execution health</criteria>
+                <criteria>Proactive alerting on failures</criteria>
+                <criteria>Historical analysis capabilities</criteria>
+            </success_criteria>
+        </phase>
+    </implementation_phases>
+
+    <compliance_checklist>
+        <architectural_compliance>
+            <check>✅ Single Source of Truth - ExecutionRegistry is SSOT for execution state</check>
+            <check>✅ Clear Boundaries - Execution tracking separated from business logic</check>
+            <check>✅ Idempotent Operations - All tracking operations safe to repeat</check>
+            <check>✅ Error Boundaries - Comprehensive error handling and recovery</check>
+            <check>✅ WebSocket Integration - Leverages existing AgentWebSocketBridge</check>
+        </architectural_compliance>
+
+        <business_value_compliance>
+            <check>✅ Chat Value Preservation - Maintains critical WebSocket event delivery</check>
+            <check>✅ User Trust - Eliminates silent failures and infinite loading</check>
+            <check>✅ Operational Excellence - Provides visibility and recovery capabilities</check>
+            <check>✅ Performance - Minimal overhead on core chat functionality</check>
+        </business_value_compliance>
+
+        <quality_standards>
+            <check>✅ Type Safety - Comprehensive type hints and validation</check>
+            <check>✅ Test Coverage - 95%+ test coverage including mission critical tests</check>
+            <check>✅ Documentation - Complete specification and implementation docs</check>
+            <check>✅ Monitoring - Comprehensive metrics and observability</check>
+        </quality_standards>
+    </compliance_checklist>
+
+    <references>
+        <reference>AGENT_DEATH_AFTER_TRIAGE_BUG_REPORT.md - Root cause analysis</reference>
+        <reference>SPEC/core.xml - Core architecture patterns</reference>
+        <reference>SPEC/learnings/websocket_agent_integration_critical.xml - WebSocket integration</reference>
+        <reference>netra_backend/app/agents/supervisor/execution_engine.py - Existing execution patterns</reference>
+        <reference>netra_backend/app/agents/supervisor/agent_registry.py - Agent management patterns</reference>
+    </references>
+</specification>
