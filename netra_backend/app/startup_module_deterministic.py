@@ -18,6 +18,7 @@ from fastapi import FastAPI
 from shared.isolated_environment import get_env
 from netra_backend.app.core.project_utils import get_project_root as _get_project_root
 from netra_backend.app.config import get_config, settings
+from netra_backend.app.services.backend_health_config import setup_backend_health_service
 from netra_backend.app.logging_config import central_logger
 
 
@@ -196,6 +197,13 @@ class StartupOrchestrator:
             self.logger.info("  ✓ Step 17: Connection monitoring started")
         except Exception as e:
             self.logger.warning(f"  ⚠ Step 17: Connection monitoring skipped: {e}")
+        
+        # Step 18: Health Service Registry (optional)
+        try:
+            await self._initialize_health_service()
+            self.logger.info("  ✓ Step 18: Health service initialized")
+        except Exception as e:
+            self.logger.warning(f"  ⚠ Step 18: Health service skipped: {e}")
     
     async def _phase5_validation(self) -> None:
         """Phase 5: Validation - Verify all critical services are operational."""
@@ -703,6 +711,12 @@ class StartupOrchestrator:
         """Start database connection monitoring - optional."""
         from netra_backend.app.services.database.connection_monitor import start_connection_monitoring
         await start_connection_monitoring()
+    
+    async def _initialize_health_service(self) -> None:
+        """Initialize health service registry - optional."""
+        health_service = await setup_backend_health_service()
+        self.app.state.health_service = health_service
+        self.logger.debug("Health service registry initialized with comprehensive checks")
     
     async def _validate_database_schema(self) -> None:
         """Validate database schema - CRITICAL."""
