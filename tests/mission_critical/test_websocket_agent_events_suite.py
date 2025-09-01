@@ -308,18 +308,20 @@ class TestUnitWebSocketComponents:
         
         # Verify initial state
         assert hasattr(dispatcher, 'executor'), "ToolDispatcher missing executor"
-        original_executor = dispatcher.executor
         
-        # Enhance
-        # Tool dispatcher is now created with WebSocket support from the start
-        # No need to enhance it separately
-        
-        # Verify enhancement
-        assert dispatcher.executor != original_executor, "Executor was not replaced"
-        # Updated to expect UnifiedToolExecutionEngine (EnhancedToolExecutionEngine is deprecated)
+        # Tool dispatcher should already have WebSocket support from creation
+        # Verify it's using the UnifiedToolExecutionEngine
         assert isinstance(dispatcher.executor, UnifiedToolExecutionEngine), \
             f"Executor is not UnifiedToolExecutionEngine, got {type(dispatcher.executor)}"
-        assert hasattr(dispatcher, '_websocket_enhanced'), "Missing enhancement marker"
+        
+        # Verify WebSocket support
+        if hasattr(dispatcher.executor, 'websocket_notifier'):
+            assert dispatcher.executor.websocket_notifier is not None, \
+                "UnifiedToolExecutionEngine has null websocket_notifier"
+        
+        # Check for enhancement marker (if present)
+        if hasattr(dispatcher, '_websocket_enhanced'):
+            assert dispatcher._websocket_enhanced, "Enhancement marker is False"
         assert dispatcher._websocket_enhanced is True, "Enhancement marker not set"
     
     @pytest.mark.asyncio
