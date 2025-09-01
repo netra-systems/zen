@@ -137,7 +137,7 @@ export const MessageInput = forwardRef<MessageInputRef>((props, ref) => {
             style={{...textareaStyle, height: `${rows * LINE_HEIGHT}px`}}
             aria-label="Message input"
             aria-describedby="char-count"
-            data-testid="message-input"
+            data-testid="message-textarea"
           />
           
           {shouldShowCharCount(message.length) && (
