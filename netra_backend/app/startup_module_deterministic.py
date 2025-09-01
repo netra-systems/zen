@@ -54,14 +54,20 @@ class StartupOrchestrator:
             # PHASE 2: Core Services (Required for chat)
             await self._phase2_core_services()
             
-            # PHASE 3: Chat Pipeline (THE CRITICAL PATH)
+            # PHASE 3: Chat Pipeline - Component Creation
             await self._phase3_chat_pipeline()
             
-            # PHASE 4: Optional Services (Can fail without breaking chat)
-            await self._phase4_optional_services()
+            # PHASE 4: Integration & Enhancement
+            await self._phase4_integration_enhancement()
             
-            # PHASE 5: Validation
-            await self._phase5_validation()
+            # PHASE 5: Critical Services  
+            await self._phase5_critical_services()
+            
+            # PHASE 6: Validation
+            await self._phase6_validation()
+            
+            # PHASE 7: Optional Services
+            await self._phase7_optional_services()
             
             # Success - mark as complete
             self._mark_startup_complete()
@@ -121,8 +127,8 @@ class StartupOrchestrator:
         self.logger.info("  ✓ Step 8: Startup fixes applied")
     
     async def _phase3_chat_pipeline(self) -> None:
-        """Phase 3: Chat Pipeline - THE CRITICAL PATH."""
-        self.logger.info("PHASE 3: Chat Pipeline (CRITICAL)")
+        """Phase 3: Chat Pipeline - Component Creation (No Integration Yet)."""
+        self.logger.info("PHASE 3: Chat Pipeline - Component Creation")
         
         # Step 9: Tool Registry (CRITICAL)
         self._initialize_tool_registry()
@@ -134,80 +140,136 @@ class StartupOrchestrator:
         await self._initialize_websocket()
         self.logger.info("  ✓ Step 10: WebSocket manager initialized")
         
-        # Step 11: AgentWebSocketBridge Integration (CRITICAL - SSOT for WebSocket-Agent coordination)
-        await self._initialize_agent_websocket_bridge()
-        if not hasattr(self.app.state, 'agent_websocket_bridge') or self.app.state.agent_websocket_bridge is None:
-            raise DeterministicStartupError("AgentWebSocketBridge is None - integration broken")
-        self.logger.info("  ✓ Step 11: AgentWebSocketBridge initialized and integrated")
-        
-        # Step 12: Agent Supervisor (CRITICAL - now using bridge for coordination)
+        # Step 11: Agent Supervisor (CRITICAL - Create before bridge for proper dependency order)
         await self._initialize_agent_supervisor()
         if not hasattr(self.app.state, 'agent_supervisor') or self.app.state.agent_supervisor is None:
             raise DeterministicStartupError("Agent supervisor is None - chat is broken")
         if not hasattr(self.app.state, 'thread_service') or self.app.state.thread_service is None:
             raise DeterministicStartupError("Thread service is None - chat is broken")
+        self.logger.info("  ✓ Step 11: Agent supervisor created")
         
-        # Verify WebSocket enhancement through bridge
-        if hasattr(self.app.state.agent_supervisor, 'registry'):
-            if hasattr(self.app.state.agent_supervisor.registry, 'tool_dispatcher'):
-                if not getattr(self.app.state.agent_supervisor.registry.tool_dispatcher, '_websocket_enhanced', False):
-                    raise DeterministicStartupError("Tool dispatcher not enhanced with WebSocket - agent events broken")
-        
-        self.logger.info("  ✓ Step 12: Agent supervisor initialized with WebSocket enhancement")
-        
-        # Step 13: Message Handlers (CRITICAL)
-        self._register_message_handlers()
-        self.logger.info("  ✓ Step 13: Message handlers registered")
+        # Step 12: AgentWebSocketBridge Creation (CRITICAL - Create bridge but don't integrate yet)
+        await self._initialize_agent_websocket_bridge_basic()
+        if not hasattr(self.app.state, 'agent_websocket_bridge') or self.app.state.agent_websocket_bridge is None:
+            raise DeterministicStartupError("AgentWebSocketBridge is None - creation failed")
+        self.logger.info("  ✓ Step 12: AgentWebSocketBridge created")
     
-    async def _phase4_optional_services(self) -> None:
-        """Phase 4: Optional Services - Can fail without breaking chat."""
-        self.logger.info("PHASE 4: Optional Services")
+    async def _phase4_integration_enhancement(self) -> None:
+        """Phase 4: Integration & Enhancement - Complete all component integration."""
+        self.logger.info("PHASE 4: Integration & Enhancement")
         
-        # Step 13: ClickHouse (optional)
+        # Step 13: Complete bridge integration with supervisor and registry
+        await self._perform_complete_bridge_integration()
+        self.logger.info("  ✓ Step 13: Bridge integration completed")
+        
+        # Step 14: Tool dispatcher enhancement via registry.set_websocket_manager
+        await self._ensure_tool_dispatcher_enhancement()
+        self.logger.info("  ✓ Step 14: Tool dispatcher enhanced with WebSocket")
+        
+        # Step 15: Message handler registration
+        self._register_message_handlers()
+        self.logger.info("  ✓ Step 15: Message handlers registered")
+    
+    async def _perform_complete_bridge_integration(self) -> None:
+        """Complete AgentWebSocketBridge integration with all dependencies."""
+        from netra_backend.app.services.agent_websocket_bridge import IntegrationState
+        from netra_backend.app.orchestration.agent_execution_registry import get_agent_execution_registry
+        
+        bridge = self.app.state.agent_websocket_bridge
+        supervisor = self.app.state.agent_supervisor
+        
+        if not bridge:
+            raise DeterministicStartupError("AgentWebSocketBridge not available for integration")
+        if not supervisor:
+            raise DeterministicStartupError("Agent supervisor not available for integration")
+        
+        # Get registry for enhanced integration
         try:
-            await self._initialize_clickhouse()
-            self.logger.info("  ✓ Step 13: ClickHouse initialized")
+            registry = await get_agent_execution_registry()
         except Exception as e:
-            self.logger.warning(f"  ⚠ Step 13: ClickHouse skipped: {e}")
+            # Registry is optional for basic integration
+            self.logger.warning(f"Agent execution registry not available for bridge: {e}")
+            registry = supervisor.registry if hasattr(supervisor, 'registry') else None
         
-        # Step 14: Monitoring (optional)
-        try:
-            await self._initialize_monitoring()
-            self.logger.info("  ✓ Step 14: Monitoring started")
-        except Exception as e:
-            self.logger.warning(f"  ⚠ Step 14: Monitoring skipped: {e}")
+        # Initialize complete integration with timeout
+        integration_result = await asyncio.wait_for(
+            bridge.ensure_integration(
+                supervisor=supervisor,
+                registry=registry,
+                force_reinit=False
+            ),
+            timeout=30.0
+        )
         
-        # Step 15: Background Tasks (optional)
+        if not integration_result.success:
+            raise DeterministicStartupError(f"AgentWebSocketBridge integration failed: {integration_result.error}")
+        
+        # Verify bridge health immediately after integration
+        health_status = await bridge.health_check()
+        if health_status.state not in [IntegrationState.ACTIVE]:
+            raise DeterministicStartupError(f"AgentWebSocketBridge unhealthy after integration: {health_status.state}")
+        
+        self.logger.info(f"    - Integration state: {health_status.state.value}")
+        self.logger.info(f"    - WebSocket Manager: {'✓' if health_status.websocket_manager_healthy else '✗'}")
+        self.logger.info(f"    - Registry: {'✓' if health_status.registry_healthy else '✗'}")
+    
+    async def _ensure_tool_dispatcher_enhancement(self) -> None:
+        """Ensure tool dispatcher is enhanced with WebSocket capabilities."""
+        from netra_backend.app.websocket_core import get_websocket_manager
+        
+        supervisor = self.app.state.agent_supervisor
+        websocket_manager = get_websocket_manager()
+        
+        if not supervisor:
+            raise DeterministicStartupError("Agent supervisor not available for enhancement")
+        if not websocket_manager:
+            raise DeterministicStartupError("WebSocket manager not available for enhancement")
+        
+        # Ensure WebSocket enhancement through registry
+        if hasattr(supervisor, 'registry') and hasattr(supervisor.registry, 'tool_dispatcher'):
+            if not getattr(supervisor.registry.tool_dispatcher, '_websocket_enhanced', False):
+                # Enhance tool dispatcher
+                if hasattr(supervisor.registry, 'set_websocket_manager'):
+                    supervisor.registry.set_websocket_manager(websocket_manager)
+                    
+                    # Verify enhancement worked
+                    if not getattr(supervisor.registry.tool_dispatcher, '_websocket_enhanced', False):
+                        raise DeterministicStartupError("Tool dispatcher enhancement with WebSocket failed")
+                else:
+                    raise DeterministicStartupError("Registry missing set_websocket_manager method")
+            
+            self.logger.info("    - Tool dispatcher WebSocket enhancement verified")
+        else:
+            raise DeterministicStartupError("Supervisor missing registry or tool_dispatcher for enhancement")
+    
+    async def _phase5_critical_services(self) -> None:
+        """Phase 5: Critical Services - Required for system stability."""
+        self.logger.info("PHASE 5: Critical Services")
+        
+        # Step 16: Background Task Manager (CRITICAL)
         try:
             self._initialize_background_tasks()
-            self.logger.info("  ✓ Step 15: Background tasks started")
+            self.logger.info("  ✓ Step 16: Background task manager initialized")
         except Exception as e:
-            self.logger.warning(f"  ⚠ Step 15: Background tasks skipped: {e}")
+            raise DeterministicStartupError(f"Background task manager initialization failed: {e}")
         
-        # Step 16: Performance Manager (optional)
-        try:
-            await self._initialize_performance_manager()
-            self.logger.info("  ✓ Step 16: Performance manager initialized")
-        except Exception as e:
-            self.logger.warning(f"  ⚠ Step 16: Performance manager skipped: {e}")
-        
-        # Step 17: Connection Monitoring (optional)
+        # Step 17: Connection Monitoring (CRITICAL)
         try:
             await self._start_connection_monitoring()
             self.logger.info("  ✓ Step 17: Connection monitoring started")
         except Exception as e:
-            self.logger.warning(f"  ⚠ Step 17: Connection monitoring skipped: {e}")
+            raise DeterministicStartupError(f"Connection monitoring initialization failed: {e}")
         
-        # Step 18: Health Service Registry (optional)
+        # Step 18: Health Service Registry (CRITICAL)
         try:
             await self._initialize_health_service()
             self.logger.info("  ✓ Step 18: Health service initialized")
         except Exception as e:
-            self.logger.warning(f"  ⚠ Step 18: Health service skipped: {e}")
+            raise DeterministicStartupError(f"Health service initialization failed: {e}")
     
-    async def _phase5_validation(self) -> None:
-        """Phase 5: Validation - Verify all critical services are operational."""
-        self.logger.info("PHASE 5: Validation")
+    async def _phase6_validation(self) -> None:
+        """Phase 6: Validation - Verify all critical services are operational."""
+        self.logger.info("PHASE 6: Validation")
         
         critical_checks = [
             (hasattr(self.app.state, 'db_session_factory') and self.app.state.db_session_factory is not None, "Database"),
@@ -217,6 +279,8 @@ class StartupOrchestrator:
             (hasattr(self.app.state, 'agent_supervisor') and self.app.state.agent_supervisor is not None, "Agent Supervisor"),
             (hasattr(self.app.state, 'thread_service') and self.app.state.thread_service is not None, "Thread Service"),
             (hasattr(self.app.state, 'tool_dispatcher') and self.app.state.tool_dispatcher is not None, "Tool Dispatcher"),
+            (hasattr(self.app.state, 'background_task_manager') and self.app.state.background_task_manager is not None, "Background Task Manager"),
+            (hasattr(self.app.state, 'health_service') and self.app.state.health_service is not None, "Health Service"),
         ]
         
         failed_checks = []
@@ -230,19 +294,30 @@ class StartupOrchestrator:
         if failed_checks:
             raise DeterministicStartupError(f"Critical services failed validation: {', '.join(failed_checks)}")
         
-        self.logger.info("  ✓ Step 18: All critical services validated")
+        self.logger.info("  ✓ Step 19: All critical services validated")
         
-        # Step 18.5: Verify AgentWebSocketBridge health
+        # Step 20: Verify AgentWebSocketBridge health
         await self._verify_bridge_health()
         
-        # Step 18.6: Verify WebSocket events can actually be sent
+        # Step 21: Verify WebSocket events can actually be sent
         await self._verify_websocket_events()
         
-        # Step 19: Comprehensive startup validation with component counts
+        # Step 22: Comprehensive startup validation with component counts
+        await self._run_comprehensive_validation()
+        
+        # Step 23: Critical path validation (CHAT FUNCTIONALITY)
+        await self._run_critical_path_validation()
+        
+        # Step 24: Schema validation (CRITICAL)
+        await self._validate_database_schema()
+        self.logger.info("  ✓ Step 24: Database schema validated")
+    
+    async def _run_comprehensive_validation(self) -> None:
+        """Run comprehensive startup validation."""
         try:
             from netra_backend.app.core.startup_validation import validate_startup
             
-            self.logger.info("  Step 19: Running comprehensive startup validation...")
+            self.logger.info("  Step 22: Running comprehensive startup validation...")
             success, report = await validate_startup(self.app)
             
             # Log critical component counts and warnings
@@ -273,25 +348,26 @@ class StartupOrchestrator:
                     )
             
             # Log summary
-            self.logger.info(f"  ✓ Step 19: Startup validation complete")
+            self.logger.info(f"  ✓ Step 22: Startup validation complete")
             self.logger.info(f"    Summary: {report['status_counts']['healthy']} healthy, "
                            f"{report['status_counts']['warning']} warnings, "
                            f"{report['status_counts']['critical']} critical")
             
         except ImportError:
-            self.logger.warning("  ⚠ Step 19: Startup validation module not found - skipping comprehensive validation")
+            self.logger.warning("  ⚠ Step 22: Startup validation module not found - skipping comprehensive validation")
         except DeterministicStartupError:
             # Re-raise deterministic errors
             raise
         except Exception as e:
             # Log but don't fail on non-critical validation errors
-            self.logger.error(f"  ⚠ Step 19: Startup validation error: {e}")
-        
-        # Step 20: Critical path validation (CHAT FUNCTIONALITY)
+            self.logger.error(f"  ⚠ Step 22: Startup validation error: {e}")
+    
+    async def _run_critical_path_validation(self) -> None:
+        """Run critical communication path validation."""
         try:
             from netra_backend.app.core.critical_path_validator import validate_critical_paths
             
-            self.logger.info("  Step 20: Validating critical communication paths...")
+            self.logger.info("  Step 23: Validating critical communication paths...")
             success, critical_validations = await validate_critical_paths(self.app)
             
             # Count failures
@@ -320,26 +396,47 @@ class StartupOrchestrator:
             if degraded_count > 0:
                 self.logger.warning(f"    ⚠️ {degraded_count} degraded communication paths detected")
             
-            self.logger.info("  ✓ Step 20: Critical communication paths validated")
+            self.logger.info("  ✓ Step 23: Critical communication paths validated")
             
         except ImportError:
-            self.logger.warning("  ⚠ Step 20: Critical path validator not found - skipping")
+            self.logger.warning("  ⚠ Step 23: Critical path validator not found - skipping")
         except DeterministicStartupError:
             # Re-raise deterministic errors
             raise
         except Exception as e:
             # Critical path validation failure is FATAL in deterministic mode
             raise DeterministicStartupError(f"Critical path validation failed: {e}")
+    
+    async def _phase7_optional_services(self) -> None:
+        """Phase 7: Optional Services - Truly optional services that can fail without breaking chat."""
+        self.logger.info("PHASE 7: Optional Services")
         
-        # Step 21: Schema validation (CRITICAL)
-        await self._validate_database_schema()
-        self.logger.info("  ✓ Step 21: Database schema validated")
+        # Step 25: ClickHouse (optional)
+        try:
+            await self._initialize_clickhouse()
+            self.logger.info("  ✓ Step 25: ClickHouse initialized")
+        except Exception as e:
+            self.logger.warning(f"  ⚠ Step 25: ClickHouse skipped: {e}")
+        
+        # Step 26: Performance Manager (optional)
+        try:
+            await self._initialize_performance_manager()
+            self.logger.info("  ✓ Step 26: Performance manager initialized")
+        except Exception as e:
+            self.logger.warning(f"  ⚠ Step 26: Performance manager skipped: {e}")
+        
+        # Step 27: Advanced Monitoring (optional)
+        try:
+            await self._initialize_monitoring()
+            self.logger.info("  ✓ Step 27: Advanced monitoring started")
+        except Exception as e:
+            self.logger.warning(f"  ⚠ Step 27: Advanced monitoring skipped: {e}")
     
     async def _verify_bridge_health(self) -> None:
         """Verify AgentWebSocketBridge is healthy and operational - CRITICAL."""
         from netra_backend.app.services.agent_websocket_bridge import IntegrationState
         
-        self.logger.info("  Step 18.5: Verifying AgentWebSocketBridge health...")
+        self.logger.info("  Step 20: Verifying AgentWebSocketBridge health...")
         
         bridge = self.app.state.agent_websocket_bridge
         if not bridge:
@@ -366,7 +463,7 @@ class StartupOrchestrator:
                 raise DeterministicStartupError(f"Bridge has {health.consecutive_failures} consecutive failures")
             
             # Log detailed bridge status
-            self.logger.info(f"  ✓ Step 18.5: AgentWebSocketBridge health verified")
+            self.logger.info(f"  ✓ Step 20: AgentWebSocketBridge health verified")
             self.logger.info(f"    - State: {health.state.value}")
             self.logger.info(f"    - Health Checks: {status['metrics']['health_checks_performed']}")
             self.logger.info(f"    - Success Rate: {status['metrics']['success_rate']:.2%}")
@@ -462,64 +559,32 @@ class StartupOrchestrator:
         if hasattr(manager, 'initialize'):
             await manager.initialize()
     
-    async def _initialize_agent_websocket_bridge(self) -> None:
-        """Initialize AgentWebSocketBridge - CRITICAL SSOT for WebSocket-Agent integration."""
-        from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge, IntegrationState
-        from netra_backend.app.orchestration.agent_execution_registry import get_agent_execution_registry
-        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+    async def _initialize_agent_websocket_bridge_basic(self) -> None:
+        """Create AgentWebSocketBridge instance - CRITICAL (Integration happens in Phase 4)."""
+        from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
         
-        # Get bridge instance (singleton)
+        # Get bridge instance (singleton) - just create it, don't integrate yet
         bridge = await get_agent_websocket_bridge()
         if bridge is None:
             raise DeterministicStartupError("Failed to get AgentWebSocketBridge instance")
         
-        # Get registry for enhanced integration
-        try:
-            registry = await get_agent_execution_registry()
-        except Exception as e:
-            # Registry is optional for basic integration
-            self.logger.warning(f"Agent execution registry not available for bridge: {e}")
-            registry = None
-        
-        # Initialize integration with timeout
-        integration_result = await asyncio.wait_for(
-            bridge.ensure_integration(
-                supervisor=None,  # Will be set when supervisor is created
-                registry=registry,
-                force_reinit=False
-            ),
-            timeout=30.0
-        )
-        
-        if not integration_result.success:
-            raise DeterministicStartupError(f"AgentWebSocketBridge integration failed: {integration_result.error}")
-        
-        # Store bridge in app state for monitoring
+        # Store bridge in app state for later integration
         self.app.state.agent_websocket_bridge = bridge
         
-        # Verify bridge health immediately
-        health_status = await bridge.health_check()
-        if health_status.state not in [IntegrationState.ACTIVE, IntegrationState.INITIALIZING]:
-            raise DeterministicStartupError(f"AgentWebSocketBridge unhealthy after initialization: {health_status.state}")
-        
-        self.logger.info(f"  ✓ AgentWebSocketBridge integration state: {health_status.state.value}")
-        self.logger.info(f"    - WebSocket Manager: {'✓' if health_status.websocket_manager_healthy else '✗'}")
-        self.logger.info(f"    - Orchestrator: {'✓' if health_status.registry_healthy else '✗'}")
-        self.logger.info(f"    - Uptime: {health_status.uptime_seconds:.1f}s")
+        self.logger.info(f"  ✓ AgentWebSocketBridge instance created (integration pending)")
     
     async def _initialize_agent_supervisor(self) -> None:
-        """Initialize agent supervisor - CRITICAL FOR CHAT."""
+        """Initialize agent supervisor - CRITICAL FOR CHAT (Enhancement happens in Phase 4)."""
         from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
         from netra_backend.app.websocket_core import get_websocket_manager
         from netra_backend.app.services.agent_service import AgentService
         from netra_backend.app.services.thread_service import ThreadService
         from netra_backend.app.services.corpus_service import CorpusService
         
-        # Get bridge and WebSocket manager
-        bridge = self.app.state.agent_websocket_bridge
+        # Get WebSocket manager
         websocket_manager = get_websocket_manager()
         
-        # Create supervisor - no fallbacks
+        # Create supervisor - no fallbacks (WebSocket enhancement happens in Phase 4)
         supervisor = SupervisorAgent(
             self.app.state.db_session_factory,
             self.app.state.llm_manager,
@@ -529,33 +594,6 @@ class StartupOrchestrator:
         
         if supervisor is None:
             raise DeterministicStartupError("Supervisor creation returned None")
-        
-        # Now update bridge with supervisor reference for enhanced integration
-        if bridge:
-            try:
-                # Update bridge integration with the created supervisor
-                integration_result = await bridge.ensure_integration(
-                    supervisor=supervisor,
-                    registry=supervisor.registry if hasattr(supervisor, 'registry') else None,
-                    force_reinit=False  # Don't force reinit, just update references
-                )
-                
-                if integration_result.success:
-                    self.logger.info(f"  ✓ Bridge integration updated with supervisor")
-                else:
-                    self.logger.warning(f"Bridge integration update had issues: {integration_result.error}")
-            except Exception as e:
-                self.logger.warning(f"Failed to update bridge with supervisor: {e}")
-        
-        # Ensure WebSocket enhancement
-        if hasattr(supervisor, 'registry') and hasattr(supervisor.registry, 'tool_dispatcher'):
-            if not getattr(supervisor.registry.tool_dispatcher, '_websocket_enhanced', False):
-                # Try to enhance
-                if websocket_manager and hasattr(supervisor.registry, 'set_websocket_manager'):
-                    supervisor.registry.set_websocket_manager(websocket_manager)
-                    # Verify enhancement worked
-                    if not getattr(supervisor.registry.tool_dispatcher, '_websocket_enhanced', False):
-                        raise DeterministicStartupError("Failed to enhance tool dispatcher with WebSocket")
         
         # Set state - NEVER set to None
         self.app.state.agent_supervisor = supervisor
@@ -574,7 +612,7 @@ class StartupOrchestrator:
         import uuid
         from netra_backend.app.websocket_core import get_websocket_manager
         
-        self.logger.info("  Step 18.5: Verifying WebSocket event delivery...")
+        self.logger.info("  Step 21: Verifying WebSocket event delivery...")
         
         manager = get_websocket_manager()
         if not manager:
@@ -620,7 +658,7 @@ class StartupOrchestrator:
                     if not hasattr(dispatcher.executor, 'websocket_notifier') or dispatcher.executor.websocket_notifier is None:
                         raise DeterministicStartupError("Tool executor has no WebSocket notifier - events cannot be sent")
             
-            self.logger.info("  ✓ Step 18.5: WebSocket event delivery verified")
+            self.logger.info("  ✓ Step 21: WebSocket event delivery verified")
             
         except DeterministicStartupError:
             raise
