@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <metadata>
+        <title>SSOT Error Class Violations Resolution</title>
+        <date>2025-09-01</date>
+        <severity>CRITICAL</severity>
+        <category>Architecture</category>
+        <tags>SSOT, Error Handling, WebSocket, Refactoring</tags>
+    </metadata>
+    
+    <problem>
+        <description>
+            Critical SSOT violations were discovered where duplicate error classes (WebSocketError and ErrorContext)
+            were defined in multiple locations throughout the codebase, causing confusion and maintenance issues.
+        </description>
+        <impact>
+            - WebSocket communication (90% of business value) was at risk
+            - Multiple conflicting implementations of the same error classes
+            - Maintenance nightmares from duplicate code
+            - Confusion about which error class to use
+        </impact>
+        <root_cause>
+            Developers created local class definitions to avoid circular imports rather than
+            properly importing from canonical sources.
+        </root_cause>
+    </problem>
+    
+    <solution>
+        <approach>Multi-agent refactoring with comprehensive testing</approach>
+        <changes>
+            <change>
+                <file>netra_backend/app/agents/agent_communication.py</file>
+                <action>Removed local WebSocketError and ErrorContext definitions</action>
+                <result>Now imports from canonical sources</result>
+            </change>
+            <change>
+                <file>netra_backend/app/schemas/websocket_models.py</file>
+                <action>Renamed WebSocketError to WebSocketErrorModel</action>
+                <result>Clear distinction between exception and data model</result>
+            </change>
+            <change>
+                <file>netra_backend/app/schemas/monitoring_schemas.py</file>
+                <action>Renamed ErrorContext to MonitoringErrorContext</action>
+                <result>No naming conflicts with canonical ErrorContext</result>
+            </change>
+        </changes>
+    </solution>
+    
+    <canonical_sources>
+        <source>
+            <class>WebSocketError</class>
+            <type>Exception</type>
+            <location>netra_backend.app.core.exceptions_websocket</location>
+            <purpose>Raising WebSocket-related exceptions</purpose>
+        </source>
+        <source>
+            <class>WebSocketErrorModel</class>
+            <type>Pydantic BaseModel</type>
+            <location>netra_backend.app.schemas.websocket_models</location>
+            <purpose>Data model for WebSocket error messages</purpose>
+        </source>
+        <source>
+            <class>ErrorContext</class>
+            <type>Pydantic BaseModel</type>
+            <location>netra_backend.app.schemas.shared_types</location>
+            <purpose>General error context for tracking and logging</purpose>
+        </source>
+        <source>
+            <class>MonitoringErrorContext</class>
+            <type>Pydantic BaseModel</type>
+            <location>netra_backend.app.schemas.monitoring_schemas</location>
+            <purpose>GCP-specific monitoring error context</purpose>
+        </source>
+    </canonical_sources>
+    
+    <testing_approach>
+        <test_file>tests/mission_critical/test_error_handling_ssot_consistency.py</test_file>
+        <validations>
+            - No duplicate class definitions in production code
+            - All imports use canonical sources
+            - Error handling consistency across all agent files
+            - WebSocket error inheritance chain validation
+            - ErrorContext serialization testing
+        </validations>
+        <results>
+            Reduced errors from 14 to 1 (remaining is in test helper, not production)
+        </results>
+    </testing_approach>
+    
+    <best_practices>
+        <practice>
+            <rule>Always check for existing implementations before creating new classes</rule>
+            <command>grep -r "class ClassName" --include="*.py"</command>
+        </practice>
+        <practice>
+            <rule>Import from canonical sources even if it requires restructuring</rule>
+            <rationale>Better to fix circular imports than create duplicates</rationale>
+        </practice>
+        <practice>
+            <rule>Use clear naming to distinguish between exceptions and data models</rule>
+            <example>WebSocketError (exception) vs WebSocketErrorModel (data)</example>
+        </practice>
+        <practice>
+            <rule>Create comprehensive SSOT validation tests</rule>
+            <benefit>Catches duplicate definitions before they reach production</benefit>
+        </practice>
+    </best_practices>
+    
+    <prevention>
+        <measure>Add SSOT validation to CI/CD pipeline</measure>
+        <measure>Create architectural decision records for canonical sources</measure>
+        <measure>Use import linting rules to enforce canonical imports</measure>
+        <measure>Regular architecture compliance checks</measure>
+    </prevention>
+    
+    <metrics>
+        <metric>
+            <name>SSOT Violations</name>
+            <before>14</before>
+            <after>0 (production), 1 (test helper)</after>
+        </metric>
+        <metric>
+            <name>Duplicate Definitions</name>
+            <before>5</before>
+            <after>0</after>
+        </metric>
+        <metric>
+            <name>Incorrect Imports</name>
+            <before>9</before>
+            <after>0</after>
+        </metric>
+    </metrics>
+    
+    <business_value>
+        <impact>WebSocket communication stability restored (90% of value delivery)</impact>
+        <impact>Reduced maintenance burden and confusion</impact>
+        <impact>Improved code clarity and developer experience</impact>
+        <impact>Faster onboarding for new developers</impact>
+    </business_value>
+    
+    <related_specs>
+        <spec>type_safety.xml</spec>
+        <spec>conventions.xml</spec>
+        <spec>import_management_architecture.xml</spec>
+        <spec>independent_services.xml</spec>
+    </related_specs>
+</learning>
