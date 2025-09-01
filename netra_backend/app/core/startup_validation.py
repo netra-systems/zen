@@ -71,6 +71,9 @@ class StartupValidator:
         await self._validate_background_tasks(app)
         await self._validate_monitoring(app)
         
+        # CRITICAL: Validate communication paths for chat functionality
+        await self._validate_critical_paths(app)
+        
         self.end_time = time.time()
         
         # Generate report
@@ -470,6 +473,85 @@ class StartupValidator:
                 
         except Exception as e:
             self._add_failed_validation("Monitoring Validation", "Monitoring", str(e))
+    
+    async def _validate_critical_paths(self, app) -> None:
+        """Validate critical communication paths for chat functionality."""
+        try:
+            from netra_backend.app.core.critical_path_validator import validate_critical_paths
+            
+            self.logger.info("Validating critical communication paths...")
+            success, critical_validations = await validate_critical_paths(app)
+            
+            # Count failures by criticality
+            chat_breaking = 0
+            degraded = 0
+            warnings = 0
+            
+            for validation in critical_validations:
+                if not validation.passed:
+                    if validation.criticality.value == "chat_breaking":
+                        chat_breaking += 1
+                    elif validation.criticality.value == "degraded":
+                        degraded += 1
+                    else:
+                        warnings += 1
+            
+            # Add overall critical path validation
+            if chat_breaking > 0:
+                validation = ComponentValidation(
+                    name="Critical Communication Paths",
+                    category="Critical Paths",
+                    expected_min=0,  # Expect 0 failures
+                    actual_count=chat_breaking,  # Number of failures
+                    status=ComponentStatus.CRITICAL,
+                    message=f"{chat_breaking} chat-breaking failures detected",
+                    is_critical=True,
+                    metadata={
+                        "chat_breaking": chat_breaking,
+                        "degraded": degraded,
+                        "warnings": warnings
+                    }
+                )
+                self.logger.error(f"❌ CRITICAL: {chat_breaking} chat-breaking communication failures!")
+            elif degraded > 0:
+                validation = ComponentValidation(
+                    name="Critical Communication Paths",
+                    category="Critical Paths",
+                    expected_min=0,
+                    actual_count=degraded,
+                    status=ComponentStatus.WARNING,
+                    message=f"{degraded} degraded path issues",
+                    is_critical=False,
+                    metadata={
+                        "chat_breaking": 0,
+                        "degraded": degraded,
+                        "warnings": warnings
+                    }
+                )
+                self.logger.warning(f"⚠️ {degraded} degraded communication paths")
+            else:
+                validation = ComponentValidation(
+                    name="Critical Communication Paths",
+                    category="Critical Paths",
+                    expected_min=0,
+                    actual_count=0,
+                    status=ComponentStatus.HEALTHY,
+                    message="All critical paths validated",
+                    is_critical=True,
+                    metadata={
+                        "chat_breaking": 0,
+                        "degraded": 0,
+                        "warnings": warnings
+                    }
+                )
+                self.logger.info("✓ Critical communication paths: All validated")
+            
+            self.validations.append(validation)
+            
+        except ImportError:
+            self.logger.warning("Critical path validator not found - skipping")
+        except Exception as e:
+            self._add_failed_validation("Critical Path Validation", "Critical Paths", str(e))
     
     async def _count_database_tables(self, db_session_factory) -> int:
         """Count database tables if possible."""

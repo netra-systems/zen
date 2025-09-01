@@ -266,9 +266,53 @@ class StartupOrchestrator:
             # Log but don't fail on non-critical validation errors
             self.logger.error(f"  ⚠ Step 19: Startup validation error: {e}")
         
-        # Step 20: Schema validation (CRITICAL)
+        # Step 20: Critical path validation (CHAT FUNCTIONALITY)
+        try:
+            from netra_backend.app.core.critical_path_validator import validate_critical_paths
+            
+            self.logger.info("  Step 20: Validating critical communication paths...")
+            success, critical_validations = await validate_critical_paths(self.app)
+            
+            # Count failures
+            chat_breaking_count = sum(1 for v in critical_validations 
+                                     if not v.passed and v.criticality.value == "chat_breaking")
+            
+            if chat_breaking_count > 0:
+                # Log all chat-breaking failures
+                self.logger.error("    🚨 CHAT-BREAKING FAILURES DETECTED:")
+                for validation in critical_validations:
+                    if not validation.passed and validation.criticality.value == "chat_breaking":
+                        self.logger.error(f"      ❌ {validation.component}")
+                        self.logger.error(f"         Reason: {validation.failure_reason}")
+                        if validation.remediation:
+                            self.logger.error(f"         Fix: {validation.remediation}")
+                
+                # In deterministic mode, chat-breaking failures are FATAL
+                raise DeterministicStartupError(
+                    f"Critical path validation failed: {chat_breaking_count} chat-breaking failures. "
+                    f"Chat functionality is BROKEN and will not work!"
+                )
+            
+            # Log any degraded paths as warnings
+            degraded_count = sum(1 for v in critical_validations 
+                               if not v.passed and v.criticality.value == "degraded")
+            if degraded_count > 0:
+                self.logger.warning(f"    ⚠️ {degraded_count} degraded communication paths detected")
+            
+            self.logger.info("  ✓ Step 20: Critical communication paths validated")
+            
+        except ImportError:
+            self.logger.warning("  ⚠ Step 20: Critical path validator not found - skipping")
+        except DeterministicStartupError:
+            # Re-raise deterministic errors
+            raise
+        except Exception as e:
+            # Critical path validation failure is FATAL in deterministic mode
+            raise DeterministicStartupError(f"Critical path validation failed: {e}")
+        
+        # Step 21: Schema validation (CRITICAL)
         await self._validate_database_schema()
-        self.logger.info("  ✓ Step 20: Database schema validated")
+        self.logger.info("  ✓ Step 21: Database schema validated")
     
     def _validate_environment(self) -> None:
         """Validate environment configuration."""
