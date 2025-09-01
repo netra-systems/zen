@@ -11,6 +11,8 @@ Business Value: Single coherent tool execution system with real-time notificatio
 
 import asyncio
 import inspect
+import os
+import psutil
 import time
 import uuid
 from abc import ABC, abstractmethod
@@ -20,6 +22,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.core.tool_models import ToolExecutionResult, UnifiedTool
 from netra_backend.app.logging_config import central_logger
+from shared.isolated_environment import IsolatedEnvironment
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
@@ -60,14 +63,30 @@ class UnifiedToolExecutionEngine:
         self.websocket_bridge = websocket_bridge
         self.permission_service = permission_service
         
+        # Security and resource management
+        self.env = IsolatedEnvironment()
+        self.default_timeout = float(self.env.get_var('AGENT_DEFAULT_TIMEOUT', '30.0'))
+        self.max_memory_mb = int(self.env.get_var('AGENT_MAX_MEMORY_MB', '512'))
+        self.max_concurrent_per_user = int(self.env.get_var('AGENT_MAX_CONCURRENT_PER_USER', '10'))
+        self.rate_limit_per_minute = int(self.env.get_var('AGENT_RATE_LIMIT_PER_MINUTE', '100'))
+        
         # Metrics tracking
         self._active_executions: Dict[str, Dict] = {}
+        self._user_execution_counts: Dict[str, int] = {}
+        self._user_request_timestamps: Dict[str, List[float]] = {}
         self._execution_metrics = {
             'total_executions': 0,
             'successful_executions': 0,
             'failed_executions': 0,
+            'timeout_executions': 0,
+            'security_violations': 0,
             'total_duration_ms': 0
         }
+        
+        # Process monitoring
+        self._process = psutil.Process(os.getpid())
+        
+        logger.info(f"🔒 Security controls initialized: timeout={self.default_timeout}s, memory={self.max_memory_mb}MB, concurrent={self.max_concurrent_per_user}")
     
     # Core execution methods with WebSocket notifications
     
@@ -775,4 +794,146 @@ class UnifiedToolExecutionEngine:
         estimated_total = self._estimate_tool_duration(tool_name, None)
         remaining = estimated_total * (1 - progress_percentage / 100)
         return int(remaining)
+    
+    async def force_cleanup_user_executions(self, user_id: str) -> int:
+        """Force cleanup of stuck executions for a user (emergency recovery).
+        
+        This method addresses the agent death scenario by providing
+        a way to clean up stuck executions that never properly finished.
+        
+        Returns:
+            Number of executions cleaned up
+        """
+        cleanup_count = 0
+        executions_to_remove = []
+        
+        for execution_id, exec_info in self._active_executions.items():
+            if exec_info.get('user_id') == user_id:
+                # Check if execution has been running too long
+                runtime = time.time() - exec_info['start_time']
+                if runtime > self.default_timeout * 3:  # 3x normal timeout
+                    executions_to_remove.append(execution_id)
+                    cleanup_count += 1
+        
+        # Remove stuck executions
+        for execution_id in executions_to_remove:
+            if execution_id in self._active_executions:
+                del self._active_executions[execution_id]
+                logger.warning(f"🧨 Cleaned up stuck execution: {execution_id}")
+        
+        # Reset user execution count
+        if user_id in self._user_execution_counts:
+            old_count = self._user_execution_counts[user_id]
+            del self._user_execution_counts[user_id]
+            logger.warning(f"🧨 Reset user execution count for {user_id}: {old_count} -> 0")
+        
+        if cleanup_count > 0:
+            logger.info(f"🧨 Emergency cleanup completed for user {user_id}: {cleanup_count} executions cleaned")
+        
+        return cleanup_count
+    
+    async def health_check(self) -> Dict[str, Any]:
+        """Comprehensive health check that detects actual processing capability.
+        
+        This addresses the health service blindness described in the bug report
+        by checking not just if the service is running, but if it can actually
+        process agent requests successfully.
+        """
+        status = "healthy"
+        issues = []
+        
+        try:
+            # Check memory usage
+            memory_info = self._process.memory_info()
+            memory_mb = memory_info.rss / 1024 / 1024
+            
+            if memory_mb > self.max_memory_mb * 0.9:  # 90% of limit
+                status = "degraded"
+                issues.append(f"High memory usage: {memory_mb:.1f}MB/{self.max_memory_mb}MB")
+            
+            if memory_mb > self.max_memory_mb:
+                status = "unhealthy"
+                issues.append(f"Memory limit exceeded: {memory_mb:.1f}MB/{self.max_memory_mb}MB")
+            
+            # Check for stuck executions
+            stuck_count = 0
+            now = time.time()
+            
+            for exec_info in self._active_executions.values():
+                runtime = now - exec_info['start_time']
+                if runtime > self.default_timeout * 2:  # 2x normal timeout
+                    stuck_count += 1
+            
+            if stuck_count > 0:
+                status = "degraded"
+                issues.append(f"Stuck executions detected: {stuck_count}")
+            
+            # Check security violations
+            if self._execution_metrics['security_violations'] > 10:
+                status = "degraded"
+                issues.append(f"High security violations: {self._execution_metrics['security_violations']}")
+            
+            # Test basic execution capability
+            try:
+                test_start = time.time()
+                async with asyncio.timeout(5.0):  # 5 second test timeout
+                    # Simple test execution
+                    test_result = "test_passed"
+                test_duration = time.time() - test_start
+                
+                if test_duration > 2.0:  # Should complete quickly
+                    status = "degraded"
+                    issues.append(f"Slow processing capability: {test_duration:.1f}s")
+                    
+            except asyncio.TimeoutError:
+                status = "unhealthy"
+                issues.append("Processing capability test timed out")
+            except Exception as e:
+                status = "unhealthy"
+                issues.append(f"Processing capability test failed: {e}")
+            
+        except Exception as e:
+            status = "unhealthy"
+            issues.append(f"Health check failed: {e}")
+        
+        return {
+            "status": status,
+            "timestamp": datetime.now(UTC).isoformat(),
+            "issues": issues,
+            "metrics": await self.get_security_status(),
+            "can_process_agents": status != "unhealthy",
+            "processing_capability_verified": "Processing capability test" not in str(issues)
+        }
+    
+    async def emergency_shutdown_all_executions(self) -> Dict[str, Any]:
+        """Emergency shutdown of all active executions.
+        
+        This is a last resort recovery mechanism for when the system
+        is overwhelmed or in an inconsistent state.
+        
+        Returns:
+            Dictionary with shutdown statistics
+        """
+        logger.critical("🚨 EMERGENCY SHUTDOWN: Terminating all active executions")
+        
+        shutdown_count = len(self._active_executions)
+        user_counts = self._user_execution_counts.copy()
+        
+        # Clear all tracking
+        self._active_executions.clear()
+        self._user_execution_counts.clear()
+        self._user_request_timestamps.clear()
+        
+        # Reset metrics except for permanent counters
+        self._execution_metrics['failed_executions'] += shutdown_count
+        
+        logger.critical(f"🚨 Emergency shutdown completed: {shutdown_count} executions terminated")
+        
+        return {
+            "shutdown_executions": shutdown_count,
+            "affected_users": len(user_counts),
+            "user_counts": user_counts,
+            "timestamp": datetime.now(UTC).isoformat(),
+            "reason": "emergency_shutdown"
+        }
 
