@@ -89,8 +89,8 @@ class ServiceConfig:
     # PostgreSQL
     postgres_host: str = "localhost"
     postgres_port: int = 5434
-    postgres_user: str = "test"
-    postgres_password: str = "test"
+    postgres_user: str = "test_user"
+    postgres_password: str = "test_pass"
     postgres_database: str = "netra_test"
     
     # Redis
@@ -101,9 +101,9 @@ class ServiceConfig:
     
     # ClickHouse
     clickhouse_host: str = "localhost"
-    clickhouse_port: int = 9000
-    clickhouse_user: str = "test"
-    clickhouse_password: str = "test"
+    clickhouse_port: int = 9002
+    clickhouse_user: str = "test_user"
+    clickhouse_password: str = "test_pass"
     clickhouse_database: str = "netra_test_analytics"
     
     # Service URLs
