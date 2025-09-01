@@ -21,6 +21,9 @@ import pytest
 import asyncio
 import logging
 from sqlalchemy.exc import OperationalError
+from unittest.mock import patch
+
+from shared.isolated_environment import get_env
 
 from test_framework.environment_markers import env, env_requires
 from tests.e2e.helpers.auth.auth_service_helpers import AuthServiceIndependenceValidator as AuthServiceTestHelper
@@ -52,7 +55,7 @@ class TestStagingFallbackDatabaseFailures:
             'POSTGRES_PASSWORD': 'staging_password'
         }
         
-        with patch.dict(os.environ, postgres_error_env):
+        with patch.dict(get_env().get_all(), postgres_error_env):
             staging_suite = StagingTestSuite()
             auth_helper = AuthServiceTestHelper()
             
@@ -104,7 +107,7 @@ class TestStagingFallbackDatabaseFailures:
             'POSTGRES_HOST': 'test-host'
         }
         
-        with patch.dict(os.environ, postgres_error_env):
+        with patch.dict(get_env().get_all(), postgres_error_env):
             auth_helper = AuthServiceTestHelper()
             
             # Mock staging mode behavior where auth appears to work but doesn't persist
@@ -157,7 +160,7 @@ class TestStagingFallbackDatabaseFailures:
             'POSTGRES_DB': 'postgres'
         }
         
-        with patch.dict(os.environ, postgres_error_env):
+        with patch.dict(get_env().get_all(), postgres_error_env):
             auth_helper = AuthServiceTestHelper()
             
             # Mock staging mode user creation that appears to succeed
@@ -223,7 +226,7 @@ class TestStagingFallbackDatabaseFailures:
             'POSTGRES_DB': 'postgres'
         }
         
-        with patch.dict(os.environ, postgres_error_env):
+        with patch.dict(get_env().get_all(), postgres_error_env):
             auth_helper = AuthServiceTestHelper()
             service_helper = ServiceIndependenceHelper()
             
@@ -288,7 +291,7 @@ class TestStagingFallbackDatabaseFailures:
             'POSTGRES_DB': 'postgres'
         }
         
-        with patch.dict(os.environ, postgres_error_env):
+        with patch.dict(get_env().get_all(), postgres_error_env):
             auth_helper = AuthServiceTestHelper()
             
             # Mock staging mode session management
@@ -381,7 +384,7 @@ class TestStagingModeHealthCheckProblems:
             'POSTGRES_DB': 'postgres'
         }
         
-        with patch.dict(os.environ, postgres_error_env):
+        with patch.dict(get_env().get_all(), postgres_error_env):
             auth_helper = AuthServiceTestHelper()
             
             # Mock staging mode health check that reports healthy incorrectly
@@ -420,7 +423,7 @@ class TestStagingModeHealthCheckProblems:
             'POSTGRES_DB': 'postgres'
         }
         
-        with patch.dict(os.environ, postgres_error_env):
+        with patch.dict(get_env().get_all(), postgres_error_env):
             # Mock monitoring system that doesn't detect staging mode degradation
             monitoring_alerts = []
             

@@ -5,6 +5,9 @@ This test verifies that the auth service uses the correct redirect URI for OAuth
 import os
 import sys
 import pytest
+from unittest.mock import patch
+
+from shared.isolated_environment import get_env
 
 # Setup test path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -42,7 +45,7 @@ class TestOAuthRedirectURIConfiguration:
     def test_oauth_redirect_uri_must_point_to_auth_service(self):
         """Test that OAuth redirect URI points to auth service, not frontend"""
         # Setup environment for staging
-        with patch.dict(os.environ, {
+        with patch.dict(get_env().get_all(), {
             'ENVIRONMENT': 'staging',
             'AUTH_SERVICE_URL': 'https://auth.staging.netrasystems.ai',
             'FRONTEND_URL': 'https://app.staging.netrasystems.ai'
@@ -69,7 +72,7 @@ class TestOAuthRedirectURIConfiguration:
         
         client = TestClient(app)
         
-        with patch.dict(os.environ, {
+        with patch.dict(get_env().get_all(), {
             'ENVIRONMENT': 'staging',
             'AUTH_SERVICE_URL': 'https://auth.staging.netrasystems.ai',
             'FRONTEND_URL': 'https://app.staging.netrasystems.ai',
