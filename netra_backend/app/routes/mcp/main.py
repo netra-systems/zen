@@ -24,9 +24,9 @@ from netra_backend.app.routes.mcp.models import (
     MCPSessionCreateRequest,
     MCPToolCallRequest,
 )
+from netra_backend.app.routes.mcp.service_factory import get_mcp_service
 from netra_backend.app.routes.mcp.websocket_handler import MCPWebSocketHandler
 from netra_backend.app.services.mcp_models import MCPClient
-from netra_backend.app.services.service_factory import get_mcp_service
 
 router = APIRouter(
     tags=["MCP"],

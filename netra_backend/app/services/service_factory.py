@@ -77,15 +77,20 @@ def _create_mcp_service(agent_service=None):
     
     Args:
         agent_service: Optional pre-initialized agent service from app.state.
-                      If not provided, MCP service will operate without agent support.
+                      Required for full functionality. If not provided, raises error.
     """
     from netra_backend.app.services.mcp_service import MCPService
     
+    if not agent_service:
+        raise ValueError(
+            "agent_service is required for MCPService initialization. "
+            "It must be provided from app.state during startup."
+        )
+    
     dependencies = _create_mcp_dependencies()
     
-    # Add agent_service if provided (from app.state during startup)
-    if agent_service:
-        dependencies['agent_service'] = agent_service
+    # Add agent_service (required)
+    dependencies['agent_service'] = agent_service
     
     return MCPService(**dependencies)
 
@@ -113,6 +118,9 @@ def get_mcp_service(agent_service=None):
     
     Args:
         agent_service: Optional pre-initialized agent service from app.state.
+    
+    Note: This function is primarily for manual creation. For FastAPI dependency injection,
+    use the get_mcp_service in routes/mcp/service_factory.py which properly injects dependencies.
     """
     return _create_mcp_service(agent_service=agent_service)
 
