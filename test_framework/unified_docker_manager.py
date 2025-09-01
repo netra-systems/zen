@@ -525,8 +525,12 @@ class UnifiedDockerManager:
             self.allocated_ports = {}
     
     def _create_environment(self, env_name: str):
-        """Create new Docker environment"""
+        """Create new Docker environment with automatic conflict resolution"""
         compose_file = self._get_compose_file()
+        
+        # SSOT: Clean up any conflicting containers first
+        logger.info(f"🧹 Checking for conflicting containers before creating {env_name}")
+        self._cleanup_conflicting_containers(env_name)
         
         # Prepare environment variables
         env = os.environ.copy()
@@ -542,20 +546,93 @@ class UnifiedDockerManager:
             env_key = f"{service.upper()}_MEMORY_LIMIT"
             env[env_key] = config.get("memory_limit", "512m")
         
-        # Start services
-        cmd = [
-            "docker-compose",
-            "-f", compose_file,
-            "-p", env_name,
-            "up", "-d"
-        ]
-        
-        result = subprocess.run(cmd, env=env, capture_output=True, text=True)
-        if result.returncode != 0:
-            raise RuntimeError(f"Failed to create environment: {result.stderr}")
+        # Start services with automatic retry on conflict
+        max_retries = 3
+        for attempt in range(max_retries):
+            cmd = [
+                "docker-compose",
+                "-f", compose_file,
+                "-p", env_name,
+                "up", "-d"
+            ]
+            
+            result = subprocess.run(cmd, env=env, capture_output=True, text=True)
+            if result.returncode == 0:
+                break
+            
+            # Check if it's a container name conflict
+            if "already in use" in result.stderr.lower():
+                logger.warning(f"Container conflict detected on attempt {attempt + 1}, cleaning up...")
+                self._force_cleanup_containers(result.stderr)
+                time.sleep(2)  # Give Docker time to clean up
+            else:
+                # Not a conflict error, fail immediately
+                raise RuntimeError(f"Failed to create environment: {result.stderr}")
+        else:
+            # All retries failed
+            raise RuntimeError(f"Failed to create environment after {max_retries} attempts: {result.stderr}")
         
         # Wait for services to be healthy
         self._wait_for_healthy(env_name)
+    
+    def _cleanup_conflicting_containers(self, env_name: str):
+        """Clean up any containers that might conflict with the new environment"""
+        # Get list of expected container names from docker-compose
+        compose_file = self._get_compose_file()
+        
+        try:
+            # Parse compose file to get service names
+            with open(compose_file, 'r') as f:
+                compose_data = yaml.safe_load(f)
+            
+            services = compose_data.get('services', {})
+            
+            # Check for conflicting containers
+            for service_name in services.keys():
+                # Common container name patterns
+                container_patterns = [
+                    f"netra-test-{service_name}",
+                    f"{env_name}-{service_name}",
+                    f"{env_name}_{service_name}_1"
+                ]
+                
+                for pattern in container_patterns:
+                    cmd = ["docker", "ps", "-a", "--filter", f"name={pattern}", "--format", "{{.Names}}"]
+                    result = subprocess.run(cmd, capture_output=True, text=True)
+                    
+                    if result.returncode == 0 and result.stdout.strip():
+                        container_names = result.stdout.strip().split('\n')
+                        for container in container_names:
+                            logger.info(f"Removing conflicting container: {container}")
+                            subprocess.run(["docker", "rm", "-f", container], capture_output=True)
+        
+        except Exception as e:
+            logger.warning(f"Could not parse compose file for cleanup: {e}")
+            # Fallback: Clean up common test containers
+            self._cleanup_test_containers()
+    
+    def _force_cleanup_containers(self, error_message: str):
+        """Force cleanup containers mentioned in error message"""
+        import re
+        
+        # Extract container name from error message
+        pattern = r'container name "([^"]+)" is already in use'
+        matches = re.findall(pattern, error_message)
+        
+        for container_name in matches:
+            logger.info(f"Force removing conflicting container: {container_name}")
+            subprocess.run(["docker", "rm", "-f", container_name], capture_output=True)
+    
+    def _cleanup_test_containers(self):
+        """Clean up all netra-test containers"""
+        cmd = ["docker", "ps", "-a", "--filter", "name=netra-test", "--format", "{{.Names}}"]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        
+        if result.returncode == 0 and result.stdout.strip():
+            container_names = result.stdout.strip().split('\n')
+            for container in container_names:
+                logger.debug(f"Removing test container: {container}")
+                subprocess.run(["docker", "rm", "-f", container], capture_output=True)
     
     def _cleanup_environment(self, env_name: str):
         """Clean up Docker environment"""

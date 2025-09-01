@@ -28,6 +28,15 @@ from enum import Enum
 # CLAUDE.md compliance: Use IsolatedEnvironment for all environment access
 from shared.isolated_environment import get_env
 
+# Import port conflict resolver for cleanup
+try:
+    from test_framework.port_conflict_fix import PortConflictResolver, SafePortAllocator
+    CONFLICT_RESOLVER_AVAILABLE = True
+except ImportError:
+    CONFLICT_RESOLVER_AVAILABLE = False
+    PortConflictResolver = None
+    SafePortAllocator = None
+
 logger = logging.getLogger(__name__)
 
 
@@ -266,6 +275,7 @@ class DynamicPortAllocator:
         Returns:
             True if port is available
         """
+        # No need to check reserved ports - let the OS handle it
         try:
             # Try to bind to the port
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -323,6 +333,15 @@ class DynamicPortAllocator:
         """
         logger.info(f"Allocating ports for {len(services)} services in environment {self.environment_id}")
         
+        # Clean up stale Docker containers if resolver available
+        if CONFLICT_RESOLVER_AVAILABLE and PortConflictResolver:
+            try:
+                cleaned = PortConflictResolver.cleanup_stale_docker_containers()
+                if cleaned > 0:
+                    logger.info(f"Cleaned up {cleaned} stale Docker containers before allocation")
+            except Exception as e:
+                logger.debug(f"Could not clean stale containers: {e}")
+        
         # Check for existing allocations
         existing_ports = {}
         for service in services:
@@ -373,11 +392,22 @@ class DynamicPortAllocator:
             
             # If preferred not available, find any available port
             if not allocated_port:
-                allocated_port = self._find_available_port(
-                    start_port, 
-                    end_port,
-                    excluded_ports=used_ports
-                )
+                # Try multiple times with cleanup on failure
+                for attempt in range(3):
+                    allocated_port = self._find_available_port(
+                        start_port, 
+                        end_port,
+                        excluded_ports=used_ports
+                    )
+                    
+                    if allocated_port:
+                        break
+                    
+                    # If failed and resolver available, try cleanup
+                    if attempt < 2 and CONFLICT_RESOLVER_AVAILABLE and PortConflictResolver:
+                        logger.warning(f"Port allocation failed for {service}, attempting cleanup")
+                        PortConflictResolver.kill_processes_on_port(preferred_port)
+                        time.sleep(1)
             
             if allocated_port:
                 # Create allocation
@@ -456,6 +486,15 @@ class DynamicPortAllocator:
         """
         max_age = max_age_hours or self.CLEANUP_AGE_HOURS
         cleaned = 0
+        
+        # Also clean up stale Docker containers if available
+        if CONFLICT_RESOLVER_AVAILABLE and PortConflictResolver:
+            try:
+                docker_cleaned = PortConflictResolver.cleanup_stale_docker_containers()
+                if docker_cleaned > 0:
+                    logger.info(f"Cleaned up {docker_cleaned} stale Docker containers")
+            except:
+                pass
         
         # Find expired allocations
         expired_keys = []
