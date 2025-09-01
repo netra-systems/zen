@@ -1530,6 +1530,54 @@ class UnifiedDockerManager:
         except Exception as e:
             logger.error(f"Error during orphan cleanup: {e}")
             return False
+    
+    # =====================================
+    # DOCKER INTROSPECTION AND MONITORING
+    # =====================================
+    
+    def create_introspector(self) -> DockerIntrospector:
+        """
+        Create a Docker introspector for log analysis and issue detection.
+        
+        Returns:
+            Configured DockerIntrospector instance
+        """
+        compose_file = self._get_compose_file()
+        project_name = f"netra-{self.environment}"
+        
+        return DockerIntrospector(compose_file, project_name)
+    
+    async def analyze_service_health(self, 
+                                   services: Optional[List[str]] = None,
+                                   since: str = "1h",
+                                   max_lines: int = 500) -> IntrospectionReport:
+        """
+        Perform comprehensive health analysis of services.
+        
+        Args:
+            services: Services to analyze, None for all
+            since: Time window for analysis (e.g., '1h', '30m')
+            max_lines: Maximum log lines to analyze
+            
+        Returns:
+            Detailed introspection report
+        """
+        logger.info(f"Analyzing service health for: {services or 'all services'}")
+        
+        introspector = self.create_introspector()
+        report = introspector.analyze_services(
+            services=services,
+            since=since,
+            max_lines=max_lines
+        )
+        
+        # Log critical issues
+        if report.has_critical_issues:
+            logger.error(f"Found {len(report.critical_issues)} critical issues!")
+            for issue in report.critical_issues:
+                logger.error(f"  - {issue.title}")
+        
+        return report
 
 
 # Convenience functions for backward compatibility and async orchestration

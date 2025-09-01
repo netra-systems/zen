@@ -507,8 +507,8 @@ class DockerIntrospector:
     
     def _generate_issue_description(self, entry: LogEntry, category: ErrorCategory) -> str:
         """Generate detailed issue description."""
-        return f"Service '{entry.service}' experiencing {category.value.lower()} issues. " \\
-               f"First observed at {entry.timestamp}. Message: {entry.message}"
+        return (f"Service '{entry.service}' experiencing {category.value.lower()} issues. "
+                f"First observed at {entry.timestamp}. Message: {entry.message}")
     
     def _get_resource_usage(self, services: Optional[List[str]]) -> Dict[str, Any]:
         """Get resource usage information for services."""
