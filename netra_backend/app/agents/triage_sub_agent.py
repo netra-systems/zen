@@ -32,7 +32,7 @@ from netra_backend.app.agents.base.interface import (
 )
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
-from netra_backend.app.agents.base.websocket_context import WebSocketContextMixin
+# WebSocketContextMixin removed - BaseSubAgent now handles WebSocket via bridge
 from netra_backend.app.agents.config import agent_config
 from netra_backend.app.agents.input_validation import validate_agent_input
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -58,8 +58,11 @@ from netra_backend.app.schemas.shared_types import RetryConfig as ModernRetryCon
 logger = central_logger.get_logger(__name__)
 
 
-class TriageSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin):
-    """Modernized triage agent with BaseExecutionInterface compliance and WebSocket events."""
+class TriageSubAgent(BaseSubAgent, BaseExecutionInterface):
+    """Modernized triage agent with BaseExecutionInterface compliance.
+    
+    WebSocket events are handled through BaseSubAgent's bridge adapter.
+    """
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
                  redis_manager: Optional[RedisManager] = None,
@@ -74,7 +77,7 @@ class TriageSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin
         """Initialize base agent components."""
         super().__init__(llm_manager, name="TriageSubAgent", description="Enhanced triage agent with modern execution.")
         BaseExecutionInterface.__init__(self, "TriageSubAgent", websocket_manager)
-        WebSocketContextMixin.__init__(self)
+        # WebSocketContextMixin removed - using BaseSubAgent's bridge
         self._setup_core_properties(tool_dispatcher, redis_manager)
         
     def _setup_core_properties(self, tool_dispatcher: ToolDispatcher, redis_manager: Optional[RedisManager]) -> None:
@@ -169,7 +172,7 @@ class TriageSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin
         result = await self._finalize_triage_result(context.state, context.run_id, context.stream_updates, triage_result)
         
         # Emit completion event using mixin methods
-        await self.emit_progress(\"Triage analysis completed successfully\", is_complete=True)
+        await self.emit_progress("Triage analysis completed successfully", is_complete=True)
         
         return result
         
@@ -244,7 +247,7 @@ class TriageSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin
         result = await self._finalize_triage_result(state, run_id, stream_updates, triage_result)
         
         # Emit completion event using mixin methods
-        await self.emit_progress(\"Triage analysis completed successfully\", is_complete=True)
+        await self.emit_progress("Triage analysis completed successfully", is_complete=True)
         
         return result
     

@@ -451,29 +451,41 @@ class UnifiedToolExecutionEngine:
         """Send tool executing notification via AgentWebSocketBridge."""
         # CRITICAL: Always attempt to notify, with fallback
         if not context:
-            logger.critical(f"MISSING CONTEXT: Tool {tool_name} executing without context - events invisible")
+            logger.critical(f"🚨 SILENT FAILURE ALERT: Tool {tool_name} executing without context")
+            logger.critical("🚨 USER WILL NOT SEE TOOL PROGRESS - This breaks chat transparency!")
+            logger.critical(f"🚨 Call stack shows missing context during tool execution")
             return
             
         if not self.websocket_bridge:
             # CRITICAL: Log when bridge unavailable so we know events are lost
-            logger.critical(
-                f"BRIDGE UNAVAILABLE: Tool {tool_name} executing for thread {context.thread_id} - "
-                f"user will not see progress"
-            )
+            logger.critical(f"🚨 BRIDGE UNAVAILABLE: Tool {tool_name} executing for run_id {context.run_id}")
+            logger.critical(f"🚨 Thread {context.thread_id} will not see tool progress - WebSocket events LOST")
+            logger.critical("🚨 This indicates WebSocket bridge was not properly initialized in tool dispatcher")
             return
         
         try:
             # Extract contextual information
             params_summary = self._create_parameters_summary(tool_input)
             
-            await self.websocket_bridge.notify_tool_executing(
+            # DEFENSIVE: Validate bridge has required method before calling
+            if not hasattr(self.websocket_bridge, 'notify_tool_executing'):
+                logger.critical(f"🚨 BRIDGE MISSING METHOD: notify_tool_executing not found")
+                return
+            
+            result = await self.websocket_bridge.notify_tool_executing(
                 run_id=context.run_id,
                 agent_name=context.agent_name,
                 tool_name=tool_name,
                 parameters={"summary": params_summary} if params_summary else None
             )
+            
+            # DEFENSIVE: Check if notification succeeded
+            if result is False:
+                logger.warning(f"⚠️ Tool executing notification failed for {tool_name} (returned False)")
+                
         except Exception as e:
-            logger.warning(f"Failed to send tool_executing notification: {e}")
+            logger.error(f"🚨 EXCEPTION in tool_executing notification for {tool_name}: {e}")
+            logger.error("🚨 User will not see tool execution start - check WebSocket connectivity")
     
     async def _send_tool_completed(
         self,
@@ -487,15 +499,15 @@ class UnifiedToolExecutionEngine:
         """Send tool completed notification via AgentWebSocketBridge."""
         # CRITICAL: Always attempt to notify, with fallback
         if not context:
-            logger.critical(f"MISSING CONTEXT: Tool {tool_name} completed without context - events invisible")
+            logger.critical(f"🚨 SILENT FAILURE ALERT: Tool {tool_name} completed without context")
+            logger.critical("🚨 USER WILL NOT SEE TOOL RESULTS - This breaks chat completeness!")
             return
             
         if not self.websocket_bridge:
             # CRITICAL: Log when bridge unavailable so we know events are lost
-            logger.critical(
-                f"BRIDGE UNAVAILABLE: Tool {tool_name} completed for thread {context.thread_id} - "
-                f"status: {status}, duration: {duration_ms:.0f}ms - user will not see result"
-            )
+            logger.critical(f"🚨 BRIDGE UNAVAILABLE: Tool {tool_name} completed for run_id {context.run_id}")
+            logger.critical(f"🚨 Thread {context.thread_id} status: {status}, duration: {duration_ms:.0f}ms")
+            logger.critical("🚨 USER WILL NOT SEE TOOL RESULTS - WebSocket events LOST")
             return
         
         try:
@@ -515,15 +527,26 @@ class UnifiedToolExecutionEngine:
                         "MemoryError", "SystemError", "KeyboardInterrupt"
                     ]
             
-            await self.websocket_bridge.notify_tool_completed(
+            # DEFENSIVE: Validate bridge has required method before calling
+            if not hasattr(self.websocket_bridge, 'notify_tool_completed'):
+                logger.critical(f"🚨 BRIDGE MISSING METHOD: notify_tool_completed not found")
+                return
+            
+            notification_result = await self.websocket_bridge.notify_tool_completed(
                 run_id=context.run_id,
                 agent_name=context.agent_name,
                 tool_name=tool_name,
                 result=result_dict,
                 execution_time_ms=duration_ms
             )
+            
+            # DEFENSIVE: Check if notification succeeded
+            if notification_result is False:
+                logger.warning(f"⚠️ Tool completed notification failed for {tool_name} (returned False)")
+                
         except Exception as e:
-            logger.warning(f"Failed to send tool_completed notification: {e}")
+            logger.error(f"🚨 EXCEPTION in tool_completed notification for {tool_name}: {e}")
+            logger.error("🚨 User will not see tool completion - check WebSocket connectivity")
     
     def _get_or_create_context(
         self,

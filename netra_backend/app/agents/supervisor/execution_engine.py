@@ -25,6 +25,10 @@ from netra_backend.app.agents.supervisor.observability_flow import (
 )
 # WebSocketNotifier deprecated - using AgentWebSocketBridge instead
 from netra_backend.app.agents.supervisor.periodic_update_manager import PeriodicUpdateManager
+from netra_backend.app.core.agent_execution_tracker import (
+    get_execution_tracker,
+    ExecutionState
+)
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -50,7 +54,9 @@ class ExecutionEngine:
         self.websocket_bridge = websocket_bridge
         self.active_runs: Dict[str, AgentExecutionContext] = {}
         self.run_history: List[AgentExecutionResult] = []
+        self.execution_tracker = get_execution_tracker()
         self._init_components()
+        self._init_death_monitoring()
         
     def _init_components(self) -> None:
         """Initialize execution components."""
@@ -67,13 +73,71 @@ class ExecutionEngine:
             'concurrent_executions': 0,
             'queue_wait_times': [],
             'execution_times': [],
-            'failed_executions': 0
+            'failed_executions': 0,
+            'dead_executions': 0,
+            'timeout_executions': 0
         }
+        
+    def _init_death_monitoring(self) -> None:
+        """Initialize agent death monitoring callbacks."""
+        # Register callbacks for death detection
+        self.execution_tracker.register_death_callback(self._handle_agent_death)
+        self.execution_tracker.register_timeout_callback(self._handle_agent_timeout)
+        
+    async def _handle_agent_death(self, execution_record) -> None:
+        """Handle agent death detection."""
+        logger.critical(f"💀 AGENT DEATH DETECTED: {execution_record.agent_name} (execution_id={execution_record.execution_id})")
+        
+        # Send death notification via WebSocket
+        if self.websocket_bridge:
+            await self.websocket_bridge.notify_agent_death(
+                execution_record.metadata.get('run_id', execution_record.execution_id),
+                execution_record.agent_name,
+                'no_heartbeat',
+                {
+                    'execution_id': execution_record.execution_id,
+                    'last_heartbeat': execution_record.last_heartbeat.isoformat(),
+                    'time_since_heartbeat': execution_record.time_since_heartbeat.total_seconds()
+                }
+            )
+        
+        self.execution_stats['dead_executions'] += 1
+        
+    async def _handle_agent_timeout(self, execution_record) -> None:
+        """Handle agent timeout detection."""
+        logger.error(f"⏱️ AGENT TIMEOUT: {execution_record.agent_name} exceeded {execution_record.timeout_seconds}s")
+        
+        # Send timeout notification via WebSocket
+        if self.websocket_bridge:
+            await self.websocket_bridge.notify_agent_death(
+                execution_record.metadata.get('run_id', execution_record.execution_id),
+                execution_record.agent_name,
+                'timeout',
+                {
+                    'execution_id': execution_record.execution_id,
+                    'timeout_seconds': execution_record.timeout_seconds,
+                    'duration': execution_record.duration.total_seconds() if execution_record.duration else 0
+                }
+            )
+        
+        self.execution_stats['timeout_executions'] += 1
         
     async def execute_agent(self, context: AgentExecutionContext,
                            state: DeepAgentState) -> AgentExecutionResult:
-        """Execute a single agent with concurrency control and guaranteed event delivery."""
+        """Execute a single agent with concurrency control, death detection, and guaranteed event delivery."""
         queue_start_time = time.time()
+        
+        # Create execution tracking record
+        execution_id = self.execution_tracker.create_execution(
+            agent_name=context.agent_name,
+            thread_id=context.thread_id,
+            user_id=context.user_id,
+            timeout_seconds=int(self.AGENT_EXECUTION_TIMEOUT),
+            metadata={'run_id': context.run_id, 'context': context.metadata}
+        )
+        
+        # Store execution ID in context for tracking
+        context.execution_id = execution_id
         
         # CONCURRENCY CONTROL: Use semaphore to limit concurrent executions
         async with self.execution_semaphore:
@@ -82,6 +146,9 @@ class ExecutionEngine:
             self.execution_stats['total_executions'] += 1
             self.execution_stats['concurrent_executions'] += 1
             
+            # Mark execution as starting
+            self.execution_tracker.start_execution(execution_id)
+            
             # Send queue wait notification if significant delay
             if queue_wait_time > 1.0:
                 await self.send_agent_thinking(
@@ -89,6 +156,9 @@ class ExecutionEngine:
                     f"Request queued due to high load - starting now (waited {queue_wait_time:.1f}s)",
                     step_number=0
                 )
+            
+            # Create heartbeat task for death detection
+            heartbeat_task = asyncio.create_task(self._heartbeat_loop(execution_id))
             
             try:
                 # Use periodic update manager for long-running operations
@@ -115,33 +185,57 @@ class ExecutionEngine:
                     
                     execution_start = time.time()
                     
-                    # Execute with timeout
+                    # Update execution state to running
+                    self.execution_tracker.update_execution_state(
+                        execution_id, ExecutionState.RUNNING
+                    )
+                    
+                    # Execute with timeout and death monitoring
                     result = await asyncio.wait_for(
-                        self._execute_with_error_handling(context, state),
+                        self._execute_with_death_monitoring(context, state, execution_id),
                         timeout=self.AGENT_EXECUTION_TIMEOUT
                     )
                     
                     execution_time = time.time() - execution_start
                     self.execution_stats['execution_times'].append(execution_time)
                     
+                    # Mark execution as completing
+                    self.execution_tracker.update_execution_state(
+                        execution_id, ExecutionState.COMPLETING
+                    )
+                    
                     # CRITICAL: Always send completion events, regardless of success/failure
                     # This ensures WebSocket clients know when agent execution is complete
                     if result.success:
                         await self._send_final_execution_report(context, result, state)
+                        # Mark execution as completed
+                        self.execution_tracker.update_execution_state(
+                            execution_id, ExecutionState.COMPLETED, result=result.data
+                        )
                     else:
                         # Send completion event for failed/fallback cases
                         await self._send_completion_for_failed_execution(context, result, state)
+                        # Mark execution as failed
+                        self.execution_tracker.update_execution_state(
+                            execution_id, ExecutionState.FAILED, error=result.error
+                        )
                     
                     self._update_history(result)
                     return result
                     
             except asyncio.TimeoutError:
                 self.execution_stats['failed_executions'] += 1
-                # Send timeout notification
-                await self.send_agent_thinking(
-                    context,
-                    f"Agent execution timed out after {self.AGENT_EXECUTION_TIMEOUT}s",
-                    step_number=-1
+                # Mark execution as timed out
+                self.execution_tracker.update_execution_state(
+                    execution_id, ExecutionState.TIMEOUT,
+                    error=f"Execution timed out after {self.AGENT_EXECUTION_TIMEOUT}s"
+                )
+                # Send timeout notification via death handler
+                await self.websocket_bridge.notify_agent_death(
+                    context.run_id,
+                    context.agent_name,
+                    'timeout',
+                    {'execution_id': execution_id, 'timeout': self.AGENT_EXECUTION_TIMEOUT}
                 )
                 timeout_result = self._create_timeout_result(context)
                 await self._send_completion_for_failed_execution(context, timeout_result, state)
@@ -149,15 +243,60 @@ class ExecutionEngine:
                 return timeout_result
                 
             except Exception as e:
-                self.execution_stats['failed_executions'] += 1
-                logger.error(f"Unexpected error in agent execution: {e}")
-                error_result = self._create_error_result(context, e)
-                await self._send_completion_for_failed_execution(context, error_result, state)
-                self._update_history(error_result)
-                return error_result
+                # Mark execution as failed for any other exception
+                self.execution_tracker.update_execution_state(
+                    execution_id, ExecutionState.FAILED, error=str(e)
+                )
+                raise
                 
             finally:
+                # Cancel heartbeat task
+                heartbeat_task.cancel()
+                try:
+                    await heartbeat_task
+                except asyncio.CancelledError:
+                    pass
+                
                 self.execution_stats['concurrent_executions'] -= 1
+    
+    async def _heartbeat_loop(self, execution_id: str) -> None:
+        """Send periodic heartbeats for death detection."""
+        try:
+            while True:
+                await asyncio.sleep(2)  # Heartbeat every 2 seconds
+                if not self.execution_tracker.heartbeat(execution_id):
+                    break  # Execution is terminal, stop heartbeat
+        except asyncio.CancelledError:
+            pass
+    
+    async def _execute_with_death_monitoring(self, context: AgentExecutionContext,
+                                            state: DeepAgentState,
+                                            execution_id: str) -> AgentExecutionResult:
+        """Execute agent with death monitoring wrapper."""
+        try:
+            # Heartbeat before execution
+            self.execution_tracker.heartbeat(execution_id)
+            
+            # Execute with error handling
+            result = await self._execute_with_error_handling(context, state)
+            
+            # Final heartbeat after execution
+            self.execution_tracker.heartbeat(execution_id)
+            
+            return result
+            
+        except Exception as e:
+            # Check if this is a death scenario
+            execution_record = self.execution_tracker.get_execution(execution_id)
+            if execution_record and execution_record.is_dead(self.execution_tracker.heartbeat_timeout):
+                # Agent died - send death notification
+                await self.websocket_bridge.notify_agent_death(
+                    context.run_id,
+                    context.agent_name,
+                    'silent_failure',
+                    {'execution_id': execution_id, 'error': str(e)}
+                )
+            raise
     
     async def _execute_with_error_handling(self, context: AgentExecutionContext,
                                           state: DeepAgentState) -> AgentExecutionResult:

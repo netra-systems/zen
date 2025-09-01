@@ -13,7 +13,7 @@ from netra_backend.app.agents.agent_communication import AgentCommunicationMixin
 from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
 from netra_backend.app.agents.agent_observability import AgentObservabilityMixin
 from netra_backend.app.agents.agent_state import AgentStateMixin
-from netra_backend.app.agents.mixins.websocket_context_mixin import WebSocketContextMixin
+from netra_backend.app.agents.mixins.websocket_bridge_adapter import WebSocketBridgeAdapter
 from netra_backend.app.agents.interfaces import BaseAgentProtocol
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.core.config import get_config
@@ -27,7 +27,6 @@ from netra_backend.app.agents.base.timing_collector import ExecutionTimingCollec
 
 
 class BaseSubAgent(
-    WebSocketContextMixin,
     AgentLifecycleMixin, 
     AgentCommunicationMixin, 
     AgentStateMixin, 
@@ -36,15 +35,15 @@ class BaseSubAgent(
 ):
     """Base agent class combining all agent functionality through modular mixins.
     
-    Includes WebSocketContextMixin for centralized WebSocket event emission capabilities.
-    All sub-agents automatically inherit WebSocket event emission methods:
+    Uses WebSocketBridgeAdapter for centralized WebSocket event emission through
+    the SSOT AgentWebSocketBridge. All sub-agents can emit WebSocket events:
     - emit_thinking() - For real-time reasoning visibility
     - emit_tool_executing() / emit_tool_completed() - For tool usage transparency
     - emit_progress() - For partial results and progress updates
     - emit_error() - For structured error reporting
     - emit_subagent_started() / emit_subagent_completed() - For sub-agent lifecycle
     
-    CRITICAL: WebSocket context must be set via set_websocket_context() before
+    CRITICAL: WebSocket bridge must be set via set_websocket_bridge() before
     any WebSocket events can be emitted. This is handled by the supervisor/execution engine.
     """
     
@@ -56,11 +55,14 @@ class BaseSubAgent(
         self.start_time = None
         self.end_time = None
         self.context = {}  # Protected context for this agent
-        self.websocket_manager = None  # Will be set by Supervisor
-        self.user_id = None  # Will be set by Supervisor for WebSocket messages
+        self.websocket_manager = None  # Deprecated - kept for backward compatibility
+        self.user_id = None  # Deprecated - kept for backward compatibility
         self.logger = central_logger.get_logger(name)
         self.correlation_id = generate_llm_correlation_id()  # Unique ID for tracing
         self._subagent_logging_enabled = self._get_subagent_logging_enabled()
+        
+        # Initialize WebSocket bridge adapter (SSOT for WebSocket events)
+        self._websocket_adapter = WebSocketBridgeAdapter()
         
         # Initialize timing collector
         self.timing_collector = ExecutionTimingCollector(agent_name=name)
@@ -102,3 +104,81 @@ class BaseSubAgent(
             self.logger.warning(f"Error cleaning up timing collector during shutdown: {e}")
         
         # Subclasses can override to add specific shutdown logic
+    
+    # WebSocket Bridge Integration Methods (SSOT Pattern)
+    
+    def set_websocket_bridge(self, bridge, run_id: str) -> None:
+        """Set the WebSocket bridge for event emission (SSOT pattern).
+        
+        Args:
+            bridge: The AgentWebSocketBridge instance
+            run_id: The execution run ID
+        """
+        self._websocket_adapter.set_websocket_bridge(bridge, run_id, self.name)
+    
+    # Delegate WebSocket methods to the adapter
+    
+    async def emit_agent_started(self, message: Optional[str] = None) -> None:
+        """Emit agent started event via WebSocket bridge."""
+        await self._websocket_adapter.emit_agent_started(message)
+    
+    async def emit_thinking(self, thought: str, step_number: Optional[int] = None) -> None:
+        """Emit agent thinking event via WebSocket bridge."""
+        await self._websocket_adapter.emit_thinking(thought, step_number)
+    
+    async def emit_tool_executing(self, tool_name: str, parameters: Optional[Dict] = None) -> None:
+        """Emit tool executing event via WebSocket bridge."""
+        await self._websocket_adapter.emit_tool_executing(tool_name, parameters)
+    
+    async def emit_tool_completed(self, tool_name: str, result: Optional[Dict] = None) -> None:
+        """Emit tool completed event via WebSocket bridge."""
+        await self._websocket_adapter.emit_tool_completed(tool_name, result)
+    
+    async def emit_agent_completed(self, result: Optional[Dict] = None) -> None:
+        """Emit agent completed event via WebSocket bridge."""
+        await self._websocket_adapter.emit_agent_completed(result)
+    
+    async def emit_progress(self, content: str, is_complete: bool = False) -> None:
+        """Emit progress update via WebSocket bridge."""
+        await self._websocket_adapter.emit_progress(content, is_complete)
+    
+    async def emit_error(self, error_message: str, error_type: Optional[str] = None,
+                        error_details: Optional[Dict] = None) -> None:
+        """Emit error event via WebSocket bridge."""
+        await self._websocket_adapter.emit_error(error_message, error_type, error_details)
+    
+    # Backward compatibility methods for legacy code
+    
+    async def emit_tool_started(self, tool_name: str, parameters: Optional[Dict] = None) -> None:
+        """Backward compatibility: emit_tool_started maps to emit_tool_executing."""
+        await self._websocket_adapter.emit_tool_started(tool_name, parameters)
+    
+    async def emit_subagent_started(self, subagent_name: str, subagent_id: Optional[str] = None) -> None:
+        """Emit subagent started event via WebSocket bridge."""
+        await self._websocket_adapter.emit_subagent_started(subagent_name, subagent_id)
+    
+    async def emit_subagent_completed(self, subagent_name: str, subagent_id: Optional[str] = None,
+                                     result: Optional[Dict] = None, duration_ms: float = 0) -> None:
+        """Emit subagent completed event via WebSocket bridge."""
+        await self._websocket_adapter.emit_subagent_completed(subagent_name, subagent_id, result, duration_ms)
+    
+    # Legacy WebSocketContextMixin compatibility methods (deprecated)
+    
+    def set_websocket_context(self, context, notifier) -> None:
+        """DEPRECATED: Use set_websocket_bridge() instead.
+        
+        Kept for backward compatibility with legacy code.
+        """
+        self.logger.warning(f"DEPRECATED: {self.name} using legacy set_websocket_context(). "
+                          "Should use set_websocket_bridge() with AgentWebSocketBridge instead.")
+        # Store for potential legacy usage
+        self._legacy_context = context
+        self._legacy_notifier = notifier
+    
+    def has_websocket_context(self) -> bool:
+        """Check if WebSocket bridge is available."""
+        return self._websocket_adapter.has_websocket_bridge()
+    
+    def propagate_websocket_context_to_state(self, state) -> None:
+        """DEPRECATED: No longer needed with bridge pattern."""
+        pass  # No-op for backward compatibility

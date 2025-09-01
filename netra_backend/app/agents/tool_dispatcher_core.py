@@ -147,7 +147,63 @@ class ToolDispatcher:
         """Execute tool via executor"""
         return await self.executor.execute_tool_with_input(tool_input, tool, kwargs)
     
+    def set_websocket_bridge(self, bridge: Optional['AgentWebSocketBridge']) -> None:
+        """Set or update WebSocket bridge on the executor.
+        
+        This method allows updating the bridge after initialization,
+        which is critical for proper WebSocket event delivery.
+        """
+        if hasattr(self.executor, 'websocket_bridge'):
+            old_bridge = self.executor.websocket_bridge
+            self.executor.websocket_bridge = bridge
+            
+            if bridge is not None:
+                logger.info("✅ Updated ToolDispatcher executor WebSocket bridge")
+            else:
+                logger.warning("⚠️ Set ToolDispatcher executor WebSocket bridge to None - events will be lost")
+            
+            if old_bridge is None and bridge is not None:
+                logger.info("🔧 Fixed missing WebSocket bridge on ToolDispatcher - events now enabled")
+        else:
+            logger.error("🚨 CRITICAL: ToolDispatcher executor doesn't support WebSocket bridge pattern")
     
+    def get_websocket_bridge(self) -> Optional['AgentWebSocketBridge']:
+        """Get current WebSocket bridge from executor."""
+        if hasattr(self.executor, 'websocket_bridge'):
+            return self.executor.websocket_bridge
+        return None
     
-    
+    def diagnose_websocket_wiring(self) -> Dict[str, Any]:
+        """Diagnose WebSocket wiring for debugging silent failures."""
+        diagnosis = {
+            "dispatcher_has_executor": hasattr(self, 'executor'),
+            "executor_type": type(self.executor).__name__ if hasattr(self, 'executor') else None,
+            "executor_has_websocket_bridge_attr": False,
+            "websocket_bridge_is_none": True,
+            "websocket_bridge_type": None,
+            "has_websocket_support": self.has_websocket_support,
+            "critical_issues": []
+        }
+        
+        if hasattr(self, 'executor'):
+            diagnosis["executor_has_websocket_bridge_attr"] = hasattr(self.executor, 'websocket_bridge')
+            
+            if hasattr(self.executor, 'websocket_bridge'):
+                bridge = self.executor.websocket_bridge
+                diagnosis["websocket_bridge_is_none"] = bridge is None
+                diagnosis["websocket_bridge_type"] = type(bridge).__name__ if bridge else None
+                
+                if bridge is None:
+                    diagnosis["critical_issues"].append("WebSocket bridge is None - tool events will be lost")
+                elif not hasattr(bridge, 'notify_tool_executing'):
+                    diagnosis["critical_issues"].append("WebSocket bridge missing notify_tool_executing method")
+                elif not hasattr(bridge, 'notify_tool_completed'):
+                    diagnosis["critical_issues"].append("WebSocket bridge missing notify_tool_completed method")
+                
+            else:
+                diagnosis["critical_issues"].append("Executor missing websocket_bridge attribute")
+        else:
+            diagnosis["critical_issues"].append("ToolDispatcher missing executor")
+        
+        return diagnosis
     
