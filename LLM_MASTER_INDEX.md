@@ -243,7 +243,7 @@
 | **🔴 COMPOSE MANAGER** | `/test_framework/docker_compose_manager.py` | **Docker Compose lifecycle** | Service health checks, port discovery, validation |
 | **🔴 PARALLEL TEST SUPPORT** | CentralizedDockerManager | **10+ parallel test runners** | File-based locking, shared/dedicated environments |
 | **🔴 MEMORY OPTIMIZATION** | Service memory limits | **50% memory reduction** | 6GB → 3GB total, production image support |
-| **Unified Test Integration** | `/scripts/unified_test_runner.py` | **Integrated Docker management** | --docker-production, --docker-dedicated flags |
+| **Unified Test Integration** | `/tests/unified_test_runner.py` | **Integrated Docker management** | --docker-production, --docker-dedicated flags |
 | **Cleanup Script** | `/scripts/docker_cleanup.py` | **Enhanced cleanup coordination** | Respects active environments, age-based cleanup |
 | **Parallel Testing Verification** | `/scripts/test_parallel_docker_manager.py` | **Conflict detection testing** | Validates no conflicts with multiple runners |
 | **Docker State Management** | Lock files in TEMP/LOCK_DIR | **Cross-platform coordination** | Windows/Unix compatible locking |
@@ -368,7 +368,7 @@ python scripts/test_hot_reload.py  # Verify hot reload is working
 python scripts/dev_launcher.py
 
 # Run Quick Tests
-python unified_test_runner.py --level integration --no-coverage --fast-fail
+python tests/unified_test_runner.py --level integration --no-coverage --fast-fail
 
 # Check Compliance
 python scripts/check_architecture_compliance.py
@@ -514,7 +514,7 @@ python netra_backend/tests/integration/critical_paths/test_websocket_silent_fail
 ### Test System & Quality (2025-01-28 IMPROVED)
 - **🔴 TEST EXECUTION TRACKER** | `/scripts/test_execution_tracker.py` | Test history, flaky detection, prioritization
 - **🔴 TEST DASHBOARD** | `/scripts/test_dashboard.py` | Interactive metrics, HTML reports, recommendations  
-- **🔴 UNIFIED TEST RUNNER** | `/scripts/unified_test_runner.py` | **FIXED E2E categories**, integrated tracking
+- **🔴 UNIFIED TEST RUNNER** | `/tests/unified_test_runner.py` | **FIXED E2E categories**, integrated tracking
 - **🔴 PRE-DEPLOYMENT AUDIT** | `/scripts/pre_deployment_audit.py` | **Catch LLM coding errors before deploy**
 - [`SPEC/pre_deployment_audit.xml`](SPEC/pre_deployment_audit.xml) - **Pre-deployment audit specification**
 - [`SPEC/learnings/test_system_improvements.xml`](SPEC/learnings/test_system_improvements.xml) - **E2E fix & test tracking learnings**

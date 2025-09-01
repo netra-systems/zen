@@ -96,7 +96,7 @@
             <files_updated count="8">
                 database_scripts/*,
                 scripts/cleanup_staging_environments.py,
-                scripts/unified_test_runner.py,
+                tests/unified_test_runner.py,
                 auth_service/tests/conftest.py,
                 test_framework/conftest_base.py
             </files_updated>

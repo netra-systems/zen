@@ -44,7 +44,7 @@ python unified_test_runner.py --categories integration api cypress
 
 The Cypress integration seamlessly connects with existing infrastructure:
 
-1. **Unified Test Runner** (`scripts/unified_test_runner.py`)
+1. **Unified Test Runner** (`tests/unified_test_runner.py`)
    - Recognizes "cypress" as a test category
    - Manages execution lifecycle
    - Aggregates results with other test categories

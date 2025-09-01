@@ -62,7 +62,7 @@
             </component>
 
             <component name="UnifiedTestRunnerIntegration">
-                <file>scripts/unified_test_runner.py</file>
+                <file>tests/unified_test_runner.py</file>
                 <purpose>Test runner integration with unified Docker management</purpose>
                 <key-features>
                     <feature>Docker environment initialization before tests</feature>

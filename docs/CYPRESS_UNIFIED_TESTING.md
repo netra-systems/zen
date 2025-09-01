@@ -8,25 +8,25 @@ Cypress E2E tests are fully integrated into the Unified Test Runner as a test ca
 ### Basic Usage
 ```bash
 # Run all Cypress tests
-python scripts/unified_test_runner.py --category cypress
+python tests/unified_test_runner.py --category cypress
 
 # Run Cypress with other test categories
-python scripts/unified_test_runner.py --categories unit api cypress
+python tests/unified_test_runner.py --categories unit api cypress
 
 # Run with real services (Docker Compose)
-python scripts/unified_test_runner.py --category cypress --real-services
+python tests/unified_test_runner.py --category cypress --real-services
 ```
 
 ### Advanced Options
 ```bash
 # Run Cypress tests in headed mode (show browser)
-python scripts/unified_test_runner.py --category cypress --cypress-headed
+python tests/unified_test_runner.py --category cypress --cypress-headed
 
 # Use a different browser
-python scripts/unified_test_runner.py --category cypress --cypress-browser firefox
+python tests/unified_test_runner.py --category cypress --cypress-browser firefox
 
 # Run with real LLM (automatically enabled for E2E)
-python scripts/unified_test_runner.py --category cypress --real-llm
+python tests/unified_test_runner.py --category cypress --real-llm
 ```
 
 ## Integration Architecture
@@ -70,7 +70,7 @@ The unified test runner uses `docker-compose.test.yml` by default:
 docker compose -f docker-compose.test.yml up -d
 
 # Run tests
-python scripts/unified_test_runner.py --category cypress
+python tests/unified_test_runner.py --category cypress
 ```
 
 ## Test Organization
@@ -91,19 +91,19 @@ The unified test runner automatically discovers Cypress tests based on:
 
 ### Fast Feedback Mode
 ```bash
-python scripts/unified_test_runner.py --execution-mode fast_feedback
+python tests/unified_test_runner.py --execution-mode fast_feedback
 ```
 Runs quick smoke tests including critical Cypress paths.
 
 ### Full Layered Execution
 ```bash
-python scripts/unified_test_runner.py --execution-mode nightly
+python tests/unified_test_runner.py --execution-mode nightly
 ```
 Runs all test layers including full Cypress suite.
 
 ### Background E2E
 ```bash
-python scripts/unified_test_runner.py --background-e2e
+python tests/unified_test_runner.py --background-e2e
 ```
 Runs Cypress tests in background mode for CI/CD pipelines.
 
@@ -142,7 +142,7 @@ SOLUTION: cd frontend && npm install
 ```yaml
 - name: Run Cypress Tests
   run: |
-    python scripts/unified_test_runner.py \
+    python tests/unified_test_runner.py \
       --category cypress \
       --real-services \
       --timeout 3600
@@ -152,7 +152,7 @@ SOLUTION: cd frontend && npm install
 ```groovy
 stage('Cypress Tests') {
     steps {
-        sh 'python scripts/unified_test_runner.py --category cypress'
+        sh 'python tests/unified_test_runner.py --category cypress'
     }
 }
 ```
@@ -169,13 +169,13 @@ Results are integrated into the unified test report:
 ### Output Formats
 ```bash
 # JSON output
-python scripts/unified_test_runner.py --category cypress --output-format json
+python tests/unified_test_runner.py --category cypress --output-format json
 
 # JUnit XML for CI
-python scripts/unified_test_runner.py --category cypress --junit-xml
+python tests/unified_test_runner.py --category cypress --junit-xml
 
 # HTML report
-python scripts/unified_test_runner.py --category cypress --html-report
+python tests/unified_test_runner.py --category cypress --html-report
 ```
 
 ## Best Practices
@@ -191,10 +191,10 @@ python scripts/unified_test_runner.py --category cypress --html-report
 ### Debug Mode
 ```bash
 # Verbose output
-python scripts/unified_test_runner.py --category cypress --verbose
+python tests/unified_test_runner.py --category cypress --verbose
 
 # Debug Docker issues
-python scripts/unified_test_runner.py --category cypress --debug-docker
+python tests/unified_test_runner.py --category cypress --debug-docker
 ```
 
 ### Manual Service Management
@@ -220,10 +220,10 @@ If you were using a standalone Cypress launcher:
 ## Summary
 
 Cypress testing is now fully integrated into the unified test runner infrastructure:
-- **Single entry point**: `scripts/unified_test_runner.py`
+- **Single entry point**: `tests/unified_test_runner.py`
 - **Centralized Docker management**: Shared across all test types
 - **Consistent reporting**: Unified test results and metrics
 - **Service orchestration**: Automatic dependency management
 - **Parallel execution support**: Coordinated with other test categories
 
-For more information, see the main [Unified Test Runner documentation](../scripts/unified_test_runner.py).
+For more information, see the main [Unified Test Runner documentation](../tests/unified_test_runner.py).

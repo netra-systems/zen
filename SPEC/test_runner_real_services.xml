@@ -77,7 +77,7 @@
     </component>
 
     <component name="Unified Test Runner Integration">
-      <location>scripts/unified_test_runner.py</location>
+      <location>tests/unified_test_runner.py</location>
       <modifications>
         <modification>Hard failure when IsolatedEnvironment unavailable</modification>
         <modification>Service availability checks before test execution</modification>

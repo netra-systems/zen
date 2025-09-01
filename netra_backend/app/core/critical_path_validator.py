@@ -395,35 +395,40 @@ class CriticalPathValidator:
             # Check if execution engine exists
             execution_engine_found = False
             context_propagation_possible = False
+            engine_with_notifier = None
             
             if hasattr(app.state, 'agent_supervisor') and app.state.agent_supervisor:
                 supervisor = app.state.agent_supervisor
                 
-                # Check for execution engine (both old name 'execution_engine' and new name 'engine')
-                if hasattr(supervisor, 'execution_engine'):
-                    execution_engine_found = True
-                    engine = supervisor.execution_engine
-                    
-                    # Check if engine has websocket_notifier
-                    if hasattr(engine, 'websocket_notifier'):
-                        context_propagation_possible = engine.websocket_notifier is not None
-                
-                # Check for newer ExecutionEngine instance
-                elif hasattr(supervisor, 'engine'):
+                # CRITICAL FIX: Check all possible execution engines and prioritize the one with WebSocket notifier
+                # Check for newer ExecutionEngine instance first (has WebSocket notifier)
+                if hasattr(supervisor, 'engine'):
                     execution_engine_found = True
                     engine = supervisor.engine
                     
                     # Check if engine has websocket_notifier
-                    if hasattr(engine, 'websocket_notifier'):
-                        context_propagation_possible = engine.websocket_notifier is not None
+                    if hasattr(engine, 'websocket_notifier') and engine.websocket_notifier is not None:
+                        context_propagation_possible = True
+                        engine_with_notifier = 'engine'
+                
+                # Check for execution engine (old BaseExecutionEngine, usually without WebSocket notifier)
+                if hasattr(supervisor, 'execution_engine') and not context_propagation_possible:
+                    execution_engine_found = True
+                    engine = supervisor.execution_engine
+                    
+                    # Check if engine has websocket_notifier
+                    if hasattr(engine, 'websocket_notifier') and engine.websocket_notifier is not None:
+                        context_propagation_possible = True
+                        engine_with_notifier = 'execution_engine'
                 
                 # Alternative: Check for agent_manager
-                elif hasattr(supervisor, 'agent_manager'):
+                if hasattr(supervisor, 'agent_manager') and not context_propagation_possible:
                     execution_engine_found = True
                     manager = supervisor.agent_manager
                     
-                    if hasattr(manager, 'websocket_notifier'):
-                        context_propagation_possible = manager.websocket_notifier is not None
+                    if hasattr(manager, 'websocket_notifier') and manager.websocket_notifier is not None:
+                        context_propagation_possible = True
+                        engine_with_notifier = 'agent_manager'
             
             if not execution_engine_found:
                 validation = CriticalPathValidation(
@@ -443,8 +448,8 @@ class CriticalPathValidator:
                     check_type="notifier_existence",
                     passed=False,
                     criticality=CriticalityLevel.CHAT_BREAKING,
-                    failure_reason="WebSocket notifier not initialized in execution engine",
-                    remediation="Ensure WebSocketNotifier is created in execution engine"
+                    failure_reason="WebSocket notifier not initialized in any execution engine",
+                    remediation="Ensure WebSocketNotifier is created in ExecutionEngine (supervisor.engine)"
                 )
                 self.logger.error("❌ CRITICAL: WebSocket notifier missing - agent events won't be sent")
             else:
@@ -453,9 +458,10 @@ class CriticalPathValidator:
                     path="Supervisor -> ExecutionEngine -> Agent",
                     check_type="context_chain",
                     passed=True,
-                    criticality=CriticalityLevel.CHAT_BREAKING
+                    criticality=CriticalityLevel.CHAT_BREAKING,
+                    metadata={"engine_with_notifier": engine_with_notifier}
                 )
-                self.logger.info("✓ Execution context propagation chain verified")
+                self.logger.info(f"✓ Execution context propagation chain verified (using {engine_with_notifier})")
             
             self.validations.append(validation)
             
@@ -477,19 +483,20 @@ class CriticalPathValidator:
             if hasattr(app.state, 'agent_supervisor') and app.state.agent_supervisor:
                 supervisor = app.state.agent_supervisor
                 
-                # Check execution engine (both old name 'execution_engine' and new name 'engine')
-                if hasattr(supervisor, 'execution_engine'):
-                    if hasattr(supervisor.execution_engine, 'websocket_notifier'):
-                        if supervisor.execution_engine.websocket_notifier is not None:
-                            notifier_found = True
-                            notifier_locations.append("execution_engine")
-                
-                # Check engine (newer ExecutionEngine instance)
+                # PRIORITIZE newer ExecutionEngine instance (has WebSocket notifier)
                 if hasattr(supervisor, 'engine'):
                     if hasattr(supervisor.engine, 'websocket_notifier'):
                         if supervisor.engine.websocket_notifier is not None:
                             notifier_found = True
                             notifier_locations.append("engine")
+                
+                # Check execution engine (older BaseExecutionEngine, usually without WebSocket notifier)
+                if hasattr(supervisor, 'execution_engine'):
+                    if hasattr(supervisor.execution_engine, 'websocket_notifier'):
+                        if supervisor.execution_engine.websocket_notifier is not None:
+                            notifier_found = True
+                            if "engine" not in notifier_locations:  # Avoid duplicates
+                                notifier_locations.append("execution_engine")
                 
                 # Check agent manager
                 if hasattr(supervisor, 'agent_manager'):

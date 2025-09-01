@@ -99,7 +99,7 @@ Monitor these metrics in production:
 ### 1. Pre-Deployment Tests
 ```bash
 # Run unified test suite
-python scripts/unified_test_runner.py --categories smoke unit integration api --real-llm --env staging
+python tests/unified_test_runner.py --categories smoke unit integration api --real-llm --env staging
 
 # Architecture compliance
 python scripts/check_architecture_compliance.py

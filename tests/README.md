@@ -1,5 +1,24 @@
 # Netra Test Suite
 
+## Primary Test Runner: `unified_test_runner.py`
+
+**Location:** `/tests/unified_test_runner.py`  
+**Absolute Path:** `/Users/anthony/Documents/GitHub/netra-apex/tests/unified_test_runner.py`
+
+### Main Test Orchestrator
+
+```bash
+# From project root:
+python tests/unified_test_runner.py
+
+# From anywhere with absolute path:
+python /Users/anthony/Documents/GitHub/netra-apex/tests/unified_test_runner.py
+
+# Common usage patterns:
+python tests/unified_test_runner.py --category integration --no-coverage --fast-fail
+python tests/unified_test_runner.py --categories smoke unit integration api --real-llm --env staging
+```
+
 ## 🚀 Quick Start
 
 ### Run all tests with failures first and parallel execution:

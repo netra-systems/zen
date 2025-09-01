@@ -20,7 +20,7 @@
         <files_affected>
             <file>netra_backend/app/db/index_optimizer_core.py</file>
             <file>shared/secret_manager_builder.py</file>
-            <file>scripts/unified_test_runner.py</file>
+            <file>tests/unified_test_runner.py</file>
             <file>tests/e2e/test_corpus_admin_e2e.py</file>
             <file>tests/e2e/test_synthetic_data_e2e.py</file>
         </files_affected>

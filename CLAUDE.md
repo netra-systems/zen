@@ -90,7 +90,7 @@ CRITICAL: Develop a globally coherent and modular architecture.
   * **Composability:** Design components for reuse.
   * **Stability by Default:** Changes must be atomic. Explicitly flag any breaking changes.
 
-Use Test Runner to discover tests e.g. python unified_test_runner.py. Read testing xmls.
+Use Test Runner to discover tests e.g. `python tests/unified_test_runner.py` (absolute path: `/Users/anthony/Documents/GitHub/netra-apex/tests/unified_test_runner.py`). Read testing xmls.
 
 **A compliance checklist against these tenets MUST be saved after every work session.**
 
@@ -276,7 +276,11 @@ The following events MUST be sent during agent execution to enable meaningful AI
 ### 7.1. Quick Start
 
 ```bash
-python unified_test_runner.py
+# From project root:
+python tests/unified_test_runner.py
+
+# Or use absolute path from anywhere:
+python /Users/anthony/Documents/GitHub/netra-apex/tests/unified_test_runner.py
 ```
 
 ### 7.2. Unified Test Runner
@@ -284,8 +288,8 @@ python unified_test_runner.py
 IMPORTANT: Use real services, real llm, docker compose etc. whenever possible for testing.
 MOCKS are FORBIDDEN in dev, staging or production.
 
-  * **Default (Fast Feedback):** `python unified_test_runner.py --category integration --no-coverage --fast-fail`
-  * **Before Release:** `python unified_test_runner.py --categories smoke unit integration api --real-llm --env staging`
+  * **Default (Fast Feedback):** `python tests/unified_test_runner.py --category integration --no-coverage --fast-fail`
+  * **Before Release:** `python tests/unified_test_runner.py --categories smoke unit integration api --real-llm --env staging`
   * **Mission Critical Tests:** `python tests/mission_critical/test_websocket_agent_events_suite.py`
 
 ### 7.3. Deployment (GCP)
