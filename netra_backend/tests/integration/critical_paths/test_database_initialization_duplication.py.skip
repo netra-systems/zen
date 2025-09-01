@@ -16,7 +16,7 @@ import pytest
 from unittest.mock import AsyncMock, Mock, patch, call
 from fastapi import FastAPI
 
-from netra_backend.app.core.startup_manager import StartupManager, ComponentPriority
+# from netra_backend.app.core.startup_manager import StartupManager, ComponentPriority  # Module removed
 from netra_backend.app.db.database_initializer import DatabaseInitializer
 
 
