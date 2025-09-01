@@ -17,7 +17,8 @@ from netra_backend.app.core.resilience.domain_circuit_breakers import (
     AgentCircuitBreakerConfig
 )
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
-from netra_backend.app.agents.base.interface import BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability import ReliabilityManager
@@ -37,14 +38,15 @@ if TYPE_CHECKING:
 logger = central_logger.get_logger(__name__)
 
 
-class AdminToolExecutionEngine(BaseExecutionInterface):
+class AdminToolExecutionEngine:
     """Modern admin tool execution engine.
     
-    Implements BaseExecutionInterface with integrated reliability patterns.
+    Provides execution patterns with integrated reliability.
     """
     
     def __init__(self, websocket_manager=None):
-        super().__init__("admin_tool_execution", websocket_manager)
+        self.websocket_manager = websocket_manager
+        self.agent_name = "admin_tool_execution"
         self.execution_engine = self._create_execution_engine()
         self.dispatcher_instance = None  # Set by dispatch_admin_tool
         

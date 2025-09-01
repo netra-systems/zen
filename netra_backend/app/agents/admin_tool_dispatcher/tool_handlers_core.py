@@ -24,8 +24,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.interface import (
-    AgentExecutionMixin,
-    BaseExecutionInterface,
     ExecutionContext,
     ExecutionResult,
 )
@@ -38,11 +36,12 @@ from netra_backend.app.schemas.shared_types import RetryConfig
 logger = central_logger
 
 
-class ModernToolHandler(BaseExecutionInterface, AgentExecutionMixin):
-    """Modern tool handler with BaseExecutionInterface pattern."""
+class ModernToolHandler:
+    """Modern tool handler with standardized execution patterns."""
     
     def __init__(self, tool_name: str, websocket_manager=None):
-        super().__init__(f"tool_handler_{tool_name}", websocket_manager)
+        self.agent_name = f"tool_handler_{tool_name}"
+        self.websocket_manager = websocket_manager
         self.tool_name = tool_name
         self.reliability_manager = self._create_reliability_manager()
         self.monitor = ExecutionMonitor()
