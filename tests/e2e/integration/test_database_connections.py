@@ -136,7 +136,7 @@ class TestDevDatabaseFixture:
     
     def _set_test_env_vars(self) -> None:
         """Set environment variables for database testing."""
-        get_env().set("TESTING",  )"true"
+        get_env().set("TESTING", "true")
         get_env().set("DATABASE_URL", self.db_tester.postgres_url)
         get_env().set("CLICKHOUSE_URL", self.db_tester.clickhouse_url)
         get_env().set("REDIS_URL", self.db_tester.redis_url)
