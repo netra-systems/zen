@@ -54,6 +54,41 @@
         </related-learnings>
     </learning>
     
+    <learning id="agent-death-detection-critical-2025-01-09">
+        <title>Agent Death Detection - Critical Production Bug Fix</title>
+        <category>AgentLifecycle/DeathDetection/Monitoring</category>
+        <keywords>agent-death, heartbeat-monitoring, websocket-notifications, execution-tracking, silent-failure, production-bug, timeout-detection</keywords>
+        <path>agent_death_detection_critical.xml</path>
+        <critical-takeaway>
+            Agents die silently without exceptions causing infinite loading states. Silent failures are more dangerous
+            than exceptions. Multi-layered death detection required: execution tracking with unique IDs, heartbeat 
+            monitoring (10s timeout), execution timeout (30s), WebSocket death notifications. Health checks must verify
+            processing capability not just service availability. Every execution needs unique ID for tracking.
+            User-friendly death messages with recovery instructions maintain trust during failures.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>100% failure rate when agent dies, infinite loading state, no user recovery possible, complete loss of chat functionality</business-impact>
+        <prevention>
+            Implement AgentExecutionTracker for all agent runs. Add heartbeat monitoring with 2s interval/10s timeout.
+            Enforce 30s execution timeout. Send WebSocket death notifications with recovery instructions.
+            Never rely on exceptions alone - use heartbeat and timeout mechanisms. Track execution state throughout lifecycle.
+        </prevention>
+        <implementation-patterns>
+            <pattern>Execution Tracking - Create unique ID, start heartbeat loop, monitor throughout lifecycle</pattern>
+            <pattern>Death Detection - Heartbeat timeout or execution timeout triggers death notification</pattern>
+            <pattern>WebSocket Notification - Send user-friendly message with recovery action</pattern>
+        </implementation-patterns>
+        <testing-strategies>
+            <strategy>Death Simulation Tests - Kill agent and verify detection within 10s</strategy>
+            <strategy>Timeout Tests - Verify timeout enforcement and notification</strategy>
+            <strategy>End-to-End Death Flow - Complete flow from death to user notification</strategy>
+        </testing-strategies>
+        <related-learnings>
+            <learning-ref>websocket_silent_failure_prevention_masterclass.xml</learning-ref>
+            <learning-ref>websocket_agent_integration_critical.xml</learning-ref>
+        </related-learnings>
+    </learning>
+    
     <learning id="jwt-secret-standardization-hard-requirements-2025-08-30">
         <title>JWT Secret Standardization with Hard Requirements (No Fallbacks)</title>
         <category>Authentication Security</category>

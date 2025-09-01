@@ -28,6 +28,7 @@ class ErrorContext:
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.agent import SubAgentState, SubAgentUpdate
 from netra_backend.app.schemas.registry import WebSocketMessage, WebSocketMessageType
+from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
 
 logger = central_logger.get_logger(__name__)
 
@@ -66,12 +67,22 @@ class AgentCommunicationMixin:
                 
     async def _attempt_websocket_update(self, run_id: str, data: Dict[str, Any]) -> None:
         """Attempt to send WebSocket update."""
-        websocket_message = self._build_websocket_message(run_id, data)
-        ws_user_id = self._get_websocket_user_id(run_id)
-        await self.websocket_manager.send_message(
-            ws_user_id,
-            websocket_message.model_dump()
-        )
+        # Use Bridge for all WebSocket notifications
+        bridge = await get_agent_websocket_bridge()
+        
+        # Determine notification type based on data
+        status = data.get("status", "")
+        message = data.get("message", "")
+        
+        if status == "starting":
+            await bridge.notify_agent_started(run_id, self.name, {"message": message})
+        elif status == "completed" or status == "failed":
+            await bridge.notify_agent_completed(run_id, self.name, {"status": status, "message": message})
+        elif status == "error":
+            await bridge.notify_agent_error(run_id, self.name, message)
+        else:
+            # Default to thinking notification for updates
+            await bridge.notify_agent_thinking(run_id, self.name, message)
     
     def _create_sub_agent_state(self, data: Dict[str, Any]) -> SubAgentState:
         """Create SubAgentState from data."""
@@ -227,15 +238,21 @@ class AgentCommunicationMixin:
     
     async def send_direct_websocket_event(self, run_id: str, event_type: str, payload: Dict[str, Any]) -> None:
         """Send direct WebSocket event with standardized format."""
-        if not self.websocket_manager:
-            return
         try:
-            ws_user_id = self._get_websocket_user_id(run_id)
-            event_data = {
-                "type": event_type,
-                "payload": {**payload, "agent_name": self.name, "timestamp": time.time()}
-            }
-            await self.websocket_manager.send_message(ws_user_id, event_data)
+            bridge = await get_agent_websocket_bridge()
+            
+            # Map event types to appropriate Bridge methods
+            if event_type == "tool_executing":
+                await bridge.notify_tool_executing(run_id, self.name, payload.get("tool_name", "unknown"))
+            elif event_type == "tool_completed":
+                await bridge.notify_tool_completed(run_id, self.name, payload.get("tool_name", "unknown"), payload)
+            elif event_type == "agent_thinking":
+                await bridge.notify_agent_thinking(run_id, self.name, payload.get("thought", ""))
+            elif event_type == "error":
+                await bridge.notify_agent_error(run_id, self.name, payload.get("error", "Unknown error"))
+            else:
+                # Use custom notification for unknown event types
+                await bridge.notify_custom(run_id, self.name, event_type, payload)
         except Exception as e:
             self.logger.debug(f"Failed to send {event_type} event: {e}")
             

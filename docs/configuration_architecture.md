@@ -818,10 +818,54 @@ WEBSOCKET_EVENT_TIMEOUT: 30  # seconds
 WEBSOCKET_HEARTBEAT_INTERVAL: 15  # seconds
 WEBSOCKET_HEALTH_CHECK_INTERVAL: 10  # seconds
 WEBSOCKET_SILENT_FAILURE_THRESHOLD: 5  # failures before alert
+
+# Agent Execution Tracking Settings (NEW)
+AGENT_EXECUTION_TIMEOUT: 30  # seconds - maximum time for agent execution
+AGENT_HEARTBEAT_TIMEOUT: 10  # seconds - time without heartbeat before agent marked dead
+AGENT_HEARTBEAT_INTERVAL: 2  # seconds - how often agents send heartbeats
+EXECUTION_CLEANUP_INTERVAL: 60  # seconds - cleanup old execution records
+MAX_CONCURRENT_AGENTS: 10  # maximum concurrent agent executions
+```
+
+## Agent Death Detection System (NEW)
+
+The platform includes comprehensive agent death detection to prevent silent failures and ensure reliable chat functionality.
+
+### Death Detection Components
+| Component | File | Purpose |
+|-----------|------|---------|
+| **Execution Tracker** | `netra_backend/app/core/agent_execution_tracker.py` | Tracks all agent executions with unique IDs |
+| **Death Monitor** | `netra_backend/app/agents/supervisor/execution_engine.py` | Monitors agents for death/timeout |
+| **Death Notification** | `netra_backend/app/services/agent_websocket_bridge.py` | Sends death notifications to users |
+| **Health Integration** | `netra_backend/app/core/agent_health_monitor.py` | Reports dead agents in health status |
+
+### Death Detection Mechanisms
+1. **Heartbeat Monitoring**: Agents must send heartbeat every 2s or marked dead after 10s
+2. **Execution Timeout**: 30s maximum execution time enforced
+3. **State Tracking**: Track execution state throughout lifecycle (PENDING→RUNNING→COMPLETED/DEAD)
+4. **Death Callbacks**: Automatic WebSocket notification when death detected
+5. **Health Reporting**: Dead agents reported in `/health` endpoint
+
+### WebSocket Death Event Format
+```json
+{
+  "type": "agent_death",
+  "run_id": "exec_abc123_1234567890",
+  "agent_name": "triage_agent",
+  "timestamp": "2025-01-09T20:30:00Z",
+  "payload": {
+    "status": "dead",
+    "death_cause": "timeout|no_heartbeat|silent_failure",
+    "message": "User-friendly recovery message",
+    "recovery_action": "refresh_required"
+  }
+}
 ```
 
 ### Related Documentation
-- See [`WEBSOCKET_SILENT_FAILURE_FIXES.md`](../WEBSOCKET_SILENT_FAILURE_FIXES.md) for implementation details
+- See [`AGENT_DEATH_FIX_IMPLEMENTATION.md`](../AGENT_DEATH_FIX_IMPLEMENTATION.md) for complete implementation details
+- See [`SPEC/learnings/agent_death_detection_critical.xml`](../SPEC/learnings/agent_death_detection_critical.xml) for lessons learned
+- See [`WEBSOCKET_SILENT_FAILURE_FIXES.md`](../WEBSOCKET_SILENT_FAILURE_FIXES.md) for WebSocket implementation details
 - See [`SPEC/learnings/websocket_silent_failure_prevention_masterclass.xml`](../SPEC/learnings/websocket_silent_failure_prevention_masterclass.xml) for comprehensive prevention strategies
 
 ## Security Considerations

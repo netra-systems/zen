@@ -76,20 +76,20 @@ class ExecutionRecord:
         if self.completed_at:
             return self.completed_at - self.started_at
         elif self.is_alive:
-            return datetime.utcnow() - self.started_at
+            return datetime.now(timezone.utc) - self.started_at
         return None
     
     @property
     def time_since_heartbeat(self) -> timedelta:
         """Time since last heartbeat"""
-        return datetime.utcnow() - self.last_heartbeat
+        return datetime.now(timezone.utc) - self.last_heartbeat
     
     def is_timed_out(self) -> bool:
         """Check if execution has timed out"""
         if self.is_terminal:
             return self.state == ExecutionState.TIMEOUT
         
-        elapsed = (datetime.utcnow() - self.started_at).total_seconds()
+        elapsed = (datetime.now(timezone.utc) - self.started_at).total_seconds()
         return elapsed > self.timeout_seconds
     
     def is_dead(self, heartbeat_timeout: int = 10) -> bool:
@@ -174,7 +174,7 @@ class AgentExecutionTracker:
         """
         execution_id = f"exec_{uuid.uuid4().hex[:12]}_{int(time.time())}"
         
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         record = ExecutionRecord(
             execution_id=execution_id,
             agent_name=agent_name,
@@ -212,8 +212,8 @@ class AgentExecutionTracker:
             return False
         
         record.state = ExecutionState.STARTING
-        record.updated_at = datetime.utcnow()
-        record.last_heartbeat = datetime.utcnow()
+        record.updated_at = datetime.now(timezone.utc)
+        record.last_heartbeat = datetime.now(timezone.utc)
         
         logger.info(f"Started execution {execution_id}")
         return True
@@ -238,7 +238,7 @@ class AgentExecutionTracker:
             logger.warning(f"Cannot update terminal execution {execution_id}")
             return False
         
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         record.state = state
         record.updated_at = now
         record.last_heartbeat = now
@@ -279,13 +279,13 @@ class AgentExecutionTracker:
         if not record or record.is_terminal:
             return False
         
-        record.last_heartbeat = datetime.utcnow()
+        record.last_heartbeat = datetime.now(timezone.utc)
         record.heartbeat_count += 1
         
         # Transition to RUNNING if still STARTING
         if record.state == ExecutionState.STARTING:
             record.state = ExecutionState.RUNNING
-            record.updated_at = datetime.utcnow()
+            record.updated_at = datetime.now(timezone.utc)
         
         return True
     
@@ -398,7 +398,7 @@ class AgentExecutionTracker:
     
     async def _cleanup_old_executions(self):
         """Clean up old completed executions"""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         cutoff = now - timedelta(seconds=self.cleanup_interval)
         
         to_remove = []

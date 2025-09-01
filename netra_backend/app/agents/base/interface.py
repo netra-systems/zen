@@ -14,6 +14,7 @@ from typing import Any, Dict, Optional, Protocol, runtime_checkable
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.schemas.agent_result_types import TypedAgentResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus
+from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
 
 
 @dataclass
@@ -139,9 +140,45 @@ class BaseExecutionInterface(ABC):
                                    update: Dict[str, Any]) -> None:
         """Send WebSocket update with error handling."""
         try:
-            await self.websocket_manager.send_agent_update(
-                context.run_id, context.agent_name, update
-            )
+            bridge = await get_agent_websocket_bridge()
+            
+            # Route updates through Bridge based on type
+            update_type = update.get("type")
+            if update_type == "agent_thinking":
+                await bridge.notify_agent_thinking(
+                    context.run_id, 
+                    context.agent_name, 
+                    update["payload"]["thought"],
+                    update["payload"].get("step_number")
+                )
+            elif update_type == "partial_result":
+                await bridge.notify_progress_update(
+                    context.run_id,
+                    context.agent_name,
+                    {
+                        "message": update["payload"]["content"],
+                        "status": "completed" if update["payload"]["is_complete"] else "in_progress",
+                        "progress_type": "partial_result"
+                    }
+                )
+            elif update_type == "tool_executing":
+                await bridge.notify_tool_executing(
+                    context.run_id,
+                    context.agent_name,
+                    update["payload"]["tool_name"]
+                )
+            else:
+                # Default status updates
+                status = update.get("status", "")
+                message = update.get("message", "")
+                if status == "starting":
+                    await bridge.notify_agent_started(context.run_id, context.agent_name, {"message": message})
+                elif status == "completed":
+                    await bridge.notify_agent_completed(context.run_id, context.agent_name, {"message": message})
+                elif status == "error":
+                    await bridge.notify_agent_error(context.run_id, context.agent_name, message)
+                else:
+                    await bridge.notify_agent_thinking(context.run_id, context.agent_name, message)
         except Exception:
             # Fail silently for WebSocket errors to not break execution
             pass

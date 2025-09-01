@@ -341,7 +341,6 @@ networks:
     driver: bridge
     # Network name will be prefixed with project name automatically
     driver_opts:
-      com.docker.network.bridge.name: netra-test-br0
       com.docker.network.driver.mtu: 1500
 
 # Test volumes (mostly tmpfs for speed)

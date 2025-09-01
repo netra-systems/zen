@@ -1,5 +1,5 @@
 """Agent mixins package."""
 
-from .websocket_context_mixin import WebSocketContextMixin
+from .websocket_bridge_adapter import WebSocketBridgeAdapter
 
-__all__ = ['WebSocketContextMixin']
+__all__ = ['WebSocketBridgeAdapter']

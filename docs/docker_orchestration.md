@@ -150,6 +150,24 @@ SERVICES = {
 }
 ```
 
+### Dynamic Container Naming
+
+**IMPORTANT**: As of the latest architecture, container names are dynamically generated using Docker Compose project names. This allows multiple test runs in parallel without conflicts.
+
+- **No hardcoded container names** in docker-compose files
+- **Project-based naming**: Containers are named as `{project}_{service}_{instance}`
+- **Network isolation**: Each project gets its own network automatically
+- **Parallel execution**: Multiple test suites can run simultaneously
+
+Example:
+```bash
+# Run 1: Gets containers like netra_test_backend_1, netra_test_postgres_1
+COMPOSE_PROJECT_NAME=netra python tests/unified_test_runner.py
+
+# Run 2: Gets containers like test_run_2_backend_1, test_run_2_postgres_1
+COMPOSE_PROJECT_NAME=test_run_2 python tests/unified_test_runner.py
+```
+
 ## Port Management
 
 The system uses dynamic port allocation to avoid conflicts:
@@ -182,8 +200,9 @@ Health states:
 ### Common Issues and Solutions
 
 1. **Container Name Conflicts**
+   - Prevented by dynamic naming with COMPOSE_PROJECT_NAME
    - Automatically resolved by the system
-   - Manual fix: `docker ps -a | grep netra | awk '{print $1}' | xargs docker rm -f`
+   - Manual fix if needed: `docker ps -a | grep netra | awk '{print $1}' | xargs docker rm -f`
 
 2. **Port Conflicts**
    - System uses dynamic allocation to avoid
@@ -200,16 +219,19 @@ Health states:
 ### Debug Commands
 
 ```bash
-# View all containers
-docker ps -a --filter "name=netra"
+# View all containers (dynamic naming means names vary by project)
+docker ps -a --filter "label=com.docker.compose.project"
 
-# Check container logs
-docker logs netra-test-backend
+# Check container logs (use actual container name from docker ps)
+docker logs <container-name>
 
 # Inspect container
-docker inspect netra-test-postgres
+docker inspect <container-name>
 
-# Clean everything
+# Clean everything for a specific project
+COMPOSE_PROJECT_NAME=netra docker-compose -f docker-compose.test.yml down -v
+
+# Clean all test containers
 docker-compose -f docker-compose.test.yml down -v
 docker system prune -f
 ```

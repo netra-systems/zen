@@ -19,7 +19,7 @@ from netra_backend.app.agents.base.interface import (
     ExecutionStatus,
     WebSocketManagerProtocol,
 )
-from netra_backend.app.agents.base.websocket_context import WebSocketContextMixin
+# WebSocketContextMixin removed - BaseSubAgent now handles WebSocket via bridge
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.core.type_validators import agent_type_safe
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -30,9 +30,10 @@ from netra_backend.app.schemas.strict_types import TypedAgentResult
 logger = central_logger.get_logger(__name__)
 
 
-class ValidationSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin):
+class ValidationSubAgent(BaseSubAgent, BaseExecutionInterface):
     """Example validation sub-agent with comprehensive WebSocket event emissions.
     
+    WebSocket events are handled through BaseSubAgent's bridge adapter.
     Demonstrates the complete pattern for sub-agents to provide real-time feedback
     during validation operations including:
     - Agent startup notifications
@@ -49,7 +50,7 @@ class ValidationSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextM
         BaseSubAgent.__init__(self, llm_manager, name="ValidationSubAgent", 
                             description="Comprehensive validation with real-time feedback")
         BaseExecutionInterface.__init__(self, "ValidationSubAgent", websocket_manager)
-        WebSocketContextMixin.__init__(self)
+        # WebSocketContextMixin removed - using BaseSubAgent's bridge
         
         # Initialize core components
         self.tool_dispatcher = tool_dispatcher

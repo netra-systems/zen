@@ -20,7 +20,7 @@ from netra_backend.app.agents.base.interface import (
     ExecutionStatus,
     WebSocketManagerProtocol,
 )
-from netra_backend.app.agents.base.websocket_context import WebSocketContextMixin
+# WebSocketContextMixin removed - BaseSubAgent now handles WebSocket via bridge
 
 # Import focused helper modules
 from netra_backend.app.db.clickhouse import get_clickhouse_service
@@ -38,9 +38,10 @@ from netra_backend.app.schemas.strict_types import TypedAgentResult
 from netra_backend.app.services.llm.cost_optimizer import LLMCostOptimizer
 
 
-class DataSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin):
-    """Consolidated data analysis agent with ClickHouse integration and WebSocket events.
+class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
+    """Consolidated data analysis agent with ClickHouse integration.
     
+    WebSocket events are handled through BaseSubAgent's bridge adapter.
     Provides reliable data insights for AI cost optimization through:
     - ClickHouse query execution with proper schema handling
     - Performance metrics analysis and trend detection
@@ -56,7 +57,7 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin):
         BaseSubAgent.__init__(self, llm_manager, name="DataSubAgent", 
                             description="Advanced data analysis for AI cost optimization")
         BaseExecutionInterface.__init__(self, "DataSubAgent", websocket_manager)
-        WebSocketContextMixin.__init__(self)
+        # WebSocketContextMixin removed - using BaseSubAgent's bridge
         
         # Initialize core components
         self.tool_dispatcher = tool_dispatcher
