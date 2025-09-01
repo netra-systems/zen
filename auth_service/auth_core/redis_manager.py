@@ -13,8 +13,9 @@ This ensures 100% microservice independence as required by architecture principl
 import os
 import logging
 import asyncio
-import redis.asyncio as redis
+import time
 from typing import Optional, Any
+import redis.asyncio as redis
 from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
@@ -89,12 +90,9 @@ class AuthRedisManager:
                 health_check_interval=30
             )
             
-            # Test connection with timeout
-            try:
-                await asyncio.wait_for(self.redis_client.ping(), timeout=10)
-                logger.info(f"Auth service Redis connection initialized successfully to {redis_url.split('@')[-1] if '@' in redis_url else redis_url}")
-            except asyncio.TimeoutError:
-                raise TimeoutError(f"Redis connection timeout after 10 seconds to {redis_url.split('@')[-1] if '@' in redis_url else redis_url}")
+            # Test connection with retry logic and exponential backoff
+            await self._test_connection_with_retry(redis_url)
+            logger.info(f"Auth service Redis connection initialized successfully to {redis_url.split('@')[-1] if '@' in redis_url else redis_url}")
             
         except Exception as e:
             env = get_env().get("ENVIRONMENT", "development").lower()
@@ -200,6 +198,47 @@ class AuthRedisManager:
     def is_available(self) -> bool:
         """Check if Redis is available"""
         return self.enabled and self.redis_client is not None
+    
+    async def _test_connection_with_retry(self, redis_url: str, max_retries: int = 3) -> None:
+        """Test Redis connection with exponential backoff retry logic"""
+        last_error = None
+        
+        for attempt in range(max_retries):
+            try:
+                # Test connection with timeout
+                await asyncio.wait_for(self.redis_client.ping(), timeout=10)
+                if attempt > 0:
+                    logger.info(f"Redis connection successful after {attempt + 1} attempts")
+                return
+                
+            except asyncio.TimeoutError as e:
+                last_error = TimeoutError(f"Redis connection timeout after 10 seconds to {redis_url.split('@')[-1] if '@' in redis_url else redis_url}")
+            except Exception as e:
+                last_error = e
+                
+            if attempt < max_retries - 1:
+                # Exponential backoff: 1s, 2s, 4s
+                wait_time = 2 ** attempt
+                logger.warning(f"Redis connection attempt {attempt + 1} failed: {last_error}. Retrying in {wait_time}s...")
+                await asyncio.sleep(wait_time)
+            else:
+                logger.error(f"Redis connection failed after {max_retries} attempts: {last_error}")
+                
+        # If we get here, all retries failed
+        if last_error:
+            raise last_error
+    
+    async def ping_with_timeout(self, timeout: float = 5.0) -> bool:
+        """Ping Redis with timeout for health checks"""
+        if not self.redis_client:
+            return False
+            
+        try:
+            await asyncio.wait_for(self.redis_client.ping(), timeout=timeout)
+            return True
+        except Exception as e:
+            logger.debug(f"Redis ping failed: {e}")
+            return False
 
 
 # Global instance for auth service

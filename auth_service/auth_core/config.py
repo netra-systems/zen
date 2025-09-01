@@ -295,21 +295,35 @@ class AuthConfig:
     
     @staticmethod
     def get_redis_url() -> str:
-        """Get Redis URL for session management"""
+        """Get Redis URL for session management with Secret Manager integration"""
         env = AuthConfig.get_environment()
-        # @marked: Redis URL for session storage
+        
+        # @marked: Redis URL for session storage - check environment variable first
         redis_url = get_env().get("REDIS_URL")
         
+        if not redis_url and env in ["staging", "production"]:
+            # Try to load from Google Secret Manager for staging/production
+            try:
+                from auth_service.auth_core.secret_loader import AuthSecretLoader
+                secret_name = f"{env}-redis-url"
+                redis_url = AuthSecretLoader._load_from_secret_manager(secret_name)
+                if redis_url:
+                    logger.info(f"Loaded Redis URL from Secret Manager: {secret_name}")
+                else:
+                    logger.warning(f"Redis URL not found in Secret Manager: {secret_name}")
+            except Exception as e:
+                logger.error(f"Failed to load Redis URL from Secret Manager: {e}")
+        
         if not redis_url:
-            # Fail loudly in staging/production if no Redis configuration
             if env in ["staging", "production"]:
-                raise ValueError(
-                    f"REDIS_URL not configured for {env} environment. "
-                    "Redis is required for session management in production/staging."
-                )
-            # Only warn in development/test
-            logger.warning("REDIS_URL not configured for development/test environment")
-            return ""  # Return empty string for development/test
+                # Allow graceful degradation in staging/production with proper warnings
+                logger.error(f"REDIS_URL not configured for {env} environment - Redis will be disabled")
+                logger.error("This will impact session management and may affect user authentication persistence")
+                return ""  # Return empty to enable fallback mode
+            else:
+                # Only warn in development/test
+                logger.warning("REDIS_URL not configured for development/test environment")
+                return ""  # Return empty string for development/test
         
         return redis_url
     
