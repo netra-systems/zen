@@ -399,10 +399,19 @@ class CriticalPathValidator:
             if hasattr(app.state, 'agent_supervisor') and app.state.agent_supervisor:
                 supervisor = app.state.agent_supervisor
                 
-                # Check for execution engine
+                # Check for execution engine (both old name 'execution_engine' and new name 'engine')
                 if hasattr(supervisor, 'execution_engine'):
                     execution_engine_found = True
                     engine = supervisor.execution_engine
+                    
+                    # Check if engine has websocket_notifier
+                    if hasattr(engine, 'websocket_notifier'):
+                        context_propagation_possible = engine.websocket_notifier is not None
+                
+                # Check for newer ExecutionEngine instance
+                elif hasattr(supervisor, 'engine'):
+                    execution_engine_found = True
+                    engine = supervisor.engine
                     
                     # Check if engine has websocket_notifier
                     if hasattr(engine, 'websocket_notifier'):
@@ -424,7 +433,7 @@ class CriticalPathValidator:
                     passed=False,
                     criticality=CriticalityLevel.CHAT_BREAKING,
                     failure_reason="Execution engine not found in supervisor",
-                    remediation="Ensure supervisor has execution_engine or agent_manager"
+                    remediation="Ensure supervisor has execution_engine, engine, or agent_manager"
                 )
                 self.logger.error("❌ CRITICAL: Execution engine missing - context can't be propagated to agents")
             elif not context_propagation_possible:
@@ -468,12 +477,19 @@ class CriticalPathValidator:
             if hasattr(app.state, 'agent_supervisor') and app.state.agent_supervisor:
                 supervisor = app.state.agent_supervisor
                 
-                # Check execution engine
+                # Check execution engine (both old name 'execution_engine' and new name 'engine')
                 if hasattr(supervisor, 'execution_engine'):
                     if hasattr(supervisor.execution_engine, 'websocket_notifier'):
                         if supervisor.execution_engine.websocket_notifier is not None:
                             notifier_found = True
                             notifier_locations.append("execution_engine")
+                
+                # Check engine (newer ExecutionEngine instance)
+                if hasattr(supervisor, 'engine'):
+                    if hasattr(supervisor.engine, 'websocket_notifier'):
+                        if supervisor.engine.websocket_notifier is not None:
+                            notifier_found = True
+                            notifier_locations.append("engine")
                 
                 # Check agent manager
                 if hasattr(supervisor, 'agent_manager'):
@@ -497,8 +513,8 @@ class CriticalPathValidator:
                     passed=False,
                     criticality=CriticalityLevel.CHAT_BREAKING,
                     failure_reason="WebSocketNotifier not found in any expected location",
-                    remediation="Ensure WebSocketNotifier is created during supervisor initialization",
-                    metadata={"checked_locations": ["execution_engine", "agent_manager", "agent_execution_core"]}
+                    remediation="Ensure WebSocketNotifier is created in ExecutionEngine during supervisor initialization",
+                    metadata={"checked_locations": ["execution_engine", "engine", "agent_manager", "agent_execution_core"]}
                 )
                 self.logger.error("❌ CRITICAL: WebSocketNotifier not initialized - NO agent events will be sent to UI")
             else:
