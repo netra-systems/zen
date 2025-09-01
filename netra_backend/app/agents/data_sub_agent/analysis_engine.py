@@ -17,9 +17,11 @@ from typing import Any, Dict, List, Optional
 
 import numpy as np
 
+from abc import ABC, abstractmethod
 from netra_backend.app.agents.base.interface import (
-    AgentExecutionMixin, BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus, WebSocketManagerProtocol
+    ExecutionContext, ExecutionResult, WebSocketManagerProtocol
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
@@ -37,7 +39,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class ModernAnalysisEngine(BaseExecutionInterface, AgentExecutionMixin):
+class ModernAnalysisEngine(ABC):
     """Modern analysis engine with BaseExecutionInterface integration.
     
     Provides standardized execution patterns for all analysis operations
