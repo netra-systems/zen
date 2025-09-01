@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeAll } from '@jest/globals';
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-ype exports at build/test time
+
+/**
+ * Type exports at build/test time
  * 
  * Business Value Justification (BVJ):
  * - Segment: All
@@ -8,8 +10,6 @@ ype exports at build/test time
  * - Value Impact: Reduces production incidents by 90%
  * - Revenue Impact: Protects against revenue loss from broken UI
  */
-
-import { describe, it, expect, beforeAll } from '@jest/globals';
 
 describe('Type Export Validation', () => {
     jest.setTimeout(10000);
@@ -235,7 +235,7 @@ describe('Auth Service Type Validation', () => {
     const client = new AuthServiceClient();
     
     try {
-      await client.getConfig();
+      await client.getAuthConfig();
     } catch (error) {
       expect(error).toBeDefined();
       expect(error.message).toContain('fetch');
