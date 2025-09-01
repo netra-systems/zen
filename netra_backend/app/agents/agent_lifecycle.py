@@ -9,7 +9,6 @@ from typing import Dict, Any, Optional
 
 from starlette.websockets import WebSocketDisconnect
 
-from netra_backend.app.agents.base.interface import BaseExecutionInterface, ExecutionContext
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.agent import SubAgentLifecycle
@@ -17,7 +16,7 @@ from netra_backend.app.agents.base.timing_decorators import time_operation, Timi
 from netra_backend.app.agents.base.timing_collector import ExecutionTimingTree
 
 
-class AgentLifecycleMixin(BaseExecutionInterface, ABC):
+class AgentLifecycleMixin(ABC):
     """Mixin providing agent lifecycle management functionality"""
     
     @time_operation("pre_run", TimingCategory.ORCHESTRATION)
