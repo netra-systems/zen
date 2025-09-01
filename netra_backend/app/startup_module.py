@@ -87,8 +87,21 @@ async def _ensure_database_tables_exist(logger: logging.Logger, graceful_startup
                 logger.warning(f"Missing {len(missing_tables)} database tables: {missing_tables}")
                 logger.debug("Creating missing database tables automatically...")
                 
-                # Create missing tables
-                await conn.run_sync(Base.metadata.create_all)
+                # Create missing tables with error handling for duplicates
+                try:
+                    await conn.run_sync(Base.metadata.create_all)
+                except Exception as create_error:
+                    # Handle duplicate table/constraint errors gracefully
+                    error_msg = str(create_error).lower()
+                    if any(keyword in error_msg for keyword in [
+                        'already exists', 'duplicate', 'relation', 
+                        'constraint', 'violates unique'
+                    ]):
+                        logger.warning(f"Some tables already exist during creation (expected): {create_error}")
+                        logger.debug("Continuing - tables may have been created by another process")
+                    else:
+                        # Re-raise unexpected errors
+                        raise create_error
                 
                 # Verify tables were created
                 result = await conn.execute(text("""
@@ -145,6 +158,8 @@ def _import_all_models() -> None:
         # Agent State models
         from netra_backend.app.db.models_agent_state import (
             AgentRecoveryLog,
+            AgentStateCheckpoint,
+            AgentStateMetadata,
             AgentStateSnapshot,
             AgentStateTransaction,
         )
