@@ -48,7 +48,24 @@ class AgentRegistry:
         self._register_core_agents()
         self._register_auxiliary_agents()
         self._agents_registered = True
-        logger.info(f"Successfully registered {len(self.agents)} agents")
+        
+        # Validate agent registration counts
+        agent_count = len(self.agents)
+        expected_agents = ["triage", "data", "optimization", "actions", 
+                          "reporting", "data_helper", "synthetic_data", "corpus_admin"]
+        expected_min = len(expected_agents)
+        
+        if agent_count == 0:
+            logger.warning(f"⚠️ CRITICAL: ZERO AGENTS REGISTERED - Expected {expected_min} agents")
+            logger.warning(f"   Expected agents: {', '.join(expected_agents)}")
+            logger.warning("   Chat functionality will be broken!")
+        elif agent_count < expected_min:
+            logger.warning(f"⚠️ WARNING: Only {agent_count}/{expected_min} agents registered")
+            missing = set(expected_agents) - set(self.agents.keys())
+            if missing:
+                logger.warning(f"   Missing agents: {', '.join(missing)}")
+        else:
+            logger.info(f"✓ Successfully registered {agent_count} agents")
     
     def _register_core_agents(self) -> None:
         """Register core workflow agents."""
