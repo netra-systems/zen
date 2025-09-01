@@ -183,7 +183,13 @@ except ImportError:
 from test_framework.service_availability import require_real_services, ServiceUnavailableError
 
 # Docker port discovery and centralized management
-from test_framework.docker_port_discovery import DockerPortDiscovery
+try:
+    from test_framework.docker_port_discovery import DockerPortDiscovery
+    DOCKER_DISCOVERY_AVAILABLE = True
+except ImportError:
+    DockerPortDiscovery = None
+    DOCKER_DISCOVERY_AVAILABLE = False
+    
 try:
     from test_framework.centralized_docker_manager import (
         CentralizedDockerManager, EnvironmentType, ServiceStatus
@@ -442,10 +448,48 @@ class UnifiedTestRunner:
             print(f"[ERROR] Failed to initialize Docker environment: {e}")
             if running_e2e or args.real_services:
                 raise  # Re-raise for E2E/real service testing
-            # Otherwise, fall back to mock services
+            # Otherwise, fall back to docker port discovery
             self.docker_manager = None
             self.docker_environment = None
             self.docker_ports = None
+            self._initialize_docker_fallback(args, running_e2e)
+    
+    def _initialize_docker_fallback(self, args, running_e2e: bool):
+        """Fallback Docker initialization using port discovery when centralized manager unavailable."""
+        if not DOCKER_DISCOVERY_AVAILABLE:
+            print("[WARNING] Docker port discovery not available")
+            return
+            
+        try:
+            # Use Docker port discovery to find service ports
+            discovery = DockerPortDiscovery(use_test_services=True)
+            port_mappings = discovery.discover_all_ports()
+            
+            if port_mappings:
+                print(f"[INFO] Discovered Docker services via port discovery")
+                self.docker_ports = {}
+                for service, mapping in port_mappings.items():
+                    self.docker_ports[service] = mapping.external_port
+                    print(f"  - {service}: {mapping.external_port}")
+                    
+                # Set discovered ports in environment
+                env = get_env()
+                if 'backend' in self.docker_ports:
+                    env.set('BACKEND_PORT', str(self.docker_ports['backend']), 'docker_discovery')
+                if 'auth' in self.docker_ports:
+                    env.set('AUTH_SERVICE_PORT', str(self.docker_ports['auth']), 'docker_discovery')
+                if 'postgres' in self.docker_ports:
+                    env.set('POSTGRES_PORT', str(self.docker_ports['postgres']), 'docker_discovery')
+                if 'redis' in self.docker_ports:
+                    env.set('REDIS_PORT', str(self.docker_ports['redis']), 'docker_discovery')
+                if 'clickhouse' in self.docker_ports:
+                    env.set('CLICKHOUSE_PORT', str(self.docker_ports['clickhouse']), 'docker_discovery')
+                    
+        except Exception as e:
+            print(f"[WARNING] Docker port discovery failed: {e}")
+            if running_e2e or args.real_services:
+                print("[ERROR] Cannot run E2E/real service tests without Docker")
+                raise RuntimeError("Docker services required but not available")
     
     def _cleanup_docker_environment(self):
         """Clean up Docker environment."""
@@ -757,15 +801,31 @@ class UnifiedTestRunner:
         # Determine which services to check based on arguments and environment
         required_services = []
         
+        # Per CLAUDE.md - real services are required for dev/staging and E2E
         if args.real_services or args.env in ['dev', 'staging'] or running_e2e:
             required_services.extend(['postgresql', 'redis'])
+            # Add clickhouse if available in docker ports
+            if hasattr(self, 'docker_ports') and self.docker_ports and 'clickhouse' in self.docker_ports:
+                required_services.append('clickhouse')
             
+        # Per CLAUDE.md - real LLM is required for E2E and dev/staging
         if args.real_llm or running_e2e or args.env in ['dev', 'staging']:
             required_services.append('llm')
             
-        # Always check Docker for dev/staging environments as most tests use it
-        if args.env in ['dev', 'staging']:
-            required_services.append('docker')
+        # Check Docker availability for containerized services
+        if args.env in ['dev', 'staging'] or running_e2e:
+            # Try to detect if Docker is available and running
+            try:
+                import subprocess
+                result = subprocess.run(
+                    ["docker", "info"],
+                    capture_output=True,
+                    timeout=5
+                )
+                if result.returncode == 0:
+                    required_services.append('docker')
+            except (subprocess.SubprocessError, FileNotFoundError):
+                print("[WARNING] Docker not available - tests may fail if they require containerized services")
         
         if not required_services:
             return
@@ -786,7 +846,8 @@ class UnifiedTestRunner:
             print(f"\n[FAIL] SERVICE AVAILABILITY CHECK FAILED\n")
             print(str(e))
             print(f"\nTIP: For mock testing, remove --real-services or --real-llm flags")
-            print(f"TIP: For quick development setup, run: python scripts/dev_launcher.py\n")
+            print(f"TIP: For quick development setup, run: python scripts/dev_launcher.py")
+            print(f"TIP: To use Alpine-based services: docker-compose -f docker-compose.alpine.yml up -d\n")
             
             # Exit immediately - don't waste time on tests that will fail
             import sys
