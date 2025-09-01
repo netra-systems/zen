@@ -100,8 +100,8 @@ if "pytest" in sys.modules or get_test_env_manager().env.get("PYTEST_CURRENT_TES
 
 @pytest.fixture(scope="session", autouse=True)
 async def real_services_session() -> AsyncIterator[RealServicesManager]:
-    """Session-scoped real services manager with health checking."""
-    logger.info("Initializing real services for test session...")
+    """Session-scoped real services manager with E2E service orchestration."""
+    logger.info("🚀 Starting E2E Service Orchestration for test session...")
     
     # Check if real services should be used
     env_manager = get_test_env_manager()
@@ -116,31 +116,79 @@ async def real_services_session() -> AsyncIterator[RealServicesManager]:
         
     if is_staging:
         logger.info("Running in staging environment with real GCP services")
-    
-    manager = get_real_services()
-    
-    try:
-        # Ensure all services are available
-        await manager.ensure_all_services_available()
-        logger.info("All real services are healthy and ready")
+        manager = get_real_services()
         
-        # Load initial test fixtures
-        fixture_dir = os.path.join(os.path.dirname(__file__), "fixtures", "test_data")
-        if os.path.exists(fixture_dir):
-            await load_test_fixtures(manager, fixture_dir)
+        try:
+            # For staging, just check service availability
+            await manager.ensure_all_services_available()
+            logger.info("✅ All staging services are healthy and ready")
+            yield manager
+        except ServiceUnavailableError as e:
+            logger.error(f"❌ Staging services not available: {e}")
+            pytest.skip(f"Staging services unavailable: {e}")
+        except Exception as e:
+            logger.error(f"❌ Failed to initialize staging services: {e}")
+            raise
+        finally:
+            await manager.close_all()
+            logger.info("Staging services session cleanup completed")
+    else:
+        # Local/test environment - use service orchestrator for Docker services
+        from test_framework.service_orchestrator import ServiceOrchestrator, OrchestrationConfig
         
-        yield manager
+        # Configure orchestration for E2E testing
+        orchestration_config = OrchestrationConfig(
+            environment=current_env,
+            required_services=["postgres", "redis", "backend", "auth"],
+            startup_timeout=90.0,  # Generous timeout for Docker service startup
+            health_check_timeout=10.0,
+            health_check_retries=15
+        )
         
-    except ServiceUnavailableError as e:
-        logger.error(f"Real services not available: {e}")
-        pytest.skip(f"Real services unavailable: {e}")
-    except Exception as e:
-        logger.error(f"Failed to initialize real services: {e}")
-        raise
-    finally:
-        # Cleanup session resources
-        await manager.close_all()
-        logger.info("Real services session cleanup completed")
+        orchestrator = ServiceOrchestrator(orchestration_config)
+        
+        try:
+            # Phase 1: Orchestrate services (start + health check)
+            logger.info("🔄 Orchestrating E2E services...")
+            success, health_report = await orchestrator.orchestrate_services()
+            
+            if not success:
+                error_report = orchestrator.get_health_report()
+                logger.error(error_report)
+                pytest.skip(f"E2E Service orchestration failed - services not healthy")
+            
+            logger.info("✅ E2E Service orchestration completed successfully")
+            logger.info(orchestrator.get_health_report())
+            
+            # Phase 2: Initialize real services manager with orchestrated services
+            manager = get_real_services()
+            await manager.ensure_all_services_available()
+            logger.info("✅ All real services are healthy and ready")
+            
+            # Phase 3: Load initial test fixtures
+            fixture_dir = os.path.join(os.path.dirname(__file__), "fixtures", "test_data")
+            if os.path.exists(fixture_dir):
+                await load_test_fixtures(manager, fixture_dir)
+            
+            yield manager
+            
+        except ServiceUnavailableError as e:
+            logger.error(f"❌ Real services not available after orchestration: {e}")
+            pytest.skip(f"Real services unavailable: {e}")
+        except Exception as e:
+            logger.error(f"❌ E2E Service orchestration failed: {e}")
+            raise
+        finally:
+            # Cleanup session resources
+            if 'manager' in locals():
+                await manager.close_all()
+            
+            # Optional: Cleanup orchestrated services (only if we started them)
+            if orchestrator.started_services:
+                logger.info("🧹 Cleaning up orchestrated services...")
+                await orchestrator.cleanup_services()
+            
+            logger.info("✅ E2E Service orchestration cleanup completed")
 
 
 # =============================================================================
