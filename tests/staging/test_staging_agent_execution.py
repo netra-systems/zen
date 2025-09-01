@@ -17,17 +17,7 @@ import time
 import uuid
 from typing import Dict, Any, List, Optional
 from shared.isolated_environment import IsolatedEnvironment
-
-# Test Configuration
-STAGING_URLS = {
-    "backend": "https://netra-backend-staging-701982941522.us-central1.run.app",
-    "auth": "https://netra-auth-service-701982941522.us-central1.run.app"
-}
-
-LOCAL_URLS = {
-    "backend": "http://localhost:8000",
-    "auth": "http://localhost:8081"
-}
+from tests.staging.staging_config import StagingConfig
 
 # Agent Types to Test
 AGENT_TYPES = [
@@ -49,9 +39,8 @@ class StagingAgentExecutionTestRunner:
     
     def __init__(self):
         self.env = IsolatedEnvironment()
-        self.environment = self.env.get("ENVIRONMENT", "development")
-        self.urls = STAGING_URLS if self.environment == "staging" else LOCAL_URLS
-        self.timeout = 60.0  # Longer timeout for agent execution
+        self.environment = StagingConfig.get_environment()
+        self.timeout = StagingConfig.TIMEOUTS["agent_execution"]
         self.access_token = None
         
     def get_base_headers(self) -> Dict[str, str]:
@@ -64,9 +53,7 @@ class StagingAgentExecutionTestRunner:
         
     def get_websocket_url(self) -> str:
         """Get WebSocket URL for agent communication."""
-        base_url = self.urls["backend"]
-        ws_url = base_url.replace("http://", "ws://").replace("https://", "wss://")
-        return f"{ws_url}/ws"
+        return StagingConfig.get_service_url("websocket")
         
     async def get_test_token(self) -> Optional[str]:
         """Get test token for authenticated agent execution."""
@@ -77,7 +64,7 @@ class StagingAgentExecutionTestRunner:
                 
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 response = await client.post(
-                    f"{self.urls['auth']}/api/auth/simulate",
+                    f"{StagingConfig.get_service_url('auth')}/api/auth/simulate",
                     headers=self.get_base_headers(),
                     json={
                         "simulation_key": simulation_key,
@@ -120,7 +107,7 @@ class StagingAgentExecutionTestRunner:
                 
                 # Execute agent request
                 response = await client.post(
-                    f"{self.urls['backend']}/api/agents/execute",
+                    f"{StagingConfig.get_service_url('netra_backend')}/api/agents/execute",
                     headers={
                         **self.get_base_headers(),
                         "Authorization": f"Bearer {self.access_token}"
@@ -279,7 +266,7 @@ class StagingAgentExecutionTestRunner:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 # Test agent status endpoint
                 status_response = await client.get(
-                    f"{self.urls['backend']}/api/agents/status",
+                    f"{StagingConfig.get_service_url('netra_backend')}/api/agents/status",
                     headers={
                         **self.get_base_headers(),
                         "Authorization": f"Bearer {self.access_token}"
@@ -313,7 +300,7 @@ class StagingAgentExecutionTestRunner:
                 # Test individual agent availability
                 for agent_type in AGENT_TYPES:
                     agent_info_response = await client.get(
-                        f"{self.urls['backend']}/api/agents/{agent_type}/info",
+                        f"{StagingConfig.get_service_url('netra_backend')}/api/agents/{agent_type}/info",
                         headers={
                             **self.get_base_headers(),
                             "Authorization": f"Bearer {self.access_token}"
@@ -349,7 +336,7 @@ class StagingAgentExecutionTestRunner:
         """Run all agent execution tests."""
         print(f"🤖 Running Agent Execution Tests")
         print(f"Environment: {self.environment}")
-        print(f"Backend URL: {self.urls['backend']}")
+        print(f"Backend URL: {StagingConfig.get_service_url('netra_backend')}")
         print(f"WebSocket URL: {self.get_websocket_url()}")
         print()
         
