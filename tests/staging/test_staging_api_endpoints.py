@@ -14,19 +14,7 @@ import asyncio
 import time
 from typing import Dict, List, Any, Optional, Tuple
 from shared.isolated_environment import IsolatedEnvironment
-
-# Test Configuration
-STAGING_URLS = {
-    "backend": "https://netra-backend-staging-701982941522.us-central1.run.app",
-    "auth": "https://netra-auth-service-701982941522.us-central1.run.app", 
-    "frontend": "https://netra-frontend-staging-701982941522.us-central1.run.app"
-}
-
-LOCAL_URLS = {
-    "backend": "http://localhost:8000",
-    "auth": "http://localhost:8081",
-    "frontend": "http://localhost:3000"
-}
+from tests.staging.staging_config import StagingConfig
 
 # Critical API Endpoints to Test
 CRITICAL_ENDPOINTS = {
@@ -51,9 +39,8 @@ class StagingAPIEndpointsTestRunner:
     
     def __init__(self):
         self.env = IsolatedEnvironment()
-        self.environment = self.env.get("ENVIRONMENT", "development")
-        self.urls = STAGING_URLS if self.environment == "staging" else LOCAL_URLS
-        self.timeout = 30.0
+        self.environment = StagingConfig.get_environment()
+        self.timeout = StagingConfig.TIMEOUTS["default"]
         self.access_token = None
         
     def get_base_headers(self) -> Dict[str, str]:
@@ -80,7 +67,7 @@ class StagingAPIEndpointsTestRunner:
                 
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 response = await client.post(
-                    f"{self.urls['auth']}/api/auth/simulate",
+                    f"{StagingConfig.get_service_url('auth')}/api/auth/simulate",
                     headers=self.get_base_headers(),
                     json={
                         "simulation_key": simulation_key,
@@ -102,13 +89,10 @@ class StagingAPIEndpointsTestRunner:
                           authenticated: bool = False, test_data: Optional[Dict] = None) -> Dict[str, Any]:
         """Test a single API endpoint."""
         try:
-            service_url = self.urls.get(service.replace("_service", ""))
-            if not service_url:
-                return {
-                    "success": False,
-                    "error": f"Unknown service: {service}",
-                    "endpoint": endpoint
-                }
+            service_name = service.replace("_service", "")
+            if service_name == "backend":
+                service_name = "netra_backend"
+            service_url = StagingConfig.get_service_url(service_name)
                 
             full_url = f"{service_url}{endpoint}"
             headers = self.get_auth_headers() if authenticated else self.get_base_headers()
@@ -279,9 +263,9 @@ class StagingAPIEndpointsTestRunner:
                 async with httpx.AsyncClient(timeout=self.timeout) as client:
                     # Send OPTIONS request (preflight)
                     response = await client.options(
-                        f"{self.urls[service]}/api/test",
+                        f"{StagingConfig.get_service_url(service)}/api/test",
                         headers={
-                            "Origin": self.urls["frontend"],
+                            "Origin": StagingConfig.get_service_url("frontend"),
                             "Access-Control-Request-Method": "POST",
                             "Access-Control-Request-Headers": "Content-Type,Authorization"
                         }
@@ -318,8 +302,8 @@ class StagingAPIEndpointsTestRunner:
         """Run all API endpoint tests."""
         print(f"🔌 Running Critical API Endpoints Tests")
         print(f"Environment: {self.environment}")
-        print(f"Auth URL: {self.urls['auth']}")
-        print(f"Backend URL: {self.urls['backend']}")
+        print(f"Auth URL: {StagingConfig.get_service_url('auth')}")
+        print(f"Backend URL: {StagingConfig.get_service_url('netra_backend')}")
         print()
         
         # Get test token first

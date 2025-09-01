@@ -16,26 +16,15 @@ import jwt
 import uuid
 from typing import Dict, Any, Optional, List
 from shared.isolated_environment import IsolatedEnvironment
-
-# Test Configuration
-STAGING_URLS = {
-    "backend": "https://netra-backend-staging-701982941522.us-central1.run.app",
-    "auth": "https://netra-auth-service-701982941522.us-central1.run.app"
-}
-
-LOCAL_URLS = {
-    "backend": "http://localhost:8000",
-    "auth": "http://localhost:8081"
-}
+from tests.staging.staging_config import StagingConfig
 
 class StagingTokenValidationTestRunner:
     """Test runner for token validation in staging environment."""
     
     def __init__(self):
         self.env = IsolatedEnvironment()
-        self.environment = self.env.get("ENVIRONMENT", "development")
-        self.urls = STAGING_URLS if self.environment == "staging" else LOCAL_URLS
-        self.timeout = 30.0
+        self.environment = StagingConfig.get_environment()
+        self.timeout = StagingConfig.TIMEOUTS["default"]
         
     def get_base_headers(self) -> Dict[str, str]:
         """Get base headers for API requests."""
@@ -64,7 +53,7 @@ class StagingTokenValidationTestRunner:
                 test_email = f"token-test-{uuid.uuid4().hex[:8]}@netrasystems.ai"
                 
                 response = await client.post(
-                    f"{self.urls['auth']}/api/auth/simulate",
+                    f"{StagingConfig.get_service_url('auth')}/api/auth/simulate",
                     headers=self.get_base_headers(),
                     json={
                         "simulation_key": simulation_key,
@@ -131,7 +120,7 @@ class StagingTokenValidationTestRunner:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 # Test authenticated endpoint
                 response = await client.get(
-                    f"{self.urls['backend']}/api/user/profile",
+                    f"{StagingConfig.get_service_url('netra_backend')}/api/user/profile",
                     headers={
                         **self.get_base_headers(),
                         "Authorization": f"Bearer {access_token}"
@@ -173,7 +162,7 @@ class StagingTokenValidationTestRunner:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 # Test token info endpoint
                 response = await client.get(
-                    f"{self.urls['auth']}/api/auth/token/info",
+                    f"{StagingConfig.get_service_url('auth')}/api/auth/token/info",
                     headers={
                         **self.get_base_headers(),
                         "Authorization": f"Bearer {access_token}"
@@ -223,7 +212,7 @@ class StagingTokenValidationTestRunner:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 # Test token refresh
                 response = await client.post(
-                    f"{self.urls['auth']}/api/auth/refresh",
+                    f"{StagingConfig.get_service_url('auth')}/api/auth/refresh",
                     headers=self.get_base_headers(),
                     json={"refresh_token": refresh_token}
                 )
@@ -270,7 +259,7 @@ class StagingTokenValidationTestRunner:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 # Test with no token
                 no_token_response = await client.get(
-                    f"{self.urls['backend']}/api/user/profile",
+                    f"{StagingConfig.get_service_url('netra_backend')}/api/user/profile",
                     headers=self.get_base_headers()
                 )
                 
@@ -282,7 +271,7 @@ class StagingTokenValidationTestRunner:
                 
                 # Test with invalid token
                 invalid_token_response = await client.get(
-                    f"{self.urls['backend']}/api/user/profile",
+                    f"{StagingConfig.get_service_url('netra_backend')}/api/user/profile",
                     headers={
                         **self.get_base_headers(),
                         "Authorization": "Bearer invalid-token-12345"
@@ -297,7 +286,7 @@ class StagingTokenValidationTestRunner:
                 
                 # Test with malformed token
                 malformed_token_response = await client.get(
-                    f"{self.urls['backend']}/api/user/profile",
+                    f"{StagingConfig.get_service_url('netra_backend')}/api/user/profile",
                     headers={
                         **self.get_base_headers(),
                         "Authorization": "Bearer malformed.token.here"
@@ -322,8 +311,8 @@ class StagingTokenValidationTestRunner:
         """Run all token validation tests."""
         print(f"🔐 Running Token Validation Tests")
         print(f"Environment: {self.environment}")
-        print(f"Auth URL: {self.urls['auth']}")
-        print(f"Backend URL: {self.urls['backend']}")
+        print(f"Auth URL: {StagingConfig.get_service_url('auth')}")
+        print(f"Backend URL: {StagingConfig.get_service_url('netra_backend')}")
         print()
         
         results = {}

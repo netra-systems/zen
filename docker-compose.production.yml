@@ -1,0 +1,140 @@
+# Production-optimized Docker Compose configuration
+# Memory-optimized images for test environments
+# This file extends docker-compose.yml with production build targets
+
+version: '3.8'
+
+services:
+  # Production-optimized PostgreSQL
+  postgres:
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.2'
+    environment:
+      # Production-optimized PostgreSQL settings
+      POSTGRES_SHARED_BUFFERS: 128MB
+      POSTGRES_WORK_MEM: 4MB
+      POSTGRES_MAINTENANCE_WORK_MEM: 64MB
+      POSTGRES_EFFECTIVE_CACHE_SIZE: 256MB
+      POSTGRES_MAX_CONNECTIONS: 50
+
+  # Production-optimized Redis
+  redis:
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.1'
+    command: >
+      redis-server 
+      --maxmemory 200mb 
+      --maxmemory-policy allkeys-lru
+      --save ""
+      --appendonly no
+
+  # Production-optimized ClickHouse
+  clickhouse:
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.2'
+    environment:
+      CLICKHOUSE_MAX_MEMORY_USAGE: 400000000  # 400MB
+
+  # Production-optimized Auth Service
+  auth:
+    build:
+      context: .
+      dockerfile: ./docker/auth.Dockerfile
+      target: production  # Use production build stage
+      args:
+        BUILD_ENV: production
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.25'
+    environment:
+      # Production optimizations
+      PYTHONOPTIMIZE: 2
+      PYTHONDONTWRITEBYTECODE: 1
+      LOG_LEVEL: WARNING
+
+  # Production-optimized Backend Service  
+  backend:
+    build:
+      context: .
+      dockerfile: ./docker/backend.Dockerfile
+      target: production  # Use production build stage
+      args:
+        BUILD_ENV: production
+    deploy:
+      resources:
+        limits:
+          memory: 1024M  # Reduced from 2048M
+          cpus: '0.4'
+    environment:
+      # Production optimizations
+      PYTHONOPTIMIZE: 2
+      PYTHONDONTWRITEBYTECODE: 1
+      LOG_LEVEL: WARNING
+      # Limit worker processes
+      WEB_CONCURRENCY: 2
+      WORKERS_PER_CORE: 1
+      MAX_WORKERS: 2
+
+  # Production-optimized Frontend Service
+  frontend:
+    build:
+      context: .
+      dockerfile: ./docker/frontend.Dockerfile
+      target: production  # Use production build stage
+      args:
+        BUILD_ENV: production
+        NODE_ENV: production
+    deploy:
+      resources:
+        limits:
+          memory: 256M  # Reduced from 512M
+          cpus: '0.3'
+    environment:
+      NODE_ENV: production
+      # Limit Node.js memory
+      NODE_OPTIONS: "--max-old-space-size=200"
+
+# Test-specific services with minimal resources
+  test-postgres:
+    extends:
+      service: postgres
+    profiles: ["test"]
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.15'
+
+  test-redis:
+    extends:
+      service: redis
+    profiles: ["test"]
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.05'
+    command: redis-server --maxmemory 100mb --maxmemory-policy allkeys-lru
+
+  test-clickhouse:
+    extends:
+      service: clickhouse
+    profiles: ["test"]
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.1'
+    environment:
+      CLICKHOUSE_MAX_MEMORY_USAGE: 200000000  # 200MB

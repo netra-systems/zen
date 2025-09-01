@@ -32,10 +32,11 @@ Docker Desktop was crashing when the test runner executed due to restart storms 
 - Proper cleanup only when environments are no longer in use
 - User count tracking to prevent premature cleanup
 
-### 4. ✅ Memory Consumption - OPTIMIZED
+### 4. ✅ Memory Consumption - OPTIMIZED (DEFAULT)
 **Previous Issue**: Services used excessive memory causing Windows WSL2/Docker Desktop issues.
 
 **Solution Implemented**:
+- **Memory-optimized production images are now DEFAULT**
 - Reduced memory limits:
   - Backend: 1024M (from 2048M)
   - Frontend: 256M (from 512M)
@@ -43,8 +44,9 @@ Docker Desktop was crashing when the test runner executed due to restart storms 
   - PostgreSQL: 512M
   - Redis: 256M
   - ClickHouse: 512M
-- Support for production Docker images with optimized memory usage
-- `--docker-production` flag to use production-optimized images
+- Test environments use even lower limits (50% less)
+- Production Docker images enabled by default (`TEST_USE_PRODUCTION_IMAGES=true`)
+- Override with `--docker-production=false` if needed for debugging
 
 ## Remediation Implementation
 
@@ -86,10 +88,10 @@ Created `scripts/test_parallel_docker_manager.py` to verify:
 
 ### Running Tests with Optimized Docker
 ```bash
-# Use shared environment with production images (recommended)
-python unified_test_runner.py --category unit --docker-production
+# Default: uses memory-optimized production images automatically
+python unified_test_runner.py --category unit
 
-# Use dedicated environment for isolation
+# Use dedicated environment for isolation (still memory-optimized)
 python unified_test_runner.py --category e2e --docker-dedicated
 
 # Clean up old environments before testing
@@ -97,6 +99,9 @@ python unified_test_runner.py --cleanup-old-environments --category integration
 
 # Show Docker statistics after test run
 python unified_test_runner.py --docker-stats --category smoke
+
+# Debug mode: disable production images (uses more memory)
+TEST_USE_PRODUCTION_IMAGES=false python unified_test_runner.py --category unit
 ```
 
 ### Parallel Testing
@@ -153,20 +158,31 @@ Implemented via rate limiting:
 
 ## Configuration
 
-### Environment Variables
+### Environment Variables (with Defaults)
 ```bash
-# Use shared Docker environment (default: true)
+# Use shared Docker environment (DEFAULT: true - reduces resource usage)
 TEST_USE_SHARED_DOCKER=true
 
-# Use production Docker images (default: true)
+# Use production Docker images (DEFAULT: true - 90% memory reduction)
 TEST_USE_PRODUCTION_IMAGES=true
 
-# Docker restart cooldown in seconds (default: 30)
+# Docker restart cooldown in seconds (DEFAULT: 30 - prevents storms)
 DOCKER_RESTART_COOLDOWN=30
 
-# Maximum restart attempts (default: 3)
+# Maximum restart attempts (DEFAULT: 3 - limits excessive restarts)
 DOCKER_MAX_RESTART_ATTEMPTS=3
+
+# Environment cleanup age in hours (DEFAULT: 4)
+DOCKER_ENV_MAX_AGE_HOURS=4
+
+# Memory limits are automatically applied:
+# - Production mode: 3GB total across all services
+# - Test mode: 1.5GB total (50% less)
+# - Debug mode: 6GB total (when production images disabled)
 ```
+
+### Default Configuration File
+The system loads defaults from `.env.docker.defaults` which includes all memory-optimized settings.
 
 ## Conclusion
 

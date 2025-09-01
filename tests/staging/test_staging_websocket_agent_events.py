@@ -16,19 +16,7 @@ import time
 import uuid
 from typing import Dict, List, Any, Optional
 from shared.isolated_environment import IsolatedEnvironment
-
-# Test Configuration
-STAGING_URLS = {
-    "backend": "https://netra-backend-staging-701982941522.us-central1.run.app",
-    "auth": "https://netra-auth-service-701982941522.us-central1.run.app",
-    "frontend": "https://netra-frontend-staging-701982941522.us-central1.run.app"
-}
-
-LOCAL_URLS = {
-    "backend": "http://localhost:8000",
-    "auth": "http://localhost:8081", 
-    "frontend": "http://localhost:3000"
-}
+from tests.staging.staging_config import StagingConfig
 
 # Required WebSocket Events for Chat Value
 REQUIRED_EVENTS = [
@@ -44,17 +32,13 @@ class StagingWebSocketTestRunner:
     
     def __init__(self):
         self.env = IsolatedEnvironment()
-        self.environment = self.env.get("ENVIRONMENT", "development")
-        self.urls = STAGING_URLS if self.environment == "staging" else LOCAL_URLS
-        self.timeout = 30.0
+        self.environment = StagingConfig.get_environment()
+        self.timeout = StagingConfig.TIMEOUTS["websocket"]
         self.received_events = []
         
     def get_websocket_url(self) -> str:
         """Get WebSocket URL for the environment."""
-        base_url = self.urls["backend"]
-        # Convert HTTP(S) to WS(S)
-        ws_url = base_url.replace("http://", "ws://").replace("https://", "wss://")
-        return f"{ws_url}/ws"
+        return StagingConfig.get_service_url("websocket")
         
     async def get_test_token(self) -> Optional[str]:
         """Get a test token for WebSocket authentication."""
@@ -67,7 +51,7 @@ class StagingWebSocketTestRunner:
                 
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 response = await client.post(
-                    f"{self.urls['auth']}/api/auth/simulate",
+                    f"{StagingConfig.get_service_url('auth')}/api/auth/simulate",
                     headers={"Content-Type": "application/json"},
                     json={
                         "simulation_key": simulation_key,
