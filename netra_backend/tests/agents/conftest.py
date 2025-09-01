@@ -3,14 +3,16 @@
 import os
 import sys
 from unittest.mock import Mock, MagicMock
+from shared.isolated_environment import get_env
 
 # Set environment variables BEFORE any imports
-os.environ["TESTING"] = "true"
-os.environ["DEV_MODE_DISABLE_CLICKHOUSE"] = "true"
-os.environ["CLICKHOUSE_ENABLED"] = "false"
-os.environ["TEST_DISABLE_CLICKHOUSE"] = "true"
-os.environ["SKIP_SERVICE_HEALTH_CHECK"] = "true"
-os.environ["USE_REAL_SERVICES"] = "false"
+env = get_env()
+env.set("TESTING", "true", "test")
+env.set("DEV_MODE_DISABLE_CLICKHOUSE", "true", "test")
+env.set("CLICKHOUSE_ENABLED", "false", "test")
+env.set("TEST_DISABLE_CLICKHOUSE", "true", "test")
+env.set("SKIP_SERVICE_HEALTH_CHECK", "true", "test")
+env.set("USE_REAL_SERVICES", "false", "test")
 
 # Mock clickhouse_connect module BEFORE it's imported
 mock_clickhouse_client = MagicMock()

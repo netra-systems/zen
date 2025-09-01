@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 """Feature Flag Environment Variable Override Demonstration.
 
+env = get_env()
 This file demonstrates how environment variables can override feature flags
 for different testing scenarios and CI/CD environments.
 """
@@ -32,7 +34,7 @@ def test_environment_override_demo():
     assert original_status == "disabled"
     
     # Test environment override in same process
-    os.environ["TEST_FEATURE_ENTERPRISE_SSO"] = "enabled"
+    env.set("TEST_FEATURE_ENTERPRISE_SSO", "enabled", "test")
     
     # Create new manager to pick up environment change
     override_manager = FeatureFlagManager()
@@ -42,7 +44,7 @@ def test_environment_override_demo():
     assert override_manager.is_enabled("enterprise_sso") is True
     
     # Clean up
-    del os.environ["TEST_FEATURE_ENTERPRISE_SSO"]
+    env.delete("TEST_FEATURE_ENTERPRISE_SSO", "test")
 
 @feature_flag("enterprise_sso")
 def test_enterprise_sso_when_enabled():

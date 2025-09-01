@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Test-Only Authentication Helper
 
@@ -15,6 +16,7 @@ from typing import Optional, Dict, Any
 from netra_backend.app.websocket_core.types import AuthInfo
 
 
+env = get_env()
 class TestAuthHelper:
     """Test-only authentication helper for bypassing auth in test environments."""
     
@@ -141,7 +143,7 @@ def bypass_auth_for_test():
     bypass_vars = ["ALLOW_DEV_OAUTH_SIMULATION", "AUTH_FAST_TEST_MODE"]
     
     for var in bypass_vars:
-        original_values[var] = os.environ.get(var)
+        original_values[var] = env.get(var)
         os.environ[var] = "true"
     
     try:

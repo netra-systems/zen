@@ -23,6 +23,27 @@ from shared.isolated_environment import get_env
 @pytest.mark.environment
 class TestConfigurationManagement:
     """Test configuration management system."""
+    
+    @pytest.fixture(autouse=True)
+    def setup_isolated_env(self):
+        """Setup isolated environment for testing."""
+        env = get_env()
+        # Store original values
+        original_test_var = env.get('TEST_CONFIG_VAR')
+        original_netra_env = env.get('NETRA_ENV')
+        
+        yield
+        
+        # Cleanup - restore original values
+        if original_test_var is not None:
+            env.set('TEST_CONFIG_VAR', original_test_var, "test_cleanup")
+        else:
+            env.delete('TEST_CONFIG_VAR', "test_cleanup")
+            
+        if original_netra_env is not None:
+            env.set('NETRA_ENV', original_netra_env, "test_cleanup")
+        else:
+            env.delete('NETRA_ENV', "test_cleanup")
 
     def test_unified_config_exists(self):
         """Test that unified config function exists."""
@@ -99,20 +120,18 @@ class TestConfigurationManagement:
         except Exception as e:
             print(f"Unified config test failed: {e}")
 
-    @patch.dict(os.environ, {'TEST_CONFIG_VAR': 'test_value'})
     def test_environment_variable_isolation(self):
         """Test that environment variable isolation works."""
         try:
-            # Test direct os.environ access
-            direct_access = os.environ.get('TEST_CONFIG_VAR')
-            assert direct_access == 'test_value'
+            # Setup test environment variable using IsolatedEnvironment
+            env = get_env()
+            env.set('TEST_CONFIG_VAR', 'test_value', "test")
             
             # Test isolated access
-            env = get_env()
             isolated_access = env.get('TEST_CONFIG_VAR')
+            assert isolated_access == 'test_value'
             
-            # Isolated access may return different value or None
-            # depending on isolation implementation
+            # Test that the variable is accessible through isolation
             
         except Exception as e:
             print(f"Environment isolation test failed: {e}")
@@ -190,19 +209,19 @@ class TestConfigurationManagement:
         except Exception as e:
             print(f"Environment detection consistency test failed: {e}")
 
-    @patch.dict(os.environ, {'NETRA_ENV': 'testing'})
     def test_environment_override(self):
         """Test environment variable override functionality."""
         try:
-            # Set environment variable
-            os.environ['NETRA_ENV'] = 'testing'
+            # Set environment variable using IsolatedEnvironment
+            env = get_env()
+            env.set('NETRA_ENV', 'testing', "test")
             
             # Test that environment detection picks up the override
-            env = get_current_environment()
+            current_env = get_current_environment()
             
             # Should detect the testing environment
             # (exact behavior may depend on implementation)
-            assert isinstance(env, str)
+            assert isinstance(current_env, str)
             
         except Exception as e:
             print(f"Environment override test failed: {e}")

@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Test and fix database connection issues.
 This test identifies and fixes database authentication problems.
@@ -7,6 +8,7 @@ import os
 from netra_backend.app.config import get_config
 
 
+env = get_env()
 class TestDatabaseConnectionFix:
     """Test and fix database connection issues."""
 
@@ -44,7 +46,7 @@ class TestDatabaseConnectionFix:
         working_db_url = "postgresql://postgres:postgres@localhost:5432/netra_dev"
         
         # Set environment variable temporarily
-        os.environ['TEST_DATABASE_URL'] = working_db_url
+        env.set('TEST_DATABASE_URL', working_db_url, "test")
         
         print(f"Set TEST_DATABASE_URL to: {working_db_url}")
         
@@ -109,7 +111,7 @@ class TestDatabaseConnectionFix:
         dev_db_url = "postgresql://postgres:postgres@localhost:5432/netra_dev"
         
         # Override the environment variable for this test session
-        os.environ['DATABASE_URL'] = dev_db_url
+        env.set('DATABASE_URL', dev_db_url, "test")
         
         print(f"Applied temporary fix: Using development database for tests")
         print(f"DATABASE_URL set to: {dev_db_url}")

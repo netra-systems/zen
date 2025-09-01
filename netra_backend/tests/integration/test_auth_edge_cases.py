@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 """Authentication Edge Cases and Error Scenarios Tests (L3)
 
+env = get_env()
 Comprehensive tests for authentication edge cases, error conditions,
 and security vulnerability scenarios.
 
@@ -43,8 +45,8 @@ import jwt
 import pytest
 
 # Set test environment
-os.environ["ENVIRONMENT"] = "testing"
-os.environ["TESTING"] = "true"
+env.set("ENVIRONMENT", "testing", "test")
+env.set("TESTING", "true", "test")
 
 # Import auth types
 # Test infrastructure  

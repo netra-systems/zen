@@ -1,18 +1,20 @@
 
 import sys
 from pathlib import Path
+from shared.isolated_environment import get_env
 
 """Simple health test without complex imports"""
 
+env = get_env()
 def test_basic_import():
     """Test that we can import the app without hanging"""
     import os
     import sys
     
     # Set minimal environment
-    os.environ["TESTING"] = "1"
-    os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
-    os.environ["DEV_MODE_DISABLE_CLICKHOUSE"] = "true"
+    env.set("TESTING", "1", "test")
+    env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
+    env.set("DEV_MODE_DISABLE_CLICKHOUSE", "true", "test")
     
     # Try basic import
     try:
@@ -32,9 +34,9 @@ def test_basic_import():
 def test_health_endpoint_direct():
     """Test health endpoint directly without pytest fixtures"""
     import os
-    os.environ["TESTING"] = "1"
-    os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
-    os.environ["DEV_MODE_DISABLE_CLICKHOUSE"] = "true"
+    env.set("TESTING", "1", "test")
+    env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
+    env.set("DEV_MODE_DISABLE_CLICKHOUSE", "true", "test")
     
     from fastapi.testclient import TestClient
 
@@ -50,9 +52,9 @@ def test_health_endpoint_direct():
 def test_live_endpoint():
     """Test the live health endpoint"""
     import os
-    os.environ["TESTING"] = "1"
-    os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
-    os.environ["DEV_MODE_DISABLE_CLICKHOUSE"] = "true"
+    env.set("TESTING", "1", "test")
+    env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
+    env.set("DEV_MODE_DISABLE_CLICKHOUSE", "true", "test")
     
     from fastapi.testclient import TestClient
 

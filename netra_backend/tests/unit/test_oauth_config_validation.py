@@ -1,4 +1,5 @@
 """
+env = get_env()
 OAuth Configuration Validation Tests
 ===================================
 
@@ -257,8 +258,8 @@ class TestOAuthEnvironmentConfiguration:
             }
             
             with patch.dict(os.environ, env_vars, clear=False):
-                loaded_id = os.environ.get("GOOGLE_CLIENT_ID", "")
-                loaded_secret = os.environ.get("GOOGLE_CLIENT_SECRET", "")
+                loaded_id = env.get("GOOGLE_CLIENT_ID", "")
+                loaded_secret = env.get("GOOGLE_CLIENT_SECRET", "")
                 
                 # Mock validation
                 is_valid = (

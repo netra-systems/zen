@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 from shared.database_url_builder import DatabaseURLBuilder
 from shared.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import get_env
 
 pytestmark = [
     pytest.mark.integration,
@@ -14,6 +15,7 @@ pytestmark = [
 ]
 
 
+env = get_env()
 class TestDatabaseURLBuilderIntegration:
     """Test DatabaseURLBuilder integration with real environment configurations."""
     
@@ -99,10 +101,10 @@ class TestDatabaseURLBuilderIntegration:
         env = IsolatedEnvironment()
         
         # Get current environment type
-        current_env = os.environ.get('ENVIRONMENT', 'development')
+        current_env = env.get('ENVIRONMENT', 'development')
         
         # Create builder with OS environment
-        builder = DatabaseURLBuilder(dict(os.environ))
+        builder = DatabaseURLBuilder(env.get_all())
         url = builder.get_url_for_environment()
         
         # Should always be able to generate some URL

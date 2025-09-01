@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Unit tests for Environment Validator
 
 Tests the environment validation logic to ensure test variables
@@ -25,7 +27,7 @@ class TestEnvironmentValidator:
     def setup_method(self):
         """Setup test environment."""
         # Store original environment to restore later
-        self.original_env = os.environ.copy()
+        self.original_env = env.get_all()
         
         # Clear potentially interfering environment variables
         for var in ['ENVIRONMENT', 'NETRA_ENV', 'TESTING', 'E2E_TESTING', 
@@ -33,27 +35,27 @@ class TestEnvironmentValidator:
             os.environ.pop(var, None)
         
         # Store pytest test variable to restore later (since pytest sets it automatically)
-        self.pytest_test_var = os.environ.pop('PYTEST_CURRENT_TEST', None)
+        self.pytest_test_var = env.delete('PYTEST_CURRENT_TEST', "test")
     
     def teardown_method(self):
         """Restore original environment."""
         # Clear all environment variables
-        os.environ.clear()
+        env.clear()
         # Restore original
-        os.environ.update(self.original_env)
+        env.update(self.original_env, "test")
         
         # Restore pytest test variable if it was set
         if self.pytest_test_var:
-            os.environ['PYTEST_CURRENT_TEST'] = self.pytest_test_var
+            env.set('PYTEST_CURRENT_TEST', self.pytest_test_var, "test")
     
     def test_detect_test_vars_in_production(self):
         """Test that test variables are detected in production environment."""
         # Set production environment
-        os.environ['ENVIRONMENT'] = 'production'
+        env.set('ENVIRONMENT', 'production', "test")
         
         # Set forbidden test variables
-        os.environ['TESTING'] = '1'
-        os.environ['AUTH_FAST_TEST_MODE'] = 'true'
+        env.set('TESTING', '1', "test")
+        env.set('AUTH_FAST_TEST_MODE', 'true', "test")
         
         # Create validator and check
         validator = EnvironmentValidator()
@@ -70,11 +72,11 @@ class TestEnvironmentValidator:
     def test_detect_test_vars_in_staging(self):
         """Test that test variables are detected in staging environment."""
         # Set staging environment
-        os.environ['ENVIRONMENT'] = 'staging'
+        env.set('ENVIRONMENT', 'staging', "test")
         
         # Set forbidden test variables
-        os.environ['WEBSOCKET_AUTH_BYPASS'] = 'true'
-        os.environ['ALLOW_DEV_OAUTH_SIMULATION'] = 'true'
+        env.set('WEBSOCKET_AUTH_BYPASS', 'true', "test")
+        env.set('ALLOW_DEV_OAUTH_SIMULATION', 'true', "test")
         
         # Create validator and check
         validator = EnvironmentValidator()
@@ -90,11 +92,11 @@ class TestEnvironmentValidator:
     def test_allow_test_vars_in_development(self):
         """Test that test variables are allowed in development environment."""
         # Set development environment
-        os.environ['ENVIRONMENT'] = 'development'
+        env.set('ENVIRONMENT', 'development', "test")
         
         # Set test variables (should be allowed in development)
-        os.environ['TESTING'] = '1'
-        os.environ['AUTH_FAST_TEST_MODE'] = 'true'
+        env.set('TESTING', '1', "test")
+        env.set('AUTH_FAST_TEST_MODE', 'true', "test")
         
         # Create validator and check
         validator = EnvironmentValidator()
@@ -110,9 +112,9 @@ class TestEnvironmentValidator:
     def test_detect_localhost_in_staging(self):
         """Test that localhost references are detected in staging."""
         # Set staging environment
-        os.environ['ENVIRONMENT'] = 'staging'
-        os.environ['AUTH_SERVICE_URL'] = 'http://localhost:8001'
-        os.environ['DATABASE_URL'] = 'postgresql://user:pass@127.0.0.1:5432/db'
+        env.set('ENVIRONMENT', 'staging', "test")
+        env.set('AUTH_SERVICE_URL', 'http://localhost:8001', "test")
+        env.set('DATABASE_URL', 'postgresql://user:pass@127.0.0.1:5432/db', "test")
         
         # Create validator and check
         validator = EnvironmentValidator()
@@ -135,8 +137,8 @@ class TestEnvironmentValidator:
     def test_detect_localhost_in_production(self):
         """Test that localhost references are critical in production."""
         # Set production environment
-        os.environ['ENVIRONMENT'] = 'production'
-        os.environ['REDIS_URL'] = 'redis://0.0.0.0:6379'
+        env.set('ENVIRONMENT', 'production', "test")
+        env.set('REDIS_URL', 'redis://0.0.0.0:6379', "test")
         
         # Create validator and check
         validator = EnvironmentValidator()
@@ -154,7 +156,7 @@ class TestEnvironmentValidator:
     def test_required_variables_missing(self):
         """Test detection of missing required variables."""
         # Set production environment
-        os.environ['ENVIRONMENT'] = 'production'
+        env.set('ENVIRONMENT', 'production', "test")
         
         # Don't set required variables
         # JWT_SECRET, DATABASE_URL, etc. should be missing
@@ -180,8 +182,8 @@ class TestEnvironmentValidator:
     def test_environment_consistency_check(self):
         """Test environment consistency checking."""
         # Set conflicting environment indicators
-        os.environ['ENVIRONMENT'] = 'production'
-        os.environ['NETRA_ENV'] = 'staging'
+        env.set('ENVIRONMENT', 'production', "test")
+        env.set('NETRA_ENV', 'staging', "test")
         
         # Create validator and check
         validator = EnvironmentValidator()
@@ -199,7 +201,7 @@ class TestEnvironmentValidator:
     def test_is_safe_for_production(self):
         """Test is_safe_for_production function."""
         # Set up a clean environment
-        os.environ['ENVIRONMENT'] = 'development'
+        env.set('ENVIRONMENT', 'development', "test")
         
         # Note: May not be safe if test framework variables are present
         # Check if we're in a test environment
@@ -211,7 +213,7 @@ class TestEnvironmentValidator:
             assert result is True  # Should be safe without test vars
         
         # Add a test variable
-        os.environ['TESTING'] = '1'
+        env.set('TESTING', '1', "test")
         
         # Should NOT be safe for production
         assert is_safe_for_production() is False
@@ -219,7 +221,7 @@ class TestEnvironmentValidator:
     def test_is_safe_for_staging(self):
         """Test is_safe_for_staging function."""
         # Set up environment
-        os.environ['ENVIRONMENT'] = 'development'
+        env.set('ENVIRONMENT', 'development', "test")
         
         # Check safety for staging
         result = is_safe_for_staging()
@@ -230,7 +232,7 @@ class TestEnvironmentValidator:
             assert result is True  # Should be safe without test vars
         
         # Add test variable
-        os.environ['E2E_TESTING'] = 'true'
+        env.set('E2E_TESTING', 'true', "test")
         
         # Should NOT be safe for staging
         assert is_safe_for_staging() is False
@@ -238,8 +240,8 @@ class TestEnvironmentValidator:
     def test_validation_report(self):
         """Test get_environment_report function."""
         # Set environment with violations
-        os.environ['ENVIRONMENT'] = 'staging'
-        os.environ['PYTEST_CURRENT_TEST'] = 'test_something'
+        env.set('ENVIRONMENT', 'staging', "test")
+        env.set('PYTEST_CURRENT_TEST', 'test_something', "test")
         
         # Create validator and validate
         validator = EnvironmentValidator()
@@ -292,7 +294,7 @@ class TestEnvironmentValidator:
     def test_all_forbidden_vars_checked(self):
         """Test that all forbidden variables are properly checked."""
         # Set production environment
-        os.environ['ENVIRONMENT'] = 'production'
+        env.set('ENVIRONMENT', 'production', "test")
         
         # Test each forbidden variable
         forbidden_vars = [
@@ -328,8 +330,8 @@ class TestEnvironmentValidator:
     def test_validate_for_environment(self):
         """Test validate_for_environment method."""
         # Set up a test environment
-        os.environ['ENVIRONMENT'] = 'development'
-        os.environ['TESTING'] = '1'
+        env.set('ENVIRONMENT', 'development', "test")
+        env.set('TESTING', '1', "test")
         
         validator = EnvironmentValidator()
         
@@ -343,4 +345,4 @@ class TestEnvironmentValidator:
         assert validator.validate_for_environment('staging') is False
         
         # Original environment should be restored
-        assert os.environ.get('ENVIRONMENT') == 'development'
+        assert env.get('ENVIRONMENT') == 'development'

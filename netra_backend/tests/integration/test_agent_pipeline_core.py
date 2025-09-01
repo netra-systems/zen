@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Agent Response Pipeline Core Tests - REAL SERVICES
 
 Business Value Justification (BVJ):
@@ -22,8 +24,8 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Set testing environment before imports
-os.environ["TESTING"] = "1"
-os.environ["ENVIRONMENT"] = "testing"
+env.set("TESTING", "1", "test")
+env.set("ENVIRONMENT", "testing", "test")
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
