@@ -12,7 +12,7 @@ from typing import Dict, Any, List
 
 from netra_backend.app.agents.agent_communication import AgentCommunicationMixin
 from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
-from netra_backend.app.agents.base.interface import BaseExecutionInterface, ExecutionContext
+from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 

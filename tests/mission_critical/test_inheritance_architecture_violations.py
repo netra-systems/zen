@@ -14,7 +14,7 @@ import pytest
 from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.validation_sub_agent import ValidationSubAgent
 from netra_backend.app.agents.base_agent import BaseSubAgent
-from netra_backend.app.agents.base.interface import BaseExecutionInterface, ExecutionContext
+from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -47,9 +47,9 @@ class TestInheritanceArchitectureViolations:
         """Test that multiple inheritance creates complex Method Resolution Order."""
         mro = data_agent.__class__.__mro__
         
-        # Check that both BaseSubAgent and BaseExecutionInterface are in MRO
+        # Check that BaseSubAgent is in MRO (BaseExecutionInterface removed for single inheritance)
         assert BaseSubAgent in mro, "BaseSubAgent not in MRO"
-        assert BaseExecutionInterface in mro, "BaseExecutionInterface not in MRO"
+        # BaseExecutionInterface removed - agents now use single inheritance
         
         # VIOLATION: Complex MRO with multiple base classes
         # The MRO should be simple and linear, not complex with multiple inheritance paths
@@ -89,19 +89,18 @@ class TestInheritanceArchitectureViolations:
     
     def test_initialization_order_confusion(self, mock_llm_manager, mock_tool_dispatcher):
         """Test that multiple __init__ calls create initialization confusion."""
-        class TestAgent(BaseSubAgent, BaseExecutionInterface):
+        class TestAgent(BaseSubAgent):
             init_calls = []
             
             def __init__(self, llm_manager, tool_dispatcher):
-                # Track which __init__ methods are called and in what order
+                # Track which __init__ methods are called (single inheritance now)
                 TestAgent.init_calls = []
                 
-                # Both parent __init__ methods must be called
+                # Single parent __init__ method
                 BaseSubAgent.__init__(self, llm_manager, name="TestAgent")
                 TestAgent.init_calls.append("BaseSubAgent")
                 
-                BaseExecutionInterface.__init__(self, "TestAgent")
-                TestAgent.init_calls.append("BaseExecutionInterface")
+                # BaseExecutionInterface removed - using composition pattern
             
             async def execute_core_logic(self, context):
                 return {}
@@ -239,9 +238,9 @@ class TestInheritanceArchitectureViolations:
     def test_method_resolution_order_conflicts(self):
         """Test for potential MRO conflicts with diamond inheritance."""
         # Create a test case that exposes MRO issues
-        class ConflictTestAgent(BaseSubAgent, BaseExecutionInterface):
+        class ConflictTestAgent(BaseSubAgent):
             def __init__(self):
-                # This might fail due to MRO conflicts
+                # Single inheritance - no MRO conflicts
                 super().__init__()
             
             async def execute_core_logic(self, context):

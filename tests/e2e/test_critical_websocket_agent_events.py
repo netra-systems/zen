@@ -29,7 +29,7 @@ from loguru import logger
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.base.interface import BaseExecutionInterface
+# BaseExecutionInterface removed - using protocol-based approach
 from netra_backend.app.routes.websocket import get_websocket_manager, WebSocketManager
 from netra_backend.app.agents.unified_tool_execution import enhance_tool_dispatcher_with_notifications
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
