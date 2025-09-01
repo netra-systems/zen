@@ -33,7 +33,7 @@ class TestServiceLauncher:
         await self._kill_port_process(port)
         
         # Set test environment variables
-        test_env = os.environ.copy()
+        test_env = get_env().as_dict().copy()
         test_env.update({
             "TESTING": "1",
             "ENVIRONMENT": "test", 
@@ -83,7 +83,7 @@ class TestServiceLauncher:
         # If not running, try to start it
         logger.warning(f"Auth service not running on port {port}, attempting to start")
         
-        test_env = os.environ.copy()
+        test_env = get_env().as_dict().copy()
         test_env.update({
             "PORT": str(port),
             "ENVIRONMENT": "test",

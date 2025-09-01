@@ -376,7 +376,7 @@ if __name__ == "__main__":
     import subprocess
     
     # Set environment to staging
-    os.environ["ENVIRONMENT"] = "staging"
+    get_env().set("ENVIRONMENT", "staging")
     
     # Check for E2E bypass key
     if not get_env().get("E2E_OAUTH_SIMULATION_KEY"):
