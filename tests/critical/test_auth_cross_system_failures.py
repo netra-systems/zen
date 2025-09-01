@@ -1,6 +1,7 @@
 from shared.isolated_environment import get_env
-"""
+
 env = get_env()
+"""
 Authentication Cross-System Critical Failure Tests
 
 These tests are designed to FAIL initially to expose real authentication integration 
@@ -39,7 +40,7 @@ from fastapi.testclient import TestClient
 
 # Set test environment before any imports
 env.set("TESTING", "true", "test")
-env.set("ENVIRONMENT", "testing", "test")
+env.set("ENVIRONMENT", "test", "test")
 env.set("SKIP_STARTUP_CHECKS", "true", "test")
 env.set("JWT_SECRET_KEY", "test-jwt-secret-key-for-testing-only", "test")
 
@@ -52,20 +53,19 @@ env.set("AUTH_SERVICE_URL", "http://127.0.0.1:8001", "test")
 import sys
 from pathlib import Path
 
-# Import after setting environment and path
+# Import modules but defer app creation until test execution
 try:
-    from netra_backend.app.main import app as backend_app
+    import netra_backend.app.main
     from netra_backend.app.auth_integration.auth import get_current_user
     from netra_backend.app.clients.auth_client import auth_client
     from netra_backend.app.db.models_postgres import User
     backend_available = True
 except ImportError as e:
     print(f"Warning: Backend imports not available: {e}")
-    backend_app = None
     backend_available = False
 
 try:
-    from auth_service.main import app as auth_app
+    import auth_service.main
     from auth_service.auth_core.core.jwt_handler import JWTHandler
     from auth_service.auth_core.services.auth_service import AuthService
     auth_service_available = True
@@ -727,14 +727,16 @@ class TestAuthCrossSystemFailures:
         """Fixture to provide auth service test client"""
         if not auth_service_available:
             pytest.skip("Auth service not available")
-        return TestClient(auth_app)
+        # Create auth app at test execution time to avoid hanging
+        return TestClient(auth_service.main.app)
     
     @pytest.fixture 
     def backend_service_client(self):
         """Fixture to provide backend service test client"""
         if not backend_available:
             pytest.skip("Backend service not available")
-        return TestClient(backend_app)
+        # Create backend app at test execution time to avoid hanging
+        return TestClient(netra_backend.app.main.app)
     
     @pytest.fixture
     async def test_user_credentials(self, auth_service_client):

@@ -189,6 +189,20 @@ try:
 except ImportError:
     DockerPortDiscovery = None
     DOCKER_DISCOVERY_AVAILABLE = False
+
+# Import port conflict resolver for safe allocation
+try:
+    from test_framework.port_conflict_fix import (
+        PortConflictResolver, 
+        allocate_docker_ports_safely,
+        SafePortAllocator
+    )
+    PORT_CONFLICT_RESOLVER_AVAILABLE = True
+except ImportError:
+    PORT_CONFLICT_RESOLVER_AVAILABLE = False
+    PortConflictResolver = None
+    allocate_docker_ports_safely = None
+    SafePortAllocator = None
     
 try:
     from test_framework.unified_docker_manager import (
@@ -395,17 +409,74 @@ class UnifiedTestRunner:
         return 0 if all(r["success"] for r in results.values()) else 1
     
     def _initialize_docker_environment(self, args, running_e2e: bool):
-        """Initialize Docker environment using centralized manager."""
-        if not CENTRALIZED_DOCKER_AVAILABLE:
-            return  # Fall back to old method if centralized manager not available
-        
-        # Determine environment type
+        """Initialize Docker environment - automatically starts services if needed."""
+        # Skip Docker for staging (uses remote services)
         if args.env == "staging":
-            # No Docker for staging - uses remote services
             return
         
-        # Check if we should use shared or dedicated environment
+        # Skip Docker if explicitly disabled
         env = get_env()
+        if env.get('TEST_NO_DOCKER', 'false').lower() == 'true':
+            print("[INFO] Docker disabled via TEST_NO_DOCKER environment variable")
+            return
+            
+        # First, try to use the simple Docker manager for automatic startup
+        print("\n" + "="*60)
+        print("DOCKER SERVICE INITIALIZATION")
+        print("="*60)
+        
+        # Check if Docker services are already running
+        try:
+            # Try simple Docker manager first for better UX
+            from scripts.docker import SimpleDockerManager
+            docker_env = 'test' if args.env == 'test' else 'dev'
+            simple_manager = SimpleDockerManager(docker_env)
+            
+            # Check current status
+            print(f"[INFO] Checking Docker services for {docker_env} environment...")
+            status = simple_manager.status()
+            
+            # Check if critical services are running
+            critical_services = ['postgres', 'redis', 'backend', 'auth']
+            services_running = all(
+                status.get(service, '').lower() in ['running', 'up']
+                for service in critical_services
+            )
+            
+            if not services_running:
+                print("\n[INFO] Docker services not running. Starting them automatically...")
+                print("      (This may take 30-60 seconds on first run)")
+                
+                if simple_manager.start():
+                    print("[SUCCESS] Docker services started successfully!")
+                else:
+                    print("\n" + "="*60)
+                    print("❌ DOCKER STARTUP FAILED")
+                    print("="*60)
+                    print("\nTo fix this issue, try one of these commands:")
+                    print("  1. python scripts/docker.py start        # Start test environment")
+                    print("  2. python scripts/docker.py start dev    # Start dev environment")
+                    print("  3. docker-compose up -d                  # Manual startup")
+                    print("\nFor more help: python scripts/docker.py help")
+                    print("="*60 + "\n")
+                    
+                    if running_e2e or args.real_services:
+                        raise RuntimeError("Docker services required but failed to start")
+            else:
+                print("[SUCCESS] Docker services already running!")
+                
+        except ImportError:
+            print("[WARNING] Simple Docker manager not available, using legacy method")
+        except Exception as e:
+            print(f"[WARNING] Simple Docker startup failed: {e}")
+            print("         Falling back to legacy Docker initialization...")
+            
+        # Now use centralized Docker manager if available
+        if not CENTRALIZED_DOCKER_AVAILABLE:
+            self._initialize_docker_fallback(args, running_e2e)
+            return
+        
+        # Determine environment type
         use_shared = env.get('TEST_USE_SHARED_DOCKER', 'true').lower() == 'true'
         if hasattr(args, 'docker_dedicated') and args.docker_dedicated:
             env_type = EnvironmentType.DEDICATED
@@ -422,7 +493,7 @@ class UnifiedTestRunner:
             use_production_images=use_production
         )
         
-        print(f"[INFO] Initializing Docker environment: type={env_type.value}, production_images={use_production}")
+        print(f"[INFO] Using Docker environment: type={env_type.value}, production_images={use_production}")
         
         # Acquire environment with locking
         try:
@@ -431,24 +502,39 @@ class UnifiedTestRunner:
             
             # Wait for services to be healthy
             if not self.docker_manager.wait_for_services(timeout=60):
-                print("[WARNING] Some Docker services failed to become healthy")
-                # Check if we should fail on unhealthy services
+                print("[WARNING] Some Docker services are unhealthy")
+                
                 if running_e2e or args.real_services:
                     # For E2E and real services, we need healthy services
-                    # Try to restart unhealthy services once
-                    print("[INFO] Attempting to restart unhealthy services...")
+                    print("[INFO] Attempting to fix unhealthy services...")
                     for service in ['backend', 'auth', 'postgres', 'redis']:
                         status = self.docker_manager.get_service_status(service)
                         if status != ServiceStatus.HEALTHY:
                             self.docker_manager.restart_service(service, force=False)
+                    
                     # Wait again
                     if not self.docker_manager.wait_for_services(timeout=30):
-                        raise RuntimeError("Docker services not healthy for E2E/real service testing")
+                        print("\n" + "="*60)
+                        print("❌ DOCKER SERVICES UNHEALTHY")
+                        print("="*60)
+                        print("\nSome services failed health checks. To fix:")
+                        print("  1. python scripts/docker.py health       # Check service health")
+                        print("  2. python scripts/docker.py restart      # Restart all services")
+                        print("  3. python scripts/docker.py logs backend # Check logs for errors")
+                        print("="*60 + "\n")
+                        raise RuntimeError("Docker services not healthy for testing")
+                        
         except Exception as e:
-            print(f"[ERROR] Failed to initialize Docker environment: {e}")
+            print(f"\n[ERROR] Docker environment setup failed: {e}")
+            print("\nTo manually manage Docker services:")
+            print("  python scripts/docker.py start     # Start services")
+            print("  python scripts/docker.py status    # Check status")
+            print("  python scripts/docker.py help      # Get help\n")
+            
             if running_e2e or args.real_services:
                 raise  # Re-raise for E2E/real service testing
-            # Otherwise, fall back to docker port discovery
+                
+            # Fall back to port discovery
             self.docker_manager = None
             self.docker_environment = None
             self.docker_ports = None
@@ -457,7 +543,18 @@ class UnifiedTestRunner:
     def _initialize_docker_fallback(self, args, running_e2e: bool):
         """Fallback Docker initialization using port discovery when centralized manager unavailable."""
         if not DOCKER_DISCOVERY_AVAILABLE:
-            print("[WARNING] Docker port discovery not available")
+            print("\n" + "="*60)
+            print("❌ DOCKER SETUP INCOMPLETE")
+            print("="*60)
+            print("\nDocker port discovery module not available.")
+            print("\nTo fix this issue:")
+            print("  1. Ensure Docker Desktop is installed and running")
+            print("  2. Start services manually: python scripts/docker.py start")
+            print("  3. Or use: docker-compose up -d")
+            print("="*60 + "\n")
+            
+            if running_e2e or args.real_services:
+                raise RuntimeError("Docker required for real service testing but not available")
             return
             
         try:
@@ -484,11 +581,51 @@ class UnifiedTestRunner:
                     env.set('REDIS_PORT', str(self.docker_ports['redis']), 'docker_discovery')
                 if 'clickhouse' in self.docker_ports:
                     env.set('CLICKHOUSE_PORT', str(self.docker_ports['clickhouse']), 'docker_discovery')
+            else:
+                print("\n[WARNING] No Docker services discovered")
+                print("         Try: python scripts/docker.py start")
                     
         except Exception as e:
-            print(f"[WARNING] Docker port discovery failed: {e}")
+            print(f"\n[WARNING] Docker port discovery failed: {e}")
+            
+            # Try port conflict resolution if available
+            if PORT_CONFLICT_RESOLVER_AVAILABLE and PortConflictResolver:
+                print("[INFO] Attempting to resolve port conflicts...")
+                try:
+                    # Clean up stale containers
+                    cleaned = PortConflictResolver.cleanup_stale_docker_containers()
+                    if cleaned > 0:
+                        print(f"[INFO] Cleaned up {cleaned} stale Docker containers")
+                    
+                    # Reset port allocation state
+                    PortConflictResolver.reset_port_allocation_state()
+                    print("[INFO] Reset port allocation state")
+                    
+                    # Retry discovery
+                    discovery = DockerPortDiscovery(use_test_services=True)
+                    port_mappings = discovery.discover_all_ports()
+                    
+                    if port_mappings:
+                        print(f"[INFO] Successfully recovered after conflict resolution")
+                        self.docker_ports = {}
+                        for service, mapping in port_mappings.items():
+                            self.docker_ports[service] = mapping.external_port
+                        return
+                        
+                except Exception as resolve_error:
+                    print(f"[ERROR] Conflict resolution failed: {resolve_error}")
+            
             if running_e2e or args.real_services:
-                print("[ERROR] Cannot run E2E/real service tests without Docker")
+                print("\n" + "="*60)
+                print("❌ DOCKER SERVICES REQUIRED")
+                print("="*60)
+                print(f"\nCannot run {('E2E' if running_e2e else 'real service')} tests without Docker.")
+                print("\nTo fix this issue:")
+                print("  1. Start Docker Desktop")
+                print("  2. Run: python scripts/docker.py start")
+                print("  3. Or use: docker-compose up -d")
+                print("\nFor more help: python scripts/docker.py help")
+                print("="*60 + "\n")
                 raise RuntimeError("Docker services required but not available")
     
     def _cleanup_docker_environment(self):
@@ -1241,10 +1378,10 @@ class UnifiedTestRunner:
         if not docker_available and not (local_postgres and local_redis):
             raise RuntimeError(
                 "HARD FAIL: Cannot run E2E tests - Docker Desktop not running and "
-                "required local services not available. "
+                "required local services not available.\n"
                 f"Either start Docker Desktop or run local PostgreSQL (port {postgres_port}) "
-                f"and Redis (port {redis_port}) services. "
-                "For test environment, use: docker compose -f docker-compose.test.yml up -d"
+                f"and Redis (port {redis_port}) services.\n"
+                "Quick fix: python scripts/docker.py start"
             )
         
         if not local_backend:
@@ -1274,10 +1411,10 @@ class UnifiedTestRunner:
             print(f"\n[ERROR] {str(e)}")
             print("\n[HARD FAIL] E2E tests cannot proceed without required services.")
             print("\nTo fix this issue:")
-            print("  1. Start Docker Desktop to enable automatic service containers")
-            print("  2. OR manually start required TEST services using: docker compose -f docker-compose.test.yml up -d")
+            print("  1. Quick fix: python scripts/docker.py start")
+            print("  2. Start Docker Desktop if not running")
             print("  3. OR manually start required services locally")
-            print("  4. OR use 'python scripts/docker_services.py start test' to start test services")
+            print("\nFor more help: python scripts/docker.py help")
             raise SystemExit(1)  # Hard exit with error code
         
         try:
@@ -1351,8 +1488,8 @@ class UnifiedTestRunner:
             if "Docker" in str(e) or "docker" in str(e).lower():
                 print("HINT: This appears to be a Docker-related issue.")
                 print("      Either start Docker Desktop or ensure required services are running locally.")
-                print("      For test environment: PostgreSQL (port 5434), Redis (port 6381)")
-                print("      Use: docker compose -f docker-compose.test.yml up -d")
+                print("      Quick fix: python scripts/docker.py start")
+                print("      For help: python scripts/docker.py help")
             
             return {
                 "success": False,
