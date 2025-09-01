@@ -17,7 +17,7 @@ from netra_backend.app.agents.supervisor_consolidated import (
     SupervisorAgent as Supervisor,
 )
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.orchestration.websocket_agent_orchestrator import get_websocket_agent_orchestrator
+from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.service_interfaces import IAgentService
 from netra_backend.app.services.streaming_service import (
@@ -26,7 +26,6 @@ from netra_backend.app.services.streaming_service import (
 )
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.websocket_core import get_websocket_manager
-manager = get_websocket_manager()
 
 logger = central_logger.get_logger(__name__)
 
@@ -35,37 +34,134 @@ class AgentService(IAgentService):
     """Service for managing agent interactions following conventions"""
     
     def __init__(self, supervisor: Supervisor) -> None:
+        """Initialize AgentService with clean bridge-based integration."""
         self.supervisor = supervisor
         self.thread_service = ThreadService()
         
-        # Setup message handler with WebSocket manager
-        try:
-            websocket_manager = get_websocket_manager()
-            self.message_handler = MessageHandlerService(supervisor, self.thread_service, websocket_manager)
-            
-            # Setup orchestrator integration (non-blocking)
-            asyncio.create_task(self._setup_orchestrator_integration())
-        except Exception:
-            # Fallback without WebSocket manager if not available
-            self.message_handler = MessageHandlerService(supervisor, self.thread_service)
+        # Bridge-based WebSocket integration (SSOT)
+        self._bridge = None
+        self._bridge_initialized = False
+        
+        # Initialize message handler (bridge will provide WebSocket manager)
+        self.message_handler = MessageHandlerService(supervisor, self.thread_service)
+        
+        # Start bridge integration (non-blocking, idempotent)
+        asyncio.create_task(self._initialize_bridge_integration())
 
-    async def _setup_orchestrator_integration(self) -> None:
-        """Setup WebSocket orchestrator integration."""
+    async def _initialize_bridge_integration(self) -> None:
+        """Initialize WebSocket-Agent integration through bridge (SSOT for integration)."""
         try:
-            orchestrator = await get_websocket_agent_orchestrator()
-            websocket_manager = get_websocket_manager()
+            # Get singleton bridge instance
+            self._bridge = await get_agent_websocket_bridge()
             
-            # Set up WebSocket manager on orchestrator
-            await orchestrator.set_websocket_manager(websocket_manager)
-            
-            # Setup agent-WebSocket integration
-            await orchestrator.setup_agent_websocket_integration(
-                self.supervisor,
-                getattr(self.supervisor, 'registry', None)
+            # Ensure complete integration with all components
+            registry = getattr(self.supervisor, 'registry', None)
+            result = await self._bridge.ensure_integration(
+                supervisor=self.supervisor,
+                registry=registry
             )
-            logger.info("WebSocketAgentOrchestrator integration complete")
+            
+            if result.success:
+                self._bridge_initialized = True
+                
+                # Update message handler with bridge-managed WebSocket manager
+                await self._configure_message_handler_websocket()
+                
+                logger.info(f"Bridge integration complete in {result.duration_ms:.1f}ms")
+            else:
+                logger.error(f"Bridge integration failed: {result.error}")
+                
         except Exception as e:
-            logger.error(f"Failed to setup orchestrator integration: {e}")
+            logger.error(f"Failed to initialize bridge integration: {e}")
+    
+    async def _configure_message_handler_websocket(self) -> None:
+        """Configure message handler with bridge-managed WebSocket manager."""
+        try:
+            if self._bridge and self._bridge._websocket_manager:
+                # Update message handler with WebSocket manager from bridge
+                self.message_handler._websocket_manager = self._bridge._websocket_manager
+                logger.debug("Message handler configured with bridge-managed WebSocket manager")
+        except Exception as e:
+            logger.error(f"Failed to configure message handler WebSocket: {e}")
+    
+    async def _ensure_bridge_ready(self) -> bool:
+        """Ensure bridge is ready for use, with idempotent retry and recovery."""
+        # Quick path: already initialized and healthy
+        if self._bridge_initialized and self._bridge:
+            try:
+                status = await self._bridge.get_status()
+                if status["state"] == "active":
+                    return True
+                # Bridge exists but not active - fall through to recovery
+                logger.debug("Bridge exists but not active, attempting recovery")
+            except Exception:
+                # Bridge status check failed - fall through to full recovery
+                logger.debug("Bridge status check failed, attempting full recovery")
+        
+        # Full recovery path: re-initialize everything idempotently
+        return await self._recover_bridge_integration()
+    
+    async def _recover_bridge_integration(self) -> bool:
+        """Idempotent bridge integration recovery."""
+        try:
+            # Get/re-get bridge instance
+            self._bridge = await get_agent_websocket_bridge()
+            
+            # Ensure integration with all components (idempotent)
+            registry = getattr(self.supervisor, 'registry', None)
+            result = await self._bridge.ensure_integration(
+                supervisor=self.supervisor,
+                registry=registry,
+                force_reinit=True  # Force re-initialization for recovery
+            )
+            
+            if result.success:
+                self._bridge_initialized = True
+                
+                # Ensure message handler is properly configured (idempotent)
+                await self._configure_message_handler_websocket()
+                
+                logger.info(f"Bridge recovery successful in {result.duration_ms:.1f}ms")
+                return True
+            else:
+                logger.error(f"Bridge recovery failed: {result.error}")
+                self._bridge_initialized = False
+                return False
+                
+        except Exception as e:
+            logger.error(f"Bridge recovery exception: {e}")
+            self._bridge_initialized = False
+            return False
+    
+    async def ensure_service_ready(self) -> bool:
+        """Idempotent method to ensure entire service is ready for operations."""
+        try:
+            # Ensure bridge is ready
+            bridge_ready = await self._ensure_bridge_ready()
+            
+            # Ensure message handler has WebSocket manager (idempotent)
+            if bridge_ready:
+                await self._configure_message_handler_websocket()
+            
+            # Basic service components check
+            service_ready = (
+                self.supervisor is not None and
+                self.thread_service is not None and
+                self.message_handler is not None
+            )
+            
+            ready_status = bridge_ready and service_ready
+            
+            if ready_status:
+                logger.debug("AgentService fully ready for operations")
+            else:
+                logger.warning(f"AgentService partial readiness: bridge={bridge_ready}, service={service_ready}")
+                
+            return ready_status
+            
+        except Exception as e:
+            logger.error(f"Service readiness check failed: {e}")
+            return False
 
     async def run(self, request_model: schemas.RequestModel, run_id: str, stream_updates: bool = False) -> Any:
         """Starts the agent. The supervisor will stream logs back to the websocket if requested."""
@@ -81,19 +177,82 @@ class AgentService(IAgentService):
     async def stop_agent(self, user_id: str) -> bool:
         """Stop an agent for the given user."""
         try:
-            await manager.send_message(user_id, {"type": "agent_stopped"})
+            # Use bridge-managed WebSocket manager if available
+            if await self._ensure_bridge_ready():
+                status = await self._bridge.get_status()
+                if status["dependencies"]["websocket_manager_available"]:
+                    websocket_manager = get_websocket_manager()
+                    await websocket_manager.send_message(user_id, {"type": "agent_stopped"})
+                    return True
+            
+            # Fallback to direct manager access (preserve existing behavior)
+            websocket_manager = get_websocket_manager()
+            await websocket_manager.send_message(user_id, {"type": "agent_stopped"})
             return True
         except Exception as e:
             logger.error(f"Failed to stop agent for user {user_id}: {e}")
             return False
 
     async def get_agent_status(self, user_id: str) -> Dict[str, Any]:
-        """Get the status of an agent for the given user."""
-        return {
+        """Get comprehensive agent service status for a user."""
+        # Base agent status
+        status = {
             "user_id": user_id,
             "status": "active",
-            "supervisor_available": self.supervisor is not None
+            "supervisor_available": self.supervisor is not None,
+            "thread_service_available": self.thread_service is not None,
+            "message_handler_available": self.message_handler is not None
         }
+        
+        # Add comprehensive integration status
+        service_ready = await self.ensure_service_ready()
+        if service_ready and self._bridge:
+            bridge_status = await self._bridge.get_status()
+            status.update({
+                "service_ready": True,
+                "bridge_integrated": True,
+                "websocket_integration": bridge_status["state"],
+                "websocket_healthy": bridge_status["health"]["websocket_manager_healthy"],
+                "orchestrator_healthy": bridge_status["health"]["orchestrator_healthy"]
+            })
+        else:
+            status.update({
+                "service_ready": service_ready,
+                "bridge_integrated": False,
+                "websocket_integration": "unavailable",
+                "websocket_healthy": False,
+                "orchestrator_healthy": False
+            })
+        
+        return status
+    
+    async def get_comprehensive_status(self) -> Dict[str, Any]:
+        """Get comprehensive service status including bridge metrics."""
+        base_status = {
+            "service": "AgentService",
+            "supervisor": {
+                "available": self.supervisor is not None,
+                "registry_available": hasattr(self.supervisor, 'registry') and self.supervisor.registry is not None
+            },
+            "thread_service": {
+                "available": self.thread_service is not None
+            },
+            "message_handler": {
+                "available": self.message_handler is not None
+            }
+        }
+        
+        # Add bridge status if available
+        if self._bridge:
+            try:
+                bridge_status = await self._bridge.get_status()
+                base_status["bridge"] = bridge_status
+            except Exception as e:
+                base_status["bridge"] = {"error": str(e), "available": False}
+        else:
+            base_status["bridge"] = {"available": False, "initialized": self._bridge_initialized}
+        
+        return base_status
 
     async def handle_websocket_message(
         self, 
@@ -173,8 +332,12 @@ class AgentService(IAgentService):
         if await self._handle_thread_message_types(user_id, message_type, payload, db_session):
             return
         logger.warning(f"Received unhandled message type '{message_type}' for user_id: {user_id}")
-        # Send error to user for unknown message type
-        await manager.send_error(user_id, f"Unknown message type: {message_type}")
+        # Send error to user for unknown message type (through bridge-managed WebSocket)
+        try:
+            websocket_manager = get_websocket_manager()
+            await websocket_manager.send_error(user_id, f"Unknown message type: {message_type}")
+        except Exception as e:
+            logger.error(f"Failed to send unknown message type error to {user_id}: {e}")
     
     async def _handle_thread_message_types(
         self, user_id: str, message_type: str, payload: Dict[str, Any], 
@@ -194,22 +357,24 @@ class AgentService(IAgentService):
         return True
     
     async def _handle_json_decode_error(self, user_id: str, e: json.JSONDecodeError) -> None:
-        """Handle JSON decode error with user notification."""
+        """Handle JSON decode error with user notification (WebSocket boundary)."""
         logger.error(f"Invalid JSON in websocket message from user {user_id}: {e}")
         try:
-            await manager.send_error(user_id, "Invalid JSON message format")
+            # Use bridge-managed WebSocket communication (preserve boundary)
+            websocket_manager = get_websocket_manager()
+            await websocket_manager.send_error(user_id, "Invalid JSON message format")
         except (WebSocketDisconnect, Exception):
             logger.warning(f"Could not send error to disconnected user {user_id}")
     
     def _handle_websocket_disconnect(self, user_id: str) -> None:
-        """Handle WebSocket disconnection."""
+        """Handle WebSocket disconnection (WebSocket boundary)."""
         logger.info(f"WebSocket disconnected for user {user_id} during message handling")
     
     async def _handle_general_exception(self, user_id: str, e: Exception) -> None:
-        """Handle general exception with error reporting."""
+        """Handle general exception with error reporting (Agent boundary + WebSocket communication)."""
         logger.error(f"Error in handle_websocket_message for user_id: {user_id}: {e}", exc_info=True)
         
-        # Provide more specific error messages based on exception type
+        # Agent concern: Determine appropriate error message based on exception type
         error_message = "Internal server error"
         if isinstance(e, (TypeError, AttributeError)):
             error_message = "Invalid message format or structure"
@@ -218,8 +383,10 @@ class AgentService(IAgentService):
         elif isinstance(e, ValueError):
             error_message = f"Invalid value: {str(e)}"
             
+        # WebSocket concern: Send error through WebSocket channel
         try:
-            await manager.send_error(user_id, error_message)
+            websocket_manager = get_websocket_manager()
+            await websocket_manager.send_error(user_id, error_message)
         except (WebSocketDisconnect, Exception):
             logger.warning(f"Could not send error to disconnected user {user_id}")
     
@@ -300,23 +467,27 @@ class AgentService(IAgentService):
         context: Optional[Dict[str, Any]] = None,
         user_id: str = "default_user"
     ) -> Dict[str, Any]:
-        """Execute an agent task using the WebSocketAgentOrchestrator.
+        """Execute an agent task using the AgentWebSocketBridge.
         
-        This method delegates all WebSocket-Agent coordination to the orchestrator,
+        This method uses the bridge for WebSocket-Agent coordination,
         ensuring proper event delivery and lifecycle management.
         """
         logger.info(f"Executing {agent_type} agent for user {user_id}")
         
         try:
-            # Get the singleton orchestrator
-            orchestrator = await get_websocket_agent_orchestrator()
+            # Ensure service is fully ready for execution (idempotent)
+            if not await self.ensure_service_ready():
+                logger.warning("Service not fully ready, executing without WebSocket coordination")
+                return await self._execute_agent_fallback(agent_type, message, context, user_id)
             
-            # Set up WebSocket manager on orchestrator if not already done
-            try:
-                websocket_manager = get_websocket_manager()
-                await orchestrator.set_websocket_manager(websocket_manager)
-            except Exception as e:
-                logger.error(f"Failed to setup WebSocket manager on orchestrator: {e}")
+            # Get orchestrator through bridge
+            status = await self._bridge.get_status()
+            if not status["dependencies"]["orchestrator_available"]:
+                logger.warning("Orchestrator not available, using fallback execution")
+                return await self._execute_agent_fallback(agent_type, message, context, user_id)
+            
+            # Get orchestrator from bridge's internal state (cleaner access)
+            orchestrator = self._bridge._orchestrator
             
             # Create execution context with deduplication
             exec_context, notifier = await orchestrator.create_execution_context(
@@ -352,14 +523,15 @@ class AgentService(IAgentService):
                 "agent": agent_type,
                 "status": "success",
                 "user_id": user_id,
-                "websocket_events_sent": True
+                "websocket_events_sent": True,
+                "bridge_coordinated": True
             }
             
         except Exception as e:
             logger.error(f"Error executing {agent_type} agent: {e}", exc_info=True)
             
-            # Ensure completion event is sent even on error
-            if 'exec_context' in locals():
+            # Ensure completion event is sent even on error (best effort)
+            if 'exec_context' in locals() and 'orchestrator' in locals():
                 try:
                     await orchestrator.complete_execution(exec_context, None)
                 except Exception:
@@ -371,4 +543,45 @@ class AgentService(IAgentService):
                 "status": "error",
                 "user_id": user_id,
                 "error": str(e)
+            }
+    
+    async def _execute_agent_fallback(
+        self, 
+        agent_type: str, 
+        message: str, 
+        context: Optional[Dict[str, Any]], 
+        user_id: str
+    ) -> Dict[str, Any]:
+        """Fallback execution without WebSocket coordination."""
+        try:
+            full_message = f"[Agent Type: {agent_type}] {message}"
+            if context:
+                full_message += f" (Context: {context})"
+                
+            result = await self.supervisor.run(
+                full_message, 
+                f"thread_{user_id}",
+                user_id,
+                f"run_{agent_type}_{user_id}"
+            )
+            
+            return {
+                "response": str(result),
+                "agent": agent_type,
+                "status": "success",
+                "user_id": user_id,
+                "websocket_events_sent": False,
+                "bridge_coordinated": False,
+                "fallback_execution": True
+            }
+            
+        except Exception as e:
+            logger.error(f"Fallback execution failed for {agent_type}: {e}")
+            return {
+                "response": f"Error in fallback execution: {str(e)}",
+                "agent": agent_type,
+                "status": "error",
+                "user_id": user_id,
+                "error": str(e),
+                "fallback_execution": True
             }
