@@ -785,9 +785,23 @@ class UnifiedTestRunner:
             # Update ClickHouse URL
             if 'clickhouse' in self.docker_ports:
                 clickhouse_port = self.docker_ports['clickhouse']
-                discovered_clickhouse_url = f"http://localhost:{clickhouse_port}"
+                # Use appropriate credentials based on environment
+                if args.env == 'test' or args.env == 'testing':
+                    clickhouse_user = 'test'
+                    clickhouse_password = 'test'
+                    clickhouse_db = 'netra_test_analytics'
+                else:  # development environment
+                    clickhouse_user = 'netra'
+                    clickhouse_password = 'netra123'
+                    clickhouse_db = 'netra_analytics'
+                
+                discovered_clickhouse_url = f"clickhouse://{clickhouse_user}:{clickhouse_password}@localhost:{clickhouse_port}/{clickhouse_db}"
                 env.set('CLICKHOUSE_URL', discovered_clickhouse_url, 'docker_manager')
-                print(f"[INFO] Updated CLICKHOUSE_URL with Docker port: {clickhouse_port}")
+                env.set('CLICKHOUSE_HTTP_PORT', str(clickhouse_port), 'docker_manager')
+                env.set('CLICKHOUSE_USER', clickhouse_user, 'docker_manager')
+                env.set('CLICKHOUSE_PASSWORD', clickhouse_password, 'docker_manager')
+                env.set('CLICKHOUSE_DB', clickhouse_db, 'docker_manager')
+                print(f"[INFO] Updated ClickHouse configuration with Docker port: {clickhouse_port}")
             
             # Update backend/auth/websocket URLs
             if 'backend' in self.docker_ports:
@@ -837,9 +851,23 @@ class UnifiedTestRunner:
             # Update ClickHouse URL
             if 'clickhouse' in port_mappings and port_mappings['clickhouse'].is_available:
                 clickhouse_port = port_mappings['clickhouse'].external_port
-                discovered_clickhouse_url = f"http://localhost:{clickhouse_port}"
+                # Use appropriate credentials based on environment
+                if args.env == 'test' or args.env == 'testing':
+                    clickhouse_user = 'test'
+                    clickhouse_password = 'test'
+                    clickhouse_db = 'netra_test_analytics'
+                else:  # development environment
+                    clickhouse_user = 'netra'
+                    clickhouse_password = 'netra123'
+                    clickhouse_db = 'netra_analytics'
+                
+                discovered_clickhouse_url = f"clickhouse://{clickhouse_user}:{clickhouse_password}@localhost:{clickhouse_port}/{clickhouse_db}"
                 env.set('CLICKHOUSE_URL', discovered_clickhouse_url, 'test_runner_port_discovery')
-                print(f"[INFO] Updated CLICKHOUSE_URL with discovered ClickHouse port: {clickhouse_port}")
+                env.set('CLICKHOUSE_HTTP_PORT', str(clickhouse_port), 'test_runner_port_discovery')
+                env.set('CLICKHOUSE_USER', clickhouse_user, 'test_runner_port_discovery')
+                env.set('CLICKHOUSE_PASSWORD', clickhouse_password, 'test_runner_port_discovery')
+                env.set('CLICKHOUSE_DB', clickhouse_db, 'test_runner_port_discovery')
+                print(f"[INFO] Updated ClickHouse configuration with discovered port: {clickhouse_port}")
         
         # Set environment variables using IsolatedEnvironment
         env = get_env()
