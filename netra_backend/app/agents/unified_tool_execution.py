@@ -65,10 +65,10 @@ class UnifiedToolExecutionEngine:
         
         # Security and resource management
         self.env = IsolatedEnvironment()
-        self.default_timeout = float(self.env.get_var('AGENT_DEFAULT_TIMEOUT', '30.0'))
-        self.max_memory_mb = int(self.env.get_var('AGENT_MAX_MEMORY_MB', '512'))
-        self.max_concurrent_per_user = int(self.env.get_var('AGENT_MAX_CONCURRENT_PER_USER', '10'))
-        self.rate_limit_per_minute = int(self.env.get_var('AGENT_RATE_LIMIT_PER_MINUTE', '100'))
+        self.default_timeout = float(self.env.get('AGENT_DEFAULT_TIMEOUT', '30.0'))
+        self.max_memory_mb = int(self.env.get('AGENT_MAX_MEMORY_MB', '512'))
+        self.max_concurrent_per_user = int(self.env.get('AGENT_MAX_CONCURRENT_PER_USER', '10'))
+        self.rate_limit_per_minute = int(self.env.get('AGENT_RATE_LIMIT_PER_MINUTE', '100'))
         
         # Metrics tracking
         self._active_executions: Dict[str, Dict] = {}

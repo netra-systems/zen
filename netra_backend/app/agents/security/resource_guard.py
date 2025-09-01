@@ -122,13 +122,13 @@ class ResourceGuard:
         
         # Load configuration from environment or use defaults
         self.limits = limits or ResourceLimits(
-            max_memory_mb=int(self.env.get_var('RESOURCE_GUARD_MAX_MEMORY_MB', '512')),
-            max_cpu_percent=float(self.env.get_var('RESOURCE_GUARD_MAX_CPU_PERCENT', '80.0')),
-            max_concurrent_per_user=int(self.env.get_var('RESOURCE_GUARD_MAX_CONCURRENT_PER_USER', '10')),
-            max_concurrent_global=int(self.env.get_var('RESOURCE_GUARD_MAX_CONCURRENT_GLOBAL', '100')),
-            rate_limit_per_minute=int(self.env.get_var('RESOURCE_GUARD_RATE_LIMIT_PER_MINUTE', '100')),
-            min_disk_space_mb=int(self.env.get_var('RESOURCE_GUARD_MIN_DISK_SPACE_MB', '1024')),
-            check_interval_seconds=float(self.env.get_var('RESOURCE_GUARD_CHECK_INTERVAL', '5.0'))
+            max_memory_mb=int(self.env.get('RESOURCE_GUARD_MAX_MEMORY_MB', '512')),
+            max_cpu_percent=float(self.env.get('RESOURCE_GUARD_MAX_CPU_PERCENT', '80.0')),
+            max_concurrent_per_user=int(self.env.get('RESOURCE_GUARD_MAX_CONCURRENT_PER_USER', '10')),
+            max_concurrent_global=int(self.env.get('RESOURCE_GUARD_MAX_CONCURRENT_GLOBAL', '100')),
+            rate_limit_per_minute=int(self.env.get('RESOURCE_GUARD_RATE_LIMIT_PER_MINUTE', '100')),
+            min_disk_space_mb=int(self.env.get('RESOURCE_GUARD_MIN_DISK_SPACE_MB', '1024')),
+            check_interval_seconds=float(self.env.get('RESOURCE_GUARD_CHECK_INTERVAL', '5.0'))
         )
         
         # Resource tracking

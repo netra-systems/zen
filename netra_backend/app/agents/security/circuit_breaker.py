@@ -234,11 +234,11 @@ class SystemCircuitBreaker:
         
         # Load default configuration
         self.default_config = default_config or CircuitBreakerConfig(
-            failure_threshold=int(self.env.get_var('CIRCUIT_BREAKER_FAILURE_THRESHOLD', '3')),
-            recovery_timeout=int(self.env.get_var('CIRCUIT_BREAKER_RECOVERY_TIMEOUT', '60')),
-            success_threshold=int(self.env.get_var('CIRCUIT_BREAKER_SUCCESS_THRESHOLD', '2')),
-            failure_window_seconds=int(self.env.get_var('CIRCUIT_BREAKER_FAILURE_WINDOW', '300')),
-            max_half_open_calls=int(self.env.get_var('CIRCUIT_BREAKER_MAX_HALF_OPEN', '3'))
+            failure_threshold=int(self.env.get('CIRCUIT_BREAKER_FAILURE_THRESHOLD', '3')),
+            recovery_timeout=int(self.env.get('CIRCUIT_BREAKER_RECOVERY_TIMEOUT', '60')),
+            success_threshold=int(self.env.get('CIRCUIT_BREAKER_SUCCESS_THRESHOLD', '2')),
+            failure_window_seconds=int(self.env.get('CIRCUIT_BREAKER_FAILURE_WINDOW', '300')),
+            max_half_open_calls=int(self.env.get('CIRCUIT_BREAKER_MAX_HALF_OPEN', '3'))
         )
         
         # Agent circuit breakers

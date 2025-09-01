@@ -91,14 +91,14 @@ class SecurityManager:
         
         # Load configuration
         self.config = config or SecurityConfig(
-            max_memory_mb=int(self.env.get_var('SECURITY_MAX_MEMORY_MB', '512')),
-            max_cpu_percent=float(self.env.get_var('SECURITY_MAX_CPU_PERCENT', '80.0')),
-            max_concurrent_per_user=int(self.env.get_var('SECURITY_MAX_CONCURRENT_PER_USER', '10')),
-            rate_limit_per_minute=int(self.env.get_var('SECURITY_RATE_LIMIT_PER_MINUTE', '100')),
-            default_timeout_seconds=float(self.env.get_var('SECURITY_DEFAULT_TIMEOUT', '30.0')),
-            enable_resource_protection=self.env.get_var('SECURITY_ENABLE_RESOURCE_PROTECTION', 'true').lower() == 'true',
-            enable_circuit_breaker=self.env.get_var('SECURITY_ENABLE_CIRCUIT_BREAKER', 'true').lower() == 'true',
-            enable_timeout_protection=self.env.get_var('SECURITY_ENABLE_TIMEOUT_PROTECTION', 'true').lower() == 'true'
+            max_memory_mb=int(self.env.get('SECURITY_MAX_MEMORY_MB', '512')),
+            max_cpu_percent=float(self.env.get('SECURITY_MAX_CPU_PERCENT', '80.0')),
+            max_concurrent_per_user=int(self.env.get('SECURITY_MAX_CONCURRENT_PER_USER', '10')),
+            rate_limit_per_minute=int(self.env.get('SECURITY_RATE_LIMIT_PER_MINUTE', '100')),
+            default_timeout_seconds=float(self.env.get('SECURITY_DEFAULT_TIMEOUT', '30.0')),
+            enable_resource_protection=self.env.get('SECURITY_ENABLE_RESOURCE_PROTECTION', 'true').lower() == 'true',
+            enable_circuit_breaker=self.env.get('SECURITY_ENABLE_CIRCUIT_BREAKER', 'true').lower() == 'true',
+            enable_timeout_protection=self.env.get('SECURITY_ENABLE_TIMEOUT_PROTECTION', 'true').lower() == 'true'
         )
         
         # Initialize security components
