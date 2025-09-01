@@ -402,8 +402,7 @@ describe('Thread Switching Comprehensive Test Suite', () => {
         result.current.switchToThread('thread-1');
       });
       
-      // Switch to another thread
-      const { threadLoadingService } = getMockedServices();
+      // Switch to another thread - reuse the same threadLoadingService mock
       threadLoadingService.loadThread.mockResolvedValue({
         success: true,
         messages: mockMessages
@@ -598,8 +597,7 @@ describe('Thread Switching Comprehensive Test Suite', () => {
       expect(result.current.state.lastLoadedThreadId).toBe('thread-1');
       expect(result.current.state.error?.threadId).toBe('thread-2');
       
-      // Successfully switch to thread 3
-      const { threadLoadingService } = getMockedServices();
+      // Successfully switch to thread 3 - reuse the same mock
       threadLoadingService.loadThread.mockResolvedValueOnce({
         success: true,
         messages: mockMessages

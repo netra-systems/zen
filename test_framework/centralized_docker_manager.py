@@ -335,13 +335,13 @@ class CentralizedDockerManager:
     def _get_compose_file(self) -> str:
         """Get appropriate docker-compose file"""
         if self.use_production_images:
-            # Use production compose configuration for memory optimization
-            compose_file = "docker-compose.production.yml"
+            # Use alpine compose configuration for memory optimization
+            compose_file = "docker-compose.alpine.yml"
             
-            # If production file doesn't exist, use regular with memory limits
+            # If alpine file doesn't exist, use regular with memory limits
             if not Path(compose_file).exists():
                 compose_file = "docker-compose.yml"
-                print("[INFO] Production compose file not found, using standard with memory limits")
+                print("[INFO] Alpine compose file not found, using standard with memory limits")
         else:
             compose_file = "docker-compose.yml"
         

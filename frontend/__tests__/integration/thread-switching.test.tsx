@@ -5,11 +5,6 @@ import { jest } from '@jest/globals';
 import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
 import { TestProviders } from '@/__tests__/setup/test-providers';
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-reEvent, act } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { jest } from '@jest/globals';
-import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
-import { TestProviders } from '@/__tests__/setup/test-providers';
 
 // Mock router for navigation testing
 const mockPush = jest.fn();

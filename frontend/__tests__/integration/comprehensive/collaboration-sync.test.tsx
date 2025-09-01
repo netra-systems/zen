@@ -1,12 +1,14 @@
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-import { al-time Collaboration Sync Tests
+
+/**
+ * Real-time Collaboration Sync Tests
  * 
  * BVJ: Enterprise segment - ensures platform scalability for collaborative features
  * Tests conflict resolution, operation history, and collaborative editing.
  */
 
+import React from 'react';
 import {
-  React,
   render,
   waitFor,
   fireEvent,

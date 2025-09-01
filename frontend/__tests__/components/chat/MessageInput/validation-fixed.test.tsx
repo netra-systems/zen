@@ -3,14 +3,12 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-component
- * in its actual state and testing what can be reliably tested.
- */
 
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { jest } from '@jest/globals';
+/**
+ * MessageInput Validation Tests
+ * 
+ * Tests the component in its actual state and testing what can be reliably tested.
+ */
 
 // Mock functions for testing
 const mockHandleSend = jest.fn().mockResolvedValue(undefined);
