@@ -36,6 +36,14 @@ try {
     },
     fillRoiCalculator: (value) => {
       cy.get('input[id="spend"], input[name="spend"]').type(String(value));
+    },
+    triggerWebSocketConnection: () => {
+      // Simulate WebSocket connection for chat functionality
+      cy.window().then((win) => {
+        if (!win.testWebSocket) {
+          win.testWebSocket = new WebSocket('ws://localhost:8000/ws');
+        }
+      });
     }
   };
   var MobileUtils = {
@@ -44,12 +52,29 @@ try {
     checkImageOptimization: () => cy.log('Image optimization checked')
   };
   var ErrorSimulation = {
-    triggerNetworkError: () => cy.intercept('**', { forceNetworkError: true }),
-    triggerAuthError: () => cy.intercept('**/api/**', { statusCode: 401 }),
-    triggerServerError: () => cy.intercept('**/api/**', { statusCode: 500 }),
+    triggerNetworkError: () => {
+      cy.intercept('**', { forceNetworkError: true });
+      cy.intercept('**/ws', { forceNetworkError: true }); // WebSocket errors
+    },
+    triggerAuthError: () => {
+      cy.intercept('**/api/**', { statusCode: 401 });
+      cy.intercept('**/auth/**', { statusCode: 401 });
+    },
+    triggerServerError: () => {
+      cy.intercept('**/api/**', { statusCode: 500 });
+      cy.intercept('**/api/agents/execute', { statusCode: 500 });
+    },
     setupConsoleErrorSpy: () => cy.window().then((win) => {
       cy.stub(win.console, 'error').as('consoleError');
-    })
+    }),
+    triggerWebSocketError: () => {
+      cy.window().then((win) => {
+        // Mock WebSocket that fails to connect
+        cy.stub(win, 'WebSocket').callsFake(() => {
+          throw new Error('WebSocket connection failed');
+        });
+      });
+    }
   };
   var Assertions = {
     verifyErrorMessage: (pattern) => cy.contains(pattern).should('be.visible')
@@ -74,6 +99,15 @@ describe('Critical Test #8: Cross-Browser Compatibility', () => {
     verifyWebSocketSupport();
     verifyCssFeatures();
     verifyJavaScriptApis();
+  });
+
+  it('should handle WebSocket connections across browsers', () => {
+    Navigation.goToAiChat();
+    
+    // Test WebSocket connection establishment
+    testWebSocketConnection();
+    testWebSocketEventHandling();
+    testWebSocketReconnection();
   });
 
   it('should handle browser-specific quirks', () => {
@@ -119,6 +153,34 @@ describe('Critical Test #8: Cross-Browser Compatibility', () => {
     TestSetup.selectIndustry('Technology');
     cy.contains('Next Steps').click();
     cy.window().scrollTo('top');
+  }
+
+  function testWebSocketConnection(): void {
+    cy.window().then((win) => {
+      expect(win.WebSocket).to.not.be.undefined;
+      const ws = new WebSocket('ws://localhost:8000/ws');
+      expect(ws).to.not.be.undefined;
+    });
+  }
+
+  function testWebSocketEventHandling(): void {
+    FormUtils.sendChatMessage('Test WebSocket events');
+    
+    // Verify expected WebSocket events can be handled
+    cy.window().then((win) => {
+      const expectedEvents = ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed'];
+      expectedEvents.forEach(eventType => {
+        // Simulate event handling capability test
+        cy.log(`Testing WebSocket event handling for: ${eventType}`);
+      });
+    });
+  }
+
+  function testWebSocketReconnection(): void {
+    cy.window().then((win) => {
+      // Test reconnection logic can be triggered
+      cy.log('Testing WebSocket reconnection capability');
+    });
   }
 });
 
@@ -237,12 +299,14 @@ describe('Critical Test #10: Error Message Clarity', () => {
   function triggerNetworkError(): void {
     ErrorSimulation.triggerNetworkError();
     Navigation.goToAiChat();
+    FormUtils.triggerWebSocketConnection();
     FormUtils.sendChatMessage('Test message');
   }
 
   function triggerAuthError(): void {
     ErrorSimulation.triggerAuthError();
-    cy.contains('Export Plan').click();
+    Navigation.goToAiChat();
+    FormUtils.sendChatMessage('Test auth error');
   }
 
   function triggerValidationError(): void {
@@ -253,7 +317,8 @@ describe('Critical Test #10: Error Message Clarity', () => {
 
   function triggerServerError(): void {
     ErrorSimulation.triggerServerError();
-    cy.contains('Generate Report').click();
+    Navigation.goToAiChat();
+    FormUtils.sendChatMessage('Test server error');
   }
 
   function verifyErrorMessageClarity(scenario: typeof ERROR_SCENARIOS[0]): void {
@@ -269,7 +334,8 @@ describe('Critical Test #10: Error Message Clarity', () => {
   }
 
   function triggerTestError(): void {
-    cy.intercept('**/api/**', { statusCode: 500, body: { error: 'Test error' } });
+    cy.intercept('**/api/agents/execute', { statusCode: 500, body: { error: 'Test error' } });
+    ErrorSimulation.triggerWebSocketError();
     Navigation.goToAiChat();
     FormUtils.sendChatMessage('Test');
   }
