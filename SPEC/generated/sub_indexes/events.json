@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "events",
-    "generated_at": "2025-08-31T15:38:41.715409",
-    "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 28
+    "generated_at": "2025-08-31T18:10:54.818655",
+    "root_directory": "/Users/anthony/Documents/GitHub/netra-apex",
+    "total_literals": 29
   },
   "literals": {
     ":event": {
@@ -26,6 +26,13 @@
       "category": "events",
       "locations": [
         "scripts/scan_string_literals.py:134"
+      ]
+    },
+    "_shutdown_event": {
+      "value": "_shutdown_event",
+      "category": "events",
+      "locations": [
+        "netra_backend/app/websocket_core/manager.py:664"
       ]
     },
     "auth_event": {
@@ -214,8 +221,8 @@
         "netra_backend/app/routes/websocket.py:830",
         "netra_backend/app/schemas/core_enums.py:63",
         "netra_backend/app/schemas/core_enums.py:172",
-        "netra_backend/app/websocket_core/manager.py:1252",
-        "netra_backend/app/websocket_core/types.py:47"
+        "netra_backend/app/websocket_core/types.py:47",
+        "netra_backend/app/websocket_core/types.py:309"
       ]
     },
     "security_event": {

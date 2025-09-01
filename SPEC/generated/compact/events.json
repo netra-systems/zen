@@ -3,6 +3,7 @@
     ":event",
     "_EVENT",
     "_event",
+    "_shutdown_event",
     "auth_event",
     "broadcast:",
     "business_event",

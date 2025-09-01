@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "states",
-    "generated_at": "2025-08-31T15:38:42.356221",
-    "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 29
+    "generated_at": "2025-08-31T18:10:55.026860",
+    "root_directory": "/Users/anthony/Documents/GitHub/netra-apex",
+    "total_literals": 28
   },
   "literals": {
     "Active": {
@@ -12,13 +12,6 @@
       "category": "states",
       "locations": [
         "scripts/monitor_oauth_health.py:359"
-      ]
-    },
-    "Connected": {
-      "value": "Connected",
-      "category": "states",
-      "locations": [
-        "scripts/startup_environment.py:130"
       ]
     },
     "Disabled": {
@@ -122,10 +115,10 @@
         "netra_backend/app/agents/data_sub_agent/data_sub_agent.py:307",
         "netra_backend/app/agents/validation_sub_agent.py:340",
         "netra_backend/app/agents/validation_sub_agent.py:341",
+        "netra_backend/app/core/startup_validation.py:449",
         "netra_backend/app/db/health_checks.py:98",
         "netra_backend/app/db/health_checks.py:106",
-        "netra_backend/app/db/models_agent_state.py:39",
-        "netra_backend/app/db/models_user.py:60"
+        "netra_backend/app/db/models_agent_state.py:39"
       ]
     },
     "busy": {
@@ -173,7 +166,7 @@
       "category": "states",
       "locations": [
         "netra_backend/app/agents/quality_supervisor.py:98",
-        "netra_backend/app/clients/auth_client_core.py:1253",
+        "netra_backend/app/clients/auth_client_core.py:1254",
         "netra_backend/app/core/configuration/services.py:210",
         "netra_backend/app/core/configuration/services.py:330",
         "netra_backend/app/core/degradation_strategies.py:257",
@@ -207,7 +200,7 @@
         "netra_backend/app/agents/corpus_admin/suggestion_profiles.py:85",
         "netra_backend/app/agents/demo_service/optimization.py:287",
         "netra_backend/app/agents/quality_supervisor.py:98",
-        "netra_backend/app/core/configuration_validator.py:414",
+        "netra_backend/app/core/configuration_validator.py:415",
         "netra_backend/app/core/health_configuration.py:47",
         "netra_backend/app/core/health_configuration.py:152",
         "netra_backend/app/core/resilience/policy.py:297",
@@ -243,9 +236,9 @@
         "netra_backend/app/schemas/core_enums.py:33",
         "netra_backend/app/websocket_core/reconnection_manager.py:32",
         "netra_backend/app/websocket_core/types.py:32",
-        "frontend/components/chat/agent-status/constants.ts:37",
-        "frontend/components/chat/agent-status/utils.tsx:46",
-        "frontend/components/chat/agent-status-panel/AgentStatusPanel.tsx:33"
+        "frontend/components/chat/ExampleMessageFlow.tsx:74",
+        "frontend/components/chat/ExampleMessageFlow.tsx:345",
+        "frontend/components/chat/ExampleMessageFlow.tsx:346"
       ]
     },
     "inactive": {
@@ -253,6 +246,7 @@
       "category": "states",
       "locations": [
         "netra_backend/app/agents/validation_sub_agent.py:341",
+        "netra_backend/app/core/startup_validation.py:449",
         "netra_backend/app/routes/quality_validation_utils.py:136",
         "netra_backend/app/routes/quality_validation_utils.py:137",
         "netra_backend/app/routes/quality_validation_utils.py:138",
@@ -260,8 +254,7 @@
         "netra_backend/app/schemas/monitoring.py:48",
         "netra_backend/app/schemas/monitoring_types.py:53",
         "netra_backend/app/services/multi_tenant.py:29",
-        "netra_backend/app/services/session_coordinator.py:30",
-        "scripts/scan_string_literals.py:148"
+        "netra_backend/app/services/session_coordinator.py:30"
       ]
     },
     "info": {
@@ -381,7 +374,7 @@
         "netra_backend/app/agents/input_validation.py:222",
         "netra_backend/app/agents/validation_sub_agent.py:222",
         "netra_backend/app/agents/validation_sub_agent.py:237",
-        "netra_backend/app/clients/auth_client_core.py:198"
+        "netra_backend/app/clients/auth_client_core.py:199"
       ]
     }
   }
