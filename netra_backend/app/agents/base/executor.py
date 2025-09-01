@@ -15,7 +15,13 @@ import time
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional
 
 if TYPE_CHECKING:
-    from netra_backend.app.agents.base.interface import BaseExecutionInterface
+    from typing import Protocol
+    
+    class BaseExecutionInterface(Protocol):
+        """Protocol for agent execution interface."""
+        async def validate_preconditions(self, context: 'ExecutionContext') -> bool: ...
+        async def execute_core_logic(self, context: 'ExecutionContext') -> Dict[str, Any]: ...
+        async def send_status_update(self, context: 'ExecutionContext', status: str, message: str) -> None: ...
 
 from netra_backend.app.agents.base.errors import (
     AgentExecutionError,
@@ -24,8 +30,8 @@ from netra_backend.app.core.unified_error_handler import agent_error_handler as 
 from netra_backend.app.agents.base.interface import (
     ExecutionContext,
     ExecutionResult,
-    ExecutionStatus,
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability import ReliabilityManager
 from netra_backend.app.logging_config import central_logger

@@ -1,21 +1,15 @@
-"""Modern Synthetic Data Sub-Agent Implementation
-
-Modern implementation extending BaseExecutionInterface with:
-- Standardized execution patterns
-- Integrated reliability management  
-- Comprehensive error handling
-- Performance monitoring
-- Circuit breaker protection
+"""Synthetic Data Sub-Agent Implementation
 
 Business Value: Modernizes synthetic data generation for Enterprise tier.
 BVJ: Growth & Enterprise | Increase Value Creation | +15% customer savings
 """
 
 import time
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Protocol
 
+from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult, WebSocketManagerProtocol
 from netra_backend.app.schemas.core_enums import ExecutionStatus
@@ -63,7 +57,7 @@ logger = central_logger.get_logger(__name__)
 
 
 
-class ModernSyntheticDataSubAgent(ABC):
+class ModernSyntheticDataSubAgent(BaseSubAgent):
     """Modern synthetic data sub-agent with standardized execution patterns.
     
     Provides reliable synthetic data generation with:
@@ -75,12 +69,18 @@ class ModernSyntheticDataSubAgent(ABC):
     """
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
-                 websocket_manager: Optional[WebSocketManagerProtocol] = None,
                  reliability_manager: Optional[ReliabilityManager] = None):
-        # BaseExecutionInterface.__init__ removed - using single inheritance pattern
-        self.agent_name = "ModernSyntheticDataSubAgent"
-        self.llm_manager = llm_manager
+        # Initialize BaseSubAgent with proper parameters
+        super().__init__(
+            llm_manager=llm_manager,
+            name="ModernSyntheticDataSubAgent",
+            description="Modern synthetic data generation agent with enhanced reliability"
+        )
+        
+        # Store additional dependencies
         self.tool_dispatcher = tool_dispatcher
+        
+        # Initialize execution patterns and components
         self._initialize_execution_engine(reliability_manager)
         self._initialize_synthetic_components()
     
@@ -89,9 +89,8 @@ class ModernSyntheticDataSubAgent(ABC):
         if not reliability_manager:
             reliability_manager = self._create_default_reliability_manager()
         
-        monitor = ExecutionMonitor(max_history_size=1000)
-        self.execution_engine = BaseExecutionEngine(reliability_manager, monitor)
-        self.monitor = monitor
+        self.monitor = ExecutionMonitor(max_history_size=1000)
+        self.execution_engine = BaseExecutionEngine(reliability_manager, self.monitor)
     
     def _create_default_reliability_manager(self) -> ReliabilityManager:
         """Create default reliability manager with synthetic data optimized settings."""
@@ -187,7 +186,8 @@ class ModernSyntheticDataSubAgent(ABC):
                                    synthetic_context: SyntheticDataContext) -> None:
         """Track execution start with monitoring integration."""
         self.monitor.start_execution(context)
-        await self.send_status_update(context, "initializing", "Preparing synthetic data generation")
+        # Use base class WebSocket methods
+        await self.emit_thinking("Preparing synthetic data generation")
         await self.metrics_handler.record_execution_start(context.run_id, synthetic_context.workload_profile)
 
     async def _execute_generation_workflow(self, context: ExecutionContext,
@@ -202,7 +202,8 @@ class ModernSyntheticDataSubAgent(ABC):
         """Finalize successful execution with metrics tracking."""
         formatted_result = self.workflow.format_execution_result(result)
         await self.metrics_handler.record_successful_generation(context.run_id, result)
-        await self.send_status_update(context, "completed", "Synthetic data generation completed")
+        # Use base class WebSocket methods for completion
+        await self.emit_progress("Synthetic data generation completed", is_complete=True)
         return formatted_result
 
     async def _handle_execution_error(self, context: ExecutionContext, error: Exception) -> Dict[str, Any]:
@@ -210,7 +211,8 @@ class ModernSyntheticDataSubAgent(ABC):
         self.monitor.record_error(context, error)
         await self.metrics_handler.record_generation_error(context.run_id, error)
         error_result = await self.workflow.handle_core_logic_error(context, error)
-        await self.send_status_update(context, "failed", f"Generation failed: {str(error)}")
+        # Use base class error emission
+        await self.emit_error(f"Generation failed: {str(error)}", "execution_error")
         return error_result
 
     def _record_generation_metrics(self, context: ExecutionContext, result: SyntheticDataResult,
@@ -254,25 +256,24 @@ class ModernSyntheticDataSubAgent(ABC):
         try:
             from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
             
-            bridge = await get_agent_websocket_bridge()
+            # Use BaseSubAgent's WebSocket methods instead of direct bridge access
             status = update_data.get('status', 'processing')
             message = update_data.get('message', '')
             
-            # Map update status to appropriate bridge notification
+            # Map update status to appropriate base class WebSocket methods
             if status == 'processing':
-                await bridge.notify_agent_thinking(run_id, self.agent_name, message)
+                await self.emit_thinking(message)
             elif status == 'generating':
-                await bridge.notify_tool_executing(run_id, self.agent_name, "synthetic_data_generation", 
-                                                  {"data_type": update_data.get("data_type", "unknown")})
+                await self.emit_tool_executing("synthetic_data_generation", 
+                                              {"data_type": update_data.get("data_type", "unknown")})
             elif status == 'completed':
-                await bridge.notify_agent_completed(run_id, self.agent_name, 
-                                                   result=update_data.get('result'), 
-                                                   execution_time_ms=update_data.get('execution_time'))
+                await self.emit_tool_completed("synthetic_data_generation",
+                                              result=update_data.get('result'))
             elif status == 'failed':
-                await bridge.notify_agent_error(run_id, self.agent_name, message)
+                await self.emit_error(message, "generation_failure")
             else:
-                # Custom status updates
-                await bridge.notify_custom(run_id, self.agent_name, f"synthetic_{status}", update_data)
+                # Use progress for custom status updates
+                await self.emit_progress(f"Status: {status} - {message}")
                 
         except Exception as e:
             logger.warning(f"Failed to send legacy update via bridge: {e}")
@@ -283,22 +284,36 @@ class ModernSyntheticDataSubAgent(ABC):
         logger.info("Legacy approval flow handler called")
         pass
     
-    async def execute_with_modern_patterns(self, state: DeepAgentState, run_id: str,
-                                         stream_updates: bool = False) -> ExecutionResult:
-        """Execute using modern execution patterns with full orchestration."""
+    async def execute(self, state: Optional[DeepAgentState], run_id: str = "", 
+                     stream_updates: bool = False) -> Any:
+        """Execute agent with modern patterns (implements BaseSubAgent abstract method)."""
+        # Use BaseSubAgent's WebSocket event emission capabilities
+        await self.emit_agent_started("Starting synthetic data generation")
+        
         context = ExecutionContext(
             run_id=run_id,
-            agent_name=self.agent_name,
+            agent_name=self.name,  # Use base class 'name' attribute
             state=state,
             stream_updates=stream_updates
         )
         
-        return await self.execution_engine.execute(self, context)
+        try:
+            result = await self.execution_engine.execute(self, context)
+            await self.emit_agent_completed({"status": "success", "result": result})
+            return result
+        except Exception as e:
+            await self.emit_error(str(e), "execution_failure")
+            raise
+    
+    async def execute_with_modern_patterns(self, state: DeepAgentState, run_id: str,
+                                         stream_updates: bool = False) -> ExecutionResult:
+        """Legacy method for backward compatibility."""
+        return await self.execute(state, run_id, stream_updates)
     
     def get_health_status(self) -> Dict[str, Any]:
         """Get comprehensive health status including all components."""
         base_status = {
-            "agent_name": self.agent_name,
+            "agent_name": self.name,  # Use base class 'name' attribute
             "execution_engine": self.execution_engine.get_health_status(),
             "monitor": self.monitor.get_health_status()
         }

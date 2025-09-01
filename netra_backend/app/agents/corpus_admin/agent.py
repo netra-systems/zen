@@ -19,8 +19,9 @@ from netra_backend.app.agents.utils import extract_thread_id
 
 # Modern execution pattern imports
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus, WebSocketManagerProtocol
+    ExecutionContext, ExecutionResult, WebSocketManagerProtocol
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
