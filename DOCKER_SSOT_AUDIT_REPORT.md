@@ -66,7 +66,7 @@ The claim of complete SSOT violation resolution is **FALSE**. While a UnifiedDoc
 
 The UnifiedDockerManager at `test_framework/unified_docker_manager.py` does combine features from:
 - ServiceOrchestrator async/await architecture
-- CentralizedDockerManager locking mechanisms
+- UnifiedDockerManager locking mechanisms
 - Memory optimization features
 - Health monitoring
 

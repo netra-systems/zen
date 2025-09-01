@@ -73,14 +73,14 @@ env.set("DATABASE_URL", test_url, "test_module")
 
 ## Integration with Centralized Docker Management
 
-The fixed tests are now ready for phase 2 integration with CentralizedDockerManager:
+The fixed tests are now ready for phase 2 integration with UnifiedDockerManager:
 
 ### Ready for Integration:
 ```python
 # Phase 2: Docker Manager Integration (Next Sprint)
-from test_framework.centralized_docker_manager import CentralizedDockerManager
+from test_framework.centralized_docker_manager import UnifiedDockerManager
 
-docker_manager = CentralizedDockerManager()
+docker_manager = UnifiedDockerManager()
 env_name, ports = docker_manager.acquire_environment()
 
 env = get_env()
