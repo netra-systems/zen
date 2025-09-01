@@ -168,17 +168,31 @@ def _extract_clickhouse_config(config):
         class TestClickHouseConfig:
             def __init__(self):
                 self.host = "localhost"
-                self.port = 8125  # Docker mapped HTTP port
-                self.user = "test_user"  # Docker test user
-                self.password = "test_pass"  # Docker test password  
+                self.port = 8125  # Docker mapped HTTP port for test
+                self.user = "test"  # Docker test user
+                self.password = "test"  # Docker test password  
                 self.database = "netra_test_analytics"  # Docker test database
                 self.secure = False
         
         return TestClickHouseConfig()
+    elif config.environment == "development":
+        # For development environment, use dev Docker service values
+        class DevClickHouseConfig:
+            def __init__(self):
+                from shared.isolated_environment import get_env
+                env = get_env()
+                self.host = env.get("CLICKHOUSE_HOST", "localhost")
+                self.port = int(env.get("CLICKHOUSE_HTTP_PORT", "8124"))  # Docker mapped HTTP port for dev
+                self.user = env.get("CLICKHOUSE_USER", "netra")  # Docker dev user
+                self.password = env.get("CLICKHOUSE_PASSWORD", "netra123")  # Docker dev password
+                self.database = env.get("CLICKHOUSE_DB", "netra_analytics")  # Docker dev database
+                self.secure = False
+        
+        return DevClickHouseConfig()
     
     # Use HTTP config for local development, HTTPS for production/remote
-    if config.clickhouse_mode == "local" or config.environment == "development":
-        # Use HTTP port (8123) for local development
+    if config.clickhouse_mode == "local":
+        # Use HTTP port for local mode
         return config.clickhouse_http
     else:
         # Use HTTPS port (8443) for production/staging
