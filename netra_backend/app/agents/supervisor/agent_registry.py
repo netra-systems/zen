@@ -238,6 +238,23 @@ class AgentRegistry:
 
     def set_websocket_manager(self, manager: 'WebSocketManager') -> None:
         """Set websocket manager and enhance tool dispatcher immediately."""
+        # CRITICAL FIX: Prevent None WebSocketManager from breaking agent events
+        if manager is None:
+            logger.error("🚨 CRITICAL: Attempting to set WebSocketManager to None - this breaks agent events!")
+            logger.error("🚨 This prevents real-time chat notifications and agent execution updates")
+            logger.error("🚨 WebSocket events are CRITICAL for 90% of chat functionality")
+            raise ValueError(
+                "WebSocketManager cannot be None. This breaks agent WebSocket events and prevents "
+                "real-time chat updates. Check WebSocketManager initialization in startup sequence."
+            )
+        
+        # Validate the manager has required methods before setting
+        required_methods = ['send_to_thread', 'connections']
+        missing_methods = [method for method in required_methods if not hasattr(manager, method)]
+        if missing_methods:
+            logger.error(f"🚨 CRITICAL: WebSocketManager missing required methods: {missing_methods}")
+            raise ValueError(f"WebSocketManager incomplete - missing methods: {missing_methods}")
+        
         self.websocket_manager = manager
         
         # Enhance tool dispatcher immediately if available

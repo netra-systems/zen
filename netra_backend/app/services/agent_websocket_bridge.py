@@ -246,15 +246,43 @@ class AgentWebSocketBridge(MonitorableComponent):
                 )
     
     async def _initialize_websocket_manager(self) -> None:
-        """Initialize WebSocket manager with error handling."""
-        try:
-            self._websocket_manager = get_websocket_manager()
-            if not self._websocket_manager:
-                raise RuntimeError("WebSocket manager is None")
-            logger.debug("WebSocket manager initialized successfully")
-        except Exception as e:
-            logger.error(f"Failed to initialize WebSocket manager: {e}")
-            raise RuntimeError(f"WebSocket manager initialization failed: {e}")
+        """Initialize WebSocket manager with error handling and retry logic."""
+        import asyncio
+        
+        websocket_manager = None
+        last_error = None
+        
+        # CRITICAL FIX: Retry WebSocket manager initialization up to 3 times
+        for attempt in range(3):
+            try:
+                websocket_manager = get_websocket_manager()
+                if websocket_manager is not None:
+                    # Validate the manager has required methods
+                    if hasattr(websocket_manager, 'connections') and hasattr(websocket_manager, 'send_to_thread'):
+                        self._websocket_manager = websocket_manager
+                        logger.info(f"WebSocket manager initialized successfully on attempt {attempt + 1}")
+                        return
+                    else:
+                        last_error = f"WebSocket manager missing required methods on attempt {attempt + 1}"
+                        logger.warning(last_error)
+                else:
+                    last_error = f"WebSocket manager is None on attempt {attempt + 1}"
+                    logger.warning(last_error)
+                
+                # Short delay before retry (except on last attempt)
+                if attempt < 2:
+                    await asyncio.sleep(0.05 * (attempt + 1))  # 0.05s, 0.1s
+                    
+            except Exception as e:
+                last_error = f"WebSocket manager creation failed on attempt {attempt + 1}: {e}"
+                logger.error(last_error)
+                if attempt < 2:
+                    await asyncio.sleep(0.05 * (attempt + 1))
+        
+        # All attempts failed
+        error_msg = f"WebSocket manager initialization failed after 3 attempts. Last error: {last_error}"
+        logger.error(error_msg)
+        raise RuntimeError(error_msg)
     
     async def _initialize_registry(self) -> None:
         """Initialize agent execution registry with error handling."""

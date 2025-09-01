@@ -29,7 +29,7 @@ from netra_backend.app.core.error_recovery import OperationType, RecoveryContext
 from netra_backend.app.core.graceful_degradation import degradation_manager
 from netra_backend.app.core.memory_recovery_strategies import memory_monitor
 from netra_backend.app.websocket_core.manager import (
-    websocket_recovery_manager,
+    get_websocket_recovery_manager,
 )
 from netra_backend.app.logging_config import central_logger
 
@@ -64,7 +64,7 @@ class EnhancedErrorRecoverySystem:
     
     def _setup_websocket_and_database_managers(self) -> None:
         """Setup websocket and database managers."""
-        self.websocket_manager = websocket_recovery_manager
+        self.websocket_manager = get_websocket_recovery_manager()
         self.database_registry = database_recovery_registry
     
     def _init_legacy_compatibility(self) -> None:

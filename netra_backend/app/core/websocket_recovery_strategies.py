@@ -10,7 +10,7 @@ into focused modules for better maintainability and compliance.
 from netra_backend.app.websocket_core.manager import (
     WebSocketManager as WebSocketConnectionManager,
     WebSocketManager as WebSocketRecoveryManager,
-    websocket_recovery_manager,
+    get_websocket_recovery_manager,
 )
 from netra_backend.app.core.websocket_recovery_types import (
     ConnectionMetrics,
@@ -28,5 +28,5 @@ __all__ = [
     'ReconnectionConfig',
     'WebSocketConnectionManager',
     'WebSocketRecoveryManager',
-    'websocket_recovery_manager'
+    'get_websocket_recovery_manager'
 ]

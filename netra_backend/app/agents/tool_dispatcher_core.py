@@ -1,11 +1,13 @@
 """Core dispatcher logic and initialization for tool dispatching."""
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel, Field
 
+if TYPE_CHECKING:
+    from netra_backend.app.websocket_core import WebSocketManager
+
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.tool_dispatcher_execution import ToolExecutionEngine
 from netra_backend.app.agents.tool_dispatcher_registry import ToolRegistry
 from netra_backend.app.agents.tool_dispatcher_validation import ToolValidator
 from netra_backend.app.logging_config import central_logger
@@ -34,8 +36,14 @@ class ToolDispatchResponse(BaseModel):
 class ToolDispatcher:
     """Core tool dispatcher with modular architecture"""
     
-    def __init__(self, tools: List[BaseTool] = None):
-        self._init_components()
+    def __init__(self, tools: List[BaseTool] = None, websocket_manager: Optional['WebSocketManager'] = None):
+        """Initialize tool dispatcher with optional WebSocket support from the start.
+        
+        Args:
+            tools: List of tools to register initially
+            websocket_manager: WebSocketManager for real-time notifications (critical for chat)
+        """
+        self._init_components(websocket_manager)
         self._register_initial_tools(tools)
     
     @property
@@ -43,10 +51,17 @@ class ToolDispatcher:
         """Expose tools registry for backward compatibility"""
         return self.registry.tools
     
-    def _init_components(self) -> None:
-        """Initialize dispatcher components"""
+    @property
+    def has_websocket_support(self) -> bool:
+        """Check if WebSocket support is enabled."""
+        return hasattr(self.executor, 'websocket_manager') and self.executor.websocket_manager is not None
+    
+    def _init_components(self, websocket_manager: Optional['WebSocketManager'] = None) -> None:
+        """Initialize dispatcher components with WebSocket support built-in."""
         self.registry = ToolRegistry()
-        self.executor = ToolExecutionEngine()
+        # Always use UnifiedToolExecutionEngine - no more enhancement pattern
+        from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
+        self.executor = UnifiedToolExecutionEngine(websocket_manager)
         self.validator = ToolValidator()
     
     def _register_initial_tools(self, tools: List[BaseTool]) -> None:
