@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Comprehensive failing tests for dev_launcher mainline scenarios.
 
 These tests focus on DEFAULT mainline cases that should work but might be broken.
@@ -68,12 +70,12 @@ class TestDefaultStartupWithRealLLM(unittest.TestCase):
                            "LLM should default to 'shared' mode")
         else:
             # Fallback check for environment variable
-            self.assertEqual(os.environ.get('LLM_MODE', 'shared'), 'shared')
+            self.assertEqual(env.get('LLM_MODE', 'shared'), 'shared')
             
     def test_gemini_api_key_detected_from_environment(self):
         """Test that Gemini API key is properly detected from environment."""
         # Set up environment with API key
-        os.environ['GEMINI_API_KEY'] = 'test_gemini_key_12345'
+        env.set('GEMINI_API_KEY', 'test_gemini_key_12345', "test")
         
         config = LauncherConfig(project_root=self.temp_dir)
         launcher = DevLauncher(config)
@@ -85,7 +87,7 @@ class TestDefaultStartupWithRealLLM(unittest.TestCase):
         self.assertEqual(os.environ['GEMINI_API_KEY'], 'test_gemini_key_12345')
         
         # ASSERTION THAT SHOULD FAIL: Should be available for service configuration
-        self.assertIsNotNone(os.environ.get('GEMINI_API_KEY'), 
+        self.assertIsNotNone(env.get('GEMINI_API_KEY'), 
                            "GEMINI_API_KEY should be available in environment")
                            
     def test_environment_variable_loading_priority(self):
@@ -95,7 +97,7 @@ class TestDefaultStartupWithRealLLM(unittest.TestCase):
         (self.temp_dir / ".env.development").write_text("PRIORITY_TEST=dev_file")
         
         # Set system environment variable (should have highest priority)
-        os.environ['PRIORITY_TEST'] = 'system_env'
+        env.set('PRIORITY_TEST', 'system_env', "test")
         
         config = LauncherConfig(project_root=self.temp_dir)
         launcher = DevLauncher(config)
@@ -108,7 +110,7 @@ class TestDefaultStartupWithRealLLM(unittest.TestCase):
                         "System environment variables should have highest priority")
                         
         # ASSERTION THAT SHOULD FAIL: .env file vars should be loaded when not in system
-        self.assertEqual(os.environ.get('FROM_ENV_FILE'), 'yes',
+        self.assertEqual(env.get('FROM_ENV_FILE'), 'yes',
                         "Variables from .env should be loaded when not in system environment")
 
 
@@ -650,7 +652,7 @@ class TestEnvironmentVariablePriority(unittest.TestCase):
         env_file.write_text("TEST_PRIORITY=env_file_value\nENV_FILE_ONLY=env_only")
         
         # Set system environment variable
-        os.environ['TEST_PRIORITY'] = 'system_value'
+        env.set('TEST_PRIORITY', 'system_value', "test")
         
         config = LauncherConfig(project_root=self.temp_dir)
         launcher = DevLauncher(self.config)
@@ -681,7 +683,7 @@ class TestEnvironmentVariablePriority(unittest.TestCase):
         
         # Clear any existing token
         if 'CROSS_SERVICE_AUTH_TOKEN' in os.environ:
-            del os.environ['CROSS_SERVICE_AUTH_TOKEN']
+            env.delete('CROSS_SERVICE_AUTH_TOKEN', "test")
             
         # Generate token
         launcher._ensure_cross_service_auth_token()
@@ -766,13 +768,13 @@ class TestCrossServiceAuthenticationFlow(unittest.TestCase):
         self.config = LauncherConfig(project_root=self.temp_dir)
         # Clear auth token
         if 'CROSS_SERVICE_AUTH_TOKEN' in os.environ:
-            del os.environ['CROSS_SERVICE_AUTH_TOKEN']
+            env.delete('CROSS_SERVICE_AUTH_TOKEN', "test")
             
     def tearDown(self):
         import shutil
         shutil.rmtree(self.temp_dir, ignore_errors=True)
         if 'CROSS_SERVICE_AUTH_TOKEN' in os.environ:
-            del os.environ['CROSS_SERVICE_AUTH_TOKEN']
+            env.delete('CROSS_SERVICE_AUTH_TOKEN', "test")
             
     def test_cross_service_token_generation_and_sharing(self):
         """Test complete flow of cross-service auth token generation and sharing."""
@@ -833,7 +835,7 @@ class TestCrossServiceAuthenticationFlow(unittest.TestCase):
         tokens = []
         for _ in range(3):
             if 'CROSS_SERVICE_AUTH_TOKEN' in os.environ:
-                del os.environ['CROSS_SERVICE_AUTH_TOKEN']
+                env.delete('CROSS_SERVICE_AUTH_TOKEN', "test")
             launcher._ensure_cross_service_auth_token()
             tokens.append(os.environ['CROSS_SERVICE_AUTH_TOKEN'])
             

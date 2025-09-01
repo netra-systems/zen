@@ -17,6 +17,7 @@ from unittest.mock import patch
 from shared.isolated_environment import get_env, get_environment_manager
 
 
+env = get_env()
 class TestPytestEnvironmentIntegration:
     """Test environment isolation integration with pytest framework."""
     
@@ -29,7 +30,7 @@ class TestPytestEnvironmentIntegration:
         _global_env._variable_sources.clear()
         
         # Store original environment for cleanup
-        self.original_env = dict(os.environ)
+        self.original_env = env.get_all()
     
     def teardown_method(self):
         """Cleanup after each test."""
@@ -40,8 +41,8 @@ class TestPytestEnvironmentIntegration:
                 pytest_vars[key] = os.environ[key]
         
         # Restore original environment
-        os.environ.clear()
-        os.environ.update(self.original_env)
+        env.clear()
+        env.update(self.original_env, "test")
         
         # Re-add pytest variables if they were present
         for key, value in pytest_vars.items():
@@ -58,7 +59,7 @@ class TestPytestEnvironmentIntegration:
         
         # Simulate pytest setting PYTEST_CURRENT_TEST (as it does during test execution)
         pytest_test_var = "dev_launcher/tests/test_environment_isolation_pytest_integration.py::TestPytestEnvironmentIntegration::test_pytest_current_test_isolation_compatibility (call)"
-        os.environ["PYTEST_CURRENT_TEST"] = pytest_test_var
+        env.set("PYTEST_CURRENT_TEST", pytest_test_var, "test")
         
         # Enable isolation mode (this is where the bug occurs)
         manager.enable_isolation()
@@ -114,7 +115,7 @@ class TestPytestEnvironmentIntegration:
         
         # Step 1: Simulate pytest setting current test variable
         test_name = "test_module::test_function (call)"
-        os.environ["PYTEST_CURRENT_TEST"] = test_name
+        env.set("PYTEST_CURRENT_TEST", test_name, "test")
         
         # Step 2: Enable isolation (this is where the preservation must happen)
         manager.enable_isolation()
@@ -123,7 +124,7 @@ class TestPytestEnvironmentIntegration:
         # This should NOT fail even with isolation enabled
         try:
             # This is what pytest does in its teardown process
-            removed_value = os.environ.pop("PYTEST_CURRENT_TEST")
+            removed_value = env.delete("PYTEST_CURRENT_TEST", "test")
             assert removed_value == test_name
         except KeyError:
             pytest.fail("PYTEST_CURRENT_TEST was not preserved in os.environ during isolation - this breaks pytest teardown")
@@ -170,7 +171,7 @@ class TestPytestEnvironmentIntegration:
         
         # Set pytest variable
         test_name = "test_module::test_function (call)"
-        os.environ["PYTEST_CURRENT_TEST"] = test_name
+        env.set("PYTEST_CURRENT_TEST", test_name, "test")
         
         manager.enable_isolation()
         
@@ -186,7 +187,7 @@ class TestPytestEnvironmentIntegration:
                 
                 # Critical: verify it's still in os.environ for pytest framework
                 results.append("PYTEST_CURRENT_TEST" in os.environ)
-                results.append(os.environ.get("PYTEST_CURRENT_TEST") == test_name)
+                results.append(env.get("PYTEST_CURRENT_TEST") == test_name)
                 
             except Exception as e:
                 errors.append(str(e))
@@ -215,7 +216,7 @@ class TestPytestEnvironmentIntegration:
         manager.enable_isolation()
         
         # Set a pytest variable
-        os.environ["PYTEST_CURRENT_TEST"] = "initial_test (call)"
+        env.set("PYTEST_CURRENT_TEST", "initial_test (call)", "test")
         
         # Try to protect pytest variables (this should be prevented)
         pytest_vars = ["PYTEST_CURRENT_TEST", "PYTEST_VERSION", "_PYTEST_RAISE"]
@@ -231,7 +232,7 @@ class TestPytestEnvironmentIntegration:
             
             # Critical: pytest variables must always remain modifiable in os.environ
             # because pytest framework needs to manage them
-            original_value = os.environ.get(pytest_var)
+            original_value = env.get(pytest_var)
             try:
                 os.environ[pytest_var] = "modified_by_pytest"
                 # This should succeed - pytest must be able to modify its own vars

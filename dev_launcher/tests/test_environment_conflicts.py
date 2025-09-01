@@ -13,6 +13,7 @@ from pathlib import Path
 from shared.isolated_environment import get_env, get_environment_manager
 
 
+env = get_env()
 def reset_global_manager():
     """Reset the global environment manager for testing."""
     from shared.isolated_environment import _global_env
@@ -33,13 +34,13 @@ class TestEnvironmentManager:
         self.manager.enable_isolation()
         
         # Store original env vars to restore later
-        self.original_env = dict(os.environ)
+        self.original_env = env.get_all()
     
     def teardown_method(self):
         """Cleanup after each test."""
         # Restore original environment
-        os.environ.clear()
-        os.environ.update(self.original_env)
+        env.clear()
+        env.update(self.original_env, "test")
         reset_global_manager()
     
     def test_singleton_pattern(self):
@@ -73,7 +74,7 @@ class TestEnvironmentManager:
         
         assert result is True
         assert manager.get("TEST_VAR") == "test_value"
-        assert os.environ.get("TEST_VAR") == "test_value"
+        assert env.get("TEST_VAR") == "test_value"
     
     def test_conflict_prevention_different_values(self):
         """Test that conflicts are prevented when different components try to set different values."""
@@ -162,7 +163,7 @@ class TestEnvironmentManager:
         manager_non_isolated = get_environment_manager()
         manager_non_isolated.disable_isolation()
         manager_non_isolated.set("TEMP_NON_ISO", "value", source="test")
-        assert os.environ.get("TEMP_NON_ISO") == "value"
+        assert env.get("TEMP_NON_ISO") == "value"
         
         # Clean up from os.environ too
         manager_non_isolated.delete("TEMP_NON_ISO", source="test_cleanup")
@@ -240,7 +241,7 @@ class TestEnvironmentManager:
         manager.set("CLEAR_TEST", "value", source="test_source")
         
         # Verify it's in os.environ
-        assert os.environ.get("CLEAR_TEST") == "value"
+        assert env.get("CLEAR_TEST") == "value"
         
         # Delete the variable
         result = manager.delete("CLEAR_TEST", source="test_source")
@@ -323,17 +324,17 @@ class TestGlobalManagerFunctions:
     def setup_method(self):
         """Setup for each test."""
         reset_global_manager()
-        self.original_env = dict(os.environ)
+        self.original_env = env.get_all()
     
     def teardown_method(self):
         """Cleanup after each test."""
-        os.environ.clear()
-        os.environ.update(self.original_env)
+        env.clear()
+        env.update(self.original_env, "test")
         reset_global_manager()
     
     def test_get_environment_manager_isolation_control(self):
         """Test isolation control in development mode."""
-        os.environ["ENVIRONMENT"] = "development"
+        env.set("ENVIRONMENT", "development", "test")
         
         manager = get_environment_manager()
         manager.enable_isolation()  # Explicitly enable for development
@@ -342,7 +343,7 @@ class TestGlobalManagerFunctions:
     
     def test_get_environment_manager_production_mode(self):
         """Test production mode configuration."""
-        os.environ["ENVIRONMENT"] = "production"
+        env.set("ENVIRONMENT", "production", "test")
         
         manager = get_environment_manager()
         manager.disable_isolation()  # Explicitly disable for production
@@ -351,7 +352,7 @@ class TestGlobalManagerFunctions:
     
     def test_get_environment_manager_explicit_mode(self):
         """Test explicit isolation mode setting."""
-        os.environ["ENVIRONMENT"] = "production"  # This should be ignored
+        env.set("ENVIRONMENT", "production", "test")  # This should be ignored
         
         manager = get_environment_manager()
         manager.enable_isolation()  # Explicitly enable regardless of environment
@@ -374,12 +375,12 @@ class TestIntegrationScenarios:
     def setup_method(self):
         """Setup for each test."""
         reset_global_manager()
-        self.original_env = dict(os.environ)
+        self.original_env = env.get_all()
     
     def teardown_method(self):
         """Cleanup after each test."""
-        os.environ.clear()
-        os.environ.update(self.original_env)
+        env.clear()
+        env.update(self.original_env, "test")
         reset_global_manager()
     
     def test_auth_service_port_conflict_scenario(self):
@@ -488,8 +489,8 @@ class TestIntegrationScenarios:
         dev_manager.disable_isolation()
         
         # Test development environment (isolation mode)
-        os.environ["ENVIRONMENT"] = "development"
-        os.environ["EXISTING_VAR"] = "should_be_ignored"
+        env.set("ENVIRONMENT", "development", "test")
+        env.set("EXISTING_VAR", "should_be_ignored", "test")
         
         # Now enable isolation - this should capture the env vars we just set
         dev_manager.enable_isolation()
@@ -507,7 +508,7 @@ class TestIntegrationScenarios:
         
         # Reset and test production environment
         reset_global_manager()
-        os.environ["ENVIRONMENT"] = "production"
+        env.set("ENVIRONMENT", "production", "test")
         
         prod_manager = get_environment_manager()
         prod_manager.disable_isolation()
@@ -517,7 +518,7 @@ class TestIntegrationScenarios:
         prod_manager.set("PROD_VAR", "production_value", source="test")
         
         # Should affect os.environ
-        assert os.environ.get("PROD_VAR") == "production_value"
+        assert env.get("PROD_VAR") == "production_value"
         
         # Should read from os.environ in non-isolation mode
         assert prod_manager.get("EXISTING_VAR") == "should_be_ignored"

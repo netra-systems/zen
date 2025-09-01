@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Validation tests for the dev launcher.
 
 These tests verify that the launcher can actually start
@@ -15,7 +17,7 @@ from pathlib import Path
 
 # Set UTF-8 encoding for Windows
 if sys.platform == "win32":
-    os.environ['PYTHONIOENCODING'] = 'utf-8'
+    env.set('PYTHONIOENCODING', 'utf-8', "test")
 
 # Add parent directory to path
 
@@ -167,14 +169,14 @@ def test_config_env_vars():
     from dev_launcher.config import LauncherConfig
     
     # Set a test project ID
-    os.environ['GOOGLE_CLOUD_PROJECT'] = 'test-project-123'
+    env.set('GOOGLE_CLOUD_PROJECT', 'test-project-123', "test")
     
     with patch.object(LauncherConfig, '_validate'):
         config = LauncherConfig()
         assert config.project_id == 'test-project-123'
     
     # Clean up
-    del os.environ['GOOGLE_CLOUD_PROJECT']
+    env.delete('GOOGLE_CLOUD_PROJECT', "test")
     print("[PASS] Environment variable handling works")
 
 
