@@ -90,7 +90,7 @@ def set_websocket_manager(self, manager: 'WebSocketManager') -> None:
     # CRITICAL: Enhance tool dispatcher with WebSocket notifications
     # This enables real-time tool execution events
     if self.tool_dispatcher and manager:
-        from netra_backend.app.agents.enhanced_tool_execution import (
+        from netra_backend.app.agents.unified_tool_execution import (
             enhance_tool_dispatcher_with_notifications
         )
         logger.info("Enhancing tool dispatcher with WebSocket notifications")
@@ -107,7 +107,7 @@ def set_websocket_manager(self, manager: 'WebSocketManager') -> None:
         </critical_importance>
       </primary_fix>
 
-      <supporting_enhancements file="netra_backend/app/agents/enhanced_tool_execution.py">
+      <supporting_enhancements file="netra_backend/app/agents/unified_tool_execution.py">
         <description>
           Improved the enhancement function to be more robust and prevent 
           double-enhancement issues.
@@ -131,7 +131,7 @@ def set_websocket_manager(self, manager: 'WebSocketManager') -> None:
       <step number="4">Agent execution sends agent_started event</step>
       <step number="5">Agent sends agent_thinking events during reasoning</step>
       <step number="6">Tool dispatcher sends tool_executing event before tool execution</step>
-      <step number="7">Tool execution happens with EnhancedToolExecutionEngine</step>
+      <step number="7">Tool execution happens with UnifiedToolExecutionEngine</step>
       <step number="8">Tool dispatcher sends tool_completed event with results</step>
       <step number="9">Agent sends agent_completed or final_report event</step>
       <step number="10">Frontend receives ALL events and updates UI in real-time</step>
@@ -350,7 +350,7 @@ def set_websocket_manager(self, manager: 'WebSocketManager') -> None:
   <success_metrics>
     <technical_metrics>
       <metric>Core fix implementation: ✅ AgentRegistry automatically enhances tool dispatcher</metric>
-      <metric>Enhancement integration: ✅ EnhancedToolExecutionEngine properly replaces base executor</metric>
+      <metric>Enhancement integration: ✅ UnifiedToolExecutionEngine properly replaces base executor</metric>
       <metric>Double enhancement safety: ✅ Multiple calls don't create nested enhancements</metric>
       <metric>WebSocket event sending: ⚠️ Events attempted but may need connection debugging</metric>
       <metric>Performance: Fix adds minimal latency to tool execution setup</metric>
@@ -410,7 +410,7 @@ def set_websocket_manager(self, manager: 'WebSocketManager') -> None:
     <implementation_success>
       The core fix has been successfully implemented and validated:
       - ✅ AgentRegistry.set_websocket_manager() now enhances tool dispatcher
-      - ✅ EnhancedToolExecutionEngine properly replaces base executor
+      - ✅ UnifiedToolExecutionEngine properly replaces base executor
       - ✅ Enhancement markers and safety checks work correctly
       - ✅ Double enhancement doesn't cause issues
     </implementation_success>

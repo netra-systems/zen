@@ -24,7 +24,6 @@ from unittest.mock import AsyncMock, MagicMock, patch, Mock
 from urllib.parse import urlparse, parse_qs
 
 from shared.isolated_environment import IsolatedEnvironment
-from netra_backend.app.core.startup_manager import StartupManager
 from netra_backend.tests.startup_check_helpers import StartupTestHelper, RealServiceTestValidator
 from test_framework.performance_helpers import fast_test
 

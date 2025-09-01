@@ -19,7 +19,6 @@ ARCHITECTURAL COMPLIANCE:
 """
 
 import asyncio
-import os
 import time
 from typing import Dict, Any, List
 
@@ -27,6 +26,7 @@ import pytest
 import pytest_asyncio
 
 from netra_backend.app.schemas.user_plan import PlanTier
+from shared.isolated_environment import get_env
 from tests.e2e.agent_conversation_helpers import (
     AgentConversationTestCore,
     ConversationFlowSimulator,
@@ -62,7 +62,12 @@ class TestAgentOrchestrationRealLLMIntegration:
         from netra_backend.app.core.configuration.loader import get_configuration
         
         config = get_configuration()
-        api_key = config.llm_configs.get("default", {}).api_key
+        default_llm_config = config.llm_configs.get("default")
+        
+        if not default_llm_config:
+            pytest.fail("Default LLM config not found. MOCKS ARE FORBIDDEN per CLAUDE.md. Configure LLM to run this test.")
+            
+        api_key = default_llm_config.api_key
         
         if not api_key or not api_key.strip():
             pytest.fail("Real LLM API key not configured. MOCKS ARE FORBIDDEN per CLAUDE.md. Configure API key to run this test.")
@@ -72,7 +77,8 @@ class TestAgentOrchestrationRealLLMIntegration:
     @pytest.fixture
     def llm_timeout(self):
         """Get LLM timeout configuration."""
-        return int(os.getenv("TEST_LLM_TIMEOUT", "30"))
+        env = get_env()
+        return int(env.get("TEST_LLM_TIMEOUT", "30"))
     
     @pytest.mark.asyncio
     @pytest.mark.e2e

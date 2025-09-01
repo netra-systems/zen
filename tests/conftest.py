@@ -436,12 +436,14 @@ def test_user():
 @pytest.fixture
 def auth_headers(test_user):
     try:
-        from netra_backend.app.auth_integration.auth import create_access_token
-
-        token = create_access_token(data={"sub": test_user.email})
+        # Use proper JWT test helpers instead of direct auth imports
+        from tests.e2e.jwt_token_helpers import JWTTestHelper
+        
+        jwt_helper = JWTTestHelper()
+        token = jwt_helper.create_access_token(test_user.id, test_user.email)
         return {"Authorization": f"Bearer {token}"}
     except ImportError:
-        # Return mock headers if auth module not available
+        # Return mock headers if test helpers not available
         return {"Authorization": "Bearer mock-token"}
 
 

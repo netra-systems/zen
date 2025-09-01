@@ -9,291 +9,280 @@ describe('Apex Optimizer Agent End-to-End Test', () => {
       return false;
     });
     
-    // Setup authenticated state with current JWT structure
-    cy.window().then((win) => {
-      win.localStorage.setItem('jwt_token', 'test-apex-optimizer-token');
-      win.localStorage.setItem('user_data', JSON.stringify({
+    // Mock current auth endpoints
+    cy.intercept('GET', '**/auth/config', {
+      statusCode: 200,
+      body: {
+        endpoints: {
+          login: '/auth/dev/login',
+          user: '/auth/me'
+        }
+      }
+    }).as('authConfig');
+    
+    cy.intercept('GET', '**/auth/me', {
+      statusCode: 200,
+      body: {
         id: 'test-user-id',
         email: 'test@netrasystems.ai',
         full_name: 'Test User',
-        role: 'user'
-      }));
+        role: 'user',
+        verified: true
+      }
+    }).as('userAuth');
+    
+    // Setup authenticated state with current JWT structure
+    cy.window().then((win) => {
+      win.localStorage.setItem('jwt_token', 'test-apex-optimizer-token');
+      win.localStorage.setItem('refresh_token', 'test-refresh-token');
     });
   });
 
-  it('should run an Apex Optimizer Agent analysis and display the response', () => {
-    // The apex optimizer functionality is likely integrated into the chat/demo system
-    // Visit demo page which seems to be the main entry point
-    cy.visit('/demo', { failOnStatusCode: false });
+  it('should run an Apex Optimizer Agent analysis via current agent API', () => {
+    // Mock the current agent execution API with apex_optimizer agent type
+    cy.intercept('POST', '**/api/agents/execute', (req) => {
+      expect(req.body).to.have.property('agent_type', 'apex_optimizer');
+      expect(req.body).to.have.property('message');
+      
+      req.reply({
+        statusCode: 200,
+        body: {
+          thread_id: 'apex-thread-123',
+          agent_type: 'apex_optimizer',
+          status: 'processing',
+          websocket_url: 'ws://localhost:8000/ws',
+          message: 'Apex Optimizer analysis started'
+        }
+      });
+    }).as('apexOptimizerExecution');
     
-    // Wait for page to load and check for content
+    // Visit chat page for current system integration
+    cy.visit('/chat', { failOnStatusCode: false });
+    
+    // Wait for page to load and auth
+    cy.wait('@authConfig');
+    cy.wait('@userAuth');
     cy.get('body').should('be.visible');
     cy.wait(2000);
     
-    // Look for demo page elements or navigation
+    // Verify chat interface is loaded with current system structure
+    cy.get('[data-testid="main-chat"]', { timeout: 10000 }).should('be.visible');
+    cy.get('[data-testid="message-textarea"]', { timeout: 5000 }).should('be.visible');
+    
+    // Submit optimization request using current system interface
+    const optimizationRequest = 'I need to reduce costs by 20% and improve latency by 2x.';
+    
+    cy.get('[data-testid="message-textarea"]')
+      .clear()
+      .type(optimizationRequest);
+    
+    cy.get('[data-testid="send-button"]').should('be.enabled');
+    cy.get('[data-testid="send-button"]').click();
+    
+    // Wait for agent API call
+    cy.wait('@apexOptimizerExecution').then((interception) => {
+      // Verify the request structure matches current API
+      expect(interception.request.body).to.deep.include({
+        message: optimizationRequest,
+        agent_type: 'apex_optimizer'
+      });
+    });
+    
+    // Verify message was sent
+    cy.get('[data-testid="message-textarea"]').should('have.value', '');
+    
+    // Check for WebSocket agent events (apex optimizer processing)
     cy.get('body').then($body => {
-      const bodyText = $body.text();
+      const bodyText = $body.text().toLowerCase();
       
-      // Check if this is a demo/optimization interface
-      if (/technology|ai|chat|optimization/i.test(bodyText)) {
-        cy.log('Demo page loaded with relevant content');
-        
-        // Look for Technology section or direct optimization interface
-        if ($body.text().includes('Technology')) {
-          cy.contains('Technology').click({ force: true });
-          cy.wait(500);
-          
-          // Look for AI Chat or optimization option
-          if ($body.text().includes('AI Chat')) {
-            cy.contains('AI Chat').click({ force: true });
-            cy.wait(1000);
-          }
-        }
-        
-        // Now look for input elements in the optimization interface
-        cy.get('body').then($optimizerBody => {
-          // First priority: Look for data-testid selectors
-          if ($optimizerBody.find('[data-testid="message-textarea"]').length > 0) {
-            cy.log('Found current system message input');
-            cy.get('[data-testid="message-textarea"]')
-              .type('I need to reduce costs by 20% and improve latency by 2x.', { force: true });
-            
-            // Look for send button
-            if ($optimizerBody.find('[data-testid="send-button"]').length > 0) {
-              cy.get('[data-testid="send-button"]').click({ force: true });
-            } else {
-              // Fallback to generic button
-              cy.get('button').contains(/send|run|submit/i).first().click({ force: true });
-            }
-            
-          } else if ($optimizerBody.find('textarea').length > 0) {
-            // Fallback: Look for any textarea
-            cy.log('Found generic textarea input');
-            cy.get('textarea').first()
-              .type('I need to reduce costs by 20% and improve latency by 2x.', { force: true });
-            
-            // Look for associated button
-            cy.get('button').contains(/run|send|submit|optimize/i).first().click({ force: true });
-            
-          } else {
-            // Alternative: Look for specific form inputs
-            cy.log('Looking for alternative input methods');
-            const inputSelectors = [
-              'input[type="text"]',
-              '[contenteditable="true"]',
-              '[role="textbox"]'
-            ];
-            
-            let inputFound = false;
-            for (const selector of inputSelectors) {
-              if ($optimizerBody.find(selector).length > 0) {
-                cy.get(selector).first()
-                  .type('I need to reduce costs by 20% and improve latency by 2x.', { force: true });
-                inputFound = true;
-                break;
-              }
-            }
-            
-            if (inputFound) {
-              cy.get('button').contains(/run|send|submit|optimize/i).first().click({ force: true });
-            }
-          }
-        });
-        
-        // Wait for response and check for results
-        cy.wait(5000);
-        
-        // Look for response indicators
-        cy.get('body', { timeout: 15000 }).then($responseBody => {
-          const responseText = $responseBody.text();
-          
-          // Check for various response patterns
-          const hasResponseHeader = /response|result|analysis|recommendation/i.test(responseText);
-          const hasOptimizationContent = /cost|latency|performance|optimization|efficiency/i.test(responseText);
-          const hasAgentResponse = /agent|processing|complete|finished/i.test(responseText);
-          const hasDataMetrics = /\d+%|\$[\d,]+|ms|reduction|improvement/i.test(responseText);
-          
-          if (hasResponseHeader) {
-            cy.log('Response header/section found');
-            // More specific check for h2 with "Response"
-            if ($responseBody.find('h2').filter(':contains("Response")').length > 0) {
-              cy.get('h2').contains('Response').should('be.visible');
-            } else {
-              cy.contains(/response|result|analysis/i).should('be.visible');
-            }
-          }
-          
-          if (hasOptimizationContent) {
-            cy.log('Optimization content detected');
-            cy.contains(/cost|latency|performance|optimization/i).should('be.visible');
-          }
-          
-          if (hasAgentResponse) {
-            cy.log('Agent response indicators found');
-          }
-          
-          if (hasDataMetrics) {
-            cy.log('Performance metrics or data found');
-            cy.contains(/\d+%|\$[\d,]+|ms|reduction|improvement/i).should('be.visible');
-          }
-          
-          // Minimum requirement: page should show some content related to the request
-          const hasRelevantContent = hasResponseHeader || hasOptimizationContent || hasAgentResponse || hasDataMetrics;
-          
-          if (hasRelevantContent) {
-            cy.log('Apex Optimizer analysis completed with relevant content');
-          } else {
-            cy.log('Response received but content type unclear');
-            // Still verify that the page responded (content length changed)
-            expect(responseText.length).to.be.greaterThan(100);
+      // Look for WebSocket event indicators: agent_started, agent_thinking, tool_executing, tool_completed, agent_completed
+      const hasProcessingIndicators = /thinking|processing|analyzing|executing|working/i.test(bodyText);
+      const hasOptimizationContent = /cost|latency|performance|optimization|efficiency/i.test(bodyText);
+      
+      if (hasProcessingIndicators) {
+        cy.log('WebSocket agent events detected - processing indicators found');
+      }
+      
+      if (hasOptimizationContent) {
+        cy.log('Optimization content detected in response');
+      }
+      
+      // Verify the optimization request is visible
+      expect(bodyText).to.include(optimizationRequest.toLowerCase());
+    });
+    
+    // Check for agent response or processing state
+    cy.get('body', { timeout: 15000 }).then($responseBody => {
+      const responseText = $responseBody.text();
+      
+      // Check for various response patterns that would come from WebSocket events
+      const hasAgentStarted = /started|initiated|beginning/i.test(responseText);
+      const hasAgentThinking = /thinking|analyzing|processing/i.test(responseText);
+      const hasToolExecution = /executing|running|tool/i.test(responseText);
+      const hasOptimizationResults = /cost|latency|performance|optimization|efficiency|\d+%|\$[\d,]+|ms|reduction|improvement/i.test(responseText);
+      
+      if (hasAgentStarted) {
+        cy.log('Agent started event processed');
+      }
+      
+      if (hasAgentThinking) {
+        cy.log('Agent thinking event processed');
+        cy.contains(/thinking|analyzing|processing/i).should('be.visible');
+      }
+      
+      if (hasToolExecution) {
+        cy.log('Tool execution events detected');
+      }
+      
+      if (hasOptimizationResults) {
+        cy.log('Optimization results found');
+        cy.contains(/cost|latency|performance|optimization/i).should('be.visible');
+      }
+      
+      // Minimum requirement: system shows the message was processed
+      cy.get('body').should('contain.text', optimizationRequest);
+    });
+  });
+
+  it('should handle apex optimizer errors with circuit breaker', () => {
+    // Mock auth for error test
+    cy.visit('/chat', { failOnStatusCode: false });
+    cy.wait('@authConfig');
+    cy.wait('@userAuth');
+    
+    // Mock API error for apex optimizer with circuit breaker response
+    cy.intercept('POST', '**/api/agents/execute', (req) => {
+      if (req.body.agent_type === 'apex_optimizer') {
+        req.reply({
+          statusCode: 503,
+          body: {
+            error: 'service_unavailable',
+            message: 'Apex Optimizer temporarily unavailable',
+            circuit_breaker: {
+              state: 'open',
+              failure_count: 5,
+              next_attempt_at: new Date(Date.now() + 30000).toISOString()
+            },
+            retry_after: 30
           }
         });
-        
+      }
+    }).as('apexOptimizerError');
+    
+    // Wait for chat interface
+    cy.get('[data-testid="main-chat"]', { timeout: 10000 }).should('be.visible');
+    cy.get('[data-testid="message-textarea"]').should('be.visible');
+    
+    // Submit request that will trigger the error
+    const errorTestMessage = 'Test error handling for apex optimizer';
+    cy.get('[data-testid="message-textarea"]')
+      .clear()
+      .type(errorTestMessage);
+    cy.get('[data-testid="send-button"]').click();
+    
+    // Wait for error response
+    cy.wait('@apexOptimizerError');
+    
+    // Check for circuit breaker error handling
+    cy.get('body').then($resultBody => {
+      const resultText = $resultBody.text().toLowerCase();
+      
+      // Look for error indicators that would come from WebSocket error events
+      const hasErrorMessage = /error|unavailable|service.*temporarily|try.*again|circuit.*breaker/i.test(resultText);
+      const hasRetryGuidance = /retry|wait|later|minutes/i.test(resultText);
+      
+      if (hasErrorMessage) {
+        cy.log('Circuit breaker error handling detected');
+        // Don't require specific error text as it may vary
       } else {
-        cy.log('Demo page structure may be different than expected');
-        // Try direct navigation to chat if demo doesn't work
-        cy.visit('/chat', { failOnStatusCode: false });
-        
-        cy.get('body').then($chatBody => {
-          if ($chatBody.find('[data-testid="message-textarea"]').length > 0) {
-            cy.get('[data-testid="message-textarea"]')
-              .type('I need to reduce costs by 20% and improve latency by 2x.', { force: true });
-            cy.get('[data-testid="send-button"]').click({ force: true });
-            
-            // Wait for response
-            cy.wait(3000);
-            cy.get('body').should('contain.text', 'cost');
-          } else {
-            cy.log('Neither demo nor chat interface found as expected');
-            // Just verify the page loaded
-            cy.get('body').should('be.visible');
-          }
-        });
+        cy.log('Error response received, checking system stability');
       }
+      
+      // Verify the system remains functional after error
+      cy.get('[data-testid="message-textarea"]').should('be.visible');
+      cy.get('[data-testid="send-button"]').should('be.visible');
+      
+      // Verify the error request is still visible in chat
+      expect(resultText).to.include(errorTestMessage.toLowerCase());
     });
   });
 
-  it('should handle apex optimizer errors gracefully', () => {
-    // Test error handling by visiting apex optimizer interface
-    cy.visit('/demo', { failOnStatusCode: false });
-    cy.wait(2000);
-    
-    // Mock API error for apex optimizer
-    cy.intercept('POST', '**/api/chat', {
-      statusCode: 500,
-      body: {
-        error: 'Apex Optimizer temporarily unavailable',
-        message: 'The optimization service is currently experiencing high load'
-      }
-    }).as('apexError');
-    
-    cy.get('body').then($body => {
-      if ($body.text().includes('Technology')) {
-        cy.contains('Technology').click({ force: true });
-        cy.wait(500);
-        if ($body.text().includes('AI Chat')) {
-          cy.contains('AI Chat').click({ force: true });
-          cy.wait(1000);
-        }
-      }
-      
-      // Try to submit a request that will trigger the error
-      cy.get('body').then($errorBody => {
-        if ($errorBody.find('[data-testid="message-textarea"]').length > 0) {
-          cy.get('[data-testid="message-textarea"]')
-            .type('Test error handling for apex optimizer', { force: true });
-          cy.get('[data-testid="send-button"]').click({ force: true });
-          
-        } else if ($errorBody.find('textarea').length > 0) {
-          cy.get('textarea').first()
-            .type('Test error handling for apex optimizer', { force: true });
-          cy.get('button').contains(/run|send/i).first().click({ force: true });
-        }
-        
-        // Check for error handling
-        cy.wait(3000);
-        cy.get('body').then($resultBody => {
-          const resultText = $resultBody.text();
-          const hasErrorHandling = /error|unavailable|try again|service/i.test(resultText);
-          
-          if (hasErrorHandling) {
-            cy.log('Error handling detected');
-            cy.contains(/error|unavailable|try again/i).should('be.visible');
-          } else {
-            cy.log('Error handling not explicitly shown');
+  it('should maintain responsive UI with WebSocket agent events', () => {
+    // Mock successful apex optimizer with WebSocket events
+    cy.intercept('POST', '**/api/agents/execute', (req) => {
+      if (req.body.agent_type === 'apex_optimizer') {
+        req.reply({
+          statusCode: 200,
+          body: {
+            thread_id: 'responsive-ui-thread',
+            agent_type: 'apex_optimizer',
+            status: 'processing',
+            websocket_url: 'ws://localhost:8000/ws',
+            estimated_duration: 30
           }
         });
-      });
-    });
-  });
-
-  it('should maintain responsive UI during apex optimization', () => {
-    // Test UI responsiveness during optimization process
-    cy.visit('/demo', { failOnStatusCode: false });
-    cy.wait(2000);
+      }
+    }).as('responsiveApexOptimizer');
     
-    cy.get('body').then($body => {
-      if ($body.text().includes('Technology')) {
-        cy.contains('Technology').click({ force: true });
-        cy.wait(500);
-        if ($body.text().includes('AI Chat')) {
-          cy.contains('AI Chat').click({ force: true });
-          cy.wait(1000);
-        }
+    // Visit chat interface
+    cy.visit('/chat', { failOnStatusCode: false });
+    cy.wait('@authConfig');
+    cy.wait('@userAuth');
+    
+    cy.get('[data-testid="main-chat"]', { timeout: 10000 }).should('be.visible');
+    cy.get('[data-testid="message-textarea"]').should('be.visible');
+    
+    // Submit comprehensive optimization request
+    const comprehensiveRequest = 'Comprehensive optimization analysis for my infrastructure';
+    cy.get('[data-testid="message-textarea"]')
+      .clear()
+      .type(comprehensiveRequest);
+    cy.get('[data-testid="send-button"]').click();
+    
+    // Wait for agent execution to start
+    cy.wait('@responsiveApexOptimizer');
+    
+    // Test UI remains responsive during processing
+    cy.wait(1000);
+    
+    // Verify interface remains interactive
+    cy.get('[data-testid="message-textarea"]').should('be.visible').should('not.be.disabled');
+    cy.get('[data-testid="send-button"]').should('be.visible');
+    
+    // Check for WebSocket event indicators (responsive loading states)
+    cy.get('body').then($progressBody => {
+      const progressText = $progressBody.text();
+      
+      // Look for WebSocket-driven progress indicators
+      const hasWebSocketEventIndicators = /thinking|processing|analyzing|executing|working/i.test(progressText);
+      const hasVisualLoadingIndicators = $progressBody.find('[class*="loading"], [class*="spinner"], [class*="animate-spin"], [data-testid*="thinking"]').length > 0;
+      
+      if (hasWebSocketEventIndicators) {
+        cy.log('WebSocket agent event indicators found - UI is responsive to events');
       }
       
-      // Submit optimization request
-      cy.get('body').then($uiBody => {
-        if ($uiBody.find('[data-testid="message-textarea"]').length > 0) {
-          cy.get('[data-testid="message-textarea"]')
-            .type('Comprehensive optimization analysis for my infrastructure', { force: true });
-          cy.get('[data-testid="send-button"]').click({ force: true });
-          
-          // Test UI remains responsive
-          cy.wait(1000);
-          
-          // Check that the interface is still interactive
-          cy.get('[data-testid="message-textarea"]').should('exist');
-          
-          // Check for loading indicators or progress feedback
-          cy.get('body').then($progressBody => {
-            const progressText = $progressBody.text();
-            const hasLoadingIndicator = /loading|processing|analyzing|working/i.test(progressText);
-            const hasVisualIndicator = $progressBody.find('[class*="loading"], [class*="spinner"], .animate-spin').length > 0;
-            
-            if (hasLoadingIndicator || hasVisualIndicator) {
-              cy.log('Loading/progress indicators found');
-            } else {
-              cy.log('No explicit loading indicators, but UI remains responsive');
-            }
-          });
-          
-        } else if ($uiBody.find('textarea').length > 0) {
-          cy.get('textarea').first()
-            .type('Comprehensive optimization analysis', { force: true });
-          cy.get('button').contains(/run|send/i).first().click({ force: true });
-          cy.wait(1000);
-        }
-      });
+      if (hasVisualLoadingIndicators) {
+        cy.log('Visual loading indicators found - responsive UI elements present');
+      }
       
-      // Wait for completion and verify final state
-      cy.wait(5000);
-      cy.get('body').should('be.visible');
-      
-      // UI should be ready for next interaction
-      cy.get('body').then($finalBody => {
-        if ($finalBody.find('[data-testid="message-textarea"]').length > 0) {
-          cy.get('[data-testid="message-textarea"]').should('not.be.disabled');
-        }
-      });
+      // Verify the message is displayed (immediate UI feedback)
+      expect(progressText.toLowerCase()).to.include(comprehensiveRequest.toLowerCase());
     });
+    
+    // Test that user can type while agent is processing
+    cy.get('[data-testid="message-textarea"]').type('Follow-up question while processing');
+    cy.get('[data-testid="message-textarea"]').should('contain.value', 'Follow-up question while processing');
+    
+    // Verify UI remains stable and ready for interaction
+    cy.get('[data-testid="send-button"]').should('be.enabled');
+    cy.get('[data-testid="message-textarea"]').should('not.be.disabled');
   });
 
   afterEach(() => {
-    // Clean up test state
+    // Clean up test state with current token structure
     cy.window().then((win) => {
       win.localStorage.removeItem('jwt_token');
-      win.localStorage.removeItem('user_data');
+      win.localStorage.removeItem('refresh_token');
       win.localStorage.removeItem('apex_optimizer_state');
     });
   });

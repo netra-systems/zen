@@ -2,7 +2,7 @@
 
 This module consolidates all tool execution functionality into a single SSOT,
 merging the best features from:
-- enhanced_tool_execution.py (WebSocket notifications)
+- unified_tool_execution.py (WebSocket notifications)
 - tool_dispatcher_execution.py (core delegation pattern)
 - core/interfaces_tools.py (permission checks and validation)
 
@@ -47,7 +47,7 @@ class UnifiedToolExecutionEngine:
     
     This class consolidates:
     1. Core tool execution from interfaces_tools.py
-    2. WebSocket notifications from enhanced_tool_execution.py
+    2. WebSocket notifications from unified_tool_execution.py
     3. Delegation pattern from tool_dispatcher_execution.py
     4. Permission checks and validation
     """
@@ -96,9 +96,8 @@ class UnifiedToolExecutionEngine:
             'context': context
         }
         
-        # Send executing notification
-        if context and self.websocket_notifier:
-            await self._send_tool_executing(context, tool_name, tool_input)
+        # CRITICAL: Always attempt to send executing notification
+        await self._send_tool_executing(context, tool_name, tool_input)
         
         try:
             # Execute tool by interface type
@@ -108,11 +107,10 @@ class UnifiedToolExecutionEngine:
             # Update metrics
             self._execution_metrics['successful_executions'] += 1
             
-            # Send completed notification
-            if context and self.websocket_notifier:
-                await self._send_tool_completed(
-                    context, tool_name, result, duration_ms, "success"
-                )
+            # CRITICAL: Always attempt to send completed notification
+            await self._send_tool_completed(
+                context, tool_name, result, duration_ms, "success"
+            )
             
             return self._create_success_result(tool_input, result)
             
@@ -123,11 +121,10 @@ class UnifiedToolExecutionEngine:
             # Update metrics
             self._execution_metrics['failed_executions'] += 1
             
-            # Send timeout notification
-            if context and self.websocket_notifier:
-                await self._send_tool_completed(
-                    context, tool_name, str(te), duration_ms, "timeout"
-                )
+            # CRITICAL: Always attempt to send timeout notification
+            await self._send_tool_completed(
+                context, tool_name, str(te), duration_ms, "timeout"
+            )
             
             return self._create_error_result(tool_input, f"Timeout after {duration_ms:.0f}ms")
             
@@ -139,11 +136,10 @@ class UnifiedToolExecutionEngine:
             # Update metrics
             self._execution_metrics['failed_executions'] += 1
             
-            # Send error notification
-            if context and self.websocket_notifier:
-                await self._send_tool_completed(
-                    context, tool_name, str(e), duration_ms, "error", error_type
-                )
+            # CRITICAL: Always attempt to send error notification
+            await self._send_tool_completed(
+                context, tool_name, str(e), duration_ms, "error", error_type
+            )
             
             return self._create_error_result(tool_input, str(e))
             
@@ -199,11 +195,10 @@ class UnifiedToolExecutionEngine:
             error_type = type(e).__name__
             logger.error(f"Tool {tool_name} failed after {duration_ms:.0f}ms with {error_type}: {e}")
             
-            # Send error notification
-            if context and self.websocket_notifier:
-                await self._send_tool_completed(
-                    context, tool_name, str(e), duration_ms, "error", error_type
-                )
+            # CRITICAL: Always attempt to send error notification
+            await self._send_tool_completed(
+                context, tool_name, str(e), duration_ms, "error", error_type
+            )
             
             return self._create_error_response(e, tool_name, run_id)
     
@@ -460,7 +455,19 @@ class UnifiedToolExecutionEngine:
         tool_input: Any
     ) -> None:
         """Send tool executing notification with enhanced metadata."""
-        if not self.websocket_notifier or not context:
+        # CRITICAL: Always attempt to notify, with fallback
+        if not context:
+            logger.critical(f"MISSING CONTEXT: Tool {tool_name} executing without context - events invisible")
+            return
+            
+        if not self.websocket_notifier:
+            # CRITICAL: Log when WebSocket unavailable so we know events are lost
+            logger.critical(
+                f"WEBSOCKET UNAVAILABLE: Tool {tool_name} executing for thread {context.thread_id} - "
+                f"user will not see progress"
+            )
+            # Could write to Redis or database here as fallback
+            # For now, at least we have audit trail in logs
             return
         
         try:
@@ -489,7 +496,18 @@ class UnifiedToolExecutionEngine:
         error_type: str = None
     ) -> None:
         """Send tool completed notification with result."""
-        if not self.websocket_notifier or not context:
+        # CRITICAL: Always attempt to notify, with fallback
+        if not context:
+            logger.critical(f"MISSING CONTEXT: Tool {tool_name} completed without context - events invisible")
+            return
+            
+        if not self.websocket_notifier:
+            # CRITICAL: Log when WebSocket unavailable so we know events are lost
+            logger.critical(
+                f"WEBSOCKET UNAVAILABLE: Tool {tool_name} completed for thread {context.thread_id} - "
+                f"status: {status}, duration: {duration_ms:.0f}ms - user will not see result"
+            )
+            # Could write to Redis or database here as fallback
             return
         
         try:

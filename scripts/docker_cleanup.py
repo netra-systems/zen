@@ -12,28 +12,57 @@ import json
 import argparse
 from datetime import datetime, timedelta
 import re
+import os
+from pathlib import Path
+
+# Add project root to path
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
+# Import centralized Docker manager if available
+try:
+    from test_framework.centralized_docker_manager import (
+        CentralizedDockerManager, EnvironmentType
+    )
+    CENTRALIZED_MANAGER_AVAILABLE = True
+except ImportError:
+    CENTRALIZED_MANAGER_AVAILABLE = False
+    CentralizedDockerManager = None
 
 
 class DockerCleaner:
     """Manages Docker cleanup operations."""
     
-    def __init__(self, dry_run: bool = False, force: bool = False):
+    def __init__(self, dry_run: bool = False, force: bool = False, use_centralized: bool = True):
         """
         Initialize Docker cleaner.
         
         Args:
             dry_run: If True, only show what would be removed
             force: If True, skip confirmation prompts
+            use_centralized: If True, use centralized Docker manager for test environments
         """
         self.dry_run = dry_run
         self.force = force
+        self.use_centralized = use_centralized and CENTRALIZED_MANAGER_AVAILABLE
         self.stats = {
             'containers_removed': 0,
             'images_removed': 0,
             'volumes_removed': 0,
             'networks_removed': 0,
-            'space_reclaimed': 0
+            'space_reclaimed': 0,
+            'test_environments_cleaned': 0
         }
+        
+        # Initialize centralized manager if available
+        self.centralized_manager = None
+        if self.use_centralized:
+            try:
+                self.centralized_manager = CentralizedDockerManager()
+                print("[INFO] Using centralized Docker manager for test environment cleanup")
+            except Exception as e:
+                print(f"[WARNING] Could not initialize centralized manager: {e}")
+                self.use_centralized = False
     
     def run_command(self, cmd: List[str], capture_output: bool = True) -> Optional[str]:
         """
@@ -82,6 +111,29 @@ class DockerCleaner:
             info['disk_usage'] = df_output
             
         return info
+    
+    def clean_test_environments(self) -> None:
+        """Clean up old test environments using centralized manager."""
+        if not self.centralized_manager:
+            return
+        
+        print("\n=== Cleaning Test Environments ===")
+        
+        try:
+            # Get current statistics
+            stats = self.centralized_manager.get_statistics()
+            print(f"Active environments: {stats['active_environments']}")
+            print(f"Total environments: {stats['environments']}")
+            
+            # Clean up old environments (older than 4 hours by default)
+            if not self.dry_run:
+                self.centralized_manager.cleanup_old_environments(max_age_hours=4)
+                self.stats['test_environments_cleaned'] += 1
+                print("✅ Cleaned up old test environments")
+            else:
+                print("[DRY RUN] Would clean up old test environments")
+        except Exception as e:
+            print(f"Error cleaning test environments: {e}")
     
     def clean_stopped_containers(self) -> None:
         """Remove all stopped containers."""
@@ -416,6 +468,10 @@ def main():
         elif args.mode == 'aggressive':
             cleaner.aggressive_cleanup()
         else:  # normal mode
+            # Clean test environments first (if centralized manager available)
+            cleaner.clean_test_environments()
+            
+            # Then clean regular Docker resources
             cleaner.clean_stopped_containers()
             cleaner.clean_dangling_images()
             cleaner.clean_unused_images(days_old=args.days_old)

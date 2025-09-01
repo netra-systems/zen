@@ -295,12 +295,13 @@ class WebSocketTestManager:
     def _create_test_token(self, user_id: str) -> str:
         """Create test JWT token with proper authentication"""
         try:
-            # Try to create real JWT token first
-            from netra_backend.app.auth_integration.auth import create_access_token
-            token_data = {"sub": user_id, "user_id": user_id, "email": f"{user_id}@test.com"}
-            return create_access_token(data=token_data)
+            # Use proper JWT test helpers instead of direct auth imports
+            from tests.e2e.jwt_token_helpers import JWTTestHelper
+            
+            jwt_helper = JWTTestHelper()
+            return jwt_helper.create_access_token(user_id, f"{user_id}@test.com")
         except (ImportError, Exception) as e:
-            logger.debug(f"Failed to create real token: {e}, using bypass")
+            logger.debug(f"Failed to create token with JWT helper: {e}, using bypass")
             # For testing, create a bypass token that works with the auth system
             return "test-bypass-token-for-websocket-events"
     

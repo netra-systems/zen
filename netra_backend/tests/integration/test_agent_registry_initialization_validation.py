@@ -318,8 +318,8 @@ class TestAgentRegistryInitializationValidation:
         assert agent_registry.tool_dispatcher._websocket_enhanced is True
         
         # Verify enhanced tool execution engine is in place
-        from netra_backend.app.agents.enhanced_tool_execution import EnhancedToolExecutionEngine
-        assert isinstance(agent_registry.tool_dispatcher.executor, EnhancedToolExecutionEngine)
+        from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
+        assert isinstance(agent_registry.tool_dispatcher.executor, UnifiedToolExecutionEngine)
         
         # Test WebSocket message creation (mission-critical events)
         test_thread_id = str(uuid.uuid4())
@@ -375,9 +375,9 @@ class TestAgentRegistryInitializationValidation:
         assert tool_dispatcher._websocket_enhanced is True
         
         # Verify WebSocket manager is properly set in tool dispatcher
-        from netra_backend.app.agents.enhanced_tool_execution import EnhancedToolExecutionEngine
+        from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
         enhanced_executor = tool_dispatcher.executor
-        assert isinstance(enhanced_executor, EnhancedToolExecutionEngine)
+        assert isinstance(enhanced_executor, UnifiedToolExecutionEngine)
         assert enhanced_executor.websocket_manager is websocket_manager
         
         # Test that agents have access to enhanced tool capabilities
@@ -561,9 +561,9 @@ class TestAgentRegistryAdvancedIntegration:
         # tool_completed, agent_completed
         
         # Check tool dispatcher enhancement
-        from netra_backend.app.agents.enhanced_tool_execution import EnhancedToolExecutionEngine
+        from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
         enhanced_executor = registry.tool_dispatcher.executor
-        assert isinstance(enhanced_executor, EnhancedToolExecutionEngine)
+        assert isinstance(enhanced_executor, UnifiedToolExecutionEngine)
         assert enhanced_executor.websocket_manager is websocket_manager
         assert enhanced_executor.websocket_notifier is not None
         

@@ -6,10 +6,6 @@ import WS from 'jest-websocket-mock';
 import { TestProviders } from '../setup/test-providers';
 import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-';
-import WS from 'jest-websocket-mock';
-import { TestProviders } from '../setup/test-providers';
-import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
 
 // Mock dependencies
 jest.mock('@/services/webSocketService');

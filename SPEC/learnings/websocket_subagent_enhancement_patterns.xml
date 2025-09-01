@@ -88,7 +88,7 @@
       </agent>
     </enhanced_agents>
 
-    <tool_execution_fix file="netra_backend/app/agents/enhanced_tool_execution.py">
+    <tool_execution_fix file="netra_backend/app/agents/unified_tool_execution.py">
       <description>
         Fixed thread_id extraction in enhanced tool execution to properly match WebSocket connections.
         The issue was that state.thread_id didn't match the connection ID used in WebSocket manager.

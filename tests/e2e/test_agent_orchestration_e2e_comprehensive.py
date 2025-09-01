@@ -37,7 +37,7 @@ from loguru import logger
 
 # Real services infrastructure
 from test_framework.real_services import get_real_services, RealServicesManager
-from test_framework.environment_isolation import IsolatedEnvironment
+from shared.isolated_environment import get_env
 from test_framework.service_availability import check_service_availability
 
 # Production components
@@ -46,8 +46,8 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.agents.enhanced_tool_execution import (
-    EnhancedToolExecutionEngine,
+from netra_backend.app.agents.unified_tool_execution import (
+    UnifiedToolExecutionEngine,
     enhance_tool_dispatcher_with_notifications
 )
 from netra_backend.app.agents.state import DeepAgentState
@@ -335,7 +335,7 @@ async def real_services():
 async def orchestration_setup(real_services):
     """Set up complete orchestration environment with real services."""
     # Initialize configuration
-    env = IsolatedEnvironment()
+    env = get_env()
     config_manager = UnifiedConfigManager()
     await config_manager.initialize()
     app_config = config_manager.get_app_config()

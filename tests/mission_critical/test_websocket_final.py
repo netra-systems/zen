@@ -7,7 +7,7 @@ Business Value: $500K+ ARR - Core chat functionality
 This test validates the exact requirements from the task:
 1. AgentRegistry.set_websocket_manager() MUST enhance tool dispatcher
 2. ExecutionEngine MUST have WebSocketNotifier initialized
-3. EnhancedToolExecutionEngine MUST wrap tool execution
+3. UnifiedToolExecutionEngine MUST wrap tool execution
 4. ALL required WebSocket events must be sent
 
 Uses mocked WebSocket connections to avoid infrastructure dependencies
@@ -30,8 +30,8 @@ from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.agents.enhanced_tool_execution import (
-    EnhancedToolExecutionEngine,
+from netra_backend.app.agents.unified_tool_execution import (
+    UnifiedToolExecutionEngine,
     enhance_tool_dispatcher_with_notifications
 )
 from netra_backend.app.websocket_core.manager import WebSocketManager
@@ -84,7 +84,7 @@ def test_2_agent_registry_websocket_enhancement():
     if tool_dispatcher.executor == original_executor:
         raise AssertionError("CRITICAL: Tool dispatcher executor not enhanced")
     
-    if not isinstance(tool_dispatcher.executor, EnhancedToolExecutionEngine):
+    if not isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine):
         raise AssertionError(f"CRITICAL: Wrong executor type: {type(tool_dispatcher.executor)}")
     
     if not getattr(tool_dispatcher, '_websocket_enhanced', False):
@@ -115,8 +115,8 @@ def test_3_execution_engine_websocket_notifier():
     print("PASS: ExecutionEngine has WebSocketNotifier")
 
 
-async def test_4_enhanced_tool_execution_sends_events():
-    """CRITICAL: EnhancedToolExecutionEngine MUST wrap tool execution and send events."""
+async def test_4_unified_tool_execution_sends_events():
+    """CRITICAL: UnifiedToolExecutionEngine MUST wrap tool execution and send events."""
     print("Test 4: Enhanced tool execution sends events...")
     
     ws_manager = WebSocketManager()
@@ -130,7 +130,7 @@ async def test_4_enhanced_tool_execution_sends_events():
     ws_manager.send_to_thread = AsyncMock(side_effect=capture_event)
     
     # Create enhanced executor
-    executor = EnhancedToolExecutionEngine(ws_manager)
+    executor = UnifiedToolExecutionEngine(ws_manager)
     
     # Create test context
     context = AgentExecutionContext(
@@ -254,7 +254,7 @@ async def test_6_regression_prevention():
         if tool_dispatcher.executor == original_executor:
             raise AssertionError(f"REGRESSION: Tool dispatcher not enhanced on iteration {i}")
         
-        if not isinstance(tool_dispatcher.executor, EnhancedToolExecutionEngine):
+        if not isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine):
             raise AssertionError(f"REGRESSION: Wrong executor type on iteration {i}")
     
     print("PASS: Regression prevention successful")
@@ -268,7 +268,7 @@ async def main():
     print("Testing the core requirements from the task:")
     print("1. AgentRegistry.set_websocket_manager() enhances tool dispatcher")
     print("2. ExecutionEngine has WebSocketNotifier initialized")
-    print("3. EnhancedToolExecutionEngine wraps tool execution")
+    print("3. UnifiedToolExecutionEngine wraps tool execution")
     print("4. All required WebSocket events are sent")
     print("=" * 70)
     
@@ -277,7 +277,7 @@ async def main():
         test_1_websocket_notifier_required_methods()
         test_2_agent_registry_websocket_enhancement()
         test_3_execution_engine_websocket_notifier()
-        await test_4_enhanced_tool_execution_sends_events()
+        await test_4_unified_tool_execution_sends_events()
         await test_5_all_required_websocket_events()
         await test_6_regression_prevention()
         

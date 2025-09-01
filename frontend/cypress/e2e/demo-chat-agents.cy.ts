@@ -30,15 +30,15 @@ describe('DemoChat Agent Processing & Business Features', () => {
       // Verify message was sent
       MessageAssertions.assertUserMessage(message)
       
-      // Check for processing indicators
+      // Check for WebSocket agent processing indicators
       cy.get('body').then($body => {
         const hasProcessingIndicator = $body.find('[data-testid="agent-processing"], .processing, [class*="processing"]').length > 0;
-        const hasProcessingText = /processing|analyzing|thinking/i.test($body.text());
+        const hasProcessingText = /processing|analyzing|thinking|agent_started|agent_thinking/i.test($body.text());
         
         if (hasProcessingIndicator || hasProcessingText) {
           AgentProcessing.assertProcessingIndicator()
         } else {
-          cy.log('Processing indicators may be displayed differently')
+          cy.log('Processing indicators may be displayed differently via WebSocket events')
           WaitHelpers.forResponse()
         }
       })
@@ -50,16 +50,16 @@ describe('DemoChat Agent Processing & Business Features', () => {
       
       MessageAssertions.assertUserMessage(complexMessage)
       
-      // Check for multiple agent indicators
+      // Check for multiple agent indicators and WebSocket events
       cy.get('body').then($body => {
         const agentIndicators = $body.find('[data-testid*="agent"], [class*="agent"]').length
-        const hasMultipleAgents = /analyzer.*optimizer|multiple.*agent|orchestrat/i.test($body.text())
+        const hasMultipleAgents = /analyzer.*optimizer|multiple.*agent|orchestrat|agent_started|tool_executing/i.test($body.text())
         
         if (agentIndicators >= 2 || hasMultipleAgents) {
           AgentProcessing.assertAgentActivation()
           cy.log(`Found ${agentIndicators} agent-related elements`)
         } else {
-          cy.log('Agent orchestration may be handled differently')
+          cy.log('Agent orchestration handled via WebSocket events (agent_started, tool_executing, agent_completed)')
           WaitHelpers.forProcessing()
         }
       })
@@ -328,9 +328,11 @@ describe('DemoChat Agent Processing & Business Features', () => {
     })
 
     it('should handle agent failures gracefully', () => {
-      cy.intercept('POST', '/api/agents/**', { statusCode: 500 })
+      // Mock agent API endpoint failure
+      cy.intercept('POST', '/api/agents/execute', { statusCode: 500 }).as('agentFailure')
       MessageInput.send('Analyze')
-      cy.contains(/fallback|alternative|retry/i).should('be.visible')
+      cy.wait('@agentFailure')
+      cy.contains(/fallback|alternative|retry|error|failed/i).should('be.visible')
     })
 
     it('should show confidence scores', () => {

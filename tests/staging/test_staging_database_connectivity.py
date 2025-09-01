@@ -14,6 +14,7 @@ import time
 import uuid
 from typing import Dict, Any, Optional, List
 from shared.isolated_environment import IsolatedEnvironment
+from tests.staging.staging_config import StagingConfig
 
 # Import database utilities (will gracefully handle import failures)
 try:
@@ -25,25 +26,13 @@ except ImportError as e:
     print(f"Warning: Database imports failed: {e}")
     # We'll use API-based testing instead
 
-# Test Configuration
-STAGING_URLS = {
-    "backend": "https://netra-backend-staging-701982941522.us-central1.run.app",
-    "auth": "https://netra-auth-service-701982941522.us-central1.run.app"
-}
-
-LOCAL_URLS = {
-    "backend": "http://localhost:8000",
-    "auth": "http://localhost:8001"
-}
-
 class StagingDatabaseConnectivityTestRunner:
     """Test runner for database connectivity validation in staging."""
     
     def __init__(self):
         self.env = IsolatedEnvironment()
-        self.environment = self.env.get("ENVIRONMENT", "development")
-        self.urls = STAGING_URLS if self.environment == "staging" else LOCAL_URLS
-        self.timeout = 30.0
+        self.environment = StagingConfig.get_environment()
+        self.timeout = StagingConfig.TIMEOUTS["default"]
         self.access_token = None
         
     def get_base_headers(self) -> Dict[str, str]:
@@ -63,7 +52,7 @@ class StagingDatabaseConnectivityTestRunner:
                 
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 response = await client.post(
-                    f"{self.urls['auth']}/api/auth/simulate",
+                    f"{StagingConfig.get_service_url('auth')}/api/auth/simulate",
                     headers=self.get_base_headers(),
                     json={
                         "simulation_key": simulation_key,
@@ -91,7 +80,7 @@ class StagingDatabaseConnectivityTestRunner:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 # Test backend database health endpoint
                 backend_health_response = await client.get(
-                    f"{self.urls['backend']}/api/system/database/health",
+                    f"{StagingConfig.get_service_url('netra_backend')}/api/system/database/health",
                     headers=self.get_base_headers()
                 )
                 
@@ -116,7 +105,7 @@ class StagingDatabaseConnectivityTestRunner:
                 
                 # Test auth service database health
                 auth_health_response = await client.get(
-                    f"{self.urls['auth']}/api/system/database/health",
+                    f"{StagingConfig.get_service_url('auth')}/api/system/database/health",
                     headers=self.get_base_headers()
                 )
                 
@@ -168,7 +157,7 @@ class StagingDatabaseConnectivityTestRunner:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 # Test user profile read (PostgreSQL)
                 profile_response = await client.get(
-                    f"{self.urls['backend']}/api/user/profile",
+                    f"{StagingConfig.get_service_url('netra_backend')}/api/user/profile",
                     headers={
                         **self.get_base_headers(),
                         "Authorization": f"Bearer {self.access_token}"
@@ -188,7 +177,7 @@ class StagingDatabaseConnectivityTestRunner:
                 
                 # Test corpus search (ClickHouse read)
                 search_response = await client.get(
-                    f"{self.urls['backend']}/api/corpus/search?q=test&limit=5",
+                    f"{StagingConfig.get_service_url('netra_backend')}/api/corpus/search?q=test&limit=5",
                     headers={
                         **self.get_base_headers(),
                         "Authorization": f"Bearer {self.access_token}"
@@ -254,7 +243,7 @@ class StagingDatabaseConnectivityTestRunner:
                 }
                 
                 profile_response = await client.put(
-                    f"{self.urls['backend']}/api/user/profile",
+                    f"{StagingConfig.get_service_url('netra_backend')}/api/user/profile",
                     headers={
                         **self.get_base_headers(),
                         "Authorization": f"Bearer {self.access_token}"
@@ -288,7 +277,7 @@ class StagingDatabaseConnectivityTestRunner:
                 }
                 
                 corpus_response = await client.post(
-                    f"{self.urls['backend']}/api/corpus/upload",
+                    f"{StagingConfig.get_service_url('netra_backend')}/api/corpus/upload",
                     headers={
                         **self.get_base_headers(),
                         "Authorization": f"Bearer {self.access_token}"
@@ -344,7 +333,7 @@ class StagingDatabaseConnectivityTestRunner:
             async def make_db_request(client, request_id):
                 try:
                     response = await client.get(
-                        f"{self.urls['backend']}/api/user/profile",
+                        f"{StagingConfig.get_service_url('netra_backend')}/api/user/profile",
                         headers={
                             **self.get_base_headers(),
                             "Authorization": f"Bearer {self.access_token}",
@@ -402,8 +391,8 @@ class StagingDatabaseConnectivityTestRunner:
         """Run all database connectivity tests."""
         print(f"🗃️  Running Database Connectivity Tests")
         print(f"Environment: {self.environment}")
-        print(f"Backend URL: {self.urls['backend']}")
-        print(f"Auth URL: {self.urls['auth']}")
+        print(f"Backend URL: {StagingConfig.get_service_url('netra_backend')}")
+        print(f"Auth URL: {StagingConfig.get_service_url('auth')}")
         print()
         
         # Get test token first

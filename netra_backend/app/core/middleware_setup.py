@@ -32,10 +32,10 @@ def setup_cors_middleware(app: FastAPI) -> None:
     cors_config = cors.fastapi.get_middleware_config()
     
     # Debug logging to understand CORS configuration
-    logger.info(f"CORS Configuration for {cors.environment}:")
-    logger.info(f"  Origins count: {len(cors_config.get('allow_origins', []))}")
-    logger.info(f"  Allow credentials: {cors_config.get('allow_credentials')}")
-    logger.info(f"  First 3 origins: {cors_config.get('allow_origins', [])[:3]}")
+    logger.debug(f"CORS Configuration for {cors.environment}:")
+    logger.debug(f"  Origins count: {len(cors_config.get('allow_origins', []))}")
+    logger.debug(f"  Allow credentials: {cors_config.get('allow_credentials')}")
+    logger.debug(f"  First 3 origins: {cors_config.get('allow_origins', [])[:3]}")
     
     # Use standard FastAPI CORSMiddleware
     # WebSocket CORS is handled separately by WebSocketCORSMiddleware at the ASGI level
@@ -43,7 +43,7 @@ def setup_cors_middleware(app: FastAPI) -> None:
         CORSMiddleware, 
         **cors_config
     )
-    logger.info(f"CORS middleware configured for environment: {cors.environment}")
+    logger.debug(f"CORS middleware configured for environment: {cors.environment}")
 
 
 # WebSocketAwareCORSMiddleware removed - using standard CORSMiddleware
@@ -119,7 +119,7 @@ def setup_auth_middleware(app: FastAPI) -> None:
             "/api/v1/auth"
         ]
     )
-    logger.info("Authentication middleware configured with WebSocket exclusions")
+    logger.debug("Authentication middleware configured with WebSocket exclusions")
 
 
 def setup_session_middleware(app: FastAPI) -> None:
@@ -161,7 +161,7 @@ def _log_session_config(session_config: dict, current_environment) -> None:
     """Log session configuration for debugging."""
     import logging
     logger = logging.getLogger(__name__)
-    logger.info(
+    logger.debug(
         f"Session middleware config: same_site={session_config['same_site']}, "
         f"https_only={session_config['https_only']}, environment={current_environment.value}"
     )

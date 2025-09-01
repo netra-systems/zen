@@ -1,453 +1,54 @@
-
-> netra-frontend-v2@0.1.0 cy:run
-> cypress run --spec cypress/e2e/agent-interaction-flow.cy.ts,cypress/e2e/data-generation-flow.cy.ts,cypress/e2e/optimization-results-flow.cy.ts --reporter json
-
-
-
-DevTools listening on ws://127.0.0.1:52061/devtools/browser/e1335e02-7571-4716-933e-7de6537082e0
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:        14.5.3                                                                         │
-  │ Browser:        Electron 130 (headless)                                                        │
-  │ Node Version:   v24.4.1 (C:\Program Files\nodejs\node.exe)                                     │
-  │ Specs:          3 found (agent-interaction-flow.cy.ts, data-generation-flow.cy.ts, optimizatio │
-  │                 n-results-flow.cy.ts)                                                          │
-  │ Searched:       C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\v2\frontend\cypr │
-  │                 ess\e2e\agent-interaction-flow.cy.ts, C:\Users\antho\OneDrive\Desktop\Netra\ne │
-  │                 tra-core-generation-1\v2\frontend\cypress\e2e\data-generation-flow.cy.ts, C:\U │
-  │                 sers\antho\OneDrive\Desktop\Netra\netra-core-generation-1\v2\frontend\cypress\ │
-  │                 e2e\optimization-results-flow.cy.ts                                            │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  agent-interaction-flow.cy.ts                                                    (1 of 3)
 {
-  "stats": {
-    "suites": 1,
-    "tests": 5,
-    "passes": 5,
-    "pending": 0,
-    "failures": 0,
-    "start": "2025-08-10T18:21:22.586Z",
-    "end": "2025-08-10T18:21:41.135Z",
-    "duration": 18549
+  "success": false,
+  "error": "Required services not available",
+  "service_status": {
+    "backend": {
+      "name": "Netra Backend",
+      "healthy": false,
+      "url": "http://localhost:8001",
+      "port": 8001,
+      "error": "Connection refused",
+      "details": {}
+    },
+    "frontend": {
+      "name": "Frontend Dev Server",
+      "healthy": false,
+      "url": "http://localhost:3001",
+      "port": 3001,
+      "error": "Timeout after 0s",
+      "details": {}
+    },
+    "postgres": {
+      "name": "PostgreSQL Database",
+      "healthy": false,
+      "url": "http://localhost:5434",
+      "port": 5434,
+      "error": "Timeout after 0s",
+      "details": {}
+    },
+    "redis": {
+      "name": "Redis Cache",
+      "healthy": false,
+      "url": "http://localhost:6381",
+      "port": 6381,
+      "error": "Timeout after 0s",
+      "details": {}
+    }
   },
-  "tests": [
-    {
-      "title": "should load chat interface and accept input",
-      "fullTitle": "Agent Interaction Complete Flow should load chat interface and accept input",
-      "file": null,
-      "duration": 3681,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should handle agent workflow simulation",
-      "fullTitle": "Agent Interaction Complete Flow should handle agent workflow simulation",
-      "file": null,
-      "duration": 2573,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should display agent status indicators if available",
-      "fullTitle": "Agent Interaction Complete Flow should display agent status indicators if available",
-      "file": null,
-      "duration": 2641,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should maintain page stability during interaction",
-      "fullTitle": "Agent Interaction Complete Flow should maintain page stability during interaction",
-      "file": null,
-      "duration": 5677,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should handle graceful degradation without backend",
-      "fullTitle": "Agent Interaction Complete Flow should handle graceful degradation without backend",
-      "file": null,
-      "duration": 3718,
-      "currentRetry": 0,
-      "err": {}
-    }
-  ],
-  "pending": [],
-  "failures": [],
-  "passes": [
-    {
-      "title": "should load chat interface and accept input",
-      "fullTitle": "Agent Interaction Complete Flow should load chat interface and accept input",
-      "file": null,
-      "duration": 3681,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should handle agent workflow simulation",
-      "fullTitle": "Agent Interaction Complete Flow should handle agent workflow simulation",
-      "file": null,
-      "duration": 2573,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should display agent status indicators if available",
-      "fullTitle": "Agent Interaction Complete Flow should display agent status indicators if available",
-      "file": null,
-      "duration": 2641,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should maintain page stability during interaction",
-      "fullTitle": "Agent Interaction Complete Flow should maintain page stability during interaction",
-      "file": null,
-      "duration": 5677,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should handle graceful degradation without backend",
-      "fullTitle": "Agent Interaction Complete Flow should handle graceful degradation without backend",
-      "file": null,
-      "duration": 3718,
-      "currentRetry": 0,
-      "err": {}
-    }
-  ]
-}
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        5                                                                                │
-  │ Passing:      5                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     18 seconds                                                                       │
-  │ Spec Ran:     agent-interaction-flow.cy.ts                                                     │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  data-generation-flow.cy.ts                                                      (2 of 3)
-{
-  "stats": {
-    "suites": 1,
-    "tests": 6,
-    "passes": 6,
-    "pending": 0,
-    "failures": 0,
-    "start": "2025-08-10T18:21:42.384Z",
-    "end": "2025-08-10T18:22:01.359Z",
-    "duration": 18975
+  "docker_info": {
+    "docker_available": false,
+    "docker_dependent_services": [
+      "postgres",
+      "redis"
+    ],
+    "can_fallback_to_docker": false,
+    "fallback_message": "Docker not available - ensure local services are running"
   },
-  "tests": [
-    {
-      "title": "should navigate to data generation page and display UI",
-      "fullTitle": "Synthetic Data Generation Flow should navigate to data generation page and display UI",
-      "file": null,
-      "duration": 2578,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should check for data generation form elements",
-      "fullTitle": "Synthetic Data Generation Flow should check for data generation form elements",
-      "file": null,
-      "duration": 2537,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should verify data generation capabilities",
-      "fullTitle": "Synthetic Data Generation Flow should verify data generation capabilities",
-      "file": null,
-      "duration": 5112,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should handle data format selection",
-      "fullTitle": "Synthetic Data Generation Flow should handle data format selection",
-      "file": null,
-      "duration": 2538,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should verify data generation workflow availability",
-      "fullTitle": "Synthetic Data Generation Flow should verify data generation workflow availability",
-      "file": null,
-      "duration": 2476,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should maintain stability during data generation interaction",
-      "fullTitle": "Synthetic Data Generation Flow should maintain stability during data generation interaction",
-      "file": null,
-      "duration": 3550,
-      "currentRetry": 0,
-      "err": {}
-    }
-  ],
-  "pending": [],
-  "failures": [],
-  "passes": [
-    {
-      "title": "should navigate to data generation page and display UI",
-      "fullTitle": "Synthetic Data Generation Flow should navigate to data generation page and display UI",
-      "file": null,
-      "duration": 2578,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should check for data generation form elements",
-      "fullTitle": "Synthetic Data Generation Flow should check for data generation form elements",
-      "file": null,
-      "duration": 2537,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should verify data generation capabilities",
-      "fullTitle": "Synthetic Data Generation Flow should verify data generation capabilities",
-      "file": null,
-      "duration": 5112,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should handle data format selection",
-      "fullTitle": "Synthetic Data Generation Flow should handle data format selection",
-      "file": null,
-      "duration": 2538,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should verify data generation workflow availability",
-      "fullTitle": "Synthetic Data Generation Flow should verify data generation workflow availability",
-      "file": null,
-      "duration": 2476,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should maintain stability during data generation interaction",
-      "fullTitle": "Synthetic Data Generation Flow should maintain stability during data generation interaction",
-      "file": null,
-      "duration": 3550,
-      "currentRetry": 0,
-      "err": {}
-    }
-  ]
+  "timestamp": "2025-08-31T17:04:35.796507",
+  "suggestion": "Docker Desktop is not running. Either start Docker Desktop to enable automatic service containers, or ensure the following services are running locally: postgres, redis",
+  "environment": {
+    "docker_used": false,
+    "compose_file": null,
+    "services_started": false
+  }
 }
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        6                                                                                │
-  │ Passing:      6                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     18 seconds                                                                       │
-  │ Spec Ran:     data-generation-flow.cy.ts                                                       │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  optimization-results-flow.cy.ts                                                 (3 of 3)
-{
-  "stats": {
-    "suites": 1,
-    "tests": 8,
-    "passes": 8,
-    "pending": 0,
-    "failures": 0,
-    "start": "2025-08-10T18:22:02.553Z",
-    "end": "2025-08-10T18:22:26.152Z",
-    "duration": 23599
-  },
-  "tests": [
-    {
-      "title": "should display optimization interface",
-      "fullTitle": "Optimization Results and Reporting Flow should display optimization interface",
-      "file": null,
-      "duration": 2585,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should check for report display capabilities",
-      "fullTitle": "Optimization Results and Reporting Flow should check for report display capabilities",
-      "file": null,
-      "duration": 2519,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should verify metrics display capability",
-      "fullTitle": "Optimization Results and Reporting Flow should verify metrics display capability",
-      "file": null,
-      "duration": 2499,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should check for export and save functionality",
-      "fullTitle": "Optimization Results and Reporting Flow should check for export and save functionality",
-      "file": null,
-      "duration": 2533,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should verify recommendation display",
-      "fullTitle": "Optimization Results and Reporting Flow should verify recommendation display",
-      "file": null,
-      "duration": 2565,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should maintain stability when viewing results",
-      "fullTitle": "Optimization Results and Reporting Flow should maintain stability when viewing results",
-      "file": null,
-      "duration": 5029,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should check for interactive report elements",
-      "fullTitle": "Optimization Results and Reporting Flow should check for interactive report elements",
-      "file": null,
-      "duration": 3091,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should verify cost-benefit analysis display",
-      "fullTitle": "Optimization Results and Reporting Flow should verify cost-benefit analysis display",
-      "file": null,
-      "duration": 2529,
-      "currentRetry": 0,
-      "err": {}
-    }
-  ],
-  "pending": [],
-  "failures": [],
-  "passes": [
-    {
-      "title": "should display optimization interface",
-      "fullTitle": "Optimization Results and Reporting Flow should display optimization interface",
-      "file": null,
-      "duration": 2585,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should check for report display capabilities",
-      "fullTitle": "Optimization Results and Reporting Flow should check for report display capabilities",
-      "file": null,
-      "duration": 2519,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should verify metrics display capability",
-      "fullTitle": "Optimization Results and Reporting Flow should verify metrics display capability",
-      "file": null,
-      "duration": 2499,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should check for export and save functionality",
-      "fullTitle": "Optimization Results and Reporting Flow should check for export and save functionality",
-      "file": null,
-      "duration": 2533,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should verify recommendation display",
-      "fullTitle": "Optimization Results and Reporting Flow should verify recommendation display",
-      "file": null,
-      "duration": 2565,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should maintain stability when viewing results",
-      "fullTitle": "Optimization Results and Reporting Flow should maintain stability when viewing results",
-      "file": null,
-      "duration": 5029,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should check for interactive report elements",
-      "fullTitle": "Optimization Results and Reporting Flow should check for interactive report elements",
-      "file": null,
-      "duration": 3091,
-      "currentRetry": 0,
-      "err": {}
-    },
-    {
-      "title": "should verify cost-benefit analysis display",
-      "fullTitle": "Optimization Results and Reporting Flow should verify cost-benefit analysis display",
-      "file": null,
-      "duration": 2529,
-      "currentRetry": 0,
-      "err": {}
-    }
-  ]
-}
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        8                                                                                │
-  │ Passing:      8                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     23 seconds                                                                       │
-  │ Spec Ran:     optimization-results-flow.cy.ts                                                  │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  agent-interaction-flow.cy.ts             00:18        5        5        -        -        - │
-  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  data-generation-flow.cy.ts               00:18        6        6        -        -        - │
-  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  optimization-results-flow.cy.ts          00:23        8        8        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        01:01       19       19        -        -        -  
-

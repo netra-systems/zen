@@ -1,6 +1,6 @@
 describe('Optimization Results and Reporting Flow', () => {
   beforeEach(() => {
-    // Clear state and mock authentication
+    // Clear state and mock authentication with current token structure
     cy.clearLocalStorage();
     cy.clearCookies();
     
@@ -9,8 +9,10 @@ describe('Optimization Results and Reporting Flow', () => {
       return false;
     });
     
+    // Mock current authentication structure with jwt_token and refresh_token
     cy.window().then((win) => {
-      win.localStorage.setItem('auth_token', 'mock-jwt-token-for-testing');
+      win.localStorage.setItem('jwt_token', 'mock-jwt-token-for-testing');
+      win.localStorage.setItem('refresh_token', 'mock-refresh-token-for-testing');
       win.localStorage.setItem('user', JSON.stringify({
         id: 'test-user-id',
         email: 'test@netrasystems.ai',
@@ -19,16 +21,35 @@ describe('Optimization Results and Reporting Flow', () => {
       }));
     });
     
+    // Setup API mocks for current endpoints
+    cy.intercept('GET', '/auth/config', {
+      statusCode: 200,
+      body: { auth_enabled: true, providers: ['email'] }
+    }).as('authConfig');
+    
+    cy.intercept('GET', '/auth/me', {
+      statusCode: 200,
+      body: {
+        id: 'test-user-id',
+        email: 'test@netrasystems.ai',
+        name: 'Test User',
+        role: 'user'
+      }
+    }).as('authMe');
+    
+    // Setup WebSocket interception
+    cy.intercept('GET', 'ws://localhost:8000/ws', { statusCode: 101 }).as('wsConnect');
+    
     cy.visit('/chat', { failOnStatusCode: false });
-    cy.wait(2000); // Wait for page load
+    cy.wait(2000); // Wait for page load and auth verification
   });
 
-  it('should display optimization interface', () => {
+  it('should display optimization interface with current system features', () => {
     cy.url().then((url) => {
       if (!url.includes('/login')) {
         cy.get('body').should('be.visible');
         
-        // Check for optimization-related content
+        // Check for optimization-related content and WebSocket connectivity
         cy.get('body').then($body => {
           const text = $body.text();
           
@@ -42,7 +63,10 @@ describe('Optimization Results and Reporting Flow', () => {
             'recommendation',
             'AI',
             'model',
-            'workload'
+            'workload',
+            'agent',
+            'WebSocket',
+            'execute'
           ];
           
           let foundKeywords: string[] = [];
@@ -56,17 +80,23 @@ describe('Optimization Results and Reporting Flow', () => {
             cy.log(`Found optimization keywords: ${foundKeywords.join(', ')}`);
             expect(foundKeywords.length).to.be.greaterThan(0);
           } else {
-            cy.log('No optimization keywords found initially - may require interaction');
+            cy.log('No optimization keywords found initially - may require agent interaction via /api/agents/execute');
+          }
+          
+          // Check for WebSocket connection indicators
+          const hasWebSocketIndicators = /connect|ws|websocket|real.*time/i.test(text);
+          if (hasWebSocketIndicators) {
+            cy.log('WebSocket connectivity indicators detected');
           }
         });
       } else {
-        cy.log('Redirected to login - authentication required');
+        cy.log('Redirected to login - current auth system requires authentication');
         expect(url).to.include('/login');
       }
     });
   });
 
-  it('should check for report display capabilities', () => {
+  it('should check for report display capabilities with WebSocket event handling', () => {
     cy.url().then((url) => {
       if (!url.includes('/login')) {
         cy.get('body').then($body => {
@@ -77,6 +107,7 @@ describe('Optimization Results and Reporting Flow', () => {
             'div[class*="report"]',
             'div[class*="result"]',
             'div[class*="card"]',
+            'div[class*="layer"]', // Three-layer response cards
             'table',
             'ul',
             'ol'
@@ -91,7 +122,7 @@ describe('Optimization Results and Reporting Flow', () => {
           });
           
           if (!structureFound) {
-            cy.log('No explicit report structure found - may be rendered dynamically');
+            cy.log('No explicit report structure found - may be rendered dynamically via WebSocket events');
           }
           
           // Check for headings that might indicate report sections
@@ -99,18 +130,25 @@ describe('Optimization Results and Reporting Flow', () => {
           if (headings.length > 0) {
             cy.log(`Found ${headings.length} heading(s) for potential report sections`);
           }
+          
+          // Check for WebSocket event indicators in report context
+          const text = $body.text();
+          const hasWebSocketEvents = /agent_started|agent_thinking|tool_executing|tool_completed|agent_completed/i.test(text);
+          if (hasWebSocketEvents) {
+            cy.log('WebSocket event indicators found in report context');
+          }
         });
       }
     });
   });
 
-  it('should verify metrics display capability', () => {
+  it('should verify metrics display capability with agent completion events', () => {
     cy.url().then((url) => {
       if (!url.includes('/login')) {
         cy.get('body').then($body => {
           const text = $body.text();
           
-          // Check for metric-related content
+          // Check for metric-related content including WebSocket metrics
           const metricIndicators = [
             /\d+\s*%/,         // Percentages
             /\$\s*\d+/,        // Dollar amounts
@@ -120,7 +158,10 @@ describe('Optimization Results and Reporting Flow', () => {
             /latency/i,
             /throughput/i,
             /cost/i,
-            /savings/i
+            /savings/i,
+            /duration_ms/i,    // WebSocket metrics
+            /tokens_used/i,    // Agent metrics
+            /execution.*time/i // Performance metrics
           ];
           
           let metricsFound: string[] = [];
@@ -133,11 +174,11 @@ describe('Optimization Results and Reporting Flow', () => {
           if (metricsFound.length > 0) {
             cy.log(`Found metric indicators: ${metricsFound.length}`);
           } else {
-            cy.log('No metrics displayed initially - may appear after optimization request');
+            cy.log('No metrics displayed initially - may appear after agent_completed WebSocket events');
           }
           
-          // Check for visualization elements
-          const vizElements = ['canvas', 'svg', '[class*="chart"]', '[class*="graph"]'];
+          // Check for visualization elements including layer response cards
+          const vizElements = ['canvas', 'svg', '[class*="chart"]', '[class*="graph"]', '[class*="layer"]', '[data-testid*="metric"]'];
           vizElements.forEach(selector => {
             if ($body.find(selector).length > 0) {
               cy.log(`Found visualization element: ${selector}`);
@@ -148,7 +189,7 @@ describe('Optimization Results and Reporting Flow', () => {
     });
   });
 
-  it('should check for export and save functionality', () => {
+  it('should check for export and save functionality with final_report event integration', () => {
     cy.url().then((url) => {
       if (!url.includes('/login')) {
         cy.get('body').then($body => {
@@ -160,6 +201,7 @@ describe('Optimization Results and Reporting Flow', () => {
                    text.includes('download') || 
                    text.includes('save') ||
                    text.includes('copy') ||
+                   text.includes('share') ||
                    ariaLabel.includes('export') ||
                    ariaLabel.includes('download');
           });
@@ -170,11 +212,11 @@ describe('Optimization Results and Reporting Flow', () => {
               cy.log(`Export element: ${Cypress.$(el).text() || Cypress.$(el).attr('aria-label')}`);
             });
           } else {
-            cy.log('No explicit export buttons found - may appear after generating report');
+            cy.log('No explicit export buttons found - may appear after final_report WebSocket event');
           }
           
-          // Check for format options mentioned
-          const formats = ['PDF', 'CSV', 'JSON', 'Excel', 'Markdown'];
+          // Check for format options mentioned including current system formats
+          const formats = ['PDF', 'CSV', 'JSON', 'Excel', 'Markdown', 'Report'];
           let foundFormats: string[] = [];
           formats.forEach(format => {
             if (new RegExp(format, 'i').test($body.text())) {
@@ -184,6 +226,13 @@ describe('Optimization Results and Reporting Flow', () => {
           
           if (foundFormats.length > 0) {
             cy.log(`Found export format options: ${foundFormats.join(', ')}`);
+          }
+          
+          // Check for final report indicators
+          const text = $body.text();
+          const hasFinalReportIndicators = /final.*report|executive.*summary|comprehensive.*report/i.test(text);
+          if (hasFinalReportIndicators) {
+            cy.log('Final report generation indicators detected');
           }
         });
       }
@@ -364,6 +413,72 @@ describe('Optimization Results and Reporting Flow', () => {
           }
         });
       }
+    });
+  });
+  
+  it('should handle agent execution workflow with current API endpoints', () => {
+    cy.url().then((url) => {
+      if (!url.includes('/login')) {
+        // Mock agent execution API
+        cy.intercept('POST', '/api/agents/execute', {
+          statusCode: 200,
+          body: {
+            run_id: 'test-run-123',
+            agent_type: 'optimization_agent',
+            status: 'started'
+          }
+        }).as('agentExecute');
+        
+        // Simulate triggering an agent execution
+        cy.get('body').then($body => {
+          const hasExecuteButton = $body.find('button').filter((i, el) => {
+            const text = Cypress.$(el).text().toLowerCase();
+            return text.includes('analyze') || text.includes('optimize') || text.includes('execute');
+          });
+          
+          if (hasExecuteButton.length > 0) {
+            cy.wrap(hasExecuteButton.first()).click();
+            cy.wait('@agentExecute');
+            cy.log('Agent execution triggered via /api/agents/execute');
+            
+            // Check for WebSocket event responses
+            cy.wait(2000);
+            cy.get('body').then($updatedBody => {
+              const updatedText = $updatedBody.text();
+              const hasAgentEvents = /agent_started|processing|analyzing|executing/i.test(updatedText);
+              if (hasAgentEvents) {
+                cy.log('WebSocket agent events detected after execution');
+              }
+            });
+          } else {
+            cy.log('No execute buttons found - agent execution may be triggered differently');
+          }
+        });
+      }
+    });
+  });
+  
+  it('should verify authentication integration with current token structure', () => {
+    // Verify jwt_token and refresh_token are properly set
+    cy.window().then((win) => {
+      const jwtToken = win.localStorage.getItem('jwt_token');
+      const refreshToken = win.localStorage.getItem('refresh_token');
+      
+      expect(jwtToken).to.equal('mock-jwt-token-for-testing');
+      expect(refreshToken).to.equal('mock-refresh-token-for-testing');
+      
+      cy.log('Current authentication token structure verified');
+    });
+    
+    // Test auth endpoints are properly mocked
+    cy.wait('@authConfig', { timeout: 5000 }).then((interception) => {
+      expect(interception.response.body).to.have.property('auth_enabled', true);
+      cy.log('/auth/config endpoint properly mocked');
+    });
+    
+    cy.wait('@authMe', { timeout: 5000 }).then((interception) => {
+      expect(interception.response.body).to.have.property('id', 'test-user-id');
+      cy.log('/auth/me endpoint properly mocked');
     });
   });
 });

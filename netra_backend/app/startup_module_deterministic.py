@@ -114,22 +114,26 @@ class StartupOrchestrator:
         if not hasattr(self.app.state, 'llm_manager') or self.app.state.llm_manager is None:
             raise DeterministicStartupError("LLM manager initialization failed")
         self.logger.info("  ✓ Step 7: LLM manager initialized")
+        
+        # Step 8: Apply startup fixes (CRITICAL)
+        await self._apply_startup_fixes()
+        self.logger.info("  ✓ Step 8: Startup fixes applied")
     
     async def _phase3_chat_pipeline(self) -> None:
         """Phase 3: Chat Pipeline - THE CRITICAL PATH."""
         self.logger.info("PHASE 3: Chat Pipeline (CRITICAL)")
         
-        # Step 8: Tool Registry (CRITICAL)
+        # Step 9: Tool Registry (CRITICAL)
         self._initialize_tool_registry()
         if not hasattr(self.app.state, 'tool_dispatcher') or self.app.state.tool_dispatcher is None:
             raise DeterministicStartupError("Tool dispatcher initialization failed")
-        self.logger.info("  ✓ Step 8: Tool registry created")
+        self.logger.info("  ✓ Step 9: Tool registry created")
         
-        # Step 9: WebSocket Manager (CRITICAL)
+        # Step 10: WebSocket Manager (CRITICAL)
         await self._initialize_websocket()
-        self.logger.info("  ✓ Step 9: WebSocket manager initialized")
+        self.logger.info("  ✓ Step 10: WebSocket manager initialized")
         
-        # Step 10: Agent Supervisor (CRITICAL)
+        # Step 11: Agent Supervisor (CRITICAL)
         await self._initialize_agent_supervisor()
         if not hasattr(self.app.state, 'agent_supervisor') or self.app.state.agent_supervisor is None:
             raise DeterministicStartupError("Agent supervisor is None - chat is broken")
@@ -142,36 +146,50 @@ class StartupOrchestrator:
                 if not getattr(self.app.state.agent_supervisor.registry.tool_dispatcher, '_websocket_enhanced', False):
                     raise DeterministicStartupError("Tool dispatcher not enhanced with WebSocket - agent events broken")
         
-        self.logger.info("  ✓ Step 10: Agent supervisor initialized with WebSocket enhancement")
+        self.logger.info("  ✓ Step 11: Agent supervisor initialized with WebSocket enhancement")
         
-        # Step 11: Message Handlers (CRITICAL)
+        # Step 12: Message Handlers (CRITICAL)
         self._register_message_handlers()
-        self.logger.info("  ✓ Step 11: Message handlers registered")
+        self.logger.info("  ✓ Step 12: Message handlers registered")
     
     async def _phase4_optional_services(self) -> None:
         """Phase 4: Optional Services - Can fail without breaking chat."""
         self.logger.info("PHASE 4: Optional Services")
         
-        # Step 12: ClickHouse (optional)
+        # Step 13: ClickHouse (optional)
         try:
             await self._initialize_clickhouse()
-            self.logger.info("  ✓ Step 12: ClickHouse initialized")
+            self.logger.info("  ✓ Step 13: ClickHouse initialized")
         except Exception as e:
-            self.logger.warning(f"  ⚠ Step 12: ClickHouse skipped: {e}")
+            self.logger.warning(f"  ⚠ Step 13: ClickHouse skipped: {e}")
         
-        # Step 13: Monitoring (optional)
+        # Step 14: Monitoring (optional)
         try:
             await self._initialize_monitoring()
-            self.logger.info("  ✓ Step 13: Monitoring started")
+            self.logger.info("  ✓ Step 14: Monitoring started")
         except Exception as e:
-            self.logger.warning(f"  ⚠ Step 13: Monitoring skipped: {e}")
+            self.logger.warning(f"  ⚠ Step 14: Monitoring skipped: {e}")
         
-        # Step 14: Background Tasks (optional)
+        # Step 15: Background Tasks (optional)
         try:
             self._initialize_background_tasks()
-            self.logger.info("  ✓ Step 14: Background tasks started")
+            self.logger.info("  ✓ Step 15: Background tasks started")
         except Exception as e:
-            self.logger.warning(f"  ⚠ Step 14: Background tasks skipped: {e}")
+            self.logger.warning(f"  ⚠ Step 15: Background tasks skipped: {e}")
+        
+        # Step 16: Performance Manager (optional)
+        try:
+            await self._initialize_performance_manager()
+            self.logger.info("  ✓ Step 16: Performance manager initialized")
+        except Exception as e:
+            self.logger.warning(f"  ⚠ Step 16: Performance manager skipped: {e}")
+        
+        # Step 17: Connection Monitoring (optional)
+        try:
+            await self._start_connection_monitoring()
+            self.logger.info("  ✓ Step 17: Connection monitoring started")
+        except Exception as e:
+            self.logger.warning(f"  ⚠ Step 17: Connection monitoring skipped: {e}")
     
     async def _phase5_validation(self) -> None:
         """Phase 5: Validation - Verify all critical services are operational."""
@@ -197,7 +215,107 @@ class StartupOrchestrator:
         if failed_checks:
             raise DeterministicStartupError(f"Critical services failed validation: {', '.join(failed_checks)}")
         
-        self.logger.info("  ✓ Step 15: All critical services validated")
+        self.logger.info("  ✓ Step 18: All critical services validated")
+        
+        # Step 18.5: Verify WebSocket events can actually be sent
+        await self._verify_websocket_events()
+        
+        # Step 19: Comprehensive startup validation with component counts
+        try:
+            from netra_backend.app.core.startup_validation import validate_startup
+            
+            self.logger.info("  Step 19: Running comprehensive startup validation...")
+            success, report = await validate_startup(self.app)
+            
+            # Log critical component counts and warnings
+            if 'categories' in report:
+                zero_count_warnings = []
+                
+                # Check all categories for zero counts
+                for category, components in report['categories'].items():
+                    for component in components:
+                        if component['actual'] == 0 and component['expected'] > 0:
+                            zero_count_warnings.append(f"{component['name']} (expected {component['expected']})")
+                
+                # Log zero count warnings prominently
+                if zero_count_warnings:
+                    self.logger.warning("    ⚠️ COMPONENTS WITH ZERO COUNTS DETECTED:")
+                    for warning in zero_count_warnings:
+                        self.logger.warning(f"      - {warning}")
+            
+            # Check for critical failures
+            if not success:
+                critical_failures = report.get('critical_failures', 0)
+                if critical_failures > 0:
+                    # In deterministic mode, critical validation failures are fatal
+                    raise DeterministicStartupError(
+                        f"Startup validation failed with {critical_failures} critical failures. "
+                        f"Status: {report['status_counts']['critical']} critical, "
+                        f"{report['status_counts']['failed']} failed components"
+                    )
+            
+            # Log summary
+            self.logger.info(f"  ✓ Step 19: Startup validation complete")
+            self.logger.info(f"    Summary: {report['status_counts']['healthy']} healthy, "
+                           f"{report['status_counts']['warning']} warnings, "
+                           f"{report['status_counts']['critical']} critical")
+            
+        except ImportError:
+            self.logger.warning("  ⚠ Step 19: Startup validation module not found - skipping comprehensive validation")
+        except DeterministicStartupError:
+            # Re-raise deterministic errors
+            raise
+        except Exception as e:
+            # Log but don't fail on non-critical validation errors
+            self.logger.error(f"  ⚠ Step 19: Startup validation error: {e}")
+        
+        # Step 20: Critical path validation (CHAT FUNCTIONALITY)
+        try:
+            from netra_backend.app.core.critical_path_validator import validate_critical_paths
+            
+            self.logger.info("  Step 20: Validating critical communication paths...")
+            success, critical_validations = await validate_critical_paths(self.app)
+            
+            # Count failures
+            chat_breaking_count = sum(1 for v in critical_validations 
+                                     if not v.passed and v.criticality.value == "chat_breaking")
+            
+            if chat_breaking_count > 0:
+                # Log all chat-breaking failures
+                self.logger.error("    🚨 CHAT-BREAKING FAILURES DETECTED:")
+                for validation in critical_validations:
+                    if not validation.passed and validation.criticality.value == "chat_breaking":
+                        self.logger.error(f"      ❌ {validation.component}")
+                        self.logger.error(f"         Reason: {validation.failure_reason}")
+                        if validation.remediation:
+                            self.logger.error(f"         Fix: {validation.remediation}")
+                
+                # In deterministic mode, chat-breaking failures are FATAL
+                raise DeterministicStartupError(
+                    f"Critical path validation failed: {chat_breaking_count} chat-breaking failures. "
+                    f"Chat functionality is BROKEN and will not work!"
+                )
+            
+            # Log any degraded paths as warnings
+            degraded_count = sum(1 for v in critical_validations 
+                               if not v.passed and v.criticality.value == "degraded")
+            if degraded_count > 0:
+                self.logger.warning(f"    ⚠️ {degraded_count} degraded communication paths detected")
+            
+            self.logger.info("  ✓ Step 20: Critical communication paths validated")
+            
+        except ImportError:
+            self.logger.warning("  ⚠ Step 20: Critical path validator not found - skipping")
+        except DeterministicStartupError:
+            # Re-raise deterministic errors
+            raise
+        except Exception as e:
+            # Critical path validation failure is FATAL in deterministic mode
+            raise DeterministicStartupError(f"Critical path validation failed: {e}")
+        
+        # Step 21: Schema validation (CRITICAL)
+        await self._validate_database_schema()
+        self.logger.info("  ✓ Step 21: Database schema validated")
     
     def _validate_environment(self) -> None:
         """Validate environment configuration."""
@@ -319,6 +437,55 @@ class StartupOrchestrator:
         # This is just a placeholder to maintain the sequence
         pass
     
+    async def _verify_websocket_events(self) -> None:
+        """Verify WebSocket events can actually be sent - CRITICAL."""
+        import uuid
+        from netra_backend.app.websocket_core import get_websocket_manager
+        
+        self.logger.info("  Step 18.5: Verifying WebSocket event delivery...")
+        
+        manager = get_websocket_manager()
+        if not manager:
+            raise DeterministicStartupError("WebSocket manager is None - events cannot be sent")
+        
+        # Create a test thread ID
+        test_thread = f"startup_test_{uuid.uuid4()}"
+        
+        # Test basic message sending capability
+        test_message = {
+            "type": "startup_test",
+            "timestamp": time.time(),
+            "validation": "critical_path"
+        }
+        
+        try:
+            # Try to send a test message
+            success = await manager.send_to_thread(test_thread, test_message)
+            
+            # Success is True even if no connections (message queued)
+            # The important thing is that the manager accepts the message
+            if success is False:
+                raise DeterministicStartupError("WebSocket test event failed to send - manager rejected message")
+            
+            # Verify tool dispatcher enhancement
+            if hasattr(self.app.state, 'agent_supervisor'):
+                supervisor = self.app.state.agent_supervisor
+                if hasattr(supervisor, 'registry') and hasattr(supervisor.registry, 'tool_dispatcher'):
+                    dispatcher = supervisor.registry.tool_dispatcher
+                    if not getattr(dispatcher, '_websocket_enhanced', False):
+                        raise DeterministicStartupError("Tool dispatcher not enhanced - agent events will be silent")
+                    
+                    # Check that notifier is present
+                    if not hasattr(dispatcher, 'websocket_notifier') or dispatcher.websocket_notifier is None:
+                        raise DeterministicStartupError("Tool dispatcher has no WebSocket notifier - events cannot be sent")
+            
+            self.logger.info("  ✓ Step 18.5: WebSocket event delivery verified")
+            
+        except DeterministicStartupError:
+            raise
+        except Exception as e:
+            raise DeterministicStartupError(f"WebSocket verification failed: {e}")
+    
     async def _initialize_clickhouse(self) -> None:
         """Initialize ClickHouse - optional."""
         from netra_backend.app.db.clickhouse_init import initialize_clickhouse_tables
@@ -329,11 +496,76 @@ class StartupOrchestrator:
         from netra_backend.app.agents.base.monitoring import performance_monitor
         await performance_monitor.start_monitoring()
         self.app.state.performance_monitor = performance_monitor
+        
+        # Start chat event monitoring for silent failure detection
+        try:
+            from netra_backend.app.websocket_core.event_monitor import chat_event_monitor
+            await chat_event_monitor.start_monitoring()
+            self.app.state.chat_event_monitor = chat_event_monitor
+            self.logger.info("  ✓ Chat event monitor started")
+        except Exception as e:
+            self.logger.warning(f"  ⚠ Chat event monitor failed to start: {e}")
     
     def _initialize_background_tasks(self) -> None:
         """Initialize background tasks - optional."""
         from netra_backend.app.services.background_task_manager import BackgroundTaskManager
         self.app.state.background_task_manager = BackgroundTaskManager()
+    
+    async def _apply_startup_fixes(self) -> None:
+        """Apply critical startup fixes - CRITICAL."""
+        from netra_backend.app.services.startup_fixes_integration import startup_fixes
+        
+        fix_results = await startup_fixes.run_comprehensive_verification()
+        applied_fixes = fix_results.get('total_fixes', 0)
+        
+        if applied_fixes < 5:
+            self.logger.warning(f"Only {applied_fixes}/5 startup fixes applied")
+            # Log details but don't fail - fixes are best-effort
+            self.logger.debug(startup_fixes.get_fix_status_summary())
+        else:
+            self.logger.debug("All critical startup fixes successfully applied")
+    
+    async def _initialize_performance_manager(self) -> None:
+        """Initialize performance optimization manager - optional."""
+        from netra_backend.app.core.performance_optimization_manager import performance_manager
+        await performance_manager.initialize()
+        self.app.state.performance_manager = performance_manager
+        
+        # Schedule index optimization as background task
+        from netra_backend.app.db.index_optimizer import index_manager
+        self.app.state.index_manager = index_manager
+        
+        if hasattr(self.app.state, 'background_task_manager'):
+            # Schedule optimization for 60 seconds after startup
+            asyncio.create_task(self._schedule_index_optimization())
+    
+    async def _schedule_index_optimization(self) -> None:
+        """Schedule database index optimization after startup."""
+        await asyncio.sleep(60)  # Wait 60 seconds after startup
+        try:
+            from netra_backend.app.db.index_optimizer import index_manager
+            await asyncio.wait_for(index_manager.optimize_all_databases(), timeout=90.0)
+            self.logger.debug("Database index optimization completed")
+        except Exception as e:
+            self.logger.warning(f"Database index optimization failed: {e}")
+    
+    async def _start_connection_monitoring(self) -> None:
+        """Start database connection monitoring - optional."""
+        from netra_backend.app.services.database.connection_monitor import start_connection_monitoring
+        await start_connection_monitoring()
+    
+    async def _validate_database_schema(self) -> None:
+        """Validate database schema - CRITICAL."""
+        from netra_backend.app.db.postgres_core import async_engine
+        from netra_backend.app.services.schema_validation_service import run_comprehensive_validation
+        
+        if async_engine is None:
+            raise DeterministicStartupError("Database engine not available for schema validation")
+        
+        validation_passed = await run_comprehensive_validation(async_engine)
+        if not validation_passed:
+            # In deterministic mode, schema validation failure is critical
+            raise DeterministicStartupError("Database schema validation failed - schema inconsistent")
     
     def _mark_startup_complete(self) -> None:
         """Mark startup as complete."""

@@ -1,0 +1,220 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from backend.gcp.Dockerfile
+#1 transferring dockerfile: 642B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.11-slim
+#2 DONE 0.9s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2.29kB done
+#3 DONE 0.0s
+
+#4 [1/7] FROM docker.io/library/python:3.11-slim@sha256:1d6131b5d479888b43200645e03a78443c7157efbdb730e6b48129740727c312
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 4.09MB 0.6s done
+#5 DONE 0.7s
+
+#6 [2/7] WORKDIR /app
+#6 CACHED
+
+#7 [3/7] RUN apt-get update && apt-get install -y     gcc     g++     && rm -rf /var/lib/apt/lists/*
+#7 CACHED
+
+#8 [4/7] COPY requirements.txt .
+#8 CACHED
+
+#9 [5/7] RUN pip install --no-cache-dir -r requirements.txt
+#9 CACHED
+
+#10 [6/7] COPY netra_backend/ ./netra_backend/
+#10 DONE 2.9s
+
+#11 [7/7] COPY shared/ ./shared/
+#11 DONE 0.1s
+
+#12 exporting to image
+#12 exporting layers
+#12 exporting layers 1.1s done
+#12 writing image sha256:ef11e5925a1113b74c174c7042898f89d3c5405f451ac243cf68b1bd58996c93 done
+#12 naming to gcr.io/netra-staging/netra-backend-staging:latest done
+#12 DONE 1.1s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/lc92v0fzu1b8wcxo0sdiuoqc8
+WARNING: Your config file at [C:\Users\antho\.docker\config.json] contains these credential helper entries:
+
+{
+  "credHelpers": {
+    "asia.gcr.io": "gcloud",
+    "eu.gcr.io": "gcloud",
+    "gcr.io": "gcloud",
+    "marketplace.gcr.io": "gcloud",
+    "staging-k8s.gcr.io": "gcloud",
+    "us-central1-docker.pkg.dev": "gcloud",
+    "us.gcr.io": "gcloud"
+  }
+}
+Adding credentials for: gcr.io
+gcloud credential helpers already registered correctly.
+The push refers to repository [gcr.io/netra-staging/netra-backend-staging]
+4cf5bbcde5ba: Preparing
+de0a37ef1dee: Preparing
+a410600ed76c: Preparing
+8484027ed388: Preparing
+60fb7bd9b01b: Preparing
+65171b602b31: Preparing
+41a3f3e0352a: Preparing
+027e5044d8c1: Preparing
+a0f52cec0ae9: Preparing
+e6a3842ebc7f: Preparing
+65171b602b31: Waiting
+41a3f3e0352a: Waiting
+027e5044d8c1: Waiting
+a0f52cec0ae9: Waiting
+e6a3842ebc7f: Waiting
+a410600ed76c: Layer already exists
+8484027ed388: Layer already exists
+60fb7bd9b01b: Layer already exists
+65171b602b31: Layer already exists
+41a3f3e0352a: Layer already exists
+027e5044d8c1: Layer already exists
+e6a3842ebc7f: Layer already exists
+a0f52cec0ae9: Layer already exists
+4cf5bbcde5ba: Pushed
+de0a37ef1dee: Pushed
+latest: digest: sha256:99e76504e196d9e048403ee835eac536667e9da8074baf6a8e7b3f1976ead121 size: 2420
+[32m2025-08-31 17:59:13.862[0m | [1mINFO    [0m | [36mnetra_backend.app.core.configuration.database[0m:[36m_get_postgres_url[0m:[36m187[0m | [1mUsing PostgreSQL URL from development configuration[0m
+[32m2025-08-31 17:59:13.868[0m | [1mINFO    [0m | [36mnetra_backend.app.core.configuration.database[0m:[36m_populate_redis_config[0m:[36m141[0m | [1mRedis Configuration (development/URL/No SSL): redis://localhost:6380/0, Pool: 10, DB: 0[0m
+[32m2025-08-31 17:59:13.879[0m | [1mINFO    [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [1mJWT secret loaded from JWT_SECRET_KEY for development environment[0m
+[32m2025-08-31 17:59:13.879[0m | [1mINFO    [0m | [36mnetra_backend.app.core.configuration.secrets[0m:[36m_ensure_jwt_secret_from_shared_manager[0m:[36m362[0m | [1mJWT=REDACTED from SharedJWTSecretManager (synchronized with auth=REDACTED[0m
+[32m2025-08-31 17:59:13.882[0m | [1mINFO    [0m | [36mnetra_backend.app.core.configuration.secrets[0m:[36mpopulate_secrets[0m:[36m222[0m | [1mPopulated secrets for development[0m
+[32m2025-08-31 17:59:13.882[0m | [1mINFO    [0m | [36mnetra_backend.app.core.configuration.validator[0m:[36m_apply_progressive_validation[0m:[36m194[0m | [1mValidation warnings (permissive mode): 0 issues converted to warnings[0m
+[32m2025-08-31 17:59:14.404[0m | [34m[1mDEBUG   [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [34m[1mSet os.environ: AUTH_SERVICE_URL=*** (source: deploy_gcp_post_deployment_test)[0m
+[32m2025-08-31 17:59:14.404[0m | [34m[1mDEBUG   [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [34m[1mSet os.environ: BACKEND_URL=None (source: deploy_gcp_post_deployment_test)[0m
+[32m2025-08-31 17:59:14.405[0m | [34m[1mDEBUG   [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [34m[1mUsing selector: SelectSelector[0m
+[32m2025-08-31 17:59:14.406[0m | [1mINFO    [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [1m
+============================================================[0m
+[32m2025-08-31 17:59:14.406[0m | [1mINFO    [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [1mPOST-DEPLOYMENT AUTH TESTS - STAGING[0m
+[32m2025-08-31 17:59:14.407[0m | [1mINFO    [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [1m============================================================[0m
+[32m2025-08-31 17:59:14.407[0m | [1mINFO    [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [1mAuth URL: [0m
+[32m2025-08-31 17:59:14.407[0m | [1mINFO    [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [1mBackend URL: None[0m
+[32m2025-08-31 17:59:14.407[0m | [1mINFO    [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [1m============================================================
+[0m
+[32m2025-08-31 17:59:14.407[0m | [1mINFO    [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [1m
+Running: Auth Service Health[0m
+[32m2025-08-31 17:59:14.848[0m | [31m[1mERROR   [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [31m[1m✗ Auth service health check failed: Request URL is missing an 'http://' or 'https://' protocol.[0m
+[32m2025-08-31 17:59:14.854[0m | [1mINFO    [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [1m
+Running: Backend Service Health[0m
+[32m2025-08-31 17:59:15.027[0m | [31m[1mERROR   [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [31m[1m✗ Backend health check failed: Request URL is missing an 'http://' or 'https://' protocol.[0m
+[32m2025-08-31 17:59:15.027[0m | [1mINFO    [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [1m
+Running: Token Generation[0m
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\post_deployment\test_auth_integration.py:220: RuntimeWarning: coroutine 'PostDeploymentAuthTest.test_token_generation' was never awaited
+  ("Token Generation", lambda: self.test_token_generation() is not None),
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+[32m2025-08-31 17:59:15.029[0m | [31m[1mERROR   [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [31m[1m✗ Token Generation failed with exception: object bool can't be used in 'await' expression[0m
+[32m2025-08-31 17:59:15.029[0m | [1mINFO    [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [1m
+Running: Cross-Service Auth[0m
+[32m2025-08-31 17:59:15.229[0m | [31m[1mERROR   [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [31m[1m✗ Cross-service auth test failed: Request URL is missing an 'http://' or 'https://' protocol.[0m
+[32m2025-08-31 17:59:15.229[0m | [1mINFO    [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [1m
+============================================================[0m
+[32m2025-08-31 17:59:15.229[0m | [1mINFO    [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [1mTEST RESULTS SUMMARY[0m
+[32m2025-08-31 17:59:15.229[0m | [1mINFO    [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [1m============================================================[0m
+[32m2025-08-31 17:59:15.229[0m | [1mINFO    [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [1m✗ FAIL: Auth Service Health[0m
+[32m2025-08-31 17:59:15.229[0m | [1mINFO    [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [1m✗ FAIL: Backend Service Health[0m
+[32m2025-08-31 17:59:15.230[0m | [1mINFO    [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [1m✗ FAIL: Token Generation[0m
+[32m2025-08-31 17:59:15.230[0m | [1mINFO    [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [1m✗ FAIL: Cross-Service Auth[0m
+[32m2025-08-31 17:59:15.230[0m | [1mINFO    [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [1m
+Total: 0 passed, 4 failed[0m
+[32m2025-08-31 17:59:15.230[0m | [31m[1mERROR   [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [31m[1m
+⚠️  DEPLOYMENT VERIFICATION FAILED[0m
+[32m2025-08-31 17:59:15.231[0m | [31m[1mERROR   [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [31m[1mJWT secrets may be misconfigured between services[0m
+[32m2025-08-31 17:59:15.231[0m | [31m[1mERROR   [0m | [36mlogging[0m:[36mhandle[0m:[36m1028[0m | [31m[1mCheck that JWT_SECRET_KEY is set to the same value in both services[0m
+🚀 Deploying Netra Apex Platform to GCP
+   Project: netra-staging
+   Region: us-central1
+   Build Mode: Local (Fast)
+   Pre-checks: Disabled
+
+🔐 Phase 1: Validating Prerequisites...
+✅ gcloud CLI configured for project: netra-staging
+
+🔧 Enabling required GCP APIs...
+  Enabling run.googleapis.com...
+  Enabling containerregistry.googleapis.com...
+  Enabling cloudbuild.googleapis.com...
+  Enabling secretmanager.googleapis.com...
+  Enabling compute.googleapis.com...
+✅ All required APIs enabled
+
+🔐 Phase 2: Validating Secrets Configuration...
+Checking all required secrets in Secret Manager...
+  ✅ Secret configured: oauth-hmac-secret-staging
+  ✅ Secret configured: gemini-api-key-staging
+  ✅ Secret configured: redis-password-staging
+  ✅ Secret configured: postgres-port-staging
+  ✅ Secret configured: openai-api-key-staging
+  ✅ Secret configured: postgres-password-staging
+  ✅ Secret configured: clickhouse-password-staging
+  ✅ Secret configured: service-id-staging
+  ✅ Secret configured: fernet-key-staging
+  ✅ Secret configured: postgres-host-staging
+  ✅ Secret configured: google-oauth-client-id-staging
+  ✅ Secret configured: secret-key-staging
+  ✅ Secret configured: jwt-secret-key-staging
+  ✅ Secret configured: jwt-secret-staging
+  ✅ Secret configured: service-secret-staging
+  ✅ Secret configured: google-oauth-client-secret-staging
+  ✅ Secret configured: postgres-user-staging
+  ✅ Secret configured: redis-url-staging
+  ✅ Secret configured: postgres-db-staging
+
+✅ All required secrets are configured
+   Service Filter: backend
+
+🏗️ Phase 4: Building and Deploying Services...
+   All prerequisites validated - proceeding with deployment
+
+   Building backend...
+
+🔨 Building backend Docker image locally...
+  Using existing deployment/docker/backend.gcp.Dockerfile
+  Building image locally: gcr.io/netra-staging/netra-backend-staging:latest
+  This is 5-10x faster than Cloud Build...
+  ✅ Built successfully, now pushing to registry...
+✅ backend image built and pushed successfully
+   Deploying backend...
+
+🚀 Deploying backend to Cloud Run...
+✅ backend deployed successfully
+  📡 Updating traffic to latest revision for netra-backend-staging...
+  ⏳ Waiting for netra-backend-staging revision to be ready...
+  ✅ Revision is ready
+  ✅ Traffic updated to latest revision
+
+==================================================
+
+🏥 Running health checks...
+  ⚠️ backend: No URL available
+
+✅ All services deployed successfully!
+
+📋 Deployment Summary:
+==================================================
+
+==================================================
+🔐 Running Post-Deployment Authentication Tests
+==================================================
+
+Testing staging environment...
+⚠️ Post-deployment tests failed - authentication may not be working correctly
+   Check that JWT_SECRET_KEY is set to the same value in both services
+
+🔑 Next Steps:
+1. Update secrets in Secret Manager with real values
+2. Configure Cloud SQL and Redis instances
+3. Set up custom domain and SSL certificates
+4. Configure authentication and remove --allow-unauthenticated
+5. Set up monitoring and alerting

@@ -30,7 +30,7 @@ import pytest_asyncio
 from loguru import logger
 
 # CLAUDE.md COMPLIANCE: Use IsolatedEnvironment instead of os.getenv
-from test_framework.environment_isolation import get_env
+from shared.isolated_environment import get_env
 
 # CLAUDE.md COMPLIANCE: Absolute imports only
 from netra_backend.app.schemas.user_plan import PlanTier

@@ -2,7 +2,7 @@
 """MISSION CRITICAL: Enhanced Tool Execution WebSocket Events Test Suite
 
 Business Value: $500K+ ARR - Ensures tool execution events reach users in real-time
-This test suite validates that EnhancedToolExecutionEngine properly sends WebSocket
+This test suite validates that UnifiedToolExecutionEngine properly sends WebSocket
 events during tool execution, which is critical for user experience during AI processing.
 
 CRITICAL: Tool execution events are the most visible part of agent processing to users.
@@ -26,8 +26,8 @@ import pytest
 from loguru import logger
 
 # Import enhanced tool execution components
-from netra_backend.app.agents.enhanced_tool_execution import (
-    EnhancedToolExecutionEngine,
+from netra_backend.app.agents.unified_tool_execution import (
+    UnifiedToolExecutionEngine,
     enhance_tool_dispatcher_with_notifications
 )
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -135,7 +135,7 @@ class MockToolResult:
 # ============================================================================
 
 class TestEnhancedToolExecutionEngineUnit:
-    """Unit tests for EnhancedToolExecutionEngine WebSocket events."""
+    """Unit tests for UnifiedToolExecutionEngine WebSocket events."""
     
     @pytest.fixture(autouse=True)
     def setup_enhanced_tool_mocks(self):
@@ -149,11 +149,11 @@ class TestEnhancedToolExecutionEngineUnit:
     
     @pytest.mark.asyncio
     @pytest.mark.critical
-    async def test_enhanced_tool_execution_engine_creation(self):
-        """Test that EnhancedToolExecutionEngine creates properly with WebSocket manager."""
+    async def test_unified_tool_execution_engine_creation(self):
+        """Test that UnifiedToolExecutionEngine creates properly with WebSocket manager."""
         
         # Create enhanced executor
-        executor = EnhancedToolExecutionEngine(self.mock_ws_manager)
+        executor = UnifiedToolExecutionEngine(self.mock_ws_manager)
         
         # Verify initialization
         assert executor.websocket_manager is self.mock_ws_manager, \
@@ -165,10 +165,10 @@ class TestEnhancedToolExecutionEngineUnit:
     
     @pytest.mark.asyncio
     @pytest.mark.critical
-    async def test_enhanced_tool_execution_sends_events(self):
+    async def test_unified_tool_execution_sends_events(self):
         """Test that enhanced tool execution sends WebSocket events."""
         
-        executor = EnhancedToolExecutionEngine(self.mock_ws_manager)
+        executor = UnifiedToolExecutionEngine(self.mock_ws_manager)
         
         # Create test context and tool
         context = AgentExecutionContext(
@@ -215,10 +215,10 @@ class TestEnhancedToolExecutionEngineUnit:
     
     @pytest.mark.asyncio
     @pytest.mark.critical
-    async def test_enhanced_tool_execution_error_handling(self):
+    async def test_unified_tool_execution_error_handling(self):
         """Test that enhanced tool execution handles errors and still sends events."""
         
-        executor = EnhancedToolExecutionEngine(self.mock_ws_manager)
+        executor = UnifiedToolExecutionEngine(self.mock_ws_manager)
         
         # Create test context
         context = AgentExecutionContext(
@@ -282,8 +282,8 @@ class TestEnhancedToolExecutionEngineUnit:
             "Enhancement marker should be True"
         assert dispatcher.executor != original_executor, \
             "Executor should be replaced"
-        assert isinstance(dispatcher.executor, EnhancedToolExecutionEngine), \
-            "Executor should be EnhancedToolExecutionEngine"
+        assert isinstance(dispatcher.executor, UnifiedToolExecutionEngine), \
+            "Executor should be UnifiedToolExecutionEngine"
         assert dispatcher.executor.websocket_manager is self.mock_ws_manager, \
             "Enhanced executor should have WebSocket manager"
     
@@ -348,7 +348,7 @@ class TestEnhancedToolDispatcherIntegration:
         # Verify enhancement occurred
         assert tool_dispatcher.executor != original_executor, \
             "AgentRegistry should enhance tool dispatcher executor"
-        assert isinstance(tool_dispatcher.executor, EnhancedToolExecutionEngine), \
+        assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
             "Tool dispatcher should have enhanced executor"
         assert hasattr(tool_dispatcher, '_websocket_enhanced'), \
             "Tool dispatcher should be marked as enhanced"
@@ -361,7 +361,7 @@ class TestEnhancedToolDispatcherIntegration:
         """Test enhanced tool execution with state using execute_with_state method."""
         
         # Create enhanced executor
-        executor = EnhancedToolExecutionEngine(self.mock_ws_manager)
+        executor = UnifiedToolExecutionEngine(self.mock_ws_manager)
         
         # Create test parameters
         mock_tool = MockTool("state_tool")
@@ -425,7 +425,7 @@ class TestEnhancedToolExecutionPerformance:
     async def test_concurrent_tool_execution_performance(self):
         """Test WebSocket events with concurrent tool execution."""
         
-        executor = EnhancedToolExecutionEngine(self.mock_ws_manager)
+        executor = UnifiedToolExecutionEngine(self.mock_ws_manager)
         concurrent_tools = 20
         
         async def execute_single_tool(tool_id: int):
@@ -481,7 +481,7 @@ class TestEnhancedToolExecutionPerformance:
     async def test_tool_event_throughput_validation(self):
         """Test WebSocket event throughput during rapid tool execution."""
         
-        executor = EnhancedToolExecutionEngine(self.mock_ws_manager)
+        executor = UnifiedToolExecutionEngine(self.mock_ws_manager)
         
         # Create single context for rapid execution
         context = AgentExecutionContext(
@@ -545,7 +545,7 @@ class TestEnhancedToolExecutionErrorHandling:
     async def test_tool_execution_error_events(self):
         """Test that tool execution errors still produce proper WebSocket events."""
         
-        executor = EnhancedToolExecutionEngine(self.mock_ws_manager)
+        executor = UnifiedToolExecutionEngine(self.mock_ws_manager)
         
         # Create error scenarios
         error_scenarios = [
@@ -605,7 +605,7 @@ class TestEnhancedToolExecutionErrorHandling:
                 raise ConnectionError("WebSocket connection lost")
         
         failing_ws_manager = FailingWebSocketManager()
-        executor = EnhancedToolExecutionEngine(failing_ws_manager)
+        executor = UnifiedToolExecutionEngine(failing_ws_manager)
         
         context = AgentExecutionContext(
             run_id="websocket-failure-test",
@@ -638,7 +638,7 @@ class TestEnhancedToolExecutionErrorHandling:
     async def test_missing_context_handling(self):
         """Test tool execution when context is missing from kwargs."""
         
-        executor = EnhancedToolExecutionEngine(self.mock_ws_manager)
+        executor = UnifiedToolExecutionEngine(self.mock_ws_manager)
         
         mock_tool = MockTool("no_context_tool")
         tool_input = MockToolInput("no_context_tool")
@@ -666,7 +666,7 @@ class TestEnhancedToolExecutionErrorHandling:
 # VALIDATION RUNNER
 # ============================================================================
 
-def run_enhanced_tool_execution_websocket_validation():
+def run_unified_tool_execution_websocket_validation():
     """Run comprehensive validation of enhanced tool execution WebSocket events."""
     
     logger.info("\n" + "=" * 80)
@@ -694,5 +694,5 @@ def run_enhanced_tool_execution_websocket_validation():
 
 if __name__ == "__main__":
     # Run comprehensive validation
-    exit_code = run_enhanced_tool_execution_websocket_validation()
+    exit_code = run_unified_tool_execution_websocket_validation()
     sys.exit(exit_code)

@@ -38,7 +38,6 @@ from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.service_startup import ServiceStartupCoordinator
 from dev_launcher.signal_handler import SignalHandler
 from dev_launcher.startup_optimizer import StartupOptimizer, StartupStep
-from dev_launcher.startup_validator import StartupValidator
 from dev_launcher.summary_display import SummaryDisplay
 from dev_launcher.utils import check_emoji_support, print_with_emoji
 from dev_launcher.websocket_validator import WebSocketValidator
@@ -177,7 +176,6 @@ class DevLauncher:
     def _setup_helpers(self):
         """Setup helper instances."""
         self.health_helper = HealthRegistrationHelper(self.health_monitor, self.use_emoji)
-        self.startup_validator = StartupValidator(self.use_emoji)
         self.migration_runner = MigrationRunner(self.config.project_root, self.use_emoji)
         self.database_connector = DatabaseConnector(self.use_emoji)
         self.database_initializer = DatabaseInitializer(self.config.project_root, self.use_emoji)

@@ -7,24 +7,30 @@
  * for WebSocket resilience testing across all test modules.
  */
 
-// Configuration constants matching WebSocketService
+// Configuration constants matching current WebSocketService
 export const WEBSOCKET_CONFIG = {
   HEARTBEAT_INTERVAL: 30000, // 30 seconds
-  HEARTBEAT_TIMEOUT: 60000, // 60 seconds
+  HEARTBEAT_TIMEOUT: 60000, // 60 seconds  
   MAX_CONNECTIONS_PER_USER: 5,
-  MAX_RETRY_ATTEMPTS: 3,
-  RETRY_DELAY: 1000, // 1 second
+  MAX_RETRY_ATTEMPTS: 10, // Updated to match current service (was 3)
+  RETRY_DELAY: 100, // Updated to match current service (was 1000)
   CONNECTION_TIMEOUT: 10000, // 10 seconds
   PING_INTERVAL: 25000, // 25 seconds
+  BASE_RECONNECT_DELAY: 100, // New: matches current service
+  MAX_RECONNECT_DELAY: 10000, // New: matches current service (was 30s, now 10s)
+  WEBSOCKET_ENDPOINT: 'ws://localhost:8000/ws', // New: unified endpoint
 };
 
-// Mission-critical WebSocket event types
+// Mission-critical WebSocket event types (updated to match current system)
 export const CRITICAL_WS_EVENTS = [
   'agent_started',
   'agent_thinking',
   'tool_executing', 
   'tool_completed',
-  'agent_completed'
+  'agent_completed',
+  'final_report', // Added: current system sends this
+  'partial_result', // Added: current system may send this
+  'agent_fallback' // Added: error handling event
 ] as const;
 
 export type CriticalWebSocketEvent = typeof CRITICAL_WS_EVENTS[number];
@@ -76,12 +82,15 @@ export const navigateToChat = () => {
 };
 
 export const findWebSocketConnection = (win: any): WebSocket | null => {
+  // Updated to match current WebSocket service integration points
   const possibleWS = [
     win.ws,
     win.websocket,
     win.socket,
     win.__netraWebSocket,
-    win.WebSocketManager?.activeConnection
+    win.WebSocketManager?.activeConnection,
+    win.webSocketService?.ws, // Current service stores WebSocket in .ws property
+    win.useUnifiedChatStore?.getState()?.webSocketService?.ws, // Store integration
   ].find(ws => ws !== undefined);
   
   return possibleWS || null;
@@ -136,21 +145,38 @@ export const verifyReconnection = (timeoutMs: number = 5000) => {
   return waitForConnection();
 };
 
-// Mission-critical WebSocket event validation functions
+// Mission-critical WebSocket event validation functions (updated)
 export const validateCriticalEvents = () => {
   const criticalEvents = [
     'agent_started',
     'agent_thinking', 
     'tool_executing',
     'tool_completed',
-    'agent_completed'
+    'agent_completed',
+    'final_report',
+    'partial_result',
+    'agent_fallback'
   ];
   
   return {
     events: criticalEvents,
     validate: (eventType: string) => {
       return criticalEvents.includes(eventType);
-    }
+    },
+    // New: Get required events (subset that MUST be present for valid flow)
+    getRequiredEvents: () => [
+      'agent_started',
+      'agent_completed'
+    ],
+    // New: Get optional events (nice to have but not required)
+    getOptionalEvents: () => [
+      'agent_thinking',
+      'tool_executing', 
+      'tool_completed',
+      'final_report',
+      'partial_result',
+      'agent_fallback'
+    ]
   };
 };
 
@@ -255,10 +281,10 @@ export const verifyWebSocketServiceIntegration = () => {
   });
 };
 
-export const monitorWebSocketEvents = (duration: number = 10000) => {
+export const monitorWebSocketEvents = (duration: number = 10000): Cypress.Chainable<any[]> => {
   const events: any[] = [];
   
-  cy.window().then((win) => {
+  return cy.window().then((win): Cypress.Chainable<any[]> => {
     const ws = findWebSocketConnection(win);
     if (ws) {
       const originalOnMessage = ws.onmessage;
@@ -269,12 +295,14 @@ export const monitorWebSocketEvents = (duration: number = 10000) => {
           events.push({
             timestamp: Date.now(),
             type: data.type,
-            payload: data.payload
+            payload: data.payload || data.data, // Handle both payload and data fields
+            raw: data
           });
           
           cy.log(`WebSocket event: ${data.type}`);
         } catch (e) {
-          // Ignore parsing errors
+          // Log parsing errors but continue
+          cy.log(`WebSocket parsing error: ${e}`);
         }
         
         // Call original handler
@@ -283,11 +311,20 @@ export const monitorWebSocketEvents = (duration: number = 10000) => {
         }
       };
       
-      // Wait for the specified duration
-      cy.wait(duration).then(() => {
-        cy.log(`Monitored ${events.length} WebSocket events over ${duration}ms`);
-        return events;
-      });
+      // Return promise that resolves with events after duration
+      return cy.wrap(new Promise<any[]>((resolve) => {
+        setTimeout(() => {
+          // Restore original handler
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.onmessage = originalOnMessage;
+          }
+          cy.log(`Monitored ${events.length} WebSocket events over ${duration}ms`);
+          resolve(events);
+        }, duration);
+      }));
+    } else {
+      cy.log('No WebSocket connection found for monitoring');
+      return cy.wrap([]);
     }
   });
 };

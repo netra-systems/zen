@@ -1,40 +1,41 @@
-
 import { defineConfig } from 'cypress';
-import * as fs from 'fs';
-import * as path from 'path';
 
 export default defineConfig({
   e2e: {
     experimentalMemoryManagement: true,
     numTestsKeptInMemory: 1,
     setupNodeEvents(on, config) {
-      // implement node event listeners here
+      // WebSocket mock tasks for testing
       on('task', {
         log(message) {
-          // console output removed: console.log(message);
           return null;
         },
+        setupWebSocketMock() {
+          return null;
+        },
+        teardownWebSocketMock() {
+          return null;
+        },
+        sendWebSocketMessage(message: any) {
+          return null;
+        },
+        disconnectWebSocket() {
+          return null;
+        },
+        reconnectWebSocket() {
+          return null;
+        }
       });
       
-      // Load dynamic port configuration if available
-      const portConfigPath = path.join(__dirname, '..', '.netra', 'cypress-ports.json');
-      if (fs.existsSync(portConfigPath)) {
-        try {
-          const portConfig = JSON.parse(fs.readFileSync(portConfigPath, 'utf-8'));
-          
-          // Override baseUrl with discovered frontend port
-          if (portConfig.baseUrl) {
-            config.baseUrl = portConfig.baseUrl;
-          }
-          
-          // Merge environment variables with discovered service URLs
-          if (portConfig.env) {
-            config.env = { ...config.env, ...portConfig.env };
-          }
-        } catch (error) {
-          // Fallback to defaults if config read fails
-        }
-      }
+      // Force correct configuration for real services
+      config.baseUrl = 'http://localhost:3000';
+      config.env = {
+        ...config.env,
+        BACKEND_URL: 'http://localhost:8000',
+        AUTH_URL: 'http://localhost:8081',
+        FRONTEND_URL: 'http://localhost:3000',
+        REAL_LLM: 'true'
+      };
       
       return config;
     },
@@ -44,12 +45,11 @@ export default defineConfig({
     watchForFileChanges: false,
     video: false,
     screenshotOnRunFailure: false,
-    // Run in headless mode by default
     chromeWebSecurity: false,
-    defaultCommandTimeout: 45000,  // Increased for slow Next.js dev server
+    defaultCommandTimeout: 45000,
     requestTimeout: 45000,
     responseTimeout: 45000,
-    pageLoadTimeout: 120000,  // Extended for very slow Next.js compilation (2 minutes)
+    pageLoadTimeout: 120000,
   },
   component: {
     devServer: {

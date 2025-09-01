@@ -23,7 +23,7 @@ if project_root not in sys.path:
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.agents.enhanced_tool_execution import EnhancedToolExecutionEngine
+from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 from netra_backend.app.agents.unified_tool_execution import enhance_tool_dispatcher_with_notifications
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.agents.state import DeepAgentState
@@ -74,7 +74,7 @@ async def test_agent_registry_enhancement():
     registry.set_websocket_manager(ws_manager)
     
     # Validate enhancement
-    success = isinstance(tool_dispatcher.executor, EnhancedToolExecutionEngine)
+    success = isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine)
     has_marker = hasattr(tool_dispatcher, '_websocket_enhanced')
     
     print(f"   Enhanced executor: {type(tool_dispatcher.executor).__name__}")
@@ -104,7 +104,7 @@ async def test_websocket_event_sending():
     print(f"   Connected WebSocket: {conn_id}")
     
     # Create enhanced executor
-    executor = EnhancedToolExecutionEngine(ws_manager)
+    executor = UnifiedToolExecutionEngine(ws_manager)
     
     # Create test state and tool
     state = DeepAgentState(
@@ -168,7 +168,7 @@ async def test_double_enhancement_safety():
     
     # Should be the same executor (no double-wrapping)
     same_executor = first_executor == second_executor
-    still_enhanced = isinstance(tool_dispatcher.executor, EnhancedToolExecutionEngine)
+    still_enhanced = isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine)
     
     print(f"   Same executor after double enhancement: {same_executor}")
     print(f"   Still properly enhanced: {still_enhanced}")

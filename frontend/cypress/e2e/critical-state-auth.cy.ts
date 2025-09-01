@@ -4,6 +4,12 @@
  * Critical State & Authentication Tests
  * Tests for auth state management and memory leak detection
  * Business Value: Prevents user churn from auth issues and performance degradation
+ * 
+ * Updated for current system implementation:
+ * - Auth endpoints: /auth/config, /auth/me, /auth/verify, /auth/refresh
+ * - Current token structure: jwt_token, refresh_token
+ * - WebSocket endpoint: ws://localhost:8000/ws
+ * - Circuit breaker integration for resilient auth
  */
 
 // Import utilities with fallback
@@ -17,18 +23,26 @@ try {
     WaitUtils
   } = require('./utils/critical-test-utils');
 } catch (e) {
-  // Define inline implementations
+  // Define inline implementations with current auth system
   var TestSetup = {
     visitDemo: () => cy.visit('/demo', { failOnStatusCode: false }),
     standardViewport: () => cy.viewport(1920, 1080),
     setupAuthState: () => {
       cy.window().then((win) => {
+        // Current token structure
         win.localStorage.setItem('jwt_token', 'test-token-12345');
+        win.localStorage.setItem('refresh_token', 'test-refresh-token-67890');
         win.localStorage.setItem('user', JSON.stringify({
           id: 'test-user-id',
           email: 'test@netrasystems.ai',
-          full_name: 'Test User'
+          full_name: 'Test User',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         }));
+        
+        // Token expiry for testing
+        const expiryTime = Date.now() + (60 * 60 * 1000); // 1 hour from now
+        win.localStorage.setItem('token_expires_at', expiryTime.toString());
       });
     },
     setupDemoProgress: () => {
@@ -38,6 +52,41 @@ try {
           completed: ['industry_selection']
         }));
       });
+    },
+    setupAuthEndpoints: () => {
+      // Setup current auth API endpoints
+      cy.intercept('GET', '**/auth/config', {
+        statusCode: 200,
+        body: {
+          enable_signup: true,
+          oauth_providers: ['google', 'github'],
+          require_email_verification: false
+        }
+      }).as('authConfig');
+      
+      cy.intercept('GET', '**/auth/me', {
+        statusCode: 200,
+        body: {
+          id: 'test-user-id',
+          email: 'test@netrasystems.ai',
+          full_name: 'Test User',
+          is_verified: true
+        }
+      }).as('authMe');
+      
+      cy.intercept('POST', '**/auth/verify', {
+        statusCode: 200,
+        body: { valid: true, user_id: 'test-user-id' }
+      }).as('authVerify');
+      
+      cy.intercept('POST', '**/auth/refresh', {
+        statusCode: 200,
+        body: {
+          jwt_token: 'new-test-token-12345',
+          refresh_token: 'new-refresh-token-67890',
+          expires_in: 3600
+        }
+      }).as('authRefresh');
     }
   };
   var Navigation = {
@@ -61,30 +110,74 @@ try {
   var AuthUtils = {
     simulateTokenExpiry: () => {
       cy.window().then((win) => {
+        // Simulate expired token
         win.localStorage.setItem('jwt_token', 'expired-token');
+        win.localStorage.setItem('token_expires_at', (Date.now() - 1000).toString());
       });
-      cy.intercept('**/api/**', { statusCode: 401, body: { detail: 'Token expired' } });
+      
+      // Mock 401 responses for expired tokens
+      cy.intercept('**/api/**', (req) => {
+        if (req.headers.authorization === 'Bearer expired-token') {
+          req.reply({ statusCode: 401, body: { detail: 'Token expired' } });
+        } else {
+          req.continue();
+        }
+      });
+      
+      // Mock auth verification failure
+      cy.intercept('POST', '**/auth/verify', {
+        statusCode: 401,
+        body: { valid: false, error: 'Token expired' }
+      }).as('authVerifyExpired');
     },
     verifyAuthState: (shouldBeValid) => {
       cy.window().then((win) => {
         const token = win.localStorage.getItem('jwt_token');
+        const refreshToken = win.localStorage.getItem('refresh_token');
+        
         if (shouldBeValid) {
           expect(token).to.be.a('string').and.not.be.empty;
+          expect(refreshToken).to.be.a('string').and.not.be.empty;
         } else {
           expect(token).to.be.null;
+          expect(refreshToken).to.be.null;
         }
       });
     },
     clearAuth: () => {
       cy.window().then((win) => {
         win.localStorage.removeItem('jwt_token');
+        win.localStorage.removeItem('refresh_token');
         win.localStorage.removeItem('user');
+        win.localStorage.removeItem('token_expires_at');
       });
     },
-    setNewToken: (token) => {
+    setNewToken: (token, refreshToken = null) => {
       cy.window().then((win) => {
         win.localStorage.setItem('jwt_token', token);
+        if (refreshToken) {
+          win.localStorage.setItem('refresh_token', refreshToken);
+        }
+        // Set future expiry
+        const expiryTime = Date.now() + (60 * 60 * 1000); // 1 hour
+        win.localStorage.setItem('token_expires_at', expiryTime.toString());
       });
+    },
+    triggerTokenRefresh: () => {
+      cy.window().then((win) => {
+        // Simulate expired token that should trigger refresh
+        win.localStorage.setItem('token_expires_at', (Date.now() - 1000).toString());
+      });
+      
+      // Make a request that should trigger token refresh
+      cy.request({
+        method: 'GET',
+        url: '**/auth/me',
+        failOnStatusCode: false
+      });
+      
+      // Wait for refresh to complete
+      cy.wait('@authRefresh', { timeout: 5000 });
     }
   };
   var PerformanceUtils = {
@@ -118,6 +211,7 @@ try {
 describe('Critical Test #5: Authentication State Corruption', () => {
   beforeEach(() => {
     TestSetup.standardViewport();
+    TestSetup.setupAuthEndpoints();
     setupInitialAuthState();
     TestSetup.visitDemo();
   });
@@ -145,6 +239,61 @@ describe('Critical Test #5: Authentication State Corruption', () => {
     setupDemoSession();
     saveDemoState();
     refreshAndVerifyRecovery();
+  });
+  
+  it('should handle automatic token refresh seamlessly', () => {
+    TestSetup.setupAuthState();
+    Navigation.goToAiChat();
+    
+    // Trigger token refresh
+    AuthUtils.triggerTokenRefresh();
+    
+    // Verify new tokens are stored
+    cy.window().then((win) => {
+      const newToken = win.localStorage.getItem('jwt_token');
+      const newRefreshToken = win.localStorage.getItem('refresh_token');
+      
+      expect(newToken).to.equal('new-test-token-12345');
+      expect(newRefreshToken).to.equal('new-refresh-token-67890');
+    });
+    
+    // Verify user can still interact with the app
+    FormUtils.sendChatMessage('Test message after token refresh');
+    cy.get('body').should('not.contain', 'Authentication failed');
+  });
+  
+  it('should handle WebSocket reconnection after auth refresh', () => {
+    TestSetup.setupAuthState();
+    Navigation.goToAiChat();
+    
+    // Mock WebSocket connection
+    cy.window().then((win) => {
+      win.mockWebSocketConnected = false;
+      win.mockWebSocketReconnected = false;
+      
+      // Simulate WebSocket disconnect on auth refresh
+      const originalConnect = win.WebSocket;
+      win.WebSocket = class extends originalConnect {
+        constructor(url, protocols) {
+          super(url, protocols);
+          this.addEventListener('open', () => {
+            if (win.mockWebSocketConnected) {
+              win.mockWebSocketReconnected = true;
+            } else {
+              win.mockWebSocketConnected = true;
+            }
+          });
+        }
+      };
+    });
+    
+    // Trigger token refresh which should reconnect WebSocket
+    AuthUtils.triggerTokenRefresh();
+    
+    // Verify WebSocket reconnection
+    cy.window().then((win) => {
+      expect(win.mockWebSocketConnected).to.be.true;
+    });
   });
 
   // Helper functions ≤8 lines each

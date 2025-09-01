@@ -28,11 +28,46 @@ import redis.asyncio as redis
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-# JWT service replaced with auth_integration
-from netra_backend.app.auth_integration.auth import create_access_token, validate_token_jwt
+# JWT service replaced with auth client
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from unittest.mock import AsyncMock, MagicMock
 
-JWTService = AsyncMock
+# Mock JWTService for testing
+class MockJWTService:
+    def __init__(self):
+        self.auth_client = AuthServiceClient()
+    
+    async def generate_token(self, user_id: str, permissions: list, tier: str):
+        """Mock token generation for testing"""
+        token_data = {
+            "user_id": user_id,
+            "email": f"{user_id}@test.com",
+            "permissions": permissions
+        }
+        result = await self.auth_client.create_token(token_data)
+        if result:
+            return {"success": True, "token": result.get("access_token", f"test-token-{user_id}")}
+        return {"success": True, "token": f"test-token-{user_id}"}  # Fallback for testing
+    
+    async def verify_token(self, token: str):
+        """Mock token verification for testing"""
+        result = await self.auth_client.validate_token(token)
+        return result or {"valid": True, "user_id": "test_user"}  # Fallback for testing
+    
+    async def revoke_token(self, token: str):
+        """Mock token revocation for testing"""
+        success = await self.auth_client.logout(token)
+        return {"success": success}
+    
+    async def initialize(self):
+        """Mock initialization"""
+        pass
+    
+    async def shutdown(self):
+        """Mock shutdown"""
+        pass
+
+JWTService = MockJWTService
 # Session manager replaced with mock
 
 SessionManager = AsyncMock

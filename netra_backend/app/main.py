@@ -59,7 +59,7 @@ def _setup_environment_files() -> None:
     # All configuration comes from Cloud Run environment variables and Google Secret Manager
     environment = env_manager.get('ENVIRONMENT', '').lower()
     if environment in ['staging', 'production', 'prod']:
-        print(f"Running in {environment} - skipping all .env file loading (using GSM)")
+        # Running in production/staging - skipping all .env file loading (using GSM)
         return
     
     # Check if dev launcher already loaded environment variables
@@ -72,7 +72,7 @@ def _setup_environment_files() -> None:
     # If any dev launcher indicator is present, skip loading
     for indicator in dev_launcher_indicators:
         if env_manager.get(indicator):
-            print(f"Dev launcher detected via {indicator} - skipping .env loading")
+            # Dev launcher detected - skipping .env loading
             return
     
     # Check if critical environment variables are already set
@@ -82,16 +82,16 @@ def _setup_environment_files() -> None:
     
     # If most critical vars are already set, assume external loading
     if vars_already_set >= len(critical_vars) // 2:
-        print("Critical environment variables already set - skipping .env loading")
+        # Critical environment variables already set - skipping .env loading
         return
     
     # Only load for direct uvicorn runs when environment is not pre-configured
     try:
         root_path = _get_project_root()
-        print("Loading .env files for direct application run")
+        # Loading .env files for direct application run
         _load_all_env_files(root_path)
     except ImportError: 
-        print("python-dotenv not available - skipping .env loading")
+        # python-dotenv not available - skipping .env loading
         pass
 
 # Load environment files only if needed

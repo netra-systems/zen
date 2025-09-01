@@ -460,43 +460,46 @@ class IsolatedEnvironment:
     def get(self, key: str, default: Optional[str] = None) -> Optional[str]:
         """Get an environment variable value."""
         with self._lock:
-            # CRITICAL TEST INTEGRATION: Always prioritize os.environ during test context
-            # This ensures that test patches (patch.dict(os.environ, ...)) are immediately respected
-            if self._is_test_context():
-                value = os.environ.get(key, default)
-                # Expand shell commands if present and not in test
-                return self._expand_shell_commands(value) if value else value
-            
-            # Check overrides first (analytics compatibility)
-            if self._isolation_enabled and key in self._isolated_vars:
-                override_value = self._isolated_vars[key]
-                if override_value == "__UNSET__":
-                    return default  # Variable was explicitly unset
-                # Expand shell commands in the value if present
-                return self._expand_shell_commands(override_value) if override_value else override_value
-            
-            # Check cache (analytics compatibility)
-            if key in self._env_cache:
-                cached_value = self._env_cache[key]
-                if cached_value is None:
-                    return default
-                return self._expand_shell_commands(cached_value) if cached_value else cached_value
-            
-            # Get from environment
+            # CRITICAL FIX: When isolation is enabled, isolated variables ALWAYS take precedence
+            # This ensures that our configuration values are properly retrieved during testing
             if self._isolation_enabled:
-                value = self._isolated_vars.get(key, default)
+                # Check isolated variables first (including explicitly unset ones)
+                if key in self._isolated_vars:
+                    override_value = self._isolated_vars[key]
+                    if override_value == "__UNSET__":
+                        return default  # Variable was explicitly unset
+                    # Expand shell commands in the value if present
+                    return self._expand_shell_commands(override_value) if override_value else override_value
+                
+                # If not in isolated vars but we're in test context, sync with os.environ
+                # This allows pytest patches to be picked up, but only if not already in isolated vars
+                if self._is_test_context() and key in os.environ:
+                    value = os.environ[key]
+                    return self._expand_shell_commands(value) if value else value
+                
+                # Not found in isolated vars or os.environ
+                return default
+            
+            # Not in isolation mode - use normal environment access with caching
             else:
+                # Check cache first (analytics compatibility)
+                if key in self._env_cache:
+                    cached_value = self._env_cache[key]
+                    if cached_value is None:
+                        return default
+                    return self._expand_shell_commands(cached_value) if cached_value else cached_value
+                
+                # Get from os.environ
                 if key in os.environ:
                     value = os.environ[key]
                     # Cache the actual value
                     self._env_cache[key] = value
+                    # Expand shell commands in the value if present
+                    return self._expand_shell_commands(value) if value else value
                 else:
                     # Cache that it doesn't exist (using None as marker)
                     self._env_cache[key] = None
-                    value = default
-            
-            # Expand shell commands in the value if present
-            return self._expand_shell_commands(value) if value else value
+                    return default
     
     def set(self, key: str, value: str, source: str = "unknown", force: bool = False) -> bool:
         """
