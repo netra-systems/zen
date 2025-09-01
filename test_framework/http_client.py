@@ -398,16 +398,18 @@ class AuthHTTPClient(UnifiedHTTPClient):
     async def login(self, username: str, password: str) -> Dict[str, Any]:
         """Login and get token."""
         return await self.post("/auth/login", {
-            "username": username,
-            "password": password
+            "email": username,  # username is actually used as email in tests
+            "password": password,
+            "provider": "local"
         })
     
     async def register(self, username: str, email: str, password: str) -> Dict[str, Any]:
         """Register new user."""
         return await self.post("/auth/register", {
-            "username": username,
+            "full_name": username,
             "email": email,
-            "password": password
+            "password": password,
+            "confirm_password": password
         })
     
     async def validate_token(self, token: str) -> Dict[str, Any]:

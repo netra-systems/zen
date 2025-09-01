@@ -21,14 +21,13 @@ class AuthTestClient:
         self.client = httpx.AsyncClient(base_url=base_url, timeout=10.0)
         
     async def register(self, email: str, password: str, 
-                      first_name: str = "Test", last_name: str = "User") -> Dict[str, Any]:
+                      full_name: str = "Test User") -> Dict[str, Any]:
         """Register a new user.
         
         Args:
             email: User email
             password: User password
-            first_name: User's first name
-            last_name: User's last name
+            full_name: User's full name
             
         Returns:
             User registration response
@@ -38,8 +37,8 @@ class AuthTestClient:
             json={
                 "email": email,
                 "password": password,
-                "first_name": first_name,
-                "last_name": last_name
+                "confirm_password": password,
+                "full_name": full_name
             }
         )
         response.raise_for_status()
@@ -59,7 +58,8 @@ class AuthTestClient:
             "/auth/login",
             json={
                 "email": email,
-                "password": password
+                "password": password,
+                "provider": "local"
             }
         )
         response.raise_for_status()
@@ -140,7 +140,7 @@ class AuthTestClient:
             return False
             
     async def create_test_user(self, email: Optional[str] = None, 
-                             password: str = "testpass123") -> Dict[str, Any]:
+                             password: str = "TestPass123#") -> Dict[str, Any]:
         """Create a test user with optional custom email.
         Uses mock token for testing to avoid auth service dependency issues.
         

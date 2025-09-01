@@ -19,7 +19,6 @@ ARCHITECTURAL COMPLIANCE:
 """
 
 import asyncio
-import os
 import time
 from typing import Dict, Any, List
 
@@ -27,6 +26,7 @@ import pytest
 import pytest_asyncio
 
 from netra_backend.app.schemas.user_plan import PlanTier
+from shared.isolated_environment import get_env
 from tests.e2e.agent_conversation_helpers import (
     AgentConversationTestCore,
     ConversationFlowSimulator,
@@ -77,7 +77,8 @@ class TestAgentOrchestrationRealLLMIntegration:
     @pytest.fixture
     def llm_timeout(self):
         """Get LLM timeout configuration."""
-        return int(os.getenv("TEST_LLM_TIMEOUT", "30"))
+        env = get_env()
+        return int(env.get("TEST_LLM_TIMEOUT", "30"))
     
     @pytest.mark.asyncio
     @pytest.mark.e2e

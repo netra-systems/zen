@@ -1,18 +1,19 @@
 """
 ClickHouse Billing Integration Helper - E2E Billing Record Testing
 
-BVJ (Business Value Justification):
-1. Segment: ALL paid tiers (revenue tracking critical)
-2. Business Goal: Validate billing record creation and integrity
-3. Value Impact: Ensures accurate revenue tracking and billing analytics
-4. Revenue Impact: Billing accuracy = customer trust = retention
+DEPRECATED: This file uses mocks which are FORBIDDEN per CLAUDE.md.
+Use real service implementations in test_agent_billing_flow_simplified.py instead.
 
-REQUIREMENTS:
-- Mock ClickHouse integration for billing records
-- Billing record validation and integrity checks
-- Performance validation for billing operations
-- Data consistency verification
-- 450-line file limit, 25-line function limit
+CLAUDE.md states: "MOCKS are FORBIDDEN in e2e tests" and "mocks = abomination"
+All e2e tests must use real services for business value validation.
+
+BVJ (Business Value Justification):
+1. Segment: ALL paid tiers (revenue tracking critical)  
+2. Business Goal: Ensure accurate usage-based billing for agent operations
+3. Value Impact: Protects revenue integrity - billing errors = customer trust loss
+4. Revenue Impact: Each billing error costs $100-1000/month per customer
+
+MIGRATION: Use RealAgentBillingTestCore in test_agent_billing_flow_simplified.py
 """
 import time
 import uuid

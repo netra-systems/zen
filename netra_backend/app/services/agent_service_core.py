@@ -5,6 +5,7 @@ for agent interactions and WebSocket message handling.
 """
 
 import json
+from datetime import datetime
 from typing import Any, AsyncGenerator, Dict, Optional, Union
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -290,6 +291,33 @@ class AgentService(IAgentService):
         logger.info(f"Executing {agent_type} agent for user {user_id}: {message[:100]}...")
         
         try:
+            # CRITICAL: Send WebSocket events for mission-critical agent orchestration
+            websocket_manager = get_websocket_manager()
+            
+            # 1. Send agent_started event
+            await websocket_manager.send_message(user_id, {
+                "type": "agent_started",
+                "agent_type": agent_type,
+                "message": message,
+                "timestamp": str(datetime.now())
+            })
+            
+            # 2. Send agent_thinking event
+            await websocket_manager.send_message(user_id, {
+                "type": "agent_thinking",
+                "agent_type": agent_type,
+                "status": "processing",
+                "timestamp": str(datetime.now())
+            })
+            
+            # 3. Send tool_executing event
+            await websocket_manager.send_message(user_id, {
+                "type": "tool_executing",
+                "agent_type": agent_type,
+                "tool": "supervisor_agent",
+                "timestamp": str(datetime.now())
+            })
+            
             # For now, route all agent types through the supervisor
             # Future enhancement: could route to specific agents based on agent_type
             context_str = f" (Context: {context})" if context else ""
@@ -302,6 +330,24 @@ class AgentService(IAgentService):
                 f"{agent_type}_run_{user_id}"
             )
             
+            # 4. Send tool_completed event
+            await websocket_manager.send_message(user_id, {
+                "type": "tool_completed", 
+                "agent_type": agent_type,
+                "tool": "supervisor_agent",
+                "result": "success",
+                "timestamp": str(datetime.now())
+            })
+            
+            # 5. Send agent_completed event
+            await websocket_manager.send_message(user_id, {
+                "type": "agent_completed",
+                "agent_type": agent_type,
+                "status": "success",
+                "response": str(result)[:200],  # Truncate long responses
+                "timestamp": str(datetime.now())
+            })
+            
             return {
                 "response": str(result),
                 "agent": agent_type,
@@ -311,6 +357,20 @@ class AgentService(IAgentService):
             
         except Exception as e:
             logger.error(f"Error executing {agent_type} agent: {e}", exc_info=True)
+            
+            # Send error completion event
+            try:
+                websocket_manager = get_websocket_manager()
+                await websocket_manager.send_message(user_id, {
+                    "type": "agent_completed",
+                    "agent_type": agent_type,
+                    "status": "error", 
+                    "error": str(e),
+                    "timestamp": str(datetime.now())
+                })
+            except Exception as ws_error:
+                logger.error(f"Failed to send WebSocket error event: {ws_error}")
+            
             return {
                 "response": f"Error executing {agent_type} agent: {str(e)}",
                 "agent": agent_type,

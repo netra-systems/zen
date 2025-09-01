@@ -56,7 +56,7 @@ class AuthTestConfig:
     # Test credentials
     test_username: str = "test_user"
     test_email: str = "test@example.com"
-    test_password: str = "test_password_123"
+    test_password: str = "TestPassword123#"
 
 
 class AuthManager:

@@ -25,20 +25,24 @@ TECHNICAL DETAILS:
 - Includes performance assertions and billing calculation validation
 """
 
+# E2E test imports - CLAUDE.md compliant absolute import structure
+import pytest
+from test_framework import setup_test_path
+setup_test_path()  # MUST be before project imports per CLAUDE.md
+
 import asyncio
 import time
 from typing import Dict, Any, Optional
-import pytest
 import pytest_asyncio
 import uuid
 
-# Import test framework - NO MOCKS
+# Import test framework - NO MOCKS per CLAUDE.md
 from test_framework.environment_isolation import isolated_test_env, get_test_env_manager
 from tests.clients.websocket_client import WebSocketTestClient
 from tests.clients.backend_client import BackendTestClient
 from tests.clients.auth_client import AuthTestClient
 
-# Import schemas
+# Import schemas using absolute paths
 from netra_backend.app.schemas.user_plan import PlanTier
 
 
@@ -83,16 +87,18 @@ class RealAgentBillingTestCore:
         register_response = await self.auth_client.register(
             email=test_email,
             password=test_password,
-            name=f"Billing Test User {tier.value}"
+            first_name=f"Billing Test",
+            last_name=f"User {tier.value}"
         )
         assert register_response.get("success"), f"Real user registration failed: {register_response}"
         
-        # Real user login
-        login_response = await self.auth_client.login(test_email, test_password)
-        assert login_response.get("access_token"), f"Real user login failed: {login_response}"
+        # Real user login - Updated to match actual auth client implementation
+        user_token = await self.auth_client.login(test_email, test_password)
+        assert user_token, f"Real user login failed - no token returned"
         
-        user_token = login_response["access_token"]
-        user_id = login_response.get("user_id")
+        # Get user info from token verification
+        user_info = await self.auth_client.verify_token(user_token)
+        user_id = user_info.get("sub") or user_info.get("user_id")
         
         # Setup WebSocket connection with real auth
         backend_host = self.backend_client.base_url.replace("http://", "").replace("https://", "")

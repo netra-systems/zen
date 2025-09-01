@@ -46,6 +46,7 @@ from netra_backend.app.agents.unified_tool_execution import (
     UnifiedToolExecutionEngine,
     enhance_tool_dispatcher_with_notifications
 )
+from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -318,8 +319,9 @@ class TestUnitWebSocketComponents:
         
         # Verify enhancement
         assert dispatcher.executor != original_executor, "Executor was not replaced"
+        # Updated to expect UnifiedToolExecutionEngine (EnhancedToolExecutionEngine is deprecated)
         assert isinstance(dispatcher.executor, UnifiedToolExecutionEngine), \
-            "Executor is not UnifiedToolExecutionEngine"
+            f"Executor is not UnifiedToolExecutionEngine, got {type(dispatcher.executor)}"
         assert hasattr(dispatcher, '_websocket_enhanced'), "Missing enhancement marker"
         assert dispatcher._websocket_enhanced is True, "Enhancement marker not set"
     

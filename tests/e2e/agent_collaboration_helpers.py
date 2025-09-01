@@ -41,7 +41,7 @@ class AgentCollaborationTurn:
     agents_involved: List[str] = field(default_factory=list)
     handoff_successful: bool = False
     context_preserved: bool = False
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 @dataclass
@@ -52,7 +52,7 @@ class MultiAgentSession:
     collaboration_turns: List[AgentCollaborationTurn] = field(default_factory=list)
     total_agents_used: int = 0
     orchestration_successful: bool = True
-    session_start: datetime = field(default_factory=datetime.utcnow)
+    session_start: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class AgentCollaborationTestCore:

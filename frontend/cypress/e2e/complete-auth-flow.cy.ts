@@ -8,11 +8,28 @@ describe('Complete Authentication Flow', () => {
     // Visit login page
     cy.visit('/login');
     
-    // Mock the login API endpoint
-    cy.intercept('POST', 'http://localhost:8001/auth/dev/login', {
+    // Mock the auth config endpoint
+    cy.intercept('GET', '**/auth/config', {
       statusCode: 200,
       body: {
-        access_token: 'test-jwt-token',
+        login_url: '/auth/login',
+        callback_url: '/auth/callback',
+        logout_url: '/auth/logout',
+        user: '/auth/me',
+        endpoints: {
+          login: '/auth/dev/login',
+          refresh: '/auth/refresh',
+          verify: '/auth/verify'
+        }
+      }
+    }).as('authConfig');
+
+    // Mock the login API endpoint with current structure
+    cy.intercept('POST', '**/auth/dev/login', {
+      statusCode: 200,
+      body: {
+        jwt_token: 'test-jwt-token',
+        refresh_token: 'test-refresh-token',
         token_type: 'bearer',
         user: {
           id: 'test-user-id',
@@ -22,15 +39,30 @@ describe('Complete Authentication Flow', () => {
       }
     }).as('loginRequest');
 
-    // Mock the user endpoint
-    cy.intercept('GET', 'http://localhost:8001/api/me', {
+    // Mock the user endpoint with current auth structure
+    cy.intercept('GET', '**/auth/me', {
       statusCode: 200,
       body: {
         id: 'test-user-id',
         email: 'test@netrasystems.ai',
-        full_name: 'Test User'
+        full_name: 'Test User',
+        role: 'user',
+        verified: true
       }
     }).as('userRequest');
+
+    // Mock token verification endpoint
+    cy.intercept('POST', '**/auth/verify', {
+      statusCode: 200,
+      body: {
+        valid: true,
+        user: {
+          id: 'test-user-id',
+          email: 'test@netrasystems.ai',
+          full_name: 'Test User'
+        }
+      }
+    }).as('verifyToken');
 
     // Fill in login form - development mode uses different login flow
     cy.get('body').then(($body) => {
@@ -45,7 +77,8 @@ describe('Complete Authentication Flow', () => {
       }
     });
 
-    // Wait for login to complete
+    // Wait for login to complete and auth config to load
+    cy.wait('@authConfig');
     cy.wait('@loginRequest');
     
     // Should redirect to main app
@@ -85,11 +118,22 @@ describe('Complete Authentication Flow', () => {
   it('should handle authentication errors gracefully', () => {
     cy.visit('/login');
     
-    // Mock failed login
-    cy.intercept('POST', 'http://localhost:8001/auth/dev/login', {
+    // Mock auth config first
+    cy.intercept('GET', '**/auth/config', {
+      statusCode: 200,
+      body: {
+        endpoints: {
+          login: '/auth/dev/login'
+        }
+      }
+    }).as('authConfigError');
+
+    // Mock failed login with current structure
+    cy.intercept('POST', '**/auth/dev/login', {
       statusCode: 401,
       body: {
-        detail: 'Invalid credentials'
+        detail: 'Invalid credentials',
+        error: 'authentication_failed'
       }
     }).as('failedLogin');
 
@@ -98,6 +142,7 @@ describe('Complete Authentication Flow', () => {
     cy.get('input[type="password"]').type('WrongPassword');
     cy.get('button[type="submit"]').contains('Sign In').click();
 
+    cy.wait('@authConfigError');
     cy.wait('@failedLogin');
     
     // Should show error message
@@ -113,17 +158,38 @@ describe('Complete Authentication Flow', () => {
       win.localStorage.setItem('jwt_token', 'expired-token');
     });
 
-    // Mock expired token response
-    cy.intercept('GET', 'http://localhost:8001/api/me', {
+    // Mock auth config for refresh flow
+    cy.intercept('GET', '**/auth/config', {
+      statusCode: 200,
+      body: {
+        endpoints: {
+          refresh: '/auth/refresh'
+        }
+      }
+    }).as('authConfigRefresh');
+
+    // Mock expired token response from current endpoint
+    cy.intercept('GET', '**/auth/me', {
       statusCode: 401,
       body: {
-        detail: 'Token expired'
+        detail: 'Token expired',
+        error: 'token_expired'
       }
     }).as('expiredToken');
+
+    // Mock refresh token failure
+    cy.intercept('POST', '**/auth/refresh', {
+      statusCode: 401,
+      body: {
+        detail: 'Refresh token invalid',
+        error: 'refresh_failed'
+      }
+    }).as('refreshFailed');
 
     // Visit protected route
     cy.visit('/chat');
     
+    cy.wait('@authConfigRefresh');
     cy.wait('@expiredToken');
     
     // Should redirect to login
