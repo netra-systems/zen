@@ -74,11 +74,9 @@ class TestL4CriticalAuthIntegration:
         )
         
         # Create expired token
-        expired_payload = {
-            "sub": "test_user_id",
-            "exp": datetime.now(timezone.utc) - timedelta(hours=1)
-        }
-        expired_token = jwt.encode(expired_payload, settings.SECRET_KEY, algorithm="HS256")
+        from tests.helpers.auth_test_utils import TestAuthHelper
+        auth_helper = TestAuthHelper()
+        expired_token = auth_helper.create_expired_test_token("test_user_id")
         
         # Try to use expired token
         result = await auth_client.verify_token(expired_token)

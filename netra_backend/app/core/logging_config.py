@@ -7,6 +7,7 @@ without ANSI escape codes that can corrupt log output.
 import os
 import sys
 import logging
+from shared.isolated_environment import IsolatedEnvironment
 
 
 def configure_cloud_run_logging():
@@ -16,6 +17,9 @@ def configure_cloud_run_logging():
     Python 3.11+ adds colored tracebacks by default which can cause issues
     in Cloud Run logs. This disables all color output.
     """
+    # Get environment manager instance
+    env = IsolatedEnvironment.get_instance()
+    
     # Disable colored output in environment variables
     os.environ['NO_COLOR'] = '1'
     os.environ['FORCE_COLOR'] = '0'
@@ -26,7 +30,7 @@ def configure_cloud_run_logging():
         sys._xoptions['no_debug_ranges'] = True
     
     # Set up basic logging configuration without colors
-    environment = os.environ.get('ENVIRONMENT', 'development').lower()
+    environment = env.get('ENVIRONMENT', 'development').lower()
     
     if environment in ['staging', 'production', 'prod']:
         # For Cloud Run, use structured logging without colors
@@ -81,7 +85,8 @@ def setup_exception_handler():
         
         sys.stderr.write(''.join(clean_lines))
     
-    environment = os.environ.get('ENVIRONMENT', 'development').lower()
+    env = IsolatedEnvironment.get_instance()
+    environment = env.get('ENVIRONMENT', 'development').lower()
     if environment in ['staging', 'production', 'prod']:
         sys.excepthook = exception_handler
 
