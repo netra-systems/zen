@@ -766,15 +766,18 @@ class DevLauncher:
     
     def _register_optimization_steps(self):
         """Register startup optimization steps."""
+        from .startup_optimizer import StartupPhase
+        
         steps = [
-            StartupStep("environment_check", self._check_environment_step, [], True, 10, True, "env_check"),
-            StartupStep("database_check", self._check_database_step, ["environment_check"], True, 15, True, "database_check"),
-            StartupStep("migration_check", self._check_migrations_step, ["database_check"], True, 15, True, "migration_check"),
-            StartupStep("backend_deps", self._check_backend_deps, [], True, 20, False, "backend_deps"),
-            StartupStep("auth_deps", self._check_auth_deps, [], True, 20, False, "auth_deps"),
-            StartupStep("frontend_deps", self._check_frontend_deps, ["backend_deps"], True, 30, False, "frontend_deps"),
+            StartupStep(name="environment_check", phase=StartupPhase.PRE_INIT, action=self._check_environment_step, timeout=10, required=True, dependencies=[]),
+            StartupStep(name="database_check", phase=StartupPhase.INIT, action=self._check_database_step, timeout=15, required=True, dependencies=["environment_check"]),
+            StartupStep(name="migration_check", phase=StartupPhase.INIT, action=self._check_migrations_step, timeout=15, required=True, dependencies=["database_check"]),
+            StartupStep(name="backend_deps", phase=StartupPhase.PRE_INIT, action=self._check_backend_deps, timeout=20, required=False, dependencies=[]),
+            StartupStep(name="auth_deps", phase=StartupPhase.PRE_INIT, action=self._check_auth_deps, timeout=20, required=False, dependencies=[]),
+            StartupStep(name="frontend_deps", phase=StartupPhase.PRE_INIT, action=self._check_frontend_deps, timeout=30, required=False, dependencies=["backend_deps"]),
         ]
-        self.startup_optimizer.register_steps(steps)
+        for step in steps:
+            self.startup_optimizer.add_step(step)
     
     def _print(self, emoji: str, text: str, message: str):
         """Print with emoji support."""

@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import List, Optional, Callable, Any
 import logging
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -40,9 +41,11 @@ class StartupOptimizer:
     Optimizes service startup sequences for faster development cycles.
     """
     
-    def __init__(self):
+    def __init__(self, cache_manager=None):
         self.steps: List[StartupStep] = []
         self.completed_steps: List[str] = []
+        self.cache_manager = cache_manager
+        self.start_time = None
         
     def add_step(self, step: StartupStep):
         """Add a startup step to the sequence"""
@@ -96,3 +99,14 @@ class StartupOptimizer:
         """Check if all required steps are complete"""
         required_steps = {s.name for s in self.steps if s.required}
         return required_steps.issubset(set(self.completed_steps))
+    
+    def start_timing(self):
+        """Start timing the optimization process"""
+        self.start_time = time.time()
+        logger.info("StartupOptimizer timing started")
+    
+    def get_elapsed_time(self) -> float:
+        """Get elapsed time since timing started"""
+        if self.start_time is None:
+            return 0.0
+        return time.time() - self.start_time
