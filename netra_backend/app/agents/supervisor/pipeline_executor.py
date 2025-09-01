@@ -271,11 +271,20 @@ class PipelineExecutor:
     
     async def _send_message_safely(self, state: DeepAgentState, 
                                   run_id: str, thread_id: str) -> None:
-        """Send message with error handling."""
-        message = self._build_completion_message(state, run_id)
-        await self.websocket_manager.send_to_thread(
-            thread_id, message.model_dump(mode='json')
-        )
+        """Send message with error handling via AgentWebSocketBridge."""
+        try:
+            from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
+            
+            bridge = await get_agent_websocket_bridge()
+            
+            # Send pipeline completion notification
+            await bridge.notify_agent_completed(
+                run_id, "PipelineExecutor", 
+                result={"pipeline_completed": True, "state_summary": "Pipeline execution completed"},
+                execution_time_ms=None
+            )
+        except Exception as e:
+            logger.error(f"Failed to send completion via bridge: {e}")
     
     async def _handle_message_error(self, error: Exception, thread_id: str) -> None:
         """Handle WebSocket message errors."""
@@ -307,31 +316,37 @@ class PipelineExecutor:
     
     async def _send_orchestration_notification(self, thread_id: str, run_id: str, 
                                              event_type: str, message: str) -> None:
-        """Send orchestration-level WebSocket notification."""
+        """Send orchestration-level WebSocket notification via AgentWebSocketBridge."""
         try:
-            if not self.websocket_manager:
-                logger.debug(f"No WebSocket manager available for orchestration event: {event_type}")
-                return
+            from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
             
-            # Create orchestration notification payload
-            payload = {
-                "run_id": run_id,
-                "event_type": event_type,
-                "message": message,
-                "timestamp": self._get_current_timestamp(),
-                "agent_name": "supervisor",
-                "orchestration_level": True
-            }
+            bridge = await get_agent_websocket_bridge()
             
-            # Send notification
-            from netra_backend.app.schemas.websocket_models import WebSocketMessage
-            notification = WebSocketMessage(type=event_type, payload=payload)
-            await self.websocket_manager.send_to_thread(thread_id, notification.model_dump())
+            # Map event types to appropriate bridge notifications
+            if event_type == "pipeline_started":
+                await bridge.notify_agent_started(run_id, "PipelineExecutor", {"orchestration_level": True, "message": message})
+            elif event_type == "pipeline_thinking" or "processing" in event_type:
+                await bridge.notify_agent_thinking(run_id, "PipelineExecutor", message)
+            elif event_type == "pipeline_completed":
+                await bridge.notify_agent_completed(run_id, "PipelineExecutor", {"orchestration_level": True})
+            elif event_type == "pipeline_error":
+                await bridge.notify_agent_error(run_id, "PipelineExecutor", message, {"orchestration_level": True})
+            else:
+                # Custom pipeline event
+                payload = {
+                    "run_id": run_id,
+                    "event_type": event_type,
+                    "message": message,
+                    "timestamp": self._get_current_timestamp(),
+                    "agent_name": "pipeline_executor",
+                    "orchestration_level": True
+                }
+                await bridge.notify_custom(run_id, "PipelineExecutor", f"pipeline_{event_type}", payload)
             
-            logger.info(f"Sent orchestration notification: {event_type} - {message[:50]}...")
+            logger.info(f"Sent orchestration notification via bridge: {event_type} - {message[:50]}...")
             
         except Exception as e:
-            logger.warning(f"Failed to send orchestration notification {event_type}: {e}")
+            logger.warning(f"Failed to send orchestration notification via bridge {event_type}: {e}")
     
     def _get_current_timestamp(self) -> float:
         """Get current timestamp."""

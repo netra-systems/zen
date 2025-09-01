@@ -246,14 +246,32 @@ class ModernSyntheticDataSubAgent(BaseExecutionInterface):
         )
     
     async def _send_legacy_update(self, run_id: str, update_data: Dict[str, Any]) -> None:
-        """Send legacy format update (compatibility bridge)."""
-        if self.websocket_manager:
-            try:
-                await self.websocket_manager.send_agent_update(
-                    run_id, self.agent_name, update_data
-                )
-            except Exception as e:
-                logger.warning(f"Failed to send legacy update: {e}")
+        """Send legacy format update via AgentWebSocketBridge (compatibility bridge)."""
+        try:
+            from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
+            
+            bridge = await get_agent_websocket_bridge()
+            status = update_data.get('status', 'processing')
+            message = update_data.get('message', '')
+            
+            # Map update status to appropriate bridge notification
+            if status == 'processing':
+                await bridge.notify_agent_thinking(run_id, self.agent_name, message)
+            elif status == 'generating':
+                await bridge.notify_tool_executing(run_id, self.agent_name, "synthetic_data_generation", 
+                                                  {"data_type": update_data.get("data_type", "unknown")})
+            elif status == 'completed':
+                await bridge.notify_agent_completed(run_id, self.agent_name, 
+                                                   result=update_data.get('result'), 
+                                                   execution_time_ms=update_data.get('execution_time'))
+            elif status == 'failed':
+                await bridge.notify_agent_error(run_id, self.agent_name, message)
+            else:
+                # Custom status updates
+                await bridge.notify_custom(run_id, self.agent_name, f"synthetic_{status}", update_data)
+                
+        except Exception as e:
+            logger.warning(f"Failed to send legacy update via bridge: {e}")
     
     async def _handle_approval_flow_legacy(self, *args, **kwargs) -> None:
         """Handle approval flow in legacy format (compatibility bridge)."""

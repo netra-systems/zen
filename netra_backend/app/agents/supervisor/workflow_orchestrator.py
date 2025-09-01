@@ -163,51 +163,80 @@ class WorkflowOrchestrator:
         )
     
     async def _send_workflow_started(self, context: ExecutionContext) -> None:
-        """Send workflow started notification."""
-        if context.stream_updates and self.websocket_manager:
-            await self.websocket_manager.send_agent_update(
-                context.run_id, "supervisor", 
-                {"status": "workflow_started", "total_steps": len(self._workflow_steps)}
-            )
+        """Send workflow started notification via AgentWebSocketBridge."""
+        if context.stream_updates:
+            try:
+                from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
+                
+                bridge = await get_agent_websocket_bridge()
+                await bridge.notify_agent_started(
+                    context.run_id, "WorkflowOrchestrator", 
+                    {"workflow_started": True, "total_steps": len(self._workflow_steps)}
+                )
+            except Exception as e:
+                logger.warning(f"Failed to send workflow started via bridge: {e}")
     
     async def _send_step_started(self, context: ExecutionContext, 
                                 step: PipelineStep) -> None:
-        """Send step started notification."""
-        if context.stream_updates and self.websocket_manager:
-            await self.websocket_manager.send_agent_update(
-                context.run_id, step.agent_name, 
-                {"status": "started", "step_type": step.metadata.get("step_type"), "order": step.metadata.get("order")}
-            )
+        """Send step started notification via AgentWebSocketBridge."""
+        if context.stream_updates:
+            try:
+                from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
+                
+                bridge = await get_agent_websocket_bridge()
+                await bridge.notify_agent_started(
+                    context.run_id, step.agent_name, 
+                    {"step_type": step.metadata.get("step_type"), "order": step.metadata.get("order")}
+                )
+            except Exception as e:
+                logger.warning(f"Failed to send step started via bridge: {e}")
     
     async def _send_step_completed(self, context: ExecutionContext, 
                                   step: PipelineStep, result: ExecutionResult) -> None:
-        """Send step completed notification."""
-        if context.stream_updates and self.websocket_manager:
-            await self.websocket_manager.send_agent_update(
-                context.run_id, step.agent_name,
-                {
-                    "status": "completed" if result.success else "failed",
-                    "execution_time_ms": result.execution_time_ms,
-                    "step_type": step.metadata.get("step_type")
-                }
-            )
+        """Send step completed notification via AgentWebSocketBridge."""
+        if context.stream_updates:
+            try:
+                from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
+                
+                bridge = await get_agent_websocket_bridge()
+                
+                if result.success:
+                    await bridge.notify_agent_completed(
+                        context.run_id, step.agent_name,
+                        result={"step_type": step.metadata.get("step_type")},
+                        execution_time_ms=result.execution_time_ms
+                    )
+                else:
+                    await bridge.notify_agent_error(
+                        context.run_id, step.agent_name, 
+                        result.error or "Step execution failed",
+                        {"step_type": step.metadata.get("step_type")}
+                    )
+            except Exception as e:
+                logger.warning(f"Failed to send step completed via bridge: {e}")
     
     async def _send_workflow_completed(self, context: ExecutionContext, 
                                       results: List[ExecutionResult]) -> None:
-        """Send workflow completed notification."""
-        if context.stream_updates and self.websocket_manager:
-            total_time = sum(r.execution_time_ms for r in results)
-            success_count = sum(1 for r in results if r.success)
-            
-            await self.websocket_manager.send_agent_update(
-                context.run_id, "supervisor",
-                {
-                    "status": "workflow_completed",
-                    "total_execution_time_ms": total_time,
-                    "successful_steps": success_count,
-                    "total_steps": len(results)
-                }
-            )
+        """Send workflow completed notification via AgentWebSocketBridge."""
+        if context.stream_updates:
+            try:
+                from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
+                
+                bridge = await get_agent_websocket_bridge()
+                total_time = sum(r.execution_time_ms for r in results)
+                success_count = sum(1 for r in results if r.success)
+                
+                await bridge.notify_agent_completed(
+                    context.run_id, "WorkflowOrchestrator",
+                    result={
+                        "workflow_completed": True,
+                        "successful_steps": success_count,
+                        "total_steps": len(results)
+                    },
+                    execution_time_ms=total_time
+                )
+            except Exception as e:
+                logger.warning(f"Failed to send workflow completed via bridge: {e}")
     
     def get_workflow_definition(self) -> List[Dict[str, Any]]:
         """Get workflow definition for monitoring.
