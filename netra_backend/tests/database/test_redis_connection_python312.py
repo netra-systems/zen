@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
+env = get_env()
 Test that reproduces the Redis connection failure in dev environment.
 
 The issue is that aioredis 2.0.1 is incompatible with Python 3.12.4 due to 
@@ -26,7 +28,7 @@ async def test_redis_connection_works_with_python312():
     has been resolved and connections work as expected.
     """
     # Setup environment for Redis connection
-    os.environ["REDIS_URL"] = "redis://localhost:6379/0"
+    env.set("REDIS_URL", "redis://localhost:6379/0", "test")
     
     # Create database connector
     connector = DatabaseConnector(use_emoji=True)
@@ -59,10 +61,10 @@ async def test_dev_launcher_database_validation_succeeds():
     This simulates what happens when running `python scripts/dev_launcher.py`.
     """
     # Setup environment
-    os.environ["DATABASE_URL"] = "postgresql+asyncpg://postgres:password@localhost:5433/netra_dev"
-    os.environ["REDIS_URL"] = "redis://localhost:6379/0"
-    os.environ["CLICKHOUSE_HOST"] = "localhost"
-    os.environ["CLICKHOUSE_HTTP_PORT"] = "8123"
+    env.set("DATABASE_URL", "postgresql+asyncpg://postgres:password@localhost:5433/netra_dev", "test")
+    env.set("REDIS_URL", "redis://localhost:6379/0", "test")
+    env.set("CLICKHOUSE_HOST", "localhost", "test")
+    env.set("CLICKHOUSE_HTTP_PORT", "8123", "test")
     
     # Create database connector
     connector = DatabaseConnector(use_emoji=True)
