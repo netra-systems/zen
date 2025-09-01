@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 E2E Admin Corpus Generation Test Suite
 
 Comprehensive E2E testing for admin corpus generation workflow.
@@ -39,7 +41,7 @@ from netra_backend.app.schemas.admin_corpus_messages import (
 def admin_corpus_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):
     """Setup admin corpus test environment with real or mock dependencies"""
     import os
-    if os.environ.get("ENABLE_REAL_LLM_TESTING") == "true":
+    if env.get("ENABLE_REAL_LLM_TESTING") == "true":
         # Use real dependencies for E2E testing
         agent = CorpusAdminSubAgent(real_llm_manager, real_tool_dispatcher)
         agent.websocket_manager = real_websocket_manager
@@ -91,7 +93,7 @@ class TestAdminCorpusGeneration:
     def _is_real_llm_testing(self) -> bool:
         """Check if real LLM testing is enabled."""
         import os
-        return os.environ.get("ENABLE_REAL_LLM_TESTING") == "true"
+        return env.get("ENABLE_REAL_LLM_TESTING") == "true"
     
     async def _execute_real_corpus_discovery(self, setup: Dict, request):
         """Execute real corpus discovery with agent."""

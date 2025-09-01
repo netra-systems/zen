@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 """Tests for project_utils module.
 
+env = get_env()
 This module tests the SSOT project utility functions for path resolution
 and test environment detection.
 
@@ -98,12 +100,12 @@ class TestEnvironmentDetection:
     
     def setup_method(self):
         """Setup method to store original environment."""
-        self.original_env = dict(os.environ)
+        self.original_env = env.get_all()
     
     def teardown_method(self):
         """Teardown method to restore original environment."""
-        os.environ.clear()
-        os.environ.update(self.original_env)
+        env.clear()
+        env.update(self.original_env, "test")
     
     def test_pytest_current_test_detection(self):
         """Test detection via PYTEST_CURRENT_TEST variable."""
@@ -113,7 +115,7 @@ class TestEnvironmentDetection:
             os.environ.pop(var, None)
         
         # Set PYTEST_CURRENT_TEST
-        os.environ['PYTEST_CURRENT_TEST'] = 'test_something.py::test_function'
+        env.set('PYTEST_CURRENT_TEST', 'test_something.py::test_function', "test")
         
         assert is_test_environment() is True
     
@@ -125,7 +127,7 @@ class TestEnvironmentDetection:
             os.environ.pop(var, None)
         
         # Set TESTING flag
-        os.environ['TESTING'] = '1'
+        env.set('TESTING', '1', "test")
         
         assert is_test_environment() is True
     
@@ -137,7 +139,7 @@ class TestEnvironmentDetection:
             os.environ.pop(var, None)
         
         # Set _ variable with pytest
-        os.environ['_'] = '/usr/bin/pytest'
+        env.set('_', '/usr/bin/pytest', "test")
         
         assert is_test_environment() is True
     
@@ -149,7 +151,7 @@ class TestEnvironmentDetection:
             os.environ.pop(var, None)
         
         # Set ENVIRONMENT to test
-        os.environ['ENVIRONMENT'] = 'test'
+        env.set('ENVIRONMENT', 'test', "test")
         
         assert is_test_environment() is True
     
@@ -161,7 +163,7 @@ class TestEnvironmentDetection:
             os.environ.pop(var, None)
         
         # Set ENVIRONMENT to testing
-        os.environ['ENVIRONMENT'] = 'testing'
+        env.set('ENVIRONMENT', 'testing', "test")
         
         assert is_test_environment() is True
     
@@ -173,7 +175,7 @@ class TestEnvironmentDetection:
             os.environ.pop(var, None)
         
         # Set NETRA_ENV to test
-        os.environ['NETRA_ENV'] = 'test'
+        env.set('NETRA_ENV', 'test', "test")
         
         assert is_test_environment() is True
     
@@ -185,7 +187,7 @@ class TestEnvironmentDetection:
             os.environ.pop(var, None)
         
         # Set NETRA_ENV to testing
-        os.environ['NETRA_ENV'] = 'testing'
+        env.set('NETRA_ENV', 'testing', "test")
         
         assert is_test_environment() is True
     
@@ -197,8 +199,8 @@ class TestEnvironmentDetection:
             os.environ.pop(var, None)
         
         # Set production-like environment
-        os.environ['ENVIRONMENT'] = 'production'
-        os.environ['NETRA_ENV'] = 'production'
+        env.set('ENVIRONMENT', 'production', "test")
+        env.set('NETRA_ENV', 'production', "test")
         
         assert is_test_environment() is False
     
@@ -235,8 +237,8 @@ class TestEnvironmentDetection:
             os.environ.pop(var, None)
         
         # Set production environment but also test flags
-        os.environ['ENVIRONMENT'] = 'production'
-        os.environ['PYTEST_CURRENT_TEST'] = 'test_file.py::test_func'
+        env.set('ENVIRONMENT', 'production', "test")
+        env.set('PYTEST_CURRENT_TEST', 'test_file.py::test_func', "test")
         
         # Should still detect as test environment due to pytest flag
         assert is_test_environment() is True
@@ -249,9 +251,9 @@ class TestEnvironmentDetection:
             os.environ.pop(var, None)
         
         # Set empty values
-        os.environ['ENVIRONMENT'] = ''
-        os.environ['NETRA_ENV'] = ''
-        os.environ['_'] = ''
+        env.set('ENVIRONMENT', '', "test")
+        env.set('NETRA_ENV', '', "test")
+        env.set('_', '', "test")
         
         assert is_test_environment() is False
 
@@ -416,12 +418,12 @@ class TestRealWorldUsage:
         # This test ensures our detection is robust
         
         # Save current environment
-        original_env = dict(os.environ)
+        original_env = env.get_all()
         
         try:
             # Simulate CI test environment
-            os.environ.clear()
-            os.environ.update(original_env)  # Restore base environment
+            env.clear()
+            env.update(original_env, "test")  # Restore base environment
             
             # CI environments often set specific test-related variables
             ci_test_scenarios = [
@@ -438,12 +440,12 @@ class TestRealWorldUsage:
                     os.environ.pop(var, None)
                 
                 # Apply scenario
-                os.environ.update(scenario)
+                env.update(scenario, "test")
                 
                 assert is_test_environment() is True, \
                     f"Failed to detect test environment for CI scenario: {scenario}"
                     
         finally:
             # Restore original environment
-            os.environ.clear()
-            os.environ.update(original_env)
+            env.clear()
+            env.update(original_env, "test")
