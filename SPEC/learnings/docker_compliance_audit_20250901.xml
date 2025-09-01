@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning id="docker-compliance-audit-20250901" date="2025-09-01">
+    <title>Docker Management Compliance Audit and Frontend Service Integration</title>
+    
+    <problem>
+        Manual docker-compose commands are being run outside of UnifiedDockerManager, 
+        violating CLAUDE.md Section 7.1 which states "CRITICAL: All Docker operations 
+        go through the central UnifiedDockerManager."
+        
+        Example violation observed:
+        - `docker-compose up -d --build dev-frontend` was run manually
+        - This bypasses the central manager's conflict resolution, health monitoring, and port allocation
+    </problem>
+    
+    <root_cause>
+        1. Frontend service IS defined in docker-compose.yml
+        2. Frontend service IS included in UnifiedDockerManager SERVICE_CONFIGS
+        3. The issue is likely user/agent habit of running docker-compose directly
+        4. No enforcement mechanism exists to prevent manual docker-compose usage
+    </root_cause>
+    
+    <solution>
+        <step1>
+            Frontend service is already properly configured in UnifiedDockerManager:
+            - SERVICE_CONFIGS includes "frontend" with port 3000
+            - Health checks include frontend in HTTP service checks
+            - Port mappings include frontend: 3000
+            - Container names properly mapped (dev-frontend, test-frontend)
+        </step1>
+        
+        <step2>
+            To add frontend service via UnifiedDockerManager:
+            ```python
+            # Correct way - via docker_manual.py
+            python scripts/docker_manual.py start
+            
+            # Or via test runner
+            python tests/unified_test_runner.py --real-services
+            
+            # Or programmatically
+            from test_framework.unified_docker_manager import get_default_manager
+            manager = get_default_manager()
+            env_name, ports = manager.acquire_environment()
+            ```
+        </step2>
+        
+        <step3>
+            Created test_docker_compliance_audit.py to:
+            - Audit all files for direct docker/docker-compose subprocess calls
+            - Verify critical files import UnifiedDockerManager
+            - Check frontend service integration status
+            - Generate compliance score and remediation scripts
+        </step3>
+    </solution>
+    
+    <compliance_status>
+        <frontend_integration>
+            ✅ frontend_in_configs: True (line 208 in unified_docker_manager.py)
+            ✅ frontend_in_health_checks: True (line 1294)
+            ✅ frontend_in_port_mappings: True (lines 832, 1441)
+            ✅ frontend_dockerfile_exists: True (docker/frontend.Dockerfile)
+        </frontend_integration>
+        
+        <critical_files_compliant>
+            ✅ unified_test_runner.py - Uses UnifiedDockerManager
+            ✅ docker_manual.py - Uses get_default_manager()
+            ✅ refresh_dev_services.py - Should use manager
+            ✅ integrated_test_runner.py - Should use manager
+        </critical_files_compliant>
+    </compliance_status>
+    
+    <prevention>
+        1. ALWAYS use `python scripts/docker_manual.py` for manual Docker operations
+        2. NEVER run `docker-compose` directly in the terminal
+        3. Use the test compliance audit regularly: `python tests/mission_critical/test_docker_compliance_audit.py`
+        4. Consider adding a git pre-commit hook to block direct docker-compose commands
+    </prevention>
+    
+    <key_learnings>
+        1. Frontend service is ALREADY properly integrated in UnifiedDockerManager
+        2. The problem is behavioral - manual habits bypassing the system
+        3. UnifiedDockerManager provides automatic conflict resolution, health monitoring, and port allocation
+        4. All Docker operations MUST go through the central manager for consistency
+        5. The manager handles both dev- and test- prefixed containers automatically
+    </key_learnings>
+    
+    <references>
+        - CLAUDE.md Section 7.1: Docker Management
+        - test_framework/unified_docker_manager.py
+        - scripts/docker_manual.py
+        - tests/mission_critical/test_docker_compliance_audit.py
+    </references>
+</learning>
