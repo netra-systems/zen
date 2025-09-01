@@ -78,7 +78,7 @@ from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from netra_backend.app.services.state_persistence import state_persistence_service
 
 logger = central_logger.get_logger(__name__)
-class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
+class SupervisorAgent(BaseSubAgent):
     """Refactored Supervisor agent with modular design."""
     
     def __init__(self, 
@@ -94,7 +94,9 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
         """Initialize base agent with modern execution interface."""
         BaseSubAgent.__init__(self, llm_manager, name="Supervisor", 
                             description="The supervisor agent that orchestrates sub-agents")
-        BaseExecutionInterface.__init__(self, "Supervisor", websocket_bridge)
+        # Set properties for BaseExecutionInterface compatibility
+        self.agent_name = "Supervisor"
+        self.websocket_manager = websocket_bridge
     
     def _init_services(self, db_session: AsyncSession,
                        websocket_bridge,

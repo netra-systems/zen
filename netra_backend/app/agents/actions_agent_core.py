@@ -26,7 +26,7 @@ from netra_backend.app.agents.actions_agent_llm import ActionsAgentLLMHandler
 from netra_backend.app.agents.actions_agent_monitoring import ActionsAgentMonitoringService
 
 
-class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
+class ActionsToMeetGoalsSubAgent(BaseSubAgent):
     """Refactored core agent following SRP - orchestrates focused sub-modules."""
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
@@ -42,7 +42,9 @@ class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
             name="ActionsToMeetGoalsSubAgent", 
             description="This agent creates a plan of action."
         )
-        BaseExecutionInterface.__init__(self, "ActionsToMeetGoalsSubAgent")
+        # Set properties for BaseExecutionInterface compatibility
+        self.agent_name = "ActionsToMeetGoalsSubAgent"
+        self.websocket_manager = None  # Will be set by registry if needed
 
     def _setup_focused_modules(self) -> None:
         """Setup focused module components following SRP."""

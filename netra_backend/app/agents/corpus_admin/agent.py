@@ -43,7 +43,7 @@ from netra_backend.app.schemas.shared_types import RetryConfig
 logger = central_logger.get_logger(__name__)
 
 
-class CorpusAdminSubAgent(BaseExecutionInterface, BaseSubAgent):
+class CorpusAdminSubAgent(BaseSubAgent):
     """Modernized corpus admin agent with standardized execution patterns."""
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
@@ -56,7 +56,9 @@ class CorpusAdminSubAgent(BaseExecutionInterface, BaseSubAgent):
         """Initialize base agent components."""
         BaseSubAgent.__init__(self, llm_manager, name="CorpusAdminSubAgent",
                             description="Agent specialized in corpus management and administration")
-        BaseExecutionInterface.__init__(self, "CorpusAdminSubAgent", websocket_manager)
+        # Store agent name for BaseExecutionInterface compatibility
+        self.agent_name = "CorpusAdminSubAgent"
+        self.websocket_manager = websocket_manager
     
     def _initialize_components(self, tool_dispatcher: ToolDispatcher, llm_manager: LLMManager) -> None:
         """Initialize agent components"""

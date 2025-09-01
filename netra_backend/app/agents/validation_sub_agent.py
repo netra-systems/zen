@@ -7,6 +7,7 @@ Business Value: Quality assurance and validation for AI operations
 BVJ: Growth & Enterprise | Quality Assurance | Risk reduction & compliance
 """
 
+import asyncio
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
@@ -273,19 +274,6 @@ class ValidationSubAgent(BaseSubAgent, BaseExecutionInterface):
         """Convert ExecutionContext to DeepAgentState for backward compatibility."""
         return context.state
     
-    # WebSocket context setup methods
-    async def _setup_websocket_context_if_available(self, context: ExecutionContext) -> None:
-        """Set up WebSocket context if websocket manager is available."""
-        # WebSocket context is now handled by the orchestrator
-        # This method is kept for compatibility but no longer needed
-        pass
-    
-    async def _setup_websocket_context_for_legacy(self, run_id: str) -> None:
-        """Set up WebSocket context for legacy execution paths."""
-        # WebSocket context is now handled by the orchestrator
-        # This method is kept for compatibility but no longer needed
-        pass
-    
     # Health and status methods
     def get_health_status(self) -> Dict[str, Any]:
         """Get comprehensive health status."""
@@ -293,14 +281,10 @@ class ValidationSubAgent(BaseSubAgent, BaseExecutionInterface):
             "agent_name": "ValidationSubAgent",
             "status": "healthy",
             "validation_rules_loaded": len(self.validation_rules),
-            "websocket_enabled": self.websocket_enabled,
+            "websocket_enabled": self.has_websocket_context(),
             "components": {
                 "validation_engine": "active",
-                "websocket_context": "active" if self.websocket_enabled else "inactive"
+                "websocket_context": "active" if self.has_websocket_context() else "inactive"
             },
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
-
-
-# Import asyncio for sleep function
-import asyncio

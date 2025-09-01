@@ -47,7 +47,10 @@ class BaseSubAgent(
     any WebSocket events can be emitted. This is handled by the supervisor/execution engine.
     """
     
-    def __init__(self, llm_manager: Optional[LLMManager] = None, name: str = "BaseSubAgent", description: str = "This is the base sub-agent."):
+    def __init__(self, llm_manager: Optional[LLMManager] = None, name: str = "BaseSubAgent", description: str = "This is the base sub-agent.", agent_id: Optional[str] = None, user_id: Optional[str] = None):
+        # Initialize BaseExecutionInterface
+        super().__init__(agent_name=name, websocket_manager=None)
+        
         self.llm_manager = llm_manager
         self.state = SubAgentLifecycle.PENDING
         self.name = name
@@ -55,11 +58,14 @@ class BaseSubAgent(
         self.start_time = None
         self.end_time = None
         self.context = {}  # Protected context for this agent
-        self.websocket_manager = None  # Deprecated - kept for backward compatibility
-        self.user_id = None  # Deprecated - kept for backward compatibility
+        self.user_id = user_id  # Deprecated - kept for backward compatibility
         self.logger = central_logger.get_logger(name)
         self.correlation_id = generate_llm_correlation_id()  # Unique ID for tracing
         self._subagent_logging_enabled = self._get_subagent_logging_enabled()
+        
+        # Initialize attributes required by AgentCommunicationMixin
+        self.agent_id = agent_id or f"{name}_{self.correlation_id}"  # Unique agent identifier
+        self._user_id = user_id  # Note underscore prefix as expected by AgentCommunicationMixin
         
         # Initialize WebSocket bridge adapter (SSOT for WebSocket events)
         self._websocket_adapter = WebSocketBridgeAdapter()

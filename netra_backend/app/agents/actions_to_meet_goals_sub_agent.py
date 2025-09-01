@@ -52,8 +52,8 @@ from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.shared_types import RetryConfig
 
 
-class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
-    """Modernized agent implementing BaseExecutionInterface pattern."""
+class ActionsToMeetGoalsSubAgent(BaseSubAgent):
+    """Modernized agent implementing BaseExecutionInterface pattern via composition."""
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
         """Initialize with modern execution patterns."""
@@ -69,7 +69,8 @@ class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
             name="ActionsToMeetGoalsSubAgent", 
             description="This agent creates a plan of action."
         )
-        BaseExecutionInterface.__init__(self, "ActionsToMeetGoalsSubAgent")
+        # Store agent name for BaseExecutionInterface compatibility
+        self.agent_name = "ActionsToMeetGoalsSubAgent"
 
     def _setup_modern_execution_infrastructure(self) -> None:
         """Setup modern execution infrastructure components."""

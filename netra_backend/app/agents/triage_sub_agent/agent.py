@@ -45,7 +45,7 @@ from netra_backend.app.schemas.shared_types import RetryConfig
 logger = central_logger.get_logger(__name__)
 
 
-class TriageSubAgent(BaseExecutionInterface, BaseSubAgent):
+class TriageSubAgent(BaseSubAgent):
     """Modernized triage agent with BaseExecutionInterface pattern."""
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher, 
@@ -61,7 +61,9 @@ class TriageSubAgent(BaseExecutionInterface, BaseSubAgent):
         """Initialize base agent with modern execution interface."""
         BaseSubAgent.__init__(self, llm_manager, name="TriageSubAgent", 
                             description="Modernized triage agent with advanced categorization.")
-        BaseExecutionInterface.__init__(self, "TriageSubAgent", websocket_manager)
+        # Store agent name and websocket manager for BaseExecutionInterface compatibility
+        self.agent_name = "TriageSubAgent"
+        self.websocket_manager = websocket_manager
     
     def _init_core_components(self, tool_dispatcher: ToolDispatcher, redis_manager: Optional[RedisManager]) -> None:
         """Initialize core triage components."""

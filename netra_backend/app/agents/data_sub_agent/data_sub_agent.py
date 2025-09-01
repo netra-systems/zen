@@ -10,7 +10,11 @@ BVJ: Enterprise | Performance Fee Capture | $10K+ monthly revenue per customer
 import asyncio
 import time
 from datetime import datetime, UTC
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
+
+# Import specific types from shared_types for better type safety
+from netra_backend.app.schemas.shared_types import DataAnalysisResponse
+from netra_backend.app.schemas.monitoring import PerformanceMetric
 
 from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.base.interface import (
@@ -135,7 +139,7 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
             self.logger.error(f"DataSubAgent execution failed: {str(e)}")
             return self._create_error_result(str(e), start_time)
     
-    def _validate_execution_state(self, state: DeepAgentState) -> bool:
+    def _validate_execution_state(self, state: Optional[DeepAgentState]) -> bool:
         """Validate execution state has required data analysis parameters."""
         return (
             state and 
@@ -143,7 +147,7 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
             state.agent_input is not None
         )
     
-    def _extract_analysis_request(self, state: DeepAgentState) -> Dict[str, Any]:
+    def _extract_analysis_request(self, state: DeepAgentState) -> Dict[str, Union[str, List[str], Optional[str]]]:
         """Extract and parse analysis request from state."""
         agent_input = state.agent_input
         
@@ -156,7 +160,7 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
             "user_id": getattr(state, 'user_id', None)
         }
     
-    async def _execute_analysis(self, request: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_analysis(self, request: Dict[str, Union[str, List[str], Optional[str]]]) -> Dict[str, Union[str, List[str], int, float, Dict[str, Any]]]:
         """Execute data analysis based on request type."""
         analysis_type = request["type"]
         
@@ -170,7 +174,7 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
             # Default to performance analysis
             return await self.performance_analyzer.analyze_performance(request)
     
-    async def _generate_insights(self, analysis_result: Dict[str, Any]) -> Dict[str, Any]:
+    async def _generate_insights(self, analysis_result: Dict[str, Union[str, List[str], int, float, Dict[str, Any]]]) -> Dict[str, Union[str, float, int]]:
         """Generate actionable insights from analysis results."""
         # Flatten complex structures to comply with TypedAgentResult constraints
         insights = {
@@ -201,7 +205,7 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
         
         return insights
     
-    async def _generate_llm_insights(self, analysis_result: Dict[str, Any]) -> str:
+    async def _generate_llm_insights(self, analysis_result: Dict[str, Union[str, List[str], int, float, Dict[str, Any]]]) -> str:
         """Generate AI-powered insights using LLM."""
         try:
             prompt = self._build_insights_prompt(analysis_result)
@@ -211,7 +215,7 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
             self.logger.warning(f"LLM insights generation failed: {e}")
             return "AI insights unavailable"
     
-    def _build_insights_prompt(self, analysis_result: Dict[str, Any]) -> str:
+    def _build_insights_prompt(self, analysis_result: Dict[str, Union[str, List[str], int, float, Dict[str, Any]]]) -> str:
         """Build prompt for LLM insights generation."""
         return f"""Analyze this AI workload data and provide actionable cost optimization insights:
         
@@ -283,12 +287,12 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
             self.schema_cache.is_available()
         )
     
-    def _context_to_state(self, context: ExecutionContext) -> DeepAgentState:
+    def _context_to_state(self, context: ExecutionContext) -> Optional[DeepAgentState]:
         """Convert ExecutionContext to DeepAgentState for backward compatibility."""
         return context.state
     
     # Health and status methods
-    def get_health_status(self) -> Dict[str, Any]:
+    def get_health_status(self) -> Dict[str, Union[str, Dict[str, str]]]:
         """Get comprehensive health status."""
         return {
             "agent_name": "DataSubAgent",
@@ -308,15 +312,3 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
         self.logger.info("Cleaning up DataSubAgent resources")
         await self.clickhouse_client.close()
         await self.schema_cache.cleanup()
-    
-    async def _setup_websocket_context_if_available(self, context: ExecutionContext) -> None:
-        """Set up WebSocket context if websocket manager is available."""
-        # WebSocket context is now handled by the orchestrator
-        # This method is kept for compatibility but no longer needed
-        pass
-    
-    async def _setup_websocket_context_for_legacy(self, run_id: str) -> None:
-        """Set up WebSocket context for legacy execution paths."""
-        # WebSocket context is now handled by the orchestrator
-        # This method is kept for compatibility but no longer needed
-        pass
