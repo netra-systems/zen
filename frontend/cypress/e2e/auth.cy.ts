@@ -9,7 +9,7 @@ describe('Authentication Flow - UnifiedAuthService', () => {
       return false;
     });
     
-    // Mock auth config API with current structure
+    // Mock current auth service endpoints
     cy.intercept('GET', '**/auth/config', {
       statusCode: 200,
       body: {
@@ -20,6 +20,8 @@ describe('Authentication Flow - UnifiedAuthService', () => {
           logout: '/auth/logout',
           callback: '/auth/callback',
           token: '/auth/token',
+          refresh: '/auth/refresh',
+          verify: '/auth/verify',
           user: '/auth/me',
           dev_login: '/auth/dev/login'
         },
@@ -27,9 +29,22 @@ describe('Authentication Flow - UnifiedAuthService', () => {
         authorized_redirect_uris: ['http://localhost:3000/auth/callback']
       }
     }).as('authConfig');
+    
+    // Mock auth verification endpoint
+    cy.intercept('POST', '**/auth/verify', {
+      statusCode: 200,
+      body: {
+        valid: true,
+        user: {
+          id: 'test-user-id',
+          email: 'test@example.com',
+          full_name: 'Test User'
+        }
+      }
+    }).as('authVerify');
 
-    // Mock user info endpoint
-    cy.intercept('GET', '**/auth/me', {
+    // Mock current user info endpoint (unified with backend API)
+    cy.intercept('GET', '**/api/me', {
       statusCode: 200,
       body: {
         id: 'test-user-id',
@@ -38,6 +53,17 @@ describe('Authentication Flow - UnifiedAuthService', () => {
         role: 'user'
       }
     }).as('userInfo');
+    
+    // Also mock auth service me endpoint for compatibility
+    cy.intercept('GET', '**/auth/me', {
+      statusCode: 200,
+      body: {
+        id: 'test-user-id',
+        email: 'test@example.com',
+        full_name: 'Test User',
+        role: 'user'
+      }
+    }).as('authUserInfo');
 
     // Mock logout endpoint
     cy.intercept('POST', '**/auth/logout', {

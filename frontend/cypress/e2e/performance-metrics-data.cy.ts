@@ -13,10 +13,49 @@ import {
  * Performance Metrics Data Tests
  * BVJ: Enterprise segment - validates platform performance, supports SLA compliance
  * Tests: Metric data accuracy, thresholds, business KPIs
+ * Updated for current system: WebSocket metrics, /api/metrics endpoint, circuit breaker integration
  */
 
 describe('Performance Metrics Data Tests', () => {
   beforeEach(() => {
+    // Set up current authentication system
+    cy.window().then((win) => {
+      win.localStorage.setItem('jwt_token', 'test-jwt-metrics');
+      win.localStorage.setItem('refresh_token', 'test-refresh-metrics');
+      win.localStorage.setItem('user', JSON.stringify({
+        id: 'test-user-metrics',
+        email: 'test@netrasystems.ai',
+        name: 'Test User'
+      }));
+    });
+    
+    // Mock current metrics API endpoint
+    cy.intercept('GET', '/api/metrics/**', {
+      statusCode: 200,
+      body: {
+        overview: {
+          active_models: 12,
+          queue_depth: 3,
+          error_rate: 0.02,
+          cache_hit_rate: 0.85,
+          inference_latency: { current: 245, optimized: 180 },
+          throughput: { current: 1250, optimized: 1800 },
+          system_health: {
+            cpu_usage: 65,
+            memory_usage: 72,
+            gpu_utilization: 88
+          }
+        },
+        timestamp: new Date().toISOString()
+      }
+    }).as('metricsData');
+    
+    // Mock WebSocket connection for real-time metrics
+    cy.intercept('/ws*', {
+      statusCode: 101,
+      headers: { 'upgrade': 'websocket' }
+    }).as('wsConnection');
+    
     MetricsTestHelper.setupViewport()
     MetricsTestHelper.navigateToMetrics()
     MetricsTestHelper.waitForPerformanceTab()
@@ -25,6 +64,44 @@ describe('Performance Metrics Data Tests', () => {
   describe('Overview Tab Metrics', () => {
     beforeEach(() => {
       MetricsTestHelper.switchToTab('Overview')
+      
+      // Wait for metrics API to be called
+      cy.wait('@metricsData')
+      
+      // Mock real-time WebSocket metrics updates
+      cy.window().then((win) => {
+        const store = (win as any).useUnifiedChatStore?.getState();
+        if (store && store.handleWebSocketEvent) {
+          const metricsEvents = [
+            {
+              type: 'metrics_update',
+              payload: {
+                type: 'system_health',
+                data: {
+                  cpu_usage: 68,
+                  memory_usage: 74,
+                  gpu_utilization: 90
+                },
+                timestamp: Date.now()
+              }
+            },
+            {
+              type: 'performance_alert',
+              payload: {
+                alert_type: 'latency_spike',
+                current_latency: 280,
+                threshold: 250
+              }
+            }
+          ];
+          
+          metricsEvents.forEach((event, index) => {
+            setTimeout(() => {
+              store.handleWebSocketEvent(event);
+            }, index * 1000);
+          });
+        }
+      });
     })
 
     it('should display system health metrics', () => {
@@ -76,7 +153,40 @@ describe('Performance Metrics Data Tests', () => {
 
   describe('Latency Tab Metrics', () => {
     beforeEach(() => {
+      // Mock latency-specific metrics endpoint
+      cy.intercept('GET', '/api/metrics/latency**', {
+        statusCode: 200,
+        body: {
+          p50: 180,
+          p90: 245,
+          p99: 380,
+          mean: 195,
+          max: 450,
+          min: 120,
+          timestamp: new Date().toISOString(),
+          circuit_breaker_status: 'closed'
+        }
+      }).as('latencyMetrics');
+      
       MetricsTestHelper.switchToTab('Latency')
+      
+      // Mock WebSocket latency updates
+      cy.window().then((win) => {
+        const store = (win as any).useUnifiedChatStore?.getState();
+        if (store && store.handleWebSocketEvent) {
+          setTimeout(() => {
+            store.handleWebSocketEvent({
+              type: 'latency_update',
+              payload: {
+                p50: 185,
+                p90: 250,
+                circuit_breaker_trips: 2,
+                timestamp: Date.now()
+              }
+            });
+          }, 500);
+        }
+      });
     })
 
     it('should display latency tab content', () => {
@@ -124,6 +234,25 @@ describe('Performance Metrics Data Tests', () => {
 
   describe('Cost Analysis Tab', () => {
     beforeEach(() => {
+      // Mock cost analysis endpoint
+      cy.intercept('GET', '/api/metrics/cost**', {
+        statusCode: 200,
+        body: {
+          total_cost: 4750.50,
+          cost_per_request: 0.0048,
+          cost_breakdown: {
+            compute: 3200.30,
+            storage: 850.20,
+            bandwidth: 700.00
+          },
+          optimization_potential: {
+            monthly_savings: 1425.15,
+            efficiency_gain: 30
+          },
+          timestamp: new Date().toISOString()
+        }
+      }).as('costMetrics');
+      
       MetricsTestHelper.switchToTab('Cost Analysis')
     })
 
@@ -169,6 +298,38 @@ describe('Performance Metrics Data Tests', () => {
 
   describe('Benchmarks Tab', () => {
     beforeEach(() => {
+      // Mock benchmarks endpoint
+      cy.intercept('GET', '/api/metrics/benchmarks**', {
+        statusCode: 200,
+        body: {
+          benchmarks: [
+            {
+              name: 'GPT-4 Inference',
+              category: 'NLP',
+              score: 92.5,
+              baseline: 88.0,
+              improvement: 5.1
+            },
+            {
+              name: 'BERT Classification',
+              category: 'NLP', 
+              score: 89.2,
+              baseline: 85.5,
+              improvement: 4.3
+            },
+            {
+              name: 'ResNet Image Processing',
+              category: 'Vision',
+              score: 94.1,
+              baseline: 90.8,
+              improvement: 3.6
+            }
+          ],
+          overall_score: 91.9,
+          timestamp: new Date().toISOString()
+        }
+      }).as('benchmarkMetrics');
+      
       MetricsTestHelper.switchToTab('Benchmarks')
     })
 
@@ -212,9 +373,17 @@ describe('Performance Metrics Data Tests', () => {
   describe('Metric Validation and Thresholds', () => {
     it('should validate real-time metrics display', () => {
       MetricsTestHelper.switchToTab('Overview')
+      
+      // Wait for metrics data to load
+      cy.wait('@metricsData')
+      
       // Validate that real-time metrics are displayed correctly
       cy.contains('Active Models').should('be.visible')
       cy.get('.text-2xl').should('have.length.at.least', 4)
+      
+      // Validate specific metric values from API response
+      cy.contains('12').should('be.visible') // Active models
+      cy.contains('0.02').should('be.visible') // Error rate
     })
 
     it('should validate metric card structure', () => {
@@ -241,13 +410,26 @@ describe('Performance Metrics Data Tests', () => {
 
     it('should ensure system health metrics are present', () => {
       MetricsTestHelper.switchToTab('Overview')
+      
+      // Wait for metrics API to provide system health data
+      cy.wait('@metricsData')
+      
       // Verify system health section with progress bars
       cy.contains('System Health').should('be.visible')
       cy.get('[role="progressbar"]').should('have.length.at.least', 3)
+      
+      // Verify specific health metrics from API
+      cy.contains('65').should('be.visible') // CPU usage
+      cy.contains('72').should('be.visible') // Memory usage
+      cy.contains('88').should('be.visible') // GPU utilization
     })
 
     it('should validate timestamp freshness', () => {
-      // Check that timestamp is updated in the header
+      // Check that timestamp is updated in the header from API
+      cy.wait('@metricsData').then((interception) => {
+        expect(interception.response.body).to.have.property('timestamp');
+      });
+      
       cy.contains('Updated').should('be.visible')
       cy.get('.text-xs').should('contain', 'Updated')
     })
