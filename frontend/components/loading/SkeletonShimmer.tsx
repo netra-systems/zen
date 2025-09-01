@@ -111,9 +111,11 @@ export const ShimmerPresets = {
  */
 export const createPresetShimmer = (preset: keyof typeof ShimmerPresets) => {
   const config = ShimmerPresets[preset];
-  return (props: Omit<SkeletonShimmerProps, 'config'>) => (
+  const PresetShimmerComponent = (props: Omit<SkeletonShimmerProps, 'config'>) => (
     <SkeletonShimmer {...props} config={config} />
   );
+  PresetShimmerComponent.displayName = `PresetShimmer_${preset}`;
+  return PresetShimmerComponent;
 };
 
 export default SkeletonShimmer;

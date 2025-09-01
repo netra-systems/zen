@@ -192,7 +192,7 @@ class ServiceAvailabilityChecker:
     
     def _check_use_real_services_flag(self) -> bool:
         """Check if USE_REAL_SERVICES flag is set."""
-        return os.getenv("USE_REAL_SERVICES", "false").lower() == "true"
+        return get_env().get("USE_REAL_SERVICES", "false").lower() == "true"
     
     def _check_use_real_llm_flag(self) -> bool:
         """Check if real LLM usage is enabled."""
@@ -204,7 +204,7 @@ class ServiceAvailabilityChecker:
         ]
         
         for flag in real_llm_flags:
-            if os.getenv(flag, "false").lower() == "true":
+            if get_env().get(flag, "false").lower() == "true":
                 return True
                 
         return False
@@ -221,9 +221,9 @@ class ServiceAvailabilityChecker:
         
         # Try multiple common database URLs
         db_urls = [
-            os.getenv("DATABASE_URL"),
-            os.getenv("POSTGRES_URL"),
-            os.getenv("TEST_DATABASE_URL"),
+            get_env().get("DATABASE_URL"),
+            get_env().get("POSTGRES_URL"),
+            get_env().get("TEST_DATABASE_URL"),
             "postgresql://postgres:password@localhost:5432/netra",
             "postgresql://postgres:password@localhost:5432/netra_test",
             "postgresql://test:test@localhost:5432/test_db"
@@ -286,8 +286,8 @@ class ServiceAvailabilityChecker:
         
         # Try multiple common Redis configurations
         redis_configs = [
-            {"url": os.getenv("REDIS_URL")},
-            {"url": os.getenv("TEST_REDIS_URL")},
+            {"url": get_env().get("REDIS_URL")},
+            {"url": get_env().get("TEST_REDIS_URL")},
             {"host": "localhost", "port": 6379},
             {"host": "127.0.0.1", "port": 6379},
             {"url": "redis://localhost:6379"},
@@ -361,7 +361,7 @@ class ServiceAvailabilityChecker:
         ]
         
         # Add environment-based config if available
-        ch_url = os.getenv("CLICKHOUSE_URL") or os.getenv("TEST_CLICKHOUSE_URL")
+        ch_url = get_env().get("CLICKHOUSE_URL") or get_env().get("TEST_CLICKHOUSE_URL")
         if ch_url and ch_url.startswith("clickhouse://"):
             try:
                 parsed = urlparse(ch_url.replace("clickhouse://", "http://"))
@@ -419,7 +419,7 @@ class ServiceAvailabilityChecker:
     
     async def _check_openai_api(self) -> ServiceStatus:
         """Check OpenAI API availability."""
-        api_key = os.getenv("OPENAI_API_KEY")
+        api_key = get_env().get("OPENAI_API_KEY")
         if not api_key:
             return ServiceStatus(
                 name="openai",
@@ -474,7 +474,7 @@ class ServiceAvailabilityChecker:
     
     async def _check_anthropic_api(self) -> ServiceStatus:
         """Check Anthropic API availability."""
-        api_key = os.getenv("ANTHROPIC_API_KEY")
+        api_key = get_env().get("ANTHROPIC_API_KEY")
         if not api_key:
             return ServiceStatus(
                 name="anthropic",

@@ -1,5 +1,6 @@
 """Real-time Streaming with Auth Validation Tests - P1 HIGH Priority
 
+from shared.isolated_environment import get_env
 Test #10 from CRITICAL_INTEGRATION_TEST_PLAN.md
 
 Business Value Justification (BVJ):
@@ -32,9 +33,9 @@ from typing import Any, Dict, List, Optional
 import jwt
 import pytest
 
-os.environ["TESTING"] = "1" 
-os.environ["ENVIRONMENT"] = "test"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+get_env().set("TESTING",  )"1" 
+get_env().set("ENVIRONMENT",  )"test"
+get_env().set("DATABASE_URL",  )"sqlite+aiosqlite:///:memory:"
 
 from tests.e2e.config import TEST_CONFIG, setup_test_environment
 from tests.e2e.harness_utils import UnifiedTestHarnessComplete

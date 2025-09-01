@@ -117,40 +117,14 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
             
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
         """Execute data analysis core logic with modern patterns and WebSocket notifications."""
-        # Set WebSocket context in state for tool execution notifications
-        if hasattr(context.state, '__dict__'):
-            context.state._websocket_context = self._create_websocket_context(context)
+        # WebSocket context is handled by orchestrator
         
-        # Send agent thinking notification
-        if self.websocket_manager:
-            notifier = self._get_websocket_notifier()
-            ws_context = self._create_websocket_context(context)
-            await notifier.send_agent_thinking(
-                ws_context, 
-                "Initializing data analysis and preparing database queries..."
-            )
+        # Send agent thinking notification using mixin
+        await self.emit_thinking("Initializing data analysis and preparing database queries...")
         
         return await self.core.execute_data_analysis(context)
     
-    def _get_websocket_notifier(self):
-        """Get WebSocket notifier instance."""
-        if not hasattr(self, '_websocket_notifier'):
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-            self._websocket_notifier = WebSocketNotifier(self.websocket_manager)
-        return self._websocket_notifier
     
-    def _create_websocket_context(self, context: ExecutionContext):
-        """Create WebSocket execution context."""
-        from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-        from netra_backend.app.agents.utils import extract_thread_id
-        
-        thread_id = extract_thread_id(context.state, context.run_id)
-        return AgentExecutionContext(
-            agent_name=self.agent_name,
-            run_id=context.run_id,
-            thread_id=thread_id,
-            user_id=getattr(context.state, 'user_id', context.run_id)
-        )
     
     # Main execution methods for backward compatibility
     @validate_agent_input('DataSubAgent')
@@ -180,40 +154,21 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
     # Data operations delegation to helpers
     async def _fetch_clickhouse_data(self, query: str, cache_key: Optional[str] = None):
         """Execute ClickHouse query with caching support and WebSocket notifications."""
-        # Send tool executing notification for database queries
-        if self.websocket_manager:
-            try:
-                notifier = self._get_websocket_notifier()
-                # Create minimal context for tool notifications
-                from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-                context = AgentExecutionContext(
-                    agent_name=self.agent_name,
-                    run_id=getattr(self, '_current_run_id', 'unknown'),
-                    thread_id=getattr(self, '_current_thread_id', 'unknown'),
-                    user_id=getattr(self, '_current_user_id', 'unknown')
-                )
-                await notifier.send_tool_executing(
-                    context, "database_query", "Executing ClickHouse query", 3000
-                )
-                
-                result = await self.helpers.fetch_clickhouse_data(query, cache_key)
-                
-                # Send tool completed notification
-                await notifier.send_tool_completed(
-                    context, "database_query", 
-                    {"status": "success", "rows_returned": len(result) if result else 0}
-                )
-                return result
-            except Exception as e:
-                # Send error notification
-                if 'notifier' in locals() and 'context' in locals():
-                    await notifier.send_tool_completed(
-                        context, "database_query",
-                        {"status": "error", "error": str(e)}
-                    )
-                raise
-        else:
-            return await self.helpers.fetch_clickhouse_data(query, cache_key)
+        # Send tool executing notification using mixin methods
+        await self.emit_tool_executing("database_query")
+        
+        try:
+            result = await self.helpers.fetch_clickhouse_data(query, cache_key)
+            
+            # Send tool completed notification using mixin methods
+            await self.emit_tool_completed("database_query", 
+                {"status": "success", "rows_returned": len(result) if result else 0})
+            return result
+        except Exception as e:
+            # Send error notification using mixin methods
+            await self.emit_tool_completed("database_query",
+                {"status": "error", "error": str(e)})
+            raise
         
     def cache_clear(self) -> None:
         """Clear cache for test compatibility."""
@@ -811,20 +766,8 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
         logger.debug("DataSubAgent cache cleared")
     
     async def _send_thinking_notification(self, thought: str) -> None:
-        """Send thinking notification if WebSocket manager available."""
-        if self.websocket_manager:
-            try:
-                notifier = self._get_websocket_notifier()
-                from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-                context = AgentExecutionContext(
-                    agent_name=self.agent_name,
-                    run_id=self._current_run_id or 'unknown',
-                    thread_id=self._current_thread_id or 'unknown',
-                    user_id=getattr(self, '_current_user_id', 'unknown')
-                )
-                await notifier.send_agent_thinking(context, thought)
-            except Exception as e:
-                logger.debug(f"Failed to send thinking notification: {e}")
+        """Send thinking notification using mixin methods."""
+        await self.emit_thinking(thought)
 
     # Dynamic delegation for backward compatibility
     def __getattr__(self, name: str):

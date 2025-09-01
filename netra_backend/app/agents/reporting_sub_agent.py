@@ -100,12 +100,8 @@ class ReportingSubAgent(BaseSubAgent, BaseExecutionInterface):
         # Log agent communication start
         log_agent_communication("Supervisor", "ReportingSubAgent", run_id, "execute_request")
         
-        # Send agent started notification
-        if self.websocket_manager:
-            notifier = self._get_websocket_notifier()
-            context = self._create_websocket_context(state, run_id)
-            await notifier.send_agent_started(context)
-            await notifier.send_agent_thinking(context, "Compiling analysis results into comprehensive report...")
+        # Send agent started notification using mixin methods
+        await self.emit_thinking("Compiling analysis results into comprehensive report...")
         
         start_time = time.time()
         try:
@@ -119,40 +115,18 @@ class ReportingSubAgent(BaseSubAgent, BaseExecutionInterface):
                 timeout=30.0
             )
             
-            # Send agent completed notification
-            if self.websocket_manager:
-                duration_ms = (time.time() - start_time) * 1000
-                result_dict = self._extract_completion_result(state)
-                await notifier.send_agent_completed(context, result_dict, duration_ms)
+            # Send agent completed notification using mixin methods
+            await self.emit_progress("Final report generation completed", is_complete=True)
                 
         except Exception as e:
-            # Send agent error notification
-            if self.websocket_manager:
-                await notifier.send_agent_failed(context, str(e), {"error_type": type(e).__name__})
+            # Send agent error notification using mixin methods
+            await self.emit_error(str(e), type(e).__name__)
             raise
         
         # Log agent communication completion
         log_agent_communication("ReportingSubAgent", "Supervisor", run_id, "execute_response")
     
-    def _get_websocket_notifier(self):
-        """Get WebSocket notifier instance."""
-        if not hasattr(self, '_websocket_notifier'):
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-            self._websocket_notifier = WebSocketNotifier(self.websocket_manager)
-        return self._websocket_notifier
     
-    def _create_websocket_context(self, state: DeepAgentState, run_id: str):
-        """Create WebSocket execution context."""
-        from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-        from netra_backend.app.agents.utils import extract_thread_id
-        
-        thread_id = extract_thread_id(state, run_id)
-        return AgentExecutionContext(
-            agent_name=self.agent_name,
-            run_id=run_id,
-            thread_id=thread_id,
-            user_id=getattr(state, 'user_id', run_id)
-        )
     
     def _extract_completion_result(self, state: DeepAgentState) -> Dict[str, Any]:
         """Extract completion result for WebSocket notification."""
@@ -169,24 +143,19 @@ class ReportingSubAgent(BaseSubAgent, BaseExecutionInterface):
         async def _execute_reporting():
             await self._send_processing_update(run_id, stream_updates)
             
-            # Send thinking notification
-            if self.websocket_manager:
-                notifier = self._get_websocket_notifier()
-                context = self._create_websocket_context(state, run_id)
-                await notifier.send_agent_thinking(context, "Building comprehensive analysis prompt...")
+            # Send thinking notification using mixin methods
+            await self.emit_thinking("Building comprehensive analysis prompt...")
             
             prompt = self._build_reporting_prompt(state)
             correlation_id = generate_llm_correlation_id()
             
-            # Send LLM execution notification
-            if self.websocket_manager:
-                await notifier.send_agent_thinking(context, "Generating final report with AI model...")
+            # Send LLM execution notification using mixin methods
+            await self.emit_thinking("Generating final report with AI model...")
             
             llm_response_str = await self._execute_reporting_llm_with_observability(prompt, correlation_id)
             
-            # Send processing notification
-            if self.websocket_manager:
-                await notifier.send_agent_thinking(context, "Processing and formatting report results...")
+            # Send processing notification using mixin methods
+            await self.emit_thinking("Processing and formatting report results...")
             
             return await self._process_reporting_response(llm_response_str, run_id, stream_updates, state)
         return _execute_reporting

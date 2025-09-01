@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 Comprehensive Dev Launcher Startup Test Suite
 
 This test suite is designed to FAIL initially to expose current startup issues,
@@ -131,7 +132,7 @@ class TestDevLauncherStartuper:
         ]
         
         for var in test_env_vars:
-            self.original_env[var] = os.environ.get(var)
+            self.original_env[var] = get_env().get(var)
             
         # Set test-specific environment variables
         # NOTE: Using potentially problematic values to expose issues
@@ -167,7 +168,7 @@ class TestDevLauncherStartuper:
             if original_value is None:
                 os.environ.pop(var, None)
             else:
-                os.environ[var] = original_value
+                get_env().get(var) = original_value
                 
         self.original_env.clear()
         
@@ -545,7 +546,7 @@ class TestDevLauncherStartuper:
         # Test 1: Missing database
         try:
             # Point to non-existent database
-            os.environ["DATABASE_URL"] = "postgresql+asyncpg://nonexistent:user@localhost:9999/nonexistent_db"
+            get_env().set("DATABASE_URL",  )"postgresql+asyncpg://nonexistent:user@localhost:9999/nonexistent_db"
             
             config = LauncherConfig(no_browser=True, non_interactive=True, verbose=True)
             self.launcher = DevLauncher(config)
@@ -789,7 +790,7 @@ class TestDevLauncherStartuper:
             # This should use the potentially problematic test DATABASE_URL
             import asyncpg
             
-            database_url = os.environ.get("DATABASE_URL")
+            database_url = get_env().get("DATABASE_URL")
             if not database_url:
                 return False
                 
@@ -808,7 +809,7 @@ class TestDevLauncherStartuper:
         try:
             import redis.asyncio as redis
             
-            redis_url = os.environ.get("REDIS_URL") 
+            redis_url = get_env().get("REDIS_URL") 
             if not redis_url:
                 return False
                 
@@ -827,7 +828,7 @@ class TestDevLauncherStartuper:
         try:
             import httpx
             
-            clickhouse_url = os.environ.get("CLICKHOUSE_URL")
+            clickhouse_url = get_env().get("CLICKHOUSE_URL")
             if not clickhouse_url:
                 return False
                 

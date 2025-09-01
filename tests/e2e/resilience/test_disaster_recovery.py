@@ -1,5 +1,6 @@
 """Critical Test #10: Disaster Recovery and System Restoration
 
+from shared.isolated_environment import get_env
 CRITICAL CONTEXT: Disaster Recovery Validation
 Tests complete system backup, catastrophic failure simulation, and restoration
 without mocking. Critical for protecting $500K+ MRR from catastrophic failures.
@@ -349,12 +350,12 @@ class TestDisasterRecovery:
             
             # Check for common environment variables that should exist
             essential_vars = ['PATH', 'PYTHONPATH', 'USERNAME']  # Use vars that always exist
-            configs_valid = all(os.getenv(var) for var in essential_vars)
+            configs_valid = all(get_env().get(var) for var in essential_vars)
             
             # In test environment, configurations are considered valid if basic system vars exist
             return {
                 'configs_valid': True,  # Always true for test environment
-                'essential_vars_present': len([var for var in essential_vars if os.getenv(var)]),
+                'essential_vars_present': len([var for var in essential_vars if get_env().get(var)]),
                 'method': 'test_simulation'
             }
         except Exception as e:

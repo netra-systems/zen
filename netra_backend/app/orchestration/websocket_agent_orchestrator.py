@@ -19,7 +19,7 @@ import asyncio
 import time
 import uuid
 from datetime import datetime, timezone
-from typing import Dict, Optional, Set, Any, TYPE_CHECKING
+from typing import Dict, Optional, Set, Any, TYPE_CHECKING, Tuple
 from dataclasses import dataclass, field
 
 if TYPE_CHECKING:
@@ -346,6 +346,301 @@ class WebSocketAgentOrchestrator:
         """Clean up all active contexts during shutdown."""
         for context_id in list(self.active_contexts.keys()):
             await self.unregister_context(context_id, success=False)
+    
+    async def create_execution_context(
+        self,
+        agent_type: str,
+        user_id: str,
+        message: str,
+        context: Optional[Dict[str, Any]] = None
+    ) -> Tuple['AgentExecutionContext', 'WebSocketNotifier']:
+        """Create execution context with deduplication.
+        
+        Factory method for creating and registering contexts with deduplication.
+        Ensures proper WebSocket notification setup.
+        """
+        thread_id = context.get('thread_id') if context else f"thread_{uuid.uuid4().hex[:8]}"
+        
+        # Check for existing context to prevent duplicates
+        if await self.is_context_active(thread_id):
+            return await self._reuse_existing_context(thread_id, user_id, context)
+        
+        # Create new context
+        return await self._create_new_context(agent_type, user_id, thread_id, context)
+    
+    async def _reuse_existing_context(
+        self, 
+        thread_id: str, 
+        user_id: str, 
+        context: Optional[Dict[str, Any]]
+    ) -> Tuple['AgentExecutionContext', 'WebSocketNotifier']:
+        """Reuse existing context for thread."""
+        from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+        from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+        
+        logger.warning(f"Context already active for thread {thread_id}, reusing")
+        existing_context_id = self.context_lookup[thread_id]
+        existing_state = self.active_contexts[existing_context_id]
+        
+        # Create context object from existing state
+        existing_context = AgentExecutionContext(
+            run_id=existing_state.run_id,
+            thread_id=thread_id,
+            user_id=user_id,
+            agent_name=existing_state.agent_name,
+            metadata=context or {}
+        )
+        
+        # Create WebSocket notifier
+        if not self._websocket_manager:
+            raise RuntimeError("WebSocket manager not initialized")
+        notifier = WebSocketNotifier(self._websocket_manager)
+        
+        return existing_context, notifier
+    
+    async def _create_new_context(
+        self,
+        agent_type: str,
+        user_id: str,
+        thread_id: str,
+        context: Optional[Dict[str, Any]]
+    ) -> Tuple['AgentExecutionContext', 'WebSocketNotifier']:
+        """Create new execution context and register it."""
+        from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+        from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+        
+        run_id = f"run_{uuid.uuid4().hex[:12]}"
+        
+        # Create new execution context
+        exec_context = AgentExecutionContext(
+            run_id=run_id,
+            thread_id=thread_id,
+            user_id=user_id,
+            agent_name=agent_type,
+            metadata=context or {}
+        )
+        
+        # Register in orchestrator
+        context_id = await self.register_context(exec_context)
+        
+        # Create WebSocket notifier and send started event
+        notifier = await self._create_notifier_and_send_started(exec_context, context_id)
+        
+        return exec_context, notifier
+    
+    async def _create_notifier_and_send_started(
+        self, 
+        exec_context: 'AgentExecutionContext', 
+        context_id: str
+    ) -> 'WebSocketNotifier':
+        """Create notifier and send agent_started event."""
+        from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+        
+        if not self._websocket_manager:
+            raise RuntimeError("WebSocket manager not initialized")
+        notifier = WebSocketNotifier(self._websocket_manager)
+        
+        # Send agent_started event
+        try:
+            await notifier.send_agent_started(exec_context)
+            logger.info(f"Context created and agent_started sent for {context_id}")
+        except Exception as e:
+            logger.error(f"Failed to send agent_started for {context_id}: {e}")
+        
+        return notifier
+    
+    async def ensure_event_delivery(
+        self,
+        context: 'AgentExecutionContext',
+        event_type: str,
+        payload: Dict[str, Any]
+    ) -> bool:
+        """Ensure critical event delivery with retry logic.
+        
+        Guarantees delivery of critical events with retry and backpressure handling.
+        """
+        from netra_backend.app.schemas.websocket_models import WebSocketMessage
+        
+        if not self._websocket_manager:
+            logger.error("WebSocket manager not available for event delivery")
+            return False
+        
+        message = WebSocketMessage(type=event_type, payload=payload)
+        max_attempts = self.config.retry_max_attempts
+        
+        # Track delivery attempts
+        for attempt in range(max_attempts):
+            try:
+                # Update context activity
+                await self.update_context_activity(context.run_id)
+                
+                # Attempt delivery
+                success = await self._websocket_manager.send_to_thread(
+                    context.thread_id, 
+                    message.model_dump()
+                )
+                
+                if success:
+                    # Track successful delivery
+                    await self.track_connection_health(
+                        context.user_id, 
+                        context.thread_id, 
+                        event_success=True
+                    )
+                    logger.debug(f"Event {event_type} delivered successfully on attempt {attempt + 1}")
+                    return True
+                
+                # Failed delivery - wait before retry
+                if attempt < max_attempts - 1:
+                    delay = (self.config.retry_delay_ms / 1000) * (2 ** attempt)
+                    await asyncio.sleep(delay)
+                    logger.debug(f"Event delivery failed, retrying in {delay}s")
+                
+            except Exception as e:
+                logger.error(f"Event delivery attempt {attempt + 1} failed: {e}")
+                
+                # Track failure
+                await self.track_connection_health(
+                    context.user_id, 
+                    context.thread_id, 
+                    event_success=False
+                )
+                
+                if attempt < max_attempts - 1:
+                    delay = (self.config.retry_delay_ms / 1000) * (2 ** attempt)
+                    await asyncio.sleep(delay)
+        
+        logger.error(f"Failed to deliver {event_type} after {max_attempts} attempts")
+        return False
+    
+    async def setup_agent_websocket_integration(
+        self,
+        supervisor: Any,
+        registry: Any
+    ) -> None:
+        """Setup WebSocket integration at startup.
+        
+        Configures WebSocket manager on registry and enhances tool dispatcher.
+        """
+        if not self._websocket_manager:
+            logger.error("WebSocket manager not initialized in orchestrator")
+            return
+        
+        try:
+            # Set WebSocket manager on registry
+            if hasattr(registry, 'set_websocket_manager'):
+                registry.set_websocket_manager(self._websocket_manager)
+                logger.info("WebSocket manager set on agent registry")
+            
+            # Enhance tool dispatcher if available
+            if hasattr(registry, 'tool_dispatcher') and registry.tool_dispatcher:
+                from netra_backend.app.agents.unified_tool_execution import (
+                    enhance_tool_dispatcher_with_notifications
+                )
+                enhance_tool_dispatcher_with_notifications(
+                    registry.tool_dispatcher, 
+                    self._websocket_manager
+                )
+                logger.info("Tool dispatcher enhanced with WebSocket notifications")
+            
+            # Configure all registered agents
+            if hasattr(registry, 'agents'):
+                for agent_name, agent in registry.agents.items():
+                    if hasattr(agent, 'websocket_manager'):
+                        agent.websocket_manager = self._websocket_manager
+                        logger.debug(f"WebSocket manager configured for agent {agent_name}")
+            
+            # Verify integration
+            integration_status = await self._verify_websocket_integration(registry)
+            if integration_status:
+                logger.info("WebSocket integration setup completed successfully")
+            else:
+                logger.warning("WebSocket integration setup had issues")
+                
+        except Exception as e:
+            logger.error(f"Failed to setup WebSocket integration: {e}")
+            raise
+    
+    async def complete_execution(
+        self,
+        context: 'AgentExecutionContext',
+        result: Any
+    ) -> None:
+        """Complete agent execution with proper cleanup.
+        
+        Sends completion events, updates metrics, and cleans up resources.
+        """
+        try:
+            # Send agent_completed event
+            if self._websocket_notifier:
+                # Calculate duration
+                context_state = await self.get_context_state(context.run_id)
+                duration_ms = 0.0
+                if context_state:
+                    duration = (datetime.now(timezone.utc) - context_state.created_at).total_seconds()
+                    duration_ms = duration * 1000
+                
+                # Send completion notification
+                await self._websocket_notifier.send_agent_completed(
+                    context, 
+                    result=result if isinstance(result, dict) else {"result": str(result)},
+                    duration_ms=duration_ms
+                )
+                logger.info(f"Agent completion event sent for {context.run_id}")
+            
+            # Unregister context
+            await self.unregister_context(context.run_id, success=True)
+            
+            # Update metrics
+            self.health_metrics["successful_executions"] += 1
+            
+            # Clean up context-specific locks
+            if context.run_id in self._context_locks:
+                del self._context_locks[context.run_id]
+            
+            logger.info(f"Execution completed successfully for context {context.run_id}")
+            
+        except Exception as e:
+            logger.error(f"Failed to complete execution for {context.run_id}: {e}")
+            # Still try to unregister context
+            await self.unregister_context(context.run_id, success=False)
+            self.health_metrics["failed_executions"] += 1
+            raise
+    
+    async def _verify_websocket_integration(self, registry: Any) -> bool:
+        """Verify WebSocket integration is properly configured."""
+        try:
+            # Check registry has WebSocket manager
+            if not hasattr(registry, 'websocket_manager') or not registry.websocket_manager:
+                logger.warning("Registry missing WebSocket manager")
+                return False
+            
+            # Check tool dispatcher enhancement
+            if hasattr(registry, 'tool_dispatcher'):
+                if not hasattr(registry.tool_dispatcher, '_websocket_manager'):
+                    logger.warning("Tool dispatcher not enhanced with WebSocket notifications")
+                    return False
+            
+            # Check sample agents have WebSocket manager
+            if hasattr(registry, 'agents'):
+                agent_count = 0
+                configured_count = 0
+                for agent_name, agent in registry.agents.items():
+                    agent_count += 1
+                    if hasattr(agent, 'websocket_manager') and agent.websocket_manager:
+                        configured_count += 1
+                
+                if agent_count > 0 and configured_count == 0:
+                    logger.warning("No agents have WebSocket manager configured")
+                    return False
+                
+                logger.info(f"WebSocket integration verified: {configured_count}/{agent_count} agents configured")
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"WebSocket integration verification failed: {e}")
+            return False
 
 
 # Global singleton instance

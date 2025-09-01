@@ -248,7 +248,7 @@ if __name__ == "__main__":
     import subprocess
     
     # Set environment to staging for testing
-    os.environ["ENVIRONMENT"] = "staging"
+    get_env().set("ENVIRONMENT",  )"staging"
     
     # Run pytest on this file
     result = subprocess.run(

@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 Critical Cold Start Integration Tests
 Tests the most common and difficult initialization issues that occur during system startup.
 Tests real services with dev launcher (local DB, Redis, ClickHouse).
@@ -102,7 +103,7 @@ class TestColdStartCriticalIssues:
     async def test_environment_variable_mapping_mismatch(self):
         """Test 1.2: Critical services fail due to env var name conflicts."""
         # Set environment variable
-        os.environ["CLICKHOUSE_PASSWORD"] = "password1"
+        get_env().set("CLICKHOUSE_PASSWORD", "password1")
         
         # Attempt ClickHouse connection with mismatched passwords
         from netra_backend.app.db.clickhouse import ClickHouseService
@@ -170,8 +171,8 @@ class TestColdStartCriticalIssues:
     async def test_jwt_secret_environment_variable_mismatch(self):
         """Test 2.2: Auth service and backend use different JWT secret variables."""
         # Set different JWT secrets
-        os.environ["JWT_SECRET"] = "auth_secret_123"
-        os.environ["JWT_SECRET_KEY"] = "backend_secret_456"
+        get_env().set("JWT_SECRET",  )"auth_secret_123"
+        get_env().set("JWT_SECRET_KEY",  )"backend_secret_456"
         
         # Generate token with auth service secret
         session_mgr = SessionManager()
@@ -254,7 +255,7 @@ class TestColdStartCriticalIssues:
     async def test_cors_blocking_websocket_upgrade_requests(self):
         """Test 3.2: CORS policies prevent WebSocket handshake completion."""
         # Configure strict CORS without WebSocket support
-        os.environ["CORS_ALLOWED_ORIGINS"] = "http://localhost:3001"
+        get_env().set("CORS_ALLOWED_ORIGINS",  )"http://localhost:3001"
         
         # Attempt WebSocket from different origin
         headers = {
@@ -309,7 +310,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         """)
         
         # Start backend on different dynamic port
-        os.environ["BACKEND_PORT"] = "8888"
+        get_env().set("BACKEND_PORT",  )"8888"
         
         # Try frontend API call
         async with httpx.AsyncClient(follow_redirects=True) as client:
@@ -439,8 +440,8 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
     @pytest.mark.e2e
     async def test_clickhouse_port_configuration_wrong_protocol(self):
         """Test 6.1: HTTPS port 8443 used instead of HTTP port 8123."""
-        os.environ["CLICKHOUSE_PORT"] = "8443"
-        os.environ["CLICKHOUSE_PROTOCOL"] = "https"
+        get_env().set("CLICKHOUSE_PORT",  )"8443"
+        get_env().set("CLICKHOUSE_PROTOCOL",  )"https"
         
         ch_conn = ClickHouseConnection()
         
@@ -455,7 +456,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
     async def test_postgresql_connection_pool_exhaustion(self):
         """Test 6.2: Connection pool depleted during startup health checks."""
         # Set very small connection pool
-        os.environ["POSTGRES_MAX_CONNECTIONS"] = "1"
+        get_env().set("POSTGRES_MAX_CONNECTIONS",  )"1"
         
         db = Database()
         
@@ -505,8 +506,8 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
     async def test_llm_api_key_missing_or_invalid(self):
         """Test 7.1: Agent execution fails due to missing GEMINI_API_KEY."""
         # Remove API key
-        if "GEMINI_API_KEY" in os.environ:
-            del os.environ["GEMINI_API_KEY"]
+        if get_env().get("GEMINI_API_KEY") is not None:
+            del get_env().get("GEMINI_API_KEY")
             
         from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
         from netra_backend.app.llm.llm_manager import LLMManager
@@ -735,11 +736,11 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
     async def test_startup_check_failure_in_staging(self):
         """Test 9.3: Non-critical failures treated as critical in staging."""
         # Set staging environment
-        os.environ["ENVIRONMENT"] = "staging"
-        os.environ["ENV"] = "staging"
+        get_env().set("ENVIRONMENT",  )"staging"
+        get_env().set("ENV",  )"staging"
         
         # Trigger minor startup check failure
-        os.environ["OPTIONAL_SERVICE_URL"] = "http://nonexistent:9999"
+        get_env().set("OPTIONAL_SERVICE_URL",  )"http://nonexistent:9999"
         
         # Start backend
         process = subprocess.Popen(
@@ -767,8 +768,8 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
     async def test_redis_remote_connection_no_local_fallback(self):
         """Test 10.1: Attempts to connect to remote Redis with no fallback."""
         # Set remote Redis URL
-        os.environ["REDIS_URL"] = "redis://remote-redis.example.com:6379"
-        os.environ["REDIS_MODE"] = "remote"
+        get_env().set("REDIS_URL",  )"redis://remote-redis.example.com:6379"
+        get_env().set("REDIS_MODE",  )"remote"
         
         redis_mgr = RedisManager()
         
@@ -808,8 +809,8 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
     async def test_redis_cluster_configuration_mismatch(self):
         """Test 10.3: Single Redis client used with cluster configuration."""
         # Configure Redis as cluster but use single-node client
-        os.environ["REDIS_CLUSTER_MODE"] = "true"
-        os.environ["REDIS_NODES"] = "localhost:7000,localhost:7001,localhost:7002"
+        get_env().set("REDIS_CLUSTER_MODE",  )"true"
+        get_env().set("REDIS_NODES",  )"localhost:7000,localhost:7001,localhost:7002"
         
         redis_mgr = RedisManager()
         

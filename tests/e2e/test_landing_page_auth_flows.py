@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 Comprehensive E2E tests for landing page authentication flows.
 Tests OAuth, JWT validation, and complete user journey from landing to dashboard.
 """
@@ -76,7 +77,7 @@ class TestLandingPageAuthFlows:
     @pytest.fixture
     def jwt_secret(self):
         """Get test JWT secret."""
-        return os.getenv("JWT_SECRET_KEY", "test_jwt_secret_key_for_testing_only")
+        return get_env().get("JWT_SECRET_KEY", "test_jwt_secret_key_for_testing_only")
     
     @pytest.fixture
     def mock_oauth_response(self):

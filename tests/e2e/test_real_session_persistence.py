@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 Test #6: Real Session Persistence Across Service Restarts - Critical E2E Test
 
 Business Value Justification (BVJ):
@@ -56,7 +57,7 @@ class RealSessionPersistenceManager:
     async def setup_real_redis_connection(self) -> bool:
         """Setup real Redis connection for testing."""
         try:
-            redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+            redis_url = get_env().get("REDIS_URL", "redis://localhost:6379")
             self.redis_client = redis.from_url(redis_url, decode_responses=True)
             
             # Test connection

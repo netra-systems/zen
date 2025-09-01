@@ -1,5 +1,6 @@
 """E2E Test: Performance SLA and Business Value Validation
 
+from shared.isolated_environment import get_env
 CRITICAL: Validates P99 <2s SLA and 20-50% cost reduction claims.
 Tests actual performance metrics with real LLM integration.
 
@@ -354,7 +355,7 @@ class TestPerformanceSLA:
         """Check if real LLM testing is enabled."""
         import os
 
-        return os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true"
+        return get_env().get("TEST_USE_REAL_LLM", "false").lower() == "true"
 
 
 @pytest.mark.e2e

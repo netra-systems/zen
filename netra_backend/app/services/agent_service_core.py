@@ -4,6 +4,7 @@ Provides the main AgentService class with core functionality
 for agent interactions and WebSocket message handling.
 """
 
+import asyncio
 import json
 from datetime import datetime
 from typing import Any, AsyncGenerator, Dict, Optional, Union
@@ -16,6 +17,7 @@ from netra_backend.app.agents.supervisor_consolidated import (
     SupervisorAgent as Supervisor,
 )
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.orchestration.websocket_agent_orchestrator import get_websocket_agent_orchestrator
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.service_interfaces import IAgentService
 from netra_backend.app.services.streaming_service import (
@@ -36,13 +38,34 @@ class AgentService(IAgentService):
         self.supervisor = supervisor
         self.thread_service = ThreadService()
         
-        # CRITICAL FIX: Include WebSocket manager to enable real-time agent events in agent service core
+        # Setup message handler with WebSocket manager
         try:
             websocket_manager = get_websocket_manager()
             self.message_handler = MessageHandlerService(supervisor, self.thread_service, websocket_manager)
+            
+            # Setup orchestrator integration (non-blocking)
+            asyncio.create_task(self._setup_orchestrator_integration())
         except Exception:
             # Fallback without WebSocket manager if not available
             self.message_handler = MessageHandlerService(supervisor, self.thread_service)
+
+    async def _setup_orchestrator_integration(self) -> None:
+        """Setup WebSocket orchestrator integration."""
+        try:
+            orchestrator = await get_websocket_agent_orchestrator()
+            websocket_manager = get_websocket_manager()
+            
+            # Set up WebSocket manager on orchestrator
+            await orchestrator.set_websocket_manager(websocket_manager)
+            
+            # Setup agent-WebSocket integration
+            await orchestrator.setup_agent_websocket_integration(
+                self.supervisor,
+                getattr(self.supervisor, 'registry', None)
+            )
+            logger.info("WebSocketAgentOrchestrator integration complete")
+        except Exception as e:
+            logger.error(f"Failed to setup orchestrator integration: {e}")
 
     async def run(self, request_model: schemas.RequestModel, run_id: str, stream_updates: bool = False) -> Any:
         """Starts the agent. The supervisor will stream logs back to the websocket if requested."""
@@ -277,147 +300,75 @@ class AgentService(IAgentService):
         context: Optional[Dict[str, Any]] = None,
         user_id: str = "default_user"
     ) -> Dict[str, Any]:
-        """Execute an agent task with the specified type and message.
+        """Execute an agent task using the WebSocketAgentOrchestrator.
         
-        CRITICAL: This method is responsible for ensuring all 5 required WebSocket events
-        are emitted during agent execution to enable proper chat functionality.
-        
-        Args:
-            agent_type: Type of agent to execute (e.g., 'triage', 'data', 'optimization')
-            message: Message to process
-            context: Additional context for the agent
-            user_id: User ID for tracking and permissions
-            
-        Returns:
-            Dict containing agent response and metadata
+        This method delegates all WebSocket-Agent coordination to the orchestrator,
+        ensuring proper event delivery and lifecycle management.
         """
-        logger.info(f"Executing {agent_type} agent for user {user_id}: {message[:100]}...")
+        logger.info(f"Executing {agent_type} agent for user {user_id}")
         
         try:
-            websocket_manager = get_websocket_manager()
-            thread_id = f"{agent_type}_{user_id}"
-            run_id = f"{agent_type}_run_{user_id}"
+            # Get the singleton orchestrator
+            orchestrator = await get_websocket_agent_orchestrator()
             
-            # CRITICAL FIX: Set up WebSocket context for the supervisor and all sub-agents
-            # This ensures that ALL WebSocket events are emitted during execution
-            from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+            # Set up WebSocket manager on orchestrator if not already done
+            try:
+                websocket_manager = get_websocket_manager()
+                await orchestrator.set_websocket_manager(websocket_manager)
+            except Exception as e:
+                logger.error(f"Failed to setup WebSocket manager on orchestrator: {e}")
             
-            # Create execution context with proper WebSocket information
-            websocket_context = AgentExecutionContext(
-                agent_name=f"Agent[{agent_type}]",
-                run_id=run_id,
-                thread_id=thread_id,
-                user_id=user_id
+            # Create execution context with deduplication
+            exec_context, notifier = await orchestrator.create_execution_context(
+                agent_type=agent_type,
+                user_id=user_id,
+                message=message,
+                context=context
             )
             
-            # Create WebSocket notifier for event emission
-            websocket_notifier = WebSocketNotifier(websocket_manager)
-            
-            # CRITICAL: Send mission-critical WebSocket events
-            # 1. Send agent_started event
-            await websocket_notifier.send_agent_started(websocket_context)
-            
-            # 2. Send agent_thinking event  
-            await websocket_notifier.send_agent_thinking(
-                websocket_context, 
-                f"Processing {agent_type} request: {message[:100]}..."
+            # Send thinking event
+            await notifier.send_agent_thinking(
+                exec_context, 
+                f"Processing {agent_type} request"
             )
             
-            # CRITICAL FIX: Set up WebSocket context on the supervisor so it propagates to sub-agents
-            # This ensures that tool execution events are properly emitted
-            if hasattr(self.supervisor, 'set_websocket_context'):
-                self.supervisor.set_websocket_context(websocket_context, websocket_notifier)
-            
-            # Set WebSocket context on all registered agents so they can emit events
-            if hasattr(self.supervisor, 'registry') and hasattr(self.supervisor.registry, 'agents'):
-                for agent_name, agent in self.supervisor.registry.agents.items():
-                    if hasattr(agent, 'set_websocket_context'):
-                        agent.set_websocket_context(websocket_context, websocket_notifier)
-            
-            # 3. Send tool_executing event before supervisor execution
-            await websocket_notifier.send_tool_executing(
-                websocket_context,
-                "supervisor_orchestrator",
-                tool_purpose="Coordinating agent execution and routing request",
-                estimated_duration_ms=5000
-            )
-            
-            # Execute through supervisor with enhanced context
-            context_str = f" (Context: {context})" if context else ""
-            full_message = f"[Agent Type: {agent_type}] {message}{context_str}"
-            
+            # Execute through supervisor
+            full_message = f"[Agent Type: {agent_type}] {message}"
+            if context:
+                full_message += f" (Context: {context})"
+                
             result = await self.supervisor.run(
                 full_message, 
-                thread_id,
+                exec_context.thread_id,
                 user_id,
-                run_id
+                exec_context.run_id
             )
             
-            # 4. Send tool_completed event after supervisor execution
-            await websocket_notifier.send_tool_completed(
-                websocket_context,
-                "supervisor_orchestrator",
-                {
-                    "status": "success",
-                    "result_length": len(str(result)),
-                    "agent_type": agent_type
-                }
-            )
-            
-            # 5. Send agent_completed event
-            await websocket_notifier.send_agent_completed(
-                websocket_context,
-                {
-                    "agent_type": agent_type,
-                    "status": "success", 
-                    "response": str(result)[:200],  # Truncate long responses
-                    "execution_successful": True
-                },
-                duration_ms=0  # Will be calculated by the notifier
-            )
+            # Complete execution with proper cleanup
+            await orchestrator.complete_execution(exec_context, result)
             
             return {
                 "response": str(result),
                 "agent": agent_type,
                 "status": "success",
                 "user_id": user_id,
-                "websocket_events_sent": True  # Indicate events were properly sent
+                "websocket_events_sent": True
             }
             
         except Exception as e:
             logger.error(f"Error executing {agent_type} agent: {e}", exc_info=True)
             
-            # Send error completion event using proper WebSocket context
-            try:
-                websocket_manager = get_websocket_manager()
-                if 'websocket_context' in locals() and 'websocket_notifier' in locals():
-                    await websocket_notifier.send_agent_completed(
-                        websocket_context,
-                        {
-                            "agent_type": agent_type,
-                            "status": "error",
-                            "error": str(e),
-                            "execution_successful": False
-                        }
-                    )
-                else:
-                    # Fallback to direct WebSocket message
-                    await websocket_manager.send_message(user_id, {
-                        "type": "agent_completed",
-                        "agent_type": agent_type,
-                        "status": "error", 
-                        "error": str(e),
-                        "timestamp": str(datetime.now())
-                    })
-            except Exception as ws_error:
-                logger.error(f"Failed to send WebSocket error event: {ws_error}")
+            # Ensure completion event is sent even on error
+            if 'exec_context' in locals():
+                try:
+                    await orchestrator.complete_execution(exec_context, None)
+                except Exception:
+                    pass  # Best effort cleanup
             
             return {
                 "response": f"Error executing {agent_type} agent: {str(e)}",
                 "agent": agent_type,
                 "status": "error",
                 "user_id": user_id,
-                "error": str(e),
-                "websocket_events_sent": False
+                "error": str(e)
             }

@@ -16,7 +16,7 @@ interface HydrationState {
   timestamp: number;
   userAgent: string;
   environment: string;
-  apiConfig: any;
+  apiConfig: Record<string, unknown>;
   serverRendered: boolean;
   clientRendered: boolean;
 }
@@ -25,8 +25,8 @@ interface ValidationResult {
   isValid: boolean;
   mismatches: string[];
   warnings: string[];
-  serverState?: any;
-  clientState?: any;
+  serverState?: unknown;
+  clientState?: unknown;
 }
 
 interface HydrationConfig {
@@ -38,8 +38,8 @@ interface HydrationConfig {
 
 export class HydrationValidator {
   private config: HydrationConfig;
-  private serverState: Map<string, any> = new Map();
-  private clientState: Map<string, any> = new Map();
+  private serverState: Map<string, unknown> = new Map();
+  private clientState: Map<string, unknown> = new Map();
   private validationResults: Map<string, ValidationResult> = new Map();
   
   constructor(config?: Partial<HydrationConfig>) {
@@ -55,7 +55,7 @@ export class HydrationValidator {
   /**
    * Capture server-side state for hydration validation
    */
-  captureServerState(key: string, state: any): void {
+  captureServerState(key: string, state: unknown): void {
     try {
       // Only capture on server side
       if (typeof window === 'undefined') {
@@ -78,7 +78,7 @@ export class HydrationValidator {
   /**
    * Capture client-side state for hydration validation
    */
-  captureClientState(key: string, state: any): void {
+  captureClientState(key: string, state: unknown): void {
     try {
       // Only capture on client side
       if (typeof window !== 'undefined') {
@@ -98,11 +98,11 @@ export class HydrationValidator {
   async validateHydration(key: string): Promise<ValidationResult> {
     try {
       let serverState = this.serverState.get(key);
-      let clientState = this.clientState.get(key);
+      const clientState = this.clientState.get(key);
 
       // Try to get server state from global if not found
       if (!serverState && typeof window !== 'undefined') {
-        const globalState = (window as any).__HYDRATION_STATE__;
+        const globalState = (window as Record<string, unknown> & { __HYDRATION_STATE__?: Record<string, unknown> }).__HYDRATION_STATE__;
         if (globalState && globalState[key]) {
           serverState = globalState[key];
           this.serverState.set(key, serverState);
@@ -180,7 +180,7 @@ export class HydrationValidator {
   /**
    * Compare server and client states
    */
-  private compareStates(serverState: any, clientState: any): { mismatches: string[]; warnings: string[] } {
+  private compareStates(serverState: unknown, clientState: unknown): { mismatches: string[]; warnings: string[] } {
     const mismatches: string[] = [];
     const warnings: string[] = [];
 
@@ -202,8 +202,8 @@ export class HydrationValidator {
    */
   private deepCompare(
     path: string,
-    serverValue: any,
-    clientValue: any,
+    serverValue: unknown,
+    clientValue: unknown,
     mismatches: string[],
     warnings: string[]
   ): void {
@@ -305,7 +305,7 @@ export class HydrationValidator {
   /**
    * Serialize state for comparison
    */
-  private serializeState(state: any): any {
+  private serializeState(state: unknown): unknown {
     try {
       // Handle functions, dates, and other non-serializable items
       return JSON.parse(JSON.stringify(state, (key, value) => {
@@ -378,7 +378,7 @@ export class HydrationValidator {
     
     // Clear global state
     if (typeof window !== 'undefined') {
-      delete (window as any).__HYDRATION_STATE__;
+      delete (window as Record<string, unknown> & { __HYDRATION_STATE__?: Record<string, unknown> }).__HYDRATION_STATE__;
     }
     
     logger.debug('Hydration validator state cleared');
@@ -456,12 +456,12 @@ export function getHydrationValidator(config?: Partial<HydrationConfig>): Hydrat
 }
 
 // Convenience functions
-export function captureServerState(key: string, state: any): void {
+export function captureServerState(key: string, state: unknown): void {
   const validator = getHydrationValidator();
   validator.captureServerState(key, state);
 }
 
-export function captureClientState(key: string, state: any): void {
+export function captureClientState(key: string, state: unknown): void {
   const validator = getHydrationValidator();
   validator.captureClientState(key, state);
 }

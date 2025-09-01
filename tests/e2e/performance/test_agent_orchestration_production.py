@@ -1,5 +1,6 @@
 """E2E Test: Agent Orchestration Production Integration
 
+from shared.isolated_environment import get_env
 CRITICAL: Real agent orchestration with actual BaseSubAgent and DeepAgentState.
 Tests production agent workflows with real LLM integration.
 
@@ -260,7 +261,7 @@ class TestAgentOrchestrationProduction:
     
     def _should_use_real_llm(self) -> bool:
         """Check if real LLM testing is enabled."""
-        return os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true"
+        return get_env().get("TEST_USE_REAL_LLM", "false").lower() == "true"
     
     async def _execute_coordination_workflow(self, orchestrator, agents: List[BaseSubAgent]):
         """Execute coordinated workflow across multiple agents."""
@@ -324,4 +325,4 @@ class TestEnterpriseAgentScenarios:
     
     def _should_use_real_llm(self) -> bool:
         """Check if real LLM testing is enabled."""
-        return os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true"
+        return get_env().get("TEST_USE_REAL_LLM", "false").lower() == "true"

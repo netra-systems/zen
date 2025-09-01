@@ -70,7 +70,7 @@ class ChatInteractionTestHarness:
             
         # Check auth service
         try:
-            auth_url = os.getenv("AUTH_SERVICE_URL", "http://localhost:8081")
+            auth_url = get_env().get("AUTH_SERVICE_URL", "http://localhost:8081")
             async with httpx.AsyncClient(timeout=5.0) as client:
                 response = await client.get(f"{auth_url}/health")
                 self.auth_available = response.status_code == 200
@@ -91,8 +91,8 @@ class ChatInteractionTestHarness:
         }
         # Use the correct JWT secret from environment
         import os
-        jwt_secret = os.getenv("JWT_SECRET_KEY", "rsWwwvq8X6mCSuNv-TMXHDCfb96Xc-Dbay9MZy6EDCU")
-        os.environ["JWT_SECRET"] = jwt_secret
+        jwt_secret = get_env().get("JWT_SECRET_KEY", "rsWwwvq8X6mCSuNv-TMXHDCfb96Xc-Dbay9MZy6EDCU")
+        get_env().set("JWT_SECRET", jwt_secret)
         self.access_token = create_real_jwt_token(user_id, ["user"])
         return self.access_token
         

@@ -1,5 +1,6 @@
 """Health Check Cascade Integration Test - Real Health Endpoint Testing
 
+from shared.isolated_environment import get_env
 Business Value: Test real health endpoints for degraded mode behavior.
 Validates actual system health reporting when ClickHouse is unavailable.
 """
@@ -69,8 +70,8 @@ class TestHealthEndpointer:
     async def test_degraded_mode_with_clickhouse_disabled(self) -> Dict[str, Any]:
         """Test health endpoints when ClickHouse is disabled via environment."""
         # Set environment variable to simulate ClickHouse failure
-        original_value = os.environ.get('CLICKHOUSE_DISABLED')
-        os.environ['CLICKHOUSE_DISABLED'] = 'true'
+        original_value = get_env().get('CLICKHOUSE_DISABLED')
+        get_env().set('CLICKHOUSE_DISABLED', 'true')
         
         try:
             # Wait a moment for configuration to take effect
@@ -94,7 +95,7 @@ class TestHealthEndpointer:
             if original_value is None:
                 os.environ.pop('CLICKHOUSE_DISABLED', None)
             else:
-                os.environ['CLICKHOUSE_DISABLED'] = original_value
+                get_env().set('CLICKHOUSE_DISABLED', original_value)
     
     async def _check_for_degraded_status(self, health_results: Dict[str, Any]) -> bool:
         """Check if any health endpoint reports degraded status."""

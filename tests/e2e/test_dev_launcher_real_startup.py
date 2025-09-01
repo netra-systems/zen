@@ -152,11 +152,11 @@ class TestRealDevLauncherer:
             for key, value in mock_env_vars.items():
                 # Backup original value
                 if key in os.environ:
-                    self.backup_env_vars[key] = os.environ[key]
+                    self.backup_env_vars[key] = get_env().get(key)
                 else:
                     self.backup_env_vars[key] = None
                 # Set mock value
-                os.environ[key] = value
+                get_env().get(key) = value
                 print(f"Set {key}={value}")
                 
         except Exception as e:
@@ -171,10 +171,10 @@ class TestRealDevLauncherer:
                     if original_value is None:
                         # Variable didn't exist originally, remove it
                         if key in os.environ:
-                            del os.environ[key]
+                            del get_env().get(key)
                     else:
                         # Restore original value
-                        os.environ[key] = original_value
+                        get_env().get(key) = original_value
                 print("Restored environment variables")
             
             # Remove test config

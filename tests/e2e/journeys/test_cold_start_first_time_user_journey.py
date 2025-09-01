@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 CRITICAL E2E: Cold Start First-Time User Complete Journey Test
 
 BVJ (Business Value Justification):
@@ -37,9 +38,9 @@ import httpx
 import aiosqlite
 
 # Set test environment for cold start conditions
-os.environ["TESTING"] = "1"
-os.environ["ENVIRONMENT"] = "testing"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+get_env().set("TESTING",  )"1"
+get_env().set("ENVIRONMENT",  )"testing"
+get_env().set("DATABASE_URL",  )"sqlite+aiosqlite:///:memory:"
 
 # Absolute imports only - no relative imports
 from tests.e2e.helpers.journey.real_service_journey_helpers import RealServiceJourneyHelper
@@ -143,7 +144,7 @@ class OAuthFlowHelper:
         import datetime
         
         # Use test JWT secret
-        test_jwt_secret = os.getenv("JWT_SECRET_KEY", "test-jwt-secret-for-testing")
+        test_jwt_secret = get_env().get("JWT_SECRET_KEY", "test-jwt-secret-for-testing")
         
         token_payload = {
             "sub": user_data["user_id"],

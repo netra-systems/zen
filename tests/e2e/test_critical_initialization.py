@@ -986,7 +986,7 @@ class TestConfigurationEnvironment(SystemInitializationTestBase):
             env_local.write_text("TEST_VAR=from_local\nPORT=8002\n")
             
             # Set system environment variable
-            os.environ["TEST_VAR"] = "from_system"
+            get_env().set("TEST_VAR",  )"from_system"
             
             with self.start_dev_launcher() as proc:
                 # Verify correct precedence (system > local > test)

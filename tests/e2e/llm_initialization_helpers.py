@@ -69,9 +69,9 @@ class LLMTestHelpers:
     @staticmethod
     def check_api_keys() -> Dict[str, bool]:
         """Check availability of real API keys"""
-        anthropic_key = os.getenv("ANTHROPIC_API_KEY")
-        openai_key = os.getenv("GOOGLE_API_KEY") 
-        gemini_key = os.getenv("GEMINI_API_KEY")
+        anthropic_key = get_env().get("ANTHROPIC_API_KEY")
+        openai_key = get_env().get("GOOGLE_API_KEY") 
+        gemini_key = get_env().get("GEMINI_API_KEY")
         return {
             "anthropic": bool(anthropic_key and anthropic_key != "test-key"),
             "openai": bool(openai_key and openai_key != "test-openai-key"),

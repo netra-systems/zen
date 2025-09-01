@@ -1,5 +1,6 @@
 """Tenant Isolation Tests for Multi-Tenant Safety
 
+from shared.isolated_environment import get_env
 **Business Value Justification (BVJ):**
 - Segment: Enterprise & Growth
 - Business Goal: Multi-tenant security and compliance for enterprise customers
@@ -24,12 +25,12 @@ from typing import Any, Dict, List, Optional
 import pytest
 
 # Set required environment variables for testing
-os.environ["TESTING"] = "1"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
-os.environ["gemini-api-key"] = "test-gemini-key"
-os.environ["google-client-id"] = "test-client-id"
-os.environ["google-client-secret"] = "test-client-secret"
-os.environ["clickhouse-default-password"] = "test-clickhouse-password"
+get_env().set("TESTING",  )"1"
+get_env().set("DATABASE_URL",  )"sqlite+aiosqlite:///:memory:"
+get_env().set("gemini-api-key",  )"test-gemini-key"
+get_env().set("google-client-id",  )"test-client-id"
+get_env().set("google-client-secret",  )"test-client-secret"
+get_env().set("clickhouse-default-password",  )"test-clickhouse-password"
 
 # Mock complex imports to avoid configuration issues
 try:

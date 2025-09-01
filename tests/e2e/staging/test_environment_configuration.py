@@ -276,7 +276,7 @@ class TestEnvironmentConfiguration:
         # Collect all database configurations
         database_configs = {}
         for var in database_config_vars:
-            value = os.environ.get(var)
+            value = get_env().get(var)
             if value:
                 database_configs[var] = {
                     "url": value,
@@ -382,7 +382,7 @@ class TestEnvironmentConfiguration:
         type_validation_failures = []
         
         for var_name, constraints in typed_env_vars.items():
-            env_value_str = os.environ.get(var_name)
+            env_value_str = get_env().get(var_name)
             
             if not env_value_str:
                 # Use default for missing variables
@@ -442,7 +442,7 @@ class TestEnvironmentConfiguration:
         ]
         
         for var_name, problematic_value in common_type_issues:
-            actual_value = os.environ.get(var_name)
+            actual_value = get_env().get(var_name)
             if actual_value == problematic_value:
                 type_validation_failures.append({
                     "variable": var_name,
@@ -583,14 +583,14 @@ class TestEnvironmentConfiguration:
         
         # Check for production configuration accidentally used in staging
         prod_indicators = ["prod", "production", "live"]
-        for var_name in os.environ:
-            env_value = os.environ[var_name].lower()
+        for var_name in get_env().as_dict():
+            env_value = get_env().get(var_name).lower()
             for indicator in prod_indicators:
                 if indicator in env_value and "staging" not in env_value:
                     staging_config_issues.append({
                         "variable": var_name,
                         "issue": "Production configuration detected in staging",
-                        "value": os.environ[var_name][:50],  # Truncate for security
+                        "value": get_env().get(var_name)[:50],  # Truncate for security
                         "indicator": indicator,
                         "risk": "Staging using production resources"
                     })

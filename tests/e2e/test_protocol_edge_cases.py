@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 E2E Test Suite for Protocol Edge Cases
 
 This test suite covers additional edge cases and boundary conditions for mixed content/HTTPS

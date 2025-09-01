@@ -73,10 +73,10 @@ class TestOAuthGoogleLogin500Error:
         
         try:
             # Clear OAuth credentials to reproduce the error
-            if "OAUTH_GOOGLE_CLIENT_ID_ENV" in os.environ:
-                del os.environ["OAUTH_GOOGLE_CLIENT_ID_ENV"]
-            if "OAUTH_GOOGLE_CLIENT_SECRET_ENV" in os.environ:
-                del os.environ["OAUTH_GOOGLE_CLIENT_SECRET_ENV"]
+            if get_env().get("OAUTH_GOOGLE_CLIENT_ID_ENV") is not None:
+                del get_env().get("OAUTH_GOOGLE_CLIENT_ID_ENV")
+            if get_env().get("OAUTH_GOOGLE_CLIENT_SECRET_ENV") is not None:
+                del get_env().get("OAUTH_GOOGLE_CLIENT_SECRET_ENV")
             
             # Attempt to initiate Google OAuth login
             async with httpx.AsyncClient(follow_redirects=False) as client:
@@ -115,9 +115,9 @@ class TestOAuthGoogleLogin500Error:
         finally:
             # Restore original environment variables
             if original_client_id:
-                os.environ["OAUTH_GOOGLE_CLIENT_ID_ENV"] = original_client_id
+                get_env().set("OAUTH_GOOGLE_CLIENT_ID_ENV", original_client_id)
             if original_client_secret:
-                os.environ["OAUTH_GOOGLE_CLIENT_SECRET_ENV"] = original_client_secret
+                get_env().set("OAUTH_GOOGLE_CLIENT_SECRET_ENV", original_client_secret)
     
     @pytest.mark.asyncio
     async def test_google_oauth_login_with_placeholder_credentials_returns_500(self, auth_service_url: str):
@@ -136,8 +136,8 @@ class TestOAuthGoogleLogin500Error:
         
         try:
             # Set placeholder credentials that will be detected as invalid
-            os.environ["GOOGLE_CLIENT_ID"] = "REPLACE_WITH_YOUR_CLIENT_ID"
-            os.environ["GOOGLE_CLIENT_SECRET"] = "REPLACE_WITH_YOUR_SECRET"
+            get_env().set("GOOGLE_CLIENT_ID",  )"REPLACE_WITH_YOUR_CLIENT_ID"
+            get_env().set("GOOGLE_CLIENT_SECRET",  )"REPLACE_WITH_YOUR_SECRET"
             
             async with httpx.AsyncClient(follow_redirects=False) as client:
                 response = await client.get(
@@ -170,11 +170,11 @@ class TestOAuthGoogleLogin500Error:
         finally:
             # Restore original environment variables
             if original_client_id:
-                os.environ["GOOGLE_CLIENT_ID"] = original_client_id
+                get_env().set("GOOGLE_CLIENT_ID", original_client_id)
             else:
                 os.environ.pop("GOOGLE_CLIENT_ID", None)
             if original_client_secret:
-                os.environ["GOOGLE_CLIENT_SECRET"] = original_client_secret
+                get_env().set("GOOGLE_CLIENT_SECRET", original_client_secret)
             else:
                 os.environ.pop("GOOGLE_CLIENT_SECRET", None)
     
@@ -196,8 +196,8 @@ class TestOAuthGoogleLogin500Error:
         try:
             # Set valid development OAuth credentials
             # These are from scripts/setup_dev_oauth.py
-            os.environ["GOOGLE_CLIENT_ID"] = "304612253870-bqie9nvlaokfc2noos1nu5st614vlqam.apps.googleusercontent.com"
-            os.environ["GOOGLE_CLIENT_SECRET"] = "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"
+            get_env().set("GOOGLE_CLIENT_ID",  )"304612253870-bqie9nvlaokfc2noos1nu5st614vlqam.apps.googleusercontent.com"
+            get_env().set("GOOGLE_CLIENT_SECRET",  )"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"
             
             async with httpx.AsyncClient(follow_redirects=False) as client:
                 response = await client.get(
@@ -218,11 +218,11 @@ class TestOAuthGoogleLogin500Error:
         finally:
             # Restore original environment variables
             if original_client_id:
-                os.environ["GOOGLE_CLIENT_ID"] = original_client_id
+                get_env().set("GOOGLE_CLIENT_ID", original_client_id)
             else:
                 os.environ.pop("GOOGLE_CLIENT_ID", None)
             if original_client_secret:
-                os.environ["GOOGLE_CLIENT_SECRET"] = original_client_secret
+                get_env().set("GOOGLE_CLIENT_SECRET", original_client_secret)
             else:
                 os.environ.pop("GOOGLE_CLIENT_SECRET", None)
 

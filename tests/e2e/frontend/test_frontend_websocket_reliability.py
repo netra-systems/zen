@@ -56,7 +56,7 @@ class WebSocketReliabilityTester:
             
         # Check auth service
         try:
-            auth_url = os.getenv("AUTH_SERVICE_URL", "http://localhost:8081")
+            auth_url = get_env().get("AUTH_SERVICE_URL", "http://localhost:8081")
             async with httpx.AsyncClient(timeout=5.0) as client:
                 response = await client.get(f"{auth_url}/health")
                 self.auth_available = response.status_code == 200

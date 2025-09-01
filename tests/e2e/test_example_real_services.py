@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 Example test demonstrating the new real service testing infrastructure.
 Shows how to use dev_launcher-based fixtures for E2E testing.
 """
@@ -10,7 +11,7 @@ import pytest
 
 # Enable real services for this test module
 pytestmark = pytest.mark.skipif(
-    os.environ.get("USE_REAL_SERVICES", "false").lower() != "true",
+    get_env().get("USE_REAL_SERVICES", "false").lower() != "true",
     reason="Real services disabled (set USE_REAL_SERVICES=true)"
 )
 

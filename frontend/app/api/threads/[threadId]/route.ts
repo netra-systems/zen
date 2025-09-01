@@ -2,7 +2,7 @@
  * Frontend API Proxy - Thread Details
  * Forwards requests to the backend service's /api/threads/[threadId] endpoint
  */
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { getUnifiedApiConfig } from '@/lib/unified-api-config'
 import { corsJsonResponse, corsEmptyResponse, handleOptions } from '@/lib/cors-utils'
 
@@ -142,6 +142,6 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-export async function OPTIONS(request: NextRequest, { params }: RouteParams) {
+export async function OPTIONS(request: NextRequest, { params: _params }: RouteParams) {
   return handleOptions(request);
 }

@@ -72,7 +72,7 @@ class TestSecretManagerBuilderRequirement:
         }
         
         for key, value in test_env.items():
-            os.environ[key] = value
+            get_env().get(key) = value
             
         yield
         
@@ -140,7 +140,7 @@ class TestSecretManagerBuilderRequirement:
         try:
             from dev_launcher.google_secret_manager import GoogleSecretManager
             dev_manager = GoogleSecretManager(
-                project_id=os.getenv('GCP_PROJECT_ID_NUMERICAL_STAGING', '701982941522'),
+                project_id=get_env().get('GCP_PROJECT_ID_NUMERICAL_STAGING', '701982941522'),
                 environment='staging'
             )
             
@@ -195,9 +195,9 @@ class TestSecretManagerBuilderRequirement:
                     
         # Extract project ID handling patterns (this shows the hardcoding problem)
         print(f"\nPROJECT ID HARDCODING DETECTED:")
-        print(f"  Staging Project ID: {os.getenv('GCP_PROJECT_ID_NUMERICAL_STAGING')}")
-        print(f"  Production Project ID: {os.getenv('GCP_PROJECT_ID_NUMERICAL_PRODUCTION')}")
-        print(f"  Generic Project ID: {os.getenv('GCP_PROJECT_ID')}")
+        print(f"  Staging Project ID: {get_env().get('GCP_PROJECT_ID_NUMERICAL_STAGING')}")
+        print(f"  Production Project ID: {get_env().get('GCP_PROJECT_ID_NUMERICAL_PRODUCTION')}")
+        print(f"  Generic Project ID: {get_env().get('GCP_PROJECT_ID')}")
         
         print(f"\nFRAGMENTATION SUMMARY:")
         print(f"  Different implementations: {len(implementations_found)}")
@@ -265,7 +265,7 @@ class TestSecretManagerBuilderRequirement:
         environment_handling = {}
         
         for env in environments:
-            os.environ['ENVIRONMENT'] = env
+            get_env().set('ENVIRONMENT', env)
             env_results = {}
             
             # Test how each service handles environment detection

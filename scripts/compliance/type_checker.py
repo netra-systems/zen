@@ -145,21 +145,28 @@ class TypeChecker:
         return problematic if problematic else []
     
     def _filter_backend_files(self, files: List[str]) -> List[str]:
-        """Filter backend files to exclude legitimate patterns"""
+        """Filter backend files to exclude legitimate service boundary patterns"""
         filtered = []
+        services = set()
+        
+        # Identify service boundaries - legitimate duplicates across services
         for file in files:
-            file_lower = file.lower()
-            # Skip legitimate pattern files that commonly have types
-            skip_patterns = [
-                'schema', 'interface', 'types.py', 'models.py',
-                'base.py', 'abstract', 'protocol', 'typing'
-            ]
-            if any(x in file_lower for x in skip_patterns):
-                continue
-            # Skip if it's a legitimate separation between layers
-            if self._is_layer_separation(file, files):
-                continue
-            filtered.append(file)
+            if 'auth_service/' in file:
+                services.add('auth')
+            elif 'netra_backend/' in file or '/app/' in file:
+                services.add('backend')
+            elif 'frontend/' in file:
+                services.add('frontend')
+            else:
+                filtered.append(file)
+        
+        # Only report duplicates if they're within the same service
+        if len(services) <= 1:
+            # Same service - these are actual duplicates that should be flagged
+            return files
+        else:
+            # Cross-service duplicates are allowed for independence
+            return []
         return filtered
     
     def _is_layer_separation(self, file: str, all_files: List[str]) -> bool:

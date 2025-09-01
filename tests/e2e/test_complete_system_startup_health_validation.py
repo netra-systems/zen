@@ -339,7 +339,7 @@ class TestComprehensiveSystemer:
         cmd = self._build_launcher_command()
         
         # Set up environment
-        env = os.environ.copy()
+        env = get_env().as_dict().copy()
         env.update({
             "NETRA_TEST_MODE": "true",
             "NETRA_STARTUP_MODE": "comprehensive",

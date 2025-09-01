@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 Unified Observability Testing Suite
 
 Business Value Justification (BVJ):
@@ -25,10 +26,10 @@ import pytest
 import websockets
 
 # Set test environment
-os.environ["TESTING"] = "1"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
-os.environ["LOG_LEVEL"] = "INFO"
-os.environ["ENABLE_JSON_LOGGING"] = "true"
+get_env().set("TESTING",  )"1"
+get_env().set("DATABASE_URL",  )"sqlite+aiosqlite:///:memory:"
+get_env().set("LOG_LEVEL",  )"INFO"
+get_env().set("ENABLE_JSON_LOGGING",  )"true"
 
 from tests.e2e.config import TestDataFactory, create_unified_config
 

@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 Comprehensive E2E OAuth flow test for staging environment.
 Validates complete OAuth token flow across all services.
 """
@@ -29,22 +30,22 @@ class TestOAuthFlower:
     """Complete OAuth flow tester for staging environment"""
     
     def __init__(self):
-        self.auth_service_url = os.getenv(
+        self.auth_service_url = get_env().get(
             "AUTH_SERVICE_URL", "https://auth.staging.netrasystems.ai"
         )
-        self.frontend_url = os.getenv(
+        self.frontend_url = get_env().get(
             "FRONTEND_URL", "https://app.staging.netrasystems.ai"
         )
-        self.api_url = os.getenv(
+        self.api_url = get_env().get(
             "API_URL", "https://api.staging.netrasystems.ai"
         )
-        self.websocket_url = os.getenv(
+        self.websocket_url = get_env().get(
             "WS_URL", "wss://api.staging.netrasystems.ai/ws"
         )
         
         # Test user credentials (if available for automated testing)
-        self.test_email = os.getenv("OAUTH_TEST_EMAIL")
-        self.test_password = os.getenv("OAUTH_TEST_PASSWORD")
+        self.test_email = get_env().get("OAUTH_TEST_EMAIL")
+        self.test_password = get_env().get("OAUTH_TEST_PASSWORD")
         
         self.session_token: Optional[str] = None
         self.jwt_token: Optional[str] = None
@@ -167,7 +168,7 @@ class TestOAuthFlower:
         }
         
         # Use a test secret for mock tokens
-        secret = os.getenv("JWT_SECRET", "test_secret_key")
+        secret = get_env().get("JWT_SECRET", "test_secret_key")
         token = jwt.encode(payload, secret, algorithm="HS256")
         
         return token

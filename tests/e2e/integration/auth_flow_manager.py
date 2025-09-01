@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 Authentication Flow Manager - E2E Test Management
 
 BVJ (Business Value Justification):
@@ -16,8 +17,8 @@ import os
 from contextlib import asynccontextmanager
 
 # Set test environment
-os.environ["TESTING"] = "1"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+get_env().set("TESTING",  )"1"
+get_env().set("DATABASE_URL",  )"sqlite+aiosqlite:///:memory:"
 
 from tests.e2e.auth_flow_testers import AuthFlowE2ETester
 from tests.e2e.harness_utils import UnifiedTestHarnessComplete

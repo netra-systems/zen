@@ -22,8 +22,8 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock
 
 # Set minimal environment for testing
-os.environ["TESTING"] = "1"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+get_env().set("TESTING",  )"1"
+get_env().set("DATABASE_URL",  )"sqlite+aiosqlite:///:memory:"
 
 # Mock utility aliases for cleaner code
 MagicNone = MagicMock()

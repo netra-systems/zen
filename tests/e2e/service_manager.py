@@ -156,7 +156,7 @@ class ServiceManager:
     
     def _create_test_environment(self, config: ServiceConfig) -> Dict[str, str]:
         """Create test environment for service startup."""
-        test_env = os.environ.copy()
+        test_env = get_env().as_dict().copy()
         
         # Set test mode variables
         test_env.update({
@@ -443,7 +443,7 @@ class RealServicesManager:
         
     def _get_auth_service_env(self) -> Dict[str, str]:
         """Get environment for auth service."""
-        env = os.environ.copy()
+        env = get_env().as_dict().copy()
         env.update({
             "PORT": str(self.service_ports["auth_service"]),
             "ENVIRONMENT": "test",
@@ -455,7 +455,7 @@ class RealServicesManager:
         
     def _get_backend_service_env(self) -> Dict[str, str]:
         """Get environment for backend service."""
-        env = os.environ.copy()
+        env = get_env().as_dict().copy()
         env.update({
             "ENVIRONMENT": "test",
             "DATABASE_URL": "sqlite+aiosqlite:///:memory:",

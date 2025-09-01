@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 CRITICAL E2E Test: Basic User Flow (Signup → Login → Chat) with REAL Services
 
 BVJ (Business Value Justification):
@@ -38,8 +39,8 @@ import websockets
 from websockets import ServerConnection
 
 # CRITICAL: Set development environment for dev login to work
-os.environ["ENVIRONMENT"] = "development"
-os.environ["NETRA_ENVIRONMENT"] = "development"
+get_env().set("ENVIRONMENT",  )"development"
+get_env().set("NETRA_ENVIRONMENT",  )"development"
 
 # Use absolute imports or handle missing dependencies gracefully
 try:

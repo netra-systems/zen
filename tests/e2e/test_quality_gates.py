@@ -15,9 +15,9 @@ from typing import Any, Dict, List
 import pytest
 
 # Set testing environment before imports
-os.environ["TESTING"] = "1"
-os.environ["ENVIRONMENT"] = "testing"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+get_env().set("TESTING", "1")
+get_env().set("ENVIRONMENT", "testing")
+get_env().set("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
 
 from netra_backend.app.services.quality_gate import (
     ContentType,

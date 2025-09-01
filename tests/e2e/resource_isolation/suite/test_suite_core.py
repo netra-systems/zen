@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 Resource Isolation Test Suite Core
 
 Core test suite class for resource isolation testing.
@@ -23,9 +24,9 @@ logger = logging.getLogger(__name__)
 
 # Test environment configuration
 TEST_CONFIG = {
-    "websocket_url": os.getenv("E2E_WEBSOCKET_URL", "ws://localhost:8000/ws"),
-    "backend_url": os.getenv("E2E_BACKEND_URL", "http://localhost:8000"),
-    "auth_service_url": os.getenv("E2E_AUTH_SERVICE_URL", "http://localhost:8001"),
+    "websocket_url": get_env().get("E2E_WEBSOCKET_URL", "ws://localhost:8000/ws"),
+    "backend_url": get_env().get("E2E_BACKEND_URL", "http://localhost:8000"),
+    "auth_service_url": get_env().get("E2E_AUTH_SERVICE_URL", "http://localhost:8001"),
     "test_timeout": 300,  # 5 minutes
     "monitoring_interval": 1.0,  # 1s intervals for test efficiency
 }
@@ -75,7 +76,7 @@ class TestResourceIsolationSuite:
     async def _verify_services(self) -> bool:
         """Verify that required services are available."""
         # Check if we're in offline test mode
-        offline_mode = os.getenv("CPU_ISOLATION_OFFLINE_MODE", "false").lower() == "true"
+        offline_mode = get_env().get("CPU_ISOLATION_OFFLINE_MODE", "false").lower() == "true"
         if offline_mode:
             logger.info("CPU isolation test running in offline mode - skipping service verification")
             return True
@@ -114,7 +115,7 @@ class TestResourceIsolationSuite:
         logger.warning("CPU isolation will be tested using process monitoring without WebSocket connections")
         
         # Set offline mode for the rest of the test suite
-        os.environ["CPU_ISOLATION_OFFLINE_MODE"] = "true"
+        get_env().set("CPU_ISOLATION_OFFLINE_MODE",  )"true"
         return True
 
     async def cleanup_test_environment(self):

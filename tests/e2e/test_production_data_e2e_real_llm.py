@@ -1,5 +1,6 @@
 """E2E Test: Production-Like Data Testing with Real LLM Integration
 
+from shared.isolated_environment import get_env
 CRITICAL E2E test for production-scale data processing with real LLM.
 Tests realistic workload scenarios, data volumes, and edge cases with actual AI models.
 
@@ -194,7 +195,7 @@ class TestProductionDataE2ERealLLM:
     @pytest.fixture
     def use_real_llm(self):
         """Check if real LLM testing is enabled."""
-        return os.getenv("ENABLE_REAL_LLM_TESTING", "false").lower() == "true"
+        return get_env().get("ENABLE_REAL_LLM_TESTING", "false").lower() == "true"
     
     @pytest.fixture
     def production_monitor(self):

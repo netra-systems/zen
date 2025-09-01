@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """
+from shared.isolated_environment import get_env
 Comprehensive test suite for dev launcher critical path.
 
 Tests are designed to FAIL initially to expose real issues.
@@ -136,7 +137,7 @@ class TestDevLauncherCriticalPath:
         launcher_script = project_root / "scripts" / "dev_launcher.py"
         
         # Configuration for local services with shared LLM
-        env = os.environ.copy()
+        env = get_env().as_dict().copy()
         env.update({
             "NETRA_ENV": "development",
             "DATABASE_URL": "postgresql://localhost/netra_dev",
@@ -599,7 +600,7 @@ class TestDevLauncherCriticalPath:
         if extra_args:
             args.extend(extra_args)
         
-        env = os.environ.copy()
+        env = get_env().as_dict().copy()
         env.update({
             "NETRA_ENV": "development",
             "PYTHONPATH": str(project_root)
@@ -682,7 +683,7 @@ class TestDevLauncherCriticalPath:
         else:
             raise ValueError(f"Unknown service: {service_name}")
         
-        env = os.environ.copy()
+        env = get_env().as_dict().copy()
         env["PYTHONPATH"] = str(project_root)
         
         return subprocess.Popen(cmd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

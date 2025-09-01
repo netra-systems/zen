@@ -256,8 +256,8 @@ class TestSecretKeyValidation:
         
         try:
             # Remove SECRET_KEY environment variable
-            if "SECRET_KEY" in os.environ:
-                del os.environ["SECRET_KEY"]
+            if get_env().get("SECRET_KEY") is not None:
+                del get_env().get("SECRET_KEY")
             
             # Test what happens with missing SECRET_KEY
             missing_key_issues = []
@@ -296,7 +296,7 @@ class TestSecretKeyValidation:
         finally:
             # Restore original SECRET_KEY
             if original_secret is not None:
-                os.environ["SECRET_KEY"] = original_secret
+                get_env().set("SECRET_KEY", original_secret)
 
     @staging_only
     @pytest.mark.e2e

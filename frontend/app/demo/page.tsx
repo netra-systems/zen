@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import DemoHeader from '@/components/demo/DemoHeader'
 import DemoProgress from '@/components/demo/DemoProgress'
@@ -16,11 +16,11 @@ export default function EnterpriseDemo() {
   const [demoStarted, setDemoStarted] = useState(false)
   const [completedSteps, setCompletedSteps] = useState<Set<string>>(new Set())
 
-  const calculateProgress = () => {
+  const calculateProgress = useCallback(() => {
     const totalSteps = 5 // industry, roi, chat, metrics, export
     const progress = (completedSteps.size / totalSteps) * 100
     setDemoProgress(progress)
-  }
+  }, [completedSteps])
 
   const navigateToNextTab = (stepId: string) => {
     if (stepId === 'roi') setActiveTab('roi')
@@ -42,7 +42,7 @@ export default function EnterpriseDemo() {
 
   useEffect(() => {
     calculateProgress()
-  }, [completedSteps])
+  }, [completedSteps, calculateProgress])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-black">

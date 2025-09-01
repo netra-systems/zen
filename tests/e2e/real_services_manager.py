@@ -228,7 +228,7 @@ class RealServicesManager:
     
     def _prepare_environment(self) -> Dict[str, str]:
         """Prepare environment variables for services."""
-        env = os.environ.copy()
+        env = get_env().as_dict().copy()
         env.update({
             "NODE_ENV": "test",
             "NETRA_ENV": "development",  # Use development environment

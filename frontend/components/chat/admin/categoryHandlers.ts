@@ -15,7 +15,7 @@ export const createWorkloadCategory = (response: DiscoveryResponse): DiscoveryCa
   };
 };
 
-const createWorkloadOption = (item: any): ConfigOption => ({
+const createWorkloadOption = (item: { name: string; id: string; description: string; recommended?: boolean }): ConfigOption => ({
   id: generateUniqueId('workload'),
   label: item.name,
   value: item.id,

@@ -6,9 +6,28 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getUnifiedApiConfig } from '@/lib/unified-api-config'
 import { corsJsonResponse, handleOptions, addCorsHeaders } from '@/lib/cors-utils'
 
+// Configuration types
+interface PublicConfigData {
+  environment: string;
+  timestamp: number;
+  cache_status: 'cached' | 'fresh' | 'fallback';
+  cached_at?: string;
+  urls?: {
+    backend: string;
+    auth: string;
+    frontend: string;
+  };
+  oauth?: {
+    google_client_id: string;
+  };
+  features?: Record<string, boolean>;
+  error?: string;
+  failure_count?: number;
+}
+
 // Simple in-memory cache for configuration data
 const CONFIG_CACHE = {
-  data: null as any,
+  data: null as PublicConfigData | null,
   timestamp: 0,
   ttl: 60 * 1000, // 1 minute TTL
 };
@@ -69,7 +88,7 @@ function recordFailure(): void {
 /**
  * Get fresh configuration from backend with retry logic
  */
-async function fetchFreshConfig(config: any): Promise<any> {
+async function fetchFreshConfig(config: { urls: { auth: string }; [key: string]: unknown }): Promise<PublicConfigData> {
   const maxRetries = 3;
   let attempt = 0;
   
@@ -122,7 +141,7 @@ async function fetchFreshConfig(config: any): Promise<any> {
 /**
  * Get cached configuration if valid
  */
-function getCachedConfig(): any | null {
+function getCachedConfig(): PublicConfigData | null {
   const now = Date.now();
   if (CONFIG_CACHE.data && (now - CONFIG_CACHE.timestamp) < CONFIG_CACHE.ttl) {
     return {
@@ -137,7 +156,7 @@ function getCachedConfig(): any | null {
 /**
  * Generate fallback configuration
  */
-function getFallbackConfig(config: any, error?: string): any {
+function getFallbackConfig(config: { environment?: string; [key: string]: unknown }, error?: string): PublicConfigData {
   return {
     environment: config.environment || 'staging',
     timestamp: Date.now(),
@@ -250,7 +269,7 @@ export async function GET(request: NextRequest) {
       });
       return addCorsHeaders(response, request);
       
-    } catch (emergencyError) {
+    } catch (err) {
       // Even fallback failed - return minimal config
       return corsJsonResponse({
         environment: 'staging',

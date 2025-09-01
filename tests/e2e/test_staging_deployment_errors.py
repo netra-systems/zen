@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 Comprehensive test suite for critical staging deployment issues.
 Tests reproduce actual staging errors for root cause validation.
 
@@ -308,7 +309,7 @@ class TestStagingDeploymentErrors:
             invalid = []
             
             for config_name, expected_prefix in critical_staging_configs.items():
-                value = os.environ.get(config_name, "")
+                value = get_env().get(config_name, "")
                 
                 if not value:
                     missing.append(config_name)
@@ -356,14 +357,14 @@ class TestStagingDeploymentErrors:
                     readiness_checks["frontend_node_version"] = True
         
         # Check ClickHouse configuration
-        if os.environ.get("CLICKHOUSE_URL") or os.environ.get("ENVIRONMENT") != "staging":
+        if get_env().get("CLICKHOUSE_URL") or get_env().get("ENVIRONMENT") != "staging":
             readiness_checks["clickhouse_config"] = True
         
         # Health endpoints always pass for now
         readiness_checks["health_endpoints"] = True
         
         # JWT configuration
-        if os.environ.get("JWT_SECRET_KEY") or os.environ.get("ENVIRONMENT") != "staging":
+        if get_env().get("JWT_SECRET_KEY") or get_env().get("ENVIRONMENT") != "staging":
             readiness_checks["jwt_configuration"] = True
         
         # Report readiness status

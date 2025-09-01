@@ -2,7 +2,7 @@
  * Frontend API Proxy - Threads
  * Forwards requests to the backend service's /api/threads endpoint with proper authentication
  */
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { getUnifiedApiConfig } from '@/lib/unified-api-config'
 import { corsJsonResponse, handleOptions } from '@/lib/cors-utils'
 

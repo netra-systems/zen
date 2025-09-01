@@ -217,8 +217,8 @@ class RealServiceConfigManager:
         """Get real PostgreSQL URL."""
         # Prefer environment variables, then use connection info
         env_urls = [
-            os.getenv("DATABASE_URL"),
-            os.getenv("POSTGRES_URL"),
+            get_env().get("DATABASE_URL"),
+            get_env().get("POSTGRES_URL"),
         ]
         
         for url in env_urls:
@@ -240,7 +240,7 @@ class RealServiceConfigManager:
     def _get_test_postgres_url(self) -> str:
         """Get test PostgreSQL URL (SQLite fallback)."""
         # For tests, prefer in-memory or file-based SQLite
-        test_db_url = os.getenv("TEST_DATABASE_URL")
+        test_db_url = get_env().get("TEST_DATABASE_URL")
         if test_db_url:
             return test_db_url
         
@@ -250,8 +250,8 @@ class RealServiceConfigManager:
     def _get_real_redis_url(self, availability: ServiceAvailability) -> str:
         """Get real Redis URL."""
         env_urls = [
-            os.getenv("REDIS_URL"),
-            os.getenv("REDIS_CONNECTION_STRING"),
+            get_env().get("REDIS_URL"),
+            get_env().get("REDIS_CONNECTION_STRING"),
         ]
         
         for url in env_urls:
@@ -271,7 +271,7 @@ class RealServiceConfigManager:
     def _get_test_redis_url(self) -> str:
         """Get test Redis URL (in-memory fallback)."""
         # For tests, use fakeredis or in-memory Redis
-        test_redis_url = os.getenv("TEST_REDIS_URL")
+        test_redis_url = get_env().get("TEST_REDIS_URL")
         if test_redis_url:
             return test_redis_url
         
@@ -281,8 +281,8 @@ class RealServiceConfigManager:
     def _get_real_clickhouse_url(self, availability: ServiceAvailability) -> str:
         """Get real ClickHouse URL."""
         env_urls = [
-            os.getenv("CLICKHOUSE_URL"),
-            os.getenv("CLICKHOUSE_CONNECTION_STRING"),
+            get_env().get("CLICKHOUSE_URL"),
+            get_env().get("CLICKHOUSE_CONNECTION_STRING"),
         ]
         
         for url in env_urls:
@@ -304,7 +304,7 @@ class RealServiceConfigManager:
     def _get_test_clickhouse_url(self) -> str:
         """Get test ClickHouse URL."""
         # For tests, use explicitly configured test ClickHouse
-        test_ch_url = os.getenv("TEST_CLICKHOUSE_URL")
+        test_ch_url = get_env().get("TEST_CLICKHOUSE_URL")
         if test_ch_url:
             return test_ch_url
         
@@ -409,19 +409,19 @@ def set_environment_for_real_services(config: RealServiceConfig) -> None:
         config: Real service configuration
     """
     # Database URLs
-    os.environ["DATABASE_URL"] = config.database.postgres_url
-    os.environ["REDIS_URL"] = config.database.redis_url
+    get_env().set("DATABASE_URL", config.database.postgres_url)
+    get_env().set("REDIS_URL", config.database.redis_url)
     if config.database.clickhouse_url:
-        os.environ["CLICKHOUSE_URL"] = config.database.clickhouse_url
+        get_env().set("CLICKHOUSE_URL", config.database.clickhouse_url)
     
     # Service flags
-    os.environ["USE_REAL_SERVICES"] = str(config.use_real_services).lower()
-    os.environ["TEST_USE_REAL_LLM"] = str(config.llm.use_real_llm).lower()
-    os.environ["ENABLE_REAL_LLM_TESTING"] = str(config.llm.use_real_llm).lower()
+    get_env().set("USE_REAL_SERVICES", str(config.use_real_services).lower())
+    get_env().set("TEST_USE_REAL_LLM", str(config.llm.use_real_llm).lower())
+    get_env().set("ENABLE_REAL_LLM_TESTING", str(config.llm.use_real_llm).lower())
     
     # LLM provider
     if config.llm.primary_provider:
-        os.environ["TEST_LLM_PROVIDER"] = config.llm.primary_provider
+        get_env().set("TEST_LLM_PROVIDER", config.llm.primary_provider)
 
 
 # CLI interface for testing

@@ -8,6 +8,29 @@ import { useUnifiedChatStore } from '@/store/unified-chat';
 import { WebSocketMessage } from '@/types/unified';
 import { logger } from '@/lib/logger';
 
+// Type interfaces for thread data
+interface ThreadMessage {
+  id: string;
+  role: string;
+  content: string;
+  created_at: number;
+  metadata?: Record<string, unknown>;
+}
+
+interface ThreadResponse {
+  thread_id: string;
+  messages: ThreadMessage[];
+}
+
+interface ConvertedMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp: number;
+  threadId: string;
+  metadata?: Record<string, unknown>;
+}
+
 interface WebSocketSender {
   sendMessage: (message: WebSocketMessage) => void;
 }
@@ -48,8 +71,8 @@ const setThreadLoadingState = (loading: boolean) => {
   setThreadLoading(loading);
 };
 
-const convertThreadMessages = (response: any) => {
-  return response.messages.map((msg: any) => ({
+const convertThreadMessages = (response: ThreadResponse): ConvertedMessage[] => {
+  return response.messages.map((msg: ThreadMessage) => ({
     id: msg.id,
     role: msg.role as 'user' | 'assistant' | 'system',
     content: msg.content,
@@ -59,7 +82,7 @@ const convertThreadMessages = (response: any) => {
   }));
 };
 
-const loadMessagesIntoStore = (convertedMessages: any[]) => {
+const loadMessagesIntoStore = (convertedMessages: ConvertedMessage[]) => {
   const { loadMessages } = useUnifiedChatStore.getState();
   loadMessages(convertedMessages);
 };

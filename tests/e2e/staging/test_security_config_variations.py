@@ -273,7 +273,7 @@ class TestSecurityConfigVariations:
         cross_validation_failures = []
         
         for rule in cross_validation_rules:
-            primary_value = os.environ.get(rule["primary_var"])
+            primary_value = get_env().get(rule["primary_var"])
             
             if not primary_value:
                 cross_validation_failures.append({
@@ -285,8 +285,8 @@ class TestSecurityConfigVariations:
             
             # Rule-specific validation
             if rule["name"] == "Environment consistency":
-                staging_var = os.environ.get("STAGING", "").lower()
-                production_var = os.environ.get("PRODUCTION", "").lower()
+                staging_var = get_env().get("STAGING", "").lower()
+                production_var = get_env().get("PRODUCTION", "").lower()
                 
                 if primary_value.lower() == "staging":
                     if staging_var not in ["true", "1", "yes"]:
@@ -307,7 +307,7 @@ class TestSecurityConfigVariations:
             
             elif rule["name"] == "Service URL consistency":
                 backend_url = primary_value
-                auth_url = os.environ.get("AUTH_SERVICE_URL", "")
+                auth_url = get_env().get("AUTH_SERVICE_URL", "")
                 
                 if backend_url and auth_url:
                     backend_staging = "staging" in backend_url.lower()
@@ -363,7 +363,7 @@ class TestSecurityConfigVariations:
         security_config_failures = []
         
         for var_name, requirements in security_config_vars.items():
-            config_value = os.environ.get(var_name, "")
+            config_value = get_env().get(var_name, "")
             
             if not config_value:
                 security_config_failures.append({

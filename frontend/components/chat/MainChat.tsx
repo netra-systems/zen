@@ -264,7 +264,7 @@ const MainChat: React.FC = () => {
                     className="text-center mt-6"
                   >
                     <p className="text-gray-500 text-sm">
-                      💡 Try typing something like: "I need to reduce my AI costs by 30% while maintaining quality"
+                      💡 Try typing something like: &quot;I need to reduce my AI costs by 30% while maintaining quality&quot;
                     </p>
                   </motion.div>
                 </motion.div>

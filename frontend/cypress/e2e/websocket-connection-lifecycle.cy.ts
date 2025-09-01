@@ -41,9 +41,6 @@ describe('WebSocket Connection Lifecycle Management', () => {
     cy.wait(2000);
   });
 
-<<<<<<< Updated upstream
-  it('CRITICAL: Should establish connection and handle agent events properly', () => {
-=======
   afterEach(() => {
     // Clean up WebSocket connections and test state
     cy.window().then((win) => {
@@ -54,8 +51,7 @@ describe('WebSocket Connection Lifecycle Management', () => {
     });
   });
 
-  it('CRITICAL: Should establish and maintain stable WebSocket connection', () => {
->>>>>>> Stashed changes
+  it('CRITICAL: Should establish connection and handle agent events properly', () => {
     waitForConnection().then((ws) => {
       if (ws) {
         testState.wsConnection = ws;
@@ -64,7 +60,6 @@ describe('WebSocket Connection Lifecycle Management', () => {
           'Should not exceed max retry attempts'
         );
       }
-<<<<<<< Updated upstream
     });
     
     // Test critical agent event flow to ensure connection is working
@@ -73,77 +68,6 @@ describe('WebSocket Connection Lifecycle Management', () => {
     // Verify agent events are processed correctly
     cy.get('[data-testid*="agent"], .agent-status').should('exist');
     cy.get('body').should('contain.text', 'lifecycle-test-agent');
-    
-    // Verify connection metadata exists
-    cy.window().then((win) => {
-      const connectionInfo = (win as any).__netraConnectionInfo;
-      if (connectionInfo) {
-        expect(connectionInfo).to.have.property('connection_id');
-        expect(connectionInfo).to.have.property('user_id', 'test-user');
-        expect(connectionInfo).to.have.property('connected_at');
-      }
-    });
-  });
-
-  it('CRITICAL: Should handle network partition and maintain agent event flow', () => {
-    const initialMessage = `Initial message ${Date.now()}`;
-    cy.get('textarea, [data-testid="message-input"]').type(initialMessage);
-    cy.get('button[aria-label="Send message"], button:contains("Send")').click();
-    cy.wait(500);
-    
-    // Test agent events before partition
-    simulateFullAgentLifecycle('pre-partition-agent');
-    
-    recordInitialConnectionId().then((initialId) => {
-      simulateCompleteNetworkPartition();
-      cy.wait(3000); // Wait for disconnection detection
-      
-      verifyDisconnectionIndicators();
-      queueAgentEventsDuringPartition();
-      restoreNetworkConnection();
-      
-      verifyReconnectionAndAgentEventDelivery(initialId);
-      
-      // Test agent events after reconnection
-      simulateFullAgentLifecycle('post-partition-agent');
-    });
-  });
-
-  it('CRITICAL: Should handle connection pool exhaustion and maintain agent events', () => {
-    const connections = createMultipleConnections();
-    
-    verifyConnectionLimitEnforcement(connections);
-    verifyOldestConnectionClosure(connections);
-    verifyGracefulPoolManagement();
-    
-    // Verify agent events still work with connection pooling
-    simulateFullAgentLifecycle('pool-test-agent');
-    cy.get('[data-testid*="agent"], .agent-status').should('exist');
-  });
-
-  it('CRITICAL: Should synchronize agent state after reconnection', () => {
-    const testMessage = `State sync test ${Date.now()}`;
-    sendMessageAndRecord(testMessage);
-    
-    // Start agent before disconnection
-    simulateFullAgentLifecycle('pre-disconnect-agent');
-    
-    cy.wait(2000);
-    simulateNetworkPartition();
-    cy.wait(2000);
-    
-    verifyReconnection().then(() => {
-      verifyStateSynchronization(testMessage);
-      
-      // Verify agent events work after reconnection
-      simulateFullAgentLifecycle('post-reconnect-agent');
-      cy.get('[data-testid*="agent"], .agent-status').should('contain', 'post-reconnect-agent');
-    });
-  });
-
-  it('CRITICAL: Should survive rapid connection cycling and maintain agent event processing', () => {
-    const cycleCount = 3; // Reduced for stability
-=======
       
       // Verify WebSocket service integration
       verifyWebSocketServiceIntegration();
@@ -157,15 +81,18 @@ describe('WebSocket Connection Lifecycle Management', () => {
           expect(connectionInfo).to.have.property('connected_at');
         }
       });
-    });
   });
 
-  it('CRITICAL: Should handle network partition and automatic reconnection', () => {
+  it('CRITICAL: Should handle network partition and maintain agent event flow', () => {
     waitForConnection().then(() => {
       const initialMessage = `Initial message ${Date.now()}`;
-      cy.get('textarea').clear().type(initialMessage);
-      cy.get('button[aria-label="Send message"]').click();
+      cy.get('textarea, [data-testid="message-input"]').clear().type(initialMessage);
+      cy.get('button[aria-label="Send message"], button:contains("Send")').click();
       cy.contains(initialMessage).should('be.visible');
+      cy.wait(500);
+      
+      // Test agent events before partition
+      simulateFullAgentLifecycle('pre-partition-agent');
       
       recordInitialConnectionId().then((initialId) => {
         simulateCompleteNetworkPartition();
@@ -176,6 +103,9 @@ describe('WebSocket Connection Lifecycle Management', () => {
         restoreNetworkConnection();
         
         verifyReconnectionAndMessageDelivery(initialId);
+        
+        // Test agent events after reconnection
+        simulateFullAgentLifecycle('post-partition-agent');
       });
     });
   });
@@ -202,6 +132,10 @@ describe('WebSocket Connection Lifecycle Management', () => {
       verifyConnectionLimitEnforcement(connections);
       verifyOldestConnectionClosure(connections);
       verifyGracefulPoolManagement();
+      
+      // Verify agent events still work with connection pooling
+      simulateFullAgentLifecycle('pool-test-agent');
+      cy.get('[data-testid*="agent"], .agent-status').should('exist');
     });
   });
 
@@ -210,36 +144,37 @@ describe('WebSocket Connection Lifecycle Management', () => {
       const testMessage = `State sync test ${Date.now()}`;
       sendMessageAndRecord(testMessage);
       
+      // Start agent before disconnection
+      simulateFullAgentLifecycle('pre-disconnect-agent');
+      
       cy.wait(2000);
       simulateNetworkPartition();
       cy.wait(2000);
       
       verifyReconnection().then(() => {
         verifyStateSynchronization(testMessage);
+        
+        // Verify agent events work after reconnection
+        simulateFullAgentLifecycle('post-reconnect-agent');
+        cy.get('[data-testid*="agent"], .agent-status').should('contain', 'post-reconnect-agent');
       });
     });
   });
 
   it('CRITICAL: Should survive rapid connection cycling without memory leaks', () => {
     const cycleCount = 3; // Reduced for faster testing
->>>>>>> Stashed changes
     
     for (let i = 0; i < cycleCount; i++) {
       cy.log(`Connection cycle ${i + 1}/${cycleCount}`);
       
-<<<<<<< Updated upstream
-      performConnectionCycle(i);
-      verifyMemoryUsage(i);
-      
-      // Test agent events after each cycle
-      simulateFullAgentLifecycle(`cycle-${i}-agent`);
-      cy.wait(1000);
-=======
       waitForConnection().then(() => {
         performConnectionCycle(i);
         verifyMemoryUsage(i);
+        
+        // Test agent events after each cycle
+        simulateFullAgentLifecycle(`cycle-${i}-agent`);
+        cy.wait(1000);
       });
->>>>>>> Stashed changes
     }
     
     verifyNoMemoryLeaks();
@@ -392,25 +327,51 @@ describe('WebSocket Connection Lifecycle Management', () => {
   function verifyReconnectionAndAgentEventDelivery(initialId: string | null): void {
     cy.wait(WEBSOCKET_CONFIG.RETRY_DELAY * 2);
     
-<<<<<<< Updated upstream
-    cy.get('[data-testid="connection-status"], [class*="connected"], [class*="online"]', { 
-      timeout: 10000 
-    }).should('exist');
+    waitForConnection().then(() => {
+      cy.wait(3000); // Allow time for message delivery
+      
+      // Verify queued agents can now be processed
+      testState.messageQueue.forEach(msg => {
+        cy.contains(msg, { timeout: 10000 }).should('be.visible');
+        simulateFullAgentLifecycle(msg);
+        cy.wait(500);
+      });
+      
+      // Test post-reconnection agent functionality
+      simulateFullAgentLifecycle('post-reconnect-test-agent');
+      cy.get('[data-testid*="agent"], .agent-status').should('contain', 'post-reconnect-test-agent');
+      
+      // Test post-reconnection messaging
+      const postReconnectMessage = `Post-reconnect message ${Date.now()}`;
+      cy.get('textarea, [data-testid="message-input"]').clear().type(postReconnectMessage);
+      cy.get('button[aria-label="Send message"], button:contains("Send")').click();
+      cy.contains(postReconnectMessage).should('be.visible');
+      
+      // Verify new connection ID
+      cy.window().then((win) => {
+        const newConnInfo = (win as any).__netraConnectionInfo;
+        if (newConnInfo && initialId) {
+          expect(newConnInfo.connection_id).to.not.equal(initialId);
+        }
+      });
+    });
+  }
+
+  function queueMessagesDuringPartition(): void {
+    // Simulate trying to send messages while disconnected
+    const queuedMessages = ['queued-msg-1', 'queued-msg-2', 'queued-msg-3'];
     
-    cy.wait(3000); // Allow time for agent event delivery
-    
-    // Verify queued agents can now be processed
-    testState.messageQueue.forEach(agentId => {
-      simulateFullAgentLifecycle(agentId);
+    queuedMessages.forEach(msg => {
+      cy.get('textarea, [data-testid="message-input"]').clear().type(msg);
+      cy.get('button[aria-label="Send message"], button:contains("Send")').click();
+      testState.messageQueue.push(msg);
       cy.wait(500);
     });
+  }
+
+  function verifyReconnectionAndMessageDelivery(initialId: string | null): void {
+    cy.wait(WEBSOCKET_CONFIG.RETRY_DELAY * 2);
     
-    // Test post-reconnection agent functionality
-    simulateFullAgentLifecycle('post-reconnect-test-agent');
-    cy.get('[data-testid*="agent"], .agent-status').should('contain', 'post-reconnect-test-agent');
-    
-    // Verify new connection ID
-=======
     waitForConnection().then(() => {
       cy.wait(3000); // Allow time for message delivery
       testState.messageQueue.forEach(msg => {
@@ -419,8 +380,8 @@ describe('WebSocket Connection Lifecycle Management', () => {
       
       // Test post-reconnection messaging
       const postReconnectMessage = `Post-reconnect message ${Date.now()}`;
-      cy.get('textarea').clear().type(postReconnectMessage);
-      cy.get('button[aria-label="Send message"]').click();
+      cy.get('textarea, [data-testid="message-input"]').clear().type(postReconnectMessage);
+      cy.get('button[aria-label="Send message"], button:contains("Send")').click();
       cy.contains(postReconnectMessage).should('be.visible');
       
       // Verify new connection ID
@@ -434,7 +395,6 @@ describe('WebSocket Connection Lifecycle Management', () => {
   }
 
   function testCriticalEvent(eventType: CriticalWebSocketEvent): void {
->>>>>>> Stashed changes
     cy.window().then((win) => {
       const store = (win as any).useUnifiedChatStore?.getState();
       if (store && store.handleWebSocketEvent) {

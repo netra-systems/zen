@@ -180,7 +180,7 @@ export default function PrivacySection() {
               borderRadius: '8px',
               color: '#856404'
             }}>
-              <p>Your export is being processed. This may take a few minutes. We'll email you when it's ready.</p>
+              <p>Your export is being processed. This may take a few minutes. We&apos;ll email you when it&apos;s ready.</p>
             </div>
           )}
         </div>

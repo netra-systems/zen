@@ -31,6 +31,8 @@ from enum import Enum
 from datetime import datetime, timedelta
 from contextlib import contextmanager
 import socket
+import yaml
+import warnings
 
 if os.name != 'nt':
     import fcntl
@@ -61,6 +63,68 @@ class ServiceHealth:
 
 
 @dataclass
+class ContainerInfo:
+    """Information about a Docker container."""
+    name: str
+    service: str
+    container_id: str
+    image: str
+    state: "ContainerState"  # Forward reference to avoid circular dependency
+    health: Optional[str] = None
+    uptime: Optional[str] = None
+    ports: Optional[Dict[str, int]] = None
+    exit_code: Optional[int] = None
+    created_at: Optional[datetime] = None
+    
+    @classmethod
+    def from_docker_inspect(cls, inspect_data: Dict[str, Any]) -> 'ContainerInfo':
+        """Create ContainerInfo from docker inspect output."""
+        state = inspect_data.get('State', {})
+        config = inspect_data.get('Config', {})
+        network = inspect_data.get('NetworkSettings', {})
+        
+        # Parse status
+        if state.get('Running'):
+            if state.get('Health', {}).get('Status') == 'healthy':
+                container_state = ContainerState.HEALTHY
+            elif state.get('Health', {}).get('Status') == 'unhealthy':
+                container_state = ContainerState.UNHEALTHY
+            elif state.get('Health', {}).get('Status') == 'starting':
+                container_state = ContainerState.STARTING
+            else:
+                container_state = ContainerState.RUNNING
+        else:
+            container_state = ContainerState.STOPPED
+        
+        # Parse ports
+        ports = {}
+        for container_port, bindings in network.get('Ports', {}).items():
+            if bindings:
+                port_num = container_port.split('/')[0]
+                host_port = bindings[0].get('HostPort')
+                if host_port:
+                    ports[port_num] = int(host_port)
+        
+        # Extract service name from container name
+        name = inspect_data.get('Name', '').lstrip('/')
+        service = name.split('_')[1] if '_' in name else name.split('-')[-1]
+        
+        return cls(
+            name=name,
+            service=service,
+            container_id=inspect_data.get('Id', '')[:12],
+            image=config.get('Image', ''),
+            state=container_state,
+            health=state.get('Health', {}).get('Status'),
+            ports=ports,
+            exit_code=state.get('ExitCode'),
+            created_at=datetime.fromisoformat(
+                inspect_data.get('Created', '').replace('Z', '+00:00')
+            ) if inspect_data.get('Created') else None
+        )
+
+
+@dataclass
 class OrchestrationConfig:
     """Service orchestration configuration."""
     environment: str = "test"
@@ -81,6 +145,22 @@ class EnvironmentType(Enum):
     DEDICATED = "dedicated"  # Dedicated per test run
     PRODUCTION = "production"  # Production-like images
     DEVELOPMENT = "development"  # Development images
+
+
+class ServiceMode(Enum):
+    """Service execution mode for testing."""
+    DOCKER = "docker"  # Use Docker Compose (default)
+    LOCAL = "local"    # Use dev_launcher (legacy)
+    MOCK = "mock"      # Use mocks only
+
+
+class ContainerState(Enum):
+    """Docker container states."""
+    RUNNING = "running"
+    STOPPED = "stopped" 
+    HEALTHY = "healthy"
+    UNHEALTHY = "unhealthy"
+    STARTING = "starting"
 
 
 class ServiceStatus(Enum):
@@ -147,7 +227,8 @@ class UnifiedDockerManager:
                  config: Optional[OrchestrationConfig] = None,
                  environment_type: EnvironmentType = EnvironmentType.SHARED,
                  test_id: Optional[str] = None,
-                 use_production_images: bool = True):  # Default to memory-optimized production images
+                 use_production_images: bool = True,  # Default to memory-optimized production images
+                 mode: ServiceMode = ServiceMode.DOCKER):
         """
         Initialize unified Docker manager with orchestration capabilities.
         
@@ -156,16 +237,24 @@ class UnifiedDockerManager:
             environment_type: Type of test environment
             test_id: Unique test identifier for dedicated environments
             use_production_images: Use production Docker images for memory efficiency
+            mode: Service execution mode (docker, local, mock)
         """
         self.config = config or OrchestrationConfig()
         self.environment_type = environment_type
         self.test_id = test_id or self._generate_test_id()
         self.use_production_images = use_production_images
+        self.mode = mode
         
         # Port discovery integration
         self.port_discovery = DockerPortDiscovery(use_test_services=True)
         self.service_health: Dict[str, ServiceHealth] = {}
         self.started_services: Set[str] = set()
+        
+        # Container management
+        self._containers: Dict[str, ContainerInfo] = {}
+        self._compose_config: Optional[Dict] = None
+        self._docker_available = None
+        self._running_services = set()
         
         # Initialize lock directory
         self.LOCK_DIR.mkdir(parents=True, exist_ok=True)
@@ -179,6 +268,25 @@ class UnifiedDockerManager:
         # Track environment setup
         env = get_env()
         self.environment = env.get("TEST_ENV", "test")
+        
+        # Additional port mappings for different modes
+        self._docker_ports = {
+            "postgres": 5433,
+            "redis": 6380,
+            "clickhouse": 8124,
+            "backend": 8001,
+            "auth": 8082,
+            "frontend": 3001
+        }
+        
+        self._local_ports = {
+            "postgres": 5432,
+            "redis": 6379,
+            "clickhouse": 8123,
+            "backend": 8000,
+            "auth": 8081,
+            "frontend": 3000
+        }
         
         # Initialize state
         self._load_state()

@@ -15,7 +15,6 @@ describe('SyntheticDataGenerator - Basic Component Tests', () => {
 
   describe('Component Initialization', () => {
     it('should render component with proper structure', () => {
-<<<<<<< Updated upstream
       cy.contains('Generate Synthetic Data').should('be.visible')
       cy.get('.max-w-2xl').should('be.visible')
       cy.get('.mx-auto').should('be.visible')
@@ -24,6 +23,8 @@ describe('SyntheticDataGenerator - Basic Component Tests', () => {
     it('should display card layout styling', () => {
       cy.get('.max-w-2xl').should('exist')
       cy.get('.space-y-4').should('exist')
+      cy.get('[class*="card"]').should('exist')
+      cy.get('[class*="grid"]').should('exist')
     })
 
     it('should show all main form elements', () => {
@@ -32,46 +33,19 @@ describe('SyntheticDataGenerator - Basic Component Tests', () => {
       cy.contains('Error Rate').should('be.visible')
       cy.contains('Workload Pattern').should('be.visible')
       cy.contains('Generate Data').should('be.visible')
-=======
-      SyntheticDataTestUtils.getGenerator().should('be.visible')
-      UIHelpers.verifyTextContent('Generate Synthetic Data')
-    })
-
-    it('should display card-based styling', () => {
-      cy.get('[class*="card"]').should('exist')
-      cy.get('[class*="grid"]').should('exist')
-    })
-
-    it('should show all configuration fields', () => {
-      UIHelpers.verifyTextContent('Number of Traces')
-      UIHelpers.verifyTextContent('Number of Users')
-      UIHelpers.verifyTextContent('Error Rate')
-      UIHelpers.verifyTextContent('Workload Pattern')
->>>>>>> Stashed changes
     })
   })
 
   describe('Configuration Panel - Basic Fields', () => {
     it('should display trace count configuration', () => {
-<<<<<<< Updated upstream
       cy.get('label[for="num_traces"]').should('be.visible')
-      cy.get('#num_traces').should('be.visible')
-      cy.get('#num_traces').should('have.value', '100')
+      cy.get('#num_traces, input[name="num_traces"]').should('be.visible')
+      cy.get('#num_traces, input[name="num_traces"]').should('have.value', '100')
     })
 
     it('should update trace count input', () => {
-      cy.get('#num_traces').clear().type('5000')
-      cy.get('#num_traces').should('have.value', '5000')
-=======
-      cy.contains('Number of Traces').should('be.visible')
-      cy.get('input[name="num_traces"]').should('be.visible')
-      cy.get('input[name="num_traces"]').should('have.value', TestData.defaultTraceCount.toString())
-    })
-
-    it('should update trace count input', () => {
-      ConfigurationFactory.setTraceCount(5000)
-      cy.get('input[name="num_traces"]').should('have.value', '5000')
->>>>>>> Stashed changes
+      cy.get('#num_traces, input[name="num_traces"]').clear().type('5000')
+      cy.get('#num_traces, input[name="num_traces"]').should('have.value', '5000')
     })
 
     it('should display user count configuration', () => {

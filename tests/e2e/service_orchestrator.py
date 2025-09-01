@@ -84,7 +84,7 @@ class E2EServiceOrchestrator:
             raise RuntimeError(f"Essential services not ready: {unhealthy_services}")
             
         # Check database connections are available (optional for test environment)
-        environment = os.getenv("ENVIRONMENT", "dev")
+        environment = get_env().get("ENVIRONMENT", "dev")
         if environment != "test":
             if not (self.db_manager.postgres_pool or self.db_manager.redis_client):
                 raise RuntimeError("Database connections not ready")
@@ -123,7 +123,7 @@ class E2EServiceOrchestrator:
     
     def is_environment_ready(self) -> bool:
         """Check if environment is ready."""
-        environment = os.getenv("ENVIRONMENT", "dev")
+        environment = get_env().get("ENVIRONMENT", "dev")
         db_requirement_met = True
         
         # Database connections only required for non-test environments

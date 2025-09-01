@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 Test Session Persistence Across Service Restarts - Enterprise E2E Testing
 
 Business Value Justification (BVJ):
@@ -61,7 +62,7 @@ class ActiveSessionSimulator:
     async def setup_redis_connection(self) -> bool:
         """Setup Redis connection for session storage."""
         try:
-            redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+            redis_url = get_env().get("REDIS_URL", "redis://localhost:6379")
             self.redis_client = redis.from_url(redis_url, decode_responses=True)
             await self.redis_client.ping()
             return True

@@ -21,7 +21,7 @@ interface AdminSection {
 import { motion } from 'framer-motion';
 
 const AdminPage: NextPage = () => {
-  const { user } = authService.useAuth();
+  authService.useAuth(); // Authentication check only
 
   return (
     <AuthGuard>
@@ -34,13 +34,6 @@ const AdminPage: NextPage = () => {
   );
 };
 
-const LoadingScreen = () => {
-  return (
-    <div className="flex items-center justify-center h-screen">
-      <p>Loading...</p>
-    </div>
-  );
-};
 
 const AdminHeader = () => {
   return (

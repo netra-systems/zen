@@ -1,7 +1,7 @@
 'use client';
 
 import { NextPage } from 'next';
-import { authService } from '@/auth';
+// import { authService } from '@/auth';  // Unused import
 import { AuthGuard } from '@/components/AuthGuard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CorpusHeader } from './components/corpus-header';
@@ -31,13 +31,6 @@ const CorpusPage: NextPage = () => {
   );
 };
 
-const LoadingScreen = () => {
-  return (
-    <div className="flex items-center justify-center h-screen">
-      <p>Loading...</p>
-    </div>
-  );
-};
 
 const CorpusTabs = ({ corpusState }: { corpusState: ReturnType<typeof useCorpusState> }) => {
   const handleTabChange = (value: string) => {

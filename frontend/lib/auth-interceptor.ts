@@ -251,17 +251,17 @@ class AuthInterceptor {
     return this.authenticatedFetch(url, { ...config, method: 'GET' });
   }
 
-  public async post(url: string, data?: any, config: RequestConfig = {}): Promise<Response> {
+  public async post(url: string, data?: unknown, config: RequestConfig = {}): Promise<Response> {
     const body = data ? JSON.stringify(data) : undefined;
     return this.authenticatedFetch(url, { ...config, method: 'POST', body });
   }
 
-  public async put(url: string, data?: any, config: RequestConfig = {}): Promise<Response> {
+  public async put(url: string, data?: unknown, config: RequestConfig = {}): Promise<Response> {
     const body = data ? JSON.stringify(data) : undefined;
     return this.authenticatedFetch(url, { ...config, method: 'PUT', body });
   }
 
-  public async patch(url: string, data?: any, config: RequestConfig = {}): Promise<Response> {
+  public async patch(url: string, data?: unknown, config: RequestConfig = {}): Promise<Response> {
     const body = data ? JSON.stringify(data) : undefined;
     return this.authenticatedFetch(url, { ...config, method: 'PATCH', body });
   }

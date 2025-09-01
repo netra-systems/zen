@@ -237,29 +237,13 @@ class AgentRegistry:
             self.llm_manager, self.tool_dispatcher))
 
     def set_websocket_manager(self, manager: 'WebSocketManager') -> None:
-        """Set websocket manager for all agents and enhance tool dispatcher with concurrency optimization."""
+        """Set websocket manager through orchestrator integration."""
         self.websocket_manager = manager
         
-        # CRITICAL: Enhance tool dispatcher with WebSocket notifications
-        # This enables real-time tool execution events
-        if self.tool_dispatcher and manager:
-            from netra_backend.app.agents.unified_tool_execution import (
-                enhance_tool_dispatcher_with_notifications
-            )
-            logger.info("Enhancing tool dispatcher with WebSocket notifications")
-            enhance_tool_dispatcher_with_notifications(self.tool_dispatcher, manager)
-            
-            # CONCURRENCY OPTIMIZATION: Verify enhancement succeeded
-            if not getattr(self.tool_dispatcher, '_websocket_enhanced', False):
-                logger.error("CRITICAL: Tool dispatcher enhancement failed - WebSocket events will not work")
-                raise RuntimeError("Tool dispatcher WebSocket enhancement failed")
-            else:
-                logger.info("✅ Tool dispatcher WebSocket enhancement verified")
-        elif manager is None:
-            # Graceful degradation when manager is None - log but don't fail
-            logger.warning("WebSocket manager is None - agent events will not be available")
+        # Delegate enhancement to orchestrator (will be called during startup)
+        logger.info("WebSocket manager set on registry - orchestrator will handle enhancement")
         
-        # Set WebSocket manager for all registered agents with verification
+        # Set WebSocket manager on all registered agents (backward compatibility)
         agent_count = 0
         for agent_name, agent in self.agents.items():
             try:

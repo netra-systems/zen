@@ -109,7 +109,7 @@ class TestHealthCascadeLogic:
         disabled = await clickhouse_simulator.disable_clickhouse_service()
         assert disabled, "Failed to disable ClickHouse"
         assert clickhouse_simulator.clickhouse_disabled
-        assert os.environ.get('CLICKHOUSE_DISABLED') == 'true'
+        assert get_env().get('CLICKHOUSE_DISABLED') == 'true'
         
         # Restore service
         restored = await clickhouse_simulator.restore_clickhouse_service()

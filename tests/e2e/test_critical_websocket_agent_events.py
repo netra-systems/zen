@@ -26,7 +26,7 @@ import pytest
 from loguru import logger
 
 # Use the actual production services
-from netra_backend.app.agents.supervisor.execution_engine import SupervisorExecutionEngine
+from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.base.interface import BaseExecutionInterface

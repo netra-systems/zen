@@ -58,11 +58,11 @@ def _validate_real_service_requirements():
     
     # Ensure real LLM is enabled
     if get_env().get("USE_REAL_LLM", "false").lower() != "true":
-        os.environ["USE_REAL_LLM"] = "true"
-        os.environ["TEST_USE_REAL_LLM"] = "true"
+        get_env().set("USE_REAL_LLM", "true")
+        get_env().set("TEST_USE_REAL_LLM", "true")
     
     # Set the JWT secret for backend compatibility
-    os.environ["JWT_SECRET_KEY"] = "rsWwwvq8X6mCSuNv-TMXHDCfb96Xc-Dbay9MZy6EDCU"
+    get_env().set("JWT_SECRET_KEY", "rsWwwvq8X6mCSuNv-TMXHDCfb96Xc-Dbay9MZy6EDCU")
     
     # Check critical environment variables
     if not get_env().get("JWT_SECRET_KEY"):

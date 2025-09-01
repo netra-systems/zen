@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 Comprehensive Authentication and OAuth Flow Test Suite - Updated for GCP Staging
 
 This test suite is designed to work with GCP staging services and includes:
@@ -87,7 +88,7 @@ class TestAuthFlower:
     
     def __init__(self):
         # Use staging URLs if in staging environment
-        self.is_staging = os.getenv("ENVIRONMENT", "development") == "staging"
+        self.is_staging = get_env().get("ENVIRONMENT", "development") == "staging"
         self.base_urls = {
             "auth": TEST_CONFIG["staging_auth_url"] if self.is_staging else TEST_CONFIG["auth_service_url"],
             "backend": TEST_CONFIG["staging_backend_url"] if self.is_staging else TEST_CONFIG["backend_url"],
@@ -202,7 +203,7 @@ class TestDevLoginFlow:
     
     @pytest.mark.e2e
     @pytest.mark.skipif(
-        not os.environ.get("USE_REAL_SERVICES", "").lower() == "true", 
+        not get_env().get("USE_REAL_SERVICES", "").lower() == "true", 
         reason="Test requires real auth service - set USE_REAL_SERVICES=true"
     )
     @pytest.mark.auth
@@ -1321,7 +1322,7 @@ async def test_gcp_staging_comprehensive_auth_flow():
     """Test comprehensive authentication flow using GCP staging services with StagingAuthHelper"""
     
     # Only run in staging environment
-    if os.getenv("ENVIRONMENT", "development") != "staging":
+    if get_env().get("ENVIRONMENT", "development") != "staging":
         pytest.skip("Test only runs in staging environment")
     
     auth_tester = TestAuthFlower()

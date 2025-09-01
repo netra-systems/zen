@@ -73,11 +73,8 @@ class ValidationSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextM
         start_time = time.time()
         
         try:
-            # Set up WebSocket context for legacy execution
-            await self._setup_websocket_context_for_legacy(run_id)
-            
-            # Emit agent started event
-            await self.emit_agent_started("Starting comprehensive validation process")
+            # Emit thinking event (agent_started is handled by orchestrator)
+            await self.emit_thinking("Starting comprehensive validation process")
             
             # Validate input state
             if not self._validate_execution_state(state):
@@ -109,8 +106,8 @@ class ValidationSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextM
                 "recommendations": ", ".join(validation_summary.get("recommendations", []))
             }
             
-            # Emit completion event
-            await self.emit_agent_completed(result_data, execution_time)
+            # Emit completion event using mixin methods
+            await self.emit_progress("Validation process completed successfully", is_complete=True)
             
             return TypedAgentResult(
                 success=True,
@@ -128,11 +125,8 @@ class ValidationSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextM
         start_time = time.time()
         
         try:
-            # Set up WebSocket context if available
-            await self._setup_websocket_context_if_available(context)
-            
-            # Emit agent started event
-            await self.emit_agent_started("Starting validation via BaseExecutionInterface")
+            # Emit thinking event (agent_started is handled by orchestrator)
+            await self.emit_thinking("Starting validation via BaseExecutionInterface")
             
             # Convert context to state for backward compatibility
             state = self._context_to_state(context)
@@ -140,9 +134,8 @@ class ValidationSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextM
             # Execute main logic
             result = await self.execute(state, context.run_id, context.stream_updates)
             
-            # Emit completion
-            duration_ms = (time.time() - start_time) * 1000
-            await self.emit_agent_completed(result.result if result.success else {}, duration_ms)
+            # Emit completion using mixin methods
+            await self.emit_progress("BaseExecutionInterface validation completed", is_complete=True)
             
             return ExecutionResult(
                 success=result.success,
@@ -282,51 +275,15 @@ class ValidationSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextM
     # WebSocket context setup methods
     async def _setup_websocket_context_if_available(self, context: ExecutionContext) -> None:
         """Set up WebSocket context if websocket manager is available."""
-        if hasattr(self, 'websocket_manager') and self.websocket_manager:
-            # Import here to avoid circular imports
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-            from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-            
-            try:
-                # Create WebSocket notifier and execution context
-                notifier = WebSocketNotifier(self.websocket_manager)
-                ws_context = AgentExecutionContext(
-                    run_id=context.run_id,
-                    agent_name="ValidationSubAgent",
-                    thread_id=getattr(context.state, 'chat_thread_id', context.run_id),
-                    user_id=getattr(context.state, 'user_id', None),
-                    start_time=time.time()
-                )
-                
-                # Set WebSocket context in mixin
-                self.set_websocket_context(notifier, ws_context)
-                
-            except Exception as e:
-                self.logger.debug(f"Failed to setup WebSocket context: {e}")
+        # WebSocket context is now handled by the orchestrator
+        # This method is kept for compatibility but no longer needed
+        pass
     
     async def _setup_websocket_context_for_legacy(self, run_id: str) -> None:
         """Set up WebSocket context for legacy execution paths."""
-        if hasattr(self, 'websocket_manager') and self.websocket_manager:
-            # Import here to avoid circular imports
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-            from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-            
-            try:
-                # Create WebSocket notifier and execution context
-                notifier = WebSocketNotifier(self.websocket_manager)
-                ws_context = AgentExecutionContext(
-                    run_id=run_id,
-                    agent_name="ValidationSubAgent",
-                    thread_id=run_id,  # Use run_id as thread_id for legacy
-                    user_id=None,
-                    start_time=time.time()
-                )
-                
-                # Set WebSocket context in mixin
-                self.set_websocket_context(notifier, ws_context)
-                
-            except Exception as e:
-                self.logger.debug(f"Failed to setup WebSocket context for legacy: {e}")
+        # WebSocket context is now handled by the orchestrator
+        # This method is kept for compatibility but no longer needed
+        pass
     
     # Health and status methods
     def get_health_status(self) -> Dict[str, Any]:

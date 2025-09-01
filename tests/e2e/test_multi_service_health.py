@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 Multi-Service Health Check Tests
 
 Business Value Justification (BVJ):
@@ -28,9 +29,9 @@ import httpx
 import pytest
 
 # Set testing environment before any imports
-os.environ["TESTING"] = "1"
-os.environ["ENVIRONMENT"] = "testing"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+get_env().set("TESTING",  )"1"
+get_env().set("ENVIRONMENT",  )"testing"
+get_env().set("DATABASE_URL",  )"sqlite+aiosqlite:///:memory:"
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -194,7 +195,7 @@ class MultiServiceHealthChecker:
         start_time = time.time()
         
         try:
-            if os.getenv('SKIP_CLICKHOUSE_INIT', 'false').lower() == 'true':
+            if get_env().get('SKIP_CLICKHOUSE_INIT', 'false').lower() == 'true':
                 return HealthCheckResult(
                     service="clickhouse",
                     status="skipped",

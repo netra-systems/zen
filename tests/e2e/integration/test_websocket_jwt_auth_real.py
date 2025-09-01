@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 Comprehensive WebSocket JWT Authentication Test with Real Services
 
 CRITICAL E2E Test: Real JWT Token Authentication for WebSocket Connections
@@ -37,7 +38,7 @@ from tests.e2e.jwt_token_helpers import JWTTestHelper
 
 # Enable real services for this test module
 pytestmark = pytest.mark.skipif(
-    os.environ.get("USE_REAL_SERVICES", "false").lower() != "true",
+    get_env().get("USE_REAL_SERVICES", "false").lower() != "true",
     reason="Real services disabled (set USE_REAL_SERVICES=true)"
 )
 

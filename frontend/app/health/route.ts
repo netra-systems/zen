@@ -6,10 +6,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getUnifiedApiConfig } from '@/lib/unified-api-config'
 
+// Health check result interface
+interface HealthCheckResult {
+  status: string;
+  details?: {
+    error?: string;
+    response_time?: number;
+    url?: string;
+    [key: string]: unknown;
+  };
+}
+
 /**
  * Check backend service health with environment-aware timeout
  */
-async function checkBackendHealth(): Promise<{ status: string; details?: any }> {
+async function checkBackendHealth(): Promise<HealthCheckResult> {
   try {
     const config = getUnifiedApiConfig();
     
@@ -48,7 +59,7 @@ async function checkBackendHealth(): Promise<{ status: string; details?: any }> 
 /**
  * Check auth service health with environment-aware timeout
  */
-async function checkAuthHealth(): Promise<{ status: string; details?: any }> {
+async function checkAuthHealth(): Promise<HealthCheckResult> {
   try {
     const config = getUnifiedApiConfig();
     
@@ -84,7 +95,7 @@ async function checkAuthHealth(): Promise<{ status: string; details?: any }> {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const config = getUnifiedApiConfig();
     const startTime = Date.now();
@@ -184,7 +195,7 @@ export async function GET(request: NextRequest) {
 /**
  * Support HEAD requests for simple alive checks
  */
-export async function HEAD(request: NextRequest) {
+export async function HEAD(_request: NextRequest) {
   try {
     // Simple alive check without dependency verification
     return new NextResponse(null, { 
@@ -203,7 +214,7 @@ export async function HEAD(request: NextRequest) {
 /**
  * Support OPTIONS requests for CORS preflight
  */
-export async function OPTIONS(request: NextRequest) {
+export async function OPTIONS(_request: NextRequest) {
   return new NextResponse(null, {
     status: 200,
     headers: {

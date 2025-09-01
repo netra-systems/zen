@@ -1,5 +1,6 @@
 """Agent Orchestration Test Runner with Real LLM Support
 
+from shared.isolated_environment import get_env
 Unified runner for agent orchestration tests with real LLM integration.
 Provides easy commands to run agent tests with or without real LLM.
 
@@ -77,18 +78,18 @@ class AgentOrchestrationTestRunner:
                           timeout: int = 30, parallel: int = 2):
         """Configure real LLM testing environment."""
         if enable:
-            os.environ["USE_REAL_LLM"] = "true"
-            os.environ["TEST_USE_REAL_LLM"] = "true"  # Legacy compatibility
-            os.environ["ENABLE_REAL_LLM_TESTING"] = "true"
-            os.environ["TEST_LLM_MODEL"] = model
-            os.environ["TEST_LLM_TIMEOUT"] = str(timeout)
-            os.environ["TEST_LLM_PARALLEL"] = str(parallel)
+            get_env().set("USE_REAL_LLM",  )"true"
+            get_env().set("TEST_USE_REAL_LLM",  )"true"  # Legacy compatibility
+            get_env().set("ENABLE_REAL_LLM_TESTING",  )"true"
+            get_env().set("TEST_LLM_MODEL", model)
+            get_env().set("TEST_LLM_TIMEOUT", str(timeout))
+            get_env().set("TEST_LLM_PARALLEL", str(parallel))
             self.results["real_llm_enabled"] = True
             print(f"[INFO] Real LLM testing enabled with model: {model}")
         else:
-            os.environ["USE_REAL_LLM"] = "false"
-            os.environ["TEST_USE_REAL_LLM"] = "false"  # Legacy compatibility
-            os.environ["ENABLE_REAL_LLM_TESTING"] = "false"
+            get_env().set("USE_REAL_LLM",  )"false"
+            get_env().set("TEST_USE_REAL_LLM",  )"false"  # Legacy compatibility
+            get_env().set("ENABLE_REAL_LLM_TESTING",  )"false"
             print("[INFO] Using mocked LLM responses")
     
     def run_high_value_tests(self, real_llm: bool = False) -> int:
@@ -279,7 +280,7 @@ class AgentOrchestrationTestRunner:
         }
         
         # Calculate coverage (simplified)
-        if (os.getenv("USE_REAL_LLM") == "true" or os.getenv("TEST_USE_REAL_LLM") == "true"):
+        if (get_env().get("USE_REAL_LLM") == "true" or get_env().get("TEST_USE_REAL_LLM") == "true"):
             report["real_llm_coverage"] = 85  # Target coverage when enabled
         
         report["recommendations"] = [
