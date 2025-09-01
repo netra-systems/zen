@@ -404,7 +404,7 @@ class TestRealSystemComponents:
         
         # Test WebSocket enhancement (this is what was failing in the original test)
         try:
-            from netra_backend.app.agents.enhanced_tool_execution import (
+            from netra_backend.app.agents.unified_tool_execution import (
                 enhance_tool_dispatcher_with_notifications
             )
             enhance_tool_dispatcher_with_notifications(tool_dispatcher, websocket_manager)

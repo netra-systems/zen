@@ -38,8 +38,8 @@ from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.agents.enhanced_tool_execution import (
-    EnhancedToolExecutionEngine,
+from netra_backend.app.agents.unified_tool_execution import (
+    UnifiedToolExecutionEngine,
     enhance_tool_dispatcher_with_notifications
 )
 from netra_backend.app.websocket_core.manager import WebSocketManager
@@ -178,8 +178,8 @@ class TestMissionCriticalWebSocketEvents:
         
         # Verify enhancement
         assert dispatcher.executor != original_executor, "Executor was not replaced"
-        assert isinstance(dispatcher.executor, EnhancedToolExecutionEngine), \
-            f"Executor is not EnhancedToolExecutionEngine: {type(dispatcher.executor)}"
+        assert isinstance(dispatcher.executor, UnifiedToolExecutionEngine), \
+            f"Executor is not UnifiedToolExecutionEngine: {type(dispatcher.executor)}"
         assert hasattr(dispatcher, '_websocket_enhanced'), "Missing enhancement marker"
         assert dispatcher._websocket_enhanced is True, "Enhancement marker not set"
     
@@ -197,7 +197,7 @@ class TestMissionCriticalWebSocketEvents:
         registry.set_websocket_manager(ws_manager)
         
         # Verify tool dispatcher was enhanced
-        assert isinstance(tool_dispatcher.executor, EnhancedToolExecutionEngine), \
+        assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
             f"CRITICAL: AgentRegistry did not enhance tool dispatcher: {type(tool_dispatcher.executor)}"
     
     @pytest.mark.asyncio
@@ -217,7 +217,7 @@ class TestMissionCriticalWebSocketEvents:
             f"CRITICAL: websocket_notifier is not WebSocketNotifier: {type(engine.websocket_notifier)}"
     
     @pytest.mark.asyncio
-    async def test_enhanced_tool_execution_sends_critical_events(self):
+    async def test_unified_tool_execution_sends_critical_events(self):
         """MISSION CRITICAL: Enhanced tool execution MUST send WebSocket events."""
         ws_manager = WebSocketManager()
         validator = MissionCriticalEventValidator()
@@ -236,7 +236,7 @@ class TestMissionCriticalWebSocketEvents:
         ws_manager.send_to_thread.side_effect = capture_events
         
         # Create enhanced executor
-        executor = EnhancedToolExecutionEngine(ws_manager)
+        executor = UnifiedToolExecutionEngine(ws_manager)
         
         # Create test context
         context = AgentExecutionContext(

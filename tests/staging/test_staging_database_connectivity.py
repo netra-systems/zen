@@ -33,7 +33,7 @@ STAGING_URLS = {
 
 LOCAL_URLS = {
     "backend": "http://localhost:8000",
-    "auth": "http://localhost:8001"
+    "auth": "http://localhost:8081"
 }
 
 class StagingDatabaseConnectivityTestRunner:

@@ -30,8 +30,8 @@ from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.agents.enhanced_tool_execution import (
-    EnhancedToolExecutionEngine,
+from netra_backend.app.agents.unified_tool_execution import (
+    UnifiedToolExecutionEngine,
     enhance_tool_dispatcher_with_notifications
 )
 from netra_backend.app.websocket_core.manager import WebSocketManager
@@ -181,7 +181,7 @@ async def test_websocket_events_emitted_during_agent_execution():
         registry.set_websocket_manager(ws_manager)  # This should enhance tool dispatcher
         
         # Verify tool dispatcher was enhanced
-        assert isinstance(tool_dispatcher.executor, EnhancedToolExecutionEngine), \
+        assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
             "Tool dispatcher was not enhanced with WebSocket notifications"
         assert hasattr(tool_dispatcher, '_websocket_enhanced'), \
             "Tool dispatcher enhancement marker missing"
@@ -262,11 +262,11 @@ async def test_websocket_events_emitted_during_agent_execution():
 
 @pytest.mark.asyncio  
 @pytest.mark.critical
-async def test_enhanced_tool_execution_direct():
+async def test_unified_tool_execution_direct():
     """
-    Direct test of the EnhancedToolExecutionEngine WebSocket integration.
+    Direct test of the UnifiedToolExecutionEngine WebSocket integration.
     
-    This tests the core fix in enhanced_tool_execution.py.
+    This tests the core fix in unified_tool_execution.py.
     """
     logger.info("\n" + "="*50)
     logger.info("TESTING: Enhanced Tool Execution Direct")
@@ -285,7 +285,7 @@ async def test_enhanced_tool_execution_direct():
     
     try:
         # Create enhanced executor directly
-        enhanced_executor = EnhancedToolExecutionEngine(ws_manager)
+        enhanced_executor = UnifiedToolExecutionEngine(ws_manager)
         
         # Create test state
         state = DeepAgentState()
@@ -347,8 +347,8 @@ async def test_tool_dispatcher_enhancement_integration():
     assert tool_dispatcher.executor != original_executor, \
         "Tool dispatcher executor was not replaced"
     
-    assert isinstance(tool_dispatcher.executor, EnhancedToolExecutionEngine), \
-        f"Expected EnhancedToolExecutionEngine, got {type(tool_dispatcher.executor)}"
+    assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
+        f"Expected UnifiedToolExecutionEngine, got {type(tool_dispatcher.executor)}"
     
     assert hasattr(tool_dispatcher, '_websocket_enhanced'), \
         "Enhancement marker not set"

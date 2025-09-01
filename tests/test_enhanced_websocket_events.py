@@ -335,11 +335,11 @@ class TestEnhancedWebSocketEvents:
 
     async def test_contextual_tool_execution_info(self):
         """Test contextual tool execution information extraction."""
-        from netra_backend.app.agents.enhanced_tool_execution import ContextualToolExecutor
+        from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
         
         # Mock websocket manager
         mock_ws = MagicMock()
-        executor = ContextualToolExecutor(mock_ws)
+        executor = UnifiedToolExecutionEngine(mock_ws)
         
         # Test tool purpose extraction
         search_purpose = executor._get_tool_purpose("search_optimizer", None)

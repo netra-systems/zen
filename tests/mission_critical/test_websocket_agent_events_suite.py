@@ -42,8 +42,8 @@ from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.agents.enhanced_tool_execution import (
-    EnhancedToolExecutionEngine,
+from netra_backend.app.agents.unified_tool_execution import (
+    UnifiedToolExecutionEngine,
     enhance_tool_dispatcher_with_notifications
 )
 from netra_backend.app.websocket_core.manager import WebSocketManager
@@ -318,8 +318,8 @@ class TestUnitWebSocketComponents:
         
         # Verify enhancement
         assert dispatcher.executor != original_executor, "Executor was not replaced"
-        assert isinstance(dispatcher.executor, EnhancedToolExecutionEngine), \
-            "Executor is not EnhancedToolExecutionEngine"
+        assert isinstance(dispatcher.executor, UnifiedToolExecutionEngine), \
+            "Executor is not UnifiedToolExecutionEngine"
         assert hasattr(dispatcher, '_websocket_enhanced'), "Missing enhancement marker"
         assert dispatcher._websocket_enhanced is True, "Enhancement marker not set"
     
@@ -338,7 +338,7 @@ class TestUnitWebSocketComponents:
         registry.set_websocket_manager(ws_manager)
         
         # Verify tool dispatcher was enhanced
-        assert isinstance(tool_dispatcher.executor, EnhancedToolExecutionEngine), \
+        assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
             "AgentRegistry did not enhance tool dispatcher"
     
     @pytest.mark.asyncio
@@ -362,13 +362,13 @@ class TestUnitWebSocketComponents:
     
     @pytest.mark.asyncio
     @pytest.mark.critical
-    async def test_enhanced_tool_execution_sends_events(self):
+    async def test_unified_tool_execution_sends_events(self):
         """Test that enhanced tool execution actually sends WebSocket events."""
         ws_manager = self.mock_ws_manager
         validator = MissionCriticalEventValidator()
         
         # Create enhanced executor with WebSocket manager
-        executor = EnhancedToolExecutionEngine(ws_manager)
+        executor = UnifiedToolExecutionEngine(ws_manager)
         
         # Test that we can directly use the WebSocket notifier
         # Since the complex tool execution may have dependencies, let's test the notifier directly
@@ -801,7 +801,7 @@ class TestRegressionPrevention:
             # MUST be enhanced
             assert tool_dispatcher.executor != original_executor, \
                 f"Iteration {i}: Tool dispatcher not enhanced - REGRESSION!"
-            assert isinstance(tool_dispatcher.executor, EnhancedToolExecutionEngine), \
+            assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
                 f"Iteration {i}: Wrong executor type - REGRESSION!"
     
     @pytest.mark.asyncio
@@ -851,7 +851,7 @@ class TestRegressionPrevention:
     async def test_tool_events_always_paired(self):
         """REGRESSION TEST: Tool events must ALWAYS be paired."""
         ws_manager = self.mock_ws_manager
-        enhanced_executor = EnhancedToolExecutionEngine(ws_manager)
+        enhanced_executor = UnifiedToolExecutionEngine(ws_manager)
         notifier = enhanced_executor.websocket_notifier
         
         validator = MissionCriticalEventValidator()

@@ -19,7 +19,7 @@ Test Coverage:
 RUN THIS AFTER ANY CHANGES TO:
 - AgentRegistry.set_websocket_manager()
 - enhance_tool_dispatcher_with_notifications()  
-- EnhancedToolExecutionEngine
+- UnifiedToolExecutionEngine
 - WebSocket event handling
 """
 
@@ -47,8 +47,8 @@ from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.agents.enhanced_tool_execution import (
-    EnhancedToolExecutionEngine,
+from netra_backend.app.agents.unified_tool_execution import (
+    UnifiedToolExecutionEngine,
     enhance_tool_dispatcher_with_notifications
 )
 from netra_backend.app.websocket_core.manager import WebSocketManager
@@ -245,7 +245,7 @@ class TestWebSocketCriticalFixValidation:
         ws_manager = WebSocketManager()
         
         # Verify initial state
-        assert not isinstance(original_executor, EnhancedToolExecutionEngine), \
+        assert not isinstance(original_executor, UnifiedToolExecutionEngine), \
             "Executor should not be enhanced initially"
         assert not hasattr(tool_dispatcher, '_websocket_enhanced'), \
             "Should not be marked as enhanced initially"
@@ -256,8 +256,8 @@ class TestWebSocketCriticalFixValidation:
         # Verify the fix worked
         assert tool_dispatcher.executor != original_executor, \
             "CRITICAL FIX BROKEN: Executor was not replaced"
-        assert isinstance(tool_dispatcher.executor, EnhancedToolExecutionEngine), \
-            "CRITICAL FIX BROKEN: Executor is not EnhancedToolExecutionEngine"
+        assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
+            "CRITICAL FIX BROKEN: Executor is not UnifiedToolExecutionEngine"
         assert hasattr(tool_dispatcher, '_websocket_enhanced'), \
             "CRITICAL FIX BROKEN: Missing enhancement marker"
         assert tool_dispatcher._websocket_enhanced is True, \
@@ -288,7 +288,7 @@ class TestWebSocketCriticalFixValidation:
         await ws_manager.connect_user(conn_id, mock_ws, conn_id)
         
         # Create enhanced executor (THE FIX)
-        enhanced_executor = EnhancedToolExecutionEngine(ws_manager)
+        enhanced_executor = UnifiedToolExecutionEngine(ws_manager)
         
         # Create test state
         state = DeepAgentState(
@@ -341,7 +341,7 @@ class TestWebSocketCriticalFixValidation:
         await ws_manager.connect_user(conn_id, mock_ws, conn_id)
         
         # Create enhanced executor
-        enhanced_executor = EnhancedToolExecutionEngine(ws_manager)
+        enhanced_executor = UnifiedToolExecutionEngine(ws_manager)
         
         # Create test state
         state = DeepAgentState(
@@ -519,7 +519,7 @@ class TestWebSocketCriticalFixValidation:
         registry.set_websocket_manager(ws_manager)
         
         # Verify the fix was applied
-        assert isinstance(tool_dispatcher.executor, EnhancedToolExecutionEngine), \
+        assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
             "Critical fix not applied in E2E test"
         
         # Create a test agent that uses multiple tools
@@ -639,7 +639,7 @@ class TestWebSocketCriticalFixValidation:
         # Create enhanced executors for each connection
         executors = {}
         for conn_id, _ in connections:
-            executors[conn_id] = EnhancedToolExecutionEngine(ws_manager)
+            executors[conn_id] = UnifiedToolExecutionEngine(ws_manager)
         
         # Execute tools concurrently on all connections
         async def execute_tools_on_connection(conn_id, executor):
@@ -713,14 +713,14 @@ class TestWebSocketCriticalFixValidation:
         registry.set_websocket_manager(ws_manager)
         
         # Verify it worked
-        assert isinstance(tool_dispatcher.executor, EnhancedToolExecutionEngine)
+        assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine)
         first_executor = tool_dispatcher.executor
         
         # Apply the fix again (should be safe)
         registry.set_websocket_manager(ws_manager)
         
         # Should not break or create nested enhancements
-        assert isinstance(tool_dispatcher.executor, EnhancedToolExecutionEngine)
+        assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine)
         assert tool_dispatcher.executor == first_executor, \
             "Double enhancement created new executor - this wastes resources"
         
@@ -748,7 +748,7 @@ class TestWebSocketCriticalFixValidation:
             registry.set_websocket_manager(WebSocketManager())
             
             test_results["enhancement_integration"] = isinstance(
-                tool_dispatcher.executor, EnhancedToolExecutionEngine
+                tool_dispatcher.executor, UnifiedToolExecutionEngine
             )
         except Exception as e:
             test_results["enhancement_integration"] = False
@@ -762,7 +762,7 @@ class TestWebSocketCriticalFixValidation:
             
             await ws_manager.connect_user("test", mock_ws, "test")
             
-            executor = EnhancedToolExecutionEngine(ws_manager)
+            executor = UnifiedToolExecutionEngine(ws_manager)
             state = DeepAgentState(chat_thread_id="test", user_id="test")
             tool = MockToolForTesting("validation_tool")
             
@@ -782,7 +782,7 @@ class TestWebSocketCriticalFixValidation:
             
             await ws_manager.connect_user("error_test", mock_ws, "error_test")
             
-            executor = EnhancedToolExecutionEngine(ws_manager)
+            executor = UnifiedToolExecutionEngine(ws_manager)
             state = DeepAgentState(chat_thread_id="error_test", user_id="error_test")
             failing_tool = MockToolForTesting("failing_validation_tool", should_fail=True)
             

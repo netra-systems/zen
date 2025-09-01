@@ -33,10 +33,9 @@ import pytest
 from loguru import logger
 
 # Import enhanced tool execution components
-from netra_backend.app.agents.enhanced_tool_execution import (
-    ContextualToolExecutor,
-    EnhancedToolExecutionEngine,
-    create_contextual_tool_executor,
+from netra_backend.app.agents.unified_tool_execution import (
+    UnifiedToolExecutionEngine,
+    UnifiedToolExecutionEngine,
     enhance_tool_dispatcher_with_notifications
 )
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
@@ -321,7 +320,7 @@ class TestToolProgressGranularity:
     def setup_granularity_tests(self):
         """Setup for granularity tests."""
         self.mock_ws = AdvancedMockWebSocketManager()
-        self.executor = ContextualToolExecutor(self.mock_ws)
+        self.executor = UnifiedToolExecutionEngine(self.mock_ws)
         yield
         self.mock_ws.clear_all()
     
@@ -388,7 +387,7 @@ class TestToolProgressGranularity:
     
     @pytest.mark.asyncio
     @pytest.mark.critical
-    async def test_enhanced_tool_execution_with_context(self):
+    async def test_unified_tool_execution_with_context(self):
         """Test enhanced tool execution with contextual information."""
         
         context = AgentExecutionContext(
@@ -430,7 +429,7 @@ class TestConcurrentToolProgress:
     def setup_concurrent_tests(self):
         """Setup for concurrent execution tests."""
         self.mock_ws = AdvancedMockWebSocketManager()
-        self.executor = EnhancedToolExecutionEngine(self.mock_ws)
+        self.executor = UnifiedToolExecutionEngine(self.mock_ws)
         yield
         self.mock_ws.clear_all()
     
@@ -563,7 +562,7 @@ class TestToolFailureRecovery:
             simulate_failures=True,
             failure_rate=0.2  # 20% failure rate
         )
-        self.executor = EnhancedToolExecutionEngine(self.mock_ws)
+        self.executor = UnifiedToolExecutionEngine(self.mock_ws)
         yield
         self.mock_ws.clear_all()
     
@@ -705,7 +704,7 @@ class TestEdgeCasesAndStress:
     def setup_edge_tests(self):
         """Setup for edge case tests."""
         self.mock_ws = AdvancedMockWebSocketManager()
-        self.executor = create_contextual_tool_executor(self.mock_ws)
+        self.executor =(self.mock_ws)
         yield
         self.mock_ws.clear_all()
     
@@ -915,7 +914,7 @@ class TestRealServiceIntegration:
         # Verify enhancement occurred
         assert hasattr(self.tool_dispatcher, '_websocket_enhanced'), \
             "Tool dispatcher should be enhanced"
-        assert isinstance(self.tool_dispatcher.executor, EnhancedToolExecutionEngine), \
+        assert isinstance(self.tool_dispatcher.executor, UnifiedToolExecutionEngine), \
             "Should have enhanced executor"
         
         # Create a real tool execution context
@@ -1013,7 +1012,7 @@ class TestExtremeLoad:
     def setup_load_tests(self):
         """Setup for load tests."""
         self.mock_ws = AdvancedMockWebSocketManager()
-        self.executor = EnhancedToolExecutionEngine(self.mock_ws)
+        self.executor = UnifiedToolExecutionEngine(self.mock_ws)
         yield
         self.mock_ws.clear_all()
     

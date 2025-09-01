@@ -26,7 +26,7 @@ STAGING_URLS = {
 
 LOCAL_URLS = {
     "backend": "http://localhost:8000",
-    "auth": "http://localhost:8001", 
+    "auth": "http://localhost:8081", 
     "frontend": "http://localhost:3000"
 }
 
@@ -289,7 +289,7 @@ class StagingWebSocketTestRunner:
             
     async def run_all_tests(self) -> Dict[str, Any]:
         """Run all WebSocket agent event tests."""
-        print(f"🔌 Running WebSocket Agent Events Tests")
+        print(f"[WebSocket] Running WebSocket Agent Events Tests")
         print(f"Environment: {self.environment}")
         print(f"WebSocket URL: {self.get_websocket_url()}")
         print()
@@ -299,20 +299,20 @@ class StagingWebSocketTestRunner:
         # Test 2.1: WebSocket connection
         print("2.1 Testing WebSocket connection...")
         results["websocket_connection"] = await self.test_websocket_connection()
-        print(f"     ✅ Connection: {results['websocket_connection']['success']}")
+        print(f"     [OK] Connection: {results['websocket_connection']['success']}")
         
         # Test 2.2: Agent event flow
         print("2.2 Testing agent event flow...")
         results["agent_events"] = await self.test_agent_event_flow()
-        print(f"     ✅ Agent events: {results['agent_events']['success']}")
-        print(f"     📋 Required events: {results['agent_events'].get('all_required_events', False)}")
+        print(f"     [OK] Agent events: {results['agent_events']['success']}")
+        print(f"     [Events] Required events: {results['agent_events'].get('all_required_events', False)}")
         if results['agent_events'].get('missing_events'):
-            print(f"     ⚠️  Missing events: {results['agent_events']['missing_events']}")
+            print(f"     [WARNING] Missing events: {results['agent_events']['missing_events']}")
             
         # Test 2.3: WebSocket authentication
         print("2.3 Testing WebSocket authentication...")
         results["websocket_auth"] = await self.test_websocket_authentication()
-        print(f"     ✅ Authentication: {results['websocket_auth']['success']}")
+        print(f"     [OK] Authentication: {results['websocket_auth']['success']}")
         
         # Summary
         all_passed = all(result["success"] for result in results.values())
@@ -328,9 +328,9 @@ class StagingWebSocketTestRunner:
         }
         
         print()
-        print(f"📊 Summary: {results['summary']['passed_tests']}/{results['summary']['total_tests']} tests passed")
+        print(f"[Summary] {results['summary']['passed_tests']}/{results['summary']['total_tests']} tests passed")
         if critical_chat_issue:
-            print("🚨 CRITICAL: Missing required WebSocket events - Chat functionality compromised!")
+            print("[CRITICAL] Missing required WebSocket events - Chat functionality compromised!")
             
         return results
 

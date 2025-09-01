@@ -14,19 +14,7 @@ import asyncio
 import time
 from typing import Dict, Any, List, Optional
 from shared.isolated_environment import IsolatedEnvironment
-
-# Test Configuration
-STAGING_URLS = {
-    "backend": "https://netra-backend-staging-701982941522.us-central1.run.app",
-    "auth": "https://netra-auth-service-701982941522.us-central1.run.app",
-    "frontend": "https://netra-frontend-staging-701982941522.us-central1.run.app"
-}
-
-LOCAL_URLS = {
-    "backend": "http://localhost:8000",
-    "auth": "http://localhost:8001", 
-    "frontend": "http://localhost:3000"
-}
+from tests.staging.staging_config import StagingConfig
 
 # Critical Services Configuration
 CRITICAL_SERVICES = {
@@ -55,9 +43,13 @@ class StagingServiceHealthTestRunner:
     
     def __init__(self):
         self.env = IsolatedEnvironment()
-        self.environment = self.env.get("ENVIRONMENT", "development")
-        self.urls = STAGING_URLS if self.environment == "staging" else LOCAL_URLS
-        self.timeout = 30.0
+        self.environment = StagingConfig.get_environment()  # Now defaults to 'staging'
+        self.urls = {
+            "backend": StagingConfig.get_service_url("NETRA_BACKEND"),
+            "auth": StagingConfig.get_service_url("AUTH_SERVICE"),
+            "frontend": StagingConfig.get_service_url("FRONTEND")
+        }
+        self.timeout = StagingConfig.TIMEOUTS["default"]
         
     def get_base_headers(self) -> Dict[str, str]:
         """Get base headers for health check requests."""

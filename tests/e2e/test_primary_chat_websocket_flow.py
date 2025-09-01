@@ -42,8 +42,8 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.agents.enhanced_tool_execution import (
-    EnhancedToolExecutionEngine,
+from netra_backend.app.agents.unified_tool_execution import (
+    UnifiedToolExecutionEngine,
     enhance_tool_dispatcher_with_notifications
 )
 from netra_backend.app.agents.state import DeepAgentState
@@ -381,7 +381,7 @@ class TestPrimaryChatWebSocketFlowE2E:
             registry.set_websocket_manager(ws_manager)  # CRITICAL: This enhances tool dispatcher
             
             # Verify tool dispatcher was enhanced (regression prevention)
-            assert isinstance(tool_dispatcher.executor, EnhancedToolExecutionEngine), \
+            assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
                 "Tool dispatcher not enhanced with WebSocket notifications - REGRESSION!"
             
             # Create execution engine
@@ -501,7 +501,7 @@ class TestPrimaryChatWebSocketFlowE2E:
             enhance_tool_dispatcher_with_notifications(tool_dispatcher, ws_manager)
             
             # Verify enhancement worked
-            assert isinstance(tool_dispatcher.executor, EnhancedToolExecutionEngine), \
+            assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
                 "Tool dispatcher not properly enhanced"
             
             # Register realistic test tools
@@ -711,7 +711,7 @@ class TestPrimaryChatWebSocketFlowE2E:
             registry.set_websocket_manager(ws_manager)
             
             # Verify system is properly configured
-            assert isinstance(tool_dispatcher.executor, EnhancedToolExecutionEngine), \
+            assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
                 "Tool dispatcher not enhanced - complete journey will fail"
             
             engine = ExecutionEngine(registry, ws_manager)
