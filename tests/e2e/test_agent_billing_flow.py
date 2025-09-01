@@ -38,7 +38,7 @@ from tests.e2e.agent_billing_test_helpers import (
     AgentBillingTestUtils
 )
 from netra_backend.app.schemas.user_plan import PlanTier
-from test_framework.environment_isolation import get_test_env_manager
+from shared.isolated_environment import get_env
 from test_framework.real_services import RealServicesManager
 from test_framework.llm_config_manager import configure_llm_testing, LLMTestMode
 
@@ -51,16 +51,13 @@ class TestAgentBillingFlow:
     async def test_core(self):
         """Initialize billing test core with isolated environment."""
         # Setup REAL services environment per CLAUDE.md requirements - NO MOCKS
-        env_manager = get_test_env_manager()
-        isolated_env = env_manager.setup_test_environment(
-            additional_vars={
-                "USE_REAL_SERVICES": "true",
-                "CLICKHOUSE_ENABLED": "true", 
-                "TEST_DISABLE_REDIS": "false",
-                "REAL_DATABASE_TESTING": "true"
-            },
-            enable_real_llm=True  # CLAUDE.md: Use REAL LLM for e2e tests
-        )
+        # Use proper environment management through shared.isolated_environment
+        env = get_env()
+        env.set("USE_REAL_SERVICES", "true", "e2e_test")
+        env.set("CLICKHOUSE_ENABLED", "true", "e2e_test")
+        env.set("TEST_DISABLE_REDIS", "false", "e2e_test")
+        env.set("REAL_DATABASE_TESTING", "true", "e2e_test")
+        env.set("LLM_TEST_MODE", "REAL", "e2e_test")  # CLAUDE.md: Use REAL LLM for e2e tests
         
         # Configure real LLM testing per CLAUDE.md standards
         configure_llm_testing(mode=LLMTestMode.REAL)
@@ -70,8 +67,13 @@ class TestAgentBillingFlow:
         yield core
         await core.teardown_test_environment()
         
-        # Cleanup isolated environment
-        env_manager.teardown_test_environment()
+        # Cleanup environment variables
+        env = get_env()
+        env.delete("USE_REAL_SERVICES", "e2e_test")
+        env.delete("CLICKHOUSE_ENABLED", "e2e_test")
+        env.delete("TEST_DISABLE_REDIS", "e2e_test")
+        env.delete("REAL_DATABASE_TESTING", "e2e_test")
+        env.delete("LLM_TEST_MODE", "e2e_test")
     
     @pytest.fixture
     def request_simulator(self):
@@ -276,16 +278,13 @@ class TestAgentBillingPerformance:
     async def test_core(self):
         """Initialize performance test core with REAL services per CLAUDE.md."""
         # Setup REAL services environment - NO MOCKS
-        env_manager = get_test_env_manager()
-        isolated_env = env_manager.setup_test_environment(
-            additional_vars={
-                "USE_REAL_SERVICES": "true",
-                "CLICKHOUSE_ENABLED": "true", 
-                "TEST_DISABLE_REDIS": "false",
-                "REAL_DATABASE_TESTING": "true"
-            },
-            enable_real_llm=True  # CLAUDE.md: Use REAL LLM for e2e tests
-        )
+        # Use proper environment management through shared.isolated_environment
+        env = get_env()
+        env.set("USE_REAL_SERVICES", "true", "e2e_perf_test")
+        env.set("CLICKHOUSE_ENABLED", "true", "e2e_perf_test")
+        env.set("TEST_DISABLE_REDIS", "false", "e2e_perf_test")
+        env.set("REAL_DATABASE_TESTING", "true", "e2e_perf_test")
+        env.set("LLM_TEST_MODE", "REAL", "e2e_perf_test")  # CLAUDE.md: Use REAL LLM for e2e tests
         
         # Configure real LLM testing per CLAUDE.md standards
         configure_llm_testing(mode=LLMTestMode.REAL)
@@ -295,8 +294,13 @@ class TestAgentBillingPerformance:
         yield core
         await core.teardown_test_environment()
         
-        # Cleanup isolated environment
-        env_manager.teardown_test_environment()
+        # Cleanup environment variables
+        env = get_env()
+        env.delete("USE_REAL_SERVICES", "e2e_perf_test")
+        env.delete("CLICKHOUSE_ENABLED", "e2e_perf_test")
+        env.delete("TEST_DISABLE_REDIS", "e2e_perf_test")
+        env.delete("REAL_DATABASE_TESTING", "e2e_perf_test")
+        env.delete("LLM_TEST_MODE", "e2e_perf_test")
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
