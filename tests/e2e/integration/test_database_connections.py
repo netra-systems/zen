@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 E2E tests for database connections in DEV MODE.
 
 Tests PostgreSQL, ClickHouse, and Redis connectivity during startup,
@@ -42,11 +43,11 @@ class TestDatabaseConnectioner:
     
     def _setup_connection_urls(self) -> None:
         """Setup database connection URLs for testing."""
-        self.postgres_url = os.getenv("TEST_DATABASE_URL") or \
+        self.postgres_url = get_env().get("TEST_DATABASE_URL") or \
             "postgresql+asyncpg://netra:netra123@localhost:5432/netra_dev"
-        self.clickhouse_url = os.getenv("TEST_CLICKHOUSE_URL") or \
+        self.clickhouse_url = get_env().get("TEST_CLICKHOUSE_URL") or \
             "http://netra:netra123@localhost:8123"
-        self.redis_url = os.getenv("TEST_REDIS_URL") or \
+        self.redis_url = get_env().get("TEST_REDIS_URL") or \
             "redis://localhost:6379/1"
     
     @pytest.mark.e2e
@@ -312,8 +313,8 @@ async def test_concurrent_database_access(test_db_test_fixture):
 async def test_database_environment_isolation(test_db_test_fixture):
     """Test database connections use test environment settings."""
     # Verify test environment variables are set
-    assert os.getenv("TESTING") == "true"
-    assert "test" in os.getenv("DATABASE_URL", "").lower()
+    assert get_env().get("TESTING") == "true"
+    assert "test" in get_env().get("DATABASE_URL", "").lower()
     
     startup_success = await test_db_test_fixture.start_dev_environment()
     assert startup_success

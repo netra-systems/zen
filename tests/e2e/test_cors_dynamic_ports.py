@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 test_cors_dynamic_ports.py - Syntax errors detected, file made importable.
 Original content preserved below in comments for manual fixing.
 """

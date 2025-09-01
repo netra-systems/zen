@@ -665,22 +665,26 @@ class ComprehensiveDatabaseConnectivityValidator:
         """Run all validation tests and return comprehensive results."""
         logger.info("Starting comprehensive database connectivity validation...")
         
-        # Run all validation tests
+        # Run all validation tests - including new real database connectivity tests
+        self.results['docker_services_health'] = await self.validate_docker_services_health()
+        self.results['postgresql_connectivity'] = await self.validate_postgresql_connectivity()
+        self.results['redis_connectivity'] = await self.validate_redis_connectivity()
+        self.results['clickhouse_connectivity'] = await self.validate_clickhouse_connectivity()
         self.results['auth_service_fixes'] = await self.validate_auth_service_503_fix()
         self.results['timeout_handling_fixes'] = await self.validate_timeout_handling_fixes()
         self.results['url_formation_fixes'] = self.validate_url_formation_fixes()
         self.results['readiness_check_fixes'] = await self.validate_concurrent_readiness_checks()
         
-        # Determine overall status
-        critical_tests = ['auth_service_fixes', 'timeout_handling_fixes']
+        # Determine overall status - CRITICAL database connectivity tests now included
+        critical_tests = ['postgresql_connectivity', 'redis_connectivity', 'auth_service_fixes', 'timeout_handling_fixes']
         critical_success = all(self.results[test]['success'] for test in critical_tests)
         
-        other_tests = ['url_formation_fixes', 'readiness_check_fixes']
-        other_success_count = sum(1 for test in other_tests if self.results[test]['success'])
+        important_tests = ['clickhouse_connectivity', 'docker_services_health', 'url_formation_fixes', 'readiness_check_fixes']
+        important_success_count = sum(1 for test in important_tests if self.results[test]['success'])
         
-        if critical_success and other_success_count >= 1:
+        if critical_success and important_success_count >= 3:
             self.results['overall_status'] = 'success'
-        elif critical_success:
+        elif critical_success and important_success_count >= 2:
             self.results['overall_status'] = 'partial_success'
         else:
             self.results['overall_status'] = 'failure'

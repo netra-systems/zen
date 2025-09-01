@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 E2E Authentication Flow Tests - Phase 2 Unified System Testing
 
 Business Value Justification (BVJ):

@@ -1,4 +1,5 @@
 """Staging Test Helpers and Utilities
+from shared.isolated_environment import get_env
 
 Business Value Justification (BVJ):
 - Segment: Platform/Internal
@@ -101,7 +102,7 @@ class StagingTestSuite:
     def _validate_staging_prerequisites(self) -> None:
         """Validate staging environment prerequisites."""
         required_env_vars = ["DATABASE_URL", "REDIS_URL", "CLICKHOUSE_URL"]
-        missing_vars = [var for var in required_env_vars if not os.getenv(var)]
+        missing_vars = [var for var in required_env_vars if not get_env().get(var)]
         if missing_vars:
             pytest.skip(f"Missing staging environment variables: {missing_vars}")
     
@@ -249,16 +250,16 @@ def validate_staging_environment() -> tuple[bool, List[str]]:
         "JWT_SECRET_KEY", "FERNET_KEY", "GOOGLE_CLIENT_ID", "GEMINI_API_KEY"
     ]
     
-    issues = [f"Missing: {var}" for var in required_vars if not os.getenv(var)]
+    issues = [f"Missing: {var}" for var in required_vars if not get_env().get(var)]
     
     # Basic URL validation
     for var, prefix in [("DATABASE_URL", "postgresql://"), ("REDIS_URL", "redis://"), ("CLICKHOUSE_URL", "clickhouse://")]:
-        value = os.getenv(var, "")
+        value = get_env().get(var, "")
         if value and not value.startswith(prefix):
             issues.append(f"{var} invalid format")
     
     # JWT secret length check
-    jwt_secret = os.getenv("JWT_SECRET_KEY", "")
+    jwt_secret = get_env().get("JWT_SECRET_KEY", "")
     if jwt_secret and len(jwt_secret) < 32:
         issues.append("JWT_SECRET_KEY too short")
     

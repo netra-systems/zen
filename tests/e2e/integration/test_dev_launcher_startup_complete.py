@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 CRITICAL Dev Launcher Startup Validation Test
 
 Business Value Justification (BVJ):

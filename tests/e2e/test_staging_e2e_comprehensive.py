@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 Comprehensive E2E Test Suite for Staging Environment
 
 This test suite validates the complete staging environment by making
@@ -378,7 +379,7 @@ if __name__ == "__main__":
     os.environ["ENVIRONMENT"] = "staging"
     
     # Check for E2E bypass key
-    if not os.getenv("E2E_OAUTH_SIMULATION_KEY"):
+    if not get_env().get("E2E_OAUTH_SIMULATION_KEY"):
         print("ERROR: E2E_OAUTH_SIMULATION_KEY environment variable not set")
         print("This key is required to simulate OAuth flow in staging tests")
         sys.exit(1)

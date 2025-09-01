@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 Critical System Initialization Tests - 30 Comprehensive Cold Start Scenarios
 
 These tests validate the most critical and difficult initialization scenarios,
@@ -97,7 +98,7 @@ class SystemInitializationTestBase:
         """Reset all databases to clean state."""
         try:
             # Reset PostgreSQL
-            engine = create_engine(os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/netra_test"))
+            engine = create_engine(get_env().get("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/netra_test"))
             with engine.connect() as conn:
                 conn.execute(text("DROP SCHEMA IF EXISTS public CASCADE"))
                 conn.execute(text("CREATE SCHEMA public"))
@@ -222,7 +223,7 @@ class TestCriticalPath(SystemInitializationTestBase):
             assert self.wait_for_service(f"{self.auth_url}/health"), "Auth service failed to start"
             
             # Verify database tables created
-            engine = create_engine(os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/netra_test"))
+            engine = create_engine(get_env().get("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/netra_test"))
             with engine.connect() as conn:
                 result = conn.execute(text(
                     "SELECT COUNT(*) FROM information_schema.tables "
@@ -280,7 +281,7 @@ class TestCriticalPath(SystemInitializationTestBase):
         
         with self.start_dev_launcher() as proc:
             # Check database migrations ran
-            engine = create_engine(os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/netra_test"))
+            engine = create_engine(get_env().get("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/netra_test"))
             with engine.connect() as conn:
                 # Check core tables exist
                 tables_to_check = [
@@ -989,7 +990,7 @@ class TestConfigurationEnvironment(SystemInitializationTestBase):
             
             with self.start_dev_launcher() as proc:
                 # Verify correct precedence (system > local > test)
-                assert os.getenv("TEST_VAR") == "from_system", "System env var not prioritized"
+                assert get_env().get("TEST_VAR") == "from_system", "System env var not prioritized"
                 
         finally:
             env_test.unlink(missing_ok=True)

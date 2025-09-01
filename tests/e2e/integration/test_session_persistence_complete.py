@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 Test Session Persistence Across Service Restarts - Complete Implementation
 
 Business Value Justification (BVJ):
@@ -62,7 +63,7 @@ class TestSessionPersistenceManager:
     async def setup_redis_connection(self) -> bool:
         """Setup Redis connection for session validation."""
         try:
-            redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+            redis_url = get_env().get("REDIS_URL", "redis://localhost:6379")
             self.redis_client = redis.from_url(redis_url, decode_responses=True)
             await self.redis_client.ping()
             return True
@@ -327,7 +328,7 @@ class ServiceHealthChecker:
     async def check_redis_service() -> bool:
         """Check if Redis is available."""
         try:
-            redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+            redis_url = get_env().get("REDIS_URL", "redis://localhost:6379")
             redis_client = redis.from_url(redis_url)
             await redis_client.ping()
             await redis_client.aclose()

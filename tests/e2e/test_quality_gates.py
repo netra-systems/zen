@@ -1,4 +1,5 @@
 """Quality Gate Tester - Phase 4 of Unified System Testing
+from shared.isolated_environment import get_env
 
 Business Value Justification (BVJ):
 - Segment: All tiers (Free, Early, Mid, Enterprise)

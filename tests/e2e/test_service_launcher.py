@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 Simple service launcher for e2e tests.
 Provides lightweight service startup with minimal dependencies.
 """

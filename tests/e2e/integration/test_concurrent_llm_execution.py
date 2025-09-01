@@ -1,4 +1,5 @@
 """E2E Test: Concurrent LLM Execution at Scale
+from shared.isolated_environment import get_env
 
 CRITICAL: Tests concurrent real LLM execution with proper resource management.
 Validates system performance under concurrent load with real APIs.
@@ -254,7 +255,7 @@ class TestConcurrentLLMExecution:
     def _should_use_real_llm(self) -> bool:
         """Check if real LLM testing is enabled."""
         import os
-        return os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true"
+        return get_env().get("TEST_USE_REAL_LLM", "false").lower() == "true"
     
     async def _execute_agent_task(self, agent: BaseSubAgent, task: str) -> Dict[str, Any]:
         """Execute task with agent."""
@@ -293,4 +294,4 @@ class TestStressConcurrency:
     
     def _should_use_real_llm(self) -> bool:
         """Check if real LLM testing is enabled."""
-        return os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true"
+        return get_env().get("TEST_USE_REAL_LLM", "false").lower() == "true"
