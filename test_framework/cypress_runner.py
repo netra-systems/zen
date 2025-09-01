@@ -19,6 +19,7 @@ from datetime import datetime
 from test_framework.cypress.service_manager import ServiceDependencyManager
 from test_framework.cypress.config_manager import CypressConfigManager
 from test_framework.cypress.results_processor import CypressResults
+from test_framework.centralized_docker_manager import CentralizedDockerManager, EnvironmentType, ServiceStatus
 
 logger = logging.getLogger(__name__)
 
@@ -52,18 +53,29 @@ class CypressTestRunner:
     - Results aggregation
     """
     
-    def __init__(self, project_root: Optional[Path] = None):
+    def __init__(self, project_root: Optional[Path] = None, use_centralized_docker: bool = True):
         """
         Initialize Cypress test runner.
         
         Args:
             project_root: Root directory of the project
+            use_centralized_docker: Use centralized Docker manager (default: True)
         """
         self.project_root = project_root or Path.cwd()
         self.frontend_path = self.project_root / "frontend"
         self.cypress_config_path = self.frontend_path / "cypress.config.ts"
         
         # Initialize managers
+        self.use_centralized_docker = use_centralized_docker
+        if use_centralized_docker:
+            # Use centralized Docker manager for unified test runner integration
+            self.docker_manager = CentralizedDockerManager(
+                environment_type=EnvironmentType.SHARED,
+                use_production_images=False  # Use test images for Cypress
+            )
+        else:
+            self.docker_manager = None
+            
         self.service_manager = ServiceDependencyManager(self.project_root)
         self.config_manager = CypressConfigManager(self.project_root)
         self.results_processor = CypressResults()
@@ -114,7 +126,43 @@ class CypressTestRunner:
         """
         logger.info("Checking service dependencies for Cypress tests...")
         
-        # Check service availability and start if needed
+        # Use centralized Docker manager if available
+        if self.use_centralized_docker and self.docker_manager:
+            logger.info("Using centralized Docker manager for service orchestration")
+            
+            # Ensure Docker environment is ready
+            compose_file = "docker-compose.test.yml"
+            if (self.project_root / compose_file).exists():
+                success = self.docker_manager.ensure_docker_compose_up(compose_file)
+                if not success:
+                    logger.warning("Failed to start Docker Compose services")
+                    # Fall back to service manager
+                else:
+                    # Wait for services to be healthy
+                    service_health = self.docker_manager.wait_for_services_healthy(
+                        services=["backend", "frontend", "postgres", "redis"],
+                        timeout=timeout
+                    )
+                    
+                    # Convert to expected format
+                    service_status = {}
+                    for service, healthy in service_health.items():
+                        service_status[service] = {
+                            "healthy": healthy,
+                            "name": service,
+                            "status": "healthy" if healthy else "unhealthy"
+                        }
+                    
+                    all_ready = all(status["healthy"] for status in service_status.values())
+                    
+                    if all_ready:
+                        logger.info("All services ready via centralized Docker manager")
+                    else:
+                        logger.warning("Some services not ready via centralized Docker manager")
+                        
+                    return all_ready, service_status
+        
+        # Fall back to original service manager
         service_status = await self.service_manager.ensure_all_services_ready(timeout)
         
         all_ready = all(status.get("healthy", False) for status in service_status.values())

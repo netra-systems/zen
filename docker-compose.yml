@@ -249,7 +249,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1024M
+          memory: 2048M
           cpus: '0.4'
 
   # Dev Frontend Service
@@ -359,6 +359,7 @@ services:
       CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
     ports:
       - "${TEST_CLICKHOUSE_HTTP_PORT:-8125}:8123"
+      - "${TEST_CLICKHOUSE_TCP_PORT:-9002}:9000"
     # Test environment - ephemeral data is acceptable
     healthcheck:
       # Using clickhouse-client for a more reliable health check
@@ -407,7 +408,7 @@ networks:
 
 # ============================================
 # TOTAL RESOURCE LIMITS (Approx for Dev profile):
-# - Memory: ~2.2GB
+# - Memory: ~3.2GB
 # - CPUs: ~1.875 cores
 # - Volumes: 5 (vs previous 33 mentioned in comments)
 # ============================================

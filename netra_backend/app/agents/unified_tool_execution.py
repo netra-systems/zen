@@ -2,7 +2,7 @@
 
 This module consolidates all tool execution functionality into a single SSOT,
 merging the best features from:
-- enhanced_tool_execution.py (WebSocket notifications)
+- unified_tool_execution.py (WebSocket notifications)
 - tool_dispatcher_execution.py (core delegation pattern)
 - core/interfaces_tools.py (permission checks and validation)
 
@@ -47,7 +47,7 @@ class UnifiedToolExecutionEngine:
     
     This class consolidates:
     1. Core tool execution from interfaces_tools.py
-    2. WebSocket notifications from enhanced_tool_execution.py
+    2. WebSocket notifications from unified_tool_execution.py
     3. Delegation pattern from tool_dispatcher_execution.py
     4. Permission checks and validation
     """

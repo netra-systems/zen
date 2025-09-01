@@ -262,13 +262,13 @@ async def isolated_clickhouse(
         async def test_analytics(isolated_clickhouse):
             # Create table with isolated name
             table_name = isolated_clickhouse.get_table_name("events")
-            await isolated_clickhouse.execute(f"""
+            await isolated_clickhouse.execute(f'''
                 CREATE TABLE {table_name} (
                     id UInt64,
                     event_type String,
                     timestamp DateTime
                 ) ENGINE = Memory
-            """)
+            ''')
             
             # Insert test data
             await isolated_clickhouse.execute(

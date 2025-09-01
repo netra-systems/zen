@@ -214,6 +214,11 @@
 
     <cross_references>
         <reference>
+            <spec>learnings/docker_centralized_management.xml</spec>
+            <relation>CRITICAL: Centralized Docker management system prevents crashes and restart storms</relation>
+        </reference>
+        
+        <reference>
             <spec>deployment_architecture.xml</spec>
             <relation>Production deployment patterns</relation>
         </reference>
@@ -225,7 +230,17 @@
         
         <reference>
             <document>LLM_MASTER_INDEX.md</document>
-            <section>Docker Configuration &amp; Service Management</section>
+            <section>Docker Infrastructure Management</section>
+        </reference>
+        
+        <reference>
+            <document>test_framework/centralized_docker_manager.py</document>
+            <relation>Primary Docker coordination implementation</relation>
+        </reference>
+        
+        <reference>
+            <document>test_framework/docker_compose_manager.py</document>
+            <relation>Docker Compose lifecycle management</relation>
         </reference>
         
         <reference>

@@ -23,7 +23,7 @@ from typing import Dict, List, Set
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-from netra_backend.app.agents.enhanced_tool_execution import EnhancedToolExecutionEngine
+from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 from netra_backend.app.agents.state import DeepAgentState
 
 class DirectWebSocketEventValidator:
@@ -173,7 +173,7 @@ async def test_basic_5_events():
     return True
 
 
-async def test_enhanced_tool_execution():
+async def test_unified_tool_execution():
     """TEST 2: Enhanced tool execution events."""
     print("\n=== TEST 2: Enhanced Tool Execution Events ===")
     
@@ -184,7 +184,7 @@ async def test_enhanced_tool_execution():
     thread_id = "tool-thread"
     
     await ws_manager.connect_user(user_id, mock_websocket, thread_id)
-    enhanced_executor = EnhancedToolExecutionEngine(ws_manager)
+    enhanced_executor = UnifiedToolExecutionEngine(ws_manager)
     
     state = DeepAgentState(
         chat_thread_id=thread_id,
@@ -299,7 +299,7 @@ async def run_all_tests():
     
     tests = [
         test_basic_5_events,
-        test_enhanced_tool_execution, 
+        test_unified_tool_execution, 
         test_hello_complete_flow
     ]
     

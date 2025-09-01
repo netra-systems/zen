@@ -15,7 +15,7 @@ def validate_websocket_integration():
     try:
         from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
         from netra_backend.app.websocket_core.manager import WebSocketManager
-        from netra_backend.app.agents.enhanced_tool_execution import EnhancedToolExecutionEngine
+        from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
         from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
         
@@ -48,7 +48,7 @@ def validate_websocket_integration():
         if tool_dispatcher.executor == original_executor:
             return False, "AgentRegistry didn't enhance tool dispatcher"
         
-        if not isinstance(tool_dispatcher.executor, EnhancedToolExecutionEngine):
+        if not isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine):
             return False, "Wrong executor type after enhancement"
         
         return True, "WebSocket integration validated"

@@ -133,12 +133,12 @@ class WebSocketComplianceValidator:
                 
         return len(issues) == 0, issues
     
-    def validate_enhanced_tool_execution(self) -> Tuple[bool, List[str]]:
-        """Validate EnhancedToolExecutionEngine implementation."""
-        enhanced_path = project_root / "netra_backend" / "app" / "agents" / "enhanced_tool_execution.py"
+    def validate_unified_tool_execution(self) -> Tuple[bool, List[str]]:
+        """Validate UnifiedToolExecutionEngine implementation."""
+        enhanced_path = project_root / "netra_backend" / "app" / "agents" / "unified_tool_execution.py"
         
         if not enhanced_path.exists():
-            return False, ["EnhancedToolExecutionEngine file not found"]
+            return False, ["UnifiedToolExecutionEngine file not found"]
         
         issues = []
         with open(enhanced_path, 'r', encoding='utf-8') as f:
@@ -236,7 +236,7 @@ class WebSocketComplianceValidator:
             ('WebSocketNotifier', self.validate_websocket_notifier),
             ('AgentRegistry', self.validate_agent_registry),
             ('ExecutionEngine', self.validate_execution_engine),
-            ('EnhancedToolExecution', self.validate_enhanced_tool_execution),
+            ('EnhancedToolExecution', self.validate_unified_tool_execution),
             ('FrontendProvider', self.validate_frontend_provider),
             ('TestCoverage', self.validate_test_coverage)
         ]

@@ -73,7 +73,7 @@ class ValidationConfig:
     # Test suites that must pass
     CRITICAL_TEST_SUITES = [
         "tests/mission_critical/test_websocket_injection_fix_comprehensive.py",
-        "tests/mission_critical/test_enhanced_tool_execution_websocket_events.py",
+        "tests/mission_critical/test_unified_tool_execution_websocket_events.py",
         "tests/mission_critical/test_websocket_agent_events_suite.py"
     ]
     

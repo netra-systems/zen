@@ -17,7 +17,7 @@ from loguru import logger
 
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.agents.enhanced_tool_execution import EnhancedToolExecutionEngine
+from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 from netra_backend.app.websocket_core.manager import WebSocketManager
 
 
@@ -48,7 +48,7 @@ class TestFinalValidation:
         assert tool_dispatcher.executor != original_executor, \
             "CRITICAL REGRESSION: Tool dispatcher not enhanced!"
         
-        assert isinstance(tool_dispatcher.executor, EnhancedToolExecutionEngine), \
+        assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
             "CRITICAL REGRESSION: Wrong executor type!"
         
         assert hasattr(tool_dispatcher, '_websocket_enhanced'), \
@@ -100,7 +100,7 @@ class TestFinalValidation:
             assert tool_dispatcher.executor != original, \
                 f"Registry {i} failed to enhance tool dispatcher"
             
-            assert isinstance(tool_dispatcher.executor, EnhancedToolExecutionEngine), \
+            assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
                 f"Registry {i} has wrong executor type"
         
         logger.success("✅ All registry instances properly enhance tool dispatcher")
@@ -135,7 +135,7 @@ class TestFinalValidation:
         registry.set_websocket_manager(ws_manager)
         
         # Verify enhancement
-        assert isinstance(tool_dispatcher.executor, EnhancedToolExecutionEngine), \
+        assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
             "Tool dispatcher not enhanced in integration test"
         
         logger.success("✅ Complete integration flow validated")
@@ -161,7 +161,7 @@ class TestFinalValidation:
         executor2 = tool_dispatcher.executor
         
         # Should still be enhanced
-        assert isinstance(executor2, EnhancedToolExecutionEngine), \
+        assert isinstance(executor2, UnifiedToolExecutionEngine), \
             "Lost enhancement after second call"
         
         # Should have updated WebSocket manager

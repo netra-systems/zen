@@ -62,7 +62,12 @@ class TestAgentOrchestrationRealLLMIntegration:
         from netra_backend.app.core.configuration.loader import get_configuration
         
         config = get_configuration()
-        api_key = config.llm_configs.get("default", {}).api_key
+        default_llm_config = config.llm_configs.get("default")
+        
+        if not default_llm_config:
+            pytest.fail("Default LLM config not found. MOCKS ARE FORBIDDEN per CLAUDE.md. Configure LLM to run this test.")
+            
+        api_key = default_llm_config.api_key
         
         if not api_key or not api_key.strip():
             pytest.fail("Real LLM API key not configured. MOCKS ARE FORBIDDEN per CLAUDE.md. Configure API key to run this test.")

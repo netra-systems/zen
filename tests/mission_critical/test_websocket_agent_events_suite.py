@@ -42,8 +42,8 @@ from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.agents.enhanced_tool_execution import (
-    EnhancedToolExecutionEngine,
+from netra_backend.app.agents.unified_tool_execution import (
+    UnifiedToolExecutionEngine,
     enhance_tool_dispatcher_with_notifications
 )
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
@@ -364,7 +364,7 @@ class TestUnitWebSocketComponents:
     
     @pytest.mark.asyncio
     @pytest.mark.critical
-    async def test_enhanced_tool_execution_sends_events(self):
+    async def test_unified_tool_execution_sends_events(self):
         """Test that enhanced tool execution actually sends WebSocket events."""
         ws_manager = self.mock_ws_manager
         validator = MissionCriticalEventValidator()

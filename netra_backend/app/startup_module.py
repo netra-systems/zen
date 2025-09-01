@@ -20,7 +20,6 @@ from netra_backend.app.config import get_config, settings
 from netra_backend.app.services.background_task_manager import background_task_manager
 from netra_backend.app.services.startup_fixes_integration import startup_fixes
 from netra_backend.app.core.performance_optimization_manager import performance_manager
-from netra_backend.app.core.startup_manager import startup_manager
 from netra_backend.app.db.index_optimizer import index_manager
 from netra_backend.app.db.migration_utils import (
     create_alembic_config,
@@ -53,10 +52,10 @@ async def _ensure_database_tables_exist(logger: logging.Logger, graceful_startup
         import asyncio
         
         # Import all model classes to ensure they're registered with Base.metadata
-        logger.info("Importing database models to register tables...")
+        logger.debug("Importing database models to register tables...")
         _import_all_models()
         
-        logger.info("Checking if database tables exist...")
+        logger.debug("Checking if database tables exist...")
         
         # Create async engine for table creation
         engine = DatabaseManager.create_application_engine()
@@ -86,7 +85,7 @@ async def _ensure_database_tables_exist(logger: logging.Logger, graceful_startup
             
             if missing_tables:
                 logger.warning(f"Missing {len(missing_tables)} database tables: {missing_tables}")
-                logger.info("Creating missing database tables automatically...")
+                logger.debug("Creating missing database tables automatically...")
                 
                 # Create missing tables
                 await conn.run_sync(Base.metadata.create_all)
@@ -109,9 +108,9 @@ async def _ensure_database_tables_exist(logger: logging.Logger, graceful_startup
                     else:
                         raise RuntimeError(error_msg)
                 else:
-                    logger.info(f"Successfully created {len(missing_tables)} missing database tables")
+                    logger.debug(f"Successfully created {len(missing_tables)} missing database tables")
             else:
-                logger.info(f"All {len(expected_tables)} database tables are present")
+                logger.debug(f"All {len(expected_tables)} database tables are present")
         
         # Log final pool status before disposal
         pool_status = DatabaseManager.get_pool_status(engine)
@@ -191,7 +190,7 @@ async def _initialize_performance_optimizations(app: FastAPI, logger: logging.Lo
         await _setup_performance_manager(app)
         _setup_optimization_components(app)
         await _schedule_background_optimizations(app, logger)
-        logger.info("Performance optimizations initialized successfully")
+        logger.debug("Performance optimizations initialized successfully")
     except Exception as e:
         logger.error(f"Failed to initialize performance optimizations: {e}")
         # Don't fail startup, but log the error
@@ -214,7 +213,7 @@ async def _schedule_background_optimizations(app: FastAPI, logger: logging.Logge
     
     # Check if background tasks are disabled for testing
     if get_env().get("DISABLE_BACKGROUND_TASKS", "false").lower() == "true":
-        logger.info("Background tasks disabled for testing environment")
+        logger.debug("Background tasks disabled for testing environment")
         return
     
     if hasattr(app.state, 'background_task_manager'):
@@ -228,7 +227,7 @@ async def _schedule_background_optimizations(app: FastAPI, logger: logging.Logge
             name="database_index_optimization",
             timeout=120  # 2-minute timeout to prevent hanging
         )
-        logger.info(f"Database index optimization scheduled as background task (ID: {task_id})")
+        logger.debug(f"Database index optimization scheduled as background task (ID: {task_id})")
 
 
 async def _run_index_optimization_background(logger: logging.Logger) -> None:
@@ -236,25 +235,25 @@ async def _run_index_optimization_background(logger: logging.Logger) -> None:
     try:
         # Extended delay to minimize startup performance impact
         await asyncio.sleep(60)  # Wait 60 seconds after startup for better performance
-        logger.info("Starting background database index optimization...")
+        logger.debug("Starting background database index optimization...")
         
         # Reduced timeout for faster failure detection
         optimization_results = await asyncio.wait_for(
             index_manager.optimize_all_databases(), 
             timeout=90.0  # 90 second timeout for better performance
         )
-        logger.info(f"Background database optimization completed successfully: {optimization_results}")
+        logger.debug(f"Background database optimization completed successfully: {optimization_results}")
     except asyncio.TimeoutError:
         logger.warning("Background index optimization timed out after 90 seconds - will retry later")
         # Schedule retry after additional delay
         await asyncio.sleep(300)  # Wait 5 minutes before potential retry
         try:
-            logger.info("Retrying background database optimization...")
+            logger.debug("Retrying background database optimization...")
             optimization_results = await asyncio.wait_for(
                 index_manager.optimize_all_databases(),
                 timeout=60.0  # Shorter timeout for retry
             )
-            logger.info(f"Background database optimization retry succeeded: {optimization_results}")
+            logger.debug(f"Background database optimization retry succeeded: {optimization_results}")
         except Exception as retry_error:
             logger.error(f"Background index optimization retry failed: {retry_error}")
     except Exception as e:
@@ -266,7 +265,7 @@ def initialize_logging() -> Tuple[float, logging.Logger]:
     """Initialize startup logging and timing."""
     start_time = time.time()
     logger = central_logger.get_logger(__name__)
-    logger.info("Application startup...")
+    logger.info("Starting Netra Backend...")
     return start_time, logger
 
 
@@ -274,7 +273,7 @@ def setup_multiprocessing_env(logger: logging.Logger) -> None:
     """Setup multiprocessing environment."""
     setup_multiprocessing()
     if 'pytest' in sys.modules:
-        logger.info("pytest detected in sys.modules")
+        logger.debug("pytest detected in sys.modules")
 
 
 def validate_database_environment(logger: logging.Logger) -> None:
@@ -306,13 +305,13 @@ def run_database_migrations(logger: logging.Logger) -> None:
     is_mock_database = _is_mock_database_url(database_url) or _is_postgres_service_mock_mode()
     
     if is_mock_database:
-        logger.info("Skipping database migrations (PostgreSQL in mock mode)")
+        logger.debug("Skipping database migrations (PostgreSQL in mock mode)")
         return
     
     if 'pytest' not in sys.modules and not fast_startup and not skip_migrations:
         _execute_migrations(logger)
     elif fast_startup or skip_migrations:
-        logger.info("Skipping database migrations (fast startup mode)")
+        logger.debug("Skipping database migrations (fast startup mode)")
 
 
 def _is_mock_database_url(database_url: str) -> bool:
@@ -369,7 +368,7 @@ def _execute_migrations(logger: logging.Logger) -> None:
 
 def _check_and_run_migrations(logger: logging.Logger) -> None:
     """Check and run migrations if needed."""
-    logger.info("Checking database migrations...")
+    logger.debug("Checking database migrations...")
     if not validate_database_url(settings.database_url, logger):
         return
     sync_url = get_sync_database_url(settings.database_url)
@@ -379,7 +378,7 @@ def _check_and_run_migrations(logger: logging.Logger) -> None:
 def _perform_migration(logger: logging.Logger, sync_url: str) -> None:
     """Perform the actual migration."""
     current = get_current_revision(sync_url)
-    logger.info(f"Current revision: {current}")
+    logger.debug(f"Current revision: {current}")
     cfg = create_alembic_config(sync_url)
     head = get_head_revision(cfg)
     _execute_if_needed(logger, current, head)
@@ -396,7 +395,7 @@ def _execute_if_needed(logger: logging.Logger, current: Optional[str], head: Opt
             error_msg = str(e)
             if any(keyword in error_msg.lower() for keyword in ['already exists', 'duplicatetable', 'relation']):
                 logger.warning(f"Tables already exist during migration: {e}")
-                logger.info("Attempting to stamp database to current head revision...")
+                logger.debug("Attempting to stamp database to current head revision...")
                 
                 # Try to stamp the database to the current head
                 try:
@@ -407,7 +406,7 @@ def _execute_if_needed(logger: logging.Logger, current: Optional[str], head: Opt
                     alembic_ini_path = Path(__file__).parent.parent.parent.parent / "config" / "alembic.ini"
                     
                     alembic.config.main(argv=["-c", str(alembic_ini_path), "--raiseerr", "stamp", "head"])
-                    logger.info("Successfully stamped database to current head revision")
+                    logger.debug("Successfully stamped database to current head revision")
                 except Exception as stamp_error:
                     logger.error(f"Failed to stamp database: {stamp_error}")
                     if should_continue_on_error(settings.environment):
@@ -445,7 +444,7 @@ async def _async_initialize_postgres(logger: logging.Logger):
 async def setup_database_connections(app: FastAPI) -> None:
     """Setup PostgreSQL connection factory (critical service) with timeout protection."""
     logger = central_logger.get_logger(__name__)
-    logger.info("Setting up database connections...")
+    logger.debug("Setting up database connections...")
     config = get_config()
     graceful_startup = getattr(config, 'graceful_startup_mode', 'true').lower() == "true"
     
@@ -454,7 +453,7 @@ async def setup_database_connections(app: FastAPI) -> None:
     is_mock_database = _is_mock_database_url(database_url) or _is_postgres_service_mock_mode()
     
     if is_mock_database:
-        logger.info("PostgreSQL in mock mode - using mock session factory")
+        logger.debug("PostgreSQL in mock mode - using mock session factory")
         app.state.db_session_factory = None  # Signal to use mock/fallback
         app.state.database_available = False
         app.state.database_mock_mode = True
@@ -489,7 +488,7 @@ async def setup_database_connections(app: FastAPI) -> None:
             
         app.state.db_session_factory = async_session_factory
         app.state.database_available = True
-        logger.info("Database session factory successfully set on app.state")
+        logger.debug("Database session factory successfully set on app.state")
         
         # Verify it's accessible
         if hasattr(app.state, 'db_session_factory') and app.state.db_session_factory is not None:
@@ -524,9 +523,9 @@ def initialize_core_services(app: FastAPI, logger: logging.Logger) -> KeyManager
     """Initialize core application services."""
     app.state.redis_manager = redis_manager
     app.state.background_task_manager = BackgroundTaskManager()
-    logger.info("Loading key manager...")
+    logger.debug("Loading key manager...")
     key_manager = KeyManager.load_from_settings(settings)
-    logger.info("Key manager loaded.")
+    logger.debug("Key manager loaded.")
     return key_manager
 
 
@@ -559,10 +558,10 @@ async def initialize_clickhouse(logger: logging.Logger) -> None:
     
     # CRITICAL FIX: Make ClickHouse optional in development when not explicitly required
     if config.environment == "development" and not clickhouse_required:
-        logger.info(f"ClickHouse not required in {config.environment} environment - skipping initialization")
+        logger.debug(f"ClickHouse not required in {config.environment} environment - skipping initialization")
         return
     elif config.environment == "staging":
-        logger.info(f"ClickHouse initialization required in {config.environment} environment")
+        logger.debug(f"ClickHouse initialization required in {config.environment} environment")
         # Proceed with real connection for staging
     
     if 'pytest' not in sys.modules and clickhouse_mode not in ['disabled', 'mock']:
@@ -634,7 +633,7 @@ async def _setup_clickhouse_tables(logger: logging.Logger, mode: str) -> None:
             timeout=init_timeout
         )
         
-        logger.info("ClickHouse tables initialization complete")
+        logger.debug("ClickHouse tables initialization complete")
         
     except asyncio.TimeoutError as e:
         logger.error(f"ClickHouse table initialization timed out after {init_timeout}s")
@@ -646,15 +645,15 @@ async def _setup_clickhouse_tables(logger: logging.Logger, mode: str) -> None:
 
 def _log_clickhouse_start(logger: logging.Logger, mode: str) -> None:
     """Log ClickHouse initialization start."""
-    logger.info(f"Initializing ClickHouse tables (mode: {mode})...")
+    logger.debug(f"Initializing ClickHouse tables (mode: {mode})...")
 
 
 def _log_clickhouse_skip(logger: logging.Logger, mode: str) -> None:
     """Log ClickHouse initialization skip."""
     if mode == 'disabled':
-        logger.info("Skipping ClickHouse initialization (mode: disabled)")
+        logger.debug("Skipping ClickHouse initialization (mode: disabled)")
     elif mode == 'mock':
-        logger.info("Skipping ClickHouse initialization (mode: mock)")
+        logger.debug("Skipping ClickHouse initialization (mode: mock)")
 
 
 def register_websocket_handlers(app: FastAPI) -> None:
@@ -684,7 +683,7 @@ def _create_agent_supervisor(app: FastAPI) -> None:
     environment = get_env().get("ENVIRONMENT", "development").lower()
     
     try:
-        logger.info(f"Creating agent supervisor for {environment} environment...")
+        logger.debug(f"Creating agent supervisor for {environment} environment...")
         supervisor = _build_supervisor_agent(app)
         
         # Verify supervisor was created properly
@@ -712,8 +711,8 @@ def _create_agent_supervisor(app: FastAPI) -> None:
         if not hasattr(app.state, 'thread_service') or app.state.thread_service is None:
             raise RuntimeError("Thread service not set on app.state after setup")
         
-        logger.info(f"✅ Agent supervisor created successfully for {environment}")
-        logger.info(f"✅ WebSocket enhancement status: {getattr(supervisor.registry.tool_dispatcher, '_websocket_enhanced', False) if hasattr(supervisor, 'registry') else 'N/A'}")
+        logger.debug(f"Agent supervisor created successfully for {environment}")
+        logger.debug(f"WebSocket enhancement status: {getattr(supervisor.registry.tool_dispatcher, '_websocket_enhanced', False) if hasattr(supervisor, 'registry') else 'N/A'}")
         
     except Exception as e:
         error_msg = f"Failed to create agent supervisor in {environment}: {e}"
@@ -742,9 +741,9 @@ def _build_supervisor_agent(app: FastAPI):
     logger = central_logger.get_logger(__name__)
     
     # Log current app.state attributes for debugging
-    logger.info("Checking supervisor dependencies in app.state...")
+    logger.debug("Checking supervisor dependencies in app.state...")
     app_state_attrs = [attr for attr in dir(app.state) if not attr.startswith('_')]
-    logger.info(f"Current app.state attributes: {app_state_attrs}")
+    logger.debug(f"Current app.state attributes: {app_state_attrs}")
     
     # Check required dependencies
     required_attrs = ['db_session_factory', 'llm_manager', 'tool_dispatcher']
@@ -756,7 +755,7 @@ def _build_supervisor_agent(app: FastAPI):
         for attr in required_attrs:
             if hasattr(app.state, attr):
                 value = getattr(app.state, attr)
-                logger.info(f"  {attr}: {value is not None} (type: {type(value).__name__})")
+                logger.debug(f"  {attr}: {value is not None} (type: {type(value).__name__})")
             else:
                 logger.error(f"  {attr}: NOT SET")
         raise RuntimeError(f"Cannot create supervisor - missing dependencies: {missing}")
@@ -800,7 +799,7 @@ async def initialize_websocket_components(logger: logging.Logger) -> None:
         if hasattr(manager, 'initialize'):
             await manager.initialize()
         
-        logger.info("WebSocket components initialized")
+        logger.debug("WebSocket components initialized")
     except Exception as e:
         if graceful_startup:
             logger.warning(f"WebSocket components initialization failed but continuing (optional service): {e}")
@@ -817,10 +816,10 @@ async def startup_health_checks(app: FastAPI, logger: logging.Logger) -> None:
     graceful_startup = getattr(config, 'graceful_startup_mode', 'true').lower() == "true"
     
     if disable_checks or fast_startup:
-        logger.info("Skipping startup health checks (fast startup mode)")
+        logger.debug("Skipping startup health checks (fast startup mode)")
         return
     
-    logger.info("Starting comprehensive startup health checks...")
+    logger.debug("Starting comprehensive startup health checks...")
     from netra_backend.app.startup_checks import run_startup_checks
     try:
         logger.debug("Calling run_startup_checks() with 20s timeout...")
@@ -831,7 +830,7 @@ async def startup_health_checks(app: FastAPI, logger: logging.Logger) -> None:
         )
         passed = results.get('passed', 0)
         total = results.get('total_checks', 0)
-        logger.info(f"Startup checks completed: {passed}/{total} passed")
+        logger.debug(f"Startup checks completed: {passed}/{total} passed")
         
         # In graceful mode, continue even if some non-critical checks fail
         if graceful_startup and passed < total:
@@ -861,7 +860,7 @@ async def startup_health_checks(app: FastAPI, logger: logging.Logger) -> None:
 async def _handle_startup_failure(logger: logging.Logger, error: Exception) -> None:
     """Handle startup check failures."""
     logger.critical(f"CRITICAL: Startup checks failed: {error}")
-    logger.info("Application shutting down due to startup failure.")
+    logger.error("Application shutting down due to startup failure.")
     await _emergency_cleanup(logger)
     raise RuntimeError(f"Application startup failed: {error}")
 
@@ -932,12 +931,12 @@ async def _create_monitoring_task(app: FastAPI, logger: logging.Logger) -> None:
     
     # Check if monitoring is disabled for testing
     if get_env().get("DISABLE_MONITORING", "false").lower() == "true":
-        logger.info("Monitoring disabled for testing environment")
+        logger.debug("Monitoring disabled for testing environment")
         return
     
     await _start_connection_monitoring(app)
     await _start_performance_monitoring(app)
-    logger.info("Comprehensive monitoring started")
+    logger.debug("Comprehensive monitoring started")
 
 
 async def _start_connection_monitoring(app: FastAPI) -> None:
@@ -958,11 +957,11 @@ async def _start_performance_monitoring(app: FastAPI) -> None:
 def log_startup_complete(start_time: float, logger: logging.Logger) -> None:
     """Log startup completion with timing."""
     elapsed_time = time.time() - start_time
-    logger.info(f"System Ready (Took {elapsed_time:.2f}s).")
+    logger.info(f"✓ Netra Backend Ready ({elapsed_time:.2f}s)")
 
 
-async def _run_startup_phase_one(app: FastAPI) -> Tuple[float, logging.Logger]:
-    """Run initial startup phase."""
+async def _deprecated_run_startup_phase_one(app: FastAPI) -> Tuple[float, logging.Logger]:
+    """DEPRECATED - Run initial startup phase."""
     start_time, logger = initialize_logging()
     setup_multiprocessing_env(logger)
     validate_database_environment(logger)
@@ -970,38 +969,38 @@ async def _run_startup_phase_one(app: FastAPI) -> Tuple[float, logging.Logger]:
     return start_time, logger
 
 
-async def _run_startup_phase_two(app: FastAPI, logger: logging.Logger) -> None:
-    """Run service initialization phase."""
-    logger.info("Starting Phase 2: Service initialization")
+async def _deprecated_run_startup_phase_two(app: FastAPI, logger: logging.Logger) -> None:
+    """DEPRECATED - Run service initialization phase."""
+    logger.debug("Starting Phase 2: Service initialization")
     
     try:
-        logger.info("Setting up database connections...")
+        logger.debug("Setting up database connections...")
         await setup_database_connections(app)  # Move database setup first
-        logger.info("Database connections established successfully")
+        logger.debug("Database connections established successfully")
     except Exception as e:
         logger.error(f"Failed to setup database connections: {e}", exc_info=True)
         raise
     
     try:
-        logger.info("Initializing core services...")
+        logger.debug("Initializing core services...")
         key_manager = initialize_core_services(app, logger)
-        logger.info("Core services initialized successfully")
+        logger.debug("Core services initialized successfully")
     except Exception as e:
         logger.error(f"Failed to initialize core services: {e}", exc_info=True)
         raise
     
     try:
-        logger.info("Setting up security services and LLM manager...")
+        logger.debug("Setting up security services and LLM manager...")
         setup_security_services(app, key_manager)
-        logger.info(f"Security services initialized - LLM manager: {app.state.llm_manager is not None}")
+        logger.debug(f"Security services initialized - LLM manager: {app.state.llm_manager is not None}")
     except Exception as e:
         logger.error(f"Failed to setup security services: {e}", exc_info=True)
         raise
     
     try:
-        logger.info("Initializing ClickHouse...")
+        logger.debug("Initializing ClickHouse...")
         await initialize_clickhouse(logger)
-        logger.info("ClickHouse initialization completed")
+        logger.debug("ClickHouse initialization completed")
     except Exception as e:
         logger.error(f"Failed to initialize ClickHouse: {e}", exc_info=True)
         # ClickHouse failures are non-critical in some environments
@@ -1013,30 +1012,30 @@ async def _run_startup_phase_two(app: FastAPI, logger: logging.Logger) -> None:
             raise
     
     # FIX: Initialize background task manager to prevent 4-minute crash
-    logger.info("Initializing background task manager with 2-minute timeout...")
+    logger.debug("Initializing background task manager...")
     app.state.background_task_manager = background_task_manager
-    logger.info("Background task manager initialized successfully")
+    logger.debug("Background task manager initialized")
     
     # FIX: Apply all startup fixes for critical cold start issues
-    logger.info("Applying startup fixes for critical cold start issues...")
+    logger.debug("Applying startup fixes...")
     try:
         fix_results = await startup_fixes.run_comprehensive_verification()
         applied_fixes = fix_results.get('total_fixes', 0)
-        logger.info(f"Startup fixes applied: {applied_fixes}/5 fixes")
+        logger.debug(f"Startup fixes applied: {applied_fixes}/5 fixes")
         
         if applied_fixes < 5:
             logger.warning("Some startup fixes could not be applied - check system configuration")
-            logger.info(startup_fixes.get_fix_status_summary())
+            logger.debug(startup_fixes.get_fix_status_summary())
         else:
-            logger.info("All critical startup fixes successfully applied")
+            logger.debug("All critical startup fixes successfully applied")
             
     except Exception as e:
         logger.error(f"Error applying startup fixes: {e}")
         logger.warning("Continuing startup despite fix application errors")
 
 
-async def _run_startup_phase_three(app: FastAPI, logger: logging.Logger) -> None:
-    """Run validation and setup phase."""
+async def _deprecated_run_startup_phase_three(app: FastAPI, logger: logging.Logger) -> None:
+    """DEPRECATED - Run validation and setup phase."""
     await startup_health_checks(app, logger)
     await validate_schema(logger)
     register_websocket_handlers(app)
@@ -1046,17 +1045,22 @@ async def _run_startup_phase_three(app: FastAPI, logger: logging.Logger) -> None
 
 
 async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
-    """Run complete startup sequence - DETERMINISTIC MODE."""
-    # Check if deterministic mode is enabled (default: YES)
-    config = get_config()
-    use_deterministic = getattr(config, 'deterministic_startup', 'true').lower() == 'true'
+    """Run complete startup sequence - DETERMINISTIC MODE ONLY.
     
-    if use_deterministic:
-        # Use the new deterministic startup - NO FALLBACKS, NO GRACEFUL DEGRADATION
-        from netra_backend.app.startup_module_deterministic import run_deterministic_startup
-        return await run_deterministic_startup(app)
-    
-    # Legacy startup (deprecated - will be removed)
+    This is the SSOT for startup. NO FALLBACKS, NO GRACEFUL DEGRADATION.
+    If chat cannot work, the service MUST NOT start.
+    """
+    # ALWAYS use deterministic startup - this is the SSOT
+    from netra_backend.app.startup_module_deterministic import run_deterministic_startup
+    return await run_deterministic_startup(app)
+
+
+# LEGACY CODE BELOW - DEPRECATED AND WILL BE REMOVED
+# Only kept temporarily for reference during transition
+# DO NOT USE - ALWAYS USE run_complete_startup() ABOVE
+
+async def _deprecated_legacy_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
+    """DEPRECATED - Legacy startup code. DO NOT USE."""
     # Initialize logger FIRST - before any logic to ensure it's always available in all scopes
     logger = None
     try:
@@ -1071,9 +1075,9 @@ async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
     # This ensures test flags never leak into production/staging
     try:
         from netra_backend.app.core.environment_validator import validate_environment_at_startup
-        logger.info("Validating environment configuration for security...")
+        logger.debug("Validating environment configuration...")
         validate_environment_at_startup()
-        logger.info("Environment validation passed")
+        logger.debug("Environment validation passed")
     except EnvironmentError as e:
         # Critical environment violation - fail fast
         logger.critical(f"Environment validation failed: {e}")
@@ -1093,7 +1097,7 @@ async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
     
     if use_robust_startup:
         # Use the new robust startup system with dependency resolution
-        logger.info("Using robust startup manager with dependency resolution...")
+        logger.debug("Using robust startup manager with dependency resolution...")
         
         try:
             # Set startup in progress flags at the beginning
@@ -1103,31 +1107,19 @@ async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
             app.state.startup_failed = False
             app.state.startup_error = None
             app.state.startup_start_time = start_time
-            logger.info("Startup in progress flags set - health endpoint will report startup in progress")
+            logger.debug("Startup in progress flags set")
             
-            # Initialize the startup manager and run the startup sequence
-            success = await startup_manager.initialize_system(app)
-            
-            if not success:
-                logger.error("Startup manager reported initialization failure")
-                # Set startup failure flags
-                app.state.startup_complete = False
-                app.state.startup_in_progress = False
-                app.state.startup_failed = True
-                app.state.startup_error = "Robust startup manager initialization failed"
-                # Fall back to legacy startup if robust startup fails
-                logger.warning("Falling back to legacy startup sequence...")
-                return await _run_legacy_startup(app)
-            
-            # Store the startup manager in app state for health monitoring
-            app.state.startup_manager = startup_manager
+            # DEPRECATED - Robust startup manager removed - use deterministic only
+            logger.error("Robust startup manager has been removed - using deterministic startup")
+            from netra_backend.app.startup_module_deterministic import run_deterministic_startup
+            return await run_deterministic_startup(app)
             
             # CRITICAL: Set startup_complete flag for health endpoint
             app.state.startup_complete = True
             app.state.startup_in_progress = False
             app.state.startup_failed = False
             app.state.startup_error = None
-            logger.info("Startup completion flags set - health endpoint will report healthy")
+            logger.debug("Startup completion flags set")
             
             log_startup_complete(start_time, logger)
             return start_time, logger
@@ -1159,11 +1151,11 @@ async def _run_legacy_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
         app.state.startup_failed = False
         app.state.startup_error = None
         app.state.startup_start_time = start_time
-        logger.info("Legacy startup in progress flags set")
+        logger.debug("Legacy startup in progress flags set")
     
     try:
         await _run_startup_phase_two(app, logger)
-        logger.info("Phase 2 completed successfully - core services initialized")
+        logger.debug("Phase 2 completed - core services initialized")
     except Exception as e:
         error_msg = f"Phase 2 (service initialization) failed: {e}"
         logger.error(error_msg, exc_info=True)
@@ -1190,7 +1182,7 @@ async def _run_legacy_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
     
     try:
         await _run_startup_phase_three(app, logger)
-        logger.info("Phase 3 completed successfully - agent supervisor initialized")
+        logger.debug("Phase 3 completed - agent supervisor initialized")
     except Exception as e:
         error_msg = f"Phase 3 (agent supervisor) failed: {e}"
         logger.error(error_msg, exc_info=True)
@@ -1220,7 +1212,7 @@ async def _run_legacy_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
     app.state.startup_in_progress = False
     app.state.startup_failed = False
     app.state.startup_error = None
-    logger.info("Legacy startup completion flags set - health endpoint will report healthy")
+    logger.debug("Legacy startup completion flags set")
     
     log_startup_complete(start_time, logger)
     return start_time, logger

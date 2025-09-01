@@ -20,11 +20,11 @@ def test_imports():
         from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
         print("OK WebSocketNotifier import successful")
         
-        from netra_backend.app.agents.enhanced_tool_execution import (
-            EnhancedToolExecutionEngine,
+        from netra_backend.app.agents.unified_tool_execution import (
+            UnifiedToolExecutionEngine,
             enhance_tool_dispatcher_with_notifications
         )
-        print("OK EnhancedToolExecutionEngine import successful")
+        print("OK UnifiedToolExecutionEngine import successful")
         
         from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
         print("OK AgentRegistry import successful")
@@ -85,8 +85,8 @@ def test_tool_dispatcher_enhancement():
     """Test that tool dispatcher enhancement works."""
     try:
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-        from netra_backend.app.agents.enhanced_tool_execution import (
-            EnhancedToolExecutionEngine,
+        from netra_backend.app.agents.unified_tool_execution import (
+            UnifiedToolExecutionEngine,
             enhance_tool_dispatcher_with_notifications
         )
         from netra_backend.app.websocket_core.manager import WebSocketManager
@@ -109,8 +109,8 @@ def test_tool_dispatcher_enhancement():
             print("FAIL Executor was not replaced during enhancement")
             return False
         
-        if not isinstance(dispatcher.executor, EnhancedToolExecutionEngine):
-            print(f"FAIL Executor is not EnhancedToolExecutionEngine: {type(dispatcher.executor)}")
+        if not isinstance(dispatcher.executor, UnifiedToolExecutionEngine):
+            print(f"FAIL Executor is not UnifiedToolExecutionEngine: {type(dispatcher.executor)}")
             return False
         
         if not hasattr(dispatcher, '_websocket_enhanced') or not dispatcher._websocket_enhanced:
@@ -130,7 +130,7 @@ def test_agent_registry_integration():
     try:
         from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-        from netra_backend.app.agents.enhanced_tool_execution import EnhancedToolExecutionEngine
+        from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
         from netra_backend.app.websocket_core.manager import WebSocketManager
         
         class MockLLM:
@@ -144,7 +144,7 @@ def test_agent_registry_integration():
         registry.set_websocket_manager(ws_manager)
         
         # Check enhancement
-        if not isinstance(tool_dispatcher.executor, EnhancedToolExecutionEngine):
+        if not isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine):
             print(f"FAIL AgentRegistry did not enhance tool dispatcher: {type(tool_dispatcher.executor)}")
             return False
         
@@ -156,10 +156,10 @@ def test_agent_registry_integration():
         traceback.print_exc()
         return False
 
-async def test_enhanced_tool_execution():
-    """Test EnhancedToolExecutionEngine without real WebSocket connections."""
+async def test_unified_tool_execution():
+    """Test UnifiedToolExecutionEngine without real WebSocket connections."""
     try:
-        from netra_backend.app.agents.enhanced_tool_execution import EnhancedToolExecutionEngine
+        from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
         from netra_backend.app.websocket_core.manager import WebSocketManager
         from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
         from netra_backend.app.agents.state import DeepAgentState
@@ -169,7 +169,7 @@ async def test_enhanced_tool_execution():
         # Mock to avoid real WebSocket calls
         ws_manager.send_to_thread = AsyncMock(return_value=True)
         
-        enhanced_executor = EnhancedToolExecutionEngine(ws_manager)
+        enhanced_executor = UnifiedToolExecutionEngine(ws_manager)
         
         # Create test context
         context = AgentExecutionContext(
@@ -223,10 +223,10 @@ async def test_enhanced_tool_execution():
             print(f"FAIL Expected at least 2 WebSocket calls, got {ws_manager.send_to_thread.call_count}")
             return False
         
-        print("OK EnhancedToolExecutionEngine works with mocked WebSocket")
+        print("OK UnifiedToolExecutionEngine works with mocked WebSocket")
         return True
     except Exception as e:
-        print(f"FAIL EnhancedToolExecutionEngine test failed: {e}")
+        print(f"FAIL UnifiedToolExecutionEngine test failed: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -241,7 +241,7 @@ def main():
         ("WebSocket Notifier Methods", test_websocket_notifier_methods),
         ("Tool Dispatcher Enhancement", test_tool_dispatcher_enhancement),
         ("Agent Registry Integration", test_agent_registry_integration),
-        ("Enhanced Tool Execution", lambda: asyncio.run(test_enhanced_tool_execution())),
+        ("Enhanced Tool Execution", lambda: asyncio.run(test_unified_tool_execution())),
     ]
     
     passed = 0

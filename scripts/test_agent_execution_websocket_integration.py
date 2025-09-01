@@ -29,7 +29,7 @@ from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNoti
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.agents.enhanced_tool_execution import EnhancedToolExecutionEngine
+from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 
 # Try to import agent registry and real agents
 try:
@@ -328,7 +328,7 @@ async def test_agent_execution_with_websocket_events():
     return True
 
 
-async def test_enhanced_tool_execution_integration():
+async def test_unified_tool_execution_integration():
     """Test enhanced tool execution with WebSocket integration."""
     
     print("\n" + "=" * 70)
@@ -344,7 +344,7 @@ async def test_enhanced_tool_execution_integration():
     await ws_manager.connect_user(user_id, mock_websocket, thread_id)
     
     # Create enhanced tool executor
-    enhanced_executor = EnhancedToolExecutionEngine(ws_manager)
+    enhanced_executor = UnifiedToolExecutionEngine(ws_manager)
     
     # Create state
     state = DeepAgentState(
@@ -412,7 +412,7 @@ async def main():
         await test_agent_execution_with_websocket_events()
         
         # Test 2: Enhanced tool execution integration
-        await test_enhanced_tool_execution_integration()
+        await test_unified_tool_execution_integration()
         
         print("\n" + "=" * 70)
         print("ALL INTEGRATION TESTS PASSED!")

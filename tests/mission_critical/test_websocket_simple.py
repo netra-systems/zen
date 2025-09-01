@@ -31,7 +31,7 @@ if project_root not in sys.path:
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-from netra_backend.app.agents.enhanced_tool_execution import EnhancedToolExecutionEngine
+from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 from netra_backend.app.agents.state import DeepAgentState
 
 # Import pytest AFTER other imports to avoid fixture injection
@@ -92,7 +92,10 @@ class MockWebSocket:
         self.messages: List[Dict] = []
         self.connected = True
         self.validator = SimpleWebSocketEventValidator()
-        self.application_state = 1  # Mock WebSocketState.CONNECTED
+        # CRITICAL FIX: Set client_state as property, not method
+        from fastapi.websockets import WebSocketState
+        self.client_state = WebSocketState.CONNECTED  # Must be attribute, not method
+        self.application_state = WebSocketState.CONNECTED
         
     async def send_text(self, data: str) -> bool:
         """Mock send_text method - returns success status."""
@@ -115,18 +118,18 @@ class MockWebSocket:
             return True
         return False
         
-    def client_state(self):
-        """Mock client state method."""
-        return 1 if self.connected else 0  # Connected state
-        
     @property 
     def state(self):
         """Mock state property."""
-        return 1 if self.connected else 0
+        from fastapi.websockets import WebSocketState
+        return WebSocketState.CONNECTED if self.connected else WebSocketState.DISCONNECTED
             
     def disconnect(self):
         """Mock disconnect."""
         self.connected = False
+        from fastapi.websockets import WebSocketState
+        self.client_state = WebSocketState.DISCONNECTED
+        self.application_state = WebSocketState.DISCONNECTED
 
 
 class SimpleTestTool:
@@ -207,7 +210,7 @@ async def test_basic_websocket_events_flow():
 
 
 @pytest.mark.asyncio
-async def test_enhanced_tool_execution_events():
+async def test_unified_tool_execution_events():
     """Test that enhanced tool execution sends proper WebSocket events."""
     
     ws_manager = WebSocketManager()
@@ -219,7 +222,7 @@ async def test_enhanced_tool_execution_events():
     await ws_manager.connect_user(user_id, mock_websocket, thread_id)
     
     # Create enhanced tool executor
-    enhanced_executor = EnhancedToolExecutionEngine(ws_manager)
+    enhanced_executor = UnifiedToolExecutionEngine(ws_manager)
     
     # Create state for tool execution
     state = DeepAgentState(

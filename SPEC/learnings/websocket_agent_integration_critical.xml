@@ -38,7 +38,7 @@ def set_websocket_manager(self, manager: 'WebSocketManager') -> None:
     # CRITICAL: Enhance tool dispatcher with WebSocket notifications
     # This enables real-time tool execution events
     if self.tool_dispatcher and manager:
-        from netra_backend.app.agents.enhanced_tool_execution import (
+        from netra_backend.app.agents.unified_tool_execution import (
             enhance_tool_dispatcher_with_notifications
         )
         logger.info("Enhancing tool dispatcher with WebSocket notifications")
@@ -50,7 +50,7 @@ def set_websocket_manager(self, manager: 'WebSocketManager') -> None:
       ]]></code>
     </critical_fix>
 
-    <enhancement file="netra_backend/app/agents/enhanced_tool_execution.py">
+    <enhancement file="netra_backend/app/agents/unified_tool_execution.py">
       <description>
         Improved enhancement function to properly mark enhanced dispatchers and check for
         prior enhancement to avoid double-wrapping.
@@ -102,13 +102,13 @@ def set_websocket_manager(self, manager: 'WebSocketManager') -> None:
       - WebSocketNotifier: Event sending abstraction
       - ExecutionEngine: Orchestrates agent execution with notifications
       - AgentRegistry: Manages agents and enhances tool dispatcher
-      - EnhancedToolExecutionEngine: Wraps tool execution with events
+      - UnifiedToolExecutionEngine: Wraps tool execution with events
     </key_components>
   </architectural_notes>
 
   <validation_checklist>
     <item>Tool dispatcher has _websocket_enhanced flag after enhancement</item>
-    <item>Tool dispatcher executor is instance of EnhancedToolExecutionEngine</item>
+    <item>Tool dispatcher executor is instance of UnifiedToolExecutionEngine</item>
     <item>WebSocket notifier has all 7 required event methods</item>
     <item>Execution engine has websocket_notifier initialized</item>
     <item>Agent registry enhances tool dispatcher on set_websocket_manager</item>
