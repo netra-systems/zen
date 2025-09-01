@@ -482,75 +482,78 @@ class CriticalPathValidator:
             )
     
     async def _validate_notifier_initialization(self, app) -> None:
-        """Validate WebSocketNotifier is properly initialized."""
+        """Validate AgentWebSocketBridge is properly initialized (replaces WebSocketNotifier)."""
         try:
-            # Check multiple possible locations for WebSocketNotifier
-            notifier_found = False
-            notifier_locations = []
+            # Check for AgentWebSocketBridge which is the new SSOT for WebSocket notifications
+            bridge_found = False
+            bridge_locations = []
             
-            # Check in supervisor
-            if hasattr(app.state, 'agent_supervisor') and app.state.agent_supervisor:
-                supervisor = app.state.agent_supervisor
+            # Check in app.state for AgentWebSocketBridge
+            if hasattr(app.state, 'agent_websocket_bridge') and app.state.agent_websocket_bridge:
+                bridge_found = True
+                bridge_locations.append("app.state.agent_websocket_bridge")
                 
-                # PRIORITIZE newer ExecutionEngine instance (has WebSocket notifier)
-                if hasattr(supervisor, 'engine'):
-                    if hasattr(supervisor.engine, 'websocket_notifier'):
-                        if supervisor.engine.websocket_notifier is not None:
-                            notifier_found = True
-                            notifier_locations.append("engine")
+                # Validate it has the required notification methods
+                bridge = app.state.agent_websocket_bridge
+                required_methods = ['notify_agent_started', 'notify_agent_completed', 'notify_tool_executing']
+                missing_methods = [m for m in required_methods if not hasattr(bridge, m)]
                 
-                # Check execution engine (older BaseExecutionEngine, usually without WebSocket notifier)
-                if hasattr(supervisor, 'execution_engine'):
-                    if hasattr(supervisor.execution_engine, 'websocket_notifier'):
-                        if supervisor.execution_engine.websocket_notifier is not None:
-                            notifier_found = True
-                            if "engine" not in notifier_locations:  # Avoid duplicates
-                                notifier_locations.append("execution_engine")
-                
-                # Check agent manager
-                if hasattr(supervisor, 'agent_manager'):
-                    if hasattr(supervisor.agent_manager, 'websocket_notifier'):
-                        if supervisor.agent_manager.websocket_notifier is not None:
-                            notifier_found = True
-                            notifier_locations.append("agent_manager")
-                
-                # Check agent execution core
-                if hasattr(supervisor, 'agent_execution_core'):
-                    if hasattr(supervisor.agent_execution_core, 'websocket_notifier'):
-                        if supervisor.agent_execution_core.websocket_notifier is not None:
-                            notifier_found = True
-                            notifier_locations.append("agent_execution_core")
-            
-            if not notifier_found:
+                if missing_methods:
+                    validation = CriticalPathValidation(
+                        component="AgentWebSocketBridge Initialization",
+                        path="AgentWebSocketBridge",
+                        check_type="initialization",
+                        passed=False,
+                        criticality=CriticalityLevel.CHAT_BREAKING,
+                        failure_reason=f"AgentWebSocketBridge missing required methods: {missing_methods}",
+                        remediation="Ensure AgentWebSocketBridge has all notification methods",
+                        metadata={"missing_methods": missing_methods}
+                    )
+                    self.logger.error(f"❌ CRITICAL: AgentWebSocketBridge incomplete - missing methods: {missing_methods}")
+                else:
+                    # Check if bridge is integrated with supervisor
+                    integrated = False
+                    if hasattr(app.state, 'agent_supervisor') and app.state.agent_supervisor:
+                        supervisor = app.state.agent_supervisor
+                        # Check if supervisor's registry has the bridge
+                        if hasattr(supervisor, 'registry') and hasattr(supervisor.registry, 'websocket_bridge'):
+                            if supervisor.registry.websocket_bridge == bridge:
+                                integrated = True
+                                bridge_locations.append("supervisor.registry.websocket_bridge")
+                    
+                    validation = CriticalPathValidation(
+                        component="AgentWebSocketBridge Initialization",
+                        path="AgentWebSocketBridge",
+                        check_type="initialization",
+                        passed=True,
+                        criticality=CriticalityLevel.CHAT_BREAKING,
+                        metadata={
+                            "found_in": bridge_locations,
+                            "integrated_with_supervisor": integrated,
+                            "has_all_methods": True
+                        }
+                    )
+                    self.logger.info(f"✓ AgentWebSocketBridge properly initialized in: {', '.join(bridge_locations)}")
+            else:
                 validation = CriticalPathValidation(
-                    component="WebSocketNotifier Initialization",
-                    path="WebSocketNotifier",
+                    component="AgentWebSocketBridge Initialization",
+                    path="AgentWebSocketBridge",
                     check_type="initialization",
                     passed=False,
                     criticality=CriticalityLevel.CHAT_BREAKING,
-                    failure_reason="WebSocketNotifier not found in any expected location",
-                    remediation="Ensure WebSocketNotifier is created in ExecutionEngine during supervisor initialization",
-                    metadata={"checked_locations": ["execution_engine", "engine", "agent_manager", "agent_execution_core"]}
+                    failure_reason="AgentWebSocketBridge not found in app.state",
+                    remediation="Ensure AgentWebSocketBridge is created during startup",
+                    metadata={"checked_locations": ["app.state.agent_websocket_bridge"]}
                 )
-                self.logger.error("❌ CRITICAL: WebSocketNotifier not initialized - NO agent events will be sent to UI")
-            else:
-                validation = CriticalPathValidation(
-                    component="WebSocketNotifier Initialization",
-                    path="WebSocketNotifier",
-                    check_type="initialization",
-                    passed=True,
-                    criticality=CriticalityLevel.CHAT_BREAKING,
-                    metadata={"found_in": notifier_locations}
-                )
-                self.logger.info(f"✓ WebSocketNotifier found in: {', '.join(notifier_locations)}")
+                self.logger.error("❌ CRITICAL: AgentWebSocketBridge not initialized - NO agent events will be sent to UI")
             
             self.validations.append(validation)
             
         except Exception as e:
             self._add_critical_failure(
-                "WebSocketNotifier Initialization",
+                "AgentWebSocketBridge Initialization",
                 f"Validation failed: {e}",
-                "Check WebSocketNotifier creation in supervisor"
+                "Check AgentWebSocketBridge creation in startup"
             )
     
     def _add_critical_failure(self, component: str, reason: str, remediation: str) -> None:
