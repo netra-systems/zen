@@ -273,36 +273,23 @@ The following events MUST be sent during agent execution to enable meaningful AI
 
 ## 7\. Project Tooling
 
-### 7.1. Quick Start with Docker
-
-```bash
-# Start Docker services (automatic for most commands)
-python scripts/docker.py start
-
-# Run tests (Docker starts automatically if needed)
-python tests/unified_test_runner.py
-
-# Check if everything is working
-python scripts/docker.py health
-
-# Or use absolute path from anywhere:
-python /Users/anthony/Documents/GitHub/netra-apex/tests/unified_test_runner.py
-```
-
-### 7.2. Docker Management
+### 7.1. Docker
 
 **CRITICAL: All Docker operations go through the central UnifiedDockerManager.**
 **See [`docs/docker_orchestration.md`](docs/docker_orchestration.md) for complete architecture and usage.**
 
 #### Automatic Docker Management (Primary Usage)
 ```bash
-# Tests automatically handle Docker - just run:
+# Tests use UnifiedDockerManager - just run:
 python tests/unified_test_runner.py --real-services
 
 # Docker starts automatically, conflicts are resolved, services are health-checked
 ```
 
 #### Manual Docker Operations (When Needed)
+
+"Refresh" local dev = for the relevant containers, remove the existing, create a new fresh image, deploy it
+
 ```bash
 # Manual control script (uses central UnifiedDockerManager)
 python scripts/docker_manual.py start     # Start test environment

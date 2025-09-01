@@ -169,60 +169,76 @@ class CriticalPathValidator:
             )
     
     async def _validate_agent_registry_chain(self, app) -> None:
-        """Validate agent registry has set_websocket_manager method."""
+        """Validate agent registry has set_websocket_bridge method."""
         try:
             if hasattr(app.state, 'agent_supervisor') and app.state.agent_supervisor:
                 if hasattr(app.state.agent_supervisor, 'registry'):
                     registry = app.state.agent_supervisor.registry
                     
-                    # Check if registry has the critical method
-                    has_setter = hasattr(registry, 'set_websocket_manager')
+                    # Check if registry has the critical method (now set_websocket_bridge)
+                    has_setter = hasattr(registry, 'set_websocket_bridge')
                     
                     if not has_setter:
                         validation = CriticalPathValidation(
                             component="Agent Registry WebSocket Integration",
-                            path="AgentRegistry.set_websocket_manager()",
+                            path="AgentRegistry.set_websocket_bridge()",
                             check_type="method_existence",
                             passed=False,
                             criticality=CriticalityLevel.CHAT_BREAKING,
-                            failure_reason="Registry missing set_websocket_manager method",
-                            remediation="Add set_websocket_manager method to AgentRegistry class"
+                            failure_reason="Registry missing set_websocket_bridge method",
+                            remediation="Add set_websocket_bridge method to AgentRegistry class"
                         )
-                        self.logger.error("❌ CRITICAL: AgentRegistry missing set_websocket_manager method")
+                        self.logger.error("❌ CRITICAL: AgentRegistry missing set_websocket_bridge method")
                     else:
-                        # Check if it was actually called (tool_dispatcher should be enhanced)
-                        if hasattr(registry, 'tool_dispatcher'):
-                            enhanced = getattr(registry.tool_dispatcher, '_websocket_enhanced', False)
-                            if not enhanced:
-                                validation = CriticalPathValidation(
-                                    component="Agent Registry WebSocket Integration",
-                                    path="AgentRegistry.set_websocket_manager() -> tool_dispatcher enhancement",
-                                    check_type="enhancement_status",
-                                    passed=False,
-                                    criticality=CriticalityLevel.CHAT_BREAKING,
-                                    failure_reason="set_websocket_manager exists but was not called or failed",
-                                    remediation="Ensure set_websocket_manager is called during startup",
-                                    metadata={"enhanced": enhanced}
-                                )
-                                self.logger.warning("⚠️ set_websocket_manager method exists but enhancement not applied")
+                        # Check if bridge was actually set
+                        if hasattr(registry, 'websocket_bridge') and registry.websocket_bridge is not None:
+                            # Verify tool dispatcher has WebSocket support through bridge
+                            if hasattr(registry, 'tool_dispatcher'):
+                                has_support = False
+                                if hasattr(registry.tool_dispatcher, 'has_websocket_support'):
+                                    has_support = registry.tool_dispatcher.has_websocket_support
+                                
+                                if has_support:
+                                    validation = CriticalPathValidation(
+                                        component="Agent Registry WebSocket Integration",
+                                        path="AgentRegistry.set_websocket_bridge()",
+                                        check_type="bridge_integration",
+                                        passed=True,
+                                        criticality=CriticalityLevel.CHAT_BREAKING,
+                                        metadata={"bridge_set": True, "tool_dispatcher_support": True}
+                                    )
+                                    self.logger.info("✓ Agent registry WebSocket bridge integration verified")
+                                else:
+                                    validation = CriticalPathValidation(
+                                        component="Agent Registry WebSocket Integration",
+                                        path="AgentRegistry.tool_dispatcher.has_websocket_support",
+                                        check_type="enhancement_status",
+                                        passed=False,
+                                        criticality=CriticalityLevel.CHAT_BREAKING,
+                                        failure_reason="Tool dispatcher lacks WebSocket support despite bridge being set",
+                                        remediation="Ensure tool dispatcher is initialized with AgentWebSocketBridge",
+                                        metadata={"has_support": has_support}
+                                    )
+                                    self.logger.warning("⚠️ Tool dispatcher lacks WebSocket support")
                             else:
                                 validation = CriticalPathValidation(
                                     component="Agent Registry WebSocket Integration",
-                                    path="AgentRegistry.set_websocket_manager()",
-                                    check_type="method_existence",
+                                    path="AgentRegistry.websocket_bridge",
+                                    check_type="bridge_integration",
                                     passed=True,
-                                    criticality=CriticalityLevel.CHAT_BREAKING
+                                    criticality=CriticalityLevel.CHAT_BREAKING,
+                                    metadata={"bridge_set": True}
                                 )
-                                self.logger.info("✓ Agent registry WebSocket integration verified")
+                                self.logger.info("✓ Agent registry has WebSocket bridge set")
                         else:
                             validation = CriticalPathValidation(
                                 component="Agent Registry WebSocket Integration",
-                                path="AgentRegistry.tool_dispatcher",
+                                path="AgentRegistry.websocket_bridge",
                                 check_type="attribute_existence",
                                 passed=False,
                                 criticality=CriticalityLevel.CHAT_BREAKING,
-                                failure_reason="Registry has no tool_dispatcher attribute",
-                                remediation="Ensure registry is initialized with tool_dispatcher"
+                                failure_reason="Registry has set_websocket_bridge but bridge not set",
+                                remediation="Ensure set_websocket_bridge is called during startup"
                             )
                     
                     self.validations.append(validation)
@@ -235,55 +251,57 @@ class CriticalPathValidator:
             )
     
     async def _validate_tool_dispatcher_enhancement(self, app) -> None:
-        """Validate tool dispatcher is enhanced with WebSocket notifications."""
+        """Validate tool dispatcher has WebSocket support through AgentWebSocketBridge."""
         try:
             if hasattr(app.state, 'tool_dispatcher') and app.state.tool_dispatcher:
                 dispatcher = app.state.tool_dispatcher
                 
-                # Check for enhancement flag
-                enhanced = getattr(dispatcher, '_websocket_enhanced', False)
+                # Check for WebSocket support through bridge
+                has_support = False
+                if hasattr(dispatcher, 'has_websocket_support'):
+                    has_support = dispatcher.has_websocket_support
                 
-                # Check for WebSocket manager
-                has_ws_manager = hasattr(dispatcher, '_websocket_manager')
-                ws_manager_not_none = has_ws_manager and dispatcher._websocket_manager is not None
+                # Check for executor with bridge
+                has_executor = hasattr(dispatcher, 'executor')
+                has_bridge = False
+                if has_executor and dispatcher.executor:
+                    has_bridge = hasattr(dispatcher.executor, 'websocket_bridge') and dispatcher.executor.websocket_bridge is not None
                 
-                # Check for notification wrapper
-                has_wrapper = hasattr(dispatcher, '_original_invoke_tool')
-                
-                if not enhanced:
+                if not has_support:
                     failure_details = []
-                    if not has_ws_manager:
-                        failure_details.append("missing _websocket_manager attribute")
-                    elif not ws_manager_not_none:
-                        failure_details.append("_websocket_manager is None")
-                    if not has_wrapper:
-                        failure_details.append("tool invocation not wrapped")
+                    if not has_executor:
+                        failure_details.append("missing executor")
+                    elif not has_bridge:
+                        failure_details.append("executor missing websocket_bridge")
                     
                     validation = CriticalPathValidation(
-                        component="Tool Dispatcher Enhancement",
-                        path="ToolDispatcher._enhance_with_websocket()",
-                        check_type="enhancement",
+                        component="Tool Dispatcher WebSocket Support",
+                        path="ToolDispatcher.has_websocket_support",
+                        check_type="websocket_support",
                         passed=False,
                         criticality=CriticalityLevel.CHAT_BREAKING,
-                        failure_reason=f"Tool dispatcher not enhanced: {', '.join(failure_details)}",
-                        remediation="Call AgentRegistry.set_websocket_manager() during startup",
+                        failure_reason=f"Tool dispatcher lacks WebSocket support: {', '.join(failure_details) if failure_details else 'no bridge configured'}",
+                        remediation="Ensure tool dispatcher is initialized with AgentWebSocketBridge",
                         metadata={
-                            "enhanced": enhanced,
-                            "has_ws_manager": has_ws_manager,
-                            "ws_manager_not_none": ws_manager_not_none,
-                            "has_wrapper": has_wrapper
+                            "has_support": has_support,
+                            "has_executor": has_executor,
+                            "has_bridge": has_bridge
                         }
                     )
-                    self.logger.error(f"❌ CRITICAL: Tool dispatcher not enhanced - tool events won't be sent to UI")
+                    self.logger.error(f"❌ CRITICAL: Tool dispatcher lacks WebSocket support - tool events won't be sent to UI")
                 else:
                     validation = CriticalPathValidation(
-                        component="Tool Dispatcher Enhancement",
-                        path="ToolDispatcher._enhance_with_websocket()",
-                        check_type="enhancement",
+                        component="Tool Dispatcher WebSocket Support",
+                        path="ToolDispatcher.has_websocket_support",
+                        check_type="websocket_support",
                         passed=True,
-                        criticality=CriticalityLevel.CHAT_BREAKING
+                        criticality=CriticalityLevel.CHAT_BREAKING,
+                        metadata={
+                            "has_executor": has_executor,
+                            "has_bridge": has_bridge
+                        }
                     )
-                    self.logger.info("✓ Tool dispatcher properly enhanced with WebSocket")
+                    self.logger.info("✓ Tool dispatcher has WebSocket support through bridge")
                 
                 self.validations.append(validation)
             else:
@@ -404,40 +422,41 @@ class CriticalPathValidator:
             # Check if execution engine exists
             execution_engine_found = False
             context_propagation_possible = False
-            engine_with_notifier = None
+            engine_with_bridge = None
             
             if hasattr(app.state, 'agent_supervisor') and app.state.agent_supervisor:
                 supervisor = app.state.agent_supervisor
                 
-                # CRITICAL FIX: Check all possible execution engines and prioritize the one with WebSocket notifier
-                # Check for newer ExecutionEngine instance first (has WebSocket notifier)
+                # Check for ExecutionEngine with AgentWebSocketBridge
                 if hasattr(supervisor, 'engine'):
                     execution_engine_found = True
                     engine = supervisor.engine
                     
-                    # Check if engine has websocket_notifier
-                    if hasattr(engine, 'websocket_notifier') and engine.websocket_notifier is not None:
+                    # Check if engine has websocket_bridge
+                    if hasattr(engine, 'websocket_bridge') and engine.websocket_bridge is not None:
                         context_propagation_possible = True
-                        engine_with_notifier = 'engine'
+                        engine_with_bridge = 'engine.websocket_bridge'
+                    # Alternative: Check if engine has websocket_notifier (deprecated but might exist)
+                    elif hasattr(engine, 'websocket_notifier') and engine.websocket_notifier is not None:
+                        context_propagation_possible = True
+                        engine_with_bridge = 'engine.websocket_notifier (deprecated)'
                 
-                # Check for execution engine (old BaseExecutionEngine, usually without WebSocket notifier)
+                # Check for BaseExecutionEngine
                 if hasattr(supervisor, 'execution_engine') and not context_propagation_possible:
                     execution_engine_found = True
                     engine = supervisor.execution_engine
                     
-                    # Check if engine has websocket_notifier
-                    if hasattr(engine, 'websocket_notifier') and engine.websocket_notifier is not None:
+                    # BaseExecutionEngine typically doesn't have WebSocket integration directly
+                    # But check anyway
+                    if hasattr(engine, 'websocket_bridge') and engine.websocket_bridge is not None:
                         context_propagation_possible = True
-                        engine_with_notifier = 'execution_engine'
+                        engine_with_bridge = 'execution_engine.websocket_bridge'
                 
-                # Alternative: Check for agent_manager
-                if hasattr(supervisor, 'agent_manager') and not context_propagation_possible:
-                    execution_engine_found = True
-                    manager = supervisor.agent_manager
-                    
-                    if hasattr(manager, 'websocket_notifier') and manager.websocket_notifier is not None:
+                # Check if the bridge is available at the supervisor level
+                if not context_propagation_possible and hasattr(app.state, 'agent_websocket_bridge'):
+                    if app.state.agent_websocket_bridge is not None:
                         context_propagation_possible = True
-                        engine_with_notifier = 'agent_manager'
+                        engine_with_bridge = 'app.state.agent_websocket_bridge'
             
             if not execution_engine_found:
                 validation = CriticalPathValidation(
@@ -447,20 +466,20 @@ class CriticalPathValidator:
                     passed=False,
                     criticality=CriticalityLevel.CHAT_BREAKING,
                     failure_reason="Execution engine not found in supervisor",
-                    remediation="Ensure supervisor has execution_engine, engine, or agent_manager"
+                    remediation="Ensure supervisor has execution_engine or engine attribute"
                 )
                 self.logger.error("❌ CRITICAL: Execution engine missing - context can't be propagated to agents")
             elif not context_propagation_possible:
                 validation = CriticalPathValidation(
                     component="Execution Context Propagation",
-                    path="ExecutionEngine.websocket_notifier",
-                    check_type="notifier_existence",
+                    path="AgentWebSocketBridge",
+                    check_type="bridge_availability",
                     passed=False,
                     criticality=CriticalityLevel.CHAT_BREAKING,
-                    failure_reason="WebSocket notifier not initialized in any execution engine",
-                    remediation="Ensure WebSocketNotifier is created in ExecutionEngine (supervisor.engine)"
+                    failure_reason="AgentWebSocketBridge not available for execution context",
+                    remediation="Ensure AgentWebSocketBridge is initialized and available"
                 )
-                self.logger.error("❌ CRITICAL: WebSocket notifier missing - agent events won't be sent")
+                self.logger.error("❌ CRITICAL: AgentWebSocketBridge not available - agent events won't be sent")
             else:
                 validation = CriticalPathValidation(
                     component="Execution Context Propagation",
@@ -468,9 +487,9 @@ class CriticalPathValidator:
                     check_type="context_chain",
                     passed=True,
                     criticality=CriticalityLevel.CHAT_BREAKING,
-                    metadata={"engine_with_notifier": engine_with_notifier}
+                    metadata={"bridge_location": engine_with_bridge}
                 )
-                self.logger.info(f"✓ Execution context propagation chain verified (using {engine_with_notifier})")
+                self.logger.info(f"✓ Execution context propagation chain verified (using {engine_with_bridge})")
             
             self.validations.append(validation)
             
