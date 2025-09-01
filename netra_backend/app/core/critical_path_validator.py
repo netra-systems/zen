@@ -301,92 +301,101 @@ class CriticalPathValidator:
             )
     
     async def _validate_message_handler_chain(self, app) -> None:
-        """Validate WebSocket message handlers are registered."""
+        """
+        Validate WebSocket message routing infrastructure is ready.
+        
+        CRITICAL: Handlers are registered PER WebSocket connection, not globally at startup.
+        This validates that the message routing mechanism EXISTS and CAN accept handlers.
+        """
         try:
-            # Get WebSocket manager
-            ws_manager = None
-            if hasattr(app.state, 'websocket_manager'):
-                ws_manager = app.state.websocket_manager
-            else:
-                try:
-                    from netra_backend.app.websocket_core import get_websocket_manager
-                    ws_manager = get_websocket_manager()
-                except ImportError:
-                    pass
+            # Check if MessageRouter exists and is functional
+            message_router = None
+            try:
+                from netra_backend.app.websocket_core import get_message_router
+                message_router = get_message_router()
+            except ImportError as e:
+                self._add_critical_failure(
+                    "Message Handler Chain",
+                    f"Failed to import message router: {e}",
+                    "Check websocket_core imports and dependencies"
+                )
+                return
             
-            if ws_manager:
-                # Check for message handlers
-                handler_count = 0
-                critical_handlers = ['agent_message', 'execute_agent', 'chat_message']
-                missing_handlers = []
+            if message_router:
+                # Check that MessageRouter has the infrastructure to accept handlers
+                has_handlers_list = hasattr(message_router, 'handlers')
+                has_add_handler_method = hasattr(message_router, 'add_handler') and callable(getattr(message_router, 'add_handler'))
+                has_route_method = hasattr(message_router, 'route_message') and callable(getattr(message_router, 'route_message'))
                 
-                if hasattr(ws_manager, 'message_handlers'):
-                    handlers = ws_manager.message_handlers
-                    handler_count = len(handlers)
-                    
-                    # Check for critical handlers
-                    for handler_name in critical_handlers:
-                        if handler_name not in handlers:
-                            missing_handlers.append(handler_name)
-                elif hasattr(ws_manager, '_handlers'):
-                    handlers = ws_manager._handlers
-                    handler_count = len(handlers)
-                    
-                    for handler_name in critical_handlers:
-                        if handler_name not in handlers:
-                            missing_handlers.append(handler_name)
+                # Count default handlers (should include HeartbeatHandler, etc.)
+                default_handler_count = 0
+                if has_handlers_list:
+                    default_handler_count = len(message_router.handlers)
                 
-                if handler_count == 0:
+                # Validate infrastructure readiness
+                infrastructure_ready = has_handlers_list and has_add_handler_method and has_route_method
+                
+                if not infrastructure_ready:
+                    missing_components = []
+                    if not has_handlers_list:
+                        missing_components.append("handlers list")
+                    if not has_add_handler_method:
+                        missing_components.append("add_handler method")
+                    if not has_route_method:
+                        missing_components.append("route_message method")
+                    
                     validation = CriticalPathValidation(
                         component="Message Handler Chain",
-                        path="WebSocketManager.message_handlers",
-                        check_type="handler_registration",
+                        path="MessageRouter infrastructure",
+                        check_type="infrastructure_readiness",
                         passed=False,
                         criticality=CriticalityLevel.CHAT_BREAKING,
-                        failure_reason="ZERO message handlers registered",
-                        remediation="Ensure register_handlers() is called during WebSocket initialization",
-                        metadata={"handler_count": 0}
+                        failure_reason=f"MessageRouter missing components: {missing_components}",
+                        remediation="Ensure MessageRouter is properly initialized with all required methods",
+                        metadata={"missing_components": missing_components}
                     )
-                    self.logger.error("❌ CRITICAL: ZERO WebSocket message handlers - chat messages won't be processed")
-                elif missing_handlers:
+                    self.logger.error(f"❌ CRITICAL: MessageRouter infrastructure incomplete - missing: {missing_components}")
+                elif default_handler_count == 0:
                     validation = CriticalPathValidation(
                         component="Message Handler Chain",
-                        path="WebSocketManager.message_handlers",
-                        check_type="handler_registration",
+                        path="MessageRouter.handlers",
+                        check_type="default_handlers",
                         passed=False,
-                        criticality=CriticalityLevel.DEGRADED,
-                        failure_reason=f"Missing critical handlers: {missing_handlers}",
-                        remediation="Ensure all critical message handlers are registered",
-                        metadata={
-                            "handler_count": handler_count,
-                            "missing": missing_handlers
-                        }
+                        criticality=CriticalityLevel.CHAT_BREAKING,
+                        failure_reason="MessageRouter has no default handlers - basic message types won't be processed",
+                        remediation="Ensure MessageRouter initializes with default handlers (HeartbeatHandler, etc.)",
+                        metadata={"default_handler_count": 0}
                     )
-                    self.logger.warning(f"⚠️ Missing critical message handlers: {missing_handlers}")
+                    self.logger.error("❌ CRITICAL: MessageRouter has no default handlers - basic functionality broken")
                 else:
+                    # Infrastructure is ready - this is what we expect during startup
                     validation = CriticalPathValidation(
                         component="Message Handler Chain",
-                        path="WebSocketManager.message_handlers",
-                        check_type="handler_registration",
+                        path="MessageRouter infrastructure",
+                        check_type="infrastructure_readiness",
                         passed=True,
                         criticality=CriticalityLevel.CHAT_BREAKING,
-                        metadata={"handler_count": handler_count}
+                        metadata={
+                            "default_handler_count": default_handler_count,
+                            "can_accept_per_connection_handlers": True,
+                            "infrastructure_components": ["handlers_list", "add_handler_method", "route_message_method"]
+                        }
                     )
-                    self.logger.info(f"✓ Message handlers properly registered ({handler_count} handlers)")
+                    self.logger.info(f"✓ Message handler infrastructure ready ({default_handler_count} default handlers, per-connection registration supported)")
                 
                 self.validations.append(validation)
             else:
                 self._add_critical_failure(
                     "Message Handler Chain",
-                    "WebSocket manager not found",
-                    "Ensure WebSocket manager is initialized"
+                    "MessageRouter not available",
+                    "Ensure MessageRouter is initialized during startup"
                 )
                 
         except Exception as e:
             self._add_critical_failure(
                 "Message Handler Chain",
                 f"Validation failed: {e}",
-                "Check WebSocket manager initialization"
+                "Check MessageRouter initialization and imports"
             )
     
     async def _validate_execution_context_propagation(self, app) -> None:
