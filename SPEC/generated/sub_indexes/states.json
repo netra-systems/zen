@@ -2,8 +2,8 @@
   "metadata": {
     "version": "3.0.0",
     "category": "states",
-    "generated_at": "2025-08-31T18:10:55.026860",
-    "root_directory": "/Users/anthony/Documents/GitHub/netra-apex",
+    "generated_at": "2025-08-31T21:59:58.070070",
+    "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 28
   },
   "literals": {
@@ -34,8 +34,8 @@
       "value": "Error",
       "category": "states",
       "locations": [
-        "netra_backend/app/agents/triage_sub_agent/agent.py:253",
-        "netra_backend/app/agents/triage_sub_agent/agent.py:275",
+        "netra_backend/app/agents/triage_sub_agent/agent.py:213",
+        "netra_backend/app/agents/triage_sub_agent/agent.py:235",
         "netra_backend/app/agents/triage_sub_agent/execution_helpers.py:66",
         "netra_backend/app/agents/triage_sub_agent/processing_monitoring.py:165",
         "netra_backend/app/agents/triage_sub_agent/result_processor.py:213",
@@ -110,15 +110,15 @@
       "category": "states",
       "locations": [
         "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_helpers.py:105",
-        "netra_backend/app/agents/data_sub_agent/data_sub_agent.py:305",
-        "netra_backend/app/agents/data_sub_agent/data_sub_agent.py:306",
-        "netra_backend/app/agents/data_sub_agent/data_sub_agent.py:307",
-        "netra_backend/app/agents/validation_sub_agent.py:340",
-        "netra_backend/app/agents/validation_sub_agent.py:341",
-        "netra_backend/app/core/startup_validation.py:449",
+        "netra_backend/app/agents/data_sub_agent/data_sub_agent.py:298",
+        "netra_backend/app/agents/data_sub_agent/data_sub_agent.py:299",
+        "netra_backend/app/agents/data_sub_agent/data_sub_agent.py:300",
+        "netra_backend/app/agents/validation_sub_agent.py:297",
+        "netra_backend/app/agents/validation_sub_agent.py:298",
         "netra_backend/app/db/health_checks.py:98",
         "netra_backend/app/db/health_checks.py:106",
-        "netra_backend/app/db/models_agent_state.py:39"
+        "netra_backend/app/db/models_agent_state.py:39",
+        "netra_backend/app/db/models_user.py:60"
       ]
     },
     "busy": {
@@ -231,22 +231,21 @@
       "locations": [
         "netra_backend/app/agents/models.py:139",
         "netra_backend/app/agents/supervisor/agent_manager.py:32",
-        "netra_backend/app/agents/supervisor/websocket_notifier.py:162",
+        "netra_backend/app/agents/supervisor/websocket_notifier.py:169",
         "netra_backend/app/db/health_checks.py:98",
         "netra_backend/app/schemas/core_enums.py:33",
         "netra_backend/app/websocket_core/reconnection_manager.py:32",
         "netra_backend/app/websocket_core/types.py:32",
-        "frontend/components/chat/ExampleMessageFlow.tsx:74",
-        "frontend/components/chat/ExampleMessageFlow.tsx:345",
-        "frontend/components/chat/ExampleMessageFlow.tsx:346"
+        "frontend/components/chat/agent-status/constants.ts:37",
+        "frontend/components/chat/agent-status/utils.tsx:46",
+        "frontend/components/chat/agent-status-panel/AgentStatusPanel.tsx:33"
       ]
     },
     "inactive": {
       "value": "inactive",
       "category": "states",
       "locations": [
-        "netra_backend/app/agents/validation_sub_agent.py:341",
-        "netra_backend/app/core/startup_validation.py:449",
+        "netra_backend/app/agents/validation_sub_agent.py:298",
         "netra_backend/app/routes/quality_validation_utils.py:136",
         "netra_backend/app/routes/quality_validation_utils.py:137",
         "netra_backend/app/routes/quality_validation_utils.py:138",
@@ -254,7 +253,8 @@
         "netra_backend/app/schemas/monitoring.py:48",
         "netra_backend/app/schemas/monitoring_types.py:53",
         "netra_backend/app/services/multi_tenant.py:29",
-        "netra_backend/app/services/session_coordinator.py:30"
+        "netra_backend/app/services/session_coordinator.py:30",
+        "scripts/scan_string_literals.py:148"
       ]
     },
     "info": {
@@ -372,8 +372,8 @@
         "netra_backend/app/agents/data_sub_agent/data_validator.py:264",
         "netra_backend/app/agents/data_sub_agent/data_validator.py:277",
         "netra_backend/app/agents/input_validation.py:222",
-        "netra_backend/app/agents/validation_sub_agent.py:222",
-        "netra_backend/app/agents/validation_sub_agent.py:237",
+        "netra_backend/app/agents/validation_sub_agent.py:215",
+        "netra_backend/app/agents/validation_sub_agent.py:230",
         "netra_backend/app/clients/auth_client_core.py:199"
       ]
     }

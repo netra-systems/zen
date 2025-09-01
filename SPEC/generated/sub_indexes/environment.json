@@ -2,8 +2,8 @@
   "metadata": {
     "version": "3.0.0",
     "category": "environment",
-    "generated_at": "2025-08-31T18:10:54.817793",
-    "root_directory": "/Users/anthony/Documents/GitHub/netra-apex",
+    "generated_at": "2025-08-31T21:59:57.715447",
+    "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 149
   },
   "literals": {
@@ -161,7 +161,7 @@
       "value": "AUTH_ENV",
       "category": "environment",
       "locations": [
-        "shared/config_builder_base.py:104"
+        "shared/config_builder_base.py:107"
       ]
     },
     "AUTH_ERROR": {
@@ -226,7 +226,7 @@
       "category": "environment",
       "locations": [
         "scripts/fix_authentication_system.py:174",
-        "shared/port_discovery.py:88"
+        "shared/port_discovery.py:90"
       ]
     },
     "AUTH_SERVICE_URL": {
@@ -499,7 +499,7 @@
         "auth_service/health_config.py:49",
         "scripts/setup_dev_oauth.py:47",
         "scripts/verify_oauth_config.py:111",
-        "shared/secret_manager_builder.py:951"
+        "shared/secret_manager_builder.py:957"
       ]
     },
     "GOOGLE_OAUTH_CLIENT_ID_PROD": {
@@ -519,7 +519,7 @@
         "scripts/validate_oauth_deployment.py:62",
         "scripts/validate_oauth_deployment.py:72",
         "scripts/validate_oauth_deployment.py:168",
-        "shared/secret_manager_builder.py:959"
+        "shared/secret_manager_builder.py:965"
       ]
     },
     "GOOGLE_OAUTH_CLIENT_ID_STAGING": {
@@ -552,7 +552,7 @@
         "auth_service/auth_core/secret_loader.py:149",
         "scripts/setup_dev_oauth.py:48",
         "scripts/verify_oauth_config.py:112",
-        "shared/secret_manager_builder.py:976"
+        "shared/secret_manager_builder.py:982"
       ]
     },
     "GOOGLE_OAUTH_CLIENT_SECRET_PROD": {
@@ -571,7 +571,7 @@
         "scripts/validate_oauth_deployment.py:63",
         "scripts/validate_oauth_deployment.py:72",
         "scripts/validate_oauth_deployment.py:171",
-        "shared/secret_manager_builder.py:984"
+        "shared/secret_manager_builder.py:990"
       ]
     },
     "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": {
@@ -700,7 +700,7 @@
         "netra_backend/app/core/project_utils.py:96",
         "netra_backend/app/core/project_utils.py:110",
         "netra_backend/app/routes/auth_proxy.py:35",
-        "shared/config_builder_base.py:102"
+        "shared/config_builder_base.py:105"
       ]
     },
     "NETRA_ENVIRONMENT": {
@@ -709,11 +709,11 @@
       "locations": [
         "netra_backend/app/redis_manager.py:91",
         "netra_backend/app/redis_manager.py:91",
-        "shared/config_builder_base.py:101",
-        "shared/config_builder_base.py:268",
-        "shared/config_builder_base.py:268",
+        "shared/config_builder_base.py:104",
+        "shared/config_builder_base.py:271",
+        "shared/config_builder_base.py:271",
         "shared/database/core_database_manager.py:199",
-        "shared/secret_manager_builder.py:180"
+        "shared/secret_manager_builder.py:186"
       ]
     },
     "NETRA_SECRETS_LOADING": {
@@ -1309,7 +1309,7 @@
       "category": "environment",
       "locations": [
         "scripts/run_e2e_tests_with_docker.py:76",
-        "shared/port_discovery.py:86"
+        "shared/port_discovery.py:88"
       ]
     },
     "TEST_DATABASE_URL": {

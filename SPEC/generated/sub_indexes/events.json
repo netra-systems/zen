@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "events",
-    "generated_at": "2025-08-31T18:10:54.818655",
-    "root_directory": "/Users/anthony/Documents/GitHub/netra-apex",
-    "total_literals": 29
+    "generated_at": "2025-08-31T21:59:57.718952",
+    "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
+    "total_literals": 30
   },
   "literals": {
     ":event": {
@@ -32,7 +32,7 @@
       "value": "_shutdown_event",
       "category": "events",
       "locations": [
-        "netra_backend/app/websocket_core/manager.py:664"
+        "netra_backend/app/websocket_core/manager.py:726"
       ]
     },
     "auth_event": {
@@ -126,6 +126,14 @@
       "locations": [
         "netra_backend/app/agents/data_sub_agent/insights_recommendations.py:75",
         "netra_backend/app/agents/data_sub_agent/insights_usage_analyzer.py:89"
+      ]
+    },
+    "last_event": {
+      "value": "last_event",
+      "category": "events",
+      "locations": [
+        "netra_backend/app/websocket_core/event_monitor.py:232",
+        "netra_backend/app/websocket_core/event_monitor.py:399"
       ]
     },
     "listen:": {

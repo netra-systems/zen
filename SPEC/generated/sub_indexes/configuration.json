@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "configuration",
-    "generated_at": "2025-08-31T18:10:54.813406",
-    "root_directory": "/Users/anthony/Documents/GitHub/netra-apex",
-    "total_literals": 691
+    "generated_at": "2025-08-31T21:59:57.704683",
+    "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
+    "total_literals": 693
   },
   "literals": {
     "ACCESS_TOKEN_EXPIRE_MINUTES": {
@@ -88,7 +88,7 @@
       "value": "ALLOW_DEVELOPMENT_FALLBACKS",
       "category": "configuration",
       "locations": [
-        "shared/secret_manager_builder.py:1014"
+        "shared/secret_manager_builder.py:1020"
       ]
     },
     "ALLOW_INSECURE": {
@@ -102,7 +102,7 @@
       "value": "ALLOW_LOCALHOST_DATABASE",
       "category": "configuration",
       "locations": [
-        "shared/secret_manager_builder.py:1066"
+        "shared/secret_manager_builder.py:1072"
       ]
     },
     "ALLOW_LOCALHOST_IN_PRODUCTION": {
@@ -834,11 +834,11 @@
       "category": "configuration",
       "locations": [
         "netra_backend/app/agents/admin_tool_dispatcher/execution_helpers.py:131",
-        "frontend/components/SubAgentStatus.tsx:36",
-        "frontend/components/SubAgentStatus.tsx:92",
         "frontend/components/chat/MCPToolIndicator.tsx:26",
         "frontend/components/chat/MCPToolIndicator.tsx:35",
-        "frontend/components/chat/MCPToolIndicator.tsx:131"
+        "frontend/components/chat/MCPToolIndicator.tsx:131",
+        "frontend/components/SubAgentStatus.tsx:36",
+        "frontend/components/SubAgentStatus.tsx:92"
       ]
     },
     "COMPLETE_PARTIAL_MIGRATION": {
@@ -962,9 +962,9 @@
       "value": "CONNECTING",
       "category": "configuration",
       "locations": [
-        "frontend/components/InitializationProgress.tsx:10",
         "frontend/components/chat/MCPServerStatus.tsx:29",
         "frontend/components/chat/MCPServerStatus.tsx:39",
+        "frontend/components/InitializationProgress.tsx:10",
         "frontend/providers/EnhancedWebSocketProvider.tsx:19",
         "frontend/providers/EnhancedWebSocketProvider.tsx:399"
       ]
@@ -1078,6 +1078,20 @@
         "scripts/ga4_api_setup_template.py:45",
         "scripts/ga4_automation.py:71",
         "scripts/ga4_automation.py:300"
+      ]
+    },
+    "CYPRESS_CACHE_FOLDER": {
+      "value": "CYPRESS_CACHE_FOLDER",
+      "category": "configuration",
+      "locations": [
+        "scripts/cypress_parallel_runner.py:151"
+      ]
+    },
+    "CYPRESS_WORKER_ID": {
+      "value": "CYPRESS_WORKER_ID",
+      "category": "configuration",
+      "locations": [
+        "scripts/cypress_parallel_runner.py:150"
       ]
     },
     "DATABASE": {
@@ -1324,7 +1338,7 @@
         "netra_backend/app/core/configuration/secrets.py:717",
         "netra_backend/app/core/configuration/secrets.py:717",
         "scripts/diagnose_secret_manager.py:195",
-        "shared/secret_manager_builder.py:1133"
+        "shared/secret_manager_builder.py:1139"
       ]
     },
     "DISABLE_MONITORING": {
@@ -1389,7 +1403,7 @@
       "locations": [
         "auth_service/auth_core/config.py:205",
         "scripts/run_e2e_tests_with_docker.py:74",
-        "shared/port_discovery.py:205"
+        "shared/port_discovery.py:209"
       ]
     },
     "DOCKER_PASSWORD": {
@@ -1717,10 +1731,10 @@
         "netra_backend/app/agents/admin_tool_dispatcher/execution_helpers.py:158",
         "netra_backend/app/agents/artifact_validator.py:304",
         "netra_backend/app/core/error_logger_core.py:137",
-        "frontend/components/SubAgentStatus.tsx:37",
         "frontend/components/chat/MCPToolIndicator.tsx:27",
         "frontend/components/chat/MCPToolIndicator.tsx:36",
         "frontend/components/chat/MCPToolIndicator.tsx:132",
+        "frontend/components/SubAgentStatus.tsx:37",
         "scripts/benchmark_optimization.py:123",
         "scripts/comprehensive_error_hunter.py:101"
       ]
@@ -1867,7 +1881,7 @@
       "value": "FORCE_COLOR",
       "category": "configuration",
       "locations": [
-        "netra_backend/app/core/logging_config.py:21",
+        "netra_backend/app/core/logging_config.py:25",
         "scripts/verify_cloud_run_logging_fix.py:126"
       ]
     },
@@ -2027,7 +2041,7 @@
       "value": "GCP_DISABLED",
       "category": "configuration",
       "locations": [
-        "shared/secret_manager_builder.py:277"
+        "shared/secret_manager_builder.py:283"
       ]
     },
     "GCP_PROJECT": {
@@ -2058,7 +2072,7 @@
       "category": "configuration",
       "locations": [
         "netra_backend/app/core/secret_manager.py:49",
-        "shared/secret_manager_builder.py:324"
+        "shared/secret_manager_builder.py:330"
       ]
     },
     "GCP_PROJECT_ID_NUMERICAL_STAGING": {
@@ -2068,7 +2082,7 @@
         "netra_backend/app/core/environment_constants.py:104",
         "netra_backend/app/core/secret_manager.py:41",
         "netra_backend/app/schemas/config.py:50",
-        "shared/secret_manager_builder.py:320"
+        "shared/secret_manager_builder.py:326"
       ]
     },
     "GCP_REGION": {
@@ -2477,9 +2491,9 @@
         "netra_backend/app/core/cross_service_validators/security_validators.py:43",
         "netra_backend/app/schemas/auth_types.py:235",
         "netra_backend/app/schemas/config.py:186",
-        "netra_backend/app/services/token_service.py:110",
-        "netra_backend/app/services/token_service.py:139",
-        "netra_backend/app/services/token_service.py:185"
+        "netra_backend/app/services/token_service.py:203",
+        "netra_backend/app/services/token_service.py:285",
+        "netra_backend/app/services/token_service.py:301"
       ]
     },
     "HS384": {
@@ -2674,7 +2688,7 @@
       "value": "INVALID_URL",
       "category": "configuration",
       "locations": [
-        "shared/config_builder_base.py:448"
+        "shared/config_builder_base.py:451"
       ]
     },
     "ISO9001": {
@@ -2689,7 +2703,7 @@
       "category": "configuration",
       "locations": [
         "auth_service/auth_core/config.py:204",
-        "shared/port_discovery.py:204"
+        "shared/port_discovery.py:208"
       ]
     },
     "ITEM": {
@@ -3007,7 +3021,7 @@
         "auth_service/auth_core/database/connection.py:38",
         "auth_service/auth_core/validation/pre_deployment_validator.py:575",
         "auth_service/auth_core/validation/pre_deployment_validator.py:665",
-        "shared/config_builder_base.py:105"
+        "shared/config_builder_base.py:108"
       ]
     },
     "LANGFUSE_PUBLIC_KEY": {
@@ -3019,7 +3033,7 @@
         "scripts/environment_validator_core.py:89",
         "scripts/fetch_secrets_to_env.py:68",
         "scripts/fetch_secrets_to_env.py:165",
-        "shared/secret_manager_builder.py:494",
+        "shared/secret_manager_builder.py:500",
         "shared/secret_mappings.py:45",
         "shared/secret_mappings.py:107"
       ]
@@ -3032,7 +3046,7 @@
         "scripts/environment_validator.py:307",
         "scripts/fetch_secrets_to_env.py:67",
         "scripts/fetch_secrets_to_env.py:165",
-        "shared/secret_manager_builder.py:494",
+        "shared/secret_manager_builder.py:500",
         "shared/secret_mappings.py:46",
         "shared/secret_mappings.py:108"
       ]
@@ -3163,8 +3177,8 @@
       "category": "configuration",
       "locations": [
         "scripts/diagnose_secret_manager.py:196",
-        "shared/secret_manager_builder.py:556",
-        "shared/secret_manager_builder.py:1138"
+        "shared/secret_manager_builder.py:562",
+        "shared/secret_manager_builder.py:1144"
       ]
     },
     "LOCKOUT_DURATION_MINUTES": {
@@ -3492,7 +3506,7 @@
         "scripts/build_frontend.py:47",
         "scripts/build_frontend.py:149",
         "scripts/deploy_to_gcp.py:147",
-        "shared/config_builder_base.py:103"
+        "shared/config_builder_base.py:106"
       ]
     },
     "NODE_OPTIONS": {
@@ -3539,8 +3553,8 @@
       "locations": [
         "netra_backend/app/core/configuration/base.py:347",
         "netra_backend/app/core/configuration/secrets.py:716",
-        "shared/config_builder_base.py:412",
-        "shared/config_builder_base.py:434"
+        "shared/config_builder_base.py:415",
+        "shared/config_builder_base.py:437"
       ]
     },
     "NO_ACTION_NEEDED": {
@@ -3562,7 +3576,7 @@
       "value": "NO_COLOR",
       "category": "configuration",
       "locations": [
-        "netra_backend/app/core/logging_config.py:20",
+        "netra_backend/app/core/logging_config.py:24",
         "scripts/verify_cloud_run_logging_fix.py:122"
       ]
     },
@@ -3621,8 +3635,8 @@
         "netra_backend/app/routes/metrics_api.py:56",
         "netra_backend/app/routes/metrics_api.py:134",
         "netra_backend/app/schemas/monitoring_schemas.py:33",
-        "frontend/components/InitializationProgress.tsx:10",
-        "frontend/components/WebSocketTest.tsx:20"
+        "frontend/components/chat/ConnectionStatusIndicator.tsx:75",
+        "frontend/components/chat/ConnectionStatusIndicator.tsx:77"
       ]
     },
     "OPENAI": {
@@ -3850,7 +3864,7 @@
         "netra_backend/app/routes/system_info.py:142",
         "scripts/code_review_analysis.py:192",
         "scripts/review/security_checker.py:38",
-        "shared/secret_manager_builder.py:506"
+        "shared/secret_manager_builder.py:512"
       ]
     },
     "PATCH": {
@@ -4201,7 +4215,7 @@
       "value": "PY_COLORS",
       "category": "configuration",
       "locations": [
-        "netra_backend/app/core/logging_config.py:22"
+        "netra_backend/app/core/logging_config.py:26"
       ]
     },
     "QUICK_FIX": {
@@ -4292,8 +4306,8 @@
         "scripts/fix_staging_secrets.py:168",
         "scripts/update_placeholder_secrets.py:86",
         "scripts/verify_clickhouse_fix.py:116",
-        "shared/secret_manager_builder.py:533",
-        "shared/secret_manager_builder.py:674"
+        "shared/secret_manager_builder.py:539",
+        "shared/secret_manager_builder.py:680"
       ]
     },
     "REPLACE_": {
@@ -4499,11 +4513,11 @@
       "value": "RUNNING",
       "category": "configuration",
       "locations": [
-        "frontend/components/SubAgentStatus.tsx:35",
-        "frontend/components/SubAgentStatus.tsx:42",
         "frontend/components/chat/MCPToolIndicator.tsx:25",
         "frontend/components/chat/MCPToolIndicator.tsx:34",
-        "frontend/components/chat/MCPToolIndicator.tsx:130"
+        "frontend/components/chat/MCPToolIndicator.tsx:130",
+        "frontend/components/SubAgentStatus.tsx:35",
+        "frontend/components/SubAgentStatus.tsx:42"
       ]
     },
     "RUNNING_IN_DOCKER": {
@@ -4511,7 +4525,7 @@
       "category": "configuration",
       "locations": [
         "auth_service/auth_core/config.py:203",
-        "shared/port_discovery.py:203"
+        "shared/port_discovery.py:207"
       ]
     },
     "SAFE": {
@@ -4586,7 +4600,7 @@
         "scripts/review/security_checker.py:37",
         "scripts/validate_oauth_deployment.py:80",
         "scripts/verify_oauth_config.py:120",
-        "shared/secret_manager_builder.py:506"
+        "shared/secret_manager_builder.py:512"
       ]
     },
     "SECRET_KEY": {
@@ -5269,8 +5283,8 @@
       "category": "configuration",
       "locations": [
         "netra_backend/app/llm/llm_defaults.py:58",
-        "shared/secret_manager_builder.py:159",
-        "shared/secret_manager_builder.py:166"
+        "shared/secret_manager_builder.py:165",
+        "shared/secret_manager_builder.py:172"
       ]
     },
     "TEST_FEATURE_ENTERPRISE_SSO": {
@@ -5351,7 +5365,7 @@
         "netra_backend/app/agents/github_analyzer/config_parser.py:395",
         "netra_backend/app/agents/github_analyzer/config_parser.py:451",
         "netra_backend/app/agents/github_analyzer/security_analyzer.py:63",
-        "shared/secret_manager_builder.py:506"
+        "shared/secret_manager_builder.py:512"
       ]
     },
     "TOKEN_LIMIT": {
@@ -5768,8 +5782,8 @@
         "netra_backend/app/routes/health.py:53",
         "netra_backend/app/services/api_gateway/fallback_service.py:40",
         "netra_backend/app/services/oauth_manager.py:303",
-        "frontend/components/chat/ErrorBoundary.tsx:117",
-        "frontend/components/chat/error-boundary-hooks.ts:71"
+        "frontend/components/chat/error-boundary-hooks.ts:71",
+        "frontend/components/chat/ErrorBoundary.tsx:117"
       ]
     },
     "application/octet-stream": {

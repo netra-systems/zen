@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "paths",
-    "generated_at": "2025-08-31T18:10:55.022550",
-    "root_directory": "/Users/anthony/Documents/GitHub/netra-apex",
-    "total_literals": 1188
+    "generated_at": "2025-08-31T21:59:58.061941",
+    "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
+    "total_literals": 1191
   },
   "literals": {
     "\"\n\n# Default to local build with checks\ncommand = [\n    sys.executable,\n    \"scripts/deploy_to_gcp.py\",\n    \"--project\", \"netra-staging\",\n    \"--build-local\",\n    \"--service-account\", SERVICE_ACCOUNT_KEY\n]\n\n# Add any additional arguments passed to this script\nif len(sys.argv) > 1:\n    command.extend(sys.argv[1:])\nelse:\n    # Default to running checks\n    command.append(\"--run-checks\")\n\n# Execute deployment\nsys.exit(subprocess.call(command))": {
@@ -369,7 +369,7 @@
       "locations": [
         "auth_service/auth_core/config.py:207",
         "scripts/verify_websocket_regression_tests.py:276",
-        "shared/port_discovery.py:206"
+        "shared/port_discovery.py:210"
       ]
     },
     "/.venv/": {
@@ -498,7 +498,7 @@
       "value": "/5 fixes",
       "category": "paths",
       "locations": [
-        "netra_backend/app/startup_module.py:1024"
+        "netra_backend/app/startup_module.py:1095"
       ]
     },
     "/5 fixes applied": {
@@ -512,7 +512,7 @@
       "value": "/5 startup fixes applied",
       "category": "paths",
       "locations": [
-        "netra_backend/app/startup_module_deterministic.py:513"
+        "netra_backend/app/startup_module_deterministic.py:680"
       ]
     },
     "/60 seconds)": {
@@ -527,6 +527,13 @@
       "category": "paths",
       "locations": [
         "scripts/service_discovery.py:106"
+      ]
+    },
+    "/Users/": {
+      "value": "/Users/",
+      "category": "paths",
+      "locations": [
+        "netra_backend/app/services/agent_websocket_bridge.py:1345"
       ]
     },
     "/Users/anthony/Documents/GitHub/netra-apex": {
@@ -1150,6 +1157,13 @@
         "scripts/fetch_secrets_to_env.py:127"
       ]
     },
+    "/app/": {
+      "value": "/app/",
+      "category": "paths",
+      "locations": [
+        "scripts/compliance/type_checker.py:156"
+      ]
+    },
     "/app/alembic.ini": {
       "value": "/app/alembic.ini",
       "category": "paths",
@@ -1613,8 +1627,8 @@
         "netra_backend/app/routes/demo.py:63",
         "frontend/components/ChatHistorySection.tsx:89",
         "frontend/components/ChatHistorySection.tsx:90",
-        "frontend/components/NavLinks.tsx:16",
-        "frontend/components/demo/DemoCompletion.tsx:16"
+        "frontend/components/demo/DemoCompletion.tsx:16",
+        "frontend/components/NavLinks.tsx:16"
       ]
     },
     "/check-blacklist": {
@@ -2361,6 +2375,14 @@
         "netra_backend/app/routes/factory_status/router.py:42"
       ]
     },
+    "/home/": {
+      "value": "/home/",
+      "category": "paths",
+      "locations": [
+        "netra_backend/app/services/agent_websocket_bridge.py:1345",
+        "netra_backend/app/services/agent_websocket_bridge.py:1345"
+      ]
+    },
     "/industry/{industry}/templates": {
       "value": "/industry/{industry}/templates",
       "category": "paths",
@@ -2912,8 +2934,8 @@
       "locations": [
         "auth_service/auth_core/config.py:209",
         "auth_service/auth_core/config.py:210",
-        "shared/port_discovery.py:207",
-        "shared/port_discovery.py:208"
+        "shared/port_discovery.py:211",
+        "shared/port_discovery.py:212"
       ]
     },
     "/profile": {
@@ -3223,14 +3245,14 @@
         "scripts/update_staging_clickhouse_secrets.py:57",
         "scripts/update_staging_clickhouse_secrets.py:166",
         "scripts/validate_oauth_deployment.py:133",
-        "shared/secret_manager_builder.py:447"
+        "shared/secret_manager_builder.py:453"
       ]
     },
     "/secrets/jwt-secret-key/versions/latest": {
       "value": "/secrets/jwt-secret-key/versions/latest",
       "category": "paths",
       "locations": [
-        "shared/jwt_secret_manager.py:135"
+        "shared/jwt_secret_manager.py:138"
       ]
     },
     "/security": {
@@ -3984,7 +4006,7 @@
         "netra_backend/app/core/secret_manager.py:395",
         "scripts/fetch_secrets_to_env.py:17",
         "scripts/gtm_api_setup.py:1090",
-        "shared/secret_manager_builder.py:447"
+        "shared/secret_manager_builder.py:453"
       ]
     },
     "/versions/latest": {
