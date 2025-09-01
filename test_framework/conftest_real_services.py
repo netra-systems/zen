@@ -134,7 +134,7 @@ async def real_services_session() -> AsyncIterator[RealServicesManager]:
             logger.info("Staging services session cleanup completed")
     else:
         # Local/test environment - use service orchestrator for Docker services
-        from test_framework.service_orchestrator import ServiceOrchestrator, OrchestrationConfig
+        from test_framework.unified_docker_manager import ServiceOrchestrator, OrchestrationConfig
         
         # Configure orchestration for E2E testing
         orchestration_config = OrchestrationConfig(

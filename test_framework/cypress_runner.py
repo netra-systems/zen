@@ -19,7 +19,7 @@ from datetime import datetime
 from test_framework.cypress.service_manager import ServiceDependencyManager
 from test_framework.cypress.config_manager import CypressConfigManager
 from test_framework.cypress.results_processor import CypressResults
-from test_framework.centralized_docker_manager import CentralizedDockerManager, EnvironmentType, ServiceStatus
+from test_framework.unified_docker_manager import UnifiedDockerManager, EnvironmentType, ServiceStatus
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +69,7 @@ class CypressTestRunner:
         self.use_centralized_docker = use_centralized_docker
         if use_centralized_docker:
             # Use centralized Docker manager for unified test runner integration
-            self.docker_manager = CentralizedDockerManager(
+            self.docker_manager = UnifiedDockerManager(
                 environment_type=EnvironmentType.SHARED,
                 use_production_images=False  # Use test images for Cypress
             )
