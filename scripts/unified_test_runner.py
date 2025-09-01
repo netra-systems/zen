@@ -182,8 +182,18 @@ except ImportError:
 # Service availability checking
 from test_framework.service_availability import require_real_services, ServiceUnavailableError
 
-# Docker port discovery
+# Docker port discovery and centralized management
 from test_framework.docker_port_discovery import DockerPortDiscovery
+try:
+    from test_framework.centralized_docker_manager import (
+        CentralizedDockerManager, EnvironmentType, ServiceStatus
+    )
+    CENTRALIZED_DOCKER_AVAILABLE = True
+except ImportError:
+    CENTRALIZED_DOCKER_AVAILABLE = False
+    CentralizedDockerManager = None
+    EnvironmentType = None
+    ServiceStatus = None
 
 
 class UnifiedTestRunner:
@@ -215,7 +225,12 @@ class UnifiedTestRunner:
         # Initialize Cypress runner lazily to avoid Docker issues during init
         self.cypress_runner = None
         
-        # Initialize Docker port discovery with test services by default
+        # Initialize centralized Docker manager
+        self.docker_manager = None
+        self.docker_environment = None
+        self.docker_ports = None
+        
+        # Initialize Docker port discovery with test services by default (for backward compatibility)
         self.port_discovery = DockerPortDiscovery(use_test_services=True)
         
         # Test execution timeout fix for iterations 41-60
@@ -373,6 +388,78 @@ class UnifiedTestRunner:
         
         return 0 if all(r["success"] for r in results.values()) else 1
     
+    def _initialize_docker_environment(self, args, running_e2e: bool):
+        """Initialize Docker environment using centralized manager."""
+        if not CENTRALIZED_DOCKER_AVAILABLE:
+            return  # Fall back to old method if centralized manager not available
+        
+        # Determine environment type
+        if args.env == "staging":
+            # No Docker for staging - uses remote services
+            return
+        
+        # Check if we should use shared or dedicated environment
+        env = get_env()
+        use_shared = env.get('TEST_USE_SHARED_DOCKER', 'true').lower() == 'true'
+        if hasattr(args, 'docker_dedicated') and args.docker_dedicated:
+            env_type = EnvironmentType.DEDICATED
+        else:
+            env_type = EnvironmentType.SHARED
+        
+        # Check if we should use production images
+        use_production = env.get('TEST_USE_PRODUCTION_IMAGES', 'true').lower() == 'true'
+        
+        # Initialize centralized Docker manager
+        self.docker_manager = CentralizedDockerManager(
+            environment_type=env_type,
+            test_id=f"test_run_{int(time.time())}",
+            use_production_images=use_production
+        )
+        
+        print(f"[INFO] Initializing Docker environment: type={env_type.value}, production_images={use_production}")
+        
+        # Acquire environment with locking
+        try:
+            self.docker_environment, self.docker_ports = self.docker_manager.acquire_environment()
+            print(f"[INFO] Acquired Docker environment: {self.docker_environment}")
+            
+            # Wait for services to be healthy
+            if not self.docker_manager.wait_for_services(timeout=60):
+                print("[WARNING] Some Docker services failed to become healthy")
+                # Check if we should fail on unhealthy services
+                if running_e2e or args.real_services:
+                    # For E2E and real services, we need healthy services
+                    # Try to restart unhealthy services once
+                    print("[INFO] Attempting to restart unhealthy services...")
+                    for service in ['backend', 'auth', 'postgres', 'redis']:
+                        status = self.docker_manager.get_service_status(service)
+                        if status != ServiceStatus.HEALTHY:
+                            self.docker_manager.restart_service(service, force=False)
+                    # Wait again
+                    if not self.docker_manager.wait_for_services(timeout=30):
+                        raise RuntimeError("Docker services not healthy for E2E/real service testing")
+        except Exception as e:
+            print(f"[ERROR] Failed to initialize Docker environment: {e}")
+            if running_e2e or args.real_services:
+                raise  # Re-raise for E2E/real service testing
+            # Otherwise, fall back to mock services
+            self.docker_manager = None
+            self.docker_environment = None
+            self.docker_ports = None
+    
+    def _cleanup_docker_environment(self):
+        """Clean up Docker environment."""
+        if self.docker_manager and self.docker_environment:
+            try:
+                print(f"[INFO] Releasing Docker environment: {self.docker_environment}")
+                self.docker_manager.release_environment(self.docker_environment)
+                
+                # Print statistics
+                stats = self.docker_manager.get_statistics()
+                print(f"[INFO] Docker statistics: {json.dumps(stats, indent=2)}")
+            except Exception as e:
+                print(f"[WARNING] Error releasing Docker environment: {e}")
+    
     def _configure_environment(self, args: argparse.Namespace):
         """Configure test environment based on arguments."""
         # Load test environment secrets first to prevent validation errors
@@ -442,6 +529,9 @@ class UnifiedTestRunner:
                     use_dedicated_env=True
                 )
         
+        # Initialize Docker environment first (if needed)
+        self._initialize_docker_environment(args, running_e2e)
+        
         # Configure services
         if args.env == "staging":
             # For staging, don't use Docker port discovery - use remote staging services
@@ -480,10 +570,57 @@ class UnifiedTestRunner:
             # Create port discovery even for mock environment to enable port discovery if Docker is available
             self.port_discovery = DockerPortDiscovery(use_test_services=True)
         
-        # Update service URLs with discovered Docker container ports
-        # This fixes the hardcoded port issues by using actual Docker container ports
-        # Skip for staging since we use remote services
-        if hasattr(self, 'port_discovery') and self.port_discovery and args.env != 'staging':
+        # Update service URLs with centralized Docker manager ports (if available)
+        if CENTRALIZED_DOCKER_AVAILABLE and self.docker_manager and self.docker_ports and args.env != 'staging':
+            env = get_env()
+            
+            # Update PostgreSQL DATABASE_URL
+            if 'postgres' in self.docker_ports:
+                postgres_port = self.docker_ports['postgres']
+                
+                # Construct DATABASE_URL with discovered port and correct user/password for each environment
+                if args.env == "dev":
+                    # Dev environment uses "netra" user with password "netra123"
+                    discovered_db_url = f"postgresql://netra:netra123@localhost:{postgres_port}/netra_dev"
+                else:
+                    # Test environment uses "test" user with password "test"
+                    discovered_db_url = f"postgresql://test:test@localhost:{postgres_port}/netra_test"
+                    
+                env.set('DATABASE_URL', discovered_db_url, 'docker_manager')
+                print(f"[INFO] Updated DATABASE_URL with Docker port: {postgres_port}")
+            
+            # Update Redis URL
+            if 'redis' in self.docker_ports:
+                redis_port = self.docker_ports['redis']
+                
+                if args.env == "dev":
+                    discovered_redis_url = f"redis://localhost:{redis_port}"
+                else:
+                    discovered_redis_url = f"redis://localhost:{redis_port}/1"  # Use DB 1 for tests
+                    
+                env.set('REDIS_URL', discovered_redis_url, 'docker_manager')
+                print(f"[INFO] Updated REDIS_URL with Docker port: {redis_port}")
+            
+            # Update ClickHouse URL
+            if 'clickhouse' in self.docker_ports:
+                clickhouse_port = self.docker_ports['clickhouse']
+                discovered_clickhouse_url = f"http://localhost:{clickhouse_port}"
+                env.set('CLICKHOUSE_URL', discovered_clickhouse_url, 'docker_manager')
+                print(f"[INFO] Updated CLICKHOUSE_URL with Docker port: {clickhouse_port}")
+            
+            # Update backend/auth/websocket URLs
+            if 'backend' in self.docker_ports:
+                backend_port = self.docker_ports['backend']
+                env.set('BACKEND_URL', f'http://localhost:{backend_port}', 'docker_manager')
+                env.set('WEBSOCKET_URL', f'ws://localhost:{backend_port}', 'docker_manager')
+                print(f"[INFO] Updated BACKEND_URL with Docker port: {backend_port}")
+            
+            if 'auth' in self.docker_ports:
+                auth_port = self.docker_ports['auth']
+                env.set('AUTH_SERVICE_URL', f'http://localhost:{auth_port}', 'docker_manager')
+                print(f"[INFO] Updated AUTH_SERVICE_URL with Docker port: {auth_port}")
+        # Fallback to old port discovery for backward compatibility
+        elif hasattr(self, 'port_discovery') and self.port_discovery and args.env != 'staging':
             port_mappings = self.port_discovery.discover_all_ports()
             env = get_env()
             
@@ -1830,6 +1967,39 @@ def main():
         help="Browser to use for Cypress tests (default: chrome)"
     )
     
+    # Docker management arguments
+    docker_group = parser.add_argument_group('Docker Management')
+    
+    docker_group.add_argument(
+        "--docker-dedicated",
+        action="store_true",
+        help="Use dedicated Docker environment instead of shared (prevents conflicts)"
+    )
+    
+    docker_group.add_argument(
+        "--docker-production",
+        action="store_true",
+        help="Use production Docker images for reduced memory usage"
+    )
+    
+    docker_group.add_argument(
+        "--docker-no-cleanup",
+        action="store_true",
+        help="Don't clean up Docker environment after tests (for debugging)"
+    )
+    
+    docker_group.add_argument(
+        "--docker-force-restart",
+        action="store_true",
+        help="Force restart of Docker services even with cooldown"
+    )
+    
+    docker_group.add_argument(
+        "--docker-stats",
+        action="store_true",
+        help="Show Docker management statistics after test run"
+    )
+    
     # Add orchestrator arguments if available
     if ORCHESTRATOR_AVAILABLE:
         add_orchestrator_arguments(parser)
@@ -1993,9 +2163,37 @@ def main():
         if background_exit_code is not None:
             return background_exit_code
     
+    # Clean up old Docker environments if requested
+    if hasattr(args, 'cleanup_old_environments') and args.cleanup_old_environments:
+        if CENTRALIZED_DOCKER_AVAILABLE:
+            print("[INFO] Cleaning up old Docker test environments...")
+            manager = CentralizedDockerManager()
+            manager.cleanup_old_environments(max_age_hours=4)
+            print("[INFO] Cleanup complete")
+    
+    # Set Docker environment variables from args
+    env = get_env()
+    if hasattr(args, 'docker_dedicated') and args.docker_dedicated:
+        env.set('TEST_USE_SHARED_DOCKER', 'false', 'docker_args')
+    if hasattr(args, 'docker_production') and args.docker_production:
+        env.set('TEST_USE_PRODUCTION_IMAGES', 'true', 'docker_args')
+    
     # Run tests with traditional category system
     runner = UnifiedTestRunner()
-    return runner.run(args)
+    try:
+        exit_code = runner.run(args)
+        
+        # Show Docker statistics if requested
+        if hasattr(args, 'docker_stats') and args.docker_stats and runner.docker_manager:
+            stats = runner.docker_manager.get_statistics()
+            print("\n[DOCKER STATISTICS]")
+            print(json.dumps(stats, indent=2))
+        
+        return exit_code
+    finally:
+        # Clean up Docker environment unless --docker-no-cleanup specified
+        if not (hasattr(args, 'docker_no_cleanup') and args.docker_no_cleanup):
+            runner._cleanup_docker_environment()
 
 
 if __name__ == "__main__":
