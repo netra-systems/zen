@@ -44,11 +44,7 @@ logger = logging.getLogger(__name__)
 
 # Enable real services for this test module
 pytestmark = pytest.mark.skipif(
-<<<<<<< HEAD
     get_env().get("USE_REAL_SERVICES", "false").lower() != "true",
-=======
-    env.get("USE_REAL_SERVICES", "false").lower() != "true",
->>>>>>> cd652f04f43df1a879423564315f459a150f8a24
     reason="Real services disabled (set USE_REAL_SERVICES=true)"
 )
 

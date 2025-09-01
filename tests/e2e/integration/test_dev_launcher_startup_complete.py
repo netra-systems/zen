@@ -171,11 +171,7 @@ class TestRealDevLauncherer:
             ]
             
             # Set environment for test
-<<<<<<< HEAD
             env = get_env().as_dict().copy()
-=======
-            env = env.get_all()
->>>>>>> cd652f04f43df1a879423564315f459a150f8a24
             env["NETRA_STARTUP_MODE"] = "minimal"
             env["NETRA_TEST_MODE"] = "true"
             

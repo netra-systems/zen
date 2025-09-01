@@ -78,33 +78,18 @@ class AgentOrchestrationTestRunner:
                           timeout: int = 30, parallel: int = 2):
         """Configure real LLM testing environment."""
         if enable:
-<<<<<<< HEAD
-            get_env().set("USE_REAL_LLM",  )"true"
-            get_env().set("TEST_USE_REAL_LLM",  )"true"  # Legacy compatibility
-            get_env().set("ENABLE_REAL_LLM_TESTING",  )"true"
-            get_env().set("TEST_LLM_MODEL", model)
-            get_env().set("TEST_LLM_TIMEOUT", str(timeout))
-            get_env().set("TEST_LLM_PARALLEL", str(parallel))
+            get_env().set("USE_REAL_LLM", "true", "test")
+            get_env().set("TEST_USE_REAL_LLM", "true", "test")  # Legacy compatibility
+            get_env().set("ENABLE_REAL_LLM_TESTING", "true", "test")
+            get_env().set("TEST_LLM_MODEL", model, "test")
+            get_env().set("TEST_LLM_TIMEOUT", str(timeout), "test")
+            get_env().set("TEST_LLM_PARALLEL", str(parallel), "test")
             self.results["real_llm_enabled"] = True
             print(f"[INFO] Real LLM testing enabled with model: {model}")
         else:
-            get_env().set("USE_REAL_LLM",  )"false"
-            get_env().set("TEST_USE_REAL_LLM",  )"false"  # Legacy compatibility
-            get_env().set("ENABLE_REAL_LLM_TESTING",  )"false"
-=======
-            env.set("USE_REAL_LLM", "true", "test")
-            env.set("TEST_USE_REAL_LLM", "true", "test")  # Legacy compatibility
-            env.set("ENABLE_REAL_LLM_TESTING", "true", "test")
-            env.set("TEST_LLM_MODEL", model, "test")
-            env.set("TEST_LLM_TIMEOUT", str, "test")(timeout)
-            env.set("TEST_LLM_PARALLEL", str, "test")(parallel)
-            self.results["real_llm_enabled"] = True
-            print(f"[INFO] Real LLM testing enabled with model: {model}")
-        else:
-            env.set("USE_REAL_LLM", "false", "test")
-            env.set("TEST_USE_REAL_LLM", "false", "test")  # Legacy compatibility
-            env.set("ENABLE_REAL_LLM_TESTING", "false", "test")
->>>>>>> cd652f04f43df1a879423564315f459a150f8a24
+            get_env().set("USE_REAL_LLM", "false", "test")
+            get_env().set("TEST_USE_REAL_LLM", "false", "test")  # Legacy compatibility
+            get_env().set("ENABLE_REAL_LLM_TESTING", "false", "test")
             print("[INFO] Using mocked LLM responses")
     
     def run_high_value_tests(self, real_llm: bool = False) -> int:

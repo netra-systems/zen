@@ -120,13 +120,8 @@ class TestDevHealthFixture:
         """Setup test environment for health checks."""
         self.test_env.setup_test_db()
         self.test_env.setup_test_redis()
-<<<<<<< HEAD
-        get_env().set("TESTING",  )"true"
-        get_env().set("HEALTH_CHECK_INTERVAL",  )"5"
-=======
-        env.set("TESTING", "true", "test")
-        env.set("HEALTH_CHECK_INTERVAL", "5", "test")
->>>>>>> cd652f04f43df1a879423564315f459a150f8a24
+        get_env().set("TESTING", "true", "test")
+        get_env().set("HEALTH_CHECK_INTERVAL", "5", "test")
     
     async def start_dev_environment(self) -> bool:
         """Start dev environment and extract service ports."""
