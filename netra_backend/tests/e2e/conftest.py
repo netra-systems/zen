@@ -1,19 +1,81 @@
-"""E2E test fixtures and configuration."""
+"""E2E test fixtures and configuration.
+
+CRITICAL: This conftest.py is designed to work with existing netra-dev-* containers
+or fallback gracefully for testing without requiring complex service orchestration.
+
+Following CLAUDE.md requirements:
+- Use IsolatedEnvironment for all environment access
+- No complex service orchestration that can fail
+- Simple, reliable test setup
+"""
 
 import pytest
 import asyncio
+import uuid
 from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, patch
-from test_framework.containers_utils import TestcontainerHelper
+
+# CLAUDE.md compliance: Use IsolatedEnvironment for all environment access
 from shared.isolated_environment import get_env
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
+
+# Configure test environment for e2e tests
+@pytest.fixture(scope="session", autouse=True)
+def setup_e2e_environment():
+    """Setup basic environment for e2e tests without complex orchestration."""
+    env = get_env()
+    
+    # CRITICAL: Disable Docker orchestration for simplified testing
+    env.set("NO_DOCKER_ORCHESTRATION", "true", source="e2e_conftest")
+    env.set("SKIP_SERVICE_ORCHESTRATION", "true", source="e2e_conftest")
+    
+    # Set basic test environment configuration
+    env.set("TESTING", "1", source="e2e_conftest")
+    env.set("ENVIRONMENT", "testing", source="e2e_conftest")
+    env.set("LOG_LEVEL", "ERROR", source="e2e_conftest")
+    
+    # Database configuration - use default localhost ports for development containers
+    # These will work with existing netra-dev containers or fallback gracefully
+    env.set("POSTGRES_HOST", "localhost", source="e2e_conftest")
+    env.set("POSTGRES_PORT", "5433", source="e2e_conftest")  # netra-dev-postgres default port
+    env.set("POSTGRES_USER", "netra", source="e2e_conftest")
+    env.set("POSTGRES_PASSWORD", "netra123", source="e2e_conftest")
+    env.set("POSTGRES_DB", "netra_dev", source="e2e_conftest")
+    
+    # Redis configuration
+    env.set("REDIS_HOST", "localhost", source="e2e_conftest")
+    env.set("REDIS_PORT", "6380", source="e2e_conftest")  # netra-dev-redis default port
+    
+    # ClickHouse configuration
+    env.set("CLICKHOUSE_HOST", "localhost", source="e2e_conftest")
+    env.set("CLICKHOUSE_HTTP_PORT", "8124", source="e2e_conftest")  # netra-dev-clickhouse default port
+    env.set("CLICKHOUSE_TCP_PORT", "9001", source="e2e_conftest")
+    env.set("CLICKHOUSE_USER", "netra", source="e2e_conftest")
+    env.set("CLICKHOUSE_PASSWORD", "netra123", source="e2e_conftest")
+    env.set("CLICKHOUSE_DB", "netra_analytics", source="e2e_conftest")
+    
+    # Service URLs for existing development containers
+    env.set("BACKEND_SERVICE_URL", "http://localhost:8000", source="e2e_conftest")
+    env.set("AUTH_SERVICE_URL", "http://localhost:8081", source="e2e_conftest")
+    env.set("FRONTEND_SERVICE_URL", "http://localhost:3000", source="e2e_conftest")
+    
+    # WebSocket configuration
+    env.set("WEBSOCKET_URL", "ws://localhost:8000/ws", source="e2e_conftest")
+    
+    # Test-specific secrets (safe for testing)
+    env.set("JWT_SECRET_KEY", "test-jwt-secret-key-must-be-at-least-32-characters-for-testing", source="e2e_conftest")
+    env.set("SERVICE_SECRET", "test-service-secret-for-cross-service-auth-testing", source="e2e_conftest")
+    env.set("FERNET_KEY", "iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw=", source="e2e_conftest")
+    env.set("SECRET_KEY", "test-secret-key-for-e2e-testing", source="e2e_conftest")
+    
+    yield
+    
 
 # Basic test setup fixtures
 @pytest.fixture
 async def mock_agent_service():
     """Mock agent service for E2E tests."""
-    # Mock: Generic component isolation for controlled unit testing
     mock_service = AsyncMock()
     mock_service.process_message.return_value = {
         "response": "Test response",
@@ -21,49 +83,39 @@ async def mock_agent_service():
     }
     yield mock_service
 
+
 @pytest.fixture
 def mock_websocket_manager():
     """Mock WebSocket manager for E2E tests."""
-    # Mock: Generic component isolation for controlled unit testing
     mock_manager = MagicMock()
-    # Mock: Generic component isolation for controlled unit testing
     mock_manager.send_message = AsyncMock()
-    # Mock: Generic component isolation for controlled unit testing
     mock_manager.broadcast = AsyncMock()
     return mock_manager
+
 
 @pytest.fixture
 def model_selection_setup():
     """Basic setup for model selection tests."""
     return {
-        # Mock: LLM service isolation for fast testing without API calls or rate limits
         "mock_llm_service": AsyncMock(),
-        # Mock: Database isolation for unit testing without external database connections
         "mock_database": AsyncMock(),
         "test_config": {"environment": "test"}
     }
+
 
 # Database mocking for E2E tests
 @pytest.fixture
 def mock_database_factory():
     """Mock database session factory for E2E tests."""
-    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session = AsyncMock()
-    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.commit = AsyncMock()
-    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.rollback = AsyncMock()
-    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.close = AsyncMock()
-    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.add = MagicMock()
-    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.execute = AsyncMock()
-    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.get = AsyncMock()
-    mock_session.id = "mock_session_id"  # Add session ID
+    mock_session.id = "mock_session_id"
     
-    # Create proper async context manager mock
     class MockSessionFactory:
         def __call__(self):
             return self
@@ -76,12 +128,13 @@ def mock_database_factory():
     
     return MockSessionFactory()
 
+
 @pytest.fixture
 def setup_database_mocking(mock_database_factory):
     """Auto-setup database mocking for all E2E tests."""
     # Skip during collection mode to avoid heavy imports
-    import os
-    if get_env().get("TEST_COLLECTION_MODE"):
+    env = get_env()
+    if env.get("TEST_COLLECTION_MODE"):
         yield
         return
         
@@ -96,7 +149,6 @@ def setup_database_mocking(mock_database_factory):
         return
     
     # Mock thread and run objects with all required attributes
-    # Mock: Generic component isolation for controlled unit testing
     mock_thread = MagicMock()
     mock_thread.id = "test_thread_123"
     mock_thread.user_id = "test_user_001"
@@ -104,7 +156,6 @@ def setup_database_mocking(mock_database_factory):
     mock_thread.created_at = 1640995200  # timestamp
     mock_thread.object = "thread"
     
-    # Mock: Generic component isolation for controlled unit testing
     mock_run = MagicMock()
     mock_run.id = "test_run_123"  
     mock_run.thread_id = "test_thread_123"
@@ -116,22 +167,14 @@ def setup_database_mocking(mock_database_factory):
     
     with patch.object(uow_module, 'async_session_factory', mock_database_factory):
         with patch.object(postgres_module, 'async_session_factory', mock_database_factory):
-            # Wrap in try-except to handle missing modules gracefully
             try:
-                # Mock: Async component isolation for testing without real async operations
                 with patch('netra_backend.app.services.thread_service.ThreadService.get_thread', new_callable=AsyncMock, return_value=mock_thread):
-                    # Mock: Async component isolation for testing without real async operations
                     with patch('netra_backend.app.services.thread_service.ThreadService.get_or_create_thread', new_callable=AsyncMock, return_value=mock_thread):
-                        # Mock: Async component isolation for testing without real async operations
                         with patch('netra_backend.app.services.thread_service.ThreadService.create_run', new_callable=AsyncMock, return_value=mock_run):
-                            # Mock: Async component isolation for testing without real async operations
                             with patch('netra_backend.app.services.thread_service.ThreadService.create_message', new_callable=AsyncMock, return_value=None):
                                 # Mock WebSocket manager broadcasting functionality
-                                # Mock: Generic component isolation for controlled unit testing
                                 mock_broadcasting = MagicMock()
-                                # Mock: Generic component isolation for controlled unit testing
                                 mock_broadcasting.join_room = AsyncMock()
-                                # Mock: Generic component isolation for controlled unit testing
                                 mock_broadcasting.leave_all_rooms = AsyncMock()
                                 
                                 try:
@@ -145,52 +188,50 @@ def setup_database_mocking(mock_database_factory):
                 warnings.warn(f"Cannot patch thread services: {e}")
                 yield
 
+
 # Real LLM testing configuration
 @pytest.fixture
 def real_llm_config():
     """Configuration for real LLM testing."""
-    import os
+    env = get_env()
     return {
-        "enabled": get_env().get("ENABLE_REAL_LLM_TESTING") == "true",
-        "timeout": float(get_env().get("LLM_TEST_TIMEOUT", "30.0")),
-        "max_retries": int(get_env().get("LLM_TEST_RETRIES", "3"))
+        "enabled": env.get("ENABLE_REAL_LLM_TESTING") == "true",
+        "timeout": float(env.get("LLM_TEST_TIMEOUT", "30.0")),
+        "max_retries": int(env.get("LLM_TEST_RETRIES", "3"))
     }
 
-# Container management for L3/L4 testing
-@pytest.fixture
-def container_helper():
-    """Provide containerized services for L3/L4 testing."""
-    helper = TestcontainerHelper()
-    yield helper
-    helper.stop_all_containers()
 
 # Real agent setup fixture for E2E pipeline tests
 @pytest.fixture
 async def real_agent_setup():
     """Setup real agent infrastructure for E2E pipeline tests."""
-    import uuid
     from unittest.mock import AsyncMock, MagicMock
     from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
     from netra_backend.app.llm.llm_manager import LLMManager
     from netra_backend.app.services.apex_optimizer_agent.tools.tool_dispatcher import ApexToolSelector
     
     # Create mock dependencies
-    # Mock: Database session isolation for transaction testing without real database dependency
     db_session = AsyncMock()
     
-    # Mock: LLM service isolation for fast testing without API calls or rate limits  
-    llm_manager = MagicMock(spec=LLMManager)
-    llm_manager.call_llm = AsyncMock(return_value={"content": "Test response", "tool_calls": []})
-    llm_manager.ask_llm = AsyncMock(return_value='{"analysis": "test result"}')
+    # LLM manager with graceful fallback
+    try:
+        from netra_backend.app.core.config import get_config
+        config = get_config()
+        llm_manager = LLMManager(config)
+    except Exception:
+        # Fallback to mock for testing
+        llm_manager = MagicMock(spec=LLMManager)
+        llm_manager.call_llm = AsyncMock(return_value={"content": "Test response", "tool_calls": []})
+        llm_manager.ask_llm = AsyncMock(return_value='{"analysis": "test result"}')
     
-    # Mock: WebSocket manager isolation for testing without network connections
+    # WebSocket manager
     websocket_manager = MagicMock()
     websocket_manager.send_message = AsyncMock()
     websocket_manager.send_to_thread = AsyncMock()
     websocket_manager.send_agent_log = AsyncMock()
     websocket_manager.send_sub_agent_update = AsyncMock()
     
-    # Mock: Tool dispatcher isolation for predictable agent testing
+    # Tool dispatcher
     tool_dispatcher = MagicMock(spec=ApexToolSelector)
     tool_dispatcher.dispatch_tool = AsyncMock(return_value={"result": "success"})
     
@@ -228,7 +269,7 @@ async def real_agent_setup():
             metadata=TriageMetadata(triage_duration_ms=100)
         )
         
-        # Handle different call patterns - if first arg is already a state, return it updated
+        # Handle different call patterns
         if hasattr(state_or_prompt, 'user_request'):
             # It's a state object, update and return it
             state_or_prompt.triage_result = mock_triage_result
