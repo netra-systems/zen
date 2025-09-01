@@ -8,7 +8,7 @@ Business Value Justification:
 - Strategic Impact: Single source of truth for integration lifecycle, enables zero-downtime recovery
 
 This class serves as the single source of truth for managing the integration lifecycle
-between AgentService and WebSocketAgentOrchestrator, providing idempotent initialization,
+between AgentService and AgentExecutionRegistry, providing idempotent initialization,
 health monitoring, and recovery mechanisms.
 """
 
@@ -16,12 +16,16 @@ import asyncio
 import time
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Dict, Optional, Any, Tuple
+from typing import Dict, Optional, Any, Tuple, List, TYPE_CHECKING
 from dataclasses import dataclass, field
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.orchestration.websocket_agent_orchestrator import get_websocket_agent_orchestrator
+from netra_backend.app.orchestration.agent_execution_registry import get_agent_execution_registry
 from netra_backend.app.websocket_core import get_websocket_manager
+from shared.monitoring.interfaces import MonitorableComponent
+
+if TYPE_CHECKING:
+    from shared.monitoring.interfaces import ComponentMonitor
 
 logger = central_logger.get_logger(__name__)
 
@@ -51,7 +55,7 @@ class HealthStatus:
     """Health status of WebSocket-Agent integration."""
     state: IntegrationState
     websocket_manager_healthy: bool
-    orchestrator_healthy: bool
+    registry_healthy: bool
     last_health_check: datetime
     consecutive_failures: int = 0
     total_recoveries: int = 0
@@ -81,13 +85,16 @@ class IntegrationMetrics:
     current_uptime_start: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
-class AgentWebSocketBridge:
+class AgentWebSocketBridge(MonitorableComponent):
     """
     SSOT for WebSocket-Agent service integration lifecycle.
     
     Provides idempotent initialization, health monitoring, and recovery
     mechanisms for the critical WebSocket-Agent integration that enables
     substantive chat interactions.
+    
+    Implements MonitorableComponent interface to enable external monitoring
+    and health auditing while maintaining full operational independence.
     """
     
     _instance: Optional['AgentWebSocketBridge'] = None
@@ -108,6 +115,7 @@ class AgentWebSocketBridge:
         self._initialize_state()
         self._initialize_dependencies()
         self._initialize_health_monitoring()
+        self._initialize_monitoring_observers()
         
         self._initialized = True
         logger.info("AgentWebSocketBridge initialized as singleton")
@@ -141,10 +149,18 @@ class AgentWebSocketBridge:
         self.health_status = HealthStatus(
             state=IntegrationState.UNINITIALIZED,
             websocket_manager_healthy=False,
-            orchestrator_healthy=False,
+            registry_healthy=False,
             last_health_check=datetime.now(timezone.utc)
         )
         logger.debug("Health monitoring initialized")
+    
+    def _initialize_monitoring_observers(self) -> None:
+        """Initialize monitor observer system for external monitoring integration."""
+        self._monitor_observers: List['ComponentMonitor'] = []
+        self._last_health_broadcast = 0.0
+        self._health_broadcast_interval = 30.0  # 30 seconds
+        self._last_broadcasted_state = None
+        logger.debug("Monitor observer system initialized")
     
     async def ensure_integration(
         self, 
@@ -189,8 +205,8 @@ class AgentWebSocketBridge:
                 
                 # Initialize core components
                 await self._initialize_websocket_manager()
-                await self._initialize_orchestrator()
-                await self._setup_orchestrator_integration()
+                await self._initialize_registry()
+                await self._setup_registry_integration()
                 
                 # Verify integration health
                 verification_result = await self._verify_integration()
@@ -240,23 +256,23 @@ class AgentWebSocketBridge:
             logger.error(f"Failed to initialize WebSocket manager: {e}")
             raise RuntimeError(f"WebSocket manager initialization failed: {e}")
     
-    async def _initialize_orchestrator(self) -> None:
-        """Initialize WebSocket agent orchestrator with error handling."""
+    async def _initialize_registry(self) -> None:
+        """Initialize agent execution registry with error handling."""
         try:
-            self._orchestrator = await get_websocket_agent_orchestrator()
+            self._orchestrator = await get_agent_execution_registry()
             if not self._orchestrator:
-                raise RuntimeError("WebSocket agent orchestrator is None")
-            logger.debug("WebSocket agent orchestrator initialized successfully")
+                raise RuntimeError("Agent execution registry is None")
+            logger.debug("Agent execution registry initialized successfully")
         except Exception as e:
-            logger.error(f"Failed to initialize orchestrator: {e}")
-            raise RuntimeError(f"Orchestrator initialization failed: {e}")
+            logger.error(f"Failed to initialize registry: {e}")
+            raise RuntimeError(f"Registry initialization failed: {e}")
     
-    async def _setup_orchestrator_integration(self) -> None:
-        """Setup orchestrator integration with WebSocket manager and agents."""
+    async def _setup_registry_integration(self) -> None:
+        """Setup registry integration with WebSocket manager and agents."""
         try:
-            # Set WebSocket manager on orchestrator
+            # Set WebSocket manager on registry
             await self._orchestrator.set_websocket_manager(self._websocket_manager)
-            logger.debug("WebSocket manager set on orchestrator")
+            logger.debug("WebSocket manager set on registry")
             
             # Setup agent-WebSocket integration if components available
             if self._supervisor and self._registry:
@@ -266,11 +282,11 @@ class AgentWebSocketBridge:
                 )
                 logger.debug("Enhanced agent-WebSocket integration configured")
             else:
-                logger.debug("Basic orchestrator integration configured (no supervisor/registry)")
+                logger.debug("Basic registry integration configured (no supervisor/registry)")
                 
         except Exception as e:
-            logger.error(f"Failed to setup orchestrator integration: {e}")
-            raise RuntimeError(f"Orchestrator integration setup failed: {e}")
+            logger.error(f"Failed to setup registry integration: {e}")
+            raise RuntimeError(f"Registry integration setup failed: {e}")
     
     async def _verify_integration(self) -> bool:
         """Verify integration is working correctly."""
@@ -279,11 +295,11 @@ class AgentWebSocketBridge:
             if not self._websocket_manager:
                 return False
             
-            # Verify orchestrator is responsive
+            # Verify registry is responsive
             if not self._orchestrator:
                 return False
             
-            # Test orchestrator metrics (should not raise)
+            # Test registry metrics (should not raise)
             metrics = await self._orchestrator.get_metrics()
             if not isinstance(metrics, dict):
                 return False
@@ -320,14 +336,14 @@ class AgentWebSocketBridge:
                 # Check WebSocket manager health
                 websocket_healthy = await self._check_websocket_manager_health()
                 
-                # Check orchestrator health  
-                orchestrator_healthy = await self._check_orchestrator_health()
+                # Check registry health  
+                registry_healthy = await self._check_registry_health()
                 
                 # Update health status
                 self.health_status = HealthStatus(
                     state=self.state,
                     websocket_manager_healthy=websocket_healthy,
-                    orchestrator_healthy=orchestrator_healthy,
+                    registry_healthy=registry_healthy,
                     last_health_check=datetime.now(timezone.utc),
                     consecutive_failures=self.health_status.consecutive_failures,
                     total_recoveries=self.health_status.total_recoveries,
@@ -335,7 +351,7 @@ class AgentWebSocketBridge:
                 )
                 
                 # Update integration state based on health
-                if websocket_healthy and orchestrator_healthy:
+                if websocket_healthy and registry_healthy:
                     if self.state in [IntegrationState.DEGRADED, IntegrationState.FAILED]:
                         self.state = IntegrationState.ACTIVE
                         logger.info("Integration recovered to ACTIVE state")
@@ -347,6 +363,10 @@ class AgentWebSocketBridge:
                         logger.warning("Integration degraded due to health check failures")
                 
                 self.health_status.state = self.state
+                
+                # Notify observers of health changes if any are registered
+                await self._notify_monitors_of_health_change()
+                
                 return self.health_status
                 
             except Exception as e:
@@ -357,6 +377,9 @@ class AgentWebSocketBridge:
                 self.health_status.error_message = error_msg
                 self.health_status.last_health_check = datetime.now(timezone.utc)
                 
+                # Notify observers of health changes if any are registered
+                await self._notify_monitors_of_health_change()
+                
                 return self.health_status
     
     async def _check_websocket_manager_health(self) -> bool:
@@ -366,13 +389,13 @@ class AgentWebSocketBridge:
         except Exception:
             return False
     
-    async def _check_orchestrator_health(self) -> bool:
-        """Check orchestrator health."""
+    async def _check_registry_health(self) -> bool:
+        """Check registry health."""
         try:
             if not self._orchestrator:
                 return False
             
-            # Test orchestrator responsiveness
+            # Test registry responsiveness
             metrics = await self._orchestrator.get_metrics()
             return isinstance(metrics, dict)
         except Exception:
@@ -385,6 +408,200 @@ class AgentWebSocketBridge:
         
         uptime_delta = datetime.now(timezone.utc) - self.metrics.current_uptime_start
         return uptime_delta.total_seconds()
+    
+    # MonitorableComponent interface implementation
+    
+    async def get_health_status(self) -> Dict[str, Any]:
+        """
+        Get current health status for monitoring (MonitorableComponent interface).
+        
+        Exposes bridge health status in standardized format for external monitors.
+        This method maintains full independence - bridge works without any monitors.
+        
+        Returns:
+            Dict containing standardized health status for monitoring
+        """
+        try:
+            health = await self.health_check()
+            
+            return {
+                "healthy": health.websocket_manager_healthy and health.registry_healthy,
+                "state": health.state.value,
+                "timestamp": time.time(),
+                "websocket_manager_healthy": health.websocket_manager_healthy,
+                "registry_healthy": health.registry_healthy,
+                "consecutive_failures": health.consecutive_failures,
+                "uptime_seconds": health.uptime_seconds,
+                "last_health_check": health.last_health_check.isoformat(),
+                "error_message": health.error_message,
+                "total_recoveries": health.total_recoveries
+            }
+        except Exception as e:
+            logger.error(f"Error getting health status for monitoring: {e}")
+            return {
+                "healthy": False,
+                "state": "error",
+                "timestamp": time.time(),
+                "error_message": f"Health status retrieval failed: {e}"
+            }
+    
+    async def get_metrics(self) -> Dict[str, Any]:
+        """
+        Get operational metrics for analysis (MonitorableComponent interface).
+        
+        Provides comprehensive metrics for business decisions and monitoring.
+        Bridge operates fully independently without registered monitors.
+        
+        Returns:
+            Dict containing operational metrics
+        """
+        try:
+            return {
+                # Core operational metrics
+                "total_initializations": self.metrics.total_initializations,
+                "successful_initializations": self.metrics.successful_initializations,
+                "failed_initializations": self.metrics.failed_initializations,
+                "recovery_attempts": self.metrics.recovery_attempts,
+                "successful_recoveries": self.metrics.successful_recoveries,
+                "health_checks_performed": self.metrics.health_checks_performed,
+                
+                # Calculated metrics
+                "success_rate": (
+                    self.metrics.successful_initializations / 
+                    max(1, self.metrics.total_initializations)
+                ),
+                "recovery_success_rate": (
+                    self.metrics.successful_recoveries /
+                    max(1, self.metrics.recovery_attempts) if self.metrics.recovery_attempts > 0 else 1.0
+                ),
+                
+                # Current status
+                "current_state": self.state.value,
+                "current_uptime_seconds": self._calculate_uptime(),
+                "uptime_start": self.metrics.current_uptime_start.isoformat(),
+                
+                # Observer system metrics  
+                "registered_observers": len(self._monitor_observers),
+                "last_health_broadcast": self._last_health_broadcast,
+                "health_broadcast_interval": self._health_broadcast_interval,
+                
+                # Component availability
+                "websocket_manager_available": self._websocket_manager is not None,
+                "registry_available": self._orchestrator is not None,
+                "supervisor_available": self._supervisor is not None,
+                "registry_available": self._registry is not None,
+                
+                # Timestamp
+                "metrics_timestamp": time.time()
+            }
+        except Exception as e:
+            logger.error(f"Error getting metrics for monitoring: {e}")
+            return {
+                "error": f"Metrics retrieval failed: {e}",
+                "metrics_timestamp": time.time()
+            }
+    
+    def register_monitor_observer(self, observer: 'ComponentMonitor') -> None:
+        """
+        Register a monitor to observe this component (MonitorableComponent interface).
+        
+        Adds external monitor as observer while maintaining bridge independence.
+        Bridge continues full operation even if observer registration fails.
+        
+        Args:
+            observer: Monitor that will receive health change notifications
+        """
+        try:
+            if observer not in self._monitor_observers:
+                self._monitor_observers.append(observer)
+                logger.info(f"✅ Monitor observer registered: {type(observer).__name__}")
+                logger.debug(f"Total registered observers: {len(self._monitor_observers)}")
+            else:
+                logger.debug(f"Observer {type(observer).__name__} already registered")
+        except Exception as e:
+            logger.warning(f"Failed to register monitor observer: {e}")
+            # Bridge continues operating - observer registration is optional
+    
+    def remove_monitor_observer(self, observer: 'ComponentMonitor') -> None:
+        """
+        Remove a registered monitor observer.
+        
+        Removes observer from notifications while maintaining bridge independence.
+        Bridge continues full operation regardless of observer management.
+        
+        Args:
+            observer: Monitor to remove from notifications
+        """
+        try:
+            if observer in self._monitor_observers:
+                self._monitor_observers.remove(observer)
+                logger.info(f"Monitor observer removed: {type(observer).__name__}")
+                logger.debug(f"Remaining registered observers: {len(self._monitor_observers)}")
+            else:
+                logger.debug(f"Observer {type(observer).__name__} was not registered")
+        except Exception as e:
+            logger.warning(f"Failed to remove monitor observer: {e}")
+            # Bridge continues operating - observer management is optional
+    
+    async def _notify_monitors_of_health_change(self) -> None:
+        """
+        Notify registered monitors of health status changes.
+        
+        Implements observer pattern with graceful degradation - bridge operates
+        independently if no monitors registered or notifications fail.
+        
+        Business Value: Enables comprehensive monitoring while maintaining independence.
+        """
+        try:
+            # Skip notification if no observers registered
+            if not self._monitor_observers:
+                return
+            
+            current_time = time.time()
+            health_changed = self.health_status.state != self._last_broadcasted_state
+            periodic_update = (current_time - self._last_health_broadcast) > self._health_broadcast_interval
+            
+            # Only notify on health changes or periodic updates
+            if not (health_changed or periodic_update):
+                return
+            
+            # Prepare health data for broadcast
+            health_data = {
+                "component_id": "agent_websocket_bridge",
+                "state": self.health_status.state.value,
+                "healthy": (
+                    self.health_status.websocket_manager_healthy and 
+                    self.health_status.registry_healthy
+                ),
+                "consecutive_failures": self.health_status.consecutive_failures,
+                "uptime_seconds": self._calculate_uptime(),
+                "timestamp": current_time,
+                "websocket_manager_healthy": self.health_status.websocket_manager_healthy,
+                "registry_healthy": self.health_status.registry_healthy,
+                "error_message": self.health_status.error_message,
+                "change_type": "health_change" if health_changed else "periodic_update"
+            }
+            
+            # Notify all observers (with error resilience)
+            successful_notifications = 0
+            for observer in self._monitor_observers[:]:  # Copy list to avoid modification during iteration
+                try:
+                    await observer.on_component_health_change("agent_websocket_bridge", health_data)
+                    successful_notifications += 1
+                except Exception as e:
+                    logger.warning(f"Failed to notify monitor observer {type(observer).__name__}: {e}")
+                    # Continue notifying other observers - individual failures don't stop bridge
+            
+            # Update broadcast tracking
+            self._last_health_broadcast = current_time
+            self._last_broadcasted_state = self.health_status.state
+            
+            if successful_notifications > 0:
+                logger.debug(f"Health change notified to {successful_notifications}/{len(self._monitor_observers)} observers")
+            
+        except Exception as e:
+            logger.warning(f"Error in health change notification: {e}")
+            # Bridge continues operating - monitoring is optional
     
     async def recover_integration(self) -> IntegrationResult:
         """
@@ -476,7 +693,7 @@ class AgentWebSocketBridge:
             "state": self.state.value,
             "health": {
                 "websocket_manager_healthy": health.websocket_manager_healthy,
-                "orchestrator_healthy": health.orchestrator_healthy,
+                "registry_healthy": health.registry_healthy,
                 "consecutive_failures": health.consecutive_failures,
                 "uptime_seconds": health.uptime_seconds,
                 "last_health_check": health.last_health_check.isoformat(),
@@ -501,7 +718,7 @@ class AgentWebSocketBridge:
             },
             "dependencies": {
                 "websocket_manager_available": self._websocket_manager is not None,
-                "orchestrator_available": self._orchestrator is not None,
+                "registry_available": self._orchestrator is not None,
                 "supervisor_available": self._supervisor is not None,
                 "registry_available": self._registry is not None
             }
@@ -520,18 +737,23 @@ class AgentWebSocketBridge:
             except asyncio.CancelledError:
                 pass
         
-        # Shutdown orchestrator if available
+        # Shutdown registry if available
         if self._orchestrator:
             try:
                 await self._orchestrator.shutdown()
             except Exception as e:
-                logger.error(f"Error shutting down orchestrator: {e}")
+                logger.error(f"Error shutting down registry: {e}")
         
         # Clear references
         self._websocket_manager = None
         self._orchestrator = None
         self._supervisor = None
         self._registry = None
+        
+        # Clear monitor observers
+        self._monitor_observers.clear()
+        self._last_health_broadcast = 0.0
+        self._last_broadcasted_state = None
         
         self.state = IntegrationState.UNINITIALIZED
         logger.info("AgentWebSocketBridge shutdown complete")
