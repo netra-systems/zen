@@ -13,6 +13,7 @@ from shared.isolated_environment import get_env, get_environment_manager
 from dev_launcher.launcher import DevLauncher
 
 
+env = get_env()
 def reset_global_manager():
     """Reset the global environment manager for testing."""
     from shared.isolated_environment import _global_env
@@ -29,19 +30,19 @@ class TestEnvironmentLoadingRegression:
         # Reset global manager before each test
         reset_global_manager()
         # Store original env vars to restore later
-        self.original_env = dict(os.environ)
+        self.original_env = env.get_all()
     
     def teardown_method(self):
         """Cleanup after each test."""
         # Restore original environment
-        os.environ.clear()
-        os.environ.update(self.original_env)
+        env.clear()
+        env.update(self.original_env, "test")
         reset_global_manager()
     
     def test_no_auth_service_port_duplicate_setting(self):
         """Test that AUTH_SERVICE_PORT is not set multiple times by different components."""
         # Setup environment for development mode
-        os.environ["ENVIRONMENT"] = "development"
+        env.set("ENVIRONMENT", "development", "test")
         
         manager = get_environment_manager()
         
@@ -65,7 +66,7 @@ class TestEnvironmentLoadingRegression:
     
     def test_temporary_secrets_loading_flag_cleanup(self):
         """Test that NETRA_SECRETS_LOADING flag is properly cleaned up."""
-        os.environ["ENVIRONMENT"] = "development"
+        env.set("ENVIRONMENT", "development", "test")
         
         manager = get_environment_manager()
         
@@ -91,7 +92,7 @@ class TestEnvironmentLoadingRegression:
     
     def test_isolation_mode_prevents_os_environ_pollution_in_development(self):
         """Test that development mode uses isolation to prevent os.environ pollution."""
-        os.environ["ENVIRONMENT"] = "development"
+        env.set("ENVIRONMENT", "development", "test")
         
         # Get manager should auto-detect development mode
         manager = get_environment_manager()
@@ -115,7 +116,7 @@ class TestEnvironmentLoadingRegression:
     
     def test_production_mode_sets_os_environ(self):
         """Test that production mode sets variables in os.environ."""
-        os.environ["ENVIRONMENT"] = "production"
+        env.set("ENVIRONMENT", "production", "test")
         
         # Reset to get fresh manager for production
         reset_global_manager()
@@ -135,11 +136,11 @@ class TestEnvironmentLoadingRegression:
         # Variables should be in both manager and os.environ
         for key, expected_value in test_vars.items():
             assert manager.get(key) == expected_value
-            assert os.environ.get(key) == expected_value
+            assert env.get(key) == expected_value
     
     def test_secret_loader_isolation_behavior(self):
         """Test that secret loading respects isolation mode."""
-        os.environ["ENVIRONMENT"] = "development"
+        env.set("ENVIRONMENT", "development", "test")
         
         # Get the environment manager (should be in isolation mode)
         manager = get_environment_manager()
@@ -165,7 +166,7 @@ class TestEnvironmentLoadingRegression:
     
     def test_environment_manager_singleton_behavior_in_launcher(self):
         """Test that all components get the same EnvironmentManager instance."""
-        os.environ["ENVIRONMENT"] = "development"
+        env.set("ENVIRONMENT", "development", "test")
         
         # Simulate different components getting the manager
         secret_loader_manager = get_environment_manager()
@@ -189,7 +190,7 @@ class TestEnvironmentLoadingRegression:
     
     def test_component_environment_variable_precedence(self):
         """Test proper precedence handling between different components."""
-        os.environ["ENVIRONMENT"] = "development"
+        env.set("ENVIRONMENT", "development", "test")
         
         manager = get_environment_manager()
         
@@ -221,7 +222,7 @@ class TestEnvironmentLoadingRegression:
     
     def test_no_race_conditions_with_temporary_flags(self):
         """Test that temporary flags don't cause race conditions."""
-        os.environ["ENVIRONMENT"] = "development"
+        env.set("ENVIRONMENT", "development", "test")
         
         manager = get_environment_manager()
         

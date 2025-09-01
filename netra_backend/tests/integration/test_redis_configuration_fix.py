@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Test to verify and fix Redis configuration loading issues.
 This test identifies why redis_url is None and provides a fix.
@@ -8,6 +9,7 @@ from netra_backend.app.config import get_config
 from netra_backend.app.core.configuration.base import config_manager
 
 
+env = get_env()
 class TestRedisConfigurationFix:
     """Test Redis configuration loading and provide fixes."""
 
@@ -73,7 +75,7 @@ class TestRedisConfigurationFix:
         if config.redis_url is None:
             # Set environment variable for development
             default_redis_url = "redis://localhost:6379"
-            os.environ['REDIS_URL'] = default_redis_url
+            env.set('REDIS_URL', default_redis_url, "test")
             
             # Re-initialize config to pick up the change
             # Note: This might not work depending on how config is cached

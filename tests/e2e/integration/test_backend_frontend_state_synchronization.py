@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Backend-Frontend State Synchronization Test
 
 CRITICAL E2E Test: Complete state consistency validation between backend and frontend.
@@ -36,7 +38,7 @@ from tests.e2e.websocket_tests.state_helpers import StateDiffTracker, StateValid
 
 # Enable real services for this test module
 pytestmark = pytest.mark.skipif(
-    os.environ.get("USE_REAL_SERVICES", "false").lower() != "true",
+    env.get("USE_REAL_SERVICES", "false").lower() != "true",
     reason="Real services disabled (set USE_REAL_SERVICES=true)"
 )
 

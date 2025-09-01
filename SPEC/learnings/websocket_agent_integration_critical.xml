@@ -147,6 +147,20 @@ def set_websocket_manager(self, manager: 'WebSocketManager') -> None:
       </business_impact>
     </learning>
 
+    <learning path="SPEC/learnings/websocket_silent_failure_prevention_masterclass.xml">
+      <title>WebSocket Silent Failure Prevention - Comprehensive Masterclass</title>
+      <relationship>COMPREHENSIVE_FRAMEWORK</relationship>
+      <description>
+        Comprehensive masterclass covering all 5 critical WebSocket failure points including
+        the tool dispatcher enhancement gap addressed in this learning. Provides complete
+        prevention framework, implementation patterns, testing strategies, and monitoring approaches.
+      </description>
+      <business_impact>
+        Systematic protection of $500K+ ARR chat functionality through comprehensive
+        silent failure prevention across all WebSocket operations.
+      </business_impact>
+    </learning>
+
     <learning path="SPEC/learnings/websocket.xml">
       <title>WebSocket Core Implementation</title>
       <relationship>FOUNDATION</relationship>

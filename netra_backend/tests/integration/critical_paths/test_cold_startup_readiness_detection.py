@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 """Cold Startup Readiness Detection Integration Tests (L3)
 
+env = get_env()
 Tests that the system properly indicates readiness during the cold startup sequence.
 This test exposes a gap where the health endpoint doesn't check application startup completion.
 
@@ -26,9 +28,9 @@ from fastapi.testclient import TestClient
 from httpx import ASGITransport, AsyncClient
 
 # Set test environment before imports
-os.environ["ENVIRONMENT"] = "testing"
-os.environ["TESTING"] = "true" 
-os.environ["SKIP_STARTUP_CHECKS"] = "true"
+env.set("ENVIRONMENT", "testing", "test")
+env.set("TESTING", "true", "test") 
+env.set("SKIP_STARTUP_CHECKS", "true", "test")
 
 from netra_backend.app.main import app
 

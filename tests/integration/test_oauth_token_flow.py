@@ -432,7 +432,7 @@ async def test_oauth_error_handling():
 @pytest.mark.asyncio
 async def test_staging_environment_urls():
     """Test that staging environment uses correct URLs using IsolatedEnvironment"""
-    # CRITICAL: Use IsolatedEnvironment instead of patch.dict(os.environ)
+    # CRITICAL: Use IsolatedEnvironment instead of patch.env.get_all()
     env = get_env()
     env.enable_isolation()
     

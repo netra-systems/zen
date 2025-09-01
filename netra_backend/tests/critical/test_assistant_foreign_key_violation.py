@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Test to reproduce and fix the assistant foreign key violation error.
 
 Error: insert or update on table "runs" violates foreign key constraint "runs_assistant_id_fkey"
@@ -20,7 +22,7 @@ setup_test_path()
 @pytest.mark.asyncio
 @pytest.mark.env_test
 @pytest.mark.skipif(
-    "sqlite" in os.environ.get("DATABASE_URL", "sqlite"),
+    "sqlite" in env.get("DATABASE_URL", "sqlite"),
     reason="SQLite doesn't support PostgreSQL-specific features like ARRAY types"
 )
 class TestAssistantForeignKeyViolation:

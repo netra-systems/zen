@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Test script for verify_workflow_status.py
@@ -11,6 +12,7 @@ import sys
 from pathlib import Path
 
 
+env = get_env()
 def run_command(cmd: list[str]) -> tuple[int, str]:
     """Run command and return exit code and output."""
     try:
@@ -53,7 +55,7 @@ def test_missing_token() -> bool:
     """Test error handling for missing GitHub token."""
     print("Testing missing token...")
     # Ensure GITHUB_TOKEN is not set for this test
-    env = os.environ.copy()
+    env = env.get_all()
     env.pop("GITHUB_TOKEN", None)
     
     try:

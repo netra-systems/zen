@@ -3,6 +3,7 @@ import os
 
 import httpx
 import pytest
+from shared.isolated_environment import get_env
 
 # NOTE: Assuming the following constants. These may need to be updated.
 BACKEND_URL = "http://localhost:8000"
@@ -10,11 +11,12 @@ AUTH_SERVICE_URL = "http://localhost:8081"
 TEST_USER_EMAIL = "test@example.com"
 
 
+env = get_env()
 @pytest.fixture(scope="module")
 def auth_token():
     """Fixture to get an auth token for a test user."""
     # Skip if real services aren't available
-    if not os.environ.get("USE_REAL_SERVICES", "").lower() == "true":
+    if not env.get("USE_REAL_SERVICES", "").lower() == "true":
         pytest.skip("Test requires real services - set USE_REAL_SERVICES=true")
     
     try:

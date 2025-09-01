@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Complete Real Pipeline E2E Test Suite
 Tests the complete agent pipeline with real LLM calls and proper error handling.
 Maximum 300 lines, functions ≤8 lines.
@@ -22,7 +24,7 @@ from netra_backend.tests.e2e.state_validation_utils import StateIntegrityChecker
 
 @pytest.mark.skipif(
 
-    os.environ.get("ENABLE_REAL_LLM_TESTING") != "true",
+    env.get("ENABLE_REAL_LLM_TESTING") != "true",
 
     reason="Real LLM testing not enabled"
 

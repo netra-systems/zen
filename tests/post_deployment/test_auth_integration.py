@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
+env = get_env()
 Post-deployment authentication integration test.
 Verifies that authentication is working correctly between auth service and backend.
 
@@ -48,7 +50,7 @@ class PostDeploymentAuthTest:
             "staging": "https://auth.staging.netrasystems.ai",
             "production": "https://auth.netrasystems.ai"
         }
-        return os.environ.get("AUTH_SERVICE_URL", env_urls.get(self.environment, env_urls["staging"]))
+        return env.get("AUTH_SERVICE_URL", env_urls.get(self.environment, env_urls["staging"]))
     
     def _get_backend_url(self) -> str:
         """Get backend service URL for environment."""
@@ -57,7 +59,7 @@ class PostDeploymentAuthTest:
             "staging": "https://api.staging.netrasystems.ai",
             "production": "https://api.netrasystems.ai"
         }
-        return os.environ.get("BACKEND_URL", env_urls.get(self.environment, env_urls["staging"]))
+        return env.get("BACKEND_URL", env_urls.get(self.environment, env_urls["staging"]))
     
     async def test_auth_service_health(self) -> bool:
         """Test that auth service is healthy."""
@@ -99,7 +101,7 @@ class PostDeploymentAuthTest:
                         f"{self.auth_url}/auth/service/token",
                         json={
                             "service_id": "test-service",
-                            "service_secret": os.environ.get("SERVICE_SECRET", "test-secret")
+                            "service_secret": env.get("SERVICE_SECRET", "test-secret")
                         }
                     )
                 
@@ -308,9 +310,9 @@ async def main():
     
     # Set environment variables if provided
     if args.auth_url:
-        os.environ["AUTH_SERVICE_URL"] = args.auth_url
+        env.set("AUTH_SERVICE_URL", args.auth_url, "test")
     if args.backend_url:
-        os.environ["BACKEND_URL"] = args.backend_url
+        env.set("BACKEND_URL", args.backend_url, "test")
     
     # Configure logging
     logging.basicConfig(

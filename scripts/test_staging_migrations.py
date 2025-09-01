@@ -6,12 +6,14 @@ import subprocess
 import tempfile
 from pathlib import Path
 from google.cloud import secretmanager
+from shared.isolated_environment import get_env
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from shared.database_url_builder import DatabaseURLBuilder
 
+env = get_env()
 def fetch_secret(secret_id: str, project: str = "netra-staging") -> str:
     """Fetch a secret from Google Secret Manager."""
     client = secretmanager.SecretManagerServiceClient()
@@ -137,7 +139,7 @@ def test_alembic_configuration():
     
     try:
         # Create temporary environment with staging URL
-        env = os.environ.copy()
+        env = env.get_all()
         env["DATABASE_URL"] = migration_url
         
         # Run alembic current to check connection

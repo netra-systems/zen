@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 E2E tests for database connections in DEV MODE.
 
 Tests PostgreSQL, ClickHouse, and Redis connectivity during startup,
@@ -135,10 +137,10 @@ class TestDevDatabaseFixture:
     
     def _set_test_env_vars(self) -> None:
         """Set environment variables for database testing."""
-        os.environ["TESTING"] = "true"
-        os.environ["DATABASE_URL"] = self.db_tester.postgres_url
-        os.environ["CLICKHOUSE_URL"] = self.db_tester.clickhouse_url
-        os.environ["REDIS_URL"] = self.db_tester.redis_url
+        env.set("TESTING", "true", "test")
+        env.set("DATABASE_URL", self.db_tester.postgres_url, "test")
+        env.set("CLICKHOUSE_URL", self.db_tester.clickhouse_url, "test")
+        env.set("REDIS_URL", self.db_tester.redis_url, "test")
     
     async def start_dev_environment(self) -> bool:
         """Start dev environment for database testing."""

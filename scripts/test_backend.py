@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python
 """
+env = get_env()
 Comprehensive backend test runner for Netra AI Platform
 Designed for easy use by Claude Code and CI/CD pipelines
 Now with test isolation support for concurrent execution
@@ -105,7 +107,7 @@ def _apply_standard_test_environment():
 def _apply_environment_variables(test_env):
     """Apply environment variables to os.environ"""
     for key, value in test_env.items():
-        should_override = key not in os.environ or os.environ.get("OVERRIDE_TEST_ENV") == "1"
+        should_override = key not in os.environ or env.get("OVERRIDE_TEST_ENV") == "1"
         if should_override:
             os.environ[key] = value
 
@@ -367,7 +369,7 @@ def _print_test_config_details(args, parallel_status):
     print(f"  Parallel: {parallel_status}")
     print(f"  Coverage: {'enabled' if args.coverage else 'disabled'}")
     print(f"  Fail Fast: {'enabled' if args.fail_fast else 'disabled'}")
-    print(f"  Environment: {os.environ.get('ENVIRONMENT', 'testing')}")
+    print(f"  Environment: {env.get('ENVIRONMENT', 'testing')}")
 
 def _print_pytest_command(pytest_args):
     """Print the pytest command being executed"""

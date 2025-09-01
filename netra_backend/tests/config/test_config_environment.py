@@ -51,7 +51,7 @@ class TestConfigEnvironmentDetection:
         """Clean environment variables for isolated testing"""
         from shared.isolated_environment import get_env
         
-        original_env = os.environ.copy()
+        original_env = env.get_all()
         env = get_env()
         
         # Clear relevant environment variables from both os.environ and isolated environment
@@ -76,8 +76,8 @@ class TestConfigEnvironmentDetection:
         yield
         
         # Restore original environment
-        os.environ.clear()
-        os.environ.update(original_env)
+        env.clear()
+        env.update(original_env, "test")
         
         # Restore isolated environment values (except PYTEST_CURRENT_TEST which should remain cleared)
         for var, value in original_isolated_values.items():
@@ -87,7 +87,7 @@ class TestConfigEnvironmentDetection:
     def test_get_environment_testing(self, config_env, clean_environment):
         """Test environment detection returns 'testing' when TESTING env var set"""
         # Arrange
-        os.environ['TESTING'] = 'true'
+        env.set('TESTING', 'true', "test")
         
         # Act
         result = config_env.detect()
@@ -155,7 +155,7 @@ class TestConfigEnvironmentDetection:
             mock_detect.return_value = None
             
             for env_value, expected in test_cases:
-                os.environ['ENVIRONMENT'] = env_value
+                env.set('ENVIRONMENT', env_value, "test")
                 
                 # Act
                 result = config_env.detect()
@@ -166,8 +166,8 @@ class TestConfigEnvironmentDetection:
     def test_testing_environment_takes_precedence(self, config_env, clean_environment):
         """Test that TESTING env var takes precedence over other detection"""
         # Arrange
-        os.environ['TESTING'] = 'true'
-        os.environ['ENVIRONMENT'] = 'production'
+        env.set('TESTING', 'true', "test")
+        env.set('ENVIRONMENT', 'production', "test")
         
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.environment_constants.EnvironmentDetector.detect_cloud_environment') as mock_detect:
@@ -299,7 +299,7 @@ class TestCloudEnvironmentDetection:
     def test_cloud_run_detection_with_k_service(self, config_env, clean_environment):
         """Test Cloud Run detection via K_SERVICE environment variable"""
         # Arrange
-        os.environ['K_SERVICE'] = 'netra-backend'
+        env.set('K_SERVICE', 'netra-backend', "test")
         
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.environment_constants.EnvironmentDetector.detect_cloud_environment') as mock_detect:
@@ -314,7 +314,7 @@ class TestCloudEnvironmentDetection:
     def test_app_engine_detection(self, config_env, clean_environment):
         """Test App Engine detection via GAE_APPLICATION"""
         # Arrange
-        os.environ['GAE_APPLICATION'] = 'netra-project'
+        env.set('GAE_APPLICATION', 'netra-project', "test")
         
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.environment_constants.EnvironmentDetector.detect_cloud_environment') as mock_detect:
@@ -329,7 +329,7 @@ class TestCloudEnvironmentDetection:
     def test_google_cloud_project_detection(self, config_env, clean_environment):
         """Test Google Cloud Project detection"""
         # Arrange
-        os.environ['GOOGLE_CLOUD_PROJECT'] = 'netra-ai-platform'
+        env.set('GOOGLE_CLOUD_PROJECT', 'netra-ai-platform', "test")
         
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.environment_constants.EnvironmentDetector.detect_cloud_environment') as mock_detect:
@@ -423,7 +423,7 @@ class TestPerformanceAndEdgeCases:
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.environment_constants.EnvironmentDetector.detect_cloud_environment', return_value=None):
             for test_env in test_cases:
-                os.environ['ENVIRONMENT'] = test_env
+                env.set('ENVIRONMENT', test_env, "test")
                 
                 # Should not raise exception
                 result = config_env.detect()

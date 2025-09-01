@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 E2E tests for dev launcher startup sequence in DEV MODE.
 
 Tests comprehensive startup behavior with real services, database connections,
@@ -45,10 +47,10 @@ class TestDevLauncherFixture:
     
     def _set_test_env_vars(self) -> None:
         """Set environment variables for testing."""
-        os.environ["TESTING"] = "true"
-        os.environ["DEV_MODE"] = "true"
-        os.environ["LOG_LEVEL"] = "DEBUG"
-        os.environ["DISABLE_BROWSER_OPEN"] = "true"
+        env.set("TESTING", "true", "test")
+        env.set("DEV_MODE", "true", "test")
+        env.set("LOG_LEVEL", "DEBUG", "test")
+        env.set("DISABLE_BROWSER_OPEN", "true", "test")
     
     async def start_launcher(self, **config_overrides) -> bool:
         """Start dev launcher with test configuration."""

@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Frontend Chat Interface Interaction E2E Tests
 
 Business Value Justification (BVJ):
@@ -90,7 +92,7 @@ class ChatInteractionTestHarness:
         # Use the correct JWT secret from environment
         import os
         jwt_secret = os.getenv("JWT_SECRET_KEY", "rsWwwvq8X6mCSuNv-TMXHDCfb96Xc-Dbay9MZy6EDCU")
-        os.environ["JWT_SECRET"] = jwt_secret
+        env.set("JWT_SECRET", jwt_secret, "test")
         self.access_token = create_real_jwt_token(user_id, ["user"])
         return self.access_token
         

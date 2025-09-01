@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
+env = get_env()
 Automated staging login test script for agent testing.
 This script provides multiple methods for testing staging login without manual OAuth flow.
 """
@@ -25,7 +27,7 @@ sys.path.insert(0, str(project_root))
 # Simple environment configuration
 class IsolatedEnvironment:
     def get(self, key, default=None):
-        return os.environ.get(key, default)
+        return env.get(key, default)
 
 
 class StagingLoginTester:

@@ -17,7 +17,6 @@ import websockets
 from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock, patch, AsyncMock
-import jwt
 import pytest
 import aiohttp
 import os
@@ -55,13 +54,11 @@ class WebSocketReconnectionTests:
     
     def generate_test_token(self, user_id: str = "user_123", expires_in: int = 3600) -> str:
         """Generate a valid JWT token for testing."""
-        payload = {
-            'sub': user_id,
-            'email': f'{user_id}@test.com',
-            'exp': datetime.now(timezone.utc) + timedelta(seconds=expires_in),
-            'iat': datetime.now(timezone.utc)
-        }
-        return jwt.encode(payload, self.jwt_secret, algorithm='HS256')
+        from tests.helpers.auth_test_utils import TestAuthHelper
+        
+        auth_helper = TestAuthHelper()
+        email = f'{user_id}@test.com'
+        return auth_helper.create_test_token(user_id, email)
     
     async def test_exponential_backoff_reconnection(self) -> bool:
         """

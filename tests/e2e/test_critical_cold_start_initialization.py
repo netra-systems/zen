@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Critical Cold Start System Initialization Tests.
 
 This test suite validates the most difficult cold start scenarios that cause
@@ -50,7 +52,7 @@ if os.getenv('DATABASE_URL') == 'sqlite+aiosqlite:///:memory:':
             for line in f:
                 if line.startswith('DATABASE_URL='):
                     real_database_url = line.split('=', 1)[1].strip()
-                    os.environ['DATABASE_URL'] = real_database_url
+                    env.set('DATABASE_URL', real_database_url, "test")
                     break
 
 class Settings:

@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Comprehensive Next.js Configuration Validation Tests
 
 Tests that will INITIALLY FAIL to reproduce the Next.js config warning:
@@ -224,14 +226,14 @@ class TestNextJSConfigValidation:
         config_content = config_validator.config_content or open(config_validator.config_path).read()
         
         # These checks will fail initially as we don't have environment validation
-        assert "ignoreBuildErrors: true" not in config_content or "development" in os.environ.get("NODE_ENV", ""), \
+        assert "ignoreBuildErrors: true" not in config_content or "development" in env.get("NODE_ENV", ""), \
             "ignoreBuildErrors should only be true in development"
         
-        assert "ignoreDuringBuilds: true" not in config_content or "staging" in os.environ.get("NODE_ENV", ""), \
+        assert "ignoreDuringBuilds: true" not in config_content or "staging" in env.get("NODE_ENV", ""), \
             "ignoreDuringBuilds should only be true in staging"
         
         # Check for production-specific issues
-        if os.environ.get("NODE_ENV") == "production":
+        if env.get("NODE_ENV") == "production":
             assert "productionBrowserSourceMaps: false" in config_content, \
                 "Source maps should be disabled in production"
 
@@ -374,7 +376,7 @@ class TestExtendedConfigScenarios:
         # These tests will fail as we don't validate dynamic config scenarios
         if "process.env.NEXT_PUBLIC_API_URL" in config_content:
             # Check for environment variable issues
-            assert os.environ.get("NEXT_PUBLIC_API_URL"), "Required environment variable missing"
+            assert env.get("NEXT_PUBLIC_API_URL"), "Required environment variable missing"
         
         # Test dynamic rewrites configuration
         if "async rewrites()" in config_content:
@@ -427,11 +429,11 @@ class TestExtendedConfigScenarios:
         required_vars = ["NEXT_PUBLIC_API_URL", "NODE_ENV"]
         for var in required_vars:
             if var in env_vars:
-                assert os.environ.get(var), f"Required environment variable {var} is not set"
+                assert env.get(var), f"Required environment variable {var} is not set"
         
         # Check for environment variable issues we're not catching
         if "NEXT_PUBLIC_API_URL" in env_vars:
-            api_url = os.environ.get("NEXT_PUBLIC_API_URL", "http://localhost:8000")
+            api_url = env.get("NEXT_PUBLIC_API_URL", "http://localhost:8000")
             assert api_url.startswith(("http://", "https://")), "API URL should be a valid HTTP URL"
     
     def test_security_configuration_issues(self, config_validator):
@@ -440,11 +442,11 @@ class TestExtendedConfigScenarios:
         
         # These security checks will fail as we don't have security validation
         if "productionBrowserSourceMaps: true" in config_content:
-            assert os.environ.get("NODE_ENV") != "production", \
+            assert env.get("NODE_ENV") != "production", \
                 "Source maps should be disabled in production for security"
         
         if "ignoreBuildErrors: true" in config_content:
-            assert os.environ.get("NODE_ENV") != "production", \
+            assert env.get("NODE_ENV") != "production", \
                 "Build errors should not be ignored in production"
         
         # Check for security issues in image configuration
@@ -454,7 +456,7 @@ class TestExtendedConfigScenarios:
             if domains_match:
                 domains_str = domains_match.group(1)
                 assert "'*'" not in domains_str, "Wildcard domains are security risk"
-                assert "'localhost'" not in domains_str or os.environ.get("NODE_ENV") != "production", \
+                assert "'localhost'" not in domains_str or env.get("NODE_ENV") != "production", \
                     "localhost domain should not be in production"
     
     def test_performance_configuration_validation(self, config_validator):

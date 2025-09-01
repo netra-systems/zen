@@ -1,6 +1,8 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+env = get_env()
 Staging Test Suite Runner
 
 This script runs the 10 most critical staging tests to validate the staging environment.
@@ -50,7 +52,7 @@ if sys.platform == 'win32':
     if sys.stderr.encoding != 'utf-8':
         sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
     # Set environment variable for child processes
-    os.environ['PYTHONIOENCODING'] = 'utf-8'
+    env.set('PYTHONIOENCODING', 'utf-8', "test")
 
 # Add the project root to the path
 project_root = Path(__file__).parent.parent.parent

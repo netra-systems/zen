@@ -14,15 +14,19 @@ from google.cloud import secretmanager
 
 from netra_backend.app.core.secret_manager import SecretManager, SecretManagerError
 from tenacity import RetryError
+from shared.isolated_environment import get_env
 
 
 class TestSecretManagerInitialization:
     """Test SecretManager initialization and configuration."""
     
     @patch('netra_backend.app.core.secret_manager.config_manager')
-    @patch.dict('os.environ', {'ENVIRONMENT': 'staging'}, clear=False)
     def test_initialization_with_staging_environment(self, mock_config_manager):
         """Test initialization detects staging environment correctly."""
+        # Set up environment using IsolatedEnvironment
+        env = get_env()
+        env.set('ENVIRONMENT', 'staging', "test")
+        
         mock_config = Mock()
         mock_config.environment = 'staging'
         mock_config.gcp_project_id_numerical_staging = '701982941522'
@@ -34,9 +38,12 @@ class TestSecretManagerInitialization:
         assert manager._config == mock_config
         
     @patch('netra_backend.app.core.secret_manager.config_manager')
-    @patch.dict('os.environ', {'ENVIRONMENT': 'production'}, clear=False)
     def test_initialization_with_production_environment(self, mock_config_manager):
         """Test initialization detects production environment correctly."""
+        # Set up environment using IsolatedEnvironment
+        env = get_env()
+        env.set('ENVIRONMENT', 'production', "test")
+        
         mock_config = Mock()
         mock_config.environment = 'production'
         mock_config.gcp_project_id_numerical_production = '304612253870'
@@ -47,9 +54,12 @@ class TestSecretManagerInitialization:
         assert manager._project_id == '304612253870'
         
     @patch('netra_backend.app.core.secret_manager.config_manager')
-    @patch.dict('os.environ', {'ENVIRONMENT': 'development'}, clear=False)
     def test_initialization_with_development_fallback(self, mock_config_manager):
         """Test initialization uses production defaults for development."""
+        # Set up environment using IsolatedEnvironment
+        env = get_env()
+        env.set('ENVIRONMENT', 'development', "test")
+        
         mock_config = Mock()
         mock_config.environment = 'development'
         mock_config.gcp_project_id_numerical_production = '304612253870'
@@ -387,14 +397,48 @@ class TestSecretValidation:
 class TestSecretManagerIntegration:
     """Integration tests for SecretManager with real configurations."""
     
-    @patch.dict(os.environ, {
-        'GEMINI_API_KEY': 'test-gemini-key',
-        'JWT_SECRET_KEY': 'test-jwt-key',
-        'FERNET_KEY': 'test-fernet-key'
-    })
+    @pytest.fixture(autouse=True)
+    def setup_environment(self):
+        """Setup isolated environment for testing."""
+        env = get_env()
+        # Store original values
+        original_gemini = env.get('GEMINI_API_KEY')
+        original_jwt = env.get('JWT_SECRET_KEY')
+        original_fernet = env.get('FERNET_KEY')
+        original_env = env.get('ENVIRONMENT')
+        
+        yield
+        
+        # Cleanup - restore original values
+        if original_gemini is not None:
+            env.set('GEMINI_API_KEY', original_gemini, "test_cleanup")
+        else:
+            env.delete('GEMINI_API_KEY', "test_cleanup")
+            
+        if original_jwt is not None:
+            env.set('JWT_SECRET_KEY', original_jwt, "test_cleanup")
+        else:
+            env.delete('JWT_SECRET_KEY', "test_cleanup")
+            
+        if original_fernet is not None:
+            env.set('FERNET_KEY', original_fernet, "test_cleanup")
+        else:
+            env.delete('FERNET_KEY', "test_cleanup")
+            
+        if original_env is not None:
+            env.set('ENVIRONMENT', original_env, "test_cleanup")
+        else:
+            env.delete('ENVIRONMENT', "test_cleanup")
+    
     @patch('netra_backend.app.core.secret_manager.config_manager')
     def test_load_secrets_from_environment_integration(self, mock_config_manager):
         """Test loading secrets from environment variables in integration."""
+        # Set up environment variables using IsolatedEnvironment
+        env = get_env()
+        env.set('GEMINI_API_KEY', 'test-gemini-key', "test")
+        env.set('JWT_SECRET_KEY', 'test-jwt-key', "test")
+        env.set('FERNET_KEY', 'test-fernet-key', "test")
+        
         mock_config = Mock()
         mock_config.environment = 'development'
         mock_config.load_secrets = False

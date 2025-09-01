@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
+env = get_env()
 SECRET_KEY Configuration Staging Regression Tests
 
 Tests to replicate critical SECRET_KEY issues found in GCP staging audit:
@@ -48,7 +50,7 @@ class TestSecretKeyConfigurationRegression:
             'TESTING': '0'
         }, clear=False):
             # Remove SECRET_KEY if it exists
-            staging_env = dict(os.environ)
+            staging_env = env.get_all()
             staging_env.pop('SECRET_KEY', None)
             staging_env.pop('NETRA_SECRET_KEY', None)
             
@@ -250,7 +252,7 @@ class TestSecretKeyJWTIntegrationRegression:
                     # This simulates JWT token generation in staging
                     import jwt
                     payload = {"user_id": "test", "exp": 1234567890}
-                    secret = os.environ.get('SECRET_KEY')
+                    secret = env.get('SECRET_KEY')
                     
                     # This should FAIL with invalid secret configurations
                     token = jwt.encode(payload, secret, algorithm="HS256")

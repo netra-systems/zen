@@ -25,7 +25,7 @@ def _is_smoke_test_run():
     """Check if we're running smoke tests specifically."""
     
     # Check environment variable set by unified test runner or other callers
-    if os.environ.get("PYTEST_CURRENT_CATEGORY") == "smoke":
+    if env.get("PYTEST_CURRENT_CATEGORY") == "smoke":
         return True
     
     # Check command line args for smoke test patterns

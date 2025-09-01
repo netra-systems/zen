@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 """Quality Gate Tester - Phase 4 of Unified System Testing
 
+env = get_env()
 Business Value Justification (BVJ):
 - Segment: All tiers (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure premium AI output quality justifies value-based pricing
@@ -14,9 +16,9 @@ from typing import Any, Dict, List
 import pytest
 
 # Set testing environment before imports
-os.environ["TESTING"] = "1"
-os.environ["ENVIRONMENT"] = "testing"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+env.set("TESTING", "1", "test")
+env.set("ENVIRONMENT", "testing", "test")
+env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
 
 from netra_backend.app.services.quality_gate import (
     ContentType,

@@ -62,7 +62,7 @@ class ComprehensiveEnvironmentViolationAnalyzer(ast.NodeVisitor):
         self.generic_visit(node)
     
     def visit_Subscript(self, node):
-        """Detect os.environ['KEY'] patterns."""
+        """Detect env.get('KEY') patterns."""
         if self._is_environ_access(node.value):
             self._add_violation(node, 'os.environ[]', 'SUBSCRIPT')
         self.generic_visit(node)
@@ -687,7 +687,7 @@ class TestEnvironmentViolationsComprehensive:
                 lines = content.split('\n')
                 for line_no, line in enumerate(lines, 1):
                     # Look for direct environment access patterns
-                    if any(pattern in line for pattern in ['os.environ.get(', 'os.getenv(']):
+                    if any(pattern in line for pattern in ['env.get(', 'os.getenv(']):
                         # Skip comments
                         if line.strip().startswith('#'):
                             continue
@@ -841,7 +841,7 @@ class TestEnvironmentViolationsComprehensive:
         print(f"\n💡 REMEDIATION STEPS:")
         print("   1. Replace os.environ.get() with env.get()")
         print("   2. Replace os.getenv() with env.get()")
-        print("   3. Replace os.environ['KEY'] with env.get('KEY')")
+        print("   3. Replace env.get('KEY') with env.get('KEY')")
         print("   4. Import: from shared.isolated_environment import get_env")
         print("   5. Initialize: env = get_env()")
         print("   6. For tests: env.enable_isolation()")

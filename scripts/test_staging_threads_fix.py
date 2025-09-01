@@ -4,8 +4,10 @@ import asyncio
 import json
 import sys
 from pathlib import Path
+from shared.isolated_environment import get_env
 
 # Add project root to path
+env = get_env()
 sys.path.append(str(Path(__file__).parent.parent))
 
 import httpx
@@ -70,8 +72,8 @@ async def test_local_environment():
     from unittest.mock import patch
     
     # Set environment to staging
-    os.environ["ENVIRONMENT"] = "staging"
-    os.environ["NETRA_ENV"] = "staging"
+    env.set("ENVIRONMENT", "staging", "test")
+    env.set("NETRA_ENV", "staging", "test")
     
     from netra_backend.app.auth_integration.auth import get_current_user
     from netra_backend.app.config import get_config

@@ -18,6 +18,42 @@
         </workflow>
     </retrieval-protocol>
     
+    <learning id="websocket-silent-failure-prevention-masterclass-2025-09-01">
+        <title>WebSocket Silent Failure Prevention - Comprehensive Masterclass</title>
+        <category>WebSocket/SilentFailure/Prevention</category>
+        <keywords>websocket, silent-failure, prevention, chat, real-time, business-critical, dependency-injection, authentication, error-handling, monitoring</keywords>
+        <path>websocket_silent_failure_prevention_masterclass.xml</path>
+        <critical-takeaway>
+            WebSocket silent failures are the most dangerous class of failures in real-time systems.
+            Five critical failure points identified: dependency injection gaps, tool dispatcher enhancement gaps,
+            authentication silent hanging, exception swallowing, and connection state management issues.
+            Comprehensive prevention framework includes explicit error propagation, dependency validation,
+            state transition logging, silent failure detection tests, and production monitoring.
+        </critical-takeaway>
+        <severity>MISSION_CRITICAL</severity>
+        <business-impact>$500K+ ARR chat functionality - Core product value delivery</business-impact>
+        <prevention>
+            Implement explicit error handling with context logging, validate all WebSocket dependencies at injection time,
+            track connection states explicitly, create silent failure detection tests, monitor WebSocket event patterns in production.
+            NEVER use bare except clauses. ALL authentication failures MUST close connections with proper error codes.
+        </prevention>
+        <implementation-patterns>
+            <pattern>Explicit Error Propagation - All errors logged with context and properly re-raised</pattern>
+            <pattern>Dependency Injection Validation - Critical dependencies validated at creation time</pattern>
+            <pattern>State Transition Logging - All state changes logged for debugging and monitoring</pattern>
+        </implementation-patterns>
+        <testing-strategies>
+            <strategy>Silent Failure Detection Tests - Tests that specifically catch silent failures</strategy>
+            <strategy>Error Propagation Validation - Ensure errors are not silently swallowed</strategy>
+            <strategy>End-to-End Event Flow Validation - Complete event flow validation</strategy>
+        </testing-strategies>
+        <related-learnings>
+            <learning-ref>websocket_silent_failures.xml</learning-ref>
+            <learning-ref>websocket_agent_integration_critical.xml</learning-ref>
+            <learning-ref>websocket_injection_fix_comprehensive.xml</learning-ref>
+        </related-learnings>
+    </learning>
+    
     <learning id="jwt-secret-standardization-hard-requirements-2025-08-30">
         <title>JWT Secret Standardization with Hard Requirements (No Fallbacks)</title>
         <category>Authentication Security</category>

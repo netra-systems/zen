@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Redis Session Performance Tests
 
 Business Value Justification (BVJ):
@@ -25,11 +27,11 @@ from typing import Any, Dict
 
 import pytest
 
-os.environ["TESTING"] = "1"
+env.set("TESTING", "1", "test")
 
-os.environ["ENVIRONMENT"] = "testing"
+env.set("ENVIRONMENT", "testing", "test")
 
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
 
 from netra_backend.app.logging_config import central_logger
 

@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Critical Staging Root Cause Validation Tests
 
 This file contains failing tests that reproduce each identified staging error
@@ -401,7 +403,7 @@ class TestConfigurationHierarchyIssues:
                 def mock_env_get(key, default=None):
                     if key == "DATABASE_URL":
                         return secret_db_url  # Secret Manager value
-                    return os.environ.get(key, default)
+                    return env.get(key, default)
                 
                 mock_get.side_effect = mock_env_get
                 

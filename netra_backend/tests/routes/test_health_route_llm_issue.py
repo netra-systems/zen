@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Test that exposes the LLM health check issue in the health route.
 This test demonstrates why the 'settings' is not defined error occurs.
@@ -14,10 +15,11 @@ import pytest
 from fastapi.testclient import TestClient
 
 # Set minimal test environment
-os.environ["TESTING"] = "1"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
-os.environ["DEV_MODE_DISABLE_CLICKHOUSE"] = "true"
+env.set("TESTING", "1", "test")
+env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
+env.set("DEV_MODE_DISABLE_CLICKHOUSE", "true", "test")
 
+env = get_env()
 @pytest.fixture
 def client():
     """Create test client with proper app setup"""

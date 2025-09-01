@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Health Check Cascade Unit Tests - Standalone Validation
 
 Business Value: Validate health check cascade logic without full service stack.
@@ -19,6 +20,7 @@ import pytest
 logger = logging.getLogger(__name__)
 
 
+env = get_env()
 class MockClickHouseSimulator:
     """Mock ClickHouse simulator for unit testing."""
     
@@ -28,14 +30,14 @@ class MockClickHouseSimulator:
     
     async def disable_clickhouse_service(self) -> bool:
         """Mock disable ClickHouse service."""
-        os.environ['CLICKHOUSE_DISABLED'] = 'true'
+        env.set('CLICKHOUSE_DISABLED', 'true', "test")
         self.clickhouse_disabled = True
         return True
     
     async def restore_clickhouse_service(self) -> bool:
         """Mock restore ClickHouse service."""
         if 'CLICKHOUSE_DISABLED' in os.environ:
-            del os.environ['CLICKHOUSE_DISABLED']
+            env.delete('CLICKHOUSE_DISABLED', "test")
         self.clickhouse_disabled = False
         return True
 
@@ -108,7 +110,7 @@ class TestHealthCascadeLogic:
         disabled = await clickhouse_simulator.disable_clickhouse_service()
         assert disabled, "Failed to disable ClickHouse"
         assert clickhouse_simulator.clickhouse_disabled
-        assert os.environ.get('CLICKHOUSE_DISABLED') == 'true'
+        assert env.get('CLICKHOUSE_DISABLED') == 'true'
         
         # Restore service
         restored = await clickhouse_simulator.restore_clickhouse_service()

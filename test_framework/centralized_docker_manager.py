@@ -57,37 +57,49 @@ class CentralizedDockerManager:
     MAX_RESTART_ATTEMPTS = 3
     HEALTH_CHECK_TIMEOUT = 60  # seconds
     
-    # Service configuration
+    # Service configuration - aligned with docker-compose.alpine.yml
     SERVICES = {
         "backend": {
             "container": "netra-backend",
             "port": 8000,
             "health_endpoint": "/health",
-            "memory_limit": "1024m"  # Reduced for stability
+            "memory_limit": "1024m",  # Reduced for stability
+            "compose_file": "docker-compose.alpine.yml"
         },
         "frontend": {
             "container": "netra-frontend", 
             "port": 3000,
             "health_endpoint": "/",
-            "memory_limit": "256m"  # Reduced for stability
+            "memory_limit": "256m",  # Reduced for stability
+            "compose_file": "docker-compose.alpine.yml"
         },
         "auth": {
             "container": "netra-auth",
             "port": 8001,
             "health_endpoint": "/health",
-            "memory_limit": "512m"
+            "memory_limit": "512m",
+            "compose_file": "docker-compose.alpine.yml"
         },
         "postgres": {
             "container": "netra-postgres",
             "port": 5432,
             "health_cmd": "pg_isready",
-            "memory_limit": "512m"
+            "memory_limit": "512m",
+            "compose_file": "docker-compose.alpine.yml"
         },
         "redis": {
             "container": "netra-redis",
             "port": 6379,
             "health_cmd": "redis-cli ping",
-            "memory_limit": "256m"
+            "memory_limit": "256m",
+            "compose_file": "docker-compose.alpine.yml"
+        },
+        "clickhouse": {
+            "container": "netra-clickhouse",
+            "port": 8123,
+            "health_endpoint": "/ping",
+            "memory_limit": "512m",
+            "compose_file": "docker-compose.alpine.yml"
         }
     }
     
@@ -220,7 +232,7 @@ class CentralizedDockerManager:
         # Check rate limit
         recent_restarts = len([t for t in history if now - t < 300])  # Last 5 minutes
         if recent_restarts >= self.MAX_RESTART_ATTEMPTS:
-            print(f"⚠️ Too many restarts for {service_name} ({recent_restarts} in last 5 min)")
+            print(f"[WARNING] Too many restarts for {service_name} ({recent_restarts} in last 5 min)")
             return False
         
         return True
@@ -248,7 +260,7 @@ class CentralizedDockerManager:
             
             # Check if environment exists
             if env_name not in state["environments"]:
-                print(f"🔧 Creating new test environment: {env_name}")
+                print(f"[INFO] Creating new test environment: {env_name}")
                 self._create_environment(env_name)
                 state["environments"][env_name] = {
                     "created": datetime.now().isoformat(),
@@ -259,7 +271,7 @@ class CentralizedDockerManager:
             else:
                 state["environments"][env_name]["users"] = \
                     state["environments"][env_name].get("users", 0) + 1
-                print(f"♻️ Reusing existing environment: {env_name} (users: {state['environments'][env_name]['users']})")
+                print(f"[INFO] Reusing existing environment: {env_name} (users: {state['environments'][env_name]['users']})")
             
             self._save_state(state)
             
@@ -304,13 +316,29 @@ class CentralizedDockerManager:
             env_key = f"{service.upper()}_MEMORY_LIMIT"
             env[env_key] = config.get("memory_limit", "512m")
         
-        # Start services
-        cmd = [
+        # Start services with proper compose command
+        # Try docker compose (v2) first, fall back to docker-compose (v1)
+        cmd_v2 = [
+            "docker", "compose",
+            "-f", compose_file,
+            "-p", env_name,
+            "up", "-d", "--remove-orphans"
+        ]
+        
+        cmd_v1 = [
             "docker-compose",
             "-f", compose_file,
             "-p", env_name,
-            "up", "-d"
+            "up", "-d", "--remove-orphans"
         ]
+        
+        # Try v2 first
+        result = subprocess.run(cmd_v2, env=env, capture_output=True, text=True)
+        if result.returncode != 0:
+            # Fall back to v1
+            result = subprocess.run(cmd_v1, env=env, capture_output=True, text=True)
+        
+        cmd = cmd_v2  # For error reporting
         
         result = subprocess.run(cmd, env=env, capture_output=True, text=True)
         if result.returncode != 0:
@@ -323,18 +351,37 @@ class CentralizedDockerManager:
         """Clean up Docker environment"""
         compose_file = self._get_compose_file()
         
-        cmd = [
+        # Try docker compose (v2) first, fall back to docker-compose (v1)
+        cmd_v2 = [
+            "docker", "compose",
+            "-f", compose_file,
+            "-p", env_name,
+            "down", "--remove-orphans", "-v"
+        ]
+        
+        cmd_v1 = [
             "docker-compose",
             "-f", compose_file,
             "-p", env_name,
             "down", "--remove-orphans", "-v"
         ]
         
-        subprocess.run(cmd, capture_output=True)
+        # Try v2 first
+        result = subprocess.run(cmd_v2, capture_output=True)
+        if result.returncode != 0:
+            # Fall back to v1
+            subprocess.run(cmd_v1, capture_output=True)
     
     def _get_compose_file(self) -> str:
-        """Get appropriate docker-compose file"""
-        if self.use_production_images:
+        """Get appropriate docker-compose file based on configuration."""
+        # Check for compose file preference in services config
+        compose_files_needed = set()
+        for service, config in self.SERVICES.items():
+            if 'compose_file' in config:
+                compose_files_needed.add(config['compose_file'])
+        
+        # Default to Alpine for production images (memory optimization)
+        if self.use_production_images or 'docker-compose.alpine.yml' in compose_files_needed:
             # Use alpine compose configuration for memory optimization
             compose_file = "docker-compose.alpine.yml"
             
@@ -417,7 +464,7 @@ class CentralizedDockerManager:
             self._save_state(state)
             
             if success:
-                print(f"✅ Successfully restarted {service_name}")
+                print(f"[OK] Successfully restarted {service_name}")
             else:
                 print(f"❌ Failed to restart {service_name}: {result.stderr}")
             
@@ -484,9 +531,9 @@ class CentralizedDockerManager:
         print(f"⏳ Waiting for services to be healthy in {env_name}...")
         
         if self.wait_for_services(timeout=timeout):
-            print(f"✅ All services healthy in {env_name}")
+            print(f"[OK] All services healthy in {env_name}")
         else:
-            print(f"⚠️ Some services failed to become healthy in {env_name}")
+            print(f"[WARNING] Some services failed to become healthy in {env_name}")
     
     def cleanup_old_environments(self, max_age_hours: int = 24):
         """Clean up old test environments"""

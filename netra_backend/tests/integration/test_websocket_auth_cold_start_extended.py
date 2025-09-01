@@ -1,6 +1,8 @@
+from shared.isolated_environment import get_env
 """Extended WebSocket Authentication Cold Start Agent Integration Tests (L3)
 
 
+env = get_env()
 Comprehensive L3 tests with increased depth and breadth for WebSocket authentication during cold start.
 These tests focus on challenging edge cases, security vulnerabilities, and real-world failure scenarios.
 
@@ -44,9 +46,9 @@ import pytest
 import websockets
 
 # Set test environment
-os.environ["ENVIRONMENT"] = "testing"
-os.environ["TESTING"] = "true"
-os.environ["SKIP_STARTUP_CHECKS"] = "true"
+env.set("ENVIRONMENT", "testing", "test")
+env.set("TESTING", "true", "test")
+env.set("SKIP_STARTUP_CHECKS", "true", "test")
 
 # Test infrastructure imports
 from netra_backend.app.clients.auth_client_core import auth_client

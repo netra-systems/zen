@@ -4,14 +4,11 @@ Provides common utilities for all test files.
 """
 
 import sys
-import jwt
 from pathlib import Path
-from datetime import datetime, timedelta, timezone
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.db.models_postgres import User
-from netra_backend.app.core.configuration import unified_config_manager
 
 
 def setup_test_path() -> Path:
@@ -78,20 +75,17 @@ async def create_test_user(db: AsyncSession, email: str = "test@example.com",
 def create_test_token(user_id: str, expires_in: int = 3600) -> str:
     """Create a test JWT token for authentication.
     
+    DEPRECATED: Use tests.helpers.auth_test_utils.TestAuthHelper instead.
+    This function is maintained for backward compatibility only.
+    
     Args:
         user_id: User ID to encode in token
-        expires_in: Token expiration time in seconds
+        expires_in: Token expiration time in seconds (ignored - uses standard expiry)
         
     Returns:
         str: JWT token
     """
-    config = unified_config_manager.get_config()
-    secret = getattr(config, 'jwt_secret', 'test_secret_key')
+    from tests.helpers.auth_test_utils import TestAuthHelper
     
-    payload = {
-        "sub": str(user_id),
-        "exp": datetime.now(timezone.utc) + timedelta(seconds=expires_in),
-        "iat": datetime.now(timezone.utc)
-    }
-    
-    return jwt.encode(payload, secret, algorithm="HS256")
+    auth_helper = TestAuthHelper()
+    return auth_helper.create_test_token(user_id)

@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Test for environment interface consistency across services.
 
 This test ensures that IsolatedEnvironment implementations across different services
@@ -26,7 +28,7 @@ class TestEnvironmentInterfaceConsistency:
     def setup(self):
         """Setup test environment with isolation."""
         # Store original environment
-        self.original_env = os.environ.copy()
+        self.original_env = env.get_all()
         
         # Clear test-specific variables
         test_vars = ['CONSISTENCY_TEST_VAR', 'INTERFACE_TEST_VAR', 'CROSS_SERVICE_VAR']
@@ -46,8 +48,8 @@ class TestEnvironmentInterfaceConsistency:
         # Restore original environment
         self.dev_env.disable_isolation()
         self.backend_env.disable_isolation()
-        os.environ.clear()
-        os.environ.update(self.original_env)
+        env.clear()
+        env.update(self.original_env, "test")
 
     def test_basic_interface_compatibility(self):
         """Test that both implementations support the same basic interface."""

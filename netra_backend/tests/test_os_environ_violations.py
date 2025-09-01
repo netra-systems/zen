@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 """Test Suite: OS Environment Variable Access Violations
 
+env = get_env()
 Business Value Justification (BVJ):
 - Segment: Enterprise  
 - Business Goal: Security and configuration integrity
@@ -38,7 +40,7 @@ class OSEnvironAnalyzer(ast.NodeVisitor):
         self.justified_calls = []
         
     def visit_Subscript(self, node):
-        """Detect os.environ['KEY'] patterns."""
+        """Detect env.get('KEY') patterns."""
         if self._is_os_environ(node.value):
             line_no = node.lineno
             if self._has_justification_marker(line_no):
@@ -170,7 +172,7 @@ class TestOSEnvironViolations:
         ]
         
     def test_no_direct_os_environ_access(self, project_root, allowed_files):
-        """Test 1: No direct os.environ['KEY'] access outside config system."""
+        """Test 1: No direct env.get('KEY') access outside config system."""
         violations = []
         
         for root, dirs, files in os.walk(project_root):
@@ -347,8 +349,8 @@ class TestOSEnvironViolations:
     def test_env_access_patterns_consistency(self, project_root):
         """Test 5: Verify environment access patterns are consistent."""
         access_patterns = {
-            'subscript': [],  # os.environ['KEY']
-            'get': [],        # os.environ.get('KEY')
+            'subscript': [],  # env.get('KEY')
+            'get': [],        # env.get('KEY')
             'getenv': [],     # os.getenv('KEY')
             'config': []      # Proper config usage
         }

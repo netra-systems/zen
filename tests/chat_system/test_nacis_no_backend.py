@@ -1,6 +1,8 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """Test NACIS without running the full backend.
 
+env = get_env()
 Date Created: 2025-01-22
 Last Updated: 2025-01-22
 
@@ -31,9 +33,9 @@ from unittest.mock import Mock, AsyncMock, MagicMock
 # Add project root to path
 
 # Set NACIS environment
-os.environ["NACIS_ENABLED"] = "true"
-os.environ["GUARDRAILS_ENABLED"] = "true"
-os.environ["SEMANTIC_CACHE_ENABLED"] = "false"  # Disable cache for testing
+env.set("NACIS_ENABLED", "true", "test")
+env.set("GUARDRAILS_ENABLED", "true", "test")
+env.set("SEMANTIC_CACHE_ENABLED", "false", "test")  # Disable cache for testing
 
 
 class MockLLMManager:

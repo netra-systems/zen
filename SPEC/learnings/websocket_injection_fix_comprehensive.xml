@@ -618,6 +618,16 @@ def __init__(self, llm_manager, db_session):
     </lessons_learned>
 
     <related_specifications>
+        <spec path="SPEC/learnings/websocket_silent_failure_prevention_masterclass.xml">
+            <relationship>COMPREHENSIVE_FRAMEWORK</relationship>
+            <description>
+                Comprehensive masterclass that includes this injection fix as one of 5 critical failure points.
+                Provides complete prevention framework, implementation patterns, testing strategies, and monitoring
+                approaches for all WebSocket silent failures including dependency injection gaps.
+            </description>
+            <business_impact>Systematic protection of $500K+ ARR chat functionality</business_impact>
+        </spec>
+
         <spec path="SPEC/learnings/websocket_agent_integration_critical.xml">
             <relationship>FOUNDATIONAL</relationship>
             <description>Provides the foundational WebSocket agent integration patterns that this fix enables</description>

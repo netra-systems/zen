@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 """Response Persistence and Recovery Integration Test
 
+env = get_env()
 Business Value Justification (BVJ):
 - Segment: Enterprise ($20K MRR protection)
 - Business Goal: Data Integrity and Disaster Recovery
@@ -25,9 +27,9 @@ from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 import pytest
 
 # Set testing environment before imports
-os.environ["TESTING"] = "1"
-os.environ["ENVIRONMENT"] = "testing"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+env.set("TESTING", "1", "test")
+env.set("ENVIRONMENT", "testing", "test")
+env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
 
 from sqlalchemy import select, text
 from sqlalchemy.exc import SQLAlchemyError

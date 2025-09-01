@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Critical test suite for staging startup initialization order issues.
 
@@ -17,6 +18,7 @@ from typing import List, Dict, Any
 import asyncio
 
 
+env = get_env()
 class TestStagingStartupInitializationOrder:
     """Test suite for startup initialization order issues in staging."""
     
@@ -279,7 +281,7 @@ class TestEnvironmentSpecificInitializationOrder:
             detection_attempts.append("environment_detection")
             # Try to detect environment but env vars aren't loaded yet
             import os
-            env = os.environ.get("ENVIRONMENT")
+            env = env.get("ENVIRONMENT")
             if env is None:
                 raise RuntimeError("Environment variables not loaded during early startup")
             return env

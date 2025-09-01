@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 """New User Registration Flow Integration Tests (L3)
 
+env = get_env()
 Tests complete new user registration journey from initial signup to first login.
 Validates user creation, email verification, initial permissions, and onboarding.
 
@@ -28,9 +30,9 @@ from fastapi.testclient import TestClient
 from httpx import ASGITransport, AsyncClient
 
 # Set test environment before imports
-os.environ["ENVIRONMENT"] = "testing"
-os.environ["TESTING"] = "true"
-os.environ["SKIP_STARTUP_CHECKS"] = "true"
+env.set("ENVIRONMENT", "testing", "test")
+env.set("TESTING", "true", "test")
+env.set("SKIP_STARTUP_CHECKS", "true", "test")
 
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.db.postgres import AsyncSessionLocal

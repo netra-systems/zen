@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Complete User Journey: OAuth Login → User Creation → Chat Test
 
 **BUSINESS VALUE JUSTIFICATION (BVJ):**
@@ -44,10 +46,10 @@ except ImportError:
     websockets = None
 
 # Set test environment
-os.environ["TESTING"] = "1" 
-os.environ["USE_REAL_SERVICES"] = "true"
-os.environ["AUTH_SERVICE_URL"] = "http://localhost:8001"
-os.environ["BACKEND_SERVICE_URL"] = "http://localhost:8000"
+env.set("TESTING", "1", "test") 
+env.set("USE_REAL_SERVICES", "true", "test")
+env.set("AUTH_SERVICE_URL", "http://localhost:8001", "test")
+env.set("BACKEND_SERVICE_URL", "http://localhost:8000", "test")
 
 # Add parent directories to sys.path for imports
 

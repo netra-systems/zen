@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
+env = get_env()
 Comprehensive Test Suite for Netra Adaptive Workflow
 Combines authentication, direct testing, and integration tests
 """
@@ -411,7 +413,7 @@ Examples:
         interactive = "--non-interactive" not in sys.argv
         
         if "--no-auth" in sys.argv:
-            os.environ["AUTH_SERVICE_ENABLED"] = "false"
+            env.set("AUTH_SERVICE_ENABLED", "false", "test")
             print_info("Authentication disabled")
         
         if "--quick" in sys.argv:

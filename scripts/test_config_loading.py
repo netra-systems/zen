@@ -5,9 +5,11 @@ import json
 import os
 import sys
 from pathlib import Path
+from shared.isolated_environment import get_env
 
 # Add app directory to path
 
+env = get_env()
 def test_config_loading():
     """Test configuration loading with detailed output."""
     _print_test_header()
@@ -37,7 +39,7 @@ def _print_environment_variables():
 
 def _print_environment_variable(var):
     """Print single environment variable with masking"""
-    value = os.environ.get(var)
+    value = env.get(var)
     if value:
         display_value = _mask_sensitive_value(var, value)
         print(f"  {var}: {display_value}")
@@ -136,10 +138,10 @@ def _handle_configuration_error(e):
 
 if __name__ == "__main__":
     # Set some test environment variables if running locally
-    if not os.environ.get("ENVIRONMENT"):
+    if not env.get("ENVIRONMENT"):
         print("[INFO] No ENVIRONMENT set, using test values for local testing")
-        os.environ["ENVIRONMENT"] = "development"
-        os.environ["LOG_LEVEL"] = "DEBUG"
+        env.set("ENVIRONMENT", "development", "test")
+        env.set("LOG_LEVEL", "DEBUG", "test")
     
     success = test_config_loading()
     sys.exit(0 if success else 1)

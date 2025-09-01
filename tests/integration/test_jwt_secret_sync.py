@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 JWT Secret Synchronization Test
 
@@ -13,6 +14,7 @@ from unittest.mock import patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 
+env = get_env()
 def test_jwt_secrets_are_synchronized():
     """
     CRITICAL: Ensure both services use EXACT same JWT secret.
@@ -172,8 +174,8 @@ if __name__ == "__main__":
     print("Running JWT Secret Synchronization Tests...")
     
     # Set up test environment
-    os.environ["ENVIRONMENT"] = "test"
-    os.environ["JWT_SECRET_KEY"] = "test-jwt-secret-32-character-minimum-length"
+    env.set("ENVIRONMENT", "test", "test")
+    env.set("JWT_SECRET_KEY", "test-jwt-secret-32-character-minimum-length", "test")
     
     try:
         test_jwt_secrets_are_synchronized()

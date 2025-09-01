@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
+env = get_env()
 Test script to verify ClickHouse graceful failure handling
 """
 import asyncio
@@ -7,8 +9,8 @@ import os
 import sys
 
 # Set up environment to simulate staging
-os.environ["ENVIRONMENT"] = "staging" 
-os.environ["CLICKHOUSE_REQUIRED"] = "false"
+env.set("ENVIRONMENT", "staging", "test") 
+env.set("CLICKHOUSE_REQUIRED", "false", "test")
 
 # Add the project root to Python path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

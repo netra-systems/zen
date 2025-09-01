@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Dict, Optional
 
 from test_launcher.config import TestConfig, TestProfile
+from shared.isolated_environment import get_env
 
 
 logger = logging.getLogger(__name__)
@@ -30,8 +31,11 @@ class TestEnvironmentManager:
         """Setup test environment variables."""
         logger.info(f"Setting up test environment for profile: {self.config.profile.value}")
         
+        # Get environment instance
+        env = get_env()
+        
         # Save original environment
-        self.original_env = dict(os.environ)
+        self.original_env = env.get_all()
         
         # Base test environment variables
         self.test_env_vars = {
@@ -51,8 +55,9 @@ class TestEnvironmentManager:
         self.test_env_vars.update(service_urls)
         
         # Apply environment variables
+        env = get_env()
         for key, value in self.test_env_vars.items():
-            os.environ[key] = value
+            env.set(key, value, "test_launcher")
         
         logger.debug(f"Applied {len(self.test_env_vars)} test environment variables")
     
@@ -154,15 +159,18 @@ class TestEnvironmentManager:
         """Restore original environment."""
         logger.info("Cleaning up test environment")
         
+        # Get environment instance
+        env = get_env()
+        
         # Remove test environment variables
         for key in self.test_env_vars:
-            if key in os.environ:
-                del os.environ[key]
+            if env.exists(key):
+                env.delete(key, "test_launcher_cleanup")
         
         # Restore original values that were overwritten
         for key, value in self.original_env.items():
-            if key not in os.environ or os.environ[key] != value:
-                os.environ[key] = value
+            if not env.exists(key) or env.get(key) != value:
+                env.set(key, value, "test_launcher_restore")
         
         logger.debug("Environment restored to original state")
     

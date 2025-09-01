@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Tests for structured generation functionality in LLM Manager.
 """
 
@@ -42,12 +44,12 @@ def test_config():
     import os
     
     # Use real API key if available, otherwise use test key
-    api_key = os.environ.get("GOOGLE_API_KEY", "test-openai-key")
+    api_key = env.get("GOOGLE_API_KEY", "test-openai-key")
     
     # If we have a Gemini API key but testing with OpenAI, skip real testing
-    if os.environ.get("ENABLE_REAL_LLM_TESTING") == "true" and api_key == "test-openai-key":
+    if env.get("ENABLE_REAL_LLM_TESTING") == "true" and api_key == "test-openai-key":
         # Try using Gemini instead if available
-        gemini_key = os.environ.get("GEMINI_API_KEY")
+        gemini_key = env.get("GEMINI_API_KEY")
         if gemini_key:
             return AppConfig(
                 llm_configs={
