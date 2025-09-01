@@ -1,6 +1,4 @@
-from shared.isolated_environment import get_env
 """
-env = get_env()
 E2E Test Service Enforcement
 Ensures E2E tests ONLY use real services, never mocks
 
@@ -64,11 +62,7 @@ class E2EServiceValidator:
     async def validate_redis_connection() -> bool:
         """Validate Redis is available for E2E testing"""
         try:
-<<<<<<< HEAD
             redis_url = get_env().get("REDIS_URL", "redis://localhost:6379/0")
-=======
-            redis_url = env.get("REDIS_URL", "redis://localhost:6379/0")
->>>>>>> cd652f04f43df1a879423564315f459a150f8a24
             client = await redis.from_url(redis_url)
             await client.ping()
             await client.close()
@@ -81,11 +75,7 @@ class E2EServiceValidator:
     async def validate_backend_service() -> bool:
         """Validate backend service is available"""
         try:
-<<<<<<< HEAD
             backend_url = get_env().get("BACKEND_SERVICE_URL", "http://localhost:8000")
-=======
-            backend_url = env.get("BACKEND_SERVICE_URL", "http://localhost:8000")
->>>>>>> cd652f04f43df1a879423564315f459a150f8a24
             async with aiohttp.ClientSession() as session:
                 async with session.get(f"{backend_url}/health") as response:
                     return response.status == 200
@@ -97,11 +87,7 @@ class E2EServiceValidator:
     async def validate_auth_service() -> bool:
         """Validate auth service is available"""
         try:
-<<<<<<< HEAD
             auth_url = get_env().get("AUTH_SERVICE_URL", "http://localhost:8081")
-=======
-            auth_url = env.get("AUTH_SERVICE_URL", "http://localhost:8081")
->>>>>>> cd652f04f43df1a879423564315f459a150f8a24
             async with aiohttp.ClientSession() as session:
                 async with session.get(f"{auth_url}/health") as response:
                     return response.status == 200
@@ -112,13 +98,8 @@ class E2EServiceValidator:
     @staticmethod
     def validate_llm_configuration() -> bool:
         """Validate LLM configuration for E2E testing"""
-<<<<<<< HEAD
         real_llm_requested = (get_env().get("USE_REAL_LLM") == "true" or get_env().get("TEST_USE_REAL_LLM") == "true")
         logger.debug(f"LLM validation: USE_REAL_LLM={get_env().get('USE_REAL_LLM')}, TEST_USE_REAL_LLM={get_env().get('TEST_USE_REAL_LLM')}, real_llm_requested={real_llm_requested}")
-=======
-        real_llm_requested = (env.get("USE_REAL_LLM") == "true" or env.get("TEST_USE_REAL_LLM") == "true")
-        logger.debug(f"LLM validation: USE_REAL_LLM={env.get('USE_REAL_LLM')}, TEST_USE_REAL_LLM={env.get('TEST_USE_REAL_LLM')}, real_llm_requested={real_llm_requested}")
->>>>>>> cd652f04f43df1a879423564315f459a150f8a24
         
         # Check that real LLM testing is enabled
         if not real_llm_requested:
@@ -126,33 +107,19 @@ class E2EServiceValidator:
             return False
         
         # Check for at least one LLM API key
-<<<<<<< HEAD
         openai_key = get_env().get("OPENAI_API_KEY")
         anthropic_key = get_env().get("ANTHROPIC_API_KEY")
         gemini_key = get_env().get("GEMINI_API_KEY")
-=======
-        openai_key = env.get("OPENAI_API_KEY")
-        anthropic_key = env.get("ANTHROPIC_API_KEY")
-        gemini_key = env.get("GEMINI_API_KEY")
->>>>>>> cd652f04f43df1a879423564315f459a150f8a24
         has_llm_key = any([openai_key, anthropic_key, gemini_key])
         logger.debug(f"API key check: OPENAI={bool(openai_key)}, ANTHROPIC={bool(anthropic_key)}, GEMINI={bool(gemini_key)}, has_any={has_llm_key}")
         
         if not has_llm_key:
             # Only set test keys if real LLM testing is not specifically requested
-<<<<<<< HEAD
             if not get_env().get("TEST_USE_REAL_LLM", "").lower() == "true":
                 logger.warning("No LLM API keys found - using test keys")
                 # Set test API keys for E2E testing
-                get_env().set("GEMINI_API_KEY", "test-gemini-api-key")
-                get_env().set("TEST_LLM_MODE", "simulate")
-=======
-            if not env.get("TEST_USE_REAL_LLM", "").lower() == "true":
-                logger.warning("No LLM API keys found - using test keys")
-                # Set test API keys for E2E testing
-                env.set("GEMINI_API_KEY", "test-gemini-api-key", "test")
-                env.set("TEST_LLM_MODE", "simulate", "test")
->>>>>>> cd652f04f43df1a879423564315f459a150f8a24
+                get_env().set("GEMINI_API_KEY", "test-gemini-api-key", "test")
+                get_env().set("TEST_LLM_MODE", "simulate", "test")
             else:
                 logger.info("Real LLM testing requested - API keys will be loaded from secret manager")
         
@@ -182,11 +149,7 @@ class E2ERealServiceFactory:
     @staticmethod
     async def create_redis_client():
         """Create real Redis client for E2E testing"""
-<<<<<<< HEAD
         redis_url = get_env().get("REDIS_URL", "redis://localhost:6379/0")
-=======
-        redis_url = env.get("REDIS_URL", "redis://localhost:6379/0")
->>>>>>> cd652f04f43df1a879423564315f459a150f8a24
         client = await redis.from_url(redis_url)
         return client
     

@@ -241,7 +241,7 @@
 |-----------|----------|---------|-------------|
 | **🔴 CENTRALIZED MANAGER** | `/test_framework/centralized_docker_manager.py` | **Primary Docker coordination system** | Rate limiting, locking, restart storm prevention |
 | **🔴 COMPOSE MANAGER** | `/test_framework/docker_compose_manager.py` | **Docker Compose lifecycle** | Service health checks, port discovery, validation |
-| **🔴 PARALLEL TEST SUPPORT** | CentralizedDockerManager | **10+ parallel test runners** | File-based locking, shared/dedicated environments |
+| **🔴 PARALLEL TEST SUPPORT** | UnifiedDockerManager | **10+ parallel test runners** | File-based locking, shared/dedicated environments |
 | **🔴 MEMORY OPTIMIZATION** | Service memory limits | **50% memory reduction** | 6GB → 3GB total, production image support |
 | **Unified Test Integration** | `/tests/unified_test_runner.py` | **Integrated Docker management** | --docker-production, --docker-dedicated flags |
 | **Cleanup Script** | `/scripts/docker_cleanup.py` | **Enhanced cleanup coordination** | Respects active environments, age-based cleanup |

@@ -33,15 +33,9 @@ import pytest
 import websockets
 
 # Test environment setup
-<<<<<<< HEAD
-get_env().set("TESTING",  )"1"
-get_env().set("CORS_ORIGINS",  )"*"
-get_env().set("ENVIRONMENT",  )"development"
-=======
-env.set("TESTING", "1", "test")
-env.set("CORS_ORIGINS", "*", "test")
-env.set("ENVIRONMENT", "development", "test")
->>>>>>> cd652f04f43df1a879423564315f459a150f8a24
+get_env().set("TESTING", "1", "test")
+get_env().set("CORS_ORIGINS", "*", "test")
+get_env().set("ENVIRONMENT", "development", "test")
 
 
 @dataclass

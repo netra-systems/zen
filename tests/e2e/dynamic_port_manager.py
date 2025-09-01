@@ -91,10 +91,7 @@ class DynamicPortManager:
         base_ports = self.DEFAULT_PORTS[self.mode]
         
         # Override with environment variables if set
-<<<<<<< HEAD
         env = get_env()
-=======
->>>>>>> cd652f04f43df1a879423564315f459a150f8a24
         backend = int(env.get("TEST_BACKEND_PORT", base_ports.backend))
         auth = int(env.get("TEST_AUTH_PORT", base_ports.auth))
         frontend = int(env.get("TEST_FRONTEND_PORT", base_ports.frontend))
@@ -165,42 +162,23 @@ class DynamicPortManager:
             
     def export_to_env(self) -> None:
         """Export port configuration to environment variables"""
-<<<<<<< HEAD
         env = get_env()
-        env.set("TEST_BACKEND_PORT", str(self.ports.backend))
-        env.set("TEST_AUTH_PORT", str(self.ports.auth))
-        env.set("TEST_FRONTEND_PORT", str(self.ports.frontend))
-        env.set("TEST_POSTGRES_PORT", str(self.ports.postgres))
-        env.set("TEST_REDIS_PORT", str(self.ports.redis))
-        env.set("TEST_CLICKHOUSE_PORT", str(self.ports.clickhouse))
+        env.set("TEST_BACKEND_PORT", str(self.ports.backend), "test")
+        env.set("TEST_AUTH_PORT", str(self.ports.auth), "test")
+        env.set("TEST_FRONTEND_PORT", str(self.ports.frontend), "test")
+        env.set("TEST_POSTGRES_PORT", str(self.ports.postgres), "test")
+        env.set("TEST_REDIS_PORT", str(self.ports.redis), "test")
+        env.set("TEST_CLICKHOUSE_PORT", str(self.ports.clickhouse), "test")
         
         # Export service URLs
         urls = self.get_service_urls()
-        env.set("TEST_BACKEND_URL", urls["backend"])
-        env.set("TEST_AUTH_URL", urls["auth"])
-        env.set("TEST_FRONTEND_URL", urls["frontend"])
-        env.set("TEST_WEBSOCKET_URL", urls["websocket"])
-        env.set("DATABASE_URL", urls["postgres"])
-        env.set("REDIS_URL", urls["redis"])
-        env.set("CLICKHOUSE_URL", urls["clickhouse"])
-=======
-        env.set("TEST_BACKEND_PORT", str, "test")(self.ports.backend)
-        env.set("TEST_AUTH_PORT", str, "test")(self.ports.auth)
-        env.set("TEST_FRONTEND_PORT", str, "test")(self.ports.frontend)
-        env.set("TEST_POSTGRES_PORT", str, "test")(self.ports.postgres)
-        env.set("TEST_REDIS_PORT", str, "test")(self.ports.redis)
-        env.set("TEST_CLICKHOUSE_PORT", str, "test")(self.ports.clickhouse)
-        
-        # Export service URLs
-        urls = self.get_service_urls()
-        env.set("TEST_BACKEND_URL", urls, "test")["backend"]
-        env.set("TEST_AUTH_URL", urls, "test")["auth"]
-        env.set("TEST_FRONTEND_URL", urls, "test")["frontend"]
-        env.set("TEST_WEBSOCKET_URL", urls, "test")["websocket"]
-        env.set("DATABASE_URL", urls, "test")["postgres"]
-        env.set("REDIS_URL", urls, "test")["redis"]
-        env.set("CLICKHOUSE_URL", urls, "test")["clickhouse"]
->>>>>>> cd652f04f43df1a879423564315f459a150f8a24
+        env.set("TEST_BACKEND_URL", urls["backend"], "test")
+        env.set("TEST_AUTH_URL", urls["auth"], "test")
+        env.set("TEST_FRONTEND_URL", urls["frontend"], "test")
+        env.set("TEST_WEBSOCKET_URL", urls["websocket"], "test")
+        env.set("DATABASE_URL", urls["postgres"], "test")
+        env.set("REDIS_URL", urls["redis"], "test")
+        env.set("CLICKHOUSE_URL", urls["clickhouse"], "test")
         
     def wait_for_service(self, service: str, timeout: int = 30) -> bool:
         """Wait for a service to be available"""

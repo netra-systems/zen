@@ -15,6 +15,7 @@
     "error",
     "filtered_by_event",
     "high_cost_per_event",
+    "last_event",
     "listen:",
     "llm_event",
     "message",

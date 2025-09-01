@@ -317,11 +317,7 @@ class TestFrontendBuildEnvironmentRegression:
         invalid_env_vars = []
         
         for env_var in required_env_vars:
-<<<<<<< HEAD
             value = get_env().get(env_var)
-=======
-            value = env.get(env_var)
->>>>>>> cd652f04f43df1a879423564315f459a150f8a24
             
             if value is None:
                 missing_env_vars.append(env_var)

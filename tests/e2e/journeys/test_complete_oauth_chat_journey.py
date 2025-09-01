@@ -45,17 +45,10 @@ except ImportError:
     websockets = None
 
 # Set test environment
-<<<<<<< HEAD
-get_env().set("TESTING",  )"1" 
-get_env().set("USE_REAL_SERVICES",  )"true"
-get_env().set("AUTH_SERVICE_URL",  )"http://localhost:8001"
-get_env().set("BACKEND_SERVICE_URL",  )"http://localhost:8000"
-=======
-env.set("TESTING", "1", "test") 
-env.set("USE_REAL_SERVICES", "true", "test")
-env.set("AUTH_SERVICE_URL", "http://localhost:8001", "test")
-env.set("BACKEND_SERVICE_URL", "http://localhost:8000", "test")
->>>>>>> cd652f04f43df1a879423564315f459a150f8a24
+get_env().set("TESTING", "1", "test")
+get_env().set("USE_REAL_SERVICES", "true", "test")
+get_env().set("AUTH_SERVICE_URL", "http://localhost:8001", "test")
+get_env().set("BACKEND_SERVICE_URL", "http://localhost:8000", "test")
 
 # Add parent directories to sys.path for imports
 

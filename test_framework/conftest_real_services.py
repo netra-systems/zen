@@ -109,6 +109,14 @@ async def real_services_session() -> AsyncIterator[RealServicesManager]:
     current_env = env_manager.env.get("ENVIRONMENT", "").lower()
     is_staging = current_env == "staging"
     
+    # CRITICAL: Check for orchestration skip flags
+    no_orchestration = env_manager.env.get("NO_DOCKER_ORCHESTRATION", "false").lower() == "true"
+    skip_orchestration = env_manager.env.get("SKIP_SERVICE_ORCHESTRATION", "false").lower() == "true"
+    
+    if no_orchestration or skip_orchestration:
+        logger.info("Docker/Service orchestration disabled, skipping service orchestration fixtures")
+        pytest.skip("Service orchestration disabled (NO_DOCKER_ORCHESTRATION=true or SKIP_SERVICE_ORCHESTRATION=true)")
+    
     # Real services are always used in staging environment
     if not (use_real_services or is_staging):
         logger.info("Real services disabled, skipping real service fixtures")

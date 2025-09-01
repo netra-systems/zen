@@ -32,7 +32,7 @@ python tests/unified_test_runner.py --category cypress --real-llm
 ## Integration Architecture
 
 ### Centralized Docker Management
-- All test categories share the same `CentralizedDockerManager`
+- All test categories share the same `UnifiedDockerManager`
 - Prevents service restart storms during parallel test execution
 - Coordinates service lifecycle across test runs
 - File-based locking ensures proper synchronization

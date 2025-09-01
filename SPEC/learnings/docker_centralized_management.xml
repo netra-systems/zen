@@ -35,7 +35,7 @@
         <core-components>
             <component name="UnifiedDockerManager">
                 <file>test_framework/unified_docker_manager.py</file>
-                <purpose>Single Source of Truth (SSOT) for all Docker operations - unified ServiceOrchestrator and CentralizedDockerManager</purpose>
+                <purpose>Single Source of Truth (SSOT) for all Docker operations - unified ServiceOrchestrator and UnifiedDockerManager</purpose>
                 <key-features>
                     <feature>Async/await architecture for better concurrency</feature>
                     <feature>Cross-platform file-based locking mechanism</feature>
@@ -55,7 +55,7 @@
                 <purpose>Legacy compatibility classes for existing code</purpose>
                 <key-features>
                     <feature>ServiceOrchestrator compatibility class</feature>
-                    <feature>CentralizedDockerManager compatibility class</feature>
+                    <feature>UnifiedDockerManager compatibility class</feature>
                     <feature>Automatic deprecation warnings</feature>
                     <feature>Seamless migration path</feature>
                 </key-features>

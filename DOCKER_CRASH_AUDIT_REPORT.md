@@ -9,7 +9,7 @@ Docker Desktop was crashing when the test runner executed due to restart storms 
 **Previous Issue**: Multiple test files and scripts performed frequent `docker restart` operations causing Docker daemon stress.
 
 **Solution Implemented**:
-- Created `CentralizedDockerManager` with rate limiting (30-second cooldown between restarts)
+- Created `UnifiedDockerManager` with rate limiting (30-second cooldown between restarts)
 - Maximum 3 restart attempts per service in 5 minutes
 - Restart history tracking to prevent storms
 - File-based locking to coordinate across parallel test processes

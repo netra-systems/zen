@@ -1,4 +1,5 @@
 import { Message, WebSocketMessage } from '@/types/unified';
+import { setupAuthenticatedState } from './auth-helpers';
 
 export interface TestFile {
   name: string;
@@ -21,9 +22,7 @@ export interface ReferenceData {
 }
 
 export const setupAuthentication = (): void => {
-  cy.window().then((win) => {
-    win.localStorage.setItem('jwt_token', 'test-jwt-token');
-  });
+  setupAuthenticatedState();
 };
 
 export const mockEmptyReferences = (): void => {

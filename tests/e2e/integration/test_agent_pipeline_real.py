@@ -49,22 +49,14 @@ def _validate_real_service_requirements():
     
     # Check for real LLM capability
     if not any([
-<<<<<<< HEAD
         get_env().get("OPENAI_API_KEY"),
         get_env().get("ANTHROPIC_API_KEY"), 
         get_env().get("GEMINI_API_KEY"),
         get_env().get("GOOGLE_API_KEY")
-=======
-        env.get("OPENAI_API_KEY"),
-        env.get("ANTHROPIC_API_KEY"), 
-        env.get("GEMINI_API_KEY"),
-        env.get("GOOGLE_API_KEY")
->>>>>>> cd652f04f43df1a879423564315f459a150f8a24
     ]):
         missing_deps.append("LLM API keys (OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY, or GOOGLE_API_KEY)")
     
     # Ensure real LLM is enabled
-<<<<<<< HEAD
     if get_env().get("USE_REAL_LLM", "false").lower() != "true":
         get_env().set("USE_REAL_LLM", "true")
         get_env().set("TEST_USE_REAL_LLM", "true")
@@ -74,17 +66,6 @@ def _validate_real_service_requirements():
     
     # Check critical environment variables
     if not get_env().get("JWT_SECRET_KEY"):
-=======
-    if env.get("USE_REAL_LLM", "false").lower() != "true":
-        env.set("USE_REAL_LLM", "true", "test")
-        env.set("TEST_USE_REAL_LLM", "true", "test")
-    
-    # Set the JWT secret for backend compatibility
-    env.set("JWT_SECRET_KEY", "rsWwwvq8X6mCSuNv-TMXHDCfb96Xc-Dbay9MZy6EDCU", "test")
-    
-    # Check critical environment variables
-    if not env.get("JWT_SECRET_KEY"):
->>>>>>> cd652f04f43df1a879423564315f459a150f8a24
         missing_deps.append("JWT_SECRET_KEY for authentication")
     
     if missing_deps:

@@ -1,3 +1,12 @@
+
+# NOTE: This workflow has been identified for PR comment update
+# To prevent comment spam, update PR comment sections to use:
+# uses: ./.github/actions/pr-comment
+# with:
+#   comment-identifier: 'netra-mission-critical'
+#   comment-body: |
+#     Your comment content here
+
 name: Mission Critical - WebSocket Agent Events
 
 on:
@@ -112,10 +121,11 @@ jobs:
           
       - name: Post PR comment
         if: github.event_name == 'pull_request' && failure()
-        uses: actions/github-script@v7
+        uses: ./.github/actions/pr-comment
         with:
-          script: |
-            const message = `## 🚨 MISSION CRITICAL Tests Failed
+          comment-identifier: 'netra-mission-critical'
+          comment-body: |
+            ## 🚨 MISSION CRITICAL Tests Failed
             
             **WebSocket agent events are NOT working!**
             
@@ -129,21 +139,14 @@ jobs:
             - [ ] agent_completed
             
             ### How to Fix:
-            1. Check \`AgentRegistry.set_websocket_manager()\` enhances tool dispatcher
-            2. Verify \`enhance_tool_dispatcher_with_notifications()\` is called
+            1. Check `AgentRegistry.set_websocket_manager()` enhances tool dispatcher
+            2. Verify `enhance_tool_dispatcher_with_notifications()` is called
             3. See [WebSocket Integration Learning](../../SPEC/learnings/websocket_agent_integration_critical.xml)
             
             ### Run Tests Locally:
-            \`\`\`bash
+            ```bash
             python -m pytest tests/mission_critical/test_final_validation.py -v
-            \`\`\``;
-            
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: message
-            });
+            ```
             
       - name: Update commit status
         if: always()

@@ -1,4 +1,3 @@
-from shared.isolated_environment import get_env
 """Health Check Cascade Unit Tests - Standalone Validation
 
 Business Value: Validate health check cascade logic without full service stack.
@@ -7,14 +6,13 @@ Tests core degraded mode logic for faster feedback during development.
 
 import asyncio
 import logging
-from shared.isolated_environment import get_env
-
-# Add project root to path for imports
+import os
 import sys
 from pathlib import Path
 from typing import Any, Dict
 
 import pytest
+from shared.isolated_environment import get_env
 
 
 logger = logging.getLogger(__name__)
@@ -111,11 +109,7 @@ class TestHealthCascadeLogic:
         disabled = await clickhouse_simulator.disable_clickhouse_service()
         assert disabled, "Failed to disable ClickHouse"
         assert clickhouse_simulator.clickhouse_disabled
-<<<<<<< HEAD
         assert get_env().get('CLICKHOUSE_DISABLED') == 'true'
-=======
-        assert env.get('CLICKHOUSE_DISABLED') == 'true'
->>>>>>> cd652f04f43df1a879423564315f459a150f8a24
         
         # Restore service
         restored = await clickhouse_simulator.restore_clickhouse_service()

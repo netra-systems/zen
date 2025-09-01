@@ -28,6 +28,7 @@ from typing import Dict, Any
 from tests.e2e.config import TEST_CONFIG
 from tests.e2e.real_services_manager import RealServicesManager
 from tests.e2e.enforce_real_services import E2EServiceValidator
+from shared.isolated_environment import get_env
 
 
 # Initialize real services

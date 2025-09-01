@@ -25,7 +25,7 @@ This document summarizes the comprehensive documentation and cross-references cr
 **File:** `SPEC/learnings/index.xml`
 - **Added:** New learning entry `docker-centralized-management-system-2025-09-01`
 - **Keywords:** docker, centralized management, crash remediation, restart storms, parallel testing, locking, rate limiting, memory optimization
-- **Critical Takeaway:** Docker Desktop crashes from restart storms require centralized management with rate limiting. CentralizedDockerManager prevents conflicts with file-based locking and 30-second cooldowns.
+- **Critical Takeaway:** Docker Desktop crashes from restart storms require centralized management with rate limiting. UnifiedDockerManager prevents conflicts with file-based locking and 30-second cooldowns.
 
 ### 3. LLM Master Index Updated ✅ UPDATED
 **File:** `LLM_MASTER_INDEX.md`

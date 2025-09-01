@@ -1128,7 +1128,7 @@ python unified_test_runner.py --cleanup-old-environments
 
 #### Integration Points
 
-- **CentralizedDockerManager**: `/test_framework/centralized_docker_manager.py`
+- **UnifiedDockerManager**: `/test_framework/centralized_docker_manager.py`
 - **DockerComposeManager**: `/test_framework/docker_compose_manager.py`
 - **Parallel Test Verification**: `/scripts/test_parallel_docker_manager.py`
 - **Enhanced Cleanup**: `/scripts/docker_cleanup.py`
