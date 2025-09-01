@@ -49,7 +49,6 @@ from dev_launcher.config import LauncherConfig
 from dev_launcher.database_connector import DatabaseConnector, DatabaseType, ConnectionStatus
 from dev_launcher.health_monitor import HealthMonitor, ServiceState, HealthStatus
 from dev_launcher.port_manager import PortManager
-# from dev_launcher.startup_validator import StartupValidator  # Module removed
 from netra_backend.app.core.network_constants import ServicePorts
 
 

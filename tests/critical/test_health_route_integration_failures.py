@@ -165,6 +165,7 @@ class TestHealthRouteIntegrationFailures:
                 })
         
         # Check if discovery reports inconsistent health endpoints
+        # Note: startup_validator.py module has been removed, so this check will be skipped
         dev_launcher = project_root / 'dev_launcher/startup_validator.py'
         if dev_launcher.exists():
             launcher_content = dev_launcher.read_text()
@@ -523,7 +524,7 @@ class TestHealthRouteIntegrationFailures:
         service_files = [
             ('netra_backend', project_root / 'netra_backend/app/routes/health.py'),
             ('auth_service', project_root / 'auth_service/main.py'),
-            ('dev_launcher', project_root / 'dev_launcher/startup_validator.py')
+            ('dev_launcher', project_root / 'dev_launcher/startup_validator.py')  # Note: removed module
         ]
         
         for service_name, service_file in service_files:
@@ -576,7 +577,7 @@ class TestHealthRouteIntegrationFailures:
         # Check for specific health check timeout cascades in startup sequence
         startup_files = [
             project_root / 'dev_launcher/launcher.py',
-            project_root / 'dev_launcher/startup_validator.py'
+            project_root / 'dev_launcher/startup_validator.py'  # Note: removed module
         ]
         
         startup_cascade_risks = []
@@ -696,7 +697,7 @@ class TestHealthRouteServiceDiscoveryFailures:
         # Check service discovery configuration
         discovery_files = [
             project_root / 'netra_backend/app/routes/discovery.py',
-            project_root / 'dev_launcher/startup_validator.py',
+            project_root / 'dev_launcher/startup_validator.py',  # Note: removed module
             project_root / 'dev_launcher/service_startup.py'
         ]
         
