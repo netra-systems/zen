@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type
 if TYPE_CHECKING:
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     from netra_backend.app.llm.llm_manager import LLMManager
-    from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import (
     ActionsToMeetGoalsSubAgent,
 )
@@ -35,7 +35,7 @@ class AgentRegistry:
         self.llm_manager = llm_manager
         self.tool_dispatcher = tool_dispatcher
         self.agents: Dict[str, BaseSubAgent] = {}
-        self.websocket_manager = None
+        self.websocket_bridge: Optional['AgentWebSocketBridge'] = None
         self._agents_registered = False
         self.registration_errors: Dict[str, str] = {}
         
@@ -106,8 +106,9 @@ class AgentRegistry:
             logger.debug(f"Agent {name} already registered, skipping")
             return
             
-        if self.websocket_manager:
-            agent.websocket_manager = self.websocket_manager
+        # Set WebSocket bridge on agent if available and agent supports it
+        if self.websocket_bridge and hasattr(agent, 'set_websocket_bridge'):
+            agent.set_websocket_bridge(self.websocket_bridge)
         self.agents[name] = agent
         # Clear any previous registration errors
         self.registration_errors.pop(name, None)
@@ -134,9 +135,9 @@ class AgentRegistry:
                 **kwargs
             )
             
-            # Set websocket manager if available
-            if self.websocket_manager:
-                agent.websocket_manager = self.websocket_manager
+            # Set websocket bridge if available and agent supports it
+            if self.websocket_bridge and hasattr(agent, 'set_websocket_bridge'):
+                agent.set_websocket_bridge(self.websocket_bridge)
                 
             # Store the agent
             self.agents[name] = agent
@@ -236,52 +237,53 @@ class AgentRegistry:
         self.register("corpus_admin", CorpusAdminSubAgent(
             self.llm_manager, self.tool_dispatcher))
 
-    def set_websocket_manager(self, manager: 'WebSocketManager') -> None:
-        """Set websocket manager on registry and agents."""
-        # CRITICAL: Prevent None WebSocketManager from breaking agent events
-        if manager is None:
-            logger.error("🚨 CRITICAL: Attempting to set WebSocketManager to None - this breaks agent events!")
+    def set_websocket_bridge(self, bridge: 'AgentWebSocketBridge') -> None:
+        """Set AgentWebSocketBridge on registry and agents."""
+        # CRITICAL: Prevent None bridge from breaking agent events
+        if bridge is None:
+            logger.error("🚨 CRITICAL: Attempting to set AgentWebSocketBridge to None - this breaks agent events!")
             logger.error("🚨 This prevents real-time chat notifications and agent execution updates")
             logger.error("🚨 WebSocket events are CRITICAL for 90% of chat functionality")
             raise ValueError(
-                "WebSocketManager cannot be None. This breaks agent WebSocket events and prevents "
-                "real-time chat updates. Check WebSocketManager initialization in startup sequence."
+                "AgentWebSocketBridge cannot be None. This breaks agent WebSocket events and prevents "
+                "real-time chat updates. Check AgentWebSocketBridge initialization in startup sequence."
             )
         
-        # Validate the manager has required methods before setting
-        required_methods = ['send_to_thread', 'connections']
-        missing_methods = [method for method in required_methods if not hasattr(manager, method)]
+        # Validate the bridge has required methods before setting
+        required_methods = ['notify_agent_started', 'notify_agent_completed', 'notify_tool_executing']
+        missing_methods = [method for method in required_methods if not hasattr(bridge, method)]
         if missing_methods:
-            logger.error(f"🚨 CRITICAL: WebSocketManager missing required methods: {missing_methods}")
-            raise ValueError(f"WebSocketManager incomplete - missing methods: {missing_methods}")
+            logger.error(f"🚨 CRITICAL: AgentWebSocketBridge missing required methods: {missing_methods}")
+            raise ValueError(f"AgentWebSocketBridge incomplete - missing methods: {missing_methods}")
         
-        self.websocket_manager = manager
+        self.websocket_bridge = bridge
         
-        # No more enhancement needed - tool dispatcher already has WebSocket support from initialization
-        # Just log the status for visibility
+        # Verify tool dispatcher has WebSocket support
         if hasattr(self, 'tool_dispatcher') and self.tool_dispatcher:
             if hasattr(self.tool_dispatcher, 'has_websocket_support'):
                 if self.tool_dispatcher.has_websocket_support:
-                    logger.info("Tool dispatcher already has WebSocket support")
+                    logger.info("Tool dispatcher already has WebSocket support via bridge")
                 else:
                     logger.warning("Tool dispatcher created without WebSocket support - may need reconfiguration")
         
-        # Set WebSocket manager on all registered agents (backward compatibility)
+        # Set WebSocket bridge on all registered agents that support it
         agent_count = 0
         for agent_name, agent in self.agents.items():
             try:
-                agent.websocket_manager = manager
-                agent_count += 1
+                if hasattr(agent, 'set_websocket_bridge'):
+                    agent.set_websocket_bridge(bridge)
+                    agent_count += 1
+                else:
+                    logger.debug(f"Agent {agent_name} does not support WebSocket bridge pattern")
             except Exception as e:
-                logger.warning(f"Failed to set WebSocket manager for agent {agent_name}: {e}")
+                logger.warning(f"Failed to set WebSocket bridge for agent {agent_name}: {e}")
         
-        if manager is not None:
-            logger.info(f"✅ WebSocket manager set for {agent_count}/{len(self.agents)} agents")
+        logger.info(f"✅ WebSocket bridge set for {agent_count}/{len(self.agents)} agents")
     
-    def get_websocket_manager(self) -> Optional['WebSocketManager']:
-        """Get the current WebSocket manager instance.
+    def get_websocket_bridge(self) -> Optional['AgentWebSocketBridge']:
+        """Get the current AgentWebSocketBridge instance.
         
         Returns:
-            The WebSocketManager instance if set, None otherwise.
+            The AgentWebSocketBridge instance if set, None otherwise.
         """
-        return getattr(self, 'websocket_manager', None)
+        return getattr(self, 'websocket_bridge', None)
