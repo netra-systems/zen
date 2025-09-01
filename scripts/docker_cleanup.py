@@ -21,13 +21,13 @@ sys.path.insert(0, str(project_root))
 
 # Import centralized Docker manager if available
 try:
-    from test_framework.centralized_docker_manager import (
-        CentralizedDockerManager, EnvironmentType
+    from test_framework.unified_docker_manager import (
+        UnifiedDockerManager, EnvironmentType
     )
     CENTRALIZED_MANAGER_AVAILABLE = True
 except ImportError:
     CENTRALIZED_MANAGER_AVAILABLE = False
-    CentralizedDockerManager = None
+    UnifiedDockerManager = None
 
 
 class DockerCleaner:
@@ -58,7 +58,7 @@ class DockerCleaner:
         self.centralized_manager = None
         if self.use_centralized:
             try:
-                self.centralized_manager = CentralizedDockerManager()
+                self.centralized_manager = UnifiedDockerManager()
                 print("[INFO] Using centralized Docker manager for test environment cleanup")
             except Exception as e:
                 print(f"[WARNING] Could not initialize centralized manager: {e}")

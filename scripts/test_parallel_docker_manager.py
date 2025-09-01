@@ -17,8 +17,8 @@ import json
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from test_framework.centralized_docker_manager import (
-    CentralizedDockerManager, EnvironmentType, ServiceStatus
+from test_framework.unified_docker_manager import (
+    UnifiedDockerManager, EnvironmentType, ServiceStatus, CentralizedDockerManager
 )
 
 

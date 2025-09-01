@@ -185,13 +185,13 @@ from test_framework.service_availability import require_real_services, ServiceUn
 # Docker port discovery and centralized management
 from test_framework.docker_port_discovery import DockerPortDiscovery
 try:
-    from test_framework.centralized_docker_manager import (
-        CentralizedDockerManager, EnvironmentType, ServiceStatus
+    from test_framework.unified_docker_manager import (
+        UnifiedDockerManager, EnvironmentType, ServiceStatus
     )
     CENTRALIZED_DOCKER_AVAILABLE = True
 except ImportError:
     CENTRALIZED_DOCKER_AVAILABLE = False
-    CentralizedDockerManager = None
+    UnifiedDockerManager = None
     EnvironmentType = None
     ServiceStatus = None
 
@@ -410,7 +410,7 @@ class UnifiedTestRunner:
         use_production = env.get('TEST_USE_PRODUCTION_IMAGES', 'true').lower() == 'true'
         
         # Initialize centralized Docker manager
-        self.docker_manager = CentralizedDockerManager(
+        self.docker_manager = UnifiedDockerManager(
             environment_type=env_type,
             test_id=f"test_run_{int(time.time())}",
             use_production_images=use_production
@@ -2167,7 +2167,7 @@ def main():
     if hasattr(args, 'cleanup_old_environments') and args.cleanup_old_environments:
         if CENTRALIZED_DOCKER_AVAILABLE:
             print("[INFO] Cleaning up old Docker test environments...")
-            manager = CentralizedDockerManager()
+            manager = UnifiedDockerManager()
             manager.cleanup_old_environments(max_age_hours=4)
             print("[INFO] Cleanup complete")
     
