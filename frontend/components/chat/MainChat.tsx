@@ -302,6 +302,7 @@ const MainChat: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 className="px-6 py-2"
+                data-testid="agent-processing"
               >
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <Loader2 className="h-4 w-4 animate-spin text-blue-600" />

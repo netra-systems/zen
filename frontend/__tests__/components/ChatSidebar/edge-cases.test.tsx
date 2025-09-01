@@ -5,8 +5,6 @@ import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import { renderWithProviders, safeAsync, resetAllMocks } from '../../shared/unified-test-utilities';
 import { safeAct, waitForCondition, flushPromises } from '../../helpers/test-timing-utilities';
 import { describeIfFeature, itIfFeature } from '../../helpers/feature-flag-helpers';
-import { ./../helpers/test-timing-utilities';
-import { describeIfFeature, itIfFeature } from '../../helpers/feature-flag-helpers';
 import { 
   mockThreadService,
   sampleThreads,

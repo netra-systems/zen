@@ -2,14 +2,13 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-tion flow and WebSocket connection
+
+/**
+ * Authentication and WebSocket Connection Tests
+ * Tests authentication flow and WebSocket connection
  * Tests 1-3 (Authentication) and Tests 16-19 (WebSocket Connection)
  * Part of split from chatUIUXCore.test.tsx (570 lines → ≤300 lines)
  */
-
-import React from 'react';
-import { render } from '@testing-library/react';
-import '@testing-library/jest-dom';
 
 // Import shared utilities and test components
 import {

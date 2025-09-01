@@ -1,13 +1,12 @@
 import '@testing-library/jest-dom';
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-tor
+
+/**
  * ================================
  * Modular test suite coordinator for chat UI components
  * Split from 570-line monolithic test file into focused ≤450-line modules
  * Enforces Elite Engineering standards: modular, maintainable, comprehensive
  */
-
-import '@testing-library/jest-dom';
 
 // Import all modular test suites
 import './auth-connection.test';

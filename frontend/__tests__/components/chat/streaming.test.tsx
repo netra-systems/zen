@@ -2,11 +2,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { render, waitFor, screen, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-/
-
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { render, waitFor, screen, fireEvent, act } from '@testing-library/react';
-import '@testing-library/jest-dom';
 
 // Performance monitoring utilities
 const createPerformanceMonitor = () => {

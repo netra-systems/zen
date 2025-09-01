@@ -3,15 +3,13 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MessageItem } from '@/components/chat/MessageItem';
-import { ering is critical for all users
+
+/**
+ * Message Content Rendering Tests
+ * Proper message rendering is critical for all users
  * Business Goal: Clear communication and professional UI appearance
  * Value Impact: Good UX increases user engagement and trust in the platform
  */
-
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom';
-import { MessageItem } from '@/components/chat/MessageItem';
 import {
   setupDefaultMocks
 } from './ui-test-utilities';

@@ -2,7 +2,10 @@ import React from 'react';
 import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-blocking
+
+/**
+ * Chat Message Send Flow Tests
+ * Comprehensive testing for message sending functionality including:
  * - Rate limiting (spam prevention)
  * - Network status checking
  * - Retry mechanisms
@@ -10,10 +13,6 @@ blocking
  * 
  * CRITICAL: Phase 4, Agent 13 - Message sending reliability
  */
-
-import React from 'react';
-import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
 // Mock dependencies with detailed control
 const mockSendMessage = jest.fn();

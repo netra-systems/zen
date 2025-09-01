@@ -62,6 +62,7 @@ export const AgentStatusBar: React.FC<AgentStatusBarProps> = ({
           "transition-all",
           activeAgent === agent.id && "animate-pulse"
         )}
+        data-testid="agent-indicator"
       >
         <span className={agent.color}>{agent.icon}</span>
         <span className="ml-1 text-xs">{agent.name}</span>
@@ -164,7 +165,7 @@ interface ProcessingIndicatorProps {
 export const ProcessingIndicator: React.FC<ProcessingIndicatorProps> = ({ 
   agents, activeAgent 
 }) => (
-  <div className="flex gap-3">
+  <div className="flex gap-3" data-testid="agent-processing">
     <Avatar className="h-8 w-8">
       <AvatarFallback><Bot /></AvatarFallback>
     </Avatar>
@@ -173,9 +174,10 @@ export const ProcessingIndicator: React.FC<ProcessingIndicatorProps> = ({
         <div className="flex items-center gap-2">
           <Loader2 className="w-4 h-4 animate-spin" />
           <span className="text-sm text-muted-foreground">
+            Processing
             {activeAgent 
-              ? `${agents.find(a => a.id === activeAgent)?.name} is processing...`
-              : 'Processing...'
+              ? ` - ${agents.find(a => a.id === activeAgent)?.name} is processing...`
+              : '...'
             }
           </span>
         </div>
