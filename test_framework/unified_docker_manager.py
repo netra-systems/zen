@@ -272,6 +272,10 @@ class UnifiedDockerManager:
         self._docker_available = None
         self._running_services = set()
         
+        # Network management
+        self._network_name: Optional[str] = None
+        self._project_name: Optional[str] = None
+        
         # Initialize lock directory
         self.LOCK_DIR.mkdir(parents=True, exist_ok=True)
         
@@ -392,6 +396,117 @@ class UnifiedDockerManager:
             return f"netra_test_{self.test_id}"
         else:
             return f"netra_{self.environment_type.value}"
+    
+    def _get_project_name(self) -> str:
+        """Get unique project name for Docker Compose isolation."""
+        if not self._project_name:
+            # Generate unique project name for parallel test isolation
+            if self.environment_type == EnvironmentType.DEDICATED:
+                self._project_name = f"netra-test-{self.test_id}"
+            else:
+                # For shared environments, add a timestamp to ensure uniqueness
+                timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+                self._project_name = f"netra-{self.environment}-{timestamp}-{self.test_id[:8]}"
+        return self._project_name
+    
+    def _allocate_service_ports(self) -> Dict[str, int]:
+        """Allocate dynamic ports for all services."""
+        if self.allocated_ports:
+            return self.allocated_ports
+            
+        logger.info(f"Allocating dynamic ports for environment {self._get_project_name()}")
+        
+        # Allocate ports for each service
+        service_ports = {}
+        for service_name, service_config in self.SERVICES.items():
+            try:
+                # Allocate a port for this service
+                result = self.port_allocator.allocate_port(
+                    service_name=service_name,
+                    preferred_port=service_config['default_port']
+                )
+                
+                if result.success:
+                    service_ports[service_name] = result.port
+                    logger.debug(f"Allocated port {result.port} for {service_name}")
+                else:
+                    # Fall back to finding a random available port
+                    fallback_port = self._find_available_port()
+                    service_ports[service_name] = fallback_port
+                    logger.warning(f"Using fallback port {fallback_port} for {service_name}")
+                    
+            except Exception as e:
+                logger.error(f"Failed to allocate port for {service_name}: {e}")
+                # Use a fallback port
+                fallback_port = self._find_available_port()
+                service_ports[service_name] = fallback_port
+        
+        self.allocated_ports = service_ports
+        return service_ports
+    
+    def _find_available_port(self) -> int:
+        """Find an available port using socket binding."""
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.bind(('', 0))
+            s.listen(1)
+            port = s.getsockname()[1]
+        return port
+    
+    def _setup_network(self) -> bool:
+        """Setup Docker network for this test run."""
+        if self._network_name:
+            return True
+            
+        project_name = self._get_project_name()
+        network_name = f"{project_name}_default"
+        
+        try:
+            # Check if network already exists
+            check_cmd = ["docker", "network", "ls", "--filter", f"name={network_name}", "--format", "{{.Name}}"]
+            result = subprocess.run(check_cmd, capture_output=True, text=True)
+            
+            if network_name not in result.stdout:
+                # Create the network
+                create_cmd = ["docker", "network", "create", network_name]
+                result = subprocess.run(create_cmd, capture_output=True, text=True)
+                
+                if result.returncode != 0:
+                    logger.error(f"Failed to create network {network_name}: {result.stderr}")
+                    return False
+                    
+                logger.info(f"Created Docker network: {network_name}")
+            else:
+                logger.info(f"Using existing Docker network: {network_name}")
+            
+            self._network_name = network_name
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to setup network: {e}")
+            return False
+    
+    def _cleanup_network(self) -> bool:
+        """Clean up Docker network for this test run."""
+        if not self._network_name:
+            return True
+            
+        try:
+            # Remove the network
+            cmd = ["docker", "network", "rm", self._network_name]
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            
+            if result.returncode != 0:
+                if "not found" not in result.stderr.lower():
+                    logger.warning(f"Failed to remove network {self._network_name}: {result.stderr}")
+                    return False
+            
+            logger.info(f"Removed Docker network: {self._network_name}")
+            self._network_name = None
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to cleanup network: {e}")
+            return False
     
     def _check_restart_allowed(self, service_name: str) -> bool:
         """
@@ -534,12 +649,22 @@ class UnifiedDockerManager:
         
         # Prepare environment variables
         env = os.environ.copy()
-        env["COMPOSE_PROJECT_NAME"] = env_name
+        env["COMPOSE_PROJECT_NAME"] = self._get_project_name()
         env["DOCKER_ENV"] = "test"
         
         if self.use_production_images:
             env["DOCKER_TAG"] = "production"
             env["BUILD_TARGET"] = "production"
+        
+        # Allocate and set dynamic ports
+        ports = self._allocate_service_ports()
+        env["DEV_POSTGRES_PORT"] = str(ports.get("postgres", 5433))
+        env["DEV_REDIS_PORT"] = str(ports.get("redis", 6380))
+        env["DEV_CLICKHOUSE_HTTP_PORT"] = str(ports.get("clickhouse", 8124))
+        env["DEV_CLICKHOUSE_TCP_PORT"] = str(ports.get("clickhouse", 8124) + 1000)  # TCP port offset
+        env["DEV_AUTH_PORT"] = str(ports.get("auth", 8081))
+        env["DEV_BACKEND_PORT"] = str(ports.get("backend", 8000))
+        env["DEV_FRONTEND_PORT"] = str(ports.get("frontend", 3000))
         
         # Set memory limits
         for service, config in self.SERVICES.items():
@@ -552,7 +677,7 @@ class UnifiedDockerManager:
             cmd = [
                 "docker-compose",
                 "-f", compose_file,
-                "-p", env_name,
+                "-p", self._get_project_name(),
                 "up", "-d"
             ]
             
@@ -782,7 +907,7 @@ class UnifiedDockerManager:
             try:
                 # Get port mapping for this container
                 if service in self.SERVICES:
-                    internal_port = self.SERVICES[service]["port"]
+                    internal_port = self.SERVICES[service].get("default_port", 8000)
                     
                     cmd = ["docker", "port", container_name, str(internal_port)]
                     result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
@@ -813,7 +938,7 @@ class UnifiedDockerManager:
                         if service in self.allocated_ports:
                             ports[service] = self.allocated_ports[service]
                         else:
-                            ports[service] = self.SERVICES[service].get("default_port", self.SERVICES[service].get("port", 8000))
+                            ports[service] = self.SERVICES[service].get("default_port", 8000)
                 else:
                     logger.warning(f"Error discovering port for {service}: {e}")
                     # Use default port as fallback
@@ -821,7 +946,7 @@ class UnifiedDockerManager:
                         if service in self.allocated_ports:
                             ports[service] = self.allocated_ports[service]
                         else:
-                            ports[service] = self.SERVICES[service].get("default_port", self.SERVICES[service].get("port", 8000))
+                            ports[service] = self.SERVICES[service].get("default_port", 8000)
         
         # If we have no ports discovered due to Docker issues, use default dev ports
         if not ports and containers:
@@ -1163,6 +1288,11 @@ class UnifiedDockerManager:
         for service in missing_services:
             self._record_restart(service)
         
+        # Setup network before starting services
+        if not self._setup_network():
+            logger.error("Failed to setup Docker network")
+            return False
+        
         # Start services using existing environment acquisition
         env_name = self._get_environment_name()
         
@@ -1171,19 +1301,29 @@ class UnifiedDockerManager:
         service_names = self._map_to_compose_services(missing_services)
         
         env = os.environ.copy()
-        env["COMPOSE_PROJECT_NAME"] = env_name
+        env["COMPOSE_PROJECT_NAME"] = self._get_project_name()
         env["DOCKER_ENV"] = "test"
         
         if self.use_production_images:
             env["DOCKER_TAG"] = "production"
             env["BUILD_TARGET"] = "production"
         
+        # Allocate and set dynamic ports
+        ports = self._allocate_service_ports()
+        env["DEV_POSTGRES_PORT"] = str(ports.get("postgres", 5433))
+        env["DEV_REDIS_PORT"] = str(ports.get("redis", 6380))
+        env["DEV_CLICKHOUSE_HTTP_PORT"] = str(ports.get("clickhouse", 8124))
+        env["DEV_CLICKHOUSE_TCP_PORT"] = str(ports.get("clickhouse", 8124) + 1000)  # TCP port offset
+        env["DEV_AUTH_PORT"] = str(ports.get("auth", 8081))
+        env["DEV_BACKEND_PORT"] = str(ports.get("backend", 8000))
+        env["DEV_FRONTEND_PORT"] = str(ports.get("frontend", 3000))
+        
         # Set memory limits
         for service, config in self.SERVICES.items():
             env_key = f"{service.upper()}_MEMORY_LIMIT"
             env[env_key] = config.get("memory_limit", "512m")
         
-        cmd = ["docker", "compose", "-f", compose_file, "-p", env_name, "up", "-d"] + service_names
+        cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "up", "-d"] + service_names
         logger.info(f"🚀 Executing: {' '.join(cmd)}")
         
         try:
@@ -1474,6 +1614,9 @@ class UnifiedDockerManager:
         env_name = self._get_environment_name()
         self.release_environment(env_name)
         
+        # Clean up network
+        self._cleanup_network()
+        
         # Additional cleanup if needed
         compose_file = self._get_compose_file()
         if compose_file:
@@ -1636,7 +1779,7 @@ class UnifiedDockerManager:
         try:
             # Get container status using docker-compose ps
             cmd = ["docker-compose", "-f", self._get_compose_file(), 
-                   "-p", f"netra-{self.environment}", "ps", "--format", "json", service]
+                   "-p", self._get_project_name(), "ps", "--format", "json", service]
             
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
             
@@ -1688,11 +1831,30 @@ class UnifiedDockerManager:
         if services_to_start:
             logger.info(f"Starting {len(services_to_start)} services: {', '.join(services_to_start)}")
             
+            # Setup network before starting services
+            if not self._setup_network():
+                logger.error("Failed to setup Docker network")
+                return False
+            
+            # Setup environment with dynamic ports
+            env = os.environ.copy()
+            env["COMPOSE_PROJECT_NAME"] = self._get_project_name()
+            
+            # Allocate and set dynamic ports
+            ports = self._allocate_service_ports()
+            env["DEV_POSTGRES_PORT"] = str(ports.get("postgres", 5433))
+            env["DEV_REDIS_PORT"] = str(ports.get("redis", 6380))
+            env["DEV_CLICKHOUSE_HTTP_PORT"] = str(ports.get("clickhouse", 8124))
+            env["DEV_CLICKHOUSE_TCP_PORT"] = str(ports.get("clickhouse", 8124) + 1000)  # TCP port offset
+            env["DEV_AUTH_PORT"] = str(ports.get("auth", 8081))
+            env["DEV_BACKEND_PORT"] = str(ports.get("backend", 8000))
+            env["DEV_FRONTEND_PORT"] = str(ports.get("frontend", 3000))
+            
             cmd = ["docker-compose", "-f", self._get_compose_file(),
-                   "-p", f"netra-{self.environment}", "up", "-d"] + services_to_start
+                   "-p", self._get_project_name(), "up", "-d"] + services_to_start
             
             try:
-                result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=120, env=env)
                 
                 if result.returncode != 0:
                     logger.error(f"Failed to start services: {result.stderr}")
@@ -1724,12 +1886,12 @@ class UnifiedDockerManager:
         try:
             # Build the shutdown command
             cmd = ["docker-compose", "-f", self._get_compose_file(),
-                   "-p", f"netra-{self.environment}", "down"]
+                   "-p", self._get_project_name(), "down"]
             
             if services:
                 # For specific services, use stop instead of down
                 cmd = ["docker-compose", "-f", self._get_compose_file(),
-                       "-p", f"netra-{self.environment}", "stop", "-t", str(timeout)] + services
+                       "-p", self._get_project_name(), "stop", "-t", str(timeout)] + services
             else:
                 cmd.extend(["-t", str(timeout)])
             
@@ -1764,7 +1926,7 @@ class UnifiedDockerManager:
         
         try:
             cmd = ["docker-compose", "-f", self._get_compose_file(),
-                   "-p", f"netra-{self.environment}", "kill"]
+                   "-p", self._get_project_name(), "kill"]
             
             if services:
                 cmd.extend(services)
@@ -1773,7 +1935,7 @@ class UnifiedDockerManager:
             
             # Also remove containers
             cmd_rm = ["docker-compose", "-f", self._get_compose_file(),
-                      "-p", f"netra-{self.environment}", "rm", "-f"]
+                      "-p", self._get_project_name(), "rm", "-f"]
             if services:
                 cmd_rm.extend(services)
             
@@ -1825,7 +1987,7 @@ class UnifiedDockerManager:
             
             for sql in sql_commands:
                 cmd = ["docker-compose", "-f", self._get_compose_file(),
-                       "-p", f"netra-{self.environment}", "exec", "-T", "postgres",
+                       "-p", self._get_project_name(), "exec", "-T", "postgres",
                        "psql", "-U", "netra", "-d", "netra", "-c", sql]
                 
                 result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
@@ -1843,7 +2005,7 @@ class UnifiedDockerManager:
         """Reset Redis test data."""
         try:
             cmd = ["docker-compose", "-f", self._get_compose_file(),
-                   "-p", f"netra-{self.environment}", "exec", "-T", "redis",
+                   "-p", self._get_project_name(), "exec", "-T", "redis",
                    "redis-cli", "FLUSHALL"]
             
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
@@ -1870,7 +2032,7 @@ class UnifiedDockerManager:
             Dictionary mapping service name to ContainerInfo
         """
         cmd = ["docker-compose", "-f", self._get_compose_file(),
-               "-p", f"netra-{self.environment}", "ps", "--format", "json"]
+               "-p", self._get_project_name(), "ps", "--format", "json"]
         
         if services:
             cmd.extend(services)
@@ -1961,13 +2123,16 @@ class UnifiedDockerManager:
         try:
             # Remove orphaned containers
             cmd = ["docker-compose", "-f", self._get_compose_file(),
-                   "-p", f"netra-{self.environment}", "down", "--remove-orphans"]
+                   "-p", self._get_project_name(), "down", "--remove-orphans"]
             
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
             
             if result.returncode != 0:
                 logger.warning(f"Orphan cleanup had issues: {result.stderr}")
                 return False
+            
+            # Clean up project-specific network if exists
+            self._cleanup_network()
             
             # Prune unused networks
             subprocess.run(["docker", "network", "prune", "-f"], 
@@ -1992,7 +2157,7 @@ class UnifiedDockerManager:
             Configured DockerIntrospector instance
         """
         compose_file = self._get_compose_file()
-        project_name = f"netra-{self.environment}"
+        project_name = self._get_project_name()
         
         return DockerIntrospector(compose_file, project_name)
     
