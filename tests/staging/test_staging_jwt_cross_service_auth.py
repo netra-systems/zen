@@ -14,28 +14,15 @@ import asyncio
 import time
 from typing import Dict, Optional, Any
 from shared.isolated_environment import IsolatedEnvironment
-
-# Test Configuration
-STAGING_URLS = {
-    "backend": "https://netra-backend-staging-701982941522.us-central1.run.app",
-    "auth": "https://netra-auth-service-701982941522.us-central1.run.app",
-    "frontend": "https://netra-frontend-staging-701982941522.us-central1.run.app"
-}
-
-LOCAL_URLS = {
-    "backend": "http://localhost:8000", 
-    "auth": "http://localhost:8081",  # Fixed: Auth service is on port 8081
-    "frontend": "http://localhost:3000"
-}
+from tests.staging.staging_config import StagingConfig
 
 class StagingJWTTestRunner:
     """Test runner for JWT cross-service authentication validation."""
     
     def __init__(self):
         self.env = IsolatedEnvironment()
-        self.environment = self.env.get("ENVIRONMENT", "development")
-        self.urls = STAGING_URLS if self.environment == "staging" else LOCAL_URLS
-        self.timeout = 30.0
+        self.environment = StagingConfig.get_environment()
+        self.timeout = StagingConfig.TIMEOUTS["default"]
         
     def get_base_headers(self) -> Dict[str, str]:
         """Get base headers for API requests."""
@@ -50,7 +37,7 @@ class StagingJWTTestRunner:
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 response = await client.get(
-                    f"{self.urls['auth']}/health",
+                    f"{StagingConfig.get_service_url('auth')}/health",
                     headers=self.get_base_headers()
                 )
                 
@@ -76,7 +63,7 @@ class StagingJWTTestRunner:
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 response = await client.get(
-                    f"{self.urls['backend']}/health",
+                    f"{StagingConfig.get_service_url('netra_backend')}/health",
                     headers=self.get_base_headers()
                 )
                 
@@ -114,7 +101,7 @@ class StagingJWTTestRunner:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 # Test dev login endpoint (development only)
                 response = await client.post(
-                    f"{self.urls['auth']}/auth/dev/login",
+                    f"{StagingConfig.get_service_url('auth')}/auth/dev/login",
                     headers=self.get_base_headers()
                 )
                 
@@ -143,7 +130,7 @@ class StagingJWTTestRunner:
                 if self.environment == "staging":
                     # Test protected endpoint without token to ensure it rejects properly
                     backend_response = await client.get(
-                        f"{self.urls['backend']}/api/admin/settings",
+                        f"{StagingConfig.get_service_url('netra_backend')}/api/admin/settings",
                         headers=self.get_base_headers()
                     )
                     
@@ -160,7 +147,7 @@ class StagingJWTTestRunner:
                 
                 # In development, get token from dev login endpoint
                 auth_response = await client.post(
-                    f"{self.urls['auth']}/auth/dev/login",
+                    f"{StagingConfig.get_service_url('auth')}/auth/dev/login",
                     headers=self.get_base_headers()
                 )
                 
@@ -185,13 +172,13 @@ class StagingJWTTestRunner:
                     
                 # Test without token first (should fail)
                 no_token_response = await client.get(
-                    f"{self.urls['backend']}/api/admin/settings",
+                    f"{StagingConfig.get_service_url('netra_backend')}/api/admin/settings",
                     headers=self.get_base_headers()
                 )
                 
                 # Now validate token with backend service using protected endpoint
                 backend_response = await client.get(
-                    f"{self.urls['backend']}/api/admin/settings",
+                    f"{StagingConfig.get_service_url('netra_backend')}/api/admin/settings",
                     headers={
                         **self.get_base_headers(),
                         "Authorization": f"Bearer {access_token}"
@@ -230,8 +217,8 @@ class StagingJWTTestRunner:
         """Run all JWT cross-service authentication tests."""
         print(f"Running JWT Cross-Service Authentication Tests")
         print(f"Environment: {self.environment}")
-        print(f"Auth URL: {self.urls['auth']}")
-        print(f"Backend URL: {self.urls['backend']}")
+        print(f"Auth URL: {StagingConfig.get_service_url('auth')}")
+        print(f"Backend URL: {StagingConfig.get_service_url('netra_backend')}")
         print()
         
         results = {}

@@ -57,6 +57,7 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from shared.isolated_environment import IsolatedEnvironment
+from tests.staging.staging_config import StagingConfig
 
 # Test Imports
 from tests.staging.test_staging_jwt_cross_service_auth import StagingJWTTestRunner
@@ -150,7 +151,7 @@ class StagingTestSuiteRunner:
     def __init__(self, args):
         self.args = args
         self.env = IsolatedEnvironment()
-        self.environment = self.env.get("ENVIRONMENT", "development")
+        self.environment = StagingConfig.get_environment()  # Now defaults to 'staging'
         self.results = {}
         self.start_time = None
         self.total_time = 0

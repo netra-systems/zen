@@ -4,7 +4,7 @@ Single Source of Truth (SSOT) for all staging test configurations.
 """
 
 from typing import Dict, Optional
-import os
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class StagingConfig:
@@ -54,7 +54,8 @@ class StagingConfig:
     @classmethod
     def get_environment(cls) -> str:
         """Get the current environment, defaulting to staging."""
-        return os.environ.get("ENVIRONMENT", cls.DEFAULT_ENVIRONMENT)
+        env = IsolatedEnvironment()
+        return env.get("ENVIRONMENT", cls.DEFAULT_ENVIRONMENT)
     
     @classmethod
     def get_service_url(cls, service: str, environment: Optional[str] = None) -> str:
@@ -98,7 +99,7 @@ class StagingConfig:
             url = cls.SERVICE_URLS[env].get(service)
             if not url or "localhost" in url:
                 return False
-            if GCP_PROJECT_NUMBER not in url and cls.GCP_REGION not in url:
+            if cls.GCP_PROJECT_NUMBER not in url and cls.GCP_REGION not in url:
                 return False
         
         return True
