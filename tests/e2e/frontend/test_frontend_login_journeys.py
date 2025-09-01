@@ -36,9 +36,11 @@ class FrontendLoginJourneyTester:
     """Test harness for frontend login journeys using Selenium"""
     
     def __init__(self):
-        self.base_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
-        self.api_url = os.getenv("API_URL", "http://localhost:8000")
-        self.auth_url = os.getenv("AUTH_SERVICE_URL", "http://localhost:8081")
+        from shared.isolated_environment import get_env
+        env = get_env()
+        self.base_url = env.get("FRONTEND_URL", "http://localhost:3000")
+        self.api_url = env.get("API_URL", "http://localhost:8000")
+        self.auth_url = env.get("AUTH_SERVICE_URL", "http://localhost:8081")
         self.driver = None
         self.service_available = False
         

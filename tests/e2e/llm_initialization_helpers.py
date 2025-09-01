@@ -5,8 +5,8 @@ All functions ≤8 lines following CLAUDE.md requirements
 """
 
 import asyncio
-import os
 import time
+from shared.isolated_environment import get_env
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock

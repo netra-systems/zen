@@ -15,8 +15,8 @@ from test_framework.helpers.auth_helpers import AuthTestHelpers
 
 import pytest
 import asyncio
-import os
 import sys
+from shared.isolated_environment import get_env
 from typing import Any, Dict
 # ENFORCED: NO MOCKS in E2E tests - use real services only
 from tests.e2e.enforce_real_services import (
@@ -36,35 +36,37 @@ E2EServiceValidator.enforce_real_services()
 def pytest_configure(config):
     """Configure pytest for E2E tests with real LLM support."""
     # Ensure that if USE_REAL_LLM (or legacy TEST_USE_REAL_LLM) is set, it persists throughout the test session
-    if (os.getenv("USE_REAL_LLM") == "true" or os.getenv("TEST_USE_REAL_LLM") == "true"):
+    env = get_env()
+    if (env.get("USE_REAL_LLM") == "true" or env.get("TEST_USE_REAL_LLM") == "true"):
         # Re-set both for compatibility
-        os.environ["USE_REAL_LLM"] = "true"
-        os.environ["TEST_USE_REAL_LLM"] = "true"  # Legacy compatibility
-        os.environ["ENABLE_REAL_LLM_TESTING"] = "true"
+        env.set("USE_REAL_LLM", "true")
+        env.set("TEST_USE_REAL_LLM", "true")  # Legacy compatibility
+        env.set("ENABLE_REAL_LLM_TESTING", "true")
 
 # CRITICAL: Override any PostgreSQL configuration for E2E tests to use SQLite
 # E2E tests should be fast and not depend on external databases
 # This must be set BEFORE any backend modules are imported
-if "pytest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
+if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
     # Check if we're in staging environment
-    current_env = os.environ.get("ENVIRONMENT", "").lower()
+    env = get_env()
+    current_env = env.get("ENVIRONMENT", "").lower()
     is_staging = current_env == "staging"
     
     if is_staging:
         # Staging environment - use staging database configuration
-        os.environ["E2E_TESTING"] = "true"
-        os.environ["TESTING"] = "0"  # Not local testing in staging
+        env.set("E2E_TESTING", "true")
+        env.set("TESTING", "0")  # Not local testing in staging
         # Keep existing ENVIRONMENT=staging
     else:
         # Force SQLite for local E2E tests regardless of other configurations
-        os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
-        os.environ["TESTING"] = "1"
-        os.environ["ENVIRONMENT"] = "testing"
-        os.environ["E2E_TESTING"] = "true"
+        env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
+        env.set("TESTING", "1")
+        env.set("ENVIRONMENT", "testing")
+        env.set("E2E_TESTING", "true")
 
 # Dynamic port configuration for E2E tests
 # Determine current environment
-current_env = os.environ.get("ENVIRONMENT", "").lower()
+current_env = env.get("ENVIRONMENT", "").lower()
 is_staging = current_env == "staging"
 
 if is_staging:
@@ -92,8 +94,8 @@ else:
         }
     except ImportError:
         # Fallback to defaults if port manager not available
-        backend_port = os.environ.get("TEST_BACKEND_PORT", "8000")
-        auth_port = os.environ.get("TEST_AUTH_PORT", "8081")
+        backend_port = env.get("TEST_BACKEND_PORT", "8000")
+        auth_port = env.get("TEST_AUTH_PORT", "8081")
         E2E_CONFIG = {
             "timeout": 30,
             "base_url": f"http://localhost:{backend_port}",
@@ -117,7 +119,7 @@ def staging_oauth_config():
     """Configure OAuth simulation for staging tests."""
     if is_staging:
         # Ensure E2E_OAUTH_SIMULATION_KEY is available for staging tests
-        oauth_key = os.getenv("E2E_OAUTH_SIMULATION_KEY")
+        oauth_key = env.get("E2E_OAUTH_SIMULATION_KEY")
         if not oauth_key:
             pytest.skip("E2E_OAUTH_SIMULATION_KEY not available - required for staging OAuth simulation")
         
@@ -196,11 +198,11 @@ def real_llm_config():
     # Check environment variable to determine if real LLM should be enabled
     # CRITICAL: Real LLM is DEFAULT per CLAUDE.md (no mocks allowed in dev/staging/production)
     # Check primary control variable first
-    primary_enabled = os.getenv("NETRA_REAL_LLM_ENABLED", "true").lower() == "true"
+    primary_enabled = env.get("NETRA_REAL_LLM_ENABLED", "true").lower() == "true"
     use_real_llm = (primary_enabled or
-                    os.getenv("USE_REAL_LLM", "true").lower() == "true" or
-                    os.getenv("TEST_USE_REAL_LLM", "true").lower() == "true" or
-                    os.getenv("ENABLE_REAL_LLM_TESTING", "true").lower() == "true" or
+                    env.get("USE_REAL_LLM", "true").lower() == "true" or
+                    env.get("TEST_USE_REAL_LLM", "true").lower() == "true" or
+                    env.get("ENABLE_REAL_LLM_TESTING", "true").lower() == "true" or
                     is_staging)  # Always use real LLM in staging
     return {
         "enabled": use_real_llm,
@@ -228,7 +230,7 @@ async def concurrent_test_environment():
     
     # Initialize real Redis connection
     env.redis_client = await redis.from_url(
-        os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+        redis_env.get("REDIS_URL", "redis://localhost:6379/0")
     )
     
     # Initialize real database pool (SQLite for tests)

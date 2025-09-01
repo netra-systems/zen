@@ -4,8 +4,8 @@ Handles database connections across PostgreSQL, ClickHouse, and Redis.
 ARCHITECTURE: Under 300 lines, 25-line functions max
 """
 
-import os
 from typing import Optional
+from shared.isolated_environment import get_env
 
 import asyncpg
 import clickhouse_connect
@@ -51,7 +51,8 @@ class DatabaseConnectionManager:
     async def _init_postgres(self):
         """Initialize PostgreSQL connection pool."""
         # Use environment variable for database URL
-        database_url = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_test")
+        env = get_env()
+        database_url = env.get("DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_test")
         
         try:
             self.postgres_pool = await asyncpg.create_pool(
@@ -64,13 +65,14 @@ class DatabaseConnectionManager:
         """Initialize Redis connection."""
         try:
             # Use environment config if available
+            env = get_env()
             if self.env_config:
-                redis_url = os.getenv("REDIS_URL", self.env_config._get_redis_url())
+                redis_url = env.get("REDIS_URL", self.env_config._get_redis_url())
                 self.redis_client = redis.Redis.from_url(redis_url, decode_responses=True)
             else:
                 self.redis_client = redis.Redis(
-                    host=os.getenv("REDIS_HOST", "localhost"),
-                    port=int(os.getenv("REDIS_PORT", "6379")),
+                    host=env.get("REDIS_HOST", "localhost"),
+                    port=int(env.get("REDIS_PORT", "6379")),
                     decode_responses=True
                 )
             await self.redis_client.ping()
@@ -81,8 +83,9 @@ class DatabaseConnectionManager:
         """Initialize ClickHouse connection."""
         try:
             # Use environment config if available
+            env = get_env()
             if self.env_config:
-                clickhouse_url = os.getenv("CLICKHOUSE_URL", self.env_config._get_clickhouse_url())
+                clickhouse_url = env.get("CLICKHOUSE_URL", self.env_config._get_clickhouse_url())
                 # Parse ClickHouse URL for connection parameters
                 if clickhouse_url.startswith("clickhouse://"):
                     url_parts = clickhouse_url.replace("clickhouse://", "").split("/")
@@ -95,8 +98,8 @@ class DatabaseConnectionManager:
                     port = 8123
                     database = "default"
             else:
-                host = os.getenv("CLICKHOUSE_HOST", "localhost")
-                port = int(os.getenv("CLICKHOUSE_PORT", "8123"))
+                host = env.get("CLICKHOUSE_HOST", "localhost")
+                port = int(env.get("CLICKHOUSE_PORT", "8123"))
                 database = "default"
             
             self.clickhouse_client = clickhouse_connect.get_client(

@@ -39,10 +39,14 @@ import uuid
 
 import pytest
 import httpx
+from shared.isolated_environment import get_env
+
+# Get environment manager
+env = get_env()
 
 # Set test environment
-os.environ["TESTING"] = "1"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+env.set("TESTING", "1", "test_websocket_comprehensive")
+env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test_websocket_comprehensive")
 
 # Import websockets only if available (not required for all tests)
 try:

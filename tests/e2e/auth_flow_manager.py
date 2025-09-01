@@ -12,12 +12,13 @@ REQUIREMENTS:
 - Context manager for resource cleanup
 - 450-line file limit, 25-line function limit
 """
-import os
 from contextlib import asynccontextmanager
+from shared.isolated_environment import get_env
 
 # Set test environment
-os.environ["TESTING"] = "1"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+env = get_env()
+env.set("TESTING", "1")
+env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
 
 from tests.e2e.auth_flow_testers import AuthFlowE2ETester
 from tests.e2e.harness_utils import UnifiedE2ETestHarness

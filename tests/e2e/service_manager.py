@@ -8,8 +8,8 @@ All functions ≤8 lines as per SPEC/conventions.xml
 
 import asyncio
 import logging
-import os
 import socket
+from shared.isolated_environment import get_env
 import subprocess
 import sys
 import time

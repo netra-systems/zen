@@ -25,9 +25,11 @@ from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 import pytest
 
 # Set testing environment before imports
-os.environ["TESTING"] = "1"
-os.environ["ENVIRONMENT"] = "testing"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+from shared.isolated_environment import get_env
+env = get_env()
+env.set("TESTING", "1", "test_response_persistence_recovery")
+env.set("ENVIRONMENT", "testing", "test_response_persistence_recovery")
+env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test_response_persistence_recovery")
 
 from sqlalchemy import select, text
 from sqlalchemy.exc import SQLAlchemyError

@@ -11,9 +11,9 @@ BVJ:
 - Strategic Impact: Enables consistent cross-environment testing
 """
 
-import os
 from dataclasses import dataclass
 from typing import Optional
+from shared.isolated_environment import get_env
 
 # Import dynamic port manager for environment-aware configuration
 try:

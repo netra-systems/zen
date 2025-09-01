@@ -32,9 +32,11 @@ class ChatInteractionTestHarness:
     """Test harness for chat interface interactions"""
     
     def __init__(self):
-        self.base_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
-        self.api_url = os.getenv("API_URL", "http://localhost:8000")
-        self.ws_url = os.getenv("WS_URL", "ws://localhost:8000/ws")
+        from shared.isolated_environment import get_env
+        env = get_env()
+        self.base_url = env.get("FRONTEND_URL", "http://localhost:3000")
+        self.api_url = env.get("API_URL", "http://localhost:8000")
+        self.ws_url = env.get("WS_URL", "ws://localhost:8000/ws")
         self.http_client = UnifiedHTTPClient(base_url=self.api_url)
         self.auth_helper = AuthServiceHelper()
         self.ws_connection = None

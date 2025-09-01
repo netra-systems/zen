@@ -24,14 +24,16 @@ import httpx
 
 from test_framework.http_client import UnifiedHTTPClient
 from test_framework.fixtures.auth import create_test_user_token, create_real_jwt_token
+from shared.isolated_environment import get_env
 
 
 class ErrorHandlingTester:
     """Test harness for error handling and edge cases"""
     
     def __init__(self):
-        self.base_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
-        self.api_url = os.getenv("API_URL", "http://localhost:8000")
+        env = get_env()
+        self.base_url = env.get("FRONTEND_URL", "http://localhost:3000")
+        self.api_url = env.get("API_URL", "http://localhost:8000")
         self.http_client = UnifiedHTTPClient(base_url=self.api_url)
         self.error_scenarios = []
         self.recovery_times = []

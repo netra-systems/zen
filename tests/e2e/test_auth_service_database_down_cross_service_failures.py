@@ -25,6 +25,9 @@ import logging
 import aiohttp
 import json
 from datetime import datetime, timezone
+from unittest.mock import patch
+
+from shared.isolated_environment import get_env
 
 from test_framework.environment_markers import env, staging_only, env_requires
 from netra_backend.tests.unit.test_real_auth_service_integration import RealAuthServiceTestFixture
@@ -53,7 +56,7 @@ class TestAuthServiceDatabaseDownCrossServiceFailures:
             'FRONTEND_URL': 'http://localhost:3000'
         }
         
-        with patch.dict(os.environ, auth_db_down_env):
+        with patch.dict(get_env().get_all(), auth_db_down_env):
             try:
                 await fixture.start_services(
                     start_auth=True,    # Start auth service (but database will be broken)
@@ -700,7 +703,7 @@ class TestAuthServiceDatabaseDownCrossServiceFailures:
                 # Simulate the recovery phase conditions
                 if phase_name == 'database_recovered':
                     # Mock database becoming available
-                    with patch.dict(os.environ, {'POSTGRES_DB': 'netra_test'}):  # Available database
+                    with patch.dict(get_env().get_all(), {'POSTGRES_DB': 'netra_test'}):  # Available database
                         actual_service_states = await self._check_service_states_during_recovery()
                 else:
                     actual_service_states = await self._check_service_states_during_recovery()

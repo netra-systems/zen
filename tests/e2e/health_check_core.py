@@ -16,14 +16,15 @@ Core components for multi-service health checking:
 CRITICAL: Maximum 300 lines, modular design for reusability
 """
 
-import os
 from datetime import UTC, datetime
 from typing import Any, Dict, Optional
+from shared.isolated_environment import get_env
 
 # Set testing environment before any imports
-os.environ["TESTING"] = "1"
-os.environ["ENVIRONMENT"] = "testing"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+env = get_env()
+env.set("TESTING", "1")
+env.set("ENVIRONMENT", "testing")
+env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
 
 
 class HealthCheckResult:

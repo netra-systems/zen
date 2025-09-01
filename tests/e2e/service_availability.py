@@ -13,8 +13,8 @@ environment variables or flags.
 
 import asyncio
 import logging
-import os
 import socket
+from shared.isolated_environment import get_env
 import time
 import traceback
 from dataclasses import dataclass

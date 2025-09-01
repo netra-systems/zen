@@ -18,8 +18,8 @@ NOTE: Now uses dev_launcher_real_system for better integration
 import asyncio
 import json
 import logging
-import os
 import platform
+from shared.isolated_environment import get_env
 import socket
 import subprocess
 import sys

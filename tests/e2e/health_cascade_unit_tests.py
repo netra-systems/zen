@@ -6,7 +6,7 @@ Tests core degraded mode logic for faster feedback during development.
 
 import asyncio
 import logging
-import os
+from shared.isolated_environment import get_env
 
 # Add project root to path for imports
 import sys
@@ -28,14 +28,15 @@ class MockClickHouseSimulator:
     
     async def disable_clickhouse_service(self) -> bool:
         """Mock disable ClickHouse service."""
-        os.environ['CLICKHOUSE_DISABLED'] = 'true'
+        env = get_env()
+        env.set('CLICKHOUSE_DISABLED', 'true')
         self.clickhouse_disabled = True
         return True
     
     async def restore_clickhouse_service(self) -> bool:
         """Mock restore ClickHouse service."""
-        if 'CLICKHOUSE_DISABLED' in os.environ:
-            del os.environ['CLICKHOUSE_DISABLED']
+        env = get_env()
+        env.delete('CLICKHOUSE_DISABLED')
         self.clickhouse_disabled = False
         return True
 

@@ -5,7 +5,7 @@ Manages service lifecycle, health checks, and coordination.
 """
 import asyncio
 import logging
-import os
+from shared.isolated_environment import get_env
 
 # Add project root to path for imports
 import sys

@@ -16,11 +16,11 @@ ARCHITECTURAL COMPLIANCE:
 import asyncio
 import time
 import json
-import os
 import uuid
 from typing import Dict, Any, Optional, List
 import httpx
 import websockets
+from shared.isolated_environment import get_env
 
 from tests.e2e.config import (
     CustomerTier, get_test_user,
@@ -116,7 +116,8 @@ class MultiAgentTestManager:
     async def authenticate_and_connect(self) -> str:
         """Authenticate user and establish WebSocket connection."""
         # Check if we're in fast test mode
-        if os.getenv("AUTH_FAST_TEST_MODE") == "true":
+        env = get_env()
+        if env.get("AUTH_FAST_TEST_MODE") == "true":
             # In fast test mode, use a mock token for testing
             mock_token = "test_token_12345"
             try:

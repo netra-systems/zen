@@ -22,9 +22,11 @@ from typing import Any, Dict, List, Optional
 import pytest
 
 # Set testing environment before imports
-os.environ["TESTING"] = "1"
-os.environ["ENVIRONMENT"] = "testing"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+from shared.isolated_environment import get_env
+env = get_env()
+env.set("TESTING", "1", "test_multi_agent_collaboration_response")
+env.set("ENVIRONMENT", "testing", "test_multi_agent_collaboration_response")
+env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test_multi_agent_collaboration_response")
 
 from sqlalchemy.ext.asyncio import AsyncSession
 

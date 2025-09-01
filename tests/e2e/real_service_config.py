@@ -11,8 +11,8 @@ service availability, not just environment flags.
 """
 
 import logging
-import os
 from dataclasses import dataclass
+from shared.isolated_environment import get_env
 from typing import Dict, Optional, Any, Union
 from urllib.parse import urlparse
 

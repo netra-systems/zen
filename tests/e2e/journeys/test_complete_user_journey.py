@@ -29,11 +29,13 @@ import pytest
 from test_framework.service_dependencies import requires_services
 
 # Test environment setup
-os.environ["TESTING"] = "1"
-os.environ["CORS_ORIGINS"] = "*"
-os.environ["ENVIRONMENT"] = "development"
-os.environ["AUTH_SERVICE_URL"] = "http://localhost:8001"
-os.environ["BACKEND_SERVICE_URL"] = "http://localhost:8000"
+from shared.isolated_environment import get_env
+env = get_env()
+env.set("TESTING", "1", "test_complete_user_journey")
+env.set("CORS_ORIGINS", "*", "test_complete_user_journey")
+env.set("ENVIRONMENT", "development", "test_complete_user_journey")
+env.set("AUTH_SERVICE_URL", "http://localhost:8001", "test_complete_user_journey")
+env.set("BACKEND_SERVICE_URL", "http://localhost:8000", "test_complete_user_journey")
 
 from tests.e2e.helpers.journey.user_journey_helpers import (
     ErrorRecoveryHelper,

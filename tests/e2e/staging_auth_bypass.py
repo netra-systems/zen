@@ -20,6 +20,7 @@ import logging
 import httpx
 from typing import Optional, Dict, Any
 from datetime import datetime, timedelta
+from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
@@ -34,10 +35,11 @@ class StagingAuthHelper:
         Args:
             bypass_key: E2E bypass key. If not provided, will try to load from environment.
         """
-        self.bypass_key = bypass_key or os.getenv("E2E_OAUTH_SIMULATION_KEY")
+        env = get_env()
+        self.bypass_key = bypass_key or env.get("E2E_OAUTH_SIMULATION_KEY")
         # Use SSOT for staging auth URL
         from netra_backend.app.core.network_constants import URLConstants
-        self.staging_auth_url = os.getenv("STAGING_AUTH_URL", URLConstants.STAGING_AUTH_URL)
+        self.staging_auth_url = env.get("STAGING_AUTH_URL", URLConstants.STAGING_AUTH_URL)
         self.token_cache: Optional[str] = None
         self.token_expiry: Optional[datetime] = None
         

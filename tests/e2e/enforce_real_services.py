@@ -15,10 +15,10 @@ Business Value Justification (BVJ):
 - Revenue Impact: Prevents customer-facing bugs that damage trust
 """
 
-import os
 import sys
 import pytest
 import logging
+from shared.isolated_environment import get_env
 from typing import Dict, Any, Optional
 import redis.asyncio as redis
 import aiohttp
@@ -34,20 +34,21 @@ class E2EServiceValidator:
     def enforce_real_services():
         """Enforce real service usage in E2E tests"""
         # Set critical environment variables for E2E testing
-        os.environ["E2E_TESTING"] = "true"
-        os.environ["TESTING"] = "1"
-        os.environ["ENVIRONMENT"] = "testing"
+        env = get_env()
+        env.set("E2E_TESTING", "true")
+        env.set("TESTING", "1")
+        env.set("ENVIRONMENT", "testing")
         
         # CRITICAL: Disable all mock fallbacks
-        os.environ["NO_MOCK_FALLBACK"] = "true"
-        os.environ["FORCE_REAL_SERVICES"] = "true"
+        env.set("NO_MOCK_FALLBACK", "true")
+        env.set("FORCE_REAL_SERVICES", "true")
         
         # Use SQLite in-memory for database (real, but fast)
-        os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+        env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
         
         # Enable real LLM testing for agent E2E tests
-        os.environ["USE_REAL_LLM"] = "true"
-        os.environ["TEST_USE_REAL_LLM"] = "true"  # Legacy compatibility
+        env.set("USE_REAL_LLM", "true")
+        env.set("TEST_USE_REAL_LLM", "true")  # Legacy compatibility
         os.environ["ENABLE_REAL_LLM_TESTING"] = "true"
         
         # Disable Docker dependency - use lightweight services

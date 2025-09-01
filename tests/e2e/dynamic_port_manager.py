@@ -14,6 +14,7 @@ import socket
 from dataclasses import dataclass
 from typing import Optional, Dict, Any
 from enum import Enum
+from shared.isolated_environment import get_env
 
 
 class TestMode(Enum):
@@ -73,11 +74,12 @@ class DynamicPortManager:
         
     def _detect_mode(self) -> TestMode:
         """Detect test execution mode from environment"""
+        env = get_env()
         # Check if running in CI
-        if os.environ.get("CI") == "true":
+        if env.get("CI") == "true":
             return TestMode.CI
         # Check if running in Docker
-        if os.environ.get("DOCKER_CONTAINER") == "true" or os.path.exists("/.dockerenv"):
+        if env.get("DOCKER_CONTAINER") == "true" or os.path.exists("/.dockerenv"):
             return TestMode.DOCKER
         # Default to local
         return TestMode.LOCAL
@@ -87,12 +89,13 @@ class DynamicPortManager:
         base_ports = self.DEFAULT_PORTS[self.mode]
         
         # Override with environment variables if set
-        backend = int(os.environ.get("TEST_BACKEND_PORT", base_ports.backend))
-        auth = int(os.environ.get("TEST_AUTH_PORT", base_ports.auth))
-        frontend = int(os.environ.get("TEST_FRONTEND_PORT", base_ports.frontend))
-        postgres = int(os.environ.get("TEST_POSTGRES_PORT", base_ports.postgres))
-        redis = int(os.environ.get("TEST_REDIS_PORT", base_ports.redis))
-        clickhouse = int(os.environ.get("TEST_CLICKHOUSE_PORT", base_ports.clickhouse))
+        env = get_env()
+        backend = int(env.get("TEST_BACKEND_PORT", base_ports.backend))
+        auth = int(env.get("TEST_AUTH_PORT", base_ports.auth))
+        frontend = int(env.get("TEST_FRONTEND_PORT", base_ports.frontend))
+        postgres = int(env.get("TEST_POSTGRES_PORT", base_ports.postgres))
+        redis = int(env.get("TEST_REDIS_PORT", base_ports.redis))
+        clickhouse = int(env.get("TEST_CLICKHOUSE_PORT", base_ports.clickhouse))
         
         # If mode is CI or port is 0, allocate dynamically
         if self.mode == TestMode.CI:
@@ -157,22 +160,23 @@ class DynamicPortManager:
             
     def export_to_env(self) -> None:
         """Export port configuration to environment variables"""
-        os.environ["TEST_BACKEND_PORT"] = str(self.ports.backend)
-        os.environ["TEST_AUTH_PORT"] = str(self.ports.auth)
-        os.environ["TEST_FRONTEND_PORT"] = str(self.ports.frontend)
-        os.environ["TEST_POSTGRES_PORT"] = str(self.ports.postgres)
-        os.environ["TEST_REDIS_PORT"] = str(self.ports.redis)
-        os.environ["TEST_CLICKHOUSE_PORT"] = str(self.ports.clickhouse)
+        env = get_env()
+        env.set("TEST_BACKEND_PORT", str(self.ports.backend))
+        env.set("TEST_AUTH_PORT", str(self.ports.auth))
+        env.set("TEST_FRONTEND_PORT", str(self.ports.frontend))
+        env.set("TEST_POSTGRES_PORT", str(self.ports.postgres))
+        env.set("TEST_REDIS_PORT", str(self.ports.redis))
+        env.set("TEST_CLICKHOUSE_PORT", str(self.ports.clickhouse))
         
         # Export service URLs
         urls = self.get_service_urls()
-        os.environ["TEST_BACKEND_URL"] = urls["backend"]
-        os.environ["TEST_AUTH_URL"] = urls["auth"]
-        os.environ["TEST_FRONTEND_URL"] = urls["frontend"]
-        os.environ["TEST_WEBSOCKET_URL"] = urls["websocket"]
-        os.environ["DATABASE_URL"] = urls["postgres"]
-        os.environ["REDIS_URL"] = urls["redis"]
-        os.environ["CLICKHOUSE_URL"] = urls["clickhouse"]
+        env.set("TEST_BACKEND_URL", urls["backend"])
+        env.set("TEST_AUTH_URL", urls["auth"])
+        env.set("TEST_FRONTEND_URL", urls["frontend"])
+        env.set("TEST_WEBSOCKET_URL", urls["websocket"])
+        env.set("DATABASE_URL", urls["postgres"])
+        env.set("REDIS_URL", urls["redis"])
+        env.set("CLICKHOUSE_URL", urls["clickhouse"])
         
     def wait_for_service(self, service: str, timeout: int = 30) -> bool:
         """Wait for a service to be available"""

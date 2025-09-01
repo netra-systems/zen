@@ -14,6 +14,7 @@ import os
 from typing import Dict, Optional
 from dataclasses import dataclass
 import logging
+from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +62,8 @@ class StagingTestConfig:
         self.verify_ssl = True
         
         # OAUTH SIMULATION configuration
-        self.E2E_OAUTH_SIMULATION_KEY = os.getenv("E2E_OAUTH_SIMULATION_KEY")
+        env = get_env()
+        self.E2E_OAUTH_SIMULATION_KEY = env.get("E2E_OAUTH_SIMULATION_KEY")
         self.test_user_email = "e2e-test@staging.netrasystems.ai"
         self.test_user_name = "E2E Test User"
         

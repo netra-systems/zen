@@ -31,9 +31,11 @@ class WebSocketReliabilityTester:
     """Test harness for WebSocket reliability and recovery"""
     
     def __init__(self):
-        self.base_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
-        self.api_url = os.getenv("API_URL", "http://localhost:8000")
-        self.ws_url = os.getenv("WS_URL", "ws://localhost:8000")
+        from shared.isolated_environment import get_env
+        env = get_env()
+        self.base_url = env.get("FRONTEND_URL", "http://localhost:3000")
+        self.api_url = env.get("API_URL", "http://localhost:8000")
+        self.ws_url = env.get("WS_URL", "ws://localhost:8000")
         self.connections = []
         self.received_messages = []
         self.connection_states = {}

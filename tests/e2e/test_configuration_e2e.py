@@ -15,6 +15,7 @@ import os
 import pytest
 from typing import Dict, List, Optional
 from unittest.mock import patch, MagicMock
+from shared.isolated_environment import get_env
 
 # Test both backend and auth service configurations
 from netra_backend.app.core.configuration.database import DatabaseConfig
@@ -95,7 +96,8 @@ class TestStagingConfiguration:
     def test_vpc_connector_enables_redis_access(self, staging_env):
         """Test that Redis URL is properly configured for VPC access."""
         with patch.dict(os.environ, staging_env, clear=True):
-            redis_url = os.getenv("REDIS_URL")
+            env = get_env()
+            redis_url = env.get("REDIS_URL")
             assert redis_url is not None
             
             # Should use private IP address accessible via VPC connector
@@ -113,7 +115,8 @@ class TestStagingConfiguration:
             # Check all URL-like environment variables
             url_vars = ["AUTH_SERVICE_URL", "POSTGRES_HOST", "REDIS_URL"]
             for var in url_vars:
-                value = os.getenv(var, "")
+                env = get_env()
+                value = env.get(var, "")
                 assert "localhost" not in value.lower()
                 assert "127.0.0.1" not in value
                 assert "0.0.0.0" not in value
@@ -229,7 +232,8 @@ class TestCrossServiceConfiguration:
         
         with patch.dict(os.environ, staging_env, clear=True):
             # Both services should use the same Redis URL
-            redis_url = os.getenv("REDIS_URL")
+            env = get_env()
+            redis_url = env.get("REDIS_URL")
             assert redis_url == staging_env["REDIS_URL"]
             
             # Should point to the correct staging Redis instance
