@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Mission Critical Test Suite: Mock Usage Policy Violations
 
 This test suite ensures compliance with CLAUDE.md policy: "MOCKS = Abomination", "MOCKS are FORBIDDEN"
@@ -443,9 +445,9 @@ class TestMockPolicyCompliance:
                         content = f.read()
                         
                     # Check for direct os.environ access
-                    if 'os.environ[' in content or 'os.environ.get(' in content:
+                    if 'os.environ[' in content or 'env.get(' in content:
                         # Count occurrences
-                        count = content.count('os.environ[') + content.count('os.environ.get(')
+                        count = content.count('os.environ[') + content.count('env.get(')
                         violations.append((str(py_file), count))
                         
                 except Exception as e:

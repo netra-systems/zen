@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 """Real Service Configuration for E2E Tests
 
+env = get_env()
 Business Value Justification (BVJ):
 - Segment: Platform/Internal
 - Business Goal: Test Infrastructure Reliability
@@ -409,19 +411,19 @@ def set_environment_for_real_services(config: RealServiceConfig) -> None:
         config: Real service configuration
     """
     # Database URLs
-    os.environ["DATABASE_URL"] = config.database.postgres_url
-    os.environ["REDIS_URL"] = config.database.redis_url
+    env.set("DATABASE_URL", config.database.postgres_url, "test")
+    env.set("REDIS_URL", config.database.redis_url, "test")
     if config.database.clickhouse_url:
-        os.environ["CLICKHOUSE_URL"] = config.database.clickhouse_url
+        env.set("CLICKHOUSE_URL", config.database.clickhouse_url, "test")
     
     # Service flags
-    os.environ["USE_REAL_SERVICES"] = str(config.use_real_services).lower()
-    os.environ["TEST_USE_REAL_LLM"] = str(config.llm.use_real_llm).lower()
-    os.environ["ENABLE_REAL_LLM_TESTING"] = str(config.llm.use_real_llm).lower()
+    env.set("USE_REAL_SERVICES", str, "test")(config.use_real_services).lower()
+    env.set("TEST_USE_REAL_LLM", str, "test")(config.llm.use_real_llm).lower()
+    env.set("ENABLE_REAL_LLM_TESTING", str, "test")(config.llm.use_real_llm).lower()
     
     # LLM provider
     if config.llm.primary_provider:
-        os.environ["TEST_LLM_PROVIDER"] = config.llm.primary_provider
+        env.set("TEST_LLM_PROVIDER", config.llm.primary_provider, "test")
 
 
 # CLI interface for testing

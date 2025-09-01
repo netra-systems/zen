@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 E2E Authentication Flow Tests - Phase 2 Unified System Testing
 
 Business Value Justification (BVJ):
@@ -21,8 +23,8 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock
 
 # Set minimal environment for testing
-os.environ["TESTING"] = "1"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+env.set("TESTING", "1", "test")
+env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
 
 # Mock utility aliases for cleaner code
 MagicNone = MagicMock()

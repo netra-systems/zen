@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Centralized Service Endpoints Configuration for E2E Tests
 
 Provides consistent service endpoint configuration that works with both
@@ -80,10 +82,10 @@ def get_service_endpoints(environment: str = "local") -> ServiceEndpoints:
         )
     else:  # local development
         return ServiceEndpoints(
-            auth_service_url=os.environ.get("AUTH_SERVICE_URL", "http://localhost:8081"),
-            backend_service_url=os.environ.get("BACKEND_SERVICE_URL", "http://localhost:8000"),
-            frontend_service_url=os.environ.get("FRONTEND_SERVICE_URL", "http://localhost:3000"),
-            websocket_url=os.environ.get("WEBSOCKET_URL", "ws://localhost:8000/ws")
+            auth_service_url=env.get("AUTH_SERVICE_URL", "http://localhost:8081"),
+            backend_service_url=env.get("BACKEND_SERVICE_URL", "http://localhost:8000"),
+            frontend_service_url=env.get("FRONTEND_SERVICE_URL", "http://localhost:3000"),
+            websocket_url=env.get("WEBSOCKET_URL", "ws://localhost:8000/ws")
         )
 
 

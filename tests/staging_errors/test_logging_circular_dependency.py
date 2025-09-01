@@ -4,15 +4,17 @@ import os
 import pytest
 import sys
 from unittest.mock import patch, MagicMock
+from shared.isolated_environment import get_env
 
 # Add the netra_backend to path
 
 
+env = get_env()
 def test_logging_filter_circular_dependency():
     """Test that reproduces the circular dependency error seen in staging."""
     
     # Set staging environment to trigger the production-like filter behavior
-    os.environ['ENVIRONMENT'] = 'staging'
+    env.set('ENVIRONMENT', 'staging', "test")
     
     # Mock the configuration manager to simulate the circular import
     # Mock: Component isolation for testing without external dependencies
@@ -46,7 +48,7 @@ def test_logging_filter_environment_detection_without_config():
     """Test that logging filter should detect environment without loading full config."""
     
     # Set staging environment
-    os.environ['ENVIRONMENT'] = 'staging'
+    env.set('ENVIRONMENT', 'staging', "test")
     
     from netra_backend.app.core.logging_context import ContextFilter
     
@@ -57,12 +59,12 @@ def test_logging_filter_environment_detection_without_config():
     assert filter_instance._is_production() == False  # staging is not production
     
     # Change to production
-    os.environ['ENVIRONMENT'] = 'production'
+    env.set('ENVIRONMENT', 'production', "test")
     filter_instance = ContextFilter()
     assert filter_instance._is_production() == True
     
     # Change to development
-    os.environ['ENVIRONMENT'] = 'development'
+    env.set('ENVIRONMENT', 'development', "test")
     filter_instance = ContextFilter()
     assert filter_instance._is_production() == False
 

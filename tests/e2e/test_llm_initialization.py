@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 """LLM Initialization Test Implementer - Real API Integration Testing
 
+env = get_env()
 BVJ: Growth & Enterprise segments | $100K+ MRR depends on real LLM responses
 Tests real Anthropic/OpenAI API integration with structured response validation,
 token tracking, fallback mechanisms, and circuit breaker patterns.
@@ -16,8 +18,8 @@ from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 import pytest
 
 # Mock configuration to avoid environment issues during import
-os.environ["TESTING_ENV"] = "true"
-os.environ["ENVIRONMENT"] = "testing"
+env.set("TESTING_ENV", "true", "test")
+env.set("ENVIRONMENT", "testing", "test")
 
 from tests.e2e.llm_initialization_helpers import (
     LLMTestHelpers, ReliabilityTestHelpers, TokenTracker, LLMTestResponse,

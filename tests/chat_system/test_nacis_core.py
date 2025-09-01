@@ -1,6 +1,8 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """Test NACIS core components without backend or complex dependencies.
 
+env = get_env()
 Date Created: 2025-01-22
 Last Updated: 2025-01-22
 
@@ -17,8 +19,8 @@ from unittest.mock import Mock, AsyncMock
 # Add project root to path
 
 # Set NACIS environment
-os.environ["NACIS_ENABLED"] = "true"
-os.environ["GUARDRAILS_ENABLED"] = "true"
+env.set("NACIS_ENABLED", "true", "test")
+env.set("GUARDRAILS_ENABLED", "true", "test")
 
 
 async def test_nacis_core():

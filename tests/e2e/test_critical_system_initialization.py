@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Critical System Initialization and Startup Tests.
 
 This test suite validates the most critical and difficult cold start scenarios
@@ -49,7 +51,7 @@ if os.getenv('DATABASE_URL') == 'sqlite+aiosqlite:///:memory:':
                     break
     
     if real_database_url:
-        os.environ['DATABASE_URL'] = real_database_url
+        env.set('DATABASE_URL', real_database_url, "test")
 
 from dev_launcher.config import LauncherConfig
 from dev_launcher.service_startup import ServiceStartupCoordinator
@@ -997,7 +999,7 @@ class TestFrontendIntegration:
         ]
         
         for var in critical_vars:
-            value = os.environ.get(var)
+            value = env.get(var)
             if not value and var.startswith("NEXT_PUBLIC_"):
                 # These should be set for frontend
                 pytest.skip(f"Frontend env var {var} not configured")

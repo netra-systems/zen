@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Service Manager - Part 2 of Unified Test Harness
 Handles service startup, health checks, and coordination
 
@@ -156,7 +158,7 @@ class ServiceManager:
     
     def _create_test_environment(self, config: ServiceConfig) -> Dict[str, str]:
         """Create test environment for service startup."""
-        test_env = os.environ.copy()
+        test_env = env.get_all()
         
         # Set test mode variables
         test_env.update({
@@ -443,7 +445,7 @@ class RealServicesManager:
         
     def _get_auth_service_env(self) -> Dict[str, str]:
         """Get environment for auth service."""
-        env = os.environ.copy()
+        env = env.get_all()
         env.update({
             "PORT": str(self.service_ports["auth_service"]),
             "ENVIRONMENT": "test",
@@ -455,7 +457,7 @@ class RealServicesManager:
         
     def _get_backend_service_env(self) -> Dict[str, str]:
         """Get environment for backend service."""
-        env = os.environ.copy()
+        env = env.get_all()
         env.update({
             "ENVIRONMENT": "test",
             "DATABASE_URL": "sqlite+aiosqlite:///:memory:",

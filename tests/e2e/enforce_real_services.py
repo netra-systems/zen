@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 E2E Test Service Enforcement
 Ensures E2E tests ONLY use real services, never mocks
 
@@ -34,25 +36,25 @@ class E2EServiceValidator:
     def enforce_real_services():
         """Enforce real service usage in E2E tests"""
         # Set critical environment variables for E2E testing
-        os.environ["E2E_TESTING"] = "true"
-        os.environ["TESTING"] = "1"
-        os.environ["ENVIRONMENT"] = "testing"
+        env.set("E2E_TESTING", "true", "test")
+        env.set("TESTING", "1", "test")
+        env.set("ENVIRONMENT", "testing", "test")
         
         # CRITICAL: Disable all mock fallbacks
-        os.environ["NO_MOCK_FALLBACK"] = "true"
-        os.environ["FORCE_REAL_SERVICES"] = "true"
+        env.set("NO_MOCK_FALLBACK", "true", "test")
+        env.set("FORCE_REAL_SERVICES", "true", "test")
         
         # Use SQLite in-memory for database (real, but fast)
-        os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+        env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
         
         # Enable real LLM testing for agent E2E tests
-        os.environ["USE_REAL_LLM"] = "true"
-        os.environ["TEST_USE_REAL_LLM"] = "true"  # Legacy compatibility
-        os.environ["ENABLE_REAL_LLM_TESTING"] = "true"
+        env.set("USE_REAL_LLM", "true", "test")
+        env.set("TEST_USE_REAL_LLM", "true", "test")  # Legacy compatibility
+        env.set("ENABLE_REAL_LLM_TESTING", "true", "test")
         
         # Disable Docker dependency - use lightweight services
-        os.environ["TEST_SERVICE_MODE"] = "local"
-        os.environ["SKIP_DOCKER_CHECK"] = "true"
+        env.set("TEST_SERVICE_MODE", "local", "test")
+        env.set("SKIP_DOCKER_CHECK", "true", "test")
         
         logger.info("E2E real service enforcement enabled")
     
@@ -60,7 +62,7 @@ class E2EServiceValidator:
     async def validate_redis_connection() -> bool:
         """Validate Redis is available for E2E testing"""
         try:
-            redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+            redis_url = env.get("REDIS_URL", "redis://localhost:6379/0")
             client = await redis.from_url(redis_url)
             await client.ping()
             await client.close()
@@ -73,7 +75,7 @@ class E2EServiceValidator:
     async def validate_backend_service() -> bool:
         """Validate backend service is available"""
         try:
-            backend_url = os.environ.get("BACKEND_SERVICE_URL", "http://localhost:8000")
+            backend_url = env.get("BACKEND_SERVICE_URL", "http://localhost:8000")
             async with aiohttp.ClientSession() as session:
                 async with session.get(f"{backend_url}/health") as response:
                     return response.status == 200
@@ -85,7 +87,7 @@ class E2EServiceValidator:
     async def validate_auth_service() -> bool:
         """Validate auth service is available"""
         try:
-            auth_url = os.environ.get("AUTH_SERVICE_URL", "http://localhost:8081")
+            auth_url = env.get("AUTH_SERVICE_URL", "http://localhost:8081")
             async with aiohttp.ClientSession() as session:
                 async with session.get(f"{auth_url}/health") as response:
                     return response.status == 200
@@ -96,8 +98,8 @@ class E2EServiceValidator:
     @staticmethod
     def validate_llm_configuration() -> bool:
         """Validate LLM configuration for E2E testing"""
-        real_llm_requested = (os.environ.get("USE_REAL_LLM") == "true" or os.environ.get("TEST_USE_REAL_LLM") == "true")
-        logger.debug(f"LLM validation: USE_REAL_LLM={os.environ.get('USE_REAL_LLM')}, TEST_USE_REAL_LLM={os.environ.get('TEST_USE_REAL_LLM')}, real_llm_requested={real_llm_requested}")
+        real_llm_requested = (env.get("USE_REAL_LLM") == "true" or env.get("TEST_USE_REAL_LLM") == "true")
+        logger.debug(f"LLM validation: USE_REAL_LLM={env.get('USE_REAL_LLM')}, TEST_USE_REAL_LLM={env.get('TEST_USE_REAL_LLM')}, real_llm_requested={real_llm_requested}")
         
         # Check that real LLM testing is enabled
         if not real_llm_requested:
@@ -105,19 +107,19 @@ class E2EServiceValidator:
             return False
         
         # Check for at least one LLM API key
-        openai_key = os.environ.get("OPENAI_API_KEY")
-        anthropic_key = os.environ.get("ANTHROPIC_API_KEY")
-        gemini_key = os.environ.get("GEMINI_API_KEY")
+        openai_key = env.get("OPENAI_API_KEY")
+        anthropic_key = env.get("ANTHROPIC_API_KEY")
+        gemini_key = env.get("GEMINI_API_KEY")
         has_llm_key = any([openai_key, anthropic_key, gemini_key])
         logger.debug(f"API key check: OPENAI={bool(openai_key)}, ANTHROPIC={bool(anthropic_key)}, GEMINI={bool(gemini_key)}, has_any={has_llm_key}")
         
         if not has_llm_key:
             # Only set test keys if real LLM testing is not specifically requested
-            if not os.environ.get("TEST_USE_REAL_LLM", "").lower() == "true":
+            if not env.get("TEST_USE_REAL_LLM", "").lower() == "true":
                 logger.warning("No LLM API keys found - using test keys")
                 # Set test API keys for E2E testing
-                os.environ["GEMINI_API_KEY"] = "test-gemini-api-key"
-                os.environ["TEST_LLM_MODE"] = "simulate"
+                env.set("GEMINI_API_KEY", "test-gemini-api-key", "test")
+                env.set("TEST_LLM_MODE", "simulate", "test")
             else:
                 logger.info("Real LLM testing requested - API keys will be loaded from secret manager")
         
@@ -147,7 +149,7 @@ class E2ERealServiceFactory:
     @staticmethod
     async def create_redis_client():
         """Create real Redis client for E2E testing"""
-        redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+        redis_url = env.get("REDIS_URL", "redis://localhost:6379/0")
         client = await redis.from_url(redis_url)
         return client
     

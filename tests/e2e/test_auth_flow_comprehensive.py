@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Comprehensive Authentication and OAuth Flow Test Suite - Updated for GCP Staging
 
 This test suite is designed to work with GCP staging services and includes:
@@ -202,7 +204,7 @@ class TestDevLoginFlow:
     
     @pytest.mark.e2e
     @pytest.mark.skipif(
-        not os.environ.get("USE_REAL_SERVICES", "").lower() == "true", 
+        not env.get("USE_REAL_SERVICES", "").lower() == "true", 
         reason="Test requires real auth service - set USE_REAL_SERVICES=true"
     )
     @pytest.mark.auth

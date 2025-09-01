@@ -1,4 +1,5 @@
 """
+env = get_env()
 CRITICAL BUSINESS REQUIREMENT TEST - Secret Manager Builder
 
 This test exposes the core configuration problem that costs engineering time
@@ -59,7 +60,7 @@ class TestSecretManagerBuilderRequirement:
     def setup_test_environment(self):
         """Setup test environment to simulate the real configuration problem."""
         # Save original environment state
-        self.original_env = dict(os.environ)
+        self.original_env = env.get_all()
         
         # Set up test environment that exposes the configuration gaps
         test_env = {
@@ -77,8 +78,8 @@ class TestSecretManagerBuilderRequirement:
         yield
         
         # Restore original environment
-        os.environ.clear()
-        os.environ.update(self.original_env)
+        env.clear()
+        env.update(self.original_env, "test")
 
     @pytest.mark.xfail(reason="Expected failure: Documents secret management fragmentation - 4 different implementations exist")
     def test_critical_developer_workflow_add_new_secret(self):
@@ -265,7 +266,7 @@ class TestSecretManagerBuilderRequirement:
         environment_handling = {}
         
         for env in environments:
-            os.environ['ENVIRONMENT'] = env
+            env.set('ENVIRONMENT', env, "test")
             env_results = {}
             
             # Test how each service handles environment detection

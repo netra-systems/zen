@@ -4,15 +4,17 @@ import os
 import pytest
 import sys
 from unittest.mock import patch, MagicMock, mock_open
+from shared.isolated_environment import get_env
 
 # Add the netra_backend to path
 
 
+env = get_env()
 def test_backend_config_loading_failure():
     """Test that reproduces the configuration loading failure seen in staging."""
     
     # Set staging environment
-    os.environ['ENVIRONMENT'] = 'staging'
+    env.set('ENVIRONMENT', 'staging', "test")
     
     # Clear critical environment variables that might be missing in staging
     critical_vars = [
@@ -42,7 +44,7 @@ def test_backend_config_loading_failure():
 def test_backend_config_create_base_config_missing_vars():
     """Test that _create_base_config fails when required environment variables are missing."""
     
-    os.environ['ENVIRONMENT'] = 'staging'
+    env.set('ENVIRONMENT', 'staging', "test")
     
     # Mock the config file loading
     mock_config_data = {
@@ -66,8 +68,8 @@ def test_backend_config_create_base_config_missing_vars():
         manager = ConfigurationManager()
         
         # Clear environment variables
-        os.environ.pop('DATABASE_URL', None)
-        os.environ.pop('CLICKHOUSE_HOST', None)
+        env.delete('DATABASE_URL', "test")
+        env.delete('CLICKHOUSE_HOST', "test")
         
         # This should fail when trying to resolve environment variables
         with pytest.raises(Exception) as exc_info:
@@ -83,14 +85,14 @@ def test_backend_config_staging_vs_local_differences():
     from netra_backend.app.core.configuration.base import ConfigurationManager
     
     # Test local environment (should have defaults)
-    os.environ['ENVIRONMENT'] = 'development'
+    env.set('ENVIRONMENT', 'development', "test")
     manager_local = ConfigurationManager()
     
     # In development, some configs might have defaults
     # This test verifies that development has fallbacks
     
     # Test staging environment (stricter requirements)
-    os.environ['ENVIRONMENT'] = 'staging'
+    env.set('ENVIRONMENT', 'staging', "test")
     manager_staging = ConfigurationManager()
     
     # Staging should not have the same fallbacks as development
@@ -100,11 +102,11 @@ def test_backend_config_staging_vs_local_differences():
 def test_backend_config_validation_in_staging():
     """Test that configuration validation is stricter in staging."""
     
-    os.environ['ENVIRONMENT'] = 'staging'
+    env.set('ENVIRONMENT', 'staging', "test")
     
     # Set minimal required variables
-    os.environ['DATABASE_URL'] = 'postgresql://test:test@localhost/test'
-    os.environ['REDIS_URL'] = 'redis://localhost:6379'
+    env.set('DATABASE_URL', 'postgresql://test:test@localhost/test', "test")
+    env.set('REDIS_URL', 'redis://localhost:6379', "test")
     
     from netra_backend.app.core.configuration.base import ConfigurationManager
     
@@ -126,7 +128,7 @@ def test_backend_config_validation_in_staging():
 def test_backend_config_cloud_sql_connection():
     """Test that Cloud SQL connection string is properly formatted for staging."""
     
-    os.environ['ENVIRONMENT'] = 'staging'
+    env.set('ENVIRONMENT', 'staging', "test")
     
     # Test different DATABASE_URL formats
     test_urls = [
@@ -139,13 +141,13 @@ def test_backend_config_cloud_sql_connection():
     ]
     
     for url in test_urls:
-        os.environ['DATABASE_URL'] = url
+        env.set('DATABASE_URL', url, "test")
         
         # Try to parse and validate the URL
         from urllib.parse import urlparse
         parsed = urlparse(url)
         
         # Check if it's a valid Cloud SQL format for staging
-        if os.environ.get('ENVIRONMENT') == 'staging':
+        if env.get('ENVIRONMENT') == 'staging':
             # Staging should use Cloud SQL format
             assert '/cloudsql/' in url or parsed.hostname != 'localhost'

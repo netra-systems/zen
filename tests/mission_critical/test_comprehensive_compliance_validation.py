@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Comprehensive Compliance Validation Suite
 
 CRITICAL MISSION: Validate all mock remediations and ensure 90%+ compliance.
@@ -479,7 +481,7 @@ class ComprehensiveComplianceValidator:
             violations = []
             
             # Check for direct os.environ usage
-            if 'os.environ[' in content or 'os.environ.get(' in content:
+            if 'os.environ[' in content or 'env.get(' in content:
                 violations.append(f"{file_path}: Direct os.environ access")
             
             # Check for IsolatedEnvironment usage

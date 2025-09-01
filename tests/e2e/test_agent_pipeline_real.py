@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Real Agent Pipeline Execution Flow Test - E2E Critical Test
 
 CRITICAL E2E Test: Real Agent Pipeline from WebSocket Message to Agent Response
@@ -55,7 +57,7 @@ from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 # Enable real services for this test module  
 # Skip this for now to debug other issues
 # pytestmark = pytest.mark.skipif(
-#     os.environ.get("USE_REAL_SERVICES", "false").lower() != "true",
+#     env.get("USE_REAL_SERVICES", "false").lower() != "true",
 #     reason="Real services disabled (set USE_REAL_SERVICES=true)"
 # )
 

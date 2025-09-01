@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 CRITICAL E2E Test: Real User Signup, Login, and Chat Flow
 Business Value: $50K MRR - Protects entire new user funnel
 
@@ -28,8 +30,8 @@ from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
 
 # Enable development OAUTH SIMULATION for WebSocket connections in e2e tests
-os.environ["WEBSOCKET_AUTH_BYPASS"] = "true"
-os.environ["ALLOW_DEV_OAUTH_SIMULATION"] = "true"
+env.set("WEBSOCKET_AUTH_BYPASS", "true", "test")
+env.set("ALLOW_DEV_OAUTH_SIMULATION", "true", "test")
 
 
 class TestRealUserFlower:
@@ -235,7 +237,7 @@ class TestE2EManager:
         """Setup and teardown for E2E testing."""
         import os
         # Set development environment for dev login endpoint
-        os.environ['NETRA_ENVIRONMENT'] = 'development'
+        env.set('NETRA_ENVIRONMENT', 'development', "test")
         
         self.harness = UnifiedTestHarnessComplete()
         self.tester = RealUserFlowTester(self.harness)

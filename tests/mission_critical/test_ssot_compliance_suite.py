@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 SSOT Compliance Validation Suite - MISSION CRITICAL
 ==================================================
 
@@ -519,7 +521,7 @@ class SSotComplianceSuite:
                 
                 forbidden_patterns = [
                     'os.environ[',
-                    'os.environ.get(',
+                    'env.get(',
                     'os.getenv(',
                     'environ['
                 ]

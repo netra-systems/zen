@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """Simple working test for NACIS system.
 
@@ -15,10 +16,11 @@ from pathlib import Path
 # Add project root to path
 
 # Set environment
-os.environ["NACIS_ENABLED"] = "true"
-os.environ["GUARDRAILS_ENABLED"] = "true"
+env.set("NACIS_ENABLED", "true", "test")
+env.set("GUARDRAILS_ENABLED", "true", "test")
 
 
+env = get_env()
 def test_imports():
     """Test that all NACIS components can be imported."""
     print("\n" + "="*60)

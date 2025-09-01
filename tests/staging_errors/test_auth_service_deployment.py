@@ -4,17 +4,19 @@ import os
 import pytest
 import sys
 from unittest.mock import patch, MagicMock
+from shared.isolated_environment import get_env
 
 # Add the auth_service to path
 
 
+env = get_env()
 def test_auth_service_missing_jwt_secret():
     """Test that auth service fails to start without JWT_SECRET_KEY or JWT_SECRET."""
     
     # Clear any existing JWT secrets
-    os.environ.pop('JWT_SECRET_KEY', None)
-    os.environ.pop('JWT_SECRET', None)
-    os.environ['ENVIRONMENT'] = 'staging'
+    env.delete('JWT_SECRET_KEY', "test")
+    env.delete('JWT_SECRET', "test")
+    env.set('ENVIRONMENT', 'staging', "test")
     
     from auth_service.auth_core.utils.secrets import AuthSecretLoader
     
@@ -27,8 +29,8 @@ def test_auth_service_missing_database_url():
     """Test that auth service fails to initialize database without DATABASE_URL."""
     
     # Clear DATABASE_URL
-    os.environ.pop('DATABASE_URL', None)
-    os.environ['ENVIRONMENT'] = 'staging'
+    env.delete('DATABASE_URL', "test")
+    env.set('ENVIRONMENT', 'staging', "test")
     
     # Mock the auth_db module
     # Mock: Authentication service isolation for testing without real auth flows
@@ -101,14 +103,14 @@ def test_auth_service_startup_with_all_configs():
     """Test that auth service can start when all required configs are present."""
     
     # Set all required environment variables
-    os.environ['ENVIRONMENT'] = 'staging'
-    os.environ['DATABASE_URL'] = 'postgresql://test:test@localhost/test'
-    os.environ['JWT_SECRET_KEY'] = 'test-jwt-secret-key'
-    os.environ['OAUTH_GOOGLE_CLIENT_ID_ENV'] = 'test-client-id'
-    os.environ['OAUTH_GOOGLE_CLIENT_SECRET_ENV'] = 'test-client-secret'
-    os.environ['SERVICE_SECRET'] = 'test-service-secret'
-    os.environ['SERVICE_ID'] = 'auth-service'
-    os.environ['PORT'] = '8080'
+    env.set('ENVIRONMENT', 'staging', "test")
+    env.set('DATABASE_URL', 'postgresql://test:test@localhost/test', "test")
+    env.set('JWT_SECRET_KEY', 'test-jwt-secret-key', "test")
+    env.set('OAUTH_GOOGLE_CLIENT_ID_ENV', 'test-client-id', "test")
+    env.set('OAUTH_GOOGLE_CLIENT_SECRET_ENV', 'test-client-secret', "test")
+    env.set('SERVICE_SECRET', 'test-service-secret', "test")
+    env.set('SERVICE_ID', 'auth-service', "test")
+    env.set('PORT', '8080', "test")
     
     from auth_service.auth_core.utils.secrets import AuthSecretLoader
     

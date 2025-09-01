@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 """Cache Coherence E2E Test Helpers
 
+env = get_env()
 Business Value Justification (BVJ):
 1. Segment: Enterprise (40K+ MRR protection from stale data issues)
 2. Business Goal: Prevent data inconsistency across distributed caches
@@ -11,7 +13,7 @@ Architecture: <300 lines, functions <8 lines per CLAUDE.md requirements
 
 import os
 
-os.environ["NETRA_ENV"] = "testing"
+env.set("NETRA_ENV", "testing", "test")
 
 import asyncio
 import json

@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 """Streaming Response Test Implementation - Real WebSocket Performance Validation
 
+env = get_env()
 Tests real-time response streaming performance with actual WebSocket connections.
 Critical for user experience and competitive differentiation.
 
@@ -22,9 +24,9 @@ from typing import Any, Dict, List, Optional
 import pytest
 
 # Set up test environment before any imports
-os.environ["TESTING"] = "1"
-os.environ["ENVIRONMENT"] = "test"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+env.set("TESTING", "1", "test")
+env.set("ENVIRONMENT", "test", "test")
+env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
 
 from tests.e2e.config import setup_test_environment
 from tests.e2e.unified_e2e_harness import (

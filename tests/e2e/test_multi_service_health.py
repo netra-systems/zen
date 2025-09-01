@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Multi-Service Health Check Tests
 
 Business Value Justification (BVJ):
@@ -28,9 +30,9 @@ import httpx
 import pytest
 
 # Set testing environment before any imports
-os.environ["TESTING"] = "1"
-os.environ["ENVIRONMENT"] = "testing"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+env.set("TESTING", "1", "test")
+env.set("ENVIRONMENT", "testing", "test")
+env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession

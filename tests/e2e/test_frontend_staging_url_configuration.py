@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Test suite to prevent frontend staging URL regression.
 Validates that frontend builds contain correct environment-specific URLs.
@@ -15,6 +16,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 
+env = get_env()
 class TestFrontendStagingURLConfiguration:
     """Comprehensive tests to prevent frontend URL configuration regressions."""
     
@@ -167,7 +169,7 @@ class TestFrontendStagingURLConfiguration:
             "auth-service-client must not have hardcoded localhost URLs except in comments"
     
     @pytest.mark.skipif(
-        not os.environ.get('RUN_DOCKER_BUILD_TEST'),
+        not env.get('RUN_DOCKER_BUILD_TEST'),
         reason="Docker build test is slow, set RUN_DOCKER_BUILD_TEST=1 to enable"
     )
     @pytest.mark.e2e

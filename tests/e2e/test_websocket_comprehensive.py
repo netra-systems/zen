@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Comprehensive WebSocket Connection Test Suite - Designed to FAIL and Expose Issues
 
 This test suite is designed to expose current WebSocket problems by testing realistic scenarios
@@ -41,8 +43,8 @@ import pytest
 import httpx
 
 # Set test environment
-os.environ["TESTING"] = "1"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+env.set("TESTING", "1", "test")
+env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
 
 # Import websockets only if available (not required for all tests)
 try:
