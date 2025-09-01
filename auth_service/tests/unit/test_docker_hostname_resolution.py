@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Test Docker hostname resolution for database connections.
 
@@ -12,6 +13,7 @@ import tempfile
 from auth_service.auth_core.config import AuthConfig
 
 
+env = get_env()
 class TestDockerHostnameResolution(unittest.TestCase):
     """Test Docker environment detection and hostname resolution.
     
@@ -22,15 +24,15 @@ class TestDockerHostnameResolution(unittest.TestCase):
     def setUp(self):
         """Set up test environment."""
         # Store original environment
-        self.original_env = os.environ.copy()
+        self.original_env = env.get_all()
         # Clear Docker-related environment variables
         for key in ['RUNNING_IN_DOCKER', 'IS_DOCKER', 'DOCKER_CONTAINER']:
             os.environ.pop(key, None)
     
     def tearDown(self):
         """Restore original environment."""
-        os.environ.clear()
-        os.environ.update(self.original_env)
+        env.clear()
+        env.update(self.original_env, "test")
     
     @patch('auth_service.auth_core.config.get_env')
     @patch('os.path.exists')

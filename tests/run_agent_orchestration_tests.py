@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
+env = get_env()
 Agent Orchestration Test Runner
 
 Comprehensive test runner for agent performance metrics and error recovery tests.
@@ -60,7 +62,7 @@ def run_performance_tests(concurrent_load: int = 10, detailed_reports: bool = Fa
     print()
     
     # Set environment variable for concurrent load
-    env = os.environ.copy()
+    env = env.get_all()
     env["AGENT_PERFORMANCE_CONCURRENT_LOAD"] = str(concurrent_load)
     
     result = subprocess.run(cmd, env=env, capture_output=False)

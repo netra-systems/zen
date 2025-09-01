@@ -1,5 +1,7 @@
 from netra_backend.app.core.configuration.base import get_unified_config
+from shared.isolated_environment import get_env
 """
+env = get_env()
 RED TEAM TESTS 36-40: Monitoring, Observability, and Configuration
 
 CRITICAL: These tests are DESIGNED TO FAIL initially to expose real monitoring gaps.
@@ -550,10 +552,10 @@ class TestMonitoringObservability:
                         f"Sensitive variable {var} exposed in config string representation"
 
             # Test configuration reloading
-            original_log_level = os.environ.get("LOG_LEVEL", "INFO")
+            original_log_level = env.get("LOG_LEVEL", "INFO")
             
             # Change environment variable
-            os.environ["LOG_LEVEL"] = "DEBUG"
+            env.set("LOG_LEVEL", "DEBUG", "test")
             
             try:
                 # Test if configuration can be reloaded
@@ -573,13 +575,13 @@ class TestMonitoringObservability:
             
             finally:
                 # Restore original value
-                os.environ["LOG_LEVEL"] = original_log_level
+                env.set("LOG_LEVEL", original_log_level, "test")
 
             # Test environment variable precedence
             # Command line args > Environment variables > Config file > Defaults
             
             # Set environment variable
-            os.environ["TEST_PRECEDENCE"] = "environment_value"
+            env.set("TEST_PRECEDENCE", "environment_value", "test")
             
             try:
                 if hasattr(config, 'get_env'):
@@ -587,12 +589,12 @@ class TestMonitoringObservability:
                     assert env_value == "environment_value", \
                         "Environment variable precedence not working"
                 else:
-                    env_value = os.environ.get("TEST_PRECEDENCE", "default_value")
+                    env_value = env.get("TEST_PRECEDENCE", "default_value")
                     assert env_value == "environment_value", \
                         "Environment variable not accessible"
             
             finally:
-                os.environ.pop("TEST_PRECEDENCE", None)
+                env.delete("TEST_PRECEDENCE", "test")
 
         except Exception as e:
             pytest.fail(f"Environment variable propagation test failed: {e}")
@@ -626,7 +628,7 @@ class TestMonitoringObservability:
             
             for secret_name, description in potential_secrets:
                 # Check if secret exists in environment
-                secret_value = os.environ.get(secret_name)
+                secret_value = env.get(secret_name)
                 if secret_value:
                     secrets_found.append(secret_name)
                     
@@ -729,7 +731,7 @@ class TestMonitoringObservability:
             test_secret_value = "super_secret_password_123"
             
             # Set test secret
-            os.environ["TEST_SECRET"] = test_secret_value
+            env.set("TEST_SECRET", test_secret_value, "test")
             
             try:
                 # Generate an error that might expose the secret
@@ -746,7 +748,7 @@ class TestMonitoringObservability:
                         "Secret exposed in error message"
             
             finally:
-                os.environ.pop("TEST_SECRET", None)
+                env.delete("TEST_SECRET", "test")
 
         except Exception as e:
             pytest.fail(f"Secret management integration test failed: {e}")
