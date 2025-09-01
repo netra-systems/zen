@@ -273,26 +273,104 @@ The following events MUST be sent during agent execution to enable meaningful AI
 
 ## 7\. Project Tooling
 
-### 7.1. Quick Start
+### 7.1. Quick Start with Docker
 
 ```bash
-# From project root:
+# Start Docker services (automatic for most commands)
+python scripts/docker.py start
+
+# Run tests (Docker starts automatically if needed)
 python tests/unified_test_runner.py
+
+# Check if everything is working
+python scripts/docker.py health
 
 # Or use absolute path from anywhere:
 python /Users/anthony/Documents/GitHub/netra-apex/tests/unified_test_runner.py
 ```
 
-### 7.2. Unified Test Runner
+### 7.2. Docker Management
+
+**CRITICAL: Use the Docker orchestration system for all service management.**
+
+#### Basic Docker Operations
+```bash
+# Start services
+python scripts/docker.py start        # Test environment (default)
+python scripts/docker.py start dev    # Development environment
+python scripts/docker.py start prod   # Production environment
+
+# Stop services
+python scripts/docker.py stop
+
+# Restart services
+python scripts/docker.py restart
+
+# Check status
+python scripts/docker.py status
+
+# Health check
+python scripts/docker.py health
+
+# View logs
+python scripts/docker.py logs backend
+python scripts/docker.py logs auth -f  # Follow logs in real-time
+
+# Clean up everything
+python scripts/docker.py cleanup
+```
+
+#### Alpine-Based Test Orchestration
+**New optimized Alpine Docker images for faster, isolated testing:**
+
+```bash
+# Run tests in isolated Alpine environment
+python test_framework/integrated_test_runner.py --mode isolated --suites unit integration
+
+# Parallel test execution with isolated environments
+python test_framework/integrated_test_runner.py --mode parallel --suites unit api e2e
+
+# Refresh services and test
+python test_framework/integrated_test_runner.py --mode refresh --services backend --suites api
+
+# Continuous integration mode (watches files)
+python test_framework/integrated_test_runner.py --mode ci --watch-paths netra_backend auth_service
+```
+
+#### Development Service Refresh
+```bash
+# Refresh backend and auth with latest changes
+python scripts/refresh_dev_services.py refresh --services backend auth
+
+# Quick restart without rebuild  
+python scripts/refresh_dev_services.py restart --services backend
+
+# Check status
+python scripts/refresh_dev_services.py status
+
+# View logs
+python scripts/refresh_dev_services.py logs --services backend -f
+```
+
+### 7.3. Unified Test Runner
 
 IMPORTANT: Use real services, real llm, docker compose etc. whenever possible for testing.
 MOCKS are FORBIDDEN in dev, staging or production.
 
+**The test runner automatically starts Docker when needed:**
+
   * **Default (Fast Feedback):** `python tests/unified_test_runner.py --category integration --no-coverage --fast-fail`
+  * **With Real Services:** `python tests/unified_test_runner.py --real-services` (Docker starts automatically)
+  * **E2E Tests:** `python tests/unified_test_runner.py --category e2e` (Docker starts automatically)
   * **Before Release:** `python tests/unified_test_runner.py --categories smoke unit integration api --real-llm --env staging`
   * **Mission Critical Tests:** `python tests/mission_critical/test_websocket_agent_events_suite.py`
 
-### 7.3. Deployment (GCP)
+#### Docker Environment Configuration
+- **Test Environment (Default)**: PostgreSQL (5434), Redis (6381), Backend (8000), Auth (8081)
+- **Development Environment**: PostgreSQL (5432), Redis (6379), Backend (8000), Auth (8081)
+- **Production Environment**: Standard production ports
+
+### 7.4. Deployment (GCP)
 
 **Use ONLY the official deployment script.**
   * **Default:** `python scripts/deploy_to_gcp.py --project netra-staging --build-local`

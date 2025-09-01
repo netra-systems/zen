@@ -72,23 +72,17 @@ The core problem is that the WebSocketManager is being set to `None` during agen
 
 ## Immediate Actions Required
 
-### 1. Fix WebSocketManager Initialization
-```python
-# In agent_registry.py
-def set_websocket_manager(self, websocket_manager):
-    # MUST NOT be None in production
-    if websocket_manager is None:
-        logger.error("WebSocketManager is None - agents will not send updates!")
-    self.websocket_manager = websocket_manager
-    # Ensure all agents get the manager
-```
+### 1. Fix WebSocketManager Initialization 
+
+from Perspective of new WebsocketAgent Bridge class
+
 
 ### 2. Verify Startup Sequence
-The correct initialization order should be:
+Audit initialization order should be:
 1. Initialize WebSocketManager
 2. Initialize Supervisor/ThreadService  
 3. Register agents with registry
-4. **Set WebSocketManager on registry** (THIS IS MISSING)
+4. **Set WebSocketManager on registry** AUDIT FROM from Perspective of new WebsocketAgent Bridge class
 5. Start WebSocket endpoint
 
 ### 3. Add Diagnostic Logging
@@ -129,12 +123,6 @@ Add logging to track:
    ```
 
 ## Success Criteria
-A successful agent execution should show:
-1. `WebSocket manager set to <WebSocketManager instance>` (not None)
-2. `agent_started` event sent
-3. `agent_thinking` events during processing
-4. `tool_executing` for each tool use
-5. `agent_completed` with results
 
 ## Timeline
 - **14:28:17** - WebSocket connection established successfully
