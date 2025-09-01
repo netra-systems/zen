@@ -2237,13 +2237,13 @@
         <path>docker_centralized_management.xml</path>
         <critical-takeaway>
             Docker Desktop crashes from restart storms require centralized management with rate limiting.
-            CentralizedDockerManager prevents conflicts with file-based locking and 30-second cooldowns.
+            UnifiedDockerManager prevents conflicts with file-based locking and 30-second cooldowns.
             Production Docker images reduce memory consumption by 90%+ (6GB to 3GB).
             Shared vs dedicated environments optimize resource usage vs test isolation.
             10+ parallel test runners now possible with proper coordination.
         </critical-takeaway>
         <severity>CRITICAL</severity>
         <business-impact>Development environment stability, prevents 4-8 hours/week developer downtime, enables reliable CI/CD</business-impact>
-        <prevention>Always use CentralizedDockerManager for Docker operations. Never issue direct docker restart commands. Use --docker-production flag for memory efficiency. Respect rate limiting and locking mechanisms.</prevention>
+        <prevention>Always use UnifiedDockerManager for Docker operations. Never issue direct docker restart commands. Use --docker-production flag for memory efficiency. Respect rate limiting and locking mechanisms.</prevention>
     </learning>
 </specification>
