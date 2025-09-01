@@ -17,6 +17,8 @@ import requests
 from typing import Dict, List, Optional
 from test_framework.environment_markers import staging_only, env_requires
 
+from shared.isolated_environment import get_env
+
 
 class TestOAuthConfiguration:
     """Test OAuth configuration and credential issues in staging."""
@@ -45,7 +47,7 @@ class TestOAuthConfiguration:
         found_credentials = {}
         
         for var_name in oauth_client_id_vars:
-            client_id = os.environ.get(var_name)
+            client_id = get_env().get(var_name)
             if not client_id:
                 missing_credentials.append({
                     "variable": var_name,
@@ -67,7 +69,7 @@ class TestOAuthConfiguration:
         )
         
         # Verify the primary expected variable is missing
-        google_client_id = os.environ.get("GOOGLE_CLIENT_ID")
+        google_client_id = get_env().get("GOOGLE_CLIENT_ID")
         assert not google_client_id, (
             f"Expected GOOGLE_CLIENT_ID to be missing (primary OAuth issue), "
             f"but found value: '{google_client_id[:10]}...' "
@@ -97,7 +99,7 @@ class TestOAuthConfiguration:
         found_secrets = {}
         
         for var_name in oauth_client_secret_vars:
-            client_secret = os.environ.get(var_name)
+            client_secret = get_env().get(var_name)
             if not client_secret:
                 missing_secrets.append({
                     "variable": var_name,
@@ -120,7 +122,7 @@ class TestOAuthConfiguration:
         )
         
         # Verify the primary expected variable is missing  
-        google_client_secret = os.environ.get("GOOGLE_CLIENT_SECRET")
+        google_client_secret = get_env().get("GOOGLE_CLIENT_SECRET")
         assert not google_client_secret, (
             f"Expected GOOGLE_CLIENT_SECRET to be missing (primary OAuth secret issue), "
             f"but secret is configured (length: {len(google_client_secret) if google_client_secret else 0}). "
@@ -151,7 +153,7 @@ class TestOAuthConfiguration:
             category_missing = []
             
             for env_var in env_vars:
-                if not os.environ.get(env_var):
+                if not get_env().get(env_var):
                     category_missing.append(env_var)
             
             if category_missing:

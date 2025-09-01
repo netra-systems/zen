@@ -11,6 +11,8 @@ import secrets
 from typing import Dict, List, Optional
 from test_framework.environment_markers import staging_only, env_requires
 
+from shared.isolated_environment import get_env
+
 
 class TestSecurityConfigVariations:
     """Additional test variations for security and configuration issues."""
@@ -41,7 +43,7 @@ class TestSecurityConfigVariations:
         missing_secrets = []
         
         for var_name, min_length in secret_env_vars.items():
-            secret_value = os.environ.get(var_name)
+            secret_value = get_env().get(var_name)
             
             if not secret_value:
                 missing_secrets.append({
@@ -90,9 +92,9 @@ class TestSecurityConfigVariations:
         This test should identify weak secret generation patterns.
         """
         secret_keys_to_test = {
-            "SECRET_KEY": os.environ.get("SECRET_KEY", ""),
-            "JWT_SECRET": os.environ.get("JWT_SECRET", ""),
-            "SESSION_SECRET": os.environ.get("SESSION_SECRET", "")
+            "SECRET_KEY": get_env().get("SECRET_KEY", ""),
+            "JWT_SECRET": get_env().get("JWT_SECRET", ""),
+            "SESSION_SECRET": get_env().get("SESSION_SECRET", "")
         }
         
         entropy_quality_issues = []
@@ -179,7 +181,7 @@ class TestSecurityConfigVariations:
         credential_format_failures = []
         
         for var_name, requirements in oauth_credentials.items():
-            credential_value = os.environ.get(var_name)
+            credential_value = get_env().get(var_name)
             
             if not credential_value:
                 credential_format_failures.append({

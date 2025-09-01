@@ -1,4 +1,5 @@
 """Test auth service route availability issues found in staging.
+from shared.isolated_environment import get_env
 
 These tests reproduce the 404 errors for missing authentication routes,
 particularly the /auth/google/login route that should be available but
@@ -34,7 +35,7 @@ class TestAuthRoutes:
         Expected failure: 404 Not Found for /auth/google/login
         """
         # Auth service URL (adjust based on staging configuration)
-        auth_service_base = os.environ.get("AUTH_SERVICE_URL", "http://localhost:8001")
+        auth_service_base = get_env().get("AUTH_SERVICE_URL", "http://localhost:8001")
         google_login_route = f"{auth_service_base}/auth/google/login"
         
         route_test_failures = []
@@ -119,7 +120,7 @@ class TestAuthRoutes:
         import os
         
         # Auth service base URL
-        auth_service_base = os.environ.get("AUTH_SERVICE_URL", "http://localhost:8001")
+        auth_service_base = get_env().get("AUTH_SERVICE_URL", "http://localhost:8001")
         
         # OAuth routes that should exist but may be missing
         expected_oauth_routes = [
@@ -205,7 +206,7 @@ class TestAuthRoutes:
         """
         import os
         
-        auth_service_base = os.environ.get("AUTH_SERVICE_URL", "http://localhost:8001")
+        auth_service_base = get_env().get("AUTH_SERVICE_URL", "http://localhost:8001")
         
         # Test basic auth service health vs missing OAuth routes
         route_registration_issues = []
@@ -305,7 +306,7 @@ class TestAuthRoutes:
         """
         import os
         
-        auth_service_base = os.environ.get("AUTH_SERVICE_URL", "http://localhost:8001")
+        auth_service_base = get_env().get("AUTH_SERVICE_URL", "http://localhost:8001")
         
         # Test different possible OAuth route patterns to find configuration issue
         oauth_route_patterns = [
@@ -412,7 +413,7 @@ class TestAuthRoutes:
         """
         import os
         
-        auth_service_base = os.environ.get("AUTH_SERVICE_URL", "http://localhost:8001")
+        auth_service_base = get_env().get("AUTH_SERVICE_URL", "http://localhost:8001")
         
         # Test route discovery to understand what blueprints/routers are registered
         blueprint_discovery_failures = []
@@ -520,7 +521,7 @@ class TestAuthRoutes:
         """
         import os
         
-        auth_service_base = os.environ.get("AUTH_SERVICE_URL", "http://localhost:8001")
+        auth_service_base = get_env().get("AUTH_SERVICE_URL", "http://localhost:8001")
         
         # Test OAuth route availability and service error responses
         oauth_dependency_failures = []
