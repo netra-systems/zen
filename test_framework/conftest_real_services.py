@@ -88,7 +88,7 @@ if "pytest" in sys.modules or get_test_env_manager().env.get("PYTEST_CURRENT_TES
         env.set("TEST_REDIS_PORT", "6381", source="real_services_conftest")
         env.set("TEST_CLICKHOUSE_HOST", "localhost", source="real_services_conftest")
         env.set("TEST_CLICKHOUSE_HTTP_PORT", "8123", source="real_services_conftest")
-        env.set("TEST_CLICKHOUSE_TCP_PORT", "9000", source="real_services_conftest")
+        env.set("TEST_CLICKHOUSE_TCP_PORT", "9002", source="real_services_conftest")
         env.set("TEST_CLICKHOUSE_USER", "test", source="real_services_conftest")
         env.set("TEST_CLICKHOUSE_PASSWORD", "test", source="real_services_conftest")
         env.set("TEST_CLICKHOUSE_DB", "netra_test_analytics", source="real_services_conftest")

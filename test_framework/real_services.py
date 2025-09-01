@@ -101,7 +101,7 @@ class ServiceConfig:
     
     # ClickHouse
     clickhouse_host: str = "localhost"
-    clickhouse_port: int = 9000
+    clickhouse_port: int = 9002  # Test ClickHouse TCP port
     clickhouse_user: str = "test"
     clickhouse_password: str = "test"
     clickhouse_database: str = "netra_test_analytics"
@@ -617,7 +617,7 @@ class RealServicesManager:
             
             # ClickHouse
             clickhouse_host=env.get("TEST_CLICKHOUSE_HOST", "localhost"),
-            clickhouse_port=int(env.get("TEST_CLICKHOUSE_TCP_PORT", "9000")),
+            clickhouse_port=int(env.get("TEST_CLICKHOUSE_TCP_PORT", "9002")),
             clickhouse_user=env.get("TEST_CLICKHOUSE_USER", "test"),
             clickhouse_password=env.get("TEST_CLICKHOUSE_PASSWORD", "test"),
             clickhouse_database=env.get("TEST_CLICKHOUSE_DB", "netra_test_analytics"),
