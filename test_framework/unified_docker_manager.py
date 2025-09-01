@@ -1127,6 +1127,409 @@ class UnifiedDockerManager:
         
         return stats
 
+    # =====================================
+    # CONSOLIDATED FEATURES FROM OTHER DOCKER MANAGERS
+    # =====================================
+    
+    def is_docker_available(self) -> bool:
+        """Check if Docker is available on the system."""
+        if hasattr(self, '_docker_available') and self._docker_available is not None:
+            return self._docker_available
+            
+        try:
+            result = subprocess.run(
+                ["docker", "--version"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            self._docker_available = result.returncode == 0
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            self._docker_available = False
+            
+        return self._docker_available
+    
+    def get_effective_mode(self, requested_mode: Optional[ServiceMode] = None) -> ServiceMode:
+        """
+        Get the effective service mode based on Docker availability and configuration.
+        
+        Args:
+            requested_mode: Requested service mode, defaults to DOCKER
+            
+        Returns:
+            Effective service mode to use
+        """
+        if requested_mode is None:
+            requested_mode = ServiceMode.DOCKER
+            
+        # Force mock mode in test environments if explicitly requested
+        if requested_mode == ServiceMode.MOCK:
+            return ServiceMode.MOCK
+            
+        # Fall back to local if Docker not available
+        if requested_mode == ServiceMode.DOCKER and not self.is_docker_available():
+            logger.warning("Docker not available, falling back to local mode")
+            return ServiceMode.LOCAL
+            
+        return requested_mode
+    
+    async def check_container_reusable(self, service: str) -> bool:
+        """
+        Check if existing container can be reused (smart container reuse).
+        
+        Args:
+            service: Service name to check
+            
+        Returns:
+            True if container exists and is healthy/reusable
+        """
+        try:
+            # Get container status using docker-compose ps
+            cmd = ["docker-compose", "-f", self._get_compose_file(), 
+                   "-p", f"netra-{self.environment}", "ps", "--format", "json", service]
+            
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+            
+            if result.returncode != 0 or not result.stdout.strip():
+                return False  # No container exists
+                
+            container_data = json.loads(result.stdout.strip())
+            state = container_data.get("State", "").lower()
+            health = container_data.get("Health", "")
+            
+            # Container is reusable if running and healthy (or no health check)
+            if state == "running":
+                return health in ["", "healthy"] or health.startswith("healthy")
+                
+            return False
+            
+        except (subprocess.TimeoutExpired, json.JSONDecodeError, Exception) as e:
+            logger.warning(f"Error checking container reusability for {service}: {e}")
+            return False
+    
+    async def start_services_smart(self, services: List[str], wait_healthy: bool = True) -> bool:
+        """
+        Start services only if they're not already healthy (smart container reuse).
+        
+        Args:
+            services: List of service names to start
+            wait_healthy: Wait for services to become healthy
+            
+        Returns:
+            True if all services started successfully
+        """
+        logger.info(f"Smart starting services: {', '.join(services)}")
+        
+        services_to_start = []
+        reused_services = []
+        
+        # Check which services can be reused
+        for service in services:
+            if await self.check_container_reusable(service):
+                reused_services.append(service)
+                logger.info(f"Reusing healthy container for {service}")
+            else:
+                services_to_start.append(service)
+        
+        if reused_services:
+            logger.info(f"Reused {len(reused_services)} healthy containers: {', '.join(reused_services)}")
+        
+        # Start only services that need starting
+        if services_to_start:
+            logger.info(f"Starting {len(services_to_start)} services: {', '.join(services_to_start)}")
+            
+            cmd = ["docker-compose", "-f", self._get_compose_file(),
+                   "-p", f"netra-{self.environment}", "up", "-d"] + services_to_start
+            
+            try:
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+                
+                if result.returncode != 0:
+                    logger.error(f"Failed to start services: {result.stderr}")
+                    return False
+                    
+            except subprocess.TimeoutExpired:
+                logger.error(f"Timeout starting services: {', '.join(services_to_start)}")
+                return False
+        
+        # Wait for health if requested
+        if wait_healthy:
+            return self.wait_for_services(services, timeout=self.HEALTH_CHECK_TIMEOUT)
+            
+        return True
+    
+    async def graceful_shutdown(self, services: Optional[List[str]] = None, timeout: int = 30) -> bool:
+        """
+        Perform graceful shutdown of services with proper cleanup.
+        
+        Args:
+            services: Services to shutdown, None for all
+            timeout: Timeout in seconds for graceful shutdown
+            
+        Returns:
+            True if shutdown completed successfully
+        """
+        logger.info(f"Gracefully shutting down services: {services or 'all'}")
+        
+        try:
+            # Build the shutdown command
+            cmd = ["docker-compose", "-f", self._get_compose_file(),
+                   "-p", f"netra-{self.environment}", "down"]
+            
+            if services:
+                # For specific services, use stop instead of down
+                cmd = ["docker-compose", "-f", self._get_compose_file(),
+                       "-p", f"netra-{self.environment}", "stop", "-t", str(timeout)] + services
+            else:
+                cmd.extend(["-t", str(timeout)])
+            
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout + 10)
+            
+            if result.returncode != 0:
+                logger.warning(f"Graceful shutdown had issues: {result.stderr}")
+                # Try force shutdown if graceful failed
+                return await self.force_shutdown(services)
+            
+            logger.info("Graceful shutdown completed successfully")
+            return True
+            
+        except subprocess.TimeoutExpired:
+            logger.error(f"Graceful shutdown timed out after {timeout}s, attempting force shutdown")
+            return await self.force_shutdown(services)
+        except Exception as e:
+            logger.error(f"Error during graceful shutdown: {e}")
+            return False
+    
+    async def force_shutdown(self, services: Optional[List[str]] = None) -> bool:
+        """
+        Force shutdown services (kill containers).
+        
+        Args:
+            services: Services to force shutdown, None for all
+            
+        Returns:
+            True if force shutdown completed
+        """
+        logger.warning(f"Force shutting down services: {services or 'all'}")
+        
+        try:
+            cmd = ["docker-compose", "-f", self._get_compose_file(),
+                   "-p", f"netra-{self.environment}", "kill"]
+            
+            if services:
+                cmd.extend(services)
+            
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            
+            # Also remove containers
+            cmd_rm = ["docker-compose", "-f", self._get_compose_file(),
+                      "-p", f"netra-{self.environment}", "rm", "-f"]
+            if services:
+                cmd_rm.extend(services)
+            
+            subprocess.run(cmd_rm, capture_output=True, text=True, timeout=30)
+            
+            logger.info("Force shutdown completed")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error during force shutdown: {e}")
+            return False
+    
+    async def reset_test_data(self, services: Optional[List[str]] = None) -> bool:
+        """
+        Reset test data without restarting containers.
+        
+        Args:
+            services: Services to reset data for, None for all applicable
+            
+        Returns:
+            True if data reset completed successfully
+        """
+        if services is None:
+            services = ["postgres", "redis"]
+            
+        logger.info(f"Resetting test data for services: {', '.join(services)}")
+        success = True
+        
+        for service in services:
+            if service == "postgres":
+                success &= await self._reset_postgres_data()
+            elif service == "redis":
+                success &= await self._reset_redis_data()
+            else:
+                logger.warning(f"Test data reset not implemented for service: {service}")
+                
+        return success
+    
+    async def _reset_postgres_data(self) -> bool:
+        """Reset PostgreSQL test data."""
+        try:
+            # Execute SQL commands to clear test data
+            sql_commands = [
+                "TRUNCATE TABLE users CASCADE;",
+                "TRUNCATE TABLE sessions CASCADE;", 
+                "TRUNCATE TABLE threads CASCADE;",
+                "TRUNCATE TABLE messages CASCADE;"
+            ]
+            
+            for sql in sql_commands:
+                cmd = ["docker-compose", "-f", self._get_compose_file(),
+                       "-p", f"netra-{self.environment}", "exec", "-T", "postgres",
+                       "psql", "-U", "netra", "-d", "netra", "-c", sql]
+                
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+                if result.returncode != 0:
+                    logger.warning(f"Failed to execute SQL: {sql} - {result.stderr}")
+                    
+            logger.info("PostgreSQL test data reset completed")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error resetting PostgreSQL data: {e}")
+            return False
+    
+    async def _reset_redis_data(self) -> bool:
+        """Reset Redis test data."""
+        try:
+            cmd = ["docker-compose", "-f", self._get_compose_file(),
+                   "-p", f"netra-{self.environment}", "exec", "-T", "redis",
+                   "redis-cli", "FLUSHALL"]
+            
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+            
+            if result.returncode != 0:
+                logger.error(f"Failed to flush Redis: {result.stderr}")
+                return False
+                
+            logger.info("Redis test data reset completed")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error resetting Redis data: {e}")
+            return False
+    
+    def get_enhanced_container_status(self, services: Optional[List[str]] = None) -> Dict[str, ContainerInfo]:
+        """
+        Get detailed container status information (enhanced from DockerHealthManager).
+        
+        Args:
+            services: Services to get status for, None for all
+            
+        Returns:
+            Dictionary mapping service name to ContainerInfo
+        """
+        cmd = ["docker-compose", "-f", self._get_compose_file(),
+               "-p", f"netra-{self.environment}", "ps", "--format", "json"]
+        
+        if services:
+            cmd.extend(services)
+        
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+            
+            if result.returncode != 0:
+                if services:
+                    # Return stopped status for requested services
+                    return {
+                        service: ContainerInfo(
+                            name=f"netra-{self.environment}-{service}",
+                            service=service,
+                            container_id="",
+                            image="",
+                            state=ContainerState.STOPPED
+                        ) for service in services
+                    }
+                return {}
+            
+            containers = {}
+            
+            if not result.stdout.strip():
+                if services:
+                    return {
+                        service: ContainerInfo(
+                            name=f"netra-{self.environment}-{service}",
+                            service=service,
+                            container_id="",
+                            image="",
+                            state=ContainerState.STOPPED
+                        ) for service in services
+                    }
+                return {}
+            
+            for line in result.stdout.strip().split('\n'):
+                if not line:
+                    continue
+                    
+                try:
+                    container_data = json.loads(line)
+                    name = container_data.get("Name", "")
+                    service = container_data.get("Service", "")
+                    state_str = container_data.get("State", "").lower()
+                    health = container_data.get("Health", "")
+                    
+                    # Determine container state
+                    if state_str == "running":
+                        if health == "healthy":
+                            state = ContainerState.HEALTHY
+                        elif health == "unhealthy":
+                            state = ContainerState.UNHEALTHY
+                        elif health == "starting":
+                            state = ContainerState.STARTING
+                        else:
+                            state = ContainerState.RUNNING
+                    else:
+                        state = ContainerState.STOPPED
+                    
+                    containers[service] = ContainerInfo(
+                        name=name,
+                        service=service,
+                        container_id=container_data.get("ID", ""),
+                        image=container_data.get("Image", ""),
+                        state=state,
+                        health=health,
+                        uptime=container_data.get("RunningFor", "")
+                    )
+                except json.JSONDecodeError:
+                    continue  # Skip malformed lines
+                
+            return containers
+            
+        except Exception as e:
+            logger.error(f"Error getting enhanced container status: {e}")
+            return {}
+    
+    def cleanup_orphaned_containers(self) -> bool:
+        """
+        Clean up orphaned containers and networks.
+        
+        Returns:
+            True if cleanup completed successfully
+        """
+        logger.info("Cleaning up orphaned containers and networks")
+        
+        try:
+            # Remove orphaned containers
+            cmd = ["docker-compose", "-f", self._get_compose_file(),
+                   "-p", f"netra-{self.environment}", "down", "--remove-orphans"]
+            
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+            
+            if result.returncode != 0:
+                logger.warning(f"Orphan cleanup had issues: {result.stderr}")
+                return False
+            
+            # Prune unused networks
+            subprocess.run(["docker", "network", "prune", "-f"], 
+                         capture_output=True, text=True, timeout=30)
+            
+            logger.info("Orphan cleanup completed successfully")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error during orphan cleanup: {e}")
+            return False
+
 
 # Convenience functions for backward compatibility and async orchestration
 _default_manager = None
