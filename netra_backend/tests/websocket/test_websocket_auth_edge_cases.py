@@ -26,7 +26,6 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Optional
 from unittest.mock import AsyncMock, MagicMock, patch, Mock
 import base64
-import jwt
 
 import pytest
 from fastapi import HTTPException
@@ -60,17 +59,20 @@ class TestWebSocketAuthenticationEdgeCases:
                         expired: bool = False,
                         malformed: bool = False) -> str:
         """Create JWT token for testing."""
+        from tests.helpers.auth_test_utils import TestAuthHelper
+        
+        auth_helper = TestAuthHelper()
+        
         if expired:
-            payload['exp'] = int((datetime.now(timezone.utc) - timedelta(hours=1)).timestamp())
-        else:
-            payload['exp'] = int((datetime.now(timezone.utc) + timedelta(hours=1)).timestamp())
-        
-        if malformed:
-            # Create malformed token by corrupting it
-            valid_token = jwt.encode(payload, secret, algorithm='HS256')
+            return auth_helper.create_expired_test_token(payload.get('user_id', 'test_user'))
+        elif malformed:
+            # Create malformed token by corrupting a valid token
+            valid_token = auth_helper.create_test_token(payload.get('user_id', 'test_user'))
             return valid_token[:-5] + "xxxxx"  # Corrupt the signature
-        
-        return jwt.encode(payload, secret, algorithm='HS256')
+        else:
+            user_id = payload.get('user_id', 'test_user')
+            email = payload.get('email', f"{user_id}@test.com")
+            return auth_helper.create_test_token(user_id, email)
 
     @pytest.mark.asyncio
     async def test_missing_token_rejection(self):
@@ -691,17 +693,20 @@ class TestWebSocketAuthenticationBypassPrevention:
                         expired: bool = False,
                         malformed: bool = False) -> str:
         """Create JWT token for testing."""
+        from tests.helpers.auth_test_utils import TestAuthHelper
+        
+        auth_helper = TestAuthHelper()
+        
         if expired:
-            payload['exp'] = int((datetime.now(timezone.utc) - timedelta(hours=1)).timestamp())
-        else:
-            payload['exp'] = int((datetime.now(timezone.utc) + timedelta(hours=1)).timestamp())
-        
-        if malformed:
-            # Create malformed token by corrupting it
-            valid_token = jwt.encode(payload, secret, algorithm='HS256')
+            return auth_helper.create_expired_test_token(payload.get('user_id', 'test_user'))
+        elif malformed:
+            # Create malformed token by corrupting a valid token
+            valid_token = auth_helper.create_test_token(payload.get('user_id', 'test_user'))
             return valid_token[:-5] + "xxxxx"  # Corrupt the signature
-        
-        return jwt.encode(payload, secret, algorithm='HS256')
+        else:
+            user_id = payload.get('user_id', 'test_user')
+            email = payload.get('email', f"{user_id}@test.com")
+            return auth_helper.create_test_token(user_id, email)
 
 
 if __name__ == "__main__":

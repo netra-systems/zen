@@ -332,7 +332,7 @@ class TestHealthRouteConfigurationChaos:
             ('health_routes', project_root / 'netra_backend/app/routes/health.py'),
             ('auth_main', project_root / 'auth_service/main.py'),
             ('configuration', project_root / 'netra_backend/app/core/configuration.py'),
-            ('dev_launcher', project_root / 'dev_launcher/startup_validator.py'),
+            ('dev_launcher', project_root / 'dev_launcher/startup_validator.py'),  # Note: removed module
             ('database_config', project_root / 'netra_backend/app/db/postgres.py')
         ]
         
@@ -435,7 +435,7 @@ class TestHealthRouteConfigurationChaos:
         
         # Check startup order vs health check dependencies
         launcher_file = project_root / 'dev_launcher/launcher.py'
-        startup_validator = project_root / 'dev_launcher/startup_validator.py'
+        startup_validator = project_root / 'dev_launcher/startup_validator.py'  # Note: removed module
         
         startup_order = []
         health_dependencies = []

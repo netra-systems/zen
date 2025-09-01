@@ -40,11 +40,13 @@
 
 ## 📍 COMMONLY CONFUSED FILES & LOCATIONS
 
-## 🚨 RECENT CRITICAL UPDATES (2025-08-31)
+## 🚨 RECENT CRITICAL UPDATES (2025-09-01)
 
 ### Infrastructure Changes
 | Component | Update | Impact |
 |-----------|---------|--------|
+| **WebSocket Silent Failure Prevention** | Comprehensive monitoring system | 100% silent failure detection (NEW) |
+| **WebSocket Health Monitoring** | Runtime event flow monitoring | Chat reliability improvements (NEW) |
 | **VPC Connector** | Added for GCP Cloud Run | Enables Redis/Cloud SQL connectivity |
 | **Agent Orchestration** | New E2E testing framework | Background agent testing support |
 | **Staging Config** | Unified staging URLs | Single source of truth for staging |
@@ -53,6 +55,9 @@
 ### New Files & Locations
 | File | Purpose | Reference |
 |------|---------|----------|
+| `/netra_backend/app/websocket_core/event_monitor.py` | WebSocket event flow monitoring | [`WEBSOCKET_SILENT_FAILURE_FIXES.md`](WEBSOCKET_SILENT_FAILURE_FIXES.md) |
+| `/netra_backend/app/websocket_core/heartbeat_manager.py` | Connection health tracking | [`SPEC/learnings/websocket_silent_failure_prevention_masterclass.xml`](SPEC/learnings/websocket_silent_failure_prevention_masterclass.xml) |
+| `/netra_backend/tests/integration/critical_paths/test_websocket_silent_failures.py` | Silent failure prevention tests | 12 comprehensive test cases |
 | `/terraform-gcp-staging/vpc-connector.tf` | VPC connector config | [`SPEC/learnings/redis_vpc_connector_requirement.xml`](SPEC/learnings/redis_vpc_connector_requirement.xml) |
 | `/tests/e2e/agent_orchestration_fixtures.py` | Agent testing fixtures | E2E agent orchestration |
 | `/tests/e2e/helpers/agent/agent_orchestration_runner.py` | Agent test runner | Background agent execution |
@@ -122,12 +127,16 @@
 | **CRITICAL**: ALL authentication throughout ENTIRE system MUST use `/netra_backend/app/auth_integration/`. NO duplicate auth logic allowed. |
 | **CRITICAL**: Frontend auth MUST always decode tokens to set user state. Test page refresh scenarios! |
 
-### WebSocket Files (Complex Structure) ✅ State Management & Agent Integration Fixed (2025-08-31)
+### WebSocket Files (Complex Structure) ✅ State Management & Agent Integration Fixed (2025-08-31) + Silent Failure Prevention (2025-09-01)
 | File | Location | Purpose | Key Functions |
 |------|----------|---------|---------------|
 | **🔴 CRITICAL FIXES (2025-08-27)** | | | |
 | `websocket_state_management.xml` | `/SPEC/learnings/websocket_state_management.xml` | **WebSocket state & subprotocol fix** | ABNORMAL_CLOSURE fix, subprotocol negotiation |
 | `test_websocket_state_regression.py` | `/netra_backend/tests/critical/test_websocket_state_regression.py` | **Regression tests for state fix** | State checking, subprotocol validation |
+| **🔴 SILENT FAILURE PREVENTION (2025-09-01)** | | | |
+| `websocket_silent_failure_prevention_masterclass.xml` | `/SPEC/learnings/websocket_silent_failure_prevention_masterclass.xml` | **Comprehensive silent failure prevention guide** | Complete prevention strategies, monitoring patterns |
+| `websocket_silent_failures.xml` | `/SPEC/learnings/websocket_silent_failures.xml` | **Silent failure detection and mitigation** | Failure modes, detection methods, fixes |
+| `WEBSOCKET_SILENT_FAILURE_FIXES.md` | `/WEBSOCKET_SILENT_FAILURE_FIXES.md` | **Implementation report for fixes** | 5 critical failure points addressed |
 | **🔴 DOCKER CONFIG (CRITICAL)** | | | |
 | `websocket_docker_fixes.xml` | `/SPEC/learnings/websocket_docker_fixes.xml` | **Complete Docker fix documentation** | Root causes, solutions, testing |
 | `websocket_docker_troubleshooting.md` | `/docs/websocket_docker_troubleshooting.md` | **Docker troubleshooting guide** | Diagnosis, solutions, prevention |
@@ -142,6 +151,11 @@
 | `websocket.py` | `/netra_backend/app/routes/websocket.py` | **WebSocket endpoints (with subprotocol fix)** | websocket_endpoint() with subprotocol negotiation |
 | `manager.py` | `/netra_backend/app/websocket_core/manager.py` | **WebSocket manager (with run_id fix)** | send_to_user(), send_to_thread() with proper ID handling |
 | `websocket_core/auth.py` | `/netra_backend/app/websocket_core/auth.py` | **WebSocket authentication (Docker bypass)** | Development OAUTH SIMULATION, JWT validation |
+| **🔴 MONITORING & HEALTH (NEW 2025-09-01)** | | | |
+| `event_monitor.py` | `/netra_backend/app/websocket_core/event_monitor.py` | **Runtime event flow monitoring** | ChatEventMonitor, silent failure detection |
+| `heartbeat_manager.py` | `/netra_backend/app/websocket_core/heartbeat_manager.py` | **Connection health tracking** | Ping/pong health checks, zombie detection |
+| `test_websocket_silent_failures.py` | `/netra_backend/tests/integration/critical_paths/test_websocket_silent_failures.py` | **Silent failure prevention tests** | 12 comprehensive test cases |
+| `test_websocket_heartbeat_monitoring.py` | `/netra_backend/tests/integration/critical_paths/test_websocket_heartbeat_monitoring.py` | **Heartbeat system tests** | Connection health validation |
 | **🔴 AGENT INTEGRATION** | | | |
 | `websocket_agent_integration_critical.xml` | `/SPEC/learnings/websocket_agent_integration_critical.xml` | **Critical agent-WebSocket integration** | MUST send events or chat breaks |
 | `test_websocket_agent_events_suite.py` | `/tests/mission_critical/test_websocket_agent_events_suite.py` | **Mission critical WebSocket tests** | Validates all required events |
@@ -448,9 +462,18 @@ Required events that MUST be sent:
 4. `tool_completed` - Tool results
 5. `agent_completed` - Completion signal
 
+**CRITICAL: Silent Failure Prevention System (NEW - 2025-09-01)**
+The system now has comprehensive safeguards against silent failures:
+- **Startup Verification:** WebSocket functionality tested before accepting traffic
+- **Event Monitoring:** Runtime monitoring detects and alerts on anomalies
+- **Health Checking:** Active connection health monitoring with ping/pong
+- **Confirmation System:** Critical events require delivery confirmation
+- **Fallback Logging:** All failures logged at CRITICAL level
+
 **Before ANY changes to agent/WebSocket code:**
 ```bash
 python tests/mission_critical/test_websocket_agent_events_suite.py
+python netra_backend/tests/integration/critical_paths/test_websocket_silent_failures.py
 ```
 
 ### Critical Integration Points

@@ -853,17 +853,10 @@ class TestDevLauncherCriticalPath:
     
     def _generate_test_jwt_token(self) -> str:
         """Generate a valid test JWT token."""
-        now = datetime.now(timezone.utc)
-        payload = {
-            "sub": "test-user-12345",
-            "email": "test@example.com",
-            "iat": int(now.timestamp()),
-            "exp": int((now + timedelta(hours=1)).timestamp()),
-            "iss": "netra-auth-service",
-            "aud": "netra-backend"
-        }
+        from tests.helpers.auth_test_utils import TestAuthHelper
         
-        return jwt.encode(payload, TEST_JWT_SECRET, algorithm="HS256")
+        auth_helper = TestAuthHelper()
+        return auth_helper.create_test_token("test-user-12345", "test@example.com")
 
 
 class TestDevLauncherRobustness:

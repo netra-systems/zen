@@ -189,7 +189,6 @@ class TestFullSystemStartupSequence:
 
         """Verify all services are healthy and accessible."""
 
-        validator = StartupValidator(use_emoji=False)
         
         # Check auth service health
 

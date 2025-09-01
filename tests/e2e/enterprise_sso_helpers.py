@@ -149,13 +149,20 @@ class EnterpriseJWTManager:
     
     async def create_enterprise_jwt(self, session_data: Dict) -> str:
         """Create JWT token with enterprise-specific claims."""
-        now = datetime.now(timezone.utc)
-        payload = {
-            "sub": session_data["user_id"], "email": session_data["email"], "enterprise_id": session_data["enterprise_id"],
-            "permissions": session_data["permissions"], "auth_method": "saml_sso", "mfa_verified": session_data["mfa_verified"],
-            "iat": int(now.timestamp()), "exp": int(session_data["expires_at"].timestamp()), "iss": self.issuer, "token_type": "access"
-        }
-        return jwt.encode(payload, self.secret, algorithm="HS256")
+        from tests.helpers.auth_test_utils import TestAuthHelper
+        
+        auth_helper = TestAuthHelper()
+        user_id = session_data["user_id"]
+        email = session_data["email"]
+        permissions = session_data.get("permissions", ["read", "write"])
+        
+        # Use TestAuthHelper for enterprise tokens with elevated permissions
+        return auth_helper.create_test_token_with_permissions(
+            user_id, 
+            permissions, 
+            tier="enterprise",
+            email=email
+        )
     
     async def validate_enterprise_jwt(self, token: str) -> Optional[Dict]:
         """Validate JWT token and extract enterprise claims."""

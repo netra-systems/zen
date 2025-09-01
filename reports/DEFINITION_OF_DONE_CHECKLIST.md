@@ -51,16 +51,27 @@
 - [ ] `tool_completed` - Tool results
 - [ ] `agent_completed` - Completion signal
 
+**WebSocket Health Verification (NEW - 2025-09-01):**
+- [ ] WebSocket startup verification passes (Phase 5 of deterministic startup)
+- [ ] Event monitor reports healthy status at `/health` endpoint
+- [ ] No CRITICAL logs for WebSocket silent failures
+- [ ] Heartbeat manager actively monitoring connections
+- [ ] Event delivery confirmation system operational
+
 **Tests:**
 - [ ] Run: `python tests/mission_critical/test_websocket_agent_events_suite.py`
 - [ ] Run: `python netra_backend/tests/critical/test_websocket_state_regression.py`
 - [ ] Run: `python tests/e2e/test_websocket_dev_docker_connection.py`
+- [ ] Run: `python netra_backend/tests/integration/critical_paths/test_websocket_silent_failures.py` (NEW)
+- [ ] Run: `python netra_backend/tests/integration/critical_paths/test_websocket_heartbeat_monitoring.py` (NEW)
 
 **Learnings to Review:**
 - [ ] `SPEC/learnings/websocket_agent_integration_critical.xml`
 - [ ] `SPEC/learnings/websocket_state_management.xml`
 - [ ] `SPEC/learnings/websocket_run_id_issue.xml`
 - [ ] `SPEC/learnings/websocket_docker_fixes.xml`
+- [ ] `SPEC/learnings/websocket_silent_failure_prevention_masterclass.xml` (NEW)
+- [ ] `SPEC/learnings/websocket_silent_failures.xml` (NEW)
 
 ---
 
@@ -272,6 +283,14 @@ python tests/mission_critical/test_websocket_agent_events_suite.py
 - [ ] User can see real-time agent progress (via WebSocket events)
 - [ ] Overall system delivers substantive value to the customer
 - [ ] No regressions in primary user workflows or response quality
+
+### 0.1. WebSocket Silent Failure Prevention Check (CRITICAL - NEW)
+- [ ] **STARTUP VERIFICATION:** WebSocket event test passes in deterministic startup
+- [ ] **EVENT MONITOR:** ChatEventMonitor shows healthy status
+- [ ] **HEARTBEAT SYSTEM:** Connection health actively monitored
+- [ ] **NO SILENT FAILURES:** All WebSocket issues log at CRITICAL level
+- [ ] **EVENT DELIVERY:** Confirmation system tracks critical events
+- [ ] **HEALTH ENDPOINT:** `/health` includes WebSocket monitor status
 
 ### 1. Code Quality Checks
 - [ ] Run linting: `npm run lint` or appropriate command

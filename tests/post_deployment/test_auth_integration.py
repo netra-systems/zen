@@ -168,6 +168,11 @@ class PostDeploymentAuthTest:
                 logger.error(f"✗ Token validation error: {e}")
                 return False
     
+    async def test_token_generation_wrapper(self) -> bool:
+        """Wrapper for token generation test to return bool."""
+        token = await self.test_token_generation()
+        return token is not None
+    
     async def test_cross_service_auth(self) -> bool:
         """Test complete auth flow between services."""
         async with httpx.AsyncClient() as client:
@@ -217,7 +222,7 @@ class PostDeploymentAuthTest:
         tests = [
             ("Auth Service Health", self.test_auth_service_health),
             ("Backend Service Health", self.test_backend_health),
-            ("Token Generation", lambda: self.test_token_generation() is not None),
+            ("Token Generation", self.test_token_generation_wrapper),
             ("Cross-Service Auth", self.test_cross_service_auth),
         ]
         

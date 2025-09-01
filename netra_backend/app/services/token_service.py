@@ -23,7 +23,7 @@ import uuid
 from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional, Set
 
-import jwt
+import jwt  # Still needed for refresh token validation and other operations
 import redis.asyncio as redis
 
 from netra_backend.app.config import get_config
@@ -77,7 +77,10 @@ class TokenService:
     
     async def create_access_token(self, user_id: str, **kwargs) -> str:
         """
-        Create a new access token.
+        DEPRECATED: Create access token - now delegates to canonical AuthServiceClient.
+        
+        SSOT ENFORCEMENT: This method now delegates to the canonical auth client
+        to eliminate duplicate token creation implementations.
         
         Args:
             user_id: User identifier
@@ -86,37 +89,41 @@ class TokenService:
         Returns:
             JWT access token string
         """
-        now = datetime.now(timezone.utc)
-        expires_in = kwargs.get('expires_in', self._access_token_ttl)
+        import warnings
+        warnings.warn(
+            "TokenService.create_access_token is DEPRECATED. "
+            "Use netra_backend.app.clients.auth_client_core.auth_client.create_token directly.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         
-        payload = {
-            'sub': user_id,
-            'iat': int(now.timestamp()),
-            'exp': int((now + timedelta(seconds=expires_in)).timestamp()),
-            'type': 'access',
-            'jti': str(uuid.uuid4()),  # JWT ID for revocation tracking
+        # Delegate to canonical implementation
+        from netra_backend.app.clients.auth_client_core import auth_client
+        
+        # Map kwargs to auth service format
+        token_data = {
+            "user_id": user_id,
+            "email": kwargs.get('email'),
+            "permissions": kwargs.get('permissions', []),
+            "expires_in": kwargs.get('expires_in', self._access_token_ttl)
         }
         
-        # Add optional claims
-        if 'email' in kwargs:
-            payload['email'] = kwargs['email']
-        if 'permissions' in kwargs:
-            payload['permissions'] = kwargs['permissions']
-        if 'session_id' in kwargs:
-            payload['session_id'] = kwargs['session_id']
+        # Remove None values
+        token_data = {k: v for k, v in token_data.items() if v is not None}
         
-        # Sign token
-        secret = self._get_jwt_secret()
-        token = jwt.encode(payload, secret, algorithm='HS256')
+        result = await auth_client.create_token(token_data)
         
-        # Store token metadata in Redis for revocation checking
-        await self._store_token_metadata(token, payload)
+        if not result or "access_token" not in result:
+            raise ValueError("Failed to create access token via auth service")
         
-        return token
+        return result["access_token"]
     
     async def create_refresh_token(self, user_id: str) -> str:
         """
-        Create a new refresh token.
+        DEPRECATED: Create refresh token - now delegates to canonical AuthServiceClient.
+        
+        SSOT ENFORCEMENT: This method now delegates to the canonical auth client
+        to eliminate duplicate token creation implementations.
         
         Args:
             user_id: User identifier
@@ -124,28 +131,37 @@ class TokenService:
         Returns:
             JWT refresh token string
         """
-        now = datetime.now(timezone.utc)
+        import warnings
+        warnings.warn(
+            "TokenService.create_refresh_token is DEPRECATED. "
+            "Use netra_backend.app.clients.auth_client_core.auth_client directly.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         
-        payload = {
-            'sub': user_id,
-            'iat': int(now.timestamp()),
-            'exp': int((now + timedelta(seconds=self._refresh_token_ttl)).timestamp()),
-            'type': 'refresh',
-            'jti': str(uuid.uuid4()),
+        # Delegate to canonical implementation via refresh token creation
+        from netra_backend.app.clients.auth_client_core import auth_client
+        
+        # Create both access and refresh token, return only refresh
+        token_data = {
+            "user_id": user_id,
+            "token_type": "refresh",
+            "expire_days": self._refresh_token_ttl // (24 * 60 * 60)  # Convert seconds to days
         }
         
-        # Sign token
-        secret = self._get_jwt_secret()
-        token = jwt.encode(payload, secret, algorithm='HS256')
+        result = await auth_client.create_token(token_data)
         
-        # Store refresh token for race condition protection
-        await self._store_refresh_token(token, payload)
+        if not result or "refresh_token" not in result:
+            raise ValueError("Failed to create refresh token via auth service")
         
-        return token
+        return result["refresh_token"]
     
     async def refresh_access_token(self, refresh_token: str) -> Optional[str]:
         """
-        Create new access token from refresh token with race condition protection.
+        DEPRECATED: Refresh access token - now delegates to canonical AuthServiceClient.
+        
+        SSOT ENFORCEMENT: This method now delegates to the canonical auth client
+        to eliminate duplicate token refresh implementations.
         
         Args:
             refresh_token: Valid refresh token
@@ -153,21 +169,23 @@ class TokenService:
         Returns:
             New access token or None if invalid/used
         """
-        # Validate refresh token
-        payload = await self._validate_refresh_token(refresh_token)
-        if not payload:
+        import warnings
+        warnings.warn(
+            "TokenService.refresh_access_token is DEPRECATED. "
+            "Use netra_backend.app.clients.auth_client_core.auth_client.refresh_token directly.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
+        # Delegate to canonical implementation
+        from netra_backend.app.clients.auth_client_core import auth_client
+        
+        result = await auth_client.refresh_token(refresh_token)
+        
+        if not result or "access_token" not in result:
             return None
         
-        # Check if already used (race condition protection)
-        if await self._is_refresh_token_used(refresh_token):
-            return None
-        
-        # Mark refresh token as used atomically
-        await self._mark_refresh_token_used(refresh_token)
-        
-        # Create new access token
-        user_id = payload['sub']
-        return await self.create_access_token(user_id)
+        return result["access_token"]
     
     async def revoke_token(self, token: str) -> bool:
         """

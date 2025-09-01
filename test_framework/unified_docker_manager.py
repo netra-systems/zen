@@ -47,6 +47,7 @@ else:
 # CLAUDE.md compliance: Use IsolatedEnvironment for all environment access
 from shared.isolated_environment import get_env
 from test_framework.docker_port_discovery import DockerPortDiscovery, ServicePortMapping
+from test_framework.docker_introspection import DockerIntrospector, IntrospectionReport
 
 logger = logging.getLogger(__name__)
 

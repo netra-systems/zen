@@ -29,7 +29,6 @@ from test_framework.performance_helpers import fast_test
 from dev_launcher.database_connector import DatabaseConnector, ConnectionStatus
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.db.database_initializer import DatabaseInitializer
-from netra_backend.app.core.startup_manager import StartupManager
 from netra_backend.app.core.unified_logging import get_logger
 
 logger = get_logger(__name__)

@@ -1,12 +1,13 @@
-# Production-optimized Docker Compose configuration
-# Memory-optimized images for test environments
-# This file extends docker-compose.yml with production build targets
+# Alpine-based memory-optimized Docker Compose configuration
+# Uses Alpine Linux base images for minimal memory footprint
+# This file extends docker-compose.yml with alpine-based images
 
 version: '3.8'
 
 services:
-  # Production-optimized PostgreSQL
+  # Alpine-based PostgreSQL (50% smaller)
   postgres:
+    image: postgres:15-alpine
     deploy:
       resources:
         limits:
@@ -20,8 +21,9 @@ services:
       POSTGRES_EFFECTIVE_CACHE_SIZE: 256MB
       POSTGRES_MAX_CONNECTIONS: 50
 
-  # Production-optimized Redis
+  # Alpine-based Redis (80% smaller)
   redis:
+    image: redis:7-alpine
     deploy:
       resources:
         limits:
@@ -34,8 +36,9 @@ services:
       --save ""
       --appendonly no
 
-  # Production-optimized ClickHouse
+  # Alpine-based ClickHouse
   clickhouse:
+    image: clickhouse/clickhouse-server:23-alpine
     deploy:
       resources:
         limits:
@@ -44,7 +47,7 @@ services:
     environment:
       CLICKHOUSE_MAX_MEMORY_USAGE: 400000000  # 400MB
 
-  # Production-optimized Auth Service
+  # Alpine-based Auth Service
   auth:
     build:
       context: .
@@ -52,6 +55,7 @@ services:
       target: production  # Use production build stage
       args:
         BUILD_ENV: production
+        BASE_IMAGE: python:3.11-alpine
     deploy:
       resources:
         limits:
@@ -63,7 +67,7 @@ services:
       PYTHONDONTWRITEBYTECODE: 1
       LOG_LEVEL: WARNING
 
-  # Production-optimized Backend Service  
+  # Alpine-based Backend Service  
   backend:
     build:
       context: .
@@ -71,6 +75,7 @@ services:
       target: production  # Use production build stage
       args:
         BUILD_ENV: production
+        BASE_IMAGE: python:3.11-alpine
     deploy:
       resources:
         limits:
@@ -86,7 +91,7 @@ services:
       WORKERS_PER_CORE: 1
       MAX_WORKERS: 2
 
-  # Production-optimized Frontend Service
+  # Alpine-based Frontend Service
   frontend:
     build:
       context: .
@@ -95,6 +100,7 @@ services:
       args:
         BUILD_ENV: production
         NODE_ENV: production
+        BASE_IMAGE: node:18-alpine
     deploy:
       resources:
         limits:

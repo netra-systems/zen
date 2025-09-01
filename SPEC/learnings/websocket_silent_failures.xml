@@ -133,4 +133,17 @@
             Review ALL try/except blocks in codebase for silent failures
         </recommendation>
   </future_recommendations>
+  
+  <related_comprehensive_learning>
+    <title>WebSocket Silent Failure Prevention - Comprehensive Masterclass</title>
+    <path>websocket_silent_failure_prevention_masterclass.xml</path>
+    <description>
+      This learning document has been superseded by a comprehensive masterclass that covers
+      all 5 critical WebSocket failure points discovered through extensive remediation work.
+      The masterclass includes detailed implementation patterns, testing strategies, monitoring
+      approaches, and a complete prevention framework for WebSocket silent failures.
+    </description>
+    <relationship>FOUNDATIONAL_TO_MASTERCLASS</relationship>
+    <business_impact>$500K+ ARR protection through systematic silent failure prevention</business_impact>
+  </related_comprehensive_learning>
 </learnings>

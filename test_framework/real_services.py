@@ -22,6 +22,7 @@ Usage:
 import asyncio
 import logging
 import os
+import subprocess
 import time
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
@@ -78,6 +79,14 @@ if TYPE_CHECKING:
 # Always import from environment isolation
 from test_framework.environment_isolation import get_test_env_manager
 
+# Import Docker port discovery
+try:
+    from test_framework.docker_port_discovery import DockerPortDiscovery
+    DOCKER_DISCOVERY_AVAILABLE = True
+except ImportError:
+    DockerPortDiscovery = None
+    DOCKER_DISCOVERY_AVAILABLE = False
+
 
 logger = logging.getLogger(__name__)
 
@@ -88,23 +97,23 @@ class ServiceConfig:
     
     # PostgreSQL
     postgres_host: str = "localhost"
-    postgres_port: int = 5434
-    postgres_user: str = "test_user"
-    postgres_password: str = "test_pass"
+    postgres_port: int = 5433  # Default test port, will be updated by Docker discovery
+    postgres_user: str = "test"
+    postgres_password: str = "test"
     postgres_database: str = "netra_test"
     
     # Redis
     redis_host: str = "localhost"  
-    redis_port: int = 6381
+    redis_port: int = 6380  # Default test port, will be updated by Docker discovery
     redis_db: int = 0
     redis_password: Optional[str] = None
     
     # ClickHouse
     clickhouse_host: str = "localhost"
-    clickhouse_port: int = 9002  # Test ClickHouse TCP port
-    clickhouse_user: str = "test_user"
-    clickhouse_password: str = "test_pass"
-    clickhouse_database: str = "netra_test_analytics"
+    clickhouse_port: int = 8123  # HTTP port for ClickHouse
+    clickhouse_user: str = "default"
+    clickhouse_password: str = ""
+    clickhouse_database: str = "default"
     
     # Service URLs
     auth_service_url: str = "http://localhost:8082"
@@ -119,6 +128,88 @@ class ServiceConfig:
     # Health check
     health_check_interval: float = 1.0
     max_health_check_retries: int = 30
+
+
+class DockerServiceManager:
+    """Manages Docker services for testing."""
+    
+    def __init__(self):
+        self.docker_available = self._check_docker()
+        self.port_discovery = DockerPortDiscovery() if DOCKER_DISCOVERY_AVAILABLE else None
+        
+    def _check_docker(self) -> bool:
+        """Check if Docker is available."""
+        try:
+            result = subprocess.run(
+                ["docker", "version"],
+                capture_output=True,
+                timeout=5
+            )
+            return result.returncode == 0
+        except (subprocess.SubprocessError, FileNotFoundError):
+            return False
+    
+    def check_and_start_services(self) -> Dict[str, int]:
+        """Check if Docker services are running and start them if needed.
+        
+        Returns:
+            Dictionary mapping service names to their ports
+        """
+        if not self.docker_available:
+            logger.warning("Docker not available, cannot start services")
+            return {}
+            
+        # Check if docker-compose services are running
+        running = self._check_compose_running()
+        
+        if not running:
+            logger.info("Docker services not running, attempting to start...")
+            self._start_docker_compose()
+            # Wait for services to be healthy
+            time.sleep(10)
+            
+        # Discover ports
+        if self.port_discovery:
+            port_mappings = self.port_discovery.discover_all_ports()
+            return {service: mapping.external_port 
+                    for service, mapping in port_mappings.items()}
+        return {}
+    
+    def _check_compose_running(self) -> bool:
+        """Check if docker-compose services are running."""
+        try:
+            # Try to check if the Alpine compose file services are running
+            result = subprocess.run(
+                ["docker", "compose", "-f", "docker-compose.alpine.yml", "ps", "--services", "--filter", "status=running"],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            if result.returncode == 0 and result.stdout:
+                running_services = result.stdout.strip().split('\n')
+                # Check if critical services are running
+                required = {'postgres', 'redis', 'clickhouse'}
+                return required.issubset(set(running_services))
+        except Exception as e:
+            logger.debug(f"Could not check compose status: {e}")
+        return False
+    
+    def _start_docker_compose(self) -> None:
+        """Start Docker Compose services."""
+        try:
+            logger.info("Starting Docker Compose services...")
+            result = subprocess.run(
+                ["docker", "compose", "-f", "docker-compose.alpine.yml", "up", "-d", "postgres", "redis", "clickhouse"],
+                capture_output=True,
+                text=True,
+                timeout=60
+            )
+            if result.returncode != 0:
+                logger.error(f"Failed to start services: {result.stderr}")
+            else:
+                logger.info("Docker Compose services started")
+        except Exception as e:
+            logger.error(f"Failed to start Docker Compose: {e}")
 
 
 class RealServiceError(Exception):
@@ -363,20 +454,37 @@ class ClickHouseManager:
         if not CLICKHOUSE_AVAILABLE:
             raise ServiceUnavailableError("clickhouse-driver not installed")
             
+        # Start Docker services if needed
+        docker_manager = DockerServiceManager()
+        docker_manager.check_and_start_services()
+        
         for attempt in range(self.config.max_health_check_retries):
             try:
-                client = ClickHouseClient(
-                    host=self.config.clickhouse_host,
-                    port=self.config.clickhouse_port,
-                    user=self.config.clickhouse_user,
-                    password=self.config.clickhouse_password,
-                    database=self.config.clickhouse_database,
-                    connect_timeout=self.config.connection_timeout
-                )
-                client.execute("SELECT 1")
-                client.disconnect()
-                logger.info(f"ClickHouse service available at {self.config.clickhouse_host}:{self.config.clickhouse_port}")
-                return True
+                # Use HTTP interface for health check since it's more reliable
+                if HTTP_AVAILABLE:
+                    import httpx
+                    async with httpx.AsyncClient() as client:
+                        response = await client.get(
+                            f"http://{self.config.clickhouse_host}:{self.config.clickhouse_port}/ping",
+                            timeout=self.config.connection_timeout
+                        )
+                        if response.status_code == 200:
+                            logger.info(f"ClickHouse service available at {self.config.clickhouse_host}:{self.config.clickhouse_port}")
+                            return True
+                else:
+                    # Fall back to TCP connection
+                    client = ClickHouseClient(
+                        host=self.config.clickhouse_host,
+                        port=9000,  # Use TCP port for driver connection
+                        user=self.config.clickhouse_user,
+                        password=self.config.clickhouse_password if self.config.clickhouse_password else None,
+                        database=self.config.clickhouse_database,
+                        connect_timeout=self.config.connection_timeout
+                    )
+                    client.execute("SELECT 1")
+                    client.disconnect()
+                    logger.info(f"ClickHouse service available at {self.config.clickhouse_host}:9000")
+                    return True
             except Exception as e:
                 if attempt == self.config.max_health_check_retries - 1:
                     logger.error(f"ClickHouse not available after {attempt + 1} attempts: {e}")
@@ -389,9 +497,9 @@ class ClickHouseManager:
         if self._client is None:
             self._client = ClickHouseClient(
                 host=self.config.clickhouse_host,
-                port=self.config.clickhouse_port,
+                port=9000,  # Use TCP port for driver connection
                 user=self.config.clickhouse_user,
-                password=self.config.clickhouse_password,
+                password=self.config.clickhouse_password if self.config.clickhouse_password else None,
                 database=self.config.clickhouse_database,
                 connect_timeout=self.config.connection_timeout
             )
@@ -601,26 +709,35 @@ class RealServicesManager:
         env_manager = get_test_env_manager()
         env = env_manager.env
         
+        # Try to discover Docker ports first
+        docker_manager = DockerServiceManager()
+        port_mappings = docker_manager.check_and_start_services()
+        
+        # Use discovered ports or fall back to defaults
+        postgres_port = port_mappings.get('postgres', 5433)
+        redis_port = port_mappings.get('redis', 6380)
+        clickhouse_port = port_mappings.get('clickhouse', 8123)
+        
         return ServiceConfig(
             # PostgreSQL
             postgres_host=env.get("TEST_POSTGRES_HOST", "localhost"),
-            postgres_port=int(env.get("TEST_POSTGRES_PORT", "5434")),
+            postgres_port=int(env.get("TEST_POSTGRES_PORT", str(postgres_port))),
             postgres_user=env.get("TEST_POSTGRES_USER", "test"),
             postgres_password=env.get("TEST_POSTGRES_PASSWORD", "test"),
             postgres_database=env.get("TEST_POSTGRES_DB", "netra_test"),
             
             # Redis
             redis_host=env.get("TEST_REDIS_HOST", "localhost"),
-            redis_port=int(env.get("TEST_REDIS_PORT", "6381")),
+            redis_port=int(env.get("TEST_REDIS_PORT", str(redis_port))),
             redis_db=int(env.get("TEST_REDIS_DB", "0")),
             redis_password=env.get("TEST_REDIS_PASSWORD"),
             
             # ClickHouse
             clickhouse_host=env.get("TEST_CLICKHOUSE_HOST", "localhost"),
-            clickhouse_port=int(env.get("TEST_CLICKHOUSE_TCP_PORT", "9002")),
-            clickhouse_user=env.get("TEST_CLICKHOUSE_USER", "test"),
-            clickhouse_password=env.get("TEST_CLICKHOUSE_PASSWORD", "test"),
-            clickhouse_database=env.get("TEST_CLICKHOUSE_DB", "netra_test_analytics"),
+            clickhouse_port=int(env.get("TEST_CLICKHOUSE_PORT", str(clickhouse_port))),
+            clickhouse_user=env.get("TEST_CLICKHOUSE_USER", "default"),
+            clickhouse_password=env.get("TEST_CLICKHOUSE_PASSWORD", ""),
+            clickhouse_database=env.get("TEST_CLICKHOUSE_DB", "default"),
             
             # Service URLs
             auth_service_url=env.get("TEST_AUTH_SERVICE_URL", "http://localhost:8082"),

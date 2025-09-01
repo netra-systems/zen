@@ -475,9 +475,18 @@ class StartupOrchestrator:
                     if not getattr(dispatcher, '_websocket_enhanced', False):
                         raise DeterministicStartupError("Tool dispatcher not enhanced - agent events will be silent")
                     
-                    # Check that notifier is present
-                    if not hasattr(dispatcher, 'websocket_notifier') or dispatcher.websocket_notifier is None:
-                        raise DeterministicStartupError("Tool dispatcher has no WebSocket notifier - events cannot be sent")
+                    # Check that the unified executor is present (it contains the notifier internally)
+                    if not hasattr(dispatcher, 'executor'):
+                        raise DeterministicStartupError("Tool dispatcher has no executor - events cannot be sent")
+                    
+                    # Verify the executor is the unified engine with WebSocket support
+                    from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
+                    if not isinstance(dispatcher.executor, UnifiedToolExecutionEngine):
+                        raise DeterministicStartupError("Tool dispatcher not using UnifiedToolExecutionEngine - events cannot be sent")
+                    
+                    # Check that the executor has WebSocket notifier internally
+                    if not hasattr(dispatcher.executor, 'websocket_notifier') or dispatcher.executor.websocket_notifier is None:
+                        raise DeterministicStartupError("Tool executor has no WebSocket notifier - events cannot be sent")
             
             self.logger.info("  ✓ Step 18.5: WebSocket event delivery verified")
             
@@ -496,6 +505,15 @@ class StartupOrchestrator:
         from netra_backend.app.agents.base.monitoring import performance_monitor
         await performance_monitor.start_monitoring()
         self.app.state.performance_monitor = performance_monitor
+        
+        # Start chat event monitoring for silent failure detection
+        try:
+            from netra_backend.app.websocket_core.event_monitor import chat_event_monitor
+            await chat_event_monitor.start_monitoring()
+            self.app.state.chat_event_monitor = chat_event_monitor
+            self.logger.info("  ✓ Chat event monitor started")
+        except Exception as e:
+            self.logger.warning(f"  ⚠ Chat event monitor failed to start: {e}")
     
     def _initialize_background_tasks(self) -> None:
         """Initialize background tasks - optional."""

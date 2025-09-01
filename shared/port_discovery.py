@@ -9,6 +9,7 @@ import os
 import socket
 from typing import Dict, Optional, Tuple
 import logging
+from shared.isolated_environment import IsolatedEnvironment
 
 logger = logging.getLogger(__name__)
 
@@ -58,9 +59,10 @@ class PortDiscovery:
     @classmethod
     def get_environment(cls) -> str:
         """Get current environment from environment variables"""
-        env = os.environ.get("ENVIRONMENT", "development").lower()
+        env_manager = IsolatedEnvironment.get_instance()
+        env = env_manager.get("ENVIRONMENT", "development").lower()
         # Also check for TESTING flag
-        if os.environ.get("TESTING", "").lower() in ["1", "true"]:
+        if env_manager.get("TESTING", "").lower() in ["1", "true"]:
             return "test"
         return env if env in cls.DEFAULT_PORTS else "development"
     
@@ -87,7 +89,8 @@ class PortDiscovery:
             else:
                 env_var_name = "AUTH_SERVICE_PORT"
         
-        env_port = os.environ.get(env_var_name)
+        env_manager = IsolatedEnvironment.get_instance()
+        env_port = env_manager.get(env_var_name)
         if env_port:
             try:
                 return int(env_port)
@@ -199,10 +202,11 @@ class PortDiscovery:
     @staticmethod
     def _is_docker() -> bool:
         """Check if running in Docker container"""
+        env_manager = IsolatedEnvironment.get_instance()
         return (
-            os.environ.get("RUNNING_IN_DOCKER") == "true" or
-            os.environ.get("IS_DOCKER") == "true" or
-            os.environ.get("DOCKER_CONTAINER") == "true" or
+            env_manager.get("RUNNING_IN_DOCKER") == "true" or
+            env_manager.get("IS_DOCKER") == "true" or
+            env_manager.get("DOCKER_CONTAINER") == "true" or
             os.path.exists("/.dockerenv") or
             (os.path.exists("/proc/self/cgroup") and 
              any("docker" in line for line in open("/proc/self/cgroup").readlines() 

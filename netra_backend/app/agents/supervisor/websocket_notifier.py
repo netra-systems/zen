@@ -23,6 +23,13 @@ from netra_backend.app.schemas.websocket_models import WebSocketMessage
 
 logger = central_logger.get_logger(__name__)
 
+# Import event monitor for runtime monitoring
+try:
+    from netra_backend.app.websocket_core.event_monitor import chat_event_monitor
+except ImportError:
+    chat_event_monitor = None
+    logger.warning("Chat event monitor not available - runtime monitoring disabled")
+
 
 class WebSocketNotifier:
     """Handles WebSocket notifications for agent execution with guaranteed delivery.
@@ -1002,8 +1009,12 @@ class WebSocketNotifier:
         self.active_operations.pop(thread_id, None)
     
     async def _send_critical_event(self, thread_id: str, message: WebSocketMessage, event_type: str) -> bool:
-        """Send critical event with guaranteed delivery and retry logic."""
+        """Send critical event with guaranteed delivery, retry logic, and confirmation tracking."""
         message_id = str(uuid.uuid4())
+        
+        # Add confirmation requirement for critical events
+        requires_confirmation = event_type in self.critical_events
+        
         event_data = {
             'message_id': message_id,
             'thread_id': thread_id,
@@ -1011,33 +1022,105 @@ class WebSocketNotifier:
             'event_type': event_type,
             'timestamp': time.time(),
             'retry_count': 0,
-            'max_retries': 3 if event_type in self.critical_events else 1
+            'max_retries': 3 if event_type in self.critical_events else 1,
+            'requires_confirmation': requires_confirmation
         }
         
-        # Try immediate delivery first
-        if await self._attempt_delivery(event_data):
-            self._update_operation_activity(thread_id)
-            return True
+        # Track pending confirmation if required
+        if requires_confirmation:
+            self.delivery_confirmations[message_id] = {
+                'thread_id': thread_id,
+                'event_type': event_type,
+                'timestamp': time.time(),
+                'confirmed': False
+            }
         
-        # Queue for retry if critical
-        if event_type in self.critical_events:
-            await self._queue_for_retry(event_data)
+        # Try immediate delivery first
+        success = await self._attempt_delivery(event_data)
+        
+        if success:
+            self._update_operation_activity(thread_id)
+            
+            # Record event in monitor
+            if chat_event_monitor:
+                await chat_event_monitor.record_event(
+                    event_type=event_type,
+                    thread_id=thread_id,
+                    metadata={"message_id": message_id, "requires_confirmation": requires_confirmation}
+                )
+            
+            # For critical events, log if confirmation is pending
+            if requires_confirmation:
+                logger.info(f"Critical event {event_type} sent to thread {thread_id}, awaiting confirmation (id: {message_id})")
+            return True
+        else:
+            # Log critical failure
+            logger.critical(f"CRITICAL EVENT DELIVERY FAILED: {event_type} for thread {thread_id}")
+            
+            # Queue for retry if critical
+            if event_type in self.critical_events:
+                await self._queue_for_retry(event_data)
+                
+                # Trigger emergency notification if this is a critical event
+                await self._trigger_emergency_notification(thread_id, event_type)
             await self._notify_user_of_backlog(thread_id)
         
         return False
     
-    async def _attempt_delivery(self, event_data: Dict) -> bool:
-        """Attempt to deliver a single event."""
+    async def _trigger_emergency_notification(self, thread_id: str, event_type: str) -> None:
+        """Trigger emergency notification system when critical events fail to deliver."""
         try:
+            # Log to critical monitoring system
+            logger.critical(
+                f"EMERGENCY: Critical event '{event_type}' failed to deliver for thread {thread_id}. "
+                f"User experience severely impacted. Immediate intervention required."
+            )
+            
+            # Could trigger alerts to ops team, write to Redis, send to monitoring system, etc.
+            # For now, ensure it's logged at CRITICAL level for alerting
+            
+            # Track in metrics for dashboard visibility
+            if hasattr(self, '_failed_critical_events'):
+                self._failed_critical_events.append({
+                    'thread_id': thread_id,
+                    'event_type': event_type,
+                    'timestamp': time.time()
+                })
+            else:
+                self._failed_critical_events = [{
+                    'thread_id': thread_id,
+                    'event_type': event_type,
+                    'timestamp': time.time()
+                }]
+            
+        except Exception as e:
+            # Even emergency notification shouldn't crash the system
+            logger.error(f"Failed to send emergency notification: {e}")
+    
+    async def _attempt_delivery(self, event_data: Dict) -> bool:
+        """Attempt to deliver a single event with confirmation tracking."""
+        try:
+            # Prepare message with confirmation requirement if needed
+            message_dict = event_data['message'].model_dump() if hasattr(event_data['message'], 'model_dump') else event_data['message']
+            
+            # Add confirmation metadata for critical events
+            if event_data.get('requires_confirmation', False):
+                message_dict['requires_confirmation'] = True
+                message_dict['message_id'] = event_data['message_id']
+            
             success = await self.websocket_manager.send_to_thread(
                 event_data['thread_id'], 
-                event_data['message'].model_dump() if hasattr(event_data['message'], 'model_dump') 
-                else event_data['message']
+                message_dict
             )
             
             if success:
-                # Track delivery confirmation
-                self.delivery_confirmations[event_data['message_id']] = time.time()
+                # Track that message was sent (not yet confirmed)
+                if event_data.get('requires_confirmation', False):
+                    # Message sent but not confirmed yet
+                    logger.debug(f"Critical event {event_data['event_type']} sent, awaiting confirmation")
+                else:
+                    # Non-critical events are considered delivered on send
+                    self.delivery_confirmations[event_data['message_id']] = time.time()
                 return True
             
             return False

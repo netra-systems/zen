@@ -145,12 +145,12 @@ class ServiceAvailabilityChecker:
             # Try sync connection if available
             if PSYCOPG_AVAILABLE:
                 self._test_sync_postgres_connection(connection_url)
-                logger.debug(f"✅ PostgreSQL sync connection successful: {self._mask_password(connection_url)}")
+                logger.debug(f"[OK] PostgreSQL sync connection successful: {self._mask_password(connection_url)}")
             
             # Test async connection (used by most of our code) if available
             if ASYNCPG_AVAILABLE:
                 asyncio.run(self._test_async_postgres_connection(connection_url))
-                logger.debug(f"✅ PostgreSQL async connection successful: {self._mask_password(connection_url)}")
+                logger.debug(f"[OK] PostgreSQL async connection successful: {self._mask_password(connection_url)}")
             
             return True
             
@@ -250,7 +250,7 @@ class ServiceAvailabilityChecker:
         try:
             # Test Redis connection
             asyncio.run(self._test_redis_connection(connection_url))
-            logger.debug(f"✅ Redis connection successful: {self._mask_password(connection_url)}")
+            logger.debug(f"[OK] Redis connection successful: {self._mask_password(connection_url)}")
             return True
             
         except Exception as e:
@@ -293,6 +293,70 @@ class ServiceAvailabilityChecker:
                 ]
             )
             
+    def check_clickhouse(self, connection_url: Optional[str] = None) -> bool:
+        """
+        Check ClickHouse availability with connection test.
+        
+        Args:
+            connection_url: ClickHouse connection URL. If None, gets from environment.
+            
+        Returns:
+            True if ClickHouse is available
+            
+        Raises:
+            ServiceUnavailableError: If ClickHouse is not available
+        """
+        if connection_url is None:
+            connection_url = self._get_clickhouse_url()
+            
+        if not connection_url:
+            # ClickHouse is optional for most tests
+            logger.debug("ClickHouse URL not configured, skipping check")
+            return True
+            
+        parsed = urlparse(connection_url)
+        host = parsed.hostname or "localhost"
+        port = parsed.port or 8123
+        
+        # Test basic connectivity
+        if not self._can_connect_to_host(host, port):
+            raise ServiceUnavailableError(
+                service_name="ClickHouse",
+                details=f"Cannot connect to ClickHouse at {host}:{port} - Connection refused",
+                remediation_steps=[
+                    "Start ClickHouse: docker-compose -f docker-compose.alpine.yml up clickhouse",
+                    f"Check if ClickHouse is running on {host}:{port}",
+                    "Run full dev environment: python scripts/dev_launcher.py",
+                    f"Test manually: curl http://{host}:{port}/ping"
+                ]
+            )
+            
+        # Try HTTP ping endpoint
+        try:
+            import socket
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(self.timeout)
+            result = sock.connect_ex((host, port))
+            sock.close()
+            
+            if result == 0:
+                logger.debug(f"[OK] ClickHouse connection successful: {host}:{port}")
+                return True
+            else:
+                raise RuntimeError(f"Connection failed with code {result}")
+                
+        except Exception as e:
+            raise ServiceUnavailableError(
+                service_name="ClickHouse",
+                details=f"ClickHouse at {host}:{port} not responding: {e}",
+                remediation_steps=[
+                    "Check ClickHouse logs for errors",
+                    "Verify ClickHouse configuration",
+                    "Restart ClickHouse service",
+                    f"Test endpoint: curl http://{host}:{port}/ping"
+                ]
+            )
+    
     def check_docker(self) -> bool:
         """
         Check Docker availability.
@@ -319,7 +383,7 @@ class ServiceAvailabilityChecker:
             # Test Docker connectivity
             client.ping()
             client.close()
-            logger.debug("✅ Docker connection successful")
+            logger.debug("[OK] Docker connection successful")
             return True
             
         except Exception as e:
@@ -387,7 +451,7 @@ class ServiceAvailabilityChecker:
             if not self._can_connect_to_host(parsed.hostname, parsed.port or 443):
                 raise RuntimeError(f"Cannot connect to {parsed.hostname}")
                 
-            logger.debug(f"✅ LLM API endpoint reachable: {endpoint}")
+            logger.debug(f"[OK] LLM API endpoint reachable: {endpoint}")
             return True
             
         except Exception as e:
@@ -414,6 +478,26 @@ class ServiceAvailabilityChecker:
         """Get PostgreSQL URL from environment."""
         return get_env("DATABASE_URL") or get_env("POSTGRES_URL")
         
+    def _get_clickhouse_url(self) -> Optional[str]:
+        """Get ClickHouse connection URL from environment."""
+        # Try multiple environment variable names
+        for key in ['CLICKHOUSE_URL', 'CLICKHOUSE_HOST', 'TEST_CLICKHOUSE_URL']:
+            value = get_env(key)
+            if value:
+                # If it's just a host, construct URL
+                if not value.startswith('http'):
+                    port = get_env('CLICKHOUSE_PORT', '8123')
+                    value = f"http://{value}:{port}"
+                return value
+                
+        # Check if we have host and port separately
+        host = get_env('CLICKHOUSE_HOST')
+        if host:
+            port = get_env('CLICKHOUSE_PORT', '8123')
+            return f"http://{host}:{port}"
+            
+        return None
+    
     def _get_redis_url(self) -> Optional[str]:
         """Get Redis URL from environment."""
         redis_url = get_env("REDIS_URL")
@@ -502,7 +586,7 @@ def require_real_services(
     checker = ServiceAvailabilityChecker(timeout_seconds=timeout)
     failed_services = []
     
-    logger.info(f"🔍 Checking availability of real services: {', '.join(services)}")
+    logger.info(f"[INFO] Checking availability of real services: {', '.join(services)}")
     start_time = time.time()
     
     for service in services:
@@ -515,6 +599,8 @@ def require_real_services(
                 checker.check_docker()
             elif service == 'llm':
                 checker.check_llm_api()
+            elif service == 'clickhouse':
+                checker.check_clickhouse()
             else:
                 logger.warning(f"Unknown service requested: {service}")
                 continue
@@ -542,7 +628,7 @@ def require_real_services(
             remediation_steps=remediation_steps
         )
     else:
-        logger.info(f"✅ All {len(services)} services are available (checked in {total_time:.2f}s)")
+        logger.info(f"[OK] All {len(services)} services are available (checked in {total_time:.2f}s)")
 
 
 def check_service_availability(
@@ -587,6 +673,8 @@ def check_service_availability(
                 checker.check_docker()
             elif service == 'llm':
                 checker.check_llm_api()
+            elif service == 'clickhouse':
+                checker.check_clickhouse()
             else:
                 results[service] = f"Unknown service: {service}"
                 continue
