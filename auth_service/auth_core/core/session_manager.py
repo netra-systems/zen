@@ -410,10 +410,27 @@ class SessionManager:
             return False
             
         try:
-            # Use a lightweight ping operation
+            # Use a lightweight ping operation - sync version for compatibility
             self.redis_client.ping()
             return True
-        except Exception:
+        except Exception as e:
+            logger.debug(f"Redis health check failed: {e}")
+            return False
+    
+    async def async_health_check(self) -> bool:
+        """Async version of health check with proper timeout handling"""
+        if not self.redis_enabled:
+            # When Redis is disabled, consider it "healthy" since it's intentionally disabled
+            return True
+            
+        if not self.redis_manager:
+            return False
+            
+        try:
+            # Use the Redis manager's async ping with timeout
+            return await self.redis_manager.ping_with_timeout(timeout=3.0)
+        except Exception as e:
+            logger.debug(f"Redis async health check failed: {e}")
             return False
     
     async def close_redis(self):
