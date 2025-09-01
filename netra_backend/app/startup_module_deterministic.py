@@ -225,22 +225,35 @@ class StartupOrchestrator:
         if not websocket_manager:
             raise DeterministicStartupError("WebSocket manager not available for enhancement")
         
-        # Ensure WebSocket enhancement through registry
-        if hasattr(supervisor, 'registry') and hasattr(supervisor.registry, 'tool_dispatcher'):
-            if not getattr(supervisor.registry.tool_dispatcher, '_websocket_enhanced', False):
-                # Enhance tool dispatcher
-                if hasattr(supervisor.registry, 'set_websocket_manager'):
-                    supervisor.registry.set_websocket_manager(websocket_manager)
-                    
-                    # Verify enhancement worked
-                    if not getattr(supervisor.registry.tool_dispatcher, '_websocket_enhanced', False):
-                        raise DeterministicStartupError("Tool dispatcher enhancement with WebSocket failed")
-                else:
-                    raise DeterministicStartupError("Registry missing set_websocket_manager method")
-            
-            self.logger.info("    - Tool dispatcher WebSocket enhancement verified")
+        # Ensure WebSocket enhancement through agent registry  
+        registry = None
+        if hasattr(supervisor, 'agent_registry'):
+            registry = supervisor.agent_registry
+        elif hasattr(supervisor, 'registry'):
+            registry = supervisor.registry
         else:
-            raise DeterministicStartupError("Supervisor missing registry or tool_dispatcher for enhancement")
+            raise DeterministicStartupError("Supervisor missing agent_registry for enhancement")
+            
+        if not hasattr(registry, 'tool_dispatcher'):
+            raise DeterministicStartupError("Registry missing tool_dispatcher for enhancement")
+            
+        # Check if enhancement is needed
+        tool_dispatcher = registry.tool_dispatcher
+        if not getattr(tool_dispatcher, '_websocket_enhanced', False):
+            # Enhance tool dispatcher
+            if hasattr(registry, 'set_websocket_manager'):
+                self.logger.info(f"    - Enhancing tool dispatcher via registry.set_websocket_manager()")
+                registry.set_websocket_manager(websocket_manager)
+                
+                # Verify enhancement worked
+                if not getattr(tool_dispatcher, '_websocket_enhanced', False):
+                    raise DeterministicStartupError("Tool dispatcher enhancement with WebSocket failed")
+                    
+                self.logger.info("    - Tool dispatcher successfully enhanced with WebSocket notifications")
+            else:
+                raise DeterministicStartupError("Registry missing set_websocket_manager method")
+        else:
+            self.logger.info("    - Tool dispatcher already enhanced with WebSocket notifications")
     
     async def _phase5_critical_services(self) -> None:
         """Phase 5: Critical Services - Required for system stability."""
@@ -603,9 +616,15 @@ class StartupOrchestrator:
     
     def _register_message_handlers(self) -> None:
         """Register WebSocket message handlers - CRITICAL."""
-        # Message handlers are registered in the WebSocket endpoint
-        # This is just a placeholder to maintain the sequence
-        pass
+        # CRITICAL: WebSocket message handlers are registered per-connection
+        # in websocket.py when connections are established, not during startup.
+        # This is correct architecture - handlers need active WebSocket connections.
+        
+        # The AgentRegistry.set_websocket_manager() call is already handled
+        # in Step 14: _ensure_tool_dispatcher_enhancement()
+        
+        self.logger.info("    - WebSocket message handlers will be registered per-connection")
+        self.logger.info("    - Tool dispatcher WebSocket enhancement completed in previous step")
     
     async def _verify_websocket_events(self) -> None:
         """Verify WebSocket events can actually be sent - CRITICAL."""
