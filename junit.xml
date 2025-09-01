@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="2" failures="0" skipped="0" tests="2" time="2.146" timestamp="2025-09-01T10:06:51.083496-07:00" hostname="Anthony"><testcase classname="tests.unit.test_refresh_endpoint.TestRefreshEndpointUnit" name="test_refresh_with_valid_token_in_body" time="0.446"><error message="failed on setup with &quot;ValueError: I/O operation on closed file.&quot;">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\pytest_asyncio\plugin.py:696: in pytest_fixture_setup
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="14" failures="0" skipped="0" tests="14" time="3.920" timestamp="2025-09-01T13:22:12.249006-07:00" hostname="Anthony"><testcase classname="tests.unit.test_refresh_endpoint.TestRefreshEndpointUnit" name="test_refresh_with_valid_token_in_body" time="0.747"><error message="failed on setup with &quot;ValueError: I/O operation on closed file.&quot;">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\pytest_asyncio\plugin.py:696: in pytest_fixture_setup
     hook_result = yield
                   ^^^^^
 ..\..\..\..\AppData\Roaming\Python\Python312\site-packages\pytest_asyncio\plugin.py:272: in _asyncgen_fixture_wrapper
@@ -16,7 +16,7 @@
 test_framework\conftest_real_services.py:156: in real_services_session
     orchestrator = ServiceOrchestrator(orchestration_config)
                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-test_framework\unified_docker_manager.py:2024: in __init__
+test_framework\unified_docker_manager.py:2226: in __init__
     logger.info("ServiceOrchestrator is deprecated - using UnifiedDockerManager")
 ..\..\..\..\miniconda3\Lib\logging\__init__.py:1539: in info
     self._log(INFO, msg, args, **kwargs)
@@ -39,6 +39,78 @@ During handling of the above exception, another exception occurred:
 ..\..\..\..\miniconda3\Lib\contextlib.py:158: in __exit__
     self.gen.throw(value)
 E   ValueError: I/O operation on closed file.</error><error message="failed on teardown with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error></testcase><testcase classname="tests.unit.test_refresh_endpoint.TestRefreshEndpointUnit" name="test_refresh_with_camelcase_field" time="0.000"><error message="failed on setup with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error><error message="failed on teardown with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error></testcase><testcase classname="tests.unit.test_refresh_endpoint.TestRefreshEndpointUnit" name="test_refresh_with_token_field" time="0.000"><error message="failed on setup with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error><error message="failed on teardown with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error></testcase><testcase classname="tests.unit.test_refresh_endpoint.TestRefreshEndpointUnit" name="test_refresh_missing_token_field" time="0.000"><error message="failed on setup with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error><error message="failed on teardown with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error></testcase><testcase classname="tests.unit.test_refresh_endpoint.TestRefreshEndpointUnit" name="test_refresh_with_invalid_json" time="0.000"><error message="failed on setup with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error><error message="failed on teardown with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error></testcase><testcase classname="tests.unit.test_refresh_endpoint.TestRefreshEndpointUnit" name="test_refresh_with_invalid_token" time="0.000"><error message="failed on setup with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error><error message="failed on teardown with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error></testcase><testcase classname="tests.unit.test_refresh_endpoint.TestRefreshEndpointUnit" name="test_refresh_with_service_error" time="0.000"><error message="failed on setup with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error><error message="failed on teardown with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
     return next(self.gen)
            ^^^^^^^^^^^^^^
 ..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper

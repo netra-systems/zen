@@ -1,7 +1,5 @@
-from shared.isolated_environment import get_env
 """Auth Token Validation Cross-Service Integration Tests (L3)
 
-env = get_env()
 Tests token validation and propagation across different services and components.
 Validates JWT handling, service-to-service auth, and token security.
 
@@ -12,6 +10,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Critical - security incidents destroy customer trust
 """
 
+from shared.isolated_environment import get_env
 from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
@@ -31,11 +30,9 @@ from fastapi.testclient import TestClient
 from httpx import ASGITransport, AsyncClient
 
 # Set test environment before imports
-
+env = get_env()
 env.set("ENVIRONMENT", "testing", "test")
-
 env.set("TESTING", "true", "test")
-
 env.set("SKIP_STARTUP_CHECKS", "true", "test")
 
 from netra_backend.app.main import app

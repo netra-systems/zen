@@ -790,18 +790,21 @@ class UnifiedTestRunner:
                     clickhouse_user = 'test'
                     clickhouse_password = 'test'
                     clickhouse_db = 'netra_test_analytics'
+                    clickhouse_native_port = '9002'  # Test native port
                 else:  # development environment
                     clickhouse_user = 'netra'
                     clickhouse_password = 'netra123'
                     clickhouse_db = 'netra_analytics'
+                    clickhouse_native_port = '9001'  # Dev native port
                 
                 discovered_clickhouse_url = f"clickhouse://{clickhouse_user}:{clickhouse_password}@localhost:{clickhouse_port}/{clickhouse_db}"
                 env.set('CLICKHOUSE_URL', discovered_clickhouse_url, 'docker_manager')
                 env.set('CLICKHOUSE_HTTP_PORT', str(clickhouse_port), 'docker_manager')
+                env.set('CLICKHOUSE_NATIVE_PORT', clickhouse_native_port, 'docker_manager')
                 env.set('CLICKHOUSE_USER', clickhouse_user, 'docker_manager')
                 env.set('CLICKHOUSE_PASSWORD', clickhouse_password, 'docker_manager')
                 env.set('CLICKHOUSE_DB', clickhouse_db, 'docker_manager')
-                print(f"[INFO] Updated ClickHouse configuration with Docker port: {clickhouse_port}")
+                print(f"[INFO] Updated ClickHouse configuration with Docker port: {clickhouse_port} (native: {clickhouse_native_port})")
             
             # Update backend/auth/websocket URLs
             if 'backend' in self.docker_ports:
@@ -856,18 +859,21 @@ class UnifiedTestRunner:
                     clickhouse_user = 'test'
                     clickhouse_password = 'test'
                     clickhouse_db = 'netra_test_analytics'
+                    clickhouse_native_port = '9002'  # Test native port
                 else:  # development environment
                     clickhouse_user = 'netra'
                     clickhouse_password = 'netra123'
                     clickhouse_db = 'netra_analytics'
+                    clickhouse_native_port = '9001'  # Dev native port
                 
                 discovered_clickhouse_url = f"clickhouse://{clickhouse_user}:{clickhouse_password}@localhost:{clickhouse_port}/{clickhouse_db}"
                 env.set('CLICKHOUSE_URL', discovered_clickhouse_url, 'test_runner_port_discovery')
                 env.set('CLICKHOUSE_HTTP_PORT', str(clickhouse_port), 'test_runner_port_discovery')
+                env.set('CLICKHOUSE_NATIVE_PORT', clickhouse_native_port, 'test_runner_port_discovery')
                 env.set('CLICKHOUSE_USER', clickhouse_user, 'test_runner_port_discovery')
                 env.set('CLICKHOUSE_PASSWORD', clickhouse_password, 'test_runner_port_discovery')
                 env.set('CLICKHOUSE_DB', clickhouse_db, 'test_runner_port_discovery')
-                print(f"[INFO] Updated ClickHouse configuration with discovered port: {clickhouse_port}")
+                print(f"[INFO] Updated ClickHouse configuration with discovered port: {clickhouse_port} (native: {clickhouse_native_port})")
         
         # Set environment variables using IsolatedEnvironment
         env = get_env()
