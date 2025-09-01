@@ -213,7 +213,7 @@ class AgentService(IAgentService):
                 "bridge_integrated": True,
                 "websocket_integration": bridge_status["state"],
                 "websocket_healthy": bridge_status["health"]["websocket_manager_healthy"],
-                "orchestrator_healthy": bridge_status["health"]["orchestrator_healthy"]
+                "registry_healthy": bridge_status["health"]["registry_healthy"]
             })
         else:
             status.update({
@@ -221,7 +221,7 @@ class AgentService(IAgentService):
                 "bridge_integrated": False,
                 "websocket_integration": "unavailable",
                 "websocket_healthy": False,
-                "orchestrator_healthy": False
+                "registry_healthy": False
             })
         
         return status
