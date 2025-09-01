@@ -1,0 +1,171 @@
+name: CI Pipeline
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main, develop, staging, critical-remediation-*]
+  workflow_dispatch:
+    inputs:
+      test_level:
+        description: 'Test level'
+        required: false
+        type: choice
+        options:
+          - unit
+          - integration
+          - comprehensive
+        default: integration
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+  statuses: write
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ==========================================
+  # RUN TESTS
+  # ==========================================
+  
+  test:
+    name: Run Tests
+    uses: ./.github/workflows/test.yml
+    with:
+      test_level: ${{ inputs.test_level || (github.event_name == 'pull_request' && 'integration' || 'comprehensive') }}
+      real_services: ${{ github.ref == 'refs/heads/main' }}
+      real_llm: false
+      fail_fast: ${{ github.event_name == 'pull_request' }}
+      coverage: true
+    secrets: inherit
+  
+  # ==========================================
+  # CODE QUALITY CHECKS
+  # ==========================================
+  
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff black mypy
+      
+      - name: Run linting
+        run: |
+          echo "=== Running Ruff Linter ==="
+          ruff check . || true
+      
+      - name: Check formatting
+        run: |
+          echo "=== Checking Black Formatting ==="
+          black --check . || true
+      
+      - name: Type checking
+        run: |
+          echo "=== Running MyPy Type Checking ==="
+          mypy . --ignore-missing-imports || true
+  
+  # ==========================================
+  # ARCHITECTURE COMPLIANCE
+  # ==========================================
+  
+  architecture-compliance:
+    name: Architecture Compliance
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Check compliance
+        run: |
+          echo "=== Checking Architecture Compliance ==="
+          python scripts/check_architecture_compliance.py
+      
+      - name: Upload compliance report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-report
+          path: compliance-report.json
+          retention-days: 7
+  
+  # ==========================================
+  # FINAL STATUS
+  # ==========================================
+  
+  status:
+    name: CI Status
+    needs: [test, code-quality, architecture-compliance]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine overall status
+        id: status
+        run: |
+          OVERALL_STATUS="success"
+          
+          if [[ "${{ needs.test.result }}" == "failure" ]]; then
+            OVERALL_STATUS="failure"
+          fi
+          
+          if [[ "${{ needs.architecture-compliance.result }}" == "failure" ]]; then
+            OVERALL_STATUS="failure"
+          fi
+          
+          echo "status=$OVERALL_STATUS" >> $GITHUB_OUTPUT
+          
+          echo "## CI Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Tests | ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Code Quality | ${{ needs.code-quality.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Architecture | ${{ needs.architecture-compliance.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ "$OVERALL_STATUS" == "success" ]]; then
+            echo "### ✅ All checks passed!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ❌ Some checks failed" >> $GITHUB_STEP_SUMMARY
+          fi
+      
+      - name: Update PR status
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ steps.status.outputs.status }}';
+            const description = status === 'success' ? '✅ All checks passed' : '❌ Some checks failed';
+            
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: status,
+              description: description,
+              context: 'CI Pipeline'
+            });

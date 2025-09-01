@@ -1,0 +1,195 @@
+name: Startup Validation - Deterministic Sequence
+
+on:
+  pull_request:
+    branches: [ main, staging, production ]
+    paths:
+      - 'netra_backend/app/startup_module_deterministic.py'
+      - 'netra_backend/app/main.py'
+      - 'netra_backend/app/routes/health*.py'
+      - 'netra_backend/app/agents/supervisor/**'
+      - 'netra_backend/app/agents/tool_dispatcher*.py'
+      - 'tests/mission_critical/test_deterministic_startup_validation.py'
+      - 'tests/mission_critical/test_startup_*'
+      - '.github/workflows/startup-validation-tests.yml'
+  push:
+    branches: [ main, staging, production ]
+    paths:
+      - 'netra_backend/app/startup_module_deterministic.py'
+      - 'netra_backend/app/main.py'
+      - 'netra_backend/app/routes/health*.py'
+  workflow_dispatch:
+  workflow_call:
+    outputs:
+      test_passed:
+        description: 'Whether startup validation tests passed'
+        value: ${{ jobs.startup-tests.outputs.passed }}
+
+permissions:
+  contents: read
+  pull-requests: write
+  statuses: write
+
+jobs:
+  startup-tests:
+    name: Deterministic Startup Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      passed: ${{ steps.test-result.outputs.passed }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio pytest-timeout pytest-mock
+          
+      - name: Run Startup Smoke Tests
+        id: smoke-tests
+        run: |
+          echo "🚀 Running Startup Smoke Tests (Fast Validation)"
+          echo "=============================================="
+          python -m pytest tests/mission_critical/test_startup_wiring_smoke.py -v --tb=short --timeout=30
+        continue-on-error: false
+        
+      - name: Run Phase Ordering Tests
+        id: phase-tests
+        if: success()
+        run: |
+          echo "📋 Validating 7-Phase Startup Sequence"
+          echo "======================================"
+          python -m pytest tests/mission_critical/test_deterministic_startup_validation.py::TestDeterministicStartupSequence::test_startup_phase_ordering -v --tb=short
+        continue-on-error: false
+        
+      - name: Run WebSocket Wiring Tests
+        id: websocket-tests
+        if: success()
+        run: |
+          echo "🔌 Testing WebSocket → Tool Dispatcher → Agent Registry Wiring"
+          echo "=============================================================="
+          python -m pytest tests/mission_critical/test_deterministic_startup_validation.py::TestWebSocketIntegration -v --tb=short
+        continue-on-error: false
+        
+      - name: Run Health Endpoint Tests
+        id: health-tests
+        if: success()
+        run: |
+          echo "❤️ Validating Health Endpoints Check Startup State"
+          echo "=================================================="
+          python -m pytest tests/mission_critical/test_deterministic_startup_validation.py::TestHealthEndpoints -v --tb=short
+        continue-on-error: false
+        
+      - name: Run Full Startup Validation Suite
+        id: full-suite
+        if: success()
+        run: |
+          echo "🧪 Running Complete Startup Validation Suite"
+          echo "==========================================="
+          python -m pytest tests/mission_critical/test_deterministic_startup_validation.py -v --tb=short --junit-xml=test-results.xml
+        continue-on-error: false
+        
+      - name: Run Integration Tests (with Docker)
+        id: integration-tests
+        if: success() && github.event_name != 'pull_request'
+        run: |
+          echo "🐳 Running Integration Tests with Real Services"
+          echo "=============================================="
+          # Start Docker services
+          docker-compose -f docker-compose.test.yml up -d postgres redis
+          sleep 10  # Wait for services to be ready
+          
+          # Run integration tests
+          python -m pytest tests/mission_critical/test_startup_integration_comprehensive.py::TestStartupIntegration::test_complete_startup_with_real_services -v --tb=short
+          
+          # Clean up
+          docker-compose -f docker-compose.test.yml down
+        continue-on-error: true  # Integration tests are informational
+        
+      - name: Set test result
+        id: test-result
+        if: always()
+        run: |
+          if [[ "${{ steps.smoke-tests.outcome }}" == "success" ]] && \
+             [[ "${{ steps.phase-tests.outcome }}" == "success" ]] && \
+             [[ "${{ steps.websocket-tests.outcome }}" == "success" ]] && \
+             [[ "${{ steps.health-tests.outcome }}" == "success" ]] && \
+             [[ "${{ steps.full-suite.outcome }}" == "success" ]]; then
+            echo "passed=true" >> $GITHUB_OUTPUT
+            echo "✅ STARTUP VALIDATION TESTS PASSED"
+          else
+            echo "passed=false" >> $GITHUB_OUTPUT
+            echo "❌ STARTUP VALIDATION TESTS FAILED"
+            echo "🚨 CRITICAL: System startup is broken!"
+            echo "Production deployments will fail without proper startup sequence"
+            exit 1
+          fi
+          
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: startup-validation-test-results
+          path: test-results.xml
+          
+      - name: Post PR comment
+        if: github.event_name == 'pull_request' && failure()
+        uses: ./.github/actions/pr-comment
+        with:
+          comment-identifier: 'netra-startup-validation'
+          comment-body: |
+            ## 🚨 Startup Validation Tests Failed
+            
+            **The deterministic startup sequence is broken!**
+            
+            This PR cannot be merged until startup tests pass. The application will fail to start properly in production.
+            
+            ### Critical Issues Found:
+            - [ ] 7-phase startup sequence not executing in order
+            - [ ] WebSocket integration not properly wired
+            - [ ] Health endpoints not checking startup state
+            - [ ] Service dependencies not initialized correctly
+            
+            ### Required Phases (in order):
+            1. INIT - Foundation setup
+            2. DEPENDENCIES - Core services
+            3. DATABASE - Database connections
+            4. CACHE - Redis setup
+            5. SERVICES - Chat pipeline
+            6. WEBSOCKET - WebSocket integration
+            7. FINALIZE - Validation
+            
+            ### How to Fix:
+            1. Ensure all phases execute in correct order
+            2. Verify `app.state.startup_complete` is set only after all phases
+            3. Check health endpoints read `app.state.startup_complete`
+            4. Test locally: `python -m pytest tests/mission_critical/test_deterministic_startup_validation.py -v`
+            
+      - name: Update commit status
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ steps.test-result.outputs.passed }}' === 'true' ? 'success' : 'failure';
+            const description = status === 'success' 
+              ? 'Startup sequence validated successfully' 
+              : 'STARTUP BROKEN - deployment will fail';
+              
+            github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: status,
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}',
+              description: description,
+              context: 'Startup Validation / Deterministic Sequence'
+            });
