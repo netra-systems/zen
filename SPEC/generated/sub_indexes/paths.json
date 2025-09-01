@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "paths",
-    "generated_at": "2025-08-31T21:59:58.061941",
+    "generated_at": "2025-09-01T14:15:57.238951",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 1191
+    "total_literals": 1192
   },
   "literals": {
     "\"\n\n# Default to local build with checks\ncommand = [\n    sys.executable,\n    \"scripts/deploy_to_gcp.py\",\n    \"--project\", \"netra-staging\",\n    \"--build-local\",\n    \"--service-account\", SERVICE_ACCOUNT_KEY\n]\n\n# Add any additional arguments passed to this script\nif len(sys.argv) > 1:\n    command.extend(sys.argv[1:])\nelse:\n    # Default to running checks\n    command.append(\"--run-checks\")\n\n# Execute deployment\nsys.exit(subprocess.call(command))": {
@@ -367,7 +367,7 @@
       "value": "/.dockerenv",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/config.py:207",
+        "auth_service/auth_core/config.py:225",
         "scripts/verify_websocket_regression_tests.py:276",
         "shared/port_discovery.py:210"
       ]
@@ -404,8 +404,8 @@
       "value": "/10",
       "category": "paths",
       "locations": [
-        "netra_backend/app/services/factory_status/report_builder.py:606",
-        "netra_backend/app/services/factory_status/report_builder.py:607"
+        "netra_backend/app/services/factory_status/report_builder.py:646",
+        "netra_backend/app/services/factory_status/report_builder.py:647"
       ]
     },
     "/10 maximum": {
@@ -498,7 +498,7 @@
       "value": "/5 fixes",
       "category": "paths",
       "locations": [
-        "netra_backend/app/startup_module.py:1095"
+        "netra_backend/app/startup_module.py:1110"
       ]
     },
     "/5 fixes applied": {
@@ -512,7 +512,7 @@
       "value": "/5 startup fixes applied",
       "category": "paths",
       "locations": [
-        "netra_backend/app/startup_module_deterministic.py:680"
+        "netra_backend/app/startup_module_deterministic.py:962"
       ]
     },
     "/60 seconds)": {
@@ -520,6 +520,13 @@
       "category": "paths",
       "locations": [
         "scripts/intelligent_docker_remediation.py:476"
+      ]
+    },
+    "/7": {
+      "value": "/7",
+      "category": "paths",
+      "locations": [
+        "netra_backend/app/startup_module_deterministic.py:1048"
       ]
     },
     "/FI": {
@@ -533,7 +540,7 @@
       "value": "/Users/",
       "category": "paths",
       "locations": [
-        "netra_backend/app/services/agent_websocket_bridge.py:1345"
+        "netra_backend/app/services/agent_websocket_bridge.py:1453"
       ]
     },
     "/Users/anthony/Documents/GitHub/netra-apex": {
@@ -1694,7 +1701,7 @@
       "locations": [
         "netra_backend/app/core/configuration/database.py:207",
         "netra_backend/app/core/configuration/database.py:223",
-        "netra_backend/app/core/configuration/database.py:597",
+        "netra_backend/app/core/configuration/database.py:600",
         "netra_backend/app/core/configuration/staging_validator.py:199",
         "netra_backend/app/core/configuration/validator_database.py:98",
         "netra_backend/app/core/network_constants.py:148",
@@ -1736,7 +1743,7 @@
       "value": "/cloudsql/netra-staging:us-central1:staging-shared-postgres",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:1001",
+        "scripts/deploy_to_gcp.py:1004",
         "scripts/migrate_staging_postgres_secrets.py:64",
         "scripts/migrate_staging_postgres_secrets_auto.py:64",
         "scripts/update_staging_secrets.py:93"
@@ -2379,8 +2386,8 @@
       "value": "/home/",
       "category": "paths",
       "locations": [
-        "netra_backend/app/services/agent_websocket_bridge.py:1345",
-        "netra_backend/app/services/agent_websocket_bridge.py:1345"
+        "netra_backend/app/services/agent_websocket_bridge.py:1453",
+        "netra_backend/app/services/agent_websocket_bridge.py:1453"
       ]
     },
     "/industry/{industry}/templates": {
@@ -2659,14 +2666,14 @@
       "value": "/mock$",
       "category": "paths",
       "locations": [
-        "netra_backend/app/startup_module.py:327"
+        "netra_backend/app/startup_module.py:342"
       ]
     },
     "/mock?": {
       "value": "/mock?",
       "category": "paths",
       "locations": [
-        "netra_backend/app/startup_module.py:326"
+        "netra_backend/app/startup_module.py:341"
       ]
     },
     "/models": {
@@ -2932,8 +2939,8 @@
       "value": "/proc/self/cgroup",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/config.py:209",
-        "auth_service/auth_core/config.py:210",
+        "auth_service/auth_core/config.py:227",
+        "auth_service/auth_core/config.py:228",
         "shared/port_discovery.py:211",
         "shared/port_discovery.py:212"
       ]
@@ -4622,7 +4629,7 @@
       "value": "Example: python scripts/deploy_to_gcp.py --project {} --build-local",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:1418"
+        "scripts/deploy_to_gcp.py:1421"
       ]
     },
     "Examples:\n    python scripts/staging_validation_e2e.py --all\n    python scripts/staging_validation_e2e.py --health-only\n    python scripts/staging_validation_e2e.py --auth-flow --websocket-test\n    python scripts/staging_validation_e2e.py --export results.json": {
@@ -4664,7 +4671,7 @@
       "value": "Examples:\n  Default deployment (fast, no checks):\n    python scripts/deploy_to_gcp.py --project netra-staging --build-local\n    \n  With pre-deployment checks:\n    python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks\n    \n  Cloud Build (slower):\n    python scripts/deploy_to_gcp.py --project netra-staging\n    \nSee SPEC/gcp_deployment.xml for detailed guidelines.",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:1382"
+        "scripts/deploy_to_gcp.py:1385"
       ]
     },
     "Examples:\n  Default deployment (with checks):\n    python scripts/deploy_staging_with_sa.py\n    \n  Quick deployment (no checks):\n    python scripts/deploy_staging_with_sa.py --no-checks\n    \n  Specify service account key:\n    python scripts/deploy_staging_with_sa.py --key path/to/key.json": {
@@ -4832,7 +4839,7 @@
       "value": "Path to service account JSON key file (default: config/netra-staging-7a1059b7cf26.json)",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:1407"
+        "scripts/deploy_to_gcp.py:1410"
       ]
     },
     "Pre-Deployment Audit Script\nImplements SPEC/pre_deployment_audit.xml to catch LLM coding errors before deployment\nFocuses on RECENT changes and NEW issues, not pre-existing violations": {
@@ -4944,14 +4951,14 @@
       "value": "Run: python scripts/validate_secrets.py --environment staging --project",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:1133"
+        "scripts/deploy_to_gcp.py:1136"
       ]
     },
     "Run: python scripts/validate_staging_urls.py --environment staging --fix": {
       "value": "Run: python scripts/validate_staging_urls.py --environment staging --fix",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:260"
+        "scripts/deploy_to_gcp.py:263"
       ]
     },
     "SPEC/*.xml": {
@@ -5025,14 +5032,14 @@
       "value": "See SPEC/gcp_deployment.xml for deployment guidelines.",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:352"
+        "scripts/deploy_to_gcp.py:355"
       ]
     },
     "See SPEC/learnings/websocket_agent_integration_critical.xml for fix details.": {
       "value": "See SPEC/learnings/websocket_agent_integration_critical.xml for fix details.",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:347"
+        "scripts/deploy_to_gcp.py:350"
       ]
     },
     "Setup E2E Bypass Key for Staging Environment\n\nThis script helps set up the E2E authentication bypass key in Google Secrets Manager\nfor the staging environment. It generates a secure key and stores it properly.\n\nUsage:\n    python scripts/setup_E2E_OAUTH_SIMULATION_KEY.py [--project PROJECT_ID]": {
@@ -7613,7 +7620,7 @@
       "value": "python tests/post_deployment/test_auth_integration.py --environment",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:1270"
+        "scripts/deploy_to_gcp.py:1273"
       ]
     },
     "quality_gate/__init__.py": {
@@ -7718,7 +7725,7 @@
       "value": "scripts/check_architecture_compliance.py",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:289",
+        "scripts/deploy_to_gcp.py:292",
         "scripts/team_updates_sync.py:86"
       ]
     },
@@ -7787,7 +7794,7 @@
       "value": "scripts/scan_string_literals.py",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:294"
+        "scripts/deploy_to_gcp.py:297"
       ]
     },
     "scripts/setup_e2e_test_ports.py": {
@@ -7801,7 +7808,7 @@
       "value": "scripts/validate_secrets.py",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:957"
+        "scripts/deploy_to_gcp.py:960"
       ]
     },
     "scripts/validate_staging_config.py": {
@@ -8445,7 +8452,7 @@
       "value": "tests/mission_critical/test_final_validation.py",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:277"
+        "scripts/deploy_to_gcp.py:280"
       ]
     },
     "tests/mission_critical/test_websocket_agent_events_suite.py": {
@@ -8460,7 +8467,7 @@
       "value": "tests/mission_critical/test_websocket_agent_events_suite.py::TestRegressionPrevention",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:283"
+        "scripts/deploy_to_gcp.py:286"
       ]
     },
     "tests/mission_critical/test_websocket_basic_events.py": {
@@ -8944,7 +8951,7 @@
       "value": "⚠️ Secret validation script not found (scripts/validate_secrets.py)",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:978"
+        "scripts/deploy_to_gcp.py:981"
       ]
     },
     "📋 Index created at: SPEC/learnings/index.xml": {
