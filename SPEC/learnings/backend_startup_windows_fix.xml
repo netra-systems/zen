@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <id>backend_startup_windows_fix_20250831</id>
+    <title>Backend Server Startup Issues on Windows - Module Import Fix</title>
+    <date>2025-08-31</date>
+    <category>windows_compatibility</category>
+    <severity>critical</severity>
+    
+    <problem>
+        <description>
+            Backend server fails to start on Windows with ModuleNotFoundError: No module named 'netra_backend'
+            when using uvicorn with 'netra_backend.app.main:app' module path.
+        </description>
+        <error_message>
+            ModuleNotFoundError: No module named 'netra_backend'
+        </error_message>
+        <affected_files>
+            - dev_launcher/backend_starter.py
+            - netra_backend/app/main.py
+        </affected_files>
+    </problem>
+    
+    <root_cause>
+        <description>
+            Windows has different module resolution behavior than Unix systems. When uvicorn is run with
+            'netra_backend.app.main:app', it expects 'netra_backend' to be a package in the Python path.
+            However, on Windows, the PYTHONPATH environment variable doesn't always resolve correctly
+            when running uvicorn as a module.
+        </description>
+        <details>
+            - The uvicorn reload feature can cause additional import issues
+            - Windows path separators (backslash) can interfere with module resolution
+            - Running from different directories affects module discovery
+        </details>
+    </root_cause>
+    
+    <solution>
+        <description>
+            Modified the backend_starter.py to change directory to netra_backend before starting uvicorn,
+            then use 'app.main:app' as the module path instead of 'netra_backend.app.main:app'.
+        </description>
+        <implementation>
+            <![CDATA[
+            # In dev_launcher/backend_starter.py
+            def _build_uvicorn_command(self, port: int) -> list:
+                # Windows compatibility: Change to netra_backend directory
+                backend_dir = resolve_path("netra_backend", root=self.config.project_root)
+                if backend_dir and backend_dir.exists():
+                    os.chdir(backend_dir)
+                    return [sys.executable, "-m", "uvicorn", "app.main:app", 
+                            "--host", "0.0.0.0", "--port", str(port), 
+                            "--log-level", "warning"]
+            ]]>
+        </implementation>
+    </solution>
+    
+    <cross_references>
+        <ref>SPEC/windows_unicode_handling.xml - Related Windows-specific issues</ref>
+        <ref>SPEC/import_management_architecture.xml - Import rules and absolute imports</ref>
+        <ref>dev_launcher/backend_starter.py:140-155 - Implementation location</ref>
+        <ref>netra_backend/app/main.py:16 - Import that was failing</ref>
+    </cross_references>
+    
+    <testing>
+        <test_scenario>
+            1. Kill any existing backend processes
+            2. Run: python -m dev_launcher
+            3. Verify backend starts on port 8000
+            4. Check health endpoint: curl http://localhost:8000/health
+        </test_scenario>
+        <verification>
+            - Backend should start without ModuleNotFoundError
+            - Health endpoint should return {"status":"healthy"}
+            - Backend should handle reload properly if --backend-reload is used
+        </verification>
+    </testing>
+    
+    <prevention>
+        <recommendation>
+            Always test backend startup on Windows when making changes to:
+            - Module import paths
+            - Uvicorn configuration
+            - PYTHONPATH handling
+            - Dev launcher startup logic
+        </recommendation>
+        <best_practice>
+            For Windows compatibility, prefer running Python modules from their
+            containing directory rather than relying on complex PYTHONPATH setups.
+        </best_practice>
+    </prevention>
+    
+    <related_issues>
+        <issue>JWT secret manager initialization error - resolved separately</issue>
+        <issue>Uvicorn reload causing "Could not import module 'main'" errors</issue>
+    </related_issues>
+</learning>

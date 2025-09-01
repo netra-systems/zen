@@ -12,11 +12,11 @@ never leak into staging or production environments. It fails fast at startup
 if dangerous test variables are detected.
 """
 
-import os
 import sys
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 
+from shared.isolated_environment import get_env
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -123,13 +123,9 @@ class EnvironmentValidator:
             if not environment:
                 environment = "development"  # Default to development
         except ImportError:
-            # Fallback to direct OS access only if unified environment is not available
-            import os
-            environment = os.getenv("ENVIRONMENT", "").lower()
-            if not environment:
-                environment = os.getenv("NETRA_ENV", "").lower()
-            if not environment:
-                environment = "development"  # Default to development
+            # Should never happen as IsolatedEnvironment is a core dependency
+            logger.error("Failed to import IsolatedEnvironment - critical configuration error")
+            environment = "development"  # Default to development for safety
         
         # Normalize environment names
         if environment in ["prod", "production"]:
@@ -147,8 +143,9 @@ class EnvironmentValidator:
     def _check_forbidden_test_variables(self, environment: str) -> None:
         """Check for test variables in non-test environments."""
         if environment in ["staging", "production"]:
+            env = get_env()
             for var in self.FORBIDDEN_TEST_VARS:
-                value = os.getenv(var)
+                value = env.get(var)
                 if value:
                     # Any non-empty value is a violation
                     self.violations.append(EnvironmentViolation(
@@ -162,8 +159,9 @@ class EnvironmentValidator:
     def _check_localhost_references(self, environment: str) -> None:
         """Check for localhost references in staging/production."""
         if environment in ["staging", "production"]:
+            env = get_env()
             for var in self.LOCALHOST_SENSITIVE_VARS:
-                value = os.getenv(var, "").lower()
+                value = env.get(var, "").lower()
                 if value and ("localhost" in value or "127.0.0.1" in value or "0.0.0.0" in value):
                     self.violations.append(EnvironmentViolation(
                         variable_name=var,
@@ -176,8 +174,9 @@ class EnvironmentValidator:
     def _check_required_variables(self, environment: str) -> None:
         """Check that required variables are present."""
         required = self.REQUIRED_VARS.get(environment, [])
+        env = get_env()
         for var in required:
-            value = os.getenv(var)
+            value = env.get(var)
             if not value:
                 self.violations.append(EnvironmentViolation(
                     variable_name=var,
@@ -190,8 +189,9 @@ class EnvironmentValidator:
     def _check_environment_consistency(self) -> None:
         """Check for environment configuration consistency."""
         # Check if ENVIRONMENT and NETRA_ENV match (if both are set)
-        env1 = os.getenv("ENVIRONMENT", "").lower()
-        env2 = os.getenv("NETRA_ENV", "").lower()
+        env = get_env()
+        env1 = env.get("ENVIRONMENT", "").lower()
+        env2 = env.get("NETRA_ENV", "").lower()
         
         if env1 and env2:
             # Normalize and compare
@@ -284,8 +284,9 @@ class EnvironmentValidator:
         Returns True if configuration is valid for target environment.
         """
         # Temporarily override environment for validation
-        original_env = os.getenv("ENVIRONMENT")
-        os.environ["ENVIRONMENT"] = target_environment
+        env = get_env()
+        original_env = env.get("ENVIRONMENT")
+        env.set("ENVIRONMENT", target_environment, "environment_validator")
         
         try:
             # Create a new validator instance for clean state
@@ -301,9 +302,9 @@ class EnvironmentValidator:
         finally:
             # Restore original environment
             if original_env is not None:
-                os.environ["ENVIRONMENT"] = original_env
+                env.set("ENVIRONMENT", original_env, "environment_validator")
             else:
-                os.environ.pop("ENVIRONMENT", None)
+                env.delete("ENVIRONMENT")
 
 
 # Global validator instance

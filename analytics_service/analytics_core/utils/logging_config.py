@@ -15,7 +15,6 @@ Provides centralized logging configuration for the Analytics Service with:
 """
 
 import logging
-import os
 import sys
 from contextlib import contextmanager
 from contextvars import ContextVar
@@ -25,6 +24,7 @@ from typing import Any, Dict, Optional, Union
 from pathlib import Path
 
 import structlog
+from shared.isolated_environment import get_env
 
 
 # Context variables for request tracing
@@ -74,7 +74,8 @@ class AnalyticsLogger:
         
     def _get_log_level(self) -> str:
         """Get log level from environment with sensible defaults."""
-        env = os.getenv('ANALYTICS_ENV', 'development').lower()
+        env_instance = get_env()
+        env = env_instance.get('ANALYTICS_ENV', 'development').lower()
         
         # Environment-specific log levels
         level_mapping = {
@@ -85,7 +86,7 @@ class AnalyticsLogger:
         }
         
         # Allow override via explicit env var
-        explicit_level = os.getenv('ANALYTICS_LOG_LEVEL')
+        explicit_level = env_instance.get('ANALYTICS_LOG_LEVEL')
         if explicit_level:
             return explicit_level.upper()
             
@@ -110,7 +111,8 @@ class AnalyticsLogger:
         ]
         
         # Environment-specific formatting
-        env = os.getenv('ANALYTICS_ENV', 'development').lower()
+        env_instance = get_env()
+        env = env_instance.get('ANALYTICS_ENV', 'development').lower()
         if env == 'production':
             # JSON logging in production
             processors.append(structlog.processors.JSONRenderer())

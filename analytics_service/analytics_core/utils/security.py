@@ -16,7 +16,6 @@ Provides comprehensive security utilities for:
 import hashlib
 import hmac
 import ipaddress
-import os
 import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Set, Tuple, Union
@@ -28,6 +27,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import base64
 
+from shared.isolated_environment import get_env
 from .logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -67,9 +67,10 @@ class APIKeyManager:
         """Load valid API keys from environment or configuration."""
         # In production, this would load from a secure key store
         # For now, support environment-based configuration
+        env = get_env()
         
         # Load master API key from environment
-        master_key = os.getenv('ANALYTICS_MASTER_API_KEY')
+        master_key = env.get('ANALYTICS_MASTER_API_KEY')
         if master_key:
             self._valid_keys[master_key] = {
                 'key_id': 'master',
@@ -80,7 +81,7 @@ class APIKeyManager:
             }
         
         # Load additional keys from environment (format: KEY_ID:API_KEY:PERMISSIONS:RATE_LIMIT)
-        additional_keys = os.getenv('ANALYTICS_API_KEYS', '').strip()
+        additional_keys = env.get('ANALYTICS_API_KEYS', '').strip()
         if additional_keys:
             for key_config in additional_keys.split(','):
                 parts = key_config.strip().split(':')
@@ -165,7 +166,8 @@ class IPHasher:
     
     def __init__(self):
         # Get salt from environment or generate a consistent one
-        self._salt = os.getenv('ANALYTICS_IP_SALT', 'default_analytics_salt').encode()
+        env = get_env()
+        self._salt = env.get('ANALYTICS_IP_SALT', 'default_analytics_salt').encode()
     
     def hash_ip(self, ip_address: str) -> str:
         """Hash an IP address for privacy while maintaining uniqueness."""
@@ -249,8 +251,9 @@ class DataEncryption:
     
     def _get_encryption_key(self) -> bytes:
         """Get or generate encryption key."""
+        env = get_env()
         # Try to get key from environment
-        env_key = os.getenv('ANALYTICS_ENCRYPTION_KEY')
+        env_key = env.get('ANALYTICS_ENCRYPTION_KEY')
         if env_key:
             try:
                 return base64.urlsafe_b64decode(env_key)
@@ -258,8 +261,8 @@ class DataEncryption:
                 logger.warning("Invalid encryption key in environment, generating new one")
         
         # Generate key from password and salt (for development)
-        password = os.getenv('ANALYTICS_ENCRYPTION_PASSWORD', 'development_password').encode()
-        salt = os.getenv('ANALYTICS_ENCRYPTION_SALT', 'development_salt').encode()
+        password = env.get('ANALYTICS_ENCRYPTION_PASSWORD', 'development_password').encode()
+        salt = env.get('ANALYTICS_ENCRYPTION_SALT', 'development_salt').encode()
         
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
@@ -325,14 +328,15 @@ class CORSManager:
         """Load allowed origins from environment."""
         # Default allowed origins
         origins = set()
+        env = get_env()
         
         # Add environment-specified origins
-        env_origins = os.getenv('ANALYTICS_CORS_ORIGINS', '').strip()
+        env_origins = env.get('ANALYTICS_CORS_ORIGINS', '').strip()
         if env_origins:
             origins.update(origin.strip() for origin in env_origins.split(','))
         
         # Add common development origins if in development
-        if os.getenv('ANALYTICS_ENV', 'development').lower() == 'development':
+        if env.get('ANALYTICS_ENV', 'development').lower() == 'development':
             origins.update([
                 'http://localhost:3000',
                 'http://localhost:8000', 

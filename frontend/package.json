@@ -53,6 +53,7 @@
     "test:smoke": "node run-jest.js --config jest.config.smoke.cjs --silent",
     "test:integration:auth-flow": "node run-jest.js --config jest.config.integration.cjs --testNamePattern=\"auth.*flow\"",
     "test:integration:websocket": "node run-jest.js --config jest.config.integration.cjs --testNamePattern=\"websocket\"",
+    "test:websocket-regression": "node scripts/run-websocket-regression-tests.js",
     "test:integration:store-sync": "node run-jest.js --config jest.config.integration.cjs --testNamePattern=\"store.*sync\"",
     "test:integration:api-calls": "node run-jest.js --config jest.config.integration.cjs --testNamePattern=\"api.*call\"",
     "test:visual:update": "node run-jest.js --config jest.config.visual.cjs --updateSnapshot",

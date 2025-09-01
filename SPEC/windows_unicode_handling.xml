@@ -99,4 +99,17 @@
       )"
     </git_commit_safe>
   </quick_reference>
+
+  <related_issues>
+    <issue>
+      <title>Backend Module Import on Windows</title>
+      <description>
+        Windows has different module resolution for Python packages.
+        When starting backend with uvicorn, must run from netra_backend directory
+        and use 'app.main:app' instead of 'netra_backend.app.main:app'.
+      </description>
+      <reference>SPEC/learnings/backend_startup_windows_fix.xml</reference>
+      <solution>dev_launcher/backend_starter.py:140-155</solution>
+    </issue>
+  </related_issues>
 </spec>

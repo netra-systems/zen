@@ -141,7 +141,7 @@ class StagingStartupTester:
             "jwt-secret-key",
             "fernet-key",
             "gemini-api-key",
-            "clickhouse-default-password"
+            "clickhouse-password"
         ]
         
         if self.simulate:

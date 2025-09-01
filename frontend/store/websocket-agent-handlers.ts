@@ -261,6 +261,59 @@ export const handleAgentCompleted = (
   cleanupToolsOnAgentComplete(state.fastLayerData, set);
 };
 
+/**
+ * Extracts agent response data from payload
+ */
+export const extractAgentResponseData = (payload: any) => {
+  const content = payload.content || payload.message || payload.data?.content || payload.data?.message || '';
+  const threadId = payload.thread_id || payload.threadId;
+  const userId = payload.user_id || payload.userId;
+  const timestamp = payload.timestamp ? parseTimestamp(payload.timestamp) : Date.now();
+  const agentData = payload.data || {};
+  return { content, threadId, userId, timestamp, agentData };
+};
+
+/**
+ * Creates agent response message for chat with formatting
+ */
+export const createAgentResponseMessage = (
+  responseData: any,
+  get: () => UnifiedChatState
+): void => {
+  if (!responseData.content) {
+    console.warn('Agent response missing content:', responseData);
+    return;
+  }
+  
+  const baseMessage: ChatMessage = {
+    id: generateUniqueId('agent-resp'),
+    role: 'assistant',
+    content: responseData.content,
+    timestamp: responseData.timestamp,
+    metadata: {
+      source: 'agent_response',
+      threadId: responseData.threadId,
+      userId: responseData.userId,
+      ...responseData.agentData
+    }
+  };
+  const enrichedMessage = MessageFormatterService.enrich(baseMessage);
+  get().addMessage(enrichedMessage);
+};
+
+/**
+ * Handles agent response event
+ */
+export const handleAgentResponse = (
+  event: UnifiedWebSocketEvent,
+  state: UnifiedChatState,
+  set: (partial: Partial<UnifiedChatState>) => void,
+  get: () => UnifiedChatState
+): void => {
+  const responseData = extractAgentResponseData(event.payload as any);
+  createAgentResponseMessage(responseData, get);
+};
+
 // Helper functions for agent completion (≤8 lines each)
 const createCompletedAgentResult = (
   displayName: string,

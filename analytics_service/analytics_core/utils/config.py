@@ -3,10 +3,10 @@
 Configuration management for analytics service.
 """
 
-import os
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
 import logging
+from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
@@ -52,34 +52,36 @@ class AnalyticsConfig:
     @classmethod
     def from_env(cls) -> 'AnalyticsConfig':
         """Create configuration from environment variables"""
+        env = get_env()
+        
         return cls(
-            service_port=int(os.getenv('ANALYTICS_SERVICE_PORT', '8090')),
-            service_host=os.getenv('ANALYTICS_SERVICE_HOST', 'localhost'),
-            debug=os.getenv('ANALYTICS_DEBUG', 'false').lower() == 'true',
+            service_port=int(env.get('ANALYTICS_SERVICE_PORT', '8090')),
+            service_host=env.get('ANALYTICS_SERVICE_HOST', 'localhost'),
+            debug=env.get('ANALYTICS_DEBUG', 'false').lower() == 'true',
             
-            clickhouse_host=os.getenv('CLICKHOUSE_HOST', 'localhost'),
-            clickhouse_port=int(os.getenv('CLICKHOUSE_PORT', '9000')),
-            clickhouse_database=os.getenv('CLICKHOUSE_DB', 'analytics'),
-            clickhouse_user=os.getenv('CLICKHOUSE_USER', 'default'),
-            clickhouse_password=os.getenv('CLICKHOUSE_PASSWORD', ''),
-            clickhouse_secure=os.getenv('CLICKHOUSE_SECURE', 'false').lower() == 'true',
+            clickhouse_host=env.get('CLICKHOUSE_HOST', 'localhost'),
+            clickhouse_port=int(env.get('CLICKHOUSE_PORT', '9000')),
+            clickhouse_database=env.get('CLICKHOUSE_DB', 'analytics'),
+            clickhouse_user=env.get('CLICKHOUSE_USER', 'default'),
+            clickhouse_password=env.get('CLICKHOUSE_PASSWORD', ''),
+            clickhouse_secure=env.get('CLICKHOUSE_SECURE', 'false').lower() == 'true',
             
-            redis_url=os.getenv('REDIS_ANALYTICS_URL', 'redis://localhost:6379/2'),
-            redis_max_connections=int(os.getenv('REDIS_MAX_CONNECTIONS', '20')),
+            redis_url=env.get('REDIS_ANALYTICS_URL', 'redis://localhost:6379/2'),
+            redis_max_connections=int(env.get('REDIS_MAX_CONNECTIONS', '20')),
             
-            batch_size=int(os.getenv('EVENT_BATCH_SIZE', '100')),
-            flush_interval_ms=int(os.getenv('EVENT_FLUSH_INTERVAL_MS', '5000')),
-            max_retries=int(os.getenv('EVENT_MAX_RETRIES', '3')),
-            retry_delay_seconds=int(os.getenv('EVENT_RETRY_DELAY_SECONDS', '1')),
-            max_events_per_user_per_minute=int(os.getenv('MAX_EVENTS_PER_USER_PER_MINUTE', '1000')),
+            batch_size=int(env.get('EVENT_BATCH_SIZE', '100')),
+            flush_interval_ms=int(env.get('EVENT_FLUSH_INTERVAL_MS', '5000')),
+            max_retries=int(env.get('EVENT_MAX_RETRIES', '3')),
+            retry_delay_seconds=int(env.get('EVENT_RETRY_DELAY_SECONDS', '1')),
+            max_events_per_user_per_minute=int(env.get('MAX_EVENTS_PER_USER_PER_MINUTE', '1000')),
             
-            enable_privacy_filtering=os.getenv('ENABLE_PRIVACY_FILTERING', 'true').lower() == 'true',
-            hash_ip_addresses=os.getenv('HASH_IP_ADDRESSES', 'true').lower() == 'true',
-            sanitize_prompts=os.getenv('SANITIZE_PROMPTS', 'true').lower() == 'true',
+            enable_privacy_filtering=env.get('ENABLE_PRIVACY_FILTERING', 'true').lower() == 'true',
+            hash_ip_addresses=env.get('HASH_IP_ADDRESSES', 'true').lower() == 'true',
+            sanitize_prompts=env.get('SANITIZE_PROMPTS', 'true').lower() == 'true',
             
-            enable_analytics=os.getenv('ENABLE_ANALYTICS', 'true').lower() == 'true',
-            enable_realtime_metrics=os.getenv('ENABLE_REALTIME_METRICS', 'true').lower() == 'true',
-            enable_hot_prompts=os.getenv('ENABLE_HOT_PROMPTS', 'true').lower() == 'true',
+            enable_analytics=env.get('ENABLE_ANALYTICS', 'true').lower() == 'true',
+            enable_realtime_metrics=env.get('ENABLE_REALTIME_METRICS', 'true').lower() == 'true',
+            enable_hot_prompts=env.get('ENABLE_HOT_PROMPTS', 'true').lower() == 'true',
         )
     
     def get_clickhouse_url(self) -> str:

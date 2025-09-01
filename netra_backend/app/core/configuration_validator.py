@@ -16,7 +16,6 @@ Business Value Justification (BVJ):
 - Revenue Impact: Configuration errors cause deployment failures and security breaches that threaten entire platform
 """
 import logging
-import os
 import re
 from dataclasses import dataclass, field
 from enum import Enum
@@ -25,6 +24,7 @@ from typing import Any, Callable, Dict, List, Optional, Pattern, Set, Union
 from urllib.parse import urlparse
 import json
 
+from shared.isolated_environment import get_env
 from netra_backend.app.core.exceptions_config import ConfigurationError, ValidationError
 from netra_backend.app.core.unified_logging import get_logger
 
@@ -209,7 +209,8 @@ class ConfigurationValidator:
             ConfigurationReport with detailed validation results
         """
         if config_dict is None:
-            config_dict = dict(os.environ)
+            env = get_env()
+            config_dict = env.get_all_variables()
         
         self.logger.info("Starting configuration validation", extra={
             "rules_count": len(self.rules),

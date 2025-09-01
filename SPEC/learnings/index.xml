@@ -50,6 +50,47 @@
         <prevention>Limit to 10 volumes max. No code in volumes. Add resource limits. Run cleanup regularly.</prevention>
     </learning>
     
+    <learning id="backend-startup-windows-fix-2025-08-31">
+        <title>Backend Server Startup Issues on Windows - Module Import Fix</title>
+        <category>Windows Compatibility</category>
+        <keywords>windows, backend, uvicorn, module, import, pythonpath, startup, dev_launcher</keywords>
+        <path>backend_startup_windows_fix.xml</path>
+        <critical-takeaway>
+            Windows backend startup fails with ModuleNotFoundError for 'netra_backend' when using uvicorn.
+            Root cause: Windows PYTHONPATH resolution differs from Unix systems.
+            Solution: Change to netra_backend directory before starting uvicorn, use 'app.main:app' instead of 'netra_backend.app.main:app'.
+            Implementation in dev_launcher/backend_starter.py:140-155.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Backend service completely unavailable, blocking all development on Windows</business-impact>
+        <prevention>Test backend startup on Windows. Run Python modules from their containing directory.</prevention>
+        <related-specs>
+            <spec href="../docker_volume_optimization.xml">Complete volume optimization specification</spec>
+            <spec href="../frontend_docker_optimization.xml">Frontend image size optimization</spec>
+            <report href="../../DOCKER_STABILITY_LEARNINGS.md">Comprehensive stability analysis</report>
+        </related-specs>
+    </learning>
+    
+    <learning id="frontend-docker-size-optimization-2025-08-31">
+        <title>Frontend Docker Image 94% Size Reduction - Next.js Standalone Mode</title>
+        <category>Infrastructure/Docker/Frontend</category>
+        <keywords>docker, frontend, nextjs, standalone, node_modules, optimization, image size</keywords>
+        <path>../frontend_docker_optimization.xml</path>
+        <critical-takeaway>
+            Frontend Docker images reduced from 1.6GB to 100MB using Next.js standalone output mode.
+            Root cause: Copying entire node_modules folder including 500MB+ of unused dev dependencies.
+            Solution: Configure Next.js with output: 'standalone' and copy only .next/standalone directory.
+            This creates optimized server.js with tree-shaken, production-only dependencies.
+            NEVER copy node_modules to production images - use standalone mode instead.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>10x faster deployments, 94% reduction in storage/bandwidth costs, 3x faster container startup</business-impact>
+        <prevention>Always use output: 'standalone' in next.config.ts. Fail CI if frontend image >200MB. Include node_modules in .dockerignore.</prevention>
+        <refresh-procedure>
+            After any Docker changes: docker-compose down, docker system prune -af --volumes, docker-compose build --no-cache
+        </refresh-procedure>
+    </learning>
+    
     <learning id="clickhouse-staging-secret-mapping-2025-08-31">
         <title>ClickHouse Staging Secret Mapping Critical Fix</title>
         <category>Deployment/GCP-Secrets</category>
@@ -81,6 +122,23 @@
         <severity>CRITICAL</severity>
         <business-impact>Complete service failure, chat functionality broken, 90% of platform value lost</business-impact>
         <prevention>Always include --vpc-connector in deployment. Verify connector exists with gcloud compute networks vpc-access connectors list. Test Redis connectivity post-deployment.</prevention>
+    </learning>
+    
+    <learning id="postgres-type-index-conflicts-2025-08-31">
+        <title>PostgreSQL Type Index Conflicts During Table Creation</title>
+        <category>Database/PostgreSQL</category>
+        <keywords>postgresql, pg_type_typname_nsp_index, duplicate-key, table-creation, idempotent, sqlalchemy, auth-service</keywords>
+        <path>postgres_type_index_conflicts.xml</path>
+        <critical-takeaway>
+            PostgreSQL duplicate key violations on pg_type_typname_nsp_index occur during table re-creation.
+            SQLAlchemy's checkfirst=True insufficient - must explicitly check information_schema.tables first.
+            Solution: Query table existence before create_all() for PostgreSQL databases.
+            Handle type conflicts as expected conditions (INFO level, not ERROR).
+            Affects all services with PostgreSQL initialization, not SQLite.
+        </critical-takeaway>
+        <severity>HIGH</severity>
+        <business-impact>Service restarts trigger error logs, confusing monitoring and creating false alerts</business-impact>
+        <prevention>Check information_schema.tables before create_all(). Handle pg_type errors gracefully. Test idempotent initialization cycles.</prevention>
     </learning>
     
     <learning id="deterministic-startup-critical-2025-08-31">
@@ -260,6 +318,14 @@
             <critical-takeaway>asyncio.wait_for provides deterministic timeout behavior for WebSocket operations (websocket_timeout_retry_implementation.xml).</critical-takeaway>
             <critical-takeaway>Track send_timeouts, timeout_retries, and timeout_failures metrics for monitoring WebSocket health (websocket_timeout_retry_implementation.xml).</critical-takeaway>
             <critical-takeaway>Timeout implementation MUST maintain backward compatibility with existing WebSocket API (websocket_timeout_retry_implementation.xml).</critical-takeaway>
+        </category>
+        
+        <category name="WebSocket/MessageHandlers" path="SPEC/learnings/websocket_agent_response_missing_handler.xml" keywords="WebSocket, agent_response, Message Handler, Frontend, Event Registry, Silent Failures, Chat UI, Message Types">
+            <critical-takeaway>CRITICAL: Frontend MUST have handlers for ALL backend WebSocket message types - missing handler for agent_response caused complete chat failure (websocket_agent_response_missing_handler.xml).</critical-takeaway>
+            <critical-takeaway>Backend sends both agent_response (content) and agent_completed (signal) - frontend must handle BOTH message types (websocket_agent_response_missing_handler.xml).</critical-takeaway>
+            <critical-takeaway>Silent WebSocket failures MUST be prevented - add console warnings for unhandled message types (websocket_agent_response_missing_handler.xml).</critical-takeaway>
+            <critical-takeaway>Always verify frontend handler registry matches backend message types - run alignment tests before deployment (websocket_agent_response_missing_handler.xml).</critical-takeaway>
+            <critical-takeaway>Test coverage MUST include all message types: unit tests for extractors, integration tests for routing, E2E tests for UI display (websocket_agent_response_missing_handler.xml).</critical-takeaway>
         </category>
         
         <category name="Authentication/MultiSystem" path="SPEC/multi_system_authentication_architecture.xml" keywords="Authentication, SSOT, JWT, OAuth, Multi-System, Auth Service, Token Management, Service-to-Service, Architecture">

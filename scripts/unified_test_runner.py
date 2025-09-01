@@ -68,11 +68,11 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from datetime import timedelta
 
-# Project root
+# Project root - script is now in scripts/ directory
 PROJECT_ROOT = Path(__file__).parent.parent.absolute()
 
-# Add parent directory to path for absolute imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Add project root to path for absolute imports
+sys.path.insert(0, str(PROJECT_ROOT))
 
 # Use centralized environment management
 try:
@@ -172,9 +172,9 @@ except ImportError:
     add_background_e2e_arguments = None
     handle_background_e2e_commands = None
 
-# Test execution tracking
+# Test execution tracking - update import path since we're now in scripts/
 try:
-    from scripts.test_execution_tracker import TestExecutionTracker, TestRunRecord
+    from test_execution_tracker import TestExecutionTracker, TestRunRecord
 except ImportError:
     TestExecutionTracker = None
     TestRunRecord = None

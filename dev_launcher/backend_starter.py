@@ -139,9 +139,20 @@ class BackendStarter:
     
     def _build_uvicorn_command(self, port: int) -> list:
         """Build uvicorn command."""
-        return [sys.executable, "-m", "uvicorn", "netra_backend.app.main:app", 
-                "--host", "0.0.0.0", "--port", str(port), 
-                "--log-level", "warning"]
+        # Windows compatibility: Change to netra_backend directory and use app.main:app
+        # This avoids module import issues on Windows
+        backend_dir = resolve_path("netra_backend", root=self.config.project_root)
+        if backend_dir and backend_dir.exists():
+            # Run from within netra_backend directory
+            os.chdir(backend_dir)
+            return [sys.executable, "-m", "uvicorn", "app.main:app", 
+                    "--host", "0.0.0.0", "--port", str(port), 
+                    "--log-level", "warning"]
+        else:
+            # Fallback to original approach
+            return [sys.executable, "-m", "uvicorn", "netra_backend.app.main:app", 
+                    "--host", "0.0.0.0", "--port", str(port), 
+                    "--log-level", "warning"]
     
     def _add_backend_flags(self, cmd: list, server_script: Optional[Path]):
         """Add backend command flags."""

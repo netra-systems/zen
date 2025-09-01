@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <id>websocket_agent_response_missing_handler</id>
+  <title>WebSocket agent_response Handler Missing in Frontend</title>
+  <date>2025-01-31</date>
+  <category>critical_bug</category>
+  <severity>high</severity>
+  
+  <problem>
+    <description>
+      Agent responses were not displaying in the frontend UI despite the backend
+      sending agent_response messages correctly. The frontend WebSocket event
+      handler registry was missing a handler for the 'agent_response' message type.
+    </description>
+    <symptoms>
+      - Users saw no agent responses in chat UI
+      - WebSocket messages with type "agent_response" were ignored
+      - Console showed no errors (silent failure)
+      - Backend logs showed messages being sent successfully
+    </symptoms>
+    <root_cause>
+      The frontend event handler registry (websocket-event-handlers-main.ts) did not
+      include a handler for 'agent_response' messages, causing them to be silently dropped.
+    </root_cause>
+  </problem>
+  
+  <solution>
+    <approach>
+      Added a dedicated handler for agent_response messages to extract content
+      and display it in the chat UI.
+    </approach>
+    <implementation>
+      <file path="frontend/store/websocket-agent-handlers.ts">
+        - Added handleAgentResponse function
+        - Added extractAgentResponseData helper
+        - Added createAgentResponseMessage helper
+      </file>
+      <file path="frontend/store/websocket-event-handlers-main.ts">
+        - Registered 'agent_response': handleAgentResponse in event handler registry
+        - Imported handleAgentResponse from websocket-agent-handlers
+      </file>
+    </implementation>
+  </solution>
+  
+  <testing_requirements>
+    <unit_tests>
+      - Test extractAgentResponseData with various payload formats
+      - Test createAgentResponseMessage creates proper chat messages
+      - Test handleAgentResponse integrates correctly with store
+    </unit_tests>
+    <integration_tests>
+      - Test WebSocket message routing to correct handler
+      - Test message appears in chat store after processing
+      - Test thread and user context preservation
+    </integration_tests>
+    <e2e_tests>
+      - Test agent response displays in UI after user message
+      - Test multiple agent responses in sequence
+      - Test agent response during connection recovery
+    </e2e_tests>
+  </testing_requirements>
+  
+  <prevention>
+    <recommendation>
+      Implement automated tests that verify ALL backend message types have
+      corresponding frontend handlers. Add a test that compares backend
+      WebSocket message types with frontend handler registry.
+    </recommendation>
+    <monitoring>
+      Add console warnings when unknown message types are received to
+      prevent silent failures in the future.
+    </monitoring>
+  </prevention>
+  
+  <related_files>
+    - frontend/store/websocket-agent-handlers.ts
+    - frontend/store/websocket-event-handlers-main.ts
+    - netra_backend/app/routes/websocket.py
+    - netra_backend/app/services/websocket/message_handler.py
+  </related_files>
+  
+  <cross_references>
+    - websocket_agent_integration_critical.xml
+    - websocket_event_types.xml
+    - frontend_backend_message_alignment.xml
+  </cross_references>
+  
+  <business_impact>
+    <severity>HIGH</severity>
+    <description>
+      Core chat functionality was broken - users could not see agent responses,
+      making the product unusable for its primary purpose of AI assistance.
+    </description>
+    <affected_users>All users attempting to use chat functionality</affected_users>
+  </business_impact>
+  
+  <keywords>
+    websocket, agent_response, message_handler, frontend, chat, UI, event_registry
+  </keywords>
+</learning>
