@@ -11,6 +11,17 @@ import subprocess
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 
+# Import dynamic port allocator for fallback allocation
+try:
+    from test_framework.dynamic_port_allocator import (
+        DynamicPortAllocator,
+        PortRange,
+        allocate_test_ports
+    )
+    DYNAMIC_ALLOCATION_AVAILABLE = True
+except ImportError:
+    DYNAMIC_ALLOCATION_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 
@@ -45,7 +56,7 @@ class DockerPortDiscovery:
         "clickhouse": 8123,
     }
     
-    # Test-specific service ports (external mappings for test environment)
+    # Test-specific service ports (defaults, actual ports dynamically allocated)
     TEST_SERVICE_PORTS = {
         "backend": 8001,
         "auth": 8082,
@@ -65,15 +76,18 @@ class DockerPortDiscovery:
         "clickhouse": ["netra-test-clickhouse", "netra-clickhouse", "netra-dev-clickhouse", "clickhouse"],
     }
     
-    def __init__(self, use_test_services: bool = True):
+    def __init__(self, use_test_services: bool = True, use_dynamic_allocation: bool = True):
         """Initialize Docker port discovery.
         
         Args:
             use_test_services: If True, default to test-specific services and ports
+            use_dynamic_allocation: If True, use dynamic port allocation for conflicts
         """
         self.docker_available = self._check_docker_available()
         self.compose_project = self._detect_compose_project()
         self.use_test_services = use_test_services
+        self.use_dynamic_allocation = use_dynamic_allocation and DYNAMIC_ALLOCATION_AVAILABLE
+        self.allocated_ports: Dict[str, int] = {}
         
     def _check_docker_available(self) -> bool:
         """Check if Docker is available."""
@@ -272,19 +286,45 @@ class DockerPortDiscovery:
         
     def _get_default_mappings(self) -> Dict[str, ServicePortMapping]:
         """Get default port mappings when Docker discovery fails."""
-        # Use test-specific ports when in test mode
-        port_map = self.TEST_SERVICE_PORTS if self.use_test_services else self.SERVICE_PORTS
+        # Try dynamic allocation first if available
+        if self.use_dynamic_allocation and not self.allocated_ports:
+            try:
+                allocation_result = allocate_test_ports(
+                    list(self.SERVICE_PORTS.keys()),
+                    port_range=PortRange.SHARED_TEST if self.use_test_services else PortRange.DEVELOPMENT
+                )
+                if allocation_result.success:
+                    self.allocated_ports = allocation_result.ports
+                    logger.info(f"Dynamically allocated ports for {len(self.allocated_ports)} services")
+            except Exception as e:
+                logger.warning(f"Dynamic allocation failed, using defaults: {e}")
         
-        return {
-            service: ServicePortMapping(
-                service_name=service,
-                container_name=f"{'test' if self.use_test_services else 'local'}-{service}",
-                internal_port=self.SERVICE_PORTS[service],
-                external_port=port_map[service],
-                is_available=False
-            )
-            for service in self.SERVICE_PORTS.keys()
-        }
+        # Use allocated ports if available, otherwise fall back to static defaults
+        if self.allocated_ports:
+            return {
+                service: ServicePortMapping(
+                    service_name=service,
+                    container_name=f"{'test' if self.use_test_services else 'local'}-{service}",
+                    internal_port=self.SERVICE_PORTS[service],
+                    external_port=self.allocated_ports.get(service, self.TEST_SERVICE_PORTS[service]),
+                    is_available=False
+                )
+                for service in self.SERVICE_PORTS.keys()
+            }
+        else:
+            # Fall back to static ports
+            port_map = self.TEST_SERVICE_PORTS if self.use_test_services else self.SERVICE_PORTS
+            
+            return {
+                service: ServicePortMapping(
+                    service_name=service,
+                    container_name=f"{'test' if self.use_test_services else 'local'}-{service}",
+                    internal_port=self.SERVICE_PORTS[service],
+                    external_port=port_map[service],
+                    is_available=False
+                )
+                for service in self.SERVICE_PORTS.keys()
+            }
         
     def get_service_url(self, service: str) -> Optional[str]:
         """

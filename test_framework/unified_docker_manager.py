@@ -48,6 +48,13 @@ else:
 from shared.isolated_environment import get_env
 from test_framework.docker_port_discovery import DockerPortDiscovery, ServicePortMapping
 from test_framework.docker_introspection import DockerIntrospector, IntrospectionReport
+from test_framework.dynamic_port_allocator import (
+    DynamicPortAllocator, 
+    PortRange, 
+    PortAllocationResult,
+    allocate_test_ports,
+    release_test_ports
+)
 
 logger = logging.getLogger(__name__)
 
@@ -190,41 +197,41 @@ class UnifiedDockerManager:
     MAX_RESTART_ATTEMPTS = 3
     HEALTH_CHECK_TIMEOUT = 60  # seconds
     
-    # Service configuration
+    # Service configuration - ports will be dynamically allocated
     SERVICES = {
         "backend": {
             "container": "netra-backend",
-            "port": 8000,
+            "default_port": 8000,  # Default for reference, actual port dynamically allocated
             "health_endpoint": "/health",
             "memory_limit": "2048m"
         },
         "frontend": {
             "container": "netra-frontend", 
-            "port": 3000,
+            "default_port": 3000,  # Default for reference
             "health_endpoint": "/",
             "memory_limit": "256m"  # Reduced for stability
         },
         "auth": {
             "container": "netra-auth",
-            "port": 8001,
+            "default_port": 8001,  # Default for reference
             "health_endpoint": "/health",
             "memory_limit": "512m"
         },
         "postgres": {
             "container": "netra-postgres",
-            "port": 5432,
+            "default_port": 5432,  # Default for reference
             "health_cmd": "pg_isready",
             "memory_limit": "512m"
         },
         "redis": {
             "container": "netra-redis",
-            "port": 6379,
+            "default_port": 6379,  # Default for reference
             "health_cmd": "redis-cli ping",
             "memory_limit": "256m"
         },
         "clickhouse": {
             "container": "netra-clickhouse",
-            "port": 8123,
+            "default_port": 8123,  # Default for reference
             "health_endpoint": "/ping",
             "memory_limit": "512m"
         }
@@ -252,8 +259,10 @@ class UnifiedDockerManager:
         self.use_production_images = use_production_images
         self.mode = mode
         
-        # Port discovery integration
+        # Port discovery and allocation
         self.port_discovery = DockerPortDiscovery(use_test_services=True)
+        self.port_allocator = self._initialize_port_allocator()
+        self.allocated_ports: Dict[str, int] = {}
         self.service_health: Dict[str, ServiceHealth] = {}
         self.started_services: Set[str] = set()
         
@@ -283,24 +292,9 @@ class UnifiedDockerManager:
             project_root = current_file.parent.parent  # Go up from test_framework to project root
             env.set("PROJECT_ROOT", str(project_root), source="unified_docker_manager")
         
-        # Additional port mappings for different modes
-        self._docker_ports = {
-            "postgres": 5433,
-            "redis": 6380,
-            "clickhouse": 8124,
-            "backend": 8001,
-            "auth": 8082,
-            "frontend": 3001
-        }
-        
-        self._local_ports = {
-            "postgres": 5432,
-            "redis": 6379,
-            "clickhouse": 8123,
-            "backend": 8000,
-            "auth": 8081,
-            "frontend": 3000
-        }
+        # Dynamic port allocation will replace hardcoded ports
+        self._docker_ports = {}  # Will be populated dynamically
+        self._local_ports = {}   # Will be populated dynamically
         
         # Initialize state
         self._load_state()
@@ -310,6 +304,24 @@ class UnifiedDockerManager:
         timestamp = datetime.now().isoformat()
         pid = os.getpid()
         return hashlib.md5(f"{timestamp}_{pid}".encode()).hexdigest()[:8]
+    
+    def _initialize_port_allocator(self) -> DynamicPortAllocator:
+        """Initialize the dynamic port allocator based on environment type."""
+        # Map environment types to port ranges
+        port_range_map = {
+            EnvironmentType.SHARED: PortRange.SHARED_TEST,
+            EnvironmentType.DEDICATED: PortRange.DEDICATED_TEST,
+            EnvironmentType.PRODUCTION: PortRange.STAGING,
+            EnvironmentType.DEVELOPMENT: PortRange.DEVELOPMENT
+        }
+        
+        port_range = port_range_map.get(self.environment_type, PortRange.SHARED_TEST)
+        
+        return DynamicPortAllocator(
+            port_range=port_range,
+            environment_id=self._get_environment_name(),
+            test_id=self.test_id
+        )
     
     @contextmanager
     def _file_lock(self, lock_name: str, timeout: int = 30):
@@ -432,6 +444,7 @@ class UnifiedDockerManager:
         if existing_containers:
             logger.info(f"🔄 Found existing netra-dev containers: {', '.join(existing_containers.keys())}")
             ports = self._discover_ports_from_existing_containers(existing_containers)
+            self.allocated_ports = ports
             
             # Use a special environment name to indicate we're using existing containers
             env_name = "netra-dev-existing"
@@ -473,8 +486,17 @@ class UnifiedDockerManager:
             
             self._save_state(state)
             
-            # Get port mappings
-            ports = self._discover_ports(env_name)
+            # Allocate ports dynamically for new or existing environment
+            services_to_allocate = list(self.SERVICES.keys())
+            allocation_result = self.port_allocator.allocate_ports(services_to_allocate)
+            
+            if not allocation_result.success:
+                # Fall back to discovery if allocation fails
+                logger.warning(f"Dynamic allocation failed: {allocation_result.error_message}")
+                ports = self._discover_ports(env_name)
+            else:
+                ports = allocation_result.ports
+                self.allocated_ports = ports
             
             return env_name, ports
     
@@ -495,6 +517,12 @@ class UnifiedDockerManager:
                     del state["environments"][env_name]
                 
                 self._save_state(state)
+        
+        # Release allocated ports
+        if self.allocated_ports:
+            self.port_allocator.release_ports(list(self.allocated_ports.keys()))
+            logger.info(f"Released {len(self.allocated_ports)} allocated ports")
+            self.allocated_ports = {}
     
     def _create_environment(self, env_name: str):
         """Create new Docker environment"""
@@ -695,12 +723,18 @@ class UnifiedDockerManager:
                 if "pipe" in str(e).lower() or "connect" in str(e).lower():
                     logger.warning(f"Docker connectivity issue for {service}, using default port")
                     if service in self.SERVICES:
-                        ports[service] = self.SERVICES[service]["port"]
+                        if service in self.allocated_ports:
+                            ports[service] = self.allocated_ports[service]
+                        else:
+                            ports[service] = self.SERVICES[service].get("default_port", self.SERVICES[service].get("port", 8000))
                 else:
                     logger.warning(f"Error discovering port for {service}: {e}")
                     # Use default port as fallback
                     if service in self.SERVICES:
-                        ports[service] = self.SERVICES[service]["port"]
+                        if service in self.allocated_ports:
+                            ports[service] = self.allocated_ports[service]
+                        else:
+                            ports[service] = self.SERVICES[service].get("default_port", self.SERVICES[service].get("port", 8000))
         
         # If we have no ports discovered due to Docker issues, use default dev ports
         if not ports and containers:
@@ -1342,6 +1376,12 @@ class UnifiedDockerManager:
             return
         
         logger.info(f"🧹 Cleaning up started services: {list(self.started_services)}")
+        
+        # Release allocated ports first
+        if self.allocated_ports:
+            self.port_allocator.release_ports(list(self.allocated_ports.keys()))
+            logger.info(f"Released {len(self.allocated_ports)} allocated ports")
+            self.allocated_ports = {}
         
         # Release environment through centralized management
         env_name = self._get_environment_name()
