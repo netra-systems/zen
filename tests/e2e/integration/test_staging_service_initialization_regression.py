@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from shared.isolated_environment import get_env
 """
 Staging Service Initialization Regression Tests
 
