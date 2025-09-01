@@ -102,9 +102,10 @@ class BaseExecutionInterface(ABC):
     Eliminates duplicate execute() methods and ensures standardization.
     """
     
-    def __init__(self, agent_name: str, websocket_manager: Optional[WebSocketManagerProtocol] = None) -> None:
+    def __init__(self, agent_name: str) -> None:
         self.agent_name = agent_name
-        self.websocket_manager = websocket_manager
+        # WebSocket functionality is handled via WebSocketBridgeAdapter pattern
+        # set_websocket_bridge() should be called to configure WebSocket events
         
     @abstractmethod
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Union[str, int, float, bool, Dict, list, None]]:
@@ -137,158 +138,10 @@ class BaseExecutionInterface(ABC):
             return
         await self._send_websocket_update(context, {"status": status, "message": message})
         
-    async def _send_websocket_update(self, context: ExecutionContext, 
-                                   update: Dict[str, Union[str, int, float, bool, Dict, list, None]]) -> None:
-        """Send WebSocket update with error handling."""
-        try:
-            bridge = await get_agent_websocket_bridge()
-            
-            # Route updates through Bridge based on type
-            update_type = update.get("type")
-            if update_type == "agent_thinking":
-                await bridge.notify_agent_thinking(
-                    context.run_id, 
-                    context.agent_name, 
-                    update["payload"]["thought"],
-                    update["payload"].get("step_number")
-                )
-            elif update_type == "partial_result":
-                await bridge.notify_progress_update(
-                    context.run_id,
-                    context.agent_name,
-                    {
-                        "message": update["payload"]["content"],
-                        "status": "completed" if update["payload"]["is_complete"] else "in_progress",
-                        "progress_type": "partial_result"
-                    }
-                )
-            elif update_type == "tool_executing":
-                await bridge.notify_tool_executing(
-                    context.run_id,
-                    context.agent_name,
-                    update["payload"]["tool_name"]
-                )
-            else:
-                # Default status updates
-                status = update.get("status", "")
-                message = update.get("message", "")
-                if status == "starting":
-                    await bridge.notify_agent_started(context.run_id, context.agent_name, {"message": message})
-                elif status == "completed":
-                    await bridge.notify_agent_completed(context.run_id, context.agent_name, {"message": message})
-                elif status == "error":
-                    await bridge.notify_agent_error(context.run_id, context.agent_name, message)
-                else:
-                    await bridge.notify_agent_thinking(context.run_id, context.agent_name, message)
-        except Exception:
-            # Fail silently for WebSocket errors to not break execution
-            pass
     
-    async def send_agent_thinking(self, context_or_run_id: Union[ExecutionContext, str], thought: str, step_number: Optional[int] = None) -> None:
-        """Send agent thinking notification via WebSocket.
-        
-        Args:
-            context_or_run_id: ExecutionContext object OR legacy run_id string
-            thought: The thinking content
-            step_number: Optional step number
-        """
-        # Handle legacy run_id-based calls for backward compatibility
-        if isinstance(context_or_run_id, str):
-            context = self._create_legacy_execution_context(context_or_run_id)
-        else:
-            context = context_or_run_id
-            
-        if not self.websocket_manager or not context.stream_updates:
-            return
-        update = {
-            "type": "agent_thinking",
-            "payload": {
-                "thought": thought,
-                "agent_name": context.agent_name,
-                "step_number": step_number,
-                "timestamp": datetime.now(timezone.utc).timestamp()
-            }
-        }
-        await self._send_websocket_update(context, update)
     
-    async def send_partial_result(self, context_or_run_id: Union[ExecutionContext, str], content: str, is_complete: bool = False) -> None:
-        """Send partial result notification via WebSocket.
-        
-        Args:
-            context_or_run_id: ExecutionContext object OR legacy run_id string
-            content: The partial result content
-            is_complete: Whether this is the final result
-        """
-        # Handle legacy run_id-based calls for backward compatibility
-        if isinstance(context_or_run_id, str):
-            context = self._create_legacy_execution_context(context_or_run_id)
-        else:
-            context = context_or_run_id
-            
-        if not self.websocket_manager or not context.stream_updates:
-            return
-        update = {
-            "type": "partial_result", 
-            "payload": {
-                "content": content,
-                "agent_name": context.agent_name,
-                "is_complete": is_complete,
-                "timestamp": datetime.now(timezone.utc).timestamp()
-            }
-        }
-        await self._send_websocket_update(context, update)
     
-    async def send_tool_executing(self, context_or_run_id: Union[ExecutionContext, str], tool_name: str) -> None:
-        """Send tool executing notification via WebSocket.
-        
-        Args:
-            context_or_run_id: ExecutionContext object OR legacy run_id string
-            tool_name: The name of the executing tool
-        """
-        # Handle legacy run_id-based calls for backward compatibility
-        if isinstance(context_or_run_id, str):
-            context = self._create_legacy_execution_context(context_or_run_id)
-        else:
-            context = context_or_run_id
-            
-        if not self.websocket_manager or not context.stream_updates:
-            return
-        update = {
-            "type": "tool_executing",
-            "payload": {
-                "tool_name": tool_name,
-                "agent_name": context.agent_name,
-                "timestamp": datetime.now(timezone.utc).timestamp()
-            }
-        }
-        await self._send_websocket_update(context, update)
     
-    async def send_final_report(self, context_or_run_id: Union[ExecutionContext, str], report: Dict[str, Union[str, int, float, bool, Dict, list, None]], duration_ms: float) -> None:
-        """Send final report notification via WebSocket.
-        
-        Args:
-            context_or_run_id: ExecutionContext object OR legacy run_id string
-            report: The final report data
-            duration_ms: Execution duration in milliseconds
-        """
-        # Handle legacy run_id-based calls for backward compatibility
-        if isinstance(context_or_run_id, str):
-            context = self._create_legacy_execution_context(context_or_run_id)
-        else:
-            context = context_or_run_id
-            
-        if not self.websocket_manager or not context.stream_updates:
-            return
-        update = {
-            "type": "final_report",
-            "payload": {
-                "report": report,
-                "total_duration_ms": duration_ms,
-                "agent_name": context.agent_name,
-                "timestamp": datetime.now(timezone.utc).timestamp()
-            }
-        }
-        await self._send_websocket_update(context, update)
     
     def _create_legacy_execution_context(self, run_id: str) -> ExecutionContext:
         """Create ExecutionContext for legacy run_id-based method calls."""

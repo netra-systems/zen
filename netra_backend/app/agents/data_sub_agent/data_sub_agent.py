@@ -17,14 +17,10 @@ from netra_backend.app.schemas.shared_types import DataAnalysisResponse
 from netra_backend.app.schemas.monitoring import PerformanceMetric
 
 from netra_backend.app.agents.base_agent import BaseSubAgent
-from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
-    ExecutionContext,
-    ExecutionResult,
-    ExecutionStatus,
-    WebSocketManagerProtocol,
-)
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 # WebSocketContextMixin removed - BaseSubAgent now handles WebSocket via bridge
+# BaseExecutionInterface removed - using single inheritance pattern
 
 # Import focused helper modules
 from netra_backend.app.db.clickhouse import get_clickhouse_service
@@ -42,7 +38,7 @@ from netra_backend.app.schemas.strict_types import TypedAgentResult
 from netra_backend.app.services.llm.cost_optimizer import LLMCostOptimizer
 
 
-class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
+class DataSubAgent(BaseSubAgent):
     """Consolidated data analysis agent with ClickHouse integration.
     
     WebSocket events are handled through BaseSubAgent's bridge adapter.
@@ -55,13 +51,13 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
     """
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
-                 websocket_manager: Optional[WebSocketManagerProtocol] = None):
+                 websocket_manager: Optional[Any] = None):
         """Initialize consolidated DataSubAgent."""
-        # Initialize base classes
-        BaseSubAgent.__init__(self, llm_manager, name="DataSubAgent", 
-                            description="Advanced data analysis for AI cost optimization")
-        BaseExecutionInterface.__init__(self, "DataSubAgent", websocket_manager)
+        # Initialize base class only - single inheritance pattern
+        super().__init__(llm_manager, name="DataSubAgent", 
+                        description="Advanced data analysis for AI cost optimization")
         # WebSocketContextMixin removed - using BaseSubAgent's bridge
+        # BaseExecutionInterface removed - single inheritance pattern
         
         # Initialize core components
         self.tool_dispatcher = tool_dispatcher
@@ -243,53 +239,8 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
             execution_time_ms=execution_time
         )
     
-    # BaseExecutionInterface implementation
-    async def execute_core_logic(self, context: ExecutionContext) -> ExecutionResult:
-        """Core execution logic for BaseExecutionInterface with WebSocket events."""
-        start_time = time.time()
-        
-        try:
-            # Emit thinking event (agent_started is handled by orchestrator)
-            await self.emit_thinking("Starting data analysis via BaseExecutionInterface")
-            
-            # Convert context to state for backward compatibility
-            state = self._context_to_state(context)
-            
-            # Emit thinking event
-            await self.emit_thinking("Converting execution context to agent state...")
-            
-            # Execute main logic
-            result = await self.execute(state, context.run_id, context.stream_updates)
-            
-            # Emit completion using mixin methods
-            await self.emit_progress("BaseExecutionInterface data analysis completed", is_complete=True)
-            
-            return ExecutionResult(
-                success=result.success,
-                status=ExecutionStatus.COMPLETED if result.success else ExecutionStatus.FAILED,
-                result=result.result,
-                execution_time_ms=result.execution_time_ms
-            )
-            
-        except Exception as e:
-            await self.emit_error(f"Core logic execution failed: {str(e)}")
-            return ExecutionResult(
-                success=False,
-                status=ExecutionStatus.FAILED,
-                error=str(e)
-            )
-    
-    async def validate_preconditions(self, context: ExecutionContext) -> bool:
-        """Validate preconditions for execution."""
-        return (
-            context.state is not None and
-            self.clickhouse_client.is_healthy() and
-            self.schema_cache.is_available()
-        )
-    
-    def _context_to_state(self, context: ExecutionContext) -> Optional[DeepAgentState]:
-        """Convert ExecutionContext to DeepAgentState for backward compatibility."""
-        return context.state
+    # BaseExecutionInterface implementation removed - single inheritance pattern
+    # All execution logic is now in execute() method only
     
     # Health and status methods
     def get_health_status(self) -> Dict[str, Union[str, Dict[str, str]]]:

@@ -153,9 +153,6 @@ class TriageSubAgent(BaseSubAgent, BaseExecutionInterface):
         """Execute core triage logic with modern patterns and WebSocket events."""
         start_time = time.time()
         
-        # Set up WebSocket context if available
-        await self._setup_websocket_context_if_available(context)
-        
         # Emit thinking event (agent_started is handled by orchestrator)
         await self.emit_thinking("Starting triage analysis for user request")
         
@@ -228,8 +225,6 @@ class TriageSubAgent(BaseSubAgent, BaseExecutionInterface):
         """Main triage execution logic with WebSocket events."""
         start_time = time.time()
         
-        # Set up WebSocket context for legacy execution
-        await self._setup_websocket_context_for_legacy(run_id)
         
         # Emit thinking event (agent_started is handled by orchestrator)
         await self.emit_thinking("Starting triage analysis for user request")
@@ -296,18 +291,6 @@ class TriageSubAgent(BaseSubAgent, BaseExecutionInterface):
         legacy_status = legacy_health.get("overall_health", "unknown")
         modern_status = modern_health.get("monitor", {}).get("status", "unknown")
         return "healthy" if legacy_status == "healthy" and modern_status == "healthy" else "degraded"
-    
-    async def _setup_websocket_context_if_available(self, context: ExecutionContext) -> None:
-        """Set up WebSocket context if websocket manager is available."""
-        # WebSocket context is now handled by the orchestrator
-        # This method is kept for compatibility but no longer needed
-        pass
-    
-    async def _setup_websocket_context_for_legacy(self, run_id: str) -> None:
-        """Set up WebSocket context for legacy execution paths."""
-        # WebSocket context is now handled by the orchestrator
-        # This method is kept for compatibility but no longer needed
-        pass
 
     # Compact delegate methods to triage core
     def _validate_request(self, request: str): return self.triage_core.validator.validate_request(request)

@@ -48,8 +48,9 @@ class BaseSubAgent(
     """
     
     def __init__(self, llm_manager: Optional[LLMManager] = None, name: str = "BaseSubAgent", description: str = "This is the base sub-agent.", agent_id: Optional[str] = None, user_id: Optional[str] = None):
-        # Initialize BaseExecutionInterface
-        super().__init__(agent_name=name, websocket_manager=None)
+        # Initialize BaseExecutionInterface with proper WebSocket bridge support
+        # Don't pass websocket_manager - it will be set via set_websocket_bridge()
+        super().__init__(agent_name=name)
         
         self.llm_manager = llm_manager
         self.state = SubAgentLifecycle.PENDING
@@ -168,23 +169,6 @@ class BaseSubAgent(
         """Emit subagent completed event via WebSocket bridge."""
         await self._websocket_adapter.emit_subagent_completed(subagent_name, subagent_id, result, duration_ms)
     
-    # Legacy WebSocketContextMixin compatibility methods (deprecated)
-    
-    def set_websocket_context(self, context, notifier) -> None:
-        """DEPRECATED: Use set_websocket_bridge() instead.
-        
-        Kept for backward compatibility with legacy code.
-        """
-        self.logger.warning(f"DEPRECATED: {self.name} using legacy set_websocket_context(). "
-                          "Should use set_websocket_bridge() with AgentWebSocketBridge instead.")
-        # Store for potential legacy usage
-        self._legacy_context = context
-        self._legacy_notifier = notifier
-    
     def has_websocket_context(self) -> bool:
         """Check if WebSocket bridge is available."""
         return self._websocket_adapter.has_websocket_bridge()
-    
-    def propagate_websocket_context_to_state(self, state) -> None:
-        """DEPRECATED: No longer needed with bridge pattern."""
-        pass  # No-op for backward compatibility

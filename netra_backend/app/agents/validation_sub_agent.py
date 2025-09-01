@@ -10,28 +10,65 @@ BVJ: Growth & Enterprise | Quality Assurance | Risk reduction & compliance
 import asyncio
 import time
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, TypedDict
 
 from netra_backend.app.agents.base_agent import BaseSubAgent
-from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
-    ExecutionContext,
-    ExecutionResult,
-    ExecutionStatus,
-    WebSocketManagerProtocol,
-)
 # WebSocketContextMixin removed - BaseSubAgent now handles WebSocket via bridge
+# BaseExecutionInterface removed - using single inheritance pattern
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.core.type_validators import agent_type_safe
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.registry import DeepAgentState
+from netra_backend.app.schemas.shared_types import ValidationResult, NestedJsonDict
 from netra_backend.app.schemas.strict_types import TypedAgentResult
 
 logger = central_logger.get_logger(__name__)
 
 
-class ValidationSubAgent(BaseSubAgent, BaseExecutionInterface):
+class ValidationRequest(TypedDict):
+    """Type definition for validation request parameters."""
+    type: str
+    target: str
+    rules: List[str]
+    strictness: str
+    user_id: Optional[str]
+
+
+class ValidationRuleResult(TypedDict):
+    """Type definition for individual validation rule results."""
+    rule: str
+    status: str
+    execution_time_ms: float
+    details: str
+    issues: List[str]
+
+
+class ValidationSummary(TypedDict):
+    """Type definition for validation summary."""
+    overall_passed: bool
+    total_rules: int
+    passed_rules: int
+    warning_rules: int
+    failed_rules: int
+    issues_count: int
+    issues: List[str]
+    recommendations: List[str]
+    validation_score: float
+
+
+class AgentHealthStatus(TypedDict):
+    """Type definition for agent health status."""
+    agent_name: str
+    status: str
+    validation_rules_loaded: int
+    websocket_enabled: bool
+    components: Dict[str, str]
+    timestamp: str
+
+
+
+class ValidationSubAgent(BaseSubAgent):
     """Example validation sub-agent with comprehensive WebSocket event emissions.
     
     WebSocket events are handled through BaseSubAgent's bridge adapter.
@@ -45,13 +82,13 @@ class ValidationSubAgent(BaseSubAgent, BaseExecutionInterface):
     """
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
-                 websocket_manager: Optional[WebSocketManagerProtocol] = None):
+                 websocket_manager: Optional[Any] = None):
         """Initialize ValidationSubAgent with WebSocket capabilities."""
-        # Initialize base classes
-        BaseSubAgent.__init__(self, llm_manager, name="ValidationSubAgent", 
-                            description="Comprehensive validation with real-time feedback")
-        BaseExecutionInterface.__init__(self, "ValidationSubAgent", websocket_manager)
+        # Initialize base class only - single inheritance pattern
+        super().__init__(llm_manager, name="ValidationSubAgent", 
+                        description="Comprehensive validation with real-time feedback")
         # WebSocketContextMixin removed - using BaseSubAgent's bridge
+        # BaseExecutionInterface removed - single inheritance pattern
         
         # Initialize core components
         self.tool_dispatcher = tool_dispatcher
@@ -100,12 +137,12 @@ class ValidationSubAgent(BaseSubAgent, BaseExecutionInterface):
             execution_time = (time.time() - start_time) * 1000
             
             result_data = {
-                "validation_type": validation_request.get("type", "comprehensive"),
+                "validation_type": validation_request["type"],
                 "execution_time_ms": execution_time,
                 "rules_checked": len(self.validation_rules),
-                "validation_passed": validation_summary.get("overall_passed", False),
-                "issues_found": validation_summary.get("issues_count", 0),
-                "recommendations": ", ".join(validation_summary.get("recommendations", []))
+                "validation_passed": validation_summary["overall_passed"],
+                "issues_found": validation_summary["issues_count"],
+                "recommendations": ", ".join(validation_summary["recommendations"])
             }
             
             # Emit completion event using mixin methods
@@ -122,47 +159,10 @@ class ValidationSubAgent(BaseSubAgent, BaseExecutionInterface):
             self.logger.error(f"ValidationSubAgent execution failed: {str(e)}")
             return self._create_error_result(str(e), start_time)
     
-    async def execute_core_logic(self, context: ExecutionContext) -> ExecutionResult:
-        """Core execution logic for BaseExecutionInterface with WebSocket events."""
-        start_time = time.time()
-        
-        try:
-            # Emit thinking event (agent_started is handled by orchestrator)
-            await self.emit_thinking("Starting validation via BaseExecutionInterface")
-            
-            # Convert context to state for backward compatibility
-            state = self._context_to_state(context)
-            
-            # Execute main logic
-            result = await self.execute(state, context.run_id, context.stream_updates)
-            
-            # Emit completion using mixin methods
-            await self.emit_progress("BaseExecutionInterface validation completed", is_complete=True)
-            
-            return ExecutionResult(
-                success=result.success,
-                status=ExecutionStatus.COMPLETED if result.success else ExecutionStatus.FAILED,
-                result=result.result,
-                execution_time_ms=result.execution_time_ms
-            )
-            
-        except Exception as e:
-            await self.emit_error(f"Core logic execution failed: {str(e)}")
-            return ExecutionResult(
-                success=False,
-                status=ExecutionStatus.FAILED,
-                error=str(e)
-            )
+    # execute_core_logic and validate_preconditions removed - single inheritance pattern
+    # All execution logic is now in execute() method only
     
-    async def validate_preconditions(self, context: ExecutionContext) -> bool:
-        """Validate preconditions for execution."""
-        return (
-            context.state is not None and
-            hasattr(context.state, 'agent_input') and
-            context.state.agent_input is not None
-        )
-    
-    def _validate_execution_state(self, state: DeepAgentState) -> bool:
+    def _validate_execution_state(self, state: Optional[DeepAgentState]) -> bool:
         """Validate execution state has required validation parameters."""
         return (
             state and 
@@ -170,22 +170,22 @@ class ValidationSubAgent(BaseSubAgent, BaseExecutionInterface):
             state.agent_input is not None
         )
     
-    def _extract_validation_request(self, state: DeepAgentState) -> Dict[str, Any]:
+    def _extract_validation_request(self, state: DeepAgentState) -> ValidationRequest:
         """Extract validation request parameters from state."""
         agent_input = state.agent_input
         
-        return {
-            "type": agent_input.get("validation_type", "comprehensive"),
-            "target": agent_input.get("validation_target", "general"),
-            "rules": agent_input.get("custom_rules", self.validation_rules),
-            "strictness": agent_input.get("strictness_level", "standard"),
-            "user_id": getattr(state, 'user_id', None)
-        }
+        return ValidationRequest(
+            type=agent_input.get("validation_type", "comprehensive"),
+            target=agent_input.get("validation_target", "general"),
+            rules=agent_input.get("custom_rules", self.validation_rules),
+            strictness=agent_input.get("strictness_level", "standard"),
+            user_id=getattr(state, 'user_id', None)
+        )
     
-    async def _execute_validation_steps(self, request: Dict[str, Any], run_id: str) -> List[Dict[str, Any]]:
+    async def _execute_validation_steps(self, request: ValidationRequest, run_id: str) -> List[ValidationRuleResult]:
         """Execute validation steps with progress updates and tool notifications."""
         validation_results = []
-        rules = request.get("rules", self.validation_rules)
+        rules = request["rules"]
         
         for i, rule in enumerate(rules):
             # Emit thinking about current validation step
@@ -202,39 +202,39 @@ class ValidationSubAgent(BaseSubAgent, BaseExecutionInterface):
             await self.emit_tool_completed(f"validation_tool_{rule}", rule_result)
             
             # Emit progress update
-            await self.emit_progress(f"Completed {rule} validation - {rule_result.get('status', 'unknown')}")
+            await self.emit_progress(f"Completed {rule} validation - {rule_result['status']}")
         
         return validation_results
     
-    async def _execute_validation_rule(self, rule: str, request: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_validation_rule(self, rule: str, request: ValidationRequest) -> ValidationRuleResult:
         """Execute a specific validation rule."""
         # Simulate validation logic
         start_time = time.time()
         
         # Mock validation results based on rule
-        validation_data = {
-            "rule": rule,
-            "status": "passed" if rule != "security_compliance_check" else "warning",
-            "execution_time_ms": (time.time() - start_time) * 1000,
-            "details": f"Validation for {rule} completed",
-            "issues": [] if rule != "security_compliance_check" else ["Minor security recommendation available"]
-        }
+        validation_data = ValidationRuleResult(
+            rule=rule,
+            status="passed" if rule != "security_compliance_check" else "warning",
+            execution_time_ms=(time.time() - start_time) * 1000,
+            details=f"Validation for {rule} completed",
+            issues=[] if rule != "security_compliance_check" else ["Minor security recommendation available"]
+        )
         
         # Add some realistic validation delay
         await asyncio.sleep(0.1)
         
         return validation_data
     
-    async def _generate_validation_summary(self, results: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def _generate_validation_summary(self, results: List[ValidationRuleResult]) -> ValidationSummary:
         """Generate comprehensive validation summary."""
         total_rules = len(results)
-        passed_rules = len([r for r in results if r.get("status") == "passed"])
-        warning_rules = len([r for r in results if r.get("status") == "warning"])
-        failed_rules = len([r for r in results if r.get("status") == "failed"])
+        passed_rules = len([r for r in results if r["status"] == "passed"])
+        warning_rules = len([r for r in results if r["status"] == "warning"])
+        failed_rules = len([r for r in results if r["status"] == "failed"])
         
         all_issues = []
         for result in results:
-            all_issues.extend(result.get("issues", []))
+            all_issues.extend(result["issues"])
         
         recommendations = []
         if warning_rules > 0:
@@ -244,17 +244,17 @@ class ValidationSubAgent(BaseSubAgent, BaseExecutionInterface):
         if len(all_issues) == 0:
             recommendations.append("All validation checks passed successfully")
         
-        return {
-            "overall_passed": failed_rules == 0,
-            "total_rules": total_rules,
-            "passed_rules": passed_rules,
-            "warning_rules": warning_rules,
-            "failed_rules": failed_rules,
-            "issues_count": len(all_issues),
-            "issues": all_issues,
-            "recommendations": recommendations,
-            "validation_score": (passed_rules + warning_rules * 0.5) / total_rules if total_rules > 0 else 0.0
-        }
+        return ValidationSummary(
+            overall_passed=failed_rules == 0,
+            total_rules=total_rules,
+            passed_rules=passed_rules,
+            warning_rules=warning_rules,
+            failed_rules=failed_rules,
+            issues_count=len(all_issues),
+            issues=all_issues,
+            recommendations=recommendations,
+            validation_score=(passed_rules + warning_rules * 0.5) / total_rules if total_rules > 0 else 0.0
+        )
     
     def _create_error_result(self, error_message: str, start_time: float) -> TypedAgentResult:
         """Create standardized error result."""
@@ -270,21 +270,19 @@ class ValidationSubAgent(BaseSubAgent, BaseExecutionInterface):
             execution_time_ms=execution_time
         )
     
-    def _context_to_state(self, context: ExecutionContext) -> DeepAgentState:
-        """Convert ExecutionContext to DeepAgentState for backward compatibility."""
-        return context.state
+    # _context_to_state removed - no longer needed with single inheritance pattern
     
     # Health and status methods
-    def get_health_status(self) -> Dict[str, Any]:
+    def get_health_status(self) -> AgentHealthStatus:
         """Get comprehensive health status."""
-        return {
-            "agent_name": "ValidationSubAgent",
-            "status": "healthy",
-            "validation_rules_loaded": len(self.validation_rules),
-            "websocket_enabled": self.has_websocket_context(),
-            "components": {
+        return AgentHealthStatus(
+            agent_name="ValidationSubAgent",
+            status="healthy",
+            validation_rules_loaded=len(self.validation_rules),
+            websocket_enabled=self.has_websocket_context(),
+            components={
                 "validation_engine": "active",
                 "websocket_context": "active" if self.has_websocket_context() else "inactive"
             },
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        }
+            timestamp=datetime.now(timezone.utc).isoformat()
+        )
