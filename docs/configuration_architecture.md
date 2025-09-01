@@ -7,6 +7,8 @@
 - [Type Safety Spec](../SPEC/type_safety.xml) - Type safety and duplication rules
 - [Database Connectivity Architecture](../SPEC/database_connectivity_architecture.xml) - Database configuration patterns
 - [WebSocket Agent Integration](../SPEC/learnings/websocket_agent_integration_critical.xml) - Critical WebSocket event requirements
+- [WebSocket Silent Failure Prevention](../SPEC/learnings/websocket_silent_failure_prevention_masterclass.xml) - Comprehensive silent failure prevention
+- [WebSocket Silent Failures](../SPEC/learnings/websocket_silent_failures.xml) - Silent failure detection and mitigation
 - [CLAUDE.md](../CLAUDE.md) - Core development principles and mission-critical requirements
 
 ## Executive Summary
@@ -577,6 +579,8 @@ This separation allows:
 6. **Handle secrets carefully** - Use sanitization and masking for logs
 7. **Test with isolation** - Enable isolation mode in tests
 8. **Document requirements** - Keep variable documentation up-to-date
+9. **Monitor WebSocket health** - Use event monitoring to detect silent failures
+10. **Verify critical services** - WebSocket events are critical infrastructure for chat functionality
 
 ## Common Patterns
 
@@ -789,6 +793,37 @@ graph TD
     style CONFIG fill:#ccffcc
 ```
 
+## WebSocket Event Monitoring Configuration
+
+The platform includes comprehensive WebSocket event monitoring to prevent silent failures and ensure chat functionality reliability.
+
+### WebSocket Health Verification
+- **Startup Verification**: WebSocket events tested during system startup (Phase 5)
+- **Runtime Monitoring**: Continuous monitoring via `ChatEventMonitor`
+- **Health Endpoint**: `/health` includes WebSocket event monitor status
+- **Critical Logging**: Silent failures logged at CRITICAL level
+
+### Event Monitoring Components
+| Component | File | Purpose |
+|-----------|------|---------|
+| **Event Monitor** | `netra_backend/app/websocket_core/event_monitor.py` | Runtime event flow monitoring |
+| **Heartbeat Manager** | `netra_backend/app/websocket_core/heartbeat_manager.py` | Connection health tracking |
+| **WebSocket Manager** | `netra_backend/app/websocket_core/manager.py` | Enhanced with health checks |
+| **Startup Verification** | `netra_backend/app/startup_module_deterministic.py` | WebSocket functionality validation |
+
+### Monitoring Configuration Variables
+```yaml
+# Event Monitor Settings
+WEBSOCKET_EVENT_TIMEOUT: 30  # seconds
+WEBSOCKET_HEARTBEAT_INTERVAL: 15  # seconds
+WEBSOCKET_HEALTH_CHECK_INTERVAL: 10  # seconds
+WEBSOCKET_SILENT_FAILURE_THRESHOLD: 5  # failures before alert
+```
+
+### Related Documentation
+- See [`WEBSOCKET_SILENT_FAILURE_FIXES.md`](../WEBSOCKET_SILENT_FAILURE_FIXES.md) for implementation details
+- See [`SPEC/learnings/websocket_silent_failure_prevention_masterclass.xml`](../SPEC/learnings/websocket_silent_failure_prevention_masterclass.xml) for comprehensive prevention strategies
+
 ## Security Considerations
 
 1. **Never log secrets** - Use masking functions
@@ -798,3 +833,4 @@ graph TD
 5. **Separate concerns** - Different secrets for different purposes
 6. **Environment isolation** - Keep dev/staging/prod separate
 7. **Audit changes** - Track sources and callbacks
+8. **Monitor WebSocket security** - Track connection health and prevent unauthorized access
