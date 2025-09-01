@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
+env = get_env()
 Comprehensive CORS Configuration Tests for DEV MODE
 
 BVJ (Business Value Justification):
@@ -32,9 +34,9 @@ import pytest
 import websockets
 
 # Test environment setup
-os.environ["TESTING"] = "1"
-os.environ["CORS_ORIGINS"] = "*"
-os.environ["ENVIRONMENT"] = "development"
+env.set("TESTING", "1", "test")
+env.set("CORS_ORIGINS", "*", "test")
+env.set("ENVIRONMENT", "development", "test")
 
 
 @dataclass

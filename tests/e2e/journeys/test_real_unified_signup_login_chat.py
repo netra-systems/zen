@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 CRITICAL E2E Unified Signup → Login → Chat Flow Test
 
 BVJ (Business Value Justification):
@@ -36,8 +38,8 @@ import httpx
 import pytest
 
 # Set test environment for controlled execution
-os.environ["TESTING"] = "1"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+env.set("TESTING", "1", "test")
+env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
 
 from tests.e2e.helpers.core.unified_flow_helpers import (
     ChatFlowSimulationHelper,

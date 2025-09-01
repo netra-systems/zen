@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
+env = get_env()
 CRITICAL DEV LAUNCHER END-TO-END TESTS
 
 Tests the ACTUAL dev_launcher.py script and validates the complete developer experience.
@@ -198,7 +200,7 @@ class DevLauncherRealTestManager:
     
     def _prepare_test_environment(self) -> Dict[str, str]:
         """Prepare environment variables for test execution."""
-        env = os.environ.copy()
+        env = env.get_all()
         
         # Core test environment settings
         env.update({

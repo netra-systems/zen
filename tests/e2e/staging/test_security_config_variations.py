@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Additional security and configuration test variations for staging issues.
 
 These tests provide additional test cases for security and configuration 
@@ -12,6 +13,7 @@ from typing import Dict, List, Optional
 from test_framework.environment_markers import staging_only, env_requires
 
 
+env = get_env()
 class TestSecurityConfigVariations:
     """Additional test variations for security and configuration issues."""
 
@@ -41,7 +43,7 @@ class TestSecurityConfigVariations:
         missing_secrets = []
         
         for var_name, min_length in secret_env_vars.items():
-            secret_value = os.environ.get(var_name)
+            secret_value = env.get(var_name)
             
             if not secret_value:
                 missing_secrets.append({
@@ -90,9 +92,9 @@ class TestSecurityConfigVariations:
         This test should identify weak secret generation patterns.
         """
         secret_keys_to_test = {
-            "SECRET_KEY": os.environ.get("SECRET_KEY", ""),
-            "JWT_SECRET": os.environ.get("JWT_SECRET", ""),
-            "SESSION_SECRET": os.environ.get("SESSION_SECRET", "")
+            "SECRET_KEY": env.get("SECRET_KEY", ""),
+            "JWT_SECRET": env.get("JWT_SECRET", ""),
+            "SESSION_SECRET": env.get("SESSION_SECRET", "")
         }
         
         entropy_quality_issues = []
@@ -179,7 +181,7 @@ class TestSecurityConfigVariations:
         credential_format_failures = []
         
         for var_name, requirements in oauth_credentials.items():
-            credential_value = os.environ.get(var_name)
+            credential_value = env.get(var_name)
             
             if not credential_value:
                 credential_format_failures.append({
@@ -271,7 +273,7 @@ class TestSecurityConfigVariations:
         cross_validation_failures = []
         
         for rule in cross_validation_rules:
-            primary_value = os.environ.get(rule["primary_var"])
+            primary_value = env.get(rule["primary_var"])
             
             if not primary_value:
                 cross_validation_failures.append({
@@ -283,8 +285,8 @@ class TestSecurityConfigVariations:
             
             # Rule-specific validation
             if rule["name"] == "Environment consistency":
-                staging_var = os.environ.get("STAGING", "").lower()
-                production_var = os.environ.get("PRODUCTION", "").lower()
+                staging_var = env.get("STAGING", "").lower()
+                production_var = env.get("PRODUCTION", "").lower()
                 
                 if primary_value.lower() == "staging":
                     if staging_var not in ["true", "1", "yes"]:
@@ -305,7 +307,7 @@ class TestSecurityConfigVariations:
             
             elif rule["name"] == "Service URL consistency":
                 backend_url = primary_value
-                auth_url = os.environ.get("AUTH_SERVICE_URL", "")
+                auth_url = env.get("AUTH_SERVICE_URL", "")
                 
                 if backend_url and auth_url:
                     backend_staging = "staging" in backend_url.lower()
@@ -361,7 +363,7 @@ class TestSecurityConfigVariations:
         security_config_failures = []
         
         for var_name, requirements in security_config_vars.items():
-            config_value = os.environ.get(var_name, "")
+            config_value = env.get(var_name, "")
             
             if not config_value:
                 security_config_failures.append({

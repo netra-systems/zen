@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 CRITICAL Complete User Journey Test with Real Services
 
 BVJ (Business Value Justification):
@@ -26,10 +28,10 @@ from typing import Any, Dict, Optional
 import pytest
 
 # Set test environment
-os.environ["TESTING"] = "1"
-os.environ["USE_REAL_SERVICES"] = "true"
-os.environ["AUTH_SERVICE_URL"] = "http://localhost:8001"
-os.environ["BACKEND_SERVICE_URL"] = "http://localhost:8000"
+env.set("TESTING", "1", "test")
+env.set("USE_REAL_SERVICES", "true", "test")
+env.set("AUTH_SERVICE_URL", "http://localhost:8001", "test")
+env.set("BACKEND_SERVICE_URL", "http://localhost:8000", "test")
 
 from tests.e2e.helpers.journey.real_service_journey_helpers import (
     RealChatHelper,
