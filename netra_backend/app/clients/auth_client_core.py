@@ -835,7 +835,7 @@ class AuthServiceClient:
     
     # RBAC Methods for Role-Based Access Control
     
-    async def login(self, request) -> Optional[Dict]:
+    async def login_with_request(self, request) -> Optional[Dict]:
         """User login through auth service with LoginRequest object."""
         # PRODUCTION SECURITY: Ensure auth service is always required in production
         if self._is_production_environment() and not self.settings.enabled:
