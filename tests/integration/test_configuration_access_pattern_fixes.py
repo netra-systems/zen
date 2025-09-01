@@ -1,793 +1,816 @@
 """
-Configuration Access Pattern Fixes
+Real Configuration Access Pattern Integration Test
 
-This test suite implements fixes for configuration access patterns that cause
-database connection issues, based on the analysis from previous tests.
-
-Key Fixes Implemented:
-1. Unified configuration access through IsolatedEnvironment
-2. Database URL construction consistency fixes  
-3. Environment variable isolation improvements
-4. Configuration pattern standardization across services
+This test validates the actual configuration access patterns in the Netra system
+according to CLAUDE.md requirements and SPEC/unified_environment_management.xml.
 
 Business Value Justification (BVJ):
 - Segment: Platform/Internal
-- Business Goal: Reliable configuration management preventing connection failures
-- Value Impact: Eliminates database connection issues due to config access patterns
-- Strategic Impact: Foundation for stable service operations across all environments
+- Business Goal: Stable configuration management preventing production incidents
+- Value Impact: Eliminates configuration-related service failures
+- Strategic Impact: Foundation for reliable multi-service architecture
+
+Key Requirements Tested:
+1. ALL environment access goes through IsolatedEnvironment (SPEC/unified_environment_management.xml)
+2. Service independence maintained (SPEC/independent_services.xml)
+3. Real services and real databases used (NO MOCKS per CLAUDE.md)
+4. Configuration patterns follow docs/configuration_architecture.md
+5. SSOT principles enforced across all services
 """
 
 import asyncio
 import logging
-import sys
+import os
+import time
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 import pytest
-import tempfile
+import subprocess
+from unittest.mock import patch
 
-from shared.isolated_environment import IsolatedEnvironment, get_env
+from shared.isolated_environment import get_env, IsolatedEnvironment
+from netra_backend.app.config import get_config as get_backend_config
+from auth_service.auth_core.config import AuthConfig
 
 logger = logging.getLogger(__name__)
 
 
-class ConfigurationAccessPatternFixer:
-    """Implements fixes for problematic configuration access patterns."""
+class RealConfigurationPatternValidator:
+    """Validates real configuration patterns across all services."""
     
     def __init__(self):
-        self.fixes_applied = []
-        self.test_env = IsolatedEnvironment()
+        self.env = get_env()
+        self.issues_found: List[str] = []
+        self.services_tested: List[str] = []
     
-    def create_unified_database_url_builder(self) -> callable:
-        """Create unified database URL builder that works consistently."""
+    def start_real_services(self) -> Dict[str, bool]:
+        """Start real database services using docker-compose.
         
-        def build_database_url(
-            host: Optional[str] = None,
-            user: Optional[str] = None, 
-            password: Optional[str] = None,
-            database: Optional[str] = None,
-            port: Optional[str] = None,
-            use_isolated_env: bool = True
-        ) -> str:
-            """Build database URL with consistent environment access."""
-            
-            env = get_env() if use_isolated_env else None
-            
-            # Get values with proper fallbacks - ALWAYS use IsolatedEnvironment
-            if use_isolated_env and env:
-                db_host = host or env.get('POSTGRES_HOST', 'localhost')
-                db_user = user or env.get('POSTGRES_USER', 'test_user')  
-                db_password = password or env.get('POSTGRES_PASSWORD', 'test_password')
-                db_name = database or env.get('POSTGRES_DB', 'netra_test')
-                db_port = port or env.get('POSTGRES_PORT', '5434')
-            else:
-                # Also use IsolatedEnvironment for consistency - no direct os.environ access
-                fallback_env = get_env()
-                db_host = host or fallback_env.get('POSTGRES_HOST', 'localhost')
-                db_user = user or fallback_env.get('POSTGRES_USER', 'test_user')
-                db_password = password or fallback_env.get('POSTGRES_PASSWORD', 'test_password') 
-                db_name = database or fallback_env.get('POSTGRES_DB', 'netra_test')
-                db_port = port or fallback_env.get('POSTGRES_PORT', '5434')
-            
-            # Handle URL encoding for special characters
-            from urllib.parse import quote_plus
-            encoded_password = quote_plus(db_password) if db_password else db_password
-            encoded_user = quote_plus(db_user) if db_user else db_user
-            
-            # Build URL with proper encoding
-            if encoded_password:
-                url = f"postgresql://{encoded_user}:{encoded_password}@{db_host}:{db_port}/{db_name}"
-            else:
-                url = f"postgresql://{encoded_user}@{db_host}:{db_port}/{db_name}"
-            
-            return url
+        CRITICAL: We use real services, no mocks per CLAUDE.md requirements.
+        """
+        print("\n=== STARTING REAL SERVICES (NO MOCKS) ===")
         
-        return build_database_url
+        services_status = {
+            'postgres': False,
+            'redis': False
+        }
+        
+        # Check if services are already running
+        try:
+            # Try to start minimal services (postgres + redis only for this test)
+            result = subprocess.run([
+                'docker-compose', '-f', 'docker-compose.minimal.yml', 'up', '-d'
+            ], 
+            cwd='/Users/anthony/Documents/GitHub/netra-apex',
+            capture_output=True, text=True, timeout=60)
+            
+            if result.returncode == 0:
+                print("✅ Docker services started successfully")
+                services_status['postgres'] = True
+                services_status['redis'] = True
+            else:
+                print(f"⚠️  Docker services may already be running: {result.stderr}")
+                # Check if services are accessible even if command failed
+                services_status = self._check_service_connectivity()
+        
+        except subprocess.TimeoutExpired:
+            print("⚠️  Docker startup timed out, checking existing services...")
+            services_status = self._check_service_connectivity()
+        except Exception as e:
+            print(f"⚠️  Docker command failed: {e}, checking existing services...")
+            services_status = self._check_service_connectivity()
+        
+        # Wait for services to be ready
+        if services_status['postgres'] or services_status['redis']:
+            print("Waiting for services to be ready...")
+            time.sleep(5)
+            
+        return services_status
     
-    def create_improved_config_accessor(self) -> callable:
-        """Create improved configuration accessor that handles both environments."""
+    def _check_service_connectivity(self) -> Dict[str, bool]:
+        """Check if services are accessible."""
+        services = {'postgres': False, 'redis': False}
         
-        def get_config_value(
-            key: str,
-            default: Any = None,
-            use_isolated: bool = None,
-            required: bool = False
-        ) -> Any:
-            """Get configuration value with consistent access pattern."""
-            
-            # Auto-detect if we're in a test environment
-            if use_isolated is None:
-                env_check = get_env()
-                use_isolated = (
-                    'pytest' in sys.modules or 
-                    env_check.get('PYTEST_CURRENT_TEST') or
-                    env_check.get('TESTING') == '1'
-                )
-            
-            value = None
-            
-            if use_isolated:
-                # Use IsolatedEnvironment in test contexts
-                env = get_env()
-                value = env.get(key, default)
-            else:
-                # Use IsolatedEnvironment in production contexts too - no direct os.environ
-                env = get_env()
-                value = env.get(key, default)
-            
-            if required and value is None:
-                raise ValueError(f"Required configuration key '{key}' not found")
-            
-            return value
+        # Check PostgreSQL
+        try:
+            # Use a simple connection test
+            import psycopg2
+            conn = psycopg2.connect(
+                host="localhost",
+                port="5433",  # From docker-compose.minimal.yml
+                user="netra",
+                password="netra123",
+                database="netra_dev",
+                connect_timeout=5
+            )
+            conn.close()
+            services['postgres'] = True
+            print("✅ PostgreSQL is accessible")
+        except Exception as e:
+            print(f"❌ PostgreSQL not accessible: {e}")
         
-        return get_config_value
+        # Check Redis
+        try:
+            import redis
+            r = redis.Redis(host='localhost', port=6380, decode_responses=True)
+            r.ping()
+            services['redis'] = True
+            print("✅ Redis is accessible")
+        except Exception as e:
+            print(f"❌ Redis not accessible: {e}")
+        
+        return services
     
-    def create_database_connection_validator(self) -> callable:
-        """Create database connection validator to prevent connection issues."""
+    def setup_test_environment(self):
+        """Setup test environment variables through IsolatedEnvironment."""
+        print("\n=== SETTING UP TEST ENVIRONMENT ===")
         
-        async def validate_database_connection(
-            db_url: str,
-            timeout: float = 10.0
-        ) -> Dict[str, Any]:
-            """Validate database connection with detailed error reporting."""
+        # Enable isolation mode for testing
+        self.env.enable_isolation()
+        
+        # Set test environment variables using REAL service connection details
+        test_config = {
+            'ENVIRONMENT': 'test',
+            'TESTING': '1',
+            # Real PostgreSQL from docker-compose.minimal.yml
+            'POSTGRES_HOST': 'localhost',
+            'POSTGRES_PORT': '5433',
+            'POSTGRES_USER': 'netra',
+            'POSTGRES_PASSWORD': 'netra123', 
+            'POSTGRES_DB': 'netra_dev',
+            'DATABASE_URL': 'postgresql://netra:netra123@localhost:5433/netra_dev',
+            # Real Redis from docker-compose.minimal.yml
+            'REDIS_URL': 'redis://localhost:6380',
+            'REDIS_DISABLED': 'false',
+            # JWT configuration
+            'JWT_SECRET_KEY': 'test-jwt-secret-key-that-is-long-enough-for-security',
+            'SECRET_KEY': 'test-secret-key-that-is-long-enough-for-security',
+            # Fernet key for encryption (required in testing)
+            'FERNET_KEY': 'Eqj3Aqtrxtbnx5ZzSgcfCpK9r_fZz0ejRC1W1Wtpdnw=',
+            # Auth service specific
+            'SERVICE_SECRET': 'test-service-secret-that-is-different-from-jwt',
+            'SERVICE_ID': 'test-auth-service-instance',
+            # OAuth configuration
+            'GOOGLE_CLIENT_ID': 'test-google-client-id',
+            'GOOGLE_CLIENT_SECRET': 'test-google-client-secret',
+            # Frontend/service URLs
+            'FRONTEND_URL': 'http://localhost:3000',
+            'AUTH_SERVICE_URL': 'http://localhost:8001',
+        }
+        
+        for key, value in test_config.items():
+            success = self.env.set(key, value, source='integration_test')
+            if success:
+                print(f"✅ Set {key}")
+            else:
+                print(f"❌ Failed to set {key}")
+                self.issues_found.append(f"Failed to set environment variable: {key}")
+        
+        print(f"Environment configured with {len(test_config)} variables")
+    
+    def validate_isolated_environment_usage(self) -> Dict[str, Any]:
+        """Validate that all services use IsolatedEnvironment correctly."""
+        print("\n=== VALIDATING ISOLATED ENVIRONMENT USAGE ===")
+        
+        results = {
+            'shared_isolated_environment': self._test_shared_isolated_environment(),
+            'netra_backend_config': self._test_netra_backend_config_patterns(),
+            'auth_service_config': self._test_auth_service_config_patterns(),
+            'environment_isolation': self._test_environment_isolation(),
+            'ssot_compliance': self._test_ssot_compliance()
+        }
+        
+        return results
+    
+    def _test_shared_isolated_environment(self) -> Dict[str, Any]:
+        """Test shared IsolatedEnvironment functionality."""
+        print("\nTesting shared IsolatedEnvironment...")
+        
+        test_result = {
+            'success': True,
+            'tests': {},
+            'issues': []
+        }
+        
+        try:
+            # Test singleton pattern
+            env1 = get_env()
+            env2 = get_env()
             
-            validation_result = {
-                'valid': False,
-                'url': db_url,
-                'issues': [],
-                'connection_test': None
-            }
+            test_result['tests']['singleton'] = env1 is env2
+            if not test_result['tests']['singleton']:
+                test_result['issues'].append("IsolatedEnvironment not singleton")
+                test_result['success'] = False
             
-            # Validate URL format
+            # Test isolation mode
+            test_result['tests']['isolation_enabled'] = env1.is_isolated()
+            if not test_result['tests']['isolation_enabled']:
+                test_result['issues'].append("Isolation mode not enabled")
+            
+            # Test get/set operations
+            test_key = "TEST_ISOLATION_KEY"
+            test_value = "test-isolation-value"
+            
+            set_success = env1.set(test_key, test_value, source='isolation_test')
+            retrieved_value = env1.get(test_key)
+            
+            test_result['tests']['get_set_operations'] = (
+                set_success and retrieved_value == test_value
+            )
+            
+            if not test_result['tests']['get_set_operations']:
+                test_result['issues'].append(f"Get/set operations failed: set={set_success}, retrieved='{retrieved_value}'")
+                test_result['success'] = False
+            
+            # Test source tracking
+            source = env1.get_variable_source(test_key)
+            test_result['tests']['source_tracking'] = source == 'isolation_test'
+            
+            if not test_result['tests']['source_tracking']:
+                test_result['issues'].append(f"Source tracking failed: expected 'isolation_test', got '{source}'")
+                test_result['success'] = False
+            
+            # Clean up test key
+            env1.delete(test_key, source='cleanup')
+            
+            print(f"  Shared IsolatedEnvironment: {'✅ PASS' if test_result['success'] else '❌ FAIL'}")
+            for issue in test_result['issues']:
+                print(f"    - {issue}")
+        
+        except Exception as e:
+            test_result['success'] = False
+            test_result['issues'].append(f"Exception during testing: {e}")
+            print(f"  Shared IsolatedEnvironment: ❌ ERROR - {e}")
+        
+        return test_result
+    
+    def _test_netra_backend_config_patterns(self) -> Dict[str, Any]:
+        """Test netra_backend configuration patterns."""
+        print("\nTesting netra_backend configuration patterns...")
+        
+        test_result = {
+            'success': True,
+            'tests': {},
+            'issues': []
+        }
+        
+        try:
+            # Test unified config access
+            config = get_backend_config()
+            
+            test_result['tests']['config_loaded'] = config is not None
+            if not config:
+                test_result['success'] = False
+                test_result['issues'].append("Backend configuration not loaded")
+                return test_result
+            
+            # Test database URL
+            db_url = getattr(config, 'database_url', None)
+            test_result['tests']['database_url_configured'] = bool(db_url)
+            
+            if not db_url:
+                test_result['issues'].append("Database URL not configured in backend")
+                test_result['success'] = False
+            else:
+                # Validate it's using our test database
+                test_result['tests']['using_test_database'] = 'localhost:5433' in db_url
+                if not test_result['tests']['using_test_database']:
+                    test_result['issues'].append(f"Not using test database: {db_url}")
+            
+            # Test environment detection
+            environment = getattr(config, 'environment', None)
+            test_result['tests']['environment_detection'] = environment == 'test'
+            
+            if environment != 'test':
+                test_result['issues'].append(f"Environment not detected as 'test': {environment}")
+                test_result['success'] = False
+            
+            # Test Redis configuration
+            redis_url = getattr(config, 'redis_url', None)
+            test_result['tests']['redis_configured'] = bool(redis_url)
+            
+            print(f"  Backend configuration: {'✅ PASS' if test_result['success'] else '❌ FAIL'}")
+            for issue in test_result['issues']:
+                print(f"    - {issue}")
+        
+        except Exception as e:
+            test_result['success'] = False
+            test_result['issues'].append(f"Exception during backend config test: {e}")
+            print(f"  Backend configuration: ❌ ERROR - {e}")
+        
+        return test_result
+    
+    def _test_auth_service_config_patterns(self) -> Dict[str, Any]:
+        """Test auth_service configuration patterns."""
+        print("\nTesting auth_service configuration patterns...")
+        
+        test_result = {
+            'success': True,
+            'tests': {},
+            'issues': []
+        }
+        
+        try:
+            # Test AuthConfig access patterns
+            auth_config = AuthConfig()
+            
+            # Test environment detection
+            environment = auth_config.get_environment()
+            test_result['tests']['environment_detection'] = environment == 'test'
+            
+            if environment != 'test':
+                test_result['issues'].append(f"Auth environment not detected as 'test': {environment}")
+                test_result['success'] = False
+            
+            # Test database URL generation
+            db_url = auth_config.get_database_url()
+            test_result['tests']['database_url_configured'] = bool(db_url)
+            
+            if not db_url:
+                test_result['issues'].append("Database URL not configured in auth service")
+                test_result['success'] = False
+            else:
+                # Validate it's using our test database
+                test_result['tests']['using_test_database'] = 'localhost:5433' in db_url
+                if not test_result['tests']['using_test_database']:
+                    test_result['issues'].append(f"Auth not using test database: {db_url}")
+            
+            # Test JWT configuration
+            jwt_secret = auth_config.get_jwt_secret()
+            test_result['tests']['jwt_secret_configured'] = bool(jwt_secret)
+            
+            if not jwt_secret:
+                test_result['issues'].append("JWT secret not configured in auth service")
+                test_result['success'] = False
+            
+            # Test service independence - auth should have its own config
+            service_secret = auth_config.get_service_secret()
+            test_result['tests']['service_secret_configured'] = bool(service_secret)
+            
+            if not service_secret:
+                test_result['issues'].append("Service secret not configured in auth service")
+                test_result['success'] = False
+            
+            # Test Redis URL
+            redis_url = auth_config.get_redis_url()
+            test_result['tests']['redis_configured'] = bool(redis_url)
+            
+            if redis_url and 'localhost:6380' not in redis_url:
+                test_result['issues'].append(f"Auth not using test Redis: {redis_url}")
+            
+            print(f"  Auth configuration: {'✅ PASS' if test_result['success'] else '❌ FAIL'}")
+            for issue in test_result['issues']:
+                print(f"    - {issue}")
+        
+        except Exception as e:
+            test_result['success'] = False
+            test_result['issues'].append(f"Exception during auth config test: {e}")
+            print(f"  Auth configuration: ❌ ERROR - {e}")
+        
+        return test_result
+    
+    def _test_environment_isolation(self) -> Dict[str, Any]:
+        """Test environment variable isolation."""
+        print("\nTesting environment isolation...")
+        
+        test_result = {
+            'success': True,
+            'tests': {},
+            'issues': []
+        }
+        
+        try:
+            env = get_env()
+            
+            # Test that isolation prevents os.environ pollution
+            test_key = "ISOLATION_TEST_KEY"
+            test_value = "isolation_test_value"
+            
+            # Set in isolated environment
+            env.set(test_key, test_value, source='isolation_test')
+            
+            # Check it's not in os.environ (unless preserved)
+            if test_key not in env.PRESERVE_IN_OS_ENVIRON:
+                test_result['tests']['isolation_prevents_pollution'] = test_key not in os.environ
+                
+                if test_key in os.environ:
+                    test_result['issues'].append(f"Isolation failed: {test_key} leaked to os.environ")
+                    test_result['success'] = False
+            
+            # Test that we can still retrieve the value
+            retrieved_value = env.get(test_key)
+            test_result['tests']['isolated_retrieval'] = retrieved_value == test_value
+            
+            if retrieved_value != test_value:
+                test_result['issues'].append(f"Failed to retrieve isolated value: expected '{test_value}', got '{retrieved_value}'")
+                test_result['success'] = False
+            
+            # Clean up
+            env.delete(test_key, source='cleanup')
+            
+            print(f"  Environment isolation: {'✅ PASS' if test_result['success'] else '❌ FAIL'}")
+            for issue in test_result['issues']:
+                print(f"    - {issue}")
+        
+        except Exception as e:
+            test_result['success'] = False
+            test_result['issues'].append(f"Exception during isolation test: {e}")
+            print(f"  Environment isolation: ❌ ERROR - {e}")
+        
+        return test_result
+    
+    def _test_ssot_compliance(self) -> Dict[str, Any]:
+        """Test Single Source of Truth compliance."""
+        print("\nTesting SSOT compliance...")
+        
+        test_result = {
+            'success': True,
+            'tests': {},
+            'issues': []
+        }
+        
+        try:
+            # Test that both services use the same IsolatedEnvironment instance
+            env1 = get_env()  # Used by shared components
+            
+            # Test that configuration managers use the same environment
+            test_key = "SSOT_TEST_KEY"
+            test_value = "ssot_test_value"
+            
+            env1.set(test_key, test_value, source='ssot_test')
+            
+            # Verify both backend and auth can see the same value
+            backend_env_value = env1.get(test_key)
+            
+            # Create new config instances to test they see same environment
             try:
-                from urllib.parse import urlparse
-                parsed = urlparse(db_url)
+                backend_config = get_backend_config()
+                auth_config = AuthConfig()
                 
-                if not parsed.scheme:
-                    validation_result['issues'].append('Missing database scheme (postgresql://)')
-                elif parsed.scheme not in ['postgresql', 'postgres']:
-                    validation_result['issues'].append(f'Invalid scheme: {parsed.scheme}')
+                # Both should see the same environment through shared IsolatedEnvironment
+                test_result['tests']['shared_environment'] = True
                 
-                if not parsed.hostname:
-                    validation_result['issues'].append('Missing hostname')
+                # Test that JWT secret is consistent (through SharedJWTSecretManager)
+                backend_jwt = getattr(backend_config, 'jwt_secret_key', None)
+                auth_jwt = auth_config.get_jwt_secret()
                 
-                if not parsed.username:
-                    validation_result['issues'].append('Missing username')
-                
-                if not parsed.path or parsed.path == '/':
-                    validation_result['issues'].append('Missing database name')
-                
-                # Check for common URL encoding issues
-                if '%' in db_url and not any(encoded in db_url for encoded in ['%40', '%2B', '%21']):
-                    validation_result['issues'].append('Potential URL encoding issue')
-                
+                if backend_jwt and auth_jwt:
+                    test_result['tests']['consistent_jwt_secrets'] = backend_jwt == auth_jwt
+                    if backend_jwt != auth_jwt:
+                        test_result['issues'].append("JWT secrets not consistent between services")
+                        test_result['success'] = False
+                else:
+                    test_result['issues'].append("Could not retrieve JWT secrets from both services")
+                    test_result['success'] = False
+            
             except Exception as e:
-                validation_result['issues'].append(f'URL parsing error: {e}')
+                test_result['issues'].append(f"Error testing service consistency: {e}")
+                test_result['success'] = False
             
-            # Test actual connection if no format issues
-            if not validation_result['issues']:
-                try:
-                    # Try to import asyncpg for connection test
-                    import asyncpg
-                    
-                    connection_start = asyncio.get_event_loop().time()
-                    try:
-                        conn = await asyncio.wait_for(
-                            asyncpg.connect(db_url),
-                            timeout=timeout
-                        )
-                        await conn.fetchval("SELECT 1")
-                        await conn.close()
-                        
-                        connection_time = asyncio.get_event_loop().time() - connection_start
-                        validation_result['connection_test'] = {
-                            'success': True,
-                            'connection_time': connection_time
-                        }
-                        validation_result['valid'] = True
-                        
-                    except asyncio.TimeoutError:
-                        validation_result['connection_test'] = {
-                            'success': False,
-                            'error': f'Connection timeout after {timeout}s'
-                        }
-                        validation_result['issues'].append('Database connection timeout')
-                        
-                    except Exception as e:
-                        validation_result['connection_test'] = {
-                            'success': False,
-                            'error': str(e)
-                        }
-                        validation_result['issues'].append(f'Connection failed: {e}')
-                
-                except ImportError:
-                    validation_result['issues'].append('asyncpg not available for connection test')
-                    validation_result['valid'] = len(validation_result['issues']) == 1  # Only missing asyncpg
+            # Clean up
+            env1.delete(test_key, source='cleanup')
             
-            return validation_result
+            print(f"  SSOT compliance: {'✅ PASS' if test_result['success'] else '❌ FAIL'}")
+            for issue in test_result['issues']:
+                print(f"    - {issue}")
         
-        return validate_database_connection
+        except Exception as e:
+            test_result['success'] = False
+            test_result['issues'].append(f"Exception during SSOT test: {e}")
+            print(f"  SSOT compliance: ❌ ERROR - {e}")
+        
+        return test_result
     
-    def create_environment_synchronizer(self) -> callable:
-        """Create environment synchronizer to keep environments consistent."""
+    def validate_real_database_connections(self) -> Dict[str, Any]:
+        """Test real database connections using configured URLs."""
+        print("\n=== TESTING REAL DATABASE CONNECTIONS ===")
         
-        def sync_environments(
-            keys: List[str],
-            source_env: Optional[IsolatedEnvironment] = None,
-            target_os_environ: bool = False
-        ) -> Dict[str, Any]:
-            """Synchronize environment variables between isolated and os.environ."""
-            
-            sync_result = {
-                'synced_keys': [],
-                'failed_keys': [],
-                'inconsistencies': []
-            }
-            
-            env = source_env or get_env()
-            
-            for key in keys:
-                try:
-                    isolated_value = env.get(key)
-                    # Use IsolatedEnvironment for all access - no direct os.environ
-                    system_env = get_env()
-                    os_value = system_env.get(key)
-                    
-                    # Check for inconsistencies
-                    if isolated_value != os_value:
-                        sync_result['inconsistencies'].append({
-                            'key': key,
-                            'isolated_value': isolated_value,
-                            'os_environ_value': os_value
-                        })
-                    
-                    # Sync if requested through IsolatedEnvironment
-                    if target_os_environ and isolated_value is not None:
-                        system_env.set(key, isolated_value, source='environment_sync')
-                        sync_result['synced_keys'].append(key)
-                    
-                except Exception as e:
-                    sync_result['failed_keys'].append({
-                        'key': key,
-                        'error': str(e)
-                    })
-            
-            return sync_result
+        results = {
+            'backend_database': self._test_backend_database_connection(),
+            'auth_database': self._test_auth_database_connection(),
+            'redis_connection': self._test_redis_connection()
+        }
         
-        return sync_environments
-
-
-class ConfigurationPatternTestSuite:
-    """Test suite for configuration pattern fixes."""
+        return results
     
-    def __init__(self):
-        self.fixer = ConfigurationAccessPatternFixer()
+    def _test_backend_database_connection(self) -> Dict[str, Any]:
+        """Test backend database connection."""
+        print("\nTesting backend database connection...")
+        
+        test_result = {
+            'success': False,
+            'connection_details': {},
+            'issues': []
+        }
+        
+        try:
+            # Get backend config
+            config = get_backend_config()
+            db_url = getattr(config, 'database_url', None)
+            
+            if not db_url:
+                test_result['issues'].append("No database URL configured")
+                return test_result
+            
+            test_result['connection_details']['url'] = db_url
+            
+            # Test actual connection
+            import psycopg2
+            from urllib.parse import urlparse
+            
+            parsed = urlparse(db_url)
+            
+            conn = psycopg2.connect(
+                host=parsed.hostname,
+                port=parsed.port,
+                user=parsed.username,
+                password=parsed.password,
+                database=parsed.path.lstrip('/'),
+                connect_timeout=10
+            )
+            
+            # Test basic query
+            cursor = conn.cursor()
+            cursor.execute("SELECT 1 as test")
+            result = cursor.fetchone()
+            
+            test_result['success'] = result[0] == 1
+            test_result['connection_details']['query_result'] = result[0]
+            
+            cursor.close()
+            conn.close()
+            
+            print(f"  Backend database: {'✅ CONNECTED' if test_result['success'] else '❌ FAILED'}")
+        
+        except Exception as e:
+            test_result['issues'].append(f"Connection failed: {e}")
+            print(f"  Backend database: ❌ ERROR - {e}")
+        
+        return test_result
     
-    async def test_unified_database_url_construction(self) -> Dict[str, Any]:
-        """Test unified database URL construction patterns."""
+    def _test_auth_database_connection(self) -> Dict[str, Any]:
+        """Test auth service database connection."""
+        print("\nTesting auth database connection...")
         
-        print(f"\n=== TESTING UNIFIED DATABASE URL CONSTRUCTION ===")
+        test_result = {
+            'success': False,
+            'connection_details': {},
+            'issues': []
+        }
         
-        url_builder = self.fixer.create_unified_database_url_builder()
-        
-        test_scenarios = [
-            {
-                'name': 'standard_local',
-                'params': {
-                    'host': 'localhost',
-                    'user': 'postgres', 
-                    'password': 'netra',
-                    'database': 'netra_test',
-                    'port': '5432'
-                },
-                'expected_pattern': 'postgresql://postgres:netra@localhost:5432/netra_test'
-            },
-            {
-                'name': 'special_characters_password',
-                'params': {
-                    'host': 'localhost',
-                    'user': 'postgres',
-                    'password': 'p@ssw0rd!',
-                    'database': 'netra_test',
-                    'port': '5432'
-                },
-                'expected_pattern': 'postgresql://postgres:p%40ssw0rd%21@localhost:5432/netra_test'
-            },
-            {
-                'name': 'cloud_database',
-                'params': {
-                    'host': 'staging-db.postgres.database.azure.com',
-                    'user': 'netra@staging-db',
-                    'password': 'complex-password-123',
-                    'database': 'netra_staging',
-                    'port': '5432'
-                },
-                'expected_contains': ['staging-db.postgres.database.azure.com', 'netra%40staging-db']
-            },
-            {
-                'name': 'environment_fallback',
-                'params': {},  # Should use environment variables
-                'setup_env': {
-                    'POSTGRES_HOST': 'env-host',
-                    'POSTGRES_USER': 'env-user',
-                    'POSTGRES_PASSWORD': 'env-password',
-                    'POSTGRES_DB': 'env-db',
-                    'POSTGRES_PORT': '5432'
-                },
-                'expected_pattern': 'postgresql://env-user:env-password@env-host:5432/env-db'
-            }
-        ]
-        
-        results = {}
-        
-        for scenario in test_scenarios:
-            scenario_name = scenario['name']
-            print(f"\nTesting scenario: {scenario_name}")
+        try:
+            # Get auth config
+            auth_config = AuthConfig()
+            db_url = auth_config.get_database_url()
             
-            # Setup environment if needed
-            if scenario.get('setup_env'):
-                env = get_env()
-                for key, value in scenario['setup_env'].items():
-                    env.set(key, value, source=f"test_{scenario_name}")
+            if not db_url:
+                test_result['issues'].append("No database URL configured")
+                return test_result
             
-            try:
-                # Test with isolated environment
-                url_isolated = url_builder(use_isolated_env=True, **scenario['params'])
+            test_result['connection_details']['url'] = db_url
+            
+            # Test actual connection
+            import psycopg2
+            from urllib.parse import urlparse
+            
+            parsed = urlparse(db_url)
+            
+            conn = psycopg2.connect(
+                host=parsed.hostname,
+                port=parsed.port,
+                user=parsed.username,
+                password=parsed.password,
+                database=parsed.path.lstrip('/'),
+                connect_timeout=10
+            )
+            
+            # Test basic query
+            cursor = conn.cursor()
+            cursor.execute("SELECT 1 as test")
+            result = cursor.fetchone()
+            
+            test_result['success'] = result[0] == 1
+            test_result['connection_details']['query_result'] = result[0]
+            
+            cursor.close()
+            conn.close()
+            
+            print(f"  Auth database: {'✅ CONNECTED' if test_result['success'] else '❌ FAILED'}")
+        
+        except Exception as e:
+            test_result['issues'].append(f"Connection failed: {e}")
+            print(f"  Auth database: ❌ ERROR - {e}")
+        
+        return test_result
+    
+    def _test_redis_connection(self) -> Dict[str, Any]:
+        """Test Redis connection."""
+        print("\nTesting Redis connection...")
+        
+        test_result = {
+            'success': False,
+            'connection_details': {},
+            'issues': []
+        }
+        
+        try:
+            # Get Redis URL from environment
+            env = get_env()
+            redis_url = env.get('REDIS_URL')
+            
+            if not redis_url:
+                test_result['issues'].append("No Redis URL configured")
+                return test_result
+            
+            test_result['connection_details']['url'] = redis_url
+            
+            # Test actual connection
+            import redis
+            r = redis.from_url(redis_url, decode_responses=True)
+            
+            # Test ping
+            ping_result = r.ping()
+            test_result['success'] = ping_result
+            
+            # Test set/get
+            test_key = "config_test_key"
+            test_value = "config_test_value"
+            
+            r.set(test_key, test_value, ex=60)  # Expire in 60 seconds
+            retrieved_value = r.get(test_key)
+            
+            test_result['connection_details']['set_get_test'] = retrieved_value == test_value
+            
+            # Clean up
+            r.delete(test_key)
+            
+            print(f"  Redis: {'✅ CONNECTED' if test_result['success'] else '❌ FAILED'}")
+        
+        except Exception as e:
+            test_result['issues'].append(f"Connection failed: {e}")
+            print(f"  Redis: ❌ ERROR - {e}")
+        
+        return test_result
+    
+    def generate_validation_report(self, results: Dict[str, Any]) -> Dict[str, Any]:
+        """Generate comprehensive validation report."""
+        
+        report = {
+            'overall_success': True,
+            'summary': {},
+            'detailed_results': results,
+            'issues_found': [],
+            'recommendations': []
+        }
+        
+        # Analyze results
+        for category, category_results in results.items():
+            if isinstance(category_results, dict):
+                # Special handling for services status
+                if category == 'services':
+                    # Services status is a dict of service_name: boolean
+                    services_working = all(status for status in category_results.values())
+                    category_success = services_working
+                    issues = [] if services_working else [f"Some services not working: {category_results}"]
+                else:
+                    # Normal test result format
+                    category_success = category_results.get('success', False)
+                    issues = category_results.get('issues', [])
                 
-                # Test with system environment (still using IsolatedEnvironment)
-                # Setup system environment for comparison
-                if scenario.get('setup_env'):
-                    system_env = get_env()
-                    for key, value in scenario['setup_env'].items():
-                        system_env.set(key, value, source=f"test_{scenario_name}_system")
-                
-                url_os_environ = url_builder(use_isolated_env=False, **scenario['params'])
-                
-                # Cleanup system environment
-                if scenario.get('setup_env'):
-                    for key in scenario['setup_env'].keys():
-                        try:
-                            system_env.unset(key)
-                        except (AttributeError, KeyError):
-                            pass
-                
-                # Validate results
-                isolated_valid = True
-                os_environ_valid = True
-                issues = []
-                
-                if 'expected_pattern' in scenario:
-                    if url_isolated != scenario['expected_pattern']:
-                        isolated_valid = False
-                        issues.append(f"Isolated URL doesn't match expected pattern")
+                if not category_success:
+                    report['overall_success'] = False
                     
-                    if url_os_environ != scenario['expected_pattern']:
-                        os_environ_valid = False
-                        issues.append(f"os.environ URL doesn't match expected pattern")
-                
-                elif 'expected_contains' in scenario:
-                    for pattern in scenario['expected_contains']:
-                        if pattern not in url_isolated:
-                            isolated_valid = False
-                            issues.append(f"Isolated URL missing pattern: {pattern}")
-                        
-                        if pattern not in url_os_environ:
-                            os_environ_valid = False
-                            issues.append(f"os.environ URL missing pattern: {pattern}")
-                
-                results[scenario_name] = {
-                    'success': isolated_valid and os_environ_valid,
-                    'url_isolated': url_isolated,
-                    'url_os_environ': url_os_environ,
-                    'isolated_valid': isolated_valid,
-                    'os_environ_valid': os_environ_valid,
+                report['summary'][category] = {
+                    'success': category_success,
                     'issues': issues
                 }
                 
-                status = "✅ PASS" if results[scenario_name]['success'] else "❌ FAIL"
-                print(f"  Status: {status}")
-                print(f"  Isolated URL: {url_isolated}")
-                print(f"  os.environ URL: {url_os_environ}")
-                
+                # Collect issues
                 if issues:
-                    print(f"  Issues:")
-                    for issue in issues:
-                        print(f"    - {issue}")
-                
-            except Exception as e:
-                results[scenario_name] = {
-                    'success': False,
-                    'error': str(e)
-                }
-                print(f"  Status: ❌ ERROR - {e}")
+                    report['issues_found'].extend(issues)
         
-        return results
-    
-    def test_improved_config_accessor(self) -> Dict[str, Any]:
-        """Test improved configuration accessor."""
+        # Add recommendations
+        if not report['overall_success']:
+            report['recommendations'] = [
+                "Fix configuration access patterns to use IsolatedEnvironment",
+                "Ensure all services maintain independence while using shared utilities",
+                "Verify database connections use real services during testing",
+                "Check SSOT compliance across all configuration components"
+            ]
         
-        print(f"\n=== TESTING IMPROVED CONFIG ACCESSOR ===")
-        
-        config_accessor = self.fixer.create_improved_config_accessor()
-        
-        test_cases = [
-            {
-                'name': 'auto_detect_test_environment',
-                'key': 'TEST_CONFIG_KEY',
-                'setup_isolated': 'isolated_value',
-                'setup_os': 'os_value',
-                'expected_in_test': 'isolated_value'  # Should prefer isolated in test
-            },
-            {
-                'name': 'explicit_isolated_access',
-                'key': 'EXPLICIT_ISOLATED_KEY',
-                'setup_isolated': 'isolated_explicit',
-                'setup_os': 'os_explicit',
-                'use_isolated': True,
-                'expected': 'isolated_explicit'
-            },
-            {
-                'name': 'explicit_os_access',
-                'key': 'EXPLICIT_OS_KEY',
-                'setup_isolated': 'isolated_os',
-                'setup_os': 'os_os',
-                'use_isolated': False,
-                'expected': 'os_os'
-            },
-            {
-                'name': 'default_fallback',
-                'key': 'NONEXISTENT_KEY',
-                'default': 'fallback_value',
-                'expected': 'fallback_value'
-            },
-            {
-                'name': 'required_key_missing',
-                'key': 'REQUIRED_MISSING_KEY',
-                'required': True,
-                'should_error': True
-            }
-        ]
-        
-        results = {}
-        
-        for test_case in test_cases:
-            test_name = test_case['name']
-            print(f"\nTesting: {test_name}")
-            
-            # Setup environments using IsolatedEnvironment only
-            env = get_env()
-            if test_case.get('setup_isolated'):
-                env.set(test_case['key'], test_case['setup_isolated'], source=f"test_{test_name}")
-            
-            # In our improved architecture, we use only IsolatedEnvironment
-            # For test purposes, we'll set up the environment to test both access patterns
-            if test_case.get('setup_os') and test_case['key'] != test_case.get('setup_isolated'):
-                # If we have different OS values, overwrite the isolated value to simulate difference
-                env.set(test_case['key'], test_case['setup_os'], source=f"test_{test_name}_override")
-            
-            try:
-                # Call config accessor
-                kwargs = {}
-                if 'use_isolated' in test_case:
-                    kwargs['use_isolated'] = test_case['use_isolated']
-                if 'default' in test_case:
-                    kwargs['default'] = test_case['default']
-                if 'required' in test_case:
-                    kwargs['required'] = test_case['required']
-                
-                value = config_accessor(test_case['key'], **kwargs)
-                
-                # Check result
-                if test_case.get('should_error'):
-                    results[test_name] = {
-                        'success': False,
-                        'issue': 'Expected error but got value',
-                        'actual_value': value
-                    }
-                    print(f"  Status: ❌ FAIL - Expected error but got: {value}")
-                else:
-                    expected = test_case.get('expected', test_case.get('expected_in_test'))
-                    success = value == expected
-                    
-                    results[test_name] = {
-                        'success': success,
-                        'expected': expected,
-                        'actual': value
-                    }
-                    
-                    status = "✅ PASS" if success else "❌ FAIL"
-                    print(f"  Status: {status}")
-                    print(f"  Expected: {expected}")
-                    print(f"  Actual: {value}")
-            
-            except Exception as e:
-                if test_case.get('should_error'):
-                    results[test_name] = {
-                        'success': True,
-                        'expected_error': True,
-                        'error': str(e)
-                    }
-                    print(f"  Status: ✅ PASS - Expected error: {e}")
-                else:
-                    results[test_name] = {
-                        'success': False,
-                        'unexpected_error': str(e)
-                    }
-                    print(f"  Status: ❌ FAIL - Unexpected error: {e}")
-            
-            # Cleanup through IsolatedEnvironment
-            if test_case.get('setup_os'):
-                # Remove the environment variable through IsolatedEnvironment
-                try:
-                    env.unset(test_case['key'])
-                except (AttributeError, KeyError):
-                    # If unset method doesn't exist, set to empty string
-                    pass
-        
-        return results
-    
-    async def test_database_connection_validation(self) -> Dict[str, Any]:
-        """Test database connection validation."""
-        
-        print(f"\n=== TESTING DATABASE CONNECTION VALIDATION ===")
-        
-        validator = self.fixer.create_database_connection_validator()
-        
-        test_urls = [
-            {
-                'name': 'valid_local_url',
-                'url': 'postgresql://test_user:test_password@localhost:5434/netra_test',
-                'expected_format_valid': True
-            },
-            {
-                'name': 'encoded_password_url',
-                'url': 'postgresql://test_user:p%40ssw0rd%21@localhost:5434/netra_test',
-                'expected_format_valid': True
-            },
-            {
-                'name': 'missing_scheme',
-                'url': '//postgres:password@localhost:5432/database',
-                'expected_format_valid': False,
-                'expected_issues': ['Missing database scheme']
-            },
-            {
-                'name': 'wrong_scheme',
-                'url': 'mysql://postgres:password@localhost:5432/database',
-                'expected_format_valid': False,
-                'expected_issues': ['Invalid scheme: mysql']
-            },
-            {
-                'name': 'missing_username',
-                'url': 'postgresql://:password@localhost:5432/database',
-                'expected_format_valid': False,
-                'expected_issues': ['Missing username']
-            },
-            {
-                'name': 'missing_database',
-                'url': 'postgresql://postgres:password@localhost:5432/',
-                'expected_format_valid': False,
-                'expected_issues': ['Missing database name']
-            }
-        ]
-        
-        results = {}
-        
-        for test_url in test_urls:
-            test_name = test_url['name']
-            print(f"\nValidating: {test_name}")
-            print(f"  URL: {test_url['url']}")
-            
-            try:
-                validation = await validator(test_url['url'], timeout=5.0)
-                
-                format_valid = len(validation['issues']) == 0
-                expected_format_valid = test_url.get('expected_format_valid', True)
-                
-                format_success = format_valid == expected_format_valid
-                
-                # Check for expected issues
-                if test_url.get('expected_issues'):
-                    expected_issues = test_url['expected_issues']
-                    issue_match = any(
-                        any(expected in issue for expected in expected_issues)
-                        for issue in validation['issues']
-                    )
-                else:
-                    issue_match = True  # No specific issues expected
-                
-                results[test_name] = {
-                    'success': format_success and issue_match,
-                    'format_valid': format_valid,
-                    'expected_format_valid': expected_format_valid,
-                    'issues': validation['issues'],
-                    'connection_test': validation.get('connection_test'),
-                    'overall_valid': validation['valid']
-                }
-                
-                status = "✅ PASS" if results[test_name]['success'] else "❌ FAIL"
-                print(f"  Status: {status}")
-                print(f"  Format valid: {format_valid} (expected: {expected_format_valid})")
-                
-                if validation['issues']:
-                    print(f"  Issues:")
-                    for issue in validation['issues']:
-                        print(f"    - {issue}")
-                
-                if validation.get('connection_test'):
-                    conn_test = validation['connection_test']
-                    conn_status = "✅ SUCCESS" if conn_test['success'] else "❌ FAILED"
-                    print(f"  Connection test: {conn_status}")
-                    if conn_test.get('error'):
-                        print(f"    Error: {conn_test['error']}")
-                    if conn_test.get('connection_time'):
-                        print(f"    Connection time: {conn_test['connection_time']:.3f}s")
-                
-            except Exception as e:
-                results[test_name] = {
-                    'success': False,
-                    'error': str(e)
-                }
-                print(f"  Status: ❌ ERROR - {e}")
-        
-        return results
-    
-    def test_environment_synchronization(self) -> Dict[str, Any]:
-        """Test environment synchronization."""
-        
-        print(f"\n=== TESTING ENVIRONMENT SYNCHRONIZATION ===")
-        
-        synchronizer = self.fixer.create_environment_synchronizer()
-        
-        # Setup test data
-        test_keys = ['SYNC_KEY_1', 'SYNC_KEY_2', 'SYNC_KEY_3']
-        
-        env = get_env()
-        env.set('SYNC_KEY_1', 'isolated_value_1', source='sync_test')
-        env.set('SYNC_KEY_2', 'isolated_value_2', source='sync_test')
-        
-        # For testing synchronization, we'll simulate different environments by
-        # setting up the test to show how sync would work with different values
-        # This is inherently limited in our improved architecture since we only use
-        # IsolatedEnvironment, but we can still test the synchronization logic
-        
-        print(f"Setup:")
-        print(f"  Isolated: SYNC_KEY_1=isolated_value_1, SYNC_KEY_2=isolated_value_2")
-        print(f"  os.environ: SYNC_KEY_2=os_value_2, SYNC_KEY_3=os_value_3")
-        
-        # Test synchronization
-        sync_result = synchronizer(test_keys, target_os_environ=True)
-        
-        print(f"\nSynchronization results:")
-        print(f"  Synced keys: {sync_result['synced_keys']}")
-        print(f"  Failed keys: {sync_result['failed_keys']}")
-        print(f"  Inconsistencies detected: {len(sync_result['inconsistencies'])}")
-        
-        if sync_result['inconsistencies']:
-            print(f"  Inconsistency details:")
-            for inconsistency in sync_result['inconsistencies']:
-                print(f"    {inconsistency['key']}: isolated='{inconsistency['isolated_value']}', os='{inconsistency['os_environ_value']}'")
-        
-        # Verify synchronization worked
-        print(f"\nPost-sync verification:")
-        system_env = get_env()
-        for key in test_keys:
-            isolated_val = env.get(key)
-            system_val = system_env.get(key)
-            sync_status = "✅ SYNCED" if isolated_val == system_val else "❌ NOT SYNCED"
-            print(f"  {key}: {sync_status} (isolated='{isolated_val}', system='{system_val}')")
-        
-        # Cleanup through IsolatedEnvironment
-        for key in test_keys:
-            try:
-                system_env.unset(key)
-            except (AttributeError, KeyError):
-                # If unset method doesn't exist, just leave as is
-                pass
-        
-        return {
-            'success': True,  # Sync completed successfully
-            'sync_result': sync_result
-        }
+        return report
 
 
 @pytest.mark.integration
 class TestConfigurationAccessPatternFixes:
-    """Integration tests for configuration access pattern fixes."""
+    """Integration test for REAL configuration access patterns.
     
-    def test_configuration_pattern_fixes_comprehensive(self):
-        """Test comprehensive configuration pattern fixes."""
+    Tests the actual configuration implementations against CLAUDE.md requirements.
+    """
+    
+    @pytest.fixture(autouse=True)
+    def setup_test_environment(self):
+        """Setup isolated test environment."""
+        # Get isolated environment and enable isolation
+        env = get_env()
+        env.enable_isolation()
         
-        print(f"\n=== COMPREHENSIVE CONFIGURATION PATTERN FIXES TEST ===")
+        # Save original state for cleanup
+        original_state = env.get_all()
         
-        test_suite = ConfigurationPatternTestSuite()
-        all_results = {}
+        yield env
         
-        # Test unified database URL construction
-        try:
-            url_results = asyncio.run(test_suite.test_unified_database_url_construction())
-            all_results['database_url_construction'] = url_results
-            
-            successful_scenarios = sum(1 for result in url_results.values() if result.get('success', False))
-            total_scenarios = len(url_results)
-            print(f"\nDatabase URL construction: {successful_scenarios}/{total_scenarios} scenarios passed")
-            
-        except Exception as e:
-            all_results['database_url_construction'] = {'error': str(e)}
-            print(f"\nDatabase URL construction: ERROR - {e}")
+        # Restore original state
+        env.reset_to_original()
+    
+    def test_real_configuration_access_patterns(self, setup_test_environment):
+        """Test REAL configuration access patterns with REAL services."""
         
-        # Test improved config accessor
-        try:
-            config_results = test_suite.test_improved_config_accessor()
-            all_results['config_accessor'] = config_results
-            
-            successful_cases = sum(1 for result in config_results.values() if result.get('success', False))
-            total_cases = len(config_results)
-            print(f"Config accessor: {successful_cases}/{total_cases} test cases passed")
-            
-        except Exception as e:
-            all_results['config_accessor'] = {'error': str(e)}
-            print(f"Config accessor: ERROR - {e}")
+        print("\n" + "="*80)
+        print("TESTING REAL CONFIGURATION ACCESS PATTERNS")
+        print("Business Goal: Prevent $12K MRR loss from config incidents")
+        print("="*80)
         
-        # Test database connection validation
-        try:
-            validation_results = asyncio.run(test_suite.test_database_connection_validation())
-            all_results['database_validation'] = validation_results
-            
-            successful_validations = sum(1 for result in validation_results.values() if result.get('success', False))
-            total_validations = len(validation_results)
-            print(f"Database validation: {successful_validations}/{total_validations} validations passed")
-            
-        except Exception as e:
-            all_results['database_validation'] = {'error': str(e)}
-            print(f"Database validation: ERROR - {e}")
+        validator = RealConfigurationPatternValidator()
         
-        # Test environment synchronization
-        try:
-            sync_results = test_suite.test_environment_synchronization()
-            all_results['environment_sync'] = sync_results
-            
-            sync_success = sync_results.get('success', False)
-            print(f"Environment synchronization: {'✅ PASS' if sync_success else '❌ FAIL'}")
-            
-        except Exception as e:
-            all_results['environment_sync'] = {'error': str(e)}
-            print(f"Environment synchronization: ERROR - {e}")
+        # Step 1: Start real services
+        services_status = validator.start_real_services()
         
-        # Overall assessment
-        total_test_groups = len(all_results)
-        successful_groups = sum(
-            1 for group_results in all_results.values()
-            if not isinstance(group_results, dict) or 'error' not in group_results
-        )
+        # Require at least PostgreSQL for the test to proceed
+        if not services_status.get('postgres', False):
+            pytest.skip("PostgreSQL service not available - cannot test real configuration patterns")
         
-        print(f"\n=== OVERALL CONFIGURATION FIXES SUMMARY ===")
-        print(f"Test groups completed: {successful_groups}/{total_test_groups}")
+        # Step 2: Setup test environment through IsolatedEnvironment
+        validator.setup_test_environment()
         
-        for test_group, results in all_results.items():
-            if isinstance(results, dict) and 'error' in results:
-                print(f"  {test_group}: ❌ FAILED - {results['error']}")
-            else:
-                print(f"  {test_group}: ✅ COMPLETED")
+        # Step 3: Validate configuration access patterns
+        config_results = validator.validate_isolated_environment_usage()
         
-        # Test passes to document fix implementations
-        assert total_test_groups > 0, "Should run configuration pattern fix tests"
+        # Step 4: Test real database connections
+        db_results = validator.validate_real_database_connections()
         
-        # Validate that all test groups completed successfully
-        assert successful_groups == total_test_groups, f"Expected all {total_test_groups} test groups to complete, but only {successful_groups} completed"
+        # Step 5: Generate comprehensive report
+        all_results = {
+            'services': services_status,
+            **config_results,
+            **db_results
+        }
         
-        # Validate specific test components
-        if 'database_url_construction' in all_results:
-            url_results = all_results['database_url_construction']
-            if not isinstance(url_results, dict) or 'error' not in url_results:
-                successful_scenarios = sum(1 for result in url_results.values() if result.get('success', False))
-                assert successful_scenarios > 0, "Should have at least one successful URL construction scenario"
+        report = validator.generate_validation_report(all_results)
         
-        if 'database_validation' in all_results:
-            validation_results = all_results['database_validation']
-            if not isinstance(validation_results, dict) or 'error' not in validation_results:
-                successful_validations = sum(1 for result in validation_results.values() if result.get('success', False))
-                assert successful_validations > 0, "Should have at least one successful database validation"
+        # Print comprehensive results
+        print(f"\n=== CONFIGURATION VALIDATION RESULTS ===")
+        print(f"Overall Success: {'✅ PASS' if report['overall_success'] else '❌ FAIL'}")
+        
+        print(f"\n=== SUMMARY BY CATEGORY ===")
+        for category, summary in report['summary'].items():
+            status = "✅ PASS" if summary['success'] else "❌ FAIL"
+            print(f"{category}: {status}")
+            for issue in summary.get('issues', []):
+                print(f"  - {issue}")
+        
+        if report['issues_found']:
+            print(f"\n=== ISSUES FOUND ({len(report['issues_found'])}) ===")
+            for i, issue in enumerate(report['issues_found'], 1):
+                print(f"{i}. {issue}")
+        
+        if report['recommendations']:
+            print(f"\n=== RECOMMENDATIONS ===")
+            for i, rec in enumerate(report['recommendations'], 1):
+                print(f"{i}. {rec}")
+        
+        print("\n" + "="*80)
+        
+        # Test assertions
+        assert services_status.get('postgres', False), "PostgreSQL service must be available for configuration testing"
+        
+        # Validate core configuration patterns
+        assert config_results.get('shared_isolated_environment', {}).get('success', False), \
+            "Shared IsolatedEnvironment must work correctly"
+        
+        assert config_results.get('environment_isolation', {}).get('success', False), \
+            "Environment isolation must prevent os.environ pollution"
+        
+        # Validate service configurations load correctly
+        backend_config_success = config_results.get('netra_backend_config', {}).get('success', False)
+        auth_config_success = config_results.get('auth_service_config', {}).get('success', False)
+        
+        assert backend_config_success, "Backend configuration patterns must be correct"
+        assert auth_config_success, "Auth service configuration patterns must be correct"
+        
+        # Validate real database connections work
+        backend_db_success = db_results.get('backend_database', {}).get('success', False)
+        auth_db_success = db_results.get('auth_database', {}).get('success', False)
+        
+        assert backend_db_success, "Backend must connect to real database"
+        assert auth_db_success, "Auth service must connect to real database"
+        
+        # Overall system health check
+        assert report['overall_success'], f"Configuration system has {len(report['issues_found'])} issues that must be fixed"
+        
+        print("🎉 ALL CONFIGURATION ACCESS PATTERNS VALIDATED SUCCESSFULLY!")
 
 
 if __name__ == "__main__":
-    # Run configuration access pattern fix tests
+    # Run the test directly for debugging
     pytest.main([__file__, "-v", "-s", "--tb=short"])
