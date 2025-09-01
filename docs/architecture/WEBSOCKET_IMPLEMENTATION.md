@@ -2,12 +2,16 @@
 
 Comprehensive documentation for the Netra platform's real-time WebSocket communication system.
 
+**Last Updated:** 2025-01-01  
+**Business Value:** $500K+ ARR - Core chat functionality
+
 ## Table of Contents
 
 - [Overview](#overview)
 - [Architecture](#architecture)
 - [Connection Management](#connection-management)
 - [Message Protocol](#message-protocol)
+- [Critical WebSocket Events](#critical-websocket-events)
 - [Event Types](#event-types)
 - [Backend Implementation](#backend-implementation)
 - [Frontend Implementation](#frontend-implementation)
@@ -365,6 +369,41 @@ class MessageValidator:
         return all(field in message for field in required_fields)
 ```
 
+## Critical WebSocket Events
+
+### Mission-Critical Agent Events
+
+These 5 events are **REQUIRED** for the chat system to function properly. They enable the "CHAT IS KING" business value by providing real-time visibility into agent processing.
+
+| Event | Purpose | When Sent | Payload |
+|-------|---------|-----------|---------|
+| `agent_started` | User must see agent began processing | Immediately when agent starts | `{agent_id, agent_type, run_id, timestamp}` |
+| `agent_thinking` | Real-time reasoning visibility | During agent reasoning steps | `{thought, agent_id, step_number, total_steps}` |
+| `tool_executing` | Tool usage transparency | Before tool execution | `{tool_name, agent_id, timestamp}` |
+| `tool_completed` | Tool results display | After tool execution | `{tool_name, result, agent_id, timestamp}` |
+| `agent_completed` | User must know when done | When agent finishes | `{agent_id, duration_ms, result, metrics}` |
+
+### Critical Integration Points
+
+1. **AgentRegistry** (`netra_backend/app/agents/supervisor/agent_registry.py`)
+   - Line 239-257: Enhances tool dispatcher with WebSocket notifications
+   - Ensures all tool events are sent
+
+2. **WebSocketNotifier** (`netra_backend/app/agents/supervisor/websocket_notifier.py`)
+   - Sends all agent lifecycle events
+   - Handles event queuing during disconnections
+
+3. **Frontend Handlers** (`frontend/store/websocket-event-handlers-main.ts`)
+   - Maps events to UI updates
+   - Maintains three-layer response architecture
+
+### Testing Requirements
+
+**Mission-Critical Test Suite:** `tests/mission_critical/test_websocket_agent_events_suite.py`
+- MUST pass before any deployment
+- Validates all 5 critical events are sent
+- Tests with MockWebSocketManager for reliability
+
 ## Event Types
 
 ### Client to Server Events
@@ -373,12 +412,15 @@ class MessageValidator:
 // frontend/types/websocket.ts
 export enum ClientEventType {
   OPTIMIZATION_REQUEST = "optimization_request",
-  CHAT_MESSAGE = "chat_message",
+  USER_MESSAGE = "user_message",  // Primary user input
   STOP_PROCESSING = "stop_processing",
   PING = "ping",
   SUBSCRIBE = "subscribe",
   UNSUBSCRIBE = "unsubscribe"
 }
+
+// DEPRECATED - Do not use in new code
+// CHAT_MESSAGE = "chat_message"  // Use USER_MESSAGE instead
 
 export interface ClientMessage {
   type: ClientEventType;
@@ -391,6 +433,14 @@ export interface ClientMessage {
 
 ```typescript
 export enum ServerEventType {
+  // Critical Agent Events (REQUIRED)
+  AGENT_STARTED = "agent_started",
+  AGENT_THINKING = "agent_thinking",
+  TOOL_EXECUTING = "tool_executing",
+  TOOL_COMPLETED = "tool_completed",
+  AGENT_COMPLETED = "agent_completed",
+  
+  // Additional Agent Events
   AGENT_UPDATE = "agent_update",
   AGENT_RESULT = "agent_result",
   CHAT_RESPONSE = "chat_response",
