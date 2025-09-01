@@ -320,12 +320,10 @@ class StartupOrchestrator:
         await self._verify_websocket_events()
         
         # Step 22: Comprehensive startup validation with component counts
-        # Temporarily skip comprehensive validation as it has outdated checks
-        self.logger.info("  ✓ Step 22: Skipping comprehensive validation (deprecated checks)")
+        await self._run_comprehensive_validation()
         
         # Step 23: Critical path validation (CHAT FUNCTIONALITY)
-        # Temporarily skip critical path validation as it has outdated checks
-        self.logger.info("  ✓ Step 23: Skipping critical path validation (deprecated checks)")
+        await self._run_critical_path_validation()
         
         # Step 24: Schema validation (CRITICAL)
         await self._validate_database_schema()

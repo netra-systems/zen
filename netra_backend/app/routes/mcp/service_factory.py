@@ -140,20 +140,14 @@ async def create_mcp_service_for_websocket(websocket=None) -> MCPService:
         if all([agent_service, thread_service, corpus_service, security_service]):
             return await _get_or_create_service(agent_service, thread_service, corpus_service, security_service)
     
-    # Fallback: Create services using direct instantiation
-    # This is a temporary workaround for WebSocket context
-    logger.warning("Creating MCP service with fallback method - some features may be limited")
+    # Fallback: Cannot create services without proper dependencies
+    logger.error("Cannot create MCP service - required services not available in app state")
+    logger.error("WebSocket endpoint requires proper application initialization")
     
-    # Import service classes directly to avoid dependency injection
-    from netra_backend.app.services.agent_service import AgentService
-    from netra_backend.app.services.thread_service import ThreadService
-    from netra_backend.app.services.corpus_service import CorpusService
-    from netra_backend.app.services.security_service import SecurityService
-    
-    # Create minimal service instances (may need configuration)
-    agent_service = AgentService()
-    thread_service = ThreadService()
-    corpus_service = CorpusService()
-    security_service = SecurityService()
-    
-    return await _get_or_create_service(agent_service, thread_service, corpus_service, security_service)
+    # MCP service requires properly initialized agent service with WebSocket bridge
+    # These services must be created during application startup
+    raise RuntimeError(
+        "MCP service cannot be created without initialized dependencies. "
+        "Ensure application startup completed successfully and all services "
+        "are available in app.state (agent_service, thread_service, corpus_service, security_service)"
+    )
