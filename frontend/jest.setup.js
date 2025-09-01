@@ -345,6 +345,31 @@ MockWebSocket.CLOSED = 3;
 
 global.WebSocket = MockWebSocket;
 
+// Additional WebSocket security: Block any attempts to use native WebSocket
+if (typeof window !== 'undefined' && window.WebSocket && window.WebSocket !== MockWebSocket) {
+  window.WebSocket = MockWebSocket;
+}
+
+// Prevent any dynamic WebSocket imports that might bypass our mock
+const originalNodeWebSocket = global.WebSocket;
+Object.defineProperty(global, 'WebSocket', {
+  get: () => MockWebSocket,
+  set: (value) => {
+    // Allow setting to MockWebSocket, but prevent real WebSocket
+    if (value !== MockWebSocket && typeof value === 'function' && value.name === 'WebSocket') {
+      console.warn('Attempted to set real WebSocket in test environment - blocked');
+      return;
+    }
+    // Allow for testing purposes if it's our mock or a test mock
+    global._webSocketMock = value;
+  },
+  configurable: true
+});
+
+// Block common WebSocket libraries that might try to use real connections
+jest.mock('ws', () => MockWebSocket, { virtual: true });
+jest.mock('websocket', () => ({ client: MockWebSocket }), { virtual: true });
+
 // Global cleanup function to be called after each test
 global.cleanupAllResources = function() {
   // Clear all timers

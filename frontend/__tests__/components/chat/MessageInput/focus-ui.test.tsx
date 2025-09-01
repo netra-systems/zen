@@ -8,9 +8,6 @@ import { useThreadStore } from '@/store/threadStore';
 import { useAuthStore } from '@/store/authStore';
 import { generateUniqueId } from '@/lib/utils';
 import { setupAntiHang, cleanupAntiHang } from '@/__tests__/utils/anti-hanging-test-utilities';
-e/threadStore';
-import { useAuthStore } from '@/store/authStore';
-import { generateUniqueId } from '@/lib/utils';
 
 // Mock dependencies
 jest.mock('@/hooks/useWebSocket', () => ({
