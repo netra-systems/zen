@@ -17,6 +17,7 @@ from netra_backend.app.services.factory_status.git_branch_tracker import (
 )
 from netra_backend.app.services.factory_status.git_commit_parser import (
     CommitInfo,
+    CommitSession,
     CommitType,
     GitCommitParser,
 )
@@ -49,6 +50,8 @@ class VelocityMetrics:
     trend_direction: TrendDirection
     trend_slope: float
     confidence: float
+    session_count: Optional[int] = None
+    avg_commits_per_session: Optional[float] = None
 
 
 @dataclass
@@ -94,10 +97,24 @@ class VelocityCalculator:
     def calculate_velocity(self, hours: int = 168) -> VelocityMetrics:
         """Calculate velocity metrics for period."""
         commits = self.commit_parser.get_commits(hours)
+        sessions = self.commit_parser.get_commit_sessions(hours)
+        
+        # Use sessions for noise reduction
         grouped_data = self._prepare_commit_groups(commits)
+        session_grouped_data = self._prepare_session_groups(sessions)
+        
         period = self._determine_period(hours)
         trend = self._calculate_trend(grouped_data['daily'])
-        return self._build_velocity_metrics(commits, period, trend, hours)
+        
+        # Build metrics with session awareness
+        metrics = self._build_velocity_metrics(commits, period, trend, hours)
+        
+        # Add session-based metrics
+        if sessions:
+            metrics.session_count = len(sessions)
+            metrics.avg_commits_per_session = round(len(commits) / len(sessions), 2)
+        
+        return metrics
     
     def _prepare_commit_groups(self, commits: List[CommitInfo]) -> Dict[str, Dict]:
         """Prepare hourly and daily commit groupings."""
@@ -105,6 +122,28 @@ class VelocityCalculator:
             'hourly': self._group_by_hour(commits),
             'daily': self._group_by_day(commits)
         }
+    
+    def _prepare_session_groups(self, sessions: List[CommitSession]) -> Dict[str, Any]:
+        """Prepare session-based groupings for noise reduction."""
+        if not sessions:
+            return {'daily': {}, 'by_author': {}}
+        
+        daily_sessions = {}
+        author_sessions = {}
+        
+        for session in sessions:
+            # Group by day
+            day = session.start_time.strftime("%Y-%m-%d")
+            if day not in daily_sessions:
+                daily_sessions[day] = []
+            daily_sessions[day].append(session)
+            
+            # Group by author
+            if session.author not in author_sessions:
+                author_sessions[session.author] = []
+            author_sessions[session.author].append(session)
+        
+        return {'daily': daily_sessions, 'by_author': author_sessions}
     
     def _group_by_hour(self, commits: List[CommitInfo]) -> Dict[int, List[CommitInfo]]:
         """Group commits by hour of day."""
