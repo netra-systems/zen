@@ -144,10 +144,14 @@ class GitCommitParser:
     def _create_commit_from_mock_data(self, data: Dict) -> CommitInfo:
         """Create CommitInfo from mock data."""
         return CommitInfo(
-            hash=data["hash"], author=data["author"], email=data["email"],
-            timestamp=data["timestamp"], message=data["message"],
+            hash=data["hash"], 
+            author=data["author"], 
+            email=data.get("email", f"{data['author'].lower().replace(' ', '.')}@example.com"),
+            timestamp=data["timestamp"], 
+            message=data["message"],
             commit_type=self._classify_commit(data["message"]),
-            files_changed=data["files_changed"], insertions=data["insertions"],
+            files_changed=data["files_changed"], 
+            insertions=data["insertions"],
             deletions=data["deletions"]
         )
     
