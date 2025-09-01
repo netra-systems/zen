@@ -49,16 +49,16 @@ class TestAgentServiceBridgeIntegration:
             await service._bridge.shutdown()
 
     @patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager')
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_agent_orchestrator')
-    async def test_service_bridge_initialization(self, mock_get_orchestrator, mock_get_manager, clean_service):
+    @patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry')
+    async def test_service_bridge_initialization(self, mock_get_registry, mock_get_manager, clean_service):
         """Test AgentService properly initializes bridge integration."""
         # Setup mocks
         websocket_manager = AsyncMock()
-        orchestrator = AsyncMock()
-        orchestrator.get_metrics.return_value = {"active_contexts": 0}
+        registry = AsyncMock()
+        registry.get_metrics.return_value = {"active_contexts": 0}
         
         mock_get_manager.return_value = websocket_manager
-        mock_get_orchestrator.return_value = orchestrator
+        mock_get_registry.return_value = registry
 
         # Wait for bridge initialization to complete
         await asyncio.sleep(0.2)
@@ -76,16 +76,16 @@ class TestAgentServiceBridgeIntegration:
         assert status["state"] == "active"
 
     @patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager')
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_agent_orchestrator')
-    async def test_service_status_includes_bridge(self, mock_get_orchestrator, mock_get_manager, clean_service):
+    @patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry')
+    async def test_service_status_includes_bridge(self, mock_get_registry, mock_get_manager, clean_service):
         """Test AgentService status includes bridge integration status."""
         # Setup mocks
         websocket_manager = AsyncMock()
-        orchestrator = AsyncMock()
-        orchestrator.get_metrics.return_value = {"active_contexts": 0}
+        registry = AsyncMock()
+        registry.get_metrics.return_value = {"active_contexts": 0}
         
         mock_get_manager.return_value = websocket_manager
-        mock_get_orchestrator.return_value = orchestrator
+        mock_get_registry.return_value = registry
 
         # Wait for initialization
         await asyncio.sleep(0.2)
@@ -99,23 +99,23 @@ class TestAgentServiceBridgeIntegration:
         assert "bridge_integrated" in status
         assert "websocket_integration" in status
         assert "websocket_healthy" in status
-        assert "orchestrator_healthy" in status
+        assert "registry_healthy" in status
 
         # Verify positive integration status
         assert status["bridge_integrated"]
         assert status["websocket_integration"] == "active"
 
     @patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager')
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_agent_orchestrator')
-    async def test_comprehensive_service_status(self, mock_get_orchestrator, mock_get_manager, clean_service):
+    @patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry')
+    async def test_comprehensive_service_status(self, mock_get_registry, mock_get_manager, clean_service):
         """Test comprehensive service status provides full observability."""
         # Setup mocks
         websocket_manager = AsyncMock()
-        orchestrator = AsyncMock()
-        orchestrator.get_metrics.return_value = {"active_contexts": 0}
+        registry = AsyncMock()
+        registry.get_metrics.return_value = {"active_contexts": 0}
         
         mock_get_manager.return_value = websocket_manager
-        mock_get_orchestrator.return_value = orchestrator
+        mock_get_registry.return_value = registry
 
         # Wait for initialization
         await asyncio.sleep(0.2)
@@ -140,15 +140,15 @@ class TestAgentServiceBridgeIntegration:
         assert "dependencies" in bridge_status
 
     @patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager')
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_agent_orchestrator')
-    async def test_agent_execution_with_bridge(self, mock_get_orchestrator, mock_get_manager, clean_service, mock_supervisor):
+    @patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry')
+    async def test_agent_execution_with_bridge(self, mock_get_registry, mock_get_manager, clean_service, mock_supervisor):
         """Test agent execution coordinates properly with bridge."""
         # Setup mocks for successful integration
         websocket_manager = AsyncMock()
-        orchestrator = AsyncMock()
-        orchestrator.get_metrics.return_value = {"active_contexts": 0}
-        orchestrator.create_execution_context = AsyncMock()
-        orchestrator.complete_execution = AsyncMock()
+        registry = AsyncMock()
+        registry.get_metrics.return_value = {"active_contexts": 0}
+        registry.create_execution_context = AsyncMock()
+        registry.complete_execution = AsyncMock()
         
         # Mock execution context and notifier
         mock_context = Mock()
@@ -156,10 +156,10 @@ class TestAgentServiceBridgeIntegration:
         mock_context.run_id = "test_run"
         mock_notifier = AsyncMock()
         
-        orchestrator.create_execution_context.return_value = (mock_context, mock_notifier)
+        registry.create_execution_context.return_value = (mock_context, mock_notifier)
         
         mock_get_manager.return_value = websocket_manager
-        mock_get_orchestrator.return_value = orchestrator
+        mock_get_registry.return_value = registry
 
         # Wait for initialization
         await asyncio.sleep(0.2)
@@ -180,9 +180,9 @@ class TestAgentServiceBridgeIntegration:
         assert result["agent"] == "test_agent"
 
         # Verify bridge coordination calls
-        orchestrator.create_execution_context.assert_called_once()
+        registry.create_execution_context.assert_called_once()
         mock_notifier.send_agent_thinking.assert_called_once()
-        orchestrator.complete_execution.assert_called_once()
+        registry.complete_execution.assert_called_once()
 
         # Verify supervisor was called with proper message
         mock_supervisor.run.assert_called_once()
@@ -235,16 +235,16 @@ class TestAgentServiceBridgeIntegration:
             assert method not in service_methods, f"AgentService should not have bridge method: {method}"
 
     @patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager')
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_agent_orchestrator')
-    async def test_idempotent_service_readiness(self, mock_get_orchestrator, mock_get_manager, clean_service):
+    @patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry')
+    async def test_idempotent_service_readiness(self, mock_get_registry, mock_get_manager, clean_service):
         """Test service readiness check is idempotent."""
         # Setup mocks
         websocket_manager = AsyncMock()
-        orchestrator = AsyncMock()
-        orchestrator.get_metrics.return_value = {"active_contexts": 0}
+        registry = AsyncMock()
+        registry.get_metrics.return_value = {"active_contexts": 0}
         
         mock_get_manager.return_value = websocket_manager
-        mock_get_orchestrator.return_value = orchestrator
+        mock_get_registry.return_value = registry
 
         # Multiple readiness checks should be safe
         ready1 = await clean_service.ensure_service_ready()
@@ -260,17 +260,17 @@ class TestAgentServiceBridgeIntegration:
         assert clean_service._bridge.metrics.total_initializations <= 1
 
     @patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager')
-    @patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_agent_orchestrator')
-    async def test_bridge_recovery_integration(self, mock_get_orchestrator, mock_get_manager, clean_service):
+    @patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry')
+    async def test_bridge_recovery_integration(self, mock_get_registry, mock_get_manager, clean_service):
         """Test service can recover from bridge failures."""
         # Setup initially failing, then succeeding mocks
         mock_get_manager.side_effect = [
             RuntimeError("Initial failure"),
             AsyncMock()  # Recovery succeeds
         ]
-        orchestrator = AsyncMock()
-        orchestrator.get_metrics.return_value = {"active_contexts": 0}
-        mock_get_orchestrator.return_value = orchestrator
+        registry = AsyncMock()
+        registry.get_metrics.return_value = {"active_contexts": 0}
+        mock_get_registry.return_value = registry
 
         # Wait for initial setup (will fail)
         await asyncio.sleep(0.2)
@@ -294,14 +294,14 @@ class TestAgentServiceBridgeIntegration:
 
         # Ensure service ready (will configure message handler)
         with patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager') as mock_get_manager, \
-             patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_agent_orchestrator') as mock_get_orchestrator:
+             patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry') as mock_get_registry:
             
             websocket_manager = AsyncMock()
-            orchestrator = AsyncMock()
-            orchestrator.get_metrics.return_value = {"active_contexts": 0}
+            registry = AsyncMock()
+            registry.get_metrics.return_value = {"active_contexts": 0}
             
             mock_get_manager.return_value = websocket_manager
-            mock_get_orchestrator.return_value = orchestrator
+            mock_get_registry.return_value = registry
 
             await clean_service.ensure_service_ready()
 

@@ -110,13 +110,13 @@ class TestMissionCriticalWebSocketEvents:
         
         # Setup integration with event capture
         with patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager') as mock_get_manager, \
-             patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_agent_orchestrator') as mock_get_orchestrator:
+             patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry') as mock_get_registry:
             
             # Use event capture as WebSocket manager
             mock_get_manager.return_value = event_capture
             
             # Setup orchestrator mock
-            orchestrator = AsyncMock()
+            registry = AsyncMock()
             orchestrator.get_metrics.return_value = {"active_contexts": 0}
             
             # Mock execution context and notifier
@@ -129,7 +129,7 @@ class TestMissionCriticalWebSocketEvents:
             mock_notifier = AsyncMock()
             orchestrator.create_execution_context.return_value = (mock_context, mock_notifier)
             
-            mock_get_orchestrator.return_value = orchestrator
+            mock_get_registry.return_value = registry
             
             # Ensure service is ready
             await service.ensure_service_ready()
@@ -195,13 +195,13 @@ class TestMissionCriticalWebSocketEvents:
         failing_capture.send_to_thread = AsyncMock(side_effect=[False, False, True])  # Fail twice, succeed third
         
         with patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager') as mock_get_manager, \
-             patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_agent_orchestrator') as mock_get_orchestrator:
+             patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry') as mock_get_registry:
             
             mock_get_manager.return_value = failing_capture
             
-            orchestrator = AsyncMock()
+            registry = AsyncMock()
             orchestrator.get_metrics.return_value = {"active_contexts": 0}
-            mock_get_orchestrator.return_value = orchestrator
+            mock_get_registry.return_value = registry
             
             await service.ensure_service_ready()
             
@@ -280,7 +280,7 @@ class TestMissionCriticalWebSocketEvents:
         
         # Verify health metrics support reliable chat
         assert health.websocket_manager_healthy
-        assert health.orchestrator_healthy
+        assert health.registry_healthy
         assert health.consecutive_failures == 0
         
         # Verify bridge configuration supports chat SLAs
@@ -305,7 +305,7 @@ class TestMissionCriticalWebSocketEvents:
         event_capture = WebSocketEventCapture()
         
         with patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager') as mock_get_manager, \
-             patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_agent_orchestrator') as mock_get_orchestrator:
+             patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry') as mock_get_registry:
             
             # First call fails, second succeeds (simulating recovery)
             mock_get_manager.side_effect = [
@@ -313,9 +313,9 @@ class TestMissionCriticalWebSocketEvents:
                 event_capture
             ]
             
-            orchestrator = AsyncMock()
+            registry = AsyncMock()
             orchestrator.get_metrics.return_value = {"active_contexts": 0}
-            mock_get_orchestrator.return_value = orchestrator
+            mock_get_registry.return_value = registry
             
             # Wait for initial setup (will fail)
             await asyncio.sleep(0.2)
@@ -388,11 +388,11 @@ class TestWebSocketEventBusinessValue:
         service = AgentService(supervisor)
         
         with patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager') as mock_get_manager, \
-             patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_agent_orchestrator') as mock_get_orchestrator:
+             patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry') as mock_get_registry:
             
             mock_get_manager.return_value = event_capture
             
-            orchestrator = AsyncMock()
+            registry = AsyncMock()
             orchestrator.get_metrics.return_value = {"active_contexts": 0}
             
             # Mock execution context
@@ -404,7 +404,7 @@ class TestWebSocketEventBusinessValue:
             
             mock_notifier = AsyncMock()
             orchestrator.create_execution_context.return_value = (mock_context, mock_notifier)
-            mock_get_orchestrator.return_value = orchestrator
+            mock_get_registry.return_value = registry
             
             await service.ensure_service_ready()
             
@@ -446,11 +446,11 @@ class TestWebSocketEventBusinessValue:
         service = AgentService(supervisor)
         
         with patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager') as mock_get_manager, \
-             patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_agent_orchestrator') as mock_get_orchestrator:
+             patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry') as mock_get_registry:
             
             mock_get_manager.return_value = event_capture
             
-            orchestrator = AsyncMock()
+            registry = AsyncMock()
             orchestrator.get_metrics.return_value = {"active_contexts": 0}
             
             mock_context = Mock()
@@ -459,7 +459,7 @@ class TestWebSocketEventBusinessValue:
             
             mock_notifier = AsyncMock()
             orchestrator.create_execution_context.return_value = (mock_context, mock_notifier)
-            mock_get_orchestrator.return_value = orchestrator
+            mock_get_registry.return_value = registry
             
             await service.ensure_service_ready()
             
