@@ -177,6 +177,61 @@ At every opportunity spawn new subagent with dedicated focus mission and context
 3.  **Plan system wide claude.md compaliant fix**  Think about ALL associated and related modules that must also be updated. Think about cross system impacts of bug. SLOWLY think DEEPLY about the implications. What is the spirit of the problem beyond the literal one-off problem? Plan the fix. Save to the bugfix .md.
 4.  **Verification and proof implementation worked** QA review and regression testing. Use fail fast, starting with proving that newly created test suite now passes, then rest of tests related to this issue. repeat until all tests pass or 100 times.
 
+### 3.6. MANDATORY COMPLEX REFACTORING PROCESS:
+
+**CRITICAL: For any refactoring involving inheritance, multiple classes, or SSOT consolidation:**
+
+1.  **MRO (Method Resolution Order) Analysis:** Generate a comprehensive MRO report BEFORE refactoring:
+    - Document current inheritance hierarchy using `inspect.getmro()` or equivalent
+    - Map all method overrides and their resolution paths
+    - Identify potential diamond inheritance patterns
+    - Save report to `reports/mro_analysis_[module]_[date].md`
+
+2.  **Dependency Impact Analysis:**
+    - Trace all consumers of classes being refactored
+    - Document which methods/attributes each consumer uses
+    - Identify breaking changes and required adaptations
+    - Cross-reference with [`SPEC/learnings/ssot_consolidation_20250825.xml`](SPEC/learnings/ssot_consolidation_20250825.xml)
+
+3.  **Agent-Based Decomposition:** For complex refactors spanning 5+ files:
+    - Spawn specialized refactoring agents with focused scope
+    - Each agent handles ONE inheritance chain or module
+    - Provide agents with MRO report and interface contracts only
+    - See examples in [`SPEC/learnings/unified_agent_testing_implementation.xml`](SPEC/learnings/unified_agent_testing_implementation.xml)
+
+4.  **Validation Checklist:**
+    - [ ] All MRO paths documented and preserved or intentionally modified
+    - [ ] No unintended method shadowing introduced
+    - [ ] All consumers updated to new interfaces
+    - [ ] Integration tests pass for all inheritance scenarios
+    - [ ] Performance regression tests pass (inheritance lookup overhead)
+
+**Example MRO Report Structure:**
+```markdown
+# MRO Analysis: [Module Name]
+## Current Hierarchy
+- BaseClass
+  - IntermediateA (overrides: method1, method2)
+    - ConcreteA1 (overrides: method2)
+    - ConcreteA2 (overrides: method1, method3)
+  - IntermediateB (overrides: method1, method3)
+    - ConcreteB1 (overrides: method3)
+
+## Method Resolution Paths
+- ConcreteA1.method1 → IntermediateA.method1
+- ConcreteA1.method2 → ConcreteA1.method2 (local override)
+- ConcreteA1.method3 → BaseClass.method3
+
+## Refactoring Impact
+- Breaking: method1 signature change affects 12 consumers
+- Safe: method2 internal refactor, interface preserved
+```
+
+**Cross-Reference Learnings:**
+- SSOT violations: [`SPEC/learnings/ssot_consolidation_20250825.xml`](SPEC/learnings/ssot_consolidation_20250825.xml)
+- Agent examples: [`SPEC/learnings/unified_agent_testing_implementation.xml`](SPEC/learnings/unified_agent_testing_implementation.xml)
+- WebSocket integration: [`SPEC/learnings/websocket_agent_integration_critical.xml`](SPEC/learnings/websocket_agent_integration_critical.xml)
+
 -----
 
 ## 4\. Knowledge Management: The Living Source of Truth
@@ -419,5 +474,6 @@ A user asking for "git commit" means: For EACH group of work that's related do a
   * **GROUP CONCEPTS - LIMIT COUNT OF FILES:** Commits must be small, focused, and conceptually similar units.
   * **CONCEPT-BASED:** Group changes by concept. NEVER bulk commit massive changes without express orders.
   * **REVIEWABLE:** Each commit must be reviewable in under one minute.
+  * **REFACTORING COMMITS:** Complex refactors MUST include MRO report reference in commit message
 
 **Final Reminder:** ULTRA THINK DEEPLY. Your mission is to generate monetization-focused value. Prioritize a coherent, unified system that delivers end-to-end value for our customers. **Think deeply. YOUR WORK MATTERS. THINK STEP BY STEP AS DEEPLY AS POSSIBLE.**
