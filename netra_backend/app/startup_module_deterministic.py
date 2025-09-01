@@ -217,6 +217,9 @@ class StartupOrchestrator:
         
         self.logger.info("  ✓ Step 18: All critical services validated")
         
+        # Step 18.5: Verify WebSocket events can actually be sent
+        await self._verify_websocket_events()
+        
         # Step 19: Comprehensive startup validation with component counts
         try:
             from netra_backend.app.core.startup_validation import validate_startup
@@ -433,6 +436,55 @@ class StartupOrchestrator:
         # Message handlers are registered in the WebSocket endpoint
         # This is just a placeholder to maintain the sequence
         pass
+    
+    async def _verify_websocket_events(self) -> None:
+        """Verify WebSocket events can actually be sent - CRITICAL."""
+        import uuid
+        from netra_backend.app.websocket_core import get_websocket_manager
+        
+        self.logger.info("  Step 18.5: Verifying WebSocket event delivery...")
+        
+        manager = get_websocket_manager()
+        if not manager:
+            raise DeterministicStartupError("WebSocket manager is None - events cannot be sent")
+        
+        # Create a test thread ID
+        test_thread = f"startup_test_{uuid.uuid4()}"
+        
+        # Test basic message sending capability
+        test_message = {
+            "type": "startup_test",
+            "timestamp": time.time(),
+            "validation": "critical_path"
+        }
+        
+        try:
+            # Try to send a test message
+            success = await manager.send_to_thread(test_thread, test_message)
+            
+            # Success is True even if no connections (message queued)
+            # The important thing is that the manager accepts the message
+            if success is False:
+                raise DeterministicStartupError("WebSocket test event failed to send - manager rejected message")
+            
+            # Verify tool dispatcher enhancement
+            if hasattr(self.app.state, 'agent_supervisor'):
+                supervisor = self.app.state.agent_supervisor
+                if hasattr(supervisor, 'registry') and hasattr(supervisor.registry, 'tool_dispatcher'):
+                    dispatcher = supervisor.registry.tool_dispatcher
+                    if not getattr(dispatcher, '_websocket_enhanced', False):
+                        raise DeterministicStartupError("Tool dispatcher not enhanced - agent events will be silent")
+                    
+                    # Check that notifier is present
+                    if not hasattr(dispatcher, 'websocket_notifier') or dispatcher.websocket_notifier is None:
+                        raise DeterministicStartupError("Tool dispatcher has no WebSocket notifier - events cannot be sent")
+            
+            self.logger.info("  ✓ Step 18.5: WebSocket event delivery verified")
+            
+        except DeterministicStartupError:
+            raise
+        except Exception as e:
+            raise DeterministicStartupError(f"WebSocket verification failed: {e}")
     
     async def _initialize_clickhouse(self) -> None:
         """Initialize ClickHouse - optional."""
