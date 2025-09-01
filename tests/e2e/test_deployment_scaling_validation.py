@@ -1,5 +1,5 @@
-"""
 from shared.isolated_environment import get_env
+"""
 Test deployment scaling and configuration resilience patterns.
 
 This E2E test validates that the system can handle deployment scenarios
@@ -51,7 +51,6 @@ class TestDeploymentScalingValidation:
         
         # Simulate configuration change (environment variable update)
         test_config_key = "TEST_DYNAMIC_CONFIG"
-        original_value = get_env().get(test_config_key)
         
         try:
             # Step 1: Set new configuration value

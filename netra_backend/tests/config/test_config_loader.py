@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Critical Config Loader Core Tests
 
 Business Value Justification (BVJ):
@@ -50,7 +52,7 @@ from netra_backend.app.core.environment_constants import (
 def detect_app_engine_environment():
     """Detect App Engine environment"""
     import os
-    return bool(os.environ.get('GAE_APPLICATION'))
+    return bool(env.get('GAE_APPLICATION'))
 
 def load_config_from_environment():
     """Load config from environment"""
@@ -67,7 +69,7 @@ class TestCloudEnvironmentDetection:
     @pytest.fixture
     def clean_environment(self):
         """Clean environment variables for isolated testing"""
-        original_env = os.environ.copy()
+        original_env = env.get_all()
         # Clear cloud-related environment variables
         cloud_vars = [
             'K_SERVICE', 'K_REVISION', 'K_CONFIGURATION',
@@ -79,14 +81,14 @@ class TestCloudEnvironmentDetection:
             os.environ.pop(var, None)
         yield
         # Restore original environment
-        os.environ.clear()
-        os.environ.update(original_env)
+        env.clear()
+        env.update(original_env, "test")
 
     def test_detect_cloud_run_environment_with_k_service(self, clean_environment):
         """Test Cloud Run detection via K_SERVICE environment variable"""
         # Arrange
-        os.environ['K_SERVICE'] = 'netra-backend-service'
-        os.environ['K_REVISION'] = 'netra-backend-00001-abc'
+        env.set('K_SERVICE', 'netra-backend-service', "test")
+        env.set('K_REVISION', 'netra-backend-00001-abc', "test")
         
         # Act
         result = detect_cloud_run_environment()
@@ -98,8 +100,8 @@ class TestCloudEnvironmentDetection:
     def test_detect_cloud_run_environment_staging_pattern(self, clean_environment):
         """Test Cloud Run staging environment detection"""
         # Arrange
-        os.environ['K_SERVICE'] = 'netra-backend-staging'
-        os.environ['K_CONFIGURATION'] = 'netra-backend-staging'
+        env.set('K_SERVICE', 'netra-backend-staging', "test")
+        env.set('K_CONFIGURATION', 'netra-backend-staging', "test")
         
         # Act
         result = detect_cloud_run_environment()
@@ -118,8 +120,8 @@ class TestCloudEnvironmentDetection:
     def test_detect_app_engine_environment_standard(self, clean_environment):
         """Test App Engine standard environment detection"""
         # Arrange
-        os.environ['GAE_APPLICATION'] = 'netra-project-123'
-        os.environ['GAE_RUNTIME'] = 'python39'
+        env.set('GAE_APPLICATION', 'netra-project-123', "test")
+        env.set('GAE_RUNTIME', 'python39', "test")
         
         # Act
         result = detect_app_engine_environment()
@@ -130,8 +132,8 @@ class TestCloudEnvironmentDetection:
     def test_detect_app_engine_environment_flex(self, clean_environment):
         """Test App Engine flexible environment detection"""
         # Arrange
-        os.environ['GAE_APPLICATION'] = 'netra-project-staging'
-        os.environ['GAE_VERSION'] = 'staging-version'
+        env.set('GAE_APPLICATION', 'netra-project-staging', "test")
+        env.set('GAE_VERSION', 'staging-version', "test")
         
         # Act
         result = detect_app_engine_environment()
@@ -142,8 +144,8 @@ class TestCloudEnvironmentDetection:
     def test_detect_kubernetes_environment(self, clean_environment):
         """Test Google Kubernetes Engine detection"""
         # Arrange
-        os.environ['KUBERNETES_SERVICE_HOST'] = '10.0.0.1'
-        os.environ['GOOGLE_CLOUD_PROJECT'] = 'netra-gke-cluster'
+        env.set('KUBERNETES_SERVICE_HOST', '10.0.0.1', "test")
+        env.set('GOOGLE_CLOUD_PROJECT', 'netra-gke-cluster', "test")
         
         # Act
         detector = CloudEnvironmentDetector()
@@ -155,9 +157,9 @@ class TestCloudEnvironmentDetection:
     def test_detect_multiple_cloud_environments_precedence(self, clean_environment):
         """Test precedence when multiple cloud environments are detected"""
         # Arrange - Set up multiple cloud environment indicators
-        os.environ['K_SERVICE'] = 'netra-cloud-run'  # Cloud Run
-        os.environ['GAE_APPLICATION'] = 'netra-app-engine'  # App Engine
-        os.environ['KUBERNETES_SERVICE_HOST'] = '10.0.0.1'  # GKE
+        env.set('K_SERVICE', 'netra-cloud-run', "test")  # Cloud Run
+        env.set('GAE_APPLICATION', 'netra-app-engine', "test")  # App Engine
+        env.set('KUBERNETES_SERVICE_HOST', '10.0.0.1', "test")  # GKE
         
         # Act
         detector = CloudEnvironmentDetector()
@@ -173,7 +175,7 @@ class TestConfigurationLoading:
     @pytest.fixture
     def clean_environment(self):
         """Clean environment for config testing"""
-        original_env = os.environ.copy()
+        original_env = env.get_all()
         config_vars = [
             'DATABASE_URL', 'REDIS_URL', 'SECRET_KEY',
             'DEBUG', 'LOG_LEVEL', 'PORT'
@@ -181,8 +183,8 @@ class TestConfigurationLoading:
         for var in config_vars:
             os.environ.pop(var, None)
         yield
-        os.environ.clear()
-        os.environ.update(original_env)
+        env.clear()
+        env.update(original_env, "test")
 
     def test_load_config_from_environment_success(self, clean_environment):
         """Test successful configuration loading from environment"""
@@ -195,13 +197,13 @@ class TestConfigurationLoading:
             'LOG_LEVEL': 'log_level'
         }
         
-        os.environ.update({
+        env.update({
             'DATABASE_URL': 'postgresql://localhost:5432/netra',
             'REDIS_URL': 'redis://localhost:6379/0',
             'SECRET_KEY': 'super-secret-key-123',
             'DEBUG': 'false',
             'LOG_LEVEL': 'INFO'
-        })
+        }, "test")
         
         # Act
         result = load_config_from_environment(config_mapping)
@@ -222,7 +224,7 @@ class TestConfigurationLoading:
         }
         
         # Only set one of the required variables
-        os.environ['REQUIRED_VAR'] = 'present'
+        env.set('REQUIRED_VAR', 'present', "test")
         
         # Act
         result = load_config_from_environment(
@@ -237,13 +239,13 @@ class TestConfigurationLoading:
     def test_load_config_from_environment_type_conversion(self, clean_environment):
         """Test automatic type conversion for configuration values"""
         # Arrange
-        os.environ.update({
+        env.update({
             'PORT': '8080',
             'DEBUG': 'true',
             'MAX_CONNECTIONS': '100',
             'TIMEOUT': '30.5',
             'ENABLE_FEATURE': 'false'
-        })
+        }, "test")
         
         type_mapping = {
             'PORT': int,
@@ -306,10 +308,10 @@ class TestConfigurationLoading:
         }
         
         # Set environment variables that should override defaults
-        os.environ.update({
+        env.update({
             'PORT': '9000',
             'DEBUG': 'true'
-        })
+        }, "test")
         
         # Act
         result = load_config_from_environment(
@@ -430,10 +432,10 @@ class TestConfigurationFallbackMechanisms:
 
     @pytest.fixture
     def clean_environment(self):
-        original_env = os.environ.copy()
+        original_env = env.get_all()
         yield
-        os.environ.clear()
-        os.environ.update(original_env)
+        env.clear()
+        env.update(original_env, "test")
 
     def test_fallback_to_default_configuration(self, clean_environment):
         """Test fallback to default configuration when environment loading fails"""
@@ -449,7 +451,7 @@ class TestConfigurationFallbackMechanisms:
         }
         
         # Set only partial environment
-        os.environ['DATABASE_URL'] = 'postgresql://primary.db'
+        env.set('DATABASE_URL', 'postgresql://primary.db', "test")
         
         # Act
         result = load_config_from_environment(
@@ -482,7 +484,7 @@ class TestConfigurationFallbackMechanisms:
         }
         
         # Set only one environment variable
-        os.environ['SETTING_C'] = 'env_c'
+        env.set('SETTING_C', 'env_c', "test")
         
         # Act
         result = load_config_from_environment(
@@ -505,7 +507,7 @@ class TestConfigurationFallbackMechanisms:
         }
         
         # Set critical setting but not optional
-        os.environ['CRITICAL_SETTING'] = 'critical_value'
+        env.set('CRITICAL_SETTING', 'critical_value', "test")
         
         # Act
         result = load_config_from_environment(
@@ -542,11 +544,11 @@ class TestConfigLoaderErrorHandling:
     def test_config_loader_type_conversion_errors(self, clean_environment=None):
         """Test handling of type conversion errors"""
         # Arrange
-        os.environ.update({
+        env.update({
             'PORT': 'not_a_number',
             'DEBUG': 'not_a_boolean',
             'TIMEOUT': 'not_a_float'
-        })
+        }, "test")
         
         config_mapping = {
             'PORT': 'port',

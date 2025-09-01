@@ -487,7 +487,7 @@ class AgentWebSocketBridge(MonitorableComponent):
                 
                 # Component availability
                 "websocket_manager_available": self._websocket_manager is not None,
-                "registry_available": self._orchestrator is not None,
+                "orchestrator_available": self._orchestrator is not None,
                 "supervisor_available": self._supervisor is not None,
                 "registry_available": self._registry is not None,
                 
@@ -718,7 +718,7 @@ class AgentWebSocketBridge(MonitorableComponent):
             },
             "dependencies": {
                 "websocket_manager_available": self._websocket_manager is not None,
-                "registry_available": self._orchestrator is not None,
+                "orchestrator_available": self._orchestrator is not None,
                 "supervisor_available": self._supervisor is not None,
                 "registry_available": self._registry is not None
             }
@@ -757,6 +757,643 @@ class AgentWebSocketBridge(MonitorableComponent):
         
         self.state = IntegrationState.UNINITIALIZED
         logger.info("AgentWebSocketBridge shutdown complete")
+    
+    # ===================== NOTIFICATION INTERFACE =====================
+    # SSOT for all WebSocket notifications - CRYSTAL CLEAR emission paths
+    # BUSINESS CRITICAL: These methods enable 90% of chat functionality value
+    
+    async def notify_agent_started(
+        self, 
+        run_id: str, 
+        agent_name: str, 
+        context: Optional[Dict[str, Any]] = None
+    ) -> bool:
+        """
+        Send agent started notification with guaranteed delivery.
+        
+        CRYSTAL CLEAR EMISSION PATH: Agent → Bridge → WebSocket Manager → User Chat
+        
+        Args:
+            run_id: Unique execution identifier for routing
+            agent_name: Name of the agent starting execution
+            context: Optional context (user_query, metadata, etc.)
+            
+        Returns:
+            bool: True if notification queued/sent successfully
+            
+        Business Value: Users see immediate feedback that AI is working on their problem
+        """
+        try:
+            if not self._websocket_manager:
+                logger.warning(f"🚨 EMISSION BLOCKED: WebSocket manager unavailable for agent_started (run_id={run_id}, agent={agent_name})")
+                return False
+            
+            # Build standardized notification message
+            notification = {
+                "type": "agent_started",
+                "run_id": run_id,
+                "agent_name": agent_name,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "payload": {
+                    "status": "started",
+                    "context": context or {},
+                    "message": f"{agent_name} has started processing your request"
+                }
+            }
+            
+            # CRYSTAL CLEAR EMISSION: Resolve thread_id and emit
+            thread_id = await self._resolve_thread_id_from_run_id(run_id)
+            if not thread_id:
+                logger.error(f"🚨 EMISSION FAILED: Cannot resolve thread_id for run_id={run_id}")
+                return False
+            
+            # EMIT TO USER CHAT
+            success = await self._websocket_manager.send_to_thread(thread_id, notification)
+            
+            if success:
+                logger.info(f"✅ EMISSION SUCCESS: agent_started → thread={thread_id} (run_id={run_id}, agent={agent_name})")
+            else:
+                logger.error(f"🚨 EMISSION FAILED: agent_started send failed (run_id={run_id}, agent={agent_name})")
+            
+            return success
+            
+        except Exception as e:
+            logger.error(f"🚨 EMISSION EXCEPTION: notify_agent_started failed (run_id={run_id}, agent={agent_name}): {e}")
+            return False
+    
+    async def notify_agent_thinking(
+        self, 
+        run_id: str, 
+        agent_name: str, 
+        reasoning: str,
+        step_number: Optional[int] = None,
+        progress_percentage: Optional[float] = None
+    ) -> bool:
+        """
+        Send agent thinking notification with progress context.
+        
+        CRYSTAL CLEAR EMISSION PATH: Agent → Bridge → WebSocket Manager → User Chat
+        
+        Args:
+            run_id: Unique execution identifier for routing
+            agent_name: Name of the thinking agent
+            reasoning: Agent's current reasoning/thinking process
+            step_number: Optional current step number
+            progress_percentage: Optional progress percentage (0-100)
+            
+        Returns:
+            bool: True if notification queued/sent successfully
+            
+        Business Value: Shows real-time AI reasoning, builds trust in AI capabilities
+        """
+        try:
+            if not self._websocket_manager:
+                logger.warning(f"🚨 EMISSION BLOCKED: WebSocket manager unavailable for agent_thinking (run_id={run_id}, agent={agent_name})")
+                return False
+            
+            # Build standardized notification message  
+            notification = {
+                "type": "agent_thinking",
+                "run_id": run_id,
+                "agent_name": agent_name,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "payload": {
+                    "reasoning": reasoning,
+                    "step_number": step_number,
+                    "progress_percentage": progress_percentage,
+                    "status": "thinking"
+                }
+            }
+            
+            # CRYSTAL CLEAR EMISSION: Resolve thread_id and emit
+            thread_id = await self._resolve_thread_id_from_run_id(run_id)
+            if not thread_id:
+                logger.error(f"🚨 EMISSION FAILED: Cannot resolve thread_id for run_id={run_id}")
+                return False
+            
+            # EMIT TO USER CHAT
+            success = await self._websocket_manager.send_to_thread(thread_id, notification)
+            
+            if success:
+                logger.debug(f"✅ EMISSION SUCCESS: agent_thinking → thread={thread_id} (run_id={run_id}, agent={agent_name})")
+            else:
+                logger.error(f"🚨 EMISSION FAILED: agent_thinking send failed (run_id={run_id}, agent={agent_name})")
+            
+            return success
+            
+        except Exception as e:
+            logger.error(f"🚨 EMISSION EXCEPTION: notify_agent_thinking failed (run_id={run_id}, agent={agent_name}): {e}")
+            return False
+    
+    async def notify_tool_executing(
+        self, 
+        run_id: str, 
+        agent_name: str, 
+        tool_name: str,
+        parameters: Optional[Dict[str, Any]] = None
+    ) -> bool:
+        """
+        Send tool execution start notification for transparency.
+        
+        CRYSTAL CLEAR EMISSION PATH: Agent → Bridge → WebSocket Manager → User Chat
+        
+        Args:
+            run_id: Unique execution identifier for routing
+            agent_name: Name of the agent executing the tool
+            tool_name: Name of the tool being executed
+            parameters: Optional tool parameters (sanitized for user display)
+            
+        Returns:
+            bool: True if notification queued/sent successfully
+            
+        Business Value: Demonstrates AI problem-solving approach, builds trust
+        """
+        try:
+            if not self._websocket_manager:
+                logger.warning(f"🚨 EMISSION BLOCKED: WebSocket manager unavailable for tool_executing (run_id={run_id}, tool={tool_name})")
+                return False
+            
+            # Build standardized notification message
+            notification = {
+                "type": "tool_executing",
+                "run_id": run_id,
+                "agent_name": agent_name,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "payload": {
+                    "tool_name": tool_name,
+                    "parameters": self._sanitize_parameters(parameters) if parameters else {},
+                    "status": "executing",
+                    "message": f"{agent_name} is using {tool_name}"
+                }
+            }
+            
+            # CRYSTAL CLEAR EMISSION: Resolve thread_id and emit
+            thread_id = await self._resolve_thread_id_from_run_id(run_id)
+            if not thread_id:
+                logger.error(f"🚨 EMISSION FAILED: Cannot resolve thread_id for run_id={run_id}")
+                return False
+            
+            # EMIT TO USER CHAT
+            success = await self._websocket_manager.send_to_thread(thread_id, notification)
+            
+            if success:
+                logger.debug(f"✅ EMISSION SUCCESS: tool_executing → thread={thread_id} (run_id={run_id}, tool={tool_name})")
+            else:
+                logger.error(f"🚨 EMISSION FAILED: tool_executing send failed (run_id={run_id}, tool={tool_name})")
+            
+            return success
+            
+        except Exception as e:
+            logger.error(f"🚨 EMISSION EXCEPTION: notify_tool_executing failed (run_id={run_id}, tool={tool_name}): {e}")
+            return False
+    
+    async def notify_tool_completed(
+        self, 
+        run_id: str, 
+        agent_name: str, 
+        tool_name: str,
+        result: Optional[Dict[str, Any]] = None,
+        execution_time_ms: Optional[float] = None
+    ) -> bool:
+        """
+        Send tool execution completion notification with results.
+        
+        CRYSTAL CLEAR EMISSION PATH: Agent → Bridge → WebSocket Manager → User Chat
+        
+        Args:
+            run_id: Unique execution identifier for routing
+            agent_name: Name of the agent that executed the tool
+            tool_name: Name of the completed tool
+            result: Optional tool results (sanitized for user display)
+            execution_time_ms: Optional execution duration
+            
+        Returns:
+            bool: True if notification queued/sent successfully
+            
+        Business Value: Shows completed work, delivers actionable insights
+        """
+        try:
+            if not self._websocket_manager:
+                logger.warning(f"🚨 EMISSION BLOCKED: WebSocket manager unavailable for tool_completed (run_id={run_id}, tool={tool_name})")
+                return False
+            
+            # Build standardized notification message
+            notification = {
+                "type": "tool_completed",
+                "run_id": run_id,
+                "agent_name": agent_name,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "payload": {
+                    "tool_name": tool_name,
+                    "result": self._sanitize_result(result) if result else {},
+                    "execution_time_ms": execution_time_ms,
+                    "status": "completed",
+                    "message": f"{agent_name} completed {tool_name}"
+                }
+            }
+            
+            # CRYSTAL CLEAR EMISSION: Resolve thread_id and emit
+            thread_id = await self._resolve_thread_id_from_run_id(run_id)
+            if not thread_id:
+                logger.error(f"🚨 EMISSION FAILED: Cannot resolve thread_id for run_id={run_id}")
+                return False
+            
+            # EMIT TO USER CHAT
+            success = await self._websocket_manager.send_to_thread(thread_id, notification)
+            
+            if success:
+                logger.debug(f"✅ EMISSION SUCCESS: tool_completed → thread={thread_id} (run_id={run_id}, tool={tool_name})")
+            else:
+                logger.error(f"🚨 EMISSION FAILED: tool_completed send failed (run_id={run_id}, tool={tool_name})")
+            
+            return success
+            
+        except Exception as e:
+            logger.error(f"🚨 EMISSION EXCEPTION: notify_tool_completed failed (run_id={run_id}, tool={tool_name}): {e}")
+            return False
+    
+    async def notify_agent_completed(
+        self, 
+        run_id: str, 
+        agent_name: str, 
+        result: Optional[Dict[str, Any]] = None,
+        execution_time_ms: Optional[float] = None
+    ) -> bool:
+        """
+        Send agent completion notification with final results.
+        
+        CRYSTAL CLEAR EMISSION PATH: Agent → Bridge → WebSocket Manager → User Chat
+        
+        Args:
+            run_id: Unique execution identifier for routing
+            agent_name: Name of the completed agent
+            result: Optional agent results (sanitized for user display)
+            execution_time_ms: Optional total execution duration
+            
+        Returns:
+            bool: True if notification queued/sent successfully
+            
+        Business Value: Users know when valuable AI response is ready
+        """
+        try:
+            if not self._websocket_manager:
+                logger.warning(f"🚨 EMISSION BLOCKED: WebSocket manager unavailable for agent_completed (run_id={run_id}, agent={agent_name})")
+                return False
+            
+            # Build standardized notification message
+            notification = {
+                "type": "agent_completed",
+                "run_id": run_id,
+                "agent_name": agent_name,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "payload": {
+                    "status": "completed",
+                    "result": self._sanitize_result(result) if result else {},
+                    "execution_time_ms": execution_time_ms,
+                    "message": f"{agent_name} has completed processing your request"
+                }
+            }
+            
+            # CRYSTAL CLEAR EMISSION: Resolve thread_id and emit
+            thread_id = await self._resolve_thread_id_from_run_id(run_id)
+            if not thread_id:
+                logger.error(f"🚨 EMISSION FAILED: Cannot resolve thread_id for run_id={run_id}")
+                return False
+            
+            # EMIT TO USER CHAT
+            success = await self._websocket_manager.send_to_thread(thread_id, notification)
+            
+            if success:
+                logger.info(f"✅ EMISSION SUCCESS: agent_completed → thread={thread_id} (run_id={run_id}, agent={agent_name})")
+            else:
+                logger.error(f"🚨 EMISSION FAILED: agent_completed send failed (run_id={run_id}, agent={agent_name})")
+            
+            return success
+            
+        except Exception as e:
+            logger.error(f"🚨 EMISSION EXCEPTION: notify_agent_completed failed (run_id={run_id}, agent={agent_name}): {e}")
+            return False
+    
+    async def notify_agent_error(
+        self, 
+        run_id: str, 
+        agent_name: str, 
+        error: str,
+        error_context: Optional[Dict[str, Any]] = None
+    ) -> bool:
+        """
+        Send agent error notification with context.
+        
+        CRYSTAL CLEAR EMISSION PATH: Agent → Bridge → WebSocket Manager → User Chat
+        
+        Args:
+            run_id: Unique execution identifier for routing
+            agent_name: Name of the agent that encountered the error
+            error: Error message (sanitized for user display)
+            error_context: Optional error context (sanitized)
+            
+        Returns:
+            bool: True if notification queued/sent successfully
+            
+        Business Value: Users receive clear error communication, maintain trust
+        """
+        try:
+            if not self._websocket_manager:
+                logger.warning(f"🚨 EMISSION BLOCKED: WebSocket manager unavailable for agent_error (run_id={run_id}, agent={agent_name})")
+                return False
+            
+            # Build standardized notification message
+            notification = {
+                "type": "agent_error",
+                "run_id": run_id,
+                "agent_name": agent_name,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "payload": {
+                    "status": "error", 
+                    "error_message": self._sanitize_error_message(error),
+                    "error_context": self._sanitize_error_context(error_context) if error_context else {},
+                    "message": f"{agent_name} encountered an issue processing your request"
+                }
+            }
+            
+            # CRYSTAL CLEAR EMISSION: Resolve thread_id and emit
+            thread_id = await self._resolve_thread_id_from_run_id(run_id)
+            if not thread_id:
+                logger.error(f"🚨 EMISSION FAILED: Cannot resolve thread_id for run_id={run_id}")
+                return False
+            
+            # EMIT TO USER CHAT
+            success = await self._websocket_manager.send_to_thread(thread_id, notification)
+            
+            if success:
+                logger.warning(f"⚠️ EMISSION SUCCESS: agent_error → thread={thread_id} (run_id={run_id}, agent={agent_name})")
+            else:
+                logger.error(f"🚨 EMISSION FAILED: agent_error send failed (run_id={run_id}, agent={agent_name})")
+            
+            return success
+            
+        except Exception as e:
+            logger.error(f"🚨 EMISSION EXCEPTION: notify_agent_error failed (run_id={run_id}, agent={agent_name}): {e}")
+            return False
+    
+    async def notify_progress_update(
+        self, 
+        run_id: str, 
+        agent_name: str, 
+        progress: Dict[str, Any]
+    ) -> bool:
+        """
+        Send agent progress update notification.
+        
+        CRYSTAL CLEAR EMISSION PATH: Agent → Bridge → WebSocket Manager → User Chat
+        
+        Args:
+            run_id: Unique execution identifier for routing
+            agent_name: Name of the agent reporting progress
+            progress: Progress data (percentage, current_step, message, etc.)
+            
+        Returns:
+            bool: True if notification queued/sent successfully
+            
+        Business Value: Users see real-time progress, understand processing status
+        """
+        try:
+            if not self._websocket_manager:
+                logger.warning(f"🚨 EMISSION BLOCKED: WebSocket manager unavailable for progress_update (run_id={run_id}, agent={agent_name})")
+                return False
+            
+            # Build standardized notification message
+            notification = {
+                "type": "progress_update",
+                "run_id": run_id,
+                "agent_name": agent_name,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "payload": {
+                    "status": "progress",
+                    "progress_data": self._sanitize_progress_data(progress),
+                    "message": progress.get("message", f"{agent_name} is making progress")
+                }
+            }
+            
+            # CRYSTAL CLEAR EMISSION: Resolve thread_id and emit
+            thread_id = await self._resolve_thread_id_from_run_id(run_id)
+            if not thread_id:
+                logger.error(f"🚨 EMISSION FAILED: Cannot resolve thread_id for run_id={run_id}")
+                return False
+            
+            # EMIT TO USER CHAT
+            success = await self._websocket_manager.send_to_thread(thread_id, notification)
+            
+            if success:
+                logger.debug(f"✅ EMISSION SUCCESS: progress_update → thread={thread_id} (run_id={run_id}, agent={agent_name})")
+            else:
+                logger.error(f"🚨 EMISSION FAILED: progress_update send failed (run_id={run_id}, agent={agent_name})")
+            
+            return success
+            
+        except Exception as e:
+            logger.error(f"🚨 EMISSION EXCEPTION: notify_progress_update failed (run_id={run_id}, agent={agent_name}): {e}")
+            return False
+    
+    async def notify_custom(
+        self, 
+        run_id: str, 
+        agent_name: str, 
+        notification_type: str, 
+        data: Dict[str, Any]
+    ) -> bool:
+        """
+        Send custom notification with flexible data.
+        
+        CRYSTAL CLEAR EMISSION PATH: Agent → Bridge → WebSocket Manager → User Chat
+        
+        Args:
+            run_id: Unique execution identifier for routing
+            agent_name: Name of the agent sending notification
+            notification_type: Custom notification type identifier
+            data: Custom notification data
+            
+        Returns:
+            bool: True if notification queued/sent successfully
+            
+        Business Value: Enables specialized agent communications, extensibility
+        """
+        try:
+            if not self._websocket_manager:
+                logger.warning(f"🚨 EMISSION BLOCKED: WebSocket manager unavailable for custom notification (run_id={run_id}, type={notification_type})")
+                return False
+            
+            # Build standardized notification message
+            notification = {
+                "type": notification_type,
+                "run_id": run_id,
+                "agent_name": agent_name,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "payload": self._sanitize_custom_data(data)
+            }
+            
+            # CRYSTAL CLEAR EMISSION: Resolve thread_id and emit
+            thread_id = await self._resolve_thread_id_from_run_id(run_id)
+            if not thread_id:
+                logger.error(f"🚨 EMISSION FAILED: Cannot resolve thread_id for run_id={run_id}")
+                return False
+            
+            # EMIT TO USER CHAT
+            success = await self._websocket_manager.send_to_thread(thread_id, notification)
+            
+            if success:
+                logger.debug(f"✅ EMISSION SUCCESS: custom({notification_type}) → thread={thread_id} (run_id={run_id}, agent={agent_name})")
+            else:
+                logger.error(f"🚨 EMISSION FAILED: custom({notification_type}) send failed (run_id={run_id}, agent={agent_name})")
+            
+            return success
+            
+        except Exception as e:
+            logger.error(f"🚨 EMISSION EXCEPTION: notify_custom failed (run_id={run_id}, type={notification_type}): {e}")
+            return False
+    
+    # ===================== HELPER METHODS =====================
+    
+    async def _resolve_thread_id_from_run_id(self, run_id: str) -> Optional[str]:
+        """
+        Resolve thread_id from run_id for proper WebSocket routing.
+        
+        CRITICAL: This method ensures notifications reach the correct user chat thread.
+        """
+        try:
+            # Try to get thread_id from orchestrator if available
+            if self._orchestrator:
+                try:
+                    # Attempt to resolve through orchestrator registry
+                    thread_id = await self._orchestrator.get_thread_id_for_run(run_id)
+                    if thread_id:
+                        return thread_id
+                except Exception as e:
+                    logger.debug(f"Orchestrator thread_id resolution failed for run_id={run_id}: {e}")
+            
+            # Fallback: Extract from run_id pattern if it follows known conventions
+            # Many run_ids contain or reference thread_id
+            if "thread_" in run_id:
+                # Extract thread_id from run_id if embedded
+                parts = run_id.split("_")
+                for i, part in enumerate(parts):
+                    if part == "thread" and i + 1 < len(parts):
+                        return f"thread_{parts[i + 1]}"
+            
+            # If we have a registry available, try alternate resolution
+            if self._registry and hasattr(self._registry, 'get_thread_for_run'):
+                try:
+                    return await self._registry.get_thread_for_run(run_id)
+                except Exception as e:
+                    logger.debug(f"Registry thread_id resolution failed for run_id={run_id}: {e}")
+            
+            # Last fallback: Assume run_id can be used directly if it looks like thread_id
+            if run_id.startswith("thread_"):
+                return run_id
+            
+            logger.warning(f"Unable to resolve thread_id for run_id={run_id}")
+            return None
+            
+        except Exception as e:
+            logger.error(f"Exception resolving thread_id for run_id={run_id}: {e}")
+            return None
+    
+    def _sanitize_parameters(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Sanitize tool parameters for user display, removing sensitive data."""
+        if not params:
+            return {}
+        
+        sanitized = {}
+        sensitive_keys = {'password', 'secret', 'key', 'token', 'api_key', 'auth', 'credential'}
+        
+        for key, value in params.items():
+            if any(sensitive in key.lower() for sensitive in sensitive_keys):
+                sanitized[key] = "[REDACTED]"
+            elif isinstance(value, str) and len(value) > 200:
+                sanitized[key] = value[:200] + "..."
+            elif isinstance(value, dict):
+                sanitized[key] = self._sanitize_parameters(value)
+            else:
+                sanitized[key] = value
+        
+        return sanitized
+    
+    def _sanitize_result(self, result: Dict[str, Any]) -> Dict[str, Any]:
+        """Sanitize tool results for user display, focusing on user-relevant data."""
+        if not result:
+            return {}
+        
+        sanitized = {}
+        for key, value in result.items():
+            if isinstance(value, str) and len(value) > 500:
+                sanitized[key] = value[:500] + "..."
+            elif isinstance(value, dict):
+                sanitized[key] = self._sanitize_result(value)
+            elif isinstance(value, list) and len(value) > 10:
+                sanitized[key] = value[:10] + ["...(truncated)"]
+            else:
+                sanitized[key] = value
+        
+        return sanitized
+    
+    def _sanitize_error_message(self, error: str) -> str:
+        """Sanitize error message for user display, removing technical internals."""
+        if not error:
+            return "An error occurred"
+        
+        # Remove file paths and internal details
+        sanitized = error.replace("/Users/", "/home/").replace("/home/", "[PATH]/")
+        
+        # Truncate very long errors
+        if len(sanitized) > 300:
+            sanitized = sanitized[:300] + "..."
+        
+        return sanitized
+    
+    def _sanitize_error_context(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Sanitize error context for user display."""
+        if not context:
+            return {}
+        
+        return {
+            "error_type": context.get("error_type", "unknown"),
+            "agent_step": context.get("agent_step", "unknown"),
+            "user_facing": True
+        }
+    
+    def _sanitize_progress_data(self, progress: Dict[str, Any]) -> Dict[str, Any]:
+        """Sanitize progress data for user display."""
+        if not progress:
+            return {}
+        
+        sanitized = {}
+        allowed_keys = {
+            'percentage', 'current_step', 'total_steps', 'message', 
+            'status', 'estimated_remaining', 'progress_type'
+        }
+        
+        for key, value in progress.items():
+            if key in allowed_keys:
+                sanitized[key] = value
+        
+        return sanitized
+    
+    def _sanitize_custom_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Sanitize custom notification data for user display."""
+        if not data:
+            return {}
+        
+        # Basic sanitization - remove large objects and sensitive data
+        sanitized = {}
+        for key, value in data.items():
+            if isinstance(value, str) and len(value) > 1000:
+                sanitized[key] = value[:1000] + "..."
+            elif isinstance(value, dict):
+                sanitized[key] = self._sanitize_custom_data(value)
+            else:
+                sanitized[key] = value
+        
+        return sanitized
 
 
 # Singleton factory function

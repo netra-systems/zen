@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 """Multi-Agent Collaboration Response Integration Test
 
+env = get_env()
 Business Value Justification (BVJ):
 - Segment: Enterprise ($30K MRR protection)
 - Business Goal: Multi-Agent Orchestration Reliability
@@ -22,11 +24,6 @@ from typing import Any, Dict, List, Optional
 import pytest
 
 # Set testing environment before imports
-from shared.isolated_environment import get_env
-env = get_env()
-env.set("TESTING", "1", "test_multi_agent_collaboration_response")
-env.set("ENVIRONMENT", "testing", "test_multi_agent_collaboration_response")
-env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test_multi_agent_collaboration_response")
 
 from sqlalchemy.ext.asyncio import AsyncSession
 

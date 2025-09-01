@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Centralized Service Endpoints Configuration for E2E Tests
 
 Provides consistent service endpoint configuration that works with both

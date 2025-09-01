@@ -1,4 +1,5 @@
 """
+env = get_env()
 Tests for Auth Service Port Configuration Mismatch Issue
 
 This test suite exposes the critical port configuration mismatch where:
@@ -276,7 +277,7 @@ class TestAuthServiceConfigurationValidation:
             # FAILING ASSERTION: Validation should catch this mismatch
             try:
                 # Attempt to validate configuration consistency
-                binding_port = os.environ.get("PORT")  # Use os.environ directly since we patched it
+                binding_port = env.get("PORT")  # Use os.environ directly since we patched it
                 auth_url = AuthConfig.get_auth_service_url()
                 
                 # Extract URL port
@@ -319,7 +320,7 @@ class TestAuthServiceConfigurationValidation:
             with patch.object(AuthConfig, 'get_auth_service_url', return_value="http://localhost:8001"):
                 
                 # This should be detected during service initialization
-                binding_port = os.environ.get("PORT")
+                binding_port = env.get("PORT")
                 service_url = AuthConfig.get_auth_service_url()
                 
                 # Extract port from URL
@@ -357,7 +358,7 @@ class TestAuthServiceConfigurationValidation:
                 
                 if env == "development":
                     # Development should use configurable ports
-                    expected_port = os.environ.get("PORT", "8081")
+                    expected_port = env.get("PORT", "8081")
                     
                     # FAILING ASSERTION: Development URL should respect PORT env var
                     assert url_port == expected_port, (
@@ -404,7 +405,7 @@ class TestPortConfigurationRecovery:
             with patch.object(AuthConfig, 'get_auth_service_url', return_value="http://localhost:8001"):
                 
                 # This should generate a clear error message about the mismatch
-                binding_port = os.environ.get("PORT")
+                binding_port = env.get("PORT")
                 service_url = AuthConfig.get_auth_service_url()
                 
                 # Extract URL port
@@ -439,7 +440,7 @@ class TestPortConfigurationRecovery:
             "PORT": "8081",
             "ENVIRONMENT": "development"
         }):
-            binding_port = os.environ.get("PORT")
+            binding_port = env.get("PORT")
             
             # In ideal system, this would auto-correct the URL to match binding port
             expected_corrected_url = f"http://localhost:{binding_port}"

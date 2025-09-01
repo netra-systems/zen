@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Critical Dev Launcher Regression Tests
 Tests to prevent the critical issues found in dev_launcher_logs.txt from recurring
 """
@@ -356,7 +358,7 @@ class TestAuthServiceVerification:
     def test_cross_service_token_validated(self):
         """Cross-service auth token should be validated on startup"""
         import os
-        token = os.environ.get("CROSS_SERVICE_AUTH_TOKEN")
+        token = env.get("CROSS_SERVICE_AUTH_TOKEN")
         
         if token:
             assert len(token) >= 32, "Cross-service token should be sufficiently long"

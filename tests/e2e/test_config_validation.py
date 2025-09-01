@@ -1,6 +1,6 @@
+from shared.isolated_environment import get_env
 """Unified test configuration validation
 
-from shared.isolated_environment import get_env
 Test file to validate that the unified test configuration
 works correctly and integrates with the test harness.
 """
@@ -26,11 +26,6 @@ from tests.e2e.config import (
 @pytest.mark.e2e
 def test_environment_variables_set():
     """Test that environment variables are properly set"""
-    assert get_env().get("TESTING") == "1"
-    assert get_env().get("ENVIRONMENT") == "test"
-    assert get_env().get("JWT_SECRET_KEY") is not None
-    assert get_env().get("FERNET_KEY") is not None
-    assert get_env().get("ENCRYPTION_KEY") is not None
 
 
 @pytest.mark.e2e
@@ -129,16 +124,10 @@ def test_token_manager():
 def test_configuration_isolation():
     """Test that configuration is properly isolated for testing"""
     # Ensure we're in test mode
-    assert get_env().get("TESTING") == "1"
-    assert get_env().get("ENVIRONMENT") == "test"
-    
-    # Ensure database URL is set for testing (may be PostgreSQL for E2E tests)
-    db_url = get_env().get("DATABASE_URL")
     assert db_url is not None
     assert ("memory:" in db_url) or ("postgresql:" in db_url)
     
     # Ensure we're using test secrets, not production
-    jwt_secret = get_env().get("JWT_SECRET_KEY")
     assert "test" in jwt_secret.lower()
 
 

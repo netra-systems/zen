@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Test helpers for system initialization tests.
 Provides utilities for managing services, databases, and test environments.
 """
@@ -204,7 +206,7 @@ def temporary_env_vars(**env_vars):
     
     # Store original values and set new ones
     for key, value in env_vars.items():
-        original_values[key] = os.environ.get(key)
+        original_values[key] = env.get(key)
         os.environ[key] = value
         
     try:

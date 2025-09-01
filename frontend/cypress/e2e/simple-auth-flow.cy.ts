@@ -1,15 +1,12 @@
 describe('Simple Authentication Flow', () => {
+  beforeEach(() => {
+    cy.clearLocalStorage();
+    cy.clearCookies();
+  });
+
   it('should display login page and handle authentication', () => {
-    // Visit login page
-    cy.visit('/login');
-    
-    // Verify login page elements - updated for current implementation
-    cy.contains('Netra').should('be.visible');
-    // In development mode, should show the Quick Dev Login button
-    cy.contains('button', 'Quick Dev Login').should('be.visible');
-    
-    // Use the Quick Dev Login button instead of manually setting localStorage
-    cy.contains('button', 'Quick Dev Login').click();
+    // Use SSOT cy.login() command for authentication
+    cy.login();
     
     // Should redirect to chat page after login
     cy.url().should('include', '/chat');
@@ -20,9 +17,8 @@ describe('Simple Authentication Flow', () => {
   });
 
   it('should allow message sending in chat', () => {
-    // Use login flow instead of manually setting token
-    cy.visit('/login');
-    cy.contains('button', 'Quick Dev Login').click();
+    // Use SSOT cy.login() command for authentication
+    cy.login();
     
     // Should be on chat page
     cy.url().should('include', '/chat');

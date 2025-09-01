@@ -1,6 +1,6 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
-from shared.isolated_environment import get_env
 CRITICAL DEV LAUNCHER END-TO-END TESTS
 
 Tests the ACTUAL dev_launcher.py script and validates the complete developer experience.

@@ -1,5 +1,5 @@
-"""
 from shared.isolated_environment import get_env
+"""
 CRITICAL E2E: Complete New User Journey Test with Real Services
 
 BVJ (Business Value Justification):
@@ -31,11 +31,12 @@ import httpx
 import pytest
 
 # Set test environment
-get_env().set("TESTING",  )"1"
-get_env().set("AUTH_FAST_TEST_MODE",  )"true"
-get_env().set("AUTH_SERVICE_URL",  )"http://localhost:8001"
-get_env().set("BACKEND_SERVICE_URL",  )"http://localhost:8000"
-get_env().set("DATABASE_URL",  )"sqlite+aiosqlite:///:memory:"
+env = get_env()
+env.set("TESTING", "1", "test")
+env.set("AUTH_FAST_TEST_MODE", "true", "test")
+env.set("AUTH_SERVICE_URL", "http://localhost:8001", "test")
+env.set("BACKEND_SERVICE_URL", "http://localhost:8000", "test")
+env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
 
 import aiosqlite
 from tests.e2e.helpers.journey.new_user_journey_helpers import (

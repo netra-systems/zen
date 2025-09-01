@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Comprehensive failing tests for mainline dev_launcher critical functionality.
 
 These tests are designed to be initially FAILING to expose issues in the implementation
@@ -800,14 +802,14 @@ class TestCrossServiceAuthentication(unittest.TestCase):
         self.config = LauncherConfig(project_root=self.temp_dir)
         # Clear any existing token
         if 'CROSS_SERVICE_AUTH_TOKEN' in os.environ:
-            del os.environ['CROSS_SERVICE_AUTH_TOKEN']
+            env.delete('CROSS_SERVICE_AUTH_TOKEN', "test")
         
     def tearDown(self):
         import shutil
         shutil.rmtree(self.temp_dir, ignore_errors=True)
         # Clean up environment
         if 'CROSS_SERVICE_AUTH_TOKEN' in os.environ:
-            del os.environ['CROSS_SERVICE_AUTH_TOKEN']
+            env.delete('CROSS_SERVICE_AUTH_TOKEN', "test")
 
     def test_cross_service_auth_token_generation(self):
         """Test that cross-service auth token is generated when not present."""
@@ -897,7 +899,7 @@ class TestCrossServiceAuthentication(unittest.TestCase):
         for _ in range(5):
             # Clear environment
             if 'CROSS_SERVICE_AUTH_TOKEN' in os.environ:
-                del os.environ['CROSS_SERVICE_AUTH_TOKEN']
+                env.delete('CROSS_SERVICE_AUTH_TOKEN', "test")
             
             launcher._ensure_cross_service_auth_token()
             generated_tokens.append(os.environ['CROSS_SERVICE_AUTH_TOKEN'])

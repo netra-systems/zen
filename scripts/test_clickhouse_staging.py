@@ -1,6 +1,8 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python
 """Test ClickHouse staging configuration and connectivity.
 
+env = get_env()
 This script validates:
 1. Environment detection is working correctly in staging
 2. ClickHouse password is loaded from GCP Secret Manager
@@ -21,16 +23,16 @@ async def test_staging_clickhouse():
     """Test ClickHouse configuration and connectivity in staging."""
     
     # Set staging environment
-    os.environ['ENVIRONMENT'] = 'staging'
-    os.environ['CLICKHOUSE_URL'] = 'clickhouse://default:@xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443/default?secure=1'
-    os.environ['CLICKHOUSE_HOST'] = 'xedvrr4c3r.us-central1.gcp.clickhouse.cloud'
-    os.environ['CLICKHOUSE_PORT'] = '8443'
-    os.environ['CLICKHOUSE_USER'] = 'default'
-    os.environ['CLICKHOUSE_DB'] = 'default'
-    os.environ['CLICKHOUSE_SECURE'] = 'true'
+    env.set('ENVIRONMENT', 'staging', "test")
+    env.set('CLICKHOUSE_URL', 'clickhouse://default:@xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443/default?secure=1', "test")
+    env.set('CLICKHOUSE_HOST', 'xedvrr4c3r.us-central1.gcp.clickhouse.cloud', "test")
+    env.set('CLICKHOUSE_PORT', '8443', "test")
+    env.set('CLICKHOUSE_USER', 'default', "test")
+    env.set('CLICKHOUSE_DB', 'default', "test")
+    env.set('CLICKHOUSE_SECURE', 'true', "test")
     
     # Set GCP project ID for staging
-    os.environ['GCP_PROJECT_ID'] = '701982941522'  # Staging project ID
+    env.set('GCP_PROJECT_ID', '701982941522', "test")  # Staging project ID
     
     print("=" * 60)
     print("Testing ClickHouse Staging Configuration")

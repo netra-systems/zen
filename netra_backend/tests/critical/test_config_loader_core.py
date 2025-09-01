@@ -1,6 +1,8 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """Critical Config Loader Core Tests
 
+env = get_env()
 Business Value: Protects $10K/hour risk from configuration loading failures.
 Prevents system unavailability due to config loading issues during startup.
 
@@ -31,13 +33,13 @@ from netra_backend.app.cloud_environment_detector import (
 def _check_k_service_for_staging():
     """Check K_SERVICE for staging environment"""
     import os
-    k_service = os.environ.get('K_SERVICE', '')
+    k_service = env.get('K_SERVICE', '')
     return "staging" if 'staging' in k_service else ""
 
 def _check_pr_number_for_staging():
     """Check PR number for staging environment"""
     import os
-    return "staging" if os.environ.get('PR_NUMBER') else ""
+    return "staging" if env.get('PR_NUMBER') else ""
 
 def _get_attribute_or_none(obj, attr):
     """Get attribute or return None"""
@@ -85,7 +87,7 @@ def get_critical_vars_mapping():
 def load_env_var(var_name, config, field):
     """Load environment variable into config field"""
     import os
-    value = os.environ.get(var_name)
+    value = env.get(var_name)
     if value and hasattr(config, field):
         setattr(config, field, value)
         return True

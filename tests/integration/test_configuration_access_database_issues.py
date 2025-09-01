@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Configuration Access Pattern Database Connection Issue Tests
 
 This test suite identifies and fixes configuration access patterns that cause
@@ -78,7 +80,7 @@ class ConfigurationAccessAnalyzer:
             line = line.strip()
             
             # Direct os.environ access
-            if 'os.environ[' in line or 'os.environ.get(' in line:
+            if 'os.environ[' in line or 'env.get(' in line:
                 if any(db_var in line for db_var in ['POSTGRES', 'DATABASE', 'DB_']):
                     patterns['direct_os_environ'].append(f"{file_path}:{i} - {line}")
             
@@ -150,11 +152,11 @@ class DatabaseConfigurationTester:
         # Test 1: Direct os.environ construction
         try:
             with patch.dict(os.environ, config_vars, clear=False):
-                host = os.environ.get('POSTGRES_HOST', 'localhost')
-                user = os.environ.get('POSTGRES_USER', 'postgres')
-                password = os.environ.get('POSTGRES_PASSWORD', 'password')
-                db = os.environ.get('POSTGRES_DB', 'test')
-                port = os.environ.get('POSTGRES_PORT', '5432')
+                host = env.get('POSTGRES_HOST', 'localhost')
+                user = env.get('POSTGRES_USER', 'postgres')
+                password = env.get('POSTGRES_PASSWORD', 'password')
+                db = env.get('POSTGRES_DB', 'test')
+                port = env.get('POSTGRES_PORT', '5432')
                 
                 direct_url = f"postgresql://{user}:{password}@{host}:{port}/{db}"
                 results['direct_construction'] = {
@@ -391,7 +393,7 @@ class TestConfigurationAccessDatabaseIssues:
         # Test with os.environ
         with patch.dict(os.environ, test_vars, clear=False):
             os_environ_values = {
-                key: os.environ.get(key)
+                key: env.get(key)
                 for key in test_vars.keys()
             }
         
@@ -455,7 +457,7 @@ class TestConfigurationAccessDatabaseIssues:
         postgres_keys = ['POSTGRES_HOST', 'POSTGRES_USER', 'POSTGRES_PASSWORD', 'POSTGRES_DB', 'POSTGRES_PORT']
         
         for key in postgres_keys:
-            original_postgres_vars[key] = os.environ.get(key)
+            original_postgres_vars[key] = env.get(key)
         
         print(f"\n=== DATABASE CONFIG ISOLATION TEST ===")
         print("Original environment values:")
@@ -485,7 +487,7 @@ class TestConfigurationAccessDatabaseIssues:
         # Verify original environment is unchanged
         print("\nVerifying original environment unchanged:")
         for key, original_value in original_postgres_vars.items():
-            current_value = os.environ.get(key)
+            current_value = env.get(key)
             print(f"  {key}: {current_value if current_value else '(not set)'}")
             
             # Environment should be unchanged by isolated environment

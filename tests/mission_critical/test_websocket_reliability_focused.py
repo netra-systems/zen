@@ -1,6 +1,8 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python
 """FOCUSED WEBSOCKET RELIABILITY TEST - TEST 3 Requirements
 
+env = get_env()
 This test specifically addresses TEST 3 requirements for WebSocket event reliability:
 1. Event Completeness Validation - All required events are sent
 2. Event Ordering and Timing - Proper sequence and no silent periods > 5 seconds  
@@ -30,10 +32,10 @@ import os
 import sys
 
 # CRITICAL: Force disable all service dependencies for standalone execution
-os.environ['SKIP_REAL_SERVICES'] = 'true'
-os.environ['USE_REAL_SERVICES'] = 'false'
-os.environ['RUN_E2E_TESTS'] = 'false'
-os.environ['PYTEST_DISABLE_PLUGIN_AUTOLOAD'] = '1'
+env.set('SKIP_REAL_SERVICES', 'true', "test")
+env.set('USE_REAL_SERVICES', 'false', "test")
+env.set('RUN_E2E_TESTS', 'false', "test")
+env.set('PYTEST_DISABLE_PLUGIN_AUTOLOAD', '1', "test")
 
 import pytest
 

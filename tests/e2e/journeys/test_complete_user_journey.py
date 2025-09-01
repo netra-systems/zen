@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
+env = get_env()
 Complete User Journey Integration Tests for DEV MODE
 
 BVJ (Business Value Justification):
@@ -29,13 +31,11 @@ import pytest
 from test_framework.service_dependencies import requires_services
 
 # Test environment setup
-from shared.isolated_environment import get_env
-env = get_env()
-env.set("TESTING", "1", "test_complete_user_journey")
-env.set("CORS_ORIGINS", "*", "test_complete_user_journey")
-env.set("ENVIRONMENT", "development", "test_complete_user_journey")
-env.set("AUTH_SERVICE_URL", "http://localhost:8001", "test_complete_user_journey")
-env.set("BACKEND_SERVICE_URL", "http://localhost:8000", "test_complete_user_journey")
+env.set("TESTING", "1", "test")
+env.set("CORS_ORIGINS", "*", "test")
+env.set("ENVIRONMENT", "development", "test")
+env.set("AUTH_SERVICE_URL", "http://localhost:8001", "test")
+env.set("BACKEND_SERVICE_URL", "http://localhost:8000", "test")
 
 from tests.e2e.helpers.journey.user_journey_helpers import (
     ErrorRecoveryHelper,

@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 L3 Real Service Tests for Startup Diagnostics
 Tests actual system startup diagnostics with real services.
 Validates real startup sequences, database connections, and error detection.
@@ -293,7 +295,7 @@ class TestRealEnvironmentVariableChecking:
     async def test_environment_variables_missing_critical(self) -> None:
         """Test environment check detects missing critical variables."""
         # Remove critical environment variables
-        env_backup = os.environ.copy()
+        env_backup = env.get_all()
         try:
             for var in ['DATABASE_URL', 'SECRET_KEY']:
                 os.environ.pop(var, None)
@@ -306,8 +308,8 @@ class TestRealEnvironmentVariableChecking:
             )]
             assert len(critical_errors) > 0
         finally:
-            os.environ.clear()
-            os.environ.update(env_backup)
+            env.clear()
+            env.update(env_backup, "test")
 
 class TestMigrationChecking:
     """Test migration status checking."""

@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Test-specific logging patch to prevent I/O errors during pytest teardown.
 """
@@ -8,6 +9,7 @@ import atexit
 from unittest.mock import MagicMock
 
 
+env = get_env()
 def patch_loguru_for_tests():
     """Completely disable loguru handlers during tests to prevent I/O errors."""
     try:
@@ -84,6 +86,6 @@ def patch_pytest_capture():
 
 
 # Apply the patches when this module is imported during tests
-if os.environ.get('TESTING') == '1' or os.environ.get('ENVIRONMENT') == 'testing' or 'pytest' in sys.modules:
+if env.get('TESTING') == '1' or env.get('ENVIRONMENT') == 'testing' or 'pytest' in sys.modules:
     patch_loguru_for_tests()
     patch_pytest_capture()

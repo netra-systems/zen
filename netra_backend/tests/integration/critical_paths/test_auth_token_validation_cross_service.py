@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 """Auth Token Validation Cross-Service Integration Tests (L3)
 
+env = get_env()
 Tests token validation and propagation across different services and components.
 Validates JWT handling, service-to-service auth, and token security.
 
@@ -30,11 +32,11 @@ from httpx import ASGITransport, AsyncClient
 
 # Set test environment before imports
 
-os.environ["ENVIRONMENT"] = "testing"
+env.set("ENVIRONMENT", "testing", "test")
 
-os.environ["TESTING"] = "true"
+env.set("TESTING", "true", "test")
 
-os.environ["SKIP_STARTUP_CHECKS"] = "true"
+env.set("SKIP_STARTUP_CHECKS", "true", "test")
 
 from netra_backend.app.main import app
 

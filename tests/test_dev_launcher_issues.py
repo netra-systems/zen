@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Comprehensive tests to prevent dev launcher issues from recurring.
 These tests expose the root causes found in dev_launcher_logs.txt audit.
@@ -13,6 +14,7 @@ from sqlalchemy.exc import OperationalError
 from sqlalchemy.pool import QueuePool
 
 
+env = get_env()
 class TestDatabaseConnectionIssues:
     """Tests for database connection failures and redundancies."""
     
@@ -94,7 +96,7 @@ class TestSQLAlchemyLoggingIssues:
         from netra_backend.app.db.database_manager import DatabaseManager
         import os
         
-        os.environ['ENVIRONMENT'] = 'production'
+        env.set('ENVIRONMENT', 'production', "test")
         engine_config = DatabaseManager._get_engine_config()
         
         assert engine_config.get('echo', False) is False, "Echo must be False in production"

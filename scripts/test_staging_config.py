@@ -4,9 +4,11 @@
 import os
 import sys
 from pathlib import Path
+from shared.isolated_environment import get_env
 
 # Add app directory to path
 
+env = get_env()
 def test_staging_config():
     """Test configuration loading with staging environment variables."""
     _print_staging_header()
@@ -62,7 +64,7 @@ def _print_env_setup_status():
     print("[SETUP] Environment variables set:")
     key_vars = ["ENVIRONMENT", "LOAD_SECRETS", "K_SERVICE", "GCP_PROJECT_ID_NUMERICAL_STAGING"]
     for key in key_vars:
-        print(f"  {key}: {os.environ.get(key)}")
+        print(f"  {key}: {env.get(key)}")
 
 def _print_loading_header():
     """Print configuration loading header"""

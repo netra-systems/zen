@@ -368,8 +368,8 @@ class StartupOrchestrator:
             deps = status['dependencies']
             if not deps['websocket_manager_available']:
                 raise DeterministicStartupError("WebSocket manager not available in bridge")
-            if not deps['orchestrator_available']:
-                raise DeterministicStartupError("Orchestrator not available in bridge")
+            if not deps['registry_available']:
+                raise DeterministicStartupError("Registry not available in bridge")
             
         except DeterministicStartupError:
             raise

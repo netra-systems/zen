@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Comprehensive test suite for the unified IsolatedEnvironment migration.
 
@@ -31,7 +32,7 @@ class TestUnifiedIsolatedEnvironment:
     def setup_and_cleanup(self):
         """Setup and cleanup for each test."""
         # Store original environment
-        original_env = os.environ.copy()
+        original_env = env.get_all()
         
         # Get fresh environment instance for each test
         env = get_env()
@@ -44,8 +45,8 @@ class TestUnifiedIsolatedEnvironment:
         
         # Cleanup: restore original environment
         env.disable_isolation()
-        os.environ.clear()
-        os.environ.update(original_env)
+        env.clear()
+        env.update(original_env, "test")
     
     def test_singleton_behavior(self):
         """Test that IsolatedEnvironment maintains singleton behavior."""
@@ -80,7 +81,7 @@ class TestUnifiedIsolatedEnvironment:
         env = get_env()
         
         # Test basic get/set
-        os.environ['TEST_BASIC'] = 'original_value'
+        env.set('TEST_BASIC', 'original_value', "test")
         assert env.get('TEST_BASIC') == 'original_value'
         assert env.get('NON_EXISTENT') is None
         assert env.get('NON_EXISTENT', 'default') == 'default'
@@ -98,7 +99,7 @@ class TestUnifiedIsolatedEnvironment:
         env = get_env()
         
         # Set initial value in os.environ
-        os.environ['TEST_ISOLATION'] = 'os_value'
+        env.set('TEST_ISOLATION', 'os_value', "test")
         
         # Enable isolation
         env.enable_isolation()
@@ -109,7 +110,7 @@ class TestUnifiedIsolatedEnvironment:
         
         # Check values
         assert env.get('TEST_ISOLATION') == 'isolated_value'
-        assert os.environ.get('TEST_ISOLATION') == 'os_value'  # Should not be polluted
+        assert env.get('TEST_ISOLATION') == 'os_value'  # Should not be polluted
         
         # Test new variable in isolation
         env.set('TEST_NEW_VAR', 'new_value', 'test')
@@ -119,7 +120,7 @@ class TestUnifiedIsolatedEnvironment:
         # Disable isolation - should sync to os.environ
         env.disable_isolation()
         assert env.is_isolated() is False
-        assert os.environ.get('TEST_ISOLATION') == 'isolated_value'  # Should be synced
+        assert env.get('TEST_ISOLATION') == 'isolated_value'  # Should be synced
     
     def test_source_tracking(self):
         """Test that all modifications include source tracking."""
@@ -169,7 +170,7 @@ class TestUnifiedIsolatedEnvironment:
         assert normal_value == "normal_value"
         
         # Test with ${VARIABLE} expansion
-        os.environ['EXPAND_TEST'] = 'expanded_value'
+        env.set('EXPAND_TEST', 'expanded_value', "test")
         test_value = env._expand_shell_commands("prefix_${EXPAND_TEST}_suffix")
         assert test_value == "prefix_expanded_value_suffix"
         
@@ -415,8 +416,8 @@ TEST_FILE_VAR3='single quoted'
         env = get_env()
         
         # Set some initial values in os.environ
-        os.environ['RESET_TEST1'] = 'original1'
-        os.environ['RESET_TEST2'] = 'original2'
+        env.set('RESET_TEST1', 'original1', "test")
+        env.set('RESET_TEST2', 'original2', "test")
         
         # Enable isolation and modify values
         env.enable_isolation()

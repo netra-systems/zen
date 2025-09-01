@@ -202,7 +202,7 @@ class TestStagingConfigurationLoading:
                 
                 # If not isolated, should also be in os.environ
                 if not env.is_isolated():
-                    assert os.environ.get('ENVIRONMENT') == 'staging'
+                    assert env.get('ENVIRONMENT') == 'staging'
                 
             finally:
                 # Clean up temp file

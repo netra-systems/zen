@@ -1,5 +1,5 @@
-"""
 from shared.isolated_environment import get_env
+"""
 End-to-End Deployment Configuration Validation Tests
 
 Comprehensive failing tests that validate deployment configuration issues
@@ -227,12 +227,10 @@ class TestDeploymentConfigurationFailures:
             
             # Check database URL
             db_url = manager._get_postgres_url()
-            if db_url and "localhost" in db_url and get_env().get("ENVIRONMENT") == "staging":
                 precedence_issues.append("DATABASE_URL using local override in staging")
             
             # Check ClickHouse config
             ch_config = manager._get_clickhouse_configuration()
-            if ch_config.get("host") == "localhost" and get_env().get("ENVIRONMENT") == "staging":
                 precedence_issues.append("CLICKHOUSE_HOST using local override in staging")
             
             assert not precedence_issues, \
@@ -329,7 +327,6 @@ class TestServiceSpecificConfigurationFailures:
             url_mismatches = []
             
             for env_var, expected_url in expected_staging_urls.items():
-                actual_url = get_env().get(env_var)
                 if actual_url and "localhost" in actual_url:
                     url_mismatches.append(f"{env_var} pointing to localhost in staging")
             

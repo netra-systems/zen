@@ -1,6 +1,8 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python
 """SIMPLE CRITICAL CHAT FLOW TEST
 
+env = get_env()
 This is a simple test that validates the critical WebSocket chat flow
 without any external service dependencies or pytest fixtures.
 
@@ -30,10 +32,10 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 # Set minimal environment variables to prevent service lookups
-os.environ["TESTING"] = "1"
-os.environ["NETRA_ENV"] = "test"
-os.environ["ENVIRONMENT"] = "test"
-os.environ["USE_REAL_SERVICES"] = "false"
+env.set("TESTING", "1", "test")
+env.set("NETRA_ENV", "test", "test")
+env.set("ENVIRONMENT", "test", "test")
+env.set("USE_REAL_SERVICES", "false", "test")
 
 try:
     # Import actual production components

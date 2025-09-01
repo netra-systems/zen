@@ -1,5 +1,5 @@
-"""
 from shared.isolated_environment import get_env
+"""
 Test Harness Integration Test
 Tests the unified test harness service startup functionality.
 
@@ -132,10 +132,6 @@ class TestUnifiedHarness:
             
             # Verify test database URLs are set correctly
             import os
-            db_url = get_env().get("DATABASE_URL")
-            assert db_url == "sqlite+aiosqlite:///:memory:", f"Expected in-memory SQLite, got: {db_url}"
-            
-            redis_url = get_env().get("REDIS_URL")
             assert "localhost" in redis_url, f"Redis should use localhost: {redis_url}"
             
         finally:

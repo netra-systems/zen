@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 from shared.isolated_environment import get_env
 E2E test to reproduce the 500 error when attempting Google OAuth login.
@@ -15,6 +16,7 @@ from typing import Optional
 
 logger = logging.getLogger(__name__)
 
+env = get_env()
 class TestOAuthGoogleLogin500Error:
     """Test case to reproduce and validate the Google OAuth login 500 error"""
     
@@ -22,10 +24,6 @@ class TestOAuthGoogleLogin500Error:
     def auth_service_url(self) -> str:
         """Get auth service URL from environment or use default"""
         # Check multiple possible sources for the auth service URL
-        url = get_env().get("AUTH_SERVICE_URL")
-        if not url:
-            # Check if we're in test mode (port 8001) or dev mode (port 8081)
-            if get_env().get("ENVIRONMENT") == "test":
                 url = "http://127.0.0.1:8001"
             else:
                 url = "http://localhost:8081"
@@ -34,7 +32,6 @@ class TestOAuthGoogleLogin500Error:
     @pytest.fixture
     def frontend_url(self) -> str:
         """Get frontend URL from environment or use default"""
-        return get_env().get("FRONTEND_URL", "http://localhost:3000")
     
     async def wait_for_auth_service(self, auth_service_url: str, max_retries: int = 30) -> bool:
         """Wait for auth service to be ready"""
@@ -68,15 +65,6 @@ class TestOAuthGoogleLogin500Error:
         
         # Clear any OAuth credentials to ensure we test the error case
         # Save original values to restore later
-        original_client_id = get_env().get("OAUTH_GOOGLE_CLIENT_ID_ENV")
-        original_client_secret = get_env().get("OAUTH_GOOGLE_CLIENT_SECRET_ENV")
-        
-        try:
-            # Clear OAuth credentials to reproduce the error
-            if get_env().get("OAUTH_GOOGLE_CLIENT_ID_ENV") is not None:
-                del get_env().get("OAUTH_GOOGLE_CLIENT_ID_ENV")
-            if get_env().get("OAUTH_GOOGLE_CLIENT_SECRET_ENV") is not None:
-                del get_env().get("OAUTH_GOOGLE_CLIENT_SECRET_ENV")
             
             # Attempt to initiate Google OAuth login
             async with httpx.AsyncClient(follow_redirects=False) as client:
@@ -115,9 +103,6 @@ class TestOAuthGoogleLogin500Error:
         finally:
             # Restore original environment variables
             if original_client_id:
-                get_env().set("OAUTH_GOOGLE_CLIENT_ID_ENV", original_client_id)
-            if original_client_secret:
-                get_env().set("OAUTH_GOOGLE_CLIENT_SECRET_ENV", original_client_secret)
     
     @pytest.mark.asyncio
     async def test_google_oauth_login_with_placeholder_credentials_returns_500(self, auth_service_url: str):
@@ -131,13 +116,6 @@ class TestOAuthGoogleLogin500Error:
             pytest.skip(f"Auth service is not running at {auth_service_url}")
         
         # Save original values
-        original_client_id = get_env().get("OAUTH_GOOGLE_CLIENT_ID_ENV")
-        original_client_secret = get_env().get("OAUTH_GOOGLE_CLIENT_SECRET_ENV")
-        
-        try:
-            # Set placeholder credentials that will be detected as invalid
-            get_env().set("GOOGLE_CLIENT_ID",  )"REPLACE_WITH_YOUR_CLIENT_ID"
-            get_env().set("GOOGLE_CLIENT_SECRET",  )"REPLACE_WITH_YOUR_SECRET"
             
             async with httpx.AsyncClient(follow_redirects=False) as client:
                 response = await client.get(
@@ -170,13 +148,11 @@ class TestOAuthGoogleLogin500Error:
         finally:
             # Restore original environment variables
             if original_client_id:
-                get_env().set("GOOGLE_CLIENT_ID", original_client_id)
             else:
-                os.environ.pop("GOOGLE_CLIENT_ID", None)
+                env.delete("GOOGLE_CLIENT_ID", "test")
             if original_client_secret:
-                get_env().set("GOOGLE_CLIENT_SECRET", original_client_secret)
             else:
-                os.environ.pop("GOOGLE_CLIENT_SECRET", None)
+                env.delete("GOOGLE_CLIENT_SECRET", "test")
     
     @pytest.mark.asyncio
     async def test_google_oauth_login_with_valid_credentials_succeeds(self, auth_service_url: str):
@@ -190,14 +166,10 @@ class TestOAuthGoogleLogin500Error:
             pytest.skip(f"Auth service is not running at {auth_service_url}")
         
         # Save original values
-        original_client_id = get_env().get("OAUTH_GOOGLE_CLIENT_ID_ENV")
-        original_client_secret = get_env().get("OAUTH_GOOGLE_CLIENT_SECRET_ENV")
         
         try:
             # Set valid development OAuth credentials
             # These are from scripts/setup_dev_oauth.py
-            get_env().set("GOOGLE_CLIENT_ID",  )"304612253870-bqie9nvlaokfc2noos1nu5st614vlqam.apps.googleusercontent.com"
-            get_env().set("GOOGLE_CLIENT_SECRET",  )"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"
             
             async with httpx.AsyncClient(follow_redirects=False) as client:
                 response = await client.get(
@@ -218,13 +190,11 @@ class TestOAuthGoogleLogin500Error:
         finally:
             # Restore original environment variables
             if original_client_id:
-                get_env().set("GOOGLE_CLIENT_ID", original_client_id)
             else:
-                os.environ.pop("GOOGLE_CLIENT_ID", None)
+                env.delete("GOOGLE_CLIENT_ID", "test")
             if original_client_secret:
-                get_env().set("GOOGLE_CLIENT_SECRET", original_client_secret)
             else:
-                os.environ.pop("GOOGLE_CLIENT_SECRET", None)
+                env.delete("GOOGLE_CLIENT_SECRET", "test")
 
 
 if __name__ == "__main__":

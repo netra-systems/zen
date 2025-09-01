@@ -397,31 +397,37 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
     
     async def _send_orchestration_notification(self, thread_id: str, run_id: str, 
                                              event_type: str, message: str) -> None:
-        """Send orchestration-level WebSocket notification."""
+        """Send orchestration-level WebSocket notification via AgentWebSocketBridge."""
         try:
-            if not self.websocket_manager:
-                logger.debug(f"No WebSocket manager available for orchestration event: {event_type}")
-                return
+            from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
             
-            # Create orchestration notification payload
-            payload = {
-                "run_id": run_id,
-                "event_type": event_type,
-                "message": message,
-                "timestamp": self._get_current_timestamp(),
-                "agent_name": "supervisor",
-                "orchestration_level": True
-            }
+            bridge = await get_agent_websocket_bridge()
             
-            # Send notification
-            from netra_backend.app.schemas.websocket_models import WebSocketMessage
-            notification = WebSocketMessage(type=event_type, payload=payload)
-            await self.websocket_manager.send_to_thread(thread_id, notification.model_dump())
+            # Map event types to appropriate bridge notifications
+            if event_type == "orchestration_started":
+                await bridge.notify_agent_started(run_id, "Supervisor", {"orchestration_level": True, "message": message})
+            elif event_type == "orchestration_thinking":
+                await bridge.notify_agent_thinking(run_id, "Supervisor", message)
+            elif event_type == "orchestration_completed":
+                await bridge.notify_agent_completed(run_id, "Supervisor", {"orchestration_level": True})
+            elif event_type == "orchestration_error":
+                await bridge.notify_agent_error(run_id, "Supervisor", message, {"orchestration_level": True})
+            else:
+                # Custom orchestration event
+                payload = {
+                    "run_id": run_id,
+                    "event_type": event_type,
+                    "message": message,
+                    "timestamp": self._get_current_timestamp(),
+                    "agent_name": "supervisor",
+                    "orchestration_level": True
+                }
+                await bridge.notify_custom(run_id, "Supervisor", f"orchestration_{event_type}", payload)
             
-            logger.info(f"Supervisor sent orchestration notification: {event_type} - {message[:50]}...")
+            logger.info(f"Supervisor sent orchestration notification via bridge: {event_type} - {message[:50]}...")
             
         except Exception as e:
-            logger.warning(f"Failed to send supervisor orchestration notification {event_type}: {e}")
+            logger.warning(f"Failed to send supervisor orchestration notification via bridge {event_type}: {e}")
     
     def _get_current_timestamp(self) -> float:
         """Get current timestamp."""

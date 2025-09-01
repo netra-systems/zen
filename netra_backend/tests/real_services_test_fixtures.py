@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Shared fixtures and data models for real services tests.
 All functions ≤8 lines per requirements.
@@ -11,6 +12,7 @@ import pytest
 from netra_backend.app.config import get_config
 from pydantic import BaseModel
 
+env = get_env()
 class Thread(BaseModel):
     """Model for thread creation"""
     title: str
@@ -27,10 +29,10 @@ def _has_any_real_services_enabled() -> bool:
     """Check if any real services are enabled"""
     # @marked: Test infrastructure - checks environment flags for test mode
     return any([
-        os.environ.get("ENABLE_REAL_LLM_TESTING") == "true",
-        os.environ.get("ENABLE_REAL_DB_TESTING") == "true",
-        os.environ.get("ENABLE_REAL_REDIS_TESTING") == "true",
-        os.environ.get("ENABLE_REAL_CLICKHOUSE_TESTING") == "true"
+        env.get("ENABLE_REAL_LLM_TESTING") == "true",
+        env.get("ENABLE_REAL_DB_TESTING") == "true",
+        env.get("ENABLE_REAL_REDIS_TESTING") == "true",
+        env.get("ENABLE_REAL_CLICKHOUSE_TESTING") == "true"
     ])
 
 # Test markers for different service types
@@ -52,17 +54,17 @@ skip_if_no_real_services = pytest.mark.skipif(
 # Database-specific skip conditions
 skip_if_no_database = pytest.mark.skipif(
     # @marked: Test infrastructure - checks test configuration flags
-    os.environ.get("ENABLE_REAL_DB_TESTING") != "true",
+    env.get("ENABLE_REAL_DB_TESTING") != "true",
     reason="Real database tests disabled. Set ENABLE_REAL_DB_TESTING=true to run"
 )
 
 skip_if_no_redis = pytest.mark.skipif(
-    os.environ.get("ENABLE_REAL_REDIS_TESTING") != "true",
+    env.get("ENABLE_REAL_REDIS_TESTING") != "true",
     reason="Real Redis tests disabled. Set ENABLE_REAL_REDIS_TESTING=true to run"
 )
 
 skip_if_no_clickhouse = pytest.mark.skipif(
-    os.environ.get("ENABLE_REAL_CLICKHOUSE_TESTING") != "true",
+    env.get("ENABLE_REAL_CLICKHOUSE_TESTING") != "true",
     reason="Real ClickHouse tests disabled. Set ENABLE_REAL_CLICKHOUSE_TESTING=true to run"
 )
 

@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Test script to verify environment detection is working correctly.
 Run this to ensure all environment detection logic defaults to staging, not production.
@@ -8,15 +9,16 @@ from pathlib import Path
 
 # Add project root to path
 
+env = get_env()
 def test_auth_client_environment_detection():
     """Test auth client environment detection."""
     print("\n=== Testing Auth Client Environment Detection ===")
     
     # Test with no environment variables
-    os.environ.pop("ENVIRONMENT", None)
-    os.environ.pop("K_SERVICE", None)
-    os.environ.pop("K_REVISION", None)
-    os.environ.pop("TESTING", None)
+    env.delete("ENVIRONMENT", "test")
+    env.delete("K_SERVICE", "test")
+    env.delete("K_REVISION", "test")
+    env.delete("TESTING", "test")
     
     from netra_backend.app.clients.auth_client_config import (
         Environment,
@@ -31,29 +33,29 @@ def test_auth_client_environment_detection():
     print("[PASS] Correctly defaults to STAGING when no env vars")
     
     # Test with ENVIRONMENT=staging
-    os.environ["ENVIRONMENT"] = "staging"
+    env.set("ENVIRONMENT", "staging", "test")
     env = detector.detect_environment()
     print(f"ENVIRONMENT=staging: {env.value}")
     assert env == Environment.STAGING
     print("[PASS] Correctly detects staging from ENVIRONMENT var")
     
     # Test with K_SERVICE containing staging
-    os.environ.pop("ENVIRONMENT", None)
-    os.environ["K_SERVICE"] = "netra-staging-backend"
+    env.delete("ENVIRONMENT", "test")
+    env.set("K_SERVICE", "netra-staging-backend", "test")
     env = detector.detect_environment()
     print(f"K_SERVICE=netra-staging-backend: {env.value}")
     assert env == Environment.STAGING
     print("[PASS] Correctly detects staging from K_SERVICE")
     
     # Test with K_SERVICE containing just backend (should NOT be production)
-    os.environ["K_SERVICE"] = "netra-backend"
+    env.set("K_SERVICE", "netra-backend", "test")
     env = detector.detect_environment()
     print(f"K_SERVICE=netra-backend: {env.value}")
     assert env == Environment.STAGING, f"Backend alone should not trigger production, got {env.value}"
     print("[PASS] Correctly defaults to staging for ambiguous service name")
     
     # Test with explicit production
-    os.environ["K_SERVICE"] = "netra-prod-backend"
+    env.set("K_SERVICE", "netra-prod-backend", "test")
     env = detector.detect_environment()
     print(f"K_SERVICE=netra-prod-backend: {env.value}")
     assert env == Environment.PRODUCTION
@@ -66,7 +68,7 @@ def test_middleware_environment_defaults():
     """Test that middleware defaults to staging."""
     print("\n=== Testing Middleware Environment Defaults ===")
     
-    os.environ.pop("ENVIRONMENT", None)
+    env.delete("ENVIRONMENT", "test")
     
     # Test by directly checking the environment default values in the code
     # without importing the full modules (to avoid circular imports)
@@ -126,7 +128,7 @@ def test_oauth_config_fallback():
     """Test OAuth configuration fallback."""
     print("\n=== Testing OAuth Config Fallback ===")
     
-    os.environ.pop("ENVIRONMENT", None)
+    env.delete("ENVIRONMENT", "test")
     from netra_backend.app.clients.auth_client_config import (
         Environment,
         EnvironmentDetector,

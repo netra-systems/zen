@@ -22,10 +22,14 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
+# Get environment manager
+from shared.isolated_environment import get_env
+env = get_env()
+
 # CRITICAL: Enable REAL services for mission-critical tests
-os.environ['USE_REAL_SERVICES'] = 'true'
-os.environ['SKIP_REAL_SERVICES'] = 'false'
-os.environ['RUN_E2E_TESTS'] = 'true'
+env.set('USE_REAL_SERVICES', 'true', "test")
+env.set('SKIP_REAL_SERVICES', 'false', "test")
+env.set('RUN_E2E_TESTS', 'true', "test")
 
 # Import REAL service managers - NO MOCKS
 try:

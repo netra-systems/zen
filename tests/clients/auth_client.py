@@ -4,10 +4,12 @@ import logging
 from typing import Any, Dict, List, Optional
 
 import httpx
+from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
 
+env = get_env()
 class AuthTestClient:
     """Typed client for testing auth service endpoints."""
     
@@ -164,7 +166,7 @@ class AuthTestClient:
         
         # Get JWT secret from environment (set by test config)
         import os
-        jwt_secret = os.environ.get("JWT_SECRET_KEY", "test-jwt-secret-key-unified-testing-32chars")
+        jwt_secret = env.get("JWT_SECRET_KEY", "test-jwt-secret-key-unified-testing-32chars")
         
         # Create a valid JWT token for testing
         payload = {

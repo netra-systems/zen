@@ -1,5 +1,6 @@
-"""
 from shared.isolated_environment import get_env
+
+"""
 Multi-Service WebSocket Authentication Flow E2E Test
 
 Tests WebSocket authentication across service boundaries with REAL services
@@ -29,12 +30,13 @@ import pytest
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 
 # Enable real services for this test module
+env_vars = get_env()
 pytestmark = pytest.mark.skipif(
-    get_env().get("USE_REAL_SERVICES", "false").lower() != "true",
+    env_vars.get("USE_REAL_SERVICES", "false").lower() != "true",
     reason="Real services disabled (set USE_REAL_SERVICES=true)"
 )
 
-class TestMultiServiceWebSocketAuther:
+class MultiServiceWebSocketAuthTester:
     """Tests WebSocket authentication flow across Auth, Backend, and Database services."""
     
     def __init__(self, real_services):

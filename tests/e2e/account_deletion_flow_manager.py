@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Account Deletion Flow Manager - E2E Test Management
 
 BVJ (Business Value Justification):
@@ -17,8 +19,8 @@ from shared.isolated_environment import get_env
 
 # Set test environment
 env = get_env()
-env.set("TESTING", "1")
-env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
+env.set("TESTING", "1", "test")
+env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
 
 from tests.e2e.account_deletion_helpers import AccountDeletionE2ETester
 from tests.e2e.harness_utils import UnifiedE2ETestHarness

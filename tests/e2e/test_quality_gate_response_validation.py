@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 """Quality Gate Response Validation Integration Test
 
+env = get_env()
 Business Value Justification (BVJ):
 - Segment: Enterprise ($25K MRR protection)
 - Business Goal: Quality Assurance for AI Response Standards
@@ -20,11 +22,6 @@ from typing import Any, Dict, List, Optional
 import pytest
 
 # Set testing environment before imports
-from shared.isolated_environment import get_env
-env = get_env()
-env.set("TESTING", "1", "test_quality_gate_response_validation")
-env.set("ENVIRONMENT", "testing", "test_quality_gate_response_validation")
-env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test_quality_gate_response_validation")
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import RedisManager

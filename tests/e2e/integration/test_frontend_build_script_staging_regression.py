@@ -1,6 +1,6 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
-from shared.isolated_environment import get_env
 Frontend Build Script Staging Regression Tests
 
 Tests to replicate frontend build issues found in GCP staging audit:
@@ -317,7 +317,11 @@ class TestFrontendBuildEnvironmentRegression:
         invalid_env_vars = []
         
         for env_var in required_env_vars:
+<<<<<<< HEAD
             value = get_env().get(env_var)
+=======
+            value = env.get(env_var)
+>>>>>>> cd652f04f43df1a879423564315f459a150f8a24
             
             if value is None:
                 missing_env_vars.append(env_var)

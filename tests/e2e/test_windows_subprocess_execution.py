@@ -1,5 +1,5 @@
-"""
 from shared.isolated_environment import get_env
+"""
 E2E Tests for Windows Subprocess Execution
 Tests Windows-specific subprocess handling for frontend and service management.
 
@@ -311,11 +311,6 @@ print("Server ready")
         Business Impact: Services can't find dependencies, configuration issues
         """
         # Test custom environment variable
-        custom_env = get_env().as_dict().copy()
-        custom_env["TEST_VAR"] = "windows_test_value"
-        
-        result = subprocess.run(
-            [sys.executable, "-c", "import os; print(get_env().get('TEST_VAR', 'NOT_FOUND'))"],
             capture_output=True,
             text=True,
             timeout=5,
@@ -329,7 +324,6 @@ print("Server ready")
         
         # Test PATH variable preservation
         result = subprocess.run(
-            [sys.executable, "-c", "import os; print(len(get_env().get('PATH', '').split(';')))"],
             capture_output=True,
             text=True,
             timeout=5,

@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 """User Login Flow Integration Tests (L3)
 
+env = get_env()
 Comprehensive integration tests for all user login scenarios including OAuth,
 API key authentication, session management, and multi-device login flows.
 
@@ -42,8 +44,8 @@ import pytest
 import websockets
 
 # Set test environment
-os.environ["ENVIRONMENT"] = "testing"
-os.environ["TESTING"] = "true"
+env.set("ENVIRONMENT", "testing", "test")
+env.set("TESTING", "true", "test")
 
 # Import auth types
 from netra_backend.app.clients.auth_client_core import auth_client

@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """Test Staging Startup Sequence
+env = get_env()
 Tests the complete startup sequence for staging deployment.
 Validates service initialization order, dependencies, and configuration.
 """
@@ -123,7 +125,7 @@ class StagingStartupTester:
         # Real validation
         missing = []
         for config in required_configs:
-            if not os.environ.get(config):
+            if not env.get(config):
                 missing.append(config)
                 
         if missing:
@@ -213,9 +215,9 @@ class StagingStartupTester:
         """Check if a dependency is available."""
         # Simplified check - in real implementation would actually test connections
         dependency_checks = {
-            "database": os.environ.get("DATABASE_URL"),
-            "redis": os.environ.get("REDIS_URL"),
-            "clickhouse": os.environ.get("CLICKHOUSE_HOST"),
+            "database": env.get("DATABASE_URL"),
+            "redis": env.get("REDIS_URL"),
+            "clickhouse": env.get("CLICKHOUSE_HOST"),
             "backend": True,  # Assume available if we're running
         }
         return bool(dependency_checks.get(dependency, False))
@@ -292,8 +294,8 @@ def main():
     args = parser.parse_args()
     
     # Set staging environment if not set
-    if not os.environ.get("ENVIRONMENT"):
-        os.environ["ENVIRONMENT"] = "staging"
+    if not env.get("ENVIRONMENT"):
+        env.set("ENVIRONMENT", "staging", "test")
     
     tester = StagingStartupTester(simulate=args.simulate)
     success, errors = tester.run_all_tests()

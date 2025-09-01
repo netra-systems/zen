@@ -320,11 +320,26 @@ class TriageSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin
     def reset_execution_metrics(self) -> None: self.execution_monitor.reset_metrics("TriageSubAgent")
     def get_modern_reliability_status(self) -> Dict[str, Any]: return self.modern_reliability.get_health_status()
 
-    # Send update method for WebSocket communication
+    # Send update method for WebSocket communication via bridge
     async def _send_update(self, run_id: str, update: Dict[str, Any]) -> None:
-        """Send update via WebSocket."""
+        """Send update via AgentWebSocketBridge for crystal clear emission paths."""
         try:
-            if hasattr(self, 'websocket_manager') and self.websocket_manager:
-                await self.websocket_manager.send_agent_update(run_id, "TriageSubAgent", update)
+            from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
+            
+            bridge = await get_agent_websocket_bridge()
+            status = update.get('status', 'processing')
+            message = update.get('message', '')
+            
+            # Map update status to appropriate bridge notification
+            if status == 'processing':
+                await bridge.notify_agent_thinking(run_id, "TriageSubAgent", message)
+            elif status == 'completed' or status == 'completed_with_fallback':
+                await bridge.notify_agent_completed(run_id, "TriageSubAgent", 
+                                                   result=update.get('result'), 
+                                                   execution_time_ms=None)
+            else:
+                # Custom status updates
+                await bridge.notify_custom(run_id, "TriageSubAgent", f"triage_{status}", update)
+            
         except Exception as e:
-            logger.debug(f"Failed to send WebSocket update: {e}")
+            logger.debug(f"Failed to send WebSocket update via bridge: {e}")

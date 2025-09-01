@@ -1,6 +1,5 @@
-"""E2E Health Check Cascade with Degraded Mode Test - Critical System Resilience
-
 from shared.isolated_environment import get_env
+"""E2E Health Check Cascade with Degraded Mode Test - Critical System Resilience
 Business Value Justification (BVJ):
 1. Segment: ALL customer segments
 2. Business Goal: Graceful degradation prevents total outages
@@ -56,7 +55,6 @@ class ClickHouseFailureSimulator:
     async def _block_clickhouse_connections(self) -> None:
         """Block ClickHouse connections by environment override."""
         import os
-        get_env().set('CLICKHOUSE_DISABLED', 'true')
         await asyncio.sleep(1)  # Allow configuration change to propagate
     
     async def restore_clickhouse_service(self) -> bool:
@@ -71,8 +69,6 @@ class ClickHouseFailureSimulator:
     
     async def _restore_clickhouse_connections(self) -> None:
         """Restore ClickHouse connections by removing override."""
-        if get_env().get("CLICKHOUSE_DISABLED") is not None:
-            del get_env().get('CLICKHOUSE_DISABLED')
         await asyncio.sleep(2)  # Allow service recovery time
 
 class DegradedModeValidator:

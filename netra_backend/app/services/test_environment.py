@@ -6,8 +6,10 @@ from typing import Any, Dict, List, Optional
 
 import redis.asyncio as redis
 from loguru import logger
+from shared.isolated_environment import get_env
 
 
+env = get_env()
 class TestEnvironment:
     """Test environment management for E2E tests with real service integration."""
     
@@ -26,7 +28,7 @@ class TestEnvironment:
         
         # Initialize Redis connection if not already set
         if not self.redis_client:
-            redis_url = os.environ.get("REDIS_URL", "redis://localhost:6380/0")
+            redis_url = env.get("REDIS_URL", "redis://localhost:6380/0")
             self.redis_client = await redis.from_url(redis_url)
         
         # Test Redis connection

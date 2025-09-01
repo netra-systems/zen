@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python
 """
+env = get_env()
 Comprehensive frontend test runner for Netra AI Platform
 Designed for easy use by Claude Code and CI/CD pipelines
 Now with test isolation support for concurrent execution
@@ -252,7 +254,7 @@ def check_backend_running(isolation_manager=None) -> bool:
         if isolation_manager and isolation_manager.ports:
             port = isolation_manager.ports.get('backend', 8000)
         else:
-            port = int(os.environ.get('BACKEND_PORT', 8000))
+            port = int(env.get('BACKEND_PORT', 8000))
         response = requests.get(f"http://localhost:{port}/health", timeout=1)
         return response.status_code == 200
     except:
@@ -266,7 +268,7 @@ def check_frontend_running(isolation_manager=None) -> bool:
         if isolation_manager and isolation_manager.ports:
             port = isolation_manager.ports.get('frontend', 3000)
         else:
-            port = int(os.environ.get('FRONTEND_PORT', 3000))
+            port = int(env.get('FRONTEND_PORT', 3000))
         response = requests.get(f"http://localhost:{port}", timeout=1)
         return response.status_code == 200
     except:

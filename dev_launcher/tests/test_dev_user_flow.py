@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Fixed Dev Launcher User Flow Tests
 
 Simplified tests that test actual launcher functionality rather than
@@ -40,8 +42,8 @@ class TestDevUserCreation:
     def dev_launcher(self, mock_dev_config):
         """Create actual dev launcher instance"""
         # Set required environment variables
-        os.environ['DATABASE_URL'] = 'postgresql://test:test@localhost/test'
-        os.environ['JWT_SECRET_KEY'] = 'test-secret-key'
+        env.set('DATABASE_URL', 'postgresql://test:test@localhost/test', "test")
+        env.set('JWT_SECRET_KEY', 'test-secret-key', "test")
         
         launcher = DevLauncher(mock_dev_config)
         return launcher
@@ -153,8 +155,8 @@ class TestDevWorkflowOptimization:
     @pytest.fixture
     def optimized_launcher(self, optimized_config):
         """Create optimized launcher instance"""
-        os.environ['DATABASE_URL'] = 'postgresql://test:test@localhost/test'
-        os.environ['JWT_SECRET_KEY'] = 'test-secret-key'
+        env.set('DATABASE_URL', 'postgresql://test:test@localhost/test', "test")
+        env.set('JWT_SECRET_KEY', 'test-secret-key', "test")
         
         launcher = DevLauncher(optimized_config)
         return launcher
@@ -229,8 +231,8 @@ class TestDevLauncherIntegration:
     @pytest.fixture
     def integration_launcher(self, integration_config):
         """Create launcher for integration testing"""
-        os.environ['DATABASE_URL'] = 'postgresql://test:test@localhost/test'
-        os.environ['JWT_SECRET_KEY'] = 'test-secret-key'
+        env.set('DATABASE_URL', 'postgresql://test:test@localhost/test', "test")
+        env.set('JWT_SECRET_KEY', 'test-secret-key', "test")
         
         launcher = DevLauncher(integration_config)
         return launcher

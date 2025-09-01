@@ -237,11 +237,19 @@ class AgentRegistry:
             self.llm_manager, self.tool_dispatcher))
 
     def set_websocket_manager(self, manager: 'WebSocketManager') -> None:
-        """Set websocket manager through orchestrator integration."""
+        """Set websocket manager and enhance tool dispatcher immediately."""
         self.websocket_manager = manager
         
-        # Delegate enhancement to orchestrator (will be called during startup)
-        logger.info("WebSocket manager set on registry - orchestrator will handle enhancement")
+        # Enhance tool dispatcher immediately if available
+        if manager and hasattr(self, 'tool_dispatcher') and self.tool_dispatcher:
+            try:
+                from netra_backend.app.agents.unified_tool_execution import (
+                    enhance_tool_dispatcher_with_notifications
+                )
+                enhance_tool_dispatcher_with_notifications(self.tool_dispatcher, manager)
+                logger.info("Tool dispatcher enhanced with WebSocket notifications immediately")
+            except Exception as e:
+                logger.error(f"Failed to enhance tool dispatcher: {e}")
         
         # Set WebSocket manager on all registered agents (backward compatibility)
         agent_count = 0

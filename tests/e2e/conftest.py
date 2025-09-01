@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 E2E test fixtures and configuration.
 ENFORCES REAL SERVICES ONLY - NO MOCKS ALLOWED.
 """
@@ -39,30 +41,29 @@ def pytest_configure(config):
     env = get_env()
     if (env.get("USE_REAL_LLM") == "true" or env.get("TEST_USE_REAL_LLM") == "true"):
         # Re-set both for compatibility
-        env.set("USE_REAL_LLM", "true")
-        env.set("TEST_USE_REAL_LLM", "true")  # Legacy compatibility
-        env.set("ENABLE_REAL_LLM_TESTING", "true")
+        env.set("USE_REAL_LLM", "true", "test")
+        env.set("TEST_USE_REAL_LLM", "true", "test")  # Legacy compatibility
+        env.set("ENABLE_REAL_LLM_TESTING", "true", "test")
 
 # CRITICAL: Override any PostgreSQL configuration for E2E tests to use SQLite
 # E2E tests should be fast and not depend on external databases
 # This must be set BEFORE any backend modules are imported
-if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
+if "pytest" in sys.modules or env.get("PYTEST_CURRENT_TEST"):
     # Check if we're in staging environment
-    env = get_env()
     current_env = env.get("ENVIRONMENT", "").lower()
     is_staging = current_env == "staging"
     
     if is_staging:
         # Staging environment - use staging database configuration
-        env.set("E2E_TESTING", "true")
-        env.set("TESTING", "0")  # Not local testing in staging
+        env.set("E2E_TESTING", "true", "test")
+        env.set("TESTING", "0", "test")  # Not local testing in staging
         # Keep existing ENVIRONMENT=staging
     else:
         # Force SQLite for local E2E tests regardless of other configurations
-        env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
-        env.set("TESTING", "1")
-        env.set("ENVIRONMENT", "testing")
-        env.set("E2E_TESTING", "true")
+        env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
+        env.set("TESTING", "1", "test")
+        env.set("ENVIRONMENT", "testing", "test")
+        env.set("E2E_TESTING", "true", "test")
 
 # Dynamic port configuration for E2E tests
 # Determine current environment
@@ -230,7 +231,7 @@ async def concurrent_test_environment():
     
     # Initialize real Redis connection
     env.redis_client = await redis.from_url(
-        redis_env.get("REDIS_URL", "redis://localhost:6379/0")
+        env.get("REDIS_URL", "redis://localhost:6379/0")
     )
     
     # Initialize real database pool (SQLite for tests)

@@ -1,4 +1,5 @@
 """
+env = get_env()
 Comprehensive Environment Variable Source Tracking Tests
 
 This test module identifies and validates critical gaps in environment variable source tracking,
@@ -36,7 +37,7 @@ class TestEnvironmentSourceTrackingComprehensive:
         self.env._variable_sources.clear()
         
         # Store original environment for cleanup
-        self.original_env = dict(os.environ)
+        self.original_env = env.get_all()
     
     def teardown_method(self):
         """Cleanup after each test."""
@@ -50,8 +51,8 @@ class TestEnvironmentSourceTrackingComprehensive:
                 pytest_vars[key] = os.environ[key]
         
         # Restore original environment
-        os.environ.clear()
-        os.environ.update(self.original_env)
+        env.clear()
+        env.update(self.original_env, "test")
         
         # Re-add pytest variables if they were present
         for key, value in pytest_vars.items():

@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Backend Server Listening Fix Test
 Tests and fixes the issue where the backend service initializes but doesn't listen on port 8000.
 
@@ -63,7 +65,7 @@ class BackendServerController:
         print(f"Starting backend server from {main_path}")
         
         # Use same environment as current process but ensure proper Python path
-        env = os.environ.copy()
+        env = env.get_all()
         env['PYTHONPATH'] = str(backend_path.parent)
         env['PYTHONUNBUFFERED'] = '1'
         

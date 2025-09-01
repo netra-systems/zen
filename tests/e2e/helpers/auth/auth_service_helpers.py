@@ -1,5 +1,5 @@
-"""
 from shared.isolated_environment import get_env
+"""
 Auth Service Independence Test - P0 CRITICAL - Test #1
 BVJ: Enterprise | SOC2 Compliance | Microservice Independence | $50K+ MRR at risk
 SPEC: SPEC/independent_services.xml
@@ -454,7 +454,11 @@ class AuthServiceIndependenceValidator:
     async def _start_auth_service_isolated(self, port: int) -> Optional[subprocess.Popen]:
         """Start auth service in complete isolation."""
         try:
+<<<<<<< HEAD
             env = get_env().as_dict().copy()
+=======
+            env = env.get_all()
+>>>>>>> cd652f04f43df1a879423564315f459a150f8a24
             env.update({
                 "PORT": str(port),
                 "ENVIRONMENT": "test",

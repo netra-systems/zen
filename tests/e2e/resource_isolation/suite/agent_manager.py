@@ -1,5 +1,5 @@
-"""
 from shared.isolated_environment import get_env
+"""
 Tenant Agent Manager for Resource Isolation Testing
 
 Manages creation, connection, and cleanup of tenant agents.
@@ -125,7 +125,6 @@ class TenantAgentManager:
         # If all connections failed due to auth issues, fallback to offline mode
         if len(connected_agents) == 0 and auth_failures == len(agents):
             logger.warning("All WebSocket connections failed - falling back to CPU isolation offline mode")
-            get_env().set("CPU_ISOLATION_OFFLINE_MODE",  )"true"
             return self._create_mock_connections(agents)
         
         logger.info(f"Established connections for {len(connected_agents)}/{len(agents)} agents")

@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Test script to validate WebSocket configuration fixes for Docker environment.
@@ -18,6 +19,7 @@ from typing import Dict, Any
 
 logger = logging.getLogger(__name__)
 
+env = get_env()
 class DockerWebSocketTester:
     """Test WebSocket connections for Docker development environment."""
     
@@ -47,7 +49,7 @@ class DockerWebSocketTester:
         }
         
         for var_name, expected in required_vars.items():
-            actual = os.environ.get(var_name)
+            actual = env.get(var_name)
             self.results["environment_vars"][var_name] = {
                 "expected": expected,
                 "actual": actual,
@@ -55,7 +57,7 @@ class DockerWebSocketTester:
             }
             
         for var_name, expected in docker_compose_vars.items():
-            actual = os.environ.get(var_name)
+            actual = env.get(var_name)
             self.results["environment_vars"][var_name] = {
                 "expected": expected,
                 "actual": actual,
@@ -206,9 +208,9 @@ class DockerWebSocketTester:
         
         # Simulate the OAUTH SIMULATION check logic
         try:
-            allow_dev_bypass = os.environ.get("ALLOW_DEV_OAUTH_SIMULATION", "false").lower() == "true"
-            websocket_bypass = os.environ.get("WEBSOCKET_AUTH_BYPASS", "false").lower() == "true"
-            environment = os.environ.get("ENVIRONMENT", "production").lower()
+            allow_dev_bypass = env.get("ALLOW_DEV_OAUTH_SIMULATION", "false").lower() == "true"
+            websocket_bypass = env.get("WEBSOCKET_AUTH_BYPASS", "false").lower() == "true"
+            environment = env.get("ENVIRONMENT", "production").lower()
             
             is_development = environment == "development"
             bypass_should_work = is_development and (allow_dev_bypass or websocket_bypass)

@@ -22,6 +22,7 @@ from typing import Dict, Optional
 import docker
 import httpx
 import pytest
+from shared.isolated_environment import get_env
 
 from shared.isolated_environment import get_env
 
@@ -95,12 +96,8 @@ class DockerServiceController:
         pytest.fail(f"Service {service_name} did not become healthy within {timeout}s")
 
 
+env = get_env()
 @pytest.fixture(scope="module")
-def service_controller():
-    """Fixture for controlling docker services."""
-    # Verify we're in real services mode
-    if not env.get("USE_REAL_SERVICES", "").lower() == "true":
-        pytest.skip("Test requires USE_REAL_SERVICES=true environment variable")
     
     controller = DockerServiceController()
     yield controller

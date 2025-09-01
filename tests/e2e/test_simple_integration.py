@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 from shared.isolated_environment import get_env
 Simple Integration Test - Bypasses Complex Harness
@@ -18,6 +19,7 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 
+env = get_env()
 class SimpleServiceManager:
     """Simplified service manager for testing."""
     
@@ -32,7 +34,6 @@ class SimpleServiceManager:
             return
         
         auth_main = project_root / "auth_service" / "main.py"
-        env = get_env().as_dict().copy()
         env["PORT"] = "8001"
         # Enable fast test mode to avoid database initialization issues
         env["AUTH_FAST_TEST_MODE"] = "true"
@@ -65,7 +66,6 @@ class SimpleServiceManager:
             print("Backend service already running")
             return
         
-        env = get_env().as_dict().copy()
         env["ENVIRONMENT"] = "test"
         env["AUTH_FAST_TEST_MODE"] = "true"
         

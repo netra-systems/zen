@@ -1,5 +1,5 @@
-"""
 from shared.isolated_environment import get_env
+"""
 CRITICAL E2E Test: Service Independence After Launcher Completion
 
 This test addresses the critical service independence issue identified in iteration 7:
@@ -118,7 +118,6 @@ class ServiceIndependenceValidator:
             "--dynamic", "--no-browser", "--non-interactive", "--minimal"
         ]
         
-        env = get_env().as_dict().copy()
         env["NETRA_TEST_MODE"] = "true"
         env["NETRA_STARTUP_MODE"] = "minimal"
         

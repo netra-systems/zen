@@ -1,5 +1,5 @@
-"""
 from shared.isolated_environment import get_env
+"""
 Resource Isolation Test Suite Core
 
 Core test suite class for resource isolation testing.
@@ -115,7 +115,6 @@ class TestResourceIsolationSuite:
         logger.warning("CPU isolation will be tested using process monitoring without WebSocket connections")
         
         # Set offline mode for the rest of the test suite
-        get_env().set("CPU_ISOLATION_OFFLINE_MODE",  )"true"
         return True
 
     async def cleanup_test_environment(self):

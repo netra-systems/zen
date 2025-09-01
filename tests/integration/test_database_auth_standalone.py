@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Standalone test for database connection auth logging issues.
 
 This test validates the core business requirement: that database authentication
@@ -22,11 +24,11 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 # Set up test environment
-os.environ['DATABASE_URL'] = 'postgresql://test_user:test_pass@localhost:5434/netra_test'
-os.environ['REDIS_URL'] = 'redis://localhost:6381'
-os.environ['TESTING'] = 'true'
-os.environ['AUTH_TEST_MODE'] = 'true'
-os.environ['USE_REAL_SERVICES'] = 'true'
+env.set('DATABASE_URL', 'postgresql://test_user:test_pass@localhost:5434/netra_test', "test")
+env.set('REDIS_URL', 'redis://localhost:6381', "test")
+env.set('TESTING', 'true', "test")
+env.set('AUTH_TEST_MODE', 'true', "test")
+env.set('USE_REAL_SERVICES', 'true', "test")
 
 
 def test_database_connection_no_auth_errors():
@@ -211,8 +213,8 @@ def test_database_manager_no_credential_logging():
         
         for i, url in enumerate(test_urls):
             # Set environment variable
-            original_url = os.environ.get('DATABASE_URL')
-            os.environ['DATABASE_URL'] = url
+            original_url = env.get('DATABASE_URL')
+            env.set('DATABASE_URL', url, "test")
             
             try:
                 # Test various URL generation methods
@@ -228,9 +230,9 @@ def test_database_manager_no_credential_logging():
             finally:
                 # Restore original URL
                 if original_url:
-                    os.environ['DATABASE_URL'] = original_url
+                    env.set('DATABASE_URL', original_url, "test")
                 elif 'DATABASE_URL' in os.environ:
-                    del os.environ['DATABASE_URL']
+                    env.delete('DATABASE_URL', "test")
         
         # Get captured logs
         log_output = log_capture.getvalue()

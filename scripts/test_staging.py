@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python
 """
 Quick script to run tests against the actual staging environment.
@@ -16,6 +17,7 @@ from pathlib import Path
 
 # Add project root to path
 
+env = get_env()
 def setup_staging_env():
     """Set up environment variables for staging tests."""
     staging_env = {
@@ -35,7 +37,7 @@ def setup_staging_env():
     }
     
     # Update environment
-    os.environ.update(staging_env)
+    env.update(staging_env, "test")
     
     print("=" * 80)
     print("STAGING ENVIRONMENT TEST RUNNER")

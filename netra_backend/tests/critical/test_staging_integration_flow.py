@@ -1,6 +1,8 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """Staging Integration Flow Tests
 
+env = get_env()
 Business Value: Validates complete staging deployment flow.
 Prevents deployment failures that impact customer confidence.
 
@@ -202,7 +204,7 @@ class TestStagingErrorHandling:
     @pytest.mark.asyncio
     async def test_error_logging_staging(self, staging_environment):
         """Test error logging configuration for staging."""
-        log_level = os.environ.get("LOG_LEVEL", "INFO")
+        log_level = env.get("LOG_LEVEL", "INFO")
         assert log_level in ["INFO", "DEBUG"]
     
     @pytest.mark.asyncio
@@ -272,7 +274,7 @@ class TestStagingEndToEndFlow:
     def _check_environment_vars(self) -> bool:
         """Check required environment variables."""
         required = ["ENVIRONMENT", "DATABASE_URL", "REDIS_URL"]
-        return all(os.environ.get(var) for var in required)
+        return all(env.get(var) for var in required)
     
     def _check_service_urls(self) -> bool:
         """Check service URLs are configured."""

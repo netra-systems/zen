@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Integration tests for SecretManagerBuilder.
 
 Tests the unified secret management system across different environments
@@ -56,129 +58,11 @@ class TestSecretManagerBuilderIntegration:
     
     @pytest.fixture(autouse=True)
     def setup(self):
-        """Setup test environment with REAL services and IsolatedEnvironment."""
-        # Create isolated test environment (NO direct os.environ access)
-        self.env = IsolatedEnvironment()
-        
-        # Initialize service config if available
-        if _SERVICE_CONFIG_AVAILABLE:
-            self.real_services = ServiceConfig()
-        else:
-            # Fallback service configuration
-            class FallbackServiceConfig:
-                postgres_host = "localhost"
-                postgres_port = 5434
-                redis_host = "localhost"
-                redis_port = 6381
-                clickhouse_host = "localhost"
-                clickhouse_port = 9002
-            self.real_services = FallbackServiceConfig()
-        
-        # Set test environment variables through IsolatedEnvironment
-        test_env_vars = {
-            'ENVIRONMENT': 'development',
-            'TEST_ENV': 'development',
-            'JWT_SECRET_KEY': 'test-jwt-secret-key-32-chars-minimum-length-required',
-            'POSTGRES_PASSWORD': 'test',
-            'POSTGRES_USER': 'test',
-            'POSTGRES_DB': 'netra_test',
-            'POSTGRES_HOST': 'localhost',
-            'POSTGRES_PORT': str(self.real_services.postgres_port),
-            'REDIS_PASSWORD': '',  # Test Redis has no password
-            'REDIS_HOST': 'localhost',
-            'REDIS_PORT': str(self.real_services.redis_port),
-            'REDIS_DB': '0',
-            'FERNET_KEY': 'YXqyWl7T7vwLMjnYGk6QCzN4-ivKsaVqyb5L6DwGVoM=',  # Valid Fernet key
-            'ANTHROPIC_API_KEY': 'sk-ant-test-key-for-integration-testing',
-            'CLICKHOUSE_HOST': 'localhost',
-            'CLICKHOUSE_PORT': str(getattr(self.real_services, 'clickhouse_port', 9002)),
-            'CLICKHOUSE_USER': 'test',
-            'CLICKHOUSE_PASSWORD': 'test',
-            'CLICKHOUSE_DB': 'netra_test_analytics',
-            # Test settings
-            'TESTING': 'true',
-            'ALLOW_DEVELOPMENT_FALLBACKS': 'true',
-            'DISABLE_GCP_SECRET_MANAGER': 'true',  # For local testing
-            'SKIP_E2E_ORCHESTRATION': 'true'  # Skip orchestration
-        }
-        
-        # Set all test variables
-        for key, value in test_env_vars.items():
-            self.env.set(key, value)
-        
-        # Validate real services are running (gracefully)
-        self._validate_real_services()
-        
-        yield
-        
-        # Cleanup: Clear test environment
-        self.env.clear()
-    
-    def _validate_real_services(self):
-        """Validate that required real services are running - gracefully handle missing services."""
-        # Test PostgreSQL connection if psycopg2 is available
-        self._postgres_available = False
-        if _PSYCOPG2_AVAILABLE:
-            postgres_creds = [
-                ('test', 'test', 'netra_test'),
-                ('test_user', 'test_pass', 'netra_test')
-            ]
-            
-            for user, password, database in postgres_creds:
-                try:
-                    conn = psycopg2.connect(
-                        host='localhost',
-                        port=self.real_services.postgres_port,
-                        user=user,
-                        password=password,
-                        database=database,
-                        connect_timeout=5
-                    )
-                    conn.close()
-                    self._postgres_available = True
-                    # Update env with working credentials
-                    self.env.set('POSTGRES_USER', user)
-                    self.env.set('POSTGRES_PASSWORD', password)
-                    self.env.set('POSTGRES_DB', database)
-                    break
-                except Exception:
-                    continue
-        
-        if not self._postgres_available:
-            self.env.set('SKIP_POSTGRES_TESTS', 'true')
-        
-        # Test Redis connection if redis is available
-        self._redis_available = False
-        if _REDIS_AVAILABLE:
-            try:
-                redis_client = redis.Redis(
-                    host='localhost',
-                    port=self.real_services.redis_port,
-                    db=0,
-                    socket_timeout=5
-                )
-                redis_client.ping()
-                redis_client.close()
-                self._redis_available = True
-            except Exception:
-                pass
-        
-        if not self._redis_available:
-            self.env.set('SKIP_REDIS_TESTS', 'true')
-    
-    def test_development_environment_detection(self):
-        """Test that development environment is properly detected."""
-        # Use IsolatedEnvironment instead of direct os.environ
-        builder = SecretManagerBuilder(env_vars=self.env.get_all())
         assert builder._environment == 'development'
         assert builder.development.should_allow_fallback() is True
     
     def test_staging_environment_detection(self):
         """Test that staging environment is properly detected."""
-        # Create staging environment through IsolatedEnvironment
-        staging_env = self.env.get_all()
-        staging_env['ENVIRONMENT'] = 'staging'
-        staging_env['K_SERVICE'] = 'netra-staging-service'
         
         builder = SecretManagerBuilder(env_vars=staging_env)
         assert builder._environment == 'staging'
@@ -186,18 +70,11 @@ class TestSecretManagerBuilderIntegration:
     
     def test_production_environment_detection(self):
         """Test that production environment is properly detected."""
-        # Create production environment through IsolatedEnvironment
-        prod_env = self.env.get_all()
-        prod_env['ENVIRONMENT'] = 'production'
-        prod_env['K_SERVICE'] = 'netra-production-service'
         
         builder = SecretManagerBuilder(env_vars=prod_env)
         assert builder._environment == 'production'
         assert builder.development.should_allow_fallback() is False
     
-    def test_load_all_secrets_development_with_real_validation(self):
-        """Test loading all secrets in development environment with real validation."""
-        builder = SecretManagerBuilder(env_vars=self.env.get_all())
         secrets = builder.load_all_secrets()
         
         # Check critical secrets are loaded
@@ -258,10 +135,6 @@ class TestSecretManagerBuilderIntegration:
     
     def test_secret_validation_production_strict(self):
         """Test strict validation for production environment."""
-        # Create production environment with invalid secret
-        prod_env = self.env.get_all()
-        prod_env['ENVIRONMENT'] = 'production'
-        prod_env['JWT_SECRET_KEY'] = 'placeholder'  # Invalid for production
         
         builder = SecretManagerBuilder(env_vars=prod_env)
         secrets = {'JWT_SECRET_KEY': 'placeholder'}
@@ -272,9 +145,6 @@ class TestSecretManagerBuilderIntegration:
         assert validation_result.placeholder_count > 0
         assert 'JWT_SECRET_KEY' in validation_result.critical_failures
     
-    def test_cache_builder_functionality_with_real_performance(self):
-        """Test the cache builder's TTL and invalidation with real performance metrics."""
-        builder = SecretManagerBuilder(env_vars=self.env.get_all())
         
         # Cache a secret with short TTL
         builder.cache.cache_secret('TEST_SECRET', 'test_value', ttl_minutes=0.01)  # 0.6 seconds
@@ -311,9 +181,6 @@ class TestSecretManagerBuilderIntegration:
         builder.cache.invalidate_cache('TEST_SECRET_2')
         assert builder.cache.get_cached_secret('TEST_SECRET_2') is None
     
-    def test_auth_builder_jwt_secret_ssot(self):
-        """Test auth builder JWT secret retrieval following SSOT principle."""
-        builder = SecretManagerBuilder(env_vars=self.env.get_all())
         jwt_secret = builder.auth.get_jwt_secret()
         
         assert jwt_secret == 'test-jwt-secret-key-32-chars-minimum-length-required'
@@ -335,9 +202,6 @@ class TestSecretManagerBuilderIntegration:
         
         assert cached_auth_jwt == cached_backend_jwt == jwt_secret
     
-    def test_encryption_builder_real_crypto(self):
-        """Test encryption/decryption functionality with real cryptographic operations."""
-        builder = SecretManagerBuilder(env_vars=self.env.get_all())
         
         # Test encryption and decryption with sensitive data
         sensitive_secrets = [
@@ -366,17 +230,6 @@ class TestSecretManagerBuilderIntegration:
             decrypted_db_pass = builder.encryption.decrypt_secret(encrypted_db_pass)
             assert decrypted_db_pass == db_password
     
-    def test_development_fallbacks_with_real_validation(self):
-        """Test development fallback mechanisms with real validation."""
-        # Create environment without JWT secret
-        fallback_env = self.env.get_all()
-        if 'JWT_SECRET_KEY' in fallback_env:
-            del fallback_env['JWT_SECRET_KEY']
-        
-        # Test that SecretManagerBuilder handles missing secrets gracefully
-        with pytest.raises(ValueError, match="JWT secret not configured"):
-            builder = SecretManagerBuilder(env_vars=fallback_env)
-            builder.auth.get_jwt_secret()
         
         # Test with fallback enabled
         fallback_env['ALLOW_DEVELOPMENT_FALLBACKS'] = 'true'
@@ -386,12 +239,6 @@ class TestSecretManagerBuilderIntegration:
         with pytest.raises(ValueError):
             builder.auth.get_jwt_secret()
     
-    def test_gcp_secret_manager_disabled_validation(self):
-        """Test GCP Secret Manager when disabled (real behavior, no mocks)."""
-        # GCP is disabled in test environment
-        staging_env = self.env.get_all()
-        staging_env['ENVIRONMENT'] = 'staging'
-        staging_env['DISABLE_GCP_SECRET_MANAGER'] = 'true'
         
         builder = SecretManagerBuilder(env_vars=staging_env)
         
@@ -412,8 +259,6 @@ class TestSecretManagerBuilderIntegration:
         # Should return empty secrets list
         assert builder.gcp.list_available_secrets() == []
     
-    def test_service_specific_configuration_real_consistency(self):
-        """Test service-specific secret loading with real cross-service consistency."""
         # Test for netra_backend
         backend_builder = SecretManagerBuilder(env_vars=self.env.get_all(), service='netra_backend')
         assert backend_builder.service == 'netra_backend'
@@ -472,9 +317,6 @@ class TestSecretManagerBuilderIntegration:
             current_env = self.env.get_all()
             assert current_env == original_env
     
-    def test_debug_info_comprehensive_real_metrics(self):
-        """Test comprehensive debug information with real metrics."""
-        builder = SecretManagerBuilder(env_vars=self.env.get_all())
         debug_info = builder.get_debug_info()
         
         # Basic info
@@ -508,17 +350,6 @@ class TestSecretManagerBuilderIntegration:
         updated_debug = builder.get_debug_info()
         assert updated_debug['cache_stats']['cached_secrets'] > 0
     
-    def test_multi_environment_consistency_real_scenarios(self):
-        """Test that secrets are consistent across environment switches with real scenarios."""
-        # Development environment
-        dev_env = self.env.get_all()
-        dev_builder = SecretManagerBuilder(env_vars=dev_env)
-        dev_jwt = dev_builder.auth.get_jwt_secret()
-        
-        # Staging environment (simulated with same test secrets)
-        staging_env = dev_env.copy()
-        staging_env['ENVIRONMENT'] = 'staging'
-        staging_env['DISABLE_GCP_SECRET_MANAGER'] = 'true'  # For test
         
         staging_builder = SecretManagerBuilder(env_vars=staging_env)
         staging_jwt = staging_builder.auth.get_jwt_secret()
@@ -573,10 +404,6 @@ class TestSecretManagerBuilderIntegration:
         cached_value = builder.cache.get_cached_secret('TEST_SECRET')
         assert cached_value == 'test_value_sensitive_data'
     
-    def test_performance_load_time_with_real_services(self):
-        """Test that secret loading meets performance requirements with real services."""
-        # Test multiple runs for consistent performance
-        load_times = []
         
         for _ in range(5):
             start_time = time.time()

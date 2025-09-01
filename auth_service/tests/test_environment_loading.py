@@ -49,8 +49,10 @@ auth_service_path = Path("{Path(__file__).parent.parent}")
 sys.path.insert(0, str(auth_service_path.parent))
 
 # Clear SERVICE_SECRET to simulate missing variable
-os.environ.pop("SERVICE_SECRET", None)
-os.environ["ENVIRONMENT"] = "development"
+from shared.isolated_environment import get_env
+env = get_env()
+env.delete("SERVICE_SECRET", "test_script")
+env.set("ENVIRONMENT", "development", "test_script")
 
 try:
     from auth_service.auth_core.config import AuthConfig
@@ -93,9 +95,11 @@ auth_service_path = Path("{Path(__file__).parent.parent}")
 sys.path.insert(0, str(auth_service_path.parent))
 
 # Set SERVICE_SECRET but clear SERVICE_ID
-os.environ["SERVICE_SECRET"] = "test-secret-32-characters-or-more"
-os.environ.pop("SERVICE_ID", None)
-os.environ["ENVIRONMENT"] = "development"
+from shared.isolated_environment import get_env
+env = get_env()
+env.set("SERVICE_SECRET", "test-secret-32-characters-or-more", "test_script")
+env.delete("SERVICE_ID", "test_script")
+env.set("ENVIRONMENT", "development", "test_script")
 
 try:
     from auth_service.auth_core.config import AuthConfig
@@ -137,8 +141,10 @@ auth_service_path = Path(__file__).parent.parent
 sys.path.insert(0, str(auth_service_path.parent))
 
 # Clear any existing variables
-os.environ.pop("SERVICE_SECRET", None)
-os.environ.pop("SERVICE_ID", None)
+from shared.isolated_environment import get_env
+env = get_env()
+env.delete("SERVICE_SECRET", "test_script")
+env.delete("SERVICE_ID", "test_script")
 
 # Load the test .env file BEFORE importing auth modules
 from dotenv import load_dotenv
@@ -185,9 +191,11 @@ auth_service_path = Path(__file__).parent.parent
 sys.path.insert(0, str(auth_service_path.parent))
 
 # Clear any existing variables to simulate fresh start
-os.environ.pop("SERVICE_SECRET", None)
-os.environ.pop("SERVICE_ID", None)
-os.environ["ENVIRONMENT"] = "development"
+from shared.isolated_environment import get_env
+env = get_env()
+env.delete("SERVICE_SECRET", "test_script")
+env.delete("SERVICE_ID", "test_script")
+env.set("ENVIRONMENT", "development", "test_script")
 
 # WRONG ORDER: Try to import config BEFORE loading .env
 try:
@@ -241,9 +249,11 @@ auth_service_path = Path("{Path(__file__).parent.parent}")
 sys.path.insert(0, str(auth_service_path.parent))
 
 # Set variables but with wrong SERVICE_ID
-os.environ["SERVICE_SECRET"] = "test-secret-32-characters-or-more"
-os.environ["SERVICE_ID"] = "netra-backend"  # WRONG!
-os.environ["ENVIRONMENT"] = "test"
+from shared.isolated_environment import get_env
+env = get_env()
+env.set("SERVICE_SECRET", "test-secret-32-characters-or-more", "test_script")
+env.set("SERVICE_ID", "netra-backend", "test_script")  # WRONG!
+env.set("ENVIRONMENT", "test", "test_script")
 
 try:
     from auth_service.auth_core.config import AuthConfig
@@ -282,10 +292,12 @@ from pathlib import Path
 auth_service_path = Path("{Path(__file__).parent.parent}")
 sys.path.insert(0, str(auth_service_path.parent))
 
-# Set variables directly in os.environ
-os.environ["SERVICE_SECRET"] = "test-secret-32-characters-or-more"
-os.environ["SERVICE_ID"] = "auth-service"
-os.environ["TEST_VAR"] = "test-value"
+# Set variables using IsolatedEnvironment
+from shared.isolated_environment import get_env
+env = get_env()
+env.set("SERVICE_SECRET", "test-secret-32-characters-or-more", "test_script")
+env.set("SERVICE_ID", "auth-service", "test_script")
+env.set("TEST_VAR", "test-value", "test_script")
 
 # Import isolated environment
 from shared.isolated_environment import get_env

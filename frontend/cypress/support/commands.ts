@@ -105,37 +105,35 @@ Cypress.Commands.add('login', (email?: string, password?: string) => {
   // Wait for page to load
   cy.get('body', { timeout: 10000 }).should('be.visible');
   
-  // Check if we're in development mode by looking for auth config
-  cy.request({
-    url: 'http://localhost:8081/auth/config',
-    failOnStatusCode: false,
-    timeout: 3000
-  }).then((response) => {
-    if (response.status === 200 && response.body?.development_mode) {
-      // Development mode login
-      cy.get('body').then(($body) => {
-        // Try quick dev login first
-        if ($body.find('[data-testid="login-button"]').length > 0) {
-          cy.get('[data-testid="login-button"]')
-            .should('be.visible')
-            .and('contain.text', 'Quick Dev Login')
-            .click();
-        } else {
-          // Fallback to custom credentials form
-          cy.get('input[type="email"]').clear().type(testEmail);
-          cy.get('input[type="password"]').clear().type(testPassword);
-          cy.get('button').contains('Login with Custom Credentials').click();
-        }
-      });
-      
-      // Wait for successful login
-      cy.url({ timeout: 15000 }).should('not.include', '/login');
-      
-      // Verify JWT token is stored
-      cy.window().then((win) => {
-        expect(win.localStorage.getItem('jwt_token')).to.be.a('string').and.not.be.empty;
-      });
-    } else {
+  // Check if already logged in by checking URL
+  cy.url().then((url) => {
+    if (url.includes('/chat')) {
+      // Already logged in, no need to do anything
+      cy.log('Already authenticated, skipping login');
+      return;
+    }
+    
+    // Check if we're in development mode by looking for auth config
+    cy.request({
+      url: 'http://localhost:8081/auth/config',
+      failOnStatusCode: false,
+      timeout: 3000
+    }).then((response) => {
+      if (response.status === 200 && response.body?.development_mode) {
+        // Development mode login - just click Quick Dev Login
+        cy.contains('button', 'Quick Dev Login', { timeout: 10000 })
+          .should('be.visible')
+          .should('not.be.disabled')
+          .click();
+        
+        // Wait for successful login
+        cy.url({ timeout: 15000 }).should('not.include', '/login');
+        
+        // Verify JWT token is stored
+        cy.window().then((win) => {
+          expect(win.localStorage.getItem('jwt_token')).to.be.a('string').and.not.be.empty;
+        });
+      } else {
       // Production/OAuth mode - skip actual login for these tests
       cy.log('OAuth mode detected - mocking authentication for security tests');
       
@@ -155,9 +153,10 @@ Cypress.Commands.add('login', (email?: string, password?: string) => {
         win.localStorage.setItem('jwt_token', mockToken);
       });
       
-      // Navigate away from login page
-      cy.visit('/chat');
-    }
+        // Navigate away from login page
+        cy.visit('/chat');
+      }
+    });
   });
 });
 

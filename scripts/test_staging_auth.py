@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Test and diagnose staging authentication issues.
@@ -15,6 +16,7 @@ from typing import Dict, Optional
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
+env = get_env()
 def decode_token_no_verify(token: str) -> Optional[Dict]:
     """Decode JWT token without signature verification."""
     try:
@@ -97,8 +99,8 @@ def analyze_staging_token():
         ("TEST-ONLY-SECRET-NOT-FOR-PRODUCTION-" + "x" * 32, "Default test secret from code"),
         
         # Secrets that might be in environment
-        (os.environ.get("JWT_SECRET_KEY", ""), "From JWT_SECRET_KEY env var"),
-        (os.environ.get("JWT_SECRET", ""), "From JWT_SECRET env var"),
+        (env.get("JWT_SECRET_KEY", ""), "From JWT_SECRET_KEY env var"),
+        (env.get("JWT_SECRET", ""), "From JWT_SECRET env var"),
     ]
     
     for secret, description in test_secrets:
@@ -149,7 +151,7 @@ def check_environment_config():
     
     print("\nCurrent Environment Variables:")
     for key in jwt_configs:
-        value = os.environ.get(key)
+        value = env.get(key)
         if value:
             if "SECRET" in key or "KEY" in key:
                 # Mask sensitive values

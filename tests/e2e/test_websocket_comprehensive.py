@@ -1,5 +1,6 @@
-"""
-Comprehensive WebSocket Connection Test Suite - Designed to FAIL and Expose Issues
+from shared.isolated_environment import get_env
+
+"""Comprehensive WebSocket Connection Test Suite - Designed to FAIL and Expose Issues
 
 This test suite is designed to expose current WebSocket problems by testing realistic scenarios
 that are likely to fail with the current implementation. The tests are structured to reveal
@@ -124,7 +125,7 @@ async def get_auth_token(user_email: str, password: str) -> Optional[str]:
         return None
 
 
-class TestWebSocketClient:
+class WebSocketTestClient:
     """Enhanced WebSocket test client with realistic connection patterns."""
     
     def __init__(self, base_url: str, token: str, user_id: str):

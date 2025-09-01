@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Unified System Test Harness for Netra Apex AI Optimization Platform.
 
 Business Value: Foundation for $180K MRR protection through comprehensive testing.
@@ -160,7 +162,7 @@ class UnifiedTestHarness:
     def _get_service_env(self, service_name: str) -> Dict[str, str]:
         """Get environment variables for service."""
         import os
-        base_env = os.environ.copy()
+        base_env = env.get_all()
         return self._add_test_env_vars(base_env, service_name)
     
     def _add_test_env_vars(self, env: Dict[str, str], service: str) -> Dict[str, str]:

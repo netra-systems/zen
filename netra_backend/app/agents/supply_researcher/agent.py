@@ -348,17 +348,31 @@ class SupplyResearcherAgent(BaseSubAgent):
         )
     
     async def _send_update(self, run_id: str, update: Dict[str, Any]) -> None:
-        """Send update via WebSocket manager"""
-        if self.websocket_manager:
-            try:
-                await self._send_websocket_update(run_id, update)
-            except Exception as e:
-                logger.error(f"Failed to send WebSocket update: {e}")
-    
-    async def _send_websocket_update(self, run_id: str, update: Dict[str, Any]) -> None:
-        """Send WebSocket update with proper parameters"""
-        await self.websocket_manager.send_agent_update(
-            run_id,
-            "supply_researcher",
-            update
-        )
+        """Send update via AgentWebSocketBridge for crystal clear emission paths."""
+        try:
+            from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
+            
+            bridge = await get_agent_websocket_bridge()
+            status = update.get('status', 'processing')
+            message = update.get('message', '')
+            
+            # Map update status to appropriate bridge notification
+            if status == 'parsing':
+                await bridge.notify_agent_thinking(run_id, "SupplyResearcherAgent", message)
+            elif status == 'researching':
+                await bridge.notify_tool_executing(run_id, "SupplyResearcherAgent", "deep_research", 
+                                                  {"research_type": message})
+            elif status == 'processing':
+                await bridge.notify_agent_thinking(run_id, "SupplyResearcherAgent", message)
+            elif status == 'completed':
+                await bridge.notify_agent_completed(run_id, "SupplyResearcherAgent", 
+                                                   result=update.get('result'), 
+                                                   execution_time_ms=None)
+            elif status == 'failed':
+                await bridge.notify_agent_error(run_id, "SupplyResearcherAgent", message)
+            else:
+                # Custom status updates
+                await bridge.notify_custom(run_id, "SupplyResearcherAgent", f"supply_{status}", update)
+            
+        except Exception as e:
+            logger.error(f"Failed to send WebSocket update via bridge: {e}")

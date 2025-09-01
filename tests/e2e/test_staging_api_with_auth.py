@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 E2E Tests for Staging API with OAUTH SIMULATION
 
 This test suite demonstrates how to use the OAUTH SIMULATION mechanism
@@ -248,7 +250,6 @@ if __name__ == "__main__":
     import subprocess
     
     # Set environment to staging for testing
-    get_env().set("ENVIRONMENT",  )"staging"
     
     # Run pytest on this file
     result = subprocess.run(

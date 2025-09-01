@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 from shared.isolated_environment import get_env
 CRITICAL E2E: Cold Start First-Time User Complete Journey Test
@@ -38,9 +39,10 @@ import httpx
 import aiosqlite
 
 # Set test environment for cold start conditions
-get_env().set("TESTING",  )"1"
-get_env().set("ENVIRONMENT",  )"testing"
-get_env().set("DATABASE_URL",  )"sqlite+aiosqlite:///:memory:"
+env = get_env()
+env.set("TESTING", "1", "test")
+env.set("ENVIRONMENT", "testing", "test")
+env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
 
 # Absolute imports only - no relative imports
 from tests.e2e.helpers.journey.real_service_journey_helpers import RealServiceJourneyHelper

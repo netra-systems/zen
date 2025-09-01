@@ -1,6 +1,6 @@
+from shared.isolated_environment import get_env
 """Agent Orchestration Test Runner with Real LLM Support
 
-from shared.isolated_environment import get_env
 Unified runner for agent orchestration tests with real LLM integration.
 Provides easy commands to run agent tests with or without real LLM.
 
@@ -78,6 +78,7 @@ class AgentOrchestrationTestRunner:
                           timeout: int = 30, parallel: int = 2):
         """Configure real LLM testing environment."""
         if enable:
+<<<<<<< HEAD
             get_env().set("USE_REAL_LLM",  )"true"
             get_env().set("TEST_USE_REAL_LLM",  )"true"  # Legacy compatibility
             get_env().set("ENABLE_REAL_LLM_TESTING",  )"true"
@@ -90,6 +91,20 @@ class AgentOrchestrationTestRunner:
             get_env().set("USE_REAL_LLM",  )"false"
             get_env().set("TEST_USE_REAL_LLM",  )"false"  # Legacy compatibility
             get_env().set("ENABLE_REAL_LLM_TESTING",  )"false"
+=======
+            env.set("USE_REAL_LLM", "true", "test")
+            env.set("TEST_USE_REAL_LLM", "true", "test")  # Legacy compatibility
+            env.set("ENABLE_REAL_LLM_TESTING", "true", "test")
+            env.set("TEST_LLM_MODEL", model, "test")
+            env.set("TEST_LLM_TIMEOUT", str, "test")(timeout)
+            env.set("TEST_LLM_PARALLEL", str, "test")(parallel)
+            self.results["real_llm_enabled"] = True
+            print(f"[INFO] Real LLM testing enabled with model: {model}")
+        else:
+            env.set("USE_REAL_LLM", "false", "test")
+            env.set("TEST_USE_REAL_LLM", "false", "test")  # Legacy compatibility
+            env.set("ENABLE_REAL_LLM_TESTING", "false", "test")
+>>>>>>> cd652f04f43df1a879423564315f459a150f8a24
             print("[INFO] Using mocked LLM responses")
     
     def run_high_value_tests(self, real_llm: bool = False) -> int:

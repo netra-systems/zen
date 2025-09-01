@@ -767,6 +767,8 @@ def enhance_tool_dispatcher_with_notifications(tool_dispatcher, websocket_manage
         # Check if already enhanced
         if isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine):
             logger.debug("Tool dispatcher already using unified execution engine")
+            # Ensure the enhancement flag is set even if already enhanced
+            tool_dispatcher._websocket_enhanced = True
             return tool_dispatcher
         
         # Get permission service if available

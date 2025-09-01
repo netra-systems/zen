@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """LLM Configuration Detection Helper
 
 from shared.isolated_environment import get_env
@@ -12,6 +13,7 @@ from typing import Dict, Any, Optional
 from netra_backend.app.config import get_config
 
 
+env = get_env()
 class LLMConfigDetector:
     """Detects LLM configuration for test execution."""
     
@@ -31,12 +33,20 @@ class LLMConfigDetector:
             return True
             
         # Check pytest markers/flags
+<<<<<<< HEAD
         if get_env().get("PYTEST_REAL_LLM", "false").lower() in ["true", "1"]:
+=======
+        if env.get("PYTEST_REAL_LLM", "false").lower() in ["true", "1"]:
+>>>>>>> cd652f04f43df1a879423564315f459a150f8a24
             self._real_llm_detected = True
             return True
             
         # Check if running in staging/production environment
+<<<<<<< HEAD
         env_name = get_env().get("ENVIRONMENT", "dev").lower()
+=======
+        env_name = env.get("ENVIRONMENT", "dev").lower()
+>>>>>>> cd652f04f43df1a879423564315f459a150f8a24
         if env_name in ["staging", "prod", "production"]:
             self._real_llm_detected = True
             return True
@@ -70,11 +80,19 @@ class LLMConfigDetector:
     def _has_real_llm_keys(self) -> bool:
         """Check if real LLM API keys are available."""
         # Check for OpenAI API key
+<<<<<<< HEAD
         if get_env().get("GOOGLE_API_KEY"):
             return True
             
         # Check for Anthropic API key
         if get_env().get("ANTHROPIC_API_KEY"):
+=======
+        if env.get("GOOGLE_API_KEY"):
+            return True
+            
+        # Check for Anthropic API key
+        if env.get("ANTHROPIC_API_KEY"):
+>>>>>>> cd652f04f43df1a879423564315f459a150f8a24
             return True
             
         # Check for other LLM provider keys
@@ -85,7 +103,11 @@ class LLMConfigDetector:
             "MISTRAL_API_KEY"
         ]
         
+<<<<<<< HEAD
         return any(get_env().get(key) for key in llm_keys)
+=======
+        return any(env.get(key) for key in llm_keys)
+>>>>>>> cd652f04f43df1a879423564315f459a150f8a24
     
     def get_test_timeout(self, base_timeout: float) -> float:
         """Get adjusted timeout based on LLM configuration."""

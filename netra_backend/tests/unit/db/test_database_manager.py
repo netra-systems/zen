@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 """Comprehensive Unit Tests for DatabaseManager
 
+env = get_env()
 Tests all URL conversion, environment detection, error handling, and integration functionality.
 
 Business Value Justification (BVJ):
@@ -32,7 +34,7 @@ class TestDatabaseManagerURLConversion:
     def setup_method(self):
         """Reset environment for each test."""
         # Clear any existing DATABASE_URL
-        os.environ.pop("DATABASE_URL", None)
+        env.delete("DATABASE_URL", "test")
     
     @pytest.mark.parametrize("input_url,expected_output", [
         # Basic PostgreSQL URL conversion (search_path option automatically added in test environment)
@@ -140,7 +142,7 @@ class TestDatabaseManagerValidation:
     
     def setup_method(self):
         """Reset environment for each test."""
-        os.environ.pop("DATABASE_URL", None)
+        env.delete("DATABASE_URL", "test")
     
     @pytest.mark.parametrize("url,expected_valid", [
         # Valid base URLs (after get_base_database_url processing)
@@ -263,8 +265,8 @@ class TestDatabaseManagerEngineCreation:
     
     def setup_method(self):
         """Reset environment for each test."""
-        os.environ.pop("DATABASE_URL", None)
-        os.environ.pop("SQL_ECHO", None)
+        env.delete("DATABASE_URL", "test")
+        env.delete("SQL_ECHO", "test")
     
     def test_create_migration_engine_basic(self):
         """Test sync engine creation for migrations."""
@@ -362,7 +364,7 @@ class TestDatabaseManagerSessionFactories:
     
     def setup_method(self):
         """Reset environment for each test."""
-        os.environ.pop("DATABASE_URL", None)
+        env.delete("DATABASE_URL", "test")
     
     def test_get_migration_session(self):
         """Test sync session factory creation."""
@@ -395,7 +397,7 @@ class TestDatabaseManagerErrorHandling:
     
     def setup_method(self):
         """Reset environment for each test."""
-        os.environ.pop("DATABASE_URL", None)
+        env.delete("DATABASE_URL", "test")
     
     def test_invalid_url_format_handling(self):
         """Test handling of invalid URL formats."""
@@ -474,7 +476,7 @@ class TestDatabaseManagerIntegration:
     
     def setup_method(self):
         """Setup for integration tests."""
-        os.environ.pop("DATABASE_URL", None)
+        env.delete("DATABASE_URL", "test")
     
     def test_migration_engine_can_connect(self):
         """Test that migration engine can attempt connection."""
@@ -630,8 +632,8 @@ class TestDatabaseManagerAdvancedErrorHandling:
     
     def setup_method(self):
         """Reset environment for each test."""
-        os.environ.pop("DATABASE_URL", None)
-        os.environ.pop("ENVIRONMENT", None)
+        env.delete("DATABASE_URL", "test")
+        env.delete("ENVIRONMENT", "test")
     
         def test_malformed_url_parsing_error(self):
             """Test handling of URLs that cause parsing errors."""

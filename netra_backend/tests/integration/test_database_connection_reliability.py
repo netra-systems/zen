@@ -138,7 +138,7 @@ class TestDatabaseConnectionReliability:
         assert postgres_conn.url.startswith('postgresql://')
     
     @pytest.mark.skipif(
-        os.environ.get('CI') == 'true',
+        env.get('CI') == 'true',
         reason="Skip in CI - requires real database containers"
     )
     async def test_real_database_connections(self, database_connector):

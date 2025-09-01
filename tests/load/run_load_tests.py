@@ -1,6 +1,8 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """Production Load Test Runner
 
+env = get_env()
 This script provides a convenient way to run production load tests
 with appropriate configuration and reporting.
 
@@ -91,7 +93,7 @@ def main():
         cmd.extend(["-n", str(args.parallel)])
     
     # Set environment variables for load testing
-    env = os.environ.copy()
+    env = env.get_all()
     env["PYTEST_LOAD_TESTING"] = "1"
     env["LOAD_TEST_REPORT_DIR"] = args.report_dir
     

@@ -1,6 +1,8 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python
 """MISSION CRITICAL: WebSocket Sub-Agent Events Test with FORCED Real Services
 
+env = get_env()
 This test bypasses all mock overrides and forces real WebSocket connections.
 The original test was blocked by conftest.py files forcing mock usage.
 
@@ -18,9 +20,9 @@ import pytest
 from loguru import logger
 
 # FORCE REAL SERVICES - Override any conftest.py mock settings
-os.environ['USE_REAL_SERVICES'] = 'true'
-os.environ['SKIP_REAL_SERVICES'] = 'false'
-os.environ['RUN_E2E_TESTS'] = 'true'
+env.set('USE_REAL_SERVICES', 'true', "test")
+env.set('SKIP_REAL_SERVICES', 'false', "test")
+env.set('RUN_E2E_TESTS', 'true', "test")
 
 # Import real services infrastructure AFTER setting environment
 from test_framework.real_services import get_real_services, RealServicesManager
@@ -94,8 +96,8 @@ class TestRealWebSocketSubAgent:
         """Test WebSocketNotifier with real connections - bypass all mocks."""
         
         # Force real services configuration
-        os.environ['USE_REAL_SERVICES'] = 'true'
-        os.environ['SKIP_REAL_SERVICES'] = 'false'
+        env.set('USE_REAL_SERVICES', 'true', "test")
+        env.set('SKIP_REAL_SERVICES', 'false', "test")
         
         # Get real services manager (bypass conftest.py mocking)
         real_services = get_real_services()
@@ -173,8 +175,8 @@ class TestRealWebSocketSubAgent:
         """Test WebSocketManager with real infrastructure."""
         
         # Force real services
-        os.environ['USE_REAL_SERVICES'] = 'true'
-        os.environ['SKIP_REAL_SERVICES'] = 'false'
+        env.set('USE_REAL_SERVICES', 'true', "test")
+        env.set('SKIP_REAL_SERVICES', 'false', "test")
         
         real_services = get_real_services()
         

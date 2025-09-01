@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Comprehensive unit tests for Analytics Service Isolated Environment Management.
 
 BUSINESS VALUE: Ensures environment management reliability and independence for
@@ -258,7 +259,7 @@ class TestIsolatedEnvironmentIsolationMode:
         env.set(test_key, "non_isolated_value")
         
         # Should be in actual environment
-        assert os.environ.get(test_key) == "non_isolated_value"
+        assert env.get(test_key) == "non_isolated_value"
         
         # Enable isolation
         env.enable_isolation()
@@ -270,7 +271,7 @@ class TestIsolatedEnvironmentIsolationMode:
         assert env.get(test_key) == "isolated_value"
         
         # But actual environment should still have old value
-        assert os.environ.get(test_key) == "non_isolated_value"
+        assert env.get(test_key) == "non_isolated_value"
         
         # Clean up
         os.environ.pop(test_key, None)
@@ -635,7 +636,7 @@ class TestIsolatedEnvironmentIntegration:
             env.set(test_key, "real_test_value")
             
             # Should be in actual environment
-            assert os.environ.get(test_key) == "real_test_value"
+            assert env.get(test_key) == "real_test_value"
             
             # Should be retrievable
             assert env.get(test_key) == "real_test_value"

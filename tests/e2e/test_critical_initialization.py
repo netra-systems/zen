@@ -1,5 +1,5 @@
-"""
 from shared.isolated_environment import get_env
+"""
 Critical System Initialization Tests - 30 Comprehensive Cold Start Scenarios
 
 These tests validate the most critical and difficult initialization scenarios,
@@ -986,7 +986,6 @@ class TestConfigurationEnvironment(SystemInitializationTestBase):
             env_local.write_text("TEST_VAR=from_local\nPORT=8002\n")
             
             # Set system environment variable
-            get_env().set("TEST_VAR",  )"from_system"
             
             with self.start_dev_launcher() as proc:
                 # Verify correct precedence (system > local > test)
@@ -995,7 +994,7 @@ class TestConfigurationEnvironment(SystemInitializationTestBase):
         finally:
             env_test.unlink(missing_ok=True)
             env_local.unlink(missing_ok=True)
-            os.environ.pop("TEST_VAR", None)
+            env.delete("TEST_VAR", "test")
             
     @pytest.mark.e2e
     def test_28_secrets_management_gcp_integration(self):

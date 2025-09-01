@@ -18,7 +18,7 @@ class TestEnvironmentIsolation:
     def setup(self):
         """Setup test environment."""
         # Store original environment
-        self.original_env = os.environ.copy()
+        self.original_env = env.get_all()
         
         # Clear test-specific variables that might interfere
         test_vars = ['TEST_VAR_1', 'TEST_VAR_2', 'NETRA_TEST_VAR', 'TESTING']
@@ -28,13 +28,13 @@ class TestEnvironmentIsolation:
         yield
         
         # Restore original environment
-        os.environ.clear()
-        os.environ.update(self.original_env)
+        env.clear()
+        env.update(self.original_env, "test")
 
     def test_isolated_environment_basic_access(self):
         """Test basic environment variable access through IsolatedEnvironment."""
         # Set test environment variable
-        os.environ['TEST_VAR_1'] = 'test_value_1'
+        env.set('TEST_VAR_1', 'test_value_1', "test")
         
         # Get environment through isolated access
         env = get_env()
@@ -47,14 +47,14 @@ class TestEnvironmentIsolation:
     def test_isolated_environment_overrides(self):
         """Test that environment variables can be overridden."""
         # Set initial value
-        os.environ['TEST_VAR_2'] = 'initial_value'
+        env.set('TEST_VAR_2', 'initial_value', "test")
         
         # Verify initial value
         env = get_env()
         assert env.get('TEST_VAR_2') == 'initial_value'
         
         # Override value
-        os.environ['TEST_VAR_2'] = 'overridden_value'
+        env.set('TEST_VAR_2', 'overridden_value', "test")
         
         # Verify override works (may need fresh env instance)
         env_fresh = get_env()
@@ -63,7 +63,7 @@ class TestEnvironmentIsolation:
     def test_environment_source_tracking(self):
         """Test that IsolatedEnvironment can track variable sources."""
         # Set a variable
-        os.environ['NETRA_TEST_VAR'] = 'tracked_value'
+        env.set('NETRA_TEST_VAR', 'tracked_value', "test")
         
         # Get environment
         env = get_env()
@@ -78,7 +78,7 @@ class TestEnvironmentIsolation:
     def test_configuration_environment_detection(self):
         """Test that configuration properly detects environment from IsolatedEnvironment."""
         # Set development environment
-        os.environ['ENVIRONMENT'] = 'development'
+        env.set('ENVIRONMENT', 'development', "test")
         
         # Import and test configuration manager
         from netra_backend.app.core.configuration.base import config_manager
@@ -90,7 +90,7 @@ class TestEnvironmentIsolation:
         assert config_manager._environment == 'development'
         
         # Test with staging
-        os.environ['ENVIRONMENT'] = 'staging' 
+        env.set('ENVIRONMENT', 'staging', "test") 
         config_manager._environment = config_manager._detect_environment()
         assert config_manager._environment == 'staging'
 
@@ -100,9 +100,9 @@ class TestEnvironmentIsolation:
         from shared.isolated_environment import get_env
         
         # Store original values to restore later
-        original_env_val = os.environ.get('ENVIRONMENT')
-        original_database_url = os.environ.get('DATABASE_URL')
-        original_redis_url = os.environ.get('REDIS_URL')
+        original_env_val = env.get('ENVIRONMENT')
+        original_database_url = env.get('DATABASE_URL')
+        original_redis_url = env.get('REDIS_URL')
         
         env = get_env()
         
@@ -126,11 +126,11 @@ class TestEnvironmentIsolation:
             
             # Verify isolation works - os.environ should be unchanged
             if original_env_val is not None:
-                assert os.environ.get('ENVIRONMENT') == original_env_val
+                assert env.get('ENVIRONMENT') == original_env_val
             if original_database_url is not None:
-                assert os.environ.get('DATABASE_URL') == original_database_url  
+                assert env.get('DATABASE_URL') == original_database_url  
             if original_redis_url is not None:
-                assert os.environ.get('REDIS_URL') == original_redis_url
+                assert env.get('REDIS_URL') == original_redis_url
                 
             # Test that the basic config manager can use IsolatedEnvironment for environment detection
             from netra_backend.app.core.configuration.base import config_manager
@@ -156,19 +156,19 @@ class TestEnvironmentIsolation:
             
             # Restore original values if they existed
             if original_env_val is not None:
-                os.environ['ENVIRONMENT'] = original_env_val
+                env.set('ENVIRONMENT', original_env_val, "test")
             else:
-                os.environ.pop('ENVIRONMENT', None)
+                env.delete('ENVIRONMENT', "test")
                 
             if original_database_url is not None:
-                os.environ['DATABASE_URL'] = original_database_url
+                env.set('DATABASE_URL', original_database_url, "test")
             else:
-                os.environ.pop('DATABASE_URL', None)
+                env.delete('DATABASE_URL', "test")
                 
             if original_redis_url is not None:
-                os.environ['REDIS_URL'] = original_redis_url  
+                env.set('REDIS_URL', original_redis_url, "test")  
             else:
-                os.environ.pop('REDIS_URL', None)
+                env.delete('REDIS_URL', "test")
                 
     def test_isolated_environment_thread_safety(self):
         """Test that IsolatedEnvironment works correctly in multi-threaded scenarios."""
@@ -214,22 +214,22 @@ class TestEnvironmentIsolation:
         env = get_env()
         
         # Test string values
-        os.environ['STRING_VAR'] = 'string_value'
+        env.set('STRING_VAR', 'string_value', "test")
         assert env.get('STRING_VAR') == 'string_value'
         
         # Test empty string
-        os.environ['EMPTY_VAR'] = ''
+        env.set('EMPTY_VAR', '', "test")
         assert env.get('EMPTY_VAR') == ''
         
         # Test values with special characters
-        os.environ['SPECIAL_VAR'] = 'value with spaces and symbols !@#$%'
+        env.set('SPECIAL_VAR', 'value with spaces and symbols !@#$%', "test")
         assert env.get('SPECIAL_VAR') == 'value with spaces and symbols !@#$%'
         
         # Test values that look like other types
-        os.environ['NUMBER_VAR'] = '123'
+        env.set('NUMBER_VAR', '123', "test")
         assert env.get('NUMBER_VAR') == '123'  # Should remain string
         
-        os.environ['BOOL_VAR'] = 'true'
+        env.set('BOOL_VAR', 'true', "test")
         assert env.get('BOOL_VAR') == 'true'  # Should remain string
         
     def test_isolated_environment_context_manager(self):
@@ -237,10 +237,10 @@ class TestEnvironmentIsolation:
         env = get_env()
         
         # Test basic functionality even if not a context manager
-        original_value = os.environ.get('CONTEXT_TEST_VAR')
+        original_value = env.get('CONTEXT_TEST_VAR')
         
         try:
-            os.environ['CONTEXT_TEST_VAR'] = 'context_value'
+            env.set('CONTEXT_TEST_VAR', 'context_value', "test")
             
             # Within context, value should be accessible
             assert env.get('CONTEXT_TEST_VAR') == 'context_value'
@@ -248,16 +248,16 @@ class TestEnvironmentIsolation:
         finally:
             # Cleanup
             if original_value is not None:
-                os.environ['CONTEXT_TEST_VAR'] = original_value
+                env.set('CONTEXT_TEST_VAR', original_value, "test")
             else:
-                os.environ.pop('CONTEXT_TEST_VAR', None)
+                env.delete('CONTEXT_TEST_VAR', "test")
                 
     def test_environment_variable_precedence(self):
         """Test precedence of environment variable sources."""
         env = get_env()
         
         # Set base value
-        os.environ['PRECEDENCE_VAR'] = 'os_environ_value'
+        env.set('PRECEDENCE_VAR', 'os_environ_value', "test")
         
         # Check that os.environ value is retrieved
         assert env.get('PRECEDENCE_VAR') == 'os_environ_value'
@@ -280,8 +280,8 @@ class TestEnvironmentIsolation:
         from netra_backend.app.core.configuration.base import config_manager
         
         # Set test environment variables
-        os.environ['ENVIRONMENT'] = 'development'
-        os.environ['INTEGRATION_TEST_VAR'] = 'integration_test_value'
+        env.set('ENVIRONMENT', 'development', "test")
+        env.set('INTEGRATION_TEST_VAR', 'integration_test_value', "test")
         
         # Force refresh environment detection
         if hasattr(config_manager, '_refresh_environment_detection'):
@@ -310,8 +310,8 @@ class TestEnvironmentIsolation:
         env = get_env()
         
         # Set some test variables
-        os.environ['SUBPROCESS_VAR_1'] = 'subprocess_value_1'
-        os.environ['SUBPROCESS_VAR_2'] = 'subprocess_value_2'
+        env.set('SUBPROCESS_VAR_1', 'subprocess_value_1', "test")
+        env.set('SUBPROCESS_VAR_2', 'subprocess_value_2', "test")
         
         # Get subprocess environment
         if hasattr(env, 'get_subprocess_env'):
@@ -332,7 +332,7 @@ class TestEnvironmentIsolation:
         env = get_env()
         
         # Test basic source tracking (if supported)
-        os.environ['SOURCE_TRACK_VAR'] = 'tracked_value'
+        env.set('SOURCE_TRACK_VAR', 'tracked_value', "test")
         
         # Access variable
         value = env.get('SOURCE_TRACK_VAR')
@@ -354,7 +354,7 @@ class TestEnvironmentIsolation:
         # Test multiple enable/disable cycles if isolation is supported
         if hasattr(env, 'enable_isolation') and hasattr(env, 'disable_isolation'):
             # Initially not isolated (presumably)
-            os.environ['ISOLATION_CYCLE_VAR'] = 'initial_value'
+            env.set('ISOLATION_CYCLE_VAR', 'initial_value', "test")
             assert env.get('ISOLATION_CYCLE_VAR') == 'initial_value'
             
             # Enable isolation

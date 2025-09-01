@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Real Services Manager for E2E Testing
 Manages starting/stopping real services without mocking.
 
@@ -228,7 +230,8 @@ class RealServicesManager:
     
     def _prepare_environment(self) -> Dict[str, str]:
         """Prepare environment variables for services."""
-        env = get_env().as_dict().copy()
+        env_vars = get_env()
+        env = env_vars.get_all()
         env.update({
             "NODE_ENV": "test",
             "NETRA_ENV": "development",  # Use development environment

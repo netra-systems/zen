@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
+env = get_env()
 Staging E2E Test Runner
 
 This script runs E2E tests against the deployed staging environment.
@@ -71,7 +73,7 @@ class StagingTestRunner:
         # Check environment setting
         if os.getenv("ENVIRONMENT") != "staging":
             logger.warning("ENVIRONMENT not set to 'staging', setting it now")
-            os.environ["ENVIRONMENT"] = "staging"
+            env.set("ENVIRONMENT", "staging", "test")
         
         if issues:
             logger.error("Environment validation failed:")

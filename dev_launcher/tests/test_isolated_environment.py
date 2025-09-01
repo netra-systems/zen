@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Tests for IsolatedEnvironment class.
 
 Comprehensive tests to verify:
@@ -111,7 +113,7 @@ class TestIsolatedEnvironmentIsolation:
         env = IsolatedEnvironment()
         
         # Store original state
-        original_os_vars = dict(os.environ)
+        original_os_vars = env.get_all()
         
         # Enable isolation
         env.enable_isolation(backup_original=True)
@@ -134,7 +136,7 @@ class TestIsolatedEnvironmentIsolation:
             env.disable_isolation(restore_original=True)
             
             # Verify os.environ is clean
-            current_os_vars = dict(os.environ)
+            current_os_vars = env.get_all()
             
             # Should have same variables as before
             assert "ISOLATED_TEST_VAR" not in current_os_vars
@@ -143,7 +145,7 @@ class TestIsolatedEnvironmentIsolation:
     def test_isolation_mode_with_existing_variables(self):
         """Test isolation mode behavior with existing os.environ variables."""
         # Set some variables in os.environ first
-        os.environ["EXISTING_VAR"] = "original_value"
+        env.set("EXISTING_VAR", "original_value", "test")
         
         try:
             env = IsolatedEnvironment()
@@ -159,17 +161,17 @@ class TestIsolatedEnvironmentIsolation:
             assert env.get("EXISTING_VAR") == "modified_value"
             
             # But os.environ should still have original value
-            assert os.environ.get("EXISTING_VAR") == "original_value"
+            assert env.get("EXISTING_VAR") == "original_value"
             
             # Disable isolation without restore - should sync to os.environ
             env.disable_isolation(restore_original=False)
             
             # Now os.environ should have the modified value
-            assert os.environ.get("EXISTING_VAR") == "modified_value"
+            assert env.get("EXISTING_VAR") == "modified_value"
             
         finally:
             # Clean up
-            os.environ.pop("EXISTING_VAR", None)
+            env.delete("EXISTING_VAR", "test")
     
     def test_subprocess_environment(self):
         """Test subprocess environment functionality."""
@@ -403,7 +405,7 @@ class TestIsolatedEnvironmentUtilityFunctions:
         env.set("NEW_CHANGE_VAR", "new_value", "changes_test")
         
         # Modify an existing variable (if any exist)
-        original_path = os.environ.get("PATH", "")
+        original_path = env.get("PATH", "")
         if original_path:
             env.set("PATH", original_path + ";test_addition", "changes_test")
         
@@ -543,7 +545,7 @@ class TestIsolatedEnvironmentIntegration:
         env = IsolatedEnvironment()
         
         # Existing variable in os.environ
-        original_path = os.environ.get("PATH", "")
+        original_path = env.get("PATH", "")
         
         # Should be accessible through isolated environment
         assert env.get("PATH") == original_path
@@ -554,7 +556,7 @@ class TestIsolatedEnvironmentIntegration:
         
         # Should be reflected in os.environ (when not in isolation mode)
         if not env.is_isolation_enabled():
-            assert os.environ.get("PATH") == new_path
+            assert env.get("PATH") == new_path
         
         # Restore original
         if original_path:

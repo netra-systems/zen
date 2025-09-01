@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Test OAuth credential loading for development environment.
@@ -11,6 +12,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
+env = get_env()
 def test_oauth_credential_loading():
     """Test that OAuth credentials are loaded correctly for each environment."""
     print("Testing OAuth credential loading for development environment...")
@@ -65,7 +67,7 @@ def test_oauth_credential_loading():
         print("-" * 40)
         
         # Save original environment
-        original_env = os.environ.copy()
+        original_env = env.get_all()
         
         try:
             # Clear relevant environment variables
@@ -99,8 +101,8 @@ def test_oauth_credential_loading():
             return False
         finally:
             # Restore original environment
-            os.environ.clear()
-            os.environ.update(original_env)
+            env.clear()
+            env.update(original_env, "test")
     
     print("\n" + "=" * 60)
     print("[SUCCESS] All OAuth credential loading tests passed!")
