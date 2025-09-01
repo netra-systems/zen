@@ -9,7 +9,6 @@ services:
   
   alpine-test-postgres:
     image: postgres:15-alpine
-    container_name: netra-alpine-test-postgres
     environment:
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test
@@ -40,7 +39,7 @@ services:
       retries: 10
       start_period: 5s
     networks:
-      - alpine-test-network
+      - default
     deploy:
       resources:
         limits:
@@ -49,7 +48,6 @@ services:
 
   alpine-test-redis:
     image: redis:7-alpine
-    container_name: netra-alpine-test-redis
     command: |
       redis-server
         --appendonly no
@@ -70,7 +68,7 @@ services:
       timeout: 1s
       retries: 5
     networks:
-      - alpine-test-network
+      - default
     deploy:
       resources:
         limits:
@@ -79,7 +77,6 @@ services:
 
   alpine-test-clickhouse:
     image: clickhouse/clickhouse-server:23-alpine
-    container_name: netra-alpine-test-clickhouse
     environment:
       CLICKHOUSE_DB: test_analytics
       CLICKHOUSE_USER: test
@@ -100,7 +97,7 @@ services:
       timeout: 2s
       retries: 10
     networks:
-      - alpine-test-network
+      - default
     deploy:
       resources:
         limits:
@@ -120,7 +117,6 @@ services:
         BUILD_ENV: test
       cache_from:
         - python:3.11-alpine3.19
-    container_name: netra-alpine-test-backend
     environment:
       ENVIRONMENT: testing
       LOG_LEVEL: ERROR
@@ -152,7 +148,7 @@ services:
       retries: 10
       start_period: 15s
     networks:
-      - alpine-test-network
+      - default
     deploy:
       resources:
         limits:
@@ -168,7 +164,6 @@ services:
         BUILD_ENV: test
       cache_from:
         - python:3.11-alpine3.19
-    container_name: netra-alpine-test-auth
     environment:
       ENVIRONMENT: testing
       LOG_LEVEL: ERROR
@@ -196,7 +191,7 @@ services:
       retries: 10
       start_period: 15s
     networks:
-      - alpine-test-network
+      - default
     deploy:
       resources:
         limits:
@@ -216,7 +211,6 @@ services:
         NEXT_PUBLIC_ENVIRONMENT: test
       cache_from:
         - node:20-alpine3.19
-    container_name: netra-alpine-test-frontend
     environment:
       NODE_ENV: test
       PORT: 3000
@@ -234,7 +228,7 @@ services:
       retries: 10
       start_period: 30s
     networks:
-      - alpine-test-network
+      - default
     deploy:
       resources:
         limits:
@@ -242,11 +236,10 @@ services:
           cpus: '0.3'
 
 networks:
-  alpine-test-network:
+  default:
     driver: bridge
-    name: netra-alpine-test-network
+    # Network name will be prefixed with project name automatically
     driver_opts:
-      com.docker.network.bridge.name: alpine-test-br
       com.docker.network.driver.mtu: 1500
 
 # No persistent volumes - everything is ephemeral for test isolation
