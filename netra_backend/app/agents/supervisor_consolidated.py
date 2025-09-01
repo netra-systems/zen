@@ -84,40 +84,40 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
     def __init__(self, 
                  db_session: AsyncSession,
                  llm_manager: LLMManager,
-                 websocket_manager: 'WebSocketManager',
+                 websocket_bridge,
                  tool_dispatcher: ToolDispatcher):
-        self._init_base(llm_manager, websocket_manager)
-        self._init_services(db_session, websocket_manager, tool_dispatcher)
-        self._init_all_components(llm_manager, tool_dispatcher, websocket_manager)
+        self._init_base(llm_manager, websocket_bridge)
+        self._init_services(db_session, websocket_bridge, tool_dispatcher)
+        self._init_all_components(llm_manager, tool_dispatcher, websocket_bridge)
     
-    def _init_base(self, llm_manager: LLMManager, websocket_manager: 'WebSocketManager') -> None:
+    def _init_base(self, llm_manager: LLMManager, websocket_bridge) -> None:
         """Initialize base agent with modern execution interface."""
         BaseSubAgent.__init__(self, llm_manager, name="Supervisor", 
                             description="The supervisor agent that orchestrates sub-agents")
-        BaseExecutionInterface.__init__(self, "Supervisor", websocket_manager)
+        BaseExecutionInterface.__init__(self, "Supervisor", websocket_bridge)
     
     def _init_services(self, db_session: AsyncSession,
-                       websocket_manager: 'WebSocketManager',
+                       websocket_bridge,
                        tool_dispatcher: ToolDispatcher) -> None:
         """Initialize services."""
         self.db_session = db_session
-        self.websocket_manager = websocket_manager
+        self.websocket_bridge = websocket_bridge
         self.tool_dispatcher = tool_dispatcher
         self.state_persistence = state_persistence_service
     
     def _init_all_components(self, llm_manager: LLMManager,
                            tool_dispatcher: ToolDispatcher,
-                           websocket_manager: 'WebSocketManager') -> None:
+                           websocket_bridge) -> None:
         """Initialize all modular components and infrastructure."""
-        self._init_core_components(llm_manager, tool_dispatcher, websocket_manager)
+        self._init_core_components(llm_manager, tool_dispatcher, websocket_bridge)
         self._init_infrastructure_components()
 
     def _init_core_components(self, llm_manager: LLMManager,
                             tool_dispatcher: ToolDispatcher,
-                            websocket_manager: 'WebSocketManager') -> None:
+                            websocket_bridge) -> None:
         """Initialize core agent components."""
-        self._init_registry(llm_manager, tool_dispatcher, websocket_manager)
-        self._init_execution_components(websocket_manager)
+        self._init_registry(llm_manager, tool_dispatcher, websocket_bridge)
+        self._init_execution_components(websocket_bridge)
         self._init_state_components()
 
     def _init_infrastructure_components(self) -> None:
@@ -141,23 +141,23 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
 
     def _init_registry(self, llm_manager: LLMManager, 
                       tool_dispatcher: ToolDispatcher,
-                      websocket_manager: 'WebSocketManager') -> None:
+                      websocket_bridge) -> None:
         """Initialize agent registry."""
         self.registry = AgentRegistry(llm_manager, tool_dispatcher)
-        # CRITICAL: Register agents BEFORE setting WebSocket manager
-        # so that agents exist when the manager is set on them
+        # CRITICAL: Register agents BEFORE setting WebSocket bridge
+        # so that agents exist when the bridge is set on them
         self.registry.register_default_agents()
-        self.registry.set_websocket_manager(websocket_manager)
+        self.registry.set_websocket_bridge(websocket_bridge)
         # Add alias for test compatibility
         self.agent_registry = self.registry
 
-    def _init_execution_components(self, websocket_manager: 'WebSocketManager') -> None:
+    def _init_execution_components(self, websocket_bridge) -> None:
         """Initialize execution components."""
-        # ExecutionEngine: Handles agent execution with WebSocket notifications
-        self.engine = ExecutionEngine(self.registry, websocket_manager)
+        # ExecutionEngine: Handles agent execution with WebSocket notifications via bridge
+        self.engine = ExecutionEngine(self.registry, websocket_bridge)
         # PipelineExecutor: Orchestrates multi-agent pipeline execution
         self.pipeline_executor = PipelineExecutor(
-            self.engine, websocket_manager, self.db_session
+            self.engine, websocket_bridge, self.db_session
         )
 
     def _init_state_components(self) -> None:
@@ -176,7 +176,7 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
         self.lifecycle_manager = SupervisorLifecycleManager()
         # Add workflow orchestrator for test compatibility
         from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
-        self.workflow_orchestrator = WorkflowOrchestrator(self.registry, self.engine, self.websocket_manager)
+        self.workflow_orchestrator = WorkflowOrchestrator(self.registry, self.engine, self.websocket_bridge)
 
     @asynccontextmanager
     async def _create_db_session_factory(self):

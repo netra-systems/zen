@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-    from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
@@ -23,7 +23,7 @@ from netra_backend.app.agents.supervisor.fallback_manager import FallbackManager
 from netra_backend.app.agents.supervisor.observability_flow import (
     get_supervisor_flow_logger,
 )
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+# WebSocketNotifier deprecated - using AgentWebSocketBridge instead
 from netra_backend.app.agents.supervisor.periodic_update_manager import PeriodicUpdateManager
 from netra_backend.app.logging_config import central_logger
 
@@ -45,19 +45,19 @@ class ExecutionEngine:
     MAX_CONCURRENT_AGENTS = 10  # Support 5 concurrent users (2 agents each)
     AGENT_EXECUTION_TIMEOUT = 30.0  # 30 seconds max per agent
     
-    def __init__(self, registry: 'AgentRegistry', websocket_manager: 'WebSocketManager'):
+    def __init__(self, registry: 'AgentRegistry', websocket_bridge):
         self.registry = registry
-        self.websocket_manager = websocket_manager
+        self.websocket_bridge = websocket_bridge
         self.active_runs: Dict[str, AgentExecutionContext] = {}
         self.run_history: List[AgentExecutionResult] = []
         self._init_components()
         
     def _init_components(self) -> None:
         """Initialize execution components."""
-        self.websocket_notifier = WebSocketNotifier(self.websocket_manager)
-        self.periodic_update_manager = PeriodicUpdateManager(self.websocket_notifier)
-        self.agent_core = AgentExecutionCore(self.registry, self.websocket_notifier)
-        self.fallback_manager = FallbackManager(self.websocket_notifier)
+        # Use AgentWebSocketBridge instead of creating WebSocketNotifier
+        self.periodic_update_manager = PeriodicUpdateManager(self.websocket_bridge)
+        self.agent_core = AgentExecutionCore(self.registry, self.websocket_bridge)
+        self.fallback_manager = FallbackManager(self.websocket_bridge)
         self.flow_logger = get_supervisor_flow_logger()
         
         # CONCURRENCY OPTIMIZATION: Semaphore for agent execution control
@@ -99,8 +99,12 @@ class ExecutionEngine:
                     expected_duration_ms=int(self.AGENT_EXECUTION_TIMEOUT * 1000),
                     operation_description=f"Executing {context.agent_name} agent"
                 ):
-                    # Send agent started with guaranteed delivery
-                    await self.websocket_notifier.send_agent_started(context)
+                    # Send agent started with guaranteed delivery via bridge
+                    await self.websocket_bridge.notify_agent_started(
+                        context.run_id, 
+                        context.agent_name,
+                        {"status": "started", "context": context.metadata or {}}
+                    )
                     
                     # Send initial thinking update
                     await self.send_agent_thinking(
@@ -418,26 +422,44 @@ class ExecutionEngine:
         self.run_history.append(result)
         self._enforce_history_size_limit()
     
-    # WebSocket delegation methods
+    # WebSocket delegation methods via bridge
     async def send_agent_thinking(self, context: AgentExecutionContext, 
                                  thought: str, step_number: int = None) -> None:
-        """Send agent thinking notification."""
-        await self.websocket_notifier.send_agent_thinking(context, thought, step_number)
+        """Send agent thinking notification via bridge."""
+        await self.websocket_bridge.notify_agent_thinking(
+            context.run_id,
+            context.agent_name,
+            thought,
+            step_number
+        )
     
     async def send_partial_result(self, context: AgentExecutionContext,
                                  content: str, is_complete: bool = False) -> None:
-        """Send partial result notification."""
-        await self.websocket_notifier.send_partial_result(context, content, is_complete)
+        """Send partial result notification via bridge."""
+        await self.websocket_bridge.notify_progress_update(
+            context.run_id,
+            context.agent_name,
+            {"content": content, "is_complete": is_complete}
+        )
     
     async def send_tool_executing(self, context: AgentExecutionContext,
                                  tool_name: str) -> None:
-        """Send tool executing notification."""
-        await self.websocket_notifier.send_tool_executing(context, tool_name)
+        """Send tool executing notification via bridge."""
+        await self.websocket_bridge.notify_tool_executing(
+            context.run_id,
+            context.agent_name,
+            tool_name
+        )
     
     async def send_final_report(self, context: AgentExecutionContext,
                                report: dict, duration_ms: float) -> None:
-        """Send final report notification."""
-        await self.websocket_notifier.send_final_report(context, report, duration_ms)
+        """Send final report notification via bridge."""
+        await self.websocket_bridge.notify_agent_completed(
+            context.run_id,
+            context.agent_name,
+            report,
+            duration_ms
+        )
     
     async def _send_final_execution_report(self, context: AgentExecutionContext,
                                           result: AgentExecutionResult,
@@ -462,9 +484,10 @@ class ExecutionEngine:
                 result.duration * 1000 if result.duration else 0
             )
             
-            # Send completion notification
-            await self.websocket_notifier.send_agent_completed(
-                context,
+            # Send completion notification via bridge
+            await self.websocket_bridge.notify_agent_completed(
+                context.run_id,
+                context.agent_name,
                 report,
                 result.duration * 1000 if result.duration else 0
             )
@@ -486,10 +509,11 @@ class ExecutionEngine:
                 "status": "failed_with_fallback" if (result.metadata and result.metadata.get('fallback_used')) else "failed"
             }
             
-            # Send completion notification for failed execution
+            # Send completion notification for failed execution via bridge
             # This is CRITICAL for WebSocket clients to know execution finished
-            await self.websocket_notifier.send_agent_completed(
-                context,
+            await self.websocket_bridge.notify_agent_completed(
+                context.run_id,
+                context.agent_name,
                 report,
                 result.duration * 1000 if result.duration else 0
             )
@@ -599,21 +623,22 @@ class ExecutionEngine:
             stats['avg_execution_time'] = 0.0
             stats['max_execution_time'] = 0.0
         
-        # Add WebSocket stats
-        delivery_stats = await self.websocket_notifier.get_delivery_stats()
-        stats.update(delivery_stats)
+        # Add WebSocket bridge stats
+        try:
+            bridge_metrics = await self.websocket_bridge.get_metrics()
+            stats['websocket_bridge_metrics'] = bridge_metrics
+        except Exception as e:
+            stats['websocket_bridge_error'] = str(e)
         
         return stats
     
     async def shutdown(self) -> None:
         """Shutdown execution engine and clean up resources."""
-        # Shutdown WebSocket notifier
-        await self.websocket_notifier.shutdown()
-        
         # Shutdown periodic update manager
         await self.periodic_update_manager.shutdown()
         
         # Clear active runs
         self.active_runs.clear()
         
+        # WebSocket bridge shutdown is handled separately
         logger.info("ExecutionEngine shutdown complete")
