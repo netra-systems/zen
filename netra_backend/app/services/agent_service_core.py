@@ -45,8 +45,8 @@ class AgentService(IAgentService):
         # Initialize message handler (bridge will provide WebSocket manager)
         self.message_handler = MessageHandlerService(supervisor, self.thread_service)
         
-        # Start bridge integration (non-blocking, idempotent)
-        asyncio.create_task(self._initialize_bridge_integration())
+        # Bridge integration will be initialized on first use (event loop safe)
+        # No longer call asyncio.create_task during __init__ as no event loop exists yet
 
     async def _initialize_bridge_integration(self) -> None:
         """Initialize WebSocket-Agent integration through bridge (SSOT for integration)."""
@@ -86,6 +86,11 @@ class AgentService(IAgentService):
     
     async def _ensure_bridge_ready(self) -> bool:
         """Ensure bridge is ready for use, with idempotent retry and recovery."""
+        # First check: if not initialized at all, initialize now (safe with event loop)
+        if not self._bridge_initialized or not self._bridge:
+            logger.debug("Bridge not initialized, initializing now")
+            await self._initialize_bridge_integration()
+        
         # Quick path: already initialized and healthy
         if self._bridge_initialized and self._bridge:
             try:
