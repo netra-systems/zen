@@ -616,12 +616,22 @@ class UnifiedDockerManager:
         import re
         
         # Extract container name from error message
-        pattern = r'container name "([^"]+)" is already in use'
-        matches = re.findall(pattern, error_message)
+        name_pattern = r'container name "([^"]+)" is already in use'
+        name_matches = re.findall(name_pattern, error_message)
         
-        for container_name in matches:
-            logger.info(f"Force removing conflicting container: {container_name}")
+        # Extract container ID from error message
+        id_pattern = r'is already in use by container "([a-f0-9]+)"'
+        id_matches = re.findall(id_pattern, error_message)
+        
+        # Remove by name
+        for container_name in name_matches:
+            logger.info(f"Force removing conflicting container by name: {container_name}")
             subprocess.run(["docker", "rm", "-f", container_name], capture_output=True)
+        
+        # Remove by ID as fallback
+        for container_id in id_matches:
+            logger.info(f"Force removing conflicting container by ID: {container_id}")
+            subprocess.run(["docker", "rm", "-f", container_id], capture_output=True)
     
     def _cleanup_test_containers(self):
         """Clean up all netra-test containers"""
