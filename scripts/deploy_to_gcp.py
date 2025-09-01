@@ -92,6 +92,8 @@ class GCPDeployer:
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
                     "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
+                    "AUTH_SERVICE_ENABLED": "true",  # CRITICAL: Enable auth service integration
+                    "SERVICE_ID": "netra-backend",  # CRITICAL: Required for service-to-service auth
                     "FRONTEND_URL": "https://app.staging.netrasystems.ai",
                     "FORCE_HTTPS": "true",  # REQUIREMENT 6: FORCE_HTTPS for load balancer
                     "GCP_PROJECT_ID": self.project_id,  # CRITICAL: Required for secret loading logic
@@ -118,6 +120,7 @@ class GCPDeployer:
                     "PYTHONUNBUFFERED": "1",
                     "FRONTEND_URL": "https://app.staging.netrasystems.ai",
                     "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
+                    "SERVICE_ID": "auth-service",  # CRITICAL: Required for service-to-service auth
                     "JWT_ALGORITHM": "HS256",
                     "JWT_ACCESS_EXPIRY_MINUTES": "15",
                     "JWT_REFRESH_EXPIRY_DAYS": "7",
