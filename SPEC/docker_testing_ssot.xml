@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+    <metadata>
+        <title>Docker Testing Configuration SSOT</title>
+        <category>testing</category>
+        <priority>CRITICAL</priority>
+        <last_updated>2025-09-01</last_updated>
+        <author>System</author>
+    </metadata>
+    
+    <overview>
+        <description>
+            Single Source of Truth for Docker-based testing configuration.
+            ALL test execution MUST follow these specifications to prevent
+            Docker crashes and ensure consistent test environments.
+        </description>
+        <business_value>
+            Ensures reliable, repeatable test execution across all environments,
+            reducing debugging time and preventing production incidents.
+        </business_value>
+    </overview>
+    
+    <critical_requirements>
+        <requirement id="default_mode" priority="CRITICAL">
+            <description>Tests MUST use Docker integrated environment by default</description>
+            <rationale>Real services provide accurate test results and catch integration issues early</rationale>
+            <implementation>Use docker-compose.test.yml for all non-smoke tests</implementation>
+        </requirement>
+        
+        <requirement id="no_mocks" priority="CRITICAL">
+            <description>Mocks are FORBIDDEN except for smoke tests</description>
+            <rationale>Mocks hide real integration issues and cause false positives</rationale>
+            <exceptions>Only smoke tests may use mocks for lightweight validation</exceptions>
+        </requirement>
+        
+        <requirement id="container_isolation" priority="CRITICAL">
+            <description>Each test run MUST use isolated containers</description>
+            <rationale>Prevents test pollution and ensures reproducibility</rationale>
+            <implementation>Use unique container names with run_id prefix</implementation>
+        </requirement>
+    </critical_requirements>
+    
+    <docker_management>
+        <lifecycle>
+            <phase name="startup">
+                <step>Clean up any existing test containers</step>
+                <step>Start new test environment with docker-compose</step>
+                <step>Wait for all health checks to pass</step>
+                <command>docker compose -f docker-compose.test.yml down --volumes --remove-orphans && docker compose -f docker-compose.test.yml up -d</command>
+            </phase>
+            
+            <phase name="execution">
+                <step>Validate service connectivity</step>
+                <step>Run tests with proper environment variables</step>
+                <step>Monitor resource usage</step>
+            </phase>
+            
+            <phase name="cleanup">
+                <step>Stop all test containers</step>
+                <step>Remove volumes and networks</step>
+                <step>Prune unused resources</step>
+                <command>docker compose -f docker-compose.test.yml down --volumes --remove-orphans</command>
+            </phase>
+        </lifecycle>
+        
+        <resource_limits>
+            <service name="postgres" memory="512m" cpu="0.5"/>
+            <service name="redis" memory="256m" cpu="0.25"/>
+            <service name="clickhouse" memory="1g" cpu="0.5"/>
+            <service name="rabbitmq" memory="256m" cpu="0.25"/>
+        </resource_limits>
+    </docker_management>
+    
+    <port_allocation>
+        <service name="postgresql" test="5434" dev="5433" prod="5432"/>
+        <service name="redis" test="6381" dev="6380" prod="6379"/>
+        <service name="clickhouse" test="8125" dev="8124" prod="8123"/>
+        <service name="rabbitmq" test="5673" dev="5672" prod="5672"/>
+        <service name="mailhog_smtp" test="1026" dev="1025" prod="N/A"/>
+        <service name="mailhog_web" test="8026" dev="8025" prod="N/A"/>
+    </port_allocation>
+    
+    <known_issues>
+        <issue id="container_conflicts">
+            <description>Container name already in use errors</description>
+            <root_cause>Previous test run didn't clean up properly</root_cause>
+            <solution>Always run cleanup before starting tests</solution>
+            <prevention>Implement automatic cleanup in test runner</prevention>
+        </issue>
+        
+        <issue id="docker_crashes">
+            <description>Docker daemon becomes unresponsive</description>
+            <root_cause>Resource exhaustion from orphaned containers</root_cause>
+            <solution>Implement resource limits and automatic pruning</solution>
+            <prevention>
+                - Set memory/CPU limits on all containers
+                - Run docker system prune between test suites
+                - Monitor resource usage during tests
+            </prevention>
+        </issue>
+        
+        <issue id="slow_startup">
+            <description>Tests take too long to initialize</description>
+            <root_cause>Disk I/O bottleneck for database initialization</root_cause>
+            <solution>Use tmpfs volumes for test databases</solution>
+            <implementation>Already configured in docker-compose.test.yml</implementation>
+        </issue>
+    </known_issues>
+    
+    <test_categories>
+        <category name="smoke" services="none" docker="optional" default="mock"/>
+        <category name="unit" services="optional" docker="optional" default="mock"/>
+        <category name="integration" services="required" docker="required" default="real"/>
+        <category name="api" services="required" docker="required" default="real"/>
+        <category name="websocket" services="required" docker="required" default="real"/>
+        <category name="database" services="required" docker="required" default="real"/>
+        <category name="e2e" services="required" docker="required" default="real"/>
+        <category name="performance" services="required" docker="required" default="real"/>
+    </test_categories>
+    
+    <compliance_checklist>
+        <item>Tests run successfully with --docker-dedicated flag</item>
+        <item>No hardcoded ports or hostnames in test code</item>
+        <item>All containers cleaned up after test completion</item>
+        <item>Resource limits defined for all test containers</item>
+        <item>Health checks implemented for all services</item>
+        <item>Documentation updated if new services added</item>
+        <item>No use of production credentials in test configuration</item>
+        <item>Test environment isolated from development environment</item>
+    </compliance_checklist>
+    
+    <references>
+        <reference type="documentation" path="/docs/docker_testing_ssot.md"/>
+        <reference type="configuration" path="/docker-compose.test.yml"/>
+        <reference type="script" path="/tests/unified_test_runner.py"/>
+        <reference type="framework" path="/test_framework/"/>
+    </references>
+</spec>

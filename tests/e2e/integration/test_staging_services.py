@@ -1,5 +1,6 @@
 """Staging Service Health and Connectivity Tests
 
+from shared.isolated_environment import get_env
 Business Value Justification (BVJ):
 - Segment: Enterprise/Platform - All customer tiers
 - Business Goal: Service health validation and connectivity assurance
@@ -170,17 +171,17 @@ class TestStagingDatabaseHealth:
     async def test_database_configuration_validation(self):
         """Test database configurations meet staging requirements."""
         # PostgreSQL configuration
-        db_url = os.getenv("DATABASE_URL")
+        db_url = get_env().get("DATABASE_URL")
         assert db_url is not None, "DATABASE_URL not set"
         assert db_url.startswith("postgresql://"), "Invalid PostgreSQL URL"
         
         # Redis configuration  
-        redis_url = os.getenv("REDIS_URL")
+        redis_url = get_env().get("REDIS_URL")
         assert redis_url is not None, "REDIS_URL not set"
         assert redis_url.startswith("redis://"), "Invalid Redis URL"
         
         # ClickHouse configuration
-        clickhouse_url = os.getenv("CLICKHOUSE_URL")
+        clickhouse_url = get_env().get("CLICKHOUSE_URL")
         assert clickhouse_url is not None, "CLICKHOUSE_URL not set"
         assert clickhouse_url.startswith("clickhouse://"), "Invalid ClickHouse URL"
 

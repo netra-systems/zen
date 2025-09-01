@@ -1,6 +1,5 @@
 from shared.isolated_environment import get_env
 """
-env = get_env()
 E2E tests for dev launcher startup sequence in DEV MODE.
 
 Tests comprehensive startup behavior with real services, database connections,
@@ -47,10 +46,10 @@ class TestDevLauncherFixture:
     
     def _set_test_env_vars(self) -> None:
         """Set environment variables for testing."""
-        env.set("TESTING", "true", "test")
-        env.set("DEV_MODE", "true", "test")
-        env.set("LOG_LEVEL", "DEBUG", "test")
-        env.set("DISABLE_BROWSER_OPEN", "true", "test")
+        get_env().set("TESTING", "true", "test")
+        get_env().set("DEV_MODE", "true", "test")
+        get_env().set("LOG_LEVEL", "DEBUG", "test")
+        get_env().set("DISABLE_BROWSER_OPEN", "true", "test")
     
     async def start_launcher(self, **config_overrides) -> bool:
         """Start dev launcher with test configuration."""
@@ -266,7 +265,7 @@ async def test_env_file_validation(dev_launcher_fixture):
 def _verify_env_loaded(launcher: DevLauncher, expected: Dict[str, str]) -> bool:
     """Verify environment variables were loaded correctly."""
     for key, value in expected.items():
-        if os.getenv(key) != value:
+        if get_env().get(key) != value:
             return False
     return True
 

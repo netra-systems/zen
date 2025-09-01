@@ -212,8 +212,8 @@ class DevLauncherStartupValidator:
                 raise RuntimeError(f"Environment manager test failed: expected 'test_value', got '{retrieved_value}'")
             
             # Clean up test variable
-            if test_var in os.environ:
-                del os.environ[test_var]
+            # Note: Cannot directly delete from os.environ in isolated environment
+            # The environment manager will handle cleanup
             
             # Validate critical environment variables are accessible
             critical_vars = ["PATH", "HOME" if sys.platform != "win32" else "USERPROFILE"]

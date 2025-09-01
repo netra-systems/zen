@@ -25,7 +25,7 @@ from enum import Enum
 from typing import Any, Dict, Optional
 
 # Import IsolatedEnvironment per CLAUDE.md requirements
-from test_framework.environment_isolation import get_env
+from shared.isolated_environment import get_env
 
 # Import dynamic port manager for port allocation
 try:

@@ -1,5 +1,14 @@
 """WebSocket notification functionality with guaranteed event delivery and concurrency optimization.
 
+⚠️  DEPRECATION WARNING ⚠️ 
+This module is DEPRECATED. Use AgentWebSocketBridge instead.
+
+AgentWebSocketBridge provides:
+- Single source of truth for all WebSocket notifications
+- Better integration with the execution lifecycle
+- Simplified API with guaranteed message delivery
+- Built-in health monitoring and recovery
+
 Business Value: Ensures reliable real-time user feedback under load, preventing user abandonment.
 Optimizations: Event queuing, delivery confirmation, backlog handling, concurrent user support.
 """
@@ -34,6 +43,9 @@ except ImportError:
 class WebSocketNotifier:
     """Handles WebSocket notifications for agent execution with guaranteed delivery.
     
+    ⚠️  DEPRECATION WARNING ⚠️ 
+    This class is DEPRECATED. Use netra_backend.app.services.agent_websocket_bridge.AgentWebSocketBridge instead.
+    
     Features:
     - Guaranteed delivery of critical events (agent_started, tool_executing, tool_completed, agent_completed)
     - Event queuing for backlog scenarios with user feedback
@@ -43,6 +55,15 @@ class WebSocketNotifier:
     """
     
     def __init__(self, websocket_manager: 'WebSocketManager'):
+        import warnings
+        warnings.warn(
+            "WebSocketNotifier is deprecated. Use AgentWebSocketBridge instead. "
+            "This class will be removed in a future version.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        logger.warning("⚠️  DEPRECATION: WebSocketNotifier is deprecated. Use AgentWebSocketBridge instead.")
+        
         self.websocket_manager = websocket_manager
         
         # CONCURRENCY OPTIMIZATION: Event delivery guarantees

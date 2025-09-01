@@ -16,9 +16,27 @@ import { logger } from '@/lib/logger';
 // Helper Functions (8 lines max each)
 // ============================================
 
+interface TestResults {
+  error?: string;
+  passedTests?: number;
+  totalTests?: number;
+  success?: boolean;
+  results?: Array<{
+    testName: string;
+    success: boolean;
+  }>;
+}
+
+interface WebSocketMessage {
+  type: string;
+  payload: Record<string, unknown>;
+  timestamp?: number;
+  id?: string;
+}
+
 const handleTestExecution = async (
   setIsRunningTests: (running: boolean) => void,
-  setTestResults: (results: any) => void
+  setTestResults: (results: TestResults) => void
 ): Promise<void> => {
   setIsRunningTests(true);
   try {
@@ -31,7 +49,7 @@ const handleTestExecution = async (
   }
 };
 
-const handleTestError = (error: unknown, setTestResults: (results: any) => void): void => {
+const handleTestError = (error: unknown, setTestResults: (results: TestResults) => void): void => {
   logger.error('Test execution failed:', error);
   setTestResults({ error: (error as Error).message });
 };
@@ -57,7 +75,7 @@ const renderTestResultsError = (error: string) => (
   <div className="text-xs text-red-600">Error: {error}</div>
 );
 
-const renderTestResultsSuccess = (testResults: any) => (
+const renderTestResultsSuccess = (testResults: TestResults) => (
   <div className="text-xs space-y-1">
     <div>Tests: {testResults.passedTests}/{testResults.totalTests}</div>
     <div className={testResults.success ? 'text-green-600' : 'text-red-600'}>
@@ -67,11 +85,11 @@ const renderTestResultsSuccess = (testResults: any) => (
   </div>
 );
 
-const renderTestResultsDetails = (testResults: any) => (
+const renderTestResultsDetails = (testResults: TestResults) => (
   <details className="mt-2">
     <summary className="cursor-pointer">Details</summary>
     <div className="mt-1 text-xs space-y-1">
-      {testResults.results?.map((result: any, index: number) => (
+      {testResults.results?.map((result, index: number) => (
         <div key={index} className={result.success ? 'text-green-600' : 'text-red-600'}>
           {result.success ? '✅' : '❌'} {result.testName}
         </div>
@@ -94,9 +112,9 @@ interface EventDiagnosticsPanelProps {
     duplicatesDropped: number;
     clearQueue: () => void;
   };
-  wsMessages: any[];
-  testResults: any;
-  setTestResults: (results: any) => void;
+  wsMessages: WebSocketMessage[];
+  testResults: TestResults | null;
+  setTestResults: (results: TestResults) => void;
   isRunningTests: boolean;
   setIsRunningTests: (running: boolean) => void;
 }

@@ -33,7 +33,7 @@ interface FormattedMessageContentProps {
 }
 
 interface CodeComponentProps {
-  readonly node?: any;
+  readonly node?: Record<string, unknown>;
   readonly inline?: boolean;
   readonly className?: string;
   readonly children?: React.ReactNode;
@@ -119,7 +119,7 @@ const createCodeElement = (
   enableHighlighting: boolean, 
   language: string, 
   children: React.ReactNode, 
-  props: any
+  props: Record<string, unknown>
 ) => {
   if (inline) {
     return <code className="bg-gray-100 px-1 py-0.5 rounded text-sm" {...props}>{children}</code>;
@@ -156,9 +156,11 @@ const createSyntaxHighlighter = (
  * Creates pre-formatted text component
  */
 const createPreComponent = () => {
-  return ({ children }: { children: React.ReactNode }) => (
+  const PreComponent = ({ children }: { children: React.ReactNode }) => (
     <div className="overflow-x-auto">{children}</div>
   );
+  PreComponent.displayName = 'PreComponent';
+  return PreComponent;
 };
 
 /**
@@ -167,33 +169,39 @@ const createPreComponent = () => {
 const createTableComponent = (enableTables: boolean) => {
   if (!enableTables) return undefined;
   
-  return ({ children }: { children: React.ReactNode }) => (
+  const TableComponent = ({ children }: { children: React.ReactNode }) => (
     <div className="overflow-x-auto my-4">
       <table className="min-w-full border-collapse border border-gray-300">
         {children}
       </table>
     </div>
   );
+  TableComponent.displayName = 'TableComponent';
+  return TableComponent;
 };
 
 /**
  * Creates table header component
  */
 const createTableHeaderComponent = () => {
-  return ({ children }: { children: React.ReactNode }) => (
+  const TableHeaderComponent = ({ children }: { children: React.ReactNode }) => (
     <th className="border border-gray-300 bg-gray-50 px-4 py-2 text-left font-semibold">
       {children}
     </th>
   );
+  TableHeaderComponent.displayName = 'TableHeaderComponent';
+  return TableHeaderComponent;
 };
 
 /**
  * Creates table cell component
  */
 const createTableCellComponent = () => {
-  return ({ children }: { children: React.ReactNode }) => (
+  const TableCellComponent = ({ children }: { children: React.ReactNode }) => (
     <td className="border border-gray-300 px-4 py-2">{children}</td>
   );
+  TableCellComponent.displayName = 'TableCellComponent';
+  return TableCellComponent;
 };
 
 // ============================================================================
@@ -206,7 +214,7 @@ const createTableCellComponent = () => {
 const renderFormattedContent = (
   content: string, 
   config: RendererConfig, 
-  components: any, 
+  components: Record<string, React.ComponentType<unknown>>, 
   className?: string
 ) => {
   if (config.enableMarkdown) {
@@ -222,7 +230,7 @@ const renderFormattedContent = (
 const renderMarkdownContent = (
   content: string, 
   config: RendererConfig, 
-  components: any, 
+  components: Record<string, React.ComponentType<unknown>>, 
   className?: string
 ) => {
   const plugins = createMarkdownPlugins(config);
@@ -288,30 +296,34 @@ export const FormattedMessageContent: React.FC<FormattedMessageContentProps> = R
 });
 
 /**
+ * Safely converts content to string for display
+ */
+const convertToSafeString = (content: unknown): string => {
+  if (typeof content === 'string') return content;
+  if (content == null) return '';
+  
+  try {
+    return JSON.stringify(content, (key, value) => {
+      if (value && typeof value === 'object') {
+        if (value.constructor === Object || Array.isArray(value)) {
+          return value;
+        }
+        return `[${value.constructor?.name || 'Object'}]`;
+      }
+      if (typeof value === 'function') return '[Function]';
+      if (typeof value === 'symbol') return '[Symbol]';
+      return value;
+    });
+  } catch (error) {
+    return '[Invalid Content - Unable to display safely]';
+  }
+};
+
+/**
  * Renders fallback content for invalid formatting
  */
-const renderFallbackContent = (content: any, className: string) => {
-  // Safely convert any content to string, handling objects, circular refs, etc.
-  const safeContent = useMemo(() => {
-    if (typeof content === 'string') return content;
-    if (content == null) return '';
-    
-    try {
-      return JSON.stringify(content, (key, value) => {
-        if (value && typeof value === 'object') {
-          if (value.constructor === Object || Array.isArray(value)) {
-            return value;
-          }
-          return `[${value.constructor?.name || 'Object'}]`;
-        }
-        if (typeof value === 'function') return '[Function]';
-        if (typeof value === 'symbol') return '[Symbol]';
-        return value;
-      });
-    } catch (error) {
-      return '[Invalid Content - Unable to display safely]';
-    }
-  }, [content]);
+const renderFallbackContent = (content: unknown, className: string) => {
+  const safeContent = convertToSafeString(content);
 
   return (
     <div className={`whitespace-pre-wrap text-gray-800 leading-relaxed ${className}`}>

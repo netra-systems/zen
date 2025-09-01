@@ -1,6 +1,5 @@
 from shared.isolated_environment import get_env
 """
-env = get_env()
 E2E tests for service health check endpoints in DEV MODE.
 
 Tests health endpoints for all services, monitors health status during startup,
@@ -121,8 +120,8 @@ class TestDevHealthFixture:
         """Setup test environment for health checks."""
         self.test_env.setup_test_db()
         self.test_env.setup_test_redis()
-        env.set("TESTING", "true", "test")
-        env.set("HEALTH_CHECK_INTERVAL", "5", "test")
+        get_env().set("TESTING", "true", "test")
+        get_env().set("HEALTH_CHECK_INTERVAL", "5", "test")
     
     async def start_dev_environment(self) -> bool:
         """Start dev environment and extract service ports."""

@@ -15,6 +15,8 @@ import tempfile
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from shared.isolated_environment import get_env
+
 
 env = get_env()
 class TestFrontendStagingURLConfiguration:
@@ -169,7 +171,6 @@ class TestFrontendStagingURLConfiguration:
             "auth-service-client must not have hardcoded localhost URLs except in comments"
     
     @pytest.mark.skipif(
-        not env.get('RUN_DOCKER_BUILD_TEST'),
         reason="Docker build test is slow, set RUN_DOCKER_BUILD_TEST=1 to enable"
     )
     @pytest.mark.e2e

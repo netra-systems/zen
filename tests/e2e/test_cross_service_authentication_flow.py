@@ -72,8 +72,6 @@ async def test_cross_service_authentication_flow():
     
     # Set correct service ports for real running services BEFORE harness initialization
     import os
-    env.set("TEST_AUTH_PORT", "8082", "test")
-    env.set("TEST_BACKEND_PORT", "8002", "test")
     env.set("TEST_AUTH_PORT", "8082", "test_cross_service_authentication_flow")
     env.set("TEST_BACKEND_PORT", "8002", "test_cross_service_authentication_flow")
     
@@ -416,8 +414,6 @@ async def test_authentication_rate_limiting():
     
     # Set correct service ports for real running services BEFORE harness initialization
     import os
-    env.set("TEST_AUTH_PORT", "8082", "test")
-    env.set("TEST_BACKEND_PORT", "8002", "test")
     env.set("TEST_AUTH_PORT", "8082", "test_authentication_rate_limiting")
     env.set("TEST_BACKEND_PORT", "8002", "test_authentication_rate_limiting")
     

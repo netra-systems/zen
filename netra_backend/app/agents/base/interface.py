@@ -9,11 +9,13 @@ Business Value: Standardizes 40+ agent execute() methods.
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional, Protocol, runtime_checkable
+from typing import Any, Callable, Coroutine, Dict, Optional, Protocol, Union, runtime_checkable
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.schemas.agent_result_types import TypedAgentResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus
+# Note: Direct bridge imports removed for SSOT compliance
+# Use emit_* methods from BaseSubAgent's WebSocketBridgeAdapter instead
 
 
 @dataclass
@@ -29,9 +31,9 @@ class ExecutionContext:
     max_retries: int = 3
     start_time: Optional[datetime] = None
     correlation_id: Optional[str] = None
-    metadata: Dict[str, Any] = None
+    metadata: Optional[Dict[str, Union[str, int, float, bool, None]]] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Initialize metadata if not provided."""
         if self.metadata is None:
             self.metadata = {}
@@ -39,12 +41,12 @@ class ExecutionContext:
         if not hasattr(self, 'timestamp'):
             self.timestamp = self.start_time or datetime.now(timezone.utc)
     
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Make ExecutionContext hashable using run_id and agent_name."""
         # Include both run_id and agent_name for unique hash
         return hash((self.run_id, self.agent_name))
     
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         """Compare ExecutionContext objects by run_id and agent_name."""
         if not isinstance(other, ExecutionContext):
             return False
@@ -56,14 +58,14 @@ class ExecutionResult:
     """Standardized execution result for all agents."""
     success: bool
     status: ExecutionStatus
-    result: Optional[Dict[str, Any]] = None
+    result: Optional[Dict[str, Union[str, int, float, bool, Dict, list, None]]] = None
     error: Optional[str] = None
     execution_time_ms: float = 0.0
     retry_count: int = 0
     fallback_used: bool = False
-    metrics: Dict[str, Any] = None
+    metrics: Optional[Dict[str, Union[str, int, float, bool, None]]] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Initialize metrics if not provided."""
         if self.metrics is None:
             self.metrics = {}
@@ -74,7 +76,7 @@ class WebSocketManagerProtocol(Protocol):
     """Protocol for WebSocket manager interface."""
     
     async def send_agent_update(self, run_id: str, agent_name: str, 
-                               update: Dict[str, Any]) -> None:
+                               update: Dict[str, Union[str, int, float, bool, Dict, list, None]]) -> None:
         """Send agent update via WebSocket."""
         ...
 
@@ -84,11 +86,11 @@ class ReliabilityManagerProtocol(Protocol):
     """Protocol for reliability manager interface."""
     
     async def execute_with_reliability(self, context: ExecutionContext,
-                                     execute_func) -> ExecutionResult:
+                                     execute_func: Callable[..., Coroutine[Any, Any, Dict[str, Any]]]) -> ExecutionResult:
         """Execute function with reliability patterns."""
         ...
     
-    def get_health_status(self) -> Dict[str, Any]:
+    def get_health_status(self) -> Dict[str, Union[str, bool, int, float]]:
         """Get reliability health status."""
         ...
 
@@ -100,12 +102,13 @@ class BaseExecutionInterface(ABC):
     Eliminates duplicate execute() methods and ensures standardization.
     """
     
-    def __init__(self, agent_name: str, websocket_manager: Optional[WebSocketManagerProtocol] = None):
+    def __init__(self, agent_name: str) -> None:
         self.agent_name = agent_name
-        self.websocket_manager = websocket_manager
+        # WebSocket functionality is handled via WebSocketBridgeAdapter pattern
+        # set_websocket_bridge() should be called to configure WebSocket events
         
     @abstractmethod
-    async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+    async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Union[str, int, float, bool, Dict, list, None]]:
         """Execute agent-specific core logic.
         
         Args:
@@ -135,79 +138,26 @@ class BaseExecutionInterface(ABC):
             return
         await self._send_websocket_update(context, {"status": status, "message": message})
         
-    async def _send_websocket_update(self, context: ExecutionContext, 
-                                   update: Dict[str, Any]) -> None:
-        """Send WebSocket update with error handling."""
-        try:
-            await self.websocket_manager.send_agent_update(
-                context.run_id, context.agent_name, update
-            )
-        except Exception:
-            # Fail silently for WebSocket errors to not break execution
-            pass
     
-    async def send_agent_thinking(self, context: ExecutionContext, 
-                                 thought: str, step_number: int = None) -> None:
-        """Send agent thinking notification via WebSocket."""
-        if not self.websocket_manager or not context.stream_updates:
-            return
-        update = {
-            "type": "agent_thinking",
-            "payload": {
-                "thought": thought,
-                "agent_name": context.agent_name,
-                "step_number": step_number,
-                "timestamp": datetime.now(timezone.utc).timestamp()
-            }
-        }
-        await self._send_websocket_update(context, update)
     
-    async def send_partial_result(self, context: ExecutionContext,
-                                 content: str, is_complete: bool = False) -> None:
-        """Send partial result notification via WebSocket."""
-        if not self.websocket_manager or not context.stream_updates:
-            return
-        update = {
-            "type": "partial_result", 
-            "payload": {
-                "content": content,
-                "agent_name": context.agent_name,
-                "is_complete": is_complete,
-                "timestamp": datetime.now(timezone.utc).timestamp()
-            }
-        }
-        await self._send_websocket_update(context, update)
     
-    async def send_tool_executing(self, context: ExecutionContext,
-                                 tool_name: str) -> None:
-        """Send tool executing notification via WebSocket."""
-        if not self.websocket_manager or not context.stream_updates:
-            return
-        update = {
-            "type": "tool_executing",
-            "payload": {
-                "tool_name": tool_name,
-                "agent_name": context.agent_name,
-                "timestamp": datetime.now(timezone.utc).timestamp()
-            }
-        }
-        await self._send_websocket_update(context, update)
     
-    async def send_final_report(self, context: ExecutionContext,
-                               report: dict, duration_ms: float) -> None:
-        """Send final report notification via WebSocket."""
-        if not self.websocket_manager or not context.stream_updates:
-            return
-        update = {
-            "type": "final_report",
-            "payload": {
-                "report": report,
-                "total_duration_ms": duration_ms,
-                "agent_name": context.agent_name,
-                "timestamp": datetime.now(timezone.utc).timestamp()
-            }
-        }
-        await self._send_websocket_update(context, update)
+    
+    def _create_legacy_execution_context(self, run_id: str) -> ExecutionContext:
+        """Create ExecutionContext for legacy run_id-based method calls."""
+        return ExecutionContext(
+            run_id=run_id,
+            agent_name=self.agent_name,
+            state=None,  # Not available in legacy context
+            stream_updates=True,  # Assume streaming since methods are being called
+            thread_id=None,
+            user_id=None,
+            retry_count=0,
+            max_retries=3,
+            start_time=None,
+            correlation_id=None,
+            metadata={}
+        )
 
 
 class AgentExecutionMixin:
@@ -230,7 +180,7 @@ class AgentExecutionMixin:
             correlation_id=getattr(self, 'correlation_id', None)
         )
     
-    def create_success_result(self, result: Dict[str, Any], 
+    def create_success_result(self, result: Dict[str, Union[str, int, float, bool, Dict, list, None]], 
                            execution_time_ms: float) -> ExecutionResult:
         """Create successful execution result."""
         return ExecutionResult(

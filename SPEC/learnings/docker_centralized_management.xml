@@ -33,34 +33,37 @@
         <title>Centralized Docker Management System</title>
         
         <core-components>
-            <component name="CentralizedDockerManager">
-                <file>test_framework/centralized_docker_manager.py</file>
-                <purpose>Single point of coordination for all Docker operations</purpose>
+            <component name="UnifiedDockerManager">
+                <file>test_framework/unified_docker_manager.py</file>
+                <purpose>Single Source of Truth (SSOT) for all Docker operations - unified ServiceOrchestrator and UnifiedDockerManager</purpose>
                 <key-features>
+                    <feature>Async/await architecture for better concurrency</feature>
                     <feature>Cross-platform file-based locking mechanism</feature>
                     <feature>Rate limiting with 30-second cooldown between restarts</feature>
                     <feature>Maximum 3 restart attempts per service in 5 minutes</feature>
                     <feature>Restart history tracking to prevent storms</feature>
                     <feature>Environment type management (shared/dedicated/production)</feature>
-                    <feature>Service health checking with proper timeouts</feature>
-                    <feature>Resource optimization with reduced memory limits</feature>
+                    <feature>Comprehensive health monitoring and reporting</feature>
+                    <feature>Memory optimization with reduced memory limits</feature>
+                    <feature>E2E service orchestration capabilities</feature>
+                    <feature>Docker Compose integration for service management</feature>
                 </key-features>
             </component>
 
-            <component name="DockerComposeManager">
-                <file>test_framework/docker_compose_manager.py</file>
-                <purpose>Docker Compose lifecycle management</purpose>
+            <component name="LegacyCompatibility">
+                <file>test_framework/unified_docker_manager.py</file>
+                <purpose>Legacy compatibility classes for existing code</purpose>
                 <key-features>
-                    <feature>Service lifecycle management (start/stop/restart)</feature>
-                    <feature>Health status monitoring</feature>
-                    <feature>Port discovery and mapping</feature>
-                    <feature>Configuration validation</feature>
+                    <feature>ServiceOrchestrator compatibility class</feature>
+                    <feature>UnifiedDockerManager compatibility class</feature>
+                    <feature>Automatic deprecation warnings</feature>
+                    <feature>Seamless migration path</feature>
                 </key-features>
             </component>
 
             <component name="UnifiedTestRunnerIntegration">
-                <file>scripts/unified_test_runner.py</file>
-                <purpose>Test runner integration with centralized Docker management</purpose>
+                <file>tests/unified_test_runner.py</file>
+                <purpose>Test runner integration with unified Docker management</purpose>
                 <key-features>
                     <feature>Docker environment initialization before tests</feature>
                     <feature>Proper cleanup on exit (including failure cases)</feature>
@@ -307,6 +310,9 @@
             <insight>Production Docker images reduce memory consumption by 90%+ - use by default</insight>
             <insight>Centralized state management prevents conflicts - single source of truth critical</insight>
             <insight>Windows WSL2 memory limitations require optimization - monitor total consumption</insight>
+            <insight>SSOT violation: Multiple Docker management implementations cause confusion and bugs</insight>
+            <insight>Unified system combining async orchestration + centralized coordination = optimal solution</insight>
+            <insight>Legacy compatibility classes enable seamless migration without breaking existing code</insight>
         </critical-insights>
 
         <anti-patterns-to-avoid>

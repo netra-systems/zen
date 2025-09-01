@@ -28,18 +28,26 @@ async def process_multimodal(multimodal_data: dict) -> dict:
 
 # Fallback agent functions for testing
 def get_primary_agent():
-    """Get primary agent instance."""
-    from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-
-    from netra_backend.app.services.agent_service_core import AgentService
-    return AgentService(SupervisorAgent())
+    """Get primary agent instance - DEPRECATED.
+    
+    This method requires proper dependencies that should be
+    obtained from app.state during runtime.
+    """
+    raise NotImplementedError(
+        "Cannot create agent without proper dependencies. "
+        "Use app.state.agent_service from the running application."
+    )
 
 def get_fallback_agent():
-    """Get fallback agent instance."""
-    from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-
-    from netra_backend.app.services.agent_service_core import AgentService
-    return AgentService(SupervisorAgent())
+    """Get fallback agent instance - DEPRECATED.
+    
+    This method requires proper dependencies that should be
+    obtained from app.state during runtime.
+    """
+    raise NotImplementedError(
+        "Cannot create agent without proper dependencies. "
+        "Use app.state.agent_service from the running application."
+    )
 
 __all__ = [
     'AgentService',

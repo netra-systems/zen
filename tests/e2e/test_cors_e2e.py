@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """
+from shared.isolated_environment import get_env
 CORS End-to-End Tests
 Complete authentication and user flows across services with CORS validation.
 """
@@ -33,10 +34,10 @@ class TestCORSCompleteAuthFlow:
     def services(self):
         """Get service endpoints configuration."""
         return ServiceEndpoints(
-            backend_url=os.getenv("BACKEND_URL", "http://localhost:8000"),
-            auth_url=os.getenv("AUTH_URL", "http://localhost:8081"),
-            frontend_url=os.getenv("FRONTEND_URL", "http://localhost:3001"),
-            websocket_url=os.getenv("WS_URL", "ws://localhost:8000/ws")
+            backend_url=get_env().get("BACKEND_URL", "http://localhost:8000"),
+            auth_url=get_env().get("AUTH_URL", "http://localhost:8081"),
+            frontend_url=get_env().get("FRONTEND_URL", "http://localhost:3001"),
+            websocket_url=get_env().get("WS_URL", "ws://localhost:8000/ws")
         )
     
     @pytest.fixture

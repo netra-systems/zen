@@ -366,11 +366,58 @@ class AuthServiceClient:
         }
     
     async def _execute_login_request(self, request_data: Dict) -> Optional[Dict]:
-        """Execute login request."""
+        """Execute login request with enhanced error handling."""
         client = await self._get_client()
         headers = self._get_request_headers()
-        response = await client.post("/auth/login", json=request_data, headers=headers)
-        return response.json() if response.status_code == 200 else None
+        
+        logger.info(f"Executing login request to: {self.settings.base_url}/auth/login")
+        logger.debug(f"Request headers keys: {list(headers.keys())}")
+        
+        try:
+            response = await client.post("/auth/login", json=request_data, headers=headers)
+            
+            logger.info(f"Auth service login response: {response.status_code}")
+            
+            if response.status_code == 200:
+                try:
+                    response_data = response.json()
+                    logger.info("Login request successful")
+                    return response_data
+                except Exception as e:
+                    logger.error(f"Failed to parse login response as JSON: {e}")
+                    logger.error(f"Response text: {response.text}")
+                    return None
+            else:
+                logger.error(f"Auth service login failed: {response.status_code}")
+                
+                # Log response body for debugging
+                try:
+                    error_detail = response.json()
+                    logger.error(f"Login error details: {error_detail}")
+                except:
+                    logger.error(f"Login error response: {response.text}")
+                
+                # Provide specific error context based on status code
+                if response.status_code == 401:
+                    logger.error("Login failed: Invalid credentials")
+                elif response.status_code == 403:
+                    logger.error("Login failed: Access forbidden - check service authentication")
+                    logger.error(f"Service ID configured: {bool(self.service_id)} (value: {self.service_id or 'NOT SET'})")
+                    logger.error(f"Service Secret configured: {bool(self.service_secret)}")
+                elif response.status_code == 404:
+                    logger.error("Login failed: Auth service login endpoint not found")
+                    logger.error(f"Auth service URL: {self.settings.base_url}")
+                elif response.status_code >= 500:
+                    logger.error("Login failed: Auth service internal error")
+                else:
+                    logger.error(f"Login failed: Unexpected status code {response.status_code}")
+                
+                return None
+                
+        except Exception as e:
+            logger.error(f"Login request failed with exception: {e}")
+            logger.error(f"Auth service URL: {self.settings.base_url}")
+            raise
     
     async def _attempt_login(self, email: str, password: str, provider: str) -> Optional[Dict]:
         """Attempt login with error handling."""
@@ -380,13 +427,73 @@ class AuthServiceClient:
         except Exception as e:
             logger.error(f"Login failed: {e}")
             return None
+
+    async def _attempt_login_with_resilience(self, email: str, password: str, provider: str) -> Optional[Dict]:
+        """Attempt login with enhanced resilience for staging environments."""
+        import asyncio
+        from netra_backend.app.core.config import get_config
+        
+        config = get_config()
+        max_retries = 3 if config.environment == "staging" else 1
+        base_delay = 1.0  # seconds
+        
+        last_exception = None
+        
+        for attempt in range(max_retries):
+            try:
+                logger.info(f"Login attempt {attempt + 1}/{max_retries} for user: {email}")
+                
+                # Log auth service configuration for debugging
+                logger.debug(f"Auth service URL: {self.settings.base_url}")
+                logger.debug(f"Service credentials configured: ID={bool(self.service_id)}, Secret={bool(self.service_secret)}")
+                
+                result = await self._attempt_login(email, password, provider)
+                
+                if result:
+                    logger.info(f"Login successful on attempt {attempt + 1} for user: {email}")
+                    return result
+                else:
+                    logger.warning(f"Login attempt {attempt + 1} returned None for user: {email}")
+                    
+                    # If this is not the last attempt, continue to retry
+                    if attempt < max_retries - 1:
+                        logger.info(f"Retrying login in {base_delay * (attempt + 1)} seconds...")
+                        await asyncio.sleep(base_delay * (attempt + 1))
+                        continue
+                    else:
+                        logger.error(f"All {max_retries} login attempts failed for user: {email}")
+                        return None
+                        
+            except Exception as e:
+                last_exception = e
+                logger.error(f"Login attempt {attempt + 1} failed with exception: {e}")
+                
+                # Log additional context for debugging
+                if hasattr(e, '__dict__'):
+                    logger.debug(f"Exception details: {e.__dict__}")
+                
+                # If this is not the last attempt, continue to retry
+                if attempt < max_retries - 1:
+                    # Exponential backoff with jitter for staging
+                    delay = base_delay * (2 ** attempt) + (attempt * 0.5)
+                    logger.info(f"Retrying login in {delay:.1f} seconds after error...")
+                    await asyncio.sleep(delay)
+                    continue
+                else:
+                    logger.error(f"All {max_retries} login attempts failed for user: {email}, last error: {e}")
+                    return None
+        
+        return None
     
     async def login(self, email: str, password: str, 
                    provider: str = "local") -> Optional[Dict]:
         """User login through auth service."""
         if not self.settings.enabled:
+            logger.error("Auth service is disabled - login unavailable")
             return None
-        return await self._attempt_login(email, password, provider)
+        
+        # Enhanced login with retry logic for staging environment
+        return await self._attempt_login_with_resilience(email, password, provider)
     
     async def _build_logout_headers(self, token: str) -> Dict[str, str]:
         """Build logout request headers."""
@@ -728,7 +835,7 @@ class AuthServiceClient:
     
     # RBAC Methods for Role-Based Access Control
     
-    async def login(self, request) -> Optional[Dict]:
+    async def login_with_request(self, request) -> Optional[Dict]:
         """User login through auth service with LoginRequest object."""
         # PRODUCTION SECURITY: Ensure auth service is always required in production
         if self._is_production_environment() and not self.settings.enabled:

@@ -14,7 +14,7 @@ from netra_backend.app.routes.mcp.models import (
     MCPSessionCreateRequest,
     MCPToolCallRequest,
 )
-from netra_backend.app.services.service_factory import get_mcp_service
+from netra_backend.app.routes.mcp.service_factory import get_mcp_service
 
 __all__ = [
     "router",

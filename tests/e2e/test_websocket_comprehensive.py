@@ -1,7 +1,6 @@
 from shared.isolated_environment import get_env
-"""
-env = get_env()
-Comprehensive WebSocket Connection Test Suite - Designed to FAIL and Expose Issues
+
+"""Comprehensive WebSocket Connection Test Suite - Designed to FAIL and Expose Issues
 
 This test suite is designed to expose current WebSocket problems by testing realistic scenarios
 that are likely to fail with the current implementation. The tests are structured to reveal
@@ -41,10 +40,14 @@ import uuid
 
 import pytest
 import httpx
+from shared.isolated_environment import get_env
+
+# Get environment manager
+env = get_env()
 
 # Set test environment
-env.set("TESTING", "1", "test")
-env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
+env.set("TESTING", "1", "test_websocket_comprehensive")
+env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test_websocket_comprehensive")
 
 # Import websockets only if available (not required for all tests)
 try:
@@ -122,7 +125,7 @@ async def get_auth_token(user_email: str, password: str) -> Optional[str]:
         return None
 
 
-class TestWebSocketClient:
+class WebSocketTestClient:
     """Enhanced WebSocket test client with realistic connection patterns."""
     
     def __init__(self, base_url: str, token: str, user_id: str):

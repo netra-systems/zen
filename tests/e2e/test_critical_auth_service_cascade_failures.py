@@ -1,4 +1,5 @@
 """Critical Auth Service Cascade Failures - E2E Failing Tests
+from shared.isolated_environment import get_env
 End-to-end tests that replicate auth service failures cascading across multiple services.
 
 CRITICAL CASCADE FAILURE SCENARIOS TO REPLICATE:
@@ -258,7 +259,7 @@ class TestCriticalAuthServiceCascadeFailures(BaseE2ETest):
             # Clear OAuth secrets
             for oauth_var in ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'OAUTH_HMAC_SECRET']:
                 if oauth_var in os.environ:
-                    del os.environ[oauth_var]
+                    del get_env().get(oauth_var)
             
             http_client = HTTPClient()
             
@@ -329,9 +330,9 @@ class TestCriticalAuthServiceCascadeFailures(BaseE2ETest):
     def get_service_url(self, service: str, default: str) -> str:
         """Get service URL from environment or use default."""
         service_urls = {
-            'auth_service': os.getenv('AUTH_SERVICE_URL', default if 'auth' in service else 'http://localhost:8081'),
-            'backend': os.getenv('BACKEND_URL', default if 'backend' in service else 'http://localhost:8000'),  
-            'frontend': os.getenv('FRONTEND_URL', default if 'frontend' in service else 'http://localhost:3000')
+            'auth_service': get_env().get('AUTH_SERVICE_URL', default if 'auth' in service else 'http://localhost:8081'),
+            'backend': get_env().get('BACKEND_URL', default if 'backend' in service else 'http://localhost:8000'),  
+            'frontend': get_env().get('FRONTEND_URL', default if 'frontend' in service else 'http://localhost:3000')
         }
         return service_urls.get(service, default)
 

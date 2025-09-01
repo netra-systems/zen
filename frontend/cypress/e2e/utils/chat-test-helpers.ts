@@ -32,11 +32,12 @@ export const ChatNavigation = {
 // Message Input Helpers
 export const MessageInput = {
   type(message: string): void {
-    cy.get('textarea').type(message)
+    cy.get('[data-testid="message-textarea"]').type(message)
   },
 
   send(message: string): void {
-    this.type(`${message}{enter}`)
+    cy.get('[data-testid="message-textarea"]').type(message)
+    cy.get('[data-testid="send-button"]').click()
   },
 
   sendAndWait(message: string, waitTime: number = 3000): void {
@@ -45,11 +46,11 @@ export const MessageInput = {
   },
 
   clear(): void {
-    cy.get('textarea').clear()
+    cy.get('[data-testid="message-textarea"]').clear()
   },
 
   assertEmpty(): void {
-    cy.get('textarea').should('have.value', '')
+    cy.get('[data-testid="message-textarea"]').should('have.value', '')
   }
 }
 
@@ -148,23 +149,23 @@ export const MetricsValidation = {
 // UI State Helpers
 export const UIState = {
   assertSendButtonDisabled(): void {
-    cy.get('button[class*="px-4"]').should('be.disabled')
+    cy.get('[data-testid="send-button"]').should('be.disabled')
   },
 
   assertSendButtonEnabled(): void {
-    cy.get('button[class*="px-4"]').should('not.be.disabled')
+    cy.get('[data-testid="send-button"]').should('not.be.disabled')
   },
 
   assertInputDisabled(): void {
-    cy.get('textarea').should('be.disabled')
+    cy.get('[data-testid="message-textarea"]').should('be.disabled')
   },
 
   assertInputEnabled(): void {
-    cy.get('textarea').should('not.be.disabled')
+    cy.get('[data-testid="message-textarea"]').should('not.be.disabled')
   },
 
   assertTypingIndicator(): void {
-    cy.get('[class*="animate-pulse"]').should('exist')
+    cy.get('[class*="animate-pulse"], [data-testid="agent-processing"]').should('exist')
   }
 }
 

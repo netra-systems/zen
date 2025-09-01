@@ -109,6 +109,14 @@ async def real_services_session() -> AsyncIterator[RealServicesManager]:
     current_env = env_manager.env.get("ENVIRONMENT", "").lower()
     is_staging = current_env == "staging"
     
+    # CRITICAL: Check for orchestration skip flags
+    no_orchestration = env_manager.env.get("NO_DOCKER_ORCHESTRATION", "false").lower() == "true"
+    skip_orchestration = env_manager.env.get("SKIP_SERVICE_ORCHESTRATION", "false").lower() == "true"
+    
+    if no_orchestration or skip_orchestration:
+        logger.info("Docker/Service orchestration disabled, skipping service orchestration fixtures")
+        pytest.skip("Service orchestration disabled (NO_DOCKER_ORCHESTRATION=true or SKIP_SERVICE_ORCHESTRATION=true)")
+    
     # Real services are always used in staging environment
     if not (use_real_services or is_staging):
         logger.info("Real services disabled, skipping real service fixtures")
@@ -134,7 +142,7 @@ async def real_services_session() -> AsyncIterator[RealServicesManager]:
             logger.info("Staging services session cleanup completed")
     else:
         # Local/test environment - use service orchestrator for Docker services
-        from test_framework.service_orchestrator import ServiceOrchestrator, OrchestrationConfig
+        from test_framework.unified_docker_manager import ServiceOrchestrator, OrchestrationConfig
         
         # Configure orchestration for E2E testing
         orchestration_config = OrchestrationConfig(

@@ -1,6 +1,5 @@
 from shared.isolated_environment import get_env
 """
-env = get_env()
 CRITICAL Dev Launcher Startup Validation Test
 
 Business Value Justification (BVJ):
@@ -172,7 +171,7 @@ class TestRealDevLauncherer:
             ]
             
             # Set environment for test
-            env = env.get_all()
+            env = get_env().as_dict().copy()
             env["NETRA_STARTUP_MODE"] = "minimal"
             env["NETRA_TEST_MODE"] = "true"
             

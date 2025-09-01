@@ -31,7 +31,7 @@
             and belong in a centralized location.
         </approach>
         <implementation>
-            <code_change file="scripts/unified_test_runner.py">
+            <code_change file="tests/unified_test_runner.py">
                 # In _build_pytest_command method:
                 # For E2E tests, include all test directories since they span services
                 if category_name == "e2e":

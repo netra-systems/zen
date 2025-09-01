@@ -9,7 +9,6 @@ Follows 450-line file limit and 25-line function limit constraints.
 
 import asyncio
 import logging
-import os
 import subprocess
 import sys
 import time
@@ -17,6 +16,7 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
+from shared.isolated_environment import get_env
 
 import aiohttp
 import pytest
@@ -78,18 +78,20 @@ class TestEnvironmentManager:
     
     def _set_temp_env(self, key: str, value: str) -> None:
         """Set temporary environment variable."""
+        env = get_env()
         if key not in self._temp_env_vars:
-            self._temp_env_vars[key] = os.getenv(key, "")
-        os.environ[key] = value
+            self._temp_env_vars[key] = env.get(key, "")
+        env.set(key, value)
     
     def cleanup(self) -> None:
         """Cleanup test environment."""
         # Restore original environment variables
+        env = get_env()
         for key, original_value in self._temp_env_vars.items():
             if original_value:
-                os.environ[key] = original_value
+                env.set(key, original_value)
             else:
-                os.environ.pop(key, None)
+                env.delete(key)
         self._temp_env_vars.clear()
 
 

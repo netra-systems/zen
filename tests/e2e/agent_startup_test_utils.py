@@ -50,47 +50,65 @@ class StartupMetrics:
 
 
 class ServiceOrchestrator:
-
-    """Orchestrates service startup and coordination for E2E tests."""
+    """
+    SSOT Compliant Service Orchestrator for E2E Agent Tests.
     
-
+    Uses UnifiedServiceOrchestrator as the core engine while maintaining
+    backward compatibility for existing test code.
+    """
+    
     def __init__(self):
-
+        # SSOT compliance: Use UnifiedServiceOrchestrator
+        from tests.e2e.unified_service_orchestrator import UnifiedServiceOrchestrator
+        
+        self.unified_orchestrator = UnifiedServiceOrchestrator()
+        
+        # Legacy compatibility - maintain existing interfaces
         self.services_manager = create_real_services_manager()
-
         self.client_factory = create_real_client_factory()
-
         self.startup_metrics = StartupMetrics()
-
         self.resource_monitor = SystemResourceMonitor()
         
 
     async def start_all_services(self) -> Dict[str, str]:
-
         """Start all services and return service URLs."""
-
         start_time = time.time()
-
+        
+        # Use unified orchestrator for Docker management
+        try:
+            await self.unified_orchestrator.start_test_environment()
+            service_urls = self.unified_orchestrator.get_service_urls()
+            
+            if service_urls:
+                self.startup_metrics.service_ready_time = time.time() - start_time
+                return service_urls
+        except Exception as e:
+            logger.warning(f"UnifiedServiceOrchestrator failed, falling back to legacy: {e}")
+        
+        # Fallback to legacy approach if needed
         await self.services_manager.start_all_services()
-
         self.startup_metrics.service_ready_time = time.time() - start_time
-
         return self.services_manager.get_service_urls()
         
 
     async def stop_all_services(self) -> None:
-
         """Stop all services and cleanup resources."""
-
+        # Cleanup unified orchestrator
+        if hasattr(self, 'unified_orchestrator'):
+            await self.unified_orchestrator.cleanup()
+            
+        # Legacy cleanup
         await self.services_manager.stop_all_services()
-
         await self.client_factory.cleanup()
         
 
     async def wait_for_service_health(self, timeout: int = 30) -> bool:
-
         """Wait for all services to be healthy."""
-
+        # Try unified orchestrator first
+        if hasattr(self, 'unified_orchestrator') and self.unified_orchestrator.ready:
+            return await self.unified_orchestrator.wait_for_services(timeout=timeout)
+            
+        # Fallback to legacy health check
         return await self._check_services_health(timeout)
         
 

@@ -1,5 +1,6 @@
 """Additional test cases for staging deployment configuration issues.
 
+from shared.isolated_environment import get_env
 Tests for similar configuration migration problems that could cause staging failures.
 """
 
@@ -273,4 +274,4 @@ class TestStagingSpecificValidation:
             app_url = DatabaseManager.get_application_url()
             
             # Should handle Cloud SQL socket path
-            assert '/cloudsql/' in os.environ['DATABASE_URL'] or 'localhost' in app_url
+            assert '/cloudsql/' in get_env().get('DATABASE_URL') or 'localhost' in app_url

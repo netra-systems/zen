@@ -32,6 +32,7 @@ import httpx
 import pytest
 
 from tests.e2e.staging_auth_bypass import StagingAuthHelper
+from shared.isolated_environment import get_env
 
 import logging
 logger = logging.getLogger(__name__)
@@ -224,7 +225,8 @@ async def test_gcp_staging_auth_complete_flow():
     - Graceful error handling for GCP service issues
     """
     # Skip test if not running in staging environment
-    if os.getenv("ENVIRONMENT", "development") != "staging":
+    env = get_env()
+    if env.get("ENVIRONMENT", "development") != "staging":
         pytest.skip("Test only runs in staging environment")
     
     tester = GCPStagingAuthTester()
@@ -266,7 +268,8 @@ async def test_gcp_staging_auth_complete_flow():
 async def test_gcp_staging_service_connectivity():
     """Test basic connectivity to all GCP staging services"""
     # Skip test if not running in staging environment
-    if os.getenv("ENVIRONMENT", "development") != "staging":
+    env = get_env()
+    if env.get("ENVIRONMENT", "development") != "staging":
         pytest.skip("Test only runs in staging environment")
     
     tester = GCPStagingAuthTester()

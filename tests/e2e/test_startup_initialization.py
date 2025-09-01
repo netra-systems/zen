@@ -1,6 +1,5 @@
 from shared.isolated_environment import get_env
 """
-env = get_env()
 Comprehensive System Initialization and Startup Tests
 
 This test suite contains 30 difficult cold start initialization tests
@@ -79,14 +78,12 @@ class DatabaseConfiguration:
     
     def validate_connection_string(self):
         """Validate connection string format."""
-        db_url = env.get('DATABASE_URL', '')
         if not db_url.startswith(('postgresql://', 'postgresql+asyncpg://')):
             raise Exception(f"Invalid database URL format: {db_url}")
         return True
     
     def get_clickhouse_host(self):
         """Get ClickHouse host."""
-        return env.get('CLICKHOUSE_HOST', os.environ.get('clickhouse_host', 'localhost'))
 
 
 class CacheManager:
@@ -112,7 +109,6 @@ class ClickHouseManager:
     
     async def connect(self):
         """Connect to ClickHouse."""
-        port = env.get('CLICKHOUSE_HTTP_PORT', '8123')
         if port == '8443':
             raise Exception(f"Connection failed on HTTPS port {port}")
         return True
@@ -123,7 +119,6 @@ class TokenValidator:
     
     async def validate_token(self, token):
         """Validate token."""
-        auth_url = env.get('AUTH_SERVICE_URL', 'http://localhost:8081')
         if 'localhost:18081' in auth_url:
             return False  # Auth service down
         return token == "valid_token"
@@ -136,7 +131,6 @@ class Configuration:
         """Validate required environment variables."""
         required = ["JWT_SECRET_KEY", "DATABASE_URL", "REDIS_URL"]
         for var in required:
-            if not env.get(var):
                 raise Exception(f"Missing required environment variable: {var}")
 
 
@@ -175,7 +169,6 @@ class StartupChecker:
 @pytest.mark.e2e
 def test_env():
     """Create isolated test environment"""
-    original_env = env.get_all()
     test_env = original_env.copy()
     test_env.update({
         "ENVIRONMENT": "test",
@@ -200,7 +193,7 @@ def test_env():
     })
     
     for key, value in test_env.items():
-        os.environ[key] = value
+        get_env().get(key) = value
     
     yield test_env
     
@@ -231,18 +224,17 @@ async def dev_launcher():
 @contextmanager
 def temporary_env_var(key: str, value: Optional[str]):
     """Temporarily set or unset an environment variable"""
-    original = env.get(key)
     if value is None:
         os.environ.pop(key, None)
     else:
-        os.environ[key] = value
+        get_env().get(key) = value
     try:
         yield
     finally:
         if original is None:
             os.environ.pop(key, None)
         else:
-            os.environ[key] = original
+            get_env().get(key) = original
 
 
 @contextmanager
@@ -274,7 +266,6 @@ def limit_resource(resource_type: str, limit: int):
 @pytest.mark.e2e
 @pytest.mark.dev
 @pytest.mark.skipif(
-    not env.get("USE_REAL_SERVICES", "").lower() == "true", 
     reason="Test requires real PostgreSQL service - set USE_REAL_SERVICES=true"
 )
 @pytest.mark.startup
@@ -368,7 +359,6 @@ async def test_connection_pool_exhaustion_during_startup(test_env):
 @pytest.mark.asyncio
 @pytest.mark.e2e
 @pytest.mark.skipif(
-    not env.get("USE_REAL_SERVICES", "").lower() == "true", 
     reason="Test requires real database services - set USE_REAL_SERVICES=true"
 )
 @pytest.mark.startup
@@ -485,7 +475,6 @@ async def test_postgresql_authentication_failure_recovery(test_env):
                 if retry_count < max_retries:
                     # Fix password for last retry
                     if retry_count == max_retries - 1:
-                        env.set("POSTGRES_PASSWORD", test_env, "test")["POSTGRES_PASSWORD"]
                     await asyncio.sleep(1)
         
         assert retry_count > 0, "Should have had authentication failures"

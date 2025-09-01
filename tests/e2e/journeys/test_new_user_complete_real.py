@@ -1,6 +1,5 @@
 from shared.isolated_environment import get_env
 """
-env = get_env()
 CRITICAL E2E: Complete New User Journey Test with Real Services
 
 BVJ (Business Value Justification):
@@ -32,6 +31,7 @@ import httpx
 import pytest
 
 # Set test environment
+env = get_env()
 env.set("TESTING", "1", "test")
 env.set("AUTH_FAST_TEST_MODE", "true", "test")
 env.set("AUTH_SERVICE_URL", "http://localhost:8001", "test")

@@ -13,7 +13,6 @@ import asyncio
 import hashlib
 import json
 import logging
-import os
 import shutil
 import subprocess
 import tempfile
@@ -27,6 +26,7 @@ import asyncpg
 import redis.asyncio as redis
 
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
+from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
@@ -182,20 +182,23 @@ class DatabaseBackupManager:
     
     def _get_postgres_url(self) -> str:
         """Get PostgreSQL database URL."""
-        return os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_test")
+        env = get_env()
+        return env.get("DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_test")
     
     def _get_auth_db_url(self) -> str:
         """Get Auth database URL."""
-        return os.getenv("AUTH_DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_auth_test")
+        env = get_env()
+        return env.get("AUTH_DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_auth_test")
     
     def _get_clickhouse_client(self) -> ClickHouseDatabase:
         """Get ClickHouse client."""
+        env = get_env()
         return ClickHouseDatabase(
-            host=os.getenv("CLICKHOUSE_HOST", "localhost"),
-            port=int(os.getenv("CLICKHOUSE_HTTP_PORT", "8123")),
-            database=os.getenv("CLICKHOUSE_DB", "default"),
-            user=os.getenv("CLICKHOUSE_USER", "default"),
-            password=os.getenv("CLICKHOUSE_PASSWORD", "")
+            host=env.get("CLICKHOUSE_HOST", "localhost"),
+            port=int(env.get("CLICKHOUSE_HTTP_PORT", "8123")),
+            database=env.get("CLICKHOUSE_DB", "default"),
+            user=env.get("CLICKHOUSE_USER", "default"),
+            password=env.get("CLICKHOUSE_PASSWORD", "")
         )
     
     def _get_safe_env_vars(self) -> Dict[str, str]:
@@ -209,19 +212,19 @@ class DatabaseBackupManager:
     def _get_service_ports(self) -> Dict[str, int]:
         """Get service port configurations."""
         return {
-            'backend': int(os.getenv("PORT", "8000")),
-            'auth': int(os.getenv("AUTH_PORT", "8001")),
-            'frontend': int(os.getenv("FRONTEND_PORT", "3000")),
-            'redis': int(os.getenv("REDIS_PORT", "6379")),
-            'postgres': int(os.getenv("POSTGRES_PORT", "5432")),
-            'clickhouse': int(os.getenv("CLICKHOUSE_HTTP_PORT", "8123"))
+            'backend': int(get_env().get("PORT", "8000")),
+            'auth': int(get_env().get("AUTH_PORT", "8001")),
+            'frontend': int(get_env().get("FRONTEND_PORT", "3000")),
+            'redis': int(get_env().get("REDIS_PORT", "6379")),
+            'postgres': int(get_env().get("POSTGRES_PORT", "5432")),
+            'clickhouse': int(get_env().get("CLICKHOUSE_HTTP_PORT", "8123"))
         }
     
     def _get_masked_db_urls(self) -> Dict[str, str]:
         """Get masked database URLs for backup."""
         urls = {}
         for key in ["DATABASE_URL", "AUTH_DATABASE_URL"]:
-            url = os.getenv(key, "")
+            url = get_env().get(key, "")
             if url:
                 # Mask password in URL
                 import re
@@ -398,20 +401,22 @@ class DisasterSimulator:
     
     def _get_postgres_url(self) -> str:
         """Get PostgreSQL URL."""
-        return os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_test")
+        return get_env().get("DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_test")
     
     def _get_auth_db_url(self) -> str:
         """Get Auth database URL."""
-        return os.getenv("AUTH_DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_auth_test")
+        env = get_env()
+        return env.get("AUTH_DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_auth_test")
     
     def _get_clickhouse_client(self) -> ClickHouseDatabase:
         """Get ClickHouse client."""
+        env = get_env()
         return ClickHouseDatabase(
-            host=os.getenv("CLICKHOUSE_HOST", "localhost"),
-            port=int(os.getenv("CLICKHOUSE_HTTP_PORT", "8123")),
-            database=os.getenv("CLICKHOUSE_DB", "default"),
-            user=os.getenv("CLICKHOUSE_USER", "default"),
-            password=os.getenv("CLICKHOUSE_PASSWORD", "")
+            host=env.get("CLICKHOUSE_HOST", "localhost"),
+            port=int(env.get("CLICKHOUSE_HTTP_PORT", "8123")),
+            database=env.get("CLICKHOUSE_DB", "default"),
+            user=env.get("CLICKHOUSE_USER", "default"),
+            password=env.get("CLICKHOUSE_PASSWORD", "")
         )
 
 
@@ -573,20 +578,22 @@ class RestoreManager:
     
     def _get_postgres_url(self) -> str:
         """Get PostgreSQL URL."""
-        return os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_test")
+        return get_env().get("DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_test")
     
     def _get_auth_db_url(self) -> str:
         """Get Auth database URL."""
-        return os.getenv("AUTH_DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_auth_test")
+        env = get_env()
+        return env.get("AUTH_DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_auth_test")
     
     def _get_clickhouse_client(self) -> ClickHouseDatabase:
         """Get ClickHouse client."""
+        env = get_env()
         return ClickHouseDatabase(
-            host=os.getenv("CLICKHOUSE_HOST", "localhost"),
-            port=int(os.getenv("CLICKHOUSE_HTTP_PORT", "8123")),
-            database=os.getenv("CLICKHOUSE_DB", "default"),
-            user=os.getenv("CLICKHOUSE_USER", "default"),
-            password=os.getenv("CLICKHOUSE_PASSWORD", "")
+            host=env.get("CLICKHOUSE_HOST", "localhost"),
+            port=int(env.get("CLICKHOUSE_HTTP_PORT", "8123")),
+            database=env.get("CLICKHOUSE_DB", "default"),
+            user=env.get("CLICKHOUSE_USER", "default"),
+            password=env.get("CLICKHOUSE_PASSWORD", "")
         )
 
 
@@ -720,20 +727,22 @@ class DataIntegrityValidator:
     
     def _get_postgres_url(self) -> str:
         """Get PostgreSQL URL."""
-        return os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_test")
+        return get_env().get("DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_test")
     
     def _get_auth_db_url(self) -> str:
         """Get Auth database URL."""
-        return os.getenv("AUTH_DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_auth_test")
+        env = get_env()
+        return env.get("AUTH_DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_auth_test")
     
     def _get_clickhouse_client(self) -> ClickHouseDatabase:
         """Get ClickHouse client."""
+        env = get_env()
         return ClickHouseDatabase(
-            host=os.getenv("CLICKHOUSE_HOST", "localhost"),
-            port=int(os.getenv("CLICKHOUSE_HTTP_PORT", "8123")),
-            database=os.getenv("CLICKHOUSE_DB", "default"),
-            user=os.getenv("CLICKHOUSE_USER", "default"),
-            password=os.getenv("CLICKHOUSE_PASSWORD", "")
+            host=env.get("CLICKHOUSE_HOST", "localhost"),
+            port=int(env.get("CLICKHOUSE_HTTP_PORT", "8123")),
+            database=env.get("CLICKHOUSE_DB", "default"),
+            user=env.get("CLICKHOUSE_USER", "default"),
+            password=env.get("CLICKHOUSE_PASSWORD", "")
         )
 
 

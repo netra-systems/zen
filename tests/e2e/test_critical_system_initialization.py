@@ -1,6 +1,5 @@
 from shared.isolated_environment import get_env
 """
-env = get_env()
 Critical System Initialization and Startup Tests.
 
 This test suite validates the most critical and difficult cold start scenarios
@@ -39,7 +38,7 @@ load_dotenv()
 
 # Override test environment DATABASE_URL to use real database for critical system tests
 # This is needed because conftest.py forces sqlite for tests, but we need real DB for these E2E tests
-if os.getenv('DATABASE_URL') == 'sqlite+aiosqlite:///:memory:':
+if get_env().get('DATABASE_URL') == 'sqlite+aiosqlite:///:memory:':
     # Load real database URL from .env file
     real_database_url = None
     env_file_path = Path('.env')
@@ -51,7 +50,6 @@ if os.getenv('DATABASE_URL') == 'sqlite+aiosqlite:///:memory:':
                     break
     
     if real_database_url:
-        env.set('DATABASE_URL', real_database_url, "test")
 
 from dev_launcher.config import LauncherConfig
 from dev_launcher.service_startup import ServiceStartupCoordinator
@@ -66,8 +64,8 @@ import os
 class Settings:
     def __init__(self):
         # Load DATABASE_URL dynamically to ensure env vars are loaded
-        self.DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql+asyncpg://postgres:DTprdt5KoQXlEG4Gh9lF@localhost:5433/netra_dev')
-        self.REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/1')
+        self.DATABASE_URL = get_env().get('DATABASE_URL', 'postgresql+asyncpg://postgres:DTprdt5KoQXlEG4Gh9lF@localhost:5433/netra_dev')
+        self.REDIS_URL = get_env().get('REDIS_URL', 'redis://localhost:6379/1')
     
     def is_postgresql(self):
         return self.DATABASE_URL.startswith(('postgresql', 'postgres'))
@@ -999,7 +997,6 @@ class TestFrontendIntegration:
         ]
         
         for var in critical_vars:
-            value = env.get(var)
             if not value and var.startswith("NEXT_PUBLIC_"):
                 # These should be set for frontend
                 pytest.skip(f"Frontend env var {var} not configured")

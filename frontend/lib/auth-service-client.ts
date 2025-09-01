@@ -87,7 +87,7 @@ export class AuthServiceClient {
       
       if (!response.ok) {
         // Check for OAuth configuration errors
-        let errorDetail: any;
+        let errorDetail: { error?: string; user_message?: string; message?: string };
         try {
           errorDetail = await response.json();
         } catch {
@@ -252,7 +252,7 @@ export class AuthServiceClient {
   /**
    * Get current user details
    */
-  async getCurrentUser(): Promise<any | null> {
+  async getCurrentUser(): Promise<{ id: string; email: string; name?: string } | null> {
     try {
       const response = await fetch(this.endpoints.authMe, {
         credentials: 'include', // Needed for session cookie

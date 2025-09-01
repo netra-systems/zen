@@ -3,7 +3,7 @@
  * Prevents infinite loops and excessive event tracking
  */
 
-import { CircuitBreaker } from '@/lib/circuit-breaker';
+import { CircuitBreaker, CircuitBreakerState } from '@/lib/circuit-breaker';
 import { logger } from '@/lib/logger';
 
 export interface GTMEventKey {
@@ -162,7 +162,7 @@ export class GTMCircuitBreaker {
     isOpen: boolean;
     recentEventsCount: number;
     eventTypeCounts: Record<string, number>;
-    circuitBreakerState: any;
+    circuitBreakerState: CircuitBreakerState;
   } {
     return {
       isOpen: this.circuitBreaker.isOpen(),

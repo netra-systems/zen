@@ -231,7 +231,7 @@ class UnifiedAuthService {
   /**
    * Handle auth errors consistently
    */
-  handleAuthError(error: any): void {
+  handleAuthError(error: unknown): void {
     logger.error('Authentication error', error, {
       component: 'UnifiedAuthService',
       action: 'handleAuthError'

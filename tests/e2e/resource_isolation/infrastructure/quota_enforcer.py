@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 Quota Enforcer for Agent Isolation Testing
 
 Enforces resource quotas for tenant agents.
@@ -29,7 +30,7 @@ class QuotaEnforcer:
         try:
             # Check if we're in offline mode - determine by checking if connection is mock
             import os
-            offline_mode = os.getenv("CPU_ISOLATION_OFFLINE_MODE", "false").lower() == "true"
+            offline_mode = get_env().get("CPU_ISOLATION_OFFLINE_MODE", "false").lower() == "true"
             
             if offline_mode:
                 # In offline mode, simulate quota violations based on recent workload history

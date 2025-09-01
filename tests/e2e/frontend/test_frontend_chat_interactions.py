@@ -1,7 +1,6 @@
 from shared.isolated_environment import get_env
-"""
-env = get_env()
-Frontend Chat Interface Interaction E2E Tests
+
+"""Frontend Chat Interface Interaction E2E Tests
 
 Business Value Justification (BVJ):
 - Segment: All tiers (core product functionality)
@@ -34,9 +33,11 @@ class ChatInteractionTestHarness:
     """Test harness for chat interface interactions"""
     
     def __init__(self):
-        self.base_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
-        self.api_url = os.getenv("API_URL", "http://localhost:8000")
-        self.ws_url = os.getenv("WS_URL", "ws://localhost:8000/ws")
+        from shared.isolated_environment import get_env
+        env = get_env()
+        self.base_url = env.get("FRONTEND_URL", "http://localhost:3000")
+        self.api_url = env.get("API_URL", "http://localhost:8000")
+        self.ws_url = env.get("WS_URL", "ws://localhost:8000/ws")
         self.http_client = UnifiedHTTPClient(base_url=self.api_url)
         self.auth_helper = AuthServiceHelper()
         self.ws_connection = None
@@ -70,7 +71,7 @@ class ChatInteractionTestHarness:
             
         # Check auth service
         try:
-            auth_url = os.getenv("AUTH_SERVICE_URL", "http://localhost:8081")
+            auth_url = get_env().get("AUTH_SERVICE_URL", "http://localhost:8081")
             async with httpx.AsyncClient(timeout=5.0) as client:
                 response = await client.get(f"{auth_url}/health")
                 self.auth_available = response.status_code == 200
@@ -90,9 +91,9 @@ class ChatInteractionTestHarness:
             "full_name": "Chat Test User"
         }
         # Use the correct JWT secret from environment
-        import os
-        jwt_secret = os.getenv("JWT_SECRET_KEY", "rsWwwvq8X6mCSuNv-TMXHDCfb96Xc-Dbay9MZy6EDCU")
-        env.set("JWT_SECRET", jwt_secret, "test")
+        env_vars = get_env()
+        jwt_secret = env_vars.get("JWT_SECRET_KEY", "rsWwwvq8X6mCSuNv-TMXHDCfb96Xc-Dbay9MZy6EDCU")
+        env_vars.set("JWT_SECRET", jwt_secret, "test")
         self.access_token = create_real_jwt_token(user_id, ["user"])
         return self.access_token
         

@@ -5,7 +5,6 @@ import pytest
 import logging
 from shared.isolated_environment import get_env
 
-env = get_env()
 logger = logging.getLogger(__name__)
 
 @pytest.mark.asyncio
@@ -13,9 +12,6 @@ async def test_staging_auth_config_no_dev_login():
     """Verify that staging auth config does not expose dev login endpoint"""
     
     # Simulate staging environment
-    original_env = env.get("ENVIRONMENT")
-    try:
-        env.set("ENVIRONMENT", "staging", "test")
         
         # Import after setting environment to ensure proper initialization
         from auth_service.auth_core.routes.auth_routes import _detect_environment
@@ -73,7 +69,6 @@ async def test_staging_auth_config_no_dev_login():
     finally:
         # Restore original environment
         if original_env:
-            env.set("ENVIRONMENT", original_env, "test")
         else:
             env.delete("ENVIRONMENT", "test")
 
@@ -82,9 +77,6 @@ async def test_dev_login_blocked_in_staging():
     """Verify that dev login endpoint returns 403 in staging"""
     
     # Simulate staging environment
-    original_env = env.get("ENVIRONMENT")
-    try:
-        env.set("ENVIRONMENT", "staging", "test")
         
         from auth_service.auth_core.routes.auth_routes import dev_login, get_client_info
         from fastapi import Request, HTTPException
@@ -116,7 +108,6 @@ async def test_dev_login_blocked_in_staging():
     finally:
         # Restore original environment
         if original_env:
-            env.set("ENVIRONMENT", original_env, "test")
         else:
             env.delete("ENVIRONMENT", "test")
 
@@ -125,9 +116,6 @@ async def test_production_auth_config_no_dev_login():
     """Verify that production auth config does not expose dev login endpoint"""
     
     # Simulate production environment
-    original_env = env.get("ENVIRONMENT")
-    try:
-        env.set("ENVIRONMENT", "production", "test")
         
         # Import after setting environment
         from auth_service.auth_core.routes.auth_routes import _detect_environment
@@ -149,7 +137,6 @@ async def test_production_auth_config_no_dev_login():
     finally:
         # Restore original environment
         if original_env:
-            env.set("ENVIRONMENT", original_env, "test")
         else:
             env.delete("ENVIRONMENT", "test")
 

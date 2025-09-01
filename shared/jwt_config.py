@@ -34,18 +34,45 @@ class SharedJWTConfig:
     
     @staticmethod
     def get_access_token_expire_minutes() -> int:
-        """Get access token expiry in minutes - consistent across all services."""
-        return 15
+        """Get access token expiry in minutes - consistent across all services.
+        
+        UPDATED: Now delegates to JWTConfigBuilder for SSOT compliance.
+        """
+        try:
+            from shared.jwt_config_builder import JWTConfigBuilder
+            builder = JWTConfigBuilder(service="shared")
+            return builder.timing.get_access_token_expire_minutes()
+        except Exception:
+            # Fallback for backward compatibility
+            return 15
     
     @staticmethod
     def get_refresh_token_expire_days() -> int:
-        """Get refresh token expiry in days - consistent across all services."""
-        return 7
+        """Get refresh token expiry in days - consistent across all services.
+        
+        UPDATED: Now delegates to JWTConfigBuilder for SSOT compliance.
+        """
+        try:
+            from shared.jwt_config_builder import JWTConfigBuilder
+            builder = JWTConfigBuilder(service="shared")
+            return builder.timing.get_refresh_token_expire_days()
+        except Exception:
+            # Fallback for backward compatibility
+            return 7
     
     @staticmethod
     def get_service_token_expire_minutes() -> int:
-        """Get service token expiry in minutes - consistent across all services."""
-        return 60
+        """Get service token expiry in minutes - consistent across all services.
+        
+        UPDATED: Now delegates to JWTConfigBuilder for SSOT compliance.
+        """
+        try:
+            from shared.jwt_config_builder import JWTConfigBuilder
+            builder = JWTConfigBuilder(service="shared")
+            return builder.timing.get_service_token_expire_minutes()
+        except Exception:
+            # Fallback for backward compatibility
+            return 60
     
     @staticmethod
     def get_jwt_secret_from_env(env_manager) -> str:

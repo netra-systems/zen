@@ -29,7 +29,7 @@ const DemoHeader = ({ demoStep }: DemoHeaderProps) => {
     return 'bg-gray-50 text-gray-400';
   };
 
-  const renderStepIcon = (step: any, index: number) => {
+  const renderStepIcon = (step: DemoStep, index: number) => {
     const isCompleted = index < currentStepIndex;
     return isCompleted ? <CheckCircle className="w-4 h-4" /> : getIconByType(step.iconType);
   };

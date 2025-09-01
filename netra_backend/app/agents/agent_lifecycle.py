@@ -5,7 +5,7 @@ Handles agent execution lifecycle including pre-run, post-run, and main executio
 
 import time
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Dict, Any, Optional
 
 from starlette.websockets import WebSocketDisconnect
 
@@ -54,10 +54,13 @@ class AgentLifecycleMixin(ABC):
     
     async def _send_completion_update(self, run_id: str, stream_updates: bool, status: str, execution_time: float) -> None:
         """Send completion update via WebSocket."""
-        if not (stream_updates and self.websocket_manager):
+        if not stream_updates:
             return
-        completion_data = self._build_completion_data(status, execution_time)
-        await self._send_update(run_id, completion_data)
+        # Use unified emit methods from BaseSubAgent's WebSocketBridgeAdapter
+        if status == "completed":
+            await self.emit_agent_completed({"execution_time": execution_time})
+        else:
+            await self.emit_error(f"{self.name} {status}", "execution_failure")
     
     async def run(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Main run method with lifecycle management."""
@@ -94,22 +97,14 @@ class AgentLifecycleMixin(ABC):
     
     async def _send_entry_condition_warning(self, run_id: str, stream_updates: bool) -> None:
         """Send warning about failed entry conditions."""
-        if not (stream_updates and self.websocket_manager):
+        if not stream_updates:
             return
         try:
-            await self._send_websocket_warning(run_id)
+            message = f"Entry conditions not met for {self.name}"
+            await self.emit_error(message, "entry_condition_failure")
         except (WebSocketDisconnect, RuntimeError, ConnectionError) as e:
             self.logger.debug(f"WebSocket disconnected when sending warning: {e}")
     
-    async def _send_websocket_warning(self, run_id: str) -> None:
-        """Send WebSocket warning about entry conditions."""
-        try:
-            ws_user_id = self._get_websocket_user_id(run_id)
-            message = f"Entry conditions not met for {self.name}"
-            await self.websocket_manager.send_agent_log(ws_user_id, "warning", message, self.name)
-        except (ConnectionError, Exception) as e:
-            # Log the error but don't let WebSocket issues break agent execution
-            self.logger.warning(f"Failed to send WebSocket warning for {self.name}: {e}")
     
     async def _handle_websocket_disconnect(self, e: WebSocketDisconnect, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Handle WebSocket disconnection during execution."""
@@ -124,18 +119,13 @@ class AgentLifecycleMixin(ABC):
     
     async def _send_error_notification(self, error: Exception, run_id: str, stream_updates: bool) -> None:
         """Send error notification via WebSocket."""
-        if not (stream_updates and self.websocket_manager):
+        if not stream_updates:
             return
         try:
-            await self._send_websocket_error(error, run_id)
+            await self.emit_error(f"{self.name} encountered an error: {str(error)}", "execution_error")
         except (WebSocketDisconnect, RuntimeError, ConnectionError):
             self.logger.debug(f"WebSocket disconnected when sending error")
     
-    async def _send_websocket_error(self, error: Exception, run_id: str) -> None:
-        """Send WebSocket error notification."""
-        ws_user_id = self._get_websocket_user_id(run_id)
-        error_message = f"{self.name} encountered an error: {str(error)}"
-        await self.websocket_manager.send_error(ws_user_id, error_message, self.name)
     
     @abstractmethod
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
@@ -161,9 +151,8 @@ class AgentLifecycleMixin(ABC):
     
     async def _send_starting_update(self, run_id: str, stream_updates: bool) -> None:
         """Send starting update if streaming enabled."""
-        if stream_updates and self.websocket_manager:
-            starting_data = {"status": "starting", "message": f"{self.name} is starting"}
-            await self._send_update(run_id, starting_data)
+        if stream_updates:
+            await self.emit_agent_started(f"{self.name} is starting")
     
     async def _complete_agent_run(
         self, run_id: str, stream_updates: bool, status: str, execution_time: float, state: DeepAgentState
@@ -173,7 +162,7 @@ class AgentLifecycleMixin(ABC):
         await self._send_completion_update(run_id, stream_updates, status, execution_time)
         await self.cleanup(state, run_id)
     
-    def _build_completion_data(self, status: str, execution_time: float) -> dict:
+    def _build_completion_data(self, status: str, execution_time: float) -> Dict[str, Any]:
         """Build completion update data dictionary."""
         return {
             "status": status,
@@ -199,78 +188,3 @@ class AgentLifecycleMixin(ABC):
     def _get_websocket_user_id(self, run_id: str) -> str:
         """Get WebSocket user ID for messaging."""
         return self.user_id if self.user_id else run_id
-    
-    async def send_agent_thinking(self, run_id: str, thought: str, step_number: int = None) -> None:
-        """Send agent thinking notification."""
-        if not self.websocket_manager:
-            return
-        try:
-            ws_user_id = self._get_websocket_user_id(run_id)
-            update_data = {
-                "type": "agent_thinking",
-                "payload": {
-                    "thought": thought,
-                    "agent_name": self.name,
-                    "step_number": step_number,
-                    "timestamp": time.time()
-                }
-            }
-            await self.websocket_manager.send_message(ws_user_id, update_data)
-        except Exception as e:
-            self.logger.debug(f"Failed to send agent thinking notification: {e}")
-    
-    async def send_partial_result(self, run_id: str, content: str, is_complete: bool = False) -> None:
-        """Send partial result notification."""
-        if not self.websocket_manager:
-            return
-        try:
-            ws_user_id = self._get_websocket_user_id(run_id)
-            update_data = {
-                "type": "partial_result",
-                "payload": {
-                    "content": content,
-                    "agent_name": self.name,
-                    "is_complete": is_complete,
-                    "timestamp": time.time()
-                }
-            }
-            await self.websocket_manager.send_message(ws_user_id, update_data)
-        except Exception as e:
-            self.logger.debug(f"Failed to send partial result notification: {e}")
-    
-    async def send_tool_executing(self, run_id: str, tool_name: str) -> None:
-        """Send tool executing notification."""
-        if not self.websocket_manager:
-            return
-        try:
-            ws_user_id = self._get_websocket_user_id(run_id)
-            update_data = {
-                "type": "tool_executing",
-                "payload": {
-                    "tool_name": tool_name,
-                    "agent_name": self.name,
-                    "timestamp": time.time()
-                }
-            }
-            await self.websocket_manager.send_message(ws_user_id, update_data)
-        except Exception as e:
-            self.logger.debug(f"Failed to send tool executing notification: {e}")
-    
-    async def send_final_report(self, run_id: str, report: dict, duration_ms: float) -> None:
-        """Send final report notification."""
-        if not self.websocket_manager:
-            return
-        try:
-            ws_user_id = self._get_websocket_user_id(run_id)
-            update_data = {
-                "type": "final_report",
-                "payload": {
-                    "report": report,
-                    "total_duration_ms": duration_ms,
-                    "agent_name": self.name,
-                    "timestamp": time.time()
-                }
-            }
-            await self.websocket_manager.send_message(ws_user_id, update_data)
-        except Exception as e:
-            self.logger.debug(f"Failed to send final report notification: {e}")

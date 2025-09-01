@@ -11,7 +11,7 @@ interface ServiceInfo {
   api_url?: string;
   ws_url?: string;
   timestamp: string;
-  cors_metadata?: any;
+  cors_metadata?: Record<string, unknown>;
 }
 
 interface ServicesResponse {

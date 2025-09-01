@@ -24,6 +24,7 @@ from typing import Any, Dict, Optional
 
 import httpx
 import pytest
+from shared.isolated_environment import get_env
 
 from tests.e2e.staging_auth_bypass import StagingAuthHelper
 
@@ -46,7 +47,8 @@ class GCPStagingOAuthTestHelper:
         
     async def verify_staging_environment(self):
         """Verify GCP staging environment configuration."""
-        environment = os.getenv("ENVIRONMENT", "development")
+        env = get_env()
+        environment = env.get("ENVIRONMENT", "development")
         if environment != "staging":
             raise ValueError(f"Expected staging environment, got {environment}")
         
@@ -176,7 +178,8 @@ class GCPStagingOAuthTestHelper:
 async def test_gcp_staging_oauth_service_health():
     """Test 1: OAuth service health check on GCP staging."""
     # Skip if not in staging environment
-    if os.getenv("ENVIRONMENT", "development") != "staging":
+    env = get_env()
+    if env.get("ENVIRONMENT", "development") != "staging":
         pytest.skip("Test only runs in staging environment")
     
     try:
@@ -200,7 +203,8 @@ async def test_gcp_staging_oauth_service_health():
 async def test_gcp_staging_oauth_config_endpoint():
     """Test 2: OAuth configuration endpoint accessibility."""
     # Skip if not in staging environment
-    if os.getenv("ENVIRONMENT", "development") != "staging":
+    env = get_env()
+    if env.get("ENVIRONMENT", "development") != "staging":
         pytest.skip("Test only runs in staging environment")
     
     try:
@@ -224,7 +228,8 @@ async def test_gcp_staging_oauth_config_endpoint():
 async def test_gcp_staging_e2e_token_generation():
     """Test 3: E2E bypass token generation on GCP staging."""
     # Skip if not in staging environment
-    if os.getenv("ENVIRONMENT", "development") != "staging":
+    env = get_env()
+    if env.get("ENVIRONMENT", "development") != "staging":
         pytest.skip("Test only runs in staging environment")
     
     try:
@@ -251,7 +256,8 @@ async def test_gcp_staging_e2e_token_generation():
 async def test_gcp_staging_token_verification():
     """Test 4: Token verification with GCP staging auth service."""
     # Skip if not in staging environment
-    if os.getenv("ENVIRONMENT", "development") != "staging":
+    env = get_env()
+    if env.get("ENVIRONMENT", "development") != "staging":
         pytest.skip("Test only runs in staging environment")
     
     try:
@@ -283,7 +289,8 @@ async def test_gcp_staging_token_verification():
 async def test_gcp_staging_authenticated_endpoint_access():
     """Test 5: Authenticated endpoint access with generated token."""
     # Skip if not in staging environment
-    if os.getenv("ENVIRONMENT", "development") != "staging":
+    env = get_env()
+    if env.get("ENVIRONMENT", "development") != "staging":
         pytest.skip("Test only runs in staging environment")
     
     try:
@@ -317,7 +324,8 @@ async def test_gcp_staging_authenticated_endpoint_access():
 async def test_gcp_staging_session_management():
     """Test 6: Session management with GCP staging services."""
     # Skip if not in staging environment
-    if os.getenv("ENVIRONMENT", "development") != "staging":
+    env = get_env()
+    if env.get("ENVIRONMENT", "development") != "staging":
         pytest.skip("Test only runs in staging environment")
     
     try:
@@ -355,7 +363,8 @@ async def test_gcp_staging_session_management():
 async def test_gcp_staging_cross_service_token_validation():
     """Test 7: Cross-service token validation between GCP staging services."""
     # Skip if not in staging environment
-    if os.getenv("ENVIRONMENT", "development") != "staging":
+    env = get_env()
+    if env.get("ENVIRONMENT", "development") != "staging":
         pytest.skip("Test only runs in staging environment")
     
     try:
@@ -397,7 +406,8 @@ async def test_gcp_staging_cross_service_token_validation():
 async def test_gcp_staging_multiple_concurrent_sessions():
     """Test 8: Multiple concurrent session handling."""
     # Skip if not in staging environment
-    if os.getenv("ENVIRONMENT", "development") != "staging":
+    env = get_env()
+    if env.get("ENVIRONMENT", "development") != "staging":
         pytest.skip("Test only runs in staging environment")
     
     try:
@@ -444,7 +454,8 @@ async def test_gcp_staging_multiple_concurrent_sessions():
 async def test_gcp_staging_error_handling():
     """Test 9: Error handling with invalid credentials."""
     # Skip if not in staging environment
-    if os.getenv("ENVIRONMENT", "development") != "staging":
+    env = get_env()
+    if env.get("ENVIRONMENT", "development") != "staging":
         pytest.skip("Test only runs in staging environment")
     
     try:
@@ -478,7 +489,8 @@ async def test_gcp_staging_error_handling():
 async def test_gcp_staging_oauth_complete_integration():
     """Test 10: Complete OAuth integration flow on GCP staging."""
     # Skip if not in staging environment
-    if os.getenv("ENVIRONMENT", "development") != "staging":
+    env = get_env()
+    if env.get("ENVIRONMENT", "development") != "staging":
         pytest.skip("Test only runs in staging environment")
     
     try:

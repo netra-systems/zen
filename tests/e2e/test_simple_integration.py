@@ -1,5 +1,6 @@
 from shared.isolated_environment import get_env
 """
+from shared.isolated_environment import get_env
 Simple Integration Test - Bypasses Complex Harness
 Tests basic service communication without the full E2E harness
 """
@@ -33,7 +34,6 @@ class SimpleServiceManager:
             return
         
         auth_main = project_root / "auth_service" / "main.py"
-        env = env.get_all()
         env["PORT"] = "8001"
         # Enable fast test mode to avoid database initialization issues
         env["AUTH_FAST_TEST_MODE"] = "true"
@@ -66,7 +66,6 @@ class SimpleServiceManager:
             print("Backend service already running")
             return
         
-        env = env.get_all()
         env["ENVIRONMENT"] = "test"
         env["AUTH_FAST_TEST_MODE"] = "true"
         

@@ -54,6 +54,41 @@
         </related-learnings>
     </learning>
     
+    <learning id="agent-death-detection-critical-2025-01-09">
+        <title>Agent Death Detection - Critical Production Bug Fix</title>
+        <category>AgentLifecycle/DeathDetection/Monitoring</category>
+        <keywords>agent-death, heartbeat-monitoring, websocket-notifications, execution-tracking, silent-failure, production-bug, timeout-detection</keywords>
+        <path>agent_death_detection_critical.xml</path>
+        <critical-takeaway>
+            Agents die silently without exceptions causing infinite loading states. Silent failures are more dangerous
+            than exceptions. Multi-layered death detection required: execution tracking with unique IDs, heartbeat 
+            monitoring (10s timeout), execution timeout (30s), WebSocket death notifications. Health checks must verify
+            processing capability not just service availability. Every execution needs unique ID for tracking.
+            User-friendly death messages with recovery instructions maintain trust during failures.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>100% failure rate when agent dies, infinite loading state, no user recovery possible, complete loss of chat functionality</business-impact>
+        <prevention>
+            Implement AgentExecutionTracker for all agent runs. Add heartbeat monitoring with 2s interval/10s timeout.
+            Enforce 30s execution timeout. Send WebSocket death notifications with recovery instructions.
+            Never rely on exceptions alone - use heartbeat and timeout mechanisms. Track execution state throughout lifecycle.
+        </prevention>
+        <implementation-patterns>
+            <pattern>Execution Tracking - Create unique ID, start heartbeat loop, monitor throughout lifecycle</pattern>
+            <pattern>Death Detection - Heartbeat timeout or execution timeout triggers death notification</pattern>
+            <pattern>WebSocket Notification - Send user-friendly message with recovery action</pattern>
+        </implementation-patterns>
+        <testing-strategies>
+            <strategy>Death Simulation Tests - Kill agent and verify detection within 10s</strategy>
+            <strategy>Timeout Tests - Verify timeout enforcement and notification</strategy>
+            <strategy>End-to-End Death Flow - Complete flow from death to user notification</strategy>
+        </testing-strategies>
+        <related-learnings>
+            <learning-ref>websocket_silent_failure_prevention_masterclass.xml</learning-ref>
+            <learning-ref>websocket_agent_integration_critical.xml</learning-ref>
+        </related-learnings>
+    </learning>
+    
     <learning id="jwt-secret-standardization-hard-requirements-2025-08-30">
         <title>JWT Secret Standardization with Hard Requirements (No Fallbacks)</title>
         <category>Authentication Security</category>
@@ -2237,13 +2272,30 @@
         <path>docker_centralized_management.xml</path>
         <critical-takeaway>
             Docker Desktop crashes from restart storms require centralized management with rate limiting.
-            CentralizedDockerManager prevents conflicts with file-based locking and 30-second cooldowns.
+            UnifiedDockerManager prevents conflicts with file-based locking and 30-second cooldowns.
             Production Docker images reduce memory consumption by 90%+ (6GB to 3GB).
             Shared vs dedicated environments optimize resource usage vs test isolation.
             10+ parallel test runners now possible with proper coordination.
         </critical-takeaway>
         <severity>CRITICAL</severity>
         <business-impact>Development environment stability, prevents 4-8 hours/week developer downtime, enables reliable CI/CD</business-impact>
-        <prevention>Always use CentralizedDockerManager for Docker operations. Never issue direct docker restart commands. Use --docker-production flag for memory efficiency. Respect rate limiting and locking mechanisms.</prevention>
+        <prevention>Always use UnifiedDockerManager for Docker operations. Never issue direct docker restart commands. Use --docker-production flag for memory efficiency. Respect rate limiting and locking mechanisms.</prevention>
+    </learning>
+    
+    <learning id="playwright-testing-advantages-2025-09-01">
+        <title>Playwright Testing Advantages and Adoption Strategy</title>
+        <category>Testing Infrastructure</category>
+        <keywords>playwright, cypress, testing, docker, websocket, load-testing, api-testing, multi-context, performance</keywords>
+        <path>playwright_testing_advantages.xml</path>
+        <critical-takeaway>
+            Playwright offers 55% faster execution with 90% less memory while enabling critical test scenarios
+            impossible with Cypress: multi-context testing, WebSocket load testing, API testing without UI,
+            cross-origin flows, and native Docker integration. Unified TypeScript testing eliminates
+            Python/JavaScript duplication. Phased adoption strategy: parallel implementation, high-value migration,
+            then gradual Cypress replacement.
+        </critical-takeaway>
+        <severity>HIGH</severity>
+        <business-impact>$2000/month CI/CD savings, 40% test maintenance reduction, 2 hours/week developer productivity gain</business-impact>
+        <prevention>Adopt Playwright for new tests, port mission-critical WebSocket tests, leverage for load testing and multi-user scenarios</prevention>
     </learning>
 </specification>

@@ -99,7 +99,7 @@ function isRunningInDocker(): boolean {
  * Validate URLs for staging/production environments
  * Prevents localhost URLs from being used in non-development environments
  */
-function validateUrlsForEnvironment(environment: Environment, urls: any): void {
+function validateUrlsForEnvironment(environment: Environment, urls: Record<string, unknown>): void {
   if (environment === 'staging' || environment === 'production') {
     const localhostUrls = Object.entries(urls)
       .filter(([_, url]) => typeof url === 'string' && url.includes('localhost'))

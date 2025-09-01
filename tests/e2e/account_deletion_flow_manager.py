@@ -14,10 +14,11 @@ REQUIREMENTS:
 - GDPR compliance validation
 - 450-line file limit, 25-line function limit
 """
-import os
 from contextlib import asynccontextmanager
+from shared.isolated_environment import get_env
 
 # Set test environment
+env = get_env()
 env.set("TESTING", "1", "test")
 env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
 

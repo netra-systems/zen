@@ -1,5 +1,6 @@
 """E2E Test: All 9 Example Prompts with Real LLM Integration
 
+from shared.isolated_environment import get_env
 CRITICAL E2E test suite covering all 9 example prompts from specification.
 Tests complete agent workflows with real LLM API calls for production validation.
 
@@ -163,7 +164,7 @@ class TestExamplePromptsE2ERealLLM:
     @pytest.fixture
     def use_real_llm(self):
         """Check if real LLM testing is enabled."""
-        return os.getenv("ENABLE_REAL_LLM_TESTING", "false").lower() == "true"
+        return get_env().get("ENABLE_REAL_LLM_TESTING", "false").lower() == "true"
     
     @pytest.fixture
     @pytest.mark.e2e

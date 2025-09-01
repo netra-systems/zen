@@ -85,9 +85,16 @@ interface ExampleMessageStatus {
   agentUpdates?: string[];
 }
 
+interface MessageResult {
+  output?: string;
+  data?: Record<string, unknown>;
+  recommendations?: string[];
+  optimizations?: Record<string, unknown>;
+}
+
 interface ExampleMessageFlowProps {
   onMessageSent?: (message: ExampleMessage) => void;
-  onMessageComplete?: (messageId: string, result: any) => void;
+  onMessageComplete?: (messageId: string, result: MessageResult) => void;
   onMessageError?: (messageId: string, error: string) => void;
 }
 
@@ -102,7 +109,7 @@ export const ExampleMessageFlow: React.FC<ExampleMessageFlowProps> = ({
 
   // Initialize WebSocket message handling
   useEffect(() => {
-    const handleWebSocketMessage = (message: any) => {
+    const handleWebSocketMessage = (message: { type: string; payload?: Record<string, unknown> }) => {
       logger.debug('Example Message Flow - WebSocket message received', { message });
 
       // Handle agent updates for example messages

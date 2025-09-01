@@ -27,6 +27,7 @@ from typing import Dict, List, Optional, Any
 import threading
 import pytest
 from loguru import logger
+from shared.isolated_environment import get_env
 
 # Add project root to Python path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -180,7 +181,7 @@ class FrontendInitializationSimulator:
         """Initialize authentication and get token."""
         try:
             # Simulate OAuth flow or dev auth
-            if os.getenv('NODE_ENV') == 'development':
+            if get_env().get('NODE_ENV') == 'development':
                 # Use dev auto-login
                 user = AuthUser(
                     id=f"dev_user_{uuid.uuid4().hex[:8]}",

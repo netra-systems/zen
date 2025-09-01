@@ -246,7 +246,6 @@ class TestDevLauncherE2Eer:
         cmd = self._build_launcher_command()
         
         # Set up environment
-        env = env.get_all()
         env["NETRA_TEST_MODE"] = "true"
         env["NETRA_STARTUP_MODE"] = "minimal"
         if not self.config.enable_secrets:

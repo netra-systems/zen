@@ -39,6 +39,8 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from unittest.mock import patch, AsyncMock
 
+from shared.isolated_environment import get_env
+
 import pytest
 import pytest_asyncio
 
@@ -57,7 +59,6 @@ from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 # Enable real services for this test module  
 # Skip this for now to debug other issues
 # pytestmark = pytest.mark.skipif(
-#     env.get("USE_REAL_SERVICES", "false").lower() != "true",
 #     reason="Real services disabled (set USE_REAL_SERVICES=true)"
 # )
 

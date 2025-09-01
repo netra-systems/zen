@@ -95,8 +95,8 @@ export function validateAuthState(
 
       // Check if user matches token
       if (tokenValidation.decodedUser) {
-        const tokenUserId = tokenValidation.decodedUser.id || (tokenValidation.decodedUser as any).sub;
-        const currentUserId = user.id || (user as any).sub;
+        const tokenUserId = tokenValidation.decodedUser.id || (tokenValidation.decodedUser as { sub?: string }).sub;
+        const currentUserId = user.id || (user as { sub?: string }).sub;
         
         if (tokenUserId !== currentUserId) {
           validation.errors.push(`User ID mismatch: token=${tokenUserId}, user=${currentUserId}`);
@@ -156,7 +156,12 @@ export function validateToken(token: string): TokenValidation {
 
   try {
     // Decode token
-    const decoded = jwtDecode(token) as any;
+    const decoded = jwtDecode(token) as Record<string, unknown> & {
+      email?: string;
+      exp?: number;
+      iat?: number;
+      sub?: string;
+    };
     validation.decodedUser = decoded as User;
 
     // Check required fields
@@ -252,7 +257,7 @@ export async function attemptAuthRecovery(
         logger.info('[AUTH RECOVERY] Successfully recovered user from token', {
           component: 'auth-validation',
           action: 'recovery_success',
-          userId: validation.decodedUser.id || (validation.decodedUser as any).sub
+          userId: validation.decodedUser.id || (validation.decodedUser as { sub?: string }).sub
         });
         return true;
       }

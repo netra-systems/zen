@@ -78,46 +78,48 @@ from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from netra_backend.app.services.state_persistence import state_persistence_service
 
 logger = central_logger.get_logger(__name__)
-class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
+class SupervisorAgent(BaseSubAgent):
     """Refactored Supervisor agent with modular design."""
     
     def __init__(self, 
                  db_session: AsyncSession,
                  llm_manager: LLMManager,
-                 websocket_manager: 'WebSocketManager',
+                 websocket_bridge,
                  tool_dispatcher: ToolDispatcher):
-        self._init_base(llm_manager, websocket_manager)
-        self._init_services(db_session, websocket_manager, tool_dispatcher)
-        self._init_all_components(llm_manager, tool_dispatcher, websocket_manager)
+        self._init_base(llm_manager, websocket_bridge)
+        self._init_services(db_session, websocket_bridge, tool_dispatcher)
+        self._init_all_components(llm_manager, tool_dispatcher, websocket_bridge)
     
-    def _init_base(self, llm_manager: LLMManager, websocket_manager: 'WebSocketManager') -> None:
+    def _init_base(self, llm_manager: LLMManager, websocket_bridge) -> None:
         """Initialize base agent with modern execution interface."""
         BaseSubAgent.__init__(self, llm_manager, name="Supervisor", 
                             description="The supervisor agent that orchestrates sub-agents")
-        BaseExecutionInterface.__init__(self, "Supervisor", websocket_manager)
+        # Set properties for BaseExecutionInterface compatibility
+        self.agent_name = "Supervisor"
+        self.websocket_manager = websocket_bridge
     
     def _init_services(self, db_session: AsyncSession,
-                       websocket_manager: 'WebSocketManager',
+                       websocket_bridge,
                        tool_dispatcher: ToolDispatcher) -> None:
         """Initialize services."""
         self.db_session = db_session
-        self.websocket_manager = websocket_manager
+        self.websocket_bridge = websocket_bridge
         self.tool_dispatcher = tool_dispatcher
         self.state_persistence = state_persistence_service
     
     def _init_all_components(self, llm_manager: LLMManager,
                            tool_dispatcher: ToolDispatcher,
-                           websocket_manager: 'WebSocketManager') -> None:
+                           websocket_bridge) -> None:
         """Initialize all modular components and infrastructure."""
-        self._init_core_components(llm_manager, tool_dispatcher, websocket_manager)
+        self._init_core_components(llm_manager, tool_dispatcher, websocket_bridge)
         self._init_infrastructure_components()
 
     def _init_core_components(self, llm_manager: LLMManager,
                             tool_dispatcher: ToolDispatcher,
-                            websocket_manager: 'WebSocketManager') -> None:
+                            websocket_bridge) -> None:
         """Initialize core agent components."""
-        self._init_registry(llm_manager, tool_dispatcher, websocket_manager)
-        self._init_execution_components(websocket_manager)
+        self._init_registry(llm_manager, tool_dispatcher, websocket_bridge)
+        self._init_execution_components(websocket_bridge)
         self._init_state_components()
 
     def _init_infrastructure_components(self) -> None:
@@ -141,23 +143,23 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
 
     def _init_registry(self, llm_manager: LLMManager, 
                       tool_dispatcher: ToolDispatcher,
-                      websocket_manager: 'WebSocketManager') -> None:
+                      websocket_bridge) -> None:
         """Initialize agent registry."""
         self.registry = AgentRegistry(llm_manager, tool_dispatcher)
-        # CRITICAL: Register agents BEFORE setting WebSocket manager
-        # so that agents exist when the manager is set on them
+        # CRITICAL: Register agents BEFORE setting WebSocket bridge
+        # so that agents exist when the bridge is set on them
         self.registry.register_default_agents()
-        self.registry.set_websocket_manager(websocket_manager)
+        self.registry.set_websocket_bridge(websocket_bridge)
         # Add alias for test compatibility
         self.agent_registry = self.registry
 
-    def _init_execution_components(self, websocket_manager: 'WebSocketManager') -> None:
+    def _init_execution_components(self, websocket_bridge) -> None:
         """Initialize execution components."""
-        # ExecutionEngine: Handles agent execution with WebSocket notifications
-        self.engine = ExecutionEngine(self.registry, websocket_manager)
+        # ExecutionEngine: Handles agent execution with WebSocket notifications via bridge
+        self.engine = ExecutionEngine(self.registry, websocket_bridge)
         # PipelineExecutor: Orchestrates multi-agent pipeline execution
         self.pipeline_executor = PipelineExecutor(
-            self.engine, websocket_manager, self.db_session
+            self.engine, websocket_bridge, self.db_session
         )
 
     def _init_state_components(self) -> None:
@@ -176,7 +178,7 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
         self.lifecycle_manager = SupervisorLifecycleManager()
         # Add workflow orchestrator for test compatibility
         from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
-        self.workflow_orchestrator = WorkflowOrchestrator(self.registry, self.engine, self.websocket_manager)
+        self.workflow_orchestrator = WorkflowOrchestrator(self.registry, self.engine, self.websocket_bridge)
 
     @asynccontextmanager
     async def _create_db_session_factory(self):
@@ -397,31 +399,37 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
     
     async def _send_orchestration_notification(self, thread_id: str, run_id: str, 
                                              event_type: str, message: str) -> None:
-        """Send orchestration-level WebSocket notification."""
+        """Send orchestration-level WebSocket notification via AgentWebSocketBridge."""
         try:
-            if not self.websocket_manager:
-                logger.debug(f"No WebSocket manager available for orchestration event: {event_type}")
-                return
+            from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
             
-            # Create orchestration notification payload
-            payload = {
-                "run_id": run_id,
-                "event_type": event_type,
-                "message": message,
-                "timestamp": self._get_current_timestamp(),
-                "agent_name": "supervisor",
-                "orchestration_level": True
-            }
+            bridge = await get_agent_websocket_bridge()
             
-            # Send notification
-            from netra_backend.app.schemas.websocket_models import WebSocketMessage
-            notification = WebSocketMessage(type=event_type, payload=payload)
-            await self.websocket_manager.send_to_thread(thread_id, notification.model_dump())
+            # Map event types to appropriate bridge notifications
+            if event_type == "orchestration_started":
+                await bridge.notify_agent_started(run_id, "Supervisor", {"orchestration_level": True, "message": message})
+            elif event_type == "orchestration_thinking":
+                await bridge.notify_agent_thinking(run_id, "Supervisor", message)
+            elif event_type == "orchestration_completed":
+                await bridge.notify_agent_completed(run_id, "Supervisor", {"orchestration_level": True})
+            elif event_type == "orchestration_error":
+                await bridge.notify_agent_error(run_id, "Supervisor", message, {"orchestration_level": True})
+            else:
+                # Custom orchestration event
+                payload = {
+                    "run_id": run_id,
+                    "event_type": event_type,
+                    "message": message,
+                    "timestamp": self._get_current_timestamp(),
+                    "agent_name": "supervisor",
+                    "orchestration_level": True
+                }
+                await bridge.notify_custom(run_id, "Supervisor", f"orchestration_{event_type}", payload)
             
-            logger.info(f"Supervisor sent orchestration notification: {event_type} - {message[:50]}...")
+            logger.info(f"Supervisor sent orchestration notification via bridge: {event_type} - {message[:50]}...")
             
         except Exception as e:
-            logger.warning(f"Failed to send supervisor orchestration notification {event_type}: {e}")
+            logger.warning(f"Failed to send supervisor orchestration notification via bridge {event_type}: {e}")
     
     def _get_current_timestamp(self) -> float:
         """Get current timestamp."""

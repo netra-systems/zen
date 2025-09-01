@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 Workload Generator for Resource Isolation Testing
 
 Generates various workload patterns for testing tenant isolation.
@@ -24,7 +25,7 @@ class WorkloadGenerator:
         """Generate workload for a tenant agent."""
         # Check if we're in offline mode
         import os
-        offline_mode = os.getenv("CPU_ISOLATION_OFFLINE_MODE", "false").lower() == "true"
+        offline_mode = get_env().get("CPU_ISOLATION_OFFLINE_MODE", "false").lower() == "true"
         
         if offline_mode:
             return await self._generate_offline_workload(agent, workload_type, duration, intensity)

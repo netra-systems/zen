@@ -1,6 +1,5 @@
 from shared.isolated_environment import get_env
 """
-env = get_env()
 E2E Test for Mixed Content and HTTPS Protocol Issues
 
 This test reproduces the critical mixed content/HTTPS issues identified in the Five Whys analysis,
@@ -336,21 +335,16 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
     def _simulate_server_side_environment_detection(self) -> bool:
         """Simulate server-side environment detection logic."""
         # Replicate logic from secure-api-config.ts isSecureEnvironment()
-        return env.get('NEXT_PUBLIC_ENVIRONMENT') != 'development'
     
     def _simulate_client_side_environment_detection(self, protocol: str, host: str) -> bool:
         """Simulate client-side environment detection logic."""
         # Replicate client-side logic from secure-api-config.ts
         is_https = protocol == 'https:'
-        is_staging = env.get('NEXT_PUBLIC_ENVIRONMENT') == 'staging'
-        is_production = env.get('NEXT_PUBLIC_ENVIRONMENT') == 'production'
-        force_https = env.get('NEXT_PUBLIC_FORCE_HTTPS') == 'true'
         
         return is_https or is_staging or is_production or force_https
     
     def _get_secure_api_config(self) -> Dict[str, Any]:
         """Simulate getSecureApiConfig() function behavior."""
-        environment = env.get('NEXT_PUBLIC_ENVIRONMENT', 'development')
         
         # Default URLs based on environment
         if environment == 'development':
@@ -367,9 +361,6 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
             default_auth_url = 'https://auth.staging.netrasystems.ai'
         
         # Get URLs from environment or use defaults
-        api_url = env.get('NEXT_PUBLIC_API_URL', default_api_url)
-        ws_url = env.get('NEXT_PUBLIC_WS_URL', default_ws_url)
-        auth_url = env.get('NEXT_PUBLIC_AUTH_URL', default_auth_url)
         
         # Apply security transformations (simulate secureUrl function)
         is_secure = self._simulate_server_side_environment_detection()

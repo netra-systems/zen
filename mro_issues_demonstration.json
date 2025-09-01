@@ -1,0 +1,269 @@
+{
+  "demonstration_timestamp": "2025-09-01T14:14:27.178794",
+  "demonstration_available": true,
+  "demonstrations": {
+    "method_resolution_ambiguity": {
+      "test_name": "Method Resolution Ambiguity",
+      "issues": [],
+      "websocket_conflicts": [
+        {
+          "method": "emit_thinking",
+          "resolved_to_class": "DataSubAgent",
+          "mro_position": 0,
+          "issue": "Multiple classes provide similar WebSocket functionality"
+        },
+        {
+          "method": "emit_agent_started",
+          "resolved_to_class": "DataSubAgent",
+          "mro_position": 0,
+          "issue": "Multiple classes provide similar WebSocket functionality"
+        },
+        {
+          "method": "emit_tool_executing",
+          "resolved_to_class": "DataSubAgent",
+          "mro_position": 0,
+          "issue": "Multiple classes provide similar WebSocket functionality"
+        },
+        {
+          "method": "send_agent_thinking",
+          "resolved_to_class": "DataSubAgent",
+          "mro_position": 0,
+          "issue": "Multiple classes provide similar WebSocket functionality"
+        },
+        {
+          "method": "send_status_update",
+          "resolved_to_class": "DataSubAgent",
+          "mro_position": 0,
+          "issue": "Multiple classes provide similar WebSocket functionality"
+        }
+      ],
+      "execution_conflicts": [
+        {
+          "method": "execute",
+          "available_in_classes": [
+            "DataSubAgent",
+            "AgentLifecycleMixin"
+          ],
+          "resolved_to": "DataSubAgent",
+          "issue": "Multiple execution interface implementations"
+        },
+        {
+          "method": "execute_core_logic",
+          "available_in_classes": [
+            "DataSubAgent",
+            "BaseExecutionInterface"
+          ],
+          "resolved_to": "DataSubAgent",
+          "issue": "Multiple execution interface implementations"
+        },
+        {
+          "method": "validate_preconditions",
+          "available_in_classes": [
+            "DataSubAgent",
+            "BaseExecutionInterface"
+          ],
+          "resolved_to": "DataSubAgent",
+          "issue": "Multiple execution interface implementations"
+        }
+      ]
+    },
+    "super_call_chain_problems": {
+      "test_name": "Super Call Chain Problems",
+      "initialization_issues": [
+        {
+          "class": "DataSubAgent",
+          "mro_position": 0,
+          "has_super_calls": false
+        },
+        {
+          "class": "BaseSubAgent",
+          "mro_position": 1,
+          "has_super_calls": true
+        },
+        {
+          "class": "AgentLifecycleMixin",
+          "mro_position": 2,
+          "has_super_calls": false
+        },
+        {
+          "class": "BaseExecutionInterface",
+          "mro_position": 3,
+          "has_super_calls": false
+        }
+      ],
+      "call_order_problems": [
+        {
+          "issue": "Complex initialization chain detected",
+          "chain_length": 4,
+          "classes_involved": [
+            "DataSubAgent",
+            "BaseSubAgent",
+            "AgentLifecycleMixin",
+            "BaseExecutionInterface"
+          ],
+          "risk": "HIGH - potential for super() call ordering issues"
+        }
+      ],
+      "multiple_inheritance_conflicts": [
+        {
+          "class": "DataSubAgent",
+          "inherits_from": [
+            "BaseSubAgent",
+            "BaseExecutionInterface"
+          ],
+          "mro_length": 9,
+          "diamond_patterns": [
+            "BaseExecutionInterface (appears 2 times)",
+            "ABC (appears 3 times)",
+            "object (appears 4 times)"
+          ]
+        },
+        {
+          "class": "ValidationSubAgent",
+          "inherits_from": [
+            "BaseSubAgent",
+            "BaseExecutionInterface"
+          ],
+          "mro_length": 9,
+          "diamond_patterns": [
+            "BaseExecutionInterface (appears 2 times)",
+            "ABC (appears 3 times)",
+            "object (appears 4 times)"
+          ]
+        }
+      ]
+    },
+    "attribute_access_conflicts": {
+      "test_name": "Attribute Access Conflicts",
+      "shadowed_attributes": [
+        {
+          "attribute": "_abc_impl",
+          "shadowed_in": "BaseSubAgent",
+          "original_in": "DataSubAgent",
+          "class_hierarchy": "DataSubAgent"
+        },
+        {
+          "attribute": "_abc_impl",
+          "shadowed_in": "AgentLifecycleMixin",
+          "original_in": "DataSubAgent",
+          "class_hierarchy": "DataSubAgent"
+        },
+        {
+          "attribute": "_abc_impl",
+          "shadowed_in": "BaseExecutionInterface",
+          "original_in": "DataSubAgent",
+          "class_hierarchy": "DataSubAgent"
+        },
+        {
+          "attribute": "_abc_impl",
+          "shadowed_in": "ABC",
+          "original_in": "DataSubAgent",
+          "class_hierarchy": "DataSubAgent"
+        },
+        {
+          "attribute": "_abc_impl",
+          "shadowed_in": "BaseSubAgent",
+          "original_in": "ValidationSubAgent",
+          "class_hierarchy": "ValidationSubAgent"
+        },
+        {
+          "attribute": "_abc_impl",
+          "shadowed_in": "AgentLifecycleMixin",
+          "original_in": "ValidationSubAgent",
+          "class_hierarchy": "ValidationSubAgent"
+        },
+        {
+          "attribute": "_abc_impl",
+          "shadowed_in": "BaseExecutionInterface",
+          "original_in": "ValidationSubAgent",
+          "class_hierarchy": "ValidationSubAgent"
+        },
+        {
+          "attribute": "_abc_impl",
+          "shadowed_in": "ABC",
+          "original_in": "ValidationSubAgent",
+          "class_hierarchy": "ValidationSubAgent"
+        }
+      ],
+      "naming_conflicts": [],
+      "initialization_conflicts": []
+    },
+    "performance_implications": {
+      "test_name": "Performance Implications",
+      "method_lookup_timing": [
+        {
+          "method": "emit_thinking",
+          "lookup_time_ms": 0.053099996875971556,
+          "mro_depth": 9,
+          "lookups_per_ms": 18832.392821712445
+        },
+        {
+          "method": "execute_core_logic",
+          "lookup_time_ms": 0.05119998240843415,
+          "mro_depth": 9,
+          "lookups_per_ms": 19531.25671065212
+        },
+        {
+          "method": "validate_preconditions",
+          "lookup_time_ms": 0.05150001379661262,
+          "mro_depth": 9,
+          "lookups_per_ms": 19417.470526304485
+        }
+      ],
+      "attribute_access_timing": [],
+      "memory_overhead": [
+        {
+          "class": "DataSubAgent",
+          "mro_depth": 9,
+          "method_count": 135,
+          "estimated_overhead_bytes": 7650,
+          "complexity_score": 31
+        },
+        {
+          "class": "ValidationSubAgent",
+          "mro_depth": 9,
+          "method_count": 133,
+          "estimated_overhead_bytes": 7550,
+          "complexity_score": 31
+        }
+      ]
+    },
+    "test_scenarios": {
+      "scenario_name": "Comprehensive MRO Issue Testing",
+      "test_cases": [
+        {
+          "name": "WebSocket Method Confusion Test",
+          "description": "Test whether emit_* and send_* methods interfere",
+          "setup": "Create agent instance with WebSocket methods",
+          "expected_issue": "Method resolution ambiguity between BaseSubAgent and BaseExecutionInterface",
+          "actual_behavior": "Methods resolve to first in MRO, potentially causing confusion",
+          "severity": "HIGH"
+        },
+        {
+          "name": "Initialization Order Test",
+          "description": "Test initialization call order with multiple inheritance",
+          "setup": "Initialize DataSubAgent with both base classes",
+          "expected_issue": "super() calls may not reach all required parent initializers",
+          "actual_behavior": "Complex initialization chain with potential gaps",
+          "severity": "HIGH"
+        },
+        {
+          "name": "Method Override Test",
+          "description": "Test method overrides across inheritance hierarchy",
+          "setup": "Override execute_core_logic in both base classes",
+          "expected_issue": "Unclear which implementation is called",
+          "actual_behavior": "First implementation in MRO wins, others ignored",
+          "severity": "MEDIUM"
+        },
+        {
+          "name": "Diamond Inheritance Test",
+          "description": "Test diamond pattern with ABC and object",
+          "setup": "Multiple inheritance creates diamond with common base",
+          "expected_issue": "Method resolution may skip important implementations",
+          "actual_behavior": "Python MRO handles diamonds, but adds complexity",
+          "severity": "MEDIUM"
+        }
+      ]
+    }
+  }
+}

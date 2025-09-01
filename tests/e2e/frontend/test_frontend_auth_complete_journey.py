@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 Frontend Authentication Complete Journey E2E Tests
 
 Business Value Justification (BVJ):
@@ -38,9 +39,9 @@ class FrontendAuthE2ETestSuite:
     """Complete frontend authentication E2E test suite with real services"""
     
     def __init__(self):
-        self.base_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
-        self.api_url = os.getenv("API_URL", "http://localhost:8000")
-        self.auth_url = os.getenv("AUTH_SERVICE_URL", "http://localhost:8081")
+        self.base_url = get_env().get("FRONTEND_URL", "http://localhost:3000")
+        self.api_url = get_env().get("API_URL", "http://localhost:8000")
+        self.auth_url = get_env().get("AUTH_SERVICE_URL", "http://localhost:8081")
         self.http_client = UnifiedHTTPClient(base_url=self.api_url)
         self.auth_helper = AuthServiceHelper()
         self.driver = None

@@ -27,8 +27,18 @@ export interface PaginationConfig {
   totalPages: number;
 }
 
+export interface Thread {
+  id: string;
+  title: string;
+  created_at: number;
+  updated_at?: number;
+  message_count?: number;
+  user_id?: string;
+  metadata?: Record<string, unknown>;
+}
+
 export interface ThreadListProps {
-  threads: any[];
+  threads: Thread[];
   isLoadingThreads: boolean;
   loadError: string | null;
   activeThreadId: string | null;
@@ -58,8 +68,8 @@ export interface PaginationProps {
 }
 
 export interface FooterProps {
-  threads: any[];
-  paginatedThreads: any[];
+  threads: Thread[];
+  paginatedThreads: Thread[];
   threadsPerPage: number;
   isAdmin: boolean;
 }

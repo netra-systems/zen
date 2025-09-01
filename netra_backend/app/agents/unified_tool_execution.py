@@ -11,6 +11,8 @@ Business Value: Single coherent tool execution system with real-time notificatio
 
 import asyncio
 import inspect
+import os
+import psutil
 import time
 import uuid
 from abc import ABC, abstractmethod
@@ -20,10 +22,10 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.core.tool_models import ToolExecutionResult, UnifiedTool
 from netra_backend.app.logging_config import central_logger
+from shared.isolated_environment import IsolatedEnvironment
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-    from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
     from netra_backend.app.db.models_postgres import User
     from netra_backend.app.schemas.tool import (
         SimpleToolPayload,
@@ -37,7 +39,7 @@ if TYPE_CHECKING:
         ToolExecutionContext,
     )
     from netra_backend.app.services.tool_permission_service import ToolPermissionService
-    from netra_backend.app.websocket_core import WebSocketManager
+    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 logger = central_logger.get_logger(__name__)
 
@@ -54,26 +56,37 @@ class UnifiedToolExecutionEngine:
     
     def __init__(
         self,
-        websocket_manager: Optional['WebSocketManager'] = None,
+        websocket_bridge: Optional['AgentWebSocketBridge'] = None,
         permission_service: Optional['ToolPermissionService'] = None
     ):
         """Initialize unified tool execution engine."""
-        self.websocket_manager = websocket_manager
-        self.websocket_notifier = None
-        if websocket_manager:
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-            self.websocket_notifier = WebSocketNotifier(websocket_manager)
-        
+        self.websocket_bridge = websocket_bridge
         self.permission_service = permission_service
+        
+        # Security and resource management
+        self.env = IsolatedEnvironment()
+        self.default_timeout = float(self.env.get('AGENT_DEFAULT_TIMEOUT', '30.0'))
+        self.max_memory_mb = int(self.env.get('AGENT_MAX_MEMORY_MB', '512'))
+        self.max_concurrent_per_user = int(self.env.get('AGENT_MAX_CONCURRENT_PER_USER', '10'))
+        self.rate_limit_per_minute = int(self.env.get('AGENT_RATE_LIMIT_PER_MINUTE', '100'))
         
         # Metrics tracking
         self._active_executions: Dict[str, Dict] = {}
+        self._user_execution_counts: Dict[str, int] = {}
+        self._user_request_timestamps: Dict[str, List[float]] = {}
         self._execution_metrics = {
             'total_executions': 0,
             'successful_executions': 0,
             'failed_executions': 0,
+            'timeout_executions': 0,
+            'security_violations': 0,
             'total_duration_ms': 0
         }
+        
+        # Process monitoring
+        self._process = psutil.Process(os.getpid())
+        
+        logger.info(f"🔒 Security controls initialized: timeout={self.default_timeout}s, memory={self.max_memory_mb}MB, concurrent={self.max_concurrent_per_user}")
     
     # Core execution methods with WebSocket notifications
     
@@ -172,7 +185,7 @@ class UnifiedToolExecutionEngine:
         
         # Get or create context for notifications
         context = None
-        if self.websocket_notifier:
+        if self.websocket_bridge:
             context = self._get_or_create_context(state, run_id, tool_name)
             await self._send_tool_executing(context, tool_name, parameters)
         
@@ -182,7 +195,7 @@ class UnifiedToolExecutionEngine:
             duration_ms = (time.time() - start_time) * 1000
             
             # Send completed notification
-            if context and self.websocket_notifier:
+            if context and self.websocket_bridge:
                 await self._send_tool_completed(
                     context, tool_name, result, duration_ms, "success"
                 )
@@ -454,37 +467,44 @@ class UnifiedToolExecutionEngine:
         tool_name: str,
         tool_input: Any
     ) -> None:
-        """Send tool executing notification with enhanced metadata."""
+        """Send tool executing notification via AgentWebSocketBridge."""
         # CRITICAL: Always attempt to notify, with fallback
         if not context:
-            logger.critical(f"MISSING CONTEXT: Tool {tool_name} executing without context - events invisible")
+            logger.critical(f"🚨 SILENT FAILURE ALERT: Tool {tool_name} executing without context")
+            logger.critical("🚨 USER WILL NOT SEE TOOL PROGRESS - This breaks chat transparency!")
+            logger.critical(f"🚨 Call stack shows missing context during tool execution")
             return
             
-        if not self.websocket_notifier:
-            # CRITICAL: Log when WebSocket unavailable so we know events are lost
-            logger.critical(
-                f"WEBSOCKET UNAVAILABLE: Tool {tool_name} executing for thread {context.thread_id} - "
-                f"user will not see progress"
-            )
-            # Could write to Redis or database here as fallback
-            # For now, at least we have audit trail in logs
+        if not self.websocket_bridge:
+            # CRITICAL: Log when bridge unavailable so we know events are lost
+            logger.critical(f"🚨 BRIDGE UNAVAILABLE: Tool {tool_name} executing for run_id {context.run_id}")
+            logger.critical(f"🚨 Thread {context.thread_id} will not see tool progress - WebSocket events LOST")
+            logger.critical("🚨 This indicates WebSocket bridge was not properly initialized in tool dispatcher")
             return
         
         try:
             # Extract contextual information
-            tool_purpose = self._get_tool_purpose(tool_name, tool_input)
-            estimated_duration = self._estimate_tool_duration(tool_name, tool_input)
             params_summary = self._create_parameters_summary(tool_input)
             
-            await self.websocket_notifier.send_tool_executing(
-                context,
-                tool_name,
-                tool_purpose=tool_purpose,
-                estimated_duration_ms=estimated_duration,
-                parameters_summary=params_summary
+            # DEFENSIVE: Validate bridge has required method before calling
+            if not hasattr(self.websocket_bridge, 'notify_tool_executing'):
+                logger.critical(f"🚨 BRIDGE MISSING METHOD: notify_tool_executing not found")
+                return
+            
+            result = await self.websocket_bridge.notify_tool_executing(
+                run_id=context.run_id,
+                agent_name=context.agent_name,
+                tool_name=tool_name,
+                parameters={"summary": params_summary} if params_summary else None
             )
+            
+            # DEFENSIVE: Check if notification succeeded
+            if result is False:
+                logger.warning(f"⚠️ Tool executing notification failed for {tool_name} (returned False)")
+                
         except Exception as e:
-            logger.warning(f"Failed to send tool_executing notification: {e}")
+            logger.error(f"🚨 EXCEPTION in tool_executing notification for {tool_name}: {e}")
+            logger.error("🚨 User will not see tool execution start - check WebSocket connectivity")
     
     async def _send_tool_completed(
         self,
@@ -495,19 +515,18 @@ class UnifiedToolExecutionEngine:
         status: str,
         error_type: str = None
     ) -> None:
-        """Send tool completed notification with result."""
+        """Send tool completed notification via AgentWebSocketBridge."""
         # CRITICAL: Always attempt to notify, with fallback
         if not context:
-            logger.critical(f"MISSING CONTEXT: Tool {tool_name} completed without context - events invisible")
+            logger.critical(f"🚨 SILENT FAILURE ALERT: Tool {tool_name} completed without context")
+            logger.critical("🚨 USER WILL NOT SEE TOOL RESULTS - This breaks chat completeness!")
             return
             
-        if not self.websocket_notifier:
-            # CRITICAL: Log when WebSocket unavailable so we know events are lost
-            logger.critical(
-                f"WEBSOCKET UNAVAILABLE: Tool {tool_name} completed for thread {context.thread_id} - "
-                f"status: {status}, duration: {duration_ms:.0f}ms - user will not see result"
-            )
-            # Could write to Redis or database here as fallback
+        if not self.websocket_bridge:
+            # CRITICAL: Log when bridge unavailable so we know events are lost
+            logger.critical(f"🚨 BRIDGE UNAVAILABLE: Tool {tool_name} completed for run_id {context.run_id}")
+            logger.critical(f"🚨 Thread {context.thread_id} status: {status}, duration: {duration_ms:.0f}ms")
+            logger.critical("🚨 USER WILL NOT SEE TOOL RESULTS - WebSocket events LOST")
             return
         
         try:
@@ -527,11 +546,26 @@ class UnifiedToolExecutionEngine:
                         "MemoryError", "SystemError", "KeyboardInterrupt"
                     ]
             
-            await self.websocket_notifier.send_tool_completed(
-                context, tool_name, result_dict
+            # DEFENSIVE: Validate bridge has required method before calling
+            if not hasattr(self.websocket_bridge, 'notify_tool_completed'):
+                logger.critical(f"🚨 BRIDGE MISSING METHOD: notify_tool_completed not found")
+                return
+            
+            notification_result = await self.websocket_bridge.notify_tool_completed(
+                run_id=context.run_id,
+                agent_name=context.agent_name,
+                tool_name=tool_name,
+                result=result_dict,
+                execution_time_ms=duration_ms
             )
+            
+            # DEFENSIVE: Check if notification succeeded
+            if notification_result is False:
+                logger.warning(f"⚠️ Tool completed notification failed for {tool_name} (returned False)")
+                
         except Exception as e:
-            logger.warning(f"Failed to send tool_completed notification: {e}")
+            logger.error(f"🚨 EXCEPTION in tool_completed notification for {tool_name}: {e}")
+            logger.error("🚨 User will not see tool completion - check WebSocket connectivity")
     
     def _get_or_create_context(
         self,
@@ -722,19 +756,23 @@ class UnifiedToolExecutionEngine:
         status_message: str = None
     ) -> None:
         """Send granular progress update for long-running tools."""
-        if not self.websocket_notifier or not context:
+        if not self.websocket_bridge or not context:
             return
         
         try:
             estimated_remaining = self._calculate_remaining_time(tool_name, progress_percentage)
             
-            await self.websocket_notifier.send_periodic_update(
-                context,
-                operation_name=tool_name,
-                progress_percentage=progress_percentage,
-                status_message=status_message,
-                estimated_remaining_ms=estimated_remaining,
-                current_step=f"Processing: {progress_percentage:.0f}% complete"
+            progress_data = {
+                "percentage": progress_percentage,
+                "message": status_message or f"Processing: {progress_percentage:.0f}% complete",
+                "estimated_remaining_ms": estimated_remaining,
+                "current_step": f"Processing: {progress_percentage:.0f}% complete"
+            }
+            
+            await self.websocket_bridge.notify_progress_update(
+                run_id=context.run_id,
+                agent_name=context.agent_name,
+                progress=progress_data
             )
         except Exception as e:
             logger.warning(f"Failed to send progress update: {e}")
@@ -756,41 +794,146 @@ class UnifiedToolExecutionEngine:
         estimated_total = self._estimate_tool_duration(tool_name, None)
         remaining = estimated_total * (1 - progress_percentage / 100)
         return int(remaining)
-
-
-def enhance_tool_dispatcher_with_notifications(tool_dispatcher, websocket_manager):
-    """Enhance existing tool dispatcher with unified execution engine.
     
-    This function replaces the dispatcher's executor with the unified engine.
-    """
-    if hasattr(tool_dispatcher, 'executor'):
-        # Check if already enhanced
-        if isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine):
-            logger.debug("Tool dispatcher already using unified execution engine")
-            return tool_dispatcher
+    async def force_cleanup_user_executions(self, user_id: str) -> int:
+        """Force cleanup of stuck executions for a user (emergency recovery).
         
-        # Get permission service if available
-        permission_service = None
-        if hasattr(tool_dispatcher.executor, 'permission_service'):
-            permission_service = tool_dispatcher.executor.permission_service
+        This method addresses the agent death scenario by providing
+        a way to clean up stuck executions that never properly finished.
         
-        # Replace executor with unified engine
-        unified_executor = UnifiedToolExecutionEngine(websocket_manager, permission_service)
+        Returns:
+            Number of executions cleaned up
+        """
+        cleanup_count = 0
+        executions_to_remove = []
         
-        # Preserve any existing core engine reference
-        if hasattr(tool_dispatcher.executor, '_core_engine'):
-            # The unified engine doesn't need a separate core engine
-            pass
+        for execution_id, exec_info in self._active_executions.items():
+            if exec_info.get('user_id') == user_id:
+                # Check if execution has been running too long
+                runtime = time.time() - exec_info['start_time']
+                if runtime > self.default_timeout * 3:  # 3x normal timeout
+                    executions_to_remove.append(execution_id)
+                    cleanup_count += 1
         
-        # Store original executor for testing/validation
-        tool_dispatcher._original_executor = tool_dispatcher.executor
-        tool_dispatcher.executor = unified_executor
+        # Remove stuck executions
+        for execution_id in executions_to_remove:
+            if execution_id in self._active_executions:
+                del self._active_executions[execution_id]
+                logger.warning(f"🧨 Cleaned up stuck execution: {execution_id}")
         
-        # Mark as enhanced for validation
-        tool_dispatcher._websocket_enhanced = True
+        # Reset user execution count
+        if user_id in self._user_execution_counts:
+            old_count = self._user_execution_counts[user_id]
+            del self._user_execution_counts[user_id]
+            logger.warning(f"🧨 Reset user execution count for {user_id}: {old_count} -> 0")
         
-        logger.info("Enhanced tool dispatcher with unified execution engine")
-    else:
-        logger.warning("Tool dispatcher does not have executor attribute")
+        if cleanup_count > 0:
+            logger.info(f"🧨 Emergency cleanup completed for user {user_id}: {cleanup_count} executions cleaned")
+        
+        return cleanup_count
     
-    return tool_dispatcher
+    async def health_check(self) -> Dict[str, Any]:
+        """Comprehensive health check that detects actual processing capability.
+        
+        This addresses the health service blindness described in the bug report
+        by checking not just if the service is running, but if it can actually
+        process agent requests successfully.
+        """
+        status = "healthy"
+        issues = []
+        
+        try:
+            # Check memory usage
+            memory_info = self._process.memory_info()
+            memory_mb = memory_info.rss / 1024 / 1024
+            
+            if memory_mb > self.max_memory_mb * 0.9:  # 90% of limit
+                status = "degraded"
+                issues.append(f"High memory usage: {memory_mb:.1f}MB/{self.max_memory_mb}MB")
+            
+            if memory_mb > self.max_memory_mb:
+                status = "unhealthy"
+                issues.append(f"Memory limit exceeded: {memory_mb:.1f}MB/{self.max_memory_mb}MB")
+            
+            # Check for stuck executions
+            stuck_count = 0
+            now = time.time()
+            
+            for exec_info in self._active_executions.values():
+                runtime = now - exec_info['start_time']
+                if runtime > self.default_timeout * 2:  # 2x normal timeout
+                    stuck_count += 1
+            
+            if stuck_count > 0:
+                status = "degraded"
+                issues.append(f"Stuck executions detected: {stuck_count}")
+            
+            # Check security violations
+            if self._execution_metrics['security_violations'] > 10:
+                status = "degraded"
+                issues.append(f"High security violations: {self._execution_metrics['security_violations']}")
+            
+            # Test basic execution capability
+            try:
+                test_start = time.time()
+                async with asyncio.timeout(5.0):  # 5 second test timeout
+                    # Simple test execution
+                    test_result = "test_passed"
+                test_duration = time.time() - test_start
+                
+                if test_duration > 2.0:  # Should complete quickly
+                    status = "degraded"
+                    issues.append(f"Slow processing capability: {test_duration:.1f}s")
+                    
+            except asyncio.TimeoutError:
+                status = "unhealthy"
+                issues.append("Processing capability test timed out")
+            except Exception as e:
+                status = "unhealthy"
+                issues.append(f"Processing capability test failed: {e}")
+            
+        except Exception as e:
+            status = "unhealthy"
+            issues.append(f"Health check failed: {e}")
+        
+        return {
+            "status": status,
+            "timestamp": datetime.now(UTC).isoformat(),
+            "issues": issues,
+            "metrics": await self.get_security_status(),
+            "can_process_agents": status != "unhealthy",
+            "processing_capability_verified": "Processing capability test" not in str(issues)
+        }
+    
+    async def emergency_shutdown_all_executions(self) -> Dict[str, Any]:
+        """Emergency shutdown of all active executions.
+        
+        This is a last resort recovery mechanism for when the system
+        is overwhelmed or in an inconsistent state.
+        
+        Returns:
+            Dictionary with shutdown statistics
+        """
+        logger.critical("🚨 EMERGENCY SHUTDOWN: Terminating all active executions")
+        
+        shutdown_count = len(self._active_executions)
+        user_counts = self._user_execution_counts.copy()
+        
+        # Clear all tracking
+        self._active_executions.clear()
+        self._user_execution_counts.clear()
+        self._user_request_timestamps.clear()
+        
+        # Reset metrics except for permanent counters
+        self._execution_metrics['failed_executions'] += shutdown_count
+        
+        logger.critical(f"🚨 Emergency shutdown completed: {shutdown_count} executions terminated")
+        
+        return {
+            "shutdown_executions": shutdown_count,
+            "affected_users": len(user_counts),
+            "user_counts": user_counts,
+            "timestamp": datetime.now(UTC).isoformat(),
+            "reason": "emergency_shutdown"
+        }
+

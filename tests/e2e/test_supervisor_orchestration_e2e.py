@@ -79,7 +79,9 @@ async def db_session(test_database):
 @pytest.fixture
 def llm_manager():
     """Create LLM manager (real or mock based on environment)."""
-    use_real_llm = os.getenv("USE_REAL_LLM", "false").lower() == "true"
+    from shared.isolated_environment import get_env
+    env = get_env()
+    use_real_llm = env.get("USE_REAL_LLM", "false").lower() == "true"
     
     if use_real_llm:
         # Use real LLM for true E2E testing

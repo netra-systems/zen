@@ -58,7 +58,7 @@ class RealLLMTestManager:
     
     def get_llm_timeout(self) -> int:
         """Get LLM timeout in seconds for tests."""
-        return int(os.getenv("TEST_LLM_TIMEOUT", "60"))
+        return int(get_env().get("TEST_LLM_TIMEOUT", "60"))
     
     def validate_cost_limits(self, tokens_used: int) -> bool:
         """Validate token usage within cost limits."""

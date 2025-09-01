@@ -91,11 +91,11 @@ export const mockThread2Messages: MockMessage[] = [
   }
 ];
 
-// Authentication setup helper
+import { setupAuthenticatedState } from '../support/auth-helpers';
+
+// Authentication setup helper - uses unified auth helper
 export function setupAuth(): void {
-  cy.window().then((win) => {
-    win.localStorage.setItem('jwt_token', 'test-jwt-token');
-  });
+  setupAuthenticatedState();
 }
 
 // Thread API mocks setup

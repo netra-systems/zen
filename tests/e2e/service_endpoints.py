@@ -13,9 +13,9 @@ BVJ:
 - Strategic Impact: Enables consistent cross-environment testing
 """
 
-import os
 from dataclasses import dataclass
 from typing import Optional
+from shared.isolated_environment import get_env
 
 # Import dynamic port manager for environment-aware configuration
 try:
@@ -82,10 +82,10 @@ def get_service_endpoints(environment: str = "local") -> ServiceEndpoints:
         )
     else:  # local development
         return ServiceEndpoints(
-            auth_service_url=env.get("AUTH_SERVICE_URL", "http://localhost:8081"),
-            backend_service_url=env.get("BACKEND_SERVICE_URL", "http://localhost:8000"),
-            frontend_service_url=env.get("FRONTEND_SERVICE_URL", "http://localhost:3000"),
-            websocket_url=env.get("WEBSOCKET_URL", "ws://localhost:8000/ws")
+            auth_service_url=get_env().get("AUTH_SERVICE_URL", "http://localhost:8081"),
+            backend_service_url=get_env().get("BACKEND_SERVICE_URL", "http://localhost:8000"),
+            frontend_service_url=get_env().get("FRONTEND_SERVICE_URL", "http://localhost:3000"),
+            websocket_url=get_env().get("WEBSOCKET_URL", "ws://localhost:8000/ws")
         )
 
 

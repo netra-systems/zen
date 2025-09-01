@@ -1,6 +1,5 @@
 from shared.isolated_environment import get_env
 """
-env = get_env()
 Real Agent Pipeline Execution Flow Test - E2E Critical Test
 
 CRITICAL E2E Test: Real Agent Pipeline from WebSocket Message to Agent Response
@@ -50,23 +49,23 @@ def _validate_real_service_requirements():
     
     # Check for real LLM capability
     if not any([
-        env.get("OPENAI_API_KEY"),
-        env.get("ANTHROPIC_API_KEY"), 
-        env.get("GEMINI_API_KEY"),
-        env.get("GOOGLE_API_KEY")
+        get_env().get("OPENAI_API_KEY"),
+        get_env().get("ANTHROPIC_API_KEY"), 
+        get_env().get("GEMINI_API_KEY"),
+        get_env().get("GOOGLE_API_KEY")
     ]):
         missing_deps.append("LLM API keys (OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY, or GOOGLE_API_KEY)")
     
     # Ensure real LLM is enabled
-    if env.get("USE_REAL_LLM", "false").lower() != "true":
-        env.set("USE_REAL_LLM", "true", "test")
-        env.set("TEST_USE_REAL_LLM", "true", "test")
+    if get_env().get("USE_REAL_LLM", "false").lower() != "true":
+        get_env().set("USE_REAL_LLM", "true")
+        get_env().set("TEST_USE_REAL_LLM", "true")
     
     # Set the JWT secret for backend compatibility
-    env.set("JWT_SECRET_KEY", "rsWwwvq8X6mCSuNv-TMXHDCfb96Xc-Dbay9MZy6EDCU", "test")
+    get_env().set("JWT_SECRET_KEY", "rsWwwvq8X6mCSuNv-TMXHDCfb96Xc-Dbay9MZy6EDCU")
     
     # Check critical environment variables
-    if not env.get("JWT_SECRET_KEY"):
+    if not get_env().get("JWT_SECRET_KEY"):
         missing_deps.append("JWT_SECRET_KEY for authentication")
     
     if missing_deps:

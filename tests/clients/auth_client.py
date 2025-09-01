@@ -23,13 +23,14 @@ class AuthTestClient:
         self.client = httpx.AsyncClient(base_url=base_url, timeout=10.0)
         
     async def register(self, email: str, password: str, 
-                      full_name: str = "Test User") -> Dict[str, Any]:
+                      first_name: str = "Test", last_name: str = "User") -> Dict[str, Any]:
         """Register a new user.
         
         Args:
             email: User email
             password: User password
-            full_name: User's full name
+            first_name: User's first name
+            last_name: User's last name
             
         Returns:
             User registration response
@@ -40,7 +41,8 @@ class AuthTestClient:
                 "email": email,
                 "password": password,
                 "confirm_password": password,
-                "full_name": full_name
+                "first_name": first_name,
+                "last_name": last_name
             }
         )
         response.raise_for_status()

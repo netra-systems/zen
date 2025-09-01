@@ -1,5 +1,6 @@
 """Auth Service Health Check Integration Test Suite
 
+from shared.isolated_environment import get_env
 BVJ: Protects $145K+ MRR by ensuring auth service availability across all customer segments.
 # Tests health endpoints, lazy DB initialization, recovery scenarios, and performance under load. # Possibly broken comprehension
 Architecture: <300 lines, async/await pattern, comprehensive AAA testing.
@@ -42,7 +43,7 @@ class AuthHealthChecker:
         """Initialize health checker with auth service URL."""
         if base_url is None:
             # Try to get from environment, fallback to default
-            auth_url = os.getenv("AUTH_SERVICE_URL", "http://localhost:8080")
+            auth_url = get_env().get("AUTH_SERVICE_URL", "http://localhost:8080")
             # Ensure URL has protocol
             if not auth_url.startswith(("http://", "https://")):
                 auth_url = f"http://{auth_url}"

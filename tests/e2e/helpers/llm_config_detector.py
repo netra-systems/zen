@@ -1,6 +1,7 @@
 from shared.isolated_environment import get_env
 """LLM Configuration Detection Helper
 
+from shared.isolated_environment import get_env
 Detects whether tests should use real LLM services or mock configurations.
 Provides utilities for E2E tests to adapt to different environments.
 
@@ -26,18 +27,18 @@ class LLMConfigDetector:
             return self._real_llm_detected
             
         # Check environment variables
-        use_real_llm = env.get("USE_REAL_LLM", "false").lower()
+        use_real_llm = get_env().get("USE_REAL_LLM", "false").lower()
         if use_real_llm in ["true", "1", "yes"]:
             self._real_llm_detected = True
             return True
             
         # Check pytest markers/flags
-        if env.get("PYTEST_REAL_LLM", "false").lower() in ["true", "1"]:
+        if get_env().get("PYTEST_REAL_LLM", "false").lower() in ["true", "1"]:
             self._real_llm_detected = True
             return True
             
         # Check if running in staging/production environment
-        env_name = env.get("ENVIRONMENT", "dev").lower()
+        env_name = get_env().get("ENVIRONMENT", "dev").lower()
         if env_name in ["staging", "prod", "production"]:
             self._real_llm_detected = True
             return True
@@ -71,11 +72,11 @@ class LLMConfigDetector:
     def _has_real_llm_keys(self) -> bool:
         """Check if real LLM API keys are available."""
         # Check for OpenAI API key
-        if env.get("GOOGLE_API_KEY"):
+        if get_env().get("GOOGLE_API_KEY"):
             return True
             
         # Check for Anthropic API key
-        if env.get("ANTHROPIC_API_KEY"):
+        if get_env().get("ANTHROPIC_API_KEY"):
             return True
             
         # Check for other LLM provider keys
@@ -86,7 +87,7 @@ class LLMConfigDetector:
             "MISTRAL_API_KEY"
         ]
         
-        return any(env.get(key) for key in llm_keys)
+        return any(get_env().get(key) for key in llm_keys)
     
     def get_test_timeout(self, base_timeout: float) -> float:
         """Get adjusted timeout based on LLM configuration."""

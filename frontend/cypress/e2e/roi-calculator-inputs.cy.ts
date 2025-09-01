@@ -5,9 +5,41 @@ import { ROICalculatorHelpers, TestData } from '../support/roi-calculator-helper
 // ROI Calculator Input Validation Tests
 // BVJ: Enterprise segment - validates input accuracy for decision maker confidence  
 // Updated for current SUT: 5 simple inputs (spend, requests, team size, latency, accuracy)
+// Updated for current system: WebSocket events, /api/agents/execute, auth endpoints
 
 describe('ROI Calculator Input Validation Tests', () => {
   beforeEach(() => {
+    // Set up current authentication system
+    cy.window().then((win) => {
+      win.localStorage.setItem('jwt_token', 'test-jwt-roi-calculator');
+      win.localStorage.setItem('refresh_token', 'test-refresh-roi-calculator');
+      win.localStorage.setItem('user', JSON.stringify({
+        id: 'test-user-roi',
+        email: 'test@netrasystems.ai',
+        name: 'Test User'
+      }));
+    });
+    
+    // Mock current authentication endpoints
+    cy.intercept('GET', '/auth/config', {
+      statusCode: 200,
+      body: {
+        oauth_enabled: false,
+        password_auth_enabled: true,
+        registration_enabled: true,
+        demo_mode: false
+      }
+    }).as('authConfig');
+    
+    cy.intercept('GET', '/auth/me', {
+      statusCode: 200,
+      body: {
+        id: 'test-user-roi',
+        email: 'test@netrasystems.ai',
+        name: 'Test User'
+      }
+    }).as('authMe');
+    
     ROICalculatorHelpers.navigateToCalculator()
   })
 
@@ -132,7 +164,15 @@ describe('ROI Calculator Input Validation Tests', () => {
     })
 
     it('should handle basic API errors', () => {
-      cy.intercept('POST', '/api/demo/roi', { statusCode: 500 }).as('roiError')
+      // Mock current agent execution endpoint for ROI calculation
+      cy.intercept('POST', '/api/agents/execute', {
+        statusCode: 500,
+        body: { error: 'ROI calculation agent failed' }
+      }).as('roiAgentError')
+      
+      // Mock WebSocket errors
+      cy.intercept('/ws*', { statusCode: 500 }).as('wsError')
+      
       cy.contains('button', 'Calculate ROI').click()
       cy.wait(3000)
       // Should not crash the interface
@@ -163,6 +203,23 @@ describe('ROI Calculator Input Validation Tests', () => {
     })
 
     it('should enable calculation with valid inputs', () => {
+      // Mock successful agent execution for ROI calculation
+      cy.intercept('POST', '/api/agents/execute', {
+        statusCode: 200,
+        body: {
+          agent_id: 'roi-calculator-agent',
+          status: 'started',
+          run_id: 'roi-calc-run',
+          agent_type: 'ROICalculatorAgent'
+        }
+      }).as('roiAgentExecute')
+      
+      // Mock WebSocket connection for real-time updates
+      cy.intercept('/ws*', {
+        statusCode: 101,
+        headers: { 'upgrade': 'websocket' }
+      }).as('wsConnection')
+      
       cy.get('input[id="spend"]').clear().type('50000')
       cy.get('input[id="requests"]').clear().type('10000000')
       
@@ -185,6 +242,58 @@ describe('ROI Calculator Input Validation Tests', () => {
     })
 
     it('should validate input combinations work together', () => {
+      // Mock WebSocket events for ROI calculation process
+      cy.window().then((win) => {
+        const store = (win as any).useUnifiedChatStore?.getState();
+        if (store && store.handleWebSocketEvent) {
+          setTimeout(() => {
+            const roiEvents = [
+              {
+                type: 'agent_started',
+                payload: {
+                  agent_id: 'roi-calc-agent',
+                  agent_type: 'ROICalculatorAgent'
+                }
+              },
+              {
+                type: 'tool_executing',
+                payload: {
+                  tool_name: 'roi_calculator',
+                  agent_id: 'roi-calc-agent'
+                }
+              },
+              {
+                type: 'agent_thinking',
+                payload: {
+                  thought: 'Calculating ROI based on provided inputs...',
+                  agent_id: 'roi-calc-agent'
+                }
+              },
+              {
+                type: 'tool_completed',
+                payload: {
+                  result: { roi: 250, monthly_savings: 12500 },
+                  agent_id: 'roi-calc-agent'
+                }
+              },
+              {
+                type: 'agent_completed',
+                payload: {
+                  agent_id: 'roi-calc-agent',
+                  result: { status: 'success' }
+                }
+              }
+            ];
+            
+            roiEvents.forEach((event, index) => {
+              setTimeout(() => {
+                store.handleWebSocketEvent(event);
+              }, index * 300);
+            });
+          }, 500);
+        }
+      });
+      
       cy.get('input[id="spend"]').clear().type('25000')
       cy.get('input[id="requests"]').clear().type('5000000')
       cy.get('input[id="team"]').invoke('val', 3).trigger('input')

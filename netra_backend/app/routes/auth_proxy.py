@@ -43,34 +43,86 @@ async def _delegate_to_auth_service(
     request_data: Any = None,
     headers: Dict[str, str] = None
 ) -> Dict[str, Any]:
-    """Delegate request to auth service using auth client."""
+    """Delegate request to auth service using auth client with enhanced error handling."""
+    from netra_backend.app.routes.auth_routes.debug_helpers import (
+        enhanced_auth_service_call,
+        AuthServiceDebugger
+    )
+    
     try:
         if endpoint == "/register":
             # Use auth client's registration method if available, otherwise use HTTP client
-            return await _http_proxy_to_auth_service(endpoint, method, request_data, headers)
+            return await enhanced_auth_service_call(
+                _http_proxy_to_auth_service, endpoint, method, request_data, headers,
+                operation_name="user_registration"
+            )
         elif endpoint == "/login":
             if isinstance(request_data, dict):
                 email = request_data.get("email", "")
                 password = request_data.get("password", "")
-                result = await auth_client.login(email, password)
-                if result:
-                    # Convert result to expected format
-                    return {
-                        "access_token": result.get("access_token", ""),
-                        "refresh_token": result.get("refresh_token", ""),
-                        "token_type": result.get("token_type", "Bearer"),
-                        "expires_in": result.get("expires_in", 900),
-                        "user": {
-                            "id": result.get("user_id", ""),
-                            "email": email,
-                            "name": result.get("name", email.split("@")[0])
+                
+                # Enhanced login with debugging
+                async def enhanced_login():
+                    debugger = AuthServiceDebugger()
+                    
+                    # Log debug info before attempting login
+                    debug_info = debugger.log_environment_debug_info()
+                    logger.info(f"Attempting login for user: {email}")
+                    
+                    # Test connectivity first
+                    connectivity = await debugger.test_auth_service_connectivity()
+                    if connectivity["connectivity_test"] == "failed":
+                        logger.error("Auth service connectivity test failed before login attempt")
+                        logger.error(f"Connectivity details: {connectivity}")
+                        
+                        # Provide specific error based on connectivity issue
+                        if connectivity["error"]:
+                            error_detail = f"Auth service unreachable: {connectivity['error']}"
+                        else:
+                            error_detail = f"Auth service at {connectivity['auth_service_url']} is not responding"
+                        
+                        raise HTTPException(
+                            status_code=503,
+                            detail=error_detail
+                        )
+                    
+                    # Attempt the login
+                    result = await auth_client.login(email, password)
+                    
+                    if result:
+                        logger.info(f"Login successful for user: {email}")
+                        # Convert result to expected format
+                        return {
+                            "access_token": result.get("access_token", ""),
+                            "refresh_token": result.get("refresh_token", ""),
+                            "token_type": result.get("token_type", "Bearer"),
+                            "expires_in": result.get("expires_in", 900),
+                            "user": {
+                                "id": result.get("user_id", ""),
+                                "email": email,
+                                "name": result.get("name", email.split("@")[0])
+                            }
                         }
-                    }
-                else:
-                    raise HTTPException(status_code=401, detail="Login failed")
+                    else:
+                        logger.warning(f"Login failed for user: {email} - auth client returned None")
+                        
+                        # Debug the failure
+                        debug_result = await debugger.debug_login_attempt(email, password)
+                        logger.error(f"Login failure debug: {debug_result}")
+                        
+                        raise HTTPException(
+                            status_code=401, 
+                            detail="Login failed - invalid credentials or service unavailable"
+                        )
+                
+                return await enhanced_login()
+                
         elif endpoint == "/dev/login":
             # Dev login still needs to go through auth service
-            return await _http_proxy_to_auth_service(endpoint, method, request_data, headers)
+            return await enhanced_auth_service_call(
+                _http_proxy_to_auth_service, endpoint, method, request_data, headers,
+                operation_name="dev_login"
+            )
         elif endpoint == "/logout":
             # Extract token from headers
             token = None
@@ -80,19 +132,31 @@ async def _delegate_to_auth_service(
                     token = auth_header[7:]  # Remove "Bearer " prefix
             
             if token:
-                success = await auth_client.logout(token)
-                return {"success": success, "message": "Logged out successfully" if success else "Logout failed"}
+                async def enhanced_logout():
+                    success = await auth_client.logout(token)
+                    return {"success": success, "message": "Logged out successfully" if success else "Logout failed"}
+                    
+                return await enhanced_auth_service_call(
+                    enhanced_logout,
+                    operation_name="user_logout"
+                )
             else:
                 raise HTTPException(status_code=401, detail="No token provided")
         else:
             # For other endpoints, use HTTP proxy
-            return await _http_proxy_to_auth_service(endpoint, method, request_data, headers)
+            return await enhanced_auth_service_call(
+                _http_proxy_to_auth_service, endpoint, method, request_data, headers,
+                operation_name=f"auth_{endpoint.replace('/', '_')}"
+            )
             
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Auth delegation failed for {endpoint}: {e}")
-        raise HTTPException(status_code=500, detail=f"Authentication service error: {str(e)}")
+        
+        # Use enhanced error response
+        from netra_backend.app.routes.auth_routes.debug_helpers import create_enhanced_auth_error_response
+        raise create_enhanced_auth_error_response(e)
 
 
 async def _http_proxy_to_auth_service(
@@ -102,42 +166,109 @@ async def _http_proxy_to_auth_service(
     headers: Dict[str, str] = None
 ) -> Dict[str, Any]:
     """HTTP proxy to auth service - fallback for endpoints not handled by auth client."""
-    auth_url = _get_auth_service_url()
+    from netra_backend.app.routes.auth_routes.debug_helpers import AuthServiceDebugger
+    
+    debugger = AuthServiceDebugger()
+    auth_url = debugger.get_auth_service_url()
     url = f"{auth_url}/auth{endpoint}"
     
+    # Log the proxy attempt
+    logger.info(f"Proxying {method} request to: {url}")
+    
     try:
+        # Add service credentials to headers if available
+        service_id, service_secret = debugger.get_service_credentials()
+        request_headers = headers or {}
+        
+        if service_id and service_secret:
+            request_headers.update({
+                "X-Service-ID": service_id,
+                "X-Service-Secret": service_secret
+            })
+            logger.info("Added service authentication headers to proxy request")
+        else:
+            logger.warning("No service credentials available for proxy request")
+        
         async with httpx.AsyncClient(timeout=30.0) as client:
-            request_headers = headers or {}
-            
             if method == "POST":
+                logger.debug(f"POST data: {request_data}")
                 response = await client.post(url, json=request_data, headers=request_headers)
             elif method == "GET":
                 response = await client.get(url, headers=request_headers)
             else:
                 raise HTTPException(status_code=405, detail=f"Method {method} not supported")
             
+            logger.info(f"Auth service response: {response.status_code}")
+            
             if response.status_code in [200, 201]:
-                return response.json()
+                try:
+                    response_data = response.json()
+                    logger.info("Successfully parsed JSON response from auth service")
+                    return response_data
+                except Exception as e:
+                    logger.error(f"Failed to parse auth service response as JSON: {e}")
+                    logger.error(f"Response text: {response.text}")
+                    raise HTTPException(
+                        status_code=502,
+                        detail="Auth service returned invalid response format"
+                    )
             else:
                 logger.error(f"Auth service error: {response.status_code} - {response.text}")
+                
+                # Provide more specific error messages based on status code
+                if response.status_code == 401:
+                    error_detail = "Authentication failed - invalid credentials"
+                elif response.status_code == 403:
+                    error_detail = "Access forbidden - service authentication may be invalid"
+                elif response.status_code == 404:
+                    error_detail = f"Auth service endpoint not found: {endpoint}"
+                elif response.status_code >= 500:
+                    error_detail = "Auth service internal error"
+                else:
+                    error_detail = response.text or "Auth service error"
+                
                 raise HTTPException(
                     status_code=response.status_code,
-                    detail=response.text or "Auth service error"
+                    detail=error_detail
                 )
                 
+    except httpx.ConnectTimeout:
+        logger.error(f"Connection timeout to auth service at: {auth_url}")
+        raise HTTPException(
+            status_code=503,
+            detail=f"Auth service connection timeout at {auth_url}"
+        )
+    except httpx.ReadTimeout:
+        logger.error(f"Read timeout from auth service at: {auth_url}")
+        raise HTTPException(
+            status_code=503,
+            detail="Auth service response timeout"
+        )
     except httpx.RequestError as e:
         logger.error(f"Auth service connection failed: {e}")
+        logger.error(f"Auth service URL: {auth_url}")
+        
+        # Test connectivity to provide better error messages
+        connectivity = await debugger.test_auth_service_connectivity()
+        logger.error(f"Connectivity test result: {connectivity}")
+        
         # SECURITY: Never fall back to mock responses in non-test environments
         if _is_test_mode():
             logger.warning("Auth service unavailable in test mode - this should not happen in production")
             raise HTTPException(
                 status_code=503,
-                detail="Auth service unavailable"
+                detail="Auth service unavailable in test mode"
             )
         else:
+            # Provide specific error based on connectivity test
+            if "connection" in str(e).lower() or "timeout" in str(e).lower():
+                error_detail = f"Cannot connect to auth service at {auth_url}"
+            else:
+                error_detail = f"Auth service communication error: {str(e)}"
+                
             raise HTTPException(
                 status_code=503,
-                detail="Auth service unavailable"
+                detail=error_detail
             )
 
 

@@ -2,15 +2,15 @@
 // Module: Utility functions for roadmap functionality
 // Max 300 lines, all functions ≤8 lines
 
-import { ExportData, ExportFormat } from './roadmap-types'
+import { ExportData, ExportFormat, Phase, SupportOption, RiskMitigation } from './roadmap-types'
 
 // Create export data (≤8 lines)
 export const createExportData = (
   industry: string,
   completedSteps: string[],
-  phases: any[],
-  supportOptions: any[],
-  riskMitigations: any[]
+  phases: Phase[],
+  supportOptions: SupportOption[],
+  riskMitigations: RiskMitigation[]
 ): ExportData => {
   return {
     industry,

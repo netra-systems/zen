@@ -1,4 +1,5 @@
 """Core Staging Startup Validation Tests
+from shared.isolated_environment import get_env
 
 Business Value Justification (BVJ):
 - Segment: Enterprise/Platform - All customer tiers  
@@ -55,7 +56,7 @@ class TestStagingEnvironmentCore:
             CredentialConstants.GOOGLE_CLIENT_ID, CredentialConstants.GEMINI_API_KEY
         ]
         
-        missing_vars = [var for var in required_vars if not os.getenv(var)]
+        missing_vars = [var for var in required_vars if not get_env().get(var)]
         assert len(missing_vars) == 0, f"Missing critical variables: {missing_vars}"
     
     @pytest.mark.e2e
@@ -80,8 +81,8 @@ class TestStagingSecurityValidation:
     @pytest.mark.e2e
     async def test_jwt_security_configuration(self):
         """Test JWT configuration meets security requirements."""
-        jwt_secret = os.getenv(JWTConstants.JWT_SECRET_KEY)
-        fernet_key = os.getenv(JWTConstants.FERNET_KEY)
+        jwt_secret = get_env().get(JWTConstants.JWT_SECRET_KEY)
+        fernet_key = get_env().get(JWTConstants.FERNET_KEY)
         
         assert jwt_secret is not None
         assert len(jwt_secret) >= 32
@@ -94,8 +95,8 @@ class TestStagingSecurityValidation:
     @pytest.mark.e2e
     async def test_oauth_configuration_security(self):
         """Test OAuth configuration is properly secured for staging."""
-        client_id = os.getenv(CredentialConstants.GOOGLE_CLIENT_ID)
-        client_secret = os.getenv(CredentialConstants.GOOGLE_CLIENT_SECRET)
+        client_id = get_env().get(CredentialConstants.GOOGLE_CLIENT_ID)
+        client_secret = get_env().get(CredentialConstants.GOOGLE_CLIENT_SECRET)
         
         assert client_id is not None
         assert client_secret is not None

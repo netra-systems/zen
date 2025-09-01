@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 Dev launcher test fixtures and utilities for startup testing.
 
 Provides fixtures for managing dev launcher lifecycle, capturing logs,
@@ -78,15 +79,15 @@ class TestEnvironmentManager:
     def _set_temp_env(self, key: str, value: str) -> None:
         """Set temporary environment variable."""
         if key not in self._temp_env_vars:
-            self._temp_env_vars[key] = os.getenv(key, "")
-        os.environ[key] = value
+            self._temp_env_vars[key] = get_env().get(key, "")
+        get_env().get(key) = value
     
     def cleanup(self) -> None:
         """Cleanup test environment."""
         # Restore original environment variables
         for key, original_value in self._temp_env_vars.items():
             if original_value:
-                os.environ[key] = original_value
+                get_env().get(key) = original_value
             else:
                 os.environ.pop(key, None)
         self._temp_env_vars.clear()

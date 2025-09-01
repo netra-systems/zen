@@ -1,7 +1,6 @@
 from shared.isolated_environment import get_env
-"""Real-time Streaming with Auth Validation Tests - P1 HIGH Priority
 
-env = get_env()
+"""Real-time Streaming with Auth Validation Tests - P1 HIGH Priority
 Test #10 from CRITICAL_INTEGRATION_TEST_PLAN.md
 
 Business Value Justification (BVJ):
@@ -34,9 +33,11 @@ from typing import Any, Dict, List, Optional
 import jwt
 import pytest
 
-env.set("TESTING", "1", "test") 
-env.set("ENVIRONMENT", "test", "test")
-env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
+# Test environment setup
+env_vars = get_env()
+env_vars.set("TESTING", "1", "test") 
+env_vars.set("ENVIRONMENT", "test", "test")
+env_vars.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
 
 from tests.e2e.config import TEST_CONFIG, setup_test_environment
 from tests.e2e.harness_utils import UnifiedTestHarnessComplete
@@ -49,11 +50,11 @@ class StreamingAuthManager:
         self.auth_checks: List[Dict] = []
         self.rate_limits: Dict[str, List[float]] = {}
         self.resource_usage: Dict[str, int] = {"memory": 0, "connections": 0}
-        self.harness = UnifiedE2ETestHarness()
-#         self.test_mode = True  # Enable test mode for reliable testing # Possibly broken comprehension
+        self.harness = UnifiedTestHarnessComplete()
+        self.test_mode = True  # Enable test mode for reliable testing
         
     def create_valid_token(self, user_id: str, exp_minutes: int = 60) -> str:
-#         """Create valid JWT token for testing.""" # Possibly broken comprehension
+        """Create valid JWT token for testing."""
         exp_time = datetime.now(timezone.utc) + timedelta(minutes=exp_minutes)
         iat_time = datetime.now(timezone.utc)
         
@@ -67,12 +68,8 @@ class StreamingAuthManager:
         return jwt.encode(payload, TEST_CONFIG.secrets.jwt_secret, algorithm="HS256")
         
 
-@pytest.mark.e2e
-class TestSyntaxFix:
-    """Generated test class"""
-
     def create_expired_token(self, user_id: str) -> str:
-#         """Create expired token for testing.""" # Possibly broken comprehension
+        """Create expired token for testing."""
         exp_time = datetime.now(timezone.utc) - timedelta(hours=1)
         iat_time = datetime.now(timezone.utc) - timedelta(hours=2)
         
@@ -118,10 +115,6 @@ class TestSyntaxFix:
         return validation_result
         
 
-@pytest.mark.e2e
-class TestSyntaxFix:
-    """Generated test class"""
-
     def check_rate_limit(self, user_id: str, max_per_second: int = 10) -> bool:
         """Check if user is within rate limits."""
         if self.test_mode and user_id.startswith("no_limit_"):
@@ -145,12 +138,8 @@ class TestSyntaxFix:
         return True
         
 
-@pytest.mark.e2e
-class TestSyntaxFix:
-    """Generated test class"""
-
     def track_resource_usage(self, operation: str, delta: int = 1) -> Dict[str, int]:
-#         """Track resource usage for streaming operations.""" # Possibly broken comprehension
+        """Track resource usage for streaming operations."""
         if operation in self.resource_usage:
             self.resource_usage[operation] += delta
         else:
@@ -160,7 +149,7 @@ class TestSyntaxFix:
     async def start_authenticated_stream(self, user_id: str, token: str, 
                                        stream_type: str = "agent_response") -> Dict:
         """Start authenticated streaming session."""
-#         # Validate token before starting stream # Possibly broken comprehension
+        # Validate token before starting stream
         auth_result = await self.validate_token_periodically(token, user_id)
         if not auth_result["token_valid"]:
             return {
@@ -190,7 +179,7 @@ class TestSyntaxFix:
         return {"stream_started": True, "stream_id": stream_id, "stream_info": stream_info}
 
 class AuthenticatedWebSocketStreamer:
-    # """Handles authenticated WebSocket streaming with comprehensive validation."""
+    """Handles authenticated WebSocket streaming with comprehensive validation."""
     
     def __init__(self, auth_manager: StreamingAuthManager):
         self.auth_manager = auth_manager
@@ -326,10 +315,9 @@ def websocket_streamer(auth_manager):
     """WebSocket streamer fixture."""
     return AuthenticatedWebSocketStreamer(auth_manager)
 
-@pytest.mark.e2e
+@pytest.mark.e2e 
 class TestStreamingWithAuthValidation:
-    # """Test real-time streaming with comprehensive auth validation."""
-    pass
+    """Test real-time streaming with comprehensive auth validation."""
     
     # @pytest.mark.asyncio
     # async def test_successful_streaming_with_valid_token(, self, auth_manager, websocket_streamer):

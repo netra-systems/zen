@@ -1,6 +1,5 @@
 from shared.isolated_environment import get_env
 """
-env = get_env()
 Critical Cold Start System Initialization Tests.
 
 This test suite validates the most difficult cold start scenarios that cause
@@ -45,22 +44,21 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Override test environment DATABASE_URL to use real database
-if os.getenv('DATABASE_URL') == 'sqlite+aiosqlite:///:memory:':
+if get_env().get('DATABASE_URL') == 'sqlite+aiosqlite:///:memory:':
     env_file_path = Path('.env')
     if env_file_path.exists():
         with open(env_file_path) as f:
             for line in f:
                 if line.startswith('DATABASE_URL='):
                     real_database_url = line.split('=', 1)[1].strip()
-                    env.set('DATABASE_URL', real_database_url, "test")
                     break
 
 class Settings:
     def __init__(self):
-        self.DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql+asyncpg://postgres:DTprdt5KoQXlEG4Gh9lF@localhost:5433/netra_dev')
-        self.REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/1')
-        self.CLICKHOUSE_HOST = os.getenv('CLICKHOUSE_HOST', 'localhost')
-        self.CLICKHOUSE_PORT = int(os.getenv('CLICKHOUSE_PORT', '8123'))
+        self.DATABASE_URL = get_env().get('DATABASE_URL', 'postgresql+asyncpg://postgres:DTprdt5KoQXlEG4Gh9lF@localhost:5433/netra_dev')
+        self.REDIS_URL = get_env().get('REDIS_URL', 'redis://localhost:6379/1')
+        self.CLICKHOUSE_HOST = get_env().get('CLICKHOUSE_HOST', 'localhost')
+        self.CLICKHOUSE_PORT = int(get_env().get('CLICKHOUSE_PORT', '8123'))
     
     def is_postgresql(self):
         return self.DATABASE_URL.startswith(('postgresql', 'postgres'))

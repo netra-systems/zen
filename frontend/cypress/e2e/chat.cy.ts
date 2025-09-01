@@ -34,15 +34,36 @@ describe('Chat UI', () => {
       }
     }).as('userRequest');
     
+    // Mock agent execution endpoint
+    cy.intercept('POST', '**/api/agents/execute', {
+      statusCode: 200,
+      body: {
+        agent_id: 'test-agent-123',
+        status: 'started',
+        message: 'Agent execution initiated'
+      }
+    }).as('agentExecute');
+    
     // Mock threads endpoint for thread management
     cy.intercept('GET', '**/api/threads*', {
       statusCode: 200,
       body: { threads: [] }
     }).as('threadsRequest');
     
-    // Set up WebSocket mocks for current WebSocket implementation
-    cy.mockWebSocket();
-    cy.mockLegacyWebSocket(); // For backward compatibility
+    // Set up WebSocket mocks for current implementation
+    cy.window().then((win) => {
+      // Mock WebSocket for current unified system
+      (win as any).mockWebSocket = {
+        readyState: WebSocket.OPEN,
+        send: cy.stub().as('wsSend'),
+        close: cy.stub(),
+        addEventListener: cy.stub(),
+        removeEventListener: cy.stub()
+      };
+      
+      // Set up WebSocket event handling
+      (win as any).ws = (win as any).mockWebSocket;
+    });
     
     cy.visit('/chat', { failOnStatusCode: false });
     
@@ -59,41 +80,79 @@ describe('Chat UI', () => {
         // Look for the current message input using proper selector
         cy.get('body').then($body => {
           if ($body.find('[data-testid="message-textarea"]').length > 0) {
-            // Use current system's message input
-            cy.get('[data-testid="message-textarea"]')
+            // Use current system's message input with fallbacks
+            cy.get('[data-testid="message-textarea"], textarea, [data-testid="message-input"]')
+              .first()
               .should('be.visible')
               .type('Hello, world!', { force: true });
             
-            // Look for send button with current selector
-            if ($body.find('[data-testid="send-button"]').length > 0) {
-              cy.get('[data-testid="send-button"]').click({ force: true });
-            } else {
-              // Fallback to generic submit button
-              cy.get('button[type="submit"], button').contains(/send|submit/i).click({ force: true });
-            }
+            // Look for send button with current selector and fallbacks
+            cy.get('[data-testid="send-button"], button[type="submit"], button')
+              .contains(/send|submit/i)
+              .first()
+              .click({ force: true });
             
             // Check if message appears in UI
             cy.contains('Hello, world!').should('be.visible');
             
-            // Simulate WebSocket response with current message structure
-            const payload: Message = {
-              id: '1',
-              created_at: new Date().toISOString(),
-              content: 'This is a response from the agent.',
-              type: 'agent',
-              sub_agent_name: 'Test Agent',
-              displayed_to_user: true,
-            };
-            const message: WebSocketMessage = {
-              type: 'message',
-              payload: payload,
-            };
-            
-            // Send WebSocket message
+            // Simulate WebSocket events with current structure (5 critical events)
             cy.window().then((win) => {
-              if ((win as any).ws && (win as any).ws.onmessage) {
-                (win as any).ws.onmessage({ data: JSON.stringify(message) });
-              }
+              const agentId = 'test-agent-chat';
+              const events = [
+                {
+                  type: 'agent_started',
+                  payload: {
+                    agent_id: agentId,
+                    agent_type: 'ChatTestAgent',
+                    run_id: 'test-run-1',
+                    timestamp: new Date().toISOString()
+                  }
+                },
+                {
+                  type: 'agent_thinking',
+                  payload: {
+                    thought: 'Processing your message...',
+                    agent_id: agentId,
+                    step_number: 1,
+                    total_steps: 2
+                  }
+                },
+                {
+                  type: 'tool_executing',
+                  payload: {
+                    tool_name: 'response_generator',
+                    agent_id: agentId,
+                    timestamp: Date.now()
+                  }
+                },
+                {
+                  type: 'tool_completed',
+                  payload: {
+                    tool_name: 'response_generator',
+                    result: { content: 'This is a response from the agent.' },
+                    agent_id: agentId,
+                    timestamp: Date.now()
+                  }
+                },
+                {
+                  type: 'agent_completed',
+                  payload: {
+                    agent_id: agentId,
+                    duration_ms: 1500,
+                    result: { response: 'This is a response from the agent.' },
+                    metrics: { tools_used: 1 }
+                  }
+                }
+              ];
+              
+              // Send events with delays to simulate real agent flow
+              events.forEach((event, index) => {
+                setTimeout(() => {
+                  if ((win as any).ws && (win as any).ws.onmessage) {
+                    (win as any).ws.onmessage({ data: JSON.stringify(event) });
+                  }
+                }, index * 300);
+              });
             });
             
             // Verify agent response appears
@@ -200,36 +259,29 @@ describe('Chat UI', () => {
     // Check if we're on chat page first
     cy.url().then((url) => {
       if (url.includes('/chat')) {
-        // Look for current message input structure
-        cy.get('body').then($body => {
-          if ($body.find('[data-testid="message-textarea"]').length > 0) {
-            // Test with current UI selectors
-            cy.get('[data-testid="message-textarea"]')
-              .should('be.visible')
-              .type('Start a long process', { force: true });
-            
-            // Click send button
-            if ($body.find('[data-testid="send-button"]').length > 0) {
-              cy.get('[data-testid="send-button"]').click({ force: true });
-            } else {
-              cy.get('button').contains(/send|submit/i).first().click({ force: true });
-            }
-            
-            // Check if input becomes disabled during processing
-            cy.get('[data-testid="message-textarea"]')
-              .should('have.attr', 'disabled').or('have.attr', 'readonly');
-              
-            if ($body.find('[data-testid="send-button"]').length > 0) {
-              cy.get('[data-testid="send-button"]')
-                .should('have.attr', 'disabled').or('contain', 'Processing');
-            }
-            
-          } else {
-            cy.log('Current UI structure different - testing alternative selectors');
-            // Test with fallback selectors
-            cy.get('textarea, input[type="text"]').first().should('be.visible');
-          }
-        });
+        // Look for message input with multiple selectors
+        cy.get('[data-testid="message-textarea"], textarea, [data-testid="message-input"]')
+          .first()
+          .should('be.visible')
+          .type('Start a long process', { force: true });
+        
+        // Click send button with multiple selectors
+        cy.get('[data-testid="send-button"], button[type="submit"], button')
+          .contains(/send|submit/i)
+          .first()
+          .click({ force: true });
+        
+        // Wait for processing to start
+        cy.wait(1000);
+        
+        // Check if input becomes disabled during processing (flexible check)
+        cy.get('[data-testid="message-textarea"], textarea, [data-testid="message-input"]')
+          .first()
+          .should(($input) => {
+            const isDisabled = $input.prop('disabled') || $input.prop('readonly');
+            // Allow for either disabled state or processing indicator
+            expect(isDisabled || $input.hasClass('processing')).to.be.true;
+          });
         
       } else {
         cy.log('Not on chat page, skipping processing test');

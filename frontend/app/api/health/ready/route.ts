@@ -2,7 +2,7 @@
  * Frontend Readiness Check API Endpoint
  * Indicates if the frontend is ready to serve traffic
  */
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { corsJsonResponse, handleOptions } from '@/lib/cors-utils'
 
 export async function GET(request: NextRequest) {

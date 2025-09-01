@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 Long-Duration Soak Testing Suite
 ===============================
 
@@ -72,27 +73,27 @@ logger = logging.getLogger("soak_testing")
 
 SOAK_CONFIG = {
 
-    "auth_service_url": os.getenv("E2E_AUTH_SERVICE_URL", "http://localhost:8001"),
+    "auth_service_url": get_env().get("E2E_AUTH_SERVICE_URL", "http://localhost:8001"),
 
-    "backend_url": os.getenv("E2E_BACKEND_URL", "http://localhost:8000"),
+    "backend_url": get_env().get("E2E_BACKEND_URL", "http://localhost:8000"),
 
-    "websocket_url": os.getenv("E2E_WEBSOCKET_URL", "ws://localhost:8000/ws"),
+    "websocket_url": get_env().get("E2E_WEBSOCKET_URL", "ws://localhost:8000/ws"),
 
-    "redis_url": os.getenv("E2E_REDIS_URL", "redis://localhost:6379"),
+    "redis_url": get_env().get("E2E_REDIS_URL", "redis://localhost:6379"),
 
-    "postgres_url": os.getenv("E2E_POSTGRES_URL", "postgresql://postgres:netra@localhost:5432/netra_test"),
+    "postgres_url": get_env().get("E2E_POSTGRES_URL", "postgresql://postgres:netra@localhost:5432/netra_test"),
 
-    "clickhouse_url": os.getenv("E2E_CLICKHOUSE_URL", "clickhouse://localhost:8123/netra_test"),
+    "clickhouse_url": get_env().get("E2E_CLICKHOUSE_URL", "clickhouse://localhost:8123/netra_test"),
 
-    "test_duration_hours": int(os.getenv("SOAK_TEST_DURATION_HOURS", "48")),
+    "test_duration_hours": int(get_env().get("SOAK_TEST_DURATION_HOURS", "48")),
 
-    "monitoring_interval_seconds": int(os.getenv("SOAK_MONITORING_INTERVAL", "60")),
+    "monitoring_interval_seconds": int(get_env().get("SOAK_MONITORING_INTERVAL", "60")),
 
-    "max_concurrent_connections": int(os.getenv("SOAK_MAX_CONNECTIONS", "500")),
+    "max_concurrent_connections": int(get_env().get("SOAK_MAX_CONNECTIONS", "500")),
 
-    "agent_spawn_rate_per_minute": int(os.getenv("SOAK_AGENT_SPAWN_RATE", "10")),
+    "agent_spawn_rate_per_minute": int(get_env().get("SOAK_AGENT_SPAWN_RATE", "10")),
 
-    "database_ops_per_minute": int(os.getenv("SOAK_DB_OPS_RATE", "1000")),
+    "database_ops_per_minute": int(get_env().get("SOAK_DB_OPS_RATE", "1000")),
 
 }
 
@@ -1150,7 +1151,7 @@ async def test_memory_leak_detection_48h():
 
     """
 
-    if not os.getenv("RUN_SOAK_TESTS", "false").lower() == "true":
+    if not get_env().get("RUN_SOAK_TESTS", "false").lower() == "true":
 
         pytest.skip("Soak tests disabled (set RUN_SOAK_TESTS=true to enable)")
         
@@ -1209,7 +1210,7 @@ async def test_websocket_connection_pool_exhaustion_36h():
 
     """
 
-    if not os.getenv("RUN_SOAK_TESTS", "false").lower() == "true":
+    if not get_env().get("RUN_SOAK_TESTS", "false").lower() == "true":
 
         pytest.skip("Soak tests disabled (set RUN_SOAK_TESTS=true to enable)")
         
@@ -1274,7 +1275,7 @@ async def test_database_connection_stability_48h():
 
     """
 
-    if not os.getenv("RUN_SOAK_TESTS", "false").lower() == "true":
+    if not get_env().get("RUN_SOAK_TESTS", "false").lower() == "true":
 
         pytest.skip("Soak tests disabled (set RUN_SOAK_TESTS=true to enable)")
         
@@ -1319,7 +1320,7 @@ async def test_log_file_growth_and_disk_management_48h():
 
     """
 
-    if not os.getenv("RUN_SOAK_TESTS", "false").lower() == "true":
+    if not get_env().get("RUN_SOAK_TESTS", "false").lower() == "true":
 
         pytest.skip("Soak tests disabled (set RUN_SOAK_TESTS=true to enable)")
         
@@ -1376,7 +1377,7 @@ async def test_performance_degradation_analysis_48h():
 
     """
 
-    if not os.getenv("RUN_SOAK_TESTS", "false").lower() == "true":
+    if not get_env().get("RUN_SOAK_TESTS", "false").lower() == "true":
 
         pytest.skip("Soak tests disabled (set RUN_SOAK_TESTS=true to enable)")
         
@@ -1422,7 +1423,7 @@ async def test_cache_memory_management_24h():
 
     """
 
-    if not os.getenv("RUN_SOAK_TESTS", "false").lower() == "true":
+    if not get_env().get("RUN_SOAK_TESTS", "false").lower() == "true":
 
         pytest.skip("Soak tests disabled (set RUN_SOAK_TESTS=true to enable)")
         
@@ -1454,7 +1455,7 @@ async def test_gc_impact_analysis_36h():
 
     """
 
-    if not os.getenv("RUN_SOAK_TESTS", "false").lower() == "true":
+    if not get_env().get("RUN_SOAK_TESTS", "false").lower() == "true":
 
         pytest.skip("Soak tests disabled (set RUN_SOAK_TESTS=true to enable)")
         
@@ -1491,7 +1492,7 @@ async def test_complete_soak_test_suite_48h():
 
     """
 
-    if not os.getenv("RUN_COMPLETE_SOAK_TEST", "false").lower() == "true":
+    if not get_env().get("RUN_COMPLETE_SOAK_TEST", "false").lower() == "true":
 
         pytest.skip("Complete soak test disabled (set RUN_COMPLETE_SOAK_TEST=true to enable)")
         

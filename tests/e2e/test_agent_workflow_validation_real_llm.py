@@ -1,5 +1,6 @@
 """E2E Test: Agent Workflow Validation with Real LLM Integration
 
+from shared.isolated_environment import get_env
 CRITICAL E2E test for complete agent workflow validation with real LLM.
 Tests all agent lifecycle stages, state management, and data flow validation.
 
@@ -226,7 +227,7 @@ class TestAgentWorkflowValidationRealLLM:
     @pytest.fixture
     def use_real_llm(self):
         """Check if real LLM testing is enabled.""" 
-        return os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true"
+        return get_env().get("TEST_USE_REAL_LLM", "false").lower() == "true"
     
     @pytest.fixture
     def workflow_validator(self):

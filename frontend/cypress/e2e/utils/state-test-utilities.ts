@@ -1,5 +1,7 @@
 /// <reference types="cypress" />
 
+import { setupAuthenticatedState } from '../../support/auth-helpers';
+
 /**
  * Shared utilities for state synchronization tests
  * Provides common setup, teardown, and assertion helpers
@@ -24,20 +26,17 @@ export const TEST_USER = {
   id: 'test-user',
   email: 'test@netrasystems.ai',
   name: 'Test User',
-  token: 'test-token'
+  full_name: 'Test User'
 } as const;
 
 /**
- * Sets up authentication and initial state
+ * Sets up authentication and initial state - uses unified auth helper
  */
 export function setupAuthAndState(): void {
-  cy.window().then((win) => {
-    win.localStorage.setItem('auth_token', TEST_USER.token);
-    win.localStorage.setItem('user', JSON.stringify({
-      id: TEST_USER.id,
-      email: TEST_USER.email,
-      name: TEST_USER.name
-    }));
+  setupAuthenticatedState({
+    id: TEST_USER.id,
+    email: TEST_USER.email,
+    full_name: TEST_USER.full_name
   });
 }
 

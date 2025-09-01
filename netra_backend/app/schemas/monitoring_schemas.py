@@ -36,8 +36,13 @@ class ErrorStatus(str, Enum):
     MUTED = "MUTED"
 
 
-class ErrorContext(BaseModel):
-    """Additional context for GCP errors."""
+class MonitoringErrorContext(BaseModel):
+    """GCP-specific error context for monitoring and error reporting.
+    
+    Note: This is distinct from the canonical ErrorContext in shared_types.py
+    which is used for general application error handling. This class focuses
+    specifically on HTTP/monitoring-related context for GCP error reporting.
+    """
     request_id: Optional[str] = Field(None, description="Request ID if available")
     user_id: Optional[str] = Field(None, description="User ID if available")
     environment: Optional[str] = Field(None, description="Environment (staging/production)")
@@ -62,7 +67,7 @@ class GCPErrorEvent(BaseModel):
     message: str = Field(..., description="Error message")
     stack_trace: Optional[str] = Field(None, description="Stack trace if available")
     source_location: Optional[Dict[str, Any]] = Field(None, description="Source location info")
-    context: ErrorContext = Field(default_factory=ErrorContext, description="Error context")
+    context: MonitoringErrorContext = Field(default_factory=MonitoringErrorContext, description="Error context")
     http_request: Optional[Dict[str, Any]] = Field(None, description="HTTP request details")
 
 
@@ -79,7 +84,7 @@ class GCPError(BaseModel):
     last_seen: datetime = Field(..., description="Last occurrence time")
     status: ErrorStatus = Field(default=ErrorStatus.OPEN, description="Error status")
     affected_users: int = Field(default=0, description="Estimated affected users")
-    context: ErrorContext = Field(default_factory=ErrorContext, description="Additional context")
+    context: MonitoringErrorContext = Field(default_factory=MonitoringErrorContext, description="Additional context")
     group: Optional[GCPErrorGroup] = Field(None, description="Error group information")
     recent_events: List[GCPErrorEvent] = Field(default_factory=list, description="Recent error events")
 
@@ -153,7 +158,7 @@ class GCPErrorServiceConfig(BaseModel):
 __all__ = [
     "ErrorSeverity",
     "ErrorStatus", 
-    "ErrorContext",
+    "MonitoringErrorContext",
     "GCPErrorGroup",
     "GCPErrorEvent",
     "GCPError",

@@ -1,4 +1,5 @@
 """Comprehensive CORS E2E Tests for Final Implementation Agent
+from shared.isolated_environment import get_env
 
 Business Value Justification (BVJ):
 1. Segment: All customer segments (Free, Early, Mid, Enterprise)
@@ -273,7 +274,7 @@ class TestCORSComprehensiveE2E:
     async def test_cors_environment_specific_origins(self, cors_tester):
         """Test environment-specific CORS origins work correctly."""
         # This test would need environment detection, for now test development
-        current_env = os.getenv("ENVIRONMENT", "development")
+        current_env = get_env().get("ENVIRONMENT", "development")
         
         if current_env == "development":
             test_origins = cors_tester.test_origins["development"]

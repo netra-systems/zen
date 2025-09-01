@@ -168,17 +168,51 @@ def _extract_clickhouse_config(config):
         class TestClickHouseConfig:
             def __init__(self):
                 self.host = "localhost"
-                self.port = 8125  # Docker mapped HTTP port
-                self.user = "test_user"  # Docker test user
-                self.password = "test_pass"  # Docker test password  
+                self.port = 8125  # Docker mapped HTTP port for test
+                self.user = "test"  # Docker test user
+                self.password = "test"  # Docker test password  
                 self.database = "netra_test_analytics"  # Docker test database
                 self.secure = False
         
         return TestClickHouseConfig()
+    elif config.environment == "development":
+        # For development environment, use dev Docker service values
+        class DevClickHouseConfig:
+            def __init__(self):
+                from shared.isolated_environment import get_env
+                import socket
+                env = get_env()
+                
+                # Smart host detection for local vs Docker development
+                default_host = env.get("CLICKHOUSE_HOST", "localhost")
+                
+                # Check if we're running locally or inside Docker network
+                # Try to resolve the Docker hostname to see if we're in Docker network
+                try:
+                    # If we can resolve the Docker service name, we're in Docker network
+                    socket.gethostbyname(default_host)
+                    self.host = default_host
+                    # Use internal port when inside Docker network
+                    self.port = int(env.get("CLICKHOUSE_HTTP_PORT", "8123"))
+                except socket.gaierror:
+                    # Can't resolve Docker hostname, we're running locally
+                    # Use localhost and the mapped external port
+                    self.host = "localhost"
+                    # The Docker compose maps 8124:8123 for dev-clickhouse
+                    self.port = 8124
+                
+                self.user = env.get("CLICKHOUSE_USER", "netra")  # Docker dev user
+                self.password = env.get("CLICKHOUSE_PASSWORD", "netra123")  # Docker dev password
+                self.database = env.get("CLICKHOUSE_DB", "netra_analytics")  # Docker dev database
+                self.secure = False
+                
+                logger.info(f"[ClickHouse Dev Config] Using host={self.host}, port={self.port}")
+        
+        return DevClickHouseConfig()
     
     # Use HTTP config for local development, HTTPS for production/remote
-    if config.clickhouse_mode == "local" or config.environment == "development":
-        # Use HTTP port (8123) for local development
+    if config.clickhouse_mode == "local":
+        # Use HTTP port for local mode
         return config.clickhouse_http
     else:
         # Use HTTPS port (8443) for production/staging
@@ -317,6 +351,37 @@ def _build_client_params(config, use_secure: bool) -> dict:
 
 def _create_base_client(config, use_secure: bool):
     """Create base ClickHouse client instance."""
+    # Check if we should use native protocol (for development with Alpine Docker)
+    use_native = getattr(config, 'use_native_protocol', False)
+    
+    if use_native:
+        # Use native protocol connection for better reliability with Alpine Docker
+        import clickhouse_connect
+        try:
+            client = clickhouse_connect.get_client(
+                host=config.host,
+                port=config.port,
+                database=config.database,
+                username=config.user,
+                password=config.password,
+                secure=use_secure
+                # Native protocol is determined by port (9000/9001/9002)
+            )
+            # Wrap in our database class
+            db = ClickHouseDatabase.__new__(ClickHouseDatabase)
+            db.host = config.host
+            db.port = config.port
+            db.database = config.database
+            db.user = config.user
+            db.password = config.password
+            db.secure = use_secure
+            db.client = client
+            return db
+        except Exception:
+            # Fallback to standard HTTP if native fails
+            pass
+    
+    # Use standard connection (HTTP or native based on port)
     params = _build_client_params(config, use_secure)
     return ClickHouseDatabase(**params)
 

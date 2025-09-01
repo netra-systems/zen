@@ -43,12 +43,13 @@ from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.shared_types import RetryConfig
 
 
-class OptimizationsCoreSubAgent(BaseExecutionInterface, AgentExecutionMixin, BaseSubAgent):
-    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher, 
-                 websocket_manager: Optional[WebSocketManagerProtocol] = None):
-        BaseExecutionInterface.__init__(self, "OptimizationsCoreSubAgent", websocket_manager)
+class OptimizationsCoreSubAgent(BaseSubAgent, AgentExecutionMixin):
+    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
         BaseSubAgent.__init__(self, llm_manager, name="OptimizationsCoreSubAgent", 
                              description="This agent formulates optimization strategies.")
+        # Set properties for BaseExecutionInterface compatibility  
+        self.agent_name = "OptimizationsCoreSubAgent"
+        # WebSocket events are handled via set_websocket_bridge() from BaseSubAgent
         self.tool_dispatcher = tool_dispatcher
         self._initialize_modern_components()
     

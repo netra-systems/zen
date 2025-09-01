@@ -32,7 +32,7 @@ from netra_backend.app.agents.base.interface import (
 )
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
-from netra_backend.app.agents.base.websocket_context import WebSocketContextMixin
+# WebSocketContextMixin removed - BaseSubAgent now handles WebSocket via bridge
 from netra_backend.app.agents.config import agent_config
 from netra_backend.app.agents.input_validation import validate_agent_input
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -58,8 +58,11 @@ from netra_backend.app.schemas.shared_types import RetryConfig as ModernRetryCon
 logger = central_logger.get_logger(__name__)
 
 
-class TriageSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin):
-    """Modernized triage agent with BaseExecutionInterface compliance and WebSocket events."""
+class TriageSubAgent(BaseSubAgent, BaseExecutionInterface):
+    """Modernized triage agent with BaseExecutionInterface compliance.
+    
+    WebSocket events are handled through BaseSubAgent's bridge adapter.
+    """
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
                  redis_manager: Optional[RedisManager] = None,
@@ -74,7 +77,7 @@ class TriageSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin
         """Initialize base agent components."""
         super().__init__(llm_manager, name="TriageSubAgent", description="Enhanced triage agent with modern execution.")
         BaseExecutionInterface.__init__(self, "TriageSubAgent", websocket_manager)
-        WebSocketContextMixin.__init__(self)
+        # WebSocketContextMixin removed - using BaseSubAgent's bridge
         self._setup_core_properties(tool_dispatcher, redis_manager)
         
     def _setup_core_properties(self, tool_dispatcher: ToolDispatcher, redis_manager: Optional[RedisManager]) -> None:
@@ -150,11 +153,8 @@ class TriageSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin
         """Execute core triage logic with modern patterns and WebSocket events."""
         start_time = time.time()
         
-        # Set up WebSocket context if available
-        await self._setup_websocket_context_if_available(context)
-        
-        # Emit agent started event
-        await self.emit_agent_started("Starting triage analysis for user request")
+        # Emit thinking event (agent_started is handled by orchestrator)
+        await self.emit_thinking("Starting triage analysis for user request")
         
         # Emit thinking event
         await self.emit_thinking("Analyzing user request and determining category...")
@@ -168,9 +168,8 @@ class TriageSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin
         await self.emit_progress("Finalizing triage results and recommendations...")
         result = await self._finalize_triage_result(context.state, context.run_id, context.stream_updates, triage_result)
         
-        # Emit completion event
-        duration_ms = (time.time() - start_time) * 1000
-        await self.emit_agent_completed(result, duration_ms)
+        # Emit completion event using mixin methods
+        await self.emit_progress("Triage analysis completed successfully", is_complete=True)
         
         return result
         
@@ -226,11 +225,9 @@ class TriageSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin
         """Main triage execution logic with WebSocket events."""
         start_time = time.time()
         
-        # Set up WebSocket context for legacy execution
-        await self._setup_websocket_context_for_legacy(run_id)
         
-        # Emit agent started event
-        await self.emit_agent_started("Starting triage analysis for user request")
+        # Emit thinking event (agent_started is handled by orchestrator)
+        await self.emit_thinking("Starting triage analysis for user request")
         
         # Emit thinking event
         await self.emit_thinking("Analyzing user request and determining category...")
@@ -244,9 +241,8 @@ class TriageSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin
         await self.emit_progress("Finalizing triage results and recommendations...")
         result = await self._finalize_triage_result(state, run_id, stream_updates, triage_result)
         
-        # Emit completion event
-        duration_ms = (time.time() - start_time) * 1000
-        await self.emit_agent_completed(result, duration_ms)
+        # Emit completion event using mixin methods
+        await self.emit_progress("Triage analysis completed successfully", is_complete=True)
         
         return result
     
@@ -295,54 +291,6 @@ class TriageSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin
         legacy_status = legacy_health.get("overall_health", "unknown")
         modern_status = modern_health.get("monitor", {}).get("status", "unknown")
         return "healthy" if legacy_status == "healthy" and modern_status == "healthy" else "degraded"
-    
-    async def _setup_websocket_context_if_available(self, context: ExecutionContext) -> None:
-        """Set up WebSocket context if websocket manager is available."""
-        if hasattr(self, 'websocket_manager') and self.websocket_manager:
-            # Import here to avoid circular imports
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-            from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-            
-            try:
-                # Create WebSocket notifier and execution context
-                notifier = WebSocketNotifier(self.websocket_manager)
-                ws_context = AgentExecutionContext(
-                    run_id=context.run_id,
-                    agent_name="TriageSubAgent",
-                    thread_id=extract_thread_id(context.state, context.run_id),
-                    user_id=getattr(context.state, 'user_id', None),
-                    start_time=time.time()
-                )
-                
-                # Set WebSocket context in mixin
-                self.set_websocket_context(notifier, ws_context)
-                
-            except Exception as e:
-                self.logger.debug(f"Failed to setup WebSocket context: {e}")
-    
-    async def _setup_websocket_context_for_legacy(self, run_id: str) -> None:
-        """Set up WebSocket context for legacy execution paths."""
-        if hasattr(self, 'websocket_manager') and self.websocket_manager:
-            # Import here to avoid circular imports
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-            from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-            
-            try:
-                # Create WebSocket notifier and execution context
-                notifier = WebSocketNotifier(self.websocket_manager)
-                ws_context = AgentExecutionContext(
-                    run_id=run_id,
-                    agent_name="TriageSubAgent",
-                    thread_id=run_id,  # Use run_id as thread_id for legacy
-                    user_id=None,
-                    start_time=time.time()
-                )
-                
-                # Set WebSocket context in mixin
-                self.set_websocket_context(notifier, ws_context)
-                
-            except Exception as e:
-                self.logger.debug(f"Failed to setup WebSocket context for legacy: {e}")
 
     # Compact delegate methods to triage core
     def _validate_request(self, request: str): return self.triage_core.validator.validate_request(request)
@@ -358,11 +306,26 @@ class TriageSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin
     def reset_execution_metrics(self) -> None: self.execution_monitor.reset_metrics("TriageSubAgent")
     def get_modern_reliability_status(self) -> Dict[str, Any]: return self.modern_reliability.get_health_status()
 
-    # Send update method for WebSocket communication
+    # Send update method for WebSocket communication via bridge
     async def _send_update(self, run_id: str, update: Dict[str, Any]) -> None:
-        """Send update via WebSocket."""
+        """Send update via AgentWebSocketBridge for crystal clear emission paths."""
         try:
-            if hasattr(self, 'websocket_manager') and self.websocket_manager:
-                await self.websocket_manager.send_agent_update(run_id, "TriageSubAgent", update)
+            from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
+            
+            bridge = await get_agent_websocket_bridge()
+            status = update.get('status', 'processing')
+            message = update.get('message', '')
+            
+            # Map update status to appropriate bridge notification
+            if status == 'processing':
+                await bridge.notify_agent_thinking(run_id, "TriageSubAgent", message)
+            elif status == 'completed' or status == 'completed_with_fallback':
+                await bridge.notify_agent_completed(run_id, "TriageSubAgent", 
+                                                   result=update.get('result'), 
+                                                   execution_time_ms=None)
+            else:
+                # Custom status updates
+                await bridge.notify_custom(run_id, "TriageSubAgent", f"triage_{status}", update)
+            
         except Exception as e:
-            logger.debug(f"Failed to send WebSocket update: {e}")
+            logger.debug(f"Failed to send WebSocket update via bridge: {e}")

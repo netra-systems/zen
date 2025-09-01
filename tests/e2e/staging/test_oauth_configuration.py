@@ -47,7 +47,6 @@ class TestOAuthConfiguration:
         found_credentials = {}
         
         for var_name in oauth_client_id_vars:
-            client_id = env.get(var_name)
             if not client_id:
                 missing_credentials.append({
                     "variable": var_name,
@@ -69,7 +68,6 @@ class TestOAuthConfiguration:
         )
         
         # Verify the primary expected variable is missing
-        google_client_id = env.get("GOOGLE_CLIENT_ID")
         assert not google_client_id, (
             f"Expected GOOGLE_CLIENT_ID to be missing (primary OAuth issue), "
             f"but found value: '{google_client_id[:10]}...' "
@@ -99,7 +97,6 @@ class TestOAuthConfiguration:
         found_secrets = {}
         
         for var_name in oauth_client_secret_vars:
-            client_secret = env.get(var_name)
             if not client_secret:
                 missing_secrets.append({
                     "variable": var_name,
@@ -122,7 +119,6 @@ class TestOAuthConfiguration:
         )
         
         # Verify the primary expected variable is missing  
-        google_client_secret = env.get("GOOGLE_CLIENT_SECRET")
         assert not google_client_secret, (
             f"Expected GOOGLE_CLIENT_SECRET to be missing (primary OAuth secret issue), "
             f"but secret is configured (length: {len(google_client_secret) if google_client_secret else 0}). "
@@ -153,7 +149,6 @@ class TestOAuthConfiguration:
             category_missing = []
             
             for env_var in env_vars:
-                if not env.get(env_var):
                     category_missing.append(env_var)
             
             if category_missing:
@@ -199,9 +194,6 @@ class TestOAuthConfiguration:
         # Required components for Google OAuth URL
         google_oauth_base = "https://accounts.google.com/o/oauth2/auth"
         required_params = {
-            "client_id": env.get("GOOGLE_CLIENT_ID", ""),
-            "redirect_uri": env.get("GOOGLE_OAUTH_REDIRECT_URI", ""),
-            "scope": env.get("GOOGLE_OAUTH_SCOPES", "openid email profile"),
             "response_type": "code",
             "state": "staging_test_state"
         }
@@ -277,8 +269,6 @@ class TestOAuthConfiguration:
         token_endpoint = "https://oauth2.googleapis.com/token"
         
         # Simulate token exchange attempt with missing/invalid credentials
-        client_id = env.get("GOOGLE_CLIENT_ID", "")
-        client_secret = env.get("GOOGLE_CLIENT_SECRET", "")
         
         token_exchange_failures = []
         
@@ -304,7 +294,6 @@ class TestOAuthConfiguration:
                     "client_secret": client_secret,
                     "code": "test_auth_code_that_will_fail",
                     "grant_type": "authorization_code",
-                    "redirect_uri": env.get("GOOGLE_OAUTH_REDIRECT_URI", "http://localhost:8000/auth/callback")
                 }
                 
                 async with aiohttp.ClientSession() as session:
@@ -378,13 +367,11 @@ class TestOAuthConfiguration:
         expected_redirect_uris = [
             "https://staging.netrasystems.ai/auth/google/callback",
             "http://localhost:3000/auth/google/callback",  # Development fallback
-            env.get("GOOGLE_OAUTH_REDIRECT_URI", "")
         ]
         
         redirect_uri_issues = []
         
         # Check configured redirect URI
-        configured_redirect_uri = env.get("GOOGLE_OAUTH_REDIRECT_URI")
         if not configured_redirect_uri:
             redirect_uri_issues.append({
                 "issue": "GOOGLE_OAUTH_REDIRECT_URI not set",
@@ -404,7 +391,6 @@ class TestOAuthConfiguration:
                     })
                 
                 # Check for staging-appropriate URIs
-                if "localhost" in uri and "staging" not in env.get("ENVIRONMENT", ""):
                     redirect_uri_issues.append({
                         "uri": uri,
                         "issue": "Using localhost URI in non-development environment",
@@ -412,7 +398,6 @@ class TestOAuthConfiguration:
                     })
         
         # Check OAuth configuration consistency
-        auth_callback_url = env.get("OAUTH_CALLBACK_URL")
         if auth_callback_url and configured_redirect_uri:
             if auth_callback_url != configured_redirect_uri:
                 redirect_uri_issues.append({
@@ -468,7 +453,6 @@ class TestOAuthConfiguration:
         scope_configuration_issues = []
         
         # Check configured OAuth scopes
-        configured_scopes_str = env.get("GOOGLE_OAUTH_SCOPES", "")
         if not configured_scopes_str:
             scope_configuration_issues.append({
                 "issue": "GOOGLE_OAUTH_SCOPES environment variable not set",
@@ -499,7 +483,6 @@ class TestOAuthConfiguration:
         # Check for alternative scope configuration variables
         alternative_scope_vars = ["OAUTH_SCOPES", "GOOGLE_SCOPES"]
         for var in alternative_scope_vars:
-            alt_scopes = env.get(var)
             if alt_scopes and not configured_scopes_str:
                 scope_configuration_issues.append({
                     "issue": f"OAuth scopes configured in {var} but not GOOGLE_OAUTH_SCOPES",

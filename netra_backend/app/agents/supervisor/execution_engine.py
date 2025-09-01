@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-    from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
@@ -23,8 +23,12 @@ from netra_backend.app.agents.supervisor.fallback_manager import FallbackManager
 from netra_backend.app.agents.supervisor.observability_flow import (
     get_supervisor_flow_logger,
 )
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+# WebSocketNotifier deprecated - using AgentWebSocketBridge instead
 from netra_backend.app.agents.supervisor.periodic_update_manager import PeriodicUpdateManager
+from netra_backend.app.core.agent_execution_tracker import (
+    get_execution_tracker,
+    ExecutionState
+)
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -45,19 +49,21 @@ class ExecutionEngine:
     MAX_CONCURRENT_AGENTS = 10  # Support 5 concurrent users (2 agents each)
     AGENT_EXECUTION_TIMEOUT = 30.0  # 30 seconds max per agent
     
-    def __init__(self, registry: 'AgentRegistry', websocket_manager: 'WebSocketManager'):
+    def __init__(self, registry: 'AgentRegistry', websocket_bridge):
         self.registry = registry
-        self.websocket_manager = websocket_manager
+        self.websocket_bridge = websocket_bridge
         self.active_runs: Dict[str, AgentExecutionContext] = {}
         self.run_history: List[AgentExecutionResult] = []
+        self.execution_tracker = get_execution_tracker()
         self._init_components()
+        self._init_death_monitoring()
         
     def _init_components(self) -> None:
         """Initialize execution components."""
-        self.websocket_notifier = WebSocketNotifier(self.websocket_manager)
-        self.periodic_update_manager = PeriodicUpdateManager(self.websocket_notifier)
-        self.agent_core = AgentExecutionCore(self.registry, self.websocket_notifier)
-        self.fallback_manager = FallbackManager(self.websocket_notifier)
+        # Use AgentWebSocketBridge instead of creating WebSocketNotifier
+        self.periodic_update_manager = PeriodicUpdateManager(self.websocket_bridge)
+        self.agent_core = AgentExecutionCore(self.registry, self.websocket_bridge)
+        self.fallback_manager = FallbackManager(self.websocket_bridge)
         self.flow_logger = get_supervisor_flow_logger()
         
         # CONCURRENCY OPTIMIZATION: Semaphore for agent execution control
@@ -67,13 +73,71 @@ class ExecutionEngine:
             'concurrent_executions': 0,
             'queue_wait_times': [],
             'execution_times': [],
-            'failed_executions': 0
+            'failed_executions': 0,
+            'dead_executions': 0,
+            'timeout_executions': 0
         }
+        
+    def _init_death_monitoring(self) -> None:
+        """Initialize agent death monitoring callbacks."""
+        # Register callbacks for death detection
+        self.execution_tracker.register_death_callback(self._handle_agent_death)
+        self.execution_tracker.register_timeout_callback(self._handle_agent_timeout)
+        
+    async def _handle_agent_death(self, execution_record) -> None:
+        """Handle agent death detection."""
+        logger.critical(f"💀 AGENT DEATH DETECTED: {execution_record.agent_name} (execution_id={execution_record.execution_id})")
+        
+        # Send death notification via WebSocket
+        if self.websocket_bridge:
+            await self.websocket_bridge.notify_agent_death(
+                execution_record.metadata.get('run_id', execution_record.execution_id),
+                execution_record.agent_name,
+                'no_heartbeat',
+                {
+                    'execution_id': execution_record.execution_id,
+                    'last_heartbeat': execution_record.last_heartbeat.isoformat(),
+                    'time_since_heartbeat': execution_record.time_since_heartbeat.total_seconds()
+                }
+            )
+        
+        self.execution_stats['dead_executions'] += 1
+        
+    async def _handle_agent_timeout(self, execution_record) -> None:
+        """Handle agent timeout detection."""
+        logger.error(f"⏱️ AGENT TIMEOUT: {execution_record.agent_name} exceeded {execution_record.timeout_seconds}s")
+        
+        # Send timeout notification via WebSocket
+        if self.websocket_bridge:
+            await self.websocket_bridge.notify_agent_death(
+                execution_record.metadata.get('run_id', execution_record.execution_id),
+                execution_record.agent_name,
+                'timeout',
+                {
+                    'execution_id': execution_record.execution_id,
+                    'timeout_seconds': execution_record.timeout_seconds,
+                    'duration': execution_record.duration.total_seconds() if execution_record.duration else 0
+                }
+            )
+        
+        self.execution_stats['timeout_executions'] += 1
         
     async def execute_agent(self, context: AgentExecutionContext,
                            state: DeepAgentState) -> AgentExecutionResult:
-        """Execute a single agent with concurrency control and guaranteed event delivery."""
+        """Execute a single agent with concurrency control, death detection, and guaranteed event delivery."""
         queue_start_time = time.time()
+        
+        # Create execution tracking record
+        execution_id = self.execution_tracker.create_execution(
+            agent_name=context.agent_name,
+            thread_id=context.thread_id,
+            user_id=context.user_id,
+            timeout_seconds=int(self.AGENT_EXECUTION_TIMEOUT),
+            metadata={'run_id': context.run_id, 'context': context.metadata}
+        )
+        
+        # Store execution ID in context for tracking
+        context.execution_id = execution_id
         
         # CONCURRENCY CONTROL: Use semaphore to limit concurrent executions
         async with self.execution_semaphore:
@@ -82,6 +146,9 @@ class ExecutionEngine:
             self.execution_stats['total_executions'] += 1
             self.execution_stats['concurrent_executions'] += 1
             
+            # Mark execution as starting
+            self.execution_tracker.start_execution(execution_id)
+            
             # Send queue wait notification if significant delay
             if queue_wait_time > 1.0:
                 await self.send_agent_thinking(
@@ -89,6 +156,9 @@ class ExecutionEngine:
                     f"Request queued due to high load - starting now (waited {queue_wait_time:.1f}s)",
                     step_number=0
                 )
+            
+            # Create heartbeat task for death detection
+            heartbeat_task = asyncio.create_task(self._heartbeat_loop(execution_id))
             
             try:
                 # Use periodic update manager for long-running operations
@@ -99,8 +169,12 @@ class ExecutionEngine:
                     expected_duration_ms=int(self.AGENT_EXECUTION_TIMEOUT * 1000),
                     operation_description=f"Executing {context.agent_name} agent"
                 ):
-                    # Send agent started with guaranteed delivery
-                    await self.websocket_notifier.send_agent_started(context)
+                    # Send agent started with guaranteed delivery via bridge
+                    await self.websocket_bridge.notify_agent_started(
+                        context.run_id, 
+                        context.agent_name,
+                        {"status": "started", "context": context.metadata or {}}
+                    )
                     
                     # Send initial thinking update
                     await self.send_agent_thinking(
@@ -111,33 +185,57 @@ class ExecutionEngine:
                     
                     execution_start = time.time()
                     
-                    # Execute with timeout
+                    # Update execution state to running
+                    self.execution_tracker.update_execution_state(
+                        execution_id, ExecutionState.RUNNING
+                    )
+                    
+                    # Execute with timeout and death monitoring
                     result = await asyncio.wait_for(
-                        self._execute_with_error_handling(context, state),
+                        self._execute_with_death_monitoring(context, state, execution_id),
                         timeout=self.AGENT_EXECUTION_TIMEOUT
                     )
                     
                     execution_time = time.time() - execution_start
                     self.execution_stats['execution_times'].append(execution_time)
                     
+                    # Mark execution as completing
+                    self.execution_tracker.update_execution_state(
+                        execution_id, ExecutionState.COMPLETING
+                    )
+                    
                     # CRITICAL: Always send completion events, regardless of success/failure
                     # This ensures WebSocket clients know when agent execution is complete
                     if result.success:
                         await self._send_final_execution_report(context, result, state)
+                        # Mark execution as completed
+                        self.execution_tracker.update_execution_state(
+                            execution_id, ExecutionState.COMPLETED, result=result.data
+                        )
                     else:
                         # Send completion event for failed/fallback cases
                         await self._send_completion_for_failed_execution(context, result, state)
+                        # Mark execution as failed
+                        self.execution_tracker.update_execution_state(
+                            execution_id, ExecutionState.FAILED, error=result.error
+                        )
                     
                     self._update_history(result)
                     return result
                     
             except asyncio.TimeoutError:
                 self.execution_stats['failed_executions'] += 1
-                # Send timeout notification
-                await self.send_agent_thinking(
-                    context,
-                    f"Agent execution timed out after {self.AGENT_EXECUTION_TIMEOUT}s",
-                    step_number=-1
+                # Mark execution as timed out
+                self.execution_tracker.update_execution_state(
+                    execution_id, ExecutionState.TIMEOUT,
+                    error=f"Execution timed out after {self.AGENT_EXECUTION_TIMEOUT}s"
+                )
+                # Send timeout notification via death handler
+                await self.websocket_bridge.notify_agent_death(
+                    context.run_id,
+                    context.agent_name,
+                    'timeout',
+                    {'execution_id': execution_id, 'timeout': self.AGENT_EXECUTION_TIMEOUT}
                 )
                 timeout_result = self._create_timeout_result(context)
                 await self._send_completion_for_failed_execution(context, timeout_result, state)
@@ -145,15 +243,60 @@ class ExecutionEngine:
                 return timeout_result
                 
             except Exception as e:
-                self.execution_stats['failed_executions'] += 1
-                logger.error(f"Unexpected error in agent execution: {e}")
-                error_result = self._create_error_result(context, e)
-                await self._send_completion_for_failed_execution(context, error_result, state)
-                self._update_history(error_result)
-                return error_result
+                # Mark execution as failed for any other exception
+                self.execution_tracker.update_execution_state(
+                    execution_id, ExecutionState.FAILED, error=str(e)
+                )
+                raise
                 
             finally:
+                # Cancel heartbeat task
+                heartbeat_task.cancel()
+                try:
+                    await heartbeat_task
+                except asyncio.CancelledError:
+                    pass
+                
                 self.execution_stats['concurrent_executions'] -= 1
+    
+    async def _heartbeat_loop(self, execution_id: str) -> None:
+        """Send periodic heartbeats for death detection."""
+        try:
+            while True:
+                await asyncio.sleep(2)  # Heartbeat every 2 seconds
+                if not self.execution_tracker.heartbeat(execution_id):
+                    break  # Execution is terminal, stop heartbeat
+        except asyncio.CancelledError:
+            pass
+    
+    async def _execute_with_death_monitoring(self, context: AgentExecutionContext,
+                                            state: DeepAgentState,
+                                            execution_id: str) -> AgentExecutionResult:
+        """Execute agent with death monitoring wrapper."""
+        try:
+            # Heartbeat before execution
+            self.execution_tracker.heartbeat(execution_id)
+            
+            # Execute with error handling
+            result = await self._execute_with_error_handling(context, state)
+            
+            # Final heartbeat after execution
+            self.execution_tracker.heartbeat(execution_id)
+            
+            return result
+            
+        except Exception as e:
+            # Check if this is a death scenario
+            execution_record = self.execution_tracker.get_execution(execution_id)
+            if execution_record and execution_record.is_dead(self.execution_tracker.heartbeat_timeout):
+                # Agent died - send death notification
+                await self.websocket_bridge.notify_agent_death(
+                    context.run_id,
+                    context.agent_name,
+                    'silent_failure',
+                    {'execution_id': execution_id, 'error': str(e)}
+                )
+            raise
     
     async def _execute_with_error_handling(self, context: AgentExecutionContext,
                                           state: DeepAgentState) -> AgentExecutionResult:
@@ -418,26 +561,44 @@ class ExecutionEngine:
         self.run_history.append(result)
         self._enforce_history_size_limit()
     
-    # WebSocket delegation methods
+    # WebSocket delegation methods via bridge
     async def send_agent_thinking(self, context: AgentExecutionContext, 
                                  thought: str, step_number: int = None) -> None:
-        """Send agent thinking notification."""
-        await self.websocket_notifier.send_agent_thinking(context, thought, step_number)
+        """Send agent thinking notification via bridge."""
+        await self.websocket_bridge.notify_agent_thinking(
+            context.run_id,
+            context.agent_name,
+            thought,
+            step_number
+        )
     
     async def send_partial_result(self, context: AgentExecutionContext,
                                  content: str, is_complete: bool = False) -> None:
-        """Send partial result notification."""
-        await self.websocket_notifier.send_partial_result(context, content, is_complete)
+        """Send partial result notification via bridge."""
+        await self.websocket_bridge.notify_progress_update(
+            context.run_id,
+            context.agent_name,
+            {"content": content, "is_complete": is_complete}
+        )
     
     async def send_tool_executing(self, context: AgentExecutionContext,
                                  tool_name: str) -> None:
-        """Send tool executing notification."""
-        await self.websocket_notifier.send_tool_executing(context, tool_name)
+        """Send tool executing notification via bridge."""
+        await self.websocket_bridge.notify_tool_executing(
+            context.run_id,
+            context.agent_name,
+            tool_name
+        )
     
     async def send_final_report(self, context: AgentExecutionContext,
                                report: dict, duration_ms: float) -> None:
-        """Send final report notification."""
-        await self.websocket_notifier.send_final_report(context, report, duration_ms)
+        """Send final report notification via bridge."""
+        await self.websocket_bridge.notify_agent_completed(
+            context.run_id,
+            context.agent_name,
+            report,
+            duration_ms
+        )
     
     async def _send_final_execution_report(self, context: AgentExecutionContext,
                                           result: AgentExecutionResult,
@@ -462,9 +623,10 @@ class ExecutionEngine:
                 result.duration * 1000 if result.duration else 0
             )
             
-            # Send completion notification
-            await self.websocket_notifier.send_agent_completed(
-                context,
+            # Send completion notification via bridge
+            await self.websocket_bridge.notify_agent_completed(
+                context.run_id,
+                context.agent_name,
                 report,
                 result.duration * 1000 if result.duration else 0
             )
@@ -486,10 +648,11 @@ class ExecutionEngine:
                 "status": "failed_with_fallback" if (result.metadata and result.metadata.get('fallback_used')) else "failed"
             }
             
-            # Send completion notification for failed execution
+            # Send completion notification for failed execution via bridge
             # This is CRITICAL for WebSocket clients to know execution finished
-            await self.websocket_notifier.send_agent_completed(
-                context,
+            await self.websocket_bridge.notify_agent_completed(
+                context.run_id,
+                context.agent_name,
                 report,
                 result.duration * 1000 if result.duration else 0
             )
@@ -599,21 +762,22 @@ class ExecutionEngine:
             stats['avg_execution_time'] = 0.0
             stats['max_execution_time'] = 0.0
         
-        # Add WebSocket stats
-        delivery_stats = await self.websocket_notifier.get_delivery_stats()
-        stats.update(delivery_stats)
+        # Add WebSocket bridge stats
+        try:
+            bridge_metrics = await self.websocket_bridge.get_metrics()
+            stats['websocket_bridge_metrics'] = bridge_metrics
+        except Exception as e:
+            stats['websocket_bridge_error'] = str(e)
         
         return stats
     
     async def shutdown(self) -> None:
         """Shutdown execution engine and clean up resources."""
-        # Shutdown WebSocket notifier
-        await self.websocket_notifier.shutdown()
-        
         # Shutdown periodic update manager
         await self.periodic_update_manager.shutdown()
         
         # Clear active runs
         self.active_runs.clear()
         
+        # WebSocket bridge shutdown is handled separately
         logger.info("ExecutionEngine shutdown complete")

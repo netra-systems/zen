@@ -130,7 +130,7 @@ class TestAgentPipelineCritical:
     async def pipeline_components(self, test_environment, real_llm_manager):
         """Setup complete pipeline components with real services."""
         import os
-        redis_url = os.getenv("REDIS_URL", "redis://localhost:6380/0")
+        redis_url = get_env().get("REDIS_URL", "redis://localhost:6380/0")
         redis_manager = RedisManager(redis_url)
         await redis_manager.initialize()
         

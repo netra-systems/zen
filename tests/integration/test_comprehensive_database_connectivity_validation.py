@@ -24,15 +24,17 @@ from pathlib import Path
 from typing import Dict, Any, List
 from contextlib import asynccontextmanager
 import asyncpg
+import redis.asyncio as redis
+import clickhouse_connect
 
-# Add project root to path for imports
-project_root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(project_root))
+# CRITICAL: Per SPEC/import_management_architecture.xml - NO path manipulation
+# Using absolute imports only - path manipulation is FORBIDDEN
 
+# CRITICAL: Use shared.isolated_environment per SPEC/unified_environment_management.xml
+from shared.isolated_environment import get_env
 from auth_service.auth_core.database.connection import AuthDatabaseConnection
 from auth_service.auth_core.config import AuthConfig
 from shared.database_url_builder import DatabaseURLBuilder
-from test_framework.environment_markers import env
 from netra_backend.app.core.configuration.database import DatabaseConfigManager
 
 logging.basicConfig(level=logging.INFO)
@@ -43,11 +45,19 @@ class ComprehensiveDatabaseConnectivityValidator:
     """Comprehensive validator for all database connectivity fixes."""
     
     def __init__(self):
+        # CRITICAL: Use IsolatedEnvironment for ALL environment access per claude.md
+        self.env = get_env()
+        self.env.enable_isolation()  # Enable isolation for testing
+        
         self.results = {
             'auth_service_fixes': {},
             'url_formation_fixes': {},
             'timeout_handling_fixes': {},
             'readiness_check_fixes': {},
+            'postgresql_connectivity': {},
+            'redis_connectivity': {},
+            'clickhouse_connectivity': {},
+            'docker_services_health': {},
             'overall_status': 'unknown'
         }
     
@@ -334,26 +344,347 @@ class ComprehensiveDatabaseConnectivityValidator:
             
         return result
     
+    async def validate_docker_services_health(self) -> Dict[str, Any]:
+        """Validate that all docker-compose database services are running and healthy."""
+        logger.info("Validating docker-compose database services health...")
+        
+        result = {
+            'test': 'docker_services_health',
+            'success': False,
+            'services': {},
+            'error': None
+        }
+        
+        try:
+            # Get docker-compose service connection details from environment
+            postgres_host = self.env.get("POSTGRES_HOST", "localhost")
+            postgres_port = int(self.env.get("DEV_POSTGRES_PORT", "5433"))
+            redis_host = self.env.get("REDIS_HOST", "localhost") 
+            redis_port = int(self.env.get("DEV_REDIS_PORT", "6380"))
+            clickhouse_host = self.env.get("CLICKHOUSE_HOST", "localhost")
+            clickhouse_port = int(self.env.get("DEV_CLICKHOUSE_HTTP_PORT", "8124"))
+            
+            # Test PostgreSQL service health
+            try:
+                pg_url = f"postgresql://{postgres_host}:{postgres_port}/postgres"
+                conn = await asyncpg.connect(pg_url, timeout=10.0)
+                await conn.fetchval("SELECT 1")
+                await conn.close()
+                result['services']['postgresql'] = {'healthy': True, 'url': f"{postgres_host}:{postgres_port}"}
+            except Exception as e:
+                result['services']['postgresql'] = {'healthy': False, 'error': str(e)}
+            
+            # Test Redis service health
+            try:
+                redis_client = redis.Redis(host=redis_host, port=redis_port, socket_timeout=10)
+                await redis_client.ping()
+                await redis_client.close()
+                result['services']['redis'] = {'healthy': True, 'url': f"{redis_host}:{redis_port}"}
+            except Exception as e:
+                result['services']['redis'] = {'healthy': False, 'error': str(e)}
+            
+            # Test ClickHouse service health  
+            try:
+                ch_client = clickhouse_connect.get_client(
+                    host=clickhouse_host, 
+                    port=clickhouse_port,
+                    connect_timeout=10
+                )
+                ch_client.command("SELECT 1")
+                ch_client.close()
+                result['services']['clickhouse'] = {'healthy': True, 'url': f"{clickhouse_host}:{clickhouse_port}"}
+            except Exception as e:
+                result['services']['clickhouse'] = {'healthy': False, 'error': str(e)}
+            
+            # Success if all services are healthy
+            healthy_services = [s for s in result['services'].values() if s['healthy']]
+            result['success'] = len(healthy_services) == len(result['services'])
+            result['healthy_count'] = len(healthy_services)
+            result['total_count'] = len(result['services'])
+            
+        except Exception as e:
+            result['error'] = str(e)
+            
+        return result
+    
+    async def validate_postgresql_connectivity(self) -> Dict[str, Any]:
+        """Validate real PostgreSQL database connectivity using docker-compose services."""
+        logger.info("Validating PostgreSQL connectivity with real database...")
+        
+        result = {
+            'test': 'postgresql_connectivity',
+            'success': False,
+            'connection_tests': [],
+            'transaction_tests': [],
+            'pool_tests': [],
+            'error': None
+        }
+        
+        try:
+            # Get PostgreSQL connection details from environment
+            postgres_user = self.env.get("POSTGRES_USER", "netra")
+            postgres_password = self.env.get("POSTGRES_PASSWORD", "netra123")
+            postgres_db = self.env.get("POSTGRES_DB", "netra_dev")
+            postgres_host = self.env.get("POSTGRES_HOST", "localhost")
+            postgres_port = int(self.env.get("DEV_POSTGRES_PORT", "5433"))
+            
+            pg_url = f"postgresql://{postgres_user}:{postgres_password}@{postgres_host}:{postgres_port}/{postgres_db}"
+            
+            # Test 1: Basic connection
+            try:
+                start_time = time.time()
+                conn = await asyncpg.connect(pg_url, timeout=15.0)
+                test_result = await conn.fetchval("SELECT version()")
+                await conn.close()
+                result['connection_tests'].append({
+                    'name': 'basic_connection',
+                    'success': True,
+                    'duration': time.time() - start_time,
+                    'postgres_version': test_result[:50] if test_result else "unknown"
+                })
+            except Exception as e:
+                result['connection_tests'].append({
+                    'name': 'basic_connection',
+                    'success': False,
+                    'error': str(e)
+                })
+            
+            # Test 2: Transaction handling
+            try:
+                start_time = time.time()
+                conn = await asyncpg.connect(pg_url, timeout=15.0)
+                async with conn.transaction():
+                    await conn.execute("CREATE TEMP TABLE test_table (id SERIAL PRIMARY KEY, data TEXT)")
+                    await conn.execute("INSERT INTO test_table (data) VALUES ('test')")
+                    count = await conn.fetchval("SELECT COUNT(*) FROM test_table")
+                await conn.close()
+                result['transaction_tests'].append({
+                    'name': 'transaction_handling',
+                    'success': count == 1,
+                    'duration': time.time() - start_time,
+                    'rows_inserted': count
+                })
+            except Exception as e:
+                result['transaction_tests'].append({
+                    'name': 'transaction_handling',
+                    'success': False,
+                    'error': str(e)
+                })
+            
+            # Test 3: Connection pool behavior
+            try:
+                start_time = time.time()
+                pool = await asyncpg.create_pool(pg_url, min_size=2, max_size=5, timeout=15.0)
+                async with pool.acquire() as conn:
+                    result_val = await conn.fetchval("SELECT 42")
+                await pool.close()
+                result['pool_tests'].append({
+                    'name': 'connection_pool',
+                    'success': result_val == 42,
+                    'duration': time.time() - start_time,
+                    'test_value': result_val
+                })
+            except Exception as e:
+                result['pool_tests'].append({
+                    'name': 'connection_pool',
+                    'success': False,
+                    'error': str(e)
+                })
+            
+            # Overall success
+            all_tests = result['connection_tests'] + result['transaction_tests'] + result['pool_tests']
+            successful_tests = [t for t in all_tests if t['success']]
+            result['success'] = len(successful_tests) == len(all_tests)
+            
+        except Exception as e:
+            result['error'] = str(e)
+            
+        return result
+    
+    async def validate_redis_connectivity(self) -> Dict[str, Any]:
+        """Validate real Redis connectivity using docker-compose services."""
+        logger.info("Validating Redis connectivity with real service...")
+        
+        result = {
+            'test': 'redis_connectivity',
+            'success': False,
+            'connection_tests': [],
+            'operation_tests': [],
+            'error': None
+        }
+        
+        try:
+            # Get Redis connection details from environment
+            redis_host = self.env.get("REDIS_HOST", "localhost")
+            redis_port = int(self.env.get("DEV_REDIS_PORT", "6380"))
+            
+            # Test 1: Basic connection and ping
+            try:
+                start_time = time.time()
+                redis_client = redis.Redis(host=redis_host, port=redis_port, socket_timeout=15)
+                ping_result = await redis_client.ping()
+                await redis_client.close()
+                result['connection_tests'].append({
+                    'name': 'ping_connection',
+                    'success': ping_result,
+                    'duration': time.time() - start_time,
+                    'ping_response': ping_result
+                })
+            except Exception as e:
+                result['connection_tests'].append({
+                    'name': 'ping_connection',
+                    'success': False,
+                    'error': str(e)
+                })
+            
+            # Test 2: Set/Get operations
+            try:
+                start_time = time.time()
+                redis_client = redis.Redis(host=redis_host, port=redis_port, socket_timeout=15)
+                test_key = "test:database_validation"
+                test_value = "database_connectivity_test_value"
+                
+                await redis_client.set(test_key, test_value, ex=60)  # 60 second expiry
+                retrieved_value = await redis_client.get(test_key)
+                await redis_client.delete(test_key)
+                await redis_client.close()
+                
+                result['operation_tests'].append({
+                    'name': 'set_get_operations',
+                    'success': retrieved_value.decode() == test_value if retrieved_value else False,
+                    'duration': time.time() - start_time,
+                    'value_match': retrieved_value.decode() == test_value if retrieved_value else False
+                })
+            except Exception as e:
+                result['operation_tests'].append({
+                    'name': 'set_get_operations',
+                    'success': False,
+                    'error': str(e)
+                })
+            
+            # Overall success
+            all_tests = result['connection_tests'] + result['operation_tests']
+            successful_tests = [t for t in all_tests if t['success']]
+            result['success'] = len(successful_tests) == len(all_tests)
+            
+        except Exception as e:
+            result['error'] = str(e)
+            
+        return result
+    
+    async def validate_clickhouse_connectivity(self) -> Dict[str, Any]:
+        """Validate real ClickHouse connectivity using docker-compose services."""
+        logger.info("Validating ClickHouse connectivity with real service...")
+        
+        result = {
+            'test': 'clickhouse_connectivity', 
+            'success': False,
+            'connection_tests': [],
+            'query_tests': [],
+            'error': None
+        }
+        
+        try:
+            # Get ClickHouse connection details from environment
+            clickhouse_host = self.env.get("CLICKHOUSE_HOST", "localhost")
+            clickhouse_port = int(self.env.get("DEV_CLICKHOUSE_HTTP_PORT", "8124"))
+            clickhouse_user = self.env.get("CLICKHOUSE_USER", "netra")
+            clickhouse_password = self.env.get("CLICKHOUSE_PASSWORD", "netra123")
+            
+            # Test 1: Basic connection
+            try:
+                start_time = time.time()
+                client = clickhouse_connect.get_client(
+                    host=clickhouse_host,
+                    port=clickhouse_port,
+                    username=clickhouse_user,
+                    password=clickhouse_password,
+                    connect_timeout=15
+                )
+                version_result = client.command("SELECT version()")
+                client.close()
+                result['connection_tests'].append({
+                    'name': 'basic_connection',
+                    'success': True,
+                    'duration': time.time() - start_time,
+                    'clickhouse_version': str(version_result)[:50] if version_result else "unknown"
+                })
+            except Exception as e:
+                result['connection_tests'].append({
+                    'name': 'basic_connection',
+                    'success': False,
+                    'error': str(e)
+                })
+            
+            # Test 2: Query operations
+            try:
+                start_time = time.time()
+                client = clickhouse_connect.get_client(
+                    host=clickhouse_host,
+                    port=clickhouse_port,
+                    username=clickhouse_user,
+                    password=clickhouse_password,
+                    connect_timeout=15
+                )
+                
+                # Test query with data
+                query_result = client.query("SELECT 42 as test_value, 'connectivity_test' as test_string")
+                rows = query_result.result_rows
+                
+                client.close()
+                
+                # Validate query result
+                expected_row = (42, 'connectivity_test')
+                success = len(rows) == 1 and rows[0] == expected_row
+                
+                result['query_tests'].append({
+                    'name': 'query_operations',
+                    'success': success,
+                    'duration': time.time() - start_time,
+                    'rows_returned': len(rows),
+                    'first_row_correct': rows[0] == expected_row if rows else False
+                })
+            except Exception as e:
+                result['query_tests'].append({
+                    'name': 'query_operations',
+                    'success': False,
+                    'error': str(e)
+                })
+            
+            # Overall success
+            all_tests = result['connection_tests'] + result['query_tests']
+            successful_tests = [t for t in all_tests if t['success']]
+            result['success'] = len(successful_tests) == len(all_tests)
+            
+        except Exception as e:
+            result['error'] = str(e)
+            
+        return result
+    
     async def run_comprehensive_validation(self) -> Dict[str, Any]:
         """Run all validation tests and return comprehensive results."""
         logger.info("Starting comprehensive database connectivity validation...")
         
-        # Run all validation tests
+        # Run all validation tests - including new real database connectivity tests
+        self.results['docker_services_health'] = await self.validate_docker_services_health()
+        self.results['postgresql_connectivity'] = await self.validate_postgresql_connectivity()
+        self.results['redis_connectivity'] = await self.validate_redis_connectivity()
+        self.results['clickhouse_connectivity'] = await self.validate_clickhouse_connectivity()
         self.results['auth_service_fixes'] = await self.validate_auth_service_503_fix()
         self.results['timeout_handling_fixes'] = await self.validate_timeout_handling_fixes()
         self.results['url_formation_fixes'] = self.validate_url_formation_fixes()
         self.results['readiness_check_fixes'] = await self.validate_concurrent_readiness_checks()
         
-        # Determine overall status
-        critical_tests = ['auth_service_fixes', 'timeout_handling_fixes']
+        # Determine overall status - CRITICAL database connectivity tests now included
+        critical_tests = ['postgresql_connectivity', 'redis_connectivity', 'auth_service_fixes', 'timeout_handling_fixes']
         critical_success = all(self.results[test]['success'] for test in critical_tests)
         
-        other_tests = ['url_formation_fixes', 'readiness_check_fixes']
-        other_success_count = sum(1 for test in other_tests if self.results[test]['success'])
+        important_tests = ['clickhouse_connectivity', 'docker_services_health', 'url_formation_fixes', 'readiness_check_fixes']
+        important_success_count = sum(1 for test in important_tests if self.results[test]['success'])
         
-        if critical_success and other_success_count >= 1:
+        if critical_success and important_success_count >= 3:
             self.results['overall_status'] = 'success'
-        elif critical_success:
+        elif critical_success and important_success_count >= 2:
             self.results['overall_status'] = 'partial_success'
         else:
             self.results['overall_status'] = 'failure'

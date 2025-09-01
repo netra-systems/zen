@@ -291,10 +291,16 @@ class ReportBuilder:
     
     def _gather_feature_progress(self, hours: int) -> Dict[str, Any]:
         """Gather feature progress information."""
+        # Get both raw commits and sessions for comprehensive reporting
         commits = self.commit_parser.get_commits(hours)
+        sessions = self.commit_parser.get_commit_sessions(hours)
         patterns = self.commit_parser.analyze_commit_patterns(hours)
+        
+        # Analyze both individual commits and sessions
         feature_data = self._analyze_feature_commits(commits)
-        return self._build_feature_progress(feature_data, patterns)
+        session_data = self._analyze_commit_sessions(sessions)
+        
+        return self._build_feature_progress(feature_data, patterns, session_data)
 
     def _analyze_feature_commits(self, commits) -> Dict[str, Any]:
         """Analyze commits for features and fixes"""
@@ -319,11 +325,45 @@ class ReportBuilder:
             "fixes_count": len(fixes)
         }
 
-    def _build_feature_progress(self, feature_data: Dict, patterns: Dict) -> Dict[str, Any]:
-        """Build feature progress dictionary"""
+    def _analyze_commit_sessions(self, sessions) -> Dict[str, Any]:
+        """Analyze commit sessions for better noise reduction."""
+        if not sessions:
+            return {"sessions": [], "session_count": 0}
+        
+        # Sort sessions by most recent first
+        sorted_sessions = sorted(sessions, key=lambda s: s.end_time, reverse=True)
+        
+        # Get summary for top sessions
+        session_summaries = []
+        for session in sorted_sessions[:10]:  # Show top 10 sessions
+            session_summaries.append({
+                "author": session.author,
+                "summary": session.summary,
+                "commits": len(session.commits),
+                "duration_mins": int((session.end_time - session.start_time).total_seconds() / 60),
+                "files_changed": session.total_files,
+                "type": session.primary_type.value
+            })
+        
+        return {
+            "sessions": session_summaries,
+            "session_count": len(sessions),
+            "total_commits_in_sessions": sum(len(s.commits) for s in sessions)
+        }
+    
+    def _build_feature_progress(self, feature_data: Dict, patterns: Dict, session_data: Dict) -> Dict[str, Any]:
+        """Build feature progress dictionary with session grouping."""
         feature_summary = self._get_feature_summary(feature_data)
         commit_summary = self._get_commit_summary(patterns)
-        return {**feature_summary, **commit_summary}
+        
+        # Add session-based summary for noise reduction
+        session_summary = {
+            "work_sessions": session_data.get("session_count", 0),
+            "session_details": session_data.get("sessions", [])[:5],  # Show top 5 sessions
+            "grouped_commits": session_data.get("total_commits_in_sessions", 0)
+        }
+        
+        return {**feature_summary, **commit_summary, **session_summary}
     
     def _get_feature_summary(self, feature_data: Dict) -> Dict[str, Any]:
         """Get feature summary data."""

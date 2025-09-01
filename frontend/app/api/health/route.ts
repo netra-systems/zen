@@ -2,7 +2,7 @@
  * Frontend Health Check API Endpoint
  * Provides health status for the Next.js frontend application
  */
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { corsJsonResponse, handleOptions } from '@/lib/cors-utils'
 
 export async function GET(request: NextRequest) {

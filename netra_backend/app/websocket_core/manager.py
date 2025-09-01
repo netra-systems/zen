@@ -760,7 +760,30 @@ def get_websocket_manager() -> WebSocketManager:
     """Get global WebSocket manager instance."""
     global _websocket_manager
     if _websocket_manager is None:
-        _websocket_manager = WebSocketManager()
+        try:
+            _websocket_manager = WebSocketManager()
+            # Validate the instance was created properly
+            if _websocket_manager is None:
+                logger.error("CRITICAL: WebSocketManager.__new__ returned None")
+                raise RuntimeError("WebSocketManager creation returned None")
+            
+            # Validate required attributes are present
+            required_attrs = ['connections', 'user_connections', 'room_memberships']
+            missing_attrs = [attr for attr in required_attrs if not hasattr(_websocket_manager, attr)]
+            if missing_attrs:
+                logger.error(f"CRITICAL: WebSocketManager missing required attributes: {missing_attrs}")
+                raise RuntimeError(f"WebSocketManager incomplete - missing: {missing_attrs}")
+            
+            logger.debug("WebSocketManager singleton created successfully")
+            
+        except Exception as e:
+            logger.error(f"CRITICAL: Failed to create WebSocketManager singleton: {e}")
+            logger.error("This is likely due to import-time execution or missing asyncio event loop")
+            logger.error("WebSocketManager should be created during application startup, not at import time")
+            # DO NOT reset _websocket_manager = None here, as it prevents proper error reporting
+            # and can cause infinite retry loops during import-time execution
+            raise RuntimeError(f"WebSocketManager creation failed: {e}")
+    
     return _websocket_manager
 
 
@@ -769,8 +792,15 @@ def get_manager() -> WebSocketManager:
     return get_websocket_manager()
 
 
-# Global instance for error recovery integration
-websocket_recovery_manager = get_websocket_manager()
+# Global instance for error recovery integration (lazy initialized to prevent import-time execution)
+_websocket_recovery_manager: Optional[WebSocketManager] = None
+
+def get_websocket_recovery_manager() -> WebSocketManager:
+    """Get WebSocket recovery manager (lazy initialized to prevent import-time issues)."""
+    global _websocket_recovery_manager
+    if _websocket_recovery_manager is None:
+        _websocket_recovery_manager = get_websocket_manager()
+    return _websocket_recovery_manager
 
 
 @asynccontextmanager

@@ -90,7 +90,7 @@ CRITICAL: Develop a globally coherent and modular architecture.
   * **Composability:** Design components for reuse.
   * **Stability by Default:** Changes must be atomic. Explicitly flag any breaking changes.
 
-Use Test Runner to discover tests e.g. python unified_test_runner.py. Read testing xmls.
+Use Test Runner to discover tests e.g. `python tests/unified_test_runner.py` (absolute path: `/Users/anthony/Documents/GitHub/netra-apex/tests/unified_test_runner.py`). Read testing xmls.
 
 **A compliance checklist against these tenets MUST be saved after every work session.**
 
@@ -176,6 +176,61 @@ At every opportunity spawn new subagent with dedicated focus mission and context
 2.  **Prove it:** Write out TWO Mermaid diagrams. One of the ideal working state and one of the current failure state. Save your work the .md file. Write a test that reproduces the bug.
 3.  **Plan system wide claude.md compaliant fix**  Think about ALL associated and related modules that must also be updated. Think about cross system impacts of bug. SLOWLY think DEEPLY about the implications. What is the spirit of the problem beyond the literal one-off problem? Plan the fix. Save to the bugfix .md.
 4.  **Verification and proof implementation worked** QA review and regression testing. Use fail fast, starting with proving that newly created test suite now passes, then rest of tests related to this issue. repeat until all tests pass or 100 times.
+
+### 3.6. MANDATORY COMPLEX REFACTORING PROCESS:
+
+**CRITICAL: For any refactoring involving inheritance, multiple classes, or SSOT consolidation:**
+
+1.  **MRO (Method Resolution Order) Analysis:** Generate a comprehensive MRO report BEFORE refactoring:
+    - Document current inheritance hierarchy using `inspect.getmro()` or equivalent
+    - Map all method overrides and their resolution paths
+    - Identify potential diamond inheritance patterns
+    - Save report to `reports/mro_analysis_[module]_[date].md`
+
+2.  **Dependency Impact Analysis:**
+    - Trace all consumers of classes being refactored
+    - Document which methods/attributes each consumer uses
+    - Identify breaking changes and required adaptations
+    - Cross-reference with [`SPEC/learnings/ssot_consolidation_20250825.xml`](SPEC/learnings/ssot_consolidation_20250825.xml)
+
+3.  **Agent-Based Decomposition:** For complex refactors spanning 5+ files:
+    - Spawn specialized refactoring agents with focused scope
+    - Each agent handles ONE inheritance chain or module
+    - Provide agents with MRO report and interface contracts only
+    - See examples in [`SPEC/learnings/unified_agent_testing_implementation.xml`](SPEC/learnings/unified_agent_testing_implementation.xml)
+
+4.  **Validation Checklist:**
+    - [ ] All MRO paths documented and preserved or intentionally modified
+    - [ ] No unintended method shadowing introduced
+    - [ ] All consumers updated to new interfaces
+    - [ ] Integration tests pass for all inheritance scenarios
+    - [ ] Performance regression tests pass (inheritance lookup overhead)
+
+**Example MRO Report Structure:**
+```markdown
+# MRO Analysis: [Module Name]
+## Current Hierarchy
+- BaseClass
+  - IntermediateA (overrides: method1, method2)
+    - ConcreteA1 (overrides: method2)
+    - ConcreteA2 (overrides: method1, method3)
+  - IntermediateB (overrides: method1, method3)
+    - ConcreteB1 (overrides: method3)
+
+## Method Resolution Paths
+- ConcreteA1.method1 → IntermediateA.method1
+- ConcreteA1.method2 → ConcreteA1.method2 (local override)
+- ConcreteA1.method3 → BaseClass.method3
+
+## Refactoring Impact
+- Breaking: method1 signature change affects 12 consumers
+- Safe: method2 internal refactor, interface preserved
+```
+
+**Cross-Reference Learnings:**
+- SSOT violations: [`SPEC/learnings/ssot_consolidation_20250825.xml`](SPEC/learnings/ssot_consolidation_20250825.xml)
+- Agent examples: [`SPEC/learnings/unified_agent_testing_implementation.xml`](SPEC/learnings/unified_agent_testing_implementation.xml)
+- WebSocket integration: [`SPEC/learnings/websocket_agent_integration_critical.xml`](SPEC/learnings/websocket_agent_integration_critical.xml)
 
 -----
 
@@ -273,22 +328,93 @@ The following events MUST be sent during agent execution to enable meaningful AI
 
 ## 7\. Project Tooling
 
-### 7.1. Quick Start
+### 7.1. Docker
 
+**CRITICAL: All Docker operations go through the central UnifiedDockerManager.**
+**See [`docs/docker_orchestration.md`](docs/docker_orchestration.md) for complete architecture and usage.**
+
+#### Automatic Docker Management (Primary Usage)
 ```bash
-python unified_test_runner.py
+# Tests use UnifiedDockerManager - just run:
+python tests/unified_test_runner.py --real-services
+
+# Docker starts automatically, conflicts are resolved, services are health-checked
 ```
 
-### 7.2. Unified Test Runner
+#### Manual Docker Operations (When Needed)
+
+"Refresh" local dev = for the relevant containers, remove the existing, create a new fresh image, deploy it
+
+```bash
+# Manual control script (uses central UnifiedDockerManager)
+python scripts/docker_manual.py start     # Start test environment
+python scripts/docker_manual.py stop      # Stop all containers  
+python scripts/docker_manual.py restart   # Restart services
+python scripts/docker_manual.py status    # Check status
+python scripts/docker_manual.py clean     # Clean up everything
+python scripts/docker_manual.py test      # Run tests with Docker
+
+# Restart specific services
+python scripts/docker_manual.py restart --services backend auth
+```
+
+**Key Features:**
+- **Automatic Conflict Resolution**: Removes conflicting containers automatically
+- **Health Monitoring**: Comprehensive health checks and reporting
+- **Dynamic Port Allocation**: Avoids port conflicts in parallel runs
+- **Cross-platform**: Works on Windows, macOS, and Linux
+
+#### Alpine-Based Test Orchestration
+**New optimized Alpine Docker images for faster, isolated testing:**
+
+```bash
+# Run tests in isolated Alpine environment
+python test_framework/integrated_test_runner.py --mode isolated --suites unit integration
+
+# Parallel test execution with isolated environments
+python test_framework/integrated_test_runner.py --mode parallel --suites unit api e2e
+
+# Refresh services and test
+python test_framework/integrated_test_runner.py --mode refresh --services backend --suites api
+
+# Continuous integration mode (watches files)
+python test_framework/integrated_test_runner.py --mode ci --watch-paths netra_backend auth_service
+```
+
+#### Development Service Refresh
+```bash
+# Refresh backend and auth with latest changes
+python scripts/refresh_dev_services.py refresh --services backend auth
+
+# Quick restart without rebuild  
+python scripts/refresh_dev_services.py restart --services backend
+
+# Check status
+python scripts/refresh_dev_services.py status
+
+# View logs
+python scripts/refresh_dev_services.py logs --services backend -f
+```
+
+### 7.3. Unified Test Runner
 
 IMPORTANT: Use real services, real llm, docker compose etc. whenever possible for testing.
 MOCKS are FORBIDDEN in dev, staging or production.
 
-  * **Default (Fast Feedback):** `python unified_test_runner.py --category integration --no-coverage --fast-fail`
-  * **Before Release:** `python unified_test_runner.py --categories smoke unit integration api --real-llm --env staging`
+**The test runner automatically starts Docker when needed:**
+
+  * **Default (Fast Feedback):** `python tests/unified_test_runner.py --category integration --no-coverage --fast-fail`
+  * **With Real Services:** `python tests/unified_test_runner.py --real-services` (Docker starts automatically)
+  * **E2E Tests:** `python tests/unified_test_runner.py --category e2e` (Docker starts automatically)
+  * **Before Release:** `python tests/unified_test_runner.py --categories smoke unit integration api --real-llm --env staging`
   * **Mission Critical Tests:** `python tests/mission_critical/test_websocket_agent_events_suite.py`
 
-### 7.3. Deployment (GCP)
+#### Docker Environment Configuration
+- **Test Environment (Default)**: PostgreSQL (5434), Redis (6381), Backend (8000), Auth (8081)
+- **Development Environment**: PostgreSQL (5432), Redis (6379), Backend (8000), Auth (8081)
+- **Production Environment**: Standard production ports
+
+### 7.4. Deployment (GCP)
 
 **Use ONLY the official deployment script.**
   * **Default:** `python scripts/deploy_to_gcp.py --project netra-staging --build-local`
@@ -348,5 +474,6 @@ A user asking for "git commit" means: For EACH group of work that's related do a
   * **GROUP CONCEPTS - LIMIT COUNT OF FILES:** Commits must be small, focused, and conceptually similar units.
   * **CONCEPT-BASED:** Group changes by concept. NEVER bulk commit massive changes without express orders.
   * **REVIEWABLE:** Each commit must be reviewable in under one minute.
+  * **REFACTORING COMMITS:** Complex refactors MUST include MRO report reference in commit message
 
 **Final Reminder:** ULTRA THINK DEEPLY. Your mission is to generate monetization-focused value. Prioritize a coherent, unified system that delivers end-to-end value for our customers. **Think deeply. YOUR WORK MATTERS. THINK STEP BY STEP AS DEEPLY AS POSSIBLE.**

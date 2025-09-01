@@ -1,278 +1,191 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="9" failures="0" skipped="0" tests="9" time="1.760" timestamp="2025-08-31T15:49:46.480892-07:00" hostname="Anthony"><testcase classname="" name="tests.test_auth_comprehensive" time="0.000"><error message="collection failure">auth_service\auth_core\secret_loader.py:45: in get_jwt_secret
-    return validator.get_jwt_secret()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^
-shared\configuration\central_config_validator.py:329: in get_jwt_secret
-    return self.get_validated_config("JWT_SECRET_STAGING")
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-shared\configuration\central_config_validator.py:310: in get_validated_config
-    self._validate_single_requirement(rule, environment)
-shared\configuration\central_config_validator.py:286: in _validate_single_requirement
-    raise ValueError(error_msg)
-E   ValueError: JWT_SECRET_STAGING required in staging environment. Set JWT_SECRET_STAGING environment variable or configure staging-jwt-secret in Secret Manager.
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="26" failures="0" skipped="0" tests="26" time="4.177" timestamp="2025-09-01T14:40:34.660067-07:00" hostname="Anthony"><testcase classname="tests.test_redis_staging_connectivity_fixes.TestRedisConnectivityFixes" name="test_redis_url_from_environment_variable" time="0.523"><error message="failed on setup with &quot;ValueError: I/O operation on closed file.&quot;">..\..\..\..\AppData\Roaming\Python\Python312\site-packages\pytest_asyncio\plugin.py:696: in pytest_fixture_setup
+    hook_result = yield
+                  ^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\pytest_asyncio\plugin.py:272: in _asyncgen_fixture_wrapper
+    result = runner.run(setup(), context=context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\base_events.py:687: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\pytest_asyncio\plugin.py:268: in setup
+    res = await gen_obj.__anext__()  # type: ignore[union-attr]
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+test_framework\conftest_real_services.py:156: in real_services_session
+    orchestrator = ServiceOrchestrator(orchestration_config)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test_framework\unified_docker_manager.py:2276: in __init__
+    logger.info("ServiceOrchestrator is deprecated - using UnifiedDockerManager")
+..\..\..\..\miniconda3\Lib\logging\__init__.py:1539: in info
+    self._log(INFO, msg, args, **kwargs)
+..\..\..\..\miniconda3\Lib\logging\__init__.py:1684: in _log
+    self.handle(record)
+..\..\..\..\miniconda3\Lib\logging\__init__.py:1700: in handle
+    self.callHandlers(record)
+..\..\..\..\miniconda3\Lib\logging\__init__.py:1762: in callHandlers
+    hdlr.handle(record)
+..\..\..\..\miniconda3\Lib\logging\__init__.py:1028: in handle
+    self.emit(record)
+..\..\..\..\miniconda3\Lib\contextlib.py:144: in __exit__
+    next(self.gen)
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file
 
 During handling of the above exception, another exception occurred:
-auth_service\tests\test_auth_comprehensive.py:44: in &lt;module&gt;
-    from auth_service.main import app
-auth_service\main.py:55: in &lt;module&gt;
-    from auth_service.auth_core.routes.auth_routes import router as auth_router, oauth_router
-auth_service\auth_core\routes\auth_routes.py:52: in &lt;module&gt;
-    auth_service = AuthService()
-                   ^^^^^^^^^^^^^
-auth_service\auth_core\services\auth_service.py:47: in __init__
-    self.jwt_handler = JWTHandler()
-                       ^^^^^^^^^^^^
-auth_service\auth_core\core\jwt_handler.py:31: in __init__
-    self.service_secret = AuthConfig.get_service_secret()
-                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\auth_core\config.py:80: in get_service_secret
-    jwt_secret = AuthSecretLoader.get_jwt_secret()
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\auth_core\secret_loader.py:49: in get_jwt_secret
-    raise ValueError(f"JWT secret configuration failed: {e}")
-E   ValueError: JWT secret configuration failed: JWT_SECRET_STAGING required in staging environment. Set JWT_SECRET_STAGING environment variable or configure staging-jwt-secret in Secret Manager.</error></testcase><testcase classname="" name="tests.test_auth_comprehensive_audit" time="0.000"><error message="collection failure">auth_service\auth_core\secret_loader.py:45: in get_jwt_secret
-    return validator.get_jwt_secret()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^
-shared\configuration\central_config_validator.py:329: in get_jwt_secret
-    return self.get_validated_config("JWT_SECRET_STAGING")
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-shared\configuration\central_config_validator.py:310: in get_validated_config
-    self._validate_single_requirement(rule, environment)
-shared\configuration\central_config_validator.py:286: in _validate_single_requirement
-    raise ValueError(error_msg)
-E   ValueError: JWT_SECRET_STAGING required in staging environment. Set JWT_SECRET_STAGING environment variable or configure staging-jwt-secret in Secret Manager.
-
-During handling of the above exception, another exception occurred:
-auth_service\tests\test_auth_comprehensive_audit.py:21: in &lt;module&gt;
-    from auth_service.main import app
-auth_service\main.py:55: in &lt;module&gt;
-    from auth_service.auth_core.routes.auth_routes import router as auth_router, oauth_router
-auth_service\auth_core\routes\auth_routes.py:52: in &lt;module&gt;
-    auth_service = AuthService()
-                   ^^^^^^^^^^^^^
-auth_service\auth_core\services\auth_service.py:47: in __init__
-    self.jwt_handler = JWTHandler()
-                       ^^^^^^^^^^^^
-auth_service\auth_core\core\jwt_handler.py:31: in __init__
-    self.service_secret = AuthConfig.get_service_secret()
-                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\auth_core\config.py:80: in get_service_secret
-    jwt_secret = AuthSecretLoader.get_jwt_secret()
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\auth_core\secret_loader.py:49: in get_jwt_secret
-    raise ValueError(f"JWT secret configuration failed: {e}")
-E   ValueError: JWT secret configuration failed: JWT_SECRET_STAGING required in staging environment. Set JWT_SECRET_STAGING environment variable or configure staging-jwt-secret in Secret Manager.</error></testcase><testcase classname="" name="tests.test_auth_real_services_comprehensive" time="0.000"><error message="collection failure">auth_service\auth_core\secret_loader.py:45: in get_jwt_secret
-    return validator.get_jwt_secret()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^
-shared\configuration\central_config_validator.py:329: in get_jwt_secret
-    return self.get_validated_config("JWT_SECRET_STAGING")
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-shared\configuration\central_config_validator.py:310: in get_validated_config
-    self._validate_single_requirement(rule, environment)
-shared\configuration\central_config_validator.py:286: in _validate_single_requirement
-    raise ValueError(error_msg)
-E   ValueError: JWT_SECRET_STAGING required in staging environment. Set JWT_SECRET_STAGING environment variable or configure staging-jwt-secret in Secret Manager.
-
-During handling of the above exception, another exception occurred:
-auth_service\tests\test_auth_real_services_comprehensive.py:40: in &lt;module&gt;
-    from auth_service.main import app
-auth_service\main.py:55: in &lt;module&gt;
-    from auth_service.auth_core.routes.auth_routes import router as auth_router, oauth_router
-auth_service\auth_core\routes\auth_routes.py:52: in &lt;module&gt;
-    auth_service = AuthService()
-                   ^^^^^^^^^^^^^
-auth_service\auth_core\services\auth_service.py:47: in __init__
-    self.jwt_handler = JWTHandler()
-                       ^^^^^^^^^^^^
-auth_service\auth_core\core\jwt_handler.py:31: in __init__
-    self.service_secret = AuthConfig.get_service_secret()
-                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\auth_core\config.py:80: in get_service_secret
-    jwt_secret = AuthSecretLoader.get_jwt_secret()
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\auth_core\secret_loader.py:49: in get_jwt_secret
-    raise ValueError(f"JWT secret configuration failed: {e}")
-E   ValueError: JWT secret configuration failed: JWT_SECRET_STAGING required in staging environment. Set JWT_SECRET_STAGING environment variable or configure staging-jwt-secret in Secret Manager.</error></testcase><testcase classname="" name="tests.test_critical_bugs" time="0.000"><error message="collection failure">auth_service\auth_core\secret_loader.py:45: in get_jwt_secret
-    return validator.get_jwt_secret()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^
-shared\configuration\central_config_validator.py:329: in get_jwt_secret
-    return self.get_validated_config("JWT_SECRET_STAGING")
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-shared\configuration\central_config_validator.py:310: in get_validated_config
-    self._validate_single_requirement(rule, environment)
-shared\configuration\central_config_validator.py:286: in _validate_single_requirement
-    raise ValueError(error_msg)
-E   ValueError: JWT_SECRET_STAGING required in staging environment. Set JWT_SECRET_STAGING environment variable or configure staging-jwt-secret in Secret Manager.
-
-During handling of the above exception, another exception occurred:
-auth_service\tests\test_critical_bugs.py:29: in &lt;module&gt;
-    from auth_service.main import app
-auth_service\main.py:55: in &lt;module&gt;
-    from auth_service.auth_core.routes.auth_routes import router as auth_router, oauth_router
-auth_service\auth_core\routes\auth_routes.py:52: in &lt;module&gt;
-    auth_service = AuthService()
-                   ^^^^^^^^^^^^^
-auth_service\auth_core\services\auth_service.py:47: in __init__
-    self.jwt_handler = JWTHandler()
-                       ^^^^^^^^^^^^
-auth_service\auth_core\core\jwt_handler.py:31: in __init__
-    self.service_secret = AuthConfig.get_service_secret()
-                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\auth_core\config.py:80: in get_service_secret
-    jwt_secret = AuthSecretLoader.get_jwt_secret()
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\auth_core\secret_loader.py:49: in get_jwt_secret
-    raise ValueError(f"JWT secret configuration failed: {e}")
-E   ValueError: JWT secret configuration failed: JWT_SECRET_STAGING required in staging environment. Set JWT_SECRET_STAGING environment variable or configure staging-jwt-secret in Secret Manager.</error></testcase><testcase classname="" name="tests.test_critical_bugs_real" time="0.000"><error message="collection failure">auth_service\auth_core\secret_loader.py:45: in get_jwt_secret
-    return validator.get_jwt_secret()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^
-shared\configuration\central_config_validator.py:329: in get_jwt_secret
-    return self.get_validated_config("JWT_SECRET_STAGING")
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-shared\configuration\central_config_validator.py:310: in get_validated_config
-    self._validate_single_requirement(rule, environment)
-shared\configuration\central_config_validator.py:286: in _validate_single_requirement
-    raise ValueError(error_msg)
-E   ValueError: JWT_SECRET_STAGING required in staging environment. Set JWT_SECRET_STAGING environment variable or configure staging-jwt-secret in Secret Manager.
-
-During handling of the above exception, another exception occurred:
-auth_service\tests\test_critical_bugs_real.py:22: in &lt;module&gt;
-    from auth_service.main import app
-auth_service\main.py:55: in &lt;module&gt;
-    from auth_service.auth_core.routes.auth_routes import router as auth_router, oauth_router
-auth_service\auth_core\routes\auth_routes.py:52: in &lt;module&gt;
-    auth_service = AuthService()
-                   ^^^^^^^^^^^^^
-auth_service\auth_core\services\auth_service.py:47: in __init__
-    self.jwt_handler = JWTHandler()
-                       ^^^^^^^^^^^^
-auth_service\auth_core\core\jwt_handler.py:31: in __init__
-    self.service_secret = AuthConfig.get_service_secret()
-                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\auth_core\config.py:80: in get_service_secret
-    jwt_secret = AuthSecretLoader.get_jwt_secret()
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\auth_core\secret_loader.py:49: in get_jwt_secret
-    raise ValueError(f"JWT secret configuration failed: {e}")
-E   ValueError: JWT secret configuration failed: JWT_SECRET_STAGING required in staging environment. Set JWT_SECRET_STAGING environment variable or configure staging-jwt-secret in Secret Manager.</error></testcase><testcase classname="" name="tests.test_oauth_state_validation" time="0.000"><error message="collection failure">auth_service\auth_core\secret_loader.py:45: in get_jwt_secret
-    return validator.get_jwt_secret()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^
-shared\configuration\central_config_validator.py:329: in get_jwt_secret
-    return self.get_validated_config("JWT_SECRET_STAGING")
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-shared\configuration\central_config_validator.py:310: in get_validated_config
-    self._validate_single_requirement(rule, environment)
-shared\configuration\central_config_validator.py:286: in _validate_single_requirement
-    raise ValueError(error_msg)
-E   ValueError: JWT_SECRET_STAGING required in staging environment. Set JWT_SECRET_STAGING environment variable or configure staging-jwt-secret in Secret Manager.
-
-During handling of the above exception, another exception occurred:
-auth_service\tests\test_oauth_state_validation.py:13: in &lt;module&gt;
-    from auth_service.auth_core.routes.auth_routes import router
-auth_service\auth_core\routes\auth_routes.py:52: in &lt;module&gt;
-    auth_service = AuthService()
-                   ^^^^^^^^^^^^^
-auth_service\auth_core\services\auth_service.py:47: in __init__
-    self.jwt_handler = JWTHandler()
-                       ^^^^^^^^^^^^
-auth_service\auth_core\core\jwt_handler.py:31: in __init__
-    self.service_secret = AuthConfig.get_service_secret()
-                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\auth_core\config.py:80: in get_service_secret
-    jwt_secret = AuthSecretLoader.get_jwt_secret()
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\auth_core\secret_loader.py:49: in get_jwt_secret
-    raise ValueError(f"JWT secret configuration failed: {e}")
-E   ValueError: JWT secret configuration failed: JWT_SECRET_STAGING required in staging environment. Set JWT_SECRET_STAGING environment variable or configure staging-jwt-secret in Secret Manager.</error></testcase><testcase classname="" name="tests.test_refresh_endpoint" time="0.000"><error message="collection failure">auth_service\auth_core\secret_loader.py:45: in get_jwt_secret
-    return validator.get_jwt_secret()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^
-shared\configuration\central_config_validator.py:329: in get_jwt_secret
-    return self.get_validated_config("JWT_SECRET_STAGING")
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-shared\configuration\central_config_validator.py:310: in get_validated_config
-    self._validate_single_requirement(rule, environment)
-shared\configuration\central_config_validator.py:286: in _validate_single_requirement
-    raise ValueError(error_msg)
-E   ValueError: JWT_SECRET_STAGING required in staging environment. Set JWT_SECRET_STAGING environment variable or configure staging-jwt-secret in Secret Manager.
-
-During handling of the above exception, another exception occurred:
-auth_service\tests\test_refresh_endpoint.py:31: in &lt;module&gt;
-    from auth_service.main import app
-auth_service\main.py:55: in &lt;module&gt;
-    from auth_service.auth_core.routes.auth_routes import router as auth_router, oauth_router
-auth_service\auth_core\routes\auth_routes.py:52: in &lt;module&gt;
-    auth_service = AuthService()
-                   ^^^^^^^^^^^^^
-auth_service\auth_core\services\auth_service.py:47: in __init__
-    self.jwt_handler = JWTHandler()
-                       ^^^^^^^^^^^^
-auth_service\auth_core\core\jwt_handler.py:31: in __init__
-    self.service_secret = AuthConfig.get_service_secret()
-                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\auth_core\config.py:80: in get_service_secret
-    jwt_secret = AuthSecretLoader.get_jwt_secret()
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\auth_core\secret_loader.py:49: in get_jwt_secret
-    raise ValueError(f"JWT secret configuration failed: {e}")
-E   ValueError: JWT secret configuration failed: JWT_SECRET_STAGING required in staging environment. Set JWT_SECRET_STAGING environment variable or configure staging-jwt-secret in Secret Manager.</error></testcase><testcase classname="" name="tests.test_refresh_endpoint_compatibility" time="0.000"><error message="collection failure">auth_service\auth_core\secret_loader.py:45: in get_jwt_secret
-    return validator.get_jwt_secret()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^
-shared\configuration\central_config_validator.py:329: in get_jwt_secret
-    return self.get_validated_config("JWT_SECRET_STAGING")
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-shared\configuration\central_config_validator.py:310: in get_validated_config
-    self._validate_single_requirement(rule, environment)
-shared\configuration\central_config_validator.py:286: in _validate_single_requirement
-    raise ValueError(error_msg)
-E   ValueError: JWT_SECRET_STAGING required in staging environment. Set JWT_SECRET_STAGING environment variable or configure staging-jwt-secret in Secret Manager.
-
-During handling of the above exception, another exception occurred:
-auth_service\tests\test_refresh_endpoint_compatibility.py:12: in &lt;module&gt;
-    from auth_service.main import app
-auth_service\main.py:55: in &lt;module&gt;
-    from auth_service.auth_core.routes.auth_routes import router as auth_router, oauth_router
-auth_service\auth_core\routes\auth_routes.py:52: in &lt;module&gt;
-    auth_service = AuthService()
-                   ^^^^^^^^^^^^^
-auth_service\auth_core\services\auth_service.py:47: in __init__
-    self.jwt_handler = JWTHandler()
-                       ^^^^^^^^^^^^
-auth_service\auth_core\core\jwt_handler.py:31: in __init__
-    self.service_secret = AuthConfig.get_service_secret()
-                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\auth_core\config.py:80: in get_service_secret
-    jwt_secret = AuthSecretLoader.get_jwt_secret()
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\auth_core\secret_loader.py:49: in get_jwt_secret
-    raise ValueError(f"JWT secret configuration failed: {e}")
-E   ValueError: JWT secret configuration failed: JWT_SECRET_STAGING required in staging environment. Set JWT_SECRET_STAGING environment variable or configure staging-jwt-secret in Secret Manager.</error></testcase><testcase classname="" name="tests.test_refresh_loop_prevention_comprehensive" time="0.000"><error message="collection failure">auth_service\auth_core\secret_loader.py:45: in get_jwt_secret
-    return validator.get_jwt_secret()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^
-shared\configuration\central_config_validator.py:329: in get_jwt_secret
-    return self.get_validated_config("JWT_SECRET_STAGING")
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-shared\configuration\central_config_validator.py:310: in get_validated_config
-    self._validate_single_requirement(rule, environment)
-shared\configuration\central_config_validator.py:286: in _validate_single_requirement
-    raise ValueError(error_msg)
-E   ValueError: JWT_SECRET_STAGING required in staging environment. Set JWT_SECRET_STAGING environment variable or configure staging-jwt-secret in Secret Manager.
-
-During handling of the above exception, another exception occurred:
-auth_service\tests\test_refresh_loop_prevention_comprehensive.py:16: in &lt;module&gt;
-    from auth_service.main import app
-auth_service\main.py:55: in &lt;module&gt;
-    from auth_service.auth_core.routes.auth_routes import router as auth_router, oauth_router
-auth_service\auth_core\routes\auth_routes.py:52: in &lt;module&gt;
-    auth_service = AuthService()
-                   ^^^^^^^^^^^^^
-auth_service\auth_core\services\auth_service.py:47: in __init__
-    self.jwt_handler = JWTHandler()
-                       ^^^^^^^^^^^^
-auth_service\auth_core\core\jwt_handler.py:31: in __init__
-    self.service_secret = AuthConfig.get_service_secret()
-                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\auth_core\config.py:80: in get_service_secret
-    jwt_secret = AuthSecretLoader.get_jwt_secret()
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service\auth_core\secret_loader.py:49: in get_jwt_secret
-    raise ValueError(f"JWT secret configuration failed: {e}")
-E   ValueError: JWT secret configuration failed: JWT_SECRET_STAGING required in staging environment. Set JWT_SECRET_STAGING environment variable or configure staging-jwt-secret in Secret Manager.</error></testcase></testsuite></testsuites>
+..\..\..\..\miniconda3\Lib\contextlib.py:158: in __exit__
+    self.gen.throw(value)
+E   ValueError: I/O operation on closed file.</error><error message="failed on teardown with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error></testcase><testcase classname="tests.test_redis_staging_connectivity_fixes.TestRedisConnectivityFixes" name="test_redis_url_from_secret_manager" time="0.000"><error message="failed on setup with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error><error message="failed on teardown with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error></testcase><testcase classname="tests.test_redis_staging_connectivity_fixes.TestRedisConnectivityFixes" name="test_redis_url_graceful_degradation_on_secret_manager_failure" time="0.000"><error message="failed on setup with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error><error message="failed on teardown with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error></testcase><testcase classname="tests.test_redis_staging_connectivity_fixes.TestRedisConnectivityFixes" name="test_redis_connection_retry_logic" time="0.000"><error message="failed on setup with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error><error message="failed on teardown with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error></testcase><testcase classname="tests.test_redis_staging_connectivity_fixes.TestRedisConnectivityFixes" name="test_redis_connection_retry_exhaustion" time="0.000"><error message="failed on setup with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error><error message="failed on teardown with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error></testcase><testcase classname="tests.test_redis_staging_connectivity_fixes.TestRedisConnectivityFixes" name="test_async_health_check_with_timeout" time="0.000"><error message="failed on setup with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error><error message="failed on teardown with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error></testcase><testcase classname="tests.test_redis_staging_connectivity_fixes.TestRedisConnectivityFixes" name="test_redis_operations_error_handling" time="0.000"><error message="failed on setup with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error><error message="failed on teardown with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error></testcase><testcase classname="tests.test_redis_staging_connectivity_fixes.TestRedisConnectivityFixes" name="test_redis_connection_info" time="0.000"><error message="failed on setup with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error><error message="failed on teardown with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error></testcase><testcase classname="tests.test_redis_staging_connectivity_fixes.TestRedisConnectivityFixes" name="test_get_redis_status_function" time="0.000"><error message="failed on setup with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error><error message="failed on teardown with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error></testcase><testcase classname="tests.test_redis_staging_connectivity_fixes.TestRedisConnectivityFixes" name="test_session_manager_fallback_behavior" time="0.000"><error message="failed on setup with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error><error message="failed on teardown with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error></testcase><testcase classname="tests.test_redis_staging_connectivity_fixes.TestRedisConnectivityFixes" name="test_environment_specific_redis_behavior" time="0.000"><error message="failed on setup with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error><error message="failed on teardown with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error></testcase><testcase classname="tests.test_redis_staging_connectivity_fixes.TestRedisStagingIntegration" name="test_staging_health_check_degraded_to_healthy" time="0.000"><error message="failed on setup with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error><error message="failed on teardown with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error></testcase><testcase classname="tests.test_redis_staging_connectivity_fixes.TestRedisStagingIntegration" name="test_staging_redis_url_secret_name_format" time="0.000"><error message="failed on setup with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error><error message="failed on teardown with &quot;ValueError: I/O operation on closed file&quot;">..\..\..\..\miniconda3\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\tempfile.py:499: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: I/O operation on closed file</error></testcase></testsuite></testsuites>

@@ -1,5 +1,6 @@
 """Integration test for the new service availability detection system.
 
+from shared.isolated_environment import get_env
 This test demonstrates how to use the service availability detection
 in E2E tests to properly handle real vs. mock services.
 """

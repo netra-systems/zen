@@ -12,7 +12,6 @@ services:
   # Test PostgreSQL Database - Optimized for fast testing
   test-postgres:
     image: postgres:15-alpine
-    container_name: netra-test-postgres
     environment:
       POSTGRES_USER: test_user
       POSTGRES_PASSWORD: test_pass
@@ -56,13 +55,12 @@ services:
       retries: 10
       start_period: 10s
     networks:
-      - test-network
+      - default
     restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
 
   # Test Redis Cache - Optimized for testing
   test-redis:
     image: redis:7-alpine
-    container_name: netra-test-redis
     command: |
       redis-server
         --appendonly no
@@ -86,13 +84,12 @@ services:
       retries: 5
       start_period: 5s
     networks:
-      - test-network
+      - default
     restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
 
   # Test ClickHouse Analytics - Optimized for testing
   test-clickhouse:
     image: clickhouse/clickhouse-server:23-alpine
-    container_name: netra-test-clickhouse
     environment:
       CLICKHOUSE_DB: netra_test_analytics
       CLICKHOUSE_USER: test_user
@@ -121,8 +118,129 @@ services:
       retries: 10
       start_period: 15s
     networks:
-      - test-network
+      - default
     restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
+
+  # ============================================
+  # APPLICATION TEST SERVICES
+  # ============================================
+
+  # Test Backend Service
+  test-backend:
+    image: netra-test-backend:latest
+    build:
+      context: .
+      dockerfile: ./docker/backend.Dockerfile
+      args:
+        BUILD_ENV: test
+    environment:
+      ENVIRONMENT: test
+      LOG_LEVEL: ERROR
+      # Database
+      POSTGRES_HOST: test-postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_pass
+      POSTGRES_DB: netra_test
+      # Redis
+      REDIS_HOST: test-redis
+      REDIS_PORT: 6379
+      # ClickHouse
+      CLICKHOUSE_HOST: test-clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USER: test_user
+      CLICKHOUSE_PASSWORD: test_pass
+      # Auth service
+      AUTH_SERVICE_URL: http://test-auth:8081
+      # Test-specific configs
+      TESTING: 1
+      TEST_MODE: true
+      SERVICE_SECRET: test_service_secret_for_testing_only
+      SERVICE_ID: test-backend-service
+      JWT_SECRET_KEY: test_jwt_secret_key_for_testing_only
+    ports:
+      - "${TEST_BACKEND_PORT:-8001}:8000"
+    depends_on:
+      test-postgres:
+        condition: service_healthy
+      test-redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 20s
+    networks:
+      - default
+    restart: no
+
+  # Test Auth Service
+  test-auth:
+    image: netra-test-auth:latest
+    build:
+      context: .
+      dockerfile: ./docker/auth.Dockerfile
+      args:
+        BUILD_ENV: test
+    environment:
+      ENVIRONMENT: test
+      LOG_LEVEL: ERROR
+      # Database
+      POSTGRES_HOST: test-postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_pass
+      POSTGRES_DB: netra_test
+      # Redis
+      REDIS_HOST: test-redis
+      REDIS_PORT: 6379
+      # Test-specific configs
+      TESTING: 1
+      TEST_MODE: true
+      JWT_SECRET_KEY: test_jwt_secret_key_for_testing_only
+      SERVICE_SECRET: test_service_secret_for_testing_only
+      SERVICE_ID: test-auth-service
+      AUTH_FAST_TEST_MODE: true
+    ports:
+      - "${TEST_AUTH_PORT:-8082}:8081"
+    depends_on:
+      test-postgres:
+        condition: service_healthy
+      test-redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 20s
+    networks:
+      - default
+    restart: no
+
+  # Test Frontend Service (optional for e2e)
+  test-frontend:
+    image: netra-test-frontend:latest
+    build:
+      context: .
+      dockerfile: ./docker/frontend.Dockerfile
+      args:
+        BUILD_ENV: test
+    environment:
+      NEXT_PUBLIC_API_URL: http://test-backend:8000
+      NEXT_PUBLIC_AUTH_URL: http://test-auth:8081
+      NODE_ENV: test
+    ports:
+      - "${TEST_FRONTEND_PORT:-3001}:3000"
+    depends_on:
+      test-backend:
+        condition: service_healthy
+      test-auth:
+        condition: service_healthy
+    networks:
+      - default
+    restart: no
 
   # ============================================
   # SUPPORTING TEST SERVICES
@@ -131,7 +249,6 @@ services:
   # Test Message Queue (RabbitMQ) - If needed for async testing
   test-rabbitmq:
     image: rabbitmq:3-alpine
-    container_name: netra-test-rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: test_user
       RABBITMQ_DEFAULT_PASS: test_pass
@@ -150,18 +267,17 @@ services:
       retries: 5
       start_period: 10s
     networks:
-      - test-network
+      - default
     restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
 
   # Test SMTP Server - For email testing
   test-mailhog:
     image: mailhog/mailhog:latest
-    container_name: netra-test-mailhog
     ports:
       - "${TEST_SMTP_PORT:-1026}:1025"
       - "${TEST_SMTP_WEB_PORT:-8026}:8025"
     networks:
-      - test-network
+      - default
     restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
 
   # ============================================
@@ -173,7 +289,6 @@ services:
     build:
       context: .
       dockerfile: ./docker/test-seeder.Dockerfile
-    container_name: netra-test-seeder
     environment:
       POSTGRES_HOST: test-postgres
       POSTGRES_PORT: 5432
@@ -198,7 +313,7 @@ services:
       test-clickhouse:
         condition: service_healthy
     networks:
-      - test-network
+      - default
     command: python seed_data.py
 
   # Test health monitor - Monitors service health during tests
@@ -206,7 +321,6 @@ services:
     build:
       context: .
       dockerfile: ./docker/test-monitor.Dockerfile
-    container_name: netra-test-monitor
     environment:
       SERVICES_TO_MONITOR: "test-postgres,test-redis,test-clickhouse"
       CHECK_INTERVAL: 5
@@ -218,16 +332,15 @@ services:
       - test-redis
       - test-clickhouse
     networks:
-      - test-network
+      - default
     restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
 
 # Optimized test network
 networks:
-  test-network:
+  default:
     driver: bridge
-    name: netra-test-network
+    # Network name will be prefixed with project name automatically
     driver_opts:
-      com.docker.network.bridge.name: netra-test-br0
       com.docker.network.driver.mtu: 1500
 
 # Test volumes (mostly tmpfs for speed)

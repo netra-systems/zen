@@ -192,7 +192,7 @@ export default function NotificationsSection() {
               <div>
                 <div style={{ fontWeight: '500' }}>Mentions</div>
                 <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                  When you're mentioned in comments or shared workspaces
+                  When you&apos;re mentioned in comments or shared workspaces
                 </div>
               </div>
               <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
@@ -210,7 +210,7 @@ export default function NotificationsSection() {
               <div>
                 <div style={{ fontWeight: '500' }}>Thread Replies</div>
                 <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                  New replies in conversations you're participating in
+                  New replies in conversations you&apos;re participating in
                 </div>
               </div>
               <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>

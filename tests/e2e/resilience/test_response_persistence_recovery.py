@@ -27,9 +27,6 @@ from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 import pytest
 
 # Set testing environment before imports
-env.set("TESTING", "1", "test")
-env.set("ENVIRONMENT", "testing", "test")
-env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
 
 from sqlalchemy import select, text
 from sqlalchemy.exc import SQLAlchemyError

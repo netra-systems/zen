@@ -21,7 +21,6 @@ services:
   # Dev PostgreSQL Database
   dev-postgres:
     image: postgres:15-alpine
-    container_name: netra-dev-postgres
     # No profile specified - runs by default
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-netra}
@@ -43,7 +42,7 @@ services:
       retries: 5
       start_period: 30s
     networks:
-      - netra-network
+      - default
     restart: unless-stopped
     deploy:
       resources:
@@ -54,7 +53,6 @@ services:
   # Dev Redis Cache
   dev-redis:
     image: redis:7-alpine
-    container_name: netra-dev-redis
     # No profile specified - runs by default
     command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
     ports:
@@ -68,7 +66,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - netra-network
+      - default
     restart: unless-stopped
     deploy:
       resources:
@@ -78,14 +76,14 @@ services:
 
   # Dev ClickHouse Analytics (Optional - can be ephemeral)
   dev-clickhouse:
-    image: clickhouse/clickhouse-server:23-alpine
-    container_name: netra-dev-clickhouse
+    image: clickhouse/clickhouse-server:23.8
     # No profile specified - runs by default
     environment:
       CLICKHOUSE_DB: ${CLICKHOUSE_DB:-netra_analytics}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER:-netra}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-netra123}
       CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+      CLICKHOUSE_HTTP_PORT: 8123
     ports:
       - "${DEV_CLICKHOUSE_HTTP_PORT:-8124}:8123"
       - "${DEV_CLICKHOUSE_TCP_PORT:-9001}:9000"
@@ -99,7 +97,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - netra-network
+      - default
     restart: unless-stopped
     deploy:
       resources:
@@ -115,7 +113,6 @@ services:
       dockerfile: ./docker/auth.Dockerfile
       args:
         BUILD_ENV: development
-    container_name: netra-dev-auth
     # No profile specified - runs by default
     environment:
       ENVIRONMENT: development
@@ -166,7 +163,7 @@ services:
       retries: 5
       start_period: 40s
     networks:
-      - netra-network
+      - default
     restart: unless-stopped
     deploy:
       resources:
@@ -182,7 +179,6 @@ services:
       dockerfile: ./docker/backend.Dockerfile
       args:
         BUILD_ENV: development
-    container_name: netra-dev-backend
     # No profile specified - runs by default
     environment:
       ENVIRONMENT: development
@@ -244,7 +240,7 @@ services:
       retries: 5
       start_period: 40s
     networks:
-      - netra-network
+      - default
     restart: unless-stopped
     deploy:
       resources:
@@ -264,7 +260,6 @@ services:
         NEXT_PUBLIC_AUTH_URL: ${NEXT_PUBLIC_AUTH_URL:-http://localhost:8081}
         NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-ws://localhost:8000}
         NEXT_PUBLIC_ENVIRONMENT: development
-    container_name: netra-dev-frontend
     # No profile specified - runs by default
     environment:
       NODE_ENV: development
@@ -284,7 +279,7 @@ services:
       retries: 5
       start_period: 60s
     networks:
-      - netra-network
+      - default
     restart: unless-stopped
     deploy:
       resources:
@@ -299,7 +294,6 @@ services:
   # Test PostgreSQL Database
   test-postgres:
     image: postgres:15-alpine
-    container_name: netra-test-postgres
     profiles: ["test"]
     environment:
       POSTGRES_USER: test
@@ -316,7 +310,7 @@ services:
       retries: 5
       start_period: 10s
     networks:
-      - netra-network
+      - default
     restart: no
     deploy:
       resources:
@@ -327,7 +321,6 @@ services:
   # Test Redis Cache
   test-redis:
     image: redis:7-alpine
-    container_name: netra-test-redis
     profiles: ["test"]
     command: redis-server --maxmemory 64mb --maxmemory-policy allkeys-lru
     ports:
@@ -339,7 +332,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - netra-network
+      - default
     restart: no
     deploy:
       resources:
@@ -349,14 +342,14 @@ services:
 
   # Test ClickHouse Analytics
   test-clickhouse:
-    image: clickhouse/clickhouse-server:23-alpine
-    container_name: netra-test-clickhouse
+    image: clickhouse/clickhouse-server:23.8
     profiles: ["test"]
     environment:
       CLICKHOUSE_DB: netra_test_analytics
       CLICKHOUSE_USER: test
       CLICKHOUSE_PASSWORD: test
       CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+      CLICKHOUSE_HTTP_PORT: 8123
     ports:
       - "${TEST_CLICKHOUSE_HTTP_PORT:-8125}:8123"
       - "${TEST_CLICKHOUSE_TCP_PORT:-9002}:9000"
@@ -368,7 +361,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - netra-network
+      - default
     restart: no
     deploy:
       resources:
@@ -382,29 +375,30 @@ services:
 volumes:
   # Infrastructure data only (required for persistence)
   postgres_data:
-    name: netra-postgres-data
+    # Volume names will be prefixed with project name automatically
 
   redis_data:
-    name: netra-redis-data
+    # Volume names will be prefixed with project name automatically
 
   clickhouse_data:
-    name: netra-clickhouse-data
+    # Volume names will be prefixed with project name automatically
 
   # Application data (for file uploads, caches, etc.)
   backend_data:
-    name: netra-backend-data
+    # Volume names will be prefixed with project name automatically
 
   # FIX: Added dedicated volume for auth service
   auth_data:
-    name: netra-auth-data
+    # Volume names will be prefixed with project name automatically
 
 # ============================================
 # NETWORKS
 # ============================================
+# Using project-based networks for isolation
+# Docker Compose will create a network with project name prefix
 networks:
-  netra-network:
+  default:
     driver: bridge
-    name: netra-network
 
 # ============================================
 # TOTAL RESOURCE LIMITS (Approx for Dev profile):

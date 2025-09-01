@@ -12,6 +12,7 @@ from typing import Dict, List, Optional, Set, Any
 from enum import Enum
 
 from netra_backend.app.logging_config import central_logger
+from shared.monitoring.interfaces import ComponentMonitor, MonitorableComponent
 
 logger = central_logger.get_logger(__name__)
 
@@ -34,9 +35,9 @@ class HealthStatus(Enum):
     FAILED = "failed"
 
 
-class ChatEventMonitor:
+class ChatEventMonitor(ComponentMonitor):
     """
-    Monitor critical chat event flow in real-time.
+    Monitor critical chat event flow in real-time with component auditing capabilities.
     
     Features:
     - Tracks event flow per thread
@@ -44,6 +45,12 @@ class ChatEventMonitor:
     - Identifies stale threads (no events for extended period)
     - Monitors event delivery latency
     - Provides health status and alerts
+    - NEW: Audits registered components (like AgentWebSocketBridge)
+    - NEW: Cross-validates component health claims against event data
+    - NEW: Maintains component health history for analysis
+    
+    Business Value: Enables comprehensive monitoring coverage where the monitor 
+    can audit components without creating tight coupling.
     """
     
     def __init__(self):
@@ -74,6 +81,12 @@ class ChatEventMonitor:
         # Background monitoring
         self._monitor_task = None
         self._shutdown = False
+        
+        # NEW: Component audit capabilities
+        self.monitored_components: Dict[str, MonitorableComponent] = {}
+        self.component_health_history: Dict[str, List[Dict]] = defaultdict(list)
+        self.bridge_audit_metrics: Dict[str, Any] = {}
+        self.max_health_history_per_component = 50  # Keep last 50 health reports per component
         
     async def record_event(
         self, 
@@ -388,6 +401,454 @@ class ChatEventMonitor:
             "total_events": sum(events.values()),
             "status": "active" if (now - last_time) < self.stale_thread_threshold else "stale"
         }
+    
+    # NEW: Component Auditing Methods
+    
+    async def register_component_for_monitoring(
+        self, 
+        component_id: str, 
+        component: MonitorableComponent
+    ) -> None:
+        """
+        Register a component (like AgentWebSocketBridge) for monitoring.
+        
+        Enables the monitor to audit component health while maintaining independence.
+        Component continues to work normally even if registration fails.
+        
+        Args:
+            component_id: Unique identifier for the component
+            component: Component instance implementing MonitorableComponent
+            
+        Business Value: Enables comprehensive system health visibility
+        and silent failure detection across integrated components.
+        """
+        try:
+            self.monitored_components[component_id] = component
+            
+            # Register ourselves as an observer with the component
+            component.register_monitor_observer(self)
+            
+            # Initialize health history for this component
+            if component_id not in self.component_health_history:
+                self.component_health_history[component_id] = []
+            
+            logger.info(f"✅ Component {component_id} registered for monitoring successfully")
+            
+            # Perform initial health audit
+            await self._perform_initial_audit(component_id)
+            
+        except Exception as e:
+            logger.warning(
+                f"⚠️ Failed to register component {component_id} for monitoring: {e}. "
+                f"Component will continue operating independently."
+            )
+    
+    async def _perform_initial_audit(self, component_id: str) -> None:
+        """Perform initial health audit of newly registered component."""
+        try:
+            audit_result = await self.audit_bridge_health(component_id)
+            logger.info(
+                f"Initial audit complete for {component_id}: "
+                f"Status={audit_result.get('internal_health', {}).get('healthy', 'unknown')}"
+            )
+        except Exception as e:
+            logger.warning(f"Initial audit failed for {component_id}: {e}")
+    
+    async def audit_bridge_health(self, bridge_id: str = "main_bridge") -> Dict[str, Any]:
+        """
+        Specific audit of AgentWebSocketBridge health and integration.
+        
+        Performs comprehensive audit including:
+        - Component's internal health status
+        - Component's operational metrics  
+        - Cross-validation with event monitor data
+        - Integration health assessment
+        
+        Args:
+            bridge_id: ID of the bridge component to audit
+            
+        Returns:
+            Dict containing comprehensive audit results
+            
+        Business Value: Provides 360-degree view of bridge health combining
+        internal metrics with external validation for complete visibility.
+        """
+        if bridge_id not in self.monitored_components:
+            return {
+                "status": "not_monitored", 
+                "bridge_id": bridge_id,
+                "audit_timestamp": time.time(),
+                "message": f"Component {bridge_id} not registered for monitoring"
+            }
+        
+        try:
+            bridge = self.monitored_components[bridge_id]
+            
+            # Get bridge's internal health status and metrics
+            bridge_health = await bridge.get_health_status()
+            bridge_metrics = await bridge.get_metrics()
+            
+            # Cross-validate with event monitor data
+            event_validation = await self._validate_bridge_events(bridge_id)
+            integration_assessment = await self._assess_bridge_integration(bridge_id)
+            
+            # Compile comprehensive audit result
+            audit_result = {
+                "bridge_id": bridge_id,
+                "audit_timestamp": time.time(),
+                "internal_health": bridge_health,
+                "internal_metrics": bridge_metrics,
+                "event_monitor_validation": event_validation,
+                "integration_health": integration_assessment,
+                "overall_assessment": self._calculate_overall_assessment(
+                    bridge_health, event_validation, integration_assessment
+                )
+            }
+            
+            # Store audit history (trim if needed)
+            self.component_health_history[bridge_id].append(audit_result)
+            if len(self.component_health_history[bridge_id]) > self.max_health_history_per_component:
+                self.component_health_history[bridge_id] = self.component_health_history[bridge_id][-self.max_health_history_per_component:]
+            
+            # Update bridge audit metrics for trend analysis
+            self._update_bridge_audit_metrics(bridge_id, audit_result)
+            
+            return audit_result
+            
+        except Exception as e:
+            error_result = {
+                "bridge_id": bridge_id,
+                "status": "audit_failed",
+                "error": str(e),
+                "audit_timestamp": time.time()
+            }
+            logger.error(f"Bridge audit failed for {bridge_id}: {e}")
+            return error_result
+    
+    async def _validate_bridge_events(self, bridge_id: str) -> Dict[str, Any]:
+        """
+        Cross-validate bridge health claims against actual event data.
+        
+        Compares bridge's claimed health with observed event patterns
+        to detect discrepancies that might indicate silent failures.
+        
+        Returns:
+            Dict containing event validation results
+        """
+        validation = {
+            "validation_timestamp": time.time(),
+            "total_active_threads": len(self.thread_start_time),
+            "total_events_processed": sum(
+                sum(counts.values()) for counts in self.event_counts.values()
+            ),
+            "recent_silent_failures": len([
+                f for f in self.silent_failures 
+                if time.time() - f["timestamp"] < 300  # Last 5 minutes
+            ]),
+            "stale_threads_count": 0,
+            "stuck_tools_count": 0
+        }
+        
+        # Check for stale threads
+        now = time.time()
+        stale_count = 0
+        for thread_id in self.thread_start_time:
+            last_time = 0
+            for event_type in EventType:
+                key = f"{thread_id}:{event_type.value}"
+                if key in self.last_event_time:
+                    last_time = max(last_time, self.last_event_time[key])
+            
+            if last_time > 0 and (now - last_time) > self.stale_thread_threshold:
+                stale_count += 1
+        
+        validation["stale_threads_count"] = stale_count
+        
+        # Check for stuck tools
+        stuck_count = 0
+        for thread_id, tools in self.active_tools.items():
+            stuck_count += len(tools)  # Any active tool could be stuck
+        validation["stuck_tools_count"] = stuck_count
+        
+        # Determine validation status
+        if validation["recent_silent_failures"] == 0 and stale_count == 0 and stuck_count == 0:
+            validation["status"] = "healthy"
+        elif validation["recent_silent_failures"] <= 2 and stale_count <= 1:
+            validation["status"] = "warning"  
+        else:
+            validation["status"] = "critical"
+            
+        return validation
+    
+    async def _assess_bridge_integration(self, bridge_id: str) -> Dict[str, Any]:
+        """
+        Assess quality of bridge integration with WebSocket system.
+        
+        Evaluates how well the bridge is integrated and functioning
+        within the overall chat system architecture.
+        
+        Returns:
+            Dict containing integration assessment
+        """
+        assessment = {
+            "assessment_timestamp": time.time(),
+            "bridge_registered": bridge_id in self.monitored_components,
+            "health_history_available": len(self.component_health_history.get(bridge_id, [])) > 0,
+            "metrics_available": bridge_id in self.bridge_audit_metrics,
+            "integration_score": 0.0
+        }
+        
+        # Calculate integration score based on available data
+        score_components = []
+        
+        if assessment["bridge_registered"]:
+            score_components.append(25.0)  # Registration: 25%
+            
+        if assessment["health_history_available"]:
+            score_components.append(25.0)  # Health tracking: 25%
+            
+        if assessment["metrics_available"]:
+            score_components.append(25.0)  # Metrics collection: 25%
+            
+        # Event correlation score: 25%
+        if self.event_counts:
+            score_components.append(25.0)  # Events being processed
+            
+        assessment["integration_score"] = sum(score_components)
+        
+        # Determine integration status
+        if assessment["integration_score"] >= 90:
+            assessment["status"] = "excellent"
+        elif assessment["integration_score"] >= 75:
+            assessment["status"] = "good"
+        elif assessment["integration_score"] >= 50:
+            assessment["status"] = "fair"
+        else:
+            assessment["status"] = "poor"
+            
+        return assessment
+    
+    def _calculate_overall_assessment(
+        self, 
+        health: Dict[str, Any], 
+        validation: Dict[str, Any], 
+        integration: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Calculate overall assessment from individual audit components."""
+        
+        # Weight the different assessment components
+        health_weight = 0.5  # Internal health: 50%
+        validation_weight = 0.3  # Event validation: 30%  
+        integration_weight = 0.2  # Integration quality: 20%
+        
+        # Convert status to numeric scores
+        status_scores = {"excellent": 100, "good": 80, "healthy": 80, "fair": 60, "warning": 40, "critical": 20, "poor": 20, "failed": 0}
+        
+        health_score = status_scores.get(health.get("state", "unknown"), 0)
+        if not health.get("healthy", False):
+            health_score = min(health_score, 40)  # Cap unhealthy components
+            
+        validation_score = status_scores.get(validation.get("status", "unknown"), 0)
+        integration_score = status_scores.get(integration.get("status", "unknown"), 0)
+        
+        # Calculate weighted overall score
+        overall_score = (
+            health_score * health_weight +
+            validation_score * validation_weight + 
+            integration_score * integration_weight
+        )
+        
+        # Determine overall status
+        if overall_score >= 80:
+            overall_status = "healthy"
+        elif overall_score >= 60:
+            overall_status = "warning"
+        elif overall_score >= 40:
+            overall_status = "critical"
+        else:
+            overall_status = "failed"
+            
+        return {
+            "overall_score": round(overall_score, 1),
+            "overall_status": overall_status,
+            "component_scores": {
+                "health": health_score,
+                "validation": validation_score,
+                "integration": integration_score
+            }
+        }
+    
+    def _update_bridge_audit_metrics(self, bridge_id: str, audit_result: Dict[str, Any]) -> None:
+        """Update trending metrics based on audit results."""
+        if bridge_id not in self.bridge_audit_metrics:
+            self.bridge_audit_metrics[bridge_id] = {
+                "total_audits": 0,
+                "healthy_audits": 0,
+                "failed_audits": 0,
+                "avg_score": 0.0,
+                "last_audit": None
+            }
+        
+        metrics = self.bridge_audit_metrics[bridge_id]
+        metrics["total_audits"] += 1
+        metrics["last_audit"] = audit_result["audit_timestamp"]
+        
+        overall_assessment = audit_result.get("overall_assessment", {})
+        if overall_assessment.get("overall_status") == "healthy":
+            metrics["healthy_audits"] += 1
+        elif overall_assessment.get("overall_status") in ["critical", "failed"]:
+            metrics["failed_audits"] += 1
+            
+        # Update running average score
+        if "overall_score" in overall_assessment:
+            current_score = overall_assessment["overall_score"]
+            # Simple running average (could use more sophisticated method)
+            metrics["avg_score"] = (
+                (metrics["avg_score"] * (metrics["total_audits"] - 1) + current_score) / 
+                metrics["total_audits"]
+            )
+    
+    async def on_component_health_change(
+        self, 
+        component_id: str, 
+        health_data: Dict[str, Any]
+    ) -> None:
+        """
+        Handle health change notification from a monitored component.
+        
+        Called by components when their health status changes.
+        Maintains health history and triggers alerts if needed.
+        
+        Args:
+            component_id: ID of component reporting health change
+            health_data: Current health status data
+        """
+        try:
+            # Log health change
+            healthy = health_data.get("healthy", health_data.get("state") == "running")
+            logger.info(
+                f"Health change notification from {component_id}: "
+                f"Status={health_data.get('state', 'unknown')}, Healthy={healthy}"
+            )
+            
+            # Store in health history
+            health_record = {
+                "component_id": component_id,
+                "timestamp": time.time(),
+                "health_data": health_data,
+                "notification_type": "health_change"
+            }
+            
+            self.component_health_history[component_id].append(health_record)
+            
+            # Trim history if needed
+            if len(self.component_health_history[component_id]) > self.max_health_history_per_component:
+                self.component_health_history[component_id] = self.component_health_history[component_id][-self.max_health_history_per_component:]
+            
+            # Trigger alert if component becomes unhealthy
+            if not healthy:
+                logger.warning(
+                    f"🚨 Component {component_id} reported unhealthy status: "
+                    f"{health_data.get('state', 'unknown')}. "
+                    f"Error: {health_data.get('error_message', 'No details provided')}"
+                )
+                
+                # Could trigger additional alert mechanisms here
+                # (e.g., notifications, automated recovery)
+                
+        except Exception as e:
+            logger.error(f"Error handling health change notification from {component_id}: {e}")
+    
+    async def remove_component_from_monitoring(self, component_id: str) -> None:
+        """
+        Remove a component from monitoring.
+        
+        Args:
+            component_id: ID of component to stop monitoring
+        """
+        try:
+            if component_id in self.monitored_components:
+                component = self.monitored_components.pop(component_id)
+                
+                # Remove ourselves from component's observers
+                try:
+                    component.remove_monitor_observer(self)
+                except Exception:
+                    pass  # Component may not support observer removal
+                
+                # Clean up health history (keep for historical analysis)
+                # self.component_health_history.pop(component_id, None)  # Commented out to preserve history
+                
+                logger.info(f"Component {component_id} removed from monitoring")
+            else:
+                logger.warning(f"Attempted to remove non-monitored component: {component_id}")
+                
+        except Exception as e:
+            logger.error(f"Error removing component {component_id} from monitoring: {e}")
+    
+    def get_component_audit_summary(self) -> Dict[str, Any]:
+        """
+        Get summary of all monitored components and their audit status.
+        
+        Returns:
+            Dict containing comprehensive monitoring summary for business visibility
+        """
+        summary = {
+            "monitoring_timestamp": time.time(),
+            "total_monitored_components": len(self.monitored_components),
+            "components": {},
+            "overall_system_health": "unknown"
+        }
+        
+        healthy_components = 0
+        total_components = len(self.monitored_components)
+        
+        for component_id in self.monitored_components:
+            # Get latest health record
+            history = self.component_health_history.get(component_id, [])
+            latest_audit = history[-1] if history else None
+            
+            component_summary = {
+                "component_id": component_id,
+                "monitored": True,
+                "audit_history_count": len(history),
+                "metrics_available": component_id in self.bridge_audit_metrics
+            }
+            
+            if latest_audit:
+                if "overall_assessment" in latest_audit:
+                    # This is an audit result
+                    assessment = latest_audit["overall_assessment"]
+                    component_summary["last_audit_status"] = assessment.get("overall_status", "unknown")
+                    component_summary["last_audit_score"] = assessment.get("overall_score", 0)
+                    component_summary["last_audit_timestamp"] = latest_audit.get("audit_timestamp")
+                    
+                    if assessment.get("overall_status") == "healthy":
+                        healthy_components += 1
+                else:
+                    # This is a health change notification
+                    health_data = latest_audit.get("health_data", {})
+                    component_summary["last_health_status"] = health_data.get("state", "unknown")
+                    component_summary["last_health_timestamp"] = latest_audit.get("timestamp")
+                    
+                    if health_data.get("healthy", False):
+                        healthy_components += 1
+            
+            summary["components"][component_id] = component_summary
+        
+        # Calculate overall system health
+        if total_components == 0:
+            summary["overall_system_health"] = "no_monitored_components"
+        elif healthy_components == total_components:
+            summary["overall_system_health"] = "healthy"
+        elif healthy_components >= total_components * 0.8:
+            summary["overall_system_health"] = "warning"
+        else:
+            summary["overall_system_health"] = "critical"
+            
+        summary["healthy_component_ratio"] = f"{healthy_components}/{total_components}"
+        
+        return summary
 
 
 # Global monitor instance

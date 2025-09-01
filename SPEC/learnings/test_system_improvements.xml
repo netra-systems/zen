@@ -50,7 +50,7 @@
 
         <solution id="2">
             <name>Fixed E2E Category Definitions</name>
-            <file>scripts/unified_test_runner.py</file>
+            <file>tests/unified_test_runner.py</file>
             <changes>
                 <before><![CDATA["e2e": ["tests/e2e", "netra_backend/tests", "auth_service/tests"]]]></before>
                 <after><![CDATA[
@@ -154,7 +154,7 @@
     <related_files>
         <file>scripts/test_execution_tracker.py</file>
         <file>scripts/test_dashboard.py</file>
-        <file>scripts/unified_test_runner.py</file>
+        <file>tests/unified_test_runner.py</file>
         <file>scripts/business_value_test_index.py</file>
         <file>E2E_TEST_BLOCKING_AUDIT.md</file>
     </related_files>

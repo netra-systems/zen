@@ -17,6 +17,8 @@ import json
 from typing import Dict, List, Optional, Any
 from test_framework.environment_markers import staging_only, env_requires
 
+from shared.isolated_environment import get_env
+
 
 class TestEnvironmentConfiguration:
     """Test comprehensive environment configuration issues in staging."""
@@ -98,7 +100,7 @@ class TestEnvironmentConfiguration:
         invalid_env_vars = []
         
         for var_name, config in critical_env_vars.items():
-            env_value = os.environ.get(var_name)
+            env_value = get_env().get(var_name)
             
             if not env_value:
                 missing_env_vars.append({
@@ -177,8 +179,8 @@ class TestEnvironmentConfiguration:
             # Find configured URL for this service
             service_url = None
             for env_var in config["env_vars"]:
-                if os.environ.get(env_var):
-                    service_url = os.environ.get(env_var)
+                if get_env().get(env_var):
+                    service_url = get_env().get(env_var)
                     break
             
             if not service_url:
@@ -210,8 +212,8 @@ class TestEnvironmentConfiguration:
                 })
         
         # Check cross-service URL consistency
-        backend_url = os.environ.get("BACKEND_URL", "")
-        auth_url = os.environ.get("AUTH_SERVICE_URL", "")
+        backend_url = get_env().get("BACKEND_URL", "")
+        auth_url = get_env().get("AUTH_SERVICE_URL", "")
         
         if backend_url and auth_url:
             # URLs should use same domain/environment
@@ -274,7 +276,7 @@ class TestEnvironmentConfiguration:
         # Collect all database configurations
         database_configs = {}
         for var in database_config_vars:
-            value = os.environ.get(var)
+            value = get_env().get(var)
             if value:
                 database_configs[var] = {
                     "url": value,
@@ -380,7 +382,7 @@ class TestEnvironmentConfiguration:
         type_validation_failures = []
         
         for var_name, constraints in typed_env_vars.items():
-            env_value_str = os.environ.get(var_name)
+            env_value_str = get_env().get(var_name)
             
             if not env_value_str:
                 # Use default for missing variables
@@ -440,7 +442,7 @@ class TestEnvironmentConfiguration:
         ]
         
         for var_name, problematic_value in common_type_issues:
-            actual_value = os.environ.get(var_name)
+            actual_value = get_env().get(var_name)
             if actual_value == problematic_value:
                 type_validation_failures.append({
                     "variable": var_name,
@@ -536,7 +538,7 @@ class TestEnvironmentConfiguration:
         staging_config_issues = []
         
         for var_name, requirements in staging_specific_config.items():
-            env_value = os.environ.get(var_name)
+            env_value = get_env().get(var_name)
             
             if not env_value:
                 staging_config_issues.append({
@@ -581,14 +583,14 @@ class TestEnvironmentConfiguration:
         
         # Check for production configuration accidentally used in staging
         prod_indicators = ["prod", "production", "live"]
-        for var_name in os.environ:
-            env_value = os.environ[var_name].lower()
+        for var_name in get_env().as_dict():
+            env_value = get_env().get(var_name).lower()
             for indicator in prod_indicators:
                 if indicator in env_value and "staging" not in env_value:
                     staging_config_issues.append({
                         "variable": var_name,
                         "issue": "Production configuration detected in staging",
-                        "value": os.environ[var_name][:50],  # Truncate for security
+                        "value": get_env().get(var_name)[:50],  # Truncate for security
                         "indicator": indicator,
                         "risk": "Staging using production resources"
                     })

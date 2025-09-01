@@ -1,5 +1,6 @@
 """Test Data Factory for E2E Tests
 
+from shared.isolated_environment import get_env
 Core factory for generating unique test data for unified E2E testing.
 Focused on user, message, and thread creation with JWT token support.
 
@@ -332,7 +333,7 @@ def create_test_service_credentials(service_id: str) -> Dict[str, str]:
     service_secret = service_secrets.get(service_id, f"test-{service_id}-secret-{uuid.uuid4().hex[:8]}")
     
     # Set environment variable for validation
-    os.environ[f"SERVICE_SECRET_{service_id}"] = service_secret
+    get_env().get(f"SERVICE_SECRET_{service_id}") = service_secret
     
     return {
         "service_id": service_id,

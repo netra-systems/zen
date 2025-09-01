@@ -13,11 +13,15 @@ import httpx
 import os
 from typing import AsyncGenerator
 from tests.e2e.staging_auth_bypass import StagingAuthHelper
+from shared.isolated_environment import get_env
 
+
+# Get environment manager
+env = get_env()
 
 # Skip these tests if not running against staging
 pytestmark = pytest.mark.skipif(
-    os.getenv("ENVIRONMENT", "development") != "staging",
+    env.get("ENVIRONMENT", "development") != "staging",
     reason="These tests only run against staging environment"
 )
 
@@ -246,7 +250,6 @@ if __name__ == "__main__":
     import subprocess
     
     # Set environment to staging for testing
-    env.set("ENVIRONMENT", "staging", "test")
     
     # Run pytest on this file
     result = subprocess.run(

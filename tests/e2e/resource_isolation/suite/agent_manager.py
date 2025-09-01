@@ -1,6 +1,5 @@
 from shared.isolated_environment import get_env
 """
-env = get_env()
 Tenant Agent Manager for Resource Isolation Testing
 
 Manages creation, connection, and cleanup of tenant agents.
@@ -83,7 +82,7 @@ class TenantAgentManager:
             test_secret = get_jwt_secret()
         except Exception as e:
             logger.warning(f"Could not get unified JWT secret: {e}, using fallback")
-            test_secret = os.getenv("JWT_SECRET_KEY", "dev-secret-key-DO-NOT-USE-IN-PRODUCTION")
+            test_secret = get_env().get("JWT_SECRET_KEY", "dev-secret-key-DO-NOT-USE-IN-PRODUCTION")
         
         try:
             # Generate proper JWT token
@@ -101,7 +100,7 @@ class TenantAgentManager:
     async def establish_agent_connections(self, agents: List[TenantAgent]) -> List[TenantAgent]:
         """Establish WebSocket connections for tenant agents."""
         # Check if we're in offline mode
-        offline_mode = os.getenv("CPU_ISOLATION_OFFLINE_MODE", "false").lower() == "true"
+        offline_mode = get_env().get("CPU_ISOLATION_OFFLINE_MODE", "false").lower() == "true"
         
         if offline_mode:
             logger.info("CPU isolation test in offline mode - creating mock agent connections")
@@ -126,7 +125,6 @@ class TenantAgentManager:
         # If all connections failed due to auth issues, fallback to offline mode
         if len(connected_agents) == 0 and auth_failures == len(agents):
             logger.warning("All WebSocket connections failed - falling back to CPU isolation offline mode")
-            env.set("CPU_ISOLATION_OFFLINE_MODE", "true", "test")
             return self._create_mock_connections(agents)
         
         logger.info(f"Established connections for {len(connected_agents)}/{len(agents)} agents")

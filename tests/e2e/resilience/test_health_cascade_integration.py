@@ -1,6 +1,7 @@
 from shared.isolated_environment import get_env
 """Health Check Cascade Integration Test - Real Health Endpoint Testing
 
+from shared.isolated_environment import get_env
 Business Value: Test real health endpoints for degraded mode behavior.
 Validates actual system health reporting when ClickHouse is unavailable.
 """

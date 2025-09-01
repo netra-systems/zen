@@ -1,5 +1,6 @@
 """Real Database Consistency Test - Critical Test #3 for Netra System
 
+from shared.isolated_environment import get_env
 CRITICAL CONTEXT: Real Database Consistency Validation
 Tests data synchronization across Auth DB, Backend PostgreSQL, Frontend state, 
 and ClickHouse without mocking. Critical for preventing $50K+ MRR revenue risk
@@ -105,39 +106,39 @@ class RealDatabaseConsistencyManager:
     def _get_auth_database_url(self) -> str:
         """Get Auth service database URL."""
         import os
-        return os.getenv("AUTH_DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_auth_test")
+        return get_env().get("AUTH_DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_auth_test")
     
     def _get_backend_database_url(self) -> str:
         """Get Backend service database URL."""
-        return os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_test")
+        return get_env().get("DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_test")
     
     def _get_redis_host(self) -> str:
         """Get Redis host configuration."""
-        return os.getenv("REDIS_HOST", "localhost")
+        return get_env().get("REDIS_HOST", "localhost")
     
     def _get_redis_port(self) -> int:
         """Get Redis port configuration."""
-        return int(os.getenv("REDIS_PORT", "6379"))
+        return int(get_env().get("REDIS_PORT", "6379"))
     
     def _get_clickhouse_host(self) -> str:
         """Get ClickHouse host configuration."""
-        return os.getenv("CLICKHOUSE_HOST", "localhost")
+        return get_env().get("CLICKHOUSE_HOST", "localhost")
     
     def _get_clickhouse_port(self) -> int:
         """Get ClickHouse port configuration."""
-        return int(os.getenv("CLICKHOUSE_HTTP_PORT", "8123"))
+        return int(get_env().get("CLICKHOUSE_HTTP_PORT", "8123"))
     
     def _get_clickhouse_database(self) -> str:
         """Get ClickHouse database name."""
-        return os.getenv("CLICKHOUSE_DB", "default")
+        return get_env().get("CLICKHOUSE_DB", "default")
     
     def _get_clickhouse_user(self) -> str:
         """Get ClickHouse user."""
-        return os.getenv("CLICKHOUSE_USER", "default")
+        return get_env().get("CLICKHOUSE_USER", "default")
     
     def _get_clickhouse_password(self) -> str:
         """Get ClickHouse password."""
-        return os.getenv("CLICKHOUSE_PASSWORD", "")
+        return get_env().get("CLICKHOUSE_PASSWORD", "")
     
     async def _verify_all_connections(self) -> None:
         """Verify all database connections are working."""

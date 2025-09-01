@@ -1,5 +1,6 @@
 """Test to demonstrate staging environment database name misconfiguration.
 
+from shared.isolated_environment import get_env
 This test proves that staging is incorrectly configured to use 'netra_dev' database
 instead of the correct staging database name.
 

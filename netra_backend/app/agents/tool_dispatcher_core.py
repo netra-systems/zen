@@ -1,11 +1,13 @@
 """Core dispatcher logic and initialization for tool dispatching."""
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel, Field
 
+if TYPE_CHECKING:
+    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.tool_dispatcher_execution import ToolExecutionEngine
 from netra_backend.app.agents.tool_dispatcher_registry import ToolRegistry
 from netra_backend.app.agents.tool_dispatcher_validation import ToolValidator
 from netra_backend.app.logging_config import central_logger
@@ -34,19 +36,33 @@ class ToolDispatchResponse(BaseModel):
 class ToolDispatcher:
     """Core tool dispatcher with modular architecture"""
     
-    def __init__(self, tools: List[BaseTool] = None):
-        self._init_components()
+    def __init__(self, tools: List[BaseTool] = None, websocket_bridge: Optional['AgentWebSocketBridge'] = None):
+        """Initialize tool dispatcher with optional AgentWebSocketBridge support.
+        
+        Args:
+            tools: List of tools to register initially
+            websocket_bridge: AgentWebSocketBridge for real-time notifications (critical for chat)
+        """
+        self._init_components(websocket_bridge)
         self._register_initial_tools(tools)
     
     @property
     def tools(self) -> Dict[str, Any]:
-        """Expose tools registry for backward compatibility"""
+        """Expose tools registry"""
         return self.registry.tools
     
-    def _init_components(self) -> None:
-        """Initialize dispatcher components"""
+    @property
+    def has_websocket_support(self) -> bool:
+        """Check if WebSocket support is enabled through bridge."""
+        return hasattr(self.executor, 'websocket_bridge') and self.executor.websocket_bridge is not None
+    
+    
+    def _init_components(self, websocket_bridge: Optional['AgentWebSocketBridge'] = None) -> None:
+        """Initialize dispatcher components with AgentWebSocketBridge support built-in."""
         self.registry = ToolRegistry()
-        self.executor = ToolExecutionEngine()
+        # Always use UnifiedToolExecutionEngine - no more enhancement pattern
+        from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
+        self.executor = UnifiedToolExecutionEngine(websocket_bridge=websocket_bridge)
         self.validator = ToolValidator()
     
     def _register_initial_tools(self, tools: List[BaseTool]) -> None:
@@ -128,38 +144,66 @@ class ToolDispatcher:
         )
     
     async def _execute_tool(self, tool_input: ToolInput, tool: Any, kwargs: Dict[str, Any]) -> ToolResult:
-        """Execute tool via executor - backward compatibility method"""
+        """Execute tool via executor"""
         return await self.executor.execute_tool_with_input(tool_input, tool, kwargs)
     
-    async def _execute_tool_with_error_handling(
-        self,
-        tool: Any,
-        tool_name: str,
-        parameters: Dict[str, Any],
-        state: DeepAgentState,
-        run_id: str
-    ) -> ToolDispatchResponse:
-        """Execute tool with comprehensive error handling"""
-        return await self.executor.execute_with_state(tool, tool_name, parameters, state, run_id)
+    def set_websocket_bridge(self, bridge: Optional['AgentWebSocketBridge']) -> None:
+        """Set or update WebSocket bridge on the executor.
+        
+        This method allows updating the bridge after initialization,
+        which is critical for proper WebSocket event delivery.
+        """
+        if hasattr(self.executor, 'websocket_bridge'):
+            old_bridge = self.executor.websocket_bridge
+            self.executor.websocket_bridge = bridge
+            
+            if bridge is not None:
+                logger.info("✅ Updated ToolDispatcher executor WebSocket bridge")
+            else:
+                logger.warning("⚠️ Set ToolDispatcher executor WebSocket bridge to None - events will be lost")
+            
+            if old_bridge is None and bridge is not None:
+                logger.info("🔧 Fixed missing WebSocket bridge on ToolDispatcher - events now enabled")
+        else:
+            logger.error("🚨 CRITICAL: ToolDispatcher executor doesn't support WebSocket bridge pattern")
     
-    async def _execute_tool_by_type(
-        self,
-        tool: Any,
-        parameters: Dict[str, Any],
-        state: DeepAgentState,
-        run_id: str
-    ) -> Any:
-        """Execute tool by type - backward compatibility method"""
-        return await self.executor._execute_by_type(tool, parameters, state, run_id)
+    def get_websocket_bridge(self) -> Optional['AgentWebSocketBridge']:
+        """Get current WebSocket bridge from executor."""
+        if hasattr(self.executor, 'websocket_bridge'):
+            return self.executor.websocket_bridge
+        return None
     
-    def _create_success_response(self, result: Any, tool_name: str, run_id: str) -> ToolDispatchResponse:
-        """Create success response - backward compatibility method"""
-        return self.executor._create_success_response(result, tool_name, run_id)
+    def diagnose_websocket_wiring(self) -> Dict[str, Any]:
+        """Diagnose WebSocket wiring for debugging silent failures."""
+        diagnosis = {
+            "dispatcher_has_executor": hasattr(self, 'executor'),
+            "executor_type": type(self.executor).__name__ if hasattr(self, 'executor') else None,
+            "executor_has_websocket_bridge_attr": False,
+            "websocket_bridge_is_none": True,
+            "websocket_bridge_type": None,
+            "has_websocket_support": self.has_websocket_support,
+            "critical_issues": []
+        }
+        
+        if hasattr(self, 'executor'):
+            diagnosis["executor_has_websocket_bridge_attr"] = hasattr(self.executor, 'websocket_bridge')
+            
+            if hasattr(self.executor, 'websocket_bridge'):
+                bridge = self.executor.websocket_bridge
+                diagnosis["websocket_bridge_is_none"] = bridge is None
+                diagnosis["websocket_bridge_type"] = type(bridge).__name__ if bridge else None
+                
+                if bridge is None:
+                    diagnosis["critical_issues"].append("WebSocket bridge is None - tool events will be lost")
+                elif not hasattr(bridge, 'notify_tool_executing'):
+                    diagnosis["critical_issues"].append("WebSocket bridge missing notify_tool_executing method")
+                elif not hasattr(bridge, 'notify_tool_completed'):
+                    diagnosis["critical_issues"].append("WebSocket bridge missing notify_tool_completed method")
+                
+            else:
+                diagnosis["critical_issues"].append("Executor missing websocket_bridge attribute")
+        else:
+            diagnosis["critical_issues"].append("ToolDispatcher missing executor")
+        
+        return diagnosis
     
-    def _create_error_response(self, error: Exception, tool_name: str, run_id: str) -> ToolDispatchResponse:
-        """Create error response - backward compatibility method"""
-        return self.executor._create_error_response(error, tool_name, run_id)
-    
-    def _register_tool_batch(self, tool_names: List[str]) -> None:
-        """Register batch of tools - backward compatibility method"""
-        return self.registry._register_tool_batch(tool_names)

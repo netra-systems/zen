@@ -1,5 +1,6 @@
 """E2E Test: Real LLM Security and Cost Controls
 
+from shared.isolated_environment import get_env
 CRITICAL: Security controls and cost management for real LLM testing.
 Implements circuit breakers, rate limiting, and cost monitoring.
 
@@ -206,7 +207,7 @@ class TestRealLLMSecurity:
     def _should_run_real_llm_test(self) -> bool:
         """Check if real LLM testing should run."""
         import os
-        return os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true"
+        return get_env().get("TEST_USE_REAL_LLM", "false").lower() == "true"
     
     def _check_for_exposed_keys(self, config) -> bool:
         """Check for exposed API keys in configuration."""

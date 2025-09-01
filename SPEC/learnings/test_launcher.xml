@@ -554,7 +554,7 @@
     <file path="test_launcher/config/test_profiles.py" description="Test profile configurations and service definitions"/>
     <file path="test_launcher/test_services.py" description="Service lifecycle management"/>
     <file path="test_launcher/isolation/environment.py" description="Environment isolation and management"/>
-    <file path="scripts/unified_test_runner.py" description="Integration point with existing test infrastructure"/>
+    <file path="tests/unified_test_runner.py" description="Integration point with existing test infrastructure"/>
     <file path="dev_launcher/launcher.py" description="Development launcher for comparison"/>
   </related_files>
 </learnings>

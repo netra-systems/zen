@@ -89,36 +89,42 @@ python scripts/scan_string_literals.py
   - Redis 7+ (optional, for caching)
   - ClickHouse 23+ (optional, for analytics)
 
-### 🐳 Recommended: Docker Compose Development
+### 🐳 Recommended: Simple Docker Management
 
-Docker Compose provides the most reliable and consistent development environment with all services pre-configured:
+Docker provides the most reliable development environment. We've made it simple with automatic startup:
 
 ```bash
 # Clone repository
 git clone https://github.com/netra-systems/netra-apex.git
 cd netra-core-generation-1
 
-# Start all services with Docker Compose (development mode)
-docker-compose -f docker-compose.dev.yml up -d
+# Start all services (simple and automatic!)
+python scripts/docker.py start
 
-# View logs
-docker-compose -f docker-compose.dev.yml logs -f
+# Check service health
+python scripts/docker.py health
 
-# Stop services
-docker-compose -f docker-compose.dev.yml down
+# Run tests (Docker starts automatically if needed)
+python tests/unified_test_runner.py
 
-# For testing environment
-docker-compose -f docker-compose.test.yml up -d
+# View logs for debugging
+python scripts/docker.py logs backend
+
+# Stop services when done
+python scripts/docker.py stop
+
+# For detailed Docker guide
+See DOCKER_QUICKSTART.md
 ```
 
-**Docker Compose Benefits:**
-- ✅ Zero configuration required
+**New Docker Management Benefits:**
+- ✅ **Automatic startup** - Tests start Docker automatically
+- ✅ **Simple commands** - No complex docker-compose syntax
+- ✅ **Clear error messages** - Helpful guidance when issues occur
+- ✅ **Health monitoring** - Built-in health checks
+- ✅ **Zero configuration** - Just works out of the box
 - ✅ All dependencies included (PostgreSQL, Redis, ClickHouse)
 - ✅ Consistent environment across all developers
-- ✅ Automatic networking between services
-- ✅ Volume persistence for databases
-- ✅ Hot-reload for code changes
-- ✅ Production-like environment
 
 **Service Endpoints:**
 - Backend API: http://localhost:8000

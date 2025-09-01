@@ -10,17 +10,17 @@ BVJ: Enterprise | Performance Fee Capture | $10K+ monthly revenue per customer
 import asyncio
 import time
 from datetime import datetime, UTC
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
+
+# Import specific types from shared_types for better type safety
+from netra_backend.app.schemas.shared_types import DataAnalysisResponse
+from netra_backend.app.schemas.monitoring import PerformanceMetric
 
 from netra_backend.app.agents.base_agent import BaseSubAgent
-from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
-    ExecutionContext,
-    ExecutionResult,
-    ExecutionStatus,
-    WebSocketManagerProtocol,
-)
-from netra_backend.app.agents.base.websocket_context import WebSocketContextMixin
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.schemas.core_enums import ExecutionStatus
+# WebSocketContextMixin removed - BaseSubAgent now handles WebSocket via bridge
+# BaseExecutionInterface removed - using single inheritance pattern
 
 # Import focused helper modules
 from netra_backend.app.db.clickhouse import get_clickhouse_service
@@ -38,9 +38,10 @@ from netra_backend.app.schemas.strict_types import TypedAgentResult
 from netra_backend.app.services.llm.cost_optimizer import LLMCostOptimizer
 
 
-class DataSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin):
-    """Consolidated data analysis agent with ClickHouse integration and WebSocket events.
+class DataSubAgent(BaseSubAgent):
+    """Consolidated data analysis agent with ClickHouse integration.
     
+    WebSocket events are handled through BaseSubAgent's bridge adapter.
     Provides reliable data insights for AI cost optimization through:
     - ClickHouse query execution with proper schema handling
     - Performance metrics analysis and trend detection
@@ -50,13 +51,13 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin):
     """
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
-                 websocket_manager: Optional[WebSocketManagerProtocol] = None):
+                 websocket_manager: Optional[Any] = None):
         """Initialize consolidated DataSubAgent."""
-        # Initialize base classes
-        BaseSubAgent.__init__(self, llm_manager, name="DataSubAgent", 
-                            description="Advanced data analysis for AI cost optimization")
-        BaseExecutionInterface.__init__(self, "DataSubAgent", websocket_manager)
-        WebSocketContextMixin.__init__(self)
+        # Initialize base class only - single inheritance pattern
+        super().__init__(llm_manager, name="DataSubAgent", 
+                        description="Advanced data analysis for AI cost optimization")
+        # WebSocketContextMixin removed - using BaseSubAgent's bridge
+        # BaseExecutionInterface removed - single inheritance pattern
         
         # Initialize core components
         self.tool_dispatcher = tool_dispatcher
@@ -81,11 +82,8 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin):
         start_time = time.time()
         
         try:
-            # Set up WebSocket context for legacy execution
-            await self._setup_websocket_context_for_legacy(run_id)
-            
-            # Emit agent started event
-            await self.emit_agent_started("Starting data analysis for AI cost optimization")
+            # Emit thinking event (agent_started is handled by orchestrator)
+            await self.emit_thinking("Starting data analysis for AI cost optimization")
             
             # Validate input
             if not self._validate_execution_state(state):
@@ -123,8 +121,8 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin):
             # Add flattened insights directly to result
             result_data.update(insights)
             
-            # Emit completion event
-            await self.emit_agent_completed(result_data, execution_time)
+            # Emit completion event using mixin methods
+            await self.emit_progress("Data analysis completed successfully", is_complete=True)
             
             return TypedAgentResult(
                 success=True,
@@ -137,7 +135,7 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin):
             self.logger.error(f"DataSubAgent execution failed: {str(e)}")
             return self._create_error_result(str(e), start_time)
     
-    def _validate_execution_state(self, state: DeepAgentState) -> bool:
+    def _validate_execution_state(self, state: Optional[DeepAgentState]) -> bool:
         """Validate execution state has required data analysis parameters."""
         return (
             state and 
@@ -145,7 +143,7 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin):
             state.agent_input is not None
         )
     
-    def _extract_analysis_request(self, state: DeepAgentState) -> Dict[str, Any]:
+    def _extract_analysis_request(self, state: DeepAgentState) -> Dict[str, Union[str, List[str], Optional[str]]]:
         """Extract and parse analysis request from state."""
         agent_input = state.agent_input
         
@@ -158,7 +156,7 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin):
             "user_id": getattr(state, 'user_id', None)
         }
     
-    async def _execute_analysis(self, request: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_analysis(self, request: Dict[str, Union[str, List[str], Optional[str]]]) -> Dict[str, Union[str, List[str], int, float, Dict[str, Any]]]:
         """Execute data analysis based on request type."""
         analysis_type = request["type"]
         
@@ -172,7 +170,7 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin):
             # Default to performance analysis
             return await self.performance_analyzer.analyze_performance(request)
     
-    async def _generate_insights(self, analysis_result: Dict[str, Any]) -> Dict[str, Any]:
+    async def _generate_insights(self, analysis_result: Dict[str, Union[str, List[str], int, float, Dict[str, Any]]]) -> Dict[str, Union[str, float, int]]:
         """Generate actionable insights from analysis results."""
         # Flatten complex structures to comply with TypedAgentResult constraints
         insights = {
@@ -203,7 +201,7 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin):
         
         return insights
     
-    async def _generate_llm_insights(self, analysis_result: Dict[str, Any]) -> str:
+    async def _generate_llm_insights(self, analysis_result: Dict[str, Union[str, List[str], int, float, Dict[str, Any]]]) -> str:
         """Generate AI-powered insights using LLM."""
         try:
             prompt = self._build_insights_prompt(analysis_result)
@@ -213,7 +211,7 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin):
             self.logger.warning(f"LLM insights generation failed: {e}")
             return "AI insights unavailable"
     
-    def _build_insights_prompt(self, analysis_result: Dict[str, Any]) -> str:
+    def _build_insights_prompt(self, analysis_result: Dict[str, Union[str, List[str], int, float, Dict[str, Any]]]) -> str:
         """Build prompt for LLM insights generation."""
         return f"""Analyze this AI workload data and provide actionable cost optimization insights:
         
@@ -241,60 +239,11 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin):
             execution_time_ms=execution_time
         )
     
-    # BaseExecutionInterface implementation
-    async def execute_core_logic(self, context: ExecutionContext) -> ExecutionResult:
-        """Core execution logic for BaseExecutionInterface with WebSocket events."""
-        start_time = time.time()
-        
-        try:
-            # Set up WebSocket context if available
-            await self._setup_websocket_context_if_available(context)
-            
-            # Emit agent started event
-            await self.emit_agent_started("Starting data analysis via BaseExecutionInterface")
-            
-            # Convert context to state for backward compatibility
-            state = self._context_to_state(context)
-            
-            # Emit thinking event
-            await self.emit_thinking("Converting execution context to agent state...")
-            
-            # Execute main logic
-            result = await self.execute(state, context.run_id, context.stream_updates)
-            
-            # Emit completion
-            duration_ms = (time.time() - start_time) * 1000
-            await self.emit_agent_completed(result.result if result.success else {}, duration_ms)
-            
-            return ExecutionResult(
-                success=result.success,
-                status=ExecutionStatus.COMPLETED if result.success else ExecutionStatus.FAILED,
-                result=result.result,
-                execution_time_ms=result.execution_time_ms
-            )
-            
-        except Exception as e:
-            await self.emit_error(f"Core logic execution failed: {str(e)}")
-            return ExecutionResult(
-                success=False,
-                status=ExecutionStatus.FAILED,
-                error=str(e)
-            )
-    
-    async def validate_preconditions(self, context: ExecutionContext) -> bool:
-        """Validate preconditions for execution."""
-        return (
-            context.state is not None and
-            self.clickhouse_client.is_healthy() and
-            self.schema_cache.is_available()
-        )
-    
-    def _context_to_state(self, context: ExecutionContext) -> DeepAgentState:
-        """Convert ExecutionContext to DeepAgentState for backward compatibility."""
-        return context.state
+    # BaseExecutionInterface implementation removed - single inheritance pattern
+    # All execution logic is now in execute() method only
     
     # Health and status methods
-    def get_health_status(self) -> Dict[str, Any]:
+    def get_health_status(self) -> Dict[str, Union[str, Dict[str, str]]]:
         """Get comprehensive health status."""
         return {
             "agent_name": "DataSubAgent",
@@ -314,51 +263,3 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface, WebSocketContextMixin):
         self.logger.info("Cleaning up DataSubAgent resources")
         await self.clickhouse_client.close()
         await self.schema_cache.cleanup()
-    
-    async def _setup_websocket_context_if_available(self, context: ExecutionContext) -> None:
-        """Set up WebSocket context if websocket manager is available."""
-        if hasattr(self, 'websocket_manager') and self.websocket_manager:
-            # Import here to avoid circular imports
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-            from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-            
-            try:
-                # Create WebSocket notifier and execution context
-                notifier = WebSocketNotifier(self.websocket_manager)
-                ws_context = AgentExecutionContext(
-                    run_id=context.run_id,
-                    agent_name="DataSubAgent",
-                    thread_id=getattr(context.state, 'chat_thread_id', context.run_id),
-                    user_id=getattr(context.state, 'user_id', None),
-                    start_time=time.time()
-                )
-                
-                # Set WebSocket context in mixin
-                self.set_websocket_context(notifier, ws_context)
-                
-            except Exception as e:
-                self.logger.debug(f"Failed to setup WebSocket context: {e}")
-    
-    async def _setup_websocket_context_for_legacy(self, run_id: str) -> None:
-        """Set up WebSocket context for legacy execution paths."""
-        if hasattr(self, 'websocket_manager') and self.websocket_manager:
-            # Import here to avoid circular imports
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-            from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-            
-            try:
-                # Create WebSocket notifier and execution context
-                notifier = WebSocketNotifier(self.websocket_manager)
-                ws_context = AgentExecutionContext(
-                    run_id=run_id,
-                    agent_name="DataSubAgent",
-                    thread_id=run_id,  # Use run_id as thread_id for legacy
-                    user_id=None,
-                    start_time=time.time()
-                )
-                
-                # Set WebSocket context in mixin
-                self.set_websocket_context(notifier, ws_context)
-                
-            except Exception as e:
-                self.logger.debug(f"Failed to setup WebSocket context for legacy: {e}")

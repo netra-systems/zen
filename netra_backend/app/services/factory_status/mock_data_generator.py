@@ -33,14 +33,17 @@ class MockDataGenerator:
         """Create a single mock commit."""
         commit_type = random.choice(self.commit_types)
         author = random.choice(self.authors)
-        timestamp = datetime.now() - timedelta(days=random.randint(0, 30))
+        timestamp = datetime.now() - timedelta(hours=random.randint(0, 168))  # Last week
         return {
             "hash": f"abc123{index}",
             "type": commit_type,
             "message": f"{commit_type}: mock commit {index}",
             "author": author,
-            "timestamp": timestamp.isoformat(),
-            "files_changed": random.randint(1, 5)
+            "email": f"{author.lower().replace(' ', '.')}@example.com",
+            "timestamp": timestamp,
+            "files_changed": random.randint(1, 5),
+            "insertions": random.randint(10, 200),
+            "deletions": random.randint(0, 100)
         }
     
     def generate_mock_metrics(self) -> Dict[str, Any]:

@@ -24,9 +24,6 @@ from typing import Any, Dict, List, Optional
 import pytest
 
 # Set testing environment before imports
-env.set("TESTING", "1", "test")
-env.set("ENVIRONMENT", "testing", "test")
-env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
 
 from sqlalchemy.ext.asyncio import AsyncSession
 

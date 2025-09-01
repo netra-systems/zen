@@ -243,7 +243,7 @@ export class EventQueue<T extends ProcessableEvent> {
   /**
    * Get current queue statistics
    */
-  getStats(): EventQueueStats & { errorHandler: any } {
+  getStats(): EventQueueStats & { errorHandler: import('./event-error-types').ErrorHandlerStats } {
     return { 
       ...this.stats, 
       queueSize: this.queue.length,

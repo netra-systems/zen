@@ -1,6 +1,5 @@
 from shared.isolated_environment import get_env
 """
-env = get_env()
 CRITICAL Complete User Journey Test with Real Services
 
 BVJ (Business Value Justification):
@@ -28,6 +27,7 @@ from typing import Any, Dict, Optional
 import pytest
 
 # Set test environment
+env = get_env()
 env.set("TESTING", "1", "test")
 env.set("USE_REAL_SERVICES", "true", "test")
 env.set("AUTH_SERVICE_URL", "http://localhost:8001", "test")

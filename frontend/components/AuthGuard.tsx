@@ -78,7 +78,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
     }
     
     onAuthCheckComplete?.(isAuthenticated);
-  }, [initialized, user]); // Include user to properly react to auth changes
+  }, [initialized, user, loading, redirectTo, router, trackError, trackPageView, onAuthCheckComplete]); // Include all dependencies
 
   // Only show loading during initial auth check to reduce flicker
   if (!initialized) {
@@ -91,7 +91,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
   // After initialization, check user authentication
   if (!user) {
     // In Cypress test environment, allow rendering without authentication
-    if (typeof window !== 'undefined' && (window as any).Cypress) {
+    if (typeof window !== 'undefined' && (window as Window & { Cypress?: unknown }).Cypress) {
       return <>{children}</>;
     }
     

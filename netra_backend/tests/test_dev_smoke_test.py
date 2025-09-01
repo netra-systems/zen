@@ -116,7 +116,7 @@ class TestDevSmokeTest:
             'netra_backend.app.logging_config',
             'netra_backend.app.db.postgres',
             'netra_backend.app.core.configuration',
-            'netra_backend.app.core.isolated_environment',
+            # Removed isolated_environment - it's now in shared module
         ]
         
         for module_name in modules_to_test:

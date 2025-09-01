@@ -1,6 +1,4 @@
-from shared.isolated_environment import get_env
 """
-env = get_env()
 Real Services Manager for E2E Testing
 Manages starting/stopping real services without mocking.
 
@@ -20,7 +18,6 @@ NOTE: Now uses dev_launcher_real_system for better integration
 import asyncio
 import json
 import logging
-import os
 import platform
 import socket
 import subprocess
@@ -35,6 +32,8 @@ from datetime import datetime, timedelta, timezone
 import httpx
 import jwt
 import websockets
+
+from shared.isolated_environment import get_env
 
 from test_framework.http_client import UnifiedHTTPClient, AuthHTTPClient, BackendHTTPClient
 
@@ -230,7 +229,8 @@ class RealServicesManager:
     
     def _prepare_environment(self) -> Dict[str, str]:
         """Prepare environment variables for services."""
-        env = env.get_all()
+        env_vars = get_env()
+        env = env_vars.get_all()
         env.update({
             "NODE_ENV": "test",
             "NETRA_ENV": "development",  # Use development environment

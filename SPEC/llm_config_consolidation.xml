@@ -141,7 +141,7 @@
       </change>
     </file>
     
-    <file path="scripts/unified_test_runner.py">
+    <file path="tests/unified_test_runner.py">
       <change type="update">
         <description>Updated import and function call</description>
         <action>

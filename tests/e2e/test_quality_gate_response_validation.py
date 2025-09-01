@@ -22,9 +22,6 @@ from typing import Any, Dict, List, Optional
 import pytest
 
 # Set testing environment before imports
-env.set("TESTING", "1", "test")
-env.set("ENVIRONMENT", "testing", "test")
-env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import RedisManager

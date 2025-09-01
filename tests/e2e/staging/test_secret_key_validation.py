@@ -1,4 +1,5 @@
 """Test SECRET_KEY validation issues found in staging.
+from shared.isolated_environment import get_env
 
 These tests reproduce the SECRET_KEY configuration problems where the key
 is too short (less than 32 characters) causing security warnings and 
@@ -79,7 +80,7 @@ class TestSecretKeyValidation:
         environment variable does not meet the 32-character minimum requirement.
         """
         # Get the actual SECRET_KEY from staging environment
-        staging_secret_key = os.environ.get("SECRET_KEY", "")
+        staging_secret_key = get_env().get("SECRET_KEY", "")
         
         # Check if SECRET_KEY exists
         assert staging_secret_key, (
@@ -112,7 +113,7 @@ class TestSecretKeyValidation:
         service_secret_keys = {}
         
         # Backend service SECRET_KEY
-        backend_secret = os.environ.get("SECRET_KEY", "")
+        backend_secret = get_env().get("SECRET_KEY", "")
         service_secret_keys["backend"] = {
             "key": backend_secret,
             "length": len(backend_secret),
@@ -124,8 +125,8 @@ class TestSecretKeyValidation:
         auth_secret = None
         
         for var in auth_secret_vars:
-            if os.environ.get(var):
-                auth_secret = os.environ.get(var, "")
+            if get_env().get(var):
+                auth_secret = get_env().get(var, "")
                 break
         
         if auth_secret:
@@ -185,7 +186,7 @@ class TestSecretKeyValidation:
         This test should FAIL, showing that even if the key meets length
         requirements, it may not have sufficient randomness/entropy.
         """
-        secret_key = os.environ.get("SECRET_KEY", "")
+        secret_key = get_env().get("SECRET_KEY", "")
         
         # Basic entropy checks that should fail on weak keys
         entropy_issues = []
@@ -251,18 +252,18 @@ class TestSecretKeyValidation:
         is not set at all in the staging environment.
         """
         # Temporarily remove SECRET_KEY to test missing key scenario
-        original_secret = os.environ.get("SECRET_KEY")
+        original_secret = get_env().get("SECRET_KEY")
         
         try:
             # Remove SECRET_KEY environment variable
-            if "SECRET_KEY" in os.environ:
-                del os.environ["SECRET_KEY"]
+            if get_env().get("SECRET_KEY") is not None:
+                del get_env().get("SECRET_KEY")
             
             # Test what happens with missing SECRET_KEY
             missing_key_issues = []
             
             # Check 1: Environment variable exists
-            secret_key = os.environ.get("SECRET_KEY")
+            secret_key = get_env().get("SECRET_KEY")
             if not secret_key:
                 missing_key_issues.append({
                     "issue": "SECRET_KEY environment variable not set",
@@ -270,7 +271,7 @@ class TestSecretKeyValidation:
                 })
             
             # Check 2: Default fallback behavior
-            fallback_key = os.environ.get("SECRET_KEY", "default_insecure_key")
+            fallback_key = get_env().get("SECRET_KEY", "default_insecure_key")
             if fallback_key == "default_insecure_key":
                 missing_key_issues.append({
                     "issue": "Using insecure default fallback key",
@@ -295,7 +296,7 @@ class TestSecretKeyValidation:
         finally:
             # Restore original SECRET_KEY
             if original_secret is not None:
-                os.environ["SECRET_KEY"] = original_secret
+                get_env().set("SECRET_KEY", original_secret)
 
     @staging_only
     @pytest.mark.e2e
@@ -305,7 +306,7 @@ class TestSecretKeyValidation:
         This test should FAIL, showing that staging SECRET_KEY doesn't meet
         the production security requirements that startup validation checks for.
         """
-        secret_key = os.environ.get("SECRET_KEY", "")
+        secret_key = get_env().get("SECRET_KEY", "")
         
         # Security requirement levels from staging audit
         security_requirements = {

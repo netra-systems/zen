@@ -85,7 +85,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
             <div className="space-y-4">
               <p className="text-sm text-gray-700">
-                We've logged this error and will investigate. Please try refreshing the page.
+                We&apos;ve logged this error and will investigate. Please try refreshing the page.
               </p>
               
               <div className="flex space-x-3">

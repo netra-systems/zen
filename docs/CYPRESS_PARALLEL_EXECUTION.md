@@ -241,10 +241,10 @@ The parallel Cypress runner can be integrated with the unified test runner:
 
 ```bash
 # Run via unified test runner
-python scripts/unified_test_runner.py --category cypress --cypress-parallel --cypress-workers 4
+python tests/unified_test_runner.py --category cypress --cypress-parallel --cypress-workers 4
 
 # With other test categories
-python scripts/unified_test_runner.py --categories unit cypress --cypress-parallel
+python tests/unified_test_runner.py --categories unit cypress --cypress-parallel
 ```
 
 ## Advanced Configuration

@@ -82,13 +82,14 @@ class RealLLMProvider:
     
     def _get_api_key_for_provider(self, provider: LLMProvider) -> Optional[str]:
         """Get API key for provider from environment."""
-        import os
+        from shared.isolated_environment import get_env
+        env = get_env()
         key_map = {
             LLMProvider.GOOGLE: "GOOGLE_API_KEY",
             LLMProvider.OPENAI: "OPENAI_API_KEY",
             LLMProvider.ANTHROPIC: "ANTHROPIC_API_KEY"
         }
-        return os.getenv(key_map.get(provider, ""))
+        return env.get(key_map.get(provider, ""))
     
     def _get_model_for_provider(self, provider: LLMProvider) -> str:
         """Get default model name for provider."""

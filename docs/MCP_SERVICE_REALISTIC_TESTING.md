@@ -139,13 +139,13 @@ The tests are designed to work with minimal infrastructure:
 #### 1. Via Unified Test Runner (Recommended):
 ```bash
 # Run all integration tests
-python scripts/unified_test_runner.py --category integration
+python tests/unified_test_runner.py --category integration
 
 # Run just MCP service tests
-python scripts/unified_test_runner.py --category integration --pattern "mcp_service_realistic"
+python tests/unified_test_runner.py --category integration --pattern "mcp_service_realistic"
 
 # Run with verbose output
-python scripts/unified_test_runner.py --category integration --pattern "mcp_service_realistic" --verbose
+python tests/unified_test_runner.py --category integration --pattern "mcp_service_realistic" --verbose
 ```
 
 #### 2. Direct pytest execution:

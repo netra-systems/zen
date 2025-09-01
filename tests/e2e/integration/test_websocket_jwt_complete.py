@@ -1,6 +1,6 @@
 from shared.isolated_environment import get_env
+
 """
-env = get_env()
 Complete WebSocket JWT Authentication Flow Test
 
 CRITICAL E2E Test: Complete JWT token authentication flow for WebSocket connections.
@@ -38,13 +38,14 @@ from tests.clients import TestClientFactory
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 
 # Enable real services for this test module
+env_vars = get_env()
 pytestmark = pytest.mark.skipif(
-    env.get("USE_REAL_SERVICES", "false").lower() != "true",
+    env_vars.get("USE_REAL_SERVICES", "false").lower() != "true",
     reason="Real services disabled (set USE_REAL_SERVICES=true)"
 )
 
 
-class TestCompleteJWTAuther:
+class CompleteJWTAuthTester:
     """Complete JWT authentication flow tester with performance tracking."""
     
     def __init__(self, real_services):

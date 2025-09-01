@@ -8,7 +8,7 @@ import asyncio
 import json
 import re
 import subprocess
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Dict, List, Optional, Tuple
@@ -46,6 +46,22 @@ class CommitInfo:
     insertions: int
     deletions: int
     branch: Optional[str] = None
+    session_id: Optional[str] = None  # For grouping related commits
+
+
+@dataclass
+class CommitSession:
+    """Groups related commits in a work session."""
+    session_id: str
+    author: str
+    start_time: datetime
+    end_time: datetime
+    commits: List[CommitInfo] = field(default_factory=list)
+    total_files: int = 0
+    total_insertions: int = 0
+    total_deletions: int = 0
+    primary_type: CommitType = CommitType.UNKNOWN
+    summary: Optional[str] = None
 
 
 class GitCommitParser:
@@ -69,13 +85,19 @@ class GitCommitParser:
         self.repo_path = repo_path
         self.mock_generator = MockDataGenerator()
         
-    def get_commits(self, hours: int = 24) -> List[CommitInfo]:
-        """Get commits from the last N hours."""
+    def get_commits(self, hours: int = 24, group_sessions: bool = False) -> List[CommitInfo]:
+        """Get commits from the last N hours, optionally grouped into sessions."""
         since_date = self._calculate_since_date(hours)
         raw_commits = self._fetch_raw_commits(since_date)
         if not raw_commits:
-            return self._get_mock_commits(hours)
-        return self._parse_commits(raw_commits)
+            commits = self._get_mock_commits(hours)
+        else:
+            commits = self._parse_commits(raw_commits)
+        
+        if group_sessions:
+            sessions = self.group_commits_into_sessions(commits)
+            return self._flatten_sessions_to_commits(sessions)
+        return commits
     
     def _calculate_since_date(self, hours: int) -> str:
         """Calculate the since date for git log."""
@@ -122,10 +144,14 @@ class GitCommitParser:
     def _create_commit_from_mock_data(self, data: Dict) -> CommitInfo:
         """Create CommitInfo from mock data."""
         return CommitInfo(
-            hash=data["hash"], author=data["author"], email=data["email"],
-            timestamp=data["timestamp"], message=data["message"],
+            hash=data["hash"], 
+            author=data["author"], 
+            email=data.get("email", f"{data['author'].lower().replace(' ', '.')}@example.com"),
+            timestamp=data["timestamp"], 
+            message=data["message"],
             commit_type=self._classify_commit(data["message"]),
-            files_changed=data["files_changed"], insertions=data["insertions"],
+            files_changed=data["files_changed"], 
+            insertions=data["insertions"],
             deletions=data["deletions"]
         )
     
@@ -311,12 +337,110 @@ class GitCommitParser:
             "deletions": commit.deletions
         }
     
+    def group_commits_into_sessions(self, commits: List[CommitInfo], 
+                                   window_minutes: int = 30) -> List[CommitSession]:
+        """Group commits into work sessions based on time proximity."""
+        if not commits:
+            return []
+        
+        # Sort commits by timestamp and author
+        sorted_commits = sorted(commits, key=lambda c: (c.author, c.timestamp))
+        sessions = []
+        current_session = None
+        
+        for commit in sorted_commits:
+            if self._should_start_new_session(current_session, commit, window_minutes):
+                if current_session:
+                    sessions.append(self._finalize_session(current_session))
+                current_session = self._create_new_session(commit)
+            current_session = self._add_commit_to_session(current_session, commit)
+        
+        if current_session:
+            sessions.append(self._finalize_session(current_session))
+        
+        return sessions
+    
+    def _should_start_new_session(self, session: Optional[CommitSession], 
+                                 commit: CommitInfo, window_minutes: int) -> bool:
+        """Determine if a new session should be started."""
+        if not session:
+            return True
+        if session.author != commit.author:
+            return True
+        time_diff = (commit.timestamp - session.end_time).total_seconds() / 60
+        return time_diff > window_minutes
+    
+    def _create_new_session(self, commit: CommitInfo) -> CommitSession:
+        """Create a new commit session."""
+        session_id = f"{commit.author}_{commit.timestamp.strftime('%Y%m%d_%H%M')}"
+        return CommitSession(
+            session_id=session_id,
+            author=commit.author,
+            start_time=commit.timestamp,
+            end_time=commit.timestamp,
+            commits=[],
+            primary_type=commit.commit_type
+        )
+    
+    def _add_commit_to_session(self, session: CommitSession, 
+                              commit: CommitInfo) -> CommitSession:
+        """Add a commit to an existing session."""
+        commit.session_id = session.session_id
+        session.commits.append(commit)
+        session.end_time = max(session.end_time, commit.timestamp)
+        session.total_files += commit.files_changed
+        session.total_insertions += commit.insertions
+        session.total_deletions += commit.deletions
+        return session
+    
+    def _finalize_session(self, session: CommitSession) -> CommitSession:
+        """Finalize a session with summary information."""
+        # Determine primary commit type
+        type_counts = {}
+        for commit in session.commits:
+            type_counts[commit.commit_type] = type_counts.get(commit.commit_type, 0) + 1
+        if type_counts:
+            session.primary_type = max(type_counts, key=type_counts.get)
+        
+        # Generate summary
+        session.summary = self._generate_session_summary(session)
+        return session
+    
+    def _generate_session_summary(self, session: CommitSession) -> str:
+        """Generate a concise summary of the session."""
+        commit_count = len(session.commits)
+        duration_mins = int((session.end_time - session.start_time).total_seconds() / 60)
+        
+        if commit_count == 1:
+            return session.commits[0].message
+        
+        type_str = session.primary_type.value.capitalize()
+        return (f"{type_str} session: {commit_count} commits over {duration_mins} mins, "
+                f"{session.total_files} files, +{session.total_insertions}/-{session.total_deletions}")
+    
+    def _flatten_sessions_to_commits(self, sessions: List[CommitSession]) -> List[CommitInfo]:
+        """Flatten sessions back to a list of commits with session info."""
+        commits = []
+        for session in sessions:
+            commits.extend(session.commits)
+        return commits
+    
+    def get_commit_sessions(self, hours: int = 24, 
+                           window_minutes: int = 30) -> List[CommitSession]:
+        """Get commits grouped into work sessions."""
+        commits = self.get_commits(hours)
+        return self.group_commits_into_sessions(commits, window_minutes)
+    
     def analyze_commit_patterns(self, hours: int = 168) -> Dict:
         """Analyze commit patterns over time."""
         commits = self.get_commits(hours)
+        sessions = self.group_commits_into_sessions(commits)
+        
         basic_stats = self._get_basic_commit_stats(commits)
         advanced_stats = self._get_advanced_commit_stats(commits)
-        return {**basic_stats, **advanced_stats}
+        session_stats = self._get_session_stats(sessions)
+        
+        return {**basic_stats, **advanced_stats, **session_stats}
     
     def _get_basic_commit_stats(self, commits: List[CommitInfo]) -> Dict:
         """Get basic commit statistics."""
@@ -379,4 +503,23 @@ class GitCommitParser:
             "files": round(totals["files"] / count, 2),
             "insertions": round(totals["insertions"] / count, 2),
             "deletions": round(totals["deletions"] / count, 2)
+        }
+    
+    def _get_session_stats(self, sessions: List[CommitSession]) -> Dict:
+        """Get statistics about commit sessions."""
+        if not sessions:
+            return {"sessions_count": 0, "avg_session_commits": 0}
+        
+        total_commits = sum(len(s.commits) for s in sessions)
+        avg_commits = round(total_commits / len(sessions), 2)
+        
+        # Find longest session
+        longest_session = max(sessions, key=lambda s: len(s.commits))
+        
+        return {
+            "sessions_count": len(sessions),
+            "avg_session_commits": avg_commits,
+            "longest_session_commits": len(longest_session.commits),
+            "longest_session_author": longest_session.author,
+            "session_grouping_enabled": True
         }

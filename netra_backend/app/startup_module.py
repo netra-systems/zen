@@ -87,8 +87,21 @@ async def _ensure_database_tables_exist(logger: logging.Logger, graceful_startup
                 logger.warning(f"Missing {len(missing_tables)} database tables: {missing_tables}")
                 logger.debug("Creating missing database tables automatically...")
                 
-                # Create missing tables
-                await conn.run_sync(Base.metadata.create_all)
+                # Create missing tables with error handling for duplicates
+                try:
+                    await conn.run_sync(Base.metadata.create_all)
+                except Exception as create_error:
+                    # Handle duplicate table/constraint errors gracefully
+                    error_msg = str(create_error).lower()
+                    if any(keyword in error_msg for keyword in [
+                        'already exists', 'duplicate', 'relation', 
+                        'constraint', 'violates unique'
+                    ]):
+                        logger.warning(f"Some tables already exist during creation (expected): {create_error}")
+                        logger.debug("Continuing - tables may have been created by another process")
+                    else:
+                        # Re-raise unexpected errors
+                        raise create_error
                 
                 # Verify tables were created
                 result = await conn.execute(text("""
@@ -145,6 +158,8 @@ def _import_all_models() -> None:
         # Agent State models
         from netra_backend.app.db.models_agent_state import (
             AgentRecoveryLog,
+            AgentStateCheckpoint,
+            AgentStateMetadata,
             AgentStateSnapshot,
             AgentStateTransaction,
         )
@@ -958,6 +973,77 @@ def log_startup_complete(start_time: float, logger: logging.Logger) -> None:
     """Log startup completion with timing."""
     elapsed_time = time.time() - start_time
     logger.info(f"✓ Netra Backend Ready ({elapsed_time:.2f}s)")
+
+
+async def initialize_monitoring_integration() -> bool:
+    """
+    Initialize monitoring integration between ChatEventMonitor and AgentWebSocketBridge.
+    
+    This function connects the ChatEventMonitor with the AgentWebSocketBridge to enable
+    comprehensive monitoring coverage where the monitor can audit the bridge without
+    creating tight coupling.
+    
+    CRITICAL DESIGN: Both components work independently if integration fails.
+    The system continues operating even if monitoring integration is not available.
+    
+    Returns:
+        bool: True if integration successful, False if integration failed but components
+              are still operating independently
+    """
+    logger = central_logger.get_logger(__name__)
+    
+    try:
+        logger.debug("Initializing monitoring integration...")
+        
+        # Import monitoring components
+        from netra_backend.app.websocket_core.event_monitor import chat_event_monitor
+        from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
+        
+        # Initialize ChatEventMonitor independently first
+        await chat_event_monitor.start_monitoring()
+        logger.debug("ChatEventMonitor started successfully")
+        
+        # Get AgentWebSocketBridge instance (should already be initialized independently)
+        try:
+            bridge = await get_agent_websocket_bridge()
+            if bridge is None:
+                logger.warning("⚠️ AgentWebSocketBridge not available - components operating independently")
+                return False
+        except Exception as e:
+            logger.warning(f"⚠️ Failed to get AgentWebSocketBridge: {e} - components operating independently")
+            return False
+        
+        # Integration is attempted but not required for either component to function
+        try:
+            await chat_event_monitor.register_component_for_monitoring(
+                "agent_websocket_bridge",
+                bridge
+            )
+            logger.info("✅ Monitoring integration established successfully")
+            
+            # Perform initial cross-system validation to verify integration quality
+            initial_audit = await chat_event_monitor.audit_bridge_health("agent_websocket_bridge")
+            audit_status = initial_audit.get("overall_assessment", {}).get("overall_status", "unknown")
+            
+            if audit_status in ["healthy", "good"]:
+                logger.info(f"✅ Initial monitoring audit passed: {audit_status}")
+            else:
+                logger.warning(f"⚠️ Initial monitoring audit shows issues: {audit_status} - but integration operational")
+            
+            return True
+            
+        except Exception as integration_error:
+            logger.warning(
+                f"⚠️ Monitoring integration failed but components continue operating independently: {integration_error}"
+            )
+            return False
+    
+    except Exception as e:
+        logger.error(
+            f"⚠️ Monitoring integration initialization failed: {e}. "
+            f"Components will operate independently without cross-system validation."
+        )
+        return False
 
 
 async def _deprecated_run_startup_phase_one(app: FastAPI) -> Tuple[float, logging.Logger]:

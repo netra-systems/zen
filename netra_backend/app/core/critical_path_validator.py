@@ -169,60 +169,76 @@ class CriticalPathValidator:
             )
     
     async def _validate_agent_registry_chain(self, app) -> None:
-        """Validate agent registry has set_websocket_manager method."""
+        """Validate agent registry has set_websocket_bridge method."""
         try:
             if hasattr(app.state, 'agent_supervisor') and app.state.agent_supervisor:
                 if hasattr(app.state.agent_supervisor, 'registry'):
                     registry = app.state.agent_supervisor.registry
                     
-                    # Check if registry has the critical method
-                    has_setter = hasattr(registry, 'set_websocket_manager')
+                    # Check if registry has the critical method (now set_websocket_bridge)
+                    has_setter = hasattr(registry, 'set_websocket_bridge')
                     
                     if not has_setter:
                         validation = CriticalPathValidation(
                             component="Agent Registry WebSocket Integration",
-                            path="AgentRegistry.set_websocket_manager()",
+                            path="AgentRegistry.set_websocket_bridge()",
                             check_type="method_existence",
                             passed=False,
                             criticality=CriticalityLevel.CHAT_BREAKING,
-                            failure_reason="Registry missing set_websocket_manager method",
-                            remediation="Add set_websocket_manager method to AgentRegistry class"
+                            failure_reason="Registry missing set_websocket_bridge method",
+                            remediation="Add set_websocket_bridge method to AgentRegistry class"
                         )
-                        self.logger.error("❌ CRITICAL: AgentRegistry missing set_websocket_manager method")
+                        self.logger.error("❌ CRITICAL: AgentRegistry missing set_websocket_bridge method")
                     else:
-                        # Check if it was actually called (tool_dispatcher should be enhanced)
-                        if hasattr(registry, 'tool_dispatcher'):
-                            enhanced = getattr(registry.tool_dispatcher, '_websocket_enhanced', False)
-                            if not enhanced:
-                                validation = CriticalPathValidation(
-                                    component="Agent Registry WebSocket Integration",
-                                    path="AgentRegistry.set_websocket_manager() -> tool_dispatcher enhancement",
-                                    check_type="enhancement_status",
-                                    passed=False,
-                                    criticality=CriticalityLevel.CHAT_BREAKING,
-                                    failure_reason="set_websocket_manager exists but was not called or failed",
-                                    remediation="Ensure set_websocket_manager is called during startup",
-                                    metadata={"enhanced": enhanced}
-                                )
-                                self.logger.warning("⚠️ set_websocket_manager method exists but enhancement not applied")
+                        # Check if bridge was actually set
+                        if hasattr(registry, 'websocket_bridge') and registry.websocket_bridge is not None:
+                            # Verify tool dispatcher has WebSocket support through bridge
+                            if hasattr(registry, 'tool_dispatcher'):
+                                has_support = False
+                                if hasattr(registry.tool_dispatcher, 'has_websocket_support'):
+                                    has_support = registry.tool_dispatcher.has_websocket_support
+                                
+                                if has_support:
+                                    validation = CriticalPathValidation(
+                                        component="Agent Registry WebSocket Integration",
+                                        path="AgentRegistry.set_websocket_bridge()",
+                                        check_type="bridge_integration",
+                                        passed=True,
+                                        criticality=CriticalityLevel.CHAT_BREAKING,
+                                        metadata={"bridge_set": True, "tool_dispatcher_support": True}
+                                    )
+                                    self.logger.info("✓ Agent registry WebSocket bridge integration verified")
+                                else:
+                                    validation = CriticalPathValidation(
+                                        component="Agent Registry WebSocket Integration",
+                                        path="AgentRegistry.tool_dispatcher.has_websocket_support",
+                                        check_type="enhancement_status",
+                                        passed=False,
+                                        criticality=CriticalityLevel.CHAT_BREAKING,
+                                        failure_reason="Tool dispatcher lacks WebSocket support despite bridge being set",
+                                        remediation="Ensure tool dispatcher is initialized with AgentWebSocketBridge",
+                                        metadata={"has_support": has_support}
+                                    )
+                                    self.logger.warning("⚠️ Tool dispatcher lacks WebSocket support")
                             else:
                                 validation = CriticalPathValidation(
                                     component="Agent Registry WebSocket Integration",
-                                    path="AgentRegistry.set_websocket_manager()",
-                                    check_type="method_existence",
+                                    path="AgentRegistry.websocket_bridge",
+                                    check_type="bridge_integration",
                                     passed=True,
-                                    criticality=CriticalityLevel.CHAT_BREAKING
+                                    criticality=CriticalityLevel.CHAT_BREAKING,
+                                    metadata={"bridge_set": True}
                                 )
-                                self.logger.info("✓ Agent registry WebSocket integration verified")
+                                self.logger.info("✓ Agent registry has WebSocket bridge set")
                         else:
                             validation = CriticalPathValidation(
                                 component="Agent Registry WebSocket Integration",
-                                path="AgentRegistry.tool_dispatcher",
+                                path="AgentRegistry.websocket_bridge",
                                 check_type="attribute_existence",
                                 passed=False,
                                 criticality=CriticalityLevel.CHAT_BREAKING,
-                                failure_reason="Registry has no tool_dispatcher attribute",
-                                remediation="Ensure registry is initialized with tool_dispatcher"
+                                failure_reason="Registry has set_websocket_bridge but bridge not set",
+                                remediation="Ensure set_websocket_bridge is called during startup"
                             )
                     
                     self.validations.append(validation)
@@ -235,55 +251,57 @@ class CriticalPathValidator:
             )
     
     async def _validate_tool_dispatcher_enhancement(self, app) -> None:
-        """Validate tool dispatcher is enhanced with WebSocket notifications."""
+        """Validate tool dispatcher has WebSocket support through AgentWebSocketBridge."""
         try:
             if hasattr(app.state, 'tool_dispatcher') and app.state.tool_dispatcher:
                 dispatcher = app.state.tool_dispatcher
                 
-                # Check for enhancement flag
-                enhanced = getattr(dispatcher, '_websocket_enhanced', False)
+                # Check for WebSocket support through bridge
+                has_support = False
+                if hasattr(dispatcher, 'has_websocket_support'):
+                    has_support = dispatcher.has_websocket_support
                 
-                # Check for WebSocket manager
-                has_ws_manager = hasattr(dispatcher, '_websocket_manager')
-                ws_manager_not_none = has_ws_manager and dispatcher._websocket_manager is not None
+                # Check for executor with bridge
+                has_executor = hasattr(dispatcher, 'executor')
+                has_bridge = False
+                if has_executor and dispatcher.executor:
+                    has_bridge = hasattr(dispatcher.executor, 'websocket_bridge') and dispatcher.executor.websocket_bridge is not None
                 
-                # Check for notification wrapper
-                has_wrapper = hasattr(dispatcher, '_original_invoke_tool')
-                
-                if not enhanced:
+                if not has_support:
                     failure_details = []
-                    if not has_ws_manager:
-                        failure_details.append("missing _websocket_manager attribute")
-                    elif not ws_manager_not_none:
-                        failure_details.append("_websocket_manager is None")
-                    if not has_wrapper:
-                        failure_details.append("tool invocation not wrapped")
+                    if not has_executor:
+                        failure_details.append("missing executor")
+                    elif not has_bridge:
+                        failure_details.append("executor missing websocket_bridge")
                     
                     validation = CriticalPathValidation(
-                        component="Tool Dispatcher Enhancement",
-                        path="ToolDispatcher._enhance_with_websocket()",
-                        check_type="enhancement",
+                        component="Tool Dispatcher WebSocket Support",
+                        path="ToolDispatcher.has_websocket_support",
+                        check_type="websocket_support",
                         passed=False,
                         criticality=CriticalityLevel.CHAT_BREAKING,
-                        failure_reason=f"Tool dispatcher not enhanced: {', '.join(failure_details)}",
-                        remediation="Call AgentRegistry.set_websocket_manager() during startup",
+                        failure_reason=f"Tool dispatcher lacks WebSocket support: {', '.join(failure_details) if failure_details else 'no bridge configured'}",
+                        remediation="Ensure tool dispatcher is initialized with AgentWebSocketBridge",
                         metadata={
-                            "enhanced": enhanced,
-                            "has_ws_manager": has_ws_manager,
-                            "ws_manager_not_none": ws_manager_not_none,
-                            "has_wrapper": has_wrapper
+                            "has_support": has_support,
+                            "has_executor": has_executor,
+                            "has_bridge": has_bridge
                         }
                     )
-                    self.logger.error(f"❌ CRITICAL: Tool dispatcher not enhanced - tool events won't be sent to UI")
+                    self.logger.error(f"❌ CRITICAL: Tool dispatcher lacks WebSocket support - tool events won't be sent to UI")
                 else:
                     validation = CriticalPathValidation(
-                        component="Tool Dispatcher Enhancement",
-                        path="ToolDispatcher._enhance_with_websocket()",
-                        check_type="enhancement",
+                        component="Tool Dispatcher WebSocket Support",
+                        path="ToolDispatcher.has_websocket_support",
+                        check_type="websocket_support",
                         passed=True,
-                        criticality=CriticalityLevel.CHAT_BREAKING
+                        criticality=CriticalityLevel.CHAT_BREAKING,
+                        metadata={
+                            "has_executor": has_executor,
+                            "has_bridge": has_bridge
+                        }
                     )
-                    self.logger.info("✓ Tool dispatcher properly enhanced with WebSocket")
+                    self.logger.info("✓ Tool dispatcher has WebSocket support through bridge")
                 
                 self.validations.append(validation)
             else:
@@ -301,92 +319,101 @@ class CriticalPathValidator:
             )
     
     async def _validate_message_handler_chain(self, app) -> None:
-        """Validate WebSocket message handlers are registered."""
+        """
+        Validate WebSocket message routing infrastructure is ready.
+        
+        CRITICAL: Handlers are registered PER WebSocket connection, not globally at startup.
+        This validates that the message routing mechanism EXISTS and CAN accept handlers.
+        """
         try:
-            # Get WebSocket manager
-            ws_manager = None
-            if hasattr(app.state, 'websocket_manager'):
-                ws_manager = app.state.websocket_manager
-            else:
-                try:
-                    from netra_backend.app.websocket_core import get_websocket_manager
-                    ws_manager = get_websocket_manager()
-                except ImportError:
-                    pass
+            # Check if MessageRouter exists and is functional
+            message_router = None
+            try:
+                from netra_backend.app.websocket_core import get_message_router
+                message_router = get_message_router()
+            except ImportError as e:
+                self._add_critical_failure(
+                    "Message Handler Chain",
+                    f"Failed to import message router: {e}",
+                    "Check websocket_core imports and dependencies"
+                )
+                return
             
-            if ws_manager:
-                # Check for message handlers
-                handler_count = 0
-                critical_handlers = ['agent_message', 'execute_agent', 'chat_message']
-                missing_handlers = []
+            if message_router:
+                # Check that MessageRouter has the infrastructure to accept handlers
+                has_handlers_list = hasattr(message_router, 'handlers')
+                has_add_handler_method = hasattr(message_router, 'add_handler') and callable(getattr(message_router, 'add_handler'))
+                has_route_method = hasattr(message_router, 'route_message') and callable(getattr(message_router, 'route_message'))
                 
-                if hasattr(ws_manager, 'message_handlers'):
-                    handlers = ws_manager.message_handlers
-                    handler_count = len(handlers)
-                    
-                    # Check for critical handlers
-                    for handler_name in critical_handlers:
-                        if handler_name not in handlers:
-                            missing_handlers.append(handler_name)
-                elif hasattr(ws_manager, '_handlers'):
-                    handlers = ws_manager._handlers
-                    handler_count = len(handlers)
-                    
-                    for handler_name in critical_handlers:
-                        if handler_name not in handlers:
-                            missing_handlers.append(handler_name)
+                # Count default handlers (should include HeartbeatHandler, etc.)
+                default_handler_count = 0
+                if has_handlers_list:
+                    default_handler_count = len(message_router.handlers)
                 
-                if handler_count == 0:
+                # Validate infrastructure readiness
+                infrastructure_ready = has_handlers_list and has_add_handler_method and has_route_method
+                
+                if not infrastructure_ready:
+                    missing_components = []
+                    if not has_handlers_list:
+                        missing_components.append("handlers list")
+                    if not has_add_handler_method:
+                        missing_components.append("add_handler method")
+                    if not has_route_method:
+                        missing_components.append("route_message method")
+                    
                     validation = CriticalPathValidation(
                         component="Message Handler Chain",
-                        path="WebSocketManager.message_handlers",
-                        check_type="handler_registration",
+                        path="MessageRouter infrastructure",
+                        check_type="infrastructure_readiness",
                         passed=False,
                         criticality=CriticalityLevel.CHAT_BREAKING,
-                        failure_reason="ZERO message handlers registered",
-                        remediation="Ensure register_handlers() is called during WebSocket initialization",
-                        metadata={"handler_count": 0}
+                        failure_reason=f"MessageRouter missing components: {missing_components}",
+                        remediation="Ensure MessageRouter is properly initialized with all required methods",
+                        metadata={"missing_components": missing_components}
                     )
-                    self.logger.error("❌ CRITICAL: ZERO WebSocket message handlers - chat messages won't be processed")
-                elif missing_handlers:
+                    self.logger.error(f"❌ CRITICAL: MessageRouter infrastructure incomplete - missing: {missing_components}")
+                elif default_handler_count == 0:
                     validation = CriticalPathValidation(
                         component="Message Handler Chain",
-                        path="WebSocketManager.message_handlers",
-                        check_type="handler_registration",
+                        path="MessageRouter.handlers",
+                        check_type="default_handlers",
                         passed=False,
-                        criticality=CriticalityLevel.DEGRADED,
-                        failure_reason=f"Missing critical handlers: {missing_handlers}",
-                        remediation="Ensure all critical message handlers are registered",
-                        metadata={
-                            "handler_count": handler_count,
-                            "missing": missing_handlers
-                        }
+                        criticality=CriticalityLevel.CHAT_BREAKING,
+                        failure_reason="MessageRouter has no default handlers - basic message types won't be processed",
+                        remediation="Ensure MessageRouter initializes with default handlers (HeartbeatHandler, etc.)",
+                        metadata={"default_handler_count": 0}
                     )
-                    self.logger.warning(f"⚠️ Missing critical message handlers: {missing_handlers}")
+                    self.logger.error("❌ CRITICAL: MessageRouter has no default handlers - basic functionality broken")
                 else:
+                    # Infrastructure is ready - this is what we expect during startup
                     validation = CriticalPathValidation(
                         component="Message Handler Chain",
-                        path="WebSocketManager.message_handlers",
-                        check_type="handler_registration",
+                        path="MessageRouter infrastructure",
+                        check_type="infrastructure_readiness",
                         passed=True,
                         criticality=CriticalityLevel.CHAT_BREAKING,
-                        metadata={"handler_count": handler_count}
+                        metadata={
+                            "default_handler_count": default_handler_count,
+                            "can_accept_per_connection_handlers": True,
+                            "infrastructure_components": ["handlers_list", "add_handler_method", "route_message_method"]
+                        }
                     )
-                    self.logger.info(f"✓ Message handlers properly registered ({handler_count} handlers)")
+                    self.logger.info(f"✓ Message handler infrastructure ready ({default_handler_count} default handlers, per-connection registration supported)")
                 
                 self.validations.append(validation)
             else:
                 self._add_critical_failure(
                     "Message Handler Chain",
-                    "WebSocket manager not found",
-                    "Ensure WebSocket manager is initialized"
+                    "MessageRouter not available",
+                    "Ensure MessageRouter is initialized during startup"
                 )
                 
         except Exception as e:
             self._add_critical_failure(
                 "Message Handler Chain",
                 f"Validation failed: {e}",
-                "Check WebSocket manager initialization"
+                "Check MessageRouter initialization and imports"
             )
     
     async def _validate_execution_context_propagation(self, app) -> None:
@@ -395,26 +422,41 @@ class CriticalPathValidator:
             # Check if execution engine exists
             execution_engine_found = False
             context_propagation_possible = False
+            engine_with_bridge = None
             
             if hasattr(app.state, 'agent_supervisor') and app.state.agent_supervisor:
                 supervisor = app.state.agent_supervisor
                 
-                # Check for execution engine
-                if hasattr(supervisor, 'execution_engine'):
+                # Check for ExecutionEngine with AgentWebSocketBridge
+                if hasattr(supervisor, 'engine'):
+                    execution_engine_found = True
+                    engine = supervisor.engine
+                    
+                    # Check if engine has websocket_bridge
+                    if hasattr(engine, 'websocket_bridge') and engine.websocket_bridge is not None:
+                        context_propagation_possible = True
+                        engine_with_bridge = 'engine.websocket_bridge'
+                    # Alternative: Check if engine has websocket_notifier (deprecated but might exist)
+                    elif hasattr(engine, 'websocket_notifier') and engine.websocket_notifier is not None:
+                        context_propagation_possible = True
+                        engine_with_bridge = 'engine.websocket_notifier (deprecated)'
+                
+                # Check for BaseExecutionEngine
+                if hasattr(supervisor, 'execution_engine') and not context_propagation_possible:
                     execution_engine_found = True
                     engine = supervisor.execution_engine
                     
-                    # Check if engine has websocket_notifier
-                    if hasattr(engine, 'websocket_notifier'):
-                        context_propagation_possible = engine.websocket_notifier is not None
+                    # BaseExecutionEngine typically doesn't have WebSocket integration directly
+                    # But check anyway
+                    if hasattr(engine, 'websocket_bridge') and engine.websocket_bridge is not None:
+                        context_propagation_possible = True
+                        engine_with_bridge = 'execution_engine.websocket_bridge'
                 
-                # Alternative: Check for agent_manager
-                elif hasattr(supervisor, 'agent_manager'):
-                    execution_engine_found = True
-                    manager = supervisor.agent_manager
-                    
-                    if hasattr(manager, 'websocket_notifier'):
-                        context_propagation_possible = manager.websocket_notifier is not None
+                # Check if the bridge is available at the supervisor level
+                if not context_propagation_possible and hasattr(app.state, 'agent_websocket_bridge'):
+                    if app.state.agent_websocket_bridge is not None:
+                        context_propagation_possible = True
+                        engine_with_bridge = 'app.state.agent_websocket_bridge'
             
             if not execution_engine_found:
                 validation = CriticalPathValidation(
@@ -424,29 +466,30 @@ class CriticalPathValidator:
                     passed=False,
                     criticality=CriticalityLevel.CHAT_BREAKING,
                     failure_reason="Execution engine not found in supervisor",
-                    remediation="Ensure supervisor has execution_engine or agent_manager"
+                    remediation="Ensure supervisor has execution_engine or engine attribute"
                 )
                 self.logger.error("❌ CRITICAL: Execution engine missing - context can't be propagated to agents")
             elif not context_propagation_possible:
                 validation = CriticalPathValidation(
                     component="Execution Context Propagation",
-                    path="ExecutionEngine.websocket_notifier",
-                    check_type="notifier_existence",
+                    path="AgentWebSocketBridge",
+                    check_type="bridge_availability",
                     passed=False,
                     criticality=CriticalityLevel.CHAT_BREAKING,
-                    failure_reason="WebSocket notifier not initialized in execution engine",
-                    remediation="Ensure WebSocketNotifier is created in execution engine"
+                    failure_reason="AgentWebSocketBridge not available for execution context",
+                    remediation="Ensure AgentWebSocketBridge is initialized and available"
                 )
-                self.logger.error("❌ CRITICAL: WebSocket notifier missing - agent events won't be sent")
+                self.logger.error("❌ CRITICAL: AgentWebSocketBridge not available - agent events won't be sent")
             else:
                 validation = CriticalPathValidation(
                     component="Execution Context Propagation",
                     path="Supervisor -> ExecutionEngine -> Agent",
                     check_type="context_chain",
                     passed=True,
-                    criticality=CriticalityLevel.CHAT_BREAKING
+                    criticality=CriticalityLevel.CHAT_BREAKING,
+                    metadata={"bridge_location": engine_with_bridge}
                 )
-                self.logger.info("✓ Execution context propagation chain verified")
+                self.logger.info(f"✓ Execution context propagation chain verified (using {engine_with_bridge})")
             
             self.validations.append(validation)
             
@@ -458,67 +501,78 @@ class CriticalPathValidator:
             )
     
     async def _validate_notifier_initialization(self, app) -> None:
-        """Validate WebSocketNotifier is properly initialized."""
+        """Validate AgentWebSocketBridge is properly initialized (replaces WebSocketNotifier)."""
         try:
-            # Check multiple possible locations for WebSocketNotifier
-            notifier_found = False
-            notifier_locations = []
+            # Check for AgentWebSocketBridge which is the new SSOT for WebSocket notifications
+            bridge_found = False
+            bridge_locations = []
             
-            # Check in supervisor
-            if hasattr(app.state, 'agent_supervisor') and app.state.agent_supervisor:
-                supervisor = app.state.agent_supervisor
+            # Check in app.state for AgentWebSocketBridge
+            if hasattr(app.state, 'agent_websocket_bridge') and app.state.agent_websocket_bridge:
+                bridge_found = True
+                bridge_locations.append("app.state.agent_websocket_bridge")
                 
-                # Check execution engine
-                if hasattr(supervisor, 'execution_engine'):
-                    if hasattr(supervisor.execution_engine, 'websocket_notifier'):
-                        if supervisor.execution_engine.websocket_notifier is not None:
-                            notifier_found = True
-                            notifier_locations.append("execution_engine")
+                # Validate it has the required notification methods
+                bridge = app.state.agent_websocket_bridge
+                required_methods = ['notify_agent_started', 'notify_agent_completed', 'notify_tool_executing']
+                missing_methods = [m for m in required_methods if not hasattr(bridge, m)]
                 
-                # Check agent manager
-                if hasattr(supervisor, 'agent_manager'):
-                    if hasattr(supervisor.agent_manager, 'websocket_notifier'):
-                        if supervisor.agent_manager.websocket_notifier is not None:
-                            notifier_found = True
-                            notifier_locations.append("agent_manager")
-                
-                # Check agent execution core
-                if hasattr(supervisor, 'agent_execution_core'):
-                    if hasattr(supervisor.agent_execution_core, 'websocket_notifier'):
-                        if supervisor.agent_execution_core.websocket_notifier is not None:
-                            notifier_found = True
-                            notifier_locations.append("agent_execution_core")
-            
-            if not notifier_found:
+                if missing_methods:
+                    validation = CriticalPathValidation(
+                        component="AgentWebSocketBridge Initialization",
+                        path="AgentWebSocketBridge",
+                        check_type="initialization",
+                        passed=False,
+                        criticality=CriticalityLevel.CHAT_BREAKING,
+                        failure_reason=f"AgentWebSocketBridge missing required methods: {missing_methods}",
+                        remediation="Ensure AgentWebSocketBridge has all notification methods",
+                        metadata={"missing_methods": missing_methods}
+                    )
+                    self.logger.error(f"❌ CRITICAL: AgentWebSocketBridge incomplete - missing methods: {missing_methods}")
+                else:
+                    # Check if bridge is integrated with supervisor
+                    integrated = False
+                    if hasattr(app.state, 'agent_supervisor') and app.state.agent_supervisor:
+                        supervisor = app.state.agent_supervisor
+                        # Check if supervisor's registry has the bridge
+                        if hasattr(supervisor, 'registry') and hasattr(supervisor.registry, 'websocket_bridge'):
+                            if supervisor.registry.websocket_bridge == bridge:
+                                integrated = True
+                                bridge_locations.append("supervisor.registry.websocket_bridge")
+                    
+                    validation = CriticalPathValidation(
+                        component="AgentWebSocketBridge Initialization",
+                        path="AgentWebSocketBridge",
+                        check_type="initialization",
+                        passed=True,
+                        criticality=CriticalityLevel.CHAT_BREAKING,
+                        metadata={
+                            "found_in": bridge_locations,
+                            "integrated_with_supervisor": integrated,
+                            "has_all_methods": True
+                        }
+                    )
+                    self.logger.info(f"✓ AgentWebSocketBridge properly initialized in: {', '.join(bridge_locations)}")
+            else:
                 validation = CriticalPathValidation(
-                    component="WebSocketNotifier Initialization",
-                    path="WebSocketNotifier",
+                    component="AgentWebSocketBridge Initialization",
+                    path="AgentWebSocketBridge",
                     check_type="initialization",
                     passed=False,
                     criticality=CriticalityLevel.CHAT_BREAKING,
-                    failure_reason="WebSocketNotifier not found in any expected location",
-                    remediation="Ensure WebSocketNotifier is created during supervisor initialization",
-                    metadata={"checked_locations": ["execution_engine", "agent_manager", "agent_execution_core"]}
+                    failure_reason="AgentWebSocketBridge not found in app.state",
+                    remediation="Ensure AgentWebSocketBridge is created during startup",
+                    metadata={"checked_locations": ["app.state.agent_websocket_bridge"]}
                 )
-                self.logger.error("❌ CRITICAL: WebSocketNotifier not initialized - NO agent events will be sent to UI")
-            else:
-                validation = CriticalPathValidation(
-                    component="WebSocketNotifier Initialization",
-                    path="WebSocketNotifier",
-                    check_type="initialization",
-                    passed=True,
-                    criticality=CriticalityLevel.CHAT_BREAKING,
-                    metadata={"found_in": notifier_locations}
-                )
-                self.logger.info(f"✓ WebSocketNotifier found in: {', '.join(notifier_locations)}")
+                self.logger.error("❌ CRITICAL: AgentWebSocketBridge not initialized - NO agent events will be sent to UI")
             
             self.validations.append(validation)
             
         except Exception as e:
             self._add_critical_failure(
-                "WebSocketNotifier Initialization",
+                "AgentWebSocketBridge Initialization",
                 f"Validation failed: {e}",
-                "Check WebSocketNotifier creation in supervisor"
+                "Check AgentWebSocketBridge creation in startup"
             )
     
     def _add_critical_failure(self, component: str, reason: str, remediation: str) -> None:

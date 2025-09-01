@@ -1,5 +1,6 @@
 """Test Environment Configuration
 
+from shared.isolated_environment import get_env
 Provides configuration for E2E test environments.
 Now integrates with service availability detection to provide intelligent
 configuration based on actual service availability.
@@ -135,7 +136,7 @@ def _get_base_test_environment_config(environment: Optional[TestEnvironmentType]
     """
     # Auto-detect environment if not specified
     if environment is None:
-        env_var = os.getenv("TEST_ENVIRONMENT", "test").lower()
+        env_var = get_env().get("TEST_ENVIRONMENT", "test").lower()
         environment = TestEnvironmentType.TEST if env_var == "test" else TestEnvironmentType.DEV
     
     # Environment-specific configurations
@@ -149,9 +150,9 @@ def _get_base_test_environment_config(environment: Optional[TestEnvironmentType]
                 websocket="ws://localhost:8000/ws"
             ),
             database=DatabaseConfig(
-                url=os.getenv("TEST_DATABASE_URL", "sqlite+aiosqlite:///:memory:"),  # Default to SQLite for tests
-                redis_url=os.getenv("TEST_REDIS_URL", "redis://localhost:6380/0"),  # Different port for tests
-                clickhouse_url=os.getenv("TEST_CLICKHOUSE_URL", "clickhouse://localhost:8124")  # Different port for tests
+                url=get_env().get("TEST_DATABASE_URL", "sqlite+aiosqlite:///:memory:"),  # Default to SQLite for tests
+                redis_url=get_env().get("TEST_REDIS_URL", "redis://localhost:6380/0"),  # Different port for tests
+                clickhouse_url=get_env().get("TEST_CLICKHOUSE_URL", "clickhouse://localhost:8124")  # Different port for tests
             ),
             use_real_database=False,
             service_detection_enabled=True
@@ -167,9 +168,9 @@ def _get_base_test_environment_config(environment: Optional[TestEnvironmentType]
                 websocket="ws://localhost:8000/ws"
             ),
             database=DatabaseConfig(
-                url=os.getenv("DATABASE_URL", "postgresql://dev:dev@localhost:5432/dev_db"),
-                redis_url=os.getenv("REDIS_URL", "redis://localhost:6379"),
-                clickhouse_url=os.getenv("CLICKHOUSE_URL", "clickhouse://localhost:8123")
+                url=get_env().get("DATABASE_URL", "postgresql://dev:dev@localhost:5432/dev_db"),
+                redis_url=get_env().get("REDIS_URL", "redis://localhost:6379"),
+                clickhouse_url=get_env().get("CLICKHOUSE_URL", "clickhouse://localhost:8123")
             ),
             use_real_database=True,
             service_detection_enabled=True
@@ -179,15 +180,15 @@ def _get_base_test_environment_config(environment: Optional[TestEnvironmentType]
         return TestEnvironmentConfig(
             environment=TestEnvironmentType.STAGING,
             services=ServiceUrls(
-                backend=os.getenv("STAGING_API_URL", "https://staging.netra.ai"),
-                auth=os.getenv("STAGING_AUTH_URL", "https://auth.staging.netra.ai"),
-                frontend=os.getenv("STAGING_FRONTEND_URL", "https://staging.netra.ai"),
-                websocket=os.getenv("STAGING_WS_URL", "wss://staging.netra.ai/ws")
+                backend=get_env().get("STAGING_API_URL", "https://staging.netra.ai"),
+                auth=get_env().get("STAGING_AUTH_URL", "https://auth.staging.netra.ai"),
+                frontend=get_env().get("STAGING_FRONTEND_URL", "https://staging.netra.ai"),
+                websocket=get_env().get("STAGING_WS_URL", "wss://staging.netra.ai/ws")
             ),
             database=DatabaseConfig(
-                url=os.getenv("STAGING_DATABASE_URL", "postgresql://staging:staging@localhost:5432/staging_db"),
-                redis_url=os.getenv("STAGING_REDIS_URL", "redis://localhost:6379"),
-                clickhouse_url=os.getenv("STAGING_CLICKHOUSE_URL", "clickhouse://localhost:8123")
+                url=get_env().get("STAGING_DATABASE_URL", "postgresql://staging:staging@localhost:5432/staging_db"),
+                redis_url=get_env().get("STAGING_REDIS_URL", "redis://localhost:6379"),
+                clickhouse_url=get_env().get("STAGING_CLICKHOUSE_URL", "clickhouse://localhost:8123")
             ),
             use_real_database=True,
             use_real_llm=True,

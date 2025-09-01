@@ -502,7 +502,7 @@ export default function SecuritySection() {
             Active Sessions
           </h4>
           <p style={{ color: '#6b7280', marginBottom: '20px' }}>
-            Manage your active sessions and devices. You can revoke access for any device you don't recognize.
+            Manage your active sessions and devices. You can revoke access for any device you don&apos;t recognize.
           </p>
           
           <div>

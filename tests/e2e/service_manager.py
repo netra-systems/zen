@@ -10,8 +10,8 @@ All functions ≤8 lines as per SPEC/conventions.xml
 
 import asyncio
 import logging
-import os
 import socket
+from shared.isolated_environment import get_env
 import subprocess
 import sys
 import time
@@ -158,7 +158,8 @@ class ServiceManager:
     
     def _create_test_environment(self, config: ServiceConfig) -> Dict[str, str]:
         """Create test environment for service startup."""
-        test_env = env.get_all()
+        env_vars = get_env()
+        test_env = env_vars.get_all()
         
         # Set test mode variables
         test_env.update({
@@ -445,7 +446,8 @@ class RealServicesManager:
         
     def _get_auth_service_env(self) -> Dict[str, str]:
         """Get environment for auth service."""
-        env = env.get_all()
+        env_vars = get_env()
+        env = env_vars.get_all()
         env.update({
             "PORT": str(self.service_ports["auth_service"]),
             "ENVIRONMENT": "test",
@@ -457,7 +459,8 @@ class RealServicesManager:
         
     def _get_backend_service_env(self) -> Dict[str, str]:
         """Get environment for backend service."""
-        env = env.get_all()
+        env_vars = get_env()
+        env = env_vars.get_all()
         env.update({
             "ENVIRONMENT": "test",
             "DATABASE_URL": "sqlite+aiosqlite:///:memory:",

@@ -1,7 +1,5 @@
-from shared.isolated_environment import get_env
 """Mission Critical Test Configuration - REAL SERVICES ONLY
 
-env = get_env()
 CRITICAL: Per CLAUDE.md - "MOCKS are FORBIDDEN in dev, staging or production"
 This conftest ensures mission-critical tests use REAL services for WebSocket events.
 
@@ -23,6 +21,10 @@ from typing import Optional
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
+
+# Get environment manager
+from shared.isolated_environment import get_env
+env = get_env()
 
 # CRITICAL: Enable REAL services for mission-critical tests
 env.set('USE_REAL_SERVICES', 'true', "test")

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type
 if TYPE_CHECKING:
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     from netra_backend.app.llm.llm_manager import LLMManager
-    from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import (
     ActionsToMeetGoalsSubAgent,
 )
@@ -23,6 +23,7 @@ from netra_backend.app.agents.synthetic_data_sub_agent import SyntheticDataSubAg
 
 # Import all sub-agents
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.core.agent_execution_tracker import get_execution_tracker
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -35,9 +36,10 @@ class AgentRegistry:
         self.llm_manager = llm_manager
         self.tool_dispatcher = tool_dispatcher
         self.agents: Dict[str, BaseSubAgent] = {}
-        self.websocket_manager = None
+        self.websocket_bridge: Optional['AgentWebSocketBridge'] = None
         self._agents_registered = False
         self.registration_errors: Dict[str, str] = {}
+        self.execution_tracker = get_execution_tracker()
         
     def register_default_agents(self) -> None:
         """Register default sub-agents"""
@@ -106,8 +108,9 @@ class AgentRegistry:
             logger.debug(f"Agent {name} already registered, skipping")
             return
             
-        if self.websocket_manager:
-            agent.websocket_manager = self.websocket_manager
+        # Set WebSocket bridge on agent if available and agent supports it
+        if self.websocket_bridge and hasattr(agent, 'set_websocket_bridge'):
+            agent.set_websocket_bridge(self.websocket_bridge)
         self.agents[name] = agent
         # Clear any previous registration errors
         self.registration_errors.pop(name, None)
@@ -134,9 +137,9 @@ class AgentRegistry:
                 **kwargs
             )
             
-            # Set websocket manager if available
-            if self.websocket_manager:
-                agent.websocket_manager = self.websocket_manager
+            # Set websocket bridge if available and agent supports it
+            if self.websocket_bridge and hasattr(agent, 'set_websocket_bridge'):
+                agent.set_websocket_bridge(self.websocket_bridge)
                 
             # Store the agent
             self.agents[name] = agent
@@ -186,12 +189,32 @@ class AgentRegistry:
                 logger.warning(f"Failed to get health status for agent {name}: {e}")
                 agent_health_details[name] = {"status": "error", "error": str(e)}
         
+        # Add execution tracker metrics
+        execution_metrics = {}
+        dead_agents = []
+        if self.execution_tracker:
+            execution_metrics = self.execution_tracker.get_metrics()
+            # Check for dead agents
+            dead_executions = self.execution_tracker.detect_dead_executions()
+            dead_agents = [
+                {
+                    "agent": ex.agent_name,
+                    "execution_id": ex.execution_id,
+                    "death_cause": "timeout" if ex.is_timed_out() else "no_heartbeat",
+                    "time_since_heartbeat": ex.time_since_heartbeat.total_seconds()
+                }
+                for ex in dead_executions
+            ]
+        
         return {
             "total_agents": len(self.agents),
             "healthy_agents": healthy_agents,
             "failed_registrations": len(self.registration_errors),
             "agent_health": agent_health_details,
-            "registration_errors": self.registration_errors.copy()
+            "registration_errors": self.registration_errors.copy(),
+            "execution_metrics": execution_metrics,
+            "dead_agents": dead_agents,
+            "death_detection_enabled": True
         }
 
     def remove_agent(self, name: str) -> bool:
@@ -236,39 +259,124 @@ class AgentRegistry:
         self.register("corpus_admin", CorpusAdminSubAgent(
             self.llm_manager, self.tool_dispatcher))
 
-    def set_websocket_manager(self, manager: 'WebSocketManager') -> None:
-        """Set websocket manager for all agents and enhance tool dispatcher with concurrency optimization."""
-        self.websocket_manager = manager
-        
-        # CRITICAL: Enhance tool dispatcher with WebSocket notifications
-        # This enables real-time tool execution events
-        if self.tool_dispatcher and manager:
-            from netra_backend.app.agents.unified_tool_execution import (
-                enhance_tool_dispatcher_with_notifications
+    def set_websocket_bridge(self, bridge: 'AgentWebSocketBridge') -> None:
+        """Set AgentWebSocketBridge on registry and agents."""
+        # CRITICAL: Prevent None bridge from breaking agent events
+        if bridge is None:
+            logger.error("🚨 CRITICAL: Attempting to set AgentWebSocketBridge to None - this breaks agent events!")
+            logger.error("🚨 This prevents real-time chat notifications and agent execution updates")
+            logger.error("🚨 WebSocket events are CRITICAL for 90% of chat functionality")
+            raise ValueError(
+                "AgentWebSocketBridge cannot be None. This breaks agent WebSocket events and prevents "
+                "real-time chat updates. Check AgentWebSocketBridge initialization in startup sequence."
             )
-            logger.info("Enhancing tool dispatcher with WebSocket notifications")
-            enhance_tool_dispatcher_with_notifications(self.tool_dispatcher, manager)
-            
-            # CONCURRENCY OPTIMIZATION: Verify enhancement succeeded
-            if not getattr(self.tool_dispatcher, '_websocket_enhanced', False):
-                logger.error("CRITICAL: Tool dispatcher enhancement failed - WebSocket events will not work")
-                raise RuntimeError("Tool dispatcher WebSocket enhancement failed")
-            else:
-                logger.info("✅ Tool dispatcher WebSocket enhancement verified")
-        elif manager is None:
-            # Graceful degradation when manager is None - log but don't fail
-            logger.warning("WebSocket manager is None - agent events will not be available")
         
-        # Set WebSocket manager for all registered agents with verification
+        # Validate the bridge has required methods before setting
+        required_methods = ['notify_agent_started', 'notify_agent_completed', 'notify_tool_executing']
+        missing_methods = [method for method in required_methods if not hasattr(bridge, method)]
+        if missing_methods:
+            logger.error(f"🚨 CRITICAL: AgentWebSocketBridge missing required methods: {missing_methods}")
+            raise ValueError(f"AgentWebSocketBridge incomplete - missing methods: {missing_methods}")
+        
+        self.websocket_bridge = bridge
+        
+        # CRITICAL: Set WebSocket bridge on tool dispatcher
+        if hasattr(self, 'tool_dispatcher') and self.tool_dispatcher:
+            if hasattr(self.tool_dispatcher, 'set_websocket_bridge'):
+                # Use the proper method to set the bridge
+                self.tool_dispatcher.set_websocket_bridge(bridge)
+                logger.info("✅ Set WebSocket bridge on tool dispatcher via proper method")
+            elif hasattr(self.tool_dispatcher, 'executor') and hasattr(self.tool_dispatcher.executor, 'websocket_bridge'):
+                # Fallback: set directly on executor
+                old_bridge = self.tool_dispatcher.executor.websocket_bridge
+                self.tool_dispatcher.executor.websocket_bridge = bridge
+                if old_bridge is None:
+                    logger.info("✅ Set WebSocket bridge on tool dispatcher executor (fallback)")
+                else:
+                    logger.info("Tool dispatcher executor already has WebSocket bridge")
+            else:
+                logger.error("🚨 CRITICAL: Tool dispatcher doesn't support WebSocket bridge pattern")
+            
+            # Verify WebSocket support after setting
+            if hasattr(self.tool_dispatcher, 'has_websocket_support'):
+                if self.tool_dispatcher.has_websocket_support:
+                    logger.info("✅ Tool dispatcher confirms WebSocket support is available")
+                else:
+                    logger.warning("⚠️ Tool dispatcher created without WebSocket support - may need reconfiguration")
+        
+        # Set WebSocket bridge on all registered agents that support it
         agent_count = 0
         for agent_name, agent in self.agents.items():
             try:
-                agent.websocket_manager = manager
-                agent_count += 1
+                if hasattr(agent, 'set_websocket_bridge'):
+                    agent.set_websocket_bridge(bridge)
+                    agent_count += 1
+                else:
+                    logger.debug(f"Agent {agent_name} does not support WebSocket bridge pattern")
             except Exception as e:
-                logger.warning(f"Failed to set WebSocket manager for agent {agent_name}: {e}")
+                logger.warning(f"Failed to set WebSocket bridge for agent {agent_name}: {e}")
         
-        if manager is not None:
-            logger.info(f"✅ WebSocket manager set for {agent_count}/{len(self.agents)} agents")
+        logger.info(f"✅ WebSocket bridge set for {agent_count}/{len(self.agents)} agents")
+    
+    def get_websocket_bridge(self) -> Optional['AgentWebSocketBridge']:
+        """Get the current AgentWebSocketBridge instance.
+        
+        Returns:
+            The AgentWebSocketBridge instance if set, None otherwise.
+        """
+        return getattr(self, 'websocket_bridge', None)
+    
+    def diagnose_websocket_wiring(self) -> Dict[str, Any]:
+        """Comprehensive diagnosis of WebSocket wiring for debugging silent failures.
+        
+        Returns detailed information about WebSocket integration status to help
+        identify why WebSocket events might not be working.
+        """
+        diagnosis = {
+            "registry_has_websocket_bridge": self.websocket_bridge is not None,
+            "websocket_bridge_type": type(self.websocket_bridge).__name__ if self.websocket_bridge else None,
+            "tool_dispatcher_present": hasattr(self, 'tool_dispatcher') and self.tool_dispatcher is not None,
+            "tool_dispatcher_diagnosis": None,
+            "agents_with_websocket_support": [],
+            "agents_without_websocket_support": [],
+            "critical_issues": []
+        }
+        
+        # Check WebSocket bridge status
+        if self.websocket_bridge is None:
+            diagnosis["critical_issues"].append("AgentRegistry has no WebSocket bridge - all events will be lost")
         else:
-            logger.info(f"WebSocket manager set to None for {agent_count}/{len(self.agents)} agents")
+            # Validate bridge has required methods
+            required_methods = ['notify_agent_started', 'notify_agent_completed', 'notify_tool_executing']
+            missing_methods = [method for method in required_methods if not hasattr(self.websocket_bridge, method)]
+            if missing_methods:
+                diagnosis["critical_issues"].append(f"WebSocket bridge missing methods: {missing_methods}")
+        
+        # Check tool dispatcher wiring
+        if hasattr(self, 'tool_dispatcher') and self.tool_dispatcher:
+            if hasattr(self.tool_dispatcher, 'diagnose_websocket_wiring'):
+                diagnosis["tool_dispatcher_diagnosis"] = self.tool_dispatcher.diagnose_websocket_wiring()
+                if diagnosis["tool_dispatcher_diagnosis"]["critical_issues"]:
+                    diagnosis["critical_issues"].extend([
+                        f"ToolDispatcher: {issue}" for issue in diagnosis["tool_dispatcher_diagnosis"]["critical_issues"]
+                    ])
+            else:
+                diagnosis["critical_issues"].append("ToolDispatcher doesn't support WebSocket diagnostics")
+        else:
+            diagnosis["critical_issues"].append("AgentRegistry missing tool_dispatcher")
+        
+        # Check agent WebSocket support
+        for agent_name, agent in self.agents.items():
+            if hasattr(agent, 'set_websocket_bridge'):
+                diagnosis["agents_with_websocket_support"].append(agent_name)
+            else:
+                diagnosis["agents_without_websocket_support"].append(agent_name)
+        
+        diagnosis["total_agents"] = len(self.agents)
+        diagnosis["agents_with_support_count"] = len(diagnosis["agents_with_websocket_support"])
+        diagnosis["agents_without_support_count"] = len(diagnosis["agents_without_websocket_support"])
+        
+        # Overall health assessment
+        diagnosis["websocket_health"] = "HEALTHY" if not diagnosis["critical_issues"] else "CRITICAL"
+        
+        return diagnosis

@@ -24,7 +24,7 @@
     
     <implementation_details>
         <component name="Unified Test Runner">
-            <file>scripts/unified_test_runner.py</file>
+            <file>tests/unified_test_runner.py</file>
             <changes>
                 <change>Added _configure_staging_e2e_auth() method to auto-fetch bypass key</change>
                 <change>Skip local service availability checks for staging environment</change>
@@ -255,7 +255,7 @@ def _configure_staging_e2e_auth(self):
     </next_steps>
     
     <files_modified>
-        <file>scripts/unified_test_runner.py</file>
+        <file>tests/unified_test_runner.py</file>
         <file>tests/e2e/config.py</file>
         <file>docs/E2E_STAGING_TESTING_REQUIREMENTS.md</file>
     </files_modified>

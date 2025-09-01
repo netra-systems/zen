@@ -45,7 +45,7 @@ from netra_backend.app.schemas.shared_types import RetryConfig
 logger = central_logger.get_logger(__name__)
 
 
-class TriageSubAgent(BaseExecutionInterface, BaseSubAgent):
+class TriageSubAgent(BaseSubAgent):
     """Modernized triage agent with BaseExecutionInterface pattern."""
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher, 
@@ -61,7 +61,9 @@ class TriageSubAgent(BaseExecutionInterface, BaseSubAgent):
         """Initialize base agent with modern execution interface."""
         BaseSubAgent.__init__(self, llm_manager, name="TriageSubAgent", 
                             description="Modernized triage agent with advanced categorization.")
-        BaseExecutionInterface.__init__(self, "TriageSubAgent", websocket_manager)
+        # Store agent name and websocket manager for BaseExecutionInterface compatibility
+        self.agent_name = "TriageSubAgent"
+        self.websocket_manager = websocket_manager
     
     def _init_core_components(self, tool_dispatcher: ToolDispatcher, redis_manager: Optional[RedisManager]) -> None:
         """Initialize core triage components."""
@@ -123,30 +125,16 @@ class TriageSubAgent(BaseExecutionInterface, BaseSubAgent):
         """Execute triage using modern execution pattern with WebSocket notifications."""
         context = self._create_execution_context(state, run_id, stream_updates)
         
-        # Send agent started notification
-        if self.websocket_manager:
-            notifier = self._get_websocket_notifier()
-            ws_context = self._create_websocket_context(context)
-            await notifier.send_agent_started(ws_context)
+        # Agent started is handled by orchestrator
         
         start_time = time.time()
         try:
             result = await self.execution_engine.execute(self, context)
             await self._process_execution_result(state, result)
             
-            # Send agent completed notification
-            if self.websocket_manager:
-                duration_ms = (time.time() - start_time) * 1000
-                result_dict = self._extract_completion_result(state)
-                await notifier.send_agent_completed(
-                    ws_context, result_dict, duration_ms
-                )
+            # Agent completed is handled by orchestrator
         except Exception as e:
-            # Send agent error notification
-            if self.websocket_manager:
-                await notifier.send_agent_failed(
-                    ws_context, str(e), {"error_type": type(e).__name__}
-                )
+            # Agent error is handled by orchestrator
             raise
     
     def _extract_completion_result(self, state: DeepAgentState) -> Dict[str, Any]:
@@ -198,43 +186,17 @@ class TriageSubAgent(BaseExecutionInterface, BaseSubAgent):
     
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
         """Execute triage core logic with WebSocket notifications."""
-        # Set WebSocket context in state for tool execution notifications
-        if hasattr(context.state, '__dict__'):
-            context.state._websocket_context = self._create_websocket_context(context)
+        # WebSocket context is handled by orchestrator
         
-        # Send agent thinking notification
-        if self.websocket_manager:
-            notifier = self._get_websocket_notifier()
-            ws_context = self._create_websocket_context(context)
-            await notifier.send_agent_thinking(
-                ws_context, 
-                "Analyzing your request to determine the best approach..."
-            )
+        # Send agent thinking notification using mixin
+        await self.emit_thinking("Analyzing your request to determine the best approach...")
         
         result = await self.executor.execute_triage_workflow(
             context.state, context.run_id, context.stream_updates
         )
         return self._extract_result_data(result, context.state)
     
-    def _get_websocket_notifier(self):
-        """Get WebSocket notifier instance."""
-        if not hasattr(self, '_websocket_notifier'):
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-            self._websocket_notifier = WebSocketNotifier(self.websocket_manager)
-        return self._websocket_notifier
     
-    def _create_websocket_context(self, context: ExecutionContext):
-        """Create WebSocket execution context."""
-        from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-        from netra_backend.app.agents.utils import extract_thread_id
-        
-        thread_id = extract_thread_id(context.state, context.run_id)
-        return AgentExecutionContext(
-            agent_name=self.name,
-            run_id=context.run_id,
-            thread_id=thread_id,
-            user_id=getattr(context.state, 'user_id', context.run_id)
-        )
     
     def _extract_result_data(self, result: Any, state: DeepAgentState) -> Dict[str, Any]:
         """Extract result data for execution interface."""

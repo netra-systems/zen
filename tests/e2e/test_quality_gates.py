@@ -1,5 +1,6 @@
 from shared.isolated_environment import get_env
 """Quality Gate Tester - Phase 4 of Unified System Testing
+from shared.isolated_environment import get_env
 
 env = get_env()
 Business Value Justification (BVJ):
@@ -16,9 +17,6 @@ from typing import Any, Dict, List
 import pytest
 
 # Set testing environment before imports
-env.set("TESTING", "1", "test")
-env.set("ENVIRONMENT", "testing", "test")
-env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
 
 from netra_backend.app.services.quality_gate import (
     ContentType,

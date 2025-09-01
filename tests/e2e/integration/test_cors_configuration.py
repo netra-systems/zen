@@ -1,7 +1,6 @@
 from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
-env = get_env()
 Comprehensive CORS Configuration Tests for DEV MODE
 
 BVJ (Business Value Justification):
@@ -34,9 +33,9 @@ import pytest
 import websockets
 
 # Test environment setup
-env.set("TESTING", "1", "test")
-env.set("CORS_ORIGINS", "*", "test")
-env.set("ENVIRONMENT", "development", "test")
+get_env().set("TESTING", "1", "test")
+get_env().set("CORS_ORIGINS", "*", "test")
+get_env().set("ENVIRONMENT", "development", "test")
 
 
 @dataclass
@@ -380,7 +379,7 @@ class TestCORSConfiguration:
             )
             
             # For dev environment, wildcard should allow any origin
-            if os.getenv("CORS_ORIGINS") == "*":
+            if get_env().get("CORS_ORIGINS") == "*":
                 assert cors_validation["origin_allowed"], \
                     "Dev mode should allow any origin with CORS_ORIGINS=*"
     

@@ -1,4 +1,5 @@
 """
+from shared.isolated_environment import get_env
 Comprehensive OAuth Configuration Tests
 Tests OAuth configuration loading, validation, and error handling across environments.
 

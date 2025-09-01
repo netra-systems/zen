@@ -42,10 +42,12 @@ class PageRefreshTestSuite:
     """Comprehensive test suite for page refresh scenarios."""
     
     def __init__(self):
-        self.frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:3000')
-        self.backend_url = os.getenv('BACKEND_URL', 'http://localhost:8000')
-        self.auth_url = os.getenv('AUTH_SERVICE_URL', 'http://localhost:8081')
-        self.jwt_secret = os.getenv('JWT_SECRET', 'test-secret-key')
+        from shared.isolated_environment import get_env
+        env = get_env()
+        self.frontend_url = env.get('FRONTEND_URL', 'http://localhost:3000')
+        self.backend_url = env.get('BACKEND_URL', 'http://localhost:8000')
+        self.auth_url = env.get('AUTH_SERVICE_URL', 'http://localhost:8081')
+        self.jwt_secret = env.get('JWT_SECRET', 'test-secret-key')
         self.test_results: Dict[str, Any] = {
             'total': 0,
             'passed': 0,

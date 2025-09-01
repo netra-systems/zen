@@ -1,4 +1,5 @@
 """FAILING E2E TESTS: Database 'postgres' Connectivity Cross-Service Impact
+from shared.isolated_environment import get_env
 
 CRITICAL DATABASE ISSUE - E2E IMPACT VERIFICATION:
 - Database connection failing with: "database 'postgres' does not exist"

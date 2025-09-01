@@ -1,5 +1,6 @@
 """Test to verify DatabaseConfig migration is complete and staging deployment issues.
 
+from shared.isolated_environment import get_env
 This test reproduces the staging error:
 RuntimeError: Database engine creation failed: name 'DatabaseConfig' is not defined
 

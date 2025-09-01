@@ -389,8 +389,11 @@ class DatabaseConfigManager:
             if self._environment == "testing":
                 # Use Docker mapped HTTP port for testing
                 default_http_port = "8125"
+            elif self._environment == "development":
+                # Use Docker mapped HTTP port for development
+                default_http_port = "8124"
             else:
-                # Use standard HTTP port 8123 for dev launcher compatibility
+                # Use standard HTTP port 8123 for other environments
                 default_http_port = "8123"
             config.clickhouse_http.port = int(self._env.get("CLICKHOUSE_HTTP_PORT", default_http_port))
             config.clickhouse_http.user = ch_config["user"]
