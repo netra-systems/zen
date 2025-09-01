@@ -319,10 +319,11 @@ class TestUnitWebSocketComponents:
             assert dispatcher.executor.websocket_notifier is not None, \
                 "UnifiedToolExecutionEngine has null websocket_notifier"
         
-        # Check for enhancement marker (if present)
-        if hasattr(dispatcher, '_websocket_enhanced'):
-            assert dispatcher._websocket_enhanced, "Enhancement marker is False"
-        assert dispatcher._websocket_enhanced is True, "Enhancement marker not set"
+        # With bridge pattern, we no longer use _websocket_enhanced marker
+        # Instead verify that the executor has proper WebSocket support
+        assert hasattr(dispatcher.executor, 'websocket_bridge') or \
+               hasattr(dispatcher.executor, 'websocket_notifier'), \
+               "Executor lacks WebSocket support (no bridge or notifier)"
     
     @pytest.mark.asyncio
     @pytest.mark.critical
