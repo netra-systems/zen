@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 """Database Transaction Consistency L4 Critical Path Tests (Staging Environment)
 
+env = get_env()
 Business Value Justification (BVJ):
 - Segment: Enterprise ($30K+ MRR) - Critical financial accuracy and audit compliance
 - Business Goal: Ensure ACID properties across PostgreSQL and ClickHouse for billing/analytics
@@ -50,7 +52,7 @@ class DatabaseTransactionL4Tester:
         """Initialize services for L4 database transaction consistency testing."""
         try:
             # Set staging environment
-            os.environ['ENVIRONMENT'] = 'staging'
+            env.set('ENVIRONMENT', 'staging', "test")
             
             # Refresh database configuration for staging
             self.db_config_manager.refresh_environment()
