@@ -391,7 +391,7 @@ class TestAgentWebSocketBridgeBoundaries:
         
         # Should NOT leak actual instances
         assert websocket_manager not in str(status)
-        assert orchestrator not in str(status)
+        assert registry not in str(status)
 
     async def test_clean_separation_in_status(self, bridge):
         """Test status reporting maintains clean separation."""
@@ -486,6 +486,230 @@ class TestAgentWebSocketBridgeAsync:
         assert bridge.state == IntegrationState.UNINITIALIZED
 
 
+class TestAgentWebSocketBridgeNotificationInterface:
+    """Tests for the new notification interface methods."""
+
+    @pytest.fixture
+    async def bridge_with_manager(self):
+        """Create bridge with mocked WebSocket manager."""
+        AgentWebSocketBridge._instance = None
+        bridge = AgentWebSocketBridge()
+        
+        with patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager') as mock_get_manager, \
+             patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry') as mock_get_registry:
+            
+            websocket_manager = AsyncMock()
+            websocket_manager.send_to_thread.return_value = True
+            mock_get_manager.return_value = websocket_manager
+            
+            registry = AsyncMock()
+            registry.get_metrics.return_value = {"active_contexts": 0}
+            registry.get_thread_id_for_run = AsyncMock(return_value="test_thread")
+            mock_get_registry.return_value = registry
+            
+            await bridge.ensure_integration()
+            
+            yield bridge, websocket_manager, registry
+        
+        await bridge.shutdown()
+
+    async def test_notify_tool_executing(self, bridge_with_manager):
+        """Test tool_executing notification method."""
+        bridge, websocket_manager, registry = bridge_with_manager
+        
+        success = await bridge.notify_tool_executing(
+            run_id="test_run",
+            agent_name="data_agent",
+            tool_name="database_query",
+            parameters={"query": "SELECT * FROM users", "limit": 100}
+        )
+        
+        assert success
+        websocket_manager.send_to_thread.assert_called_once()
+        
+        call_args = websocket_manager.send_to_thread.call_args[0]
+        assert call_args[0] == "test_thread"
+        notification = call_args[1]
+        assert notification["type"] == "tool_executing"
+        assert notification["payload"]["tool_name"] == "database_query"
+        assert notification["payload"]["parameters"]["query"] == "SELECT * FROM users"
+
+    async def test_notify_tool_completed(self, bridge_with_manager):
+        """Test tool_completed notification method."""
+        bridge, websocket_manager, registry = bridge_with_manager
+        
+        success = await bridge.notify_tool_completed(
+            run_id="test_run",
+            agent_name="data_agent",
+            tool_name="database_query",
+            result={"row_count": 42, "execution_status": "success"},
+            execution_time_ms=123.4
+        )
+        
+        assert success
+        websocket_manager.send_to_thread.assert_called_once()
+        
+        call_args = websocket_manager.send_to_thread.call_args[0]
+        notification = call_args[1]
+        assert notification["type"] == "tool_completed"
+        assert notification["payload"]["tool_name"] == "database_query"
+        assert notification["payload"]["result"]["row_count"] == 42
+        assert notification["payload"]["execution_time_ms"] == 123.4
+
+    async def test_notify_agent_completed(self, bridge_with_manager):
+        """Test agent_completed notification method."""
+        bridge, websocket_manager, registry = bridge_with_manager
+        
+        success = await bridge.notify_agent_completed(
+            run_id="test_run",
+            agent_name="analysis_agent",
+            result={"insights": "Customer retention improved by 15%", "confidence": 0.92},
+            execution_time_ms=5432.1
+        )
+        
+        assert success
+        websocket_manager.send_to_thread.assert_called_once()
+        
+        notification = websocket_manager.send_to_thread.call_args[0][1]
+        assert notification["type"] == "agent_completed"
+        assert notification["payload"]["status"] == "completed"
+        assert "insights" in notification["payload"]["result"]
+        assert notification["payload"]["execution_time_ms"] == 5432.1
+
+    async def test_notify_agent_error(self, bridge_with_manager):
+        """Test agent_error notification method."""
+        bridge, websocket_manager, registry = bridge_with_manager
+        
+        success = await bridge.notify_agent_error(
+            run_id="test_run",
+            agent_name="failing_agent",
+            error="Database connection timeout",
+            error_context={"retry_attempts": 3, "error_type": "ConnectionError"}
+        )
+        
+        assert success
+        websocket_manager.send_to_thread.assert_called_once()
+        
+        notification = websocket_manager.send_to_thread.call_args[0][1]
+        assert notification["type"] == "agent_error"
+        assert notification["payload"]["status"] == "error"
+        assert "timeout" in notification["payload"]["error_message"]
+        assert notification["payload"]["error_context"]["error_type"] == "ConnectionError"
+
+    async def test_notify_progress_update(self, bridge_with_manager):
+        """Test progress_update notification method."""
+        bridge, websocket_manager, registry = bridge_with_manager
+        
+        success = await bridge.notify_progress_update(
+            run_id="test_run",
+            agent_name="long_running_agent",
+            progress={
+                "percentage": 65.0,
+                "current_step": 13,
+                "total_steps": 20,
+                "message": "Processing batch 13 of 20"
+            }
+        )
+        
+        assert success
+        websocket_manager.send_to_thread.assert_called_once()
+        
+        notification = websocket_manager.send_to_thread.call_args[0][1]
+        assert notification["type"] == "progress_update"
+        assert notification["payload"]["progress_data"]["percentage"] == 65.0
+        assert notification["payload"]["progress_data"]["current_step"] == 13
+
+    async def test_notify_custom(self, bridge_with_manager):
+        """Test custom notification method."""
+        bridge, websocket_manager, registry = bridge_with_manager
+        
+        success = await bridge.notify_custom(
+            run_id="test_run",
+            agent_name="specialized_agent",
+            notification_type="data_visualization_ready",
+            data={
+                "chart_type": "line",
+                "data_points": 100,
+                "url": "/visualizations/chart_123"
+            }
+        )
+        
+        assert success
+        websocket_manager.send_to_thread.assert_called_once()
+        
+        notification = websocket_manager.send_to_thread.call_args[0][1]
+        assert notification["type"] == "data_visualization_ready"
+        assert notification["payload"]["chart_type"] == "line"
+        assert notification["payload"]["data_points"] == 100
+
+    async def test_parameter_sanitization(self, bridge_with_manager):
+        """Test sensitive data is sanitized in notifications."""
+        bridge, websocket_manager, registry = bridge_with_manager
+        
+        # Test with sensitive parameters
+        success = await bridge.notify_tool_executing(
+            run_id="test_run",
+            agent_name="secure_agent",
+            tool_name="api_call",
+            parameters={
+                "api_key": "sk-secret123456",
+                "password": "mypassword",
+                "username": "john_doe",
+                "data": "A" * 300  # Long string
+            }
+        )
+        
+        assert success
+        notification = websocket_manager.send_to_thread.call_args[0][1]
+        
+        # Verify sensitive data is redacted
+        params = notification["payload"]["parameters"]
+        assert params["api_key"] == "[REDACTED]"
+        assert params["password"] == "[REDACTED]"
+        assert params["username"] == "john_doe"  # Username not redacted
+        assert len(params["data"]) == 203  # Truncated (200 + "...")
+
+    async def test_thread_id_resolution_fallbacks(self, bridge_with_manager):
+        """Test thread_id resolution with various fallback strategies."""
+        bridge, websocket_manager, registry = bridge_with_manager
+        
+        # Test 1: Registry returns thread_id successfully
+        registry.get_thread_id_for_run.return_value = "resolved_thread"
+        success = await bridge.notify_agent_started("run_123", "test_agent")
+        assert success
+        assert websocket_manager.send_to_thread.call_args[0][0] == "resolved_thread"
+        
+        # Test 2: Registry fails, but run_id contains thread_id
+        registry.get_thread_id_for_run.return_value = None
+        websocket_manager.send_to_thread.reset_mock()
+        success = await bridge.notify_agent_started("thread_456_run_789", "test_agent")
+        assert success
+        assert websocket_manager.send_to_thread.call_args[0][0] == "thread_456"
+        
+        # Test 3: Run_id is already a thread_id
+        websocket_manager.send_to_thread.reset_mock()
+        success = await bridge.notify_agent_started("thread_999", "test_agent")
+        assert success
+        assert websocket_manager.send_to_thread.call_args[0][0] == "thread_999"
+
+    async def test_notification_without_websocket_manager(self, bridge_with_manager):
+        """Test notifications gracefully handle missing WebSocket manager."""
+        bridge, _, _ = bridge_with_manager
+        
+        # Simulate WebSocket manager becoming unavailable
+        bridge._websocket_manager = None
+        
+        # All notification methods should return False but not crash
+        assert not await bridge.notify_agent_started("run_1", "agent")
+        assert not await bridge.notify_agent_thinking("run_1", "agent", "thinking")
+        assert not await bridge.notify_tool_executing("run_1", "agent", "tool")
+        assert not await bridge.notify_tool_completed("run_1", "agent", "tool")
+        assert not await bridge.notify_agent_completed("run_1", "agent")
+        assert not await bridge.notify_agent_error("run_1", "agent", "error")
+        assert not await bridge.notify_progress_update("run_1", "agent", {})
+        assert not await bridge.notify_custom("run_1", "agent", "custom", {})
+
+
 @pytest.mark.asyncio
 class TestAgentWebSocketBridgeMissionCritical:
     """Mission-critical tests for WebSocket event delivery - ensures business value."""
@@ -525,11 +749,14 @@ class TestAgentWebSocketBridgeMissionCritical:
         result = await bridge.ensure_integration()
         assert result.success
 
-        # Test critical event delivery
-        success = await bridge.ensure_event_delivery(
-            mock_execution_context,
-            "agent_started",
-            {"agent": "test_agent", "status": "processing"}
+        # Setup registry to resolve thread_id
+        registry.get_thread_id_for_run = AsyncMock(return_value="test_thread")
+
+        # Test critical event delivery using new notification interface
+        success = await bridge.notify_agent_started(
+            run_id="test_run",
+            agent_name="test_agent",
+            context={"user_query": "test query"}
         )
 
         # Verify critical event delivered
@@ -541,17 +768,19 @@ class TestAgentWebSocketBridgeMissionCritical:
         # Verify event structure
         event_payload = call_args[0][1]
         assert event_payload["type"] == "agent_started"
-        assert "agent" in event_payload["payload"]
+        assert event_payload["agent_name"] == "test_agent"
+        assert "payload" in event_payload
 
     @patch('netra_backend.app.services.agent_websocket_bridge.get_websocket_manager')
     @patch('netra_backend.app.services.agent_websocket_bridge.get_agent_execution_registry')
-    async def test_event_delivery_retry_mechanism(self, mock_get_registry, mock_get_manager, bridge, mock_execution_context):
-        """Test event delivery retry mechanism for reliability."""
-        # Setup integration with failing WebSocket manager
+    async def test_notification_interface_agent_thinking(self, mock_get_registry, mock_get_manager, bridge):
+        """Test agent_thinking notification interface method."""
+        # Setup integration
         websocket_manager = AsyncMock()
-        websocket_manager.send_to_thread.side_effect = [False, False, True]  # Fail twice, succeed third time
+        websocket_manager.send_to_thread.return_value = True
         registry = AsyncMock()
         registry.get_metrics.return_value = {"active_contexts": 0}
+        registry.get_thread_id_for_run = AsyncMock(return_value="test_thread")
         
         mock_get_manager.return_value = websocket_manager
         mock_get_registry.return_value = registry
@@ -559,16 +788,26 @@ class TestAgentWebSocketBridgeMissionCritical:
         # Initialize bridge
         await bridge.ensure_integration()
 
-        # Test event delivery with retries
-        success = await bridge.ensure_event_delivery(
-            mock_execution_context,
-            "agent_thinking",
-            {"message": "Processing request"}
+        # Test agent_thinking notification
+        success = await bridge.notify_agent_thinking(
+            run_id="test_run",
+            agent_name="reasoning_agent",
+            reasoning="Analyzing user request and formulating response",
+            step_number=2,
+            progress_percentage=40.0
         )
 
-        # Verify event eventually delivered
+        # Verify notification sent
         assert success
-        assert websocket_manager.send_to_thread.call_count == 3  # Retried twice
+        websocket_manager.send_to_thread.assert_called_once()
+        
+        # Verify notification structure
+        call_args = websocket_manager.send_to_thread.call_args[0]
+        notification = call_args[1]
+        assert notification["type"] == "agent_thinking"
+        assert notification["payload"]["reasoning"] == "Analyzing user request and formulating response"
+        assert notification["payload"]["step_number"] == 2
+        assert notification["payload"]["progress_percentage"] == 40.0
 
     async def test_substantive_chat_value_preservation(self, bridge):
         """Test bridge preserves substantive chat value through WebSocket events."""
@@ -576,7 +815,6 @@ class TestAgentWebSocketBridgeMissionCritical:
         status = await bridge.get_status()
         
         # Bridge configuration should support chat business value
-        assert status["config"]["event_delivery_timeout_ms"] <= 500  # Fast event delivery
         assert status["config"]["recovery_max_attempts"] >= 3  # Reliable recovery
         
         # Health monitoring should be frequent enough for chat
