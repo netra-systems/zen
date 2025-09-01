@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Integration tests for SecretManagerBuilder.
 
 Tests the unified secret management system across different environments
@@ -28,24 +30,24 @@ class TestSecretManagerBuilderIntegration:
     def setup(self):
         """Setup test environment."""
         # Save original environment
-        self.original_env = dict(os.environ)
+        self.original_env = env.get_all()
         
         # Set test environment variables
-        os.environ['JWT_SECRET_KEY'] = 'test-jwt-secret-key-32-chars-min'
-        os.environ['POSTGRES_PASSWORD'] = 'test-postgres-password'
-        os.environ['REDIS_PASSWORD'] = 'test-redis-password'
-        os.environ['FERNET_KEY'] = 'test-fernet-key-32-chars-exactly-required'
-        os.environ['ANTHROPIC_API_KEY'] = 'sk-ant-test-key'
+        env.set('JWT_SECRET_KEY', 'test-jwt-secret-key-32-chars-min', "test")
+        env.set('POSTGRES_PASSWORD', 'test-postgres-password', "test")
+        env.set('REDIS_PASSWORD', 'test-redis-password', "test")
+        env.set('FERNET_KEY', 'test-fernet-key-32-chars-exactly-required', "test")
+        env.set('ANTHROPIC_API_KEY', 'sk-ant-test-key', "test")
         
         yield
         
         # Restore environment
-        os.environ.clear()
-        os.environ.update(self.original_env)
+        env.clear()
+        env.update(self.original_env, "test")
     
     def test_development_environment_detection(self):
         """Test that development environment is properly detected."""
-        os.environ['ENVIRONMENT'] = 'development'
+        env.set('ENVIRONMENT', 'development', "test")
         
         builder = SecretManagerBuilder()
         assert builder._environment == 'development'
@@ -53,8 +55,8 @@ class TestSecretManagerBuilderIntegration:
     
     def test_staging_environment_detection(self):
         """Test that staging environment is properly detected."""
-        os.environ['ENVIRONMENT'] = 'staging'
-        os.environ['K_SERVICE'] = 'netra-staging-service'
+        env.set('ENVIRONMENT', 'staging', "test")
+        env.set('K_SERVICE', 'netra-staging-service', "test")
         
         builder = SecretManagerBuilder()
         assert builder._environment == 'staging'
@@ -62,8 +64,8 @@ class TestSecretManagerBuilderIntegration:
     
     def test_production_environment_detection(self):
         """Test that production environment is properly detected."""
-        os.environ['ENVIRONMENT'] = 'production'
-        os.environ['K_SERVICE'] = 'netra-production-service'
+        env.set('ENVIRONMENT', 'production', "test")
+        env.set('K_SERVICE', 'netra-production-service', "test")
         
         builder = SecretManagerBuilder()
         assert builder._environment == 'production'
@@ -71,7 +73,7 @@ class TestSecretManagerBuilderIntegration:
     
     def test_load_all_secrets_development(self):
         """Test loading all secrets in development environment."""
-        os.environ['ENVIRONMENT'] = 'development'
+        env.set('ENVIRONMENT', 'development', "test")
         
         builder = SecretManagerBuilder()
         secrets = builder.load_all_secrets()
@@ -86,7 +88,7 @@ class TestSecretManagerBuilderIntegration:
     
     def test_get_individual_secret(self):
         """Test getting individual secrets with caching."""
-        os.environ['ENVIRONMENT'] = 'development'
+        env.set('ENVIRONMENT', 'development', "test")
         
         builder = SecretManagerBuilder()
         
@@ -104,7 +106,7 @@ class TestSecretManagerBuilderIntegration:
     
     def test_secret_validation_development(self):
         """Test secret validation in development."""
-        os.environ['ENVIRONMENT'] = 'development'
+        env.set('ENVIRONMENT', 'development', "test")
         
         builder = SecretManagerBuilder()
         validation_result = builder.validate_configuration()
@@ -115,8 +117,8 @@ class TestSecretManagerBuilderIntegration:
     
     def test_secret_validation_production_strict(self):
         """Test strict validation for production environment."""
-        os.environ['ENVIRONMENT'] = 'production'
-        os.environ['JWT_SECRET_KEY'] = 'placeholder'  # Invalid for production
+        env.set('ENVIRONMENT', 'production', "test")
+        env.set('JWT_SECRET_KEY', 'placeholder', "test")  # Invalid for production
         
         builder = SecretManagerBuilder()
         secrets = {'JWT_SECRET_KEY': 'placeholder'}
@@ -129,7 +131,7 @@ class TestSecretManagerBuilderIntegration:
     
     def test_cache_builder_functionality(self):
         """Test the cache builder's TTL and invalidation."""
-        os.environ['ENVIRONMENT'] = 'development'
+        env.set('ENVIRONMENT', 'development', "test")
         
         builder = SecretManagerBuilder()
         
@@ -154,7 +156,7 @@ class TestSecretManagerBuilderIntegration:
     
     def test_auth_builder_jwt_secret(self):
         """Test auth builder JWT secret retrieval."""
-        os.environ['ENVIRONMENT'] = 'development'
+        env.set('ENVIRONMENT', 'development', "test")
         
         builder = SecretManagerBuilder()
         jwt_secret = builder.auth.get_jwt_secret()
@@ -164,8 +166,8 @@ class TestSecretManagerBuilderIntegration:
     
     def test_encryption_builder(self):
         """Test encryption/decryption functionality."""
-        os.environ['ENVIRONMENT'] = 'development'
-        os.environ['FERNET_KEY'] = 'YXqyWl7T7vwLMjnYGk6QCzN4-ivKsaVqyb5L6DwGVoM='  # Valid Fernet key
+        env.set('ENVIRONMENT', 'development', "test")
+        env.set('FERNET_KEY', 'YXqyWl7T7vwLMjnYGk6QCzN4-ivKsaVqyb5L6DwGVoM=', "test")  # Valid Fernet key
         
         builder = SecretManagerBuilder()
         
@@ -180,11 +182,11 @@ class TestSecretManagerBuilderIntegration:
     
     def test_development_fallbacks(self):
         """Test development fallback mechanisms."""
-        os.environ['ENVIRONMENT'] = 'development'
+        env.set('ENVIRONMENT', 'development', "test")
         
         # Remove JWT_SECRET_KEY from environment
         if 'JWT_SECRET_KEY' in os.environ:
-            del os.environ['JWT_SECRET_KEY']
+            env.delete('JWT_SECRET_KEY', "test")
         
         builder = SecretManagerBuilder()
         
@@ -197,7 +199,7 @@ class TestSecretManagerBuilderIntegration:
     @patch('shared.secret_manager_builder.SecretManagerBuilder.GCPSecretBuilder._get_secret_client')
     def test_gcp_secret_retrieval(self, mock_client):
         """Test GCP secret retrieval with mocked client."""
-        os.environ['ENVIRONMENT'] = 'staging'
+        env.set('ENVIRONMENT', 'staging', "test")
         
         # Mock GCP client
         mock_secret_client = MagicMock()
@@ -215,7 +217,7 @@ class TestSecretManagerBuilderIntegration:
     
     def test_service_specific_configuration(self):
         """Test service-specific secret loading."""
-        os.environ['ENVIRONMENT'] = 'development'
+        env.set('ENVIRONMENT', 'development', "test")
         
         # Test for netra_backend
         backend_builder = SecretManagerBuilder(service='netra_backend')
@@ -233,7 +235,7 @@ class TestSecretManagerBuilderIntegration:
     
     def test_backward_compatibility_functions(self):
         """Test backward compatibility wrapper functions."""
-        os.environ['ENVIRONMENT'] = 'development'
+        env.set('ENVIRONMENT', 'development', "test")
         
         # Test get_secret_manager
         manager = get_secret_manager('shared')
@@ -250,7 +252,7 @@ class TestSecretManagerBuilderIntegration:
     
     def test_debug_info_comprehensive(self):
         """Test comprehensive debug information."""
-        os.environ['ENVIRONMENT'] = 'development'
+        env.set('ENVIRONMENT', 'development', "test")
         
         builder = SecretManagerBuilder()
         debug_info = builder.get_debug_info()
@@ -266,12 +268,12 @@ class TestSecretManagerBuilderIntegration:
     def test_multi_environment_consistency(self):
         """Test that secrets are consistent across environment switches."""
         # Start in development
-        os.environ['ENVIRONMENT'] = 'development'
+        env.set('ENVIRONMENT', 'development', "test")
         dev_builder = SecretManagerBuilder()
         dev_jwt = dev_builder.auth.get_jwt_secret()
         
         # Switch to staging (simulated)
-        os.environ['ENVIRONMENT'] = 'staging'
+        env.set('ENVIRONMENT', 'staging', "test")
         staging_builder = SecretManagerBuilder()
         
         # In real staging, would get from GCP, but in test gets from env
@@ -301,7 +303,7 @@ class TestSecretManagerBuilderIntegration:
     
     def test_performance_load_time(self):
         """Test that secret loading meets performance requirements."""
-        os.environ['ENVIRONMENT'] = 'development'
+        env.set('ENVIRONMENT', 'development', "test")
         
         start_time = time.time()
         builder = SecretManagerBuilder()

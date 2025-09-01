@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Environment Configuration Authentication Failures - Iteration 2 Audit Findings
 
 This test file validates the complete breakdown of authentication due to 
@@ -49,13 +51,13 @@ class TestEnvironmentConfigurationAuthenticationFailures:
 
     def setup_method(self):
         """Set up test environment with clean state"""
-        self.original_environ = os.environ.copy()
+        self.original_environ = env.get_all()
         self.temp_files = []
         
     def teardown_method(self):
         """Clean up test environment"""
-        os.environ.clear()
-        os.environ.update(self.original_environ)
+        env.clear()
+        env.update(self.original_environ, "test")
         
         # Clean up temporary files
         for temp_file in self.temp_files:
@@ -153,8 +155,8 @@ class TestEnvironmentConfigurationAuthenticationFailures:
         environments = ['development', 'staging', 'production']
         
         for env_name in environments:
-            os.environ['ENVIRONMENT'] = env_name
-            os.environ['NODE_ENV'] = env_name if env_name != 'development' else 'development'
+            env.set('ENVIRONMENT', env_name, "test")
+            env.set('NODE_ENV', env_name, "test") if env_name != 'development' else 'development'
             
             # Set environment-specific JWT keys
             jwt_key_vars = [
@@ -279,8 +281,8 @@ class TestEnvironmentConfigurationAuthenticationFailures:
         Root cause: SSL certificate files missing or environment configuration invalid
         """
         # Test SSL certificate configuration for staging
-        os.environ['ENVIRONMENT'] = 'staging'
-        os.environ['NODE_ENV'] = 'production'
+        env.set('ENVIRONMENT', 'staging', "test")
+        env.set('NODE_ENV', 'production', "test")
         
         ssl_cert_vars = [
             'SSL_CERT_PATH',
@@ -346,7 +348,7 @@ class TestEnvironmentConfigurationAuthenticationFailures:
         ]
         
         for env_name, expected_urls in environments_urls:
-            os.environ['ENVIRONMENT'] = env_name
+            env.set('ENVIRONMENT', env_name, "test")
             
             # Clear URL configuration
             for url_var in expected_urls.keys():
@@ -470,7 +472,7 @@ class TestEnvironmentConfigurationAuthenticationFailures:
         for ci_var in ci_cd_env_vars:
             os.environ[ci_var] = 'true'
         
-        os.environ['ENVIRONMENT'] = 'ci'
+        env.set('ENVIRONMENT', 'ci', "test")
         
         env = IsolatedEnvironment()
         
@@ -524,7 +526,7 @@ class TestEnvironmentConfigurationAuthenticationFailures:
             os.environ[var_name] = var_value
         
         # Set staging environment
-        os.environ['ENVIRONMENT'] = 'staging'
+        env.set('ENVIRONMENT', 'staging', "test")
         
         # Set staging overrides (should override base config)
         for var_name, var_value in staging_overrides.items():

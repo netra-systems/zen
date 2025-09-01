@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Critical Integration Test for Dev Environment Initialization
 
 Business Value: $20K MRR - Ensures reliable development and demo environments
@@ -744,7 +746,7 @@ class TestDevEnvironmentRealServices:
     async def test_end_to_end_startup_with_real_services(self):
         """Test complete end-to-end startup with real services."""
         # Skip if not in development environment
-        if os.environ.get('ENVIRONMENT') != 'development':
+        if env.get('ENVIRONMENT') != 'development':
             pytest.skip("End-to-end test only runs in development environment")
         
         try:

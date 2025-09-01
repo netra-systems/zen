@@ -20,8 +20,10 @@ from dev_launcher.service_discovery import ServiceDiscovery
 from netra_backend.app.core.middleware_setup import setup_cors_middleware
 from fastapi.middleware.cors import CORSMiddleware
 from shared.cors_config_builder import get_fastapi_cors_config
+from shared.isolated_environment import get_env
 
 
+env = get_env()
 class TestSyntaxFix:
     """Test class for orphaned methods"""
 
@@ -265,9 +267,9 @@ class TestSyntaxFix:
         """Test CORS environment variables are set correctly."""
         
         # Clear CORS_ORIGINS first to test default setting
-        original_cors = os.environ.get('CORS_ORIGINS')
+        original_cors = env.get('CORS_ORIGINS')
         if 'CORS_ORIGINS' in os.environ:
-            del os.environ['CORS_ORIGINS']
+            env.delete('CORS_ORIGINS', "test")
         
         try:
             launcher = DevLauncher(launcher_config)
@@ -279,11 +281,11 @@ class TestSyntaxFix:
             launcher.check_environment()
             
             # Check that CORS_ORIGINS is set to wildcard for development
-            assert os.environ.get('CORS_ORIGINS') == '*'
+            assert env.get('CORS_ORIGINS') == '*'
         finally:
             # Restore original value
             if original_cors is not None:
-                os.environ['CORS_ORIGINS'] = original_cors
+                env.set('CORS_ORIGINS', original_cors, "test")
 
     def test_real_cors_with_running_services(self):
         """Test CORS with actual running services."""

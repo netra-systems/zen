@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Authentication Cross-System Critical Failure Tests
 
 These tests are designed to FAIL initially to expose real authentication integration 
@@ -36,15 +38,15 @@ import jwt as pyjwt
 from fastapi.testclient import TestClient
 
 # Set test environment before any imports
-os.environ["TESTING"] = "true"
-os.environ["ENVIRONMENT"] = "testing"
-os.environ["SKIP_STARTUP_CHECKS"] = "true"
-os.environ["JWT_SECRET_KEY"] = "test-jwt-secret-key-for-testing-only"
+env.set("TESTING", "true", "test")
+env.set("ENVIRONMENT", "testing", "test")
+env.set("SKIP_STARTUP_CHECKS", "true", "test")
+env.set("JWT_SECRET_KEY", "test-jwt-secret-key-for-testing-only", "test")
 
 # Force enable auth service for cross-system testing
-os.environ["AUTH_SERVICE_ENABLED"] = "true"
-os.environ["AUTH_FAST_TEST_MODE"] = "false"
-os.environ["AUTH_SERVICE_URL"] = "http://127.0.0.1:8001"
+env.set("AUTH_SERVICE_ENABLED", "true", "test")
+env.set("AUTH_FAST_TEST_MODE", "false", "test")
+env.set("AUTH_SERVICE_URL", "http://127.0.0.1:8001", "test")
 
 # Add project root to path for imports
 import sys
@@ -389,7 +391,7 @@ class TestAuthCrossSystemFailures:
         # Create token with same secret (simulating secret leak or weak secret)
         malicious_token = pyjwt.encode(
             malicious_payload, 
-            os.environ["JWT_SECRET_KEY"], 
+            env.get("JWT_SECRET_KEY"), 
             algorithm="HS256"
         )
         
@@ -691,7 +693,7 @@ class TestAuthCrossSystemFailures:
         
         malicious_token = pyjwt.encode(
             malicious_payload,
-            os.environ["JWT_SECRET_KEY"],  # Same secret (simulating leak)
+            env.get("JWT_SECRET_KEY"),  # Same secret (simulating leak)
             algorithm="HS256"
         )
         

@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 """Integration test for Secret Manager timeout and caching behavior.
 
+env = get_env()
 This test validates critical timeout and caching functionality that could cause
 production issues if not working correctly.
 
@@ -35,17 +37,17 @@ class TestSecretManagerTimeoutBehavior:
     def setup_method(self):
         """Setup test environment."""
         # Save original environment
-        self.original_env = dict(os.environ)
+        self.original_env = env.get_all()
         
         # Set up clean test environment
-        os.environ.clear()
-        os.environ['ENVIRONMENT'] = 'test'
-        os.environ['TESTING'] = '1'
+        env.clear()
+        env.set('ENVIRONMENT', 'test', "test")
+        env.set('TESTING', '1', "test")
     
     def teardown_method(self):
         """Restore original environment."""
-        os.environ.clear()
-        os.environ.update(self.original_env)
+        env.clear()
+        env.update(self.original_env, "test")
     
     @patch('shared.secret_manager_builder.secretmanager')
     def test_gcp_secret_timeout_doesnt_hang_application(self, mock_secretmanager):
@@ -62,8 +64,8 @@ class TestSecretManagerTimeoutBehavior:
         mock_client.access_secret_version.side_effect = slow_access
         
         # Set up staging environment to trigger GCP usage
-        os.environ['ENVIRONMENT'] = 'staging'
-        os.environ['GCP_PROJECT_ID_NUMERICAL_STAGING'] = '701982941522'
+        env.set('ENVIRONMENT', 'staging', "test")
+        env.set('GCP_PROJECT_ID_NUMERICAL_STAGING', '701982941522', "test")
         
         builder = SecretManagerBuilder(service="test_service")
         
@@ -111,8 +113,8 @@ class TestSecretManagerTimeoutBehavior:
         builder = SecretManagerBuilder(service="test_service")
         
         # Set up environment secrets
-        os.environ['JWT_SECRET_KEY'] = 'test-jwt-secret'
-        os.environ['POSTGRES_PASSWORD'] = 'test-postgres-password'
+        env.set('JWT_SECRET_KEY', 'test-jwt-secret', "test")
+        env.set('POSTGRES_PASSWORD', 'test-postgres-password', "test")
         
         results = []
         errors = []
@@ -157,7 +159,7 @@ class TestSecretManagerTimeoutBehavior:
         }
         
         # Set up staging environment (should be strict about placeholders)
-        os.environ['ENVIRONMENT'] = 'staging'
+        env.set('ENVIRONMENT', 'staging', "test")
         builder = SecretManagerBuilder(service="test_service")
         
         validation_result = builder.validation.validate_critical_secrets(test_secrets)
@@ -217,7 +219,7 @@ class TestSecretManagerTimeoutBehavior:
         
         # Test case 1: All methods fail - should raise ValueError
         with patch.dict(os.environ, {}, clear=True):
-            os.environ['ENVIRONMENT'] = 'production'
+            env.set('ENVIRONMENT', 'production', "test")
             
             builder = SecretManagerBuilder(service="test_service")
             
@@ -228,8 +230,8 @@ class TestSecretManagerTimeoutBehavior:
         
         # Test case 2: GCP fails but environment variable works
         with patch.dict(os.environ, {}, clear=True):
-            os.environ['ENVIRONMENT'] = 'production'
-            os.environ['JWT_SECRET_KEY'] = 'production-jwt-secret-from-env'
+            env.set('ENVIRONMENT', 'production', "test")
+            env.set('JWT_SECRET_KEY', 'production-jwt-secret-from-env', "test")
             
             builder = SecretManagerBuilder(service="test_service")
             
@@ -240,7 +242,7 @@ class TestSecretManagerTimeoutBehavior:
         
         # Test case 3: Cache hit should return immediately
         with patch.dict(os.environ, {}, clear=True):
-            os.environ['ENVIRONMENT'] = 'staging'
+            env.set('ENVIRONMENT', 'staging', "test")
             
             builder = SecretManagerBuilder(service="test_service")
             
@@ -288,8 +290,8 @@ class TestSecretManagerTimeoutBehavior:
     
     def test_debug_info_provides_comprehensive_status(self):
         """Test that debug info provides comprehensive status for troubleshooting."""
-        os.environ['ENVIRONMENT'] = 'staging'
-        os.environ['GCP_PROJECT_ID_NUMERICAL_STAGING'] = '701982941522'
+        env.set('ENVIRONMENT', 'staging', "test")
+        env.set('GCP_PROJECT_ID_NUMERICAL_STAGING', '701982941522', "test")
         
         builder = SecretManagerBuilder(service="test_service")
         
@@ -327,9 +329,9 @@ class TestSecretManagerProductionFailures:
         
         # Set up production environment
         with patch.dict(os.environ, {}, clear=True):
-            os.environ['ENVIRONMENT'] = 'production'
-            os.environ['DATABASE_URL'] = 'postgresql://user:pass@localhost:5432/db'  # localhost not allowed
-            os.environ['REDIS_URL'] = 'redis://localhost:6379'  # localhost not allowed
+            env.set('ENVIRONMENT', 'production', "test")
+            env.set('DATABASE_URL', 'postgresql://user:pass@localhost:5432/db', "test")  # localhost not allowed
+            env.set('REDIS_URL', 'redis://localhost:6379', "test")  # localhost not allowed
             
             builder = SecretManagerBuilder(service="test_service")
             
@@ -349,16 +351,16 @@ class TestSecretManagerProductionFailures:
         
         # Set up staging environment with localhost (might be acceptable in staging)
         with patch.dict(os.environ, {}, clear=True):
-            os.environ['ENVIRONMENT'] = 'staging'
-            os.environ['DATABASE_URL'] = 'postgresql://user:pass@localhost:5432/db'
-            os.environ['ALLOW_LOCALHOST_DATABASE'] = 'true'  # Explicit override
+            env.set('ENVIRONMENT', 'staging', "test")
+            env.set('DATABASE_URL', 'postgresql://user:pass@localhost:5432/db', "test")
+            env.set('ALLOW_LOCALHOST_DATABASE', 'true', "test")  # Explicit override
             
             # Set critical secrets to non-placeholder values
-            os.environ['JWT_SECRET_KEY'] = 'staging-jwt-secret-valid'
-            os.environ['POSTGRES_PASSWORD'] = 'staging-postgres-password'
-            os.environ['REDIS_PASSWORD'] = 'staging-redis-password'
-            os.environ['CLICKHOUSE_PASSWORD'] = 'staging-clickhouse-password'
-            os.environ['FERNET_KEY'] = 'staging-fernet-key-valid'
+            env.set('JWT_SECRET_KEY', 'staging-jwt-secret-valid', "test")
+            env.set('POSTGRES_PASSWORD', 'staging-postgres-password', "test")
+            env.set('REDIS_PASSWORD', 'staging-redis-password', "test")
+            env.set('CLICKHOUSE_PASSWORD', 'staging-clickhouse-password', "test")
+            env.set('FERNET_KEY', 'staging-fernet-key-valid', "test")
             
             builder = SecretManagerBuilder(service="test_service")
             
