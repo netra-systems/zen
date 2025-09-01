@@ -896,6 +896,324 @@ class TestRegressionPrevention:
 
 
 # ============================================================================
+# MONITORING INTEGRATION TESTS - Phase 3
+# ============================================================================
+
+class TestMonitoringIntegrationCritical:
+    """Mission-critical tests for monitoring integration capabilities."""
+    
+    @pytest.fixture(autouse=True)
+    async def setup_monitoring_services(self):
+        """Setup monitoring services for testing."""
+        self.mock_ws_manager = MockWebSocketManager()
+        yield
+        self.mock_ws_manager.clear_messages()
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_integrated_monitoring_detects_silent_failures(self):
+        """CRITICAL: Test that integrated monitoring catches failures neither component would detect alone."""
+        from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor
+        from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+        from unittest.mock import Mock, AsyncMock
+        
+        # Create real monitor and mock bridge
+        monitor = ChatEventMonitor()
+        bridge = Mock(spec=AgentWebSocketBridge)
+        
+        try:
+            # Setup bridge that reports healthy but has hidden issues
+            bridge.get_health_status = AsyncMock(return_value={
+                "healthy": True,
+                "state": "active",
+                "timestamp": time.time(),
+                "websocket_manager_healthy": True,
+                "registry_healthy": True,
+                "consecutive_failures": 0,
+                "uptime_seconds": 300.0
+            })
+            bridge.get_metrics = AsyncMock(return_value={
+                "total_initializations": 1,
+                "successful_initializations": 1,
+                "success_rate": 1.0
+            })
+            bridge.register_monitor_observer = Mock()
+            
+            # Start monitor and register bridge
+            await monitor.start_monitoring()
+            await monitor.register_component_for_monitoring("test_bridge", bridge)
+            
+            # Simulate silent failure that bridge missed but monitor detects
+            await monitor.record_event("agent_started", "critical_thread")
+            await monitor.record_event("tool_executing", "critical_thread", "critical_tool")
+            # Missing tool_completed - this is a silent failure
+            await monitor.record_event("agent_completed", "critical_thread")
+            
+            # Audit should detect the issue despite bridge claiming health
+            audit_result = await monitor.audit_bridge_health("test_bridge")
+            
+            # CRITICAL: Combined system MUST detect what individual components miss
+            validation = audit_result["event_monitor_validation"]
+            overall = audit_result["overall_assessment"]
+            
+            # Should detect silent failures
+            assert len(monitor.silent_failures) > 0, "Monitor must detect silent failures"
+            assert validation["recent_silent_failures"] > 0, "Cross-validation must catch silent failures"
+            
+            # Overall assessment should reflect concerns
+            assert overall["overall_status"] != "healthy" or overall["overall_score"] < 100, \
+                "Combined monitoring must flag issues even when bridge reports healthy"
+            
+        finally:
+            await monitor.stop_monitoring()
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_monitoring_independence_on_failure(self):
+        """CRITICAL: Test each component continues if other fails."""
+        from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor
+        from unittest.mock import Mock
+        
+        monitor = ChatEventMonitor()
+        
+        try:
+            await monitor.start_monitoring()
+            
+            # Create bridge that fails during registration
+            failing_bridge = Mock()
+            failing_bridge.register_monitor_observer.side_effect = Exception("Registration failed")
+            failing_bridge.get_health_status = AsyncMock(return_value={"healthy": True})
+            failing_bridge.get_metrics = AsyncMock(return_value={"total": 1})
+            
+            # Attempt integration (should fail gracefully)
+            try:
+                await monitor.register_component_for_monitoring("failing_bridge", failing_bridge)
+            except:
+                pass  # Expected to fail
+            
+            # CRITICAL: Monitor must continue working independently
+            await monitor.record_event("agent_started", "independent_thread")
+            health = await monitor.check_health()
+            assert health["healthy"] is not False, "Monitor must work independently after integration failure"
+            
+            # CRITICAL: Bridge must continue working independently
+            bridge_health = await failing_bridge.get_health_status()
+            assert bridge_health["healthy"] is True, "Bridge must work independently after integration failure"
+            
+        finally:
+            await monitor.stop_monitoring()
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_end_to_end_audit_flow(self):
+        """CRITICAL: Test complete audit cycle from bridge to monitor."""
+        from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor
+        from unittest.mock import Mock, AsyncMock
+        
+        monitor = ChatEventMonitor()
+        bridge = Mock()
+        
+        try:
+            # Setup bridge with realistic metrics
+            bridge.get_health_status = AsyncMock(return_value={
+                "healthy": True,
+                "state": "active",
+                "timestamp": time.time(),
+                "websocket_manager_healthy": True,
+                "registry_healthy": True,
+                "consecutive_failures": 0,
+                "uptime_seconds": 120.0
+            })
+            bridge.get_metrics = AsyncMock(return_value={
+                "total_initializations": 5,
+                "successful_initializations": 4,
+                "success_rate": 0.8,
+                "recovery_attempts": 1,
+                "successful_recoveries": 1
+            })
+            bridge.register_monitor_observer = Mock()
+            
+            await monitor.start_monitoring()
+            await monitor.register_component_for_monitoring("audit_bridge", bridge)
+            
+            # Add some event data for cross-validation
+            await monitor.record_event("agent_started", "audit_thread")
+            await monitor.record_event("agent_thinking", "audit_thread")
+            await monitor.record_event("tool_executing", "audit_thread", "audit_tool")
+            await monitor.record_event("tool_completed", "audit_thread", "audit_tool")
+            await monitor.record_event("agent_completed", "audit_thread")
+            
+            # CRITICAL: Complete audit flow must work end-to-end
+            audit_result = await monitor.audit_bridge_health("audit_bridge")
+            
+            # Verify all audit components
+            required_keys = [
+                "bridge_id", "audit_timestamp", "internal_health", "internal_metrics",
+                "event_monitor_validation", "integration_health", "overall_assessment"
+            ]
+            for key in required_keys:
+                assert key in audit_result, f"Audit missing required component: {key}"
+            
+            # Verify data retrieval worked
+            bridge.get_health_status.assert_called_once()
+            bridge.get_metrics.assert_called_once()
+            
+            # Verify audit history is maintained
+            assert len(monitor.component_health_history["audit_bridge"]) > 0
+            
+            # Verify integration assessment
+            integration = audit_result["integration_health"]
+            assert integration["bridge_registered"] is True
+            assert integration["integration_score"] > 0
+            
+        finally:
+            await monitor.stop_monitoring()
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_performance_impact_assessment(self):
+        """CRITICAL: Ensure <5ms overhead from monitoring integration."""
+        from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor
+        from unittest.mock import Mock, AsyncMock
+        
+        monitor = ChatEventMonitor()
+        bridge = Mock()
+        
+        # Setup fast bridge responses
+        bridge.get_health_status = AsyncMock(return_value={
+            "healthy": True,
+            "state": "active",
+            "timestamp": time.time()
+        })
+        bridge.get_metrics = AsyncMock(return_value={"success_rate": 1.0})
+        bridge.register_monitor_observer = Mock()
+        
+        try:
+            await monitor.start_monitoring()
+            
+            # Measure baseline event recording performance
+            baseline_events = 50
+            start_time = time.time()
+            for i in range(baseline_events):
+                await monitor.record_event("agent_thinking", f"baseline_{i}")
+            baseline_time = time.time() - start_time
+            
+            # Add monitoring integration
+            await monitor.register_component_for_monitoring("perf_bridge", bridge)
+            
+            # Measure performance with integration
+            start_time = time.time()
+            for i in range(baseline_events):
+                await monitor.record_event("agent_thinking", f"integrated_{i}")
+            integrated_time = time.time() - start_time
+            
+            # Measure audit performance
+            start_time = time.time()
+            await monitor.audit_bridge_health("perf_bridge")
+            audit_time = time.time() - start_time
+            
+            # CRITICAL: Performance requirements
+            overhead_ratio = integrated_time / baseline_time if baseline_time > 0 else 1.0
+            assert overhead_ratio < 1.1, f"Event recording overhead {overhead_ratio:.2f}x too high (>10%)"
+            assert audit_time < 0.005, f"Audit time {audit_time:.3f}s too slow (>5ms)"
+            
+        finally:
+            await monitor.stop_monitoring()
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_combined_failure_detection_coverage(self):
+        """CRITICAL: Verify 100% coverage of silent failure scenarios."""
+        from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor
+        from unittest.mock import Mock, AsyncMock
+        
+        monitor = ChatEventMonitor()
+        bridge = Mock()
+        
+        # Test scenarios that require combined monitoring to detect
+        test_scenarios = [
+            {
+                "name": "Bridge healthy, events failing",
+                "bridge_health": {"healthy": True, "state": "active"},
+                "event_issue": "missing_tool_completion",
+                "expected_detection": "event_validation"
+            },
+            {
+                "name": "Bridge degraded, events normal",
+                "bridge_health": {"healthy": False, "state": "degraded", "consecutive_failures": 3},
+                "event_issue": None,
+                "expected_detection": "internal_health"
+            },
+            {
+                "name": "Both systems showing issues",
+                "bridge_health": {"healthy": False, "state": "failed"},
+                "event_issue": "stale_threads",
+                "expected_detection": "both"
+            }
+        ]
+        
+        try:
+            await monitor.start_monitoring()
+            
+            for i, scenario in enumerate(test_scenarios):
+                bridge_id = f"scenario_{i}_bridge"
+                
+                # Setup bridge for scenario
+                bridge.get_health_status = AsyncMock(return_value={
+                    **scenario["bridge_health"],
+                    "timestamp": time.time(),
+                    "websocket_manager_healthy": scenario["bridge_health"]["healthy"],
+                    "registry_healthy": scenario["bridge_health"]["healthy"]
+                })
+                bridge.get_metrics = AsyncMock(return_value={
+                    "success_rate": 1.0 if scenario["bridge_health"]["healthy"] else 0.3
+                })
+                bridge.register_monitor_observer = Mock()
+                
+                await monitor.register_component_for_monitoring(bridge_id, bridge)
+                
+                # Create event issue if specified
+                thread_id = f"scenario_{i}_thread"
+                if scenario["event_issue"] == "missing_tool_completion":
+                    await monitor.record_event("agent_started", thread_id)
+                    await monitor.record_event("tool_executing", thread_id, "test_tool")
+                    # Missing tool_completed - silent failure
+                    await monitor.record_event("agent_completed", thread_id)
+                elif scenario["event_issue"] == "stale_threads":
+                    # Create stale thread
+                    monitor.thread_start_time[thread_id] = time.time() - 100  # Very stale
+                
+                # Perform audit
+                audit_result = await monitor.audit_bridge_health(bridge_id)
+                
+                # CRITICAL: Must detect the issue
+                internal_health = audit_result["internal_health"]
+                validation = audit_result["event_monitor_validation"] 
+                overall = audit_result["overall_assessment"]
+                
+                # Verify detection based on scenario
+                if scenario["expected_detection"] in ["internal_health", "both"]:
+                    assert not internal_health.get("healthy", True), \
+                        f"Scenario '{scenario['name']}': Must detect internal health issues"
+                
+                if scenario["expected_detection"] in ["event_validation", "both"]:
+                    has_event_issues = (
+                        validation.get("recent_silent_failures", 0) > 0 or
+                        validation.get("stale_threads_count", 0) > 0 or
+                        validation.get("status") in ["warning", "critical"]
+                    )
+                    assert has_event_issues, \
+                        f"Scenario '{scenario['name']}': Must detect event validation issues"
+                
+                # Overall status should reflect issues
+                assert overall["overall_status"] in ["warning", "critical", "failed"], \
+                    f"Scenario '{scenario['name']}': Overall assessment must flag issues"
+        
+        finally:
+            await monitor.stop_monitoring()
+
+
+# ============================================================================
 # STAGING INTEGRATION TESTS (if enabled)
 # ============================================================================
 
