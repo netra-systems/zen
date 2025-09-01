@@ -83,16 +83,75 @@ def get_agent_supervisor(request: Request) -> "Supervisor":
     return supervisor
 
 def get_agent_service(request: Request) -> "AgentService":
-    """Get agent service from app state"""
-    return request.app.state.agent_service
+    """Get agent service from app state.
+    
+    CRITICAL: This service MUST be initialized during startup.
+    If missing, it indicates a startup failure that should have halted the application.
+    """
+    if not hasattr(request.app.state, 'agent_service'):
+        # This should NEVER happen with deterministic startup
+        # If it does, it means startup failed but app continued (graceful mode bug)
+        logger.critical("CRITICAL: agent_service not initialized - startup sequence failed!")
+        raise RuntimeError(
+            "CRITICAL STARTUP FAILURE: agent_service is not initialized. "
+            "This indicates the application started in a degraded state. "
+            "The application should use deterministic startup to prevent this."
+        )
+    
+    agent_service = request.app.state.agent_service
+    if agent_service is None:
+        # Service was set but is None - also a critical failure
+        logger.critical("CRITICAL: agent_service is None - initialization failed!")
+        raise RuntimeError(
+            "CRITICAL INITIALIZATION FAILURE: agent_service is None. "
+            "Critical services must never be None."
+        )
+    
+    return agent_service
 
 def get_thread_service(request: Request) -> "ThreadService":
-    """Get thread service from app state"""
-    return request.app.state.thread_service
+    """Get thread service from app state.
+    
+    CRITICAL: This service MUST be initialized during startup.
+    """
+    if not hasattr(request.app.state, 'thread_service'):
+        logger.critical("CRITICAL: thread_service not initialized - startup sequence failed!")
+        raise RuntimeError(
+            "CRITICAL STARTUP FAILURE: thread_service is not initialized. "
+            "This indicates the application started in a degraded state."
+        )
+    
+    thread_service = request.app.state.thread_service
+    if thread_service is None:
+        logger.critical("CRITICAL: thread_service is None - initialization failed!")
+        raise RuntimeError(
+            "CRITICAL INITIALIZATION FAILURE: thread_service is None. "
+            "Critical services must never be None."
+        )
+    
+    return thread_service
 
 def get_corpus_service(request: Request) -> "CorpusService":
-    """Get corpus service from app state"""
-    return request.app.state.corpus_service
+    """Get corpus service from app state.
+    
+    CRITICAL: This service MUST be initialized during startup.
+    """
+    if not hasattr(request.app.state, 'corpus_service'):
+        logger.critical("CRITICAL: corpus_service not initialized - startup sequence failed!")
+        raise RuntimeError(
+            "CRITICAL STARTUP FAILURE: corpus_service is not initialized. "
+            "This indicates the application started in a degraded state."
+        )
+    
+    corpus_service = request.app.state.corpus_service
+    if corpus_service is None:
+        logger.critical("CRITICAL: corpus_service is None - initialization failed!")
+        raise RuntimeError(
+            "CRITICAL INITIALIZATION FAILURE: corpus_service is None. "
+            "Critical services must never be None."
+        )
+    
+    return corpus_service
 
 def get_message_handler_service(request: Request):
     """Get message handler service from app state or create one."""

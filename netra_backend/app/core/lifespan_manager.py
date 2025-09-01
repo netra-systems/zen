@@ -9,7 +9,12 @@ from fastapi import FastAPI
 import asyncio
 
 from netra_backend.app.shutdown import run_complete_shutdown
-from netra_backend.app.startup_module import run_complete_startup
+# CRITICAL FIX: Use deterministic startup to prevent agent_service AttributeError
+# The regular startup_module has graceful mode which allows degraded startup
+from netra_backend.app.startup_module_deterministic import (
+    run_deterministic_startup as run_complete_startup,
+    DeterministicStartupError
+)
 
 
 @asynccontextmanager
@@ -54,20 +59,28 @@ async def lifespan(app: FastAPI):
         # Re-raise to properly handle cancellation
         raise
         
-    except Exception as startup_error:
-        # CRITICAL FIX: Handle startup failures gracefully to prevent async generator issues
+    except (Exception, DeterministicStartupError) as startup_error:
+        # CRITICAL FIX: With deterministic startup, we MUST fail fast on critical errors
         if logger is None:
             # Initialize basic logger if startup failed before logger creation
             import logging
             logger = logging.getLogger(__name__)
             logger.setLevel(logging.INFO)
         
+        # Check if this is a critical deterministic startup failure
+        if isinstance(startup_error, DeterministicStartupError):
+            # CRITICAL: Deterministic startup failures MUST halt the application
+            logger.critical(f"DETERMINISTIC STARTUP FAILURE: {startup_error}")
+            logger.critical("Application cannot start without critical services")
+            # Re-raise to prevent application from starting in degraded state
+            raise
+        
+        # For non-critical errors, log but continue (backward compatibility)
         logger.error(f"Startup failed in lifespan manager: {startup_error}")
         app.state.startup_successful = False
         app.state.startup_error = str(startup_error)
         
-        # Don't re-raise during startup - let the app start with degraded functionality
-        # This prevents Docker health check failures due to startup issues
+        # Only allow degraded startup for non-critical errors
         # CRITICAL FIX: Ensure single yield even on startup failure
         if not yielded:
             yielded = True
