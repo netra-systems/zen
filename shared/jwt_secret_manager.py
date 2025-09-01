@@ -10,6 +10,7 @@ CRITICAL: This is the ONLY authorized source for JWT secrets in production.
 import os
 import logging
 from typing import Optional
+from shared.isolated_environment import IsolatedEnvironment
 
 logger = logging.getLogger(__name__)
 
@@ -47,31 +48,32 @@ class SharedJWTSecretManager:
         if cls._jwt_secret_cache:
             return cls._jwt_secret_cache
         
-        # Determine environment
-        environment = os.environ.get("ENVIRONMENT", "development").lower()
+        # Determine environment using IsolatedEnvironment
+        env_manager = IsolatedEnvironment.get_instance()
+        environment = env_manager.get("ENVIRONMENT", "development").lower()
         
         # Try environment-specific secrets first (for staging/production)
         secret = None
         source = None
         
         if environment == "staging":
-            secret = os.environ.get("JWT_SECRET_STAGING", "").strip()
+            secret = env_manager.get("JWT_SECRET_STAGING", "").strip()
             if secret:
                 source = "JWT_SECRET_STAGING"
         elif environment == "production":
-            secret = os.environ.get("JWT_SECRET_PRODUCTION", "").strip()
+            secret = env_manager.get("JWT_SECRET_PRODUCTION", "").strip()
             if secret:
                 source = "JWT_SECRET_PRODUCTION"
         
         # Try generic JWT_SECRET_KEY
         if not secret:
-            secret = os.environ.get("JWT_SECRET_KEY", "").strip()
+            secret = env_manager.get("JWT_SECRET_KEY", "").strip()
             if secret:
                 source = "JWT_SECRET_KEY"
         
         # Try legacy JWT_SECRET (with warning)
         if not secret:
-            secret = os.environ.get("JWT_SECRET", "").strip()
+            secret = env_manager.get("JWT_SECRET", "").strip()
             if secret:
                 source = "JWT_SECRET (legacy)"
                 logger.warning(
@@ -122,7 +124,8 @@ class SharedJWTSecretManager:
         """
         try:
             # Only attempt if we're in GCP environment
-            project_id = os.environ.get("GCP_PROJECT_ID")
+            env_manager = IsolatedEnvironment.get_instance()
+            project_id = env_manager.get("GCP_PROJECT_ID")
             if not project_id:
                 return None
             
@@ -211,7 +214,8 @@ class SharedJWTSecretManager:
             raise ValueError("JWT secret validation failed: No secret configured")
         
         # Ensure it's not a development secret in production
-        environment = os.environ.get("ENVIRONMENT", "development").lower()
+        env_manager = IsolatedEnvironment.get_instance()
+        environment = env_manager.get("ENVIRONMENT", "development").lower()
         if environment in ["staging", "production"]:
             if "development" in secret.lower():
                 raise ValueError(

@@ -131,12 +131,18 @@ class SecretManagerBuilder:
             logger.debug(f"Service-specific environment manager not available: {e}. Using fallback.")
         
         # Fallback to a minimal isolated environment implementation
-        # This ensures we never directly access os.environ
+        # This ensures we follow the interface pattern while avoiding direct os.environ access
         class BasicEnvManager:
             def __init__(self):
-                # Create a minimal implementation that wraps os.environ
-                # but still follows the interface pattern
-                self._env_copy = dict(os.environ)
+                # Create a minimal implementation that wraps environment access
+                # through IsolatedEnvironment if available
+                try:
+                    from shared.isolated_environment import IsolatedEnvironment
+                    self._env_manager = IsolatedEnvironment.get_instance()
+                    self._env_copy = self._env_manager.get_all()
+                except ImportError:
+                    # Last resort fallback - should only occur in emergency situations
+                    self._env_copy = dict(os.environ)
             
             def get(self, key, default=None):
                 return self._env_copy.get(key, default)

@@ -24,6 +24,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional, Tuple, List
 from enum import Enum
+from shared.isolated_environment import IsolatedEnvironment
 
 logger = logging.getLogger(__name__)
 
@@ -71,11 +72,13 @@ class ConfigBuilderBase(ABC):
         Returns:
             Dictionary of environment variables
         """
-        if env_vars is None:
-            return dict(os.environ)
+        env_manager = IsolatedEnvironment.get_instance()
         
-        # Start with os.environ as base, then overlay with provided env_vars
-        result = dict(os.environ)
+        if env_vars is None:
+            return dict(env_manager.get_all())
+        
+        # Start with IsolatedEnvironment as base, then overlay with provided env_vars
+        result = dict(env_manager.get_all())
         
         # Filter out None values and overlay non-None values
         for key, value in env_vars.items():
