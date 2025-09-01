@@ -1,0 +1,85 @@
+name: 'PR Comment Manager'
+description: 'Creates or updates a single PR comment with a unique identifier'
+inputs:
+  github-token:
+    description: 'GitHub token for authentication'
+    required: false
+    default: ${{ github.token }}
+  pr-number:
+    description: 'Pull request number'
+    required: false
+    default: ${{ github.event.pull_request.number }}
+  comment-identifier:
+    description: 'Unique identifier for the comment (used to find and update existing comments)'
+    required: true
+  comment-body:
+    description: 'The comment body content'
+    required: true
+  mode:
+    description: 'Comment mode: create-or-update (default) or append'
+    required: false
+    default: 'create-or-update'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Manage PR Comment
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          const identifier = `<!-- ${{ inputs.comment-identifier }} -->`;
+          const body = `${identifier}\n${{ inputs.comment-body }}`;
+          const prNumber = ${{ inputs.pr-number }};
+          
+          if (!prNumber) {
+            console.log('Not a pull request, skipping comment');
+            return;
+          }
+          
+          try {
+            // Get all comments
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber
+            });
+            
+            // Find existing comment with the identifier
+            const existingComment = comments.find(c => 
+              c.body && c.body.includes(identifier)
+            );
+            
+            if ('${{ inputs.mode }}' === 'append' && existingComment) {
+              // Append mode: add to existing comment
+              const newBody = existingComment.body + '\n\n---\n\n' + body.replace(identifier, '');
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: newBody
+              });
+              console.log(`Appended to existing comment with identifier: ${{ inputs.comment-identifier }}`);
+            } else if (existingComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: body
+              });
+              console.log(`Updated existing comment with identifier: ${{ inputs.comment-identifier }}`);
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: body
+              });
+              console.log(`Created new comment with identifier: ${{ inputs.comment-identifier }}`);
+            }
+          } catch (error) {
+            console.error('Failed to manage PR comment:', error);
+            // Don't fail the workflow if comment posting fails
+          }

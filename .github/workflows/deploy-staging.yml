@@ -1,3 +1,12 @@
+
+# NOTE: This workflow has been identified for PR comment update
+# To prevent comment spam, update PR comment sections to use:
+# uses: ./.github/actions/pr-comment
+# with:
+#   comment-identifier: 'netra-deploy-staging'
+#   comment-body: |
+#     Your comment content here
+
 name: Deploy to Staging
 
 on:

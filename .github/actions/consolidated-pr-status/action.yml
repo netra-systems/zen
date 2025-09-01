@@ -1,0 +1,154 @@
+name: 'Consolidated PR Status'
+description: 'Updates a single consolidated status comment for all workflow runs'
+inputs:
+  github-token:
+    description: 'GitHub token for authentication'
+    required: false
+    default: ${{ github.token }}
+  pr-number:
+    description: 'Pull request number'
+    required: false
+    default: ${{ github.event.pull_request.number }}
+  workflow-name:
+    description: 'Name of the workflow reporting status'
+    required: true
+  status:
+    description: 'Status of the workflow (success, failure, skipped)'
+    required: true
+  details:
+    description: 'Additional details about the workflow run'
+    required: false
+    default: ''
+  run-url:
+    description: 'URL to the workflow run'
+    required: false
+    default: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Update Consolidated Status
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          const identifier = '<!-- netra-consolidated-status -->';
+          const prNumber = ${{ inputs.pr-number }};
+          
+          if (!prNumber) {
+            console.log('Not a pull request, skipping status update');
+            return;
+          }
+          
+          const workflowName = '${{ inputs.workflow-name }}';
+          const status = '${{ inputs.status }}';
+          const details = `${{ inputs.details }}`;
+          const runUrl = '${{ inputs.run-url }}';
+          
+          // Status icons
+          const statusIcons = {
+            'success': '✅',
+            'failure': '❌',
+            'skipped': '⏭️',
+            'running': '🔄',
+            'cancelled': '⏹️'
+          };
+          
+          const statusIcon = statusIcons[status] || 'ℹ️';
+          const timestamp = new Date().toISOString();
+          
+          try {
+            // Get all comments
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber
+            });
+            
+            // Find existing consolidated status comment
+            const existingComment = comments.find(c => 
+              c.body && c.body.includes(identifier)
+            );
+            
+            let statusData = {};
+            let body = '';
+            
+            if (existingComment) {
+              // Parse existing status data
+              const dataMatch = existingComment.body.match(/<!-- STATUS_DATA:(.*?)-->/s);
+              if (dataMatch) {
+                try {
+                  statusData = JSON.parse(Buffer.from(dataMatch[1], 'base64').toString());
+                } catch (e) {
+                  console.log('Failed to parse existing status data, starting fresh');
+                }
+              }
+            }
+            
+            // Update status for this workflow
+            statusData[workflowName] = {
+              status: status,
+              icon: statusIcon,
+              timestamp: timestamp,
+              details: details,
+              url: runUrl
+            };
+            
+            // Build the comment body
+            body = `${identifier}\n# 📊 PR Workflow Status\n\n`;
+            body += `*Last updated: ${new Date().toLocaleString()}*\n\n`;
+            
+            // Summary
+            const statuses = Object.values(statusData);
+            const failed = statuses.filter(s => s.status === 'failure').length;
+            const success = statuses.filter(s => s.status === 'success').length;
+            const skipped = statuses.filter(s => s.status === 'skipped').length;
+            const running = statuses.filter(s => s.status === 'running').length;
+            
+            if (failed > 0) {
+              body += `## ❌ ${failed} workflow(s) failed\n\n`;
+            } else if (running > 0) {
+              body += `## 🔄 ${running} workflow(s) running\n\n`;
+            } else if (success > 0) {
+              body += `## ✅ All workflows passed\n\n`;
+            }
+            
+            // Workflow table
+            body += `| Workflow | Status | Details | Action |\n`;
+            body += `|----------|--------|---------|--------|\n`;
+            
+            for (const [name, data] of Object.entries(statusData)) {
+              const detailsText = data.details ? data.details.substring(0, 50) + (data.details.length > 50 ? '...' : '') : '-';
+              body += `| ${name} | ${data.icon} ${data.status} | ${detailsText} | [View](${data.url}) |\n`;
+            }
+            
+            // Add encoded status data for future parsing
+            body += `\n<!-- STATUS_DATA:${Buffer.from(JSON.stringify(statusData)).toString('base64')}-->\n`;
+            
+            // Add footer
+            body += `\n---\n`;
+            body += `*💡 This comment consolidates status from all workflows. Individual workflow comments have been disabled to reduce noise.*`;
+            
+            if (existingComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: body
+              });
+              console.log('Updated consolidated status comment');
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: body
+              });
+              console.log('Created consolidated status comment');
+            }
+          } catch (error) {
+            console.error('Failed to update consolidated status:', error);
+            // Don't fail the workflow if comment update fails
+          }
