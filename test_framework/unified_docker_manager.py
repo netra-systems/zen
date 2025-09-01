@@ -1,7 +1,7 @@
 """
 Unified Docker Management System - SSOT for Docker Operations
 
-Combines the best features of ServiceOrchestrator and CentralizedDockerManager:
+Combines the best features of ServiceOrchestrator and UnifiedDockerManager:
 - Async/await architecture for better concurrency
 - Cross-platform locking to prevent restart storms
 - Environment type management (shared/dedicated/production) 
@@ -196,7 +196,7 @@ class UnifiedDockerManager:
             "container": "netra-backend",
             "port": 8000,
             "health_endpoint": "/health",
-            "memory_limit": "1024m"  # Reduced for stability
+            "memory_limit": "2048m"
         },
         "frontend": {
             "container": "netra-frontend", 
@@ -1296,15 +1296,29 @@ class UnifiedDockerManager:
 
     def _map_to_compose_services(self, services: List[str]) -> List[str]:
         """Map service names to docker-compose service names."""
-        # Map generic service names to compose service names
-        service_mapping = {
-            "postgres": "test-postgres",
-            "redis": "test-redis", 
-            "clickhouse": "test-clickhouse",
-            "backend": "backend",  # These might be built on-demand
-            "auth": "auth",
-            "frontend": "frontend"
-        }
+        # Determine the prefix based on the compose file being used
+        compose_file = self._get_compose_file()
+        
+        # If using test compose file, use test- prefix for ALL services
+        if "test" in compose_file:
+            service_mapping = {
+                "postgres": "test-postgres",
+                "redis": "test-redis", 
+                "clickhouse": "test-clickhouse",
+                "backend": "test-backend",
+                "auth": "test-auth",
+                "frontend": "test-frontend"
+            }
+        else:
+            # For dev/main compose, use dev- prefix
+            service_mapping = {
+                "postgres": "dev-postgres",
+                "redis": "dev-redis",
+                "clickhouse": "dev-clickhouse", 
+                "backend": "dev-backend",
+                "auth": "dev-auth",
+                "frontend": "dev-frontend"
+            }
         
         return [service_mapping.get(service, service) for service in services]
 
@@ -1970,18 +1984,18 @@ class ServiceOrchestrator(UnifiedDockerManager):
         logger.info("ServiceOrchestrator is deprecated - using UnifiedDockerManager")
 
 
-class CentralizedDockerManager(UnifiedDockerManager):
+class UnifiedDockerManager(UnifiedDockerManager):
     """Legacy compatibility class - redirects to UnifiedDockerManager"""
     
     def __init__(self, 
                  environment_type: EnvironmentType = EnvironmentType.SHARED,
                  test_id: Optional[str] = None,
                  use_production_images: bool = True):
-        """Initialize with legacy CentralizedDockerManager interface"""
+        """Initialize with legacy UnifiedDockerManager interface"""
         super().__init__(
             config=OrchestrationConfig(),
             environment_type=environment_type, 
             test_id=test_id,
             use_production_images=use_production_images
         )
-        logger.info("CentralizedDockerManager is deprecated - using UnifiedDockerManager")
+        logger.info("UnifiedDockerManager is deprecated - using UnifiedDockerManager")

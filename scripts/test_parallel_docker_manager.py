@@ -18,7 +18,7 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from test_framework.unified_docker_manager import (
-    UnifiedDockerManager, EnvironmentType, ServiceStatus, CentralizedDockerManager
+    UnifiedDockerManager, EnvironmentType, ServiceStatus, UnifiedDockerManager
 )
 
 
@@ -47,7 +47,7 @@ class ParallelTestSimulator:
             print(f"[Runner {runner_id}] Starting with {env_type.value} environment")
             
             # Create Docker manager
-            manager = CentralizedDockerManager(
+            manager = UnifiedDockerManager(
                 environment_type=env_type,
                 test_id=f"runner_{runner_id}_{int(time.time())}",
                 use_production_images=True

@@ -125,6 +125,124 @@ services:
     restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
 
   # ============================================
+  # APPLICATION TEST SERVICES
+  # ============================================
+
+  # Test Backend Service
+  test-backend:
+    image: netra-test-backend:latest
+    build:
+      context: .
+      dockerfile: ./docker/backend.Dockerfile
+      args:
+        BUILD_ENV: test
+    container_name: netra-test-backend
+    environment:
+      ENVIRONMENT: testing
+      LOG_LEVEL: ERROR
+      # Database
+      POSTGRES_HOST: test-postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_pass
+      POSTGRES_DB: netra_test
+      # Redis
+      REDIS_HOST: test-redis
+      REDIS_PORT: 6379
+      # ClickHouse
+      CLICKHOUSE_HOST: test-clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USER: test_user
+      CLICKHOUSE_PASSWORD: test_pass
+      # Auth service
+      AUTH_SERVICE_URL: http://test-auth:8081
+      # Test-specific configs
+      TESTING: 1
+      TEST_MODE: true
+    ports:
+      - "${TEST_BACKEND_PORT:-8001}:8000"
+    depends_on:
+      test-postgres:
+        condition: service_healthy
+      test-redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 20s
+    networks:
+      - test-network
+    restart: no
+
+  # Test Auth Service
+  test-auth:
+    image: netra-test-auth:latest
+    build:
+      context: .
+      dockerfile: ./docker/auth.Dockerfile
+      args:
+        BUILD_ENV: test
+    container_name: netra-test-auth
+    environment:
+      ENVIRONMENT: testing
+      LOG_LEVEL: ERROR
+      # Database
+      POSTGRES_HOST: test-postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_pass
+      POSTGRES_DB: netra_test
+      # Redis
+      REDIS_HOST: test-redis
+      REDIS_PORT: 6379
+      # Test-specific configs
+      TESTING: 1
+      TEST_MODE: true
+      JWT_SECRET_KEY: test_jwt_secret_key_for_testing_only
+    ports:
+      - "${TEST_AUTH_PORT:-8082}:8081"
+    depends_on:
+      test-postgres:
+        condition: service_healthy
+      test-redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 20s
+    networks:
+      - test-network
+    restart: no
+
+  # Test Frontend Service (optional for e2e)
+  test-frontend:
+    image: netra-test-frontend:latest
+    build:
+      context: .
+      dockerfile: ./docker/frontend.Dockerfile
+      args:
+        BUILD_ENV: test
+    container_name: netra-test-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://test-backend:8000
+      NEXT_PUBLIC_AUTH_URL: http://test-auth:8081
+      NODE_ENV: test
+    ports:
+      - "${TEST_FRONTEND_PORT:-3001}:3000"
+    depends_on:
+      test-backend:
+        condition: service_healthy
+      test-auth:
+        condition: service_healthy
+    networks:
+      - test-network
+    restart: no
+
+  # ============================================
   # SUPPORTING TEST SERVICES
   # ============================================
 
