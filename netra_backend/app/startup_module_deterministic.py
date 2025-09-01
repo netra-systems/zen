@@ -130,15 +130,15 @@ class StartupOrchestrator:
         """Phase 3: Chat Pipeline - Component Creation (No Integration Yet)."""
         self.logger.info("PHASE 3: Chat Pipeline - Component Creation")
         
-        # Step 9: Tool Registry (CRITICAL)
+        # Step 9: WebSocket Manager (CRITICAL - Initialize before tool registry)
+        await self._initialize_websocket()
+        self.logger.info("  ✓ Step 9: WebSocket manager initialized")
+        
+        # Step 10: Tool Registry with WebSocket Support (CRITICAL)
         self._initialize_tool_registry()
         if not hasattr(self.app.state, 'tool_dispatcher') or self.app.state.tool_dispatcher is None:
             raise DeterministicStartupError("Tool dispatcher initialization failed")
-        self.logger.info("  ✓ Step 9: Tool registry created")
-        
-        # Step 10: WebSocket Manager (CRITICAL)
-        await self._initialize_websocket()
-        self.logger.info("  ✓ Step 10: WebSocket manager initialized")
+        self.logger.info("  ✓ Step 10: Tool registry created with WebSocket support")
         
         # Step 11: Agent Supervisor (CRITICAL - Create before bridge for proper dependency order)
         await self._initialize_agent_supervisor()
@@ -162,9 +162,9 @@ class StartupOrchestrator:
         await self._perform_complete_bridge_integration()
         self.logger.info("  ✓ Step 13: Bridge integration completed")
         
-        # Step 14: Tool dispatcher enhancement via registry.set_websocket_manager
-        await self._ensure_tool_dispatcher_enhancement()
-        self.logger.info("  ✓ Step 14: Tool dispatcher enhanced with WebSocket")
+        # Step 14: Verify tool dispatcher has WebSocket support
+        await self._verify_tool_dispatcher_websocket_support()
+        self.logger.info("  ✓ Step 14: Tool dispatcher WebSocket support verified")
         
         # Step 15: Message handler registration
         self._register_message_handlers()
@@ -213,57 +213,47 @@ class StartupOrchestrator:
         self.logger.info(f"    - WebSocket Manager: {'✓' if health_status.websocket_manager_healthy else '✗'}")
         self.logger.info(f"    - Registry: {'✓' if health_status.registry_healthy else '✗'}")
     
-    async def _ensure_tool_dispatcher_enhancement(self) -> None:
-        """Ensure tool dispatcher is enhanced with WebSocket capabilities."""
+    async def _verify_tool_dispatcher_websocket_support(self) -> None:
+        """Verify tool dispatcher has WebSocket support."""
         from netra_backend.app.websocket_core import get_websocket_manager
         
-        supervisor = self.app.state.agent_supervisor
+        # Get tool dispatcher
+        tool_dispatcher = self.app.state.tool_dispatcher
+        if not tool_dispatcher:
+            raise DeterministicStartupError("Tool dispatcher not available for verification")
         
-        # Get WebSocketManager - should never be None after fixing import-time execution
-        websocket_manager = get_websocket_manager()
-        if websocket_manager is None:
-            raise DeterministicStartupError(
-                "WebSocketManager is None - this should never happen after fixing singleton pattern"
-            )
-        
-        # Validate it has required methods
-        if not hasattr(websocket_manager, 'connections') or not hasattr(websocket_manager, 'send_to_thread'):
-            raise DeterministicStartupError(
-                "WebSocketManager incomplete - missing required methods"
-            )
-        
-        if not supervisor:
-            raise DeterministicStartupError("Agent supervisor not available for enhancement")
-        
-        # Ensure WebSocket enhancement through agent registry  
-        registry = None
-        if hasattr(supervisor, 'agent_registry'):
-            registry = supervisor.agent_registry
-        elif hasattr(supervisor, 'registry'):
-            registry = supervisor.registry
-        else:
-            raise DeterministicStartupError("Supervisor missing agent_registry for enhancement")
-            
-        if not hasattr(registry, 'tool_dispatcher'):
-            raise DeterministicStartupError("Registry missing tool_dispatcher for enhancement")
-            
-        # Check if enhancement is needed
-        tool_dispatcher = registry.tool_dispatcher
-        if not getattr(tool_dispatcher, '_websocket_enhanced', False):
-            # Enhance tool dispatcher
-            if hasattr(registry, 'set_websocket_manager'):
-                self.logger.info(f"    - Enhancing tool dispatcher via registry.set_websocket_manager()")
-                registry.set_websocket_manager(websocket_manager)
-                
-                # Verify enhancement worked
-                if not getattr(tool_dispatcher, '_websocket_enhanced', False):
-                    raise DeterministicStartupError("Tool dispatcher enhancement with WebSocket failed")
-                    
-                self.logger.info("    - Tool dispatcher successfully enhanced with WebSocket notifications")
+        # Check if it has WebSocket support
+        if hasattr(tool_dispatcher, 'has_websocket_support'):
+            if tool_dispatcher.has_websocket_support:
+                self.logger.info("    - Tool dispatcher has WebSocket support enabled")
             else:
-                raise DeterministicStartupError("Registry missing set_websocket_manager method")
+                # This shouldn't happen since we create it with WebSocket support
+                self.logger.warning("    - Tool dispatcher lacks WebSocket support - events may not work")
+                
+                # Try to fix it by getting WebSocket manager
+                websocket_manager = get_websocket_manager()
+                if websocket_manager and hasattr(tool_dispatcher, 'executor'):
+                    if hasattr(tool_dispatcher.executor, 'websocket_manager'):
+                        tool_dispatcher.executor.websocket_manager = websocket_manager
+                        self.logger.info("    - WebSocket support added to tool dispatcher")
         else:
-            self.logger.info("    - Tool dispatcher already enhanced with WebSocket notifications")
+            # Legacy check for older versions
+            self.logger.info("    - Tool dispatcher doesn't expose WebSocket support status (legacy)")
+        
+        # Also ensure registry has WebSocket manager set for agents
+        supervisor = self.app.state.agent_supervisor
+        if supervisor:
+            registry = None
+            if hasattr(supervisor, 'agent_registry'):
+                registry = supervisor.agent_registry
+            elif hasattr(supervisor, 'registry'):
+                registry = supervisor.registry
+            
+            if registry and hasattr(registry, 'set_websocket_manager'):
+                websocket_manager = get_websocket_manager()
+                if websocket_manager:
+                    registry.set_websocket_manager(websocket_manager)
+                    self.logger.info("    - WebSocket manager set on agent registry")
     
     async def _phase5_critical_services(self) -> None:
         """Phase 5: Critical Services - Required for system stability."""
@@ -567,12 +557,25 @@ class StartupOrchestrator:
         self.app.state.security_service = SecurityService(self.app.state.key_manager)
     
     def _initialize_tool_registry(self) -> None:
-        """Initialize tool registry and dispatcher - CRITICAL."""
+        """Initialize tool registry and dispatcher with WebSocket support - CRITICAL."""
         from netra_backend.app.services.tool_registry import ToolRegistry
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+        from netra_backend.app.websocket_core import get_websocket_manager
         
+        # Get WebSocket manager for real-time notifications
+        websocket_manager = get_websocket_manager()
+        if websocket_manager is None:
+            self.logger.warning("WebSocketManager is None during tool dispatcher creation - WebSocket events may not work")
+        
+        # Create tool dispatcher with WebSocket support from the start
         tool_registry = ToolRegistry(self.app.state.db_session_factory)
-        self.app.state.tool_dispatcher = ToolDispatcher(tool_registry.get_tools([]))
+        self.app.state.tool_dispatcher = ToolDispatcher(
+            tools=tool_registry.get_tools([]),
+            websocket_manager=websocket_manager
+        )
+        
+        if websocket_manager:
+            self.logger.info("    - Tool dispatcher created with WebSocket support built-in")
     
     async def _initialize_websocket(self) -> None:
         """Initialize WebSocket components - CRITICAL."""

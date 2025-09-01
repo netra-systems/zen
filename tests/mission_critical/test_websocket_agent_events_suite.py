@@ -42,10 +42,6 @@ from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.agents.unified_tool_execution import (
-    UnifiedToolExecutionEngine,
-    enhance_tool_dispatcher_with_notifications
-)
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.agents.state import DeepAgentState
@@ -315,7 +311,8 @@ class TestUnitWebSocketComponents:
         original_executor = dispatcher.executor
         
         # Enhance
-        enhance_tool_dispatcher_with_notifications(dispatcher, ws_manager)
+        # Tool dispatcher is now created with WebSocket support from the start
+        # No need to enhance it separately
         
         # Verify enhancement
         assert dispatcher.executor != original_executor, "Executor was not replaced"

@@ -237,8 +237,8 @@ class AgentRegistry:
             self.llm_manager, self.tool_dispatcher))
 
     def set_websocket_manager(self, manager: 'WebSocketManager') -> None:
-        """Set websocket manager and enhance tool dispatcher immediately."""
-        # CRITICAL FIX: Prevent None WebSocketManager from breaking agent events
+        """Set websocket manager on registry and agents."""
+        # CRITICAL: Prevent None WebSocketManager from breaking agent events
         if manager is None:
             logger.error("🚨 CRITICAL: Attempting to set WebSocketManager to None - this breaks agent events!")
             logger.error("🚨 This prevents real-time chat notifications and agent execution updates")
@@ -257,16 +257,14 @@ class AgentRegistry:
         
         self.websocket_manager = manager
         
-        # Enhance tool dispatcher immediately if available
-        if manager and hasattr(self, 'tool_dispatcher') and self.tool_dispatcher:
-            try:
-                from netra_backend.app.agents.unified_tool_execution import (
-                    enhance_tool_dispatcher_with_notifications
-                )
-                enhance_tool_dispatcher_with_notifications(self.tool_dispatcher, manager)
-                logger.info("Tool dispatcher enhanced with WebSocket notifications immediately")
-            except Exception as e:
-                logger.error(f"Failed to enhance tool dispatcher: {e}")
+        # No more enhancement needed - tool dispatcher already has WebSocket support from initialization
+        # Just log the status for visibility
+        if hasattr(self, 'tool_dispatcher') and self.tool_dispatcher:
+            if hasattr(self.tool_dispatcher, 'has_websocket_support'):
+                if self.tool_dispatcher.has_websocket_support:
+                    logger.info("Tool dispatcher already has WebSocket support")
+                else:
+                    logger.warning("Tool dispatcher created without WebSocket support - may need reconfiguration")
         
         # Set WebSocket manager on all registered agents (backward compatibility)
         agent_count = 0
@@ -279,5 +277,11 @@ class AgentRegistry:
         
         if manager is not None:
             logger.info(f"✅ WebSocket manager set for {agent_count}/{len(self.agents)} agents")
-        else:
-            logger.info(f"WebSocket manager set to None for {agent_count}/{len(self.agents)} agents")
+    
+    def get_websocket_manager(self) -> Optional['WebSocketManager']:
+        """Get the current WebSocket manager instance.
+        
+        Returns:
+            The WebSocketManager instance if set, None otherwise.
+        """
+        return getattr(self, 'websocket_manager', None)
