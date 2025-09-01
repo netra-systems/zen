@@ -207,11 +207,11 @@ class TestAgentCommunicationOrchestration:
         
         run_id = "run_test_123"
         
-        # Test different communication patterns
-        await agent.notify_tool_execution(run_id, "data_query_tool")
-        await agent.notify_agent_thinking(run_id, "Processing user request", step_number=1)
-        await agent.notify_partial_result(run_id, "Intermediate results...", is_complete=False)
-        await agent.notify_final_report(run_id, {"status": "complete"}, duration_ms=1500.0)
+        # Test different communication patterns using unified emit methods
+        await agent.emit_tool_executing("data_query_tool")
+        await agent.emit_thinking("Processing user request", step_number=1)
+        await agent.emit_progress("Intermediate results...", is_complete=False)
+        await agent.emit_agent_completed({"status": "complete", "duration_ms": 1500.0})
         
         # Verify all communication types were attempted
         assert websocket_manager.send_message.call_count == 4

@@ -23,9 +23,9 @@ from netra_backend.app.agents.example_message_processor import (
 from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.error_handling import (
     ErrorCategory,
-    ErrorContext,
     handle_example_message_error,
 )
+from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.registry import WebSocketMessage
 from netra_backend.app.websocket_core import get_websocket_manager as get_manager

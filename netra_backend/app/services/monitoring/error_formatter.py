@@ -18,11 +18,11 @@ from typing import Any, List, Tuple
 from loguru import logger
 
 from netra_backend.app.schemas.monitoring_schemas import (
-    ErrorContext,
     ErrorStatus,
     GCPError,
     GCPErrorEvent,
 )
+from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.app.schemas.monitoring_schemas import (
     ErrorSeverity as GCPErrorSeverity,
 )
