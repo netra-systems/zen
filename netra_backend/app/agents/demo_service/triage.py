@@ -29,10 +29,10 @@ from netra_backend.app.agents.base.executor import BaseExecutionEngine
 
 # Modern execution patterns
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
     ExecutionContext,
     ExecutionResult,
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -43,7 +43,7 @@ from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocke
 logger = central_logger.get_logger(__name__)
 
 
-class DemoTriageService(BaseSubAgent, BaseExecutionInterface):
+class DemoTriageService(BaseSubAgent):
     """Specialized triage service for demo scenarios - Modernized.
     
     Implements modern execution patterns for reliable demo operations.
@@ -51,8 +51,8 @@ class DemoTriageService(BaseSubAgent, BaseExecutionInterface):
     """
     
     def __init__(self, llm_manager: LLMManager, websocket_manager: WebSocketManager):
-        BaseSubAgent.__init__(self, llm_manager, websocket_manager)
-        BaseExecutionInterface.__init__(self, "DemoTriageService", websocket_manager)
+        super().__init__(llm_manager, websocket_manager)
+        # BaseExecutionInterface.__init__ removed - using single inheritance pattern
         self._initialize_modern_components()
         
     def _initialize_modern_components(self) -> None:

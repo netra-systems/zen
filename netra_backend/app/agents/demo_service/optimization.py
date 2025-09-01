@@ -30,11 +30,13 @@ from netra_backend.app.agents.base.errors import (
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 
 # Modern execution interface imports
+from abc import ABC, abstractmethod
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
     ExecutionContext,
+    ExecutionResult,
     WebSocketManagerProtocol,
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 
@@ -46,7 +48,7 @@ from netra_backend.app.schemas.shared_types import RetryConfig
 logger = central_logger.get_logger(__name__)
 
 
-class DemoOptimizationService(BaseExecutionInterface):
+class DemoOptimizationService(ABC):
     """Modernized optimization service for demo scenarios.
     
     Uses BaseExecutionInterface for standardized execution patterns.
@@ -54,7 +56,8 @@ class DemoOptimizationService(BaseExecutionInterface):
     
     def __init__(self, llm_manager: LLMManager, 
                  websocket_manager: Optional[WebSocketManagerProtocol] = None):
-        super().__init__("DemoOptimizationService", websocket_manager)
+        # BaseExecutionInterface.__init__ removed - using single inheritance pattern
+        self.agent_name = "DemoOptimizationService"
         self.llm_manager = llm_manager
         self._engine = self._create_execution_engine()
         self._initialize_reliability_components()

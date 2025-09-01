@@ -11,11 +11,13 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from abc import ABC, abstractmethod
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
     ExecutionContext,
+    ExecutionResult,
     WebSocketManagerProtocol,
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.agents.data_sub_agent.metric_comparison_analyzer import (
@@ -36,7 +38,7 @@ from netra_backend.app.agents.data_sub_agent.metric_trend_analyzer import (
 from netra_backend.app.logging_config import central_logger as logger
 
 
-class MetricsAnalyzer(BaseExecutionInterface):
+class MetricsAnalyzer(ABC):
     """Modernized orchestrator for specialized metric analysis operations.
     
     Now supports BaseExecutionInterface for standardized execution patterns
@@ -50,8 +52,9 @@ class MetricsAnalyzer(BaseExecutionInterface):
         self._init_all_components(query_builder, analysis_engine, clickhouse_ops, reliability_manager)
         
     def _init_base_interface(self, websocket_manager: Optional[WebSocketManagerProtocol]) -> None:
-        """Initialize base execution interface."""
-        BaseExecutionInterface.__init__(self, "MetricsAnalyzer", websocket_manager)
+        """Initialize base interface properties."""
+        # BaseExecutionInterface.__init__ removed - using single inheritance pattern
+        self.agent_name = "MetricsAnalyzer"
         
     def _init_all_components(self, query_builder: Any, analysis_engine: Any, 
                            clickhouse_ops: Any, reliability_manager: Optional[ReliabilityManager]) -> None:

@@ -17,10 +17,10 @@ from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
     ExecutionContext,
     ExecutionResult,
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -31,12 +31,12 @@ from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocke
 logger = central_logger.get_logger(__name__)
 
 
-class DemoReportingService(BaseSubAgent, BaseExecutionInterface):
+class DemoReportingService(BaseSubAgent):
     """Specialized reporting service for demo scenarios."""
     
     def __init__(self, llm_manager: LLMManager, websocket_manager: WebSocketManager):
-        BaseSubAgent.__init__(self, llm_manager, websocket_manager)
-        BaseExecutionInterface.__init__(self, "DemoReportingService", websocket_manager)
+        super().__init__(llm_manager, websocket_manager)
+        # BaseExecutionInterface.__init__ removed - using single inheritance pattern
         self.agent_name = "DemoReportingService"
         self._initialize_modern_components()
         

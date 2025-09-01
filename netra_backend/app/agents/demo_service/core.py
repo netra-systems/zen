@@ -25,7 +25,8 @@ from typing import Any, Dict, Optional
 
 from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
-from netra_backend.app.agents.base.interface import BaseExecutionInterface, ExecutionContext, ExecutionResult
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
@@ -37,7 +38,7 @@ from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocke
 logger = central_logger.get_logger(__name__)
 
 
-class DemoService(BaseSubAgent, BaseExecutionInterface):
+class DemoService(BaseSubAgent):
     """
     Modernized demo service with BaseExecutionInterface compliance.
     
@@ -52,8 +53,8 @@ class DemoService(BaseSubAgent, BaseExecutionInterface):
         industry: str = "technology",
         demo_mode: bool = True
     ):
-        BaseSubAgent.__init__(self, llm_manager, websocket_manager)
-        BaseExecutionInterface.__init__(self, "DemoService", websocket_manager)
+        super().__init__(llm_manager, websocket_manager)
+        # BaseExecutionInterface.__init__ removed - using single inheritance pattern
         self._initialize_demo_properties(industry, demo_mode)
         self._initialize_modern_components()
         
