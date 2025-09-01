@@ -16,23 +16,23 @@ from typing import Any, Callable, Dict, Optional
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
     ExecutionContext,
     ExecutionResult,
-    ExecutionStatus,
     WebSocketManagerProtocol,
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.shared_types import RetryConfig
 
 
-class ExecutionCore(BaseExecutionInterface):
+class ExecutionCore:
     """Core execution workflow coordinator with modern patterns."""
     
     def __init__(self, execution_engine, websocket_manager: Optional[WebSocketManagerProtocol] = None):
-        super().__init__("DataSubAgent", websocket_manager)
+        self.agent_name = "DataSubAgent"
+        self.websocket_manager = websocket_manager
         self.engine = execution_engine
         self._init_modern_components()
         

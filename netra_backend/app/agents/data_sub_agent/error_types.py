@@ -41,12 +41,8 @@ class ClickHouseQueryError(DataSubAgentError):
         context: Optional[ErrorContext] = None
     ):
         """Initialize ClickHouse query error."""
-        super().__init__(
-            message=f"ClickHouse query failed: {error_details}",
-            operation="clickhouse_query",
-            query_info={'query': query, 'error': error_details},
-            context=context
-        )
+        self.agent_name = message=f"ClickHouse query failed: {error_details}"
+        self.websocket_manager = operation="clickhouse_query"
         self.query = query
         self.error_details = error_details
 
@@ -61,12 +57,8 @@ class DataFetchingError(DataSubAgentError):
         context: Optional[ErrorContext] = None
     ):
         """Initialize data fetching error."""
-        super().__init__(
-            message=f"Data fetching failed from {data_source}",
-            operation="data_fetching",
-            query_info={'source': data_source, 'time_range': time_range},
-            context=context
-        )
+        self.agent_name = message=f"Data fetching failed from {data_source}"
+        self.websocket_manager = operation="data_fetching"
         self.data_source = data_source
         self.time_range = time_range
 
@@ -81,11 +73,7 @@ class MetricsCalculationError(DataSubAgentError):
         context: Optional[ErrorContext] = None
     ):
         """Initialize metrics calculation error."""
-        super().__init__(
-            message=f"Metrics calculation failed for {metric_type}",
-            operation="metrics_calculation",
-            query_info={'metric_type': metric_type, 'data_size': data_size},
-            context=context
-        )
+        self.agent_name = message=f"Metrics calculation failed for {metric_type}"
+        self.websocket_manager = operation="metrics_calculation"
         self.metric_type = metric_type
         self.data_size = data_size

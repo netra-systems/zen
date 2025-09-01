@@ -19,12 +19,11 @@ from typing import Any, Dict, List, Optional, Protocol, runtime_checkable
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
     ExecutionContext,
     ExecutionResult,
-    ExecutionStatus,
     WebSocketManagerProtocol,
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.logging_config import central_logger as logger
@@ -68,14 +67,15 @@ class CacheStorageProtocol(Protocol):
         ...
 
 
-class DataSubAgentCacheManager(BaseExecutionInterface):
-    """Modern cache manager with BaseExecutionInterface pattern.
+class DataSubAgentCacheManager:
+    """Modern cache manager with execution patterns.
     
     Provides reliable caching with monitoring and error handling.
     """
     
     def __init__(self, agent, websocket_manager: Optional[WebSocketManagerProtocol] = None):
-        super().__init__("DataSubAgentCacheManager", websocket_manager)
+        self.agent_name = "DataSubAgentCacheManager"
+        self.websocket_manager = websocket_manager
         self.agent = agent
         self.metrics = CacheMetrics()
         self._init_modern_components()

@@ -47,7 +47,8 @@ class ModernAnalysisEngine(ABC):
     """
     
     def __init__(self, websocket_manager: Optional[WebSocketManagerProtocol] = None):
-        super().__init__("ModernAnalysisEngine", websocket_manager)
+        self.agent_name = "ModernAnalysisEngine"
+        self.websocket_manager = websocket_manager
         self.execution_monitor = ExecutionMonitor()
         self.error_handler = ExecutionErrorHandler
         self.execution_engine = BaseExecutionEngine(monitor=self.execution_monitor)

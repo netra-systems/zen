@@ -10,9 +10,8 @@ from typing import Any, Dict, List, Optional
 
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
-    ExecutionContext,
-)
+    
+    ExecutionContext)
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.agents.data_sub_agent.fallback_helpers import (
@@ -25,7 +24,7 @@ from netra_backend.app.schemas.shared_types import RetryConfig
 logger = central_logger.get_logger(__name__)
 
 
-class ModernFallbackDataProvider(BaseExecutionInterface):
+class ModernFallbackDataProvider:
     """Modern fallback data provider with BaseExecutionInterface.
     
     Provides intelligent fallback data sources with reliability patterns.
@@ -33,7 +32,8 @@ class ModernFallbackDataProvider(BaseExecutionInterface):
     
     def __init__(self, cache_manager=None, websocket_manager=None):
         """Initialize modern fallback provider."""
-        super().__init__("FallbackDataProvider", websocket_manager)
+        self.agent_name = "FallbackDataProvider"
+        self.websocket_manager = websocket_manager
         self.cache_manager = cache_manager
         self.execution_monitor = ExecutionMonitor()
         self._initialize_reliability_manager()

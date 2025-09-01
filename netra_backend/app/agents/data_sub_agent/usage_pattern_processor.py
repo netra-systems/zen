@@ -12,17 +12,16 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
+    
     ExecutionContext,
-    WebSocketManagerProtocol,
-)
+    WebSocketManagerProtocol)
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.core.exceptions import ProcessingError
 from netra_backend.app.logging_config import central_logger as logger
 
 
-class UsagePatternProcessor(BaseExecutionInterface):
+class UsagePatternProcessor:
     """Modernized usage pattern processor with standardized execution.
     
     Provides usage pattern analysis with reliability patterns

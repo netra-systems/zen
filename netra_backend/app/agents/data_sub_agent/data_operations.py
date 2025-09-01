@@ -16,10 +16,9 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
+    
     ExecutionContext,
-    ExecutionResult,
-)
+    ExecutionResult)
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.agents.data_sub_agent.anomaly_detection import (
@@ -39,7 +38,7 @@ from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.schemas.shared_types import RetryConfig
 
 
-class DataOperations(BaseExecutionInterface):
+class DataOperations:
     """Coordinates data processing operations with modern execution patterns.
     
     Enhanced with:

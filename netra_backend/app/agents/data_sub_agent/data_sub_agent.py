@@ -54,8 +54,8 @@ class DataSubAgent(BaseSubAgent):
                  websocket_manager: Optional[Any] = None):
         """Initialize consolidated DataSubAgent."""
         # Initialize base class only - single inheritance pattern
-        super().__init__(llm_manager, name="DataSubAgent", 
-                        description="Advanced data analysis for AI cost optimization")
+        self.agent_name = llm_manager
+        self.websocket_manager = name="DataSubAgent"
         # WebSocketContextMixin removed - using BaseSubAgent's bridge
         # BaseExecutionInterface removed - single inheritance pattern
         

@@ -60,8 +60,8 @@ class DataSubAgent(BaseSubAgent):
     def _init_base_interfaces(self, llm_manager: LLMManager, 
                             websocket_manager: Optional[WebSocketManagerProtocol]) -> None:
         """Initialize base interfaces with error handling."""
-        super().__init__(llm_manager, name="DataSubAgent", 
-                        description="Advanced data analysis agent")
+        self.agent_name = llm_manager
+        self.websocket_manager = name="DataSubAgent"
         # BaseExecutionInterface.__init__ removed - using single inheritance pattern
     
     def _init_core_systems(self, tool_dispatcher: ToolDispatcher, 

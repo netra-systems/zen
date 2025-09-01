@@ -1,7 +1,7 @@
-"""Modernized ClickHouse Operations with BaseExecutionInterface.
+"""Modernized ClickHouse Operations.
 
 Provides standardized ClickHouse database operations with:
-- BaseExecutionInterface pattern compliance
+- Standardized execution patterns
 - Comprehensive error handling and retry logic
 - Performance tracking and monitoring
 - Circuit breaker protection
@@ -18,12 +18,10 @@ from typing import Any, Dict, List, Optional, Protocol
 
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.interface import (
-    AgentExecutionMixin,
-    BaseExecutionInterface,
     ExecutionContext,
     ExecutionResult,
-    ExecutionStatus,
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.core.exceptions_database import (
     DatabaseConnectionError,
@@ -63,11 +61,12 @@ class RedisManagerProtocol(Protocol):
         ...
 
 
-class ModernClickHouseOperations(BaseExecutionInterface, AgentExecutionMixin):
-    """Modernized ClickHouse operations with BaseExecutionInterface."""
+class ModernClickHouseOperations:
+    """Modernized ClickHouse operations with standardized execution patterns."""
     
     def __init__(self, websocket_manager=None, redis_manager: Optional[RedisManagerProtocol] = None):
-        super().__init__(agent_name="ClickHouseOperations", websocket_manager=websocket_manager)
+        self.agent_name = "ClickHouseOperations"
+        self.websocket_manager = websocket_manager
         self.redis_manager = redis_manager
         self.reliability_manager = self._create_reliability_manager()
         self._performance_metrics = self._initialize_performance_metrics()

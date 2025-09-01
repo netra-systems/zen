@@ -16,11 +16,10 @@ from typing import Any, Dict, List, Optional
 
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
+    
     ExecutionContext,
-    ExecutionResult,
-    ExecutionStatus,
-)
+    ExecutionResult)
+from netra_backend.app.schemas.core_enums import 
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.logging_config import central_logger
@@ -29,7 +28,7 @@ from netra_backend.app.schemas.shared_types import RetryConfig
 logger = central_logger.get_logger(__name__)
 
 
-class ModernAgentDelegation(BaseExecutionInterface):
+class ModernAgentDelegation:
     """Modern delegation interface with BaseExecutionInterface patterns.
     
     Enhanced delegation with:

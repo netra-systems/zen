@@ -34,12 +34,11 @@ from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
     ExecutionContext,
     ExecutionResult,
-    ExecutionStatus,
     WebSocketManagerProtocol,
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.agents.data_sub_agent.execution_analysis import AnalysisRouter
@@ -58,8 +57,8 @@ from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.shared_types import RetryConfig
 
 
-class DataSubAgentExecutionEngine(BaseExecutionInterface):
-    """Modern DataSubAgent execution engine implementing BaseExecutionInterface.
+class DataSubAgentExecutionEngine:
+    """Modern DataSubAgent execution engine with standardized patterns.
     
     Provides standardized execution patterns with reliability management.
     """
@@ -67,8 +66,9 @@ class DataSubAgentExecutionEngine(BaseExecutionInterface):
     def __init__(self, clickhouse_ops: Any, query_builder: Any, 
                  analysis_engine: Any, redis_manager: Any, llm_manager: LLMManager,
                  websocket_manager: Optional[WebSocketManagerProtocol] = None) -> None:
-        """Initialize modern execution engine with BaseExecutionInterface."""
-        super().__init__("DataSubAgentExecution", websocket_manager)
+        """Initialize modern execution engine."""
+        self.agent_name = "DataSubAgentExecution"
+        self.websocket_manager = websocket_manager
         self._init_dependencies(clickhouse_ops, query_builder, analysis_engine, redis_manager, llm_manager)
         self._init_modern_execution_components()
         self._init_legacy_components()
