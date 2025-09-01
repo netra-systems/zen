@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Test script to specifically check backend port 8000 binding.
@@ -18,6 +19,7 @@ sys.path.insert(0, str(project_root))
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
 
+env = get_env()
 def test_basic_socket_binding():
     """Test basic socket binding to port 8000."""
     import socket
@@ -121,9 +123,9 @@ def test_backend_main_directly():
     
     try:
         # Set environment variables needed for testing
-        os.environ['LLM_MODE'] = 'disabled'  # Disable LLM for testing
-        os.environ['DATABASE_URL'] = 'sqlite:///test.db'  # Use SQLite for testing
-        os.environ['ENVIRONMENT'] = 'test'
+        env.set('LLM_MODE', 'disabled', "test")  # Disable LLM for testing
+        env.set('DATABASE_URL', 'sqlite:///test.db', "test")  # Use SQLite for testing
+        env.set('ENVIRONMENT', 'test', "test")
         
         # Try importing the main module
         from netra_backend.app.main import app, _get_uvicorn_config

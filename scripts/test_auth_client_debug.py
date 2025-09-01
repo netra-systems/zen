@@ -1,5 +1,7 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
+env = get_env()
 Debug the auth client validation issue
 """
 import asyncio
@@ -8,8 +10,8 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Set staging environment
-os.environ['ENVIRONMENT'] = 'staging'
-os.environ['AUTH_SERVICE_URL'] = 'https://auth.staging.netrasystems.ai'
+env.set('ENVIRONMENT', 'staging', "test")
+env.set('AUTH_SERVICE_URL', 'https://auth.staging.netrasystems.ai', "test")
 
 import httpx
 import json

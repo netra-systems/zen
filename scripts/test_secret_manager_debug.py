@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Debug script to test SecretManagerBuilder implementation and identify issues.
 """
 
@@ -14,12 +16,12 @@ if sys.platform == "win32":
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
 # Set test environment
-os.environ['ENVIRONMENT'] = 'development'
-os.environ['JWT_SECRET_KEY'] = 'test-jwt-secret-key'
-os.environ['POSTGRES_PASSWORD'] = 'test-postgres-password'
-os.environ['REDIS_PASSWORD'] = 'test-redis-password'
-os.environ['FERNET_KEY'] = 'test-fernet-key-32-chars-exactly'
-os.environ['ANTHROPIC_API_KEY'] = 'sk-ant-test-key'
+env.set('ENVIRONMENT', 'development', "test")
+env.set('JWT_SECRET_KEY', 'test-jwt-secret-key', "test")
+env.set('POSTGRES_PASSWORD', 'test-postgres-password', "test")
+env.set('REDIS_PASSWORD', 'test-redis-password', "test")
+env.set('FERNET_KEY', 'test-fernet-key-32-chars-exactly', "test")
+env.set('ANTHROPIC_API_KEY', 'sk-ant-test-key', "test")
 
 def test_secret_manager_builder():
     """Test the SecretManagerBuilder implementation."""

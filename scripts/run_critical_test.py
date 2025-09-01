@@ -5,32 +5,34 @@ import os
 import sys
 from pathlib import Path
 from dotenv import load_dotenv
+from shared.isolated_environment import get_env
 
 # Load .env file with override to ensure our values take precedence
+env = get_env()
 env_path = Path(__file__).parent / '.env'
 load_dotenv(env_path, override=True)
 
 # Ensure GEMINI_API_KEY is set from .env
 gemini_key = os.getenv('GEMINI_API_KEY')
 if not os.getenv('GEMINI_API_KEY'):
-    os.environ['GEMINI_API_KEY'] = gemini_key
+    env.set('GEMINI_API_KEY', gemini_key, "test")
     print(f"Set GEMINI_API_KEY directly")
 
 # Set all possible API key environment variables that might be needed
-os.environ['TEST_GOOGLE_API_KEY'] = gemini_key
-os.environ['TEST_GEMINI_API_KEY'] = gemini_key
-os.environ['GOOGLE_API_KEY'] = gemini_key  # Some code might look for this
+env.set('TEST_GOOGLE_API_KEY', gemini_key, "test")
+env.set('TEST_GEMINI_API_KEY', gemini_key, "test")
+env.set('GOOGLE_API_KEY', gemini_key, "test")  # Some code might look for this
 
 print(f"Set all Google/Gemini API key variants")
 
 # Enable real LLM testing
-os.environ['ENABLE_REAL_LLM_TESTING'] = 'true'
-os.environ['TEST_LLM_MODE'] = 'real'
-os.environ['USE_REAL_LLM'] = 'true'
-os.environ['TEST_USE_REAL_LLM'] = 'true'
+env.set('ENABLE_REAL_LLM_TESTING', 'true', "test")
+env.set('TEST_LLM_MODE', 'real', "test")
+env.set('USE_REAL_LLM', 'true', "test")
+env.set('TEST_USE_REAL_LLM', 'true', "test")
 
 # Set environment to testing to ensure config loads properly
-os.environ['ENVIRONMENT'] = 'testing'
+env.set('ENVIRONMENT', 'testing', "test")
 
 # Print configuration
 print("\nEnvironment configuration:")

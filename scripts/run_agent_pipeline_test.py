@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Test runner script for the agent pipeline real test.
@@ -10,6 +11,7 @@ import subprocess
 from pathlib import Path
 from dotenv import load_dotenv
 
+env = get_env()
 def setup_test_environment():
     """Setup test environment with development configuration."""
     project_root = Path(__file__).parent
@@ -46,10 +48,10 @@ def setup_test_environment():
     
     # Check API key availability
     api_keys = {
-        'GEMINI_API_KEY': os.environ.get('GEMINI_API_KEY'),
-        'OPENAI_API_KEY': os.environ.get('OPENAI_API_KEY'),
-        'ANTHROPIC_API_KEY': os.environ.get('ANTHROPIC_API_KEY'),
-        'GOOGLE_API_KEY': os.environ.get('GOOGLE_API_KEY')
+        'GEMINI_API_KEY': env.get('GEMINI_API_KEY'),
+        'OPENAI_API_KEY': env.get('OPENAI_API_KEY'),
+        'ANTHROPIC_API_KEY': env.get('ANTHROPIC_API_KEY'),
+        'GOOGLE_API_KEY': env.get('GOOGLE_API_KEY')
     }
     
     available_keys = {k: v for k, v in api_keys.items() if v}

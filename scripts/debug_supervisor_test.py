@@ -4,19 +4,21 @@
 import asyncio
 import os
 import sys
+from shared.isolated_environment import get_env
 
 # Set up environment before any imports
-os.environ["TESTING"] = "1"
-os.environ["ENVIRONMENT"] = "testing"
+env = get_env()
+env.set("TESTING", "1", "test")
+env.set("ENVIRONMENT", "testing", "test")
 # Use central config manager per database_connectivity_architecture.xml
-os.environ["USE_MEMORY_DB"] = "true"  # Tell DatabaseURLBuilder to use SQLite memory
-os.environ["CLICKHOUSE_URL"] = "http://localhost:8123/test"
-os.environ["CLICKHOUSE_HOST"] = "localhost"
-os.environ["CLICKHOUSE_ENABLED"] = "false"
-os.environ["REDIS_URL"] = "redis://localhost:6379/0"
-os.environ["NETRA_REAL_LLM_ENABLED"] = "false"
-os.environ["USE_REAL_LLM"] = "false"
-os.environ["TEST_LLM_MODE"] = "mock"
+env.set("USE_MEMORY_DB", "true", "test")  # Tell DatabaseURLBuilder to use SQLite memory
+env.set("CLICKHOUSE_URL", "http://localhost:8123/test", "test")
+env.set("CLICKHOUSE_HOST", "localhost", "test")
+env.set("CLICKHOUSE_ENABLED", "false", "test")
+env.set("REDIS_URL", "redis://localhost:6379/0", "test")
+env.set("NETRA_REAL_LLM_ENABLED", "false", "test")
+env.set("USE_REAL_LLM", "false", "test")
+env.set("TEST_LLM_MODE", "mock", "test")
 
 # Add the project root to Python path
 project_root = os.path.dirname(os.path.abspath(__file__))
@@ -24,9 +26,9 @@ sys.path.insert(0, project_root)
 
 print(f"Python path: {sys.path[0]}")
 print(f"Testing environment vars:")
-print(f"  DATABASE_URL: {os.environ.get('DATABASE_URL')}")
-print(f"  CLICKHOUSE_URL: {os.environ.get('CLICKHOUSE_URL')}")
-print(f"  USE_REAL_LLM: {os.environ.get('USE_REAL_LLM')}")
+print(f"  DATABASE_URL: {env.get('DATABASE_URL')}")
+print(f"  CLICKHOUSE_URL: {env.get('CLICKHOUSE_URL')}")
+print(f"  USE_REAL_LLM: {env.get('USE_REAL_LLM')}")
 
 try:
     from netra_backend.app.config import get_config

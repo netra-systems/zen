@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Test script to verify ANSI escape codes are properly handled in logs.
@@ -10,11 +11,12 @@ import traceback
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
+env = get_env()
 def test_production_logging():
     """Test logging with production settings."""
     # Set production environment
-    os.environ['ENVIRONMENT'] = 'production'
-    os.environ['NO_COLOR'] = '1'
+    env.set('ENVIRONMENT', 'production', "test")
+    env.set('NO_COLOR', '1', "test")
     
     # Import after setting environment
     from netra_backend.app.core.logging_config import configure_cloud_run_logging, setup_exception_handler
@@ -54,9 +56,9 @@ def test_production_logging():
 def test_development_logging():
     """Test logging with development settings."""
     # Reset environment
-    os.environ['ENVIRONMENT'] = 'development'
+    env.set('ENVIRONMENT', 'development', "test")
     if 'NO_COLOR' in os.environ:
-        del os.environ['NO_COLOR']
+        env.delete('NO_COLOR', "test")
     
     print("\nTesting exception handling in development mode...")
     

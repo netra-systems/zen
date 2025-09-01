@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 CRITICAL FAILING TEST: Redis Configuration Inconsistency Across Services and Environments
 
 Business Value Justification (BVJ):
@@ -315,7 +317,7 @@ class TestRedisCriticalConfigurationFailure:
             import os
             
             # Use current environment for SSL config extraction
-            env_vars = dict(os.environ)
+            env_vars = env.get_all()
             redis_builder = RedisConfigurationBuilder(env_vars)
             
             ssl_config = redis_builder.ssl.get_ssl_config()
