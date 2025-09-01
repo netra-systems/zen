@@ -6,11 +6,15 @@ import os
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Set required environment variables for testing
-os.environ["JWT_SECRET_KEY"] = "test-secret-key-for-audit-testing-only-not-for-production"
-os.environ["SERVICE_SECRET"] = "test-service-secret-for-audit-only"
-os.environ["SERVICE_ID"] = "test-service"
-os.environ["ENVIRONMENT"] = "test"
+# Import IsolatedEnvironment before auth modules
+from shared.isolated_environment import get_env
+
+# Get environment instance and set required variables using IsolatedEnvironment
+env = get_env()
+env.set("JWT_SECRET_KEY", "test-secret-key-for-audit-testing-only-not-for-production", "test_auth_direct")
+env.set("SERVICE_SECRET", "test-service-secret-for-audit-only", "test_auth_direct")
+env.set("SERVICE_ID", "test-service", "test_auth_direct")
+env.set("ENVIRONMENT", "test", "test_auth_direct")
 
 import time
 import uuid
