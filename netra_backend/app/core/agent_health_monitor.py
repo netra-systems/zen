@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List
 
 from netra_backend.app.core.agent_reliability_types import AgentError, AgentHealthStatus
+from netra_backend.app.core.agent_execution_tracker import get_execution_tracker
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -21,6 +22,7 @@ class AgentHealthMonitor:
         self.max_operation_history = max_operation_history
         self.last_health_check = 0
         self.health_check_interval = 60
+        self.execution_tracker = get_execution_tracker()
 
     def record_successful_operation(self, operation_name: str, execution_time: float) -> None:
         """Record a successful operation for monitoring."""
@@ -32,6 +34,11 @@ class AgentHealthMonitor:
         self, agent_name: str, error_history: List[AgentError], reliability_wrapper
     ) -> AgentHealthStatus:
         """Get comprehensive health status of the agent."""
+        # Check for dead agents first
+        dead_agents = self._detect_dead_agents(agent_name)
+        if dead_agents:
+            return self._create_dead_agent_status(agent_name, dead_agents)
+        
         metrics = self._calculate_health_metrics(error_history)
         overall_health = self._calculate_overall_health(*metrics[:3])
         status = self._determine_health_status(overall_health, metrics[0])
@@ -97,6 +104,77 @@ class AgentHealthMonitor:
             return 0.0
         recent_times = self.operation_times[-20:]
         return sum(recent_times) / len(recent_times)
+    
+    def _detect_dead_agents(self, agent_name: str) -> List[Any]:
+        """Detect dead agents for the given agent name."""
+        # Get all executions for this agent
+        executions = self.execution_tracker.get_executions_by_agent(agent_name)
+        
+        # Filter for dead/timed-out executions
+        dead_executions = [
+            ex for ex in executions
+            if ex.is_dead(self.execution_tracker.heartbeat_timeout) or ex.is_timed_out()
+        ]
+        
+        return dead_executions
+    
+    def _create_dead_agent_status(self, agent_name: str, dead_executions: List[Any]) -> AgentHealthStatus:
+        """Create health status for dead agent."""
+        most_recent_death = max(dead_executions, key=lambda x: x.updated_at)
+        
+        return AgentHealthStatus(
+            agent_name=agent_name,
+            overall_health=0.0,  # Dead agent has 0 health
+            circuit_breaker_state='open',  # Consider dead as open circuit
+            recent_errors=len(dead_executions),
+            total_operations=len(dead_executions),
+            success_rate=0.0,  # Dead agent has 0% success
+            average_response_time=0.0,
+            status='dead',
+            last_error=AgentError(
+                error_type='AgentDeath',
+                message=f'Agent died: {most_recent_death.error or "No heartbeat"}',
+                timestamp=most_recent_death.updated_at,
+                context={'execution_id': most_recent_death.execution_id}
+            )
+        )
+    
+    async def detect_agent_death(
+        self, 
+        agent_name: str, 
+        last_heartbeat: datetime,
+        execution_context: Dict[str, Any]
+    ) -> bool:
+        """Detect if an agent has died based on heartbeat and health metrics.
+        
+        Args:
+            agent_name: Name of the agent to check
+            last_heartbeat: Last known heartbeat timestamp
+            execution_context: Context of the current execution
+            
+        Returns:
+            True if agent is detected as dead, False otherwise
+        """
+        # Check time since last heartbeat
+        time_since_heartbeat = (datetime.now(timezone.utc) - last_heartbeat).total_seconds()
+        
+        # Agent is considered dead if no heartbeat for > 10 seconds
+        if time_since_heartbeat > 10:
+            logger.critical(
+                f"💀 AGENT DEATH DETECTED: {agent_name} - No heartbeat for {time_since_heartbeat:.1f}s"
+            )
+            return True
+        
+        # Check execution tracker for dead executions
+        dead_executions = self.execution_tracker.detect_dead_executions()
+        for execution in dead_executions:
+            if execution.agent_name == agent_name:
+                logger.critical(
+                    f"💀 AGENT DEATH DETECTED via tracker: {agent_name} - {execution.error or 'No heartbeat'}"
+                )
+                return True
+        
+        return False
 
     def _calculate_overall_health(self, success_rate: float, recent_errors: int, avg_response_time: float) -> float:
         """Calculate overall health score."""

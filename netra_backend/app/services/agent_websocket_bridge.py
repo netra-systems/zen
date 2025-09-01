@@ -1164,6 +1164,86 @@ class AgentWebSocketBridge(MonitorableComponent):
             logger.error(f"🚨 EMISSION EXCEPTION: notify_agent_error failed (run_id={run_id}, agent={agent_name}): {e}")
             return False
     
+    async def notify_agent_death(
+        self, 
+        run_id: str, 
+        agent_name: str, 
+        death_cause: str,
+        death_context: Optional[Dict[str, Any]] = None
+    ) -> bool:
+        """
+        Send agent death notification for critical failures.
+        
+        CRITICAL: This notification is sent when an agent dies silently without exceptions.
+        This prevents the infinite loading state users experience.
+        
+        CRYSTAL CLEAR EMISSION PATH: Agent → Bridge → WebSocket Manager → User Chat
+        
+        Args:
+            run_id: Unique execution identifier for routing
+            agent_name: Name of the agent that died
+            death_cause: Cause of death (timeout, no_heartbeat, silent_failure)
+            death_context: Optional context about the death
+            
+        Returns:
+            bool: True if notification queued/sent successfully
+            
+        Business Value: Prevents silent failures that destroy user trust
+        """
+        try:
+            if not self._websocket_manager:
+                logger.critical(f"🚨💀 CRITICAL: Cannot notify agent death - WebSocket manager unavailable (run_id={run_id}, agent={agent_name})")
+                return False
+            
+            # Build critical death notification
+            notification = {
+                "type": "agent_death",
+                "run_id": run_id,
+                "agent_name": agent_name,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "payload": {
+                    "status": "dead",
+                    "death_cause": death_cause,
+                    "death_context": death_context or {},
+                    "message": self._get_user_friendly_death_message(death_cause, agent_name),
+                    "recovery_action": "refresh_required"
+                }
+            }
+            
+            # CRITICAL EMISSION: Resolve thread_id and emit with highest priority
+            thread_id = await self._resolve_thread_id_from_run_id(run_id)
+            if not thread_id:
+                logger.critical(f"🚨💀 CRITICAL: Cannot resolve thread_id for agent death notification (run_id={run_id})")
+                return False
+            
+            # Emit death notification with critical priority
+            success = await self._websocket_manager.send_to_thread(
+                thread_id=thread_id,
+                message=notification
+            )
+            
+            if success:
+                logger.critical(f"💀 AGENT DEATH NOTIFIED: {agent_name} died due to {death_cause} (run_id={run_id}, thread={thread_id})")
+            else:
+                logger.critical(f"🚨💀 FAILED to notify agent death: {agent_name} (run_id={run_id}, thread={thread_id})")
+            
+            return success
+            
+        except Exception as e:
+            logger.critical(f"🚨💀 CRITICAL EXCEPTION: notify_agent_death failed (run_id={run_id}, agent={agent_name}): {e}")
+            return False
+    
+    def _get_user_friendly_death_message(self, death_cause: str, agent_name: str) -> str:
+        """Generate user-friendly message for agent death"""
+        messages = {
+            "timeout": f"The {agent_name} agent took too long to respond and has been stopped. Please try again.",
+            "no_heartbeat": f"Lost connection with the {agent_name} agent. Please refresh and try again.",
+            "silent_failure": f"The {agent_name} agent stopped unexpectedly. Please refresh the page.",
+            "memory_limit": f"The {agent_name} agent ran out of resources. Please try with a simpler request.",
+            "cancelled": f"The {agent_name} agent was cancelled. You can start a new request."
+        }
+        return messages.get(death_cause, f"The {agent_name} agent encountered a critical error. Please refresh and try again.")
+    
     async def notify_progress_update(
         self, 
         run_id: str, 
