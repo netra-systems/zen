@@ -31,12 +31,13 @@ class SharedJWTSecretManager:
         """
         Get the JWT secret key that MUST be used by all services.
         
-        This method implements a strict hierarchy:
+        This method implements a strict hierarchy with comprehensive logging:
         1. Cached value (if already loaded)
         2. Environment-specific secret (JWT_SECRET_STAGING, JWT_SECRET_PRODUCTION)
         3. Generic JWT_SECRET_KEY
         4. Legacy JWT_SECRET (with warning)
-        5. FAIL in staging/production if not found
+        5. GCP Secret Manager (for staging/production)
+        6. FAIL in staging/production if not found
         
         Returns:
             str: The JWT secret key
@@ -46,11 +47,21 @@ class SharedJWTSecretManager:
         """
         # Return cached value if available
         if cls._jwt_secret_cache:
+            logger.debug("JWT secret returned from cache")
             return cls._jwt_secret_cache
         
         # Determine environment using IsolatedEnvironment
         env_manager = IsolatedEnvironment.get_instance()
         environment = env_manager.get("ENVIRONMENT", "development").lower()
+        
+        logger.info(f"Loading JWT secret for environment: {environment}")
+        
+        # Log environment variables for debugging (without values)
+        logger.debug(f"JWT_SECRET_STAGING available: {bool(env_manager.get('JWT_SECRET_STAGING'))}")
+        logger.debug(f"JWT_SECRET_PRODUCTION available: {bool(env_manager.get('JWT_SECRET_PRODUCTION'))}")
+        logger.debug(f"JWT_SECRET_KEY available: {bool(env_manager.get('JWT_SECRET_KEY'))}")
+        logger.debug(f"JWT_SECRET available: {bool(env_manager.get('JWT_SECRET'))}")
+        logger.debug(f"GCP_PROJECT_ID available: {bool(env_manager.get('GCP_PROJECT_ID'))}")
         
         # Try environment-specific secrets first (for staging/production)
         secret = None
@@ -60,16 +71,19 @@ class SharedJWTSecretManager:
             secret = env_manager.get("JWT_SECRET_STAGING", "").strip()
             if secret:
                 source = "JWT_SECRET_STAGING"
+                logger.info(f"Found JWT secret from JWT_SECRET_STAGING (length: {len(secret)})")
         elif environment == "production":
             secret = env_manager.get("JWT_SECRET_PRODUCTION", "").strip()
             if secret:
                 source = "JWT_SECRET_PRODUCTION"
+                logger.info(f"Found JWT secret from JWT_SECRET_PRODUCTION (length: {len(secret)})")
         
         # Try generic JWT_SECRET_KEY
         if not secret:
             secret = env_manager.get("JWT_SECRET_KEY", "").strip()
             if secret:
                 source = "JWT_SECRET_KEY"
+                logger.info(f"Found JWT secret from JWT_SECRET_KEY (length: {len(secret)})")
         
         # Try legacy JWT_SECRET (with warning)
         if not secret:
@@ -77,23 +91,42 @@ class SharedJWTSecretManager:
             if secret:
                 source = "JWT_SECRET (legacy)"
                 logger.warning(
-                    "Using legacy JWT_SECRET environment variable. "
+                    f"Using legacy JWT_SECRET environment variable (length: {len(secret)}). "
                     "Please migrate to JWT_SECRET_KEY"
                 )
         
         # For GCP environments, try Secret Manager as last resort
         if not secret and environment in ["staging", "production"]:
+            logger.info(f"Attempting to load JWT secret from GCP Secret Manager for {environment}")
             secret = cls._load_from_secret_manager(environment)
             if secret:
                 source = "GCP Secret Manager"
+                logger.info(f"Found JWT secret from GCP Secret Manager (length: {len(secret)})")
+            else:
+                logger.warning(f"Failed to load JWT secret from GCP Secret Manager for {environment}")
         
         # Validate secret exists for non-development environments
         if not secret:
             if environment in ["staging", "production"]:
-                raise ValueError(
+                available_sources = []
+                if env_manager.get("JWT_SECRET_STAGING"):
+                    available_sources.append("JWT_SECRET_STAGING")
+                if env_manager.get("JWT_SECRET_PRODUCTION"):
+                    available_sources.append("JWT_SECRET_PRODUCTION")
+                if env_manager.get("JWT_SECRET_KEY"):
+                    available_sources.append("JWT_SECRET_KEY")
+                if env_manager.get("JWT_SECRET"):
+                    available_sources.append("JWT_SECRET")
+                if env_manager.get("GCP_PROJECT_ID"):
+                    available_sources.append("GCP Secret Manager (GCP_PROJECT_ID set)")
+                
+                error_msg = (
                     f"JWT secret is REQUIRED in {environment} environment. "
-                    f"Set one of: JWT_SECRET_{environment.upper()}, JWT_SECRET_KEY"
+                    f"Set one of: JWT_SECRET_{environment.upper()}, JWT_SECRET_KEY. "
+                    f"Available sources: {available_sources or 'NONE'}"
                 )
+                logger.error(error_msg)
+                raise ValueError(error_msg)
             else:
                 # Development/test fallback
                 secret = "development-jwt-secret-minimum-32-characters-long"
@@ -107,7 +140,12 @@ class SharedJWTSecretManager:
         
         # Cache the secret
         cls._jwt_secret_cache = secret
-        logger.info(f"JWT secret loaded from {source} for {environment} environment")
+        
+        # Log success with hash for debugging
+        import hashlib
+        secret_hash = hashlib.sha256(secret.encode()).hexdigest()[:16]
+        logger.info(f"JWT secret successfully loaded from {source} for {environment} environment")
+        logger.info(f"JWT secret hash (first 16 chars): {secret_hash}")
         
         return secret
     
@@ -123,34 +161,54 @@ class SharedJWTSecretManager:
             Optional[str]: The JWT secret from Secret Manager, or None if not available
         """
         try:
-            # Only attempt if we're in GCP environment
+            # Check for GCP environment indicators
             env_manager = IsolatedEnvironment.get_instance()
-            project_id = env_manager.get("GCP_PROJECT_ID")
+            project_id = env_manager.get("GCP_PROJECT_ID") or env_manager.get("GOOGLE_CLOUD_PROJECT")
+            
             if not project_id:
+                logger.debug("No GCP project ID found (GCP_PROJECT_ID or GOOGLE_CLOUD_PROJECT)")
                 return None
+            
+            logger.info(f"Attempting to load JWT secret from GCP Secret Manager, project: {project_id}")
             
             # Import here to avoid dependency if not in GCP
             from google.cloud import secretmanager
             
             client = secretmanager.SecretManagerServiceClient()
             
-            # Try to load jwt-secret-key from Secret Manager
-            secret_name = f"projects/{project_id}/secrets/jwt-secret-key/versions/latest"
+            # Try multiple possible secret names in order of preference
+            secret_names = [
+                f"jwt-secret-{environment}",  # Environment-specific (e.g., jwt-secret-staging)
+                "jwt-secret-key",             # Generic JWT secret key
+                "jwt-secret",                 # Legacy name
+            ]
             
-            try:
-                response = client.access_secret_version(request={"name": secret_name})
-                secret_value = response.payload.data.decode("UTF-8").strip()
-                logger.info(f"Loaded JWT secret from GCP Secret Manager for {environment}")
-                return secret_value
-            except Exception as e:
-                logger.warning(f"Could not load JWT secret from Secret Manager: {e}")
-                return None
+            for secret_name in secret_names:
+                full_secret_name = f"projects/{project_id}/secrets/{secret_name}/versions/latest"
+                logger.debug(f"Trying GCP secret: {full_secret_name}")
                 
-        except ImportError:
-            logger.debug("Google Cloud Secret Manager not available")
+                try:
+                    response = client.access_secret_version(request={"name": full_secret_name})
+                    secret_value = response.payload.data.decode("UTF-8").strip()
+                    
+                    if secret_value:
+                        logger.info(f"Successfully loaded JWT secret '{secret_name}' from GCP Secret Manager for {environment} (length: {len(secret_value)})")
+                        return secret_value
+                    else:
+                        logger.warning(f"GCP secret '{secret_name}' was empty")
+                        
+                except Exception as e:
+                    logger.debug(f"Failed to load GCP secret '{secret_name}': {e}")
+                    continue
+            
+            logger.warning(f"Could not load JWT secret from any GCP Secret Manager secret for {environment}")
+            return None
+                
+        except ImportError as e:
+            logger.warning(f"Google Cloud Secret Manager not available: {e}")
             return None
         except Exception as e:
-            logger.warning(f"Error loading from Secret Manager: {e}")
+            logger.error(f"Error loading from GCP Secret Manager: {e}")
             return None
     
     @classmethod
@@ -224,6 +282,99 @@ class SharedJWTSecretManager:
         
         logger.info(f"JWT secret synchronization validated for {environment}")
         return True
+    
+    @classmethod
+    def force_environment_consistency(cls, target_environment: str) -> str:
+        """
+        Force consistent environment detection across all services.
+        
+        This method ensures that regardless of how each service detects the environment,
+        they will all use the same JWT secret loading logic.
+        
+        Args:
+            target_environment: The environment to force (staging, production, development)
+            
+        Returns:
+            str: The JWT secret for the specified environment
+            
+        Raises:
+            ValueError: If the environment is invalid or secret cannot be loaded
+        """
+        if target_environment not in ["staging", "production", "development", "test"]:
+            raise ValueError(f"Invalid environment: {target_environment}")
+        
+        # Clear cache to force fresh loading
+        cls.clear_cache()
+        
+        # Temporarily override environment
+        env_manager = IsolatedEnvironment.get_instance()
+        original_env = env_manager.get("ENVIRONMENT")
+        
+        try:
+            # Set the target environment
+            env_manager.set("ENVIRONMENT", target_environment, "jwt_secret_manager_override")
+            
+            # Load secret with forced environment
+            secret = cls.get_jwt_secret()
+            
+            logger.info(f"Successfully loaded JWT secret for forced environment: {target_environment}")
+            return secret
+            
+        finally:
+            # Restore original environment if it existed
+            if original_env:
+                env_manager.set("ENVIRONMENT", original_env, "jwt_secret_manager_restore")
+            else:
+                env_manager.delete("ENVIRONMENT", "jwt_secret_manager_restore")
+            
+            # Clear cache again to prevent cross-contamination
+            cls.clear_cache()
+    
+    @classmethod
+    def get_secret_loading_diagnostics(cls) -> dict:
+        """
+        Get comprehensive diagnostics about JWT secret loading.
+        
+        This method provides detailed information about the current state
+        of JWT secret loading for debugging purposes.
+        
+        Returns:
+            dict: Diagnostic information
+        """
+        env_manager = IsolatedEnvironment.get_instance()
+        environment = env_manager.get("ENVIRONMENT", "development").lower()
+        
+        diagnostics = {
+            "current_environment": environment,
+            "cache_status": {
+                "has_cached_secret": cls._jwt_secret_cache is not None,
+                "validation_performed": cls._validation_performed
+            },
+            "environment_variables": {
+                "JWT_SECRET_STAGING": bool(env_manager.get("JWT_SECRET_STAGING")),
+                "JWT_SECRET_PRODUCTION": bool(env_manager.get("JWT_SECRET_PRODUCTION")), 
+                "JWT_SECRET_KEY": bool(env_manager.get("JWT_SECRET_KEY")),
+                "JWT_SECRET": bool(env_manager.get("JWT_SECRET")),
+                "GCP_PROJECT_ID": bool(env_manager.get("GCP_PROJECT_ID")),
+                "GOOGLE_CLOUD_PROJECT": bool(env_manager.get("GOOGLE_CLOUD_PROJECT"))
+            },
+            "secret_source_priority": [
+                f"JWT_SECRET_{environment.upper()}" if environment in ["staging", "production"] else "N/A",
+                "JWT_SECRET_KEY",
+                "JWT_SECRET (legacy)",
+                "GCP Secret Manager" if environment in ["staging", "production"] else "N/A",
+                "Development fallback" if environment in ["development", "test"] else "N/A"
+            ]
+        }
+        
+        # If we have a cached secret, add its hash for verification
+        if cls._jwt_secret_cache:
+            import hashlib
+            secret_hash = hashlib.sha256(cls._jwt_secret_cache.encode()).hexdigest()[:16]
+            diagnostics["cached_secret_hash"] = secret_hash
+            diagnostics["cached_secret_length"] = len(cls._jwt_secret_cache)
+        
+        return diagnostics
 
 
 # Module-level convenience function
