@@ -94,70 +94,20 @@ Cypress.Commands.add('mockLegacyWebSocket', () => {
   });
 });
 
+import { performUILogin, setupAuthenticatedState } from './auth-helpers';
+
 // Custom login command for authentication in tests
+// Uses unified auth helpers for consistency
 Cypress.Commands.add('login', (email?: string, password?: string) => {
-  const testEmail = email || Cypress.env('CYPRESS_TEST_USER') || 'dev@example.com';
-  const testPassword = password || Cypress.env('CYPRESS_TEST_PASSWORD') || 'dev';
-  
-  // Visit login page
-  cy.visit('/login');
-  
-  // Wait for page to load
-  cy.get('body', { timeout: 10000 }).should('be.visible');
-  
-  // Check if already logged in by checking URL
-  cy.url().then((url) => {
-    if (url.includes('/chat')) {
-      // Already logged in, no need to do anything
-      cy.log('Already authenticated, skipping login');
-      return;
-    }
-    
-    // Check if we're in development mode by looking for auth config
-    cy.request({
-      url: 'http://localhost:8081/auth/config',
-      failOnStatusCode: false,
-      timeout: 3000
-    }).then((response) => {
-      if (response.status === 200 && response.body?.development_mode) {
-        // Development mode login - just click Quick Dev Login
-        cy.contains('button', 'Quick Dev Login', { timeout: 10000 })
-          .should('be.visible')
-          .should('not.be.disabled')
-          .click();
-        
-        // Wait for successful login
-        cy.url({ timeout: 15000 }).should('not.include', '/login');
-        
-        // Verify JWT token is stored
-        cy.window().then((win) => {
-          expect(win.localStorage.getItem('jwt_token')).to.be.a('string').and.not.be.empty;
-        });
-      } else {
-      // Production/OAuth mode - skip actual login for these tests
-      cy.log('OAuth mode detected - mocking authentication for security tests');
-      
-      // Mock a valid JWT token in localStorage for testing purposes
-      // This creates a token that expires in the far future for testing stability
-      const futureTimestamp = Math.floor(Date.now() / 1000) + (24 * 60 * 60); // 24 hours from now
-      const mockPayload = btoa(JSON.stringify({
-        sub: 'test-user-id',
-        email: 'test@example.com',
-        full_name: 'Test User',
-        role: 'user',
-        iat: Math.floor(Date.now() / 1000),
-        exp: futureTimestamp
-      }));
-      const mockToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${mockPayload}.mock-signature-for-testing`;
-      cy.window().then((win) => {
-        win.localStorage.setItem('jwt_token', mockToken);
-      });
-      
-        // Navigate away from login page
-        cy.visit('/chat');
-      }
-    });
-  });
+  // For most tests, use the faster mock authentication
+  // For integration tests that need real login, use performUILogin
+  if (Cypress.env('USE_REAL_LOGIN')) {
+    performUILogin(email, password);
+  } else {
+    // Default to faster mock authentication for most tests
+    setupAuthenticatedState({ email: email || 'dev@example.com' });
+    cy.visit('/chat');
+  }
 });
 
 declare global {

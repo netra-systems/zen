@@ -76,13 +76,13 @@ export const TestDataFactory = {
   })
 };
 
+import { setupAuthenticatedState } from './auth-helpers';
+
 // Common setup functions for tests (≤8 lines each)
 export const TestSetup = {
-  // Setup authenticated user state
+  // Setup authenticated user state - uses unified auth helper
   setupAuthenticatedUser: () => {
-    cy.window().then((win) => {
-      win.localStorage.setItem('jwt_token', 'test-jwt-token');
-    });
+    setupAuthenticatedState();
   },
 
   // Navigate to settings page
