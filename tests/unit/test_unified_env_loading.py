@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Tests for unified environment loading from .env files.
 
 These tests verify that the configuration system correctly loads
@@ -14,6 +15,7 @@ import pytest
 from netra_backend.app.core.configuration.base import config_manager
 
 
+env = get_env()
 class TestUnifiedEnvLoading:
     """Test suite for unified environment loading."""
     
@@ -21,7 +23,7 @@ class TestUnifiedEnvLoading:
     def setup(self):
         """Setup test environment."""
         # Save original environment
-        self.original_env = os.environ.copy()
+        self.original_env = env.get_all()
         
         # Clear critical environment variables
         env_vars_to_clear = [
@@ -39,24 +41,24 @@ class TestUnifiedEnvLoading:
         yield
         
         # Restore original environment
-        os.environ.clear()
-        os.environ.update(self.original_env)
+        env.clear()
+        env.update(self.original_env, "test")
     
     def test_load_from_dotenv_file_in_development(self):
         """Test that .env file is loaded in development mode."""
         # Set development environment
-        os.environ['ENVIRONMENT'] = 'development'
-        os.environ['GEMINI_API_KEY'] = 'test_gemini_key'
-        os.environ['OAUTH_GOOGLE_CLIENT_ID_ENV'] = 'test_client_id'
-        os.environ['OAUTH_GOOGLE_CLIENT_SECRET_ENV'] = 'test_client_secret'
-        os.environ['JWT_SECRET_KEY'] = 'test_jwt_key'
-        os.environ['FERNET_KEY'] = 'test_fernet_key'
-        os.environ['SERVICE_SECRET'] = 'test_service_secret'
-        os.environ['CLICKHOUSE_PASSWORD'] = 'test_clickhouse_pwd'
-        os.environ['DATABASE_URL'] = 'postgresql://test@localhost/testdb'
-        os.environ['REDIS_URL'] = 'redis://localhost:6379'
-        os.environ['ANTHROPIC_API_KEY'] = 'test_anthropic_key'
-        os.environ['OPENAI_API_KEY'] = 'test_openai_key'
+        env.set('ENVIRONMENT', 'development', "test")
+        env.set('GEMINI_API_KEY', 'test_gemini_key', "test")
+        env.set('OAUTH_GOOGLE_CLIENT_ID_ENV', 'test_client_id', "test")
+        env.set('OAUTH_GOOGLE_CLIENT_SECRET_ENV', 'test_client_secret', "test")
+        env.set('JWT_SECRET_KEY', 'test_jwt_key', "test")
+        env.set('FERNET_KEY', 'test_fernet_key', "test")
+        env.set('SERVICE_SECRET', 'test_service_secret', "test")
+        env.set('CLICKHOUSE_PASSWORD', 'test_clickhouse_pwd', "test")
+        env.set('DATABASE_URL', 'postgresql://test@localhost/testdb', "test")
+        env.set('REDIS_URL', 'redis://localhost:6379', "test")
+        env.set('ANTHROPIC_API_KEY', 'test_anthropic_key', "test")
+        env.set('OPENAI_API_KEY', 'test_openai_key', "test")
         
         # Force reload of configuration
         config_manager._config_cache = None
@@ -82,9 +84,9 @@ class TestUnifiedEnvLoading:
     def test_env_vars_override_dotenv_file(self):
         """Test that environment variables override .env file values."""
         # Set development environment and override values
-        os.environ['ENVIRONMENT'] = 'development'
-        os.environ['GEMINI_API_KEY'] = 'env_gemini_key'
-        os.environ['DATABASE_URL'] = 'postgresql://env@localhost/envdb'
+        env.set('ENVIRONMENT', 'development', "test")
+        env.set('GEMINI_API_KEY', 'env_gemini_key', "test")
+        env.set('DATABASE_URL', 'postgresql://env@localhost/envdb', "test")
         
         # Force reload of configuration
         config_manager._config_cache = None
@@ -100,7 +102,7 @@ class TestUnifiedEnvLoading:
     def test_no_dotenv_loading_in_production(self):
         """Test that .env file is NOT loaded in production mode."""
         # Set production environment
-        os.environ['ENVIRONMENT'] = 'production'
+        env.set('ENVIRONMENT', 'production', "test")
         
         # Force reload of configuration
         config_manager._config_cache = None
@@ -117,14 +119,14 @@ class TestUnifiedEnvLoading:
     def test_all_required_secrets_populated_from_env(self):
         """Test that all required secrets can be populated from environment."""
         # Set all required secrets in environment
-        os.environ['ENVIRONMENT'] = 'development'
-        os.environ['GEMINI_API_KEY'] = 'test_gemini'
-        os.environ['OAUTH_GOOGLE_CLIENT_ID_ENV'] = 'test_client_id'
-        os.environ['OAUTH_GOOGLE_CLIENT_SECRET_ENV'] = 'test_client_secret'
-        os.environ['JWT_SECRET_KEY'] = 'test_jwt'
-        os.environ['FERNET_KEY'] = 'test_fernet'
-        os.environ['SERVICE_SECRET'] = 'test_service'
-        os.environ['CLICKHOUSE_PASSWORD'] = 'test_clickhouse'
+        env.set('ENVIRONMENT', 'development', "test")
+        env.set('GEMINI_API_KEY', 'test_gemini', "test")
+        env.set('OAUTH_GOOGLE_CLIENT_ID_ENV', 'test_client_id', "test")
+        env.set('OAUTH_GOOGLE_CLIENT_SECRET_ENV', 'test_client_secret', "test")
+        env.set('JWT_SECRET_KEY', 'test_jwt', "test")
+        env.set('FERNET_KEY', 'test_fernet', "test")
+        env.set('SERVICE_SECRET', 'test_service', "test")
+        env.set('CLICKHOUSE_PASSWORD', 'test_clickhouse', "test")
         
         # Force reload of configuration
         config_manager._config_cache = None
@@ -145,10 +147,10 @@ class TestUnifiedEnvLoading:
     def test_service_modes_from_env(self):
         """Test that service modes are correctly loaded from environment."""
         # Set service modes in environment
-        os.environ['ENVIRONMENT'] = 'development'
-        os.environ['LLM_MODE'] = 'mock'
-        os.environ['REDIS_MODE'] = 'local'
-        os.environ['CLICKHOUSE_MODE'] = 'docker'
+        env.set('ENVIRONMENT', 'development', "test")
+        env.set('LLM_MODE', 'mock', "test")
+        env.set('REDIS_MODE', 'local', "test")
+        env.set('CLICKHOUSE_MODE', 'docker', "test")
         
         # Force reload of configuration
         config_manager._config_cache = None
@@ -165,8 +167,8 @@ class TestUnifiedEnvLoading:
     def test_cors_origins_from_env(self):
         """Test that CORS origins are correctly loaded from environment."""
         # Set CORS origins
-        os.environ['ENVIRONMENT'] = 'development'
-        os.environ['CORS_ORIGINS'] = '*'
+        env.set('ENVIRONMENT', 'development', "test")
+        env.set('CORS_ORIGINS', '*', "test")
         
         # Force reload of configuration
         config_manager._config_cache = None
@@ -181,9 +183,9 @@ class TestUnifiedEnvLoading:
     def test_no_secrets_loading_flag_during_startup(self):
         """Test that NETRA_SECRETS_LOADING flag doesn't block env loading."""
         # Set flag that indicates secrets are still loading
-        os.environ['ENVIRONMENT'] = 'development'
-        os.environ['NETRA_SECRETS_LOADING'] = 'true'
-        os.environ['GEMINI_API_KEY'] = 'test_key'
+        env.set('ENVIRONMENT', 'development', "test")
+        env.set('NETRA_SECRETS_LOADING', 'true', "test")
+        env.set('GEMINI_API_KEY', 'test_key', "test")
         
         # Force reload of configuration  
         config_manager._config_cache = None
@@ -198,14 +200,14 @@ class TestUnifiedEnvLoading:
     def test_dev_launcher_env_propagation(self):
         """Test that dev launcher environment variables are properly loaded."""
         # Simulate dev launcher environment
-        os.environ['ENVIRONMENT'] = 'development'
-        os.environ['BACKEND_PORT'] = '8000'
-        os.environ['PYTHONPATH'] = '/path/to/project'
-        os.environ['CORS_ORIGINS'] = '*'
-        os.environ['REDIS_MODE'] = 'shared'
-        os.environ['CLICKHOUSE_MODE'] = 'shared'
-        os.environ['LLM_MODE'] = 'shared'
-        os.environ['GEMINI_API_KEY'] = 'launcher_gemini_key'
+        env.set('ENVIRONMENT', 'development', "test")
+        env.set('BACKEND_PORT', '8000', "test")
+        env.set('PYTHONPATH', '/path/to/project', "test")
+        env.set('CORS_ORIGINS', '*', "test")
+        env.set('REDIS_MODE', 'shared', "test")
+        env.set('CLICKHOUSE_MODE', 'shared', "test")
+        env.set('LLM_MODE', 'shared', "test")
+        env.set('GEMINI_API_KEY', 'launcher_gemini_key', "test")
         
         # Force reload of configuration
         config_manager._config_cache = None
@@ -224,7 +226,7 @@ class TestUnifiedEnvLoading:
     def test_missing_required_environment_defaults(self):
         """Test configuration behavior when required environment variables are missing."""
         # Set only basic environment
-        os.environ['ENVIRONMENT'] = 'development'
+        env.set('ENVIRONMENT', 'development', "test")
         # Deliberately don't set other required vars
         
         # Force reload of configuration
@@ -243,9 +245,9 @@ class TestUnifiedEnvLoading:
     def test_environment_variable_type_coercion(self):
         """Test that environment variables are properly converted to expected types."""
         # Set various types of environment variables
-        os.environ['ENVIRONMENT'] = 'development'
-        os.environ['CLICKHOUSE_PORT'] = '9000'  # String that should become int
-        os.environ['DEBUG'] = 'true'  # String that might become boolean
+        env.set('ENVIRONMENT', 'development', "test")
+        env.set('CLICKHOUSE_PORT', '9000', "test")  # String that should become int
+        env.set('DEBUG', 'true', "test")  # String that might become boolean
         
         # Force reload of configuration
         config_manager._config_cache = None
@@ -262,8 +264,8 @@ class TestUnifiedEnvLoading:
     def test_config_manager_caching_behavior(self):
         """Test that config manager properly caches configuration instances."""
         # Set environment
-        os.environ['ENVIRONMENT'] = 'development'
-        os.environ['GEMINI_API_KEY'] = 'cache_test_key'
+        env.set('ENVIRONMENT', 'development', "test")
+        env.set('GEMINI_API_KEY', 'cache_test_key', "test")
         
         # Force reload of configuration
         config_manager._config_cache = None
@@ -280,9 +282,9 @@ class TestUnifiedEnvLoading:
     def test_staging_environment_behavior(self):
         """Test configuration behavior in staging environment."""
         # Set staging environment
-        os.environ['ENVIRONMENT'] = 'staging'
-        os.environ['GEMINI_API_KEY'] = 'staging_gemini_key'
-        os.environ['DATABASE_URL'] = 'postgresql://staging@host/db'
+        env.set('ENVIRONMENT', 'staging', "test")
+        env.set('GEMINI_API_KEY', 'staging_gemini_key', "test")
+        env.set('DATABASE_URL', 'postgresql://staging@host/db', "test")
         
         # Force reload of configuration
         config_manager._config_cache = None
@@ -300,9 +302,9 @@ class TestUnifiedEnvLoading:
     def test_config_loading_with_invalid_values(self):
         """Test configuration loading handles invalid environment variable values gracefully."""
         # Set environment with potentially invalid values
-        os.environ['ENVIRONMENT'] = 'development'
-        os.environ['CLICKHOUSE_PORT'] = 'invalid_port'  # Invalid port number
-        os.environ['CORS_ORIGINS'] = ''  # Empty string
+        env.set('ENVIRONMENT', 'development', "test")
+        env.set('CLICKHOUSE_PORT', 'invalid_port', "test")  # Invalid port number
+        env.set('CORS_ORIGINS', '', "test")  # Empty string
         
         # Force reload of configuration
         config_manager._config_cache = None
@@ -318,10 +320,10 @@ class TestUnifiedEnvLoading:
     def test_multiple_llm_providers_from_env(self):
         """Test loading multiple LLM provider configurations from environment."""
         # Set multiple LLM provider keys
-        os.environ['ENVIRONMENT'] = 'development'
-        os.environ['GEMINI_API_KEY'] = 'gemini_test_key'
-        os.environ['ANTHROPIC_API_KEY'] = 'anthropic_test_key'
-        os.environ['OPENAI_API_KEY'] = 'openai_test_key'
+        env.set('ENVIRONMENT', 'development', "test")
+        env.set('GEMINI_API_KEY', 'gemini_test_key', "test")
+        env.set('ANTHROPIC_API_KEY', 'anthropic_test_key', "test")
+        env.set('OPENAI_API_KEY', 'openai_test_key', "test")
         
         # Force reload of configuration
         config_manager._config_cache = None
@@ -345,11 +347,11 @@ class TestUnifiedEnvLoading:
         
         for db_url in test_cases:
             # Clear and set environment
-            os.environ.clear()
-            os.environ.update(self.original_env)
+            env.clear()
+            env.update(self.original_env, "test")
             
-            os.environ['ENVIRONMENT'] = 'development'
-            os.environ['DATABASE_URL'] = db_url
+            env.set('ENVIRONMENT', 'development', "test")
+            env.set('DATABASE_URL', db_url, "test")
             
             # Force reload of configuration
             config_manager._config_cache = None
@@ -364,9 +366,9 @@ class TestUnifiedEnvLoading:
     def test_redis_configuration_from_env(self):
         """Test Redis configuration loading from environment variables."""
         # Set Redis configuration
-        os.environ['ENVIRONMENT'] = 'development'
-        os.environ['REDIS_URL'] = 'redis://localhost:6379/0'
-        os.environ['REDIS_MODE'] = 'local'
+        env.set('ENVIRONMENT', 'development', "test")
+        env.set('REDIS_URL', 'redis://localhost:6379/0', "test")
+        env.set('REDIS_MODE', 'local', "test")
         
         # Force reload of configuration
         config_manager._config_cache = None
@@ -382,11 +384,11 @@ class TestUnifiedEnvLoading:
     def test_clickhouse_configuration_from_env(self):
         """Test ClickHouse configuration loading from environment variables."""
         # Set ClickHouse configuration
-        os.environ['ENVIRONMENT'] = 'development'
-        os.environ['CLICKHOUSE_HOST'] = 'clickhouse.example.com'
-        os.environ['CLICKHOUSE_PORT'] = '9000'
-        os.environ['CLICKHOUSE_PASSWORD'] = 'test_ch_password'
-        os.environ['CLICKHOUSE_MODE'] = 'remote'
+        env.set('ENVIRONMENT', 'development', "test")
+        env.set('CLICKHOUSE_HOST', 'clickhouse.example.com', "test")
+        env.set('CLICKHOUSE_PORT', '9000', "test")
+        env.set('CLICKHOUSE_PASSWORD', 'test_ch_password', "test")
+        env.set('CLICKHOUSE_MODE', 'remote', "test")
         
         # Force reload of configuration
         config_manager._config_cache = None
@@ -404,9 +406,9 @@ class TestUnifiedEnvLoading:
     def test_oauth_configuration_from_env(self):
         """Test OAuth configuration loading from environment variables."""
         # Set OAuth configuration
-        os.environ['ENVIRONMENT'] = 'development'
-        os.environ['OAUTH_GOOGLE_CLIENT_ID_ENV'] = 'test_oauth_client_id'
-        os.environ['OAUTH_GOOGLE_CLIENT_SECRET_ENV'] = 'test_oauth_client_secret'
+        env.set('ENVIRONMENT', 'development', "test")
+        env.set('OAUTH_GOOGLE_CLIENT_ID_ENV', 'test_oauth_client_id', "test")
+        env.set('OAUTH_GOOGLE_CLIENT_SECRET_ENV', 'test_oauth_client_secret', "test")
         
         # Force reload of configuration
         config_manager._config_cache = None
@@ -423,10 +425,10 @@ class TestUnifiedEnvLoading:
     def test_security_keys_from_env(self):
         """Test security key loading from environment variables."""
         # Set security keys
-        os.environ['ENVIRONMENT'] = 'development'
-        os.environ['JWT_SECRET_KEY'] = 'test_jwt_secret_key_123'
-        os.environ['FERNET_KEY'] = 'test_fernet_key_456'
-        os.environ['SERVICE_SECRET'] = 'test_service_secret_789'
+        env.set('ENVIRONMENT', 'development', "test")
+        env.set('JWT_SECRET_KEY', 'test_jwt_secret_key_123', "test")
+        env.set('FERNET_KEY', 'test_fernet_key_456', "test")
+        env.set('SERVICE_SECRET', 'test_service_secret_789', "test")
         
         # Force reload of configuration
         config_manager._config_cache = None
@@ -443,7 +445,7 @@ class TestUnifiedEnvLoading:
     def test_config_manager_error_handling(self):
         """Test that config manager handles errors gracefully during loading."""
         # Set minimal environment to avoid issues
-        os.environ['ENVIRONMENT'] = 'development'
+        env.set('ENVIRONMENT', 'development', "test")
         
         # Test with potentially problematic configuration manager state
         with patch.object(config_manager, 'get_config') as mock_get_config:
@@ -457,8 +459,8 @@ class TestUnifiedEnvLoading:
         """Test that environment changes are properly isolated between tests."""
         # This test verifies that our setup/teardown works correctly
         # Set test-specific environment
-        os.environ['ENVIRONMENT'] = 'test_isolation'
-        os.environ['CUSTOM_TEST_VAR'] = 'test_value'
+        env.set('ENVIRONMENT', 'test_isolation', "test")
+        env.set('CUSTOM_TEST_VAR', 'test_value', "test")
         
         # Force reload of configuration
         config_manager._config_cache = None
@@ -469,4 +471,4 @@ class TestUnifiedEnvLoading:
         
         # Verify test environment is set
         assert config.environment == 'test_isolation'
-        assert os.environ.get('CUSTOM_TEST_VAR') == 'test_value'
+        assert env.get('CUSTOM_TEST_VAR') == 'test_value'

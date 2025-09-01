@@ -10,8 +10,10 @@ import threading
 import time
 from pathlib import Path
 from typing import Dict, Optional, Tuple
+from shared.isolated_environment import get_env
 
 
+env = get_env()
 class TestIsolationManager:
     """Manages isolated test environments for concurrent test execution."""
     
@@ -205,7 +207,7 @@ class TestIsolationManager:
     
     def cleanup(self, keep_reports: bool = False) -> None:
         """Clean up test isolation resources."""
-        if keep_reports or os.environ.get('KEEP_TEST_REPORTS'):
+        if keep_reports or env.get('KEEP_TEST_REPORTS'):
             print(f"Test reports preserved at: {self.base_dir}")
             return
         

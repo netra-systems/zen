@@ -133,3 +133,4 @@ nul
 .env.dev
 /google-cloud-sdk
 google-cloud-cli-darwin-arm.tar.gz
+/frontend/cypress/screenshots

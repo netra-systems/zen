@@ -1,4 +1,6 @@
+from shared.isolated_environment import get_env
 """
+env = get_env()
 Base E2E Test Framework
 
 Business Value Justification (BVJ):
@@ -262,7 +264,7 @@ class DevLauncherE2ETestMixin:
     
     def get_test_environment(self) -> Dict[str, str]:
         """Get standard test environment variables."""
-        env = os.environ.copy()
+        env = env.get_all()
         env.update({
             "NETRA_TEST_MODE": "true",
             "NETRA_STARTUP_MODE": "minimal",
