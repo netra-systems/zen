@@ -218,12 +218,22 @@ class StartupOrchestrator:
         from netra_backend.app.websocket_core import get_websocket_manager
         
         supervisor = self.app.state.agent_supervisor
+        
+        # Get WebSocketManager - should never be None after fixing import-time execution
         websocket_manager = get_websocket_manager()
+        if websocket_manager is None:
+            raise DeterministicStartupError(
+                "WebSocketManager is None - this should never happen after fixing singleton pattern"
+            )
+        
+        # Validate it has required methods
+        if not hasattr(websocket_manager, 'connections') or not hasattr(websocket_manager, 'send_to_thread'):
+            raise DeterministicStartupError(
+                "WebSocketManager incomplete - missing required methods"
+            )
         
         if not supervisor:
             raise DeterministicStartupError("Agent supervisor not available for enhancement")
-        if not websocket_manager:
-            raise DeterministicStartupError("WebSocket manager not available for enhancement")
         
         # Ensure WebSocket enhancement through agent registry  
         registry = None
