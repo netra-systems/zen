@@ -27,10 +27,22 @@ from typing import Any, Dict, List
 import aiohttp
 import pytest
 
-# Use IsolatedEnvironment for env management per CLAUDE.md
+# CLAUDE.md compliance: setup_test_path() before project imports
+from test_framework import setup_test_path
+setup_test_path()
+
+# Use centralized environment management per CLAUDE.md
+from netra_backend.app.config import get_config
 from shared.isolated_environment import get_env
 
-# Set test environment using IsolatedEnvironment - SSOT for env access
+# Service availability checking per CLAUDE.md real services requirement
+from test_framework.service_availability import require_real_services, check_service_availability
+
+# Absolute imports only - no relative imports per CLAUDE.md
+from test_framework.fixtures.auth import create_real_jwt_token
+from tests.e2e.jwt_token_helpers import JWTTestHelper
+
+# Set up test environment using IsolatedEnvironment - SSOT for env access
 env = get_env()
 env.enable_isolation()
 env.set("TESTING", "1", "test_agent_circuit_breaker_e2e")
@@ -39,10 +51,6 @@ env.set("AUTH_FAST_TEST_MODE", "true", "test_agent_circuit_breaker_e2e")
 env.set("USE_REAL_SERVICES", "true", "test_agent_circuit_breaker_e2e")
 env.set("CIRCUIT_BREAKER_ENABLED", "true", "test_agent_circuit_breaker_e2e")
 
-# Absolute imports only - no relative imports per CLAUDE.md
-from test_framework.fixtures.auth import create_real_jwt_token
-from tests.e2e.jwt_token_helpers import JWTTestHelper
-
 
 class TestAgentCircuitBreakerE2E:
     """E2E tests for agent execution with circuit breaker protection - REAL SERVICES ONLY."""
@@ -50,8 +58,12 @@ class TestAgentCircuitBreakerE2E:
     @pytest.fixture(autouse=True)
     async def setup_test_environment(self):
         """Setup test environment with real services and authentication."""
-        # Use environment from IsolatedEnvironment
-        self.api_base = env.get("API_BASE", "http://localhost:8000")
+        # Verify real services are available per CLAUDE.md - use real HTTP services
+        # NOTE: We use HTTP endpoints instead of direct database connections for E2E tests
+        
+        # Use centralized config per CLAUDE.md
+        config = get_config()
+        self.api_base = getattr(config, 'api_base_url', None) or config.API_BASE_URL or env.get("API_BASE", "http://localhost:8000")
         self.jwt_helper = JWTTestHelper()
         
         # Generate a real JWT token for testing - NO MOCKS
@@ -365,6 +377,7 @@ class TestAgentCircuitBreakerE2E:
         This validates the core chat functionality that delivers 90% of our value.
         """
         # REAL WebSocket connection - NO MOCKS
+        config = get_config()
         ws_url = env.get("WS_URL", "ws://localhost:8000/ws")
         ws_headers = {"Authorization": f"Bearer {self.auth_token}"}
         
@@ -444,8 +457,11 @@ class TestCircuitBreakerMetricsMonitoring:
     @pytest.fixture(autouse=True)
     async def setup_monitoring(self):
         """Setup REAL monitoring infrastructure."""
-        # Use IsolatedEnvironment for configuration
-        self.api_base = env.get("API_BASE", "http://localhost:8000")
+        # Verify real services are available per CLAUDE.md - use real HTTP services
+        
+        # Use centralized config per CLAUDE.md
+        config = get_config()
+        self.api_base = getattr(config, 'api_base_url', None) or config.API_BASE_URL or env.get("API_BASE", "http://localhost:8000")
         self.metrics_endpoint = f"{self.api_base}/metrics"
         
         # Setup real JWT token for metrics access
@@ -539,8 +555,11 @@ class TestRegressionPrevention:
     @pytest.fixture(autouse=True)
     async def setup_regression_tests(self):
         """Setup for REAL regression testing."""
-        # Use IsolatedEnvironment for configuration
-        self.api_base = env.get("API_BASE", "http://localhost:8000")
+        # Verify real services are available per CLAUDE.md - use real HTTP services
+        
+        # Use centralized config per CLAUDE.md
+        config = get_config()
+        self.api_base = getattr(config, 'api_base_url', None) or config.API_BASE_URL or env.get("API_BASE", "http://localhost:8000")
         
         # Setup real JWT token for regression tests
         test_user_id = "test_user_regression"

@@ -36,11 +36,16 @@ class TestRealAgentCollaboration:
     """Test #1: Real Multi-Agent Collaboration with LLM Integration."""
     
     @pytest_asyncio.fixture
-    @pytest.mark.e2e
     async def test_core(self):
         """Initialize collaboration test core with IsolatedEnvironment."""
+        from test_framework.llm_config_manager import configure_llm_testing, LLMTestMode
+        
         env_manager = get_test_env_manager()
-        env = env_manager.setup_test_environment(enable_real_llm=True)
+        env = env_manager.setup_test_environment()
+        
+        # Use canonical LLM configuration system
+        configure_llm_testing(mode=LLMTestMode.REAL, model="gemini-2.5-pro", parallel=3)
+        
         core = AgentCollaborationTestCore()
         await core.setup_test_environment()
         yield core
@@ -52,7 +57,7 @@ class TestRealAgentCollaboration:
         """Initialize multi-agent flow simulator."""
         return MultiAgentFlowSimulator()
     
-    @pytest.fixture  
+    @pytest.fixture
     def flow_validator(self):
         """Initialize collaboration flow validator."""
         return CollaborationFlowValidator()
@@ -313,11 +318,16 @@ class TestAgentCollaborationPerformance:
     """Performance validation for multi-agent collaboration operations."""
     
     @pytest_asyncio.fixture
-    @pytest.mark.e2e
     async def test_core(self):
         """Initialize collaboration performance test core with IsolatedEnvironment."""
+        from test_framework.llm_config_manager import configure_llm_testing, LLMTestMode
+        
         env_manager = get_test_env_manager()
-        env = env_manager.setup_test_environment(enable_real_llm=True)
+        env = env_manager.setup_test_environment()
+        
+        # Use canonical LLM configuration system
+        configure_llm_testing(mode=LLMTestMode.REAL, model="gemini-2.5-pro", parallel=3)
+        
         core = AgentCollaborationTestCore()
         await core.setup_test_environment()
         yield core

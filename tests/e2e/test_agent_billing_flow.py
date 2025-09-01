@@ -12,13 +12,13 @@ Business Value Justification (BVJ):
 ARCHITECTURAL COMPLIANCE:
 - File size: <300 lines (modular design with helper imports)
 - Function size: <8 lines each
-- Real services (Auth, Backend, WebSocket) with mocked LLM API only
-- <5 seconds per test execution for performance validation
+- REAL services (Auth, Backend, WebSocket, LLM) per CLAUDE.md - NO MOCKS
+- Performance validation for real-world conditions
 - Multiple agent types with different cost structures
 
 TECHNICAL DETAILS:
 - Uses real WebSocket infrastructure from existing E2E patterns
-- Mocks only LLM API calls (OpenAI/Anthropic) to ensure deterministic costs
+- REAL LLM API calls per CLAUDE.md - NO MOCKS ALLOWED
 - Validates ClickHouse usage tracking and billing record creation
 - Tests Triage, Data, and Admin agent types with different pricing
 - Includes performance assertions and billing calculation validation
@@ -29,7 +29,7 @@ import time
 from typing import Dict, Any
 import pytest
 import pytest_asyncio
-from unittest.mock import patch
+# CLAUDE.md: NO MOCKS - removed unittest.mock import
 
 from tests.e2e.agent_billing_test_helpers import (
     AgentBillingTestCore, 
@@ -39,6 +39,8 @@ from tests.e2e.agent_billing_test_helpers import (
 )
 from netra_backend.app.schemas.user_plan import PlanTier
 from test_framework.environment_isolation import get_test_env_manager
+from test_framework.real_services import RealServicesManager
+from test_framework.llm_config_manager import configure_llm_testing, LLMTestMode
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
@@ -48,16 +50,20 @@ class TestAgentBillingFlow:
     @pytest_asyncio.fixture
     async def test_core(self):
         """Initialize billing test core with isolated environment."""
-        # Setup isolated test environment per CLAUDE.md requirements
+        # Setup REAL services environment per CLAUDE.md requirements - NO MOCKS
         env_manager = get_test_env_manager()
         isolated_env = env_manager.setup_test_environment(
             additional_vars={
-                "USE_MEMORY_DB": "true",
-                "CLICKHOUSE_ENABLED": "false",
-                "TEST_DISABLE_REDIS": "true"
+                "USE_REAL_SERVICES": "true",
+                "CLICKHOUSE_ENABLED": "true", 
+                "TEST_DISABLE_REDIS": "false",
+                "REAL_DATABASE_TESTING": "true"
             },
-            enable_real_llm=False  # Use mocked LLM only for deterministic billing tests
+            enable_real_llm=True  # CLAUDE.md: Use REAL LLM for e2e tests
         )
+        
+        # Configure real LLM testing per CLAUDE.md standards
+        configure_llm_testing(mode=LLMTestMode.REAL)
         
         core = AgentBillingTestCore()
         await core.setup_test_environment()
@@ -92,8 +98,8 @@ class TestAgentBillingFlow:
             # Create and send triage request
             request = request_simulator.create_triage_request(session["user_data"]["id"])
             
-            # Test with mocked LLM for deterministic costs
-            response = await self._execute_agent_request_with_mock(session, request)
+            # Test with REAL LLM per CLAUDE.md requirements
+            response = await self._execute_real_agent_request(session, request)
             
             # Validate complete billing flow
             validation = await billing_validator.validate_agent_response_flow(
@@ -122,7 +128,7 @@ class TestAgentBillingFlow:
                     session["user_data"]["id"]
                 )
                 
-                response = await self._execute_agent_request_with_mock(session, request)
+                response = await self._execute_real_agent_request(session, request)
                 validation = await billing_validator.validate_agent_response_flow(
                     session, request, response
                 )
@@ -148,7 +154,7 @@ class TestAgentBillingFlow:
             
             # Measure total response time
             start_time = time.time()
-            response = await self._execute_agent_request_with_mock(session, request)
+            response = await self._execute_real_agent_request(session, request)
             response_time = time.time() - start_time
             
             # Validate performance requirement
@@ -223,7 +229,7 @@ class TestAgentBillingFlow:
             
             try:
                 request = request_simulator.create_data_request(session["user_data"]["id"])
-                response = await self._execute_agent_request_with_mock(session, request)
+                response = await self._execute_real_agent_request(session, request)
                 
                 validation = await billing_validator.validate_agent_response_flow(
                     session, request, response
@@ -236,20 +242,15 @@ class TestAgentBillingFlow:
             finally:
                 await session["client"].close()
     
-    async def _execute_agent_request_with_mock(self, session: Dict, request: Dict) -> Dict[str, Any]:
-        """Execute agent request with mocked LLM response."""
-        expected_tokens = request["expected_cost"]["tokens"]
+    async def _execute_real_agent_request(self, session: Dict, request: Dict) -> Dict[str, Any]:
+        """Execute agent request with REAL LLM per CLAUDE.md requirements - NO MOCKS."""
+        # CLAUDE.md: Real Everything (LLM, Services) E2E > E2E > Integration > Unit
+        # Send actual agent request through real WebSocket to real backend with real LLM
+        response = await AgentBillingTestUtils.send_agent_request(
+            session["client"], request
+        )
         
-        # Mock: LLM service isolation for fast testing without API calls or rate limits
-        # This is the only acceptable mock per CLAUDE.md - to avoid external API costs
-        with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
-            mock_llm.return_value = AgentBillingTestUtils.create_mock_llm_response(expected_tokens)
-            
-            response = await AgentBillingTestUtils.send_agent_request(
-                session["client"], request
-            )
-            
-            return response
+        return response
     
     def _assert_billing_flow_success(self, validation: Dict[str, Any]) -> None:
         """Assert billing flow validation success."""
@@ -273,11 +274,29 @@ class TestAgentBillingPerformance:
     @pytest_asyncio.fixture
     @pytest.mark.e2e
     async def test_core(self):
-        """Initialize performance test core."""
+        """Initialize performance test core with REAL services per CLAUDE.md."""
+        # Setup REAL services environment - NO MOCKS
+        env_manager = get_test_env_manager()
+        isolated_env = env_manager.setup_test_environment(
+            additional_vars={
+                "USE_REAL_SERVICES": "true",
+                "CLICKHOUSE_ENABLED": "true", 
+                "TEST_DISABLE_REDIS": "false",
+                "REAL_DATABASE_TESTING": "true"
+            },
+            enable_real_llm=True  # CLAUDE.md: Use REAL LLM for e2e tests
+        )
+        
+        # Configure real LLM testing per CLAUDE.md standards
+        configure_llm_testing(mode=LLMTestMode.REAL)
+        
         core = AgentBillingTestCore()
         await core.setup_test_environment()
         yield core
         await core.teardown_test_environment()
+        
+        # Cleanup isolated environment
+        env_manager.teardown_test_environment()
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
