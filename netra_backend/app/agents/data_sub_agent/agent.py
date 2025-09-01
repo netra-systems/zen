@@ -17,14 +17,13 @@ from typing import Any, Dict, Optional
 from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 
-# Modern Base Components
+# Modern Base Components (BaseExecutionInterface removed for architecture simplification)
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
     ExecutionContext,
     ExecutionResult,
-    ExecutionStatus,
     WebSocketManagerProtocol,
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 
@@ -42,8 +41,11 @@ from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.strict_types import TypedAgentResult
 
 
-class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
-    """Advanced data gathering and analysis agent with ClickHouse integration."""
+class DataSubAgent(BaseSubAgent):
+    """Advanced data gathering and analysis agent with ClickHouse integration.
+    
+    Uses single inheritance pattern with ExecutionContext/ExecutionResult types.
+    """
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
                  websocket_manager: Optional[WebSocketManagerProtocol] = None,
@@ -55,9 +57,9 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
     def _init_base_interfaces(self, llm_manager: LLMManager, 
                             websocket_manager: Optional[WebSocketManagerProtocol]) -> None:
         """Initialize base interfaces and agent identity."""
-        BaseSubAgent.__init__(self, llm_manager, name="DataSubAgent", 
-                            description="Advanced data gathering and analysis agent with ClickHouse integration.")
-        BaseExecutionInterface.__init__(self, "DataSubAgent", websocket_manager)
+        super().__init__(llm_manager, name="DataSubAgent", 
+                        description="Advanced data gathering and analysis agent with ClickHouse integration.")
+        # BaseExecutionInterface.__init__ removed - using single inheritance pattern
     
     def _init_core_systems(self, tool_dispatcher: ToolDispatcher, 
                           reliability_manager: Optional[ReliabilityManager]) -> None:

@@ -16,9 +16,8 @@ from netra_backend.app.agents.base.errors import (
     AgentExecutionError,
 )
 
-# New base execution interface components
+# Execution types (BaseExecutionInterface removed for architecture simplification)
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
     ExecutionContext,
     ExecutionResult,
 )
@@ -35,8 +34,7 @@ from netra_backend.app.agents.base.monitoring import ExecutionMetrics, Execution
 __all__ = [
     # Backward compatibility - BaseSubAgent removed to avoid circular import
     # Import BaseSubAgent directly from netra_backend.app.agents.base_agent where needed
-    # New base execution interface
-    'BaseExecutionInterface',
+    # Execution types (BaseExecutionInterface removed for architecture simplification)
     'ExecutionContext', 
     'ExecutionResult',
     # 'BaseExecutionEngine',  # Import separately to avoid circular import

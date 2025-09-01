@@ -12,11 +12,13 @@ BVJ: Growth & Enterprise | Increase Value Creation | +15% customer savings
 """
 
 import time
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Protocol
 
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
-from netra_backend.app.agents.base.interface import BaseExecutionInterface, ExecutionContext, ExecutionResult, WebSocketManagerProtocol
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult, WebSocketManagerProtocol
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
@@ -61,7 +63,7 @@ logger = central_logger.get_logger(__name__)
 
 
 
-class ModernSyntheticDataSubAgent(BaseExecutionInterface):
+class ModernSyntheticDataSubAgent(ABC):
     """Modern synthetic data sub-agent with standardized execution patterns.
     
     Provides reliable synthetic data generation with:
@@ -69,12 +71,14 @@ class ModernSyntheticDataSubAgent(BaseExecutionInterface):
     - Retry logic for transient failures
     - Comprehensive monitoring and metrics
     - Standardized error handling and recovery
+    Uses ExecutionContext/ExecutionResult types for consistency.
     """
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
                  websocket_manager: Optional[WebSocketManagerProtocol] = None,
                  reliability_manager: Optional[ReliabilityManager] = None):
-        super().__init__("ModernSyntheticDataSubAgent", websocket_manager)
+        # BaseExecutionInterface.__init__ removed - using single inheritance pattern
+        self.agent_name = "ModernSyntheticDataSubAgent"
         self.llm_manager = llm_manager
         self.tool_dispatcher = tool_dispatcher
         self._initialize_execution_engine(reliability_manager)

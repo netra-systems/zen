@@ -13,17 +13,17 @@ Target: Enterprise & Growth segments.
 """
 
 import asyncio
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
     ExecutionContext,
     ExecutionResult,
-    ExecutionStatus,
     WebSocketManagerProtocol,
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability import (
     CircuitBreakerConfig,
@@ -120,18 +120,19 @@ class MCPExecutionErrorHandler:
         return error_type in fallback_eligible
 
 
-class BaseMCPAgent(BaseExecutionInterface):
-    """Base MCP agent with modern execution patterns.
+class BaseMCPAgent(ABC):
+    """Base MCP agent with standardized execution patterns.
     
-    Provides standardized MCP execution with reliability patterns,
-    monitoring, and error handling for 99.9% uptime target.
+    Provides MCP execution with reliability patterns, monitoring, and error handling.
+    Uses ExecutionContext/ExecutionResult types for consistency.
     """
     
     def __init__(self, agent_name: str, 
                  mcp_service: Optional[MCPClientService] = None,
                  websocket_manager: Optional[WebSocketManagerProtocol] = None,
                  config: Optional[MCPExecutionConfig] = None):
-        super().__init__(agent_name, websocket_manager)
+        self.agent_name = agent_name
+        # BaseExecutionInterface.__init__ removed - using single inheritance pattern
         self.mcp_service = mcp_service or MCPClientService()
         self.config = config or MCPExecutionConfig()
         self._initialize_components()

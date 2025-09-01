@@ -9,7 +9,8 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set
 
-from netra_backend.app.agents.base.interface import BaseExecutionInterface
+# BaseExecutionInterface removed for architecture simplification
+from abc import ABC, abstractmethod
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
@@ -154,11 +155,14 @@ class MCPPermissionChecker:
         return tool_name in agent_tools or tool_name in context.allowed_tools
 
 
-class MCPContextManager(BaseExecutionInterface):
-    """Main MCP context manager for agent integration."""
+class MCPContextManager(ABC):
+    """Main MCP context manager for agent integration.
+    
+    Uses ExecutionContext/ExecutionResult types for consistency.
+    """
     
     def __init__(self, mcp_service: Optional[MCPClientService] = None):
-        super().__init__("MCP_Context_Manager")
+        # BaseExecutionInterface.__init__ removed - using single inheritance pattern
         self.mcp_service = mcp_service or MCPClientService()
         self.tool_discovery = MCPToolDiscoveryManager(self.mcp_service)
         self.connection_pool = MCPConnectionPoolManager(self.mcp_service)

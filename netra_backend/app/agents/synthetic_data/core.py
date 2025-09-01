@@ -5,12 +5,12 @@ Business Value: Customer-facing data generation - HIGH revenue impact
 """
 
 import time
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
     ExecutionContext,
 )
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
@@ -51,15 +51,16 @@ class SyntheticDataExecutionContext(ExecutionContext):
     generation_start_time: Optional[float] = None
 
 
-class SyntheticDataAgentCore(BaseExecutionInterface):
+class SyntheticDataAgentCore(ABC):
     """Modern synthetic data agent core with standardized execution patterns.
     
-    Implements BaseExecutionInterface for consistent execution workflow
+    Uses ExecutionContext/ExecutionResult types for consistent execution workflow
     while maintaining all synthetic data generation capabilities.
     """
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
-        super().__init__("SyntheticDataSubAgent")
+        # BaseExecutionInterface.__init__ removed - using single inheritance pattern
+        self.agent_name = "SyntheticDataSubAgent"
         self.llm_manager = llm_manager
         self.tool_dispatcher = tool_dispatcher
         self._initialize_components()

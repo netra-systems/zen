@@ -22,14 +22,13 @@ from netra_backend.app.agents.utils import extract_thread_id
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 
-# Modern Base Components
+# Modern Base Components (BaseExecutionInterface removed for architecture simplification)
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
     ExecutionContext,
     ExecutionResult,
-    ExecutionStatus,
     WebSocketManagerProtocol,
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 # WebSocketContextMixin removed - BaseSubAgent now handles WebSocket via bridge
@@ -58,10 +57,11 @@ from netra_backend.app.schemas.shared_types import RetryConfig as ModernRetryCon
 logger = central_logger.get_logger(__name__)
 
 
-class TriageSubAgent(BaseSubAgent, BaseExecutionInterface):
-    """Modernized triage agent with BaseExecutionInterface compliance.
+class TriageSubAgent(BaseSubAgent):
+    """Modernized triage agent with single inheritance pattern.
     
     WebSocket events are handled through BaseSubAgent's bridge adapter.
+    Uses ExecutionContext and ExecutionResult types for standardized execution.
     """
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
@@ -76,7 +76,7 @@ class TriageSubAgent(BaseSubAgent, BaseExecutionInterface):
                          tool_dispatcher: ToolDispatcher, redis_manager: Optional[RedisManager]) -> None:
         """Initialize base agent components."""
         super().__init__(llm_manager, name="TriageSubAgent", description="Enhanced triage agent with modern execution.")
-        BaseExecutionInterface.__init__(self, "TriageSubAgent", websocket_manager)
+        # BaseExecutionInterface.__init__ removed - using single inheritance pattern
         # WebSocketContextMixin removed - using BaseSubAgent's bridge
         self._setup_core_properties(tool_dispatcher, redis_manager)
         

@@ -10,18 +10,18 @@ Revenue Impact: Reduces operational overhead by 40%, improves uptime SLA complia
 
 import asyncio
 import time
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Set
 
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
     ExecutionContext,
     ExecutionResult,
-    ExecutionStatus,
     WebSocketManagerProtocol,
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability import (
     CircuitBreakerConfig,
@@ -187,17 +187,19 @@ class MCPPerformanceTracker:
                self.metrics.total_executions) * 100.0
 
 
-class MCPExecutionOrchestrator(BaseExecutionInterface):
+class MCPExecutionOrchestrator(ABC):
     """Unified MCP execution orchestrator with enterprise reliability.
     
     Integrates all modernized MCP components providing single entry point
     for MCP operations with comprehensive monitoring and error handling.
+    Uses ExecutionContext/ExecutionResult types for consistency.
     """
     
     def __init__(self, mcp_service: Optional[MCPClientService] = None,
                  websocket_manager: Optional[WebSocketManagerProtocol] = None,
                  config: Optional[MCPOrchestrationConfig] = None):
-        super().__init__("MCP_Execution_Orchestrator", websocket_manager)
+        # BaseExecutionInterface.__init__ removed - using single inheritance pattern
+        self.agent_name = "MCP_Execution_Orchestrator"
         self.mcp_service = mcp_service or MCPClientService()
         self.config = config or MCPOrchestrationConfig()
         self._initialize_orchestration_components()

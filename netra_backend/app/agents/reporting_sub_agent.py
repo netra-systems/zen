@@ -15,8 +15,9 @@ from typing import Any, Dict, Optional
 from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus, WebSocketManagerProtocol
+    ExecutionContext, ExecutionResult, WebSocketManagerProtocol
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
@@ -38,11 +39,11 @@ from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.shared_types import RetryConfig
 
 
-class ReportingSubAgent(BaseSubAgent, BaseExecutionInterface):
+class ReportingSubAgent(BaseSubAgent):
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
                  websocket_manager: Optional[WebSocketManagerProtocol] = None):
-        BaseSubAgent.__init__(self, llm_manager, name="ReportingSubAgent", description="This agent generates a final report.")
-        BaseExecutionInterface.__init__(self, "ReportingSubAgent", websocket_manager)
+        super().__init__(llm_manager, name="ReportingSubAgent", description="This agent generates a final report.")
+        # BaseExecutionInterface.__init__ removed - using single inheritance pattern
         self.tool_dispatcher = tool_dispatcher
         self._initialize_modern_components()
     
