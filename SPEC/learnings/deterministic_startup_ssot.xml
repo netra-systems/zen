@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Deterministic Startup - SSOT</title>
+    <date>2025-09-01</date>
+    <category>startup</category>
+    <priority>CRITICAL</priority>
+    <status>ACTIVE</status>
+  </metadata>
+  
+  <summary>
+    The deterministic startup process is the SINGLE SOURCE OF TRUTH for all service initialization.
+    NO FALLBACKS. NO GRACEFUL DEGRADATION. NO MOCKS. If chat cannot work, the service MUST NOT start.
+  </summary>
+  
+  <problem>
+    Previous startup had three competing approaches:
+    1. Legacy startup with graceful degradation and mocks
+    2. Robust startup manager with over-engineered circuit breakers
+    3. Deterministic startup with strict phases
+    
+    This violated SSOT principles and made debugging difficult.
+  </problem>
+  
+  <solution>
+    UNIFIED DETERMINISTIC STARTUP ONLY:
+    - Location: netra_backend/app/startup_module_deterministic.py
+    - Entry: run_deterministic_startup()
+    - Philosophy: Fail-fast, no ambiguity, no conditional paths
+  </solution>
+  
+  <implementation>
+    <phases>
+      <phase number="1" name="Foundation">
+        - Logging initialization
+        - Environment validation  
+        - Database migrations
+      </phase>
+      
+      <phase number="2" name="Core Services" critical="true">
+        - Database connection (CRITICAL)
+        - Redis connection (CRITICAL)
+        - Key manager (CRITICAL)
+        - LLM manager (CRITICAL)
+        - Startup fixes application (CRITICAL)
+      </phase>
+      
+      <phase number="3" name="Chat Pipeline" critical="true">
+        - Tool registry (CRITICAL)
+        - WebSocket manager (CRITICAL)
+        - Agent supervisor (CRITICAL)
+        - Message handlers (CRITICAL)
+        - WebSocket enhancement verification (CRITICAL)
+      </phase>
+      
+      <phase number="4" name="Optional Services">
+        - ClickHouse (can fail)
+        - Monitoring (can fail)
+        - Background tasks (can fail)
+        - Performance manager (can fail)
+        - Connection monitoring (can fail)
+      </phase>
+      
+      <phase number="5" name="Validation">
+        - Critical service verification
+        - Schema validation (CRITICAL)
+        - Startup completion marking
+      </phase>
+    </phases>
+  </implementation>
+  
+  <removed_files>
+    <file>netra_backend/app/core/startup_manager.py</file>
+    <file>netra_backend/app/core/startup_config.py</file>
+    <file>dev_launcher/startup_profiler.py</file>
+    <file>dev_launcher/startup_optimizer.py</file>
+    <file>dev_launcher/startup_validator.py</file>
+    <file>scripts/startup_diagnostics.py</file>
+    <file>scripts/startup_reporter.py</file>
+    <file>scripts/startup_performance.py</file>
+    <file>scripts/startup_environment.py</file>
+    <file>scripts/startup_test_executor.py</file>
+  </removed_files>
+  
+  <key_principles>
+    <principle>Chat is King - 90% of value comes from chat working</principle>
+    <principle>No graceful degradation - either it works or it doesn't</principle>
+    <principle>No mocks in dev/staging/production</principle>
+    <principle>Clear phase logging for debugging</principle>
+    <principle>WebSocket enhancement is mandatory for agent events</principle>
+  </key_principles>
+  
+  <validation>
+    - All critical services must be non-None
+    - WebSocket tool dispatcher must be enhanced
+    - Database schema must validate
+    - Agent supervisor must be initialized
+  </validation>
+  
+  <migration_notes>
+    All code must use:
+    from netra_backend.app.startup_module import run_complete_startup
+    
+    Which internally calls:
+    from netra_backend.app.startup_module_deterministic import run_deterministic_startup
+    
+    NEVER use legacy startup functions directly.
+  </migration_notes>
+</learning>

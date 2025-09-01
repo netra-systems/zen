@@ -223,13 +223,13 @@ def __init__(self, llm_manager, db_session):
                 </test_categories>
             </test_file>
 
-            <test_file path="/tests/mission_critical/test_enhanced_tool_execution_websocket_events.py">
-                <description>Specialized test suite for enhanced tool execution WebSocket events</description>
+            <test_file path="/tests/mission_critical/test_unified_tool_execution_websocket_events.py">
+                <description>Specialized test suite for unified tool execution WebSocket events</description>
                 <test_categories>
-                    <category name="Enhanced Tool Execution">
+                    <category name="Unified Tool Execution">
                         <description>Test tool execution WebSocket event enhancement</description>
                         <key_tests>
-                            <test>EnhancedToolExecutionEngine creation with WebSocket manager</test>
+                            <test>UnifiedToolExecutionEngine creation with WebSocket manager</test>
                             <test>Tool dispatcher enhancement function validation</test>
                             <test>AgentRegistry automatic tool dispatcher enhancement</test>
                             <test>Double enhancement protection</test>
@@ -264,7 +264,7 @@ def __init__(self, llm_manager, db_session):
                     <description>Must pass before any deployment</description>
                 </requirement>
                 <requirement>
-                    <command>pytest tests/mission_critical/test_enhanced_tool_execution_websocket_events.py -v</command>
+                    <command>pytest tests/mission_critical/test_unified_tool_execution_websocket_events.py -v</command>
                     <description>Must pass to ensure tool execution events work</description>
                 </requirement>
                 <requirement>

@@ -203,6 +203,8 @@
 | Component | Location | Purpose | Documentation |
 |-----------|----------|---------|---------------|
 | **📖 MAIN TESTING GUIDE** | `/TESTING.md` | **Comprehensive testing documentation** | Start here for all testing |
+| **🔴 CENTRALIZED DOCKER MANAGER** | `/test_framework/centralized_docker_manager.py` | **Docker crash remediation with rate limiting** | Prevents restart storms, manages parallel tests |
+| **🔴 DOCKER COMPOSE MANAGER** | `/test_framework/docker_compose_manager.py` | **Docker Compose lifecycle management** | Service health monitoring, port discovery |
 | **Test Framework** | `/test_framework/` | Enhanced test framework | Core runner and configuration |
 | **Test Runner** | `/test_framework/runner.py` | Main test runner | Unified test execution |
 | **Test Config** | `/test_framework/test_config.py` | Test configuration | Test levels, environments |
@@ -219,6 +221,30 @@
 | Auth Tests | `/auth_service/tests/` | `test_*.py` | `python -m test_framework.runner --service auth` |
 | Frontend Tests | `/frontend/__tests__/` | `*.test.tsx` | `python -m test_framework.runner --service frontend` |
 | E2E Tests | `/tests/e2e/` | `test_*.py` | `python -m test_framework.runner --level e2e` |
+
+### Docker Infrastructure Management (NEW - 2025-09-01)
+| Component | Location | Purpose | Key Features |
+|-----------|----------|---------|-------------|
+| **🔴 CENTRALIZED MANAGER** | `/test_framework/centralized_docker_manager.py` | **Primary Docker coordination system** | Rate limiting, locking, restart storm prevention |
+| **🔴 COMPOSE MANAGER** | `/test_framework/docker_compose_manager.py` | **Docker Compose lifecycle** | Service health checks, port discovery, validation |
+| **🔴 PARALLEL TEST SUPPORT** | CentralizedDockerManager | **10+ parallel test runners** | File-based locking, shared/dedicated environments |
+| **🔴 MEMORY OPTIMIZATION** | Service memory limits | **50% memory reduction** | 6GB → 3GB total, production image support |
+| **Unified Test Integration** | `/scripts/unified_test_runner.py` | **Integrated Docker management** | --docker-production, --docker-dedicated flags |
+| **Cleanup Script** | `/scripts/docker_cleanup.py` | **Enhanced cleanup coordination** | Respects active environments, age-based cleanup |
+| **Parallel Testing Verification** | `/scripts/test_parallel_docker_manager.py` | **Conflict detection testing** | Validates no conflicts with multiple runners |
+| **Docker State Management** | Lock files in TEMP/LOCK_DIR | **Cross-platform coordination** | Windows/Unix compatible locking |
+| **Rate Limiting System** | 30s cooldown, max 3 attempts | **Restart storm prevention** | Circuit breaker pattern |
+| **Environment Types** | Shared/Dedicated/Production | **Resource optimization** | Balances efficiency vs isolation |
+
+#### Docker Command-Line Interface
+| Flag | Purpose | Use Case |
+|------|---------|----------|
+| `--docker-dedicated` | Use dedicated environment | E2E tests requiring isolation |
+| `--docker-production` | Use production-optimized images | Memory-constrained environments |
+| `--docker-no-cleanup` | Skip cleanup | Debugging Docker issues |
+| `--docker-force-restart` | Override rate limiting | Emergency restart scenarios |
+| `--docker-stats` | Show Docker statistics | Performance monitoring |
+| `--cleanup-old-environments` | Clean stale environments | Maintenance operations |
 
 ### Google Tag Manager (GTM) Integration
 | Component | Location | Purpose | Status |
