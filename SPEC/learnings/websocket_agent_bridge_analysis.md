@@ -18,10 +18,10 @@
 2. **Non-Idempotent Initialization**:
    - `asyncio.create_task()` at line 47 doesn't wait for completion
    - No verification of integration success
-   - Race conditions between service init and orchestrator availability
+   - Race conditions between service init and registry availability
 
 3. **Mixed Responsibilities**:
-   - AgentService handles business logic AND orchestration setup
+   - AgentService handles business logic AND registry setup
    - Violates Single Responsibility Principle
    - Makes testing and recovery difficult
 
@@ -99,7 +99,7 @@ async def recover_integration(self) -> RecoveryResult:
 ### Integration Points
 
 1. **AgentService**: Uses bridge instead of direct orchestrator setup
-2. **WebSocketAgentOrchestrator**: Configured through bridge
+2. **AgentExecutionRegistry**: Configured through bridge
 3. **WebSocket Manager**: Lifecycle managed by bridge
 4. **Startup Sequence**: Bridge handles initialization timing
 

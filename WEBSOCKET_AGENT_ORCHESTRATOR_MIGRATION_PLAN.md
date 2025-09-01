@@ -1,7 +1,7 @@
-# WebSocketAgentOrchestrator Integration & Migration Plan
+# AgentExecutionRegistry Integration & Migration Plan
 
 ## Executive Summary
-The WebSocketAgentOrchestrator is the **Single Source of Truth (SSOT)** for WebSocket-Agent integration, designed to eliminate the current glue code repetition, provide centralized lifecycle management, and ensure reliable WebSocket event delivery for the "Chat is King" business goal.
+The AgentExecutionRegistry is the **Single Source of Truth (SSOT)** for WebSocket-Agent integration, designed to eliminate the current glue code repetition, provide centralized lifecycle management, and ensure reliable WebSocket event delivery for the "Chat is King" business goal.
 
 ## Current State Analysis
 
@@ -31,7 +31,7 @@ Application Start
     ↓
 FastAPI Lifespan
     ↓
-WebSocketAgentOrchestrator.initialize()
+AgentExecutionRegistry.initialize()
     ↓
 WebSocketManager Registration
     ↓
@@ -46,7 +46,7 @@ WebSocket Message
     ↓
 AgentService.handle_websocket_message()
     ↓
-WebSocketAgentOrchestrator.create_execution_context()
+AgentExecutionRegistry.create_execution_context()
     ↓
 Context Registration & Deduplication
     ↓
@@ -59,7 +59,7 @@ Context Cleanup
 ```
 Agent Action
     ↓
-WebSocketAgentOrchestrator.ensure_event_delivery()
+AgentExecutionRegistry.ensure_event_delivery()
     ↓
 WebSocketNotifier (with retry logic)
     ↓
@@ -74,7 +74,7 @@ Frontend Update
 
 #### 1.1 Core Enhancements Required
 ```python
-class WebSocketAgentOrchestrator:
+class AgentExecutionRegistry:
     # Add these methods to existing orchestrator
     
     async def create_execution_context(
@@ -125,7 +125,7 @@ await websocket_notifier.send_agent_started(...)
 
 **AFTER (With Orchestrator):**
 ```python
-orchestrator = await get_websocket_agent_orchestrator()
+orchestrator = await get_agent_execution_registry()
 context, notifier = await orchestrator.create_execution_context(
     agent_type=agent_type,
     user_id=user_id,
@@ -286,7 +286,7 @@ except Exception as ws_error:
 
 ```
 ┌─────────────────────────────────────────┐
-│         WebSocketAgentOrchestrator      │ ← SSOT
+│         AgentExecutionRegistry      │ ← SSOT
 │  - Lifecycle Management                 │
 │  - Context Registry                     │
 │  - Event Delivery Guarantee             │

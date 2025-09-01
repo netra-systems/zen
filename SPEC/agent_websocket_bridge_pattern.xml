@@ -15,10 +15,45 @@
     <pattern_overview>
         <description>
             The AgentWebSocketBridge serves as the Single Source of Truth (SSOT) for 
-            managing the integration lifecycle between AgentService and WebSocketAgentOrchestrator.
+            managing the integration lifecycle between AgentService and AgentExecutionRegistry.
             It provides idempotent initialization, health monitoring, and recovery mechanisms
             while maintaining clear boundaries between WebSocket, Agent, and Bridge concerns.
         </description>
+        
+        <naming_justification>
+            <component_name>AgentExecutionRegistry</component_name>
+            <previous_name>WebSocketAgentOrchestrator</previous_name>
+            <justification>
+                <context>🎭 WebSocketAgentOrchestrator - Context & Lifecycle Manager
+                Why does WebSocketAgentOrchestrator exist?
+                Why? To prevent duplicate agent executions and manage execution contexts
+                Why? Because duplicate executions waste LLM API costs and confuse users
+                Why? Because cost control and user experience directly impact profitability
+                Why? Because profitability determines our ability to invest in better AI capabilities
+                Why? Because better AI capabilities differentiate us from competitors</context>
+                
+                <boundary_analysis>
+                    <current_name_issues>WebSocketAgentOrchestrator emphasizes WebSocket first, but the class is actually about agent execution context management</current_name_issues>
+                    <boundary_confusion>Name doesn't clearly distinguish it from AgentWebSocketBridge</boundary_confusion>
+                    <missing_core_purpose>Name doesn't convey "Context Registry" and "Lifecycle Management"</missing_core_purpose>
+                </boundary_analysis>
+                
+                <new_name_benefits>
+                    <agent_first>Primary concern is agent execution, not WebSocket</agent_first>
+                    <clear_boundary>"Registry" vs "Bridge" vs "Lifecycle" - distinct responsibilities</clear_boundary>
+                    <matches_purpose>Context registry to prevent duplicates aligns with registry pattern</matches_purpose>
+                    <business_aligned>Prevents duplicate LLM API costs (cost control business value)</business_aligned>
+                </new_name_benefits>
+                
+                <boundary_promises>
+                    <context_registry>Track active agent executions to prevent duplicates</context_registry>
+                    <lifecycle_management>Manage agent execution from start to completion</lifecycle_management>
+                    <connection_health>Monitor WebSocket connection health per context</connection_health>
+                    <resource_cleanup>Clean up inactive contexts to prevent memory leaks</resource_cleanup>
+                    <metrics_collection>Provide execution metrics for business intelligence</metrics_collection>
+                </boundary_promises>
+            </justification>
+        </naming_justification>
         
         <problem_solved>
             <issue>Repetitive glue code for WebSocket-Agent integration setup</issue>
@@ -96,7 +131,7 @@
             </point>
             
             <point>
-                <name>WebSocketAgentOrchestrator Management</name>
+                <name>AgentExecutionRegistry Management</name>
                 <description>Bridge manages orchestrator lifecycle</description>
                 <method>Bridge owns orchestrator reference and configuration</method>
                 <benefit>Clean separation from service-level concerns</benefit>
