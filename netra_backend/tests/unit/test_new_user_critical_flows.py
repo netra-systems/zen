@@ -26,7 +26,6 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.services.security_service import get_password_hash
 from netra_backend.app.clients.auth_client_core import auth_client
 from netra_backend.app.db.models_postgres import Secret, ToolUsageLog, User
 from netra_backend.app.schemas.registry import UserCreate
