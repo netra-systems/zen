@@ -1,0 +1,1603 @@
+{
+  "analysis_timestamp": "2025-09-01T14:12:41.414180",
+  "runtime_analysis_available": true,
+  "classes_analyzed": [
+    "DataSubAgent",
+    "ValidationSubAgent"
+  ],
+  "summary": {
+    "total_classes_analyzed": 2,
+    "complexity_comparison": {
+      "DataSubAgent": {
+        "complexity_score": 2049,
+        "mro_depth": 9,
+        "conflict_count": 196,
+        "diamond_count": 3
+      },
+      "ValidationSubAgent": {
+        "complexity_score": 2049,
+        "mro_depth": 9,
+        "conflict_count": 196,
+        "diamond_count": 3
+      }
+    },
+    "common_issues": [
+      {
+        "type": "initialization_complexity",
+        "occurrence_count": 2
+      }
+    ],
+    "recommendations": [
+      {
+        "priority": "HIGH",
+        "description": "Reduce complexity in: DataSubAgent, ValidationSubAgent",
+        "action": "Consider single inheritance pattern with mixins"
+      },
+      {
+        "priority": "MEDIUM",
+        "description": "Diamond inheritance patterns detected",
+        "action": "Review inheritance hierarchy for unnecessary multiple inheritance"
+      }
+    ]
+  },
+  "detailed_results": {
+    "DataSubAgent": {
+      "mro_analysis": {
+        "class_name": "DataSubAgent",
+        "mro_length": 9,
+        "mro_chain": [
+          "DataSubAgent",
+          "BaseSubAgent",
+          "AgentLifecycleMixin",
+          "BaseExecutionInterface",
+          "AgentCommunicationMixin",
+          "AgentStateMixin",
+          "AgentObservabilityMixin",
+          "ABC",
+          "object"
+        ],
+        "method_sources": {
+          "__init__": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_apply_exponential_backoff": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_attempt_single_update": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_attempt_websocket_update": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_build_completion_data": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_build_error_context_params": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_build_insights_prompt": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_build_system_message": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_build_websocket_message": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_calculate_data_size": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_complete_agent_run": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_construct_sub_agent_state": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_context_to_state": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_create_error_context": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_create_error_result": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_create_execution_context": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_create_failed_update_record": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_create_failure_result": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_create_sub_agent_state": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_create_success_result": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_create_update_payload": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_create_websocket_message": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_ensure_failed_updates_list": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_execute_analysis": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_execute_websocket_update_with_retry": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_execute_with_conditions": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_extract_analysis_request": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_finalize_execution_timing": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_generate_insights": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_generate_llm_insights": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_get_basic_context_params": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_get_completed_transitions": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_get_extended_context_params": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_get_failed_transitions": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_get_manager_user_id": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_get_pending_transitions": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_get_running_transitions": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_get_subagent_logging_enabled": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_get_valid_transitions": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_get_websocket_user_id": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_handle_and_reraise_error": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_handle_entry_conditions": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_handle_entry_failure": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_handle_execution_error": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_handle_fallback_user_id": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_handle_retry_or_failure": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_handle_unexpected_websocket_error": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_handle_unexpected_websocket_error_fallback": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_handle_websocket_disconnect": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_handle_websocket_exception": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_handle_websocket_failure": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_init_helper_modules": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_initialize_agent_run": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_is_valid_transition": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_limit_failed_updates_storage": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_log_agent_completion": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_log_agent_start": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_log_execution_completion": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_post_run": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_pre_run": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_process_websocket_error": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_raise_transition_error": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_send_completion_update": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_send_entry_condition_warning": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_send_error_notification": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_send_starting_update": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_send_update": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_send_websocket_error": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_send_websocket_update": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_send_websocket_warning": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_setup_websocket_context_for_legacy": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_setup_websocket_context_if_available": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_store_failed_update": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_update_lifecycle_status": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_validate_execution_state": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "check_entry_conditions": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "cleanup": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "emit_agent_completed": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "emit_agent_started": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "emit_error": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "emit_progress": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "emit_subagent_completed": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "emit_subagent_started": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "emit_thinking": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "emit_tool_completed": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "emit_tool_executing": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "emit_tool_started": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "execute": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "execute_core_logic": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "get_execution_metrics": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "get_health_status": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "get_state": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "has_websocket_context": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "log_input_from_agent": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "log_output_to_agent": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "notify_agent_thinking": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "notify_final_report": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "notify_partial_result": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "notify_tool_execution": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "propagate_websocket_context_to_state": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "run": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "run_in_background": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "send_agent_thinking": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "send_direct_websocket_event": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "send_final_report": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "send_partial_result": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "send_status_update": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "send_tool_executing": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "set_state": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "set_websocket_bridge": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "set_websocket_context": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "shutdown": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "validate_preconditions": {
+            "source_class": "DataSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          }
+        },
+        "attribute_sources": {},
+        "conflicts": [],
+        "diamonds": [
+          {
+            "diamond_root": "BaseExecutionInterface",
+            "occurrence_count": 2,
+            "mro_positions": [
+              3
+            ]
+          },
+          {
+            "diamond_root": "ABC",
+            "occurrence_count": 3,
+            "mro_positions": [
+              7
+            ]
+          },
+          {
+            "diamond_root": "object",
+            "occurrence_count": 4,
+            "mro_positions": [
+              8
+            ]
+          }
+        ],
+        "super_chains": []
+      },
+      "visualization": "\n=== MRO for DataSubAgent ===\n\u250c\u2500 DataSubAgent\n    Methods: __init__, check_entry_conditions, cleanup, emit_agent_completed, emit_agent_started ... (+34 more)\n  \u2514\u2500 BaseSubAgent\n      Methods: __init__, check_entry_conditions, cleanup, emit_agent_completed, emit_agent_started ... (+33 more)\n    \u2514\u2500 AgentLifecycleMixin\n        Methods: __init__, check_entry_conditions, cleanup, execute, execute_core_logic ... (+7 more)\n      \u2514\u2500 BaseExecutionInterface\n          Methods: __init__, execute_core_logic, send_agent_thinking, send_final_report, send_partial_result ... (+3 more)\n        \u2514\u2500 AgentCommunicationMixin\n            Methods: notify_agent_thinking, notify_final_report, notify_partial_result, notify_tool_execution, run_in_background ... (+1 more)\n          \u2514\u2500 AgentStateMixin\n              Methods: get_state, set_state\n            \u2514\u2500 AgentObservabilityMixin\n                Methods: get_execution_metrics, log_input_from_agent, log_output_to_agent\n              \u2514\u2500 ABC\n                \u2514\u2500 object\n",
+      "complexity_metrics": {
+        "mro_depth": 9,
+        "method_count": 113,
+        "abstract_method_count": 8,
+        "conflict_count": 196,
+        "diamond_count": 3,
+        "complexity_score": 2049
+      },
+      "resolution_issues": {
+        "class_name": "DataSubAgent",
+        "issues": [
+          {
+            "type": "initialization_complexity",
+            "description": "Complex initialization chain: DataSubAgent -> BaseSubAgent -> AgentLifecycleMixin -> BaseExecutionInterface",
+            "severity": "HIGH"
+          }
+        ],
+        "test_scenarios": [
+          {
+            "method": "emit_thinking",
+            "resolved_to": "BaseSubAgent",
+            "issue": "Multiple WebSocket event methods with similar functionality"
+          },
+          {
+            "method": "emit_agent_started",
+            "resolved_to": "BaseSubAgent",
+            "issue": "Multiple WebSocket event methods with similar functionality"
+          },
+          {
+            "method": "emit_tool_executing",
+            "resolved_to": "BaseSubAgent",
+            "issue": "Multiple WebSocket event methods with similar functionality"
+          },
+          {
+            "method": "send_agent_thinking",
+            "resolved_to": "AgentLifecycleMixin",
+            "issue": "Multiple WebSocket event methods with similar functionality"
+          },
+          {
+            "method": "send_status_update",
+            "resolved_to": "BaseExecutionInterface",
+            "issue": "Multiple WebSocket event methods with similar functionality"
+          },
+          {
+            "method": "send_tool_executing",
+            "resolved_to": "AgentLifecycleMixin",
+            "issue": "Multiple WebSocket event methods with similar functionality"
+          }
+        ]
+      },
+      "performance_implications": {
+        "mro_lookup_cost": 9,
+        "method_resolution_cost": 18,
+        "attribute_access_cost": 0,
+        "memory_overhead": 900,
+        "recommendations": [
+          "Consider reducing inheritance depth",
+          "High method resolution cost - consider composition over inheritance",
+          "Diamond inheritance detected - review for unnecessary complexity"
+        ]
+      }
+    },
+    "ValidationSubAgent": {
+      "mro_analysis": {
+        "class_name": "ValidationSubAgent",
+        "mro_length": 9,
+        "mro_chain": [
+          "ValidationSubAgent",
+          "BaseSubAgent",
+          "AgentLifecycleMixin",
+          "BaseExecutionInterface",
+          "AgentCommunicationMixin",
+          "AgentStateMixin",
+          "AgentObservabilityMixin",
+          "ABC",
+          "object"
+        ],
+        "method_sources": {
+          "__init__": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_apply_exponential_backoff": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_attempt_single_update": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_attempt_websocket_update": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_build_completion_data": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_build_error_context_params": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_build_system_message": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_build_websocket_message": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_calculate_data_size": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_complete_agent_run": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_construct_sub_agent_state": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_context_to_state": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_create_error_context": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_create_error_result": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_create_execution_context": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_create_failed_update_record": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_create_failure_result": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_create_sub_agent_state": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_create_success_result": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_create_update_payload": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_create_websocket_message": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_ensure_failed_updates_list": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_execute_validation_rule": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_execute_validation_steps": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_execute_websocket_update_with_retry": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_execute_with_conditions": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_extract_validation_request": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_finalize_execution_timing": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_generate_validation_summary": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_get_basic_context_params": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_get_completed_transitions": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_get_extended_context_params": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_get_failed_transitions": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_get_manager_user_id": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_get_pending_transitions": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_get_running_transitions": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_get_subagent_logging_enabled": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_get_valid_transitions": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_get_websocket_user_id": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_handle_and_reraise_error": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_handle_entry_conditions": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_handle_entry_failure": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_handle_execution_error": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_handle_fallback_user_id": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_handle_retry_or_failure": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_handle_unexpected_websocket_error": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_handle_unexpected_websocket_error_fallback": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_handle_websocket_disconnect": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_handle_websocket_exception": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_handle_websocket_failure": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_initialize_agent_run": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_is_valid_transition": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_limit_failed_updates_storage": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_log_agent_completion": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_log_agent_start": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_log_execution_completion": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_post_run": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_pre_run": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_process_websocket_error": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_raise_transition_error": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_send_completion_update": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_send_entry_condition_warning": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_send_error_notification": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_send_starting_update": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_send_update": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_send_websocket_error": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_send_websocket_update": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_send_websocket_warning": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_setup_websocket_context_for_legacy": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_setup_websocket_context_if_available": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_store_failed_update": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_update_lifecycle_status": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "_validate_execution_state": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "check_entry_conditions": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "cleanup": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "emit_agent_completed": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "emit_agent_started": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "emit_error": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "emit_progress": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "emit_subagent_completed": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "emit_subagent_started": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "emit_thinking": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "emit_tool_completed": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "emit_tool_executing": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "emit_tool_started": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "execute": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "execute_core_logic": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "get_execution_metrics": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "get_health_status": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "get_state": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "has_websocket_context": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "log_input_from_agent": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "log_output_to_agent": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "notify_agent_thinking": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "notify_final_report": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "notify_partial_result": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "notify_tool_execution": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "propagate_websocket_context_to_state": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "run": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "run_in_background": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "send_agent_thinking": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "send_direct_websocket_event": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "send_final_report": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "send_partial_result": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "send_status_update": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "send_tool_executing": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "set_state": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "set_websocket_bridge": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "set_websocket_context": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "shutdown": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          },
+          "validate_preconditions": {
+            "source_class": "ValidationSubAgent",
+            "mro_position": 0,
+            "is_abstract": false,
+            "type": "function"
+          }
+        },
+        "attribute_sources": {},
+        "conflicts": [],
+        "diamonds": [
+          {
+            "diamond_root": "BaseExecutionInterface",
+            "occurrence_count": 2,
+            "mro_positions": [
+              3
+            ]
+          },
+          {
+            "diamond_root": "ABC",
+            "occurrence_count": 3,
+            "mro_positions": [
+              7
+            ]
+          },
+          {
+            "diamond_root": "object",
+            "occurrence_count": 4,
+            "mro_positions": [
+              8
+            ]
+          }
+        ],
+        "super_chains": []
+      },
+      "visualization": "\n=== MRO for ValidationSubAgent ===\n\u250c\u2500 ValidationSubAgent\n    Methods: __init__, check_entry_conditions, cleanup, emit_agent_completed, emit_agent_started ... (+34 more)\n  \u2514\u2500 BaseSubAgent\n      Methods: __init__, check_entry_conditions, cleanup, emit_agent_completed, emit_agent_started ... (+33 more)\n    \u2514\u2500 AgentLifecycleMixin\n        Methods: __init__, check_entry_conditions, cleanup, execute, execute_core_logic ... (+7 more)\n      \u2514\u2500 BaseExecutionInterface\n          Methods: __init__, execute_core_logic, send_agent_thinking, send_final_report, send_partial_result ... (+3 more)\n        \u2514\u2500 AgentCommunicationMixin\n            Methods: notify_agent_thinking, notify_final_report, notify_partial_result, notify_tool_execution, run_in_background ... (+1 more)\n          \u2514\u2500 AgentStateMixin\n              Methods: get_state, set_state\n            \u2514\u2500 AgentObservabilityMixin\n                Methods: get_execution_metrics, log_input_from_agent, log_output_to_agent\n              \u2514\u2500 ABC\n                \u2514\u2500 object\n",
+      "complexity_metrics": {
+        "mro_depth": 9,
+        "method_count": 111,
+        "abstract_method_count": 8,
+        "conflict_count": 196,
+        "diamond_count": 3,
+        "complexity_score": 2049
+      },
+      "resolution_issues": {
+        "class_name": "ValidationSubAgent",
+        "issues": [
+          {
+            "type": "initialization_complexity",
+            "description": "Complex initialization chain: ValidationSubAgent -> BaseSubAgent -> AgentLifecycleMixin -> BaseExecutionInterface",
+            "severity": "HIGH"
+          }
+        ],
+        "test_scenarios": [
+          {
+            "method": "emit_thinking",
+            "resolved_to": "BaseSubAgent",
+            "issue": "Multiple WebSocket event methods with similar functionality"
+          },
+          {
+            "method": "emit_agent_started",
+            "resolved_to": "BaseSubAgent",
+            "issue": "Multiple WebSocket event methods with similar functionality"
+          },
+          {
+            "method": "emit_tool_executing",
+            "resolved_to": "BaseSubAgent",
+            "issue": "Multiple WebSocket event methods with similar functionality"
+          },
+          {
+            "method": "send_agent_thinking",
+            "resolved_to": "AgentLifecycleMixin",
+            "issue": "Multiple WebSocket event methods with similar functionality"
+          },
+          {
+            "method": "send_status_update",
+            "resolved_to": "BaseExecutionInterface",
+            "issue": "Multiple WebSocket event methods with similar functionality"
+          },
+          {
+            "method": "send_tool_executing",
+            "resolved_to": "AgentLifecycleMixin",
+            "issue": "Multiple WebSocket event methods with similar functionality"
+          }
+        ]
+      },
+      "performance_implications": {
+        "mro_lookup_cost": 9,
+        "method_resolution_cost": 18,
+        "attribute_access_cost": 0,
+        "memory_overhead": 900,
+        "recommendations": [
+          "Consider reducing inheritance depth",
+          "High method resolution cost - consider composition over inheritance",
+          "Diamond inheritance detected - review for unnecessary complexity"
+        ]
+      }
+    }
+  }
+}

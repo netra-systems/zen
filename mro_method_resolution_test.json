@@ -1,0 +1,217 @@
+{
+  "test_timestamp": "2025-09-01T14:17:54.872981",
+  "testing_available": true,
+  "test_results": {
+    "websocket_method_resolution": {
+      "test_name": "WebSocket Method Resolution Test",
+      "findings": [
+        {
+          "method": "emit_thinking",
+          "resolved_to": "BaseSubAgent",
+          "expected_source": "BaseSubAgent",
+          "issue": "Method resolved to BaseSubAgent - potential confusion with BaseExecutionInterface methods"
+        },
+        {
+          "method": "send_agent_thinking",
+          "resolved_to": "BaseExecutionInterface",
+          "expected_source": "BaseExecutionInterface",
+          "issue": "Similar functionality to emit_thinking but from different class: BaseExecutionInterface"
+        }
+      ],
+      "critical_issues": [
+        {
+          "issue": "WebSocket method signature mismatch",
+          "emit_thinking_params": [
+            "thought",
+            "step_number"
+          ],
+          "send_agent_thinking_params": [
+            "context_or_run_id",
+            "thought",
+            "step_number"
+          ],
+          "risk": "Different WebSocket methods have different interfaces"
+        },
+        {
+          "issue": "WebSocket methods come from multiple classes",
+          "method_sources": {
+            "BaseSubAgent": [
+              "emit_thinking",
+              "emit_agent_started"
+            ],
+            "BaseExecutionInterface": [
+              "send_agent_thinking",
+              "send_status_update"
+            ]
+          },
+          "risk": "Inconsistent WebSocket behavior across method calls"
+        }
+      ]
+    },
+    "initialization_order_issues": {
+      "test_name": "Initialization Order Test",
+      "findings": [
+        {
+          "initialization_chain": [
+            {
+              "class": "DataSubAgent",
+              "mro_position": 0,
+              "has_custom_init": true
+            },
+            {
+              "class": "BaseSubAgent",
+              "mro_position": 1,
+              "has_custom_init": true
+            },
+            {
+              "class": "AgentLifecycleMixin",
+              "mro_position": 2,
+              "has_custom_init": true
+            },
+            {
+              "class": "BaseExecutionInterface",
+              "mro_position": 3,
+              "has_custom_init": true
+            }
+          ],
+          "chain_length": 4,
+          "complexity": "HIGH"
+        },
+        {
+          "class": "BaseSubAgent",
+          "uses_super": true,
+          "position_in_mro": 1
+        },
+        {
+          "parameter_analysis": {
+            "DataSubAgent_init_params": [
+              "self",
+              "llm_manager",
+              "tool_dispatcher",
+              "websocket_manager"
+            ],
+            "BaseSubAgent_init_params": [
+              "self",
+              "llm_manager",
+              "name",
+              "description",
+              "agent_id",
+              "user_id"
+            ],
+            "signature_compatible": false
+          }
+        }
+      ],
+      "super_call_issues": [
+        {
+          "issue": "Multiple base classes with __init__",
+          "classes": [
+            "BaseSubAgent",
+            "BaseExecutionInterface"
+          ],
+          "risk": "super() call order ambiguity in multiple inheritance"
+        }
+      ]
+    },
+    "method_override_confusion": {
+      "test_name": "Method Override Confusion Test",
+      "override_conflicts": [
+        {
+          "method": "execute_core_logic",
+          "implementations": [
+            {
+              "class": "DataSubAgent",
+              "mro_position": 0,
+              "is_abstract": false
+            },
+            {
+              "class": "BaseExecutionInterface",
+              "mro_position": 3,
+              "is_abstract": true
+            }
+          ],
+          "resolved_to": "DataSubAgent",
+          "risk": "Multiple implementations may cause execution confusion"
+        },
+        {
+          "method": "validate_preconditions",
+          "implementations": [
+            {
+              "class": "DataSubAgent",
+              "mro_position": 0,
+              "is_abstract": false
+            },
+            {
+              "class": "BaseExecutionInterface",
+              "mro_position": 3,
+              "is_abstract": true
+            }
+          ],
+          "resolved_to": "DataSubAgent",
+          "risk": "Validation logic may be bypassed or inconsistent"
+        }
+      ],
+      "execution_path_issues": [
+        {
+          "issue": "Multiple execution entry points",
+          "execute_source": "DataSubAgent",
+          "execute_core_logic_source": "DataSubAgent",
+          "risk": "Unclear which execution path will be taken"
+        }
+      ]
+    },
+    "performance_degradation": {
+      "test_name": "Performance Degradation Test",
+      "method_lookup_times": [
+        {
+          "method": "emit_thinking",
+          "total_time_ms": 0.06089999806135893,
+          "average_per_lookup_us": 0.06089999806135893,
+          "mro_position": 1,
+          "mro_depth": 9
+        },
+        {
+          "method": "execute_core_logic",
+          "total_time_ms": 0.05930001498199999,
+          "average_per_lookup_us": 0.05930001498199999,
+          "mro_position": 0,
+          "mro_depth": 9
+        },
+        {
+          "method": "validate_preconditions",
+          "total_time_ms": 0.05880001117475331,
+          "average_per_lookup_us": 0.05880001117475331,
+          "mro_position": 0,
+          "mro_depth": 9
+        },
+        {
+          "method": "send_agent_thinking",
+          "total_time_ms": 0.058699981309473515,
+          "average_per_lookup_us": 0.058699981309473515,
+          "mro_position": 3,
+          "mro_depth": 9
+        }
+      ],
+      "memory_overhead": [
+        {
+          "mro_depth": 9,
+          "total_methods": 133,
+          "estimated_class_overhead_bytes": 576,
+          "estimated_method_table_bytes": 1064,
+          "total_estimated_bytes": 1640
+        }
+      ],
+      "comparison_metrics": [
+        {
+          "current_mro_depth": 9,
+          "ideal_mro_depth": 3,
+          "overhead_multiplier": 3.0,
+          "current_estimated_bytes": 1640,
+          "ideal_estimated_bytes": 1256,
+          "memory_waste_bytes": 384,
+          "efficiency_loss_percent": 30.573248407643312
+        }
+      ]
+    }
+  }
+}
