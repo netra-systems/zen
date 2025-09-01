@@ -431,7 +431,9 @@ class TestSupervisorE2EWithRealLLM:
         # Since we don't have active WebSocket connections in tests,
         # verify the WebSocket manager structure exists and is correct
         assert hasattr(websocket_manager, 'connections')
-        assert isinstance(websocket_manager.connections, dict)
+        # connections is a TTLCache, not a dict - check for dict-like interface
+        assert hasattr(websocket_manager.connections, '__getitem__')
+        assert hasattr(websocket_manager.connections, '__contains__')
     
     
     def test_workflow_definition_compliance(self, supervisor):
