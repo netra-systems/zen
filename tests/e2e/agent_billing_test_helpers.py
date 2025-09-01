@@ -20,13 +20,13 @@ import asyncio
 import json
 import time
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, patch
+# CLAUDE.md: NO MOCKS - removed unittest.mock imports per requirements
 
 from netra_backend.app.schemas.user_plan import PlanTier, UsageRecord
 from tests.e2e.config import TEST_USERS
 from tests.e2e.clickhouse_billing_helper import ClickHouseBillingHelper
 from tests.e2e.websocket_resilience_core import WebSocketResilienceTestCore
-from test_framework.environment_isolation import get_test_env_manager
+from shared.isolated_environment import get_env
 
 
 class AgentBillingTestCore:
@@ -52,16 +52,9 @@ class AgentBillingTestCore:
         # Get test user for tier
         user_data = self._get_test_user_for_tier(tier)
         
-        # Try to establish WebSocket connection, fall back to mock if real server unavailable
-        client = None
-        try:
-            client = await self.websocket_core.establish_authenticated_connection(user_data.id)
-        except Exception:
-            # Use mock WebSocket client for billing flow testing when real server unavailable
-            from tests.e2e.websocket_resilience_core import MockWebSocketClient
-            from test_framework.http_client import ClientConfig
-            client = MockWebSocketClient("ws://localhost:8000/ws", ClientConfig())
-            await client.connect()
+        # CLAUDE.md: REAL EVERYTHING - Only use real WebSocket connections
+        # NO MOCKS ALLOWED - If real server is not available, test must fail
+        client = await self.websocket_core.establish_authenticated_connection(user_data.id)
         
         return {
             "client": client,
@@ -238,14 +231,18 @@ class AgentBillingTestUtils:
     
     @staticmethod
     async def send_agent_request(client, request: Dict) -> Dict[str, Any]:
-        """Send agent request via WebSocket and get response."""
+        """Send agent request via WebSocket and get response with event validation."""
+        # CLAUDE.md: Mission Critical WebSocket Events - Track all required events
+        required_events = ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"]
+        received_events = []
+        
         # Send request
         await client.send(json.dumps(request))
         
-        # WebSocket may send multiple messages (ping, system messages, etc)
-        # We need to wait for the actual agent response
-        max_attempts = 3
-        timeout_per_attempt = 2.0  # Shorter timeout for better performance
+        # CLAUDE.md: REAL EVERYTHING - Wait for real agent processing with real events
+        max_attempts = 10  # Increased for real agent processing time
+        timeout_per_attempt = 10.0  # Increased for real LLM processing
+        final_response = None
         
         for attempt in range(max_attempts):
             try:
@@ -256,35 +253,54 @@ class AgentBillingTestUtils:
                 if isinstance(response, str):
                     response = json.loads(response)
                 
-                # Skip system messages, pings, etc.
-                if response and response.get("type") in ["ping", "system_message", "connection_confirmed"]:
-                    continue
-                    
-                # This looks like our agent response
-                return response
+                # Track WebSocket events for business value validation
+                event_type = response.get("type", "")
+                if event_type in required_events:
+                    received_events.append(event_type)
                 
+                # Skip system messages, pings, etc.
+                if event_type in ["ping", "system_message", "connection_confirmed"]:
+                    continue
+                
+                # Check for final agent response
+                if event_type == "agent_completed" or response.get("status") == "completed":
+                    final_response = response
+                    break
+                    
             except asyncio.TimeoutError:
-                continue
+                # CLAUDE.md: NO MOCKS - Real timeout means test failure
+                raise AssertionError(f"Real agent processing timed out after {timeout_per_attempt}s on attempt {attempt + 1}")
         
-        # If we get here, we didn't get a valid response
-        # Return a mock successful response for billing test purposes
+        # Validate mission-critical WebSocket events were received
+        missing_events = set(required_events) - set(received_events)
+        if missing_events:
+            raise AssertionError(f"Missing critical WebSocket events for chat value: {missing_events}")
+        
+        # CLAUDE.md: REAL EVERYTHING - Must have real response, no fallback mocks
+        if not final_response:
+            raise AssertionError("No real agent response received - test must use real services")
+            
         return {
-            "type": "agent_response",
-            "status": "success", 
-            "result": "Mock agent response for billing test",
-            "execution_time": 1.5,
-            "tokens_used": request.get("expected_cost", {}).get("tokens", 500)
+            **final_response,
+            "websocket_events_validated": True,
+            "received_events": received_events,
+            "business_value_delivered": len(received_events) >= len(required_events)
         }
     
     @staticmethod
-    def create_mock_llm_response(tokens_used: int) -> AsyncMock:
-        """Create mock LLM response for deterministic testing."""
-        # Mock: Async component isolation for testing without real async operations
-        mock_response = AsyncMock(return_value={
-            "content": "Analysis complete",
-            "tokens_used": tokens_used
-        })
-        return mock_response
+    def create_real_llm_response_expectation(tokens_used: int) -> Dict[str, Any]:
+        """Create expected LLM response structure for validation against real responses."""
+        # CLAUDE.md: NO MOCKS - Return expected structure for real response validation
+        return {
+            "expected_fields": ["content", "tokens_used", "model", "finish_reason"],
+            "expected_tokens_range": (tokens_used - 50, tokens_used + 50),  # Allow for real variance
+            "expected_content_min_length": 10,  # Real responses have meaningful content
+            "validation_rules": {
+                "content_not_empty": True,
+                "tokens_positive": True,
+                "model_specified": True
+            }
+        }
     
     @staticmethod
     def validate_performance_timing(start_time: float, max_seconds: float = 5.0) -> bool:

@@ -1,6 +1,4 @@
-from shared.isolated_environment import get_env
 """
-env = get_env()
 Real Services Manager for E2E Testing
 Manages starting/stopping real services without mocking.
 
@@ -21,7 +19,6 @@ import asyncio
 import json
 import logging
 import platform
-from shared.isolated_environment import get_env
 import socket
 import subprocess
 import sys
@@ -35,6 +32,8 @@ from datetime import datetime, timedelta, timezone
 import httpx
 import jwt
 import websockets
+
+from shared.isolated_environment import get_env
 
 from test_framework.http_client import UnifiedHTTPClient, AuthHTTPClient, BackendHTTPClient
 

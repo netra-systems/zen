@@ -1,6 +1,4 @@
-from shared.isolated_environment import get_env
 """
-env = get_env()
 E2E test fixtures and configuration.
 ENFORCES REAL SERVICES ONLY - NO MOCKS ALLOWED.
 """
@@ -48,26 +46,26 @@ def pytest_configure(config):
 # CRITICAL: Override any PostgreSQL configuration for E2E tests to use SQLite
 # E2E tests should be fast and not depend on external databases
 # This must be set BEFORE any backend modules are imported
-if "pytest" in sys.modules or env.get("PYTEST_CURRENT_TEST"):
+if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
     # Check if we're in staging environment
-    current_env = env.get("ENVIRONMENT", "").lower()
+    current_env = get_env().get("ENVIRONMENT", "").lower()
     is_staging = current_env == "staging"
     
     if is_staging:
         # Staging environment - use staging database configuration
-        env.set("E2E_TESTING", "true", "test")
-        env.set("TESTING", "0", "test")  # Not local testing in staging
+        get_env().set("E2E_TESTING", "true", "test")
+        get_env().set("TESTING", "0", "test")  # Not local testing in staging
         # Keep existing ENVIRONMENT=staging
     else:
         # Force SQLite for local E2E tests regardless of other configurations
-        env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
-        env.set("TESTING", "1", "test")
-        env.set("ENVIRONMENT", "testing", "test")
-        env.set("E2E_TESTING", "true", "test")
+        get_env().set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
+        get_env().set("TESTING", "1", "test")
+        get_env().set("ENVIRONMENT", "testing", "test")
+        get_env().set("E2E_TESTING", "true", "test")
 
 # Dynamic port configuration for E2E tests
 # Determine current environment
-current_env = env.get("ENVIRONMENT", "").lower()
+current_env = get_env().get("ENVIRONMENT", "").lower()
 is_staging = current_env == "staging"
 
 if is_staging:
