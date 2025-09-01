@@ -214,33 +214,31 @@ class StartupOrchestrator:
         self.logger.info(f"    - Registry: {'✓' if health_status.registry_healthy else '✗'}")
     
     async def _verify_tool_dispatcher_websocket_support(self) -> None:
-        """Verify tool dispatcher has WebSocket support."""
-        from netra_backend.app.websocket_core import get_websocket_manager
-        
+        """Verify tool dispatcher has AgentWebSocketBridge support."""
         # Get tool dispatcher
         tool_dispatcher = self.app.state.tool_dispatcher
         if not tool_dispatcher:
             raise DeterministicStartupError("Tool dispatcher not available for verification")
         
-        # Check if it has WebSocket support
+        # Connect tool dispatcher to bridge if not already connected
+        bridge = self.app.state.agent_websocket_bridge
+        if bridge and hasattr(tool_dispatcher, 'executor'):
+            if not hasattr(tool_dispatcher.executor, 'websocket_bridge') or not tool_dispatcher.executor.websocket_bridge:
+                # Connect the bridge to tool dispatcher
+                tool_dispatcher.executor.websocket_bridge = bridge
+                self.logger.info("    - AgentWebSocketBridge connected to tool dispatcher")
+        
+        # Check if it has WebSocket support through bridge
         if hasattr(tool_dispatcher, 'has_websocket_support'):
             if tool_dispatcher.has_websocket_support:
-                self.logger.info("    - Tool dispatcher has WebSocket support enabled")
+                self.logger.info("    - Tool dispatcher has WebSocket support through AgentWebSocketBridge")
             else:
-                # This shouldn't happen since we create it with WebSocket support
                 self.logger.warning("    - Tool dispatcher lacks WebSocket support - events may not work")
-                
-                # Try to fix it by getting WebSocket manager
-                websocket_manager = get_websocket_manager()
-                if websocket_manager and hasattr(tool_dispatcher, 'executor'):
-                    if hasattr(tool_dispatcher.executor, 'websocket_manager'):
-                        tool_dispatcher.executor.websocket_manager = websocket_manager
-                        self.logger.info("    - WebSocket support added to tool dispatcher")
         else:
             # Legacy check for older versions
             self.logger.info("    - Tool dispatcher doesn't expose WebSocket support status (legacy)")
         
-        # Also ensure registry has WebSocket manager set for agents
+        # Also ensure registry has WebSocket bridge connection for agents
         supervisor = self.app.state.agent_supervisor
         if supervisor:
             registry = None
@@ -249,11 +247,17 @@ class StartupOrchestrator:
             elif hasattr(supervisor, 'registry'):
                 registry = supervisor.registry
             
-            if registry and hasattr(registry, 'set_websocket_manager'):
-                websocket_manager = get_websocket_manager()
-                if websocket_manager:
-                    registry.set_websocket_manager(websocket_manager)
-                    self.logger.info("    - WebSocket manager set on agent registry")
+            if registry and bridge:
+                # Set the bridge on agent registry - only latest method supported
+                if hasattr(registry, 'set_websocket_bridge'):
+                    registry.set_websocket_bridge(bridge)
+                    self.logger.info("    - AgentWebSocketBridge set on agent registry")
+                else:
+                    # Registry must support the bridge pattern
+                    raise DeterministicStartupError(
+                        "Agent registry does not support set_websocket_bridge() - "
+                        "registry must be updated to support AgentWebSocketBridge pattern"
+                    )
     
     async def _phase5_critical_services(self) -> None:
         """Phase 5: Critical Services - Required for system stability."""
@@ -557,25 +561,39 @@ class StartupOrchestrator:
         self.app.state.security_service = SecurityService(self.app.state.key_manager)
     
     def _initialize_tool_registry(self) -> None:
-        """Initialize tool registry and dispatcher with WebSocket support - CRITICAL."""
+        """Initialize tool registry and dispatcher with AgentWebSocketBridge support - CRITICAL."""
         from netra_backend.app.services.tool_registry import ToolRegistry
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-        from netra_backend.app.websocket_core import get_websocket_manager
+        from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
         
-        # Get WebSocket manager for real-time notifications
-        websocket_manager = get_websocket_manager()
-        if websocket_manager is None:
-            self.logger.warning("WebSocketManager is None during tool dispatcher creation - WebSocket events may not work")
+        # Get AgentWebSocketBridge for real-time notifications
+        # Note: Bridge might not be fully integrated yet, but we need the instance
+        try:
+            import asyncio
+            # Try to get existing bridge instance if available
+            if hasattr(self.app.state, 'agent_websocket_bridge') and self.app.state.agent_websocket_bridge:
+                websocket_bridge = self.app.state.agent_websocket_bridge
+                self.logger.info("    - Using existing AgentWebSocketBridge instance for tool dispatcher")
+            else:
+                # Bridge not created yet - create basic instance
+                # Full integration will happen in Phase 4
+                websocket_bridge = None  # Will be set during integration phase
+                self.logger.info("    - Tool dispatcher created without bridge (will be connected in Phase 4)")
+        except Exception as e:
+            self.logger.warning(f"Could not get AgentWebSocketBridge for tool dispatcher: {e}")
+            websocket_bridge = None
         
-        # Create tool dispatcher with WebSocket support from the start
+        # Create tool dispatcher with bridge support
         tool_registry = ToolRegistry(self.app.state.db_session_factory)
         self.app.state.tool_dispatcher = ToolDispatcher(
             tools=tool_registry.get_tools([]),
-            websocket_manager=websocket_manager
+            websocket_bridge=websocket_bridge
         )
         
-        if websocket_manager:
-            self.logger.info("    - Tool dispatcher created with WebSocket support built-in")
+        if websocket_bridge:
+            self.logger.info("    - Tool dispatcher created with AgentWebSocketBridge support built-in")
+        else:
+            self.logger.info("    - Tool dispatcher created without bridge (bridge integration pending)")
     
     async def _initialize_websocket(self) -> None:
         """Initialize WebSocket components - CRITICAL."""
@@ -686,9 +704,9 @@ class StartupOrchestrator:
                     if not isinstance(dispatcher.executor, UnifiedToolExecutionEngine):
                         raise DeterministicStartupError("Tool dispatcher not using UnifiedToolExecutionEngine - events cannot be sent")
                     
-                    # Check that the executor has WebSocket notifier internally
-                    if not hasattr(dispatcher.executor, 'websocket_notifier') or dispatcher.executor.websocket_notifier is None:
-                        raise DeterministicStartupError("Tool executor has no WebSocket notifier - events cannot be sent")
+                    # Check that the executor has AgentWebSocketBridge internally
+                    if not hasattr(dispatcher.executor, 'websocket_bridge') or dispatcher.executor.websocket_bridge is None:
+                        raise DeterministicStartupError("Tool executor has no AgentWebSocketBridge - events cannot be sent")
             
             self.logger.info("  ✓ Step 21: WebSocket event delivery verified")
             

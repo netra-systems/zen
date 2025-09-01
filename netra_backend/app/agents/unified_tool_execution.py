@@ -23,7 +23,6 @@ from netra_backend.app.logging_config import central_logger
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-    from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
     from netra_backend.app.db.models_postgres import User
     from netra_backend.app.schemas.tool import (
         SimpleToolPayload,
@@ -37,7 +36,7 @@ if TYPE_CHECKING:
         ToolExecutionContext,
     )
     from netra_backend.app.services.tool_permission_service import ToolPermissionService
-    from netra_backend.app.websocket_core import WebSocketManager
+    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 logger = central_logger.get_logger(__name__)
 
@@ -54,16 +53,11 @@ class UnifiedToolExecutionEngine:
     
     def __init__(
         self,
-        websocket_manager: Optional['WebSocketManager'] = None,
+        websocket_bridge: Optional['AgentWebSocketBridge'] = None,
         permission_service: Optional['ToolPermissionService'] = None
     ):
         """Initialize unified tool execution engine."""
-        self.websocket_manager = websocket_manager
-        self.websocket_notifier = None
-        if websocket_manager:
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-            self.websocket_notifier = WebSocketNotifier(websocket_manager)
-        
+        self.websocket_bridge = websocket_bridge
         self.permission_service = permission_service
         
         # Metrics tracking
@@ -172,7 +166,7 @@ class UnifiedToolExecutionEngine:
         
         # Get or create context for notifications
         context = None
-        if self.websocket_notifier:
+        if self.websocket_bridge:
             context = self._get_or_create_context(state, run_id, tool_name)
             await self._send_tool_executing(context, tool_name, parameters)
         
@@ -182,7 +176,7 @@ class UnifiedToolExecutionEngine:
             duration_ms = (time.time() - start_time) * 1000
             
             # Send completed notification
-            if context and self.websocket_notifier:
+            if context and self.websocket_bridge:
                 await self._send_tool_completed(
                     context, tool_name, result, duration_ms, "success"
                 )
@@ -454,34 +448,29 @@ class UnifiedToolExecutionEngine:
         tool_name: str,
         tool_input: Any
     ) -> None:
-        """Send tool executing notification with enhanced metadata."""
+        """Send tool executing notification via AgentWebSocketBridge."""
         # CRITICAL: Always attempt to notify, with fallback
         if not context:
             logger.critical(f"MISSING CONTEXT: Tool {tool_name} executing without context - events invisible")
             return
             
-        if not self.websocket_notifier:
-            # CRITICAL: Log when WebSocket unavailable so we know events are lost
+        if not self.websocket_bridge:
+            # CRITICAL: Log when bridge unavailable so we know events are lost
             logger.critical(
-                f"WEBSOCKET UNAVAILABLE: Tool {tool_name} executing for thread {context.thread_id} - "
+                f"BRIDGE UNAVAILABLE: Tool {tool_name} executing for thread {context.thread_id} - "
                 f"user will not see progress"
             )
-            # Could write to Redis or database here as fallback
-            # For now, at least we have audit trail in logs
             return
         
         try:
             # Extract contextual information
-            tool_purpose = self._get_tool_purpose(tool_name, tool_input)
-            estimated_duration = self._estimate_tool_duration(tool_name, tool_input)
             params_summary = self._create_parameters_summary(tool_input)
             
-            await self.websocket_notifier.send_tool_executing(
-                context,
-                tool_name,
-                tool_purpose=tool_purpose,
-                estimated_duration_ms=estimated_duration,
-                parameters_summary=params_summary
+            await self.websocket_bridge.notify_tool_executing(
+                run_id=context.run_id,
+                agent_name=context.agent_name,
+                tool_name=tool_name,
+                parameters={"summary": params_summary} if params_summary else None
             )
         except Exception as e:
             logger.warning(f"Failed to send tool_executing notification: {e}")
@@ -495,19 +484,18 @@ class UnifiedToolExecutionEngine:
         status: str,
         error_type: str = None
     ) -> None:
-        """Send tool completed notification with result."""
+        """Send tool completed notification via AgentWebSocketBridge."""
         # CRITICAL: Always attempt to notify, with fallback
         if not context:
             logger.critical(f"MISSING CONTEXT: Tool {tool_name} completed without context - events invisible")
             return
             
-        if not self.websocket_notifier:
-            # CRITICAL: Log when WebSocket unavailable so we know events are lost
+        if not self.websocket_bridge:
+            # CRITICAL: Log when bridge unavailable so we know events are lost
             logger.critical(
-                f"WEBSOCKET UNAVAILABLE: Tool {tool_name} completed for thread {context.thread_id} - "
+                f"BRIDGE UNAVAILABLE: Tool {tool_name} completed for thread {context.thread_id} - "
                 f"status: {status}, duration: {duration_ms:.0f}ms - user will not see result"
             )
-            # Could write to Redis or database here as fallback
             return
         
         try:
@@ -527,8 +515,12 @@ class UnifiedToolExecutionEngine:
                         "MemoryError", "SystemError", "KeyboardInterrupt"
                     ]
             
-            await self.websocket_notifier.send_tool_completed(
-                context, tool_name, result_dict
+            await self.websocket_bridge.notify_tool_completed(
+                run_id=context.run_id,
+                agent_name=context.agent_name,
+                tool_name=tool_name,
+                result=result_dict,
+                execution_time_ms=duration_ms
             )
         except Exception as e:
             logger.warning(f"Failed to send tool_completed notification: {e}")
@@ -722,19 +714,23 @@ class UnifiedToolExecutionEngine:
         status_message: str = None
     ) -> None:
         """Send granular progress update for long-running tools."""
-        if not self.websocket_notifier or not context:
+        if not self.websocket_bridge or not context:
             return
         
         try:
             estimated_remaining = self._calculate_remaining_time(tool_name, progress_percentage)
             
-            await self.websocket_notifier.send_periodic_update(
-                context,
-                operation_name=tool_name,
-                progress_percentage=progress_percentage,
-                status_message=status_message,
-                estimated_remaining_ms=estimated_remaining,
-                current_step=f"Processing: {progress_percentage:.0f}% complete"
+            progress_data = {
+                "percentage": progress_percentage,
+                "message": status_message or f"Processing: {progress_percentage:.0f}% complete",
+                "estimated_remaining_ms": estimated_remaining,
+                "current_step": f"Processing: {progress_percentage:.0f}% complete"
+            }
+            
+            await self.websocket_bridge.notify_progress_update(
+                run_id=context.run_id,
+                agent_name=context.agent_name,
+                progress=progress_data
             )
         except Exception as e:
             logger.warning(f"Failed to send progress update: {e}")

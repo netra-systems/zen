@@ -5,7 +5,7 @@ from langchain_core.tools import BaseTool
 from pydantic import BaseModel, Field
 
 if TYPE_CHECKING:
-    from netra_backend.app.websocket_core import WebSocketManager
+    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher_registry import ToolRegistry
@@ -36,32 +36,33 @@ class ToolDispatchResponse(BaseModel):
 class ToolDispatcher:
     """Core tool dispatcher with modular architecture"""
     
-    def __init__(self, tools: List[BaseTool] = None, websocket_manager: Optional['WebSocketManager'] = None):
-        """Initialize tool dispatcher with optional WebSocket support from the start.
+    def __init__(self, tools: List[BaseTool] = None, websocket_bridge: Optional['AgentWebSocketBridge'] = None):
+        """Initialize tool dispatcher with optional AgentWebSocketBridge support.
         
         Args:
             tools: List of tools to register initially
-            websocket_manager: WebSocketManager for real-time notifications (critical for chat)
+            websocket_bridge: AgentWebSocketBridge for real-time notifications (critical for chat)
         """
-        self._init_components(websocket_manager)
+        self._init_components(websocket_bridge)
         self._register_initial_tools(tools)
     
     @property
     def tools(self) -> Dict[str, Any]:
-        """Expose tools registry for backward compatibility"""
+        """Expose tools registry"""
         return self.registry.tools
     
     @property
     def has_websocket_support(self) -> bool:
-        """Check if WebSocket support is enabled."""
-        return hasattr(self.executor, 'websocket_manager') and self.executor.websocket_manager is not None
+        """Check if WebSocket support is enabled through bridge."""
+        return hasattr(self.executor, 'websocket_bridge') and self.executor.websocket_bridge is not None
     
-    def _init_components(self, websocket_manager: Optional['WebSocketManager'] = None) -> None:
-        """Initialize dispatcher components with WebSocket support built-in."""
+    
+    def _init_components(self, websocket_bridge: Optional['AgentWebSocketBridge'] = None) -> None:
+        """Initialize dispatcher components with AgentWebSocketBridge support built-in."""
         self.registry = ToolRegistry()
         # Always use UnifiedToolExecutionEngine - no more enhancement pattern
         from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-        self.executor = UnifiedToolExecutionEngine(websocket_manager)
+        self.executor = UnifiedToolExecutionEngine(websocket_bridge=websocket_bridge)
         self.validator = ToolValidator()
     
     def _register_initial_tools(self, tools: List[BaseTool]) -> None:
@@ -143,38 +144,10 @@ class ToolDispatcher:
         )
     
     async def _execute_tool(self, tool_input: ToolInput, tool: Any, kwargs: Dict[str, Any]) -> ToolResult:
-        """Execute tool via executor - backward compatibility method"""
+        """Execute tool via executor"""
         return await self.executor.execute_tool_with_input(tool_input, tool, kwargs)
     
-    async def _execute_tool_with_error_handling(
-        self,
-        tool: Any,
-        tool_name: str,
-        parameters: Dict[str, Any],
-        state: DeepAgentState,
-        run_id: str
-    ) -> ToolDispatchResponse:
-        """Execute tool with comprehensive error handling"""
-        return await self.executor.execute_with_state(tool, tool_name, parameters, state, run_id)
     
-    async def _execute_tool_by_type(
-        self,
-        tool: Any,
-        parameters: Dict[str, Any],
-        state: DeepAgentState,
-        run_id: str
-    ) -> Any:
-        """Execute tool by type - backward compatibility method"""
-        return await self.executor._execute_by_type(tool, parameters, state, run_id)
     
-    def _create_success_response(self, result: Any, tool_name: str, run_id: str) -> ToolDispatchResponse:
-        """Create success response - backward compatibility method"""
-        return self.executor._create_success_response(result, tool_name, run_id)
     
-    def _create_error_response(self, error: Exception, tool_name: str, run_id: str) -> ToolDispatchResponse:
-        """Create error response - backward compatibility method"""
-        return self.executor._create_error_response(error, tool_name, run_id)
     
-    def _register_tool_batch(self, tool_names: List[str]) -> None:
-        """Register batch of tools - backward compatibility method"""
-        return self.registry._register_tool_batch(tool_names)
