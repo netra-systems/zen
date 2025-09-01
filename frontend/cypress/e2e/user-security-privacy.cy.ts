@@ -293,8 +293,8 @@ describe('User Security and Privacy Settings', () => {
     cy.get('button').contains('Security').click();
     cy.get('button').contains('Active Sessions').click();
 
-    // Mock sessions
-    cy.intercept('GET', '/api/users/sessions', {
+    // Mock sessions with current API structure
+    cy.intercept('GET', '/api/user/sessions', {
       statusCode: 200,
       body: {
         sessions: [
@@ -340,8 +340,8 @@ describe('User Security and Privacy Settings', () => {
     cy.get('button').contains('Security').click();
     cy.get('button').contains('Active Sessions').click();
 
-    // Mock sessions
-    cy.intercept('GET', '/api/users/sessions', {
+    // Mock sessions with current API structure
+    cy.intercept('GET', '/api/user/sessions', {
       statusCode: 200,
       body: {
         sessions: [

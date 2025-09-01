@@ -1,8 +1,17 @@
-import { WebSocketMessage } from '@/types/unified';
+/// <reference types="cypress" />
+
+/**
+ * User Profile Basic Information Management E2E Tests
+ * Updated for current system implementation:
+ * - Auth endpoints: /auth/config, /auth/me, /auth/verify, /auth/refresh
+ * - Current token structure: jwt_token, refresh_token, user
+ * - API endpoints: /api/user/* for user management
+ * - Circuit breaker integration for resilient API calls
+ */
 
 describe('User Profile Basic Information Management', () => {
   beforeEach(() => {
-    // Clear storage and setup authenticated state matching current auth system
+    // Clear storage and setup authenticated state matching current system
     cy.clearLocalStorage();
     cy.clearCookies();
     
@@ -11,19 +20,40 @@ describe('User Profile Basic Information Management', () => {
       return false;
     });
     
-    // Setup auth state to match current LoginButton component expectations
+    // Setup current auth state structure (matching actual token names)
     cy.window().then((win) => {
-      win.localStorage.setItem('auth_token', 'mock-jwt-token-for-testing');
+      win.localStorage.setItem('jwt_token', 'mock-jwt-token-for-testing');
+      win.localStorage.setItem('refresh_token', 'mock-refresh-token-for-testing');
       win.localStorage.setItem('user', JSON.stringify({
         id: 'test-user-id',
         email: 'test@netrasystems.ai',
         full_name: 'Test User',
         picture: null,
-        created_at: '2024-01-01T00:00:00Z'
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z'
       }));
     });
     
-    // Visit main page first since no /settings page exists yet
+    // Mock auth verification endpoint
+    cy.intercept('POST', '/auth/verify', {
+      statusCode: 200,
+      body: { valid: true, user_id: 'test-user-id' }
+    }).as('verifyAuth');
+    
+    // Mock user profile endpoint
+    cy.intercept('GET', '/api/user/profile', {
+      statusCode: 200,
+      body: {
+        id: 'test-user-id',
+        email: 'test@netrasystems.ai',
+        full_name: 'Test User',
+        picture: null,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z'
+      }
+    }).as('getUserProfile');
+    
+    // Visit main page
     cy.visit('/', { failOnStatusCode: false });
   });
 
@@ -38,11 +68,13 @@ describe('User Profile Basic Information Management', () => {
   });
 
   it('should validate user authentication state', () => {
-    // Check that user is properly authenticated
+    // Check that user is properly authenticated with current token structure
     cy.window().then((win) => {
-      const token = win.localStorage.getItem('auth_token');
+      const token = win.localStorage.getItem('jwt_token');
+      const refreshToken = win.localStorage.getItem('refresh_token');
       const user = win.localStorage.getItem('user');
       expect(token).to.equal('mock-jwt-token-for-testing');
+      expect(refreshToken).to.equal('mock-refresh-token-for-testing');
       expect(user).to.not.be.null;
       
       if (user) {
@@ -57,10 +89,10 @@ describe('User Profile Basic Information Management', () => {
     // Test logout button exists and works
     cy.get('[data-testid="logout-button"]').should('exist');
     
-    // Mock logout endpoint if it exists
+    // Mock logout endpoint with current auth service structure
     cy.intercept('POST', '/auth/logout', {
       statusCode: 200,
-      body: { success: true }
+      body: { success: true, message: 'Logged out successfully' }
     }).as('logoutRequest');
     
     cy.get('[data-testid="logout-button"]').click();
@@ -76,11 +108,13 @@ describe('User Profile Basic Information Management', () => {
     testRoutes.forEach(route => {
       cy.visit(route, { failOnStatusCode: false });
       
-      // Check that auth data persists in localStorage
+      // Check that auth data persists in localStorage with current token structure
       cy.window().then((win) => {
-        const token = win.localStorage.getItem('auth_token');
+        const token = win.localStorage.getItem('jwt_token');
+        const refreshToken = win.localStorage.getItem('refresh_token');
         const user = win.localStorage.getItem('user');
         expect(token).to.not.be.null;
+        expect(refreshToken).to.not.be.null;
         expect(user).to.not.be.null;
       });
     });
@@ -157,9 +191,10 @@ describe('User Profile Basic Information Management', () => {
   });
 
   it('should handle authentication errors gracefully', () => {
-    // Clear auth data to simulate expired token
+    // Clear auth data to simulate expired token (current token structure)
     cy.window().then((win) => {
-      win.localStorage.removeItem('auth_token');
+      win.localStorage.removeItem('jwt_token');
+      win.localStorage.removeItem('refresh_token');
       win.localStorage.removeItem('user');
     });
     
@@ -168,7 +203,7 @@ describe('User Profile Basic Information Management', () => {
     // Should show login button when not authenticated
     cy.get('[data-testid="login-button"]').should('exist').and('contain', 'Login with Google');
     
-    // Should not show user profile components
-    cy.get('[data-testid="auth-component"]').should('not.exist');
+    // Should not show user profile components when not authenticated
+    cy.get('[data-testid="user-email"]').should('not.exist');
   });
 });
