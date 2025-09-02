@@ -281,7 +281,9 @@ class UnifiedDockerManager:
                  test_id: Optional[str] = None,
                  use_production_images: bool = True,  # Default to memory-optimized production images
                  mode: ServiceMode = ServiceMode.DOCKER,
-                 use_alpine: bool = False):  # Add Alpine container support
+                 use_alpine: bool = False,  # Add Alpine container support
+                 rebuild_images: bool = True,  # Rebuild images by default for freshness
+                 rebuild_backend_only: bool = True):  # Only rebuild backend by default
         """
         Initialize unified Docker manager with orchestration capabilities.
         
@@ -292,6 +294,8 @@ class UnifiedDockerManager:
             use_production_images: Use production Docker images for memory efficiency
             mode: Service execution mode (docker, local, mock)
             use_alpine: Use Alpine-based Docker compose files for minimal container size
+            rebuild_images: Whether to rebuild Docker images before starting
+            rebuild_backend_only: Whether to rebuild only backend services (backend, auth)
         """
         self.config = config or OrchestrationConfig()
         self.environment_type = environment_type
@@ -299,6 +303,8 @@ class UnifiedDockerManager:
         self.use_production_images = use_production_images
         self.mode = mode
         self.use_alpine = use_alpine
+        self.rebuild_images = rebuild_images
+        self.rebuild_backend_only = rebuild_backend_only
         
         # Port discovery and allocation
         self.port_discovery = DockerPortDiscovery(use_test_services=True)
@@ -3180,9 +3186,12 @@ async def pytest_orchestrate_services():
 class ServiceOrchestrator(UnifiedDockerManager):
     """Legacy compatibility class - redirects to UnifiedDockerManager"""
     
-    def __init__(self, config: Optional[OrchestrationConfig] = None, use_alpine: bool = False):
+    def __init__(self, config: Optional[OrchestrationConfig] = None, use_alpine: bool = False,
+                 rebuild_images: bool = True, rebuild_backend_only: bool = True):
         """Initialize with legacy ServiceOrchestrator interface"""
-        super().__init__(config=config, environment_type=EnvironmentType.SHARED, use_production_images=True, use_alpine=use_alpine)
+        super().__init__(config=config, environment_type=EnvironmentType.SHARED, 
+                        use_production_images=True, use_alpine=use_alpine,
+                        rebuild_images=rebuild_images, rebuild_backend_only=rebuild_backend_only)
         logger.info("ServiceOrchestrator is deprecated - using UnifiedDockerManager")
 
 
