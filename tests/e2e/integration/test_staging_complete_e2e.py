@@ -24,19 +24,10 @@ import pytest
 from test_framework.environment_markers import env, env_requires, staging_only
 from tests.e2e.integration.unified_e2e_harness import UnifiedE2ETestHarness
 from tests.e2e.service_manager import RealServicesManager
+from tests.e2e.staging_test_helpers import StagingTestResult
 from tests.e2e.test_environment_config import TestEnvironmentType
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class TestStagingResult:
-    """Container for staging test results."""
-    test_name: str
-    status: str  # passed, failed, skipped
-    duration_ms: int
-    error_message: Optional[str] = None
-    details: Optional[Dict] = None
 
 
 class TestStagingE2ESuite:

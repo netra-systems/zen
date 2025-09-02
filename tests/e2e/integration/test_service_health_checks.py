@@ -158,7 +158,7 @@ class TestDevHealthFixture:
 @pytest.mark.e2e
 async def test_health_test_fixture():
     """Fixture providing health test environment."""
-    fixture = DevHealthTestFixture()
+    fixture = TestDevHealthFixture()
     yield fixture
     await fixture.cleanup()
 
@@ -245,7 +245,7 @@ async def test_health_monitoring_reliability(test_health_test_fixture):
     assert _verify_consistent_health(check_results)
 
 
-async def _check_all_service_health(fixture: DevHealthTestFixture) -> List[HealthCheckResult]:
+async def _check_all_service_health(fixture: TestDevHealthFixture) -> List[HealthCheckResult]:
     """Check health of all available services."""
     results = []
     
@@ -256,7 +256,7 @@ async def _check_all_service_health(fixture: DevHealthTestFixture) -> List[Healt
     return results
 
 
-async def _monitor_startup_health(fixture: DevHealthTestFixture) -> List[Tuple[float, List[HealthCheckResult]]]:
+async def _monitor_startup_health(fixture: TestDevHealthFixture) -> List[Tuple[float, List[HealthCheckResult]]]:
     """Monitor health checks during startup sequence."""
     progression = []
     start_time = time.time()

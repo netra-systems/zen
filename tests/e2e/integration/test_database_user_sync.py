@@ -39,6 +39,16 @@ import httpx
 import pytest
 import pytest_asyncio
 
+
+@dataclass
+class UserTestData:
+    """Test user data structure."""
+    id: str
+    email: str
+    full_name: str
+    auth_provider: str = "google"
+    is_active: bool = True
+
 # Add parent directories to sys.path for imports
 
 from tests.e2e.service_manager import (
