@@ -321,6 +321,7 @@ class BaseAgent(ABC):
     def _init_unified_reliability_infrastructure(self) -> None:
         """Initialize unified reliability infrastructure using UnifiedRetryHandler as SSOT foundation."""
         # Create custom retry configuration for agents based on AGENT_RETRY_POLICY
+        # Enable circuit breaker for agents (overriding AGENT_RETRY_POLICY default)
         custom_config = RetryConfig(
             max_attempts=getattr(agent_config.retry, 'max_retries', AGENT_RETRY_POLICY.max_attempts),
             base_delay=getattr(agent_config.retry, 'base_delay', AGENT_RETRY_POLICY.base_delay),
@@ -331,7 +332,7 @@ class BaseAgent(ABC):
             timeout_seconds=getattr(agent_config.timeout, 'default_timeout', AGENT_RETRY_POLICY.timeout_seconds),
             retryable_exceptions=AGENT_RETRY_POLICY.retryable_exceptions,
             non_retryable_exceptions=AGENT_RETRY_POLICY.non_retryable_exceptions,
-            circuit_breaker_enabled=getattr(agent_config, 'circuit_breaker_enabled', False),
+            circuit_breaker_enabled=True,  # Enable circuit breaker for BaseAgent reliability
             circuit_breaker_failure_threshold=getattr(agent_config, 'failure_threshold', 5),
             circuit_breaker_recovery_timeout=getattr(agent_config.timeout, 'default_timeout', 30.0),
             metrics_enabled=True
