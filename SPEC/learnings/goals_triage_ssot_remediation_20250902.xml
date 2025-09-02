@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>GoalsTriageSubAgent SSOT Remediation</title>
+    <date>2025-09-02</date>
+    <author>Claude Code Agent</author>
+    <category>SSOT Compliance</category>
+    <agent>GoalsTriageSubAgent</agent>
+    <phase>Phase 2 - Infrastructure Layer</phase>
+    <status>Completed</status>
+  </metadata>
+  
+  <executive_summary>
+    Successfully remediated SSOT violations in GoalsTriageSubAgent as part of Phase 2 of the agent audit plan.
+    Fixed 2 critical JSON handling violations and improved error handling patterns to use unified platform standards.
+    All tests pass with full backward compatibility maintained.
+  </executive_summary>
+  
+  <violations_found>
+    <violation>
+      <type>JSON Handling</type>
+      <location>Line 340 in _parse_goals_from_llm_response</location>
+      <issue>Direct usage of json.loads() instead of LLMResponseParser</issue>
+      <impact>Inconsistent error handling, no malformed JSON recovery</impact>
+    </violation>
+    
+    <violation>
+      <type>JSON Handling</type>
+      <location>Line 365 in _parse_goal_analysis_response</location>
+      <issue>Direct usage of json.loads() instead of LLMResponseParser</issue>
+      <impact>Poor handling of LLM response variations</impact>
+    </violation>
+    
+    <violation>
+      <type>Error Handling</type>
+      <location>Multiple methods</location>
+      <issue>Basic try/except without unified error handler integration</issue>
+      <impact>Inconsistent error logging, missing context information</impact>
+    </violation>
+  </violations_found>
+  
+  <fixes_applied>
+    <fix>
+      <component>JSON Parsing</component>
+      <changes>
+        - Added imports: LLMResponseParser, JSONErrorFixer, UnifiedJSONHandler
+        - Replaced json.loads() with LLMResponseParser.safe_json_parse()
+        - Replaced json.loads() with LLMResponseParser.ensure_agent_response_is_json()
+        - Added JSONErrorFixer for malformed JSON recovery
+      </changes>
+      <benefits>
+        - Consistent JSON handling across platform
+        - Better malformed JSON recovery
+        - Improved LLM response parsing
+      </benefits>
+    </fix>
+    
+    <fix>
+      <component>Error Handling</component>
+      <changes>
+        - Added import: agent_error_handler from unified_error_handler
+        - Integrated ErrorContext for comprehensive error logging
+        - Enhanced error handling in _extract_goals_from_request
+        - Enhanced error handling in _analyze_single_goal
+        - Enhanced error handling in main execute method
+        - Added proper session cleanup error handling
+      </changes>
+      <benefits>
+        - Consistent error logging with user context
+        - Better debugging with operation-specific details
+        - Unified error handling patterns
+      </benefits>
+    </fix>
+  </fixes_applied>
+  
+  <testing_approach>
+    <test_suite>test_goals_triage_ssot_violations.py</test_suite>
+    <test_suite>test_goals_triage_ssot_simple.py</test_suite>
+    <tests_created>
+      - JSON parsing compliance tests
+      - Error handling pattern tests
+      - Integration tests for full execution
+      - Concurrent execution isolation tests
+      - Malformed JSON recovery tests
+    </tests_created>
+    <results>All tests passing with full SSOT compliance achieved</results>
+  </testing_approach>
+  
+  <patterns_established>
+    <pattern>
+      <name>LLM Response Parsing</name>
+      <description>Always use LLMResponseParser for parsing LLM JSON responses</description>
+      <implementation>
+        parser = LLMResponseParser()
+        result = parser.safe_json_parse(response, fallback=default_value)
+      </implementation>
+    </pattern>
+    
+    <pattern>
+      <name>Error Context Creation</name>
+      <description>Create ErrorContext with user execution details for all errors</description>
+      <implementation>
+        error_context = ErrorContext(
+            user_id=context.user_id,
+            run_id=context.run_id,
+            thread_id=context.thread_id,
+            operation="operation_name",
+            severity="ERROR",
+            details={"additional": "context"}
+        )
+        agent_error_handler.handle_error(error, error_context)
+      </implementation>
+    </pattern>
+  </patterns_established>
+  
+  <lessons_learned>
+    <lesson>
+      <insight>JSON handling violations are common in agents that parse LLM responses</insight>
+      <recommendation>All agents should be audited for direct json.loads/dumps usage</recommendation>
+    </lesson>
+    
+    <lesson>
+      <insight>Error handling often lacks user context information</insight>
+      <recommendation>Standardize ErrorContext usage across all agents</recommendation>
+    </lesson>
+    
+    <lesson>
+      <insight>Test-driven remediation ensures backward compatibility</insight>
+      <recommendation>Create failing tests before fixes to verify improvements</recommendation>
+    </lesson>
+    
+    <lesson>
+      <insight>Multi-agent approach speeds up remediation</insight>
+      <recommendation>Use specialized agents for focused fixes to maintain quality</recommendation>
+    </lesson>
+  </lessons_learned>
+  
+  <metrics>
+    <metric name="Violations Fixed">3</metric>
+    <metric name="Lines Modified">~50</metric>
+    <metric name="Tests Created">15+</metric>
+    <metric name="Time to Complete">45 minutes</metric>
+    <metric name="Backward Compatibility">100% maintained</metric>
+  </metrics>
+  
+  <next_steps>
+    <step>Apply similar fixes to remaining Tier 2 agents</step>
+    <step>Create automated SSOT violation scanner for CI/CD</step>
+    <step>Update agent creation templates with SSOT patterns</step>
+    <step>Document patterns in developer guidelines</step>
+  </next_steps>
+  
+  <references>
+    <reference>AGENT_SSOT_AUDIT_PLAN.md</reference>
+    <reference>unified_json_handler.py</reference>
+    <reference>unified_error_handler.py</reference>
+    <reference>USER_CONTEXT_ARCHITECTURE.md</reference>
+  </references>
+</learning>

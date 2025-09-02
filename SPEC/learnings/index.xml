@@ -2422,4 +2422,38 @@
             <learning-ref>unified_agent_testing_implementation.xml</learning-ref>
         </related-learnings>
     </learning>
+    
+    <learning id="goals-triage-ssot-remediation-20250902">
+        <title>GoalsTriageSubAgent SSOT Remediation - Phase 2 Infrastructure</title>
+        <category>Agent/SSOT/Compliance</category>
+        <keywords>ssot, goals-triage, json-handling, error-handling, llm-response-parser, unified-patterns</keywords>
+        <path>goals_triage_ssot_remediation_20250902.xml</path>
+        <critical-takeaway>
+            Successfully remediated critical SSOT violations in GoalsTriageSubAgent. Fixed direct json.loads() 
+            usage (lines 340, 365) with LLMResponseParser. Integrated unified error handler with ErrorContext. 
+            Created comprehensive test suite. All agents parsing LLM responses must use LLMResponseParser, 
+            not direct JSON methods. Error handling must include UserExecutionContext details.
+        </critical-takeaway>
+        <severity>HIGH</severity>
+        <business-impact>Routing logic integrity, goal prioritization consistency, improved error recovery</business-impact>
+        <prevention>
+            Always use LLMResponseParser for LLM response parsing. Never use json.loads/dumps directly.
+            Always create ErrorContext with user details for error handling. Run SSOT compliance tests.
+        </prevention>
+        <implementation-patterns>
+            <pattern>LLMResponseParser.safe_json_parse() for JSON parsing with fallback</pattern>
+            <pattern>LLMResponseParser.ensure_agent_response_is_json() for LLM responses</pattern>
+            <pattern>ErrorContext with user_id, run_id, thread_id for all errors</pattern>
+        </implementation-patterns>
+        <testing-strategies>
+            <strategy>Create failing tests before fixes to ensure improvements</strategy>
+            <strategy>Test malformed JSON recovery scenarios</strategy>
+            <strategy>Verify concurrent user isolation</strategy>
+        </testing-strategies>
+        <related-learnings>
+            <learning-ref>golden-agent-index-2025-09-02</learning-ref>
+            <learning-ref>ssot_consolidation_20250825.xml</learning-ref>
+            <learning-ref>unified_agent_testing_implementation.xml</learning-ref>
+        </related-learnings>
+    </learning>
 </specification>
