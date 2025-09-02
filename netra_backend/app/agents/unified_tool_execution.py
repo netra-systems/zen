@@ -45,6 +45,59 @@ if TYPE_CHECKING:
 logger = central_logger.get_logger(__name__)
 
 
+async def enhance_tool_dispatcher_with_notifications(
+    tool_dispatcher,
+    websocket_manager=None,
+    enable_notifications=True
+):
+    """
+    Enhance tool dispatcher with WebSocket notifications.
+    
+    This function replaces the tool dispatcher's executor with a 
+    UnifiedToolExecutionEngine that has WebSocket notification capabilities.
+    
+    Args:
+        tool_dispatcher: The ToolDispatcher instance to enhance
+        websocket_manager: Optional WebSocket manager for notifications
+        enable_notifications: Whether to enable notifications (default True)
+    
+    Returns:
+        The enhanced tool dispatcher
+    """
+    # Check if already enhanced to prevent double enhancement
+    if hasattr(tool_dispatcher, '_websocket_enhanced') and tool_dispatcher._websocket_enhanced:
+        logger.debug("Tool dispatcher already enhanced with WebSocket notifications")
+        return tool_dispatcher
+    
+    # Create enhanced executor with WebSocket support
+    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+    
+    # Create WebSocket bridge if manager provided
+    websocket_bridge = None
+    if websocket_manager and enable_notifications:
+        websocket_bridge = AgentWebSocketBridge()
+        websocket_bridge.websocket_manager = websocket_manager
+    
+    # Replace executor with enhanced version
+    enhanced_executor = UnifiedToolExecutionEngine(
+        websocket_bridge=websocket_bridge,
+        permission_service=getattr(tool_dispatcher.executor, 'permission_service', None) if hasattr(tool_dispatcher, 'executor') else None
+    )
+    
+    # Store reference to websocket manager for compatibility
+    if websocket_manager:
+        enhanced_executor.websocket_manager = websocket_manager
+    
+    # Replace the executor
+    tool_dispatcher.executor = enhanced_executor
+    
+    # Mark as enhanced to prevent double enhancement
+    tool_dispatcher._websocket_enhanced = True
+    
+    logger.info("✅ Tool dispatcher enhanced with WebSocket notifications")
+    return tool_dispatcher
+
+
 class UnifiedToolExecutionEngine:
     """Single source of truth for all tool execution with WebSocket notifications.
     
