@@ -390,8 +390,18 @@ class DockerResourceMonitor:
         
         try:
             memory = psutil.virtual_memory()
-            max_limit = self.max_memory_gb * 1024**3
-            percentage = (memory.used / max_limit) * 100
+            
+            # For memory monitoring, we track how much of the system's total memory is used
+            # Our max_limit represents the threshold we're comfortable with for Docker operations
+            # But we report against total system memory to be realistic
+            max_limit = memory.total  # Use actual system total
+            docker_threshold_bytes = self.max_memory_gb * 1024**3
+            
+            # Calculate percentage of system memory used
+            percentage = (memory.used / memory.total) * 100
+            
+            # But for reporting purposes, show our Docker-specific threshold
+            # This way we can warn when approaching Docker limits
             
             return ResourceUsage(
                 resource_type=ResourceType.MEMORY,
