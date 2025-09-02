@@ -40,7 +40,11 @@
       "Bash(gcloud config:*)",
       "Bash(gcloud services enable:*)",
       "Bash(gcloud services list:*)",
-      "Bash(gcloud logging read:*)"
+      "Bash(gcloud logging read:*)",
+      "Bash(gcloud run services describe:*)",
+      "Bash(docker restart:*)",
+      "Bash(npx cypress run:*)",
+      "Bash(gcloud run services list:*)"
     ],
     "deny": []
   },
