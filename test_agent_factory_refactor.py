@@ -119,7 +119,7 @@ async def test_agent_class_registry():
     except RuntimeError as e:
         assert "frozen" in str(e).lower(), f"Expected freeze error, got: {e}"
     
-    print("✅ AgentClassRegistry tests passed")
+    print("[PASS] AgentClassRegistry tests passed")
 
 
 async def test_user_execution_context():
@@ -159,7 +159,7 @@ async def test_user_execution_context():
     except Exception as e:
         assert "placeholder" in str(e).lower(), f"Expected placeholder error, got: {e}"
     
-    print("✅ UserExecutionContext tests passed")
+    print("[PASS] UserExecutionContext tests passed")
 
 
 async def test_agent_instance_factory():
@@ -208,7 +208,7 @@ async def test_agent_instance_factory():
     # Test cleanup
     await factory.cleanup_user_context(context)
     
-    print("✅ AgentInstanceFactory tests passed")
+    print("[PASS] AgentInstanceFactory tests passed")
 
 
 async def test_legacy_agent_registry_compatibility():
@@ -229,7 +229,7 @@ async def test_legacy_agent_registry_compatibility():
     factory = registry.create_request_scoped_factory()
     assert isinstance(factory, AgentInstanceFactory)
     
-    print("✅ Legacy AgentRegistry compatibility tests passed")
+    print("[PASS] Legacy AgentRegistry compatibility tests passed")
 
 
 async def test_websocket_isolation():
@@ -274,7 +274,7 @@ async def test_websocket_isolation():
     await factory.cleanup_user_context(context1)
     await factory.cleanup_user_context(context2)
     
-    print("✅ WebSocket isolation tests passed")
+    print("[PASS] WebSocket isolation tests passed")
 
 
 async def main():

@@ -1,6 +1,7 @@
-"""Execution engine for supervisor agent pipelines with concurrency optimization.
+"""Execution engine for supervisor agent pipelines with UserExecutionContext support.
 
-Business Value: Supports 5+ concurrent users with <2s response times and proper event ordering.
+Business Value: Supports 5+ concurrent users with complete isolation and <2s response times.
+New Features: UserExecutionContext integration, per-user isolation, UserWebSocketEmitter support.
 Optimizations: Semaphore-based concurrency control, event sequencing, backlog handling.
 """
 
@@ -11,6 +12,8 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+    from netra_backend.app.agents.supervisor.agent_instance_factory import UserWebSocketEmitter
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
@@ -31,13 +34,29 @@ from netra_backend.app.core.agent_execution_tracker import (
 )
 from netra_backend.app.logging_config import central_logger
 
+# NEW: Split architecture imports
+from netra_backend.app.agents.supervisor.user_execution_context import (
+    UserExecutionContext,
+    validate_user_context
+)
+from netra_backend.app.agents.supervisor.agent_instance_factory import (
+    UserWebSocketEmitter,
+    get_agent_instance_factory
+)
+
 logger = central_logger.get_logger(__name__)
 
 
 class ExecutionEngine:
-    """Handles agent execution orchestration with concurrency optimization.
+    """Handles agent execution orchestration with UserExecutionContext support.
     
-    Features:
+    NEW Features (Split Architecture):
+    - UserExecutionContext integration for complete user isolation
+    - UserWebSocketEmitter support for per-user event emission
+    - Request-scoped execution with no global state sharing
+    - Enhanced isolation verification and context validation
+    
+    Existing Features:
     - Semaphore-based concurrency control for 5+ concurrent users
     - Guaranteed WebSocket event delivery with proper sequencing
     - Backlog handling with user feedback
@@ -49,9 +68,20 @@ class ExecutionEngine:
     MAX_CONCURRENT_AGENTS = 10  # Support 5 concurrent users (2 agents each)
     AGENT_EXECUTION_TIMEOUT = 30.0  # 30 seconds max per agent
     
-    def __init__(self, registry: 'AgentRegistry', websocket_bridge):
+    def __init__(self, registry: 'AgentRegistry', websocket_bridge, 
+                 user_context: Optional['UserExecutionContext'] = None):
+        """Initialize ExecutionEngine with optional UserExecutionContext support.
+        
+        Args:
+            registry: Agent registry for agent lookup
+            websocket_bridge: WebSocket bridge for event emission
+            user_context: Optional UserExecutionContext for per-request isolation
+        """
         self.registry = registry
         self.websocket_bridge = websocket_bridge
+        
+        # NEW: Store UserExecutionContext for per-request isolation
+        self.user_context = user_context
         
         # Compatibility: Create WebSocketNotifier for tests expecting it
         # If websocket_bridge is a WebSocketManager, wrap it with WebSocketNotifier
@@ -63,11 +93,18 @@ class ExecutionEngine:
             # Bridge is already an AgentWebSocketBridge or compatible object
             self.websocket_notifier = websocket_bridge
             
+        # NOTE: These remain as instance variables but are now scoped per ExecutionEngine instance
+        # In the new architecture, each user request gets its own ExecutionEngine instance
         self.active_runs: Dict[str, AgentExecutionContext] = {}
         self.run_history: List[AgentExecutionResult] = []
         self.execution_tracker = get_execution_tracker()
         self._init_components()
         self._init_death_monitoring()
+        
+        if self.user_context:
+            logger.info(f"ExecutionEngine initialized with UserExecutionContext for user {self.user_context.user_id}")
+        else:
+            logger.info("ExecutionEngine initialized in legacy mode (no UserExecutionContext)")
         
     def _init_components(self) -> None:
         """Initialize execution components."""
@@ -163,11 +200,35 @@ class ExecutionEngine:
                 f"got: {context.run_id!r}"
             )
         
+        # NEW: Validate UserExecutionContext consistency if present
+        if self.user_context:
+            if context.user_id != self.user_context.user_id:
+                raise ValueError(
+                    f"UserExecutionContext user_id mismatch: "
+                    f"context.user_id='{context.user_id}' vs user_context.user_id='{self.user_context.user_id}'"
+                )
+            
+            if context.run_id != self.user_context.run_id:
+                logger.warning(
+                    f"UserExecutionContext run_id mismatch: "
+                    f"context.run_id='{context.run_id}' vs user_context.run_id='{self.user_context.run_id}' "
+                    f"- this may indicate multiple runs in same context"
+                )
+        
     async def execute_agent(self, context: AgentExecutionContext,
                            state: DeepAgentState) -> AgentExecutionResult:
-        """Execute a single agent with concurrency control, death detection, and guaranteed event delivery."""
+        """Execute a single agent with UserExecutionContext support and concurrency control.
+        
+        NEW: Supports UserExecutionContext for complete user isolation and per-user WebSocket events.
+        """
         # FAIL-FAST: Validate context before any processing
         self._validate_execution_context(context)
+        
+        # NEW: Log user isolation status
+        if self.user_context:
+            logger.debug(f"Executing agent {context.agent_name} with user isolation for user {self.user_context.user_id}")
+        else:
+            logger.warning(f"Executing agent {context.agent_name} without UserExecutionContext - isolation not guaranteed")
         
         queue_start_time = time.time()
         
@@ -213,12 +274,27 @@ class ExecutionEngine:
                     expected_duration_ms=int(self.AGENT_EXECUTION_TIMEOUT * 1000),
                     operation_description=f"Executing {context.agent_name} agent"
                 ):
-                    # Send agent started with guaranteed delivery via bridge
-                    await self.websocket_bridge.notify_agent_started(
-                        context.run_id, 
-                        context.agent_name,
-                        {"status": "started", "context": context.metadata or {}}
-                    )
+                    # NEW: Send agent started via UserWebSocketEmitter if available
+                    if self.user_context:
+                        success = await self._send_via_user_emitter(
+                            'notify_agent_started',
+                            context.agent_name,
+                            {"status": "started", "context": context.metadata or {}, "isolated": True}
+                        )
+                        if not success:
+                            # Fallback to bridge
+                            await self.websocket_bridge.notify_agent_started(
+                                context.run_id, 
+                                context.agent_name,
+                                {"status": "started", "context": context.metadata or {}}
+                            )
+                    else:
+                        # Legacy: Send agent started with guaranteed delivery via bridge
+                        await self.websocket_bridge.notify_agent_started(
+                            context.run_id, 
+                            context.agent_name,
+                            {"status": "started", "context": context.metadata or {}}
+                        )
                     
                     # Send initial thinking update
                     await self.send_agent_thinking(
