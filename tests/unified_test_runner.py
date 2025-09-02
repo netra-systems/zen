@@ -764,8 +764,8 @@ class UnifiedTestRunner:
                     # Dev environment uses "netra" user with password "netra123"
                     discovered_db_url = f"postgresql://netra:netra123@localhost:{postgres_port}/netra_dev"
                 else:
-                    # Test environment uses "test" user with password "test"
-                    discovered_db_url = f"postgresql://test:test@localhost:{postgres_port}/netra_test"
+                    # Test environment uses "test_user" user with password "test_pass" (from docker-compose.test.yml)
+                    discovered_db_url = f"postgresql://test_user:test_pass@localhost:{postgres_port}/netra_test"
                     
                 env.set('DATABASE_URL', discovered_db_url, 'docker_manager')
                 print(f"[INFO] Updated DATABASE_URL with Docker port: {postgres_port}")
@@ -831,8 +831,8 @@ class UnifiedTestRunner:
                     # Dev environment uses "netra" user with password "netra123"
                     discovered_db_url = f"postgresql://netra:netra123@localhost:{postgres_port}/netra_dev"
                 else:
-                    # Test environment uses "test" user with password "test"
-                    discovered_db_url = f"postgresql://test:test@localhost:{postgres_port}/netra_test"
+                    # Test environment uses "test_user" user with password "test_pass" (from docker-compose.test.yml)
+                    discovered_db_url = f"postgresql://test_user:test_pass@localhost:{postgres_port}/netra_test"
                     
                 env.set('DATABASE_URL', discovered_db_url, 'test_runner_port_discovery')
                 print(f"[INFO] Updated DATABASE_URL with discovered PostgreSQL port: {postgres_port}")
@@ -2565,6 +2565,19 @@ def main():
         env.set('TEST_USE_SHARED_DOCKER', 'false', 'docker_args')
     if hasattr(args, 'docker_production') and args.docker_production:
         env.set('TEST_USE_PRODUCTION_IMAGES', 'true', 'docker_args')
+    
+    # CRITICAL: Set USE_REAL_SERVICES early BEFORE any test imports or TestRunner creation
+    # This ensures environment isolation respects real services flag from the start
+    running_e2e = (args.category in ['e2e', 'websocket', 'agent'] if args.category else False) or \
+                  (args.categories and any(cat in ['e2e', 'websocket', 'agent'] for cat in args.categories))
+                  
+    if args.env in ['staging', 'dev'] or args.real_services or running_e2e:
+        env.set('USE_REAL_SERVICES', 'true', 'main_early_setup')
+        env.set('SKIP_MOCKS', 'true', 'main_early_setup')
+        print(f"[INFO] USE_REAL_SERVICES set to true early in process (env={args.env}, real_services={args.real_services}, running_e2e={running_e2e})")
+    else:
+        env.set('USE_REAL_SERVICES', 'false', 'main_early_setup')
+        env.set('SKIP_MOCKS', 'false', 'main_early_setup')
     
     # Run tests with traditional category system
     runner = UnifiedTestRunner()
