@@ -198,7 +198,7 @@ class MCPExecutionOrchestrator(ABC):
     def __init__(self, mcp_service: Optional[MCPClientService] = None,
                  websocket_manager: Optional[WebSocketManagerProtocol] = None,
                  config: Optional[MCPOrchestrationConfig] = None):
-        # BaseExecutionInterface.__init__ removed - using single inheritance pattern
+        # Using single inheritance with standardized execution patterns
         self.agent_name = "MCP_Execution_Orchestrator"
         self.mcp_service = mcp_service or MCPClientService()
         self.config = config or MCPOrchestrationConfig()
@@ -364,7 +364,7 @@ class MCPExecutionOrchestrator(ABC):
         return success_rate >= 0.8  # 80% success threshold
     
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
-        """Execute core orchestration logic (BaseExecutionInterface requirement)."""
+        """Execute core orchestration logic (using standardized execution patterns)."""
         orchestration_result = await self.orchestrate_mcp_execution([context])
         return {
             "orchestration_success": orchestration_result.success,

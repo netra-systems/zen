@@ -1,6 +1,6 @@
 """Synthetic Data Agent Core Implementation
 
-Modern synthetic data generation following BaseExecutionInterface patterns.
+Modern synthetic data generation following standardized execution patterns.
 Business Value: Customer-facing data generation - HIGH revenue impact
 """
 
@@ -59,7 +59,7 @@ class SyntheticDataAgentCore(ABC):
     """
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
-        # BaseExecutionInterface.__init__ removed - using single inheritance pattern
+        # Using single inheritance with standardized execution patterns
         self.agent_name = "SyntheticDataSubAgent"
         self.llm_manager = llm_manager
         self.tool_dispatcher = tool_dispatcher

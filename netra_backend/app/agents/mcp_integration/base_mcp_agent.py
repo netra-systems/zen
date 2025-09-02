@@ -1,7 +1,7 @@
 """Base MCP Agent with Modern Execution Patterns
 
 Standardizes MCP execution with 99.9% reliability target using:
-- BaseExecutionInterface for consistent execution
+- Standardized execution patterns for consistent execution
 - ReliabilityManager for circuit breaker/retry patterns
 - ExecutionMonitor for performance tracking
 - MCPContextManager for context management
@@ -132,7 +132,7 @@ class BaseMCPAgent(ABC):
                  websocket_manager: Optional[WebSocketManagerProtocol] = None,
                  config: Optional[MCPExecutionConfig] = None):
         self.agent_name = agent_name
-        # BaseExecutionInterface.__init__ removed - using single inheritance pattern
+        # Using single inheritance with standardized execution patterns
         self.mcp_service = mcp_service or MCPClientService()
         self.config = config or MCPExecutionConfig()
         self._initialize_components()

@@ -2,7 +2,7 @@
 # ================================
 # Timestamp: 2025-08-18T12:00:00.000000+00:00
 # Agent: Claude Sonnet 4 claude-sonnet-4-20250514
-# Context: Modernize demo_agent/triage.py with BaseExecutionInterface
+# Context: Modernize demo_agent/triage.py with standardized execution patterns
 # Git: 8-18-25-AM | Current | Clean
 # Change: Modernize | Scope: Component | Risk: Low
 # Session: Demo Service Modernization
@@ -52,7 +52,7 @@ class DemoTriageService(BaseSubAgent):
     
     def __init__(self, llm_manager: LLMManager, websocket_manager: WebSocketManager):
         super().__init__(llm_manager, websocket_manager)
-        # BaseExecutionInterface.__init__ removed - using single inheritance pattern
+        # Using single inheritance with standardized execution patterns
         self._initialize_modern_components()
         
     def _initialize_modern_components(self) -> None:

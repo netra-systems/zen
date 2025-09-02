@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set
 
-# BaseExecutionInterface removed for architecture simplification
+# Using standardized execution patterns for architecture simplification
 from abc import ABC, abstractmethod
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
@@ -162,7 +162,7 @@ class MCPContextManager(ABC):
     """
     
     def __init__(self, mcp_service: Optional[MCPClientService] = None):
-        # BaseExecutionInterface.__init__ removed - using single inheritance pattern
+        # Using single inheritance with standardized execution patterns
         self.mcp_service = mcp_service or MCPClientService()
         self.tool_discovery = MCPToolDiscoveryManager(self.mcp_service)
         self.connection_pool = MCPConnectionPoolManager(self.mcp_service)
@@ -254,7 +254,7 @@ class MCPContextManager(ABC):
         return self.execution_monitor.get_health_status()
     
     async def execute_core_logic(self, context) -> Dict[str, Any]:
-        """Execute core MCP logic (required by BaseExecutionInterface)."""
+        """Execute core MCP logic (using standardized execution patterns)."""
         return {"status": "mcp_context_ready", "context_id": context.run_id}
     
     async def validate_preconditions(self, context) -> bool:

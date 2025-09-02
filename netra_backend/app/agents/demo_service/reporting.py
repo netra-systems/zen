@@ -36,7 +36,7 @@ class DemoReportingService(BaseSubAgent):
     
     def __init__(self, llm_manager: LLMManager, websocket_manager: WebSocketManager):
         super().__init__(llm_manager, websocket_manager)
-        # BaseExecutionInterface.__init__ removed - using single inheritance pattern
+        # Using single inheritance with standardized execution patterns
         self.agent_name = "DemoReportingService"
         self._initialize_modern_components()
         
