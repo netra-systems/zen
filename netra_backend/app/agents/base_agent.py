@@ -25,19 +25,16 @@ from netra_backend.app.schemas.agent import SubAgentLifecycle
 # Import timing components
 from netra_backend.app.agents.base.timing_collector import ExecutionTimingCollector
 
-# Import reliability and execution infrastructure
-from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+# Import reliability and execution infrastructure using UnifiedRetryHandler as SSOT foundation
+from netra_backend.app.core.resilience.unified_retry_handler import (
+    UnifiedRetryHandler,
+    RetryConfig,
+    AGENT_RETRY_POLICY
+)
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus
-from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
-from netra_backend.app.schemas.shared_types import RetryConfig
-from netra_backend.app.core.reliability import (
-    CircuitBreakerConfig as LegacyCircuitConfig,
-    RetryConfig as LegacyRetryConfig,
-    get_reliability_wrapper,
-)
 from netra_backend.app.core.unified_error_handler import agent_error_handler
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -109,12 +106,11 @@ class BaseAgent(ABC):
         self.cache_ttl = 3600  # Default cache TTL
         self.max_retries = 3   # Default retry count
         
-        # Initialize reliability management (unified SSOT)
+        # Initialize unified reliability management (SSOT pattern with UnifiedRetryHandler)
         self._enable_reliability = enable_reliability
-        self._reliability_manager = None
-        self._legacy_reliability = None
+        self._unified_reliability_handler = None
         if enable_reliability:
-            self._init_reliability_infrastructure()
+            self._init_unified_reliability_infrastructure()
         
         # Initialize execution engine (unified SSOT)
         self._enable_execution_engine = enable_execution_engine
@@ -247,12 +243,15 @@ class BaseAgent(ABC):
         except Exception as e:
             self.logger.warning(f"Error cleaning up timing collector during shutdown: {e}")
         
-        # Cleanup reliability infrastructure
+        # Cleanup unified reliability infrastructure
         try:
-            if hasattr(self, '_reliability_manager') and self._reliability_manager:
-                self._reliability_manager.reset_health_tracking()
+            if hasattr(self, '_unified_reliability_handler') and self._unified_reliability_handler:
+                # Circuit breaker cleanup if enabled
+                circuit_status = self._unified_reliability_handler.get_circuit_breaker_status()
+                if circuit_status:
+                    self.logger.debug(f"Cleaned up unified reliability handler during shutdown")
         except Exception as e:
-            self.logger.warning(f"Error cleaning up reliability manager during shutdown: {e}")
+            self.logger.warning(f"Error cleaning up unified reliability handler during shutdown: {e}")
         
         # Subclasses can override to add specific shutdown logic
     
@@ -319,39 +318,38 @@ class BaseAgent(ABC):
     
     # === SSOT Reliability Management Infrastructure ===
     
-    def _init_reliability_infrastructure(self) -> None:
-        """Initialize unified reliability infrastructure (SSOT pattern)."""
-        # Modern reliability manager
-        circuit_config = CircuitBreakerConfig(
-            name=self.name,
-            failure_threshold=getattr(agent_config, 'failure_threshold', 5),
-            recovery_timeout=getattr(agent_config.timeout, 'default_timeout', 60)
+    def _init_unified_reliability_infrastructure(self) -> None:
+        """Initialize unified reliability infrastructure using UnifiedRetryHandler as SSOT foundation."""
+        # Create custom retry configuration for agents based on AGENT_RETRY_POLICY
+        custom_config = RetryConfig(
+            max_attempts=getattr(agent_config.retry, 'max_retries', AGENT_RETRY_POLICY.max_attempts),
+            base_delay=getattr(agent_config.retry, 'base_delay', AGENT_RETRY_POLICY.base_delay),
+            max_delay=getattr(agent_config.retry, 'max_delay', AGENT_RETRY_POLICY.max_delay),
+            strategy=AGENT_RETRY_POLICY.strategy,
+            backoff_multiplier=AGENT_RETRY_POLICY.backoff_multiplier,
+            jitter_range=AGENT_RETRY_POLICY.jitter_range,
+            timeout_seconds=getattr(agent_config.timeout, 'default_timeout', AGENT_RETRY_POLICY.timeout_seconds),
+            retryable_exceptions=AGENT_RETRY_POLICY.retryable_exceptions,
+            non_retryable_exceptions=AGENT_RETRY_POLICY.non_retryable_exceptions,
+            circuit_breaker_enabled=getattr(agent_config, 'circuit_breaker_enabled', False),
+            circuit_breaker_failure_threshold=getattr(agent_config, 'failure_threshold', 5),
+            circuit_breaker_recovery_timeout=getattr(agent_config.timeout, 'default_timeout', 30.0),
+            metrics_enabled=True
         )
-        retry_config = RetryConfig(
-            max_retries=getattr(agent_config.retry, 'max_retries', 3),
-            base_delay=getattr(agent_config.retry, 'base_delay', 1.0),
-            max_delay=getattr(agent_config.retry, 'max_delay', 30.0)
-        )
-        self._reliability_manager = ReliabilityManager(circuit_config, retry_config)
         
-        # Legacy reliability for backward compatibility
-        legacy_circuit_config = LegacyCircuitConfig(
-            failure_threshold=getattr(agent_config, 'failure_threshold', 5),
-            recovery_timeout=getattr(agent_config.timeout, 'default_timeout', 60),
-            name=self.name
+        # Initialize single unified reliability handler (SSOT)
+        self._unified_reliability_handler = UnifiedRetryHandler(
+            service_name=f"agent_{self.name}",
+            config=custom_config
         )
-        legacy_retry_config = LegacyRetryConfig(
-            max_retries=getattr(agent_config.retry, 'max_retries', 3),
-            base_delay=getattr(agent_config.retry, 'base_delay', 1.0),
-            max_delay=getattr(agent_config.retry, 'max_delay', 30.0)
-        )
-        self._legacy_reliability = get_reliability_wrapper(self.name, legacy_circuit_config, legacy_retry_config)
     
     def _init_execution_infrastructure(self) -> None:
         """Initialize unified execution infrastructure (SSOT pattern)."""
         self._execution_monitor = ExecutionMonitor(max_history_size=1000)
+        # Note: BaseExecutionEngine will be updated separately to use UnifiedRetryHandler
+        # For now, passing None to avoid breaking changes
         self._execution_engine = BaseExecutionEngine(
-            reliability_manager=self._reliability_manager,
+            reliability_manager=None,  # Will be integrated with UnifiedRetryHandler in future update
             monitor=self._execution_monitor
         )
     
@@ -363,14 +361,19 @@ class BaseAgent(ABC):
     # === SSOT Property Access Pattern ===
     
     @property
-    def reliability_manager(self) -> Optional[ReliabilityManager]:
-        """Get modern reliability manager (SSOT pattern)."""
-        return self._reliability_manager
+    def unified_reliability_handler(self) -> Optional[UnifiedRetryHandler]:
+        """Get unified reliability handler (SSOT pattern)."""
+        return self._unified_reliability_handler
     
     @property
-    def legacy_reliability(self):
-        """Get legacy reliability wrapper for backward compatibility."""
-        return self._legacy_reliability
+    def reliability_manager(self) -> Optional[UnifiedRetryHandler]:
+        """Get reliability manager - now delegates to unified handler for backward compatibility."""
+        return self._unified_reliability_handler
+    
+    @property
+    def legacy_reliability(self) -> Optional[UnifiedRetryHandler]:
+        """Get legacy reliability wrapper - now delegates to unified handler for backward compatibility."""
+        return self._unified_reliability_handler
     
     @property
     def execution_engine(self) -> Optional[BaseExecutionEngine]:
@@ -389,20 +392,33 @@ class BaseAgent(ABC):
                                       operation_name: str,
                                       fallback: Optional[Callable[[], Awaitable[Any]]] = None,
                                       timeout: Optional[float] = None) -> Any:
-        """Execute operation with unified reliability patterns (SSOT)."""
-        if not self._legacy_reliability:
+        """Execute operation with unified reliability patterns using UnifiedRetryHandler (SSOT)."""
+        if not self._unified_reliability_handler:
             raise RuntimeError(f"Reliability not enabled for {self.name}")
         
-        return await self._legacy_reliability.execute_safely(
-            operation,
-            operation_name,
-            fallback=fallback,
-            timeout=timeout or getattr(agent_config.timeout, 'default_timeout', 60)
+        # Use UnifiedRetryHandler for unified execution with retry logic
+        result = await self._unified_reliability_handler.execute_with_retry_async(
+            operation
         )
+        
+        if result.success:
+            return result.result
+        elif fallback:
+            # Try fallback if primary operation failed
+            self.logger.info(f"{self.name}.{operation_name}: Primary operation failed, trying fallback")
+            fallback_result = await self._unified_reliability_handler.execute_with_retry_async(
+                fallback
+            )
+            if fallback_result.success:
+                return fallback_result.result
+            else:
+                raise fallback_result.final_exception
+        else:
+            raise result.final_exception
     
     async def execute_modern(self, state: DeepAgentState, run_id: str, 
                            stream_updates: bool = False) -> ExecutionResult:
-        """Execute using modern execution engine patterns (SSOT)."""
+        """Execute using modern execution engine patterns with unified reliability (SSOT)."""
         if not self._execution_engine:
             raise RuntimeError(f"Modern execution engine not enabled for {self.name}")
         
@@ -416,7 +432,40 @@ class BaseAgent(ABC):
             start_time=time.time(),
             correlation_id=self.correlation_id
         )
-        return await self._execution_engine.execute(self, context)
+        
+        # Use unified reliability handler for execution if available
+        if self._unified_reliability_handler:
+            try:
+                # Wrap execution in unified retry logic
+                async def execute_operation():
+                    return await self._execution_engine.execute(self, context)
+                
+                result = await self._unified_reliability_handler.execute_with_retry_async(
+                    execute_operation
+                )
+                
+                if result.success:
+                    return result.result
+                else:
+                    # Create error result
+                    return ExecutionResult(
+                        success=False,
+                        status=ExecutionStatus.FAILED,
+                        error=str(result.final_exception),
+                        execution_time_ms=result.total_time * 1000,
+                        retry_count=result.total_attempts - 1 if result.total_attempts > 0 else 0
+                    )
+            except Exception as e:
+                return ExecutionResult(
+                    success=False,
+                    status=ExecutionStatus.FAILED,
+                    error=str(e),
+                    execution_time_ms=0,
+                    retry_count=0
+                )
+        else:
+            # Fallback to direct execution if reliability not enabled
+            return await self._execution_engine.execute(self, context)
     
     # === SSOT Abstract Methods for Execution Patterns ===
     
@@ -453,15 +502,27 @@ class BaseAgent(ABC):
     # === SSOT Health Status Infrastructure ===
     
     def get_health_status(self) -> Dict[str, Any]:
-        """Get comprehensive agent health status (SSOT pattern)."""
+        """Get comprehensive agent health status using unified reliability handler (SSOT pattern)."""
         health_status = {
             "agent_name": self.name,
             "state": self.state.value,
-            "websocket_available": self.has_websocket_context()
+            "websocket_available": self.has_websocket_context(),
+            "uses_unified_reliability": True  # Flag to indicate new architecture
         }
         
-        if self._legacy_reliability:
-            health_status["legacy_reliability"] = self._legacy_reliability.get_health_status()
+        # Get unified reliability handler status
+        if self._unified_reliability_handler:
+            circuit_status = self._unified_reliability_handler.get_circuit_breaker_status()
+            if circuit_status:
+                health_status["unified_reliability"] = {
+                    "circuit_breaker": circuit_status,
+                    "service_name": self._unified_reliability_handler.service_name,
+                    "config": {
+                        "max_attempts": self._unified_reliability_handler.config.max_attempts,
+                        "strategy": self._unified_reliability_handler.config.strategy.value,
+                        "circuit_breaker_enabled": self._unified_reliability_handler.config.circuit_breaker_enabled
+                    }
+                }
         
         if self._execution_engine:
             health_status["modern_execution"] = self._execution_engine.get_health_status()
@@ -475,16 +536,19 @@ class BaseAgent(ABC):
         return health_status
     
     def get_circuit_breaker_status(self) -> Dict[str, Any]:
-        """Get circuit breaker status (SSOT pattern)."""
-        if self._legacy_reliability:
-            return self._legacy_reliability.circuit_breaker.get_status()
-        return {"status": "not_available", "reason": "reliability not enabled"}
+        """Get circuit breaker status using unified reliability handler (SSOT pattern)."""
+        if self._unified_reliability_handler:
+            status = self._unified_reliability_handler.get_circuit_breaker_status()
+            if status:
+                return status
+        return {"status": "not_available", "reason": "reliability not enabled or circuit breaker disabled"}
     
     def _determine_overall_health_status(self, health_data: Dict[str, Any]) -> str:
         """Determine overall health status from component health data."""
-        if "legacy_reliability" in health_data:
-            legacy_status = health_data["legacy_reliability"].get("overall_health", "unknown")
-            if legacy_status != "healthy":
+        # Check unified reliability status
+        if "unified_reliability" in health_data:
+            circuit_status = health_data["unified_reliability"].get("circuit_breaker", {})
+            if circuit_status.get("state") == "OPEN":
                 return "degraded"
         
         if "modern_execution" in health_data:
