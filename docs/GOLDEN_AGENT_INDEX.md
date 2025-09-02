@@ -161,10 +161,10 @@ python tests/mission_critical/test_websocket_agent_events_suite.py
 - ValidationSubAgent
 - SyntheticDataSubAgent
 - ReportingSubAgent
+- DataSubAgent (2025-09-01)
 
 ### In Progress 🚧
 - SupervisorAgent
-- DataSubAgent
 - ActionsAgent
 
 ### Pending ⏳
