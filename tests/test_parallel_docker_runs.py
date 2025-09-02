@@ -17,6 +17,9 @@ from typing import List, Dict, Any
 import sys
 import os
 
+# CRITICAL: Import Docker rate limiter to prevent daemon crashes
+from test_framework.docker_rate_limiter import execute_docker_command
+
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -183,8 +186,8 @@ class ParallelDockerTest:
                 logger.warning(f"Cleanup error: {e}")
         
         # Prune Docker resources
-        subprocess.run(["docker", "container", "prune", "-f"], capture_output=True)
-        subprocess.run(["docker", "network", "prune", "-f"], capture_output=True)
+        execute_docker_command(["docker", "container", "prune", "-f"], timeout=30)
+        execute_docker_command(["docker", "network", "prune", "-f"], timeout=30)
 
 
 async def main():
