@@ -143,8 +143,7 @@ class AgentRegistry:
     
     def _register_core_workflow_agents(self, DataSubAgent) -> None:
         """Register core workflow agents."""
-        self.register("triage", TriageSubAgent(
-            self.llm_manager, self.tool_dispatcher))
+        self.register("triage", TriageSubAgent())
         self.register("data", DataSubAgent(
             self.llm_manager, self.tool_dispatcher))
     

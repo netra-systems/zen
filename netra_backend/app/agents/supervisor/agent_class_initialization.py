@@ -437,8 +437,13 @@ def populate_agent_registry_from_class_registry(agent_registry, llm_manager, too
                 error_count += 1
                 continue
             
-            # Create agent instance
-            agent_instance = agent_class(llm_manager, tool_dispatcher)
+            # Create agent instance - handle different constructor patterns
+            # Try UserExecutionContext pattern first (new agents like TriageSubAgent)
+            try:
+                agent_instance = agent_class()  # UserExecutionContext pattern
+            except TypeError:
+                # Fallback to legacy pattern for older agents
+                agent_instance = agent_class(llm_manager, tool_dispatcher)
             
             # Register with runtime registry
             agent_registry.register(agent_name, agent_instance)
