@@ -56,7 +56,7 @@ class AgentLifecycleMixin(ABC):
         """Send completion update via WebSocket."""
         if not stream_updates:
             return
-        # Use unified emit methods from BaseSubAgent's WebSocketBridgeAdapter
+        # Use unified emit methods from BaseAgent's WebSocketBridgeAdapter
         if status == "completed":
             await self.emit_agent_completed({"execution_time": execution_time})
         else:

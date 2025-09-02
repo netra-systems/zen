@@ -45,7 +45,7 @@ from netra_backend.app.agents.config import agent_config
 from netra_backend.app.agents.utils import extract_thread_id
 
 
-class BaseSubAgent(ABC):
+class BaseAgent(ABC):
     """Base agent class with simplified single inheritance pattern.
     
     Uses WebSocketBridgeAdapter for centralized WebSocket event emission through
@@ -68,7 +68,7 @@ class BaseSubAgent(ABC):
     
     def __init__(self, 
                  llm_manager: Optional[LLMManager] = None, 
-                 name: str = "BaseSubAgent", 
+                 name: str = "BaseAgent", 
                  description: str = "This is the base sub-agent.", 
                  agent_id: Optional[str] = None, 
                  user_id: Optional[str] = None,

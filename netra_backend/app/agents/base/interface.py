@@ -4,7 +4,7 @@ Core types for agent execution patterns.
 Contains ExecutionContext and ExecutionResult for standardized execution.
 
 Note: Legacy execution interface was removed as part of architecture simplification.
-All agents now use single inheritance from BaseSubAgent only.
+All agents now use single inheritance from BaseAgent only.
 """
 
 from dataclasses import dataclass
@@ -15,7 +15,7 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.schemas.agent_result_types import TypedAgentResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 # Note: Direct bridge imports removed for SSOT compliance
-# Use emit_* methods from BaseSubAgent's WebSocketBridgeAdapter instead
+# Use emit_* methods from BaseAgent's WebSocketBridgeAdapter instead
 
 
 @dataclass
@@ -97,4 +97,4 @@ class ReliabilityManagerProtocol(Protocol):
 
 # Note: Legacy execution interface and mixin classes have been removed
 # as part of architecture simplification. All agents now use single inheritance
-# from BaseSubAgent which already provides WebSocket functionality via WebSocketBridgeAdapter.
+# from BaseAgent which already provides WebSocket functionality via WebSocketBridgeAdapter.

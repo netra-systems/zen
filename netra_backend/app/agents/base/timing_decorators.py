@@ -141,7 +141,7 @@ def timed_agent(cls: Type[T]) -> Type[T]:
     
     Example:
         @timed_agent
-        class MyAgent(BaseSubAgent):
+        class MyAgent(BaseAgent):
             async def process(self):
                 # Automatically timed
                 pass
