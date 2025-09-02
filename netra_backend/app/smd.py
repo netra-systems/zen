@@ -16,7 +16,13 @@ from enum import Enum
 
 from fastapi import FastAPI
 
-from shared.isolated_environment import get_env
+from shared.isolated_environment import get_env as get_isolated_env
+
+# Create a wrapper for get_env to match expected signature
+_env = get_isolated_env()
+def get_env(key: str, default: str = '') -> str:
+    """Get environment variable value."""
+    return _env.get(key, default) or default
 from netra_backend.app.core.project_utils import get_project_root as _get_project_root
 from netra_backend.app.config import get_config, settings
 from netra_backend.app.services.backend_health_config import setup_backend_health_service

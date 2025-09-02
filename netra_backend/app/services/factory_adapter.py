@@ -61,7 +61,8 @@ class AdapterConfig:
         """Create config from environment variables."""
         from shared.isolated_environment import get_env
         
-        mode_str = get_env('FACTORY_MIGRATION_MODE', 'factory_preferred')
+        env = get_env()
+        mode_str = env.get('FACTORY_MIGRATION_MODE', 'factory_preferred')
         try:
             migration_mode = MigrationMode(mode_str)
         except ValueError:
@@ -70,11 +71,11 @@ class AdapterConfig:
             
         return cls(
             migration_mode=migration_mode,
-            enable_migration_logging=get_env('FACTORY_ENABLE_MIGRATION_LOGGING', 'true').lower() == 'true',
-            log_legacy_calls=get_env('FACTORY_LOG_LEGACY_CALLS', 'true').lower() == 'true',
-            track_migration_metrics=get_env('FACTORY_TRACK_METRICS', 'true').lower() == 'true',
-            factory_timeout_seconds=float(get_env('FACTORY_TIMEOUT_SECONDS', '30.0')),
-            legacy_fallback_enabled=get_env('FACTORY_LEGACY_FALLBACK', 'true').lower() == 'true'
+            enable_migration_logging=env.get('FACTORY_ENABLE_MIGRATION_LOGGING', 'true').lower() == 'true',
+            log_legacy_calls=env.get('FACTORY_LOG_LEGACY_CALLS', 'true').lower() == 'true',
+            track_migration_metrics=env.get('FACTORY_TRACK_METRICS', 'true').lower() == 'true',
+            factory_timeout_seconds=float(env.get('FACTORY_TIMEOUT_SECONDS', '30.0')),
+            legacy_fallback_enabled=env.get('FACTORY_LEGACY_FALLBACK', 'true').lower() == 'true'
         )
 
 

@@ -138,15 +138,16 @@ class WebSocketFactoryConfig:
         """Create config from environment variables."""
         from shared.isolated_environment import get_env
         
+        env = get_env()
         return cls(
-            max_events_per_user=int(get_env('WEBSOCKET_MAX_EVENTS_PER_USER', '1000')),
-            event_timeout_seconds=float(get_env('WEBSOCKET_EVENT_TIMEOUT', '30.0')),
-            heartbeat_interval_seconds=float(get_env('WEBSOCKET_HEARTBEAT_INTERVAL', '30.0')),
-            max_reconnect_attempts=int(get_env('WEBSOCKET_MAX_RECONNECT_ATTEMPTS', '3')),
-            delivery_retries=int(get_env('WEBSOCKET_DELIVERY_RETRIES', '3')),
-            delivery_timeout_seconds=float(get_env('WEBSOCKET_DELIVERY_TIMEOUT', '5.0')),
-            enable_event_compression=get_env('WEBSOCKET_ENABLE_COMPRESSION', 'true').lower() == 'true',
-            enable_event_batching=get_env('WEBSOCKET_ENABLE_BATCHING', 'true').lower() == 'true',
+            max_events_per_user=int(env.get('WEBSOCKET_MAX_EVENTS_PER_USER', '1000')),
+            event_timeout_seconds=float(env.get('WEBSOCKET_EVENT_TIMEOUT', '30.0')),
+            heartbeat_interval_seconds=float(env.get('WEBSOCKET_HEARTBEAT_INTERVAL', '30.0')),
+            max_reconnect_attempts=int(env.get('WEBSOCKET_MAX_RECONNECT_ATTEMPTS', '3')),
+            delivery_retries=int(env.get('WEBSOCKET_DELIVERY_RETRIES', '3')),
+            delivery_timeout_seconds=float(env.get('WEBSOCKET_DELIVERY_TIMEOUT', '5.0')),
+            enable_event_compression=env.get('WEBSOCKET_ENABLE_COMPRESSION', 'true').lower() == 'true',
+            enable_event_batching=env.get('WEBSOCKET_ENABLE_BATCHING', 'true').lower() == 'true',
         )
 
 

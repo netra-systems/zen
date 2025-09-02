@@ -191,13 +191,14 @@ class ExecutionFactoryConfig:
         """Create config from environment variables."""
         from shared.isolated_environment import get_env
         
+        env = get_env()
         return cls(
-            max_concurrent_per_user=int(get_env('EXECUTION_MAX_CONCURRENT_PER_USER', '5')),
-            execution_timeout_seconds=float(get_env('EXECUTION_TIMEOUT_SECONDS', '30.0')),
-            cleanup_interval_seconds=int(get_env('EXECUTION_CLEANUP_INTERVAL', '300')),
-            max_history_per_user=int(get_env('EXECUTION_MAX_HISTORY_PER_USER', '100')),
-            enable_user_semaphores=get_env('EXECUTION_ENABLE_USER_SEMAPHORES', 'true').lower() == 'true',
-            enable_execution_tracking=get_env('EXECUTION_ENABLE_TRACKING', 'true').lower() == 'true',
+            max_concurrent_per_user=int(env.get('EXECUTION_MAX_CONCURRENT_PER_USER', '5')),
+            execution_timeout_seconds=float(env.get('EXECUTION_TIMEOUT_SECONDS', '30.0')),
+            cleanup_interval_seconds=int(env.get('EXECUTION_CLEANUP_INTERVAL', '300')),
+            max_history_per_user=int(env.get('EXECUTION_MAX_HISTORY_PER_USER', '100')),
+            enable_user_semaphores=env.get('EXECUTION_ENABLE_USER_SEMAPHORES', 'true').lower() == 'true',
+            enable_execution_tracking=env.get('EXECUTION_ENABLE_TRACKING', 'true').lower() == 'true',
         )
 
 
