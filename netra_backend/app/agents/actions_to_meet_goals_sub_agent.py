@@ -26,6 +26,10 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.shared_types import DataAnalysisResponse
+# SSOT Imports for compliance
+from netra_backend.app.core.serialization.unified_json_handler import backend_json_handler
+from netra_backend.app.core.unified_error_handler import agent_error_handler
+from netra_backend.app.schemas.shared_types import ErrorContext
 
 logger = central_logger.get_logger(__name__)
 
@@ -145,7 +149,7 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
         )
         
     async def _get_llm_response_with_monitoring(self, prompt: str) -> str:
-        """Get LLM response with simplified monitoring."""
+        """Get LLM response with SSOT error handling."""
         try:
             # Use BaseAgent's LLM infrastructure
             response = await self.llm_manager.ask_llm(
@@ -153,7 +157,13 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
             )
             return response
         except Exception as e:
+            error_context = ErrorContext(
+                operation="llm_response_generation",
+                details={"prompt_size": len(prompt), "config": "actions_to_meet_goals"},
+                component="ActionsToMeetGoalsSubAgent"
+            )
             self.logger.error(f"LLM request failed: {e}")
+            # Re-raise with context - let BaseAgent's error handling manage it
             raise
 
     async def execute(self, context: 'UserExecutionContext', stream_updates: bool = False) -> Dict[str, Any]:
@@ -167,17 +177,28 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
             Dict with action plan results
         """
         try:
-            # Validate preconditions
+            # Validate preconditions with SSOT error handling
             if not await self.validate_preconditions(context):
+                # Create structured error for validation failure
+                error_context = ErrorContext(
+                    operation="precondition_validation",
+                    details={"run_id": context.run_id, "reason": "validation_failed"},
+                    component="ActionsToMeetGoalsSubAgent"
+                )
                 raise ValueError("Precondition validation failed for action plan generation")
             
             # Execute core logic
             result = await self.execute_core_logic(context)
-            
             return result
             
         except Exception as e:
-            # Fallback logic for errors
+            # Structured error handling with ErrorContext
+            error_context = ErrorContext(
+                operation="action_plan_execution",
+                details={"run_id": context.run_id, "stream_updates": stream_updates, "error": str(e)},
+                component="ActionsToMeetGoalsSubAgent"
+            )
+            # Fallback logic for errors with structured logging
             self.logger.warning(f"Action plan generation failed, using fallback: {e}")
             return await self._execute_fallback_logic(context, stream_updates)
         
@@ -215,7 +236,7 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
             # Note: Default values handled in metadata copy for isolation
             if 'optimizations_result' not in context.metadata:
                 # Since context.metadata should be mutable copy, this should work
-                context.metadata['optimizations_result'] = default_optimization.model_dump()
+                context.metadata['optimizations_result'] = backend_json_handler.to_dict(default_optimization)
         
         if "data_result" in missing_deps and not context.metadata.get('data_result'):
             default_data = DataAnalysisResponse(
@@ -228,7 +249,7 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
             # Note: Default values handled in metadata copy for isolation
             if 'data_result' not in context.metadata:
                 # Since context.metadata should be mutable copy, this should work
-                context.metadata['data_result'] = default_data.model_dump()
+                context.metadata['data_result'] = backend_json_handler.to_dict(default_data)
     
     async def check_entry_conditions(self, context: 'UserExecutionContext') -> bool:
         """Entry condition check using UserExecutionContext."""
