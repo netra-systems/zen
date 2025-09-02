@@ -98,14 +98,19 @@ if "pytest" in sys.modules or get_test_env_manager().env.get("PYTEST_CURRENT_TES
 # CONDITIONAL SERVICE ORCHESTRATION
 # =============================================================================
 
-@pytest.fixture(scope="session", autouse=True)
-async def conditional_service_orchestration(request):
+@pytest.fixture(scope="function", autouse=True)
+def conditional_service_orchestration(request):
     """Conditionally run service orchestration based on test markers.
     
     This fixture runs automatically but only orchestrates services for:
     - Tests marked with @pytest.mark.integration
     - Tests marked with @pytest.mark.e2e
     - Tests that explicitly request real_services fixtures
+    """
+    """Conditionally run service orchestration based on test markers.
+    
+    FIXED: Converted from async session to sync function-scoped fixture
+    to avoid ScopeMismatch with pytest-asyncio function-scoped event loops.
     """
     # Check if this test needs service orchestration
     markers = list(request.node.iter_markers())
@@ -126,16 +131,19 @@ async def conditional_service_orchestration(request):
     
     # Run the actual orchestration
     logger.info("Running service orchestration for integration/e2e test")
-    # Delegate to the real_services_session fixture
+    # Delegate to the real_services_function fixture
     yield
 
 # =============================================================================
 # SESSION-SCOPED REAL SERVICE FIXTURES
 # =============================================================================
 
-@pytest.fixture(scope="session", autouse=False)  # Changed to autouse=False for conditional use
-async def real_services_session() -> AsyncIterator[RealServicesManager]:
-    """Session-scoped real services manager with E2E service orchestration.
+@pytest.fixture(scope="function", autouse=False)  # Changed to function scope to fix ScopeMismatch
+async def real_services_function() -> AsyncIterator[RealServicesManager]:
+    """Function-scoped real services manager with E2E service orchestration.
+    
+    FIXED: Converted from session to function scope to avoid ScopeMismatch
+    with pytest-asyncio function-scoped event loops.
     
     This fixture is now opt-in. Tests that need real services should:
     1. Mark with @pytest.mark.integration or @pytest.mark.e2e
@@ -193,7 +201,10 @@ async def real_services_session() -> AsyncIterator[RealServicesManager]:
             health_check_retries=15
         )
         
-        orchestrator = ServiceOrchestrator(orchestration_config)
+        # Use pull_policy='never' if we have rate limit issues, otherwise 'missing'
+        # This prevents Docker Hub pulls when base images are available locally
+        pull_policy = env.get("DOCKER_PULL_POLICY", "missing")
+        orchestrator = ServiceOrchestrator(orchestration_config, pull_policy=pull_policy)
         
         try:
             # Phase 1: Orchestrate services (start + health check)
@@ -244,16 +255,27 @@ async def real_services_session() -> AsyncIterator[RealServicesManager]:
 # =============================================================================
 
 @pytest.fixture(scope="function")
-async def real_services(real_services_session: RealServicesManager) -> AsyncIterator[RealServicesManager]:
+async def real_services(real_services_function: RealServicesManager) -> AsyncIterator[RealServicesManager]:
     """Function-scoped real services with automatic data cleanup."""
     # Reset all data before test
-    await real_services_session.reset_all_data()
+    await real_services_function.reset_all_data()
     
-    yield real_services_session
+    yield real_services_function
     
     # Optional: Reset after test for extra isolation
     # Commented out for performance, but can be enabled if needed
-    # await real_services_session.reset_all_data()
+    # await real_services_function.reset_all_data()
+
+
+# BACKWARD COMPATIBILITY: Alias for old session fixture name
+@pytest.fixture(scope="function")
+async def real_services_session(real_services_function: RealServicesManager) -> AsyncIterator[RealServicesManager]:
+    """DEPRECATED: Use real_services_function instead.
+    
+    Backward compatibility alias for real_services_session fixture.
+    Now function-scoped to fix pytest-asyncio ScopeMismatch issues.
+    """
+    yield real_services_function
 
 
 @pytest.fixture(scope="function")
@@ -586,7 +608,8 @@ def performance_monitor():
 # Export all fixtures for easy import
 __all__ = [
     # Core real service managers
-    'real_services_session',
+    'real_services_function',  # New primary fixture (function-scoped)
+    'real_services_session',   # Backward compatibility alias
     'real_services', 
     'real_postgres',
     'real_redis',
