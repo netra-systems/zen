@@ -34,7 +34,7 @@ import os
 # Add the project root to the path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent.parent))
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.mixins.websocket_bridge_adapter import WebSocketBridgeAdapter
 
 
@@ -1195,12 +1195,12 @@ class TestWebSocketEventSSOTCompliance:
         Current State: SHOULD PASS - WebSocket events properly implemented via SSOT
         Expected: Single WebSocketBridgeAdapter provides unified event interface
         """
-        # Verify WebSocketBridgeAdapter exists and is used by BaseSubAgent
-        base_agent = BaseSubAgent()
+        # Verify WebSocketBridgeAdapter exists and is used by BaseAgent
+        base_agent = BaseAgent()
         
-        # ASSERTION: BaseSubAgent should have WebSocket adapter
+        # ASSERTION: BaseAgent should have WebSocket adapter
         assert hasattr(base_agent, '_websocket_adapter'), (
-            "SSOT VIOLATION: BaseSubAgent missing WebSocket adapter. "
+            "SSOT VIOLATION: BaseAgent missing WebSocket adapter. "
             "WebSocket events must use WebSocketBridgeAdapter for SSOT compliance."
         )
         
@@ -1216,7 +1216,7 @@ class TestWebSocketEventSSOTCompliance:
         Current State: SHOULD PASS - All event methods available via adapter
         Expected: Complete event method coverage through single adapter
         """
-        base_agent = BaseSubAgent()
+        base_agent = BaseAgent()
         
         # Expected WebSocket event methods (SSOT interface)
         required_methods = [
@@ -1258,8 +1258,8 @@ class TestWebSocketEventSSOTCompliance:
         Expected: Single bridge instance coordinates all WebSocket events
         """
         # Create multiple agent instances
-        agent1 = BaseSubAgent(name="Agent1")
-        agent2 = BaseSubAgent(name="Agent2") 
+        agent1 = BaseAgent(name="Agent1")
+        agent2 = BaseAgent(name="Agent2") 
         
         # Mock bridge setup
         mock_bridge = object()  # Simple mock object
@@ -1298,8 +1298,8 @@ class TestWebSocketEventSSOTCompliance:
         Current State: SHOULD PASS - All WebSocket interaction via adapter
         Expected: No direct WebSocket imports or usage outside adapter
         """
-        # Check BaseSubAgent source for direct WebSocket imports
-        base_agent_module = inspect.getmodule(BaseSubAgent)
+        # Check BaseAgent source for direct WebSocket imports
+        base_agent_module = inspect.getmodule(BaseAgent)
         source_code = inspect.getsource(base_agent_module)
         
         # ASSERTION: Should not have direct WebSocket imports
@@ -1318,7 +1318,7 @@ class TestWebSocketEventSSOTCompliance:
                 violations.append(forbidden)
         
         assert len(violations) == 0, (
-            f"SSOT VIOLATION: Direct WebSocket dependencies found in BaseSubAgent: {violations}. "
+            f"SSOT VIOLATION: Direct WebSocket dependencies found in BaseAgent: {violations}. "
             f"All WebSocket interaction must go through WebSocketBridgeAdapter SSOT."
         )
         
@@ -1361,7 +1361,7 @@ class TestComprehensiveIntegrationSSOTCompliance:
         Current State: SHOULD FAIL - Multiple infrastructure patterns used
         Expected: BaseAgent uses unified SSOT infrastructure for all components
         """
-        base_agent = BaseSubAgent(enable_reliability=True, enable_execution_engine=True)
+        base_agent = BaseAgent(enable_reliability=True, enable_execution_engine=True)
         
         # ASSERTION: Should have unified infrastructure components
         infrastructure_components = {
@@ -1394,13 +1394,13 @@ class TestComprehensiveIntegrationSSOTCompliance:
         Expected: Consistent configuration access through unified interface
         """
         # Test agent configuration access
-        base_agent = BaseSubAgent()
+        base_agent = BaseAgent()
         
         # ASSERTION: Agent should not access configuration directly
         forbidden_attributes = ['os.environ', 'getenv', 'config.get']
         
         # Check source code for forbidden patterns
-        source_code = inspect.getsource(BaseSubAgent)
+        source_code = inspect.getsource(BaseAgent)
         violations = []
         
         for forbidden in forbidden_attributes:
@@ -1422,7 +1422,7 @@ class TestComprehensiveIntegrationSSOTCompliance:
         Current State: SHOULD FAIL - Multiple error handling approaches
         Expected: Unified error handling through SSOT infrastructure
         """
-        base_agent = BaseSubAgent(enable_reliability=True)
+        base_agent = BaseAgent(enable_reliability=True)
         
         # Check that error handling is unified through reliability infrastructure
         reliability_manager = base_agent.reliability_manager
@@ -1447,7 +1447,7 @@ class TestComprehensiveIntegrationSSOTCompliance:
         Current State: SHOULD FAIL - Multiple monitoring approaches
         Expected: Unified monitoring through SSOT execution infrastructure
         """
-        base_agent = BaseSubAgent(enable_execution_engine=True)
+        base_agent = BaseAgent(enable_execution_engine=True)
         
         # ASSERTION: Should have unified monitoring infrastructure
         execution_monitor = base_agent.execution_monitor

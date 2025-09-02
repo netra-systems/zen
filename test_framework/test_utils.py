@@ -58,7 +58,7 @@ async def retry_with_backoff(
     **kwargs
 ) -> Any:
     """
-    Retry a function with exponential backoff.
+    Retry a function with exponential backoff using UnifiedRetryHandler.
     
     Args:
         func: Function to retry
@@ -72,23 +72,63 @@ async def retry_with_backoff(
     Raises:
         Exception from final failed attempt
     """
-    delay = initial_delay
-    last_exception = None
-    
-    for attempt in range(max_attempts):
-        try:
-            if asyncio.iscoroutinefunction(func):
+    # Import here to avoid circular dependencies
+    try:
+        from netra_backend.app.core.resilience.unified_retry_handler import (
+            UnifiedRetryHandler, RetryConfig, RetryStrategy
+        )
+        
+        # Create unified retry handler configuration
+        retry_config = RetryConfig(
+            max_attempts=max_attempts,
+            base_delay=initial_delay,
+            backoff_multiplier=backoff_factor,
+            strategy=RetryStrategy.EXPONENTIAL,
+            jitter_range=0.1,
+            timeout_seconds=None,
+            retryable_exceptions=(Exception,),
+            circuit_breaker_enabled=False,
+            metrics_enabled=False  # Disable for test framework
+        )
+        
+        handler = UnifiedRetryHandler("test_utils", retry_config)
+        
+        # Create wrapper function
+        if asyncio.iscoroutinefunction(func):
+            async def operation_wrapper():
                 return await func(*args, **kwargs)
-            else:
+            
+            result = await handler.execute_with_retry_async(operation_wrapper)
+        else:
+            def operation_wrapper():
                 return func(*args, **kwargs)
-        except Exception as e:
-            last_exception = e
-            if attempt == max_attempts - 1:
-                break
-            await asyncio.sleep(delay)
-            delay *= backoff_factor
-    
-    raise last_exception
+            
+            result = handler.execute_with_retry(operation_wrapper)
+        
+        if result.success:
+            return result.result
+        else:
+            raise result.final_exception
+            
+    except ImportError:
+        # Fall back to legacy implementation if UnifiedRetryHandler not available
+        delay = initial_delay
+        last_exception = None
+        
+        for attempt in range(max_attempts):
+            try:
+                if asyncio.iscoroutinefunction(func):
+                    return await func(*args, **kwargs)
+                else:
+                    return func(*args, **kwargs)
+            except Exception as e:
+                last_exception = e
+                if attempt == max_attempts - 1:
+                    break
+                await asyncio.sleep(delay)
+                delay *= backoff_factor
+        
+        raise last_exception
 
 
 def create_test_user(

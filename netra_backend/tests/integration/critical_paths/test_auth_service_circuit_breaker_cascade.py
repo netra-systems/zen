@@ -27,7 +27,9 @@ import docker
 import pytest
 from netra_backend.app.clients.auth_client_cache import AuthCircuitBreakerManager
 
-from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
+# Use UnifiedCircuitBreaker for new code, legacy for compatibility
+from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitBreaker, get_unified_circuit_breaker_manager
+from netra_backend.app.core.circuit_breaker_core import CircuitBreaker  # Legacy compatibility
 from netra_backend.app.core.circuit_breaker_types import CircuitConfig, CircuitState
 
 logger = logging.getLogger(__name__)

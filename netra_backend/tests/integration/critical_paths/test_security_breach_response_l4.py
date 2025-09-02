@@ -34,7 +34,9 @@ import pytest
 import websockets
 from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 
-from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
+# Use UnifiedCircuitBreaker for new code, legacy for compatibility
+from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitBreaker, get_unified_circuit_breaker_manager
+from netra_backend.app.core.circuit_breaker_core import CircuitBreaker  # Legacy compatibility
 from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.services.security_service import SecurityService
 from netra_backend.app.websocket_core.rate_limiter import RateLimiter

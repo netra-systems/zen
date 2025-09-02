@@ -31,8 +31,14 @@ from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 
-from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
+from netra_backend.app.core.resilience.unified_circuit_breaker import (
+    UnifiedCircuitBreaker,
+    UnifiedCircuitConfig,
+    get_unified_circuit_breaker_manager,
+)
 from netra_backend.app.core.circuit_breaker_types import CircuitConfig, CircuitState
+# Backward compatibility - import legacy CircuitBreaker for tests
+from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.schemas.registry import AgentMessage, TaskPriority
 

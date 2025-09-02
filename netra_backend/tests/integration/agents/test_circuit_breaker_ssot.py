@@ -28,7 +28,7 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent.parent))
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.core.reliability import get_reliability_wrapper
 
 
@@ -44,9 +44,9 @@ class TestCircuitBreakerStateConsistency:
         Expected: All agents using same service should share circuit breaker state
         """
         # Create multiple agents that should share circuit breaker state
-        agent1 = BaseSubAgent(name="Agent1", enable_reliability=True)
-        agent2 = BaseSubAgent(name="Agent2", enable_reliability=True) 
-        agent3 = BaseSubAgent(name="Agent3", enable_reliability=True)
+        agent1 = BaseAgent(name="Agent1", enable_reliability=True)
+        agent2 = BaseAgent(name="Agent2", enable_reliability=True) 
+        agent3 = BaseAgent(name="Agent3", enable_reliability=True)
         
         agents = [agent1, agent2, agent3]
         
@@ -104,8 +104,8 @@ class TestCircuitBreakerStateConsistency:
         Expected: All circuit breakers should have identical configuration
         """
         # Create agents with reliability enabled
-        agent1 = BaseSubAgent(name="TestAgent1", enable_reliability=True)
-        agent2 = BaseSubAgent(name="TestAgent2", enable_reliability=True)
+        agent1 = BaseAgent(name="TestAgent1", enable_reliability=True)
+        agent2 = BaseAgent(name="TestAgent2", enable_reliability=True)
         
         # Get circuit breaker configurations
         config1 = agent1.get_circuit_breaker_status()
@@ -209,7 +209,7 @@ class TestCircuitBreakerFailureRecoveryConsistency:
         """
         # Create agents with different names but same underlying service
         agents = [
-            BaseSubAgent(name=f"Agent_{i}", enable_reliability=True) 
+            BaseAgent(name=f"Agent_{i}", enable_reliability=True) 
             for i in range(3)
         ]
         
@@ -270,7 +270,7 @@ class TestCircuitBreakerFailureRecoveryConsistency:
         Expected: Uniform recovery timing and behavior across all instances
         """
         # Create agent with reliability
-        agent = BaseSubAgent(name="RecoveryTestAgent", enable_reliability=True)
+        agent = BaseAgent(name="RecoveryTestAgent", enable_reliability=True)
         
         # Force circuit breaker to OPEN state by causing failures
         failure_operation = AsyncMock(side_effect=ConnectionError("Forced failure"))
@@ -328,7 +328,7 @@ class TestCircuitBreakerFailureRecoveryConsistency:
         """
         # Create multiple agents to test metrics consistency
         agents = [
-            BaseSubAgent(name=f"MetricsAgent_{i}", enable_reliability=True)
+            BaseAgent(name=f"MetricsAgent_{i}", enable_reliability=True)
             for i in range(2)
         ]
         
@@ -441,7 +441,7 @@ class TestCircuitBreakerIntegrationWithReliabilityManager:
         Expected: Seamless integration between circuit breaker and reliability manager
         """
         # Create agent with both reliability manager and circuit breaker
-        agent = BaseSubAgent(name="IntegrationTestAgent", enable_reliability=True)
+        agent = BaseAgent(name="IntegrationTestAgent", enable_reliability=True)
         
         # Get both reliability manager and circuit breaker status
         reliability_manager = agent.reliability_manager
@@ -496,7 +496,7 @@ class TestCircuitBreakerIntegrationWithReliabilityManager:
         Expected: Circuit breaker health reflected in overall agent health
         """
         # Create agent with reliability infrastructure
-        agent = BaseSubAgent(name="HealthTestAgent", enable_reliability=True)
+        agent = BaseAgent(name="HealthTestAgent", enable_reliability=True)
         
         # Get comprehensive health status
         health_status = agent.get_health_status()
@@ -552,7 +552,7 @@ class TestCircuitBreakerCrossComponentConsistency:
         """
         # Create different types of components that use circuit breakers
         components = {
-            'agent': BaseSubAgent(name="AgentComponent", enable_reliability=True),
+            'agent': BaseAgent(name="AgentComponent", enable_reliability=True),
             'reliability_wrapper1': get_reliability_wrapper("service1", None, None),
             'reliability_wrapper2': get_reliability_wrapper("service2", None, None)
         }
@@ -612,7 +612,7 @@ class TestCircuitBreakerCrossComponentConsistency:
         
         # Create multiple agents and collect their circuit breaker configurations
         for i in range(3):
-            agent = BaseSubAgent(name=f"ConfigTestAgent_{i}", enable_reliability=True)
+            agent = BaseAgent(name=f"ConfigTestAgent_{i}", enable_reliability=True)
             agents.append(agent)
             
             cb_status = agent.get_circuit_breaker_status()

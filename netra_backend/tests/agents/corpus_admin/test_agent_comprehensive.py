@@ -858,7 +858,7 @@ class TestCleanupAndFinalization:
     @pytest.mark.asyncio
     async def test_cleanup(self, corpus_admin_agent, sample_state):
         """Test cleanup after execution."""
-        with patch('netra_backend.app.agents.base_agent.BaseSubAgent.cleanup') as mock_parent_cleanup:
+        with patch('netra_backend.app.agents.base_agent.BaseAgent.cleanup') as mock_parent_cleanup:
             mock_parent_cleanup.return_value = None
             
             await corpus_admin_agent.cleanup(sample_state, "cleanup_run")
