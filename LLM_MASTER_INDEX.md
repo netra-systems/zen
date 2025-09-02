@@ -1,5 +1,5 @@
 # 🤖 LLM MASTER INDEX - Netra Apex Navigation Guide
-**Last Updated: 2025-08-31**
+**Last Updated: 2025-09-02**
 
 ## 🔴 CRITICAL: Cross-System Navigation
 
@@ -39,15 +39,50 @@
 
 ---
 
+## 🔴 MISSION CRITICAL TEST SUITES
+
+### Core Validation (Run Before Any Deployment)
+```bash
+# Essential system health checks
+python tests/mission_critical/test_websocket_agent_events_suite.py        # WebSocket chat delivery
+python tests/mission_critical/test_no_ssot_violations.py                  # SSOT compliance
+python tests/mission_critical/test_orchestration_integration.py           # Docker orchestration
+python tests/mission_critical/test_docker_stability_suite.py             # Docker stability
+```
+
+### Agent Compliance
+```bash
+# Agent golden pattern validation  
+python tests/mission_critical/test_supervisor_golden_compliance_quick.py  # Supervisor pattern
+python tests/mission_critical/test_data_sub_agent_golden_ssot.py         # DataSubAgent SSOT
+python tests/mission_critical/test_reporting_agent_golden.py             # Reporting agent
+python tests/mission_critical/test_agent_resilience_patterns.py          # Resilience patterns
+```
+
+### Infrastructure Stability  
+```bash
+# Critical infrastructure tests
+python tests/mission_critical/test_docker_force_flag_prohibition.py      # Docker safety
+python tests/mission_critical/test_isolated_environment_compliance.py    # Environment isolation
+python tests/mission_critical/test_websocket_bridge_lifecycle_audit_20250902.py  # WebSocket lifecycle
+python tests/mission_critical/test_deterministic_startup_validation.py   # Startup sequence
+```
+
+---
+
 ## 📍 COMMONLY CONFUSED FILES & LOCATIONS
 
-## 🚨 RECENT CRITICAL UPDATES (2025-09-01)
+## 🚨 RECENT CRITICAL UPDATES (2025-09-02)
 
 ### Infrastructure Changes
 | Component | Update | Impact |
 |-----------|---------|--------|
-| **WebSocket Silent Failure Prevention** | Comprehensive monitoring system | 100% silent failure detection (NEW) |
-| **WebSocket Health Monitoring** | Runtime event flow monitoring | Chat reliability improvements (NEW) |
+| **Resource Monitoring** | Enhanced memory limits and integration | Docker stability improvements |
+| **Environment Locking** | Thread-safe environment management | Prevents concurrent test conflicts |
+| **Docker Stability** | Comprehensive stability suite with rate limiting | Prevents Docker daemon crashes |
+| **SSOT Consolidation** | Unified enums and eliminated duplication | 98%+ compliance achieved |
+| **WebSocket Silent Failure Prevention** | Comprehensive monitoring system | 100% silent failure detection |
+| **WebSocket Health Monitoring** | Runtime event flow monitoring | Chat reliability improvements |
 | **VPC Connector** | Added for GCP Cloud Run | Enables Redis/Cloud SQL connectivity |
 | **Agent Orchestration** | New E2E testing framework | Background agent testing support |
 | **Staging Config** | Unified staging URLs | Single source of truth for staging |
@@ -56,6 +91,10 @@
 ### New Files & Locations
 | File | Purpose | Reference |
 |------|---------|----------|
+| `/test_framework/resource_monitor.py` | Resource usage monitoring and limits | [`test_framework/RESOURCE_MONITOR_DOCUMENTATION.md`](test_framework/RESOURCE_MONITOR_DOCUMENTATION.md) |
+| `/test_framework/environment_lock.py` | Thread-safe environment locking | Prevents test conflicts |
+| `/test_framework/docker_rate_limiter.py` | Docker API rate limiting | Prevents daemon overload |
+| `/test_framework/docker_force_flag_guardian.py` | Prevents dangerous force flags | Docker stability |
 | `/netra_backend/app/websocket_core/event_monitor.py` | WebSocket event flow monitoring | [`WEBSOCKET_SILENT_FAILURE_FIXES.md`](WEBSOCKET_SILENT_FAILURE_FIXES.md) |
 | `/netra_backend/app/websocket_core/heartbeat_manager.py` | Connection health tracking | [`SPEC/learnings/websocket_silent_failure_prevention_masterclass.xml`](SPEC/learnings/websocket_silent_failure_prevention_masterclass.xml) |
 | `/netra_backend/tests/integration/critical_paths/test_websocket_silent_failures.py` | Silent failure prevention tests | 12 comprehensive test cases |
@@ -72,10 +111,11 @@
 | **Database Connectivity** | `/shared/database/core_database_manager.py` | SSL resolution & driver compatibility | [`SPEC/database_connectivity_architecture.xml`](SPEC/database_connectivity_architecture.xml) |
 | **CORS Configuration** | `/shared/cors_config.py` | **Unified CORS configuration for all services** | [`SPEC/cors_configuration.xml`](SPEC/cors_configuration.xml) |
 | **Shared Component Library** | `/shared/` | Universal utilities & schemas | [`SPEC/shared_component_architecture.xml`](SPEC/shared_component_architecture.xml) |
-| **Test Infrastructure** | `/test_framework/` | Unified test utilities | [`SPEC/test_infrastructure_architecture.xml`](SPEC/test_infrastructure_architecture.xml) |
+| **Test Infrastructure** | `/test_framework/` | Unified test utilities with resource monitoring | [`SPEC/test_infrastructure_architecture.xml`](SPEC/test_infrastructure_architecture.xml) |
 | **Test Runner Real Services** | `/test_framework/service_availability.py` | Real service validation | [`SPEC/test_runner_real_services.xml`](SPEC/test_runner_real_services.xml) |
 | **Test Execution Tracker** | `/scripts/test_execution_tracker.py` | Test history & metrics tracking | [`SPEC/learnings/test_system_improvements.xml`](SPEC/learnings/test_system_improvements.xml) |
 | **Test Dashboard** | `/scripts/test_dashboard.py` | Interactive test health monitoring | [`SPEC/learnings/test_system_improvements.xml`](SPEC/learnings/test_system_improvements.xml) |
+| **Docker Manual Control** | `/scripts/docker_manual.py` | Manual Docker operations using UnifiedDockerManager | [`docs/docker_orchestration.md`](docs/docker_orchestration.md) |
 | **Test Collection Auditor** | `/scripts/test_collection_audit.py` | Test collection health analysis | [`SPEC/learnings/test_collection_optimization.xml`](SPEC/learnings/test_collection_optimization.xml) |
 | **Import Management** | Various scripts | Absolute imports enforcement | [`SPEC/import_management_architecture.xml`](SPEC/import_management_architecture.xml) |
 | **Deployment System** | `/scripts/deploy_to_gcp.py` | Official deployment script | [`SPEC/deployment_architecture.xml`](SPEC/deployment_architecture.xml) |

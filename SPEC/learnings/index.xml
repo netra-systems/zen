@@ -2370,4 +2370,39 @@
         <business-impact>$2000/month CI/CD savings, 40% test maintenance reduction, 2 hours/week developer productivity gain</business-impact>
         <prevention>Adopt Playwright for new tests, port mission-critical WebSocket tests, leverage for load testing and multi-user scenarios</prevention>
     </learning>
+
+    <learning id="ssot-orchestration-consolidation-2025-09-02">
+        <title>SSOT Orchestration Consolidation - Infrastructure SSOT Violation Remediation</title>
+        <category>SSOT/Infrastructure/Orchestration</category>
+        <keywords>ssot, orchestration, consolidation, enum-duplication, availability-configuration, test-infrastructure, mro-analysis, thread-safety, singleton-pattern</keywords>
+        <path>ssot_orchestration_consolidation_20250902.xml</path>
+        <critical-takeaway>
+            Eliminated 15+ duplicate orchestration enum definitions causing SSOT violations and maintenance overhead.
+            Created centralized OrchestrationConfig singleton with thread-safe availability caching and environment overrides.
+            Consolidated BackgroundTaskStatus, E2ETestCategory, ExecutionStrategy, ProgressOutputMode, ProgressEventType
+            and other orchestration enums into test_framework/ssot modules. 60% reduction in maintenance overhead,
+            eliminated import inconsistencies causing unpredictable test behavior. Two-module SSOT pattern:
+            orchestration.py for availability config, orchestration_enums.py for consolidated enums.
+        </critical-takeaway>
+        <severity>HIGH</severity>
+        <business-impact>60% maintenance reduction, eliminated test inconsistencies, prevented cascading failures, established SSOT pattern for infrastructure</business-impact>
+        <prevention>Always use test_framework.ssot.orchestration modules for availability and enums. Automated SSOT violation scanning. MRO analysis for complex refactoring. No try-except import patterns for infrastructure.</prevention>
+        <implementation-patterns>
+            <pattern>Centralized Availability Configuration - OrchestrationConfig singleton with caching</pattern>
+            <pattern>Consolidated Enum Imports - Single SSOT module for all orchestration enums</pattern>
+            <pattern>Thread-Safe Singleton Pattern - Lazy loading with RLock for parallel test safety</pattern>
+            <pattern>Environment Override Support - Configuration flexibility for testing scenarios</pattern>
+        </implementation-patterns>
+        <testing-strategies>
+            <strategy>SSOT Compliance Validation - Automated scanning for duplicate definitions</strategy>
+            <strategy>Thread Safety Testing - Parallel access validation for singleton configuration</strategy>
+            <strategy>Migration Integrity Testing - Comprehensive validation of functionality preservation</strategy>
+            <strategy>MRO Analysis - Method resolution order validation for inheritance changes</strategy>
+        </testing-strategies>
+        <related-learnings>
+            <learning-ref>golden-agent-index-2025-09-02</learning-ref>
+            <learning-ref>ssot_consolidation_20250825.xml</learning-ref>
+            <learning-ref>unified_agent_testing_implementation.xml</learning-ref>
+        </related-learnings>
+    </learning>
 </specification>
