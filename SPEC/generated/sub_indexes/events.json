@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "events",
-    "generated_at": "2025-09-01T14:15:56.860358",
+    "generated_at": "2025-09-01T19:24:20.106598",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 30
   },
@@ -101,16 +101,16 @@
       "value": "error",
       "category": "events",
       "locations": [
-        "netra_backend/app/agents/actions_agent_monitoring.py:45",
         "netra_backend/app/agents/actions_goals_plan_builder.py:124",
-        "netra_backend/app/agents/actions_to_meet_goals_sub_agent.py:182",
-        "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_core.py:229",
+        "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_core.py:227",
         "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_helpers.py:242",
         "netra_backend/app/agents/admin_tool_dispatcher/execution_helpers.py:138",
         "netra_backend/app/agents/admin_tool_dispatcher/execution_pattern_helpers.py:45",
-        "netra_backend/app/agents/admin_tool_dispatcher/modern_execution_helpers.py:48",
-        "netra_backend/app/agents/admin_tool_dispatcher/modern_execution_helpers.py:48",
-        "netra_backend/app/agents/admin_tool_dispatcher/operation_helpers.py:76"
+        "netra_backend/app/agents/admin_tool_dispatcher/modern_execution_helpers.py:52",
+        "netra_backend/app/agents/admin_tool_dispatcher/modern_execution_helpers.py:52",
+        "netra_backend/app/agents/admin_tool_dispatcher/operation_helpers.py:76",
+        "netra_backend/app/agents/admin_tool_dispatcher/tool_handler_helpers.py:207",
+        "netra_backend/app/agents/admin_tool_dispatcher/tool_handlers_core.py:83"
       ]
     },
     "filtered_by_event": {
@@ -154,16 +154,16 @@
       "value": "message",
       "category": "events",
       "locations": [
-        "netra_backend/app/agents/actions_agent_monitoring.py:53",
-        "netra_backend/app/agents/actions_to_meet_goals_sub_agent.py:190",
-        "netra_backend/app/agents/actions_to_meet_goals_sub_agent.py:411",
-        "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_core.py:208",
+        "netra_backend/app/agents/actions_to_meet_goals_sub_agent.py:194",
+        "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_core.py:206",
         "netra_backend/app/agents/admin_tool_dispatcher/tool_handler_helpers.py:284",
         "netra_backend/app/agents/admin_tool_executors.py:245",
+        "netra_backend/app/agents/agent_communication.py:61",
         "netra_backend/app/agents/agent_communication.py:66",
-        "netra_backend/app/agents/agent_communication.py:69",
-        "netra_backend/app/agents/agent_communication.py:71",
-        "netra_backend/app/agents/agent_communication.py:85"
+        "netra_backend/app/agents/agent_communication.py:82",
+        "netra_backend/app/agents/agent_lifecycle.py:169",
+        "netra_backend/app/agents/base/executor.py:392",
+        "netra_backend/app/agents/base_agent.py:481"
       ]
     },
     "newest_event": {

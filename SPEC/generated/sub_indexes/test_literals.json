@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "test_literals",
-    "generated_at": "2025-09-01T14:15:57.252454",
+    "generated_at": "2025-09-01T19:24:20.994009",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 12860
+    "total_literals": 12904
   },
   "literals": {
     "\u001b[0m": {
@@ -6925,14 +6925,14 @@
       "locations": [
         "auth_service/tests/test_auth_comprehensive.py:584",
         "auth_service/tests/test_auth_comprehensive_audit.py:619",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:491",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:519",
         "auth_service/tests/test_critical_bugs_real.py:289",
         "auth_service/tests/test_critical_bugs_simple.py:141",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:334",
         "auth_service/tests/test_refresh_endpoint_integration.py:173",
         "auth_service/tests/test_refresh_loop_prevention_comprehensive.py:285",
         "scripts/auto_fix_test_violations.py:733",
-        "scripts/comprehensive_test_fixer.py:367",
-        "scripts/e2e_test_fixer.py:311"
+        "scripts/comprehensive_test_fixer.py:367"
       ]
     },
     "--test": {
@@ -7484,14 +7484,14 @@
       "locations": [
         "auth_service/tests/test_auth_comprehensive.py:584",
         "auth_service/tests/test_auth_comprehensive_audit.py:619",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:491",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:519",
         "auth_service/tests/test_critical_bugs_real.py:289",
         "auth_service/tests/test_critical_bugs_simple.py:141",
         "auth_service/tests/test_environment_loading.py:365",
         "auth_service/tests/test_oauth_state_validation.py:303",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:334",
         "auth_service/tests/test_refresh_endpoint_integration.py:173",
-        "auth_service/tests/test_refresh_loop_prevention_comprehensive.py:285",
-        "auth_service/tests/unit/test_refresh_endpoint.py:334"
+        "auth_service/tests/test_refresh_loop_prevention_comprehensive.py:285"
       ]
     },
     "-vv": {
@@ -8705,7 +8705,7 @@
         "auth_service/tests/test_auth_comprehensive_audit.py:51",
         "auth_service/tests/test_auth_comprehensive_audit.py:522",
         "auth_service/tests/test_auth_comprehensive_audit.py:606",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:394",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:421",
         "scripts/test_oauth_local.py:143",
         "scripts/test_staging_auth_flow.py:34",
         "scripts/test_staging_auth_flow.py:45"
@@ -8823,8 +8823,8 @@
         "auth_service/tests/test_auth_comprehensive_audit.py:283",
         "auth_service/tests/test_auth_comprehensive_audit.py:292",
         "auth_service/tests/test_auth_comprehensive_audit.py:548",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:411",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:416",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:438",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:443",
         "auth_service/tests/test_critical_bugs.py:63",
         "auth_service/tests/test_critical_bugs.py:99",
         "auth_service/tests/test_critical_bugs.py:107",
@@ -9002,7 +9002,7 @@
         "auth_service/tests/test_auth_comprehensive.py:429",
         "auth_service/tests/test_auth_comprehensive.py:448",
         "auth_service/tests/test_auth_comprehensive.py:511",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:385"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:412"
       ]
     },
     "/health-status": {
@@ -10077,7 +10077,8 @@
       "value": "192.168.1.1",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_real_services_comprehensive.py:127"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:117",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:134"
       ]
     },
     "192.168.1.100": {
@@ -13491,8 +13492,8 @@
         "auth_service/tests/test_auth_comprehensive_audit.py:378",
         "auth_service/tests/test_auth_comprehensive_audit.py:381",
         "auth_service/tests/test_auth_comprehensive_audit.py:499",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:83",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:310"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:76",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:300"
       ]
     },
     "@fast_test": {
@@ -15156,6 +15157,14 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_execution_tracker.py:742"
+      ]
+    },
+    "Always fails": {
+      "value": "Always fails",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:122",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:127"
       ]
     },
     "Analysis Complete:": {
@@ -19049,6 +19058,7 @@
       "value": "Clean up resources.",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/helpers/test_repository_factory.py:102",
         "scripts/test_cold_start_e2e.py:462"
       ]
     },
@@ -19836,6 +19846,13 @@
         "auth_service/tests/test_refresh_endpoint_compatibility.py:1"
       ]
     },
+    "Comprehensive tests for Redis connectivity fixes in staging environment.\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal  \n- Business Goal: System Reliability and Monitoring\n- Value Impact: Ensures auth service functions correctly with/without Redis\n- Strategic Impact: Prevents service degradation and improves observability\n\nThese tests validate the Redis connectivity improvements made to fix the\nstaging environment degraded status issue.": {
+      "value": "Comprehensive tests for Redis connectivity fixes in staging environment.\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal  \n- Business Goal: System Reliability and Monitoring\n- Value Impact: Ensures auth service functions correctly with/without Redis\n- Strategic Impact: Prevents service degradation and improves observability\n\nThese tests validate the Redis connectivity improvements made to fix the\nstaging environment degraded status issue.",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:1"
+      ]
+    },
     "Comprehensive tests for user signup flow with edge cases\nTests database persistence, password hashing, validation, and error handling": {
       "value": "Comprehensive tests for user signup flow with edge cases\nTests database persistence, password hashing, validation, and error handling",
       "category": "test_literals",
@@ -20219,6 +20236,23 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_docker_websocket_fix.py:107"
+      ]
+    },
+    "Connection failed": {
+      "value": "Connection failed",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:98",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:99"
+      ]
+    },
+    "Connection lost": {
+      "value": "Connection lost",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:167",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:168",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:169"
       ]
     },
     "Connection pool exhausted, queuing request": {
@@ -20690,7 +20724,7 @@
       "value": "Create auth service with real dependencies.",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_real_services_comprehensive.py:294"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:284"
       ]
     },
     "Create isolated session manager for testing.": {
@@ -20700,25 +20734,32 @@
         "auth_service/tests/test_session_security_cycles_36_40.py:41"
       ]
     },
+    "Create mock repository factory": {
+      "value": "Create mock repository factory",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_signup_flow_comprehensive.py:42"
+      ]
+    },
     "Create real Redis manager using test environment.": {
       "value": "Create real Redis manager using test environment.",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_real_services_comprehensive.py:157"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:147"
       ]
     },
-    "Create real database engine using test environment.": {
-      "value": "Create real database engine using test environment.",
+    "Create real repository factory using test environment.": {
+      "value": "Create real repository factory using test environment.",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_real_services_comprehensive.py:55"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:60"
       ]
     },
-    "Create real database session with test environment": {
-      "value": "Create real database session with test environment",
+    "Create real repository factory with test environment": {
+      "value": "Create real repository factory with test environment",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:27"
+        "auth_service/tests/test_signup_flow_comprehensive.py:33"
       ]
     },
     "Create tests in appropriate directory for": {
@@ -21841,7 +21882,7 @@
       "value": "Database error",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:184",
+        "auth_service/tests/test_signup_flow_comprehensive.py:198",
         "auth_service/tests/unit/test_refresh_endpoint.py:135"
       ]
     },
@@ -27682,6 +27723,11 @@
       "value": "GCP_PROJECT_ID",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:65",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:82",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:274",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:290",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:319",
         "scripts/test/test_clickhouse_staging_fix.py:128",
         "scripts/test_clickhouse_staging.py:35",
         "scripts/test_config_loading.py:36",
@@ -28283,6 +28329,76 @@
       "category": "test_literals",
       "locations": [
         "scripts/autonomous_review/test_reviewer.py:280"
+      ]
+    },
+    "Get audit repository instance.": {
+      "value": "Get audit repository instance.",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/helpers/test_repository_factory.py:97"
+      ]
+    },
+    "Get database session.": {
+      "value": "Get database session.",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/helpers/test_repository_factory.py:76"
+      ]
+    },
+    "Get mock audit repository.": {
+      "value": "Get mock audit repository.",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/helpers/test_repository_factory.py:146"
+      ]
+    },
+    "Get mock session repository.": {
+      "value": "Get mock session repository.",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/helpers/test_repository_factory.py:140"
+      ]
+    },
+    "Get mock user repository.": {
+      "value": "Get mock user repository.",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/helpers/test_repository_factory.py:134"
+      ]
+    },
+    "Get real audit repository.": {
+      "value": "Get real audit repository.",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/helpers/test_repository_factory.py:164"
+      ]
+    },
+    "Get real session repository.": {
+      "value": "Get real session repository.",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/helpers/test_repository_factory.py:158"
+      ]
+    },
+    "Get real user repository.": {
+      "value": "Get real user repository.",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/helpers/test_repository_factory.py:152"
+      ]
+    },
+    "Get session repository instance.": {
+      "value": "Get session repository instance.",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/helpers/test_repository_factory.py:92"
+      ]
+    },
+    "Get user repository instance.": {
+      "value": "Get user repository instance.",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/helpers/test_repository_factory.py:87"
       ]
     },
     "Getting health status...": {
@@ -29431,11 +29547,32 @@
         "netra_backend/app/services/test_environment.py:23"
       ]
     },
+    "Initialize the factory with database connection.": {
+      "value": "Initialize the factory with database connection.",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/helpers/test_repository_factory.py:39"
+      ]
+    },
     "Initialize web application.": {
       "value": "Initialize web application.",
       "category": "test_literals",
       "locations": [
         "scripts/test_service_monitor.py:266"
+      ]
+    },
+    "Initialize with mock database.": {
+      "value": "Initialize with mock database.",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/helpers/test_repository_factory.py:63"
+      ]
+    },
+    "Initialize with real database connection.": {
+      "value": "Initialize with real database connection.",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/helpers/test_repository_factory.py:46"
       ]
     },
     "Initializing database...": {
@@ -29731,9 +29868,9 @@
       "value": "Invalid email format",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:160",
-        "auth_service/tests/test_signup_flow_comprehensive.py:260",
-        "auth_service/tests/test_signup_flow_comprehensive.py:281"
+        "auth_service/tests/test_signup_flow_comprehensive.py:169",
+        "auth_service/tests/test_signup_flow_comprehensive.py:277",
+        "auth_service/tests/test_signup_flow_comprehensive.py:299"
       ]
     },
     "Invalid email format:": {
@@ -33943,6 +34080,15 @@
         "scripts/simple_websocket_blocking_test.py:159"
       ]
     },
+    "Operation timeout": {
+      "value": "Operation timeout",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:178",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:179",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:180"
+      ]
+    },
     "Optimization agent endpoints available for retry testing": {
       "value": "Optimization agent endpoints available for retry testing",
       "category": "test_literals",
@@ -34847,14 +34993,14 @@
       "value": "Password must",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:172"
+        "auth_service/tests/test_signup_flow_comprehensive.py:182"
       ]
     },
     "Password must be at least": {
       "value": "Password must be at least",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:268"
+        "auth_service/tests/test_signup_flow_comprehensive.py:285"
       ]
     },
     "Password must contain at least one digit": {
@@ -35832,6 +35978,20 @@
         "scripts/remove_test_stubs.py:223"
       ]
     },
+    "Pytest fixture for test repository factory with mock database.": {
+      "value": "Pytest fixture for test repository factory with mock database.",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/helpers/test_repository_factory.py:116"
+      ]
+    },
+    "Pytest fixture for test repository factory with real database.": {
+      "value": "Pytest fixture for test repository factory with real database.",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/helpers/test_repository_factory.py:125"
+      ]
+    },
     "Pytest plugins to fix I/O operation on closed file errors.": {
       "value": "Pytest plugins to fix I/O operation on closed file errors.",
       "category": "test_literals",
@@ -36165,14 +36325,14 @@
       "locations": [
         "netra_backend/app/services/test_environment.py:31",
         "auth_service/tests/conftest.py:72",
-        "auth_service/tests/test_redis_staging_fixes.py:43",
-        "auth_service/tests/test_redis_staging_fixes.py:110",
-        "auth_service/tests/test_redis_staging_fixes.py:135",
-        "auth_service/tests/test_redis_staging_fixes.py:161",
-        "scripts/debug_supervisor_test.py:18",
-        "scripts/setup_test_environment.py:95",
-        "scripts/setup_test_environment.py:179",
-        "scripts/start_test_services.py:157"
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:47",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:63",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:80",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:213",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:252",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:262",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:272",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:317"
       ]
     },
     "REDIS_URL must be configured in staging": {
@@ -36779,7 +36939,7 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_auth_comprehensive.py:555",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:165"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:155"
       ]
     },
     "Redis not ready after": {
@@ -36964,8 +37124,8 @@
       "value": "Registration failed",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:185",
-        "auth_service/tests/test_signup_flow_comprehensive.py:346"
+        "auth_service/tests/test_signup_flow_comprehensive.py:201",
+        "auth_service/tests/test_signup_flow_comprehensive.py:377"
       ]
     },
     "Registry doesn't have WebSocket manager": {
@@ -38397,8 +38557,6 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_database_connection.py:228",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:77",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:464",
         "scripts/test/test_docker_stability.py:22",
         "scripts/test_clickhouse_graceful_failure.py:51",
         "scripts/test_seed_data.py:65",
@@ -39848,6 +40006,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_redis_config_critical_failure.py:222"
+      ]
+    },
+    "Secret Manager not available": {
+      "value": "Secret Manager not available",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:86"
       ]
     },
     "Secret access test failed:": {
@@ -44049,14 +44214,14 @@
       "value": "Test OAuth session ID generation without mocks.",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_real_services_comprehensive.py:440"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:467"
       ]
     },
     "Test OAuth state generation without mocks.": {
       "value": "Test OAuth state generation without mocks.",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_real_services_comprehensive.py:427"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:454"
       ]
     },
     "Test Overlap Analyzer\nAnalyzes test files for similarity and potential duplication using vector similarity techniques.": {
@@ -44101,6 +44266,13 @@
         "auth_service/tests/test_redis_staging_fixes.py:131"
       ]
     },
+    "Test Redis connection retry with exponential backoff": {
+      "value": "Test Redis connection retry with exponential backoff",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:94"
+      ]
+    },
     "Test Redis database cleaned": {
       "value": "Test Redis database cleaned",
       "category": "test_literals",
@@ -44120,6 +44292,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/team_updates_test_analyzer.py:1"
+      ]
+    },
+    "Test Repository Factory for Auth Service\nProvides repository instances for testing without direct database access": {
+      "value": "Test Repository Factory for Auth Service\nProvides repository instances for testing without direct database access",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/helpers/test_repository_factory.py:1"
       ]
     },
     "Test Results Summary": {
@@ -44243,14 +44422,14 @@
       "locations": [
         "auth_service/tests/factories/user_factory.py:39",
         "auth_service/tests/test_auth_real_services_comprehensive.py:91",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:110",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:312",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:337",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:358",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:100",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:302",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:342",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:377",
         "auth_service/tests/test_oauth_security_vulnerabilities.py:148",
         "auth_service/tests/test_oauth_state_validation.py:128",
         "auth_service/tests/test_oauth_state_validation.py:271",
-        "auth_service/tests/test_signup_flow_comprehensive.py:125"
+        "auth_service/tests/test_signup_flow_comprehensive.py:128"
       ]
     },
     "Test User Real": {
@@ -44536,6 +44715,13 @@
         "scripts/test_async_postgres.py:2"
       ]
     },
+    "Test async health check with proper timeout handling": {
+      "value": "Test async health check with proper timeout handling",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:132"
+      ]
+    },
     "Test async request handling with real AsyncClient.\n        \n        Validates that async requests work correctly with actual service.": {
       "value": "Test async request handling with real AsyncClient.\n        \n        Validates that async requests work correctly with actual service.",
       "category": "test_literals",
@@ -44597,7 +44783,7 @@
       "value": "Test auth session persistence in real database.",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_real_services_comprehensive.py:116"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:107"
       ]
     },
     "Test authentication flow on staging with fresh tokens": {
@@ -44816,7 +45002,7 @@
       "value": "Test complete user registration with real database.",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_real_services_comprehensive.py:309"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:299"
       ]
     },
     "Test complete. Check the log output above for proper file:line information.": {
@@ -44845,6 +45031,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_triage_flow.py:219"
+      ]
+    },
+    "Test comprehensive error handling in Redis operations": {
+      "value": "Test comprehensive error handling in Redis operations",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:155"
       ]
     },
     "Test concurrent request handling.": {
@@ -44986,7 +45179,7 @@
       "value": "Test creating an auth user in real database.",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_real_services_comprehensive.py:81"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:75"
       ]
     },
     "Test credentials have been generated and saved.": {
@@ -45336,7 +45529,7 @@
       "value": "Test fallback to in-memory registration when no database",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:196"
+        "auth_service/tests/test_signup_flow_comprehensive.py:212"
       ]
     },
     "Test file": {
@@ -45441,35 +45634,35 @@
       "value": "Test handling of Redis connection failures.",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_real_services_comprehensive.py:474"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:502"
       ]
     },
     "Test handling of database connection failures.": {
       "value": "Test handling of database connection failures.",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_real_services_comprehensive.py:457"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:484"
       ]
     },
     "Test handling of database errors during registration": {
       "value": "Test handling of database errors during registration",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:181"
+        "auth_service/tests/test_signup_flow_comprehensive.py:191"
       ]
     },
     "Test handling of extremely long inputs": {
       "value": "Test handling of extremely long inputs",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:290"
+        "auth_service/tests/test_signup_flow_comprehensive.py:308"
       ]
     },
     "Test handling of unicode and special characters": {
       "value": "Test handling of unicode and special characters",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:304"
+        "auth_service/tests/test_signup_flow_comprehensive.py:323"
       ]
     },
     "Test health endpoints for all services": {
@@ -45693,7 +45886,7 @@
       "value": "Test race condition protection for concurrent registrations",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:325"
+        "auth_service/tests/test_signup_flow_comprehensive.py:350"
       ]
     },
     "Test rapid sequential token refreshes": {
@@ -45777,7 +45970,7 @@
       "value": "Test refresh endpoint with real async client.",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_real_services_comprehensive.py:403"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:430"
       ]
     },
     "Test refresh fails with invalid token": {
@@ -45819,28 +46012,28 @@
       "value": "Test registration with empty fields",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:256"
+        "auth_service/tests/test_signup_flow_comprehensive.py:272"
       ]
     },
     "Test registration with existing email": {
       "value": "Test registration with existing email",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:137"
+        "auth_service/tests/test_signup_flow_comprehensive.py:140"
       ]
     },
     "Test registration with invalid email": {
       "value": "Test registration with invalid email",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:157"
+        "auth_service/tests/test_signup_flow_comprehensive.py:165"
       ]
     },
     "Test registration with weak password": {
       "value": "Test registration with weak password",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:169"
+        "auth_service/tests/test_signup_flow_comprehensive.py:178"
       ]
     },
     "Test remediation on a small sample of high-priority files": {
@@ -46146,6 +46339,13 @@
         "auth_service/debug_db_test.py:65"
       ]
     },
+    "Test session manager behavior when Redis is unavailable": {
+      "value": "Test session manager behavior when Redis is unavailable",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:226"
+      ]
+    },
     "Test session properly cleaned up when user logs out.": {
       "value": "Test session properly cleaned up when user logs out.",
       "category": "test_literals",
@@ -46164,7 +46364,7 @@
       "value": "Test session storage in real Redis.",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_real_services_comprehensive.py:182"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:172"
       ]
     },
     "Test session survives auth service restart without user re-login.": {
@@ -46248,7 +46448,7 @@
       "value": "Test successful user registration",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:110"
+        "auth_service/tests/test_signup_flow_comprehensive.py:108"
       ]
     },
     "Test suite file does not exist": {
@@ -46311,7 +46511,7 @@
       "value": "Test that SQL injection attempts are handled safely",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:277"
+        "auth_service/tests/test_signup_flow_comprehensive.py:294"
       ]
     },
     "Test that SupervisorAgent imports correctly from the consolidated module.": {
@@ -46405,6 +46605,13 @@
         "scripts/staging_comprehensive_test.py:152"
       ]
     },
+    "Test that health check reports healthy when Redis is properly configured": {
+      "value": "Test that health check reports healthy when Redis is properly configured",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:286"
+      ]
+    },
     "Test that localhost Redis URL is rejected in staging unless explicitly allowed": {
       "value": "Test that localhost Redis URL is rejected in staging unless explicitly allowed",
       "category": "test_literals",
@@ -46496,6 +46703,13 @@
         "auth_service/tests/test_refresh_token_fix.py:64"
       ]
     },
+    "Test that retry logic eventually gives up": {
+      "value": "Test that retry logic eventually gives up",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:119"
+      ]
+    },
     "Test that services can start properly even when non-critical environment variables are missing.\n\nThis validates that our environment variable categorization fixes prevent\nservice startup failures due to missing optional variables.\n\nBusiness Value: Platform/Internal - System Reliability\nEnsures 99.9% service availability by preventing startup failures from optional config.": {
       "value": "Test that services can start properly even when non-critical environment variables are missing.\n\nThis validates that our environment variable categorization fixes prevent\nservice startup failures due to missing optional variables.\n\nBusiness Value: Platform/Internal - System Reliability\nEnsures 99.9% service availability by preventing startup failures from optional config.",
       "category": "test_literals",
@@ -46570,14 +46784,14 @@
       "value": "Test that we can establish a real Redis connection.",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_real_services_comprehensive.py:176"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:166"
       ]
     },
     "Test that we can establish a real database connection.": {
       "value": "Test that we can establish a real database connection.",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_real_services_comprehensive.py:74"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:67"
       ]
     },
     "Test the /ws/test endpoint (no auth required).": {
@@ -46697,7 +46911,7 @@
       "value": "Test token blacklist management in real Redis.",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_real_services_comprehensive.py:201"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:191"
       ]
     },
     "Test token generation with mock user": {
@@ -46718,7 +46932,7 @@
       "value": "Test token refresh with real dependencies.",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_real_services_comprehensive.py:350"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:364"
       ]
     },
     "Test token refresh with snake_case format": {
@@ -46803,7 +47017,8 @@
       "value": "TestAgent/1.0",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_real_services_comprehensive.py:128"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:118",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:135"
       ]
     },
     "TestClient not using real app": {
@@ -46833,12 +47048,13 @@
       "value": "TestPassword123!",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_real_services_comprehensive.py:311",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:86",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:301",
         "auth_service/tests/test_auth_real_services_comprehensive.py:331",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:352",
-        "auth_service/tests/test_signup_flow_comprehensive.py:219",
-        "auth_service/tests/test_signup_flow_comprehensive.py:230",
-        "auth_service/tests/test_signup_flow_comprehensive.py:239",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:366",
+        "auth_service/tests/test_signup_flow_comprehensive.py:235",
+        "auth_service/tests/test_signup_flow_comprehensive.py:246",
+        "auth_service/tests/test_signup_flow_comprehensive.py:255",
         "scripts/test_adaptive_workflow.py:32",
         "scripts/test_auth_client_debug.py:32",
         "scripts/test_staging_auth_live.py:23"
@@ -50503,8 +50719,8 @@
       "value": "User registered successfully",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:131",
-        "auth_service/tests/test_signup_flow_comprehensive.py:208"
+        "auth_service/tests/test_signup_flow_comprehensive.py:134",
+        "auth_service/tests/test_signup_flow_comprehensive.py:224"
       ]
     },
     "User registration failed:": {
@@ -50525,14 +50741,14 @@
       "value": "User with email test@example.com already exists",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:345"
+        "auth_service/tests/test_signup_flow_comprehensive.py:374"
       ]
     },
     "User with this email already exists": {
       "value": "User with this email already exists",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:146"
+        "auth_service/tests/test_signup_flow_comprehensive.py:154"
       ]
     },
     "User-Agent": {
@@ -50828,16 +51044,16 @@
       "value": "ValidPass123!",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:124",
-        "auth_service/tests/test_signup_flow_comprehensive.py:149",
-        "auth_service/tests/test_signup_flow_comprehensive.py:163",
-        "auth_service/tests/test_signup_flow_comprehensive.py:188",
-        "auth_service/tests/test_signup_flow_comprehensive.py:202",
-        "auth_service/tests/test_signup_flow_comprehensive.py:263",
-        "auth_service/tests/test_signup_flow_comprehensive.py:284",
-        "auth_service/tests/test_signup_flow_comprehensive.py:298",
+        "auth_service/tests/test_signup_flow_comprehensive.py:127",
+        "auth_service/tests/test_signup_flow_comprehensive.py:157",
+        "auth_service/tests/test_signup_flow_comprehensive.py:172",
+        "auth_service/tests/test_signup_flow_comprehensive.py:204",
+        "auth_service/tests/test_signup_flow_comprehensive.py:218",
+        "auth_service/tests/test_signup_flow_comprehensive.py:280",
+        "auth_service/tests/test_signup_flow_comprehensive.py:302",
         "auth_service/tests/test_signup_flow_comprehensive.py:317",
-        "auth_service/tests/test_signup_flow_comprehensive.py:349"
+        "auth_service/tests/test_signup_flow_comprehensive.py:342",
+        "auth_service/tests/test_signup_flow_comprehensive.py:380"
       ]
     },
     "Validate splitting suggestion": {
@@ -52059,7 +52275,7 @@
       "value": "WrongPassword123!",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:231",
+        "auth_service/tests/test_signup_flow_comprehensive.py:247",
         "scripts/test_signup_flow_manual.py:159"
       ]
     },
@@ -57383,7 +57599,7 @@
         "auth_service/tests/test_auth_comprehensive.py:583",
         "auth_service/tests/test_auth_comprehensive_audit.py:617",
         "auth_service/tests/test_auth_port_configuration.py:457",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:490"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:518"
       ]
     },
     "__pycache__": {
@@ -57941,7 +58157,7 @@
       "value": "a",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:294",
+        "auth_service/tests/test_signup_flow_comprehensive.py:313",
         "scripts/fix_test_batch.py:210",
         "scripts/test_failure_analyzer.py:410"
       ]
@@ -58076,12 +58292,12 @@
         "auth_service/tests/factories/token_factory.py:218",
         "auth_service/tests/test_auth_comprehensive_audit.py:533",
         "auth_service/tests/test_auth_comprehensive_audit.py:554",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:322",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:344",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:371",
-        "auth_service/tests/test_critical_bugs.py:73",
-        "auth_service/tests/test_critical_bugs.py:154",
-        "auth_service/tests/test_critical_bugs.py:157"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:317",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:350",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:351",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:391",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:392",
+        "auth_service/tests/test_critical_bugs.py:73"
       ]
     },
     "access_token=": {
@@ -59505,7 +59721,7 @@
         "auth_service/tests/auth-service-down-critical-scenarios.py:136",
         "auth_service/tests/test_auth_comprehensive.py:490",
         "auth_service/tests/test_auth_comprehensive_audit.py:285",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:418",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:445",
         "auth_service/tests/test_critical_bugs.py:101",
         "auth_service/tests/test_critical_bugs.py:146",
         "auth_service/tests/test_critical_bugs.py:194",
@@ -59795,6 +60011,14 @@
       "locations": [
         "scripts/auto_fix_test_sizes.py:533",
         "scripts/compliance/test_refactor_helper.py:131"
+      ]
+    },
+    "asyncio.sleep": {
+      "value": "asyncio.sleep",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:106",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:126"
       ]
     },
     "asyncio\\.sleep\\(": {
@@ -60212,11 +60436,38 @@
         "auth_service/tests/test_refresh_endpoint_compatibility.py:312"
       ]
     },
+    "auth_service.auth_core.secret_loader.AuthSecretLoader._load_from_secret_manager": {
+      "value": "auth_service.auth_core.secret_loader.AuthSecretLoader._load_from_secret_manager",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:85",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:322"
+      ]
+    },
+    "auth_service.auth_core.secret_loader.secretmanager": {
+      "value": "auth_service.auth_core.secret_loader.secretmanager",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:38",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:294"
+      ]
+    },
     "auth_service.auth_core.security.oauth_security.time": {
       "value": "auth_service.auth_core.security.oauth_security.time",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_oauth_state_validation.py:193"
+      ]
+    },
+    "auth_service.auth_core.services.auth_service.AuthUserRepository": {
+      "value": "auth_service.auth_core.services.auth_service.AuthUserRepository",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_signup_flow_comprehensive.py:123",
+        "auth_service/tests/test_signup_flow_comprehensive.py:152",
+        "auth_service/tests/test_signup_flow_comprehensive.py:200",
+        "auth_service/tests/test_signup_flow_comprehensive.py:339",
+        "auth_service/tests/test_signup_flow_comprehensive.py:376"
       ]
     },
     "auth_service.main": {
@@ -61315,7 +61566,7 @@
       "value": "call_count",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:332"
+        "auth_service/tests/test_signup_flow_comprehensive.py:360"
       ]
     },
     "callback_result": {
@@ -62106,6 +62357,7 @@
       "value": "client",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:194",
         "scripts/compliance/real_test_requirements_enforcer.py:239",
         "scripts/compliance/real_test_requirements_enforcer.py:261"
       ]
@@ -62129,6 +62381,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_oauth_local.py:153"
+      ]
+    },
+    "client_available": {
+      "value": "client_available",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:219"
       ]
     },
     "client_id": {
@@ -62950,6 +63209,8 @@
       "value": "connected",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:193",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:205",
         "scripts/test_supervisor_execution_flow.py:53",
         "scripts/test_supervisor_execution_flow.py:58",
         "scripts/test_websocket_cors_comprehensive.py:65",
@@ -62969,8 +63230,8 @@
       "value": "connection",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_real_services_comprehensive.py:471",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:487",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:499",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:515",
         "auth_service/tests/test_critical_bugs.py:388",
         "auth_service/tests/test_critical_bugs_real.py:93",
         "auth_service/tests/test_critical_bugs_real.py:197",
@@ -63024,6 +63285,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_websocket_manual.py:44"
+      ]
+    },
+    "connection_info": {
+      "value": "connection_info",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:220"
       ]
     },
     "connection_lost": {
@@ -63238,7 +63506,7 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/auth-service-down-critical-scenarios.py:136",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:418",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:445",
         "scripts/test_staging_login_automated.py:160"
       ]
     },
@@ -63803,15 +64071,6 @@
         "scripts/test_auth_database_sessions.py:42"
       ]
     },
-    "create_local_user": {
-      "value": "create_local_user",
-      "category": "test_literals",
-      "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:120",
-        "auth_service/tests/test_signup_flow_comprehensive.py:314",
-        "auth_service/tests/test_signup_flow_comprehensive.py:344"
-      ]
-    },
     "create_module": {
       "value": "create_module",
       "category": "test_literals",
@@ -63842,7 +64101,7 @@
         "auth_service/tests/factories/audit_factory.py:58",
         "auth_service/tests/factories/session_factory.py:38",
         "auth_service/tests/factories/user_factory.py:43",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:187",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:177",
         "auth_service/tests/test_critical_bugs_simple.py:65",
         "auth_service/tests/utils/assertion_helpers.py:111",
         "auth_service/tests/utils/assertion_helpers.py:123",
@@ -65185,7 +65444,8 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/factories/session_factory.py:37",
-        "auth_service/tests/factories/session_factory.py:161"
+        "auth_service/tests/factories/session_factory.py:161",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:119"
       ]
     },
     "diagnosis_assistance": {
@@ -65835,6 +66095,8 @@
       "value": "enabled",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:192",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:204",
         "scripts/test_backend.py:370",
         "scripts/test_backend.py:371"
       ]
@@ -65936,7 +66198,7 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_auth_comprehensive_audit.py:54",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:398",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:425",
         "scripts/test_staging_deployment.py:29",
         "scripts/test_staging_deployment.py:114",
         "scripts/test_staging_deployment.py:135",
@@ -66154,15 +66416,15 @@
       "category": "test_literals",
       "locations": [
         "netra_backend/app/api/test_endpoints.py:62",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:399",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:400",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:426",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:427",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:221",
         "scripts/frontend_iterative_test_runner.py:704",
         "scripts/setup_staging_test_account.py:112",
         "scripts/setup_staging_test_account.py:250",
         "scripts/setup_test_environment.py:104",
         "scripts/test_backend_auth_config.py:33",
-        "scripts/test_cors.py:263",
-        "scripts/test_cors.py:459"
+        "scripts/test_cors.py:263"
       ]
     },
     "environment in ['staging', 'production', 'prod']": {
@@ -66250,10 +66512,10 @@
         "auth_service/tests/auth-service-down-critical-scenarios.py:410",
         "auth_service/tests/factories/audit_factory.py:176",
         "auth_service/tests/test_auth_comprehensive.py:250",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:487",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:499",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:515",
         "auth_service/tests/test_critical_bugs.py:234",
-        "auth_service/tests/test_critical_bugs_real.py:57",
-        "auth_service/tests/test_refresh_endpoint_integration.py:80"
+        "auth_service/tests/test_critical_bugs_real.py:57"
       ]
     },
     "error rate": {
@@ -66824,8 +67086,8 @@
       "value": "existing@example.com",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:142",
-        "auth_service/tests/test_signup_flow_comprehensive.py:148"
+        "auth_service/tests/test_signup_flow_comprehensive.py:147",
+        "auth_service/tests/test_signup_flow_comprehensive.py:156"
       ]
     },
     "exists": {
@@ -69674,7 +69936,7 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/factories/user_factory.py:39",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:326",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:320",
         "scripts/test_adaptive_workflow.py:182",
         "scripts/test_data_pipeline_simple.py:26",
         "scripts/test_signup_flow_manual.py:26",
@@ -70022,17 +70284,6 @@
         "auth_service/tests/test_auth_port_configuration.py:405"
       ]
     },
-    "get_by_email": {
-      "value": "get_by_email",
-      "category": "test_literals",
-      "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:119",
-        "auth_service/tests/test_signup_flow_comprehensive.py:144",
-        "auth_service/tests/test_signup_flow_comprehensive.py:184",
-        "auth_service/tests/test_signup_flow_comprehensive.py:313",
-        "auth_service/tests/test_signup_flow_comprehensive.py:343"
-      ]
-    },
     "get_connection": {
       "value": "get_connection",
       "category": "test_literals",
@@ -70044,6 +70295,7 @@
       "value": "get_database_url",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_auth_real_services_comprehensive.py:489",
         "scripts/test_auth_database_sessions.py:43"
       ]
     },
@@ -70612,7 +70864,7 @@
         "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:294",
         "auth_service/tests/test_auth_comprehensive.py:277",
         "auth_service/tests/test_auth_comprehensive_audit.py:47",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:389",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:416",
         "scripts/setup_test_environment.py:76",
         "scripts/setup_test_environment.py:273",
         "scripts/staging_comprehensive_test.py:172",
@@ -71312,7 +71564,7 @@
       "value": "http://test",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_real_services_comprehensive.py:405",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:432",
         "auth_service/tests/test_critical_bugs.py:60",
         "auth_service/tests/test_critical_bugs.py:96",
         "auth_service/tests/test_refresh_endpoint_simple.py:27",
@@ -72484,7 +72736,7 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_auth_comprehensive.py:321",
-        "auth_service/tests/test_signup_flow_comprehensive.py:162"
+        "auth_service/tests/test_signup_flow_comprehensive.py:171"
       ]
     },
     "invalid-json": {
@@ -72631,6 +72883,7 @@
       "value": "ip",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_auth_real_services_comprehensive.py:117",
         "auth_service/tests/test_session_security_cycles_36_40.py:250",
         "auth_service/tests/test_session_security_cycles_36_40.py:251",
         "auth_service/tests/test_session_security_cycles_36_40.py:252",
@@ -73948,14 +74201,14 @@
       "locations": [
         "auth_service/tests/factories/audit_factory.py:75",
         "auth_service/tests/test_auth_comprehensive.py:74",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:92",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:111",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:101",
         "auth_service/tests/utils/assertion_helpers.py:104",
         "scripts/compliance/test_refactor_helper.py:114",
         "scripts/compliance/test_refactor_helper.py:130",
         "scripts/run_agent_pipeline_test.py:41",
         "scripts/setup_e2e_test_ports.py:49",
-        "scripts/test_sqlalchemy_2_migration.py:67"
+        "scripts/test_sqlalchemy_2_migration.py:67",
+        "scripts/test_sqlalchemy_2_migration.py:70"
       ]
     },
     "local_storage": {
@@ -74227,6 +74480,13 @@
         "scripts/auto_fix_test_sizes.py:365"
       ]
     },
+    "manager_enabled": {
+      "value": "manager_enabled",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:218"
+      ]
+    },
     "managers": {
       "value": "managers",
       "category": "test_literals",
@@ -74350,6 +74610,13 @@
         "scripts/simple_websocket_blocking_test.py:107",
         "scripts/simple_websocket_blocking_test.py:161",
         "scripts/simple_websocket_blocking_test.py:215"
+      ]
+    },
+    "max_connections": {
+      "value": "max_connections",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:206"
       ]
     },
     "max_error_rate": {
@@ -76022,6 +76289,10 @@
       "value": "netra-staging",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:65",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:82",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:290",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:319",
         "scripts/test/test_clickhouse_staging_fix.py:128",
         "scripts/test_redis_config_critical_failure.py:93",
         "scripts/test_staging_config.py:46"
@@ -76939,6 +77210,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_verify_workflow_status_corrected.py:141"
+      ]
+    },
+    "nonexistent@example.com": {
+      "value": "nonexistent@example.com",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_real_services_comprehensive.py:71"
       ]
     },
     "nonexistent_auth_package.anything": {
@@ -78591,7 +78869,7 @@
         "auth_service/tests/factories/token_factory.py:39",
         "auth_service/tests/factories/token_factory.py:265",
         "auth_service/tests/test_auth_comprehensive_audit.py:366",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:248",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:238",
         "auth_service/tests/test_refresh_critical_fix.py:104",
         "auth_service/tests/test_refresh_loop_prevention_comprehensive.py:139",
         "auth_service/tests/test_refresh_token_fix.py:80",
@@ -78652,6 +78930,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_websocket_cors_comprehensive.py:83"
+      ]
+    },
+    "ping_with_timeout": {
+      "value": "ping_with_timeout",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:307"
       ]
     },
     "pip freeze | findstr {module}": {
@@ -79021,7 +79306,7 @@
       "value": "postgresql://invalid:invalid@localhost:9999/invalid",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_real_services_comprehensive.py:460"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:489"
       ]
     },
     "postgresql://netra:netra123@localhost:": {
@@ -79512,7 +79797,7 @@
         "auth_service/tests/test_auth_port_configuration.py:348",
         "auth_service/tests/test_auth_port_configuration.py:369",
         "auth_service/tests/test_auth_port_configuration.py:378",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:400",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:427",
         "auth_service/tests/unit/test_docker_hostname_resolution.py:217",
         "scripts/test_ansi_logging.py:18",
         "scripts/test_cors.py:305",
@@ -80382,7 +80667,7 @@
         "auth_service/test_auth_direct.py:34",
         "auth_service/tests/test_auth_comprehensive_audit.py:63",
         "auth_service/tests/test_auth_comprehensive_audit.py:88",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:229",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:219",
         "auth_service/tests/test_refresh_critical_fix.py:30",
         "auth_service/tests/test_refresh_critical_fix.py:94",
         "auth_service/tests/test_refresh_critical_fix.py:114",
@@ -80788,7 +81073,7 @@
       "value": "redis://invalid:9999",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_real_services_comprehensive.py:478"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:506"
       ]
     },
     "redis://localhost:": {
@@ -80869,11 +81154,39 @@
         "scripts/test_redis_config_critical_failure.py:98"
       ]
     },
+    "redis://staging-redis:6379": {
+      "value": "redis://staging-redis:6379",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:58",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:69",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:297",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:323",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:329"
+      ]
+    },
     "redis://staging-redis:6379/0": {
       "value": "redis://staging-redis:6379/0",
       "category": "test_literals",
       "locations": [
         "scripts/test_service_startup_with_missing_optionals.py:151"
+      ]
+    },
+    "redis://test-redis:6379": {
+      "value": "redis://test-redis:6379",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:47",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:52"
+      ]
+    },
+    "redis://test:6379": {
+      "value": "redis://test:6379",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:107",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:128",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:213"
       ]
     },
     "redis_connection": {
@@ -80903,6 +81216,13 @@
         "scripts/unified_test_config.py:310"
       ]
     },
+    "redis_url_configured": {
+      "value": "redis_url_configured",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:222"
+      ]
+    },
     "redis|Redis|REDIS": {
       "value": "redis|Redis|REDIS",
       "category": "test_literals",
@@ -80925,8 +81245,8 @@
         "auth_service/tests/test_auth_comprehensive_audit.py:190",
         "auth_service/tests/test_auth_comprehensive_audit.py:484",
         "auth_service/tests/test_auth_comprehensive_audit.py:492",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:262",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:266",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:252",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:256",
         "auth_service/tests/test_refresh_critical_fix.py:82",
         "auth_service/tests/test_refresh_critical_fix.py:100",
         "auth_service/tests/test_refresh_endpoint.py:116",
@@ -80971,12 +81291,12 @@
         "auth_service/tests/test_auth_comprehensive_audit.py:534",
         "auth_service/tests/test_auth_comprehensive_audit.py:549",
         "auth_service/tests/test_auth_comprehensive_audit.py:555",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:323",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:345",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:361",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:352",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:353",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:380",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:381",
         "auth_service/tests/test_critical_bugs.py:64",
-        "auth_service/tests/test_critical_bugs.py:64",
-        "auth_service/tests/test_critical_bugs.py:74"
+        "auth_service/tests/test_critical_bugs.py:64"
       ]
     },
     "refresh_token field is required": {
@@ -81191,6 +81511,7 @@
       "value": "request",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:74",
         "scripts/test_adaptive_workflow.py:317",
         "scripts/test_adaptive_workflow.py:324",
         "scripts/test_adaptive_workflow.py:330",
@@ -81199,8 +81520,7 @@
         "scripts/test_adaptive_workflow_direct.py:169",
         "scripts/test_adaptive_workflow_direct.py:175",
         "scripts/test_adaptive_workflow_direct.py:184",
-        "scripts/test_adaptive_workflow_local.py:88",
-        "scripts/test_adaptive_workflow_local.py:97"
+        "scripts/test_adaptive_workflow_local.py:88"
       ]
     },
     "request_classifier": {
@@ -81350,7 +81670,7 @@
       "value": "requires_verification",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:132"
+        "auth_service/tests/test_signup_flow_comprehensive.py:135"
       ]
     },
     "research": {
@@ -82874,7 +83194,7 @@
       "value": "session:",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_real_services_comprehensive.py:183"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:173"
       ]
     },
     "session:test-session-1": {
@@ -83109,6 +83429,21 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_oauth_security_vulnerabilities.py:190"
+      ]
+    },
+    "shared.isolated_environment.get_env": {
+      "value": "shared.isolated_environment.get_env",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:45",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:61",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:78",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:210",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:250",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:260",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:270",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:287",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:315"
       ]
     },
     "shared_secrets_tested": {
@@ -83925,6 +84260,14 @@
         "scripts/test_secret_manager_builder_critical.py:691"
       ]
     },
+    "staging-redis-url": {
+      "value": "staging-redis-url",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:74",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:328"
+      ]
+    },
     "staging-secret-345678": {
       "value": "staging-secret-345678",
       "category": "test_literals",
@@ -84263,7 +84606,7 @@
         "auth_service/tests/test_auth_comprehensive.py:437",
         "auth_service/tests/test_auth_comprehensive_audit.py:47",
         "auth_service/tests/test_auth_comprehensive_audit.py:582",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:389",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:416",
         "auth_service/tests/test_critical_bugs_real.py:117",
         "scripts/fix_test_batch.py:248",
         "scripts/fix_test_batch.py:250"
@@ -85203,7 +85546,7 @@
       "value": "test'; DROP TABLE users; --",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:283",
+        "auth_service/tests/test_signup_flow_comprehensive.py:301",
         "scripts/test_signup_flow_manual.py:124"
       ]
     },
@@ -85247,10 +85590,10 @@
       "value": "test-",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_real_services_comprehensive.py:83",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:310",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:76",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:300",
         "auth_service/tests/test_auth_real_services_comprehensive.py:330",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:351",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:365",
         "scripts/setup_test_environment.py:127",
         "scripts/setup_test_environment.py:250",
         "scripts/setup_test_environment.py:252",
@@ -85889,9 +86232,9 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_signup_flow_comprehensive.py:115",
-        "auth_service/tests/test_signup_flow_comprehensive.py:129",
-        "auth_service/tests/test_signup_flow_comprehensive.py:309",
-        "auth_service/tests/test_signup_flow_comprehensive.py:321"
+        "auth_service/tests/test_signup_flow_comprehensive.py:132",
+        "auth_service/tests/test_signup_flow_comprehensive.py:331",
+        "auth_service/tests/test_signup_flow_comprehensive.py:346"
       ]
     },
     "test.": {
@@ -86057,11 +86400,11 @@
         "auth_service/tests/test_auth_comprehensive.py:322",
         "auth_service/tests/test_auth_comprehensive.py:378",
         "auth_service/tests/test_auth_comprehensive.py:401",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:186",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:228",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:278",
-        "auth_service/tests/test_auth_session_persistence_edge_cases.py:26",
-        "auth_service/tests/test_critical_bugs_simple.py:58"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:176",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:218",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:268",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:495",
+        "auth_service/tests/test_auth_session_persistence_edge_cases.py:26"
       ]
     },
     "test@netra.ai": {
@@ -86455,6 +86798,13 @@
         "auth_service/tests/test_redis_staging_fixes.py:125"
       ]
     },
+    "test_device": {
+      "value": "test_device",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_real_services_comprehensive.py:119"
+      ]
+    },
     "test_dir": {
       "value": "test_dir",
       "category": "test_literals",
@@ -86708,14 +87058,6 @@
         "scripts/apply_fast_test_decorators.py:149"
       ]
     },
-    "test_hash": {
-      "value": "test_hash",
-      "category": "test_literals",
-      "locations": [
-        "auth_service/tests/test_auth_real_services_comprehensive.py:126",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:146"
-      ]
-    },
     "test_history.json": {
       "value": "test_history.json",
       "category": "test_literals",
@@ -86765,6 +87107,21 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/conftest.py:59"
+      ]
+    },
+    "test_key": {
+      "value": "test_key",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:160",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:161",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:162",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:173",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:174",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:175",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:183",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:184",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:185"
       ]
     },
     "test_managers": {
@@ -86942,6 +87299,7 @@
       "value": "test_refresh_token_12345",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_auth_real_services_comprehensive.py:124",
         "scripts/test_staging_refresh_format.py:25"
       ]
     },
@@ -88483,8 +88841,8 @@
         "netra_backend/app/services/realistic_test_data/models.py:135",
         "auth_service/tests/auth-service-down-critical-scenarios.py:284",
         "auth_service/tests/auth-service-down-critical-scenarios.py:294",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:471",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:487",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:499",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:515",
         "scripts/fix_test_batch.py:317",
         "scripts/frontend_iterative_test_runner.py:741",
         "scripts/test_agent_orchestration_recovery.py:204",
@@ -88533,7 +88891,7 @@
         "netra_backend/app/services/realistic_test_data/log_generator.py:50",
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:121",
         "netra_backend/app/services/realistic_test_data/workload_simulator.py:123",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:390",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:417",
         "scripts/align_test_imports.py:404",
         "scripts/analyze_test_overlap.py:346",
         "scripts/analyze_test_overlap.py:519",
@@ -89497,8 +89855,8 @@
         "netra_backend/app/services/realistic_test_data/llm_response_generator.py:69",
         "auth_service/tests/factories/token_factory.py:38",
         "auth_service/tests/factories/token_factory.py:133",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:249",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:266",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:239",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:256",
         "auth_service/tests/test_refresh_endpoint.py:116",
         "auth_service/tests/test_refresh_endpoint_compatibility.py:30",
         "auth_service/tests/test_refresh_endpoint_compatibility.py:42",
@@ -90069,7 +90427,8 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/factories/audit_factory.py:55",
-        "auth_service/tests/factories/session_factory.py:36"
+        "auth_service/tests/factories/session_factory.py:36",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:118"
       ]
     },
     "user_count": {
@@ -90106,8 +90465,8 @@
         "auth_service/tests/factories/permission_factory.py:81",
         "auth_service/tests/factories/session_factory.py:34",
         "auth_service/tests/test_auth_comprehensive.py:151",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:185",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:197"
+        "auth_service/tests/test_auth_real_services_comprehensive.py:175",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:187"
       ]
     },
     "user_initiated": {
@@ -90453,16 +90812,16 @@
       "value": "value",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:161",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:174",
+        "auth_service/tests/test_redis_staging_connectivity_fixes.py:184",
         "auth_service/tests/test_redis_staging_fixes.py:99",
         "scripts/compliance/test_size_validator.py:269",
         "scripts/optimize_test_performance.py:85",
         "scripts/optimize_test_performance.py:118",
         "scripts/optimize_test_performance.py:120",
         "scripts/setup_staging_test_account.py:154",
-        "scripts/setup_staging_test_account.py:162",
-        "scripts/test_intensive_serialization.py:123",
-        "scripts/test_triage_flow.py:47",
-        "scripts/test_triage_flow.py:48"
+        "scripts/setup_staging_test_account.py:162"
       ]
     },
     "value_": {
@@ -90855,7 +91214,7 @@
       "value": "weak",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:175",
+        "auth_service/tests/test_signup_flow_comprehensive.py:185",
         "scripts/test_signup_flow_manual.py:77",
         "scripts/test_signup_flow_manual.py:78"
       ]
@@ -91310,7 +91669,7 @@
       "locations": [
         "auth_service/test_auth_direct.py:34",
         "auth_service/tests/test_auth_comprehensive_audit.py:63",
-        "auth_service/tests/test_auth_real_services_comprehensive.py:229",
+        "auth_service/tests/test_auth_real_services_comprehensive.py:219",
         "auth_service/tests/test_refresh_critical_fix.py:30",
         "auth_service/tests/test_refresh_critical_fix.py:94",
         "auth_service/tests/test_refresh_critical_fix.py:114",
@@ -96676,7 +97035,7 @@
       "value": "用户名 🚀",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_signup_flow_comprehensive.py:318"
+        "auth_service/tests/test_signup_flow_comprehensive.py:343"
       ]
     },
     "🌍": {

@@ -57,6 +57,13 @@ services:
     networks:
       - default
     restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.3'
+        reservations:
+          memory: 256M
 
   # Test Redis Cache - Optimized for testing
   test-redis:
@@ -174,6 +181,13 @@ services:
     networks:
       - default
     restart: no
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '0.4'
+        reservations:
+          memory: 1G
 
   # Test Auth Service
   test-auth:
@@ -218,6 +232,13 @@ services:
     networks:
       - default
     restart: no
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.25'
+        reservations:
+          memory: 512M
 
   # Test Frontend Service (optional for e2e)
   test-frontend:
@@ -241,6 +262,13 @@ services:
     networks:
       - default
     restart: no
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.3'
+        reservations:
+          memory: 512M
 
   # ============================================
   # SUPPORTING TEST SERVICES

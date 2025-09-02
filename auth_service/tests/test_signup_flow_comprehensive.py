@@ -3,16 +3,22 @@ Comprehensive tests for user signup flow with edge cases
 Tests database persistence, password hashing, validation, and error handling
 """
 import pytest
-# Removed all mock imports - using real services per CLAUDE.md requirement
+# Using repository pattern per SSOT requirements
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from auth_service.auth_core.services.auth_service import AuthService
 from auth_service.auth_core.database.models import AuthUser
 from auth_service.auth_core.database.repository import AuthUserRepository
 
-# Import test framework for isolated environment
+# Import test framework for isolated environment and repository factory
 from test_framework.environment_isolation import isolated_test_env
+from auth_service.tests.helpers.test_repository_factory import (
+    TestRepositoryFactory,
+    mock_user_repository,
+    real_user_repository
+)
 
 
 @pytest.fixture
@@ -23,29 +29,21 @@ def auth_service():
 
 
 @pytest.fixture
-async def real_db_session(isolated_test_env):
-    """Create real database session with test environment"""
-    from auth_service.auth_core.database.database_manager import AuthDatabaseManager
-    from auth_service.auth_core.database.models import Base
-    from auth_service.auth_core.config import AuthConfig
-    
-    database_url = AuthConfig.get_database_url()
-    engine = AuthDatabaseManager.create_async_engine(database_url)
-    
-    # Create tables
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-        
-    # Return session factory
-    from sqlalchemy.ext.asyncio import AsyncSession
-    session_factory = lambda: AsyncSession(bind=engine)
-    
-    yield session_factory
-    
-    # Cleanup
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-    await engine.dispose()
+async def real_repository_factory(isolated_test_env):
+    """Create real repository factory with test environment"""
+    factory = TestRepositoryFactory(use_real_db=True)
+    await factory.initialize()
+    yield factory
+    await factory.cleanup()
+
+
+@pytest.fixture
+async def mock_repository_factory():
+    """Create mock repository factory"""
+    factory = TestRepositoryFactory(use_real_db=False)
+    await factory.initialize()
+    yield factory
+    await factory.cleanup()
 
 
 @pytest.fixture
@@ -106,42 +104,52 @@ class TestUserRegistration:
     """Test user registration with database persistence"""
     
     @pytest.mark.asyncio
-    async def test_successful_registration(self, auth_service, mock_db_session):
+    async def test_successful_registration(self, auth_service, mock_repository_factory):
         """Test successful user registration"""
         # Setup
-        auth_service.db_session = mock_db_session
+        user_repo = await mock_repository_factory.get_user_repository()
+        session = await mock_repository_factory.get_session()
+        auth_service.db_session = session
         
         mock_user = MagicMock(spec=AuthUser)
         mock_user.id = "test-user-id"
         mock_user.email = "test@example.com"
         mock_user.is_verified = False
         
-        with patch.object(AuthUserRepository, 'get_by_email', return_value=None):
-            with patch.object(AuthUserRepository, 'create_local_user', return_value=mock_user):
-                # Execute
-                result = await auth_service.register_user(
-                    email="test@example.com",
-                    password="ValidPass123!",
-                    full_name="Test User"
-                )
-                
-                # Verify
-                assert result["user_id"] == "test-user-id"
-                assert result["email"] == "test@example.com"
-                assert result["message"] == "User registered successfully"
-                assert result["requires_verification"] == True
-                mock_db_session.commit.assert_called_once()
+        # Mock repository methods
+        user_repo.get_by_email = AsyncMock(return_value=None)
+        user_repo.create_local_user = AsyncMock(return_value=mock_user)
+        
+        with patch('auth_service.auth_core.services.auth_service.AuthUserRepository', return_value=user_repo):
+            # Execute
+            result = await auth_service.register_user(
+                email="test@example.com",
+                password="ValidPass123!",
+                full_name="Test User"
+            )
+            
+            # Verify
+            assert result["user_id"] == "test-user-id"
+            assert result["email"] == "test@example.com"
+            assert result["message"] == "User registered successfully"
+            assert result["requires_verification"] == True
+            session.commit.assert_called_once()
     
     @pytest.mark.asyncio
-    async def test_duplicate_email_registration(self, auth_service, mock_db_session):
+    async def test_duplicate_email_registration(self, auth_service, mock_repository_factory):
         """Test registration with existing email"""
         # Setup
-        auth_service.db_session = mock_db_session
+        user_repo = await mock_repository_factory.get_user_repository()
+        session = await mock_repository_factory.get_session()
+        auth_service.db_session = session
         
         existing_user = MagicMock(spec=AuthUser)
         existing_user.email = "existing@example.com"
         
-        with patch.object(AuthUserRepository, 'get_by_email', return_value=existing_user):
+        # Mock repository methods
+        user_repo.get_by_email = AsyncMock(return_value=existing_user)
+        
+        with patch('auth_service.auth_core.services.auth_service.AuthUserRepository', return_value=user_repo):
             # Execute and verify
             with pytest.raises(ValueError, match="User with this email already exists"):
                 await auth_service.register_user(
@@ -150,12 +158,13 @@ class TestUserRegistration:
                     full_name="Test User"
                 )
             
-            mock_db_session.rollback.assert_not_called()
+            session.rollback.assert_not_called()
     
     @pytest.mark.asyncio
-    async def test_invalid_email_registration(self, auth_service, mock_db_session):
+    async def test_invalid_email_registration(self, auth_service, mock_repository_factory):
         """Test registration with invalid email"""
-        auth_service.db_session = mock_db_session
+        session = await mock_repository_factory.get_session()
+        auth_service.db_session = session
         
         with pytest.raises(ValueError, match="Invalid email format"):
             await auth_service.register_user(
@@ -165,9 +174,10 @@ class TestUserRegistration:
             )
     
     @pytest.mark.asyncio
-    async def test_weak_password_registration(self, auth_service, mock_db_session):
+    async def test_weak_password_registration(self, auth_service, mock_repository_factory):
         """Test registration with weak password"""
-        auth_service.db_session = mock_db_session
+        session = await mock_repository_factory.get_session()
+        auth_service.db_session = session
         
         with pytest.raises(ValueError, match="Password must"):
             await auth_service.register_user(
@@ -177,11 +187,17 @@ class TestUserRegistration:
             )
     
     @pytest.mark.asyncio
-    async def test_database_error_handling(self, auth_service, mock_db_session):
+    async def test_database_error_handling(self, auth_service, mock_repository_factory):
         """Test handling of database errors during registration"""
-        auth_service.db_session = mock_db_session
+        # Setup
+        user_repo = await mock_repository_factory.get_user_repository()
+        session = await mock_repository_factory.get_session()
+        auth_service.db_session = session
         
-        with patch.object(AuthUserRepository, 'get_by_email', side_effect=Exception("Database error")):
+        # Mock repository methods
+        user_repo.get_by_email = AsyncMock(side_effect=Exception("Database error"))
+        
+        with patch('auth_service.auth_core.services.auth_service.AuthUserRepository', return_value=user_repo):
             with pytest.raises(RuntimeError, match="Registration failed"):
                 await auth_service.register_user(
                     email="test@example.com",
@@ -189,7 +205,7 @@ class TestUserRegistration:
                     full_name="Test User"
                 )
             
-            mock_db_session.rollback.assert_called_once()
+            session.rollback.assert_called_once()
     
     @pytest.mark.asyncio
     async def test_fallback_to_test_registration(self, auth_service):
@@ -252,9 +268,10 @@ class TestEdgeCases:
     """Test edge cases and boundary conditions"""
     
     @pytest.mark.asyncio
-    async def test_empty_fields(self, auth_service, mock_db_session):
+    async def test_empty_fields(self, auth_service, mock_repository_factory):
         """Test registration with empty fields"""
-        auth_service.db_session = mock_db_session
+        session = await mock_repository_factory.get_session()
+        auth_service.db_session = session
         
         # Empty email
         with pytest.raises(ValueError, match="Invalid email format"):
@@ -273,9 +290,10 @@ class TestEdgeCases:
             )
     
     @pytest.mark.asyncio
-    async def test_sql_injection_attempts(self, auth_service, mock_db_session):
+    async def test_sql_injection_attempts(self, auth_service, mock_repository_factory):
         """Test that SQL injection attempts are handled safely"""
-        auth_service.db_session = mock_db_session
+        session = await mock_repository_factory.get_session()
+        auth_service.db_session = session
         
         # SQL injection in email
         with pytest.raises(ValueError, match="Invalid email format"):
@@ -286,9 +304,10 @@ class TestEdgeCases:
             )
     
     @pytest.mark.asyncio
-    async def test_extremely_long_inputs(self, auth_service, mock_db_session):
+    async def test_extremely_long_inputs(self, auth_service, mock_repository_factory):
         """Test handling of extremely long inputs"""
-        auth_service.db_session = mock_db_session
+        session = await mock_repository_factory.get_session()
+        auth_service.db_session = session
         
         # Very long email (should fail validation)
         long_email = "a" * 1000 + "@example.com"
@@ -300,9 +319,12 @@ class TestEdgeCases:
             )
     
     @pytest.mark.asyncio
-    async def test_unicode_and_special_characters(self, auth_service, mock_db_session):
+    async def test_unicode_and_special_characters(self, auth_service, mock_repository_factory):
         """Test handling of unicode and special characters"""
-        auth_service.db_session = mock_db_session
+        # Setup
+        user_repo = await mock_repository_factory.get_user_repository()
+        session = await mock_repository_factory.get_session()
+        auth_service.db_session = session
         
         # Unicode in name is fine
         mock_user = MagicMock(spec=AuthUser)
@@ -310,20 +332,26 @@ class TestEdgeCases:
         mock_user.email = "test@example.com"
         mock_user.is_verified = False
         
-        with patch.object(AuthUserRepository, 'get_by_email', return_value=None):
-            with patch.object(AuthUserRepository, 'create_local_user', return_value=mock_user):
-                result = await auth_service.register_user(
-                    email="test@example.com",
-                    password="ValidPass123!",
-                    full_name="用户名 🚀"
-                )
-                
-                assert result["user_id"] == "test-user-id"
+        # Mock repository methods
+        user_repo.get_by_email = AsyncMock(return_value=None)
+        user_repo.create_local_user = AsyncMock(return_value=mock_user)
+        
+        with patch('auth_service.auth_core.services.auth_service.AuthUserRepository', return_value=user_repo):
+            result = await auth_service.register_user(
+                email="test@example.com",
+                password="ValidPass123!",
+                full_name="用户名 🚀"
+            )
+            
+            assert result["user_id"] == "test-user-id"
     
     @pytest.mark.asyncio
-    async def test_concurrent_registration_same_email(self, auth_service, mock_db_session):
+    async def test_concurrent_registration_same_email(self, auth_service, mock_repository_factory):
         """Test race condition protection for concurrent registrations"""
-        auth_service.db_session = mock_db_session
+        # Setup
+        user_repo = await mock_repository_factory.get_user_repository()
+        session = await mock_repository_factory.get_session()
+        auth_service.db_session = session
         
         # Simulate race condition where user is created between check and create
         async def side_effect(email):
@@ -340,12 +368,15 @@ class TestEdgeCases:
                 existing_user.email = email
                 return existing_user
         
-        with patch.object(AuthUserRepository, 'get_by_email', side_effect=side_effect):
-            with patch.object(AuthUserRepository, 'create_local_user', 
-                            side_effect=ValueError("User with email test@example.com already exists")):
-                with pytest.raises(RuntimeError, match="Registration failed"):
-                    await auth_service.register_user(
-                        email="test@example.com",
-                        password="ValidPass123!",
-                        full_name="Test User"
-                    )
+        # Mock repository methods
+        user_repo.get_by_email = AsyncMock(side_effect=side_effect)
+        user_repo.create_local_user = AsyncMock(
+            side_effect=ValueError("User with email test@example.com already exists"))
+        
+        with patch('auth_service.auth_core.services.auth_service.AuthUserRepository', return_value=user_repo):
+            with pytest.raises(RuntimeError, match="Registration failed"):
+                await auth_service.register_user(
+                    email="test@example.com",
+                    password="ValidPass123!",
+                    full_name="Test User"
+                )

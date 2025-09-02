@@ -52,8 +52,8 @@ pytest tests/e2e
 
 ### Running E2E Tests with Docker
 ```bash
-# Using the helper script
-python scripts/run_e2e_tests_with_docker.py
+# Using unified test runner (recommended)
+python tests/unified_test_runner.py --category e2e --real-services
 
 # Manual setup
 docker-compose -f docker-compose.test.yml up -d --profile e2e

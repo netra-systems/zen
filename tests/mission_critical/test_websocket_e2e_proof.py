@@ -72,9 +72,9 @@ class TestWebSocketE2EProof(unittest.TestCase):
         engine = ExecutionEngine(registry=registry, websocket_bridge=mock_bridge)
         
         # ===== STEP 4: Agent with Bridge =====
-        from netra_backend.app.agents.base_agent import BaseSubAgent
+        from netra_backend.app.agents.base_agent import BaseAgent
         
-        class TestOptimizationAgent(BaseSubAgent):
+        class TestOptimizationAgent(BaseAgent):
             """Test agent that emits all WebSocket events."""
             
             async def execute(self, state, run_id, stream_updates=False):
@@ -271,9 +271,9 @@ class TestWebSocketE2EProof(unittest.TestCase):
             missing_connections.append("AgentExecutionCore still using legacy set_websocket_context")
         
         # Check 2: BaseAgent has bridge adapter
-        from netra_backend.app.agents.base_agent import BaseSubAgent
-        if not hasattr(BaseSubAgent, '_websocket_adapter'):
-            missing_connections.append("BaseSubAgent missing _websocket_adapter")
+        from netra_backend.app.agents.base_agent import BaseAgent
+        if not hasattr(BaseAgent, '_websocket_adapter'):
+            missing_connections.append("BaseAgent missing _websocket_adapter")
         
         # Check 3: WebSocketBridgeAdapter exists
         try:

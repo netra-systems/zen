@@ -76,8 +76,8 @@ class SupervisorAgent(BaseAgent):
         self.websocket_manager = websocket_bridge
         
         # Initialize execution helpers for business logic
-        self.execution_helpers = SupervisorExecutionHelpers()
-        self.workflow_executor = SupervisorWorkflowExecutor()
+        self.execution_helpers = SupervisorExecutionHelpers(self)
+        self.workflow_executor = SupervisorWorkflowExecutor(self)
         
         # Legacy compatibility properties
         self._init_legacy_compatibility_components()
@@ -212,7 +212,7 @@ class SupervisorAgent(BaseAgent):
         # Initialize state
         state = DeepAgentState()
         state.user_request = user_prompt
-        state.thread_id = thread_id
+        state.chat_thread_id = thread_id
         state.user_id = user_id
         
         # Create ExecutionContext for modern execution pattern

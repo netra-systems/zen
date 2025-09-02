@@ -112,9 +112,10 @@ The test infrastructure has **6,096 test files** with massive SSOT violations th
    - Single mock factory for all mocks
    - Single database setup utility
    - Single WebSocket test utility
+      - Unify UnifiedServiceOrchestrator to use UnifiedDockerManager?
+    review "ServiceOrchestrator" (legacy?)
 
 2. **Remove All Legacy Code**
-   - Delete ServiceOrchestrator (use UnifiedDockerManager)
    - Remove all duplicate mock implementations
    - Consolidate test runners to one
 

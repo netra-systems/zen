@@ -59,8 +59,8 @@
                     <purpose>Configure and verify port settings</purpose>
                 </script>
                 <script>
-                    <name>scripts/run_e2e_tests_with_docker.py</name>
-                    <purpose>Manage Docker services lifecycle for E2E tests</purpose>
+                    <name>tests/unified_test_runner.py</name>
+                    <purpose>Unified test runner with Docker orchestration capabilities</purpose>
                 </script>
             </scripts>
         </component>

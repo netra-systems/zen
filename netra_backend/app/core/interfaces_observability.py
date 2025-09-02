@@ -41,7 +41,13 @@ class CoreSupervisorFlowLogger:
     def __init__(self, correlation_id: Optional[str] = None, run_id: Optional[str] = None, enabled: bool = True):
         """Initialize flow logger with tracking capabilities."""
         self.correlation_id = correlation_id or f"corr_{str(uuid.uuid4())[:8]}"
-        self.run_id = run_id or f"run_{str(uuid.uuid4())[:8]}"
+        if run_id:
+            self.run_id = run_id
+        else:
+            from netra_backend.app.utils.run_id_generator import generate_run_id
+            # Generate generic thread_id for observability logging
+            observability_thread_id = f"observability_{str(uuid.uuid4())[:8]}"
+            self.run_id = generate_run_id(observability_thread_id, "observability_logging")
         self.enabled = enabled
         self.flow_state = FlowState.PENDING
         self.start_time = time.time()

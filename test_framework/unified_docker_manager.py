@@ -55,6 +55,11 @@ from test_framework.dynamic_port_allocator import (
     allocate_test_ports,
     release_test_ports
 )
+from test_framework.docker_rate_limiter import (
+    DockerRateLimiter,
+    execute_docker_command,
+    get_docker_rate_limiter
+)
 
 logger = logging.getLogger(__name__)
 
@@ -209,31 +214,31 @@ class UnifiedDockerManager:
             "container": "netra-frontend", 
             "default_port": 3000,  # Default for reference
             "health_endpoint": "/",
-            "memory_limit": "256m"  # Reduced for stability
+            "memory_limit": "1024m"  # Increased for better stability
         },
         "auth": {
             "container": "netra-auth",
             "default_port": 8001,  # Default for reference
             "health_endpoint": "/health",
-            "memory_limit": "512m"
+            "memory_limit": "1024m"  # Increased from 512m to prevent memory pressure (73% usage)
         },
         "postgres": {
             "container": "netra-postgres",
             "default_port": 5432,  # Default for reference
             "health_cmd": "pg_isready",
-            "memory_limit": "512m"
+            "memory_limit": "1024m"  # Increased for better performance
         },
         "redis": {
             "container": "netra-redis",
             "default_port": 6379,  # Default for reference
             "health_cmd": "redis-cli ping",
-            "memory_limit": "256m"
+            "memory_limit": "512m"  # Increased from 256m for better performance
         },
         "clickhouse": {
             "container": "netra-clickhouse",
             "default_port": 8123,  # Default for reference
             "health_endpoint": "/ping",
-            "memory_limit": "512m"
+            "memory_limit": "1024m"  # Increased for better analytics performance
         }
     }
     
@@ -289,6 +294,10 @@ class UnifiedDockerManager:
         env = get_env()
         self.environment = env.get("TEST_ENV", "test")
         
+        # Cleanup scheduler integration (optional)
+        self._cleanup_scheduler = None
+        self._enable_cleanup_scheduler = env.get("ENABLE_DOCKER_CLEANUP_SCHEDULER", "false").lower() == "true"
+        
         # Ensure PROJECT_ROOT is set for docker-compose file detection
         if not env.get("PROJECT_ROOT"):
             # Calculate project root from this file's location
@@ -299,6 +308,9 @@ class UnifiedDockerManager:
         # Dynamic port allocation will replace hardcoded ports
         self._docker_ports = {}  # Will be populated dynamically
         self._local_ports = {}   # Will be populated dynamically
+        
+        # Initialize Docker rate limiter
+        self.docker_rate_limiter = get_docker_rate_limiter()
         
         # Initialize state
         self._load_state()
@@ -463,12 +475,12 @@ class UnifiedDockerManager:
         try:
             # Check if network already exists
             check_cmd = ["docker", "network", "ls", "--filter", f"name={network_name}", "--format", "{{.Name}}"]
-            result = subprocess.run(check_cmd, capture_output=True, text=True)
+            result = self.docker_rate_limiter.execute_docker_command(check_cmd, timeout=10)
             
             if network_name not in result.stdout:
                 # Create the network
                 create_cmd = ["docker", "network", "create", network_name]
-                result = subprocess.run(create_cmd, capture_output=True, text=True)
+                result = self.docker_rate_limiter.execute_docker_command(create_cmd, timeout=30)
                 
                 if result.returncode != 0:
                     logger.error(f"Failed to create network {network_name}: {result.stderr}")
@@ -493,7 +505,7 @@ class UnifiedDockerManager:
         try:
             # Remove the network
             cmd = ["docker", "network", "rm", self._network_name]
-            result = subprocess.run(cmd, capture_output=True, text=True)
+            result = self.docker_rate_limiter.execute_docker_command(cmd, timeout=30)
             
             if result.returncode != 0:
                 if "not found" not in result.stderr.lower():
@@ -506,6 +518,79 @@ class UnifiedDockerManager:
             
         except Exception as e:
             logger.error(f"Failed to cleanup network: {e}")
+            return False
+    
+    def safe_container_remove(self, container_name: str, timeout: int = 10) -> bool:
+        """
+        Safely remove container with graceful shutdown.
+        
+        This replaces dangerous 'docker rm -f' patterns that can crash Docker daemon.
+        
+        Args:
+            container_name: Name or ID of container to remove
+            timeout: Seconds to wait for graceful stop
+            
+        Returns:
+            True if container was safely removed or didn't exist
+        """
+        try:
+            # First check if container exists
+            inspect_cmd = ["docker", "inspect", container_name]
+            inspect_result = subprocess.run(inspect_cmd, capture_output=True, text=True, timeout=5)
+            
+            if inspect_result.returncode != 0:
+                # Container doesn't exist, nothing to remove
+                logger.debug(f"Container {container_name} doesn't exist, nothing to remove")
+                return True
+            
+            # Step 1: Stop gracefully with timeout
+            logger.info(f"Gracefully stopping container: {container_name}")
+            stop_result = subprocess.run(
+                ["docker", "stop", "-t", str(timeout), container_name],
+                capture_output=True,
+                text=True,
+                timeout=timeout + 5
+            )
+            
+            if stop_result.returncode != 0:
+                logger.warning(f"Graceful stop failed for {container_name}: {stop_result.stderr}")
+                # Don't proceed to rm if stop failed - container may still be running
+                return False
+            
+            # Step 2: Wait for container to fully stop
+            time.sleep(2)
+            
+            # Step 3: Verify container is stopped
+            verify_cmd = ["docker", "inspect", "-f", "{{.State.Running}}", container_name]
+            verify_result = subprocess.run(verify_cmd, capture_output=True, text=True, timeout=5)
+            
+            if verify_result.returncode == 0:
+                is_running = verify_result.stdout.strip() == "true"
+                if is_running:
+                    logger.warning(f"Container {container_name} is still running after stop command")
+                    return False
+            
+            # Step 4: Safe removal (WITHOUT -f flag)
+            logger.info(f"Safely removing stopped container: {container_name}")
+            rm_result = subprocess.run(
+                ["docker", "rm", container_name],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            
+            if rm_result.returncode == 0:
+                logger.debug(f"Successfully removed container: {container_name}")
+                return True
+            else:
+                logger.error(f"Failed to remove container {container_name}: {rm_result.stderr}")
+                return False
+                
+        except subprocess.TimeoutExpired:
+            logger.error(f"Timeout during safe removal of container {container_name}")
+            return False
+        except Exception as e:
+            logger.error(f"Failed to safely remove container {container_name}: {e}")
             return False
     
     def _check_restart_allowed(self, service_name: str) -> bool:
@@ -681,7 +766,8 @@ class UnifiedDockerManager:
                 "up", "-d"
             ]
             
-            result = subprocess.run(cmd, env=env, capture_output=True, text=True)
+            docker_result = self.docker_rate_limiter.execute_docker_command(cmd, timeout=120, env=env)
+            result = subprocess.CompletedProcess(cmd, docker_result.returncode, docker_result.stdout, docker_result.stderr)
             if result.returncode == 0:
                 break
             
@@ -728,8 +814,11 @@ class UnifiedDockerManager:
                     if result.returncode == 0 and result.stdout.strip():
                         container_names = result.stdout.strip().split('\n')
                         for container in container_names:
-                            logger.info(f"Removing conflicting container: {container}")
-                            subprocess.run(["docker", "rm", "-f", container], capture_output=True)
+                            logger.info(f"Safely removing conflicting container: {container}")
+                            if not self.safe_container_remove(container):
+                                logger.warning(f"Failed to safely remove container {container}")
+                            else:
+                                logger.info(f"Successfully removed container {container}")
         
         except Exception as e:
             logger.warning(f"Could not parse compose file for cleanup: {e}")
@@ -750,13 +839,15 @@ class UnifiedDockerManager:
         
         # Remove by name
         for container_name in name_matches:
-            logger.info(f"Force removing conflicting container by name: {container_name}")
-            subprocess.run(["docker", "rm", "-f", container_name], capture_output=True)
+            logger.info(f"Safely removing conflicting container by name: {container_name}")
+            if not self.safe_container_remove(container_name):
+                logger.warning(f"Failed to safely remove container {container_name}")
         
         # Remove by ID as fallback
         for container_id in id_matches:
-            logger.info(f"Force removing conflicting container by ID: {container_id}")
-            subprocess.run(["docker", "rm", "-f", container_id], capture_output=True)
+            logger.info(f"Safely removing conflicting container by ID: {container_id}")
+            if not self.safe_container_remove(container_id):
+                logger.warning(f"Failed to safely remove container {container_id}")
     
     def _cleanup_test_containers(self):
         """Clean up all netra-test containers"""
@@ -766,8 +857,11 @@ class UnifiedDockerManager:
         if result.returncode == 0 and result.stdout.strip():
             container_names = result.stdout.strip().split('\n')
             for container in container_names:
-                logger.debug(f"Removing test container: {container}")
-                subprocess.run(["docker", "rm", "-f", container], capture_output=True)
+                logger.debug(f"Safely removing test container: {container}")
+                if not self.safe_container_remove(container):
+                    logger.warning(f"Failed to safely remove test container {container}")
+                else:
+                    logger.debug(f"Successfully removed test container {container}")
     
     def _cleanup_environment(self, env_name: str):
         """Clean up Docker environment"""
@@ -780,7 +874,7 @@ class UnifiedDockerManager:
             "down", "--remove-orphans", "-v"
         ]
         
-        subprocess.run(cmd, capture_output=True)
+        self.docker_rate_limiter.execute_docker_command(cmd, timeout=60)
     
     def _get_compose_file(self) -> str:
         """Get appropriate docker-compose file"""
@@ -826,7 +920,8 @@ class UnifiedDockerManager:
         try:
             # List all running netra-dev containers
             cmd = ["docker", "ps", "--format", "{{.Names}}", "--filter", "name=netra-dev-"]
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+            docker_result = self.docker_rate_limiter.execute_docker_command(cmd, timeout=10)
+            result = subprocess.CompletedProcess(cmd, docker_result.returncode, docker_result.stdout, docker_result.stderr)
             
             if result.returncode == 0 and result.stdout.strip():
                 container_names = result.stdout.strip().split('\n')
@@ -910,7 +1005,8 @@ class UnifiedDockerManager:
                     internal_port = self.SERVICES[service].get("default_port", 8000)
                     
                     cmd = ["docker", "port", container_name, str(internal_port)]
-                    result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+                    docker_result = self.docker_rate_limiter.execute_docker_command(cmd, timeout=5)
+                    result = subprocess.CompletedProcess(cmd, docker_result.returncode, docker_result.stdout, docker_result.stderr)
                     
                     if result.returncode == 0 and result.stdout.strip():
                         # Parse output like "0.0.0.0:8000" or "127.0.0.1:8000"
@@ -1061,7 +1157,8 @@ class UnifiedDockerManager:
             container_name = f"{env_name}_{service_name}_1"
             cmd = ["docker", "restart", container_name]
             
-            result = subprocess.run(cmd, capture_output=True, text=True)
+            docker_result = self.docker_rate_limiter.execute_docker_command(cmd, timeout=60)
+            result = subprocess.CompletedProcess(cmd, docker_result.returncode, docker_result.stdout, docker_result.stderr)
             success = result.returncode == 0
             
             # Update status
@@ -1730,13 +1827,11 @@ class UnifiedDockerManager:
             return self._docker_available
             
         try:
-            result = subprocess.run(
+            docker_result = self.docker_rate_limiter.execute_docker_command(
                 ["docker", "--version"],
-                capture_output=True,
-                text=True,
                 timeout=5
             )
-            self._docker_available = result.returncode == 0
+            self._docker_available = docker_result.returncode == 0
         except (subprocess.TimeoutExpired, FileNotFoundError):
             self._docker_available = False
             
@@ -1933,7 +2028,10 @@ class UnifiedDockerManager:
             
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
             
-            # Also remove containers
+            # Wait for containers to be fully killed
+            await asyncio.sleep(3)
+            
+            # Remove containers (safer after kill + delay)
             cmd_rm = ["docker-compose", "-f", self._get_compose_file(),
                       "-p", self._get_project_name(), "rm", "-f"]
             if services:
@@ -2192,6 +2290,190 @@ class UnifiedDockerManager:
                 logger.error(f"  - {issue.title}")
         
         return report
+    
+    # =====================================
+    # CLEANUP SCHEDULER INTEGRATION
+    # =====================================
+    
+    def enable_cleanup_scheduler(self, 
+                                schedule_config: Optional[object] = None,
+                                resource_thresholds: Optional[object] = None) -> bool:
+        """
+        Enable the Docker cleanup scheduler for this manager.
+        
+        Args:
+            schedule_config: Optional ScheduleConfig instance
+            resource_thresholds: Optional ResourceThresholds instance
+            
+        Returns:
+            True if scheduler was enabled successfully
+        """
+        if not self._enable_cleanup_scheduler:
+            logger.debug("Cleanup scheduler is disabled via environment variable")
+            return False
+        
+        try:
+            # Import here to avoid circular imports
+            from test_framework.docker_cleanup_scheduler import (
+                DockerCleanupScheduler, ScheduleConfig, ResourceThresholds
+            )
+            
+            if self._cleanup_scheduler is None:
+                self._cleanup_scheduler = DockerCleanupScheduler(
+                    docker_manager=self,
+                    rate_limiter=self.config.rate_limiter if hasattr(self.config, 'rate_limiter') else None,
+                    schedule_config=schedule_config,
+                    resource_thresholds=resource_thresholds
+                )
+                
+                # Add callbacks for test session tracking
+                self._cleanup_scheduler.add_pre_cleanup_callback(self._pre_cleanup_check)
+                self._cleanup_scheduler.add_post_cleanup_callback(self._post_cleanup_handler)
+                
+                result = self._cleanup_scheduler.start()
+                if result:
+                    logger.info("Docker cleanup scheduler enabled and started")
+                else:
+                    logger.error("Failed to start cleanup scheduler")
+                return result
+            else:
+                logger.debug("Cleanup scheduler already enabled")
+                return True
+                
+        except Exception as e:
+            logger.error(f"Failed to enable cleanup scheduler: {e}")
+            return False
+    
+    def disable_cleanup_scheduler(self) -> bool:
+        """
+        Disable the Docker cleanup scheduler.
+        
+        Returns:
+            True if scheduler was disabled successfully
+        """
+        if self._cleanup_scheduler is not None:
+            try:
+                result = self._cleanup_scheduler.stop()
+                self._cleanup_scheduler = None
+                logger.info("Docker cleanup scheduler disabled")
+                return result
+            except Exception as e:
+                logger.error(f"Failed to disable cleanup scheduler: {e}")
+                return False
+        return True
+    
+    def get_cleanup_scheduler_status(self) -> Optional[Dict[str, Any]]:
+        """
+        Get status of the cleanup scheduler.
+        
+        Returns:
+            Scheduler statistics dictionary or None if scheduler not enabled
+        """
+        if self._cleanup_scheduler is not None:
+            return self._cleanup_scheduler.get_statistics()
+        return None
+    
+    def register_with_cleanup_scheduler(self, test_id: Optional[str] = None) -> str:
+        """
+        Register the current test session with the cleanup scheduler.
+        
+        Args:
+            test_id: Optional test identifier (uses self.test_id if None)
+            
+        Returns:
+            The registered test ID
+        """
+        session_id = test_id or self.test_id
+        if self._cleanup_scheduler is not None:
+            self._cleanup_scheduler.register_test_session(session_id)
+            logger.debug(f"Registered test session {session_id} with cleanup scheduler")
+        return session_id
+    
+    def unregister_from_cleanup_scheduler(self, test_id: Optional[str] = None, 
+                                        trigger_cleanup: bool = True) -> None:
+        """
+        Unregister test session from cleanup scheduler.
+        
+        Args:
+            test_id: Optional test identifier (uses self.test_id if None)
+            trigger_cleanup: Whether to trigger post-test cleanup
+        """
+        session_id = test_id or self.test_id
+        if self._cleanup_scheduler is not None:
+            self._cleanup_scheduler.unregister_test_session(session_id, trigger_cleanup)
+            logger.debug(f"Unregistered test session {session_id} from cleanup scheduler")
+    
+    def trigger_manual_cleanup(self, cleanup_types: Optional[List] = None) -> List:
+        """
+        Trigger manual cleanup through the scheduler if available.
+        
+        Args:
+            cleanup_types: Optional list of CleanupType enums
+            
+        Returns:
+            List of CleanupResult objects
+        """
+        if self._cleanup_scheduler is not None:
+            return self._cleanup_scheduler.trigger_manual_cleanup(cleanup_types, force=True)
+        else:
+            logger.warning("Cleanup scheduler not available for manual cleanup")
+            # Fallback to existing cleanup method
+            try:
+                self.cleanup_orphaned_containers()
+                return []
+            except Exception as e:
+                logger.error(f"Fallback cleanup failed: {e}")
+                return []
+    
+    def _pre_cleanup_check(self) -> bool:
+        """
+        Pre-cleanup callback to check if cleanup should proceed.
+        
+        Returns:
+            True if cleanup should proceed
+        """
+        # Check if any critical services are starting up
+        try:
+            if hasattr(self, '_starting_services') and self._starting_services:
+                logger.info("Skipping cleanup - services are starting")
+                return False
+            
+            # Check if we're in the middle of a restart operation
+            now = time.time()
+            for service, restart_times in self._restart_history.items():
+                if restart_times and (now - restart_times[-1]) < 60:  # Within last minute
+                    logger.info(f"Skipping cleanup - {service} recently restarted")
+                    return False
+            
+            return True
+            
+        except Exception as e:
+            logger.warning(f"Error in pre-cleanup check: {e}")
+            return True  # Proceed with cleanup on error
+    
+    def _post_cleanup_handler(self, results: List) -> None:
+        """
+        Post-cleanup callback to handle cleanup results.
+        
+        Args:
+            results: List of CleanupResult objects
+        """
+        try:
+            total_space_freed = sum(r.space_freed_mb for r in results if r.success)
+            total_items_removed = sum(r.items_removed for r in results if r.success)
+            failed_operations = [r for r in results if not r.success]
+            
+            if total_space_freed > 0 or total_items_removed > 0:
+                logger.info(f"Cleanup completed: {total_items_removed} items removed, "
+                           f"{total_space_freed:.1f} MB freed")
+            
+            if failed_operations:
+                logger.warning(f"Some cleanup operations failed: {len(failed_operations)}")
+                for result in failed_operations:
+                    logger.debug(f"  {result.cleanup_type.value}: {result.error_message}")
+                    
+        except Exception as e:
+            logger.warning(f"Error in post-cleanup handler: {e}")
 
 
 # Convenience functions for backward compatibility and async orchestration

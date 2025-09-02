@@ -827,6 +827,22 @@ class AgentCircuitBreakerConfig:
             timeout_seconds=self.task_timeout_seconds
         )
     
+    def to_unified_config(self):
+        """Convert to UnifiedCircuitConfig for SSOT compliance."""
+        return UnifiedCircuitConfig(
+            name="agent_circuit_breaker",
+            failure_threshold=self.failure_threshold,
+            recovery_timeout=self.recovery_timeout_seconds,
+            success_threshold=self.success_threshold,
+            timeout_seconds=self.task_timeout_seconds,
+            sliding_window_size=self.sliding_window_size,
+            error_rate_threshold=self.error_rate_threshold,
+            adaptive_threshold=True,
+            exponential_backoff=True,
+            max_backoff_seconds=self.max_backoff_seconds,
+            expected_exception_types=self.expected_agent_exceptions
+        )
+    
     def to_dict(self) -> Dict[str, Any]:
         """Convert config to dictionary."""
         return {

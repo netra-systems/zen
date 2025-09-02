@@ -149,7 +149,10 @@ def _build_context_metadata(tool_name: str, kwargs: Dict[str, Any], dispatcher) 
 
 def _generate_run_id(tool_name: str) -> str:
     """Generate unique run ID for execution."""
-    return f"admin_tool_{tool_name}_{datetime.now(UTC).isoformat()}"
+    from netra_backend.app.utils.run_id_generator import generate_run_id
+    # Use tool_name as thread_id for admin tools - each tool execution is independent
+    thread_id = f"admin_{tool_name}_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}"
+    return generate_run_id(thread_id, f"admin_tool_{tool_name}")
 
 
 def _convert_to_tool_response(result: ExecutionResult, tool_name: str, 

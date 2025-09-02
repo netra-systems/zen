@@ -21,7 +21,11 @@ from netra_backend.app.schemas.admin_tool_types import ToolStatus as AdminToolSt
 
 def create_dispatch_context(dispatcher, tool_name: str, kwargs: Dict[str, Any]) -> ExecutionContext:
     """Create execution context for tool dispatch."""
-    run_id = str(uuid.uuid4())
+    from netra_backend.app.utils.run_id_generator import generate_run_id
+    # Use dispatcher's user context if available for thread_id
+    user_id = getattr(dispatcher.user, 'id', 'unknown') if dispatcher.user else 'unknown'
+    admin_thread_id = f"admin_{user_id}_{tool_name}_{uuid.uuid4().hex[:8]}"
+    run_id = generate_run_id(admin_thread_id, f"admin_tool_dispatch_{tool_name}")
     metadata = {"tool_name": tool_name, "kwargs": kwargs}
     return ExecutionContext(
         run_id=run_id,

@@ -67,10 +67,10 @@ class TestReportingSubAgentGoldenPattern:
     @pytest.fixture
     def reporting_agent(self, mock_llm_manager, mock_tool_dispatcher):
         """Create ReportingSubAgent for testing."""
-        agent = ReportingSubAgent(
-            llm_manager=mock_llm_manager,
-            tool_dispatcher=mock_tool_dispatcher
-        )
+        agent = ReportingSubAgent()
+        # Mock the dependencies that BaseAgent initializes
+        agent.llm_manager = mock_llm_manager
+        agent.tool_dispatcher = mock_tool_dispatcher
         return agent
 
     @pytest.fixture
@@ -397,13 +397,9 @@ class TestCacheScenarios:
         assert reporting_agent.cache_ttl >= 0
         
         # Test with caching enabled
-        agent_with_cache = ReportingSubAgent(
-            llm_manager=Mock(spec=LLMManager),
-            tool_dispatcher=Mock(spec=ToolDispatcher),
-            websocket_manager=Mock()
-        )
+        agent_with_cache = ReportingSubAgent()
         # Cache is controlled by BaseAgent initialization
-        assert agent_with_cache._enable_caching is False  # Default
+        assert agent_with_cache._enable_caching is True  # Set in constructor
 
     async def test_report_result_creation(self, reporting_agent):
         """Test ReportResult object creation."""
@@ -644,11 +640,9 @@ class TestReportingAgentIntegration:
 
     async def test_integration_with_redis(self, real_redis_manager, mock_llm_manager):
         """Test integration with real Redis for caching."""
-        reporting_agent = ReportingSubAgent(
-            llm_manager=mock_llm_manager,
-            tool_dispatcher=Mock(spec=ToolDispatcher),
-            websocket_manager=Mock()
-        )
+        reporting_agent = ReportingSubAgent()
+        reporting_agent.llm_manager = mock_llm_manager
+        reporting_agent.tool_dispatcher = Mock(spec=ToolDispatcher)
         
         # Test Redis integration if available
         if real_redis_manager:
