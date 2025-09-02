@@ -62,22 +62,56 @@ async def _retry_with_backoff(
     *args,
     **kwargs
 ) -> T:
-    """Execute function with retry and exponential backoff."""
-    last_exception = None
-    current_delay = delay
-    
-    for attempt in range(max_attempts):
-        try:
+    """Execute function with retry and exponential backoff using UnifiedRetryHandler."""
+    try:
+        # Import here to avoid circular dependencies
+        from netra_backend.app.core.resilience.unified_retry_handler import (
+            UnifiedRetryHandler, RetryConfig, RetryStrategy
+        )
+        
+        # Create configuration for unified retry handler
+        retry_config = RetryConfig(
+            max_attempts=max_attempts,
+            base_delay=delay,
+            backoff_multiplier=backoff_factor,
+            strategy=RetryStrategy.EXPONENTIAL,
+            jitter_range=0.1,
+            timeout_seconds=None,
+            retryable_exceptions=exceptions,
+            circuit_breaker_enabled=False,
+            metrics_enabled=True
+        )
+        
+        handler = UnifiedRetryHandler("async_retry_logic", retry_config)
+        
+        # Create wrapper function for the handler
+        async def operation_wrapper():
             return await func(*args, **kwargs)
-        except exceptions as e:
-            last_exception = e
-            if _is_final_attempt(attempt, max_attempts):
-                break
+        
+        result = await handler.execute_with_retry_async(operation_wrapper)
+        
+        if result.success:
+            return result.result
+        else:
+            raise result.final_exception
             
-            await _sleep_with_backoff(current_delay)
-            current_delay = _calculate_next_delay(current_delay, backoff_factor)
-    
-    raise last_exception
+    except ImportError:
+        # Fall back to legacy implementation if UnifiedRetryHandler not available
+        last_exception = None
+        current_delay = delay
+        
+        for attempt in range(max_attempts):
+            try:
+                return await func(*args, **kwargs)
+            except exceptions as e:
+                last_exception = e
+                if _is_final_attempt(attempt, max_attempts):
+                    break
+                
+                await _sleep_with_backoff(current_delay)
+                current_delay = _calculate_next_delay(current_delay, backoff_factor)
+        
+        raise last_exception
 
 
 def _is_final_attempt(attempt: int, max_attempts: int) -> bool:

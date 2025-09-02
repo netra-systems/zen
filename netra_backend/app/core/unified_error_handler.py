@@ -65,11 +65,28 @@ class RecoveryStrategy(ABC):
 
 
 class RetryRecoveryStrategy(RecoveryStrategy):
-    """Retry-based recovery strategy."""
+    """Retry-based recovery strategy using UnifiedRetryHandler."""
     
     def __init__(self, max_retries: int = 3, base_delay: float = 1.0):
+        # Import here to avoid circular imports
+        from netra_backend.app.core.resilience.unified_retry_handler import (
+            UnifiedRetryHandler, RetryConfig, RetryStrategy
+        )
+        
         self.max_retries = max_retries
         self.base_delay = base_delay
+        
+        # Create unified retry handler with appropriate config
+        retry_config = RetryConfig(
+            max_attempts=max_retries,
+            base_delay=base_delay,
+            strategy=RetryStrategy.EXPONENTIAL,
+            backoff_multiplier=2.0,
+            jitter_range=0.1,
+            circuit_breaker_enabled=False,
+            metrics_enabled=True
+        )
+        self._retry_handler = UnifiedRetryHandler("error_recovery", retry_config)
     
     async def attempt_recovery(
         self, 
@@ -78,18 +95,39 @@ class RetryRecoveryStrategy(RecoveryStrategy):
         operation: Optional[Callable] = None,
         **kwargs
     ) -> Any:
-        """Attempt recovery via retries with exponential backoff."""
-        if not operation or context.retry_count >= self.max_retries:
+        """Attempt recovery via retries using UnifiedRetryHandler."""
+        if not operation:
             return None
-            
-        delay = self.base_delay * (2 ** context.retry_count)
-        await asyncio.sleep(delay)
+        
+        # Update context with current retry count
+        context.retry_count = getattr(context, 'retry_count', 0)
+        
+        # If we've exceeded retries, don't attempt
+        if context.retry_count >= self.max_retries:
+            logger.warning(f"Max retries ({self.max_retries}) exceeded, stopping recovery attempts")
+            return None
         
         try:
-            context.retry_count += 1
-            return await operation(**kwargs)
+            # Create wrapper function that includes kwargs
+            async def operation_wrapper():
+                return await operation(**kwargs)
+            
+            # Execute with unified retry handler
+            result = await self._retry_handler.execute_with_retry_async(operation_wrapper)
+            
+            # Update context with total attempts
+            context.retry_count = result.total_attempts
+            
+            if result.success:
+                logger.info(f"Retry recovery succeeded after {result.total_attempts} attempts")
+                return result.result
+            else:
+                logger.warning(f"Retry recovery failed after {result.total_attempts} attempts: {result.final_exception}")
+                return None
+                
         except Exception as retry_error:
-            logger.warning(f"Retry {context.retry_count} failed: {retry_error}")
+            logger.warning(f"Retry recovery failed: {retry_error}")
+            context.retry_count += 1
             return None
 
 
