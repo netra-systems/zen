@@ -453,46 +453,81 @@ class AgentInstanceFactory:
         try:
             logger.debug(f"Creating agent instance: {agent_name} for user {user_context.user_id}")
             
-            # Get agent class from registry or use provided class
+            # Get agent class from registries or use provided class
             if agent_class:
                 AgentClass = agent_class
+                llm_manager = None
+                tool_dispatcher = None
             else:
-                agent_instance = self._agent_registry.get(agent_name)
-                if not agent_instance:
-                    raise ValueError(f"Agent '{agent_name}' not found in registry")
+                # Try AgentClassRegistry first (preferred)
+                if self._agent_class_registry:
+                    AgentClass = self._agent_class_registry.get_agent_class(agent_name)
+                    if not AgentClass:
+                        raise ValueError(f"Agent '{agent_name}' not found in AgentClassRegistry")
+                    
+                    # For class registry, we need to get dependencies from legacy registry for now
+                    if self._agent_registry:
+                        llm_manager = self._agent_registry.llm_manager
+                        tool_dispatcher = self._agent_registry.tool_dispatcher
+                    else:
+                        raise ValueError("No LLM manager or tool dispatcher available")
                 
-                # Create fresh instance of the same class
-                AgentClass = type(agent_instance)
+                # Fallback to legacy AgentRegistry
+                elif self._agent_registry:
+                    agent_instance = self._agent_registry.get(agent_name)
+                    if not agent_instance:
+                        raise ValueError(f"Agent '{agent_name}' not found in AgentRegistry")
+                    
+                    AgentClass = type(agent_instance)
+                    llm_manager = self._agent_registry.llm_manager
+                    tool_dispatcher = self._agent_registry.tool_dispatcher
+                else:
+                    raise ValueError("No agent registry configured")
             
             # Create fresh agent instance with request-scoped dependencies
-            agent = AgentClass(
-                llm_manager=self._agent_registry.llm_manager,
-                tool_dispatcher=self._agent_registry.tool_dispatcher,
-                name=agent_name,
-                user_id=user_context.user_id  # Bind to specific user
-            )
+            if llm_manager and tool_dispatcher:
+                agent = AgentClass(
+                    llm_manager=llm_manager,
+                    tool_dispatcher=tool_dispatcher,
+                    name=agent_name,
+                    user_id=user_context.user_id  # Bind to specific user
+                )
+            else:
+                # For provided agent class, try basic initialization
+                agent = AgentClass(name=agent_name, user_id=user_context.user_id)
             
-            # Set WebSocket bridge on agent for event emission
-            if hasattr(agent, 'set_websocket_bridge') and user_context.websocket_emitter:
+            # CRITICAL: Set WebSocket bridge on agent with REAL run_id (not placeholder)
+            if hasattr(agent, 'set_websocket_bridge'):
                 try:
-                    agent.set_websocket_bridge(self._websocket_bridge, user_context.run_id)
-                    logger.debug(f"✅ WebSocket bridge set on agent {agent_name} for user {user_context.user_id}")
+                    # Use the WebSocketBridgeAdapter pattern from BaseAgent
+                    if hasattr(agent, '_websocket_adapter'):
+                        agent._websocket_adapter.set_websocket_bridge(
+                            self._websocket_bridge, 
+                            user_context.run_id,  # REAL run_id from UserExecutionContext
+                            agent_name
+                        )
+                        logger.debug(f"✅ WebSocket bridge set via adapter for {agent_name} (run_id: {user_context.run_id})")
+                    else:
+                        # Fallback for older agent implementations
+                        agent.set_websocket_bridge(self._websocket_bridge, user_context.run_id)
+                        logger.debug(f"✅ WebSocket bridge set directly for {agent_name} (run_id: {user_context.run_id})")
                 except Exception as e:
                     logger.warning(f"Failed to set WebSocket bridge on agent {agent_name}: {e}")
             
-            # Store agent reference in user context for cleanup
-            user_context.active_runs[f"{agent_name}_{int(time.time() * 1000)}"] = {
-                'agent_instance': agent,
-                'agent_name': agent_name,
-                'created_at': datetime.now(timezone.utc).isoformat(),
+            # Store agent instance for tracking (not in immutable context)
+            if not hasattr(self, '_agent_instances'):
+                self._agent_instances = {}
+            
+            instance_key = f"{user_context.user_id}_{agent_name}_{int(time.time() * 1000)}"
+            self._agent_instances[instance_key] = {
+                'agent': agent,
+                'user_context': user_context,
+                'created_at': datetime.now(timezone.utc),
                 'status': 'created'
             }
             
-            # Update metrics
-            user_context.execution_metrics['active_agent_count'] += 1
-            
             creation_time_ms = (time.time() - start_time) * 1000
-            logger.info(f"✅ Created agent instance {agent_name} for user {user_context.user_id} in {creation_time_ms:.1f}ms")
+            logger.info(f"✅ Created agent instance {agent_name} for user {user_context.user_id} in {creation_time_ms:.1f}ms (run_id: {user_context.run_id})")
             
             return agent
             
@@ -520,12 +555,40 @@ class AgentInstanceFactory:
             # Unregister run-thread mapping
             if self._websocket_bridge:
                 try:
-                    await self._websocket_bridge.unregister_run_mapping(user_context.run_id)
+                    if hasattr(self._websocket_bridge, 'unregister_run_mapping'):
+                        await self._websocket_bridge.unregister_run_mapping(user_context.run_id)
                 except Exception as e:
                     logger.warning(f"Failed to unregister run mapping for {context_id}: {e}")
             
-            # Execute context cleanup
-            await user_context.cleanup()
+            # Clean up WebSocket emitter if exists
+            emitter_key = f"{context_id}_emitter"
+            if hasattr(self, '_websocket_emitters') and emitter_key in self._websocket_emitters:
+                try:
+                    await self._websocket_emitters[emitter_key].cleanup()
+                    del self._websocket_emitters[emitter_key]
+                except Exception as e:
+                    logger.error(f"Failed to cleanup WebSocket emitter for {context_id}: {e}")
+            
+            # Clean up agent instances for this context
+            if hasattr(self, '_agent_instances'):
+                instances_to_remove = []
+                for key, instance_data in self._agent_instances.items():
+                    if instance_data.get('user_context') == user_context:
+                        instances_to_remove.append(key)
+                
+                for key in instances_to_remove:
+                    del self._agent_instances[key]
+                
+                if instances_to_remove:
+                    logger.debug(f"Cleaned up {len(instances_to_remove)} agent instances for {context_id}")
+            
+            # Close database session if present
+            if user_context.db_session:
+                try:
+                    await user_context.db_session.close()
+                    logger.debug(f"Closed database session for {context_id}")
+                except Exception as e:
+                    logger.warning(f"Failed to close database session for {context_id}: {e}")
             
             # Remove from active contexts tracking
             self._active_contexts.pop(context_id, None)
@@ -559,8 +622,8 @@ class AgentInstanceFactory:
                                   user_id: str,
                                   thread_id: str,
                                   run_id: str,
-                                  db_session: AsyncSession,
-                                  session_id: Optional[str] = None,
+                                  db_session: Optional[AsyncSession] = None,
+                                  websocket_connection_id: Optional[str] = None,
                                   metadata: Optional[Dict[str, Any]] = None):
         """
         Context manager for user execution scope with automatic cleanup.

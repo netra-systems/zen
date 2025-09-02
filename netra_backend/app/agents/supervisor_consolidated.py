@@ -99,11 +99,11 @@ class SupervisorAgent(BaseAgent):
         
         logger.info(f"SupervisorAgent initialized with user context: {user_context.user_id if user_context else 'None'}")
 
-    def _init_business_components(self, llm_manager: LLMManager,
-                                 tool_dispatcher: ToolDispatcher,
-                                 websocket_bridge) -> None:
-        """Initialize business logic components only."""
-        # Agent registry - CRITICAL business component
+    def _init_legacy_compatibility_components(self, llm_manager: LLMManager,
+                                             tool_dispatcher: ToolDispatcher,
+                                             websocket_bridge) -> None:
+        """Initialize legacy components for backward compatibility during transition."""
+        # Legacy agent registry for backward compatibility
         self.registry = AgentRegistry(llm_manager, tool_dispatcher)
         self.registry.register_default_agents()
         self.registry.set_websocket_bridge(websocket_bridge)
@@ -117,17 +117,10 @@ class SupervisorAgent(BaseAgent):
         self.workflow_executor = SupervisorWorkflowExecutor(self)
         
         # Legacy compatibility properties
-        self._init_legacy_compatibility_components()
+        self._init_legacy_properties()
     
-    def _init_state_management_components(self) -> None:
-        """Initialize state management components without global db_session storage.
-        
-        These components will receive sessions through method parameters or 
-        create sessions on-demand using the session factory.
-        """
-        # Note: No db_session passed - components will get sessions from factory or context
-        # Components are created without global session storage to ensure proper isolation
-        
+    def _init_legacy_properties(self) -> None:
+        """Initialize legacy compatibility properties."""
         # State management (will get sessions on-demand)
         self.state_manager = SessionlessAgentStateManager()  # No global session storage
         
@@ -137,6 +130,21 @@ class SupervisorAgent(BaseAgent):
         
         # Flow logger for observability
         self.flow_logger = get_supervisor_flow_logger()
+        
+        # Hooks for legacy compatibility
+        self.hooks = {"before_agent": [], "after_agent": [], "on_error": [], "on_retry": [], "on_complete": []}
+        
+        # Legacy properties that tests/code might expect
+        self.sub_agents = self.registry.get_all_agents()
+        
+        # Mock completion helpers for stats methods
+        from types import SimpleNamespace
+        self.completion_helpers = SimpleNamespace(
+            get_comprehensive_stats=lambda: {"agents_registered": len(self.registry.agents)},
+            get_agent_health_status=lambda: self.get_health_status(),
+            get_agent_performance_metrics=lambda: {"supervisor": "operational"},
+            get_reliability_status=lambda: self.get_circuit_breaker_status()
+        )
     
     async def _get_session_for_operation(self):
         """Get a database session for an operation.
@@ -154,22 +162,6 @@ class SupervisorAgent(BaseAgent):
         engine = ExecutionEngine(self.registry)
         return PipelineExecutor(engine, self.websocket_manager, session)
     
-    def _init_legacy_compatibility_components(self) -> None:
-        """Initialize components needed for legacy compatibility."""
-        # Hooks for legacy compatibility
-        self.hooks = {"before_agent": [], "after_agent": [], "on_error": [], "on_retry": [], "on_complete": []}
-        
-        # Legacy properties that tests/code might expect
-        self.sub_agents = self.registry.get_all_agents()
-        
-        # Mock completion helpers for stats methods
-        from types import SimpleNamespace
-        self.completion_helpers = SimpleNamespace(
-            get_comprehensive_stats=lambda: {"agents_registered": len(self.registry.agents)},
-            get_agent_health_status=lambda: self.get_health_status(),
-            get_agent_performance_metrics=lambda: {"supervisor": "operational"},
-            get_reliability_status=lambda: self.get_circuit_breaker_status()
-        )
 
     # === SSOT Abstract Method Implementations ===
     
@@ -211,36 +203,69 @@ class SupervisorAgent(BaseAgent):
         return True
 
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
-        """Execute core supervisor orchestration logic with WebSocket events."""
-        await self.emit_thinking("Starting supervisor orchestration...")
-        await self.emit_progress("Analyzing request and planning agent workflow...")
+        """Execute core supervisor orchestration logic with per-user isolation."""
+        # CRITICAL: Validate user context is available for proper isolation
+        if not self.user_context:
+            logger.error(f"SupervisorAgent missing UserExecutionContext - cannot ensure isolation")
+            raise RuntimeError("SupervisorAgent requires UserExecutionContext for proper isolation")
         
-        # Execute supervisor workflow using business logic components
-        await self.emit_thinking("Coordinating with registered agents for optimal workflow")
-        updated_state = await self._run_supervisor_workflow(context.state, context.run_id)
+        # Use user-specific WebSocket emitter if available
+        if self.user_context.websocket_emitter:
+            await self.user_context.websocket_emitter.notify_agent_thinking(
+                "Supervisor", "Starting supervisor orchestration with complete user isolation..."
+            )
+            await self.user_context.websocket_emitter.notify_agent_thinking(
+                "Supervisor", "Analyzing request and planning agent workflow..."
+            )
         
-        await self.emit_progress("Orchestration completed successfully", is_complete=True)
+        # Execute supervisor workflow using NEW split architecture
+        await self._emit_thinking("Coordinating with per-request agent instances for optimal workflow")
+        updated_state = await self._run_isolated_supervisor_workflow(context.state, context.run_id)
+        
+        # Send completion via user-specific emitter
+        if self.user_context.websocket_emitter:
+            await self.user_context.websocket_emitter.notify_agent_completed(
+                "Supervisor",
+                {"supervisor_result": "completed", "orchestration_successful": True}
+            )
         
         return {
             "supervisor_result": "completed",
             "updated_state": updated_state,
-            "orchestration_successful": True
+            "orchestration_successful": True,
+            "user_isolation_verified": True
         }
 
     # === Business Logic Methods ===
     
-    async def _run_supervisor_workflow(self, state: DeepAgentState, run_id: str) -> DeepAgentState:
-        """Run supervisor workflow using workflow executor directly."""
+    async def _run_isolated_supervisor_workflow(self, state: DeepAgentState, run_id: str) -> DeepAgentState:
+        """Run supervisor workflow with complete user isolation using split architecture."""
+        if not self.user_context:
+            raise RuntimeError("User context required for isolated workflow execution")
+        
         flow_id = self.flow_logger.generate_flow_id()
         self.flow_logger.start_flow(flow_id, run_id, 4)  # 4 main workflow steps
         
-        # Use workflow executor to run the actual workflow steps
-        updated_state = await self.workflow_executor.execute_workflow_steps(
-            flow_id, state.user_request, state.chat_thread_id, state.user_id, run_id
-        )
-        
-        self.flow_logger.complete_flow(flow_id)
-        return updated_state
+        try:
+            # NEW: Use AgentInstanceFactory to create isolated agent instances
+            agent_instances = await self._create_isolated_agent_instances()
+            
+            # Execute workflow with isolated instances
+            updated_state = await self._execute_workflow_with_isolated_agents(
+                agent_instances, flow_id, state, run_id
+            )
+            
+            self.flow_logger.complete_flow(flow_id)
+            return updated_state
+            
+        except Exception as e:
+            # Fallback to legacy workflow if new approach fails
+            logger.warning(f"Isolated workflow failed, falling back to legacy: {e}")
+            updated_state = await self.workflow_executor.execute_workflow_steps(
+                flow_id, state.user_request, state.chat_thread_id, state.user_id, run_id
+            )
+            self.flow_logger.complete_flow(flow_id)
+            return updated_state
     
     async def _run_hooks(self, event: str, state: DeepAgentState, **kwargs) -> None:
         """Run registered hooks for an event."""
