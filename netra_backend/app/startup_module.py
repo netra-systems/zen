@@ -793,13 +793,16 @@ def _build_supervisor_agent(app: FastAPI):
                 logger.error(f"  {attr}: NOT SET")
         raise RuntimeError(f"Cannot create supervisor - missing dependencies: {missing}")
     
-    websocket_manager = get_websocket_manager()
+    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+    
+    # Create the proper websocket bridge instance  
+    websocket_bridge = AgentWebSocketBridge()
     logger.debug(f"Creating supervisor with dependencies: db_session_factory={app.state.db_session_factory}, llm_manager={app.state.llm_manager}, tool_dispatcher={app.state.tool_dispatcher}")
     
     return SupervisorAgent(
         app.state.db_session_factory, 
         app.state.llm_manager, 
-        websocket_manager, 
+        websocket_bridge,  # Correct AgentWebSocketBridge instance
         app.state.tool_dispatcher
     )
 

@@ -752,6 +752,46 @@ class WebSocketManager:
         
         logger.info("WebSocket manager shutdown complete")
 
+    async def disconnect_user(self, user_id: str, websocket: WebSocket, code: int = 1000, reason: str = "Normal closure") -> None:
+        """
+        Disconnect user and clean up all their connections.
+        
+        Args:
+            user_id: User ID to disconnect
+            websocket: WebSocket connection
+            code: WebSocket close code (default 1000)
+            reason: Reason for disconnection
+        """
+        try:
+            user_conns = self.user_connections.get(user_id, set()).copy()
+            
+            if not user_conns:
+                logger.debug(f"No connections found for user {user_id}")
+                return
+            
+            # Clean up all connections for this user
+            cleanup_tasks = []
+            for conn_id in user_conns:
+                if conn_id in self.connections:
+                    conn = self.connections[conn_id]
+                    # Verify this is the same websocket instance or close anyway for cleanup
+                    if conn.get("websocket") == websocket or conn.get("user_id") == user_id:
+                        cleanup_tasks.append(self._cleanup_connection(conn_id, code, reason))
+            
+            if cleanup_tasks:
+                await asyncio.gather(*cleanup_tasks, return_exceptions=True)
+                
+            logger.info(f"Disconnected user {user_id} with {len(cleanup_tasks)} connections")
+            
+        except Exception as e:
+            logger.error(f"Error disconnecting user {user_id}: {e}")
+            # Still try to close the websocket if possible
+            if websocket and is_websocket_connected(websocket):
+                try:
+                    await websocket.close(code=code, reason=reason)
+                except Exception as close_error:
+                    logger.warning(f"Error closing websocket for user {user_id}: {close_error}")
+
 
 # Global manager instance
 _websocket_manager: Optional[WebSocketManager] = None
