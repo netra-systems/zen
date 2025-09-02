@@ -508,3 +508,42 @@ class AgentRegistry:
         diagnosis["websocket_health"] = "HEALTHY" if not diagnosis["critical_issues"] else "CRITICAL"
         
         return diagnosis
+    
+    def create_request_scoped_factory(self) -> 'AgentInstanceFactory':
+        """
+        Create a request-scoped AgentInstanceFactory for proper user isolation.
+        
+        This method provides a migration path from the legacy AgentRegistry
+        to the new architecture that prevents user context leakage.
+        
+        Returns:
+            AgentInstanceFactory: Factory configured with this registry's components
+            
+        Usage:
+            # Instead of: agent = registry.get("triage")
+            # Use:
+            factory = registry.create_request_scoped_factory()
+            async with factory.user_execution_scope(user_id, thread_id, run_id) as context:
+                agent = await factory.create_agent_instance("triage", context)
+        """
+        try:
+            from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory
+            
+            factory = AgentInstanceFactory()
+            factory.configure(
+                agent_class_registry=self._agent_class_registry,
+                agent_registry=self,  # Fallback for compatibility
+                websocket_bridge=self.websocket_bridge,
+                websocket_manager=self.websocket_manager
+            )
+            
+            logger.info("✅ Created request-scoped AgentInstanceFactory from legacy AgentRegistry")
+            return factory
+            
+        except Exception as e:
+            logger.error(f"Failed to create request-scoped factory: {e}")
+            raise RuntimeError(f"Cannot create request-scoped factory: {e}")
+    
+    def get_agent_class_registry(self) -> Optional[AgentClassRegistry]:
+        """Get the underlying AgentClassRegistry for new architecture migration."""
+        return self._agent_class_registry
