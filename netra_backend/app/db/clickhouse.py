@@ -290,7 +290,25 @@ async def get_clickhouse_client():
             yield client
             return
     
-    # Use real client in development, production, and real database tests
+    # Try to use the connection manager if available (for startup and production use)
+    try:
+        from netra_backend.app.core.clickhouse_connection_manager import get_clickhouse_connection_manager
+        
+        connection_manager = get_clickhouse_connection_manager()
+        if connection_manager and connection_manager.connection_health.state.value != "disconnected":
+            # Use connection manager's pooled connection
+            async with connection_manager.get_connection() as client:
+                yield client
+                return
+    except ImportError:
+        # Connection manager not available, fall back to direct connection
+        logger.debug("[ClickHouse] Connection manager not available, using direct connection")
+        pass
+    except Exception as e:
+        logger.warning(f"[ClickHouse] Connection manager failed, falling back to direct connection: {e}")
+        pass
+    
+    # Fallback to direct connection (backward compatibility)
     environment = get_env().get("ENVIRONMENT", "development").lower()
     
     # CRITICAL FIX: Use unified config environment for better testing support
@@ -635,6 +653,28 @@ class ClickHouseService:
             if cached_result is not None:
                 return cached_result
         
+        # Try to use connection manager if available
+        try:
+            from netra_backend.app.core.clickhouse_connection_manager import get_clickhouse_connection_manager
+            
+            connection_manager = get_clickhouse_connection_manager()
+            if connection_manager and connection_manager.connection_health.state.value != "disconnected":
+                # Use connection manager's robust execute with retry
+                result = await connection_manager.execute_with_retry(query, params)
+                
+                # Cache successful read results
+                if query.lower().strip().startswith("select") and result:
+                    _clickhouse_cache.set(query, result, params, ttl=300)
+                
+                self._metrics["queries"] += 1
+                return result
+        except ImportError:
+            pass  # Fall back to standard execution
+        except Exception as e:
+            logger.warning(f"Connection manager execution failed, falling back: {e}")
+            pass
+        
+        # Fallback to standard circuit breaker execution
         try:
             self._metrics["queries"] += 1
             result = await self._execute_with_circuit_breaker(query, params)

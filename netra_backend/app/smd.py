@@ -238,17 +238,17 @@ class StartupOrchestrator:
         """Phase 5: SERVICES - Chat Pipeline and critical services."""
         self.logger.info("PHASE 5: SERVICES - Chat Pipeline & Critical Services")
         
-        # Step 10: Tool Registry (CRITICAL)
-        self._initialize_tool_registry()
-        if not hasattr(self.app.state, 'tool_dispatcher') or self.app.state.tool_dispatcher is None:
-            raise DeterministicStartupError("Tool dispatcher initialization failed")
-        self.logger.info("  ✓ Step 10: Tool registry created")
-        
-        # Step 11: AgentWebSocketBridge Creation (CRITICAL)
+        # Step 10: AgentWebSocketBridge Creation (CRITICAL - Must be created BEFORE tool dispatcher)
         await self._initialize_agent_websocket_bridge_basic()
         if not hasattr(self.app.state, 'agent_websocket_bridge') or self.app.state.agent_websocket_bridge is None:
             raise DeterministicStartupError("AgentWebSocketBridge is None - creation failed")
-        self.logger.info("  ✓ Step 11: AgentWebSocketBridge created")
+        self.logger.info("  ✓ Step 10: AgentWebSocketBridge created")
+        
+        # Step 11: Tool Registry (CRITICAL - Now can use the pre-created bridge)
+        self._initialize_tool_registry()
+        if not hasattr(self.app.state, 'tool_dispatcher') or self.app.state.tool_dispatcher is None:
+            raise DeterministicStartupError("Tool dispatcher initialization failed")
+        self.logger.info("  ✓ Step 11: Tool registry created with WebSocket bridge support")
         
         # Step 12: Agent Supervisor (CRITICAL - Create with bridge for proper WebSocket integration)
         await self._initialize_agent_supervisor()
@@ -788,24 +788,17 @@ class StartupOrchestrator:
         """Initialize tool registry and dispatcher with AgentWebSocketBridge support - CRITICAL."""
         from netra_backend.app.services.tool_registry import ToolRegistry
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-        from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
         
-        # Get AgentWebSocketBridge for real-time notifications
-        # Note: Bridge might not be fully integrated yet, but we need the instance
-        try:
-            import asyncio
-            # Try to get existing bridge instance if available
-            if hasattr(self.app.state, 'agent_websocket_bridge') and self.app.state.agent_websocket_bridge:
-                websocket_bridge = self.app.state.agent_websocket_bridge
-                self.logger.info("    - Using existing AgentWebSocketBridge instance for tool dispatcher")
-            else:
-                # Bridge not created yet - create basic instance
-                # Full integration will happen in Phase 6 (WebSocket phase)
-                websocket_bridge = None  # Will be set during integration phase
-                self.logger.info("    - Tool dispatcher created without bridge (will be connected in Phase 6: WebSocket)")
-        except Exception as e:
-            self.logger.warning(f"Could not get AgentWebSocketBridge for tool dispatcher: {e}")
-            websocket_bridge = None
+        # CRITICAL FIX: WebSocket bridge MUST be created before tool dispatcher
+        # Bridge should already be created in previous step
+        if not hasattr(self.app.state, 'agent_websocket_bridge') or self.app.state.agent_websocket_bridge is None:
+            raise DeterministicStartupError(
+                "AgentWebSocketBridge not available for tool dispatcher initialization. "
+                "Bridge must be created before tool dispatcher to prevent notification failures."
+            )
+        
+        websocket_bridge = self.app.state.agent_websocket_bridge
+        self.logger.info("    - Using pre-created AgentWebSocketBridge for tool dispatcher")
         
         # Create tool dispatcher with bridge support
         tool_registry = ToolRegistry(self.app.state.db_session_factory)
@@ -814,10 +807,21 @@ class StartupOrchestrator:
             websocket_bridge=websocket_bridge
         )
         
-        if websocket_bridge:
-            self.logger.info("    - Tool dispatcher created with AgentWebSocketBridge support built-in")
-        else:
-            self.logger.info("    - Tool dispatcher created without bridge (bridge integration pending)")
+        # Validate that the tool dispatcher has WebSocket support
+        if not hasattr(self.app.state.tool_dispatcher, 'has_websocket_support'):
+            raise DeterministicStartupError(
+                "Tool dispatcher missing has_websocket_support property - "
+                "cannot verify WebSocket event capability"
+            )
+        
+        if not self.app.state.tool_dispatcher.has_websocket_support:
+            raise DeterministicStartupError(
+                "Tool dispatcher reports no WebSocket support despite being provided a bridge. "
+                "This will cause tool execution events to be silent."
+            )
+        
+        self.logger.info("    - Tool dispatcher created with AgentWebSocketBridge support verified")
+        self.logger.info(f"    - WebSocket notification capability: {'✓ Enabled' if self.app.state.tool_dispatcher.has_websocket_support else '✗ Disabled'}")
     
     async def _initialize_websocket(self) -> None:
         """Initialize WebSocket components - CRITICAL."""
@@ -940,27 +944,59 @@ class StartupOrchestrator:
             if success is False:
                 raise DeterministicStartupError("WebSocket test event failed to send - manager rejected message")
             
-            # Verify tool dispatcher enhancement
+            # CRITICAL FIX: Verify tool dispatcher has WebSocket support after initialization order fix
+            # Check the main tool dispatcher in app.state first
+            if hasattr(self.app.state, 'tool_dispatcher') and self.app.state.tool_dispatcher:
+                main_dispatcher = self.app.state.tool_dispatcher
+                
+                # Verify the main dispatcher has WebSocket support
+                if not hasattr(main_dispatcher, 'has_websocket_support') or not main_dispatcher.has_websocket_support:
+                    raise DeterministicStartupError(
+                        "Main tool dispatcher has no WebSocket support - initialization order fix failed. "
+                        "Tool execution events will be silent."
+                    )
+                
+                # Verify the executor has the WebSocket bridge
+                if hasattr(main_dispatcher, 'executor'):
+                    if not hasattr(main_dispatcher.executor, 'websocket_bridge') or main_dispatcher.executor.websocket_bridge is None:
+                        raise DeterministicStartupError(
+                            "Main tool dispatcher executor has no AgentWebSocketBridge - initialization order fix incomplete"
+                        )
+                    
+                    # Verify it's the same bridge we created
+                    expected_bridge = self.app.state.agent_websocket_bridge
+                    if main_dispatcher.executor.websocket_bridge != expected_bridge:
+                        raise DeterministicStartupError(
+                            "Tool dispatcher has different WebSocket bridge than expected - integration error"
+                        )
+                
+                self.logger.info("    ✓ Main tool dispatcher WebSocket integration verified")
+            else:
+                raise DeterministicStartupError("Main tool dispatcher not found in app.state")
+            
+            # Also verify tool dispatcher in supervisor registry (if present)
             if hasattr(self.app.state, 'agent_supervisor'):
                 supervisor = self.app.state.agent_supervisor
                 if hasattr(supervisor, 'registry') and hasattr(supervisor.registry, 'tool_dispatcher'):
                     dispatcher = supervisor.registry.tool_dispatcher
                     # Check using the actual has_websocket_support property
                     if not dispatcher.has_websocket_support:
-                        raise DeterministicStartupError("Tool dispatcher has no WebSocket support - agent events will be silent")
+                        raise DeterministicStartupError("Supervisor tool dispatcher has no WebSocket support - agent events will be silent")
                     
                     # Check that the unified executor is present (it contains the notifier internally)
                     if not hasattr(dispatcher, 'executor'):
-                        raise DeterministicStartupError("Tool dispatcher has no executor - events cannot be sent")
+                        raise DeterministicStartupError("Supervisor tool dispatcher has no executor - events cannot be sent")
                     
                     # Verify the executor is the unified engine with WebSocket support
                     from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
                     if not isinstance(dispatcher.executor, UnifiedToolExecutionEngine):
-                        raise DeterministicStartupError("Tool dispatcher not using UnifiedToolExecutionEngine - events cannot be sent")
+                        raise DeterministicStartupError("Supervisor tool dispatcher not using UnifiedToolExecutionEngine - events cannot be sent")
                     
                     # Check that the executor has AgentWebSocketBridge internally
                     if not hasattr(dispatcher.executor, 'websocket_bridge') or dispatcher.executor.websocket_bridge is None:
-                        raise DeterministicStartupError("Tool executor has no AgentWebSocketBridge - events cannot be sent")
+                        raise DeterministicStartupError("Supervisor tool executor has no AgentWebSocketBridge - events cannot be sent")
+                    
+                    self.logger.info("    ✓ Supervisor tool dispatcher WebSocket integration verified")
             
             self.logger.info("  ✓ Step 21: WebSocket event delivery verified")
             
@@ -970,9 +1006,36 @@ class StartupOrchestrator:
             raise DeterministicStartupError(f"WebSocket verification failed: {e}")
     
     async def _initialize_clickhouse(self) -> None:
-        """Initialize ClickHouse - optional."""
-        from netra_backend.app.db.clickhouse_init import initialize_clickhouse_tables
-        await asyncio.wait_for(initialize_clickhouse_tables(), timeout=10.0)
+        """Initialize ClickHouse with robust retry logic and dependency validation."""
+        from netra_backend.app.core.clickhouse_connection_manager import (
+            initialize_clickhouse_with_retry,
+            get_clickhouse_connection_manager
+        )
+        
+        self.logger.info("Initializing ClickHouse with robust connection manager...")
+        
+        # Use the robust connection manager with retry logic and health monitoring
+        success = await initialize_clickhouse_with_retry()
+        
+        if success:
+            # Store connection manager in app state for health checks
+            self.app.state.clickhouse_connection_manager = get_clickhouse_connection_manager()
+            
+            # Initialize ClickHouse tables after successful connection
+            try:
+                from netra_backend.app.db.clickhouse_init import initialize_clickhouse_tables
+                await asyncio.wait_for(initialize_clickhouse_tables(), timeout=30.0)
+                self.logger.info("  ✓ ClickHouse tables initialized")
+            except Exception as e:
+                self.logger.warning(f"  ⚠ ClickHouse table initialization failed: {e}")
+                # Don't fail startup for table creation issues
+        
+        else:
+            # Log failure but don't raise exception (ClickHouse is optional)
+            self.logger.warning("ClickHouse initialization failed - continuing without analytics")
+            
+            # Store a None connection manager to indicate ClickHouse is unavailable
+            self.app.state.clickhouse_connection_manager = None
     
     async def _initialize_monitoring(self) -> None:
         """Initialize monitoring - optional."""
@@ -1012,18 +1075,90 @@ class StartupOrchestrator:
         self.app.state.background_task_manager = BackgroundTaskManager()
     
     async def _apply_startup_fixes(self) -> None:
-        """Apply critical startup fixes - CRITICAL."""
+        """Apply critical startup fixes with enhanced error handling and validation."""
         from netra_backend.app.services.startup_fixes_integration import startup_fixes
+        from netra_backend.app.services.startup_fixes_validator import (
+            startup_fixes_validator, 
+            ValidationLevel
+        )
         
-        fix_results = await startup_fixes.run_comprehensive_verification()
-        applied_fixes = fix_results.get('total_fixes', 0)
-        
-        if applied_fixes < 5:
-            self.logger.warning(f"Only {applied_fixes}/5 startup fixes applied")
-            # Log details but don't fail - fixes are best-effort
-            self.logger.debug(startup_fixes.get_fix_status_summary())
-        else:
-            self.logger.debug("All critical startup fixes successfully applied")
+        try:
+            # Run comprehensive verification with enhanced logging and retry logic
+            self.logger.info("Applying startup fixes with dependency resolution and retry logic...")
+            fix_results = await startup_fixes.run_comprehensive_verification()
+            
+            # Extract detailed results
+            total_fixes = fix_results.get('total_fixes', 0)
+            successful_fixes = len(fix_results.get('successful_fixes', []))
+            failed_fixes = len(fix_results.get('failed_fixes', []))
+            skipped_fixes = len(fix_results.get('skipped_fixes', []))
+            
+            # Log comprehensive summary
+            self.logger.info(f"Startup fixes completed: {successful_fixes}/5 successful, {failed_fixes} failed, {skipped_fixes} skipped")
+            
+            # Log successful fixes
+            if fix_results.get('successful_fixes'):
+                self.logger.info(f"✅ Successful fixes: {', '.join(fix_results['successful_fixes'])}")
+            
+            # Log failed fixes with details
+            if fix_results.get('failed_fixes'):
+                self.logger.warning(f"❌ Failed fixes: {', '.join(fix_results['failed_fixes'])}")
+                for fix_name in fix_results['failed_fixes']:
+                    fix_detail = fix_results.get('fix_details', {}).get(fix_name, {})
+                    error = fix_detail.get('error', 'Unknown error')
+                    self.logger.warning(f"  - {fix_name}: {error}")
+            
+            # Log skipped fixes with reasons
+            if fix_results.get('skipped_fixes'):
+                self.logger.info(f"⏭️ Skipped fixes: {', '.join(fix_results['skipped_fixes'])}")
+                for fix_name in fix_results['skipped_fixes']:
+                    fix_detail = fix_results.get('fix_details', {}).get(fix_name, {})
+                    error = fix_detail.get('error', 'Unknown reason')
+                    self.logger.info(f"  - {fix_name}: {error}")
+            
+            # Log retry information if any retries were needed
+            if fix_results.get('retry_summary'):
+                self.logger.info(f"🔄 Fixes requiring retries: {fix_results['retry_summary']}")
+            
+            # Validate critical fixes are applied
+            validation_result = await startup_fixes_validator.validate_all_fixes_applied(
+                level=ValidationLevel.CRITICAL_ONLY,
+                timeout=10.0
+            )
+            
+            if not validation_result.success:
+                # Critical fixes failed - this is a deterministic startup failure
+                critical_failures = validation_result.critical_failures
+                self.logger.error("🚨 CRITICAL: Critical startup fixes failed validation!")
+                for failure in critical_failures:
+                    self.logger.error(f"  - {failure}")
+                
+                # In deterministic mode, critical fix failures are FATAL
+                raise DeterministicStartupError(
+                    f"Critical startup fixes validation failed: {', '.join(critical_failures)}. "
+                    f"System cannot start without these fixes."
+                )
+            
+            # Success case
+            if successful_fixes == 5:
+                self.logger.info("✅ All 5 startup fixes successfully applied and validated")
+            elif successful_fixes >= 4:
+                self.logger.info(f"✅ {successful_fixes}/5 startup fixes applied with {skipped_fixes} optional fixes skipped")
+            else:
+                self.logger.warning(f"⚠️ Only {successful_fixes}/5 startup fixes applied - some functionality may be degraded")
+            
+            # Log total duration
+            total_duration = fix_results.get('total_duration', 0)
+            self.logger.info(f"Startup fixes completed in {total_duration:.2f}s")
+            
+        except DeterministicStartupError:
+            # Re-raise deterministic errors
+            raise
+            
+        except Exception as e:
+            # Wrap unexpected errors
+            self.logger.error(f"Unexpected error in startup fixes: {e}", exc_info=True)
+            raise DeterministicStartupError(f"Startup fixes system failed: {e}") from e
     
     async def _initialize_performance_manager(self) -> None:
         """Initialize performance optimization manager - optional."""

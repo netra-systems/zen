@@ -15,7 +15,8 @@ import time
 # from netra_backend.app.agents.agent_state import AgentStateMixin
 from netra_backend.app.agents.mixins.websocket_bridge_adapter import WebSocketBridgeAdapter
 from netra_backend.app.agents.interfaces import BaseAgentProtocol
-# DeepAgentState import removed - legacy support removed
+# Temporary import for DeepAgentState - needed until all agents migrate to UserExecutionContext
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.llm.observability import generate_llm_correlation_id
@@ -80,7 +81,7 @@ class BaseAgent(ABC):
                  enable_reliability: bool = True,
                  enable_execution_engine: bool = True,
                  enable_caching: bool = False,
-                 tool_dispatcher: Optional[ToolDispatcher] = None,
+                 tool_dispatcher: Optional[ToolDispatcher] = None,  # DEPRECATED: Use create_agent_with_context() factory
                  redis_manager: Optional[RedisManager] = None):
         
         # Initialize with simple single inheritance pattern
@@ -109,6 +110,19 @@ class BaseAgent(ABC):
         self.timing_collector = ExecutionTimingCollector(agent_name=name)
         
         # Initialize core properties pattern
+        # DEPRECATED WARNING: Direct tool_dispatcher assignment uses global state
+        if tool_dispatcher is not None:
+            import warnings
+            warnings.warn(
+                f"BaseAgent.__init__ with tool_dispatcher parameter creates global state risks. "
+                f"Use BaseAgent.create_agent_with_context() factory method instead. "
+                f"Global state support will be removed in v3.0.0 (Q2 2025).",
+                DeprecationWarning,
+                stacklevel=2
+            )
+            self.logger.warning(f"🚨 DEPRECATED: {name} initialized with global tool_dispatcher")
+            self.logger.warning("📋 MIGRATION: Use BaseAgent.create_agent_with_context() factory instead")
+        
         self.tool_dispatcher = tool_dispatcher
         self.redis_manager = redis_manager
         self.cache_ttl = 3600  # Default cache TTL
@@ -295,10 +309,16 @@ class BaseAgent(ABC):
         """
         # Default implementation delegates to execute_core_logic if available
         if hasattr(self, 'execute_core_logic'):
+            # Create temporary DeepAgentState for backward compatibility
+            temp_state = DeepAgentState(
+                user_request=getattr(context, 'user_request', 'default_request'),
+                chat_thread_id=context.thread_id,
+                user_id=context.user_id
+            )
             execution_context = ExecutionContext(
                 run_id=context.run_id,
                 agent_name=self.name,
-                state=None,  # No longer using DeepAgentState
+                state=temp_state,  # Temporarily using DeepAgentState until migration complete
                 stream_updates=stream_updates,
                 thread_id=context.thread_id,
                 user_id=context.user_id,

@@ -28,7 +28,6 @@ services:
         -c fsync=off
         -c synchronous_commit=off
         -c full_page_writes=off
-        -c checkpoint_segments=32
         -c checkpoint_completion_target=0.9
         -c wal_buffers=16MB
     healthcheck:
