@@ -132,10 +132,43 @@ class ExecutionEngine:
             )
         
         self.execution_stats['timeout_executions'] += 1
+    
+    def _validate_execution_context(self, context: AgentExecutionContext) -> None:
+        """Validate execution context to prevent invalid placeholder values from propagating.
+        
+        Args:
+            context: The agent execution context to validate
+            
+        Raises:
+            ValueError: If context contains invalid or placeholder values
+        """
+        # Validate user_id is not None or empty
+        if not context.user_id or not context.user_id.strip():
+            raise ValueError(
+                f"Invalid execution context: user_id must be a non-empty string, "
+                f"got: {context.user_id!r}"
+            )
+        
+        # Validate run_id is not the forbidden 'registry' placeholder
+        if context.run_id == 'registry':
+            raise ValueError(
+                f"Invalid execution context: run_id cannot be 'registry' placeholder value, "
+                f"got: {context.run_id!r}"
+            )
+        
+        # Validate run_id is not None or empty
+        if not context.run_id or not context.run_id.strip():
+            raise ValueError(
+                f"Invalid execution context: run_id must be a non-empty string, "
+                f"got: {context.run_id!r}"
+            )
         
     async def execute_agent(self, context: AgentExecutionContext,
                            state: DeepAgentState) -> AgentExecutionResult:
         """Execute a single agent with concurrency control, death detection, and guaranteed event delivery."""
+        # FAIL-FAST: Validate context before any processing
+        self._validate_execution_context(context)
+        
         queue_start_time = time.time()
         
         # Create execution tracking record

@@ -800,10 +800,10 @@ def _build_supervisor_agent(app: FastAPI):
     logger.debug(f"Creating supervisor with dependencies: db_session_factory={app.state.db_session_factory}, llm_manager={app.state.llm_manager}, tool_dispatcher={app.state.tool_dispatcher}")
     
     return SupervisorAgent(
-        app.state.db_session_factory, 
         app.state.llm_manager, 
         websocket_bridge,  # Correct AgentWebSocketBridge instance
-        app.state.tool_dispatcher
+        app.state.tool_dispatcher,
+        db_session_factory=app.state.db_session_factory  # Pass as optional parameter
     )
 
 
