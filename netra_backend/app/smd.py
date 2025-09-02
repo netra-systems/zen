@@ -889,11 +889,21 @@ class StartupOrchestrator:
         
         # Create supervisor with bridge for proper WebSocket integration
         # Note: SupervisorAgent uses UserExecutionContext pattern - no database sessions in constructor
-        supervisor = SupervisorAgent(
-            self.app.state.llm_manager,
-            agent_websocket_bridge,
-            self.app.state.tool_dispatcher
-        )
+        # SupervisorAgent expects 2 args: llm_manager and websocket_bridge (no tool_dispatcher)
+        
+        # Debug logging to see what we're passing
+        self.logger.info(f"DEBUG: llm_manager type: {type(self.app.state.llm_manager)}")
+        self.logger.info(f"DEBUG: agent_websocket_bridge type: {type(agent_websocket_bridge)}")
+        
+        try:
+            supervisor = SupervisorAgent(
+                self.app.state.llm_manager,
+                agent_websocket_bridge
+            )
+        except TypeError as e:
+            self.logger.error(f"DEBUG: TypeError creating SupervisorAgent: {e}")
+            self.logger.error(f"DEBUG: Args: llm_manager={self.app.state.llm_manager}, bridge={agent_websocket_bridge}")
+            raise
         
         if supervisor is None:
             raise DeterministicStartupError("Supervisor creation returned None")
