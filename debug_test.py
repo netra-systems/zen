@@ -49,11 +49,11 @@ def test_metadata_deep_copy():
         
         assert parent_value == "modified", f"Expected parent to still be 'modified', got {parent_value}"
         
-        print("✅ All assertions passed!")
+        print("[OK] All assertions passed!")
         return True
         
     except Exception as e:
-        print(f"❌ Test failed: {e}")
+        print(f"[ERROR] Test failed: {e}")
         print("Exception type:", type(e).__name__)
         traceback.print_exc()
         return False

@@ -80,7 +80,7 @@ async def test_basic_agent_instance_factory():
     
     # Create factory
     factory = AgentInstanceFactory()
-    factory.configure(mock_registry, mock_websocket_bridge)
+    factory.configure(agent_registry=mock_registry, websocket_bridge=mock_websocket_bridge)
     
     # Create mock session
     mock_session = MagicMock()

@@ -681,10 +681,50 @@ class ExecutionEngine:
         self.run_history.append(result)
         self._enforce_history_size_limit()
     
-    # WebSocket delegation methods via bridge
+    # === NEW: UserWebSocketEmitter Integration ===
+    
+    async def _send_via_user_emitter(self, method_name: str, *args, **kwargs) -> bool:
+        """Send notification via UserWebSocketEmitter if available.
+        
+        Returns:
+            bool: True if sent successfully via user emitter, False if not available
+        """
+        if not self.user_context:
+            return False
+        
+        try:
+            # Get UserWebSocketEmitter from factory
+            factory = get_agent_instance_factory()
+            if hasattr(factory, '_websocket_emitters'):
+                context_id = f"{self.user_context.user_id}_{self.user_context.thread_id}_{self.user_context.run_id}"
+                emitter_key = f"{context_id}_emitter"
+                if emitter_key in factory._websocket_emitters:
+                    emitter = factory._websocket_emitters[emitter_key]
+                    method = getattr(emitter, method_name, None)
+                    if method:
+                        await method(*args, **kwargs)
+                        return True
+        except Exception as e:
+            logger.debug(f"Failed to send via UserWebSocketEmitter: {e}")
+        
+        return False
+    
+    # WebSocket delegation methods with UserExecutionContext support
     async def send_agent_thinking(self, context: AgentExecutionContext, 
                                  thought: str, step_number: int = None) -> None:
-        """Send agent thinking notification via bridge."""
+        """Send agent thinking notification with UserExecutionContext support."""
+        # NEW: Try UserWebSocketEmitter first if available
+        if self.user_context:
+            success = await self._send_via_user_emitter(
+                'notify_agent_thinking',
+                context.agent_name,
+                thought,
+                step_number
+            )
+            if success:
+                return
+        
+        # Fallback to bridge
         await self.websocket_bridge.notify_agent_thinking(
             context.run_id,
             context.agent_name,
@@ -694,16 +734,28 @@ class ExecutionEngine:
     
     async def send_partial_result(self, context: AgentExecutionContext,
                                  content: str, is_complete: bool = False) -> None:
-        """Send partial result notification via bridge."""
+        """Send partial result notification with UserExecutionContext support."""
+        # NEW: Use bridge directly for progress updates (UserWebSocketEmitter may not have this method)
         await self.websocket_bridge.notify_progress_update(
             context.run_id,
             context.agent_name,
-            {"content": content, "is_complete": is_complete}
+            {"content": content, "is_complete": is_complete, "isolated": self.user_context is not None}
         )
     
     async def send_tool_executing(self, context: AgentExecutionContext,
                                  tool_name: str) -> None:
-        """Send tool executing notification via bridge."""
+        """Send tool executing notification with UserExecutionContext support."""
+        # NEW: Try UserWebSocketEmitter first if available
+        if self.user_context:
+            success = await self._send_via_user_emitter(
+                'notify_tool_executing',
+                context.agent_name,
+                tool_name
+            )
+            if success:
+                return
+        
+        # Fallback to bridge
         await self.websocket_bridge.notify_tool_executing(
             context.run_id,
             context.agent_name,
@@ -712,7 +764,28 @@ class ExecutionEngine:
     
     async def send_final_report(self, context: AgentExecutionContext,
                                report: dict, duration_ms: float) -> None:
-        """Send final report notification via bridge."""
+        """Send final report notification with UserExecutionContext support."""
+        # NEW: Try UserWebSocketEmitter first if available
+        if self.user_context:
+            # Enhance report with isolation info
+            enhanced_report = report.copy()
+            enhanced_report['isolated'] = True
+            enhanced_report['user_context'] = {
+                'user_id': self.user_context.user_id,
+                'thread_id': self.user_context.thread_id,
+                'run_id': self.user_context.run_id
+            }
+            
+            success = await self._send_via_user_emitter(
+                'notify_agent_completed',
+                context.agent_name,
+                enhanced_report,
+                duration_ms
+            )
+            if success:
+                return
+        
+        # Fallback to bridge
         await self.websocket_bridge.notify_agent_completed(
             context.run_id,
             context.agent_name,
