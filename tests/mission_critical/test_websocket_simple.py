@@ -1,5 +1,5 @@
-from shared.isolated_environment import get_env
 #!/usr/bin/env python
+from shared.isolated_environment import get_env
 """MISSION CRITICAL: Simple WebSocket Bridge Tests
 
 CRITICAL BUSINESS CONTEXT:
@@ -38,7 +38,7 @@ class MockWebSocketManager:
     
     async def send_to_thread(self, thread_id: str, message: dict) -> bool:
         self.sent_messages.append((thread_id, message))
-        print(f"Mock WebSocket sent to {thread_id}: {message.get(\"type\", \"unknown\")}")
+        print(f"Mock WebSocket sent to {thread_id}: {message.get('type', 'unknown')}")
         return True
 
 
