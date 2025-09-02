@@ -376,7 +376,7 @@ class TestP1EnvironmentLockMechanism:
             # Test test environment lock after dev lock is released
             stability_framework.metrics['lock_acquisitions_attempted'] += 1
             with stability_framework.environment_lock_manager.acquire_environment_lock(
-                EnvironmentType.TEST,
+                EnvironmentType.SHARED,
                 timeout=DockerStabilityP1Config.ENVIRONMENT_LOCK_TIMEOUT
             ) as test_lock:
                 assert test_lock is not None, "Failed to acquire test environment lock"
@@ -420,7 +420,7 @@ class TestP1EnvironmentLockMechanism:
         for i in range(3):
             thread = threading.Thread(
                 target=attempt_lock_acquisition,
-                args=(EnvironmentType.TEST, 10, results)
+                args=(EnvironmentType.SHARED, 10, results)
             )
             threads.append(thread)
             thread.start()

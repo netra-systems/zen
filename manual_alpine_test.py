@@ -60,30 +60,30 @@ class AlpineContainerTester:
             
             # Verify parameter is stored
             if hasattr(manager, 'use_alpine'):
-                self.log(f"✓ use_alpine parameter accepted and stored: {manager.use_alpine}")
+                self.log(f"[PASS] use_alpine parameter accepted and stored: {manager.use_alpine}")
                 self.test_results["parameter_tests"]["acceptance"] = True
                 
                 # Test default value
                 manager_default = UnifiedDockerManager(environment_type=EnvironmentType.SHARED)
                 if hasattr(manager_default, 'use_alpine'):
-                    self.log(f"✓ use_alpine defaults to: {manager_default.use_alpine}")
+                    self.log(f"[PASS] use_alpine defaults to: {manager_default.use_alpine}")
                     self.test_results["parameter_tests"]["default_value"] = manager_default.use_alpine is False
                 else:
-                    self.log("✗ use_alpine attribute missing on default manager")
+                    self.log("[FAIL] use_alpine attribute missing on default manager")
                     self.test_results["parameter_tests"]["default_value"] = False
                     
                 return True
             else:
-                self.log("✗ use_alpine parameter not stored as attribute")
+                self.log("[FAIL] use_alpine parameter not stored as attribute")
                 self.test_results["parameter_tests"]["acceptance"] = False
                 return False
                 
         except TypeError as e:
-            self.log(f"✗ use_alpine parameter not accepted: {e}")
+            self.log(f"[FAIL] use_alpine parameter not accepted: {e}")
             self.test_results["parameter_tests"]["acceptance"] = False
             return False
         except Exception as e:
-            self.log(f"✗ Unexpected error testing parameter: {e}")
+            self.log(f"[FAIL] Unexpected error testing parameter: {e}")
             self.test_results["parameter_tests"]["acceptance"] = False
             return False
     
@@ -107,9 +107,9 @@ class AlpineContainerTester:
                 self.test_results["compose_selection_tests"]["alpine_selection"] = alpine_selected
                 
                 if alpine_selected:
-                    self.log("✓ Alpine compose file selected correctly")
+                    self.log("[PASS] Alpine compose file selected correctly")
                 else:
-                    self.log("✗ Alpine compose file not selected")
+                    self.log("[FAIL] Alpine compose file not selected")
                 
                 # Test regular compose file selection
                 manager_regular = UnifiedDockerManager(
@@ -123,17 +123,17 @@ class AlpineContainerTester:
                 self.test_results["compose_selection_tests"]["regular_selection"] = regular_not_alpine
                 
                 if regular_not_alpine:
-                    self.log("✓ Regular compose file selected correctly")
+                    self.log("[PASS] Regular compose file selected correctly")
                 else:
-                    self.log("✗ Regular compose file incorrectly contains 'alpine'")
+                    self.log("[FAIL] Regular compose file incorrectly contains 'alpine'")
                 
                 return alpine_selected and regular_not_alpine
             else:
-                self.log("✗ _get_compose_file method not available")
+                self.log("[FAIL] _get_compose_file method not available")
                 return False
                 
         except Exception as e:
-            self.log(f"✗ Error testing compose file selection: {e}")
+            self.log(f"[FAIL] Error testing compose file selection: {e}")
             self.test_results["compose_selection_tests"]["error"] = str(e)
             return False
     
@@ -144,7 +144,7 @@ class AlpineContainerTester:
         try:
             # Check Docker availability
             if not self._is_docker_available():
-                self.log("✗ Docker not available - skipping integration tests")
+                self.log("[FAIL] Docker not available - skipping integration tests")
                 self.test_results["integration_tests"]["docker_available"] = False
                 return False
             
@@ -165,7 +165,7 @@ class AlpineContainerTester:
             self.test_results["integration_tests"]["startup_time"] = startup_time
             
             if success:
-                self.log(f"✓ Alpine containers started successfully in {startup_time:.1f}s")
+                self.log(f"[PASS] Alpine containers started successfully in {startup_time:.1f}s")
                 
                 # Test health checks
                 health_report = manager.get_health_report()
@@ -175,9 +175,9 @@ class AlpineContainerTester:
                 self.test_results["integration_tests"]["health_check"] = healthy
                 
                 if healthy:
-                    self.log("✓ All Alpine containers are healthy")
+                    self.log("[PASS] All Alpine containers are healthy")
                 else:
-                    self.log("✗ Some Alpine containers failed health checks")
+                    self.log("[FAIL] Some Alpine containers failed health checks")
                 
                 # Get container info to verify Alpine images
                 container_info = manager.get_enhanced_container_status(self.services)
@@ -186,23 +186,23 @@ class AlpineContainerTester:
                 for service, info in container_info.items():
                     self.log(f"Service {service}: Image {info.image}, State: {info.state}")
                     if "alpine" not in info.image.lower():
-                        self.log(f"⚠ Service {service} not using Alpine image: {info.image}")
+                        self.log(f"[WARN] Service {service} not using Alpine image: {info.image}")
                         alpine_images_used = False
                 
                 self.test_results["integration_tests"]["alpine_images_verified"] = alpine_images_used
                 
                 # Cleanup
                 await manager.graceful_shutdown(self.services)
-                self.log("✓ Alpine containers cleaned up")
+                self.log("[PASS] Alpine containers cleaned up")
                 
                 return success and healthy
                 
             else:
-                self.log("✗ Alpine containers failed to start")
+                self.log("[FAIL] Alpine containers failed to start")
                 return False
                 
         except Exception as e:
-            self.log(f"✗ Error testing Alpine container startup: {e}")
+            self.log(f"[FAIL] Error testing Alpine container startup: {e}")
             self.test_results["integration_tests"]["error"] = str(e)
             return False
     
@@ -212,7 +212,7 @@ class AlpineContainerTester:
         
         try:
             if not self._is_docker_available():
-                self.log("✗ Docker not available - skipping memory tests")
+                self.log("[FAIL] Docker not available - skipping memory tests")
                 return False
             
             memory_stats = {}
@@ -268,14 +268,14 @@ class AlpineContainerTester:
             significant_savings = any(savings > 20 for savings in memory_savings.values())
             
             if all_services_saved and significant_savings:
-                self.log("✓ Alpine containers show significant memory savings")
+                self.log("[PASS] Alpine containers show significant memory savings")
                 return True
             else:
-                self.log("⚠ Alpine containers memory savings not as expected")
+                self.log("[WARN] Alpine containers memory savings not as expected")
                 return False
                 
         except Exception as e:
-            self.log(f"✗ Error testing memory usage: {e}")
+            self.log(f"[FAIL] Error testing memory usage: {e}")
             self.test_results["performance_tests"]["error"] = str(e)
             return False
     
@@ -285,18 +285,18 @@ class AlpineContainerTester:
         
         try:
             if not self._is_docker_available():
-                self.log("✗ Docker not available - skipping parallel tests")
+                self.log("[FAIL] Docker not available - skipping parallel tests")
                 return False
             
             # Create managers for both types
             manager_regular = UnifiedDockerManager(
-                environment_type=EnvironmentType.TEST,
+                environment_type=EnvironmentType.SHARED,
                 test_id="parallel_regular",
                 use_alpine=False
             )
             
             manager_alpine = UnifiedDockerManager(
-                environment_type=EnvironmentType.TEST,
+                environment_type=EnvironmentType.SHARED,
                 test_id="parallel_alpine", 
                 use_alpine=True
             )
@@ -312,9 +312,9 @@ class AlpineContainerTester:
             self.test_results["edge_case_tests"]["different_project_names"] = different_projects
             
             if different_projects:
-                self.log("✓ Different project names for isolation")
+                self.log("[PASS] Different project names for isolation")
             else:
-                self.log("✗ Same project names - potential conflicts")
+                self.log("[FAIL] Same project names - potential conflicts")
             
             # Test starting both in parallel
             self.log("Starting both container types in parallel...")
@@ -342,9 +342,9 @@ class AlpineContainerTester:
             self.test_results["edge_case_tests"]["parallel_execution"] = parallel_success
             
             if parallel_success:
-                self.log("✓ Parallel execution successful")
+                self.log("[PASS] Parallel execution successful")
             else:
-                self.log(f"✗ Parallel execution failed: regular={regular_success}, alpine={alpine_success}")
+                self.log(f"[FAIL] Parallel execution failed: regular={regular_success}, alpine={alpine_success}")
             
             # Cleanup both
             await asyncio.gather(
@@ -356,7 +356,7 @@ class AlpineContainerTester:
             return different_projects and parallel_success
             
         except Exception as e:
-            self.log(f"✗ Error testing parallel execution: {e}")
+            self.log(f"[FAIL] Error testing parallel execution: {e}")
             self.test_results["edge_case_tests"]["error"] = str(e)
             return False
     
@@ -441,8 +441,8 @@ class AlpineContainerTester:
         param_results = self.test_results["parameter_tests"]
         report.extend([
             "1. PARAMETER ACCEPTANCE TESTS",
-            f"   - Parameter acceptance: {'✓' if param_results.get('acceptance') else '✗'}",
-            f"   - Default value check: {'✓' if param_results.get('default_value') else '✗'}",
+            f"   - Parameter acceptance: {'[PASS]' if param_results.get('acceptance') else '[FAIL]'}",
+            f"   - Default value check: {'[PASS]' if param_results.get('default_value') else '[FAIL]'}",
             "",
         ])
         
@@ -450,8 +450,8 @@ class AlpineContainerTester:
         compose_results = self.test_results["compose_selection_tests"]
         report.extend([
             "2. COMPOSE FILE SELECTION TESTS",
-            f"   - Alpine selection: {'✓' if compose_results.get('alpine_selection') else '✗'}",
-            f"   - Regular selection: {'✓' if compose_results.get('regular_selection') else '✗'}",
+            f"   - Alpine selection: {'[PASS]' if compose_results.get('alpine_selection') else '[FAIL]'}",
+            f"   - Regular selection: {'[PASS]' if compose_results.get('regular_selection') else '[FAIL]'}",
             "",
         ])
         
@@ -459,10 +459,10 @@ class AlpineContainerTester:
         integration_results = self.test_results["integration_tests"]
         report.extend([
             "3. INTEGRATION TESTS",
-            f"   - Docker available: {'✓' if integration_results.get('docker_available', True) else '✗'}",
-            f"   - Startup success: {'✓' if integration_results.get('startup_success') else '✗'}",
-            f"   - Health checks: {'✓' if integration_results.get('health_check') else '✗'}",
-            f"   - Alpine images: {'✓' if integration_results.get('alpine_images_verified') else '✗'}",
+            f"   - Docker available: {'[PASS]' if integration_results.get('docker_available', True) else '[FAIL]'}",
+            f"   - Startup success: {'[PASS]' if integration_results.get('startup_success') else '[FAIL]'}",
+            f"   - Health checks: {'[PASS]' if integration_results.get('health_check') else '[FAIL]'}",
+            f"   - Alpine images: {'[PASS]' if integration_results.get('alpine_images_verified') else '[FAIL]'}",
         ])
         
         if integration_results.get('startup_time'):
@@ -477,7 +477,7 @@ class AlpineContainerTester:
                 "4. PERFORMANCE TESTS (Memory Savings)",
             ])
             for service, savings in perf_results["memory_savings"].items():
-                status = "✓" if savings > 0 else "✗"
+                status = "[PASS]" if savings > 0 else "[FAIL]"
                 report.append(f"   - {service}: {status} {savings:.1f}% memory reduction")
         else:
             report.append("4. PERFORMANCE TESTS: Not completed")
@@ -488,8 +488,8 @@ class AlpineContainerTester:
         edge_results = self.test_results["edge_case_tests"]
         report.extend([
             "5. EDGE CASE TESTS",
-            f"   - Different project names: {'✓' if edge_results.get('different_project_names') else '✗'}",
-            f"   - Parallel execution: {'✓' if edge_results.get('parallel_execution') else '✗'}",
+            f"   - Different project names: {'[PASS]' if edge_results.get('different_project_names') else '[FAIL]'}",
+            f"   - Parallel execution: {'[PASS]' if edge_results.get('parallel_execution') else '[FAIL]'}",
             "",
         ])
         
@@ -505,7 +505,7 @@ class AlpineContainerTester:
         
         report.extend([
             "=" * 60,
-            f"OVERALL STATUS: {'✓ SUCCESS' if overall_success else '✗ SOME TESTS FAILED'}",
+            f"OVERALL STATUS: {'[PASS] SUCCESS' if overall_success else '[FAIL] SOME TESTS FAILED'}",
             f"Tests passed: {sum(all_tests)}/{len(all_tests)}",
             "=" * 60,
         ])
@@ -549,10 +549,10 @@ async def main():
     success = await tester.run_all_tests()
     
     if success:
-        print("\n🎉 All Alpine container tests passed!")
+        print("\n[SUCCESS] All Alpine container tests passed!")
         return 0
     else:
-        print("\n❌ Some Alpine container tests failed!")
+        print("\n[FAILED] Some Alpine container tests failed!")
         return 1
 
 
@@ -561,8 +561,8 @@ if __name__ == "__main__":
         exit_code = asyncio.run(main())
         sys.exit(exit_code)
     except KeyboardInterrupt:
-        print("\n⏹ Test execution interrupted")
+        print("\n[STOP] Test execution interrupted")
         sys.exit(130)
     except Exception as e:
-        print(f"\n💥 Test execution failed: {e}")
+        print(f"\n[ERROR] Test execution failed: {e}")
         sys.exit(1)
