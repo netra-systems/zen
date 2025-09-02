@@ -105,7 +105,7 @@ class WebSocketBridgeE2EValidator:
         try:
             # Create a minimal FastAPI app for testing
             from fastapi import FastAPI
-            from netra_backend.app.startup_module_deterministic import StartupOrchestrator
+            from netra_backend.app.smd import StartupOrchestrator
             
             app = FastAPI()
             orchestrator = StartupOrchestrator(app)

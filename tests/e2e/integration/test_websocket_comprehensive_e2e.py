@@ -42,7 +42,7 @@ class TestWebSocketE2Eer:
     def __init__(self):
         self.harness = TestHarness()
         self.jwt_helper = JWTTestHelper()
-        self.connections: Dict[str, websockets.WebSocketClientProtocol] = {}
+        self.connections: Dict[str, websockets.ClientConnection] = {}
         self.received_messages: Dict[str, List] = {}
     
     async def setup(self):

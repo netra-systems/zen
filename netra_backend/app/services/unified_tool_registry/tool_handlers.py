@@ -4,6 +4,7 @@ Tool Handlers
 Contains the implementation methods for handling tool execution requests.
 Split into separate modules for better maintainability.
 """
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict
 
 from netra_backend.app.db.models_postgres import User

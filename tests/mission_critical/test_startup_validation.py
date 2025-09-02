@@ -242,7 +242,7 @@ class TestStartupValidation:
 @pytest.mark.asyncio
 async def test_integration_with_deterministic_startup():
     """Test that validation integrates with deterministic startup."""
-    from netra_backend.app.startup_module_deterministic import StartupOrchestrator, DeterministicStartupError
+    from netra_backend.app.smd import StartupOrchestrator, DeterministicStartupError
     
     # Create mock app
     app = FastAPI()

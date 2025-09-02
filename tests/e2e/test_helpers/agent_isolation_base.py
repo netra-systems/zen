@@ -27,10 +27,10 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore", DeprecationWarning)
     import websockets
     try:
-        from websockets import WebSocketServerProtocol
+        from websockets import ServerConnection as WebSocketServerProtocol
     except ImportError:
         # Fallback for older versions
-        from websockets.server import WebSocketServerProtocol
+        from websockets import ServerConnection as WebSocketServerProtocol
 
 logger = logging.getLogger(__name__)
 

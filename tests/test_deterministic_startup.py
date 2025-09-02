@@ -13,7 +13,7 @@ import pytest
 from unittest.mock import AsyncMock, Mock, patch, MagicMock
 from fastapi import FastAPI
 
-from netra_backend.app.startup_module_deterministic import (
+from netra_backend.app.smd import (
     StartupOrchestrator,
     DeterministicStartupError,
     run_deterministic_startup
@@ -348,7 +348,7 @@ class TestDeterministicStartup:
         environments = ['development', 'staging', 'production']
         
         for env in environments:
-            with patch('netra_backend.app.startup_module_deterministic.get_env') as mock_env:
+            with patch('netra_backend.app.smd.get_env') as mock_env:
                 mock_env.return_value = {'ENVIRONMENT': env}
                 
                 # Database failure should always be critical

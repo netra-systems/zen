@@ -136,7 +136,7 @@ class TestStartupSequenceSmoke:
     @pytest.mark.timeout(10)
     async def test_startup_phases_execute(self):
         """SMOKE: All startup phases execute without hanging."""
-        from netra_backend.app.startup_module_deterministic import StartupOrchestrator
+        from netra_backend.app.smd import StartupOrchestrator
         from fastapi import FastAPI
         
         app = FastAPI()
@@ -205,7 +205,7 @@ class TestStartupSequenceSmoke:
     @pytest.mark.timeout(5)
     async def test_startup_error_propagation(self):
         """SMOKE: Startup errors properly propagate and prevent completion."""
-        from netra_backend.app.startup_module_deterministic import (
+        from netra_backend.app.smd import (
             StartupOrchestrator,
             DeterministicStartupError
         )

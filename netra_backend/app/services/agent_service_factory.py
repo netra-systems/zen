@@ -30,4 +30,7 @@ def _create_supervisor_agent(db_session: AsyncSession, llm_manager: LLMManager):
     )
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     tool_dispatcher = ToolDispatcher(db_session)
-    return Supervisor(db_session, llm_manager, manager, tool_dispatcher)
+    # Pass llm_manager first, then websocket_bridge, tool_dispatcher, and db_session_factory
+    # This avoids storing the session in the llm_manager field
+    db_session_factory = lambda: db_session  # Create a factory that returns the session
+    return Supervisor(llm_manager, manager, tool_dispatcher, db_session_factory)

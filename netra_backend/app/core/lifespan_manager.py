@@ -11,7 +11,7 @@ import asyncio
 from netra_backend.app.shutdown import run_complete_shutdown
 # CRITICAL FIX: Use deterministic startup to prevent agent_service AttributeError
 # The regular startup_module has graceful mode which allows degraded startup
-from netra_backend.app.startup_module_deterministic import (
+from netra_backend.app.smd import (
     run_deterministic_startup as run_complete_startup,
     DeterministicStartupError
 )

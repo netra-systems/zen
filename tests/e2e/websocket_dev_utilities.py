@@ -73,7 +73,7 @@ class WebSocketClientSimulator:
         self.client_id = client_id
         self.base_url = base_url
         self.jwt_helper = JWTTestHelper()
-        self.connection: Optional[websockets.WebSocketClientProtocol] = None
+        self.connection: Optional[websockets.ClientConnection] = None
         self.state = ConnectionState.DISCONNECTED
         self.metrics = ConnectionMetrics()
         self.message_history: List[MessageEvent] = []

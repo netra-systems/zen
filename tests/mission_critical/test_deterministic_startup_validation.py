@@ -53,7 +53,7 @@ class TestDeterministicStartupSequence:
     @pytest.mark.asyncio
     async def test_startup_phase_ordering(self, mock_app):
         """Test 1: Verify startup phases execute in correct deterministic order."""
-        from netra_backend.app.startup_module_deterministic import StartupOrchestrator
+        from netra_backend.app.smd import StartupOrchestrator
         
         orchestrator = StartupOrchestrator(mock_app)
         phase_order = []
@@ -104,7 +104,7 @@ class TestDeterministicStartupSequence:
     @pytest.mark.asyncio
     async def test_critical_service_initialization_failures(self, mock_app):
         """Test 2: Verify startup fails immediately when critical services fail."""
-        from netra_backend.app.startup_module_deterministic import (
+        from netra_backend.app.smd import (
             StartupOrchestrator, 
             DeterministicStartupError
         )
@@ -124,7 +124,7 @@ class TestDeterministicStartupSequence:
     @pytest.mark.asyncio
     async def test_websocket_manager_initialization_order(self, mock_app):
         """Test 3: Verify WebSocket manager is initialized before tool registry."""
-        from netra_backend.app.startup_module_deterministic import StartupOrchestrator
+        from netra_backend.app.smd import StartupOrchestrator
         
         orchestrator = StartupOrchestrator(mock_app)
         initialization_order = []
@@ -213,7 +213,7 @@ class TestDeterministicStartupSequence:
     @pytest.mark.asyncio
     async def test_bridge_integration_validation(self, mock_app):
         """Test 5: Verify AgentWebSocketBridge integration is properly validated."""
-        from netra_backend.app.startup_module_deterministic import StartupOrchestrator
+        from netra_backend.app.smd import StartupOrchestrator
         from netra_backend.app.services.agent_websocket_bridge import IntegrationState
         
         orchestrator = StartupOrchestrator(mock_app)
@@ -245,7 +245,7 @@ class TestStartupDependencyValidation:
     @pytest.mark.asyncio
     async def test_database_required_before_services(self):
         """Test 6: Verify database must be initialized before dependent services."""
-        from netra_backend.app.startup_module_deterministic import (
+        from netra_backend.app.smd import (
             StartupOrchestrator,
             DeterministicStartupError
         )
@@ -270,7 +270,7 @@ class TestStartupDependencyValidation:
     @pytest.mark.asyncio
     async def test_redis_required_for_caching(self):
         """Test 7: Verify Redis must be available for cache-dependent services."""
-        from netra_backend.app.startup_module_deterministic import (
+        from netra_backend.app.smd import (
             StartupOrchestrator,
             DeterministicStartupError
         )
@@ -294,7 +294,7 @@ class TestStartupDependencyValidation:
     @pytest.mark.asyncio
     async def test_llm_manager_required_for_chat(self):
         """Test 8: Verify LLM manager must be initialized for chat functionality."""
-        from netra_backend.app.startup_module_deterministic import (
+        from netra_backend.app.smd import (
             StartupOrchestrator,
             DeterministicStartupError
         )
@@ -327,7 +327,7 @@ class TestStartupRaceConditions:
     @pytest.mark.asyncio
     async def test_concurrent_initialization_protection(self):
         """Test 9: Verify protection against concurrent initialization attempts."""
-        from netra_backend.app.startup_module_deterministic import StartupOrchestrator
+        from netra_backend.app.smd import StartupOrchestrator
         
         app = FastAPI()
         app.state = MagicMock()
@@ -390,7 +390,7 @@ class TestStartupTimeoutHandling:
     @pytest.mark.asyncio
     async def test_startup_timeout_enforcement(self):
         """Test 11: Verify startup has reasonable timeout to prevent hanging."""
-        from netra_backend.app.startup_module_deterministic import StartupOrchestrator
+        from netra_backend.app.smd import StartupOrchestrator
         
         app = FastAPI()
         app.state = MagicMock()

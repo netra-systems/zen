@@ -15,7 +15,7 @@ import time
 # from netra_backend.app.agents.agent_state import AgentStateMixin
 from netra_backend.app.agents.mixins.websocket_bridge_adapter import WebSocketBridgeAdapter
 from netra_backend.app.agents.interfaces import BaseAgentProtocol
-from netra_backend.app.agents.state import DeepAgentState
+# DeepAgentState import removed - legacy support removed
 from netra_backend.app.core.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.llm.observability import generate_llm_correlation_id
@@ -93,14 +93,14 @@ class BaseAgent(ABC):
         self.start_time = None
         self.end_time = None
         self.context = {}  # Protected context for this agent
-        self.user_id = user_id  # Deprecated - kept for backward compatibility
+# Legacy user_id instance variables removed
         self.logger = central_logger.get_logger(name)
         self.correlation_id = generate_llm_correlation_id()  # Unique ID for tracing
         self._subagent_logging_enabled = self._get_subagent_logging_enabled()
         
         # Initialize attributes required by AgentCommunicationMixin
         self.agent_id = agent_id or f"{name}_{self.correlation_id}"  # Unique agent identifier
-        self._user_id = user_id  # Note underscore prefix as expected by AgentCommunicationMixin
+# Legacy user_id instance variables removed
         
         # Initialize WebSocket bridge adapter (SSOT for WebSocket events)
         self._websocket_adapter = WebSocketBridgeAdapter()
@@ -249,7 +249,7 @@ class BaseAgent(ABC):
     async def execute(self, context: 'UserExecutionContext', stream_updates: bool = False) -> Any:
         """Execute the agent with user execution context.
         
-        CRITICAL: Updated signature to use UserExecutionContext instead of separate parameters.
+        CRITICAL: Only supports UserExecutionContext pattern - no legacy support.
         This ensures proper session isolation and prevents parameter proliferation.
         
         Args:
@@ -272,28 +272,19 @@ class BaseAgent(ABC):
         # Validate session isolation before execution
         self._validate_session_isolation()
         
-        # Try new context-based execution first
+        # Use context-based execution - no legacy support
         if hasattr(self, 'execute_with_context'):
             return await self.execute_with_context(context, stream_updates)
-        
-        # Try modern execution engine with context conversion
-        if hasattr(self, 'execute_modern') and self._enable_execution_engine:
-            # Convert UserExecutionContext to DeepAgentState for backward compatibility
-            state = self._convert_context_to_state(context)
-            result = await self.execute_modern(state, context.run_id, stream_updates)
-            return result.result if result.success else None
         
         # Fallback - agents should implement execute_with_context or execute_core_logic
         raise NotImplementedError(
             f"Agent {self.name} must implement execute_with_context() or execute_core_logic(). "
-            f"Legacy execute() with separate parameters is deprecated."
         )
     
     async def execute_with_context(self, context: 'UserExecutionContext', stream_updates: bool = False) -> Any:
         """Execute agent with proper context-based session management.
         
-        This is the NEW preferred execution pattern. Subclasses should override this method
-        instead of the legacy execute() method.
+        This is the primary execution pattern. Subclasses should override this method.
         
         Args:
             context: User execution context with database session and user info
@@ -307,7 +298,7 @@ class BaseAgent(ABC):
             execution_context = ExecutionContext(
                 run_id=context.run_id,
                 agent_name=self.name,
-                state=self._convert_context_to_state(context),
+                state=None,  # No longer using DeepAgentState
                 stream_updates=stream_updates,
                 thread_id=context.thread_id,
                 user_id=context.user_id,
@@ -318,46 +309,9 @@ class BaseAgent(ABC):
         
         raise NotImplementedError(f"Agent {self.name} must implement execute_with_context() or execute_core_logic()")
     
-    def _convert_context_to_state(self, context: 'UserExecutionContext') -> DeepAgentState:
-        """Convert UserExecutionContext to DeepAgentState for backward compatibility.
-        
-        Args:
-            context: User execution context
-            
-        Returns:
-            DeepAgentState with context data
-        """
-        return DeepAgentState(
-            user_id=context.user_id,
-            thread_id=context.thread_id,
-            run_id=context.run_id,
-            metadata=context.metadata
-        )
+# _convert_context_to_state method removed - legacy support removed
     
-    # === Legacy Execute Method (DEPRECATED) ===
-    
-    async def execute_legacy(self, state: Optional[DeepAgentState], run_id: str = "", stream_updates: bool = False) -> Any:
-        """DEPRECATED: Legacy execute method with separate parameters.
-        
-        This method is deprecated. Use execute_with_context() instead.
-        
-        Args:
-            state: Agent state (deprecated)
-            run_id: Run identifier (deprecated)
-            stream_updates: Stream updates flag
-            
-        Returns:
-            Execution result
-        """
-        self.logger.warning(f"Agent {self.name} using deprecated execute_legacy method")
-        
-        if hasattr(self, 'execute_modern') and self._enable_execution_engine:
-            # Use modern execution if available
-            result = await self.execute_modern(state, run_id, stream_updates)
-            return result.result if result.success else None
-        else:
-            # Fallback for agents that haven't implemented execute_core_logic yet
-            raise NotImplementedError("Subclasses must implement either execute_with_context() or execute_core_logic()")
+# Legacy execute_legacy method removed - no backward compatibility
 
     def _get_subagent_logging_enabled(self) -> bool:
         """Get subagent logging configuration setting."""
@@ -580,56 +534,7 @@ class BaseAgent(ABC):
         else:
             raise result.final_exception
     
-    async def execute_modern(self, state: DeepAgentState, run_id: str, 
-                           stream_updates: bool = False) -> ExecutionResult:
-        """Execute using modern execution engine patterns with unified reliability (SSOT)."""
-        if not self._execution_engine:
-            raise RuntimeError(f"Modern execution engine not enabled for {self.name}")
-        
-        context = ExecutionContext(
-            run_id=run_id,
-            agent_name=self.name,
-            state=state,
-            stream_updates=stream_updates,
-            thread_id=getattr(state, 'thread_id', None),
-            user_id=getattr(state, 'user_id', None),
-            start_time=time.time(),
-            correlation_id=self.correlation_id
-        )
-        
-        # Use unified reliability handler for execution if available
-        if self._unified_reliability_handler:
-            try:
-                # Wrap execution in unified retry logic
-                async def execute_operation():
-                    return await self._execution_engine.execute(self, context)
-                
-                result = await self._unified_reliability_handler.execute_with_retry_async(
-                    execute_operation
-                )
-                
-                if result.success:
-                    return result.result
-                else:
-                    # Create error result
-                    return ExecutionResult(
-                        success=False,
-                        status=ExecutionStatus.FAILED,
-                        error=str(result.final_exception),
-                        execution_time_ms=result.total_time * 1000,
-                        retry_count=result.total_attempts - 1 if result.total_attempts > 0 else 0
-                    )
-            except Exception as e:
-                return ExecutionResult(
-                    success=False,
-                    status=ExecutionStatus.FAILED,
-                    error=str(e),
-                    execution_time_ms=0,
-                    retry_count=0
-                )
-        else:
-            # Fallback to direct execution if reliability not enabled
-            return await self._execution_engine.execute(self, context)
+# execute_modern method removed - legacy support removed
     
     # === SSOT Abstract Methods for Execution Patterns ===
     

@@ -78,18 +78,30 @@ async def execute_supervisor_run(supervisor: Supervisor, request_model: RequestM
 
 @router.post("/run_agent")
 async def run_agent(
-    request_model: RequestModel, 
-    supervisor: Supervisor = Depends(get_agent_supervisor)
+    request_model: RequestModel,
+    context: RequestScopedContextDep,
+    supervisor: RequestScopedSupervisorDep
 ) -> Dict[str, Any]:
-    """Starts the agent to analyze the user's request.
+    """Starts the agent to analyze the user's request using UserExecutionContext pattern.
     
-    DEPRECATED ROUTE: This route uses legacy dependency injection.
-    Consider using request-scoped dependencies for new routes.
+    UPDATED: Now uses request-scoped dependencies and UserExecutionContext for proper isolation.
     """
-    logger.warning("Using legacy run_agent route - consider request-scoped implementation")
+    logger.info(f"Processing run_agent with UserExecutionContext for user {context.user_id}, run {context.run_id}")
     try:
-        return await execute_supervisor_run(supervisor, request_model)
+        # Execute using request-scoped supervisor with proper session lifecycle
+        await supervisor.run(
+            request_model.query, 
+            request_model.id or context.run_id, 
+            stream_updates=True
+        )
+        return {
+            "run_id": request_model.id or context.run_id, 
+            "status": "started",
+            "user_id": context.user_id,
+            "request_scoped": True
+        }
     except Exception as e:
+        logger.error(f"Request-scoped run_agent failed for user {context.user_id}: {e}")
         handle_run_agent_error(e)
 
 @router.post("/run_agent_v2")
@@ -124,17 +136,21 @@ async def run_agent_v2(
 
 @router.get("/{run_id}/status")
 async def get_agent_status(
-    run_id: str, 
-    supervisor: Supervisor = Depends(get_agent_supervisor)
+    run_id: str,
+    context: RequestScopedContextDep,
+    supervisor: RequestScopedSupervisorDep
 ) -> Dict[str, Any]:
-    """Get agent status for a specific run.
+    """Get agent status for a specific run using request-scoped dependencies.
     
-    DEPRECATED ROUTE: Uses legacy dependency injection.
+    UPDATED: Now uses proper request-scoped database session management.
     """
-    logger.warning("Using legacy get_agent_status route")
+    logger.info(f"Getting agent status for run {run_id}, user {context.user_id}")
     state = await supervisor.get_agent_state(run_id)
     validate_agent_state(state, run_id)
-    return build_agent_status_response(run_id, state)
+    response = build_agent_status_response(run_id, state)
+    response["request_scoped"] = True
+    response["user_id"] = context.user_id
+    return response
 
 @router.get("/v2/{run_id}/status")
 async def get_agent_status_v2(

@@ -65,7 +65,7 @@ class WebSocketReliabilityTester:
             self.auth_available = False
             print(f"[WARNING] Auth service not available: {str(e)[:100]}...")
         
-    async def create_ws_connection(self, token: str, connection_id: str = None) -> Optional[websockets.WebSocketClientProtocol]:
+    async def create_ws_connection(self, token: str, connection_id: str = None) -> Optional[websockets.ClientConnection]:
         """Create a WebSocket connection with authentication"""
         connection_id = connection_id or str(uuid.uuid4())
         
@@ -121,7 +121,7 @@ class WebSocketReliabilityTester:
             }
             return None
             
-    async def monitor_connection(self, connection: websockets.WebSocketClientProtocol, connection_id: str):
+    async def monitor_connection(self, connection: websockets.ClientConnection, connection_id: str):
         """Monitor WebSocket connection for messages and state changes"""
         try:
             async for message in connection:
@@ -135,7 +135,7 @@ class WebSocketReliabilityTester:
             self.connection_states[connection_id]["connected"] = False
             self.connection_states[connection_id]["disconnected_at"] = time.time()
             
-    async def simulate_network_interruption(self, connection: websockets.WebSocketClientProtocol, duration: float = 2.0):
+    async def simulate_network_interruption(self, connection: websockets.ClientConnection, duration: float = 2.0):
         """Simulate network interruption"""
         # Force close the connection
         await connection.close()

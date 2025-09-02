@@ -1158,7 +1158,7 @@ async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
     If chat cannot work, the service MUST NOT start.
     """
     # ALWAYS use deterministic startup - this is the SSOT
-    from netra_backend.app.startup_module_deterministic import run_deterministic_startup
+    from netra_backend.app.smd import run_deterministic_startup
     return await run_deterministic_startup(app)
 
 
@@ -1218,7 +1218,7 @@ async def _deprecated_legacy_startup(app: FastAPI) -> Tuple[float, logging.Logge
             
             # DEPRECATED - Robust startup manager removed - use deterministic only
             logger.error("Robust startup manager has been removed - using deterministic startup")
-            from netra_backend.app.startup_module_deterministic import run_deterministic_startup
+            from netra_backend.app.smd import run_deterministic_startup
             return await run_deterministic_startup(app)
             
             # CRITICAL: Set startup_complete flag for health endpoint

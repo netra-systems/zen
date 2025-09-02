@@ -44,7 +44,7 @@
           Orchestrates deterministic startup with strict phases and no conditional paths.
           Every critical service must initialize successfully or startup fails completely.
         </description>
-        <file>netra_backend/app/startup_module_deterministic.py</file>
+        <file>netra_backend/app/smd.py</file>
       </component>
       
       <component name="Startup Specification">
@@ -99,7 +99,7 @@
       when agent services are missing in staging/production.
     </change>
     
-    <change file="netra_backend/app/startup_module_deterministic.py">
+    <change file="netra_backend/app/smd.py">
       New deterministic startup implementation with no fallbacks or None assignments
       for critical services.
     </change>

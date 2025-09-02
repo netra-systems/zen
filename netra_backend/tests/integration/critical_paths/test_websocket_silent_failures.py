@@ -18,7 +18,7 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor, HealthStatus
-from netra_backend.app.startup_module_deterministic import StartupOrchestrator, DeterministicStartupError
+from netra_backend.app.smd import StartupOrchestrator, DeterministicStartupError
 
 
 class TestWebSocketSilentFailures:
@@ -216,7 +216,7 @@ class TestWebSocketSilentFailures:
         
         app.state.agent_supervisor = mock_supervisor
         
-        with patch('netra_backend.app.startup_module_deterministic.get_websocket_manager', return_value=mock_manager):
+        with patch('netra_backend.app.smd.get_websocket_manager', return_value=mock_manager):
             # Should succeed with proper setup
             await orchestrator._verify_websocket_events()
             

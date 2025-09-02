@@ -100,7 +100,7 @@
             <change>Documented migration to AgentWebSocketBridge</change>
         </fix>
         
-        <fix file="startup_module_deterministic.py">
+        <fix file="smd.py">
             <change>Fixed initialization order: WebSocket → Tools → Supervisor → Bridge</change>
             <change>Removed redundant enhancement in Step 14</change>
             <change>Pass bridge to tool dispatcher creation</change>

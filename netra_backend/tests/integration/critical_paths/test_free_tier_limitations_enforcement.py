@@ -60,7 +60,7 @@ class FreeTierLimitsTester:
         self.auth_token: Optional[str] = None
         self.user_id: Optional[str] = None
         self.workspace_id: Optional[str] = None
-        self.ws_connections: List[websockets.WebSocketClientProtocol] = []
+        self.ws_connections: List[websockets.ClientConnection] = []
         self.test_email = f"freetier_{uuid.uuid4().hex[:8]}@example.com"
         self.test_password = f"TestPass123_{uuid.uuid4().hex[:8]}"
         self.api_call_times: List[float] = []

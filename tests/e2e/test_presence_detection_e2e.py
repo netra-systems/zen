@@ -49,7 +49,7 @@ class WebSocketClient:
     def __init__(self, user_id: str, token: str):
         self.user_id = user_id
         self.token = token
-        self.websocket: Optional[websockets.WebSocketClientProtocol] = None
+        self.websocket: Optional[websockets.ClientConnection] = None
         self.messages_received: List[Dict] = []
         self.connection_id: Optional[str] = None
         self.is_connected = False

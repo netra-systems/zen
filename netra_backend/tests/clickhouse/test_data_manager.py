@@ -5,6 +5,7 @@ Handles test data insertion and management for ClickHouse
 
 import sys
 from pathlib import Path
+from datetime import datetime
 
 # Test framework import - using pytest fixtures instead
 

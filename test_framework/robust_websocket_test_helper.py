@@ -59,7 +59,7 @@ class RobustWebSocketTestHelper:
     def __init__(self, config: Optional[WebSocketTestConfig] = None):
         """Initialize robust WebSocket test helper."""
         self.config = config or self._detect_configuration()
-        self.websocket: Optional[websockets.WebSocketClientProtocol] = None
+        self.websocket: Optional[websockets.ClientConnection] = None
         self.is_connected = False
         self.received_messages: List[Dict[str, Any]] = []
         self.event_handlers: Dict[str, List[Callable]] = {}

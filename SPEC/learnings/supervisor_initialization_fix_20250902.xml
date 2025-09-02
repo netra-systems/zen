@@ -18,7 +18,7 @@
       CRITICAL STARTUP FAILURE: 'NoneType' object is not callable
     </error_message>
     <location>
-      netra_backend/app/startup_module_deterministic.py:863-868
+      netra_backend/app/smd.py:863-868
     </location>
   </problem>
 

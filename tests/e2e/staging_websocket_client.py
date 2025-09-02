@@ -32,7 +32,7 @@ class StagingWebSocketClient:
         """Initialize WebSocket client."""
         self.config = get_staging_config()
         self.auth_client = auth_client or StagingAuthClient()
-        self.websocket: Optional[websockets.WebSocketClientProtocol] = None
+        self.websocket: Optional[websockets.ClientConnection] = None
         self.is_connected = False
         self.message_handlers: Dict[str, List[Callable]] = {}
         self.received_messages: List[Dict] = []

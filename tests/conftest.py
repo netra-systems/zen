@@ -1,9 +1,13 @@
 import asyncio
 import os
 import sys
-from typing import Optional
-from unittest.mock import AsyncMock, MagicMock
+import uuid
+import time
+from typing import Optional, Dict, Any, List, Callable
+from unittest.mock import AsyncMock, MagicMock, patch
 from pathlib import Path
+from datetime import datetime, timezone
+from contextlib import asynccontextmanager
 
 import pytest
 
@@ -22,9 +26,51 @@ from test_framework.environment_isolation import (
 # Import all real service fixtures to replace mocks
 from test_framework.conftest_real_services import *
 
+# PHASE 0 MIGRATION IMPORTS
+# Import Phase 0 migration components for testing
+try:
+    from netra_backend.app.models.user_execution_context import UserExecutionContext
+    from netra_backend.app.dependencies import (
+        get_request_scoped_db_session,
+        RequestScopedDbDep,
+        RequestScopedSupervisorDep,
+        get_request_scoped_supervisor_dependency
+    )
+    from netra_backend.app.services.memory_optimization_service import (
+        MemoryOptimizationService,
+        get_memory_service,
+        MemoryPressureLevel,
+        RequestScope
+    )
+    from netra_backend.app.services.session_memory_manager import (
+        SessionMemoryManager,
+        UserSession,
+        SessionState,
+        get_session_manager
+    )
+    from netra_backend.app.database.session_manager import (
+        DatabaseSessionManager,
+        SessionScopeValidator,
+        managed_session
+    )
+    PHASE0_COMPONENTS_AVAILABLE = True
+except ImportError as e:
+    # Mock Phase 0 components if not available
+    PHASE0_COMPONENTS_AVAILABLE = False
+    
+    # Create mock classes for compatibility
+    class UserExecutionContext:
+        def __init__(self, user_id, thread_id, run_id, request_id, websocket_connection_id=None):
+            self.user_id = user_id
+            self.thread_id = thread_id
+            self.run_id = run_id
+            self.request_id = request_id
+            self.websocket_connection_id = websocket_connection_id
+
 # =============================================================================
 # COMMON ENVIRONMENT SETUP FOR ALL TESTS
 # Uses IsolatedEnvironment to prevent global pollution
+# Phase 0 Migration: Enhanced with request-scoped dependencies
 # =============================================================================
 
 # Set up isolated test environment if we're running tests

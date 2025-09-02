@@ -44,10 +44,11 @@ from test_framework.isolated_environment_manager import TestResource, ResourceTy
 # External service dependencies with graceful fallback
 try:
     import websockets
-    from websockets import WebSocketServerProtocol
+    from websockets import ServerConnection as WebSocketServerProtocol
     WEBSOCKETS_AVAILABLE = True
 except ImportError:
     WEBSOCKETS_AVAILABLE = False
+    WebSocketServerProtocol = None
     
 try:
     import httpx
@@ -157,7 +158,7 @@ class WebSocketTestResource(TestResource):
         self.server_task = None
         self.client = None
         self.server_port = config.websocket_port
-        self.connected_clients: Set[WebSocketServerProtocol] = set()
+        self.connected_clients: Set[websockets.ServerConnection] = set()
         self.message_handlers: Dict[str, Callable] = {}
         self.received_messages: List[Dict] = []
         

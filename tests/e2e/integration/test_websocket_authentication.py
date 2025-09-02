@@ -35,7 +35,7 @@ class TestWebSocketAuther:
     def __init__(self):
         self.harness = TestHarness()
         self.jwt_helper = JWTTestHelper()
-        self.active_connections: Dict[str, websockets.WebSocketClientProtocol] = {}
+        self.active_connections: Dict[str, websockets.ClientConnection] = {}
         self.test_users: Dict[str, Dict] = {}
     
     async def setup(self):

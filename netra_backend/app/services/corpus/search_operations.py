@@ -5,6 +5,7 @@ Handles content retrieval, statistics, analytical queries, and symbol search
 
 import json
 from typing import Dict, List, Optional
+from datetime import datetime
 
 from netra_backend.app.database import get_clickhouse_client
 from netra_backend.app.logging_config import central_logger
