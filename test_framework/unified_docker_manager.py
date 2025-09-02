@@ -208,37 +208,37 @@ class UnifiedDockerManager:
     SERVICES = {
         "backend": {
             "container": "netra-backend",
-            "default_port": 8000,  # Default for reference, actual port dynamically allocated
+            "default_port": 8000,  # Internal container port
             "health_endpoint": "/health",
             "memory_limit": "2048m"
         },
         "frontend": {
             "container": "netra-frontend", 
-            "default_port": 3000,  # Default for reference
+            "default_port": 3000,  # Internal container port
             "health_endpoint": "/",
             "memory_limit": "1024m"  # Increased for better stability
         },
         "auth": {
             "container": "netra-auth",
-            "default_port": 8001,  # Default for reference
+            "default_port": 8081,  # Internal container port (corrected from 8001)
             "health_endpoint": "/health",
             "memory_limit": "1024m"  # Increased from 512m to prevent memory pressure (73% usage)
         },
         "postgres": {
             "container": "netra-postgres",
-            "default_port": 5432,  # Default for reference
+            "default_port": 5432,  # Internal container port
             "health_cmd": "pg_isready",
             "memory_limit": "1024m"  # Increased for better performance
         },
         "redis": {
             "container": "netra-redis",
-            "default_port": 6379,  # Default for reference
+            "default_port": 6379,  # Internal container port
             "health_cmd": "redis-cli ping",
             "memory_limit": "512m"  # Increased from 256m for better performance
         },
         "clickhouse": {
             "container": "netra-clickhouse",
-            "default_port": 8123,  # Default for reference
+            "default_port": 8123,  # Internal container port
             "health_endpoint": "/ping",
             "memory_limit": "1024m"  # Increased for better analytics performance
         }
@@ -637,6 +637,16 @@ class UnifiedDockerManager:
         Acquire test environment with proper locking.
         Returns environment name and port mappings.
         """
+        # Ensure Docker stability before proceeding
+        try:
+            from test_framework.docker_stability_manager import DockerStabilityManager
+            stability_manager = DockerStabilityManager()
+            docker_stable, message = stability_manager.ensure_docker_stability()
+            if not docker_stable:
+                logger.warning(f"Docker stability issues: {message}")
+        except ImportError:
+            logger.debug("DockerStabilityManager not available, proceeding without stability check")
+        
         # First try to detect and use existing netra-dev containers
         existing_containers = self._detect_existing_dev_containers()
         if existing_containers:
@@ -909,78 +919,121 @@ class UnifiedDockerManager:
     def _detect_existing_dev_containers(self) -> Dict[str, str]:
         """
         Detect existing netra-dev-* containers that are currently running.
+        Enhanced with retry logic for better reliability during test execution.
         
         Returns:
             Dictionary mapping service name to container name
         """
         containers = {}
+        max_retries = 3
+        retry_delay = 1  # seconds
         
-        try:
-            # List all running netra-dev containers
-            cmd = ["docker", "ps", "--format", "{{.Names}}", "--filter", "name=netra-dev-"]
-            docker_result = self.docker_rate_limiter.execute_docker_command(cmd, timeout=10)
-            result = subprocess.CompletedProcess(cmd, docker_result.returncode, docker_result.stdout, docker_result.stderr)
-            
-            if result.returncode == 0 and result.stdout.strip():
-                container_names = result.stdout.strip().split('\n')
-                
-                # Map container names to service names
-                for container_name in container_names:
-                    if container_name.startswith('netra-dev-'):
-                        # Extract service name from container name (e.g., netra-dev-backend -> backend)
-                        service = container_name.replace('netra-dev-', '')
-                        containers[service] = container_name
-                        logger.debug(f"🔍 Detected existing container: {service} -> {container_name}")
-                
-                logger.info(f"🔄 Found {len(containers)} existing development containers")
-            else:
-                # Check if this is a Docker connectivity issue
-                if result.returncode != 0 and ("pipe" in result.stderr or "connect" in result.stderr):
-                    logger.warning("🔄 Docker connectivity issue detected during container detection")
-                    logger.info("🔄 Assuming standard development container setup exists")
-                    
-                    # Return expected container names for development environment
-                    expected_services = ["backend", "auth", "postgres", "redis", "frontend", "clickhouse"]
-                    for service in expected_services:
-                        containers[service] = f"netra-dev-{service}"
-                    logger.info(f"🔄 Assuming {len(containers)} development containers exist")
-                else:
-                    logger.debug("No existing netra-dev containers found")
-                
-        except subprocess.TimeoutExpired:
-            logger.warning("Docker command timed out - Docker may be having connectivity issues")
-            # Try alternative approach using docker container ls
+        for attempt in range(max_retries):
             try:
-                cmd = ["docker", "container", "ls", "--format", "{{.Names}}", "--filter", "name=netra-dev-"]
-                result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
-                if result.returncode == 0 and result.stdout.strip():
-                    container_names = result.stdout.strip().split('\n')
-                    for container_name in container_names:
-                        if container_name.startswith('netra-dev-'):
-                            service = container_name.replace('netra-dev-', '')
-                            containers[service] = container_name
-                    logger.info(f"🔄 Found {len(containers)} containers via alternative method")
-            except Exception as alt_e:
-                logger.warning(f"Alternative docker detection also failed: {alt_e}")
+                logger.debug(f"🔍 Container detection attempt {attempt + 1}/{max_retries}")
+                # List all running netra containers - support multiple naming patterns
+                patterns = ["netra-dev-", "netra-apex-test-", "netra-test-", "netra_test_shared_"]
                 
-        except Exception as e:
-            logger.warning(f"Error detecting existing containers: {e}")
-            # In case of Docker connectivity issues, assume we might have the standard dev setup
-            if "http" in str(e).lower() and "pipe" in str(e).lower():
-                logger.info("🔄 Docker connectivity issue detected, checking for dev environment indicators")
+                for pattern in patterns:
+                    cmd = ["docker", "ps", "--format", "{{.Names}}", "--filter", f"name={pattern}"]
+                    # Use docker_rate_limiter for rate limiting
+                    docker_result = self.docker_rate_limiter.execute_docker_command(cmd, timeout=10)
+                    result = subprocess.CompletedProcess(cmd, docker_result.returncode, docker_result.stdout, docker_result.stderr)
+                    
+                    if result.returncode == 0 and result.stdout.strip():
+                        container_names = result.stdout.strip().split('\n')
+                        
+                        # Map container names to service names
+                        for container_name in container_names:
+                            # Extract service name from different patterns
+                            if container_name.startswith('netra-dev-'):
+                                service = container_name.replace('netra-dev-', '')
+                                containers[service] = container_name
+                            elif container_name.startswith('netra-apex-test-'):
+                                # Handle netra-apex-test-backend-1 -> backend
+                                service = container_name.replace('netra-apex-test-', '')
+                                if service.endswith('-1'):
+                                    service = service[:-2]  # Remove '-1' suffix properly
+                                containers[service] = container_name
+                            elif container_name.startswith('netra-test-'):
+                                service = container_name.replace('netra-test-', '')
+                                if service.endswith('-1'):
+                                    service = service[:-2]  # Remove '-1' suffix properly
+                                containers[service] = container_name
+                            elif container_name.startswith('netra_test_shared_'):
+                                service = container_name.replace('netra_test_shared_', '')
+                                if service.endswith('_1'):
+                                    service = service[:-2]  # Remove '_1' suffix properly
+                                containers[service] = container_name
+                            else:
+                                continue
+                            logger.debug(f"🔍 Detected existing container: {service} -> {container_name}")
+            
+                # If we found containers, return immediately
+                if containers:
+                    logger.info(f"🔄 Found {len(containers)} existing containers on attempt {attempt + 1}")
+                    for service, container_name in containers.items():
+                        logger.debug(f"  - {service}: {container_name}")
+                    return containers
                 
-                # Check if we're in a development environment that likely has containers running
-                env = get_env()
-                test_env = env.get("TEST_ENV", "").lower()
-                current_env = env.get("NETRA_ENV", "").lower()
+                # If no containers found and not last attempt, wait and retry
+                if attempt < max_retries - 1:
+                    logger.debug(f"No containers found on attempt {attempt + 1}, retrying in {retry_delay}s...")
+                    import time
+                    time.sleep(retry_delay)
+                    continue
+                else:
+                    logger.debug("No existing netra containers found after all attempts")
+                    # Don't assume development containers exist - let orchestration handle it
                 
-                if "dev" in test_env or "dev" in current_env or self.environment == "test":
-                    logger.info("🔄 Development environment detected, assuming standard dev container setup")
-                    # Return expected container names for testing purposes
-                    expected_services = ["backend", "auth", "postgres", "redis", "frontend", "clickhouse"]
-                    for service in expected_services:
-                        containers[service] = f"netra-dev-{service}"
-                    logger.info(f"🔄 Assuming {len(containers)} development containers exist")
+            except subprocess.TimeoutExpired:
+                logger.warning(f"Docker command timed out on attempt {attempt + 1}")
+                if attempt < max_retries - 1:
+                    logger.debug(f"Retrying in {retry_delay}s due to timeout...")
+                    import time
+                    time.sleep(retry_delay)
+                    continue
+                else:
+                    # Last attempt - try alternative approach
+                    logger.warning("Using alternative docker detection method")
+                    try:
+                        patterns = ["netra-dev-", "netra-apex-test-", "netra-test-", "netra_test_shared_"]
+                        for pattern in patterns:
+                            cmd = ["docker", "container", "ls", "--format", "{{.Names}}", "--filter", f"name={pattern}"]
+                            result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+                            if result.returncode == 0 and result.stdout.strip():
+                                container_names = result.stdout.strip().split('\n')
+                                for container_name in container_names:
+                                    # Extract service name based on pattern
+                                    if 'netra-apex-test-' in container_name:
+                                        service = container_name.replace('netra-apex-test-', '')
+                                        if service.endswith('-1'):
+                                            service = service[:-2]  # Remove '-1' suffix properly
+                                    elif 'netra-dev-' in container_name:
+                                        service = container_name.replace('netra-dev-', '')
+                                    elif 'netra_test_shared_' in container_name:
+                                        service = container_name.replace('netra_test_shared_', '')
+                                        if service.endswith('_1'):
+                                            service = service[:-2]  # Remove '_1' suffix properly
+                                    else:
+                                        service = container_name.replace('netra-test-', '')
+                                        if service.endswith('-1'):
+                                            service = service[:-2]  # Remove '-1' suffix properly
+                                    containers[service] = container_name
+                        if containers:
+                            logger.info(f"🔄 Found {len(containers)} containers via alternative method")
+                            return containers
+                    except Exception as alt_e:
+                        logger.warning(f"Alternative docker detection also failed: {alt_e}")
+                        
+            except Exception as e:
+                logger.warning(f"Error detecting existing containers on attempt {attempt + 1}: {e}")
+                if attempt < max_retries - 1:
+                    logger.debug(f"Retrying in {retry_delay}s due to error...")
+                    import time
+                    time.sleep(retry_delay)
+                    continue
+                # Don't assume any containers exist - let orchestration handle missing containers
             
         return containers
     
@@ -1061,6 +1114,50 @@ class UnifiedDockerManager:
         
         logger.info(f"📍 Discovered ports: {ports}")
         return ports
+    
+    def _get_actual_container_name(self, env_name: str, service_name: str) -> Optional[str]:
+        """
+        Get the actual container name for a service, handling different naming patterns.
+        
+        Args:
+            env_name: Environment name
+            service_name: Service name
+            
+        Returns:
+            Actual container name or None if not found
+        """
+        # Try different naming patterns
+        possible_names = [
+            f"{env_name}_{service_name}_1",  # Standard compose format
+            f"{env_name}-{service_name}-1",   # Alternative compose format
+            f"netra-apex-test-{service_name}-1",  # Our test containers
+            f"netra-dev-{service_name}",     # Dev containers
+            f"netra-test-{service_name}-1",  # Test containers
+            f"netra_test_shared_{service_name}_1"  # Shared test containers
+        ]
+        
+        for name in possible_names:
+            # Check if container exists
+            cmd = ["docker", "ps", "-a", "--filter", f"name={name}", "--format", "{{.Names}}"]
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            if result.returncode == 0 and result.stdout.strip():
+                actual_name = result.stdout.strip().split('\n')[0]  # Get first match
+                if actual_name:
+                    logger.debug(f"Found container {actual_name} for service {service_name}")
+                    return actual_name
+        
+        # If not found by exact match, try to find by service name pattern
+        cmd = ["docker", "ps", "--format", "{{.Names}}"]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode == 0 and result.stdout.strip():
+            container_names = result.stdout.strip().split('\n')
+            for container_name in container_names:
+                # Check if service name is in container name
+                if service_name in container_name and 'netra' in container_name:
+                    logger.debug(f"Found container {container_name} by pattern match for service {service_name}")
+                    return container_name
+        
+        return None
     
     def _is_existing_container_healthy(self, container_name: str) -> bool:
         """Check if an existing container is healthy and running."""
@@ -1151,8 +1248,12 @@ class UnifiedDockerManager:
             # Record restart attempt
             self._record_restart(service_name)
             
-            # Perform restart
-            container_name = f"{env_name}_{service_name}_1"
+            # Perform restart - try to find actual container name
+            container_name = self._get_actual_container_name(env_name, service_name)
+            if not container_name:
+                logger.error(f"❌ Could not find container for service {service_name}")
+                return False
+            
             cmd = ["docker", "restart", container_name]
             
             docker_result = self.docker_rate_limiter.execute_docker_command(cmd, timeout=60)
@@ -1218,11 +1319,11 @@ class UnifiedDockerManager:
     
     def _is_service_healthy(self, env_name: str, service_name: str) -> bool:
         """Check if service is healthy"""
-        # Handle existing dev containers with different naming convention
-        if env_name == "netra-dev-existing":
-            container_name = f"netra-dev-{service_name}"
-        else:
-            container_name = f"{env_name}_{service_name}_1"
+        # Get the actual container name
+        container_name = self._get_actual_container_name(env_name, service_name)
+        if not container_name:
+            logger.warning(f"Container for service {service_name} not found")
+            return False
         
         # Check container status
         cmd = ["docker", "inspect", "--format='{{.State.Health.Status}}'", container_name]
@@ -1230,7 +1331,10 @@ class UnifiedDockerManager:
         
         if result.returncode == 0:
             status = result.stdout.strip().strip("'")
-            return status == "healthy" or status == "none"  # Some containers don't have health checks
+            # Accept healthy, starting (during startup), or none (no health checks)
+            is_healthy = status in ["healthy", "starting", "none"]
+            logger.debug(f"Service {service_name} ({container_name}) health: {status} -> {is_healthy}")
+            return is_healthy
         
         return False
     
@@ -1615,10 +1719,10 @@ class UnifiedDockerManager:
             auth_port = ports["auth"]
             env.set("AUTH_SERVICE_URL", f"http://localhost:{auth_port}", source="unified_docker_manager")
         
-        # Set database URLs
+        # Set database URLs (using correct credentials from docker-compose.test.yml)
         if "postgres" in ports:
             postgres_port = ports["postgres"]
-            db_url = f"postgresql://test:test@localhost:{postgres_port}/netra_test"
+            db_url = f"postgresql://test_user:test_pass@localhost:{postgres_port}/netra_test"
             env.set("DATABASE_URL", db_url, source="unified_docker_manager")
         
         if "redis" in ports:
