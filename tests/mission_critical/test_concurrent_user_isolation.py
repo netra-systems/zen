@@ -200,6 +200,12 @@ def reset_global_state():
         ExecutionEngine._instance = None
     if hasattr(AgentWebSocketBridge, '_instance'):
         AgentWebSocketBridge._instance = None
+    
+    yield  # This is important for pytest fixtures
+    
+    # Cleanup after test
+    _global_event_capture.clear()
+    _execution_order.clear()
 
 
 class TestConcurrentUserIsolation:

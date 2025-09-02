@@ -829,3 +829,19 @@ class ConnectionNotFound(Exception):
 class ConnectionClosed(Exception):
     """Exception raised when WebSocket connection is closed."""
     pass
+
+
+# Factory instance management
+_websocket_bridge_factory: Optional[WebSocketBridgeFactory] = None
+
+
+def get_websocket_bridge_factory() -> WebSocketBridgeFactory:
+    """Get or create the singleton WebSocketBridgeFactory instance.
+    
+    Returns:
+        WebSocketBridgeFactory: The singleton factory instance
+    """
+    global _websocket_bridge_factory
+    if _websocket_bridge_factory is None:
+        _websocket_bridge_factory = WebSocketBridgeFactory()
+    return _websocket_bridge_factory

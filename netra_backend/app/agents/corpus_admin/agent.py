@@ -73,8 +73,8 @@ class CorpusAdminSubAgent(BaseAgent):
     def _init_modern_execution_infrastructure(self) -> None:
         """Initialize modern execution infrastructure."""
         self._execution_monitor = ExecutionMonitor()
-        self.reliability_manager = self._create_reliability_manager()
-        self.execution_engine = BaseExecutionEngine(self.reliability_manager, self._execution_monitor)
+        self._unified_reliability_handler = self._create_reliability_manager()
+        self._execution_engine = BaseExecutionEngine(self._unified_reliability_handler, self._execution_monitor)
         self.error_handler = ExecutionErrorHandler
     
     def _create_reliability_manager(self):

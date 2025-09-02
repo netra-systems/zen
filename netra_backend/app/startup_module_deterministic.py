@@ -1081,9 +1081,12 @@ class StartupOrchestrator:
             if hasattr(self.app.state, 'agent_supervisor'):
                 supervisor = self.app.state.agent_supervisor
                 if hasattr(supervisor, 'agent_registry'):
+                    # Get websocket factory first
+                    websocket_factory = get_websocket_bridge_factory()
                     execution_factory.configure(
                         agent_registry=supervisor.agent_registry,
-                        websocket_bridge=self.app.state.agent_websocket_bridge
+                        websocket_bridge_factory=websocket_factory,
+                        db_connection_pool=None  # Will be set later if needed
                     )
                     self.logger.info("    ✓ ExecutionEngineFactory configured with agent registry")
                 else:
@@ -1093,12 +1096,18 @@ class StartupOrchestrator:
             
             self.app.state.execution_engine_factory = execution_factory
             
-            # 2. Initialize WebSocketBridgeFactory
-            websocket_factory = get_websocket_bridge_factory()
-            websocket_factory.configure(
-                websocket_manager=get_websocket_manager(),
-                agent_bridge=self.app.state.agent_websocket_bridge
-            )
+            # 2. Initialize WebSocketBridgeFactory (if not already done)
+            if not hasattr(self.app.state, 'agent_supervisor'):
+                websocket_factory = get_websocket_bridge_factory()
+            
+            # Configure with dummy parameters for now - will be properly configured later
+            # TODO: Get proper connection pool and health monitor instances
+            if hasattr(self.app.state, 'agent_supervisor'):
+                websocket_factory.configure(
+                    connection_pool=None,  # Will be set later
+                    agent_registry=self.app.state.agent_supervisor.agent_registry,
+                    health_monitor=None  # Will be set later
+                )
             self.app.state.websocket_bridge_factory = websocket_factory
             self.logger.info("    ✓ WebSocketBridgeFactory configured")
             
