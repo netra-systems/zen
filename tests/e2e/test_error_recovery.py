@@ -59,6 +59,10 @@ class TestRecoveryResult:
     user_impact_prevented: bool
 
 
+# Alias for backward compatibility (fixing typo)
+RecoveryTestResult = TestRecoveryResult
+
+
 class MockServiceManager:
     """Mock service manager for simulating service crashes and recovery"""
     

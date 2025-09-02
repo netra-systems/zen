@@ -19,6 +19,7 @@ import json
 import subprocess
 from pathlib import Path
 from typing import Dict, List, Tuple, Any
+from unittest.mock import patch
 import pytest
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.environment_markers import env, env_requires, dev_and_staging

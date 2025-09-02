@@ -1,5 +1,4 @@
 """
-from shared.isolated_environment import get_env
 Comprehensive test suite for critical staging deployment issues.
 Tests reproduce actual staging errors for root cause validation.
 
@@ -13,6 +12,9 @@ import os
 import re
 import sys
 from pathlib import Path
+from unittest.mock import patch
+
+from shared.isolated_environment import get_env
 
 # Setup test path
 

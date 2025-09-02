@@ -7,12 +7,17 @@ ARCHITECTURE: 450-line limit, ≤8 lines per function
 import time
 import uuid
 from typing import Any, Dict
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from netra_backend.app.schemas.registry import User, UserCreate
 from netra_backend.app.schemas.user_plan import PLAN_DEFINITIONS, PlanTier
 from tests.e2e.jwt_token_helpers import JWTTestHelper
+
+# Aliases for backward compatibility
+MagicNone = MagicMock()
+AsyncNone = AsyncMock()
 
 # Helper function for backward compatibility
 jwt_helper = JWTTestHelper()

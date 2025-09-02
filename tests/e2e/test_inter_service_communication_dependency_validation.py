@@ -159,10 +159,10 @@ class TestServiceConfig:
     enable_detailed_logging: bool = True
 
 
-class TestInterServiceCommunicationer:
+class InterServiceCommunicationTester:
     """Comprehensive inter-service communication and dependency tester."""
     
-    def __init__(self, config: ServiceTestConfig):
+    def __init__(self, config: TestServiceConfig):
         self.config = config
         self.project_root = config.project_root or self._detect_project_root()
         self.metrics = ServiceCommunicationMetrics(test_name="inter_service_communication")
@@ -375,7 +375,8 @@ class TestInterServiceCommunicationer:
             }
             
             # Simulate token generation (using direct token manager if available)
-            if self.token_manager:
+            token_manager = getattr(self, 'token_manager', None)
+            if token_manager:
                 start_time = time.time()
                 
                 # Generate access token
@@ -973,7 +974,7 @@ class TestInterServiceCommunicationDependencyValidation:
     @pytest.fixture
     def service_config(self):
         """Create service test configuration."""
-        return ServiceTestConfig(
+        return TestServiceConfig(
             test_auth_service=True,
             test_backend_service=True,
             test_websocket_service=True,
@@ -1050,7 +1051,7 @@ class TestInterServiceCommunicationDependencyValidation:
 
 async def run_inter_service_communication_test():
     """Standalone function to run inter-service communication test."""
-    config = ServiceTestConfig()
+    config = TestServiceConfig()
     tester = InterServiceCommunicationTester(config)
     return await tester.run_comprehensive_communication_test()
 

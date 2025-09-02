@@ -110,6 +110,10 @@ class TestDatabaseConnectioner:
         self.max_connections = max_connections
         self.connection_times: List[float] = []
         self.pool_stats: Dict[str, Any] = {}
+
+
+# Alias for backward compatibility (fixing typo)
+DatabaseConnectionTester = TestDatabaseConnectioner
     
     @pytest.mark.e2e
     async def test_connection_acquisition_speed(self) -> Tuple[float, bool]:

@@ -1,9 +1,9 @@
 """
-from shared.isolated_environment import get_env
 Shared utilities for high-volume throughput testing.
 Extracted from test_high_volume_throughput.py to comply with size limits.
 """
 
+from shared.isolated_environment import get_env
 import asyncio
 import time
 import uuid

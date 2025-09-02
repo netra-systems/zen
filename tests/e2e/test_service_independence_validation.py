@@ -70,7 +70,7 @@ class ServiceIndependenceValidator:
     def __init__(self, project_root: Path):
         self.project_root = project_root
         self.discovery = ServiceDiscovery(project_root)
-        self.test_results = LauncherTestResult(
+        self.test_results = TestLauncherResult(
             launcher_pid=None,
             launcher_terminated=False,
             services_before_termination={},
@@ -79,7 +79,7 @@ class ServiceIndependenceValidator:
             errors=[]
         )
     
-    async def run_independence_test(self, timeout_seconds: int = 60) -> LauncherTestResult:
+    async def run_independence_test(self, timeout_seconds: int = 60) -> TestLauncherResult:
         """Run complete service independence test."""
         logger.info("Starting service independence validation test")
         
@@ -118,6 +118,7 @@ class ServiceIndependenceValidator:
             "--dynamic", "--no-browser", "--non-interactive", "--minimal"
         ]
         
+        env = os.environ.copy()
         env["NETRA_TEST_MODE"] = "true"
         env["NETRA_STARTUP_MODE"] = "minimal"
         
@@ -481,7 +482,7 @@ class TestServiceIndependenceValidation(BaseE2ETest):
         from netra_backend.app.core.project_utils import get_project_root
         return get_project_root()
     
-    def _validate_final_system_state(self, result: LauncherTestResult):
+    def _validate_final_system_state(self, result: TestLauncherResult):
         """Validate final system state after independence test."""
         print("\n=== FINAL SYSTEM STATE VALIDATION ===")
         

@@ -182,8 +182,10 @@ class WebSocketConnection:
     auth_token: Optional[str] = None
     is_authenticated: bool = False
 
+# Alias for naming consistency
+WebSocketTestConfig = TestWebSocketConfig
 
-class TestWebSocketConnectivityer:
+class WebSocketConnectivityTester:
     """Comprehensive WebSocket connectivity and real-time features tester."""
     
     def __init__(self, config: WebSocketTestConfig):

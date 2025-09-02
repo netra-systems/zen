@@ -119,6 +119,10 @@ class TestMigrationMetrics:
         return (passed_checks / total_checks) * 100
 
 
+# Alias for backward compatibility (fixing typo)
+MigrationTestMetrics = TestMigrationMetrics
+
+
 @dataclass
 class TestDatabaseConfig:
     """Configuration for comprehensive database testing."""
@@ -947,6 +951,10 @@ class TestDatabaseMigrationConsistencyer:
                 await self.db_connector.stop_health_monitoring()
             except Exception:
                 pass
+
+
+# Alias for naming consistency
+DatabaseMigrationConsistencyTester = TestDatabaseMigrationConsistencyer
 
 
 @pytest.mark.e2e

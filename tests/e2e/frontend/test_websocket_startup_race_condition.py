@@ -17,8 +17,7 @@ from unittest.mock import patch, MagicMock, AsyncMock
 import pytest
 from playwright.async_api import Page, WebSocket, ConsoleMessage
 
-from test_framework.e2e_base import E2ETestBase
-from test_framework.websocket_helpers import WebSocketMonitor
+from test_framework.base_e2e_test import BaseE2ETest as E2ETestBase
 
 
 class TestWebSocketStartupRaceCondition(E2ETestBase):

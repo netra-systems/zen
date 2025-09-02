@@ -1,5 +1,4 @@
 """
-env = get_env()
 CRITICAL BUSINESS REQUIREMENT TEST - Secret Manager Builder
 
 This test exposes the core configuration problem that costs engineering time
@@ -46,6 +45,8 @@ from typing import Dict, Any, Optional, Set
 
 from test_framework.environment_markers import env
 from shared.isolated_environment import get_env
+
+env = get_env()
 
 # Test the current fragmented state to prove the need for consolidation
 class TestSecretManagerBuilderRequirement:
