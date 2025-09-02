@@ -70,9 +70,9 @@ class CorpusAdminSubAgent(BaseAgent):
     
     def _init_modern_execution_infrastructure(self) -> None:
         """Initialize modern execution infrastructure."""
-        self.monitor = ExecutionMonitor()
+        self._execution_monitor = ExecutionMonitor()
         self._unified_reliability_handler = self._create_reliability_manager()
-        self.execution_engine = BaseExecutionEngine(self._unified_reliability_handler, self.monitor)
+        self._execution_engine = BaseExecutionEngine(self._unified_reliability_handler, self._execution_monitor)
         self.error_handler = ExecutionErrorHandler
     
     def _create_reliability_manager(self) -> ReliabilityManager:
@@ -100,12 +100,12 @@ class CorpusAdminSubAgent(BaseAgent):
     
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
         """Execute core corpus administration logic."""
-        self.monitor.start_operation(f"corpus_admin_execution_{context.run_id}")
+        self._execution_monitor.start_operation(f"corpus_admin_execution_{context.run_id}")
         await self.send_status_update(context, "executing", "Starting corpus administration...")
         
         result = await self._execute_corpus_administration_workflow(context)
         
-        self.monitor.complete_operation(f"corpus_admin_execution_{context.run_id}")
+        self._execution_monitor.complete_operation(f"corpus_admin_execution_{context.run_id}")
         await self.send_status_update(context, "completed", "Corpus administration completed")
         return result
     
@@ -235,7 +235,7 @@ class CorpusAdminSubAgent(BaseAgent):
         """Get comprehensive health status from modern execution infrastructure."""
         status = {
             "agent_health": "healthy",
-            "monitor": self.monitor.get_health_status(),
+            "monitor": self._execution_monitor.get_health_status(),
             "error_handler": self.error_handler.get_health_status()
         }
         if self.reliability_manager:
