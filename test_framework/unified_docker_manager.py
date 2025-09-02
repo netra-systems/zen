@@ -244,6 +244,37 @@ class UnifiedDockerManager:
         }
     }
     
+    # Environment-specific database credentials - SSOT for credential management
+    ENVIRONMENT_CREDENTIALS = {
+        EnvironmentType.DEVELOPMENT: {
+            "user": "netra",
+            "password": "netra123", 
+            "database": "netra_dev"
+        },
+        EnvironmentType.SHARED: {
+            "user": "test_user",
+            "password": "test_pass",
+            "database": "netra_test"
+        },
+        EnvironmentType.DEDICATED: {
+            "user": "test_user", 
+            "password": "test_pass",
+            "database": "netra_test"
+        },
+        EnvironmentType.PRODUCTION: {
+            "user": "netra",
+            "password": "netra123",
+            "database": "netra_production"
+        }
+    }
+    
+    # Alpine-specific credentials (when use_alpine=True)
+    ALPINE_CREDENTIALS = {
+        "user": "test",
+        "password": "test",
+        "database": "netra_test"
+    }
+    
     def __init__(self, 
                  config: Optional[OrchestrationConfig] = None,
                  environment_type: EnvironmentType = EnvironmentType.SHARED,

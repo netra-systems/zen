@@ -199,7 +199,7 @@ class TestRequestScopedAgentExecutor:
     @pytest.mark.asyncio
     async def test_execute_agent_timeout(self, executor_alice):
         """Test agent execution timeout handling."""
-        test_state = DeepAgentState()
+        test_state = DeepAgentState(user_request="Test request")
         
         # Mock agent core to timeout
         async def timeout_execution(*args, **kwargs):
@@ -236,10 +236,8 @@ class TestRequestScopedAgentExecutor:
         executor_bob = RequestScopedAgentExecutor(user_context_bob, emitter_bob, mock_agent_registry)
         
         # Create test states
-        state_alice = DeepAgentState()
-        state_alice.user_prompt = "Alice's request"
-        state_bob = DeepAgentState()
-        state_bob.user_prompt = "Bob's request"
+        state_alice = DeepAgentState(user_request="Alice's request")
+        state_bob = DeepAgentState(user_request="Bob's request")
         
         # Mock successful results
         result_alice = AgentExecutionResult(success=True, state=state_alice, duration=1.0)
@@ -262,8 +260,8 @@ class TestRequestScopedAgentExecutor:
                                                 results = await asyncio.gather(alice_task, bob_task)
         
         # Verify results are isolated
-        assert results[0].state.user_prompt == "Alice's request"
-        assert results[1].state.user_prompt == "Bob's request"
+        assert results[0].state.user_request == "Alice's request"
+        assert results[1].state.user_request == "Bob's request"
         
         # Verify metrics are isolated
         alice_metrics = executor_alice.get_metrics()
@@ -276,7 +274,7 @@ class TestRequestScopedAgentExecutor:
     @pytest.mark.asyncio
     async def test_websocket_event_isolation(self, executor_alice, executor_bob):
         """Test that WebSocket events are sent to the correct user only."""
-        test_state = DeepAgentState()
+        test_state = DeepAgentState(user_request="Test request")
         
         # Mock successful execution
         mock_result = AgentExecutionResult(success=True, state=test_state, duration=1.0)

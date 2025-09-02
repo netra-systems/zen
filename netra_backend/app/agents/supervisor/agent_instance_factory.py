@@ -641,7 +641,7 @@ class AgentInstanceFactory:
                 thread_id=thread_id,
                 run_id=run_id,
                 db_session=db_session,
-                session_id=session_id,
+                websocket_connection_id=websocket_connection_id,
                 metadata=metadata
             )
             
@@ -757,14 +757,16 @@ def get_agent_instance_factory() -> AgentInstanceFactory:
     return _factory_instance
 
 
-async def configure_agent_instance_factory(agent_registry: AgentRegistry,
-                                          websocket_bridge: AgentWebSocketBridge,
+async def configure_agent_instance_factory(agent_class_registry: Optional[AgentClassRegistry] = None,
+                                          agent_registry: Optional[AgentRegistry] = None,
+                                          websocket_bridge: Optional[AgentWebSocketBridge] = None,
                                           websocket_manager: Optional[WebSocketManager] = None) -> AgentInstanceFactory:
     """
     Configure the singleton AgentInstanceFactory with infrastructure components.
     
     Args:
-        agent_registry: Registry containing agent classes
+        agent_class_registry: Registry containing agent classes (preferred)
+        agent_registry: Legacy agent registry (for backward compatibility)
         websocket_bridge: WebSocket bridge for notifications
         websocket_manager: Optional WebSocket manager
         
@@ -773,6 +775,7 @@ async def configure_agent_instance_factory(agent_registry: AgentRegistry,
     """
     factory = get_agent_instance_factory()
     factory.configure(
+        agent_class_registry=agent_class_registry,
         agent_registry=agent_registry,
         websocket_bridge=websocket_bridge,
         websocket_manager=websocket_manager
