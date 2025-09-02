@@ -8,7 +8,6 @@ BVJ: Enterprise | Performance Fee Capture | $10K+ monthly revenue per customer
 """
 
 import asyncio
-import time
 from datetime import datetime, UTC
 from typing import Any, Dict, List, Optional, Union
 
@@ -19,8 +18,6 @@ from netra_backend.app.schemas.monitoring import PerformanceMetric
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus
-# WebSocketContextMixin removed - BaseAgent now handles WebSocket via bridge
-# Using single inheritance pattern for simplicity
 
 # Import focused helper modules
 from netra_backend.app.db.clickhouse import get_clickhouse_service
@@ -31,10 +28,8 @@ from netra_backend.app.agents.data_sub_agent.performance_analyzer import (
 from netra_backend.app.agents.data_sub_agent.schema_cache import SchemaCache
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.core.type_validators import agent_type_safe
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.strict_types import TypedAgentResult
 from netra_backend.app.services.llm.cost_optimizer import LLMCostOptimizer
 
 
@@ -53,15 +48,18 @@ class DataSubAgent(BaseAgent):
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
                  websocket_manager: Optional[Any] = None):
         """Initialize consolidated DataSubAgent."""
-        # Initialize base class only - single inheritance pattern
-        self.agent_name = llm_manager
-        self.websocket_manager = name="DataSubAgent"
-        # WebSocketContextMixin removed - using BaseAgent's bridge
-        # Using single inheritance pattern
+        # Initialize base agent with proper parameters
+        super().__init__(
+            llm_manager=llm_manager,
+            name="DataSubAgent", 
+            description="Consolidated data analysis agent providing reliable AI cost optimization insights",
+            enable_reliability=True,
+            enable_execution_engine=True,
+            tool_dispatcher=tool_dispatcher
+        )
         
-        # Initialize core components
-        self.tool_dispatcher = tool_dispatcher
-        self.logger = central_logger.get_logger("DataSubAgent")
+        # Store websocket manager reference
+        self.websocket_manager = websocket_manager
         
         # Initialize focused helper modules
         self._init_helper_modules()
@@ -76,72 +74,53 @@ class DataSubAgent(BaseAgent):
         self.cost_optimizer = LLMCostOptimizer()
         self.data_validator = DataValidator()
     
-    @agent_type_safe
-    async def execute(self, state: Optional[DeepAgentState], run_id: str = "", stream_updates: bool = False) -> TypedAgentResult:
-        """Execute data analysis workflow with WebSocket events."""
-        start_time = time.time()
-        
-        try:
-            # Emit thinking event (agent_started is handled by orchestrator)
-            await self.emit_thinking("Starting data analysis for AI cost optimization")
+    async def validate_preconditions(self, context: ExecutionContext) -> bool:
+        """Validate execution preconditions for data analysis."""
+        if not context.state:
+            return False
             
-            # Validate input
-            if not self._validate_execution_state(state):
-                await self.emit_error("Invalid execution state provided")
-                return self._create_error_result("Invalid execution state", start_time)
+        # Check if agent_input exists and has required data
+        if not hasattr(context.state, 'agent_input') or context.state.agent_input is None:
+            return False
             
-            # Emit thinking event
-            await self.emit_thinking("Extracting analysis parameters from request...")
+        # Validate that we have the necessary helper modules initialized
+        if not hasattr(self, 'clickhouse_client') or not hasattr(self, 'performance_analyzer'):
+            return False
             
-            # Extract analysis request
-            analysis_request = self._extract_analysis_request(state)
-            
-            # Emit progress during analysis
-            await self.emit_progress(f"Executing {analysis_request.get('type', 'performance')} analysis...")
-            
-            # Execute analysis based on request type
-            analysis_result = await self._execute_analysis(analysis_request)
-            
-            # Emit progress during insights generation
-            await self.emit_progress("Generating actionable insights and cost optimization recommendations...")
-            
-            # Generate insights and recommendations
-            insights = await self._generate_insights(analysis_result)
-            
-            # Prepare final result
-            execution_time = (time.time() - start_time) * 1000
-            
-            # Flatten all result data to comply with TypedAgentResult constraints
-            result_data = {
-                "analysis_type": analysis_request.get("type"),
-                "execution_time_ms": execution_time,
-                "data_points_analyzed": analysis_result.get("data_points", 0)
-            }
-            
-            # Add flattened insights directly to result
-            result_data.update(insights)
-            
-            # Emit completion event using mixin methods
-            await self.emit_progress("Data analysis completed successfully", is_complete=True)
-            
-            return TypedAgentResult(
-                success=True,
-                result=result_data,
-                execution_time_ms=execution_time
-            )
-            
-        except Exception as e:
-            await self.emit_error(f"DataSubAgent execution failed: {str(e)}")
-            self.logger.error(f"DataSubAgent execution failed: {str(e)}")
-            return self._create_error_result(str(e), start_time)
+        return True
     
-    def _validate_execution_state(self, state: Optional[DeepAgentState]) -> bool:
-        """Validate execution state has required data analysis parameters."""
-        return (
-            state and 
-            hasattr(state, 'agent_input') and 
-            state.agent_input is not None
-        )
+    async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+        """Execute core data analysis logic with WebSocket notifications."""
+        # Send agent thinking notification
+        await self.emit_thinking("Starting data analysis for AI cost optimization")
+        
+        # Extract analysis request from state
+        await self.emit_thinking("Extracting analysis parameters from request...")
+        analysis_request = self._extract_analysis_request(context.state)
+        
+        # Execute analysis with progress updates
+        await self.emit_progress(f"Executing {analysis_request.get('type', 'performance')} analysis...")
+        analysis_result = await self._execute_analysis(analysis_request)
+        
+        # Generate insights with progress updates
+        await self.emit_progress("Generating actionable insights and cost optimization recommendations...")
+        insights = await self._generate_insights(analysis_result)
+        
+        # Prepare final result data
+        result_data = {
+            "analysis_type": analysis_request.get("type"),
+            "data_points_analyzed": analysis_result.get("data_points", 0),
+            "status": "completed"
+        }
+        
+        # Add flattened insights directly to result
+        result_data.update(insights)
+        
+        # Emit completion notification
+        await self.emit_progress("Data analysis completed successfully", is_complete=True)
+        
+        return result_data
+    
     
     def _extract_analysis_request(self, state: DeepAgentState) -> Dict[str, Union[str, List[str], Optional[str]]]:
         """Extract and parse analysis request from state."""
@@ -226,21 +205,7 @@ class DataSubAgent(BaseAgent):
         
         Provide specific, actionable recommendations."""
     
-    def _create_error_result(self, error_message: str, start_time: float) -> TypedAgentResult:
-        """Create standardized error result."""
-        execution_time = (time.time() - start_time) * 1000
-        
-        return TypedAgentResult(
-            success=False,
-            result={
-                "error": error_message,
-                "execution_time_ms": execution_time
-            },
-            execution_time_ms=execution_time
-        )
     
-    # Using simplified single inheritance pattern
-    # All execution logic is now in execute() method only
     
     # Health and status methods
     def get_health_status(self) -> Dict[str, Union[str, Dict[str, str]]]:

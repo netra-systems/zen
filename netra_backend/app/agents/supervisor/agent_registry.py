@@ -7,6 +7,7 @@ if TYPE_CHECKING:
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     from netra_backend.app.llm.llm_manager import LLMManager
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+    from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import (
     ActionsToMeetGoalsSubAgent,
 )
@@ -24,6 +25,10 @@ from netra_backend.app.agents.synthetic_data_sub_agent import SyntheticDataSubAg
 # Import all sub-agents
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.core.agent_execution_tracker import get_execution_tracker
+from netra_backend.app.core.reliability.unified_reliability_manager import (
+    get_reliability_manager,
+    create_agent_reliability_manager
+)
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -37,9 +42,28 @@ class AgentRegistry:
         self.tool_dispatcher = tool_dispatcher
         self.agents: Dict[str, BaseAgent] = {}
         self.websocket_bridge: Optional['AgentWebSocketBridge'] = None
+        self.websocket_manager: Optional['WebSocketManager'] = None
         self._agents_registered = False
         self.registration_errors: Dict[str, str] = {}
         self.execution_tracker = get_execution_tracker()
+        
+        # Unified reliability manager for agent operations
+        self.reliability_manager = None
+        self._setup_reliability_manager()
+    
+    def _setup_reliability_manager(self) -> None:
+        """Setup unified reliability manager with WebSocket integration."""
+        try:
+            self.reliability_manager = create_agent_reliability_manager(
+                service_name="agent_registry",
+                websocket_manager=self.websocket_manager,
+                websocket_notifier=None  # Will be set when websocket_bridge is available
+            )
+            logger.info("Agent registry reliability manager initialized")
+        except Exception as e:
+            logger.error(f"Failed to setup reliability manager: {e}")
+            # Fallback to basic reliability manager
+            self.reliability_manager = get_reliability_manager("agent_registry")
         
     def register_default_agents(self) -> None:
         """Register default sub-agents"""
@@ -259,6 +283,22 @@ class AgentRegistry:
         self.register("corpus_admin", CorpusAdminSubAgent(
             self.llm_manager, self.tool_dispatcher))
 
+    def set_websocket_manager(self, websocket_manager: 'WebSocketManager') -> None:
+        """Set WebSocket manager for reliability events."""
+        self.websocket_manager = websocket_manager
+        
+        # Update reliability manager with WebSocket capabilities
+        if self.reliability_manager:
+            try:
+                self.reliability_manager = create_agent_reliability_manager(
+                    service_name="agent_registry",
+                    websocket_manager=websocket_manager,
+                    websocket_notifier=getattr(self, 'websocket_bridge', None)
+                )
+                logger.info("Agent registry reliability manager updated with WebSocket manager")
+            except Exception as e:
+                logger.error(f"Failed to update reliability manager with WebSocket: {e}")
+    
     def set_websocket_bridge(self, bridge: 'AgentWebSocketBridge') -> None:
         """Set AgentWebSocketBridge on registry and agents."""
         # CRITICAL: Prevent None bridge from breaking agent events
@@ -279,6 +319,18 @@ class AgentRegistry:
             raise ValueError(f"AgentWebSocketBridge incomplete - missing methods: {missing_methods}")
         
         self.websocket_bridge = bridge
+        
+        # Update reliability manager with WebSocket bridge
+        if self.reliability_manager and hasattr(bridge, 'websocket_manager'):
+            try:
+                self.reliability_manager = create_agent_reliability_manager(
+                    service_name="agent_registry",
+                    websocket_manager=getattr(bridge, 'websocket_manager', self.websocket_manager),
+                    websocket_notifier=bridge
+                )
+                logger.info("Agent registry reliability manager updated with WebSocket bridge")
+            except Exception as e:
+                logger.error(f"Failed to update reliability manager with WebSocket bridge: {e}")
         
         # CRITICAL: Set WebSocket bridge on tool dispatcher
         if hasattr(self, 'tool_dispatcher') and self.tool_dispatcher:

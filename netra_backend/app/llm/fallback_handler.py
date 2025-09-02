@@ -13,7 +13,8 @@ from typing import Any, Dict, Optional, Type, TypeVar
 
 from pydantic import BaseModel
 
-from netra_backend.app.core.reliability import CircuitBreaker, CircuitBreakerConfig
+from netra_backend.app.core.reliability import CircuitBreakerConfig
+from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
 from netra_backend.app.core.interfaces_validation import (
     ErrorClassificationChain,
     FailureType,

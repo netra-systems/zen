@@ -12,6 +12,11 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.base_agent import BaseAgent
+from netra_backend.app.agents.base.executor import (
+    BaseExecutionEngine, ExecutionStrategy, ExecutionWorkflowBuilder,
+    LambdaExecutionPhase, AgentMethodExecutionPhase
+)
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supply_researcher.data_extractor import (
     SupplyDataExtractor,
@@ -56,6 +61,23 @@ class SupplyResearcherAgent(BaseAgent):
         self.research_engine = SupplyResearchEngine()
         self.data_extractor = SupplyDataExtractor()
         self.db_manager = SupplyDatabaseManager(db)
+        self._init_execution_engine()
+    
+    def _init_execution_engine(self) -> None:
+        """Initialize BaseExecutionEngine with research phases."""
+        # Create execution phases for supply research workflow
+        phase_1 = AgentMethodExecutionPhase("request_parsing", self, "_execute_parsing_phase")
+        phase_2 = AgentMethodExecutionPhase("research_session_creation", self, "_execute_session_creation_phase", ["request_parsing"])
+        phase_3 = AgentMethodExecutionPhase("research_execution", self, "_execute_research_phase", ["research_session_creation"])
+        phase_4 = AgentMethodExecutionPhase("results_processing", self, "_execute_processing_phase", ["research_execution"])
+        
+        # Build execution engine with sequential strategy (research needs to be sequential)
+        self.execution_engine = ExecutionWorkflowBuilder() \
+            .add_phases([phase_1, phase_2, phase_3, phase_4]) \
+            .set_strategy(ExecutionStrategy.SEQUENTIAL) \
+            .add_pre_execution_hook(self._pre_execution_hook) \
+            .add_post_execution_hook(self._post_execution_hook) \
+            .build()
     
     async def execute(
         self,
@@ -63,12 +85,80 @@ class SupplyResearcherAgent(BaseAgent):
         run_id: str,
         stream_updates: bool = False
     ) -> None:
-        """Execute supply research based on request"""
+        """Execute supply research using BaseExecutionEngine."""
         try:
-            await self._execute_research_pipeline(state, run_id, stream_updates)
+            # Create execution context
+            execution_context = ExecutionContext(
+                run_id=run_id,
+                agent_name=self.name,
+                state=state,
+                stream_updates=stream_updates,
+                thread_id=getattr(state, 'chat_thread_id', None),
+                user_id=getattr(state, 'user_id', None),
+                correlation_id=run_id
+            )
+            
+            # Execute using BaseExecutionEngine with phases
+            result = await self.execution_engine.execute_phases(execution_context)
+            
+            if not result.success:
+                raise Exception(result.error)
+                
         except Exception as e:
             await self._handle_execution_error(e, state, run_id, stream_updates)
             raise
+    
+    async def _pre_execution_hook(self, context: ExecutionContext) -> None:
+        """Pre-execution hook for setup."""
+        logger.info(f"Starting supply research for run_id: {context.run_id}")
+    
+    async def _post_execution_hook(self, context: ExecutionContext, phase_results: Dict[str, Any]) -> None:
+        """Post-execution hook for cleanup."""
+        logger.info(f"Supply research completed for run_id: {context.run_id}")
+        # Extract final result and store in state
+        if "results_processing" in phase_results:
+            result_data = phase_results["results_processing"]
+            context.state.supply_research_result = result_data.get("final_result", {})
+    
+    # Phase execution methods for BaseExecutionEngine integration
+    async def _execute_parsing_phase(self, context: ExecutionContext, previous_results: Dict[str, Any]) -> Dict[str, Any]:
+        """Phase 1: Request parsing - method wrapper."""
+        request = context.state.user_request or "Provide AI market overview"
+        await self._send_parsing_update(context.run_id, context.stream_updates)
+        parsed_request = self.parser.parse_natural_language_request(request)
+        logger.info(f"Parsed request: {parsed_request}")
+        return {"parsed_request": parsed_request, "original_request": request}
+    
+    async def _execute_session_creation_phase(self, context: ExecutionContext, previous_results: Dict[str, Any]) -> Dict[str, Any]:
+        """Phase 2: Research session creation - method wrapper."""
+        parsed_request = previous_results["request_parsing"]["parsed_request"]
+        research_session = await self._create_research_session(parsed_request, context.state)
+        return {"research_session": research_session}
+    
+    async def _execute_research_phase(self, context: ExecutionContext, previous_results: Dict[str, Any]) -> Dict[str, Any]:
+        """Phase 3: Research execution - method wrapper."""
+        parsed_request = previous_results["request_parsing"]["parsed_request"]
+        research_session = previous_results["research_session_creation"]["research_session"]
+        
+        await self._send_research_update(context.run_id, context.stream_updates, parsed_request)
+        research_result = await self._conduct_research(parsed_request, research_session)
+        return {"research_result": research_result, "research_session": research_session}
+    
+    async def _execute_processing_phase(self, context: ExecutionContext, previous_results: Dict[str, Any]) -> Dict[str, Any]:
+        """Phase 4: Results processing - method wrapper."""
+        parsed_request = previous_results["request_parsing"]["parsed_request"]
+        research_result = previous_results["research_execution"]["research_result"]
+        research_session = previous_results["research_execution"]["research_session"]
+        
+        await self._send_processing_update(context.run_id, context.stream_updates)
+        
+        result = await self._process_research_results(
+            research_result, parsed_request, research_session, 
+            context.run_id, context.stream_updates
+        )
+        
+        await self._send_completion_update(context.run_id, context.stream_updates, result)
+        return {"final_result": result}
     
     async def _execute_research_pipeline(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Execute the main research pipeline."""
