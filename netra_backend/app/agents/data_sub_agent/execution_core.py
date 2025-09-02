@@ -1,6 +1,6 @@
 """Core execution workflow coordination for DataSubAgent.
 
-Modernized with BaseExecutionInterface pattern:
+Modernized with standardized execution patterns:
 - Standardized execution patterns
 - Integrated reliability management
 - Comprehensive error handling
@@ -150,7 +150,7 @@ class ExecutionCore:
         return await self.error_handler.handle_execution_error(error, context)
     
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
-        """Execute agent-specific core logic (BaseExecutionInterface implementation)."""
+        """Execute agent-specific core logic with standardized execution patterns."""
         params = self.engine.parameter_processor.extract_analysis_params(context.state)
         result = await self.engine.analysis_router.perform_complete_analysis(
             params, context.run_id, context.stream_updates, 
@@ -163,7 +163,7 @@ class ExecutionCore:
         return result
         
     async def validate_preconditions(self, context: ExecutionContext) -> bool:
-        """Validate execution preconditions (BaseExecutionInterface implementation)."""
+        """Validate execution preconditions with standardized validation patterns."""
         try:
             return await self._validate_analysis_preconditions(context)
         except Exception as e:

@@ -1,4 +1,4 @@
-"""Modernized Query Builder with BaseExecutionInterface support."""
+"""Modernized Query Builder with standardized execution patterns."""
 
 import time
 from dataclasses import dataclass
@@ -42,7 +42,7 @@ class QueryBuilder(ABC):
     
     def __init__(self, websocket_manager: Optional[WebSocketManagerProtocol] = None):
         """Initialize modernized query builder."""
-        # BaseExecutionInterface.__init__ removed - using single inheritance pattern
+        # Using single inheritance pattern for simplicity
         self.agent_name = "QueryBuilder"
         self._init_query_registry()
         self._init_performance_tracking()

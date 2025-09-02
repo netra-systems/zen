@@ -1,7 +1,7 @@
-"""Modern Data Analysis Engine with BaseExecutionInterface Integration
+"""Modern Data Analysis Engine with Standardized Execution Patterns
 
 Advanced data analysis capabilities with:
-- BaseExecutionInterface standardization
+- Reliable execution patterns
 - Integrated reliability patterns
 - Performance monitoring
 - Error handling improvements
@@ -40,9 +40,9 @@ logger = central_logger.get_logger(__name__)
 
 
 class ModernAnalysisEngine(ABC):
-    """Modern analysis engine with BaseExecutionInterface integration.
+    """Modern analysis engine with standardized execution patterns.
     
-    Provides standardized execution patterns for all analysis operations
+    Provides reliable execution workflows for all analysis operations
     with integrated monitoring and reliability features.
     """
     

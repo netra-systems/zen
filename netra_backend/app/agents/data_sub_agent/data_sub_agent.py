@@ -20,7 +20,7 @@ from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 # WebSocketContextMixin removed - BaseSubAgent now handles WebSocket via bridge
-# BaseExecutionInterface removed - using single inheritance pattern
+# Using single inheritance pattern for simplicity
 
 # Import focused helper modules
 from netra_backend.app.db.clickhouse import get_clickhouse_service
@@ -57,7 +57,7 @@ class DataSubAgent(BaseSubAgent):
         self.agent_name = llm_manager
         self.websocket_manager = name="DataSubAgent"
         # WebSocketContextMixin removed - using BaseSubAgent's bridge
-        # BaseExecutionInterface removed - single inheritance pattern
+        # Using single inheritance pattern
         
         # Initialize core components
         self.tool_dispatcher = tool_dispatcher
@@ -239,7 +239,7 @@ class DataSubAgent(BaseSubAgent):
             execution_time_ms=execution_time
         )
     
-    # BaseExecutionInterface implementation removed - single inheritance pattern
+    # Using simplified single inheritance pattern
     # All execution logic is now in execute() method only
     
     # Health and status methods

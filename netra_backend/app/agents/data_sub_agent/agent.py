@@ -1,6 +1,6 @@
-"""Modernized DataSubAgent with BaseExecutionInterface Integration
+"""Modern DataSubAgent with optimized execution patterns
 
-Clean modern implementation following BaseExecutionInterface pattern:
+Clean implementation with:
 - Standardized execution workflow with reliability management
 - Comprehensive monitoring and error handling
 - Circuit breaker protection and retry logic
@@ -17,7 +17,7 @@ from typing import Any, Dict, Optional
 from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 
-# Modern Base Components (BaseExecutionInterface removed for architecture simplification)
+# Modern Base Components
 from netra_backend.app.agents.base.interface import (
     ExecutionContext,
     ExecutionResult,
@@ -47,19 +47,16 @@ class DataSubAgent(BaseSubAgent):
     Uses single inheritance pattern with ExecutionContext/ExecutionResult types.
     """
     
-    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
-                 websocket_manager: Optional[WebSocketManagerProtocol] = None,
+    def __init__(self, llm_manager: LLMManager, 
+                 tool_dispatcher: ToolDispatcher,
                  reliability_manager: Optional[ReliabilityManager] = None) -> None:
-        self._init_base_interfaces(llm_manager, websocket_manager)
+        self._init_base_interfaces(llm_manager)
         self._init_core_systems(tool_dispatcher, reliability_manager)
         self._init_component_helpers()
     
-    def _init_base_interfaces(self, llm_manager: LLMManager, 
-                            websocket_manager: Optional[WebSocketManagerProtocol]) -> None:
+    def _init_base_interfaces(self, llm_manager: LLMManager) -> None:
         """Initialize base interfaces and agent identity."""
-        self.agent_name = llm_manager
-        self.websocket_manager = name="DataSubAgent"
-        # BaseExecutionInterface.__init__ removed - using single inheritance pattern
+        self.llm_manager = llm_manager
     
     def _init_core_systems(self, tool_dispatcher: ToolDispatcher, 
                           reliability_manager: Optional[ReliabilityManager]) -> None:
@@ -108,7 +105,7 @@ class DataSubAgent(BaseSubAgent):
         from netra_backend.app.agents.data_sub_agent.extended_operations import ExtendedOperations
         self.extended_ops = ExtendedOperations(self)
         
-    # Modern BaseExecutionInterface Implementation
+    # Modern Execution Interface Implementation
     async def validate_preconditions(self, context: ExecutionContext) -> bool:
         """Validate execution preconditions for data analysis."""
         try:

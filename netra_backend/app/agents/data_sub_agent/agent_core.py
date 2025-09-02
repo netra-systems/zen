@@ -11,7 +11,7 @@ from typing import Any, Dict, Optional
 from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 
-# Modern Base Components (BaseExecutionInterface removed for architecture simplification)
+# Modern Base Components (using simplified single inheritance architecture)
 from netra_backend.app.agents.base.interface import (
     ExecutionContext,
     ExecutionResult,
@@ -60,9 +60,10 @@ class DataSubAgent(BaseSubAgent):
     def _init_base_interfaces(self, llm_manager: LLMManager, 
                             websocket_manager: Optional[WebSocketManagerProtocol]) -> None:
         """Initialize base interfaces with error handling."""
-        self.agent_name = llm_manager
-        self.websocket_manager = name="DataSubAgent"
-        # BaseExecutionInterface.__init__ removed - using single inheritance pattern
+        self.agent_name = "DataSubAgent"
+        self.llm_manager = llm_manager
+        self.websocket_manager = websocket_manager
+        # Using single inheritance pattern for simplicity
     
     def _init_core_systems(self, tool_dispatcher: ToolDispatcher, 
                           reliability_manager: Optional[ReliabilityManager]) -> None:
@@ -135,7 +136,7 @@ class DataSubAgent(BaseSubAgent):
         self._fallback_mode = True
         logger.warning("DataSubAgent running in fallback mode")
         
-    # Modern BaseExecutionInterface Implementation
+    # Modern Execution Interface Implementation
     async def validate_preconditions(self, context: ExecutionContext) -> bool:
         """Validate execution preconditions with fallback."""
         try:

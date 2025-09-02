@@ -1,6 +1,6 @@
-"""Modern Fallback Data Providers with BaseExecutionInterface
+"""Modern Fallback Data Providers with Standardized Execution Patterns
 
-Modernized fallback data providers implementing BaseExecutionInterface.
+Modernized fallback data providers implementing standardized execution patterns.
 Provides reliable fallback data sources with monitoring and error handling.
 
 Business Value: Ensures 99.9% data availability through intelligent fallback patterns.
@@ -25,7 +25,7 @@ logger = central_logger.get_logger(__name__)
 
 
 class ModernFallbackDataProvider:
-    """Modern fallback data provider with BaseExecutionInterface.
+    """Modern fallback data provider with standardized execution patterns.
     
     Provides intelligent fallback data sources with reliability patterns.
     """

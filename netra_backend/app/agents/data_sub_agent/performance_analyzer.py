@@ -1,7 +1,7 @@
-"""Modern Performance Analyzer with BaseExecutionInterface
+"""Modern Performance Analyzer with Standardized Execution Patterns
 
 Modernized performance metrics analysis with:
-- BaseExecutionInterface integration
+- Standardized execution integration
 - Reliability patterns and error handling
 - Performance monitoring
 - Circuit breaker protection
@@ -63,7 +63,7 @@ class ModernPerformanceAnalyzer:
     - Comprehensive monitoring and metrics
     - Standardized error handling and recovery
     
-    NOTE: Removed BaseExecutionInterface inheritance to resolve multiple inheritance issues.
+    NOTE: Using single inheritance pattern to avoid complex inheritance hierarchies.
     """
     
     def __init__(self, clickhouse_client_or_query_builder: Any, 
@@ -72,7 +72,7 @@ class ModernPerformanceAnalyzer:
                  redis_manager: Any = None,
                  websocket_manager: Optional[WebSocketManagerProtocol] = None,
                  reliability_manager: Optional[ReliabilityManager] = None):
-        # Removed BaseExecutionInterface.__init__ call for clean single inheritance
+        # Using clean single inheritance pattern
         self.agent_name = "ModernPerformanceAnalyzer"
         self.websocket_manager = websocket_manager
         
@@ -196,7 +196,7 @@ class ModernPerformanceAnalyzer:
     async def send_status_update(self, context: ExecutionContext, 
                                status: str, message: str) -> None:
         """Send status update via WebSocket (stub implementation)."""
-        # Stub implementation to replace BaseExecutionInterface method
+        # Stub implementation for standardized execution pattern
         # In a real implementation, this would send updates via websocket_manager
         logger.debug(f"Status update [{status}]: {message}")
         if self.websocket_manager and context.stream_updates:

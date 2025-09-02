@@ -1,7 +1,7 @@
-"""Data processing operations coordinator with BaseExecutionInterface modernization.
+"""Data processing operations coordinator with standardized execution patterns.
 
 Modernized with:
-- BaseExecutionInterface implementation
+- Standardized execution implementation
 - ReliabilityManager integration
 - ExecutionMonitor support
 - Structured error handling
@@ -42,7 +42,7 @@ class DataOperations:
     """Coordinates data processing operations with modern execution patterns.
     
     Enhanced with:
-    - BaseExecutionInterface compliance
+    - Standardized execution compliance
     - ReliabilityManager for fault tolerance
     - ExecutionMonitor for performance tracking
     - Structured error handling

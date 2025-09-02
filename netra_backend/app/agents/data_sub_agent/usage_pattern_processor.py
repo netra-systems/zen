@@ -1,7 +1,7 @@
-"""Modernized Usage Pattern Processor with BaseExecutionInterface
+"""Modernized Usage Pattern Processor with Standardized Execution Patterns
 
 Usage pattern analysis with standardized execution patterns.
-Now modernized with BaseExecutionInterface for reliability and monitoring.
+Now modernized with standardized execution patterns for reliability and monitoring.
 
 Business Value: Critical for customer usage optimization insights.
 BVJ: Growth & Enterprise | Usage Analytics | +20% optimization value capture
@@ -25,7 +25,7 @@ class UsagePatternProcessor:
     """Modernized usage pattern processor with standardized execution.
     
     Provides usage pattern analysis with reliability patterns
-    and performance monitoring via BaseExecutionInterface.
+    and performance monitoring via standardized execution patterns.
     """
     
     def __init__(self, websocket_manager: Optional[WebSocketManagerProtocol] = None,
@@ -35,7 +35,7 @@ class UsagePatternProcessor:
         
     def _init_base_interface(self, websocket_manager: Optional[WebSocketManagerProtocol]) -> None:
         """Initialize base execution interface."""
-        BaseExecutionInterface.__init__(self, "UsagePatternProcessor", websocket_manager)
+        # Using single inheritance pattern - initialization handled directly
         
     def _init_modern_components(self, reliability_manager: Optional[ReliabilityManager]) -> None:
         """Initialize modern reliability and monitoring components."""
@@ -104,7 +104,7 @@ class UsagePatternProcessor:
         return 'days_back' in context.metadata or hasattr(context.state, 'data_result')
     
     def _format_execution_result(self, result: Dict[str, Any]) -> Dict[str, Any]:
-        """Format result for BaseExecutionInterface."""
+        """Format result for standardized execution patterns."""
         return {
             "success": True,
             "pattern_analysis": result,

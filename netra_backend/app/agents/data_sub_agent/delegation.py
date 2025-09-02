@@ -1,6 +1,6 @@
 """Modern Delegation Interface for DataSubAgent
 
-Modernized with BaseExecutionInterface patterns:
+Modernized with standardized execution patterns:
 - Standardized execution context handling
 - ReliabilityManager integration
 - ExecutionMonitor support
@@ -29,7 +29,7 @@ logger = central_logger.get_logger(__name__)
 
 
 class ModernAgentDelegation:
-    """Modern delegation interface with BaseExecutionInterface patterns.
+    """Modern delegation interface with standardized execution patterns.
     
     Enhanced delegation with:
     - Standardized execution patterns

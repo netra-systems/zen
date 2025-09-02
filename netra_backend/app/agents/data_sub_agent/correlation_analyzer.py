@@ -1,4 +1,4 @@
-"""Modern Correlation Analysis Module with BaseExecutionInterface
+"""Modern Correlation Analysis Module with Standardized Execution Patterns
 
 Business Value: Provides reliable correlation analysis for mid-tier and enterprise customers.
 Enables data-driven insights that justify AI spend optimization decisions.
@@ -12,10 +12,10 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.interface import (
-    
     ExecutionContext,
-    ExecutionResult)
-from netra_backend.app.schemas.core_enums import 
+    ExecutionResult
+)
+from netra_backend.app.schemas.core_enums import ExecutionStatus 
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.core.exceptions_base import NetraException, ValidationError
 from netra_backend.app.core.system_health_monitor import system_health_monitor

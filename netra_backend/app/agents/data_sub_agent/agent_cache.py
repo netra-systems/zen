@@ -1,7 +1,7 @@
 """Modern Cache Management for DataSubAgent.
 
-Modernized with BaseExecutionInterface pattern:
-- Standardized execution patterns
+Modernized with standardized execution patterns:
+- Reliable execution workflows
 - Integrated reliability management
 - Comprehensive error handling
 - Performance monitoring
@@ -280,7 +280,7 @@ class DataSubAgentCacheManager:
             self.agent._schema_cache_timestamps.clear()
             
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
-        """Execute cache operation core logic (BaseExecutionInterface implementation)."""
+        """Execute cache operation core logic with modern execution patterns."""
         operation = context.metadata.get('operation', 'unknown')
         table_name = context.metadata.get('table_name')
         
