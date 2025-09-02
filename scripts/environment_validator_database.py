@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Database Connection Validation Module
 Tests REAL database connections for PostgreSQL and ClickHouse.
@@ -52,13 +53,13 @@ class DatabaseValidator:
         """Parse PostgreSQL configuration using DatabaseURLBuilder."""
         # Build environment variables dict
         env_vars = {
-            "ENVIRONMENT": os.getenv("ENVIRONMENT", "development"),
-            "DATABASE_URL": os.getenv("DATABASE_URL", ""),
-            "POSTGRES_HOST": os.getenv("POSTGRES_HOST"),
-            "POSTGRES_PORT": os.getenv("POSTGRES_PORT"),
-            "POSTGRES_DB": os.getenv("POSTGRES_DB"),
-            "POSTGRES_USER": os.getenv("POSTGRES_USER"),
-            "POSTGRES_PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+            "ENVIRONMENT": get_env().get("ENVIRONMENT", "development"),
+            "DATABASE_URL": get_env().get("DATABASE_URL", ""),
+            "POSTGRES_HOST": get_env().get("POSTGRES_HOST"),
+            "POSTGRES_PORT": get_env().get("POSTGRES_PORT"),
+            "POSTGRES_DB": get_env().get("POSTGRES_DB"),
+            "POSTGRES_USER": get_env().get("POSTGRES_USER"),
+            "POSTGRES_PASSWORD": get_env().get("POSTGRES_PASSWORD"),
         }
         
         # Create builder
@@ -96,14 +97,14 @@ class DatabaseValidator:
     
     def _parse_clickhouse_config(self) -> Dict[str, Any]:
         """Parse ClickHouse configuration from environment."""
-        host = os.getenv("CLICKHOUSE_HOST", "localhost")
+        host = get_env().get("CLICKHOUSE_HOST", "localhost")
         
         return {
             "host": host,
-            "port": int(os.getenv("CLICKHOUSE_PORT", "8123")),
-            "user": os.getenv("CLICKHOUSE_USER", "default"),
-            "password": os.getenv("CLICKHOUSE_PASSWORD", ""),
-            "database": os.getenv("CLICKHOUSE_DB", "default"),
+            "port": int(get_env().get("CLICKHOUSE_PORT", "8123")),
+            "user": get_env().get("CLICKHOUSE_USER", "default"),
+            "password": get_env().get("CLICKHOUSE_PASSWORD", ""),
+            "database": get_env().get("CLICKHOUSE_DB", "default"),
             "secure": "localhost" not in host  # Use HTTPS for cloud instances
         }
     
@@ -117,7 +118,7 @@ class DatabaseValidator:
             "error": None
         }
         
-        database_url = os.getenv("DATABASE_URL", "")
+        database_url = get_env().get("DATABASE_URL", "")
         if not database_url:
             db_result["status"] = "error"
             db_result["error"] = "DATABASE_URL not configured"
@@ -134,7 +135,7 @@ class DatabaseValidator:
         try:
             # Use DatabaseURLBuilder to ensure correct URL format
             env_vars = {
-                "ENVIRONMENT": os.getenv("ENVIRONMENT", "development"),
+                "ENVIRONMENT": get_env().get("ENVIRONMENT", "development"),
                 "DATABASE_URL": database_url,
             }
             builder = DatabaseURLBuilder(env_vars)
@@ -166,7 +167,7 @@ class DatabaseValidator:
         
         # Build environment variables dict
         env_vars = {
-            "ENVIRONMENT": os.getenv("ENVIRONMENT", "development"),
+            "ENVIRONMENT": get_env().get("ENVIRONMENT", "development"),
             "POSTGRES_HOST": self.postgres_config.get('host', 'localhost'),
             "POSTGRES_PORT": str(self.postgres_config.get('port', 5432)),
             "POSTGRES_DB": self.postgres_config.get('database', 'netra_dev'),

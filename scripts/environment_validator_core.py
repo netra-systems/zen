@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Environment Variable Validation Core Module
 Validates all required environment variables and configurations.
@@ -139,7 +140,7 @@ class EnvironmentValidatorCore:
     
     def _validate_single_variable(self, var_name: str, config: Dict[str, Any]) -> Dict[str, Any]:
         """Validate single environment variable."""
-        value = os.getenv(var_name)
+        value = get_env().get(var_name)
         
         return {
             "exists": value is not None,
@@ -175,7 +176,7 @@ class EnvironmentValidatorCore:
     
     def _check_security_key_strength(self, var_name: str, results: Dict[str, Any]) -> None:
         """Check security key strength and add recommendations."""
-        value = os.getenv(var_name, "")
+        value = get_env().get(var_name, "")
         
         if len(value) < 32:
             results["recommendations"].append(f"{var_name} should be at least 32 characters")
