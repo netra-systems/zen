@@ -219,13 +219,56 @@ class ServiceDependencyManager:
         }
         
     async def _start_docker_services_if_needed(self):
-        """Start Docker services for databases/cache if local services not available."""
-        logger.info("Checking if Docker services need to be started...")
+        """Start Docker services for databases/cache using SSOT UnifiedDockerManager."""
+        logger.info("Checking if Docker services need to be started via UnifiedDockerManager...")
         
         # Skip Docker operations if Docker is not available
         if not self.docker_available:
             logger.warning("Docker is not available - skipping Docker service startup")
             return
+        
+        try:
+            # Import SSOT Docker management
+            from test_framework.unified_docker_manager import UnifiedDockerManager
+            
+            # Use UnifiedDockerManager for all Docker operations
+            docker_manager = UnifiedDockerManager()
+            
+            # Check which services need to be started
+            services_to_start = []
+            
+            # Check PostgreSQL
+            postgres_available = await self._check_service_health("postgres", self.required_services["postgres"])
+            if not postgres_available.healthy:
+                services_to_start.append("postgres")
+                logger.info("PostgreSQL needs to be started")
+                
+            # Check Redis
+            redis_available = await self._check_service_health("redis", self.required_services["redis"])
+            if not redis_available.healthy:
+                services_to_start.append("redis")
+                logger.info("Redis needs to be started")
+            
+            # Start needed services using SSOT manager
+            if services_to_start:
+                logger.info(f"Starting Docker services via UnifiedDockerManager: {services_to_start}")
+                success = await docker_manager.start_services_smart(services_to_start, wait_healthy=True)
+                
+                if success:
+                    logger.info(f"Successfully started Docker services: {services_to_start}")
+                else:
+                    logger.warning(f"Failed to start some Docker services: {services_to_start}")
+            else:
+                logger.info("All required Docker services are already healthy")
+                
+        except Exception as e:
+            logger.error(f"Error using UnifiedDockerManager for service startup: {e}")
+            # Fallback to legacy docker manager
+            await self._start_docker_services_if_needed_legacy()
+    
+    async def _start_docker_services_if_needed_legacy(self):
+        """Legacy Docker service startup - fallback only."""
+        logger.info("Using legacy Docker service startup as fallback...")
         
         # Check PostgreSQL
         postgres_available = await self._check_service_health("postgres", self.required_services["postgres"])

@@ -26,13 +26,23 @@ class TestDockerConfigurationIntegration(unittest.TestCase):
     
     @classmethod
     def cleanup_container(cls):
-        """Remove test container if it exists."""
+        """Remove test container if it exists using safe removal method."""
         try:
+            # Stop gracefully first
             subprocess.run(
-                ["docker", "rm", "-f", cls.container_name],
+                ["docker", "stop", "-t", "10", cls.container_name],
                 capture_output=True,
                 text=True,
-                check=False
+                check=False,
+                timeout=15
+            )
+            # Then remove without force
+            subprocess.run(
+                ["docker", "rm", cls.container_name],
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=10
             )
         except Exception:
             pass

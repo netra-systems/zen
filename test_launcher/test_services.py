@@ -67,7 +67,34 @@ class TestServiceManager:
             return False
     
     async def _start_docker_service(self, service_name: str, config: ServiceConfig) -> bool:
-        """Start a Docker-based service."""
+        """Start a Docker-based service using SSOT UnifiedDockerManager."""
+        try:
+            logger.info(f"Starting Docker service {service_name} via UnifiedDockerManager")
+            
+            # Import SSOT Docker management
+            from test_framework.unified_docker_manager import UnifiedDockerManager
+            
+            # Use UnifiedDockerManager to start service
+            docker_manager = UnifiedDockerManager()
+            
+            # Start the service using SSOT manager
+            success = await docker_manager.start_services_smart([service_name], wait_healthy=True)
+            
+            if success:
+                logger.info(f"Successfully started {service_name} via UnifiedDockerManager")
+                self.running_services.add(service_name)
+                return True
+            else:
+                logger.error(f"Failed to start {service_name} via UnifiedDockerManager")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Error starting Docker service {service_name}: {e}")
+            # Fallback to legacy Docker commands for compatibility
+            return await self._start_docker_service_legacy(service_name, config)
+    
+    async def _start_docker_service_legacy(self, service_name: str, config: ServiceConfig) -> bool:
+        """Legacy Docker service startup - fallback only."""
         try:
             # Check if Docker is available
             result = subprocess.run(
