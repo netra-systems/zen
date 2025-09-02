@@ -1,6 +1,6 @@
-"""Modernized TriageSubAgent with BaseExecutionInterface (<300 lines).
+"""Modernized TriageSubAgent with standardized execution patterns (<300 lines).
 
-Modern implementation extending BaseExecutionInterface with:
+Modern implementation using standardized execution patterns with:
 - Standardized execution patterns  
 - Integrated reliability management
 - Comprehensive error handling
@@ -22,7 +22,7 @@ from netra_backend.app.agents.utils import extract_thread_id
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 
-# Modern Base Components (BaseExecutionInterface removed for architecture simplification)
+# Modern Base Components (using standardized execution patterns)
 from netra_backend.app.agents.base.interface import (
     ExecutionContext,
     ExecutionResult,
@@ -76,7 +76,7 @@ class TriageSubAgent(BaseSubAgent):
                          tool_dispatcher: ToolDispatcher, redis_manager: Optional[RedisManager]) -> None:
         """Initialize base agent components."""
         super().__init__(llm_manager, name="TriageSubAgent", description="Enhanced triage agent with modern execution.")
-        # BaseExecutionInterface.__init__ removed - using single inheritance pattern
+        # Using single inheritance with standardized execution patterns
         # WebSocketContextMixin removed - using BaseSubAgent's bridge
         self._setup_core_properties(tool_dispatcher, redis_manager)
         
@@ -132,7 +132,7 @@ class TriageSubAgent(BaseSubAgent):
         self.processor = TriageProcessor(self.triage_core, llm_manager)
         self.websocket_handler = WebSocketHandler(self._send_update)
 
-    # BaseExecutionInterface implementation
+    # Standardized execution patterns implementation
     async def validate_preconditions(self, context: ExecutionContext) -> bool:
         """Validate execution preconditions for triage."""
         if not context.state.user_request:

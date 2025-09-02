@@ -1,5 +1,5 @@
 """
-Modernized Corpus Admin Agent with BaseExecutionInterface pattern (<300 lines).
+Modernized Corpus Admin Agent with standardized execution patterns (<300 lines).
 
 Business Value: Standardized execution patterns for corpus administration,
 improved reliability, and comprehensive monitoring.
@@ -57,7 +57,7 @@ class CorpusAdminSubAgent(BaseSubAgent):
         """Initialize base agent components."""
         BaseSubAgent.__init__(self, llm_manager, name="CorpusAdminSubAgent",
                             description="Agent specialized in corpus management and administration")
-        # Store agent name for BaseExecutionInterface compatibility
+        # Store agent name for standardized execution patterns
         self.agent_name = "CorpusAdminSubAgent"
         self.websocket_manager = websocket_manager
     
@@ -110,7 +110,7 @@ class CorpusAdminSubAgent(BaseSubAgent):
         return result
     
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
-        """Modernized execute using BaseExecutionEngine for backward compatibility."""
+        """Modernized execute using modern execution engine for backward compatibility."""
         log_agent_communication("Supervisor", "CorpusAdminSubAgent", run_id, "execute_request")
         context = self._create_execution_context(state, run_id, stream_updates)
         
@@ -258,17 +258,17 @@ class CorpusAdminSubAgent(BaseSubAgent):
     
     async def _send_initial_update(self, run_id: str, stream_updates: bool) -> None:
         """Send initial status update via WebSocket."""
-        # Implementation moved to BaseExecutionInterface
+        # Implementation uses standardized execution patterns
         pass
     
     async def _send_processing_update(self, operation_request, run_id: str, stream_updates: bool) -> None:
         """Send processing status update via WebSocket."""
-        # Implementation moved to BaseExecutionInterface
+        # Implementation uses standardized execution patterns
         pass
     
     async def _send_completion_update(self, result, run_id: str, stream_updates: bool, start_time: float) -> None:
         """Send completion status update via WebSocket."""
-        # Implementation moved to BaseExecutionInterface
+        # Implementation uses standardized execution patterns
         pass
     
     def _log_completion(self, result, run_id: str) -> None:

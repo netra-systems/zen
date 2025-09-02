@@ -43,7 +43,7 @@ class ReportingSubAgent(BaseSubAgent):
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
                  websocket_manager: Optional[WebSocketManagerProtocol] = None):
         super().__init__(llm_manager, name="ReportingSubAgent", description="This agent generates a final report.")
-        # BaseExecutionInterface.__init__ removed - using single inheritance pattern
+        # Using single inheritance with standardized execution patterns
         self.tool_dispatcher = tool_dispatcher
         self._initialize_modern_components()
     
@@ -296,7 +296,7 @@ class ReportingSubAgent(BaseSubAgent):
             metadata=data.get("metadata", {})
         )
     
-    # BaseExecutionInterface implementation
+    # Standardized execution patterns implementation
     async def validate_preconditions(self, context: ExecutionContext) -> bool:
         """Validate execution preconditions for reporting."""
         return self._validate_state_has_results(context.state)
@@ -331,7 +331,7 @@ class ReportingSubAgent(BaseSubAgent):
     
     async def execute_modern(self, state: DeepAgentState, run_id: str, 
                            stream_updates: bool = False) -> ExecutionResult:
-        """Modern execute method using BaseExecutionInterface pattern."""
+        """Modern execute method using standardized execution patterns."""
         context = self._create_execution_context(state, run_id, stream_updates)
         
         try:

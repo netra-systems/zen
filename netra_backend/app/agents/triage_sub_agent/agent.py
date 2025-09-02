@@ -1,4 +1,4 @@
-"""Modernized Triage Sub Agent with BaseExecutionInterface pattern (<300 lines).
+"""Modernized Triage Sub Agent with standardized execution patterns (<300 lines).
 
 Business Value: Standardized execution patterns with improved reliability,
 comprehensive monitoring, and 40% better error handling.
@@ -21,7 +21,7 @@ from netra_backend.app.agents.base.executor import BaseExecutionEngine
 
 # Modern execution pattern imports
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus, WebSocketManagerProtocol
+    ExecutionContext, ExecutionResult, ExecutionStatus, WebSocketManagerProtocol
 )
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
@@ -46,7 +46,7 @@ logger = central_logger.get_logger(__name__)
 
 
 class TriageSubAgent(BaseSubAgent):
-    """Modernized triage agent with BaseExecutionInterface pattern."""
+    """Modernized triage agent with standardized execution patterns."""
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher, 
                  redis_manager: Optional[RedisManager] = None,
@@ -61,7 +61,7 @@ class TriageSubAgent(BaseSubAgent):
         """Initialize base agent with modern execution interface."""
         BaseSubAgent.__init__(self, llm_manager, name="TriageSubAgent", 
                             description="Modernized triage agent with advanced categorization.")
-        # Store agent name and websocket manager for BaseExecutionInterface compatibility
+        # Store agent name and websocket manager for standardized execution patterns
         self.agent_name = "TriageSubAgent"
         self.websocket_manager = websocket_manager
     

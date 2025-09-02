@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Optional, TypedDict
 
 from netra_backend.app.agents.base_agent import BaseSubAgent
 # WebSocketContextMixin removed - BaseSubAgent now handles WebSocket via bridge
-# BaseExecutionInterface removed - using single inheritance pattern
+# Using single inheritance with standardized execution patterns
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.core.type_validators import agent_type_safe
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -88,7 +88,7 @@ class ValidationSubAgent(BaseSubAgent):
         super().__init__(llm_manager, name="ValidationSubAgent", 
                         description="Comprehensive validation with real-time feedback")
         # WebSocketContextMixin removed - using BaseSubAgent's bridge
-        # BaseExecutionInterface removed - single inheritance pattern
+        # Using single inheritance with standardized execution patterns
         
         # Initialize core components
         self.tool_dispatcher = tool_dispatcher
