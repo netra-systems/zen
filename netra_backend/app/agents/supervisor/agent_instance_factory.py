@@ -29,6 +29,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.agent_class_registry import AgentClassRegistry, get_agent_class_registry
+from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.logging_config import central_logger
@@ -36,150 +38,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-@dataclass
-class UserExecutionContext:
-    """
-    Per-request execution context with complete user isolation.
-    
-    This context contains all user-specific state and ensures no data leakage
-    between concurrent users. Each request gets its own isolated context.
-    
-    Business Value: Enables safe concurrent user operations, prevents data leakage
-    """
-    user_id: str
-    thread_id: str
-    run_id: str
-    session_id: Optional[str] = None
-    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    
-    # Request-scoped database session (NEVER global!)
-    db_session: Optional[AsyncSession] = None
-    
-    # User-specific execution state (completely isolated)
-    active_runs: Dict[str, Any] = field(default_factory=dict)
-    run_history: List[Dict[str, Any]] = field(default_factory=list)
-    execution_metrics: Dict[str, Any] = field(default_factory=dict)
-    
-    # User-specific WebSocket state
-    websocket_emitter: Optional['UserWebSocketEmitter'] = None
-    
-    # Resource management for cleanup
-    cleanup_callbacks: List[Callable[[], Awaitable[None]]] = field(default_factory=list)
-    _is_cleaned: bool = False
-    
-    # Request metadata
-    request_metadata: Dict[str, Any] = field(default_factory=dict)
-    
-    def __post_init__(self):
-        """Initialize context after creation."""
-        # Initialize execution metrics with user-specific data
-        self.execution_metrics = {
-            'user_id': self.user_id,
-            'thread_id': self.thread_id,
-            'run_id': self.run_id,
-            'created_at': self.created_at.isoformat(),
-            'active_agent_count': 0,
-            'completed_agent_count': 0,
-            'total_execution_time_ms': 0.0
-        }
-        
-        # Initialize request metadata
-        self.request_metadata = {
-            'context_id': f"{self.user_id}_{self.thread_id}_{uuid.uuid4().hex[:8]}",
-            'isolation_level': 'complete',
-            'resource_scope': 'request'
-        }
-    
-    async def cleanup(self) -> None:
-        """
-        Clean up user-specific resources with comprehensive error handling.
-        
-        This method ensures all user resources are properly cleaned up
-        to prevent memory leaks and resource exhaustion.
-        """
-        if self._is_cleaned:
-            logger.debug(f"Context already cleaned for user {self.user_id}")
-            return
-        
-        logger.info(f"Starting cleanup for user execution context: {self.user_id}")
-        cleanup_errors = []
-        
-        # Execute all cleanup callbacks with error resilience
-        for i, callback in enumerate(self.cleanup_callbacks):
-            try:
-                logger.debug(f"Executing cleanup callback {i+1}/{len(self.cleanup_callbacks)} for user {self.user_id}")
-                await callback()
-            except Exception as e:
-                error_msg = f"Cleanup callback {i+1} failed for user {self.user_id}: {e}"
-                logger.error(error_msg)
-                cleanup_errors.append(error_msg)
-        
-        # Close database session if present
-        if self.db_session:
-            try:
-                logger.debug(f"Closing database session for user {self.user_id}")
-                await self.db_session.close()
-                self.db_session = None
-            except Exception as e:
-                error_msg = f"Failed to close database session for user {self.user_id}: {e}"
-                logger.error(error_msg)
-                cleanup_errors.append(error_msg)
-        
-        # Clean up WebSocket emitter
-        if self.websocket_emitter:
-            try:
-                logger.debug(f"Cleaning up WebSocket emitter for user {self.user_id}")
-                await self.websocket_emitter.cleanup()
-                self.websocket_emitter = None
-            except Exception as e:
-                error_msg = f"Failed to cleanup WebSocket emitter for user {self.user_id}: {e}"
-                logger.error(error_msg)
-                cleanup_errors.append(error_msg)
-        
-        # Clear user-specific state collections
-        try:
-            self.active_runs.clear()
-            self.run_history.clear()
-            self.cleanup_callbacks.clear()
-        except Exception as e:
-            error_msg = f"Failed to clear state collections for user {self.user_id}: {e}"
-            logger.error(error_msg)
-            cleanup_errors.append(error_msg)
-        
-        self._is_cleaned = True
-        
-        if cleanup_errors:
-            logger.warning(f"Context cleanup completed with {len(cleanup_errors)} errors for user {self.user_id}")
-            for error in cleanup_errors:
-                logger.warning(f"  - {error}")
-        else:
-            logger.info(f"Context cleanup completed successfully for user {self.user_id}")
-    
-    def add_cleanup_callback(self, callback: Callable[[], Awaitable[None]]) -> None:
-        """Add a cleanup callback for resource management."""
-        if not self._is_cleaned:
-            self.cleanup_callbacks.append(callback)
-        else:
-            logger.warning(f"Cannot add cleanup callback - context already cleaned for user {self.user_id}")
-    
-    def get_context_summary(self) -> Dict[str, Any]:
-        """Get summary of context state for debugging."""
-        return {
-            'user_id': self.user_id,
-            'thread_id': self.thread_id,
-            'run_id': self.run_id,
-            'created_at': self.created_at.isoformat(),
-            'session_id': self.session_id,
-            'active_runs_count': len(self.active_runs),
-            'run_history_count': len(self.run_history),
-            'has_db_session': self.db_session is not None,
-            'has_websocket_emitter': self.websocket_emitter is not None,
-            'cleanup_callbacks_count': len(self.cleanup_callbacks),
-            'is_cleaned': self._is_cleaned,
-            'context_id': self.request_metadata.get('context_id'),
-            'isolation_level': self.request_metadata.get('isolation_level'),
-            'execution_metrics': self.execution_metrics.copy()
-        }
+# UserExecutionContext is now imported from user_execution_context.py
 
 
 class UserWebSocketEmitter:
@@ -387,7 +246,7 @@ class AgentInstanceFactory:
     
     This factory ensures that each user request gets completely isolated agent instances:
     - Fresh agent instances with no shared state
-    - User-specific WebSocket emitters
+    - User-specific WebSocket emitters bound to specific UserExecutionContext
     - Request-scoped database sessions
     - Complete resource isolation and cleanup
     
@@ -396,11 +255,15 @@ class AgentInstanceFactory:
     
     Business Value: Enables safe concurrent user operations, prevents data leakage,
     and provides the foundation for multi-user production deployment.
+    
+    The factory uses both the infrastructure-only AgentClassRegistry for agent
+    classes and AgentRegistry for backward compatibility during the transition.
     """
     
     def __init__(self):
         """Initialize the factory with infrastructure components."""
         # Infrastructure components (shared, immutable)
+        self._agent_class_registry: Optional[AgentClassRegistry] = None
         self._agent_registry: Optional[AgentRegistry] = None
         self._websocket_bridge: Optional[AgentWebSocketBridge] = None
         self._websocket_manager: Optional[WebSocketManager] = None
@@ -431,23 +294,37 @@ class AgentInstanceFactory:
         logger.info("AgentInstanceFactory initialized")
     
     def configure(self, 
-                 agent_registry: AgentRegistry,
-                 websocket_bridge: AgentWebSocketBridge,
+                 agent_class_registry: Optional[AgentClassRegistry] = None,
+                 agent_registry: Optional[AgentRegistry] = None,
+                 websocket_bridge: Optional[AgentWebSocketBridge] = None,
                  websocket_manager: Optional[WebSocketManager] = None) -> None:
         """
         Configure factory with infrastructure components.
         
         Args:
-            agent_registry: Registry containing agent classes and configurations
+            agent_class_registry: Registry containing agent classes (preferred)
+            agent_registry: Legacy agent registry (for backward compatibility)
             websocket_bridge: WebSocket bridge for agent notifications
             websocket_manager: Optional WebSocket manager for direct access
         """
-        if not agent_registry:
-            raise ValueError("AgentRegistry cannot be None")
         if not websocket_bridge:
             raise ValueError("AgentWebSocketBridge cannot be None")
         
-        self._agent_registry = agent_registry
+        # Prefer AgentClassRegistry but fallback to AgentRegistry for compatibility
+        if agent_class_registry:
+            self._agent_class_registry = agent_class_registry
+            logger.info("✅ AgentInstanceFactory configured with AgentClassRegistry")
+        elif agent_registry:
+            self._agent_registry = agent_registry
+            logger.info("✅ AgentInstanceFactory configured with legacy AgentRegistry")
+        else:
+            # Try to get global agent class registry
+            try:
+                self._agent_class_registry = get_agent_class_registry()
+                logger.info("✅ AgentInstanceFactory configured with global AgentClassRegistry")
+            except Exception as e:
+                raise ValueError("Either agent_class_registry or agent_registry must be provided")
+        
         self._websocket_bridge = websocket_bridge
         self._websocket_manager = websocket_manager
         
