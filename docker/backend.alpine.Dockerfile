@@ -32,6 +32,7 @@ RUN apk add --no-cache \
     libpq \
     curl \
     tini \
+    lz4-libs \
     && rm -rf /var/cache/apk/*
 
 # Create non-root user
