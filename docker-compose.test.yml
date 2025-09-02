@@ -298,16 +298,6 @@ services:
       - default
     restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
 
-  # Test SMTP Server - For email testing
-  test-mailhog:
-    image: mailhog/mailhog:latest
-    ports:
-      - "${TEST_SMTP_PORT:-1026}:1025"
-      - "${TEST_SMTP_WEB_PORT:-8026}:8025"
-    networks:
-      - default
-    restart: no  # Changed from unless-stopped to prevent unwanted auto-restarts
-
   # ============================================
   # TEST UTILITIES
   # ============================================

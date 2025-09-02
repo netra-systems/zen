@@ -73,7 +73,6 @@ class DockerServicesAuditor:
         # Services that should not exist in normal development
         self.unexpected_services = {
             'test-rabbitmq': ServiceCheck('test-rabbitmq', 'netra-test-rabbitmq', 5673, service_type='queue'),
-            'test-mailhog': ServiceCheck('test-mailhog', 'netra-test-mailhog', 1026, service_type='mail'),
             'test-seeder': ServiceCheck('test-seeder', 'netra-test-seeder', 0, service_type='utility'),
             'test-monitor': ServiceCheck('test-monitor', 'netra-test-monitor', 9090, service_type='utility'),
         }
