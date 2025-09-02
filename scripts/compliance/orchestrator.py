@@ -16,6 +16,7 @@ from scripts.compliance.core import (
 from scripts.compliance.file_checker import FileChecker, count_total_files
 from scripts.compliance.function_checker import FunctionChecker
 from scripts.compliance.mock_justification_checker import MockJustificationChecker
+from scripts.compliance.mro_auditor import MROAuditor
 from scripts.compliance.reporter import ComplianceReporter
 from scripts.compliance.ssot_checker import SSOTChecker
 from scripts.compliance.stub_checker import StubChecker
@@ -41,6 +42,7 @@ class ArchitectureEnforcer:
         self.ssot_checker = SSOTChecker(self.config)
         self.test_limits_checker = TestLimitsChecker(self.config) if check_test_limits else None
         self.mock_justification_checker = MockJustificationChecker(self.config)
+        self.mro_auditor = MROAuditor(self.config.root_path)
         self.reporter = ComplianceReporter(max_file_lines, max_function_lines,
                                           violation_limit, smart_limits, use_emoji)
     
@@ -67,7 +69,26 @@ class ArchitectureEnforcer:
         if self.test_limits_checker:
             violations.extend(self.test_limits_checker.check_test_limits())
         violations.extend(self.mock_justification_checker.check_mock_justifications())
+        violations.extend(self._check_mro_complexity())
         return violations
+    
+    def _check_mro_complexity(self) -> List[Violation]:
+        """Check MRO complexity for all Python files in target folders"""
+        mro_violations = []
+        from pathlib import Path
+        
+        # Focus on agent modules where inheritance is complex
+        agent_paths = [
+            self.config.root_path / "netra_backend" / "app" / "agents",
+            self.config.root_path / "auth_service" / "app" / "agents"
+        ]
+        
+        for agent_path in agent_paths:
+            if agent_path.exists():
+                audit_result = self.mro_auditor.audit_module(agent_path)
+                mro_violations.extend(audit_result.get("violations", []))
+        
+        return mro_violations
     
     def _group_violations_by_type(self, violations: List[Violation]) -> Dict[str, int]:
         """Group violations by type for summary"""
