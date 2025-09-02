@@ -22,6 +22,7 @@
 | **Review changes** | [`DEFINITION_OF_DONE_CHECKLIST.md`](DEFINITION_OF_DONE_CHECKLIST.md) | Module-specific checklists |
 | **Fix a bug** | [`SPEC/learnings/index.xml`](SPEC/learnings/index.xml) | Check learnings first |
 | **Add new feature** | [`SPEC/core.xml`](SPEC/core.xml) | Architecture patterns |
+| **Agent implementation** | [`docs/GOLDEN_AGENT_INDEX.md`](docs/GOLDEN_AGENT_INDEX.md) | **Complete agent patterns & migration** |
 | **Fix tests** | [`docs/testing/TESTING_GUIDE.md`](docs/testing/TESTING_GUIDE.md) | Test framework guide |
 | **Deploy changes** | [`scripts/deploy_to_gcp.py`](scripts/deploy_to_gcp.py) | Official deploy script |
 | **Check compliance** | [`scripts/check_architecture_compliance.py`](scripts/check_architecture_compliance.py) | Architecture validator |

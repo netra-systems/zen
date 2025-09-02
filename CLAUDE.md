@@ -181,6 +181,8 @@ At every opportunity spawn new subagent with dedicated focus mission and context
 
 **CRITICAL: For any refactoring involving inheritance, multiple classes, or SSOT consolidation:**
 
+**See Also:** [`docs/GOLDEN_AGENT_INDEX.md`](docs/GOLDEN_AGENT_INDEX.md) for comprehensive agent implementation patterns and migration guidance.
+
 1.  **MRO (Method Resolution Order) Analysis:** Generate a comprehensive MRO report BEFORE refactoring:
     - Document current inheritance hierarchy using `inspect.getmro()` or equivalent
     - Map all method overrides and their resolution paths
@@ -323,6 +325,9 @@ The following events MUST be sent during agent execution to enable meaningful AI
 - `ExecutionEngine` MUST have WebSocketNotifier initialized
 - `EnhancedToolExecutionEngine` MUST wrap tool execution
 - See [`SPEC/learnings/websocket_agent_integration_critical.xml`](SPEC/learnings/websocket_agent_integration_critical.xml)
+
+**For Complete Agent Implementation Patterns:**
+- See [`docs/GOLDEN_AGENT_INDEX.md`](docs/GOLDEN_AGENT_INDEX.md) - The definitive guide to agent implementation
 
 -----
 
