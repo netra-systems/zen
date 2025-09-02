@@ -1,4 +1,3 @@
-from shared.isolated_environment import get_env
 """
 CRITICAL E2E Unified Signup → Login → Chat Flow Test
 
@@ -32,9 +31,12 @@ import os
 import time
 from contextlib import asynccontextmanager
 from typing import Any, Dict, Optional
+from unittest.mock import MagicMock
 
 import httpx
 import pytest
+
+from shared.isolated_environment import get_env
 
 # Set test environment for controlled execution
 env = get_env()
@@ -54,6 +56,7 @@ from tests.e2e.helpers.core.unified_flow_helpers import (
 
 from tests.e2e.database_test_connections import DatabaseConnectionManager
 from tests.e2e.harness_utils import UnifiedTestHarnessComplete
+from tests.e2e.integration.unified_e2e_harness import UnifiedE2ETestHarness
 
 
 class TestRealUnifiedFlower:
@@ -125,6 +128,10 @@ class TestRealUnifiedFlower:
             "chat": chat,
             "user_email": self.test_user_data["email"]
         }
+
+
+# Alias for backward compatibility
+RealUnifiedFlowTester = TestRealUnifiedFlower
 
 
 @pytest.mark.asyncio

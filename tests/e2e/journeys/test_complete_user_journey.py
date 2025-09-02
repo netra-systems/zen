@@ -1,7 +1,5 @@
-from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
-env = get_env()
 Complete User Journey Integration Tests for DEV MODE
 
 BVJ (Business Value Justification):
@@ -28,9 +26,11 @@ from typing import Any, Dict, List
 
 import pytest
 
+from shared.isolated_environment import get_env
 from test_framework.service_dependencies import requires_services
 
 # Test environment setup
+env = get_env()
 env.set("TESTING", "1", "test")
 env.set("CORS_ORIGINS", "*", "test")
 env.set("ENVIRONMENT", "development", "test")
