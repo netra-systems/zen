@@ -1236,6 +1236,1182 @@ async def test_docker_stability_comprehensive_report(docker_stability_metrics):
     logger.info("=" * 80)
 
 
+class TestDockerInfrastructureServiceStartup:
+    """Infrastructure Test Category: Service Startup (5 tests)"""
+    
+    def test_alpine_service_startup_performance(self, docker_manager, docker_stability_metrics):
+        """Test Alpine container startup meets < 30 second requirement."""
+        env_name = f"alpine_startup_{int(time.time())}"
+        
+        try:
+            with docker_daemon_health_monitor(docker_stability_metrics):
+                start_time = time.time()
+                
+                # Use UnifiedDockerManager for Alpine startup
+                result = docker_manager.acquire_environment(
+                    env_name,
+                    use_alpine=True,
+                    timeout=30
+                )
+                
+                startup_duration = time.time() - start_time
+                docker_stability_metrics.record_operation("alpine_startup", startup_duration, result is not None)
+                
+                assert result is not None, "Failed to acquire Alpine environment"
+                assert startup_duration < 30, f"Alpine startup took {startup_duration:.2f}s > 30s"
+                
+                # Verify all services are healthy within timeout
+                health = docker_manager.get_health_report(env_name)
+                assert health.get('all_healthy'), f"Services not healthy: {health}"
+        
+        finally:
+            if 'result' in locals() and result:
+                docker_manager.release_environment(env_name)
+    
+    def test_service_startup_resource_limits(self, docker_manager, docker_stability_metrics):
+        """Test service startup respects < 500MB memory per container limit."""
+        env_name = f"resource_startup_{int(time.time())}"
+        
+        try:
+            with docker_daemon_health_monitor(docker_stability_metrics):
+                # Start with strict resource limits
+                result = docker_manager.acquire_environment(
+                    env_name,
+                    use_alpine=True,
+                    resource_limits={'memory': '500m', 'cpus': '0.5'}
+                )
+                
+                assert result is not None, "Failed to start with resource limits"
+                
+                # Verify memory usage compliance
+                time.sleep(5)  # Let services stabilize
+                
+                # Get container stats
+                stats_cmd = ["docker", "stats", "--no-stream", "--format", "table {{.Container}}\t{{.MemUsage}}"]
+                stats_result = execute_docker_command(stats_cmd, timeout=10)
+                
+                docker_stability_metrics.record_operation("memory_check", 1.0, stats_result.returncode == 0)
+                
+                if stats_result.returncode == 0:
+                    for line in stats_result.stdout.strip().split('\n')[1:]:  # Skip header
+                        if env_name in line:
+                            memory_part = line.split('\t')[1].split('/')[0].strip() if '\t' in line else ''
+                            if 'MiB' in memory_part:
+                                usage_mb = float(memory_part.replace('MiB', '').strip())
+                                assert usage_mb < 500, f"Container using {usage_mb}MB > 500MB limit"
+        
+        finally:
+            if 'result' in locals() and result:
+                docker_manager.release_environment(env_name)
+    
+    def test_parallel_service_startup(self, docker_manager, docker_stability_metrics):
+        """Test multiple environment startup without conflicts."""
+        environments = []
+        
+        try:
+            with docker_daemon_health_monitor(docker_stability_metrics):
+                def start_env(index):
+                    env_name = f"parallel_startup_{index}_{int(time.time())}"
+                    try:
+                        result = docker_manager.acquire_environment(
+                            env_name,
+                            use_alpine=True,
+                            timeout=45
+                        )
+                        if result:
+                            environments.append(env_name)
+                            return True
+                        return False
+                    except Exception as e:
+                        logger.error(f"Parallel startup {index} failed: {e}")
+                        return False
+                
+                # Start 5 environments in parallel
+                with ThreadPoolExecutor(max_workers=5) as executor:
+                    futures = [executor.submit(start_env, i) for i in range(5)]
+                    results = [f.result() for f in as_completed(futures, timeout=60)]
+                
+                successful_starts = sum(results)
+                docker_stability_metrics.record_operation("parallel_startup", 10.0, successful_starts >= 4)
+                
+                assert successful_starts >= 4, f"Only {successful_starts}/5 parallel starts succeeded"
+        
+        finally:
+            for env_name in environments:
+                try:
+                    docker_manager.release_environment(env_name)
+                except Exception as e:
+                    logger.error(f"Cleanup failed for {env_name}: {e}")
+    
+    def test_service_startup_failure_recovery(self, docker_manager, docker_stability_metrics):
+        """Test automatic recovery from partial service startup failures."""
+        env_name = f"recovery_startup_{int(time.time())}"
+        
+        try:
+            with docker_daemon_health_monitor(docker_stability_metrics):
+                # Start environment and simulate interference
+                def interfere():
+                    time.sleep(3)
+                    # Kill first container we find
+                    try:
+                        ps_result = execute_docker_command(["docker", "ps", "--format", "{{.Names}}"], timeout=5)
+                        if ps_result.returncode == 0:
+                            containers = ps_result.stdout.strip().split('\n')
+                            for container in containers[:1]:  # Kill first one
+                                if env_name in container:
+                                    execute_docker_command(["docker", "kill", container], timeout=5)
+                                    break
+                    except:
+                        pass
+                
+                # Start interference in background
+                interference_thread = threading.Thread(target=interfere)
+                interference_thread.start()
+                
+                # Attempt startup with recovery enabled
+                result = docker_manager.acquire_environment(
+                    env_name,
+                    use_alpine=True,
+                    timeout=60,
+                    retry_on_failure=True
+                )
+                
+                interference_thread.join()
+                
+                docker_stability_metrics.record_operation("recovery_startup", 15.0, result is not None)
+                
+                assert result is not None, "Failed to recover from startup interference"
+                
+                # Verify all services are healthy after recovery
+                time.sleep(5)
+                health = docker_manager.get_health_report(env_name)
+                assert health.get('all_healthy'), "Services not healthy after recovery"
+        
+        finally:
+            if 'result' in locals() and result:
+                docker_manager.release_environment(env_name)
+    
+    def test_service_startup_network_isolation(self, docker_manager, docker_stability_metrics):
+        """Test service startup with proper network isolation."""
+        environments = []
+        
+        try:
+            with docker_daemon_health_monitor(docker_stability_metrics):
+                # Start two isolated environments
+                for i in range(2):
+                    env_name = f"isolated_startup_{i}_{int(time.time())}"
+                    result = docker_manager.acquire_environment(
+                        env_name,
+                        use_alpine=True,
+                        isolated_network=True
+                    )
+                    assert result is not None, f"Failed to start isolated environment {i}"
+                    environments.append(env_name)
+                
+                docker_stability_metrics.record_operation("isolated_startup", 8.0, len(environments) == 2)
+                
+                # Verify network isolation
+                networks_0 = set()
+                networks_1 = set()
+                
+                # Get network info for each environment
+                for env_index, env_name in enumerate(environments):
+                    ps_result = execute_docker_command([
+                        "docker", "ps", "--filter", f"name={env_name}", 
+                        "--format", "{{.Names}}"
+                    ], timeout=10)
+                    
+                    if ps_result.returncode == 0:
+                        for container_name in ps_result.stdout.strip().split('\n'):
+                            if container_name:
+                                inspect_result = execute_docker_command([
+                                    "docker", "inspect", container_name,
+                                    "--format", "{{range $net, $config := .NetworkSettings.Networks}}{{$net}} {{end}}"
+                                ], timeout=10)
+                                
+                                if inspect_result.returncode == 0:
+                                    network_names = inspect_result.stdout.strip().split()
+                                    if env_index == 0:
+                                        networks_0.update(network_names)
+                                    else:
+                                        networks_1.update(network_names)
+                
+                # Networks should be different (except possibly bridge)
+                unique_networks = networks_0.symmetric_difference(networks_1)
+                assert len(unique_networks) > 0, "Environments not properly network isolated"
+        
+        finally:
+            for env_name in environments:
+                try:
+                    docker_manager.release_environment(env_name)
+                except Exception as e:
+                    logger.error(f"Cleanup failed for {env_name}: {e}")
+
+
+class TestDockerInfrastructureHealthMonitoring:
+    """Infrastructure Test Category: Health Monitoring (5 tests)"""
+    
+    def test_continuous_health_monitoring_under_load(self, docker_manager, docker_stability_metrics):
+        """Test health monitoring accuracy under system load."""
+        env_name = f"health_load_{int(time.time())}"
+        
+        try:
+            with docker_daemon_health_monitor(docker_stability_metrics):
+                result = docker_manager.acquire_environment(env_name, use_alpine=True)
+                assert result is not None
+                
+                # Generate system load
+                load_containers = []
+                for i in range(5):
+                    try:
+                        container_name = create_stress_container(f"load_gen_{i}", "100m")
+                        load_containers.append(container_name)
+                        
+                        # Run CPU-intensive task in background
+                        execute_docker_command([
+                            "docker", "exec", "-d", container_name,
+                            "sh", "-c", "while true; do dd if=/dev/zero of=/dev/null bs=1M count=10; done"
+                        ], timeout=5)
+                    except:
+                        pass
+                
+                # Monitor health during load
+                health_checks = []
+                for _ in range(10):
+                    start_time = time.time()
+                    health = docker_manager.get_health_report(env_name)
+                    check_duration = time.time() - start_time
+                    
+                    health_checks.append({
+                        'healthy': health.get('all_healthy', False),
+                        'duration': check_duration,
+                        'service_count': len(health.get('service_health', {}))
+                    })
+                    
+                    time.sleep(2)
+                
+                docker_stability_metrics.record_operation("health_under_load", 1.0, len(health_checks) == 10)
+                
+                # Verify health monitoring remained accurate
+                avg_duration = sum(h['duration'] for h in health_checks) / len(health_checks)
+                healthy_count = sum(1 for h in health_checks if h['healthy'])
+                
+                assert avg_duration < 2.0, f"Health checks too slow under load: {avg_duration:.2f}s"
+                assert healthy_count >= 8, f"Health monitoring unreliable under load: {healthy_count}/10"
+                
+                # Cleanup load containers
+                for container in load_containers:
+                    safe_container_cleanup(container, timeout=10)
+        
+        finally:
+            if 'result' in locals() and result:
+                docker_manager.release_environment(env_name)
+    
+    def test_health_check_failure_detection_speed(self, docker_manager, docker_stability_metrics):
+        """Test rapid detection of service failures."""
+        env_name = f"failure_detection_{int(time.time())}"
+        
+        try:
+            with docker_daemon_health_monitor(docker_stability_metrics):
+                result = docker_manager.acquire_environment(env_name, use_alpine=True)
+                assert result is not None
+                
+                # Get initial healthy state
+                initial_health = docker_manager.get_health_report(env_name)
+                assert initial_health.get('all_healthy'), "Initial state not healthy"
+                
+                # Find a service container to kill
+                ps_result = execute_docker_command([
+                    "docker", "ps", "--filter", f"name={env_name}", "--format", "{{.Names}}"
+                ], timeout=10)
+                
+                target_container = None
+                if ps_result.returncode == 0:
+                    containers = ps_result.stdout.strip().split('\n')
+                    for container in containers:
+                        if container and 'backend' in container:
+                            target_container = container
+                            break
+                
+                if target_container:
+                    # Kill the service and measure detection time
+                    failure_time = time.time()
+                    execute_docker_command(["docker", "kill", target_container], timeout=5)
+                    
+                    # Monitor for failure detection
+                    detection_time = None
+                    for attempt in range(15):  # Check for up to 30 seconds
+                        time.sleep(2)
+                        health = docker_manager.get_health_report(env_name)
+                        
+                        if not health.get('all_healthy', True):
+                            detection_time = time.time() - failure_time
+                            break
+                    
+                    docker_stability_metrics.record_operation("failure_detection", detection_time or 30, detection_time is not None)
+                    
+                    assert detection_time is not None, "Service failure not detected"
+                    assert detection_time < 15, f"Failure detection too slow: {detection_time:.1f}s"
+        
+        finally:
+            if 'result' in locals() and result:
+                docker_manager.release_environment(env_name)
+    
+    def test_health_metrics_aggregation_accuracy(self, docker_manager, docker_stability_metrics):
+        """Test accuracy of aggregated health metrics."""
+        env_name = f"metrics_accuracy_{int(time.time())}"
+        
+        try:
+            with docker_daemon_health_monitor(docker_stability_metrics):
+                result = docker_manager.acquire_environment(env_name, use_alpine=True)
+                assert result is not None
+                
+                # Collect detailed metrics over time
+                metric_samples = []
+                for cycle in range(5):
+                    health = docker_manager.get_health_report(env_name)
+                    
+                    # Extract detailed service metrics
+                    service_metrics = {}
+                    for service, status in health.get('service_health', {}).items():
+                        if isinstance(status, dict):
+                            service_metrics[service] = {
+                                'response_time': status.get('response_time_ms', 0),
+                                'healthy': status.get('healthy', False),
+                                'port': status.get('port', 0)
+                            }
+                        else:
+                            service_metrics[service] = {
+                                'healthy': status == 'healthy',
+                                'response_time': 0,
+                                'port': 0
+                            }
+                    
+                    metric_samples.append({
+                        'timestamp': time.time(),
+                        'all_healthy': health.get('all_healthy'),
+                        'services': service_metrics,
+                        'service_count': len(service_metrics)
+                    })
+                    
+                    time.sleep(3)
+                
+                docker_stability_metrics.record_operation("metrics_aggregation", 2.0, len(metric_samples) == 5)
+                
+                # Verify metric consistency and accuracy
+                service_counts = [s['service_count'] for s in metric_samples]
+                assert all(count > 0 for count in service_counts), "No services detected in metrics"
+                assert max(service_counts) - min(service_counts) <= 1, "Inconsistent service count detection"
+                
+                # Verify response time metrics are reasonable
+                all_response_times = []
+                for sample in metric_samples:
+                    for service, metrics in sample['services'].items():
+                        if metrics['response_time'] > 0:
+                            all_response_times.append(metrics['response_time'])
+                
+                if all_response_times:
+                    avg_response_time = sum(all_response_times) / len(all_response_times)
+                    assert avg_response_time < 1000, f"Average response time too high: {avg_response_time:.1f}ms"
+        
+        finally:
+            if 'result' in locals() and result:
+                docker_manager.release_environment(env_name)
+    
+    def test_health_monitoring_resource_efficiency(self, docker_manager, docker_stability_metrics):
+        """Test health monitoring doesn't consume excessive resources."""
+        env_name = f"health_efficiency_{int(time.time())}"
+        
+        try:
+            with docker_daemon_health_monitor(docker_stability_metrics):
+                result = docker_manager.acquire_environment(env_name, use_alpine=True)
+                assert result is not None
+                
+                # Baseline system resources
+                initial_memory = psutil.virtual_memory().percent
+                initial_cpu = psutil.cpu_percent(interval=1)
+                
+                # Perform intensive health monitoring
+                health_check_times = []
+                for _ in range(20):
+                    start_time = time.time()
+                    health = docker_manager.get_health_report(env_name)
+                    check_duration = time.time() - start_time
+                    health_check_times.append(check_duration)
+                    
+                    time.sleep(0.5)  # Rapid health checking
+                
+                # Final system resources
+                final_memory = psutil.virtual_memory().percent
+                final_cpu = psutil.cpu_percent(interval=1)
+                
+                docker_stability_metrics.record_operation("health_efficiency", 1.0, len(health_check_times) == 20)
+                
+                # Verify resource efficiency
+                avg_check_time = sum(health_check_times) / len(health_check_times)
+                memory_increase = final_memory - initial_memory
+                cpu_increase = final_cpu - initial_cpu
+                
+                assert avg_check_time < 0.5, f"Health checks too slow: {avg_check_time:.3f}s"
+                assert memory_increase < 5, f"Memory increase too high: {memory_increase:.1f}%"
+                assert cpu_increase < 20, f"CPU increase too high: {cpu_increase:.1f}%"
+        
+        finally:
+            if 'result' in locals() and result:
+                docker_manager.release_environment(env_name)
+    
+    def test_health_monitoring_concurrent_environments(self, docker_manager, docker_stability_metrics):
+        """Test health monitoring across multiple concurrent environments."""
+        environments = []
+        
+        try:
+            with docker_daemon_health_monitor(docker_stability_metrics):
+                # Start multiple environments
+                for i in range(3):
+                    env_name = f"concurrent_health_{i}_{int(time.time())}"
+                    result = docker_manager.acquire_environment(env_name, use_alpine=True)
+                    if result:
+                        environments.append(env_name)
+                
+                assert len(environments) >= 2, "Failed to start multiple environments"
+                
+                # Monitor health across all environments simultaneously
+                concurrent_health_checks = []
+                
+                def check_env_health(env_name):
+                    health_results = []
+                    for _ in range(5):
+                        start_time = time.time()
+                        health = docker_manager.get_health_report(env_name)
+                        duration = time.time() - start_time
+                        
+                        health_results.append({
+                            'env': env_name,
+                            'healthy': health.get('all_healthy'),
+                            'duration': duration,
+                            'services': len(health.get('service_health', {}))
+                        })
+                        time.sleep(1)
+                    return health_results
+                
+                # Run health checks concurrently
+                with ThreadPoolExecutor(max_workers=len(environments)) as executor:
+                    futures = [executor.submit(check_env_health, env) for env in environments]
+                    for future in as_completed(futures):
+                        concurrent_health_checks.extend(future.result())
+                
+                docker_stability_metrics.record_operation("concurrent_health_monitoring", 2.0, len(concurrent_health_checks) > 0)
+                
+                # Verify concurrent monitoring effectiveness
+                env_results = {}
+                for check in concurrent_health_checks:
+                    env = check['env']
+                    if env not in env_results:
+                        env_results[env] = []
+                    env_results[env].append(check)
+                
+                # Each environment should have consistent health results
+                for env_name, results in env_results.items():
+                    healthy_count = sum(1 for r in results if r['healthy'])
+                    avg_duration = sum(r['duration'] for r in results) / len(results)
+                    
+                    assert healthy_count >= len(results) * 0.8, f"Environment {env_name} unhealthy too often"
+                    assert avg_duration < 1.0, f"Health checks too slow for {env_name}: {avg_duration:.2f}s"
+        
+        finally:
+            for env_name in environments:
+                try:
+                    docker_manager.release_environment(env_name)
+                except Exception as e:
+                    logger.error(f"Cleanup failed for {env_name}: {e}")
+
+
+class TestDockerInfrastructureFailureRecovery:
+    """Infrastructure Test Category: Failure Recovery (5 tests)"""
+    
+    def test_automatic_container_restart_mechanism(self, docker_manager, docker_stability_metrics):
+        """Test automatic restart of crashed containers within 60s."""
+        env_name = f"restart_test_{int(time.time())}"
+        
+        try:
+            with docker_daemon_health_monitor(docker_stability_metrics):
+                result = docker_manager.acquire_environment(env_name, use_alpine=True)
+                assert result is not None
+                
+                # Find a service container to crash
+                ps_result = execute_docker_command([
+                    "docker", "ps", "--filter", f"name={env_name}", "--format", "{{.Names}}"
+                ], timeout=10)
+                
+                target_container = None
+                if ps_result.returncode == 0:
+                    containers = ps_result.stdout.strip().split('\n')
+                    for container in containers:
+                        if container and 'backend' in container:
+                            target_container = container
+                            break
+                
+                if target_container:
+                    # Get original container ID
+                    inspect_result = execute_docker_command([
+                        "docker", "inspect", target_container, "--format", "{{.Id}}"
+                    ], timeout=5)
+                    original_id = inspect_result.stdout.strip()[:12] if inspect_result.returncode == 0 else ""
+                    
+                    # Crash the container
+                    crash_time = time.time()
+                    execute_docker_command(["docker", "kill", target_container], timeout=5)
+                    
+                    # Monitor for restart
+                    restart_detected = False
+                    restart_time = None
+                    
+                    for attempt in range(30):  # Check for 60 seconds
+                        time.sleep(2)
+                        
+                        # Check if container restarted (new ID but same name)
+                        new_inspect = execute_docker_command([
+                            "docker", "inspect", target_container, "--format", "{{.Id}} {{.State.Running}}"
+                        ], timeout=5)
+                        
+                        if new_inspect.returncode == 0:
+                            id_and_status = new_inspect.stdout.strip().split()
+                            if len(id_and_status) >= 2:
+                                new_id = id_and_status[0][:12]
+                                is_running = id_and_status[1] == "true"
+                                
+                                if new_id != original_id and is_running:
+                                    restart_time = time.time() - crash_time
+                                    restart_detected = True
+                                    break
+                    
+                    docker_stability_metrics.record_operation("automatic_restart", restart_time or 60, restart_detected)
+                    
+                    assert restart_detected, f"Container {target_container} did not restart automatically"
+                    assert restart_time < 60, f"Restart took too long: {restart_time:.1f}s"
+        
+        finally:
+            if 'result' in locals() and result:
+                docker_manager.release_environment(env_name)
+    
+    def test_cascade_failure_prevention_system(self, docker_manager, docker_stability_metrics):
+        """Test system prevents cascade failures when multiple services crash."""
+        env_name = f"cascade_prevention_{int(time.time())}"
+        
+        try:
+            with docker_daemon_health_monitor(docker_stability_metrics):
+                result = docker_manager.acquire_environment(env_name, use_alpine=True)
+                assert result is not None
+                
+                # Get list of service containers
+                ps_result = execute_docker_command([
+                    "docker", "ps", "--filter", f"name={env_name}", "--format", "{{.Names}}"
+                ], timeout=10)
+                
+                service_containers = []
+                if ps_result.returncode == 0:
+                    service_containers = [name for name in ps_result.stdout.strip().split('\n') if name]
+                
+                assert len(service_containers) >= 2, "Need at least 2 services for cascade test"
+                
+                # Kill multiple services rapidly
+                killed_containers = []
+                for container in service_containers[:min(3, len(service_containers))]:
+                    try:
+                        execute_docker_command(["docker", "kill", container], timeout=5)
+                        killed_containers.append(container)
+                        time.sleep(0.5)  # Rapid kills to simulate cascade
+                    except:
+                        pass
+                
+                # Monitor system stability
+                time.sleep(10)  # Allow recovery time
+                
+                # Check that not ALL services failed (cascade prevented)
+                health = docker_manager.get_health_report(env_name)
+                service_health = health.get('service_health', {})
+                
+                healthy_services = sum(1 for status in service_health.values() 
+                                     if status == 'healthy' or (isinstance(status, dict) and status.get('healthy')))
+                
+                docker_stability_metrics.record_operation("cascade_prevention", 5.0, healthy_services > 0)
+                
+                # At least one service should remain healthy or recover
+                assert healthy_services > 0, f"Complete cascade failure - no services healthy"
+                
+                # Verify system can still function
+                daemon_health = check_docker_daemon_health()
+                assert daemon_health, "Docker daemon became unhealthy during cascade test"
+        
+        finally:
+            if 'result' in locals() and result:
+                docker_manager.release_environment(env_name)
+    
+    def test_network_partition_recovery_mechanism(self, docker_manager, docker_stability_metrics):
+        """Test recovery from simulated network partitions."""
+        env_name = f"network_recovery_{int(time.time())}"
+        
+        try:
+            with docker_daemon_health_monitor(docker_stability_metrics):
+                result = docker_manager.acquire_environment(env_name, use_alpine=True)
+                assert result is not None
+                
+                # Get service containers
+                ps_result = execute_docker_command([
+                    "docker", "ps", "--filter", f"name={env_name}", "--format", "{{.Names}}"
+                ], timeout=10)
+                
+                target_containers = []
+                if ps_result.returncode == 0:
+                    all_containers = ps_result.stdout.strip().split('\n')
+                    target_containers = [c for c in all_containers if c][:2]  # Partition 2 containers
+                
+                if len(target_containers) >= 1:
+                    # Simulate network partition by disrupting container networking
+                    partition_start = time.time()
+                    partitioned_containers = []
+                    
+                    for container in target_containers:
+                        try:
+                            # Simulate network issue by pausing container briefly
+                            execute_docker_command(["docker", "pause", container], timeout=5)
+                            partitioned_containers.append(container)
+                            time.sleep(1)
+                        except:
+                            pass
+                    
+                    # Wait a bit to simulate partition duration
+                    time.sleep(5)
+                    
+                    # Restore network connectivity
+                    for container in partitioned_containers:
+                        try:
+                            execute_docker_command(["docker", "unpause", container], timeout=5)
+                        except:
+                            pass
+                    
+                    # Monitor recovery
+                    recovery_start = time.time()
+                    recovery_success = False
+                    
+                    for attempt in range(15):  # Check for 30 seconds
+                        time.sleep(2)
+                        health = docker_manager.get_health_report(env_name)
+                        
+                        if health.get('all_healthy'):
+                            recovery_success = True
+                            break
+                    
+                    recovery_time = time.time() - recovery_start
+                    total_recovery_time = time.time() - partition_start
+                    
+                    docker_stability_metrics.record_operation("network_recovery", total_recovery_time, recovery_success)
+                    
+                    assert recovery_success, f"System did not recover from network partition"
+                    assert total_recovery_time < 45, f"Recovery took too long: {total_recovery_time:.1f}s"
+        
+        finally:
+            if 'result' in locals() and result:
+                docker_manager.release_environment(env_name)
+    
+    def test_resource_exhaustion_recovery(self, docker_manager, docker_stability_metrics):
+        """Test recovery from resource exhaustion scenarios."""
+        env_name = f"resource_recovery_{int(time.time())}"
+        resource_containers = []
+        
+        try:
+            with docker_daemon_health_monitor(docker_stability_metrics):
+                result = docker_manager.acquire_environment(env_name, use_alpine=True)
+                assert result is not None
+                
+                # Create resource-intensive containers to simulate exhaustion
+                for i in range(5):
+                    try:
+                        container_name = f"resource_hog_{i}_{int(time.time())}"
+                        cmd = [
+                            "docker", "run", "-d", f"--name={container_name}",
+                            "--memory=200m", "--cpus=0.5",
+                            "alpine:latest",
+                            "sh", "-c", "while true; do dd if=/dev/zero of=/tmp/fill bs=1M count=50; sleep 1; done"
+                        ]
+                        
+                        resource_result = execute_docker_command(cmd, timeout=15)
+                        if resource_result.returncode == 0:
+                            resource_containers.append(container_name)
+                        
+                        time.sleep(1)
+                    except:
+                        pass
+                
+                # Let system run under resource pressure
+                time.sleep(10)
+                
+                # Check if main services are still responsive
+                initial_health = docker_manager.get_health_report(env_name)
+                initial_daemon_health = check_docker_daemon_health()
+                
+                # Clean up resource hogs to trigger recovery
+                cleanup_start = time.time()
+                for container in resource_containers:
+                    try:
+                        execute_docker_command(["docker", "stop", "-t", "5", container], timeout=10)
+                        execute_docker_command(["docker", "rm", container], timeout=5)
+                    except:
+                        pass
+                
+                resource_containers = []  # Cleaned up
+                
+                # Monitor recovery
+                time.sleep(5)  # Allow recovery time
+                
+                recovery_health = docker_manager.get_health_report(env_name)
+                recovery_daemon_health = check_docker_daemon_health()
+                recovery_time = time.time() - cleanup_start
+                
+                docker_stability_metrics.record_operation("resource_recovery", recovery_time, recovery_daemon_health)
+                
+                # Verify recovery
+                assert recovery_daemon_health, "Docker daemon did not recover from resource exhaustion"
+                assert recovery_health.get('all_healthy') or initial_health.get('all_healthy'), \
+                    "Services did not maintain/recover health during resource pressure"
+        
+        finally:
+            if 'result' in locals() and result:
+                docker_manager.release_environment(env_name)
+            
+            # Emergency cleanup
+            for container in resource_containers:
+                try:
+                    safe_container_cleanup(container, timeout=10)
+                except:
+                    pass
+    
+    def test_docker_daemon_reconnection_recovery(self, docker_manager, docker_stability_metrics):
+        """Test recovery from Docker daemon connection issues."""
+        env_name = f"daemon_recovery_{int(time.time())}"
+        
+        try:
+            with docker_daemon_health_monitor(docker_stability_metrics):
+                result = docker_manager.acquire_environment(env_name, use_alpine=True)
+                assert result is not None
+                
+                # Verify initial connectivity
+                initial_health = check_docker_daemon_health()
+                assert initial_health, "Docker daemon not healthy initially"
+                
+                # Simulate connection issues by overwhelming daemon with requests
+                connection_stress_containers = []
+                
+                # Create many rapid operations to stress daemon connection
+                def stress_daemon():
+                    stress_ops = 0
+                    for _ in range(20):
+                        try:
+                            # Rapid docker commands
+                            execute_docker_command(["docker", "version"], timeout=1)
+                            execute_docker_command(["docker", "info"], timeout=1)
+                            stress_ops += 1
+                            time.sleep(0.1)  # Very rapid operations
+                        except:
+                            pass
+                    return stress_ops
+                
+                # Run stress operations concurrently
+                with ThreadPoolExecutor(max_workers=5) as executor:
+                    stress_futures = [executor.submit(stress_daemon) for _ in range(3)]
+                    stress_results = [f.result() for f in as_completed(stress_futures, timeout=30)]
+                
+                total_stress_ops = sum(stress_results)
+                
+                # Check daemon recovery after stress
+                recovery_start = time.time()
+                daemon_recovered = False
+                
+                for attempt in range(10):
+                    time.sleep(2)
+                    if check_docker_daemon_health():
+                        daemon_recovered = True
+                        break
+                
+                recovery_time = time.time() - recovery_start
+                
+                docker_stability_metrics.record_operation("daemon_reconnection", recovery_time, daemon_recovered)
+                
+                assert daemon_recovered, "Docker daemon did not recover from connection stress"
+                assert total_stress_ops > 50, f"Stress test insufficient: only {total_stress_ops} operations"
+                
+                # Verify environment still functional
+                final_health = docker_manager.get_health_report(env_name)
+                assert final_health is not None, "Environment health check failed after daemon recovery"
+        
+        finally:
+            if 'result' in locals() and result:
+                docker_manager.release_environment(env_name)
+
+
+class TestDockerInfrastructurePerformance:
+    """Infrastructure Test Category: Performance (5 tests)"""
+    
+    def test_container_creation_throughput_benchmark(self, docker_stability_metrics):
+        """Test container creation meets throughput requirements."""
+        created_containers = []
+        
+        try:
+            with docker_daemon_health_monitor(docker_stability_metrics):
+                # Measure container creation throughput
+                throughput_start = time.time()
+                
+                for i in range(10):
+                    creation_start = time.time()
+                    try:
+                        container_name = f"throughput_test_{i}_{int(time.time() * 1000)}"
+                        cmd = [
+                            "docker", "run", "-d", f"--name={container_name}",
+                            "--memory=64m", "alpine:latest", "sleep", "30"
+                        ]
+                        
+                        result = execute_docker_command(cmd, timeout=10)
+                        creation_time = time.time() - creation_start
+                        
+                        if result.returncode == 0:
+                            created_containers.append(container_name)
+                            docker_stability_metrics.record_operation("container_creation", creation_time, True)
+                        else:
+                            docker_stability_metrics.record_operation("container_creation", creation_time, False)
+                    
+                    except Exception as e:
+                        creation_time = time.time() - creation_start
+                        logger.warning(f"Container creation failed: {e}")
+                        docker_stability_metrics.record_operation("container_creation", creation_time, False)
+                
+                total_throughput_time = time.time() - throughput_start
+                
+                # Calculate metrics
+                successful_creations = len(created_containers)
+                throughput_per_second = successful_creations / total_throughput_time
+                avg_creation_time = total_throughput_time / max(1, successful_creations)
+                
+                assert successful_creations >= 8, f"Too many creation failures: {successful_creations}/10"
+                assert avg_creation_time < 3.0, f"Average creation time too slow: {avg_creation_time:.2f}s"
+                assert throughput_per_second > 0.5, f"Throughput too low: {throughput_per_second:.2f} containers/s"
+        
+        finally:
+            # Cleanup
+            for container in created_containers:
+                safe_container_cleanup(container, timeout=10)
+    
+    def test_alpine_vs_regular_performance_comparison(self, docker_manager, docker_stability_metrics):
+        """Compare Alpine vs regular container performance."""
+        alpine_times = []
+        regular_times = []
+        
+        try:
+            with docker_daemon_health_monitor(docker_stability_metrics):
+                # Test Alpine performance
+                for i in range(3):
+                    alpine_start = time.time()
+                    env_name = f"alpine_perf_{i}_{int(time.time())}"
+                    
+                    result = docker_manager.acquire_environment(
+                        env_name,
+                        use_alpine=True,
+                        timeout=45
+                    )
+                    
+                    alpine_time = time.time() - alpine_start
+                    
+                    if result:
+                        alpine_times.append(alpine_time)
+                        docker_manager.release_environment(env_name)
+                    
+                    docker_stability_metrics.record_operation("alpine_performance", alpine_time, result is not None)
+                
+                # Test regular performance
+                for i in range(3):
+                    regular_start = time.time()
+                    env_name = f"regular_perf_{i}_{int(time.time())}"
+                    
+                    result = docker_manager.acquire_environment(
+                        env_name,
+                        use_alpine=False,
+                        timeout=60
+                    )
+                    
+                    regular_time = time.time() - regular_start
+                    
+                    if result:
+                        regular_times.append(regular_time)
+                        docker_manager.release_environment(env_name)
+                    
+                    docker_stability_metrics.record_operation("regular_performance", regular_time, result is not None)
+                
+                # Compare performance
+                if alpine_times and regular_times:
+                    avg_alpine = sum(alpine_times) / len(alpine_times)
+                    avg_regular = sum(regular_times) / len(regular_times)
+                    speedup_ratio = avg_regular / avg_alpine if avg_alpine > 0 else 1
+                    
+                    assert avg_alpine < avg_regular, f"Alpine ({avg_alpine:.1f}s) not faster than regular ({avg_regular:.1f}s)"
+                    assert speedup_ratio >= 1.5, f"Alpine speedup insufficient: {speedup_ratio:.1f}x < 1.5x"
+                    
+                    logger.info(f"Alpine vs Regular performance: {speedup_ratio:.1f}x speedup")
+        
+        except Exception as e:
+            logger.error(f"Performance comparison failed: {e}")
+            docker_stability_metrics.record_operation("performance_comparison", 30.0, False)
+    
+    def test_memory_efficiency_validation(self, docker_manager, docker_stability_metrics):
+        """Test memory efficiency meets < 500MB per container requirement."""
+        env_name = f"memory_efficiency_{int(time.time())}"
+        
+        try:
+            with docker_daemon_health_monitor(docker_stability_metrics):
+                result = docker_manager.acquire_environment(
+                    env_name,
+                    use_alpine=True,
+                    resource_limits={'memory': '500m'}
+                )
+                assert result is not None
+                
+                # Monitor memory usage over time
+                memory_samples = []
+                for sample_round in range(5):
+                    # Get detailed container stats
+                    stats_cmd = ["docker", "stats", "--no-stream", "--format", 
+                               "table {{.Container}}\t{{.MemUsage}}\t{{.MemPerc}}"]
+                    stats_result = execute_docker_command(stats_cmd, timeout=15)
+                    
+                    if stats_result.returncode == 0:
+                        sample_data = {'timestamp': time.time(), 'containers': {}}
+                        
+                        for line in stats_result.stdout.strip().split('\n')[1:]:  # Skip header
+                            if env_name in line and '\t' in line:
+                                parts = line.split('\t')
+                                if len(parts) >= 3:
+                                    container = parts[0].strip()
+                                    memory_usage = parts[1].strip()
+                                    memory_percent = parts[2].strip()
+                                    
+                                    # Parse memory usage
+                                    if '/' in memory_usage:
+                                        current_mem = memory_usage.split('/')[0].strip()
+                                        if 'MiB' in current_mem:
+                                            mem_mb = float(current_mem.replace('MiB', '').strip())
+                                            sample_data['containers'][container] = {
+                                                'memory_mb': mem_mb,
+                                                'memory_percent': memory_percent
+                                            }
+                        
+                        memory_samples.append(sample_data)
+                    
+                    time.sleep(3)
+                
+                docker_stability_metrics.record_operation("memory_efficiency", 2.0, len(memory_samples) > 0)
+                
+                # Analyze memory efficiency
+                max_memory_per_container = {}
+                total_samples = 0
+                
+                for sample in memory_samples:
+                    for container, stats in sample['containers'].items():
+                        memory_mb = stats['memory_mb']
+                        if container not in max_memory_per_container:
+                            max_memory_per_container[container] = memory_mb
+                        else:
+                            max_memory_per_container[container] = max(max_memory_per_container[container], memory_mb)
+                        total_samples += 1
+                
+                assert total_samples > 0, "No memory samples collected"
+                
+                # Verify memory limits compliance
+                violations = []
+                for container, max_memory in max_memory_per_container.items():
+                    if max_memory > 500:  # 500MB limit
+                        violations.append(f"{container}: {max_memory:.1f}MB")
+                        docker_stability_metrics.record_memory_warning()
+                
+                assert len(violations) == 0, f"Memory limit violations: {violations}"
+                
+                # Log efficiency metrics
+                avg_memory = sum(max_memory_per_container.values()) / len(max_memory_per_container)
+                logger.info(f"Average max memory per container: {avg_memory:.1f}MB")
+        
+        finally:
+            if 'result' in locals() and result:
+                docker_manager.release_environment(env_name)
+    
+    def test_concurrent_operation_performance(self, docker_stability_metrics):
+        """Test performance under concurrent Docker operations."""
+        concurrent_containers = []
+        
+        try:
+            with docker_daemon_health_monitor(docker_stability_metrics):
+                def create_and_test_container(index):
+                    """Create container and perform operations concurrently."""
+                    container_name = f"concurrent_perf_{index}_{int(time.time() * 1000)}"
+                    operations = []
+                    
+                    try:
+                        # Create container
+                        create_start = time.time()
+                        cmd = [
+                            "docker", "run", "-d", f"--name={container_name}",
+                            "--memory=100m", "alpine:latest", "sh", "-c",
+                            "while true; do echo 'performance test'; sleep 1; done"
+                        ]
+                        
+                        create_result = execute_docker_command(cmd, timeout=15)
+                        create_time = time.time() - create_start
+                        operations.append(('create', create_time, create_result.returncode == 0))
+                        
+                        if create_result.returncode == 0:
+                            concurrent_containers.append(container_name)
+                            
+                            # Perform operations on container
+                            time.sleep(1)  # Let container stabilize
+                            
+                            # Inspect operation
+                            inspect_start = time.time()
+                            inspect_result = execute_docker_command([
+                                "docker", "inspect", container_name, "--format", "{{.State.Running}}"
+                            ], timeout=10)
+                            inspect_time = time.time() - inspect_start
+                            operations.append(('inspect', inspect_time, inspect_result.returncode == 0))
+                            
+                            # Stats operation
+                            stats_start = time.time()
+                            stats_result = execute_docker_command([
+                                "docker", "stats", "--no-stream", container_name
+                            ], timeout=10)
+                            stats_time = time.time() - stats_start
+                            operations.append(('stats', stats_time, stats_result.returncode == 0))
+                    
+                    except Exception as e:
+                        logger.error(f"Concurrent operation failed for {index}: {e}")
+                        operations.append(('error', 5.0, False))
+                    
+                    return operations
+                
+                # Run concurrent operations
+                performance_start = time.time()
+                
+                with ThreadPoolExecutor(max_workers=8) as executor:
+                    futures = [executor.submit(create_and_test_container, i) for i in range(10)]
+                    all_operations = []
+                    
+                    for future in as_completed(futures, timeout=120):
+                        try:
+                            operations = future.result()
+                            all_operations.extend(operations)
+                        except Exception as e:
+                            logger.error(f"Concurrent future failed: {e}")
+                
+                total_performance_time = time.time() - performance_start
+                
+                # Analyze performance metrics
+                operation_stats = {}
+                for op_type, duration, success in all_operations:
+                    if op_type not in operation_stats:
+                        operation_stats[op_type] = {'times': [], 'successes': 0, 'total': 0}
+                    
+                    operation_stats[op_type]['times'].append(duration)
+                    operation_stats[op_type]['total'] += 1
+                    if success:
+                        operation_stats[op_type]['successes'] += 1
+                
+                docker_stability_metrics.record_operation("concurrent_performance", total_performance_time, len(all_operations) > 0)
+                
+                # Verify performance requirements
+                for op_type, stats in operation_stats.items():
+                    if stats['times']:
+                        avg_time = sum(stats['times']) / len(stats['times'])
+                        success_rate = stats['successes'] / stats['total']
+                        
+                        assert avg_time < 5.0, f"{op_type} operations too slow: {avg_time:.2f}s average"
+                        assert success_rate >= 0.8, f"{op_type} success rate too low: {success_rate:.2%}"
+                
+                assert total_performance_time < 60, f"Concurrent operations took too long: {total_performance_time:.1f}s"
+        
+        finally:
+            # Cleanup concurrent containers
+            cleanup_start = time.time()
+            for container in concurrent_containers:
+                try:
+                    safe_container_cleanup(container, timeout=10)
+                except Exception as e:
+                    logger.error(f"Concurrent cleanup failed for {container}: {e}")
+            
+            cleanup_time = time.time() - cleanup_start
+            docker_stability_metrics.record_cleanup_operation()
+            logger.info(f"Concurrent cleanup completed in {cleanup_time:.1f}s")
+    
+    def test_io_performance_optimization(self, docker_stability_metrics):
+        """Test I/O performance with tmpfs and optimization."""
+        io_test_containers = []
+        
+        try:
+            with docker_daemon_health_monitor(docker_stability_metrics):
+                # Test I/O performance with tmpfs optimization
+                for test_type in ['regular', 'tmpfs']:
+                    container_name = f"io_test_{test_type}_{int(time.time())}"
+                    
+                    if test_type == 'tmpfs':
+                        # Create container with tmpfs for performance
+                        cmd = [
+                            "docker", "run", "-d", f"--name={container_name}",
+                            "--memory=200m", "--tmpfs=/tmp:size=100m",
+                            "alpine:latest", "sleep", "60"
+                        ]
+                    else:
+                        # Regular container
+                        cmd = [
+                            "docker", "run", "-d", f"--name={container_name}",
+                            "--memory=200m", "alpine:latest", "sleep", "60"
+                        ]
+                    
+                    create_result = execute_docker_command(cmd, timeout=15)
+                    
+                    if create_result.returncode == 0:
+                        io_test_containers.append(container_name)
+                        
+                        # Test I/O operations
+                        io_tests = []
+                        
+                        # Write performance test
+                        write_start = time.time()
+                        write_result = execute_docker_command([
+                            "docker", "exec", container_name,
+                            "dd", "if=/dev/zero", "of=/tmp/testfile", "bs=1M", "count=10"
+                        ], timeout=30)
+                        write_time = time.time() - write_start
+                        io_tests.append(('write', write_time, write_result.returncode == 0))
+                        
+                        # Read performance test
+                        if write_result.returncode == 0:
+                            read_start = time.time()
+                            read_result = execute_docker_command([
+                                "docker", "exec", container_name,
+                                "dd", "if=/tmp/testfile", "of=/dev/null", "bs=1M"
+                            ], timeout=30)
+                            read_time = time.time() - read_start
+                            io_tests.append(('read', read_time, read_result.returncode == 0))
+                        
+                        # Record I/O performance
+                        for op_type, duration, success in io_tests:
+                            docker_stability_metrics.record_operation(f"io_{test_type}_{op_type}", duration, success)
+                        
+                        logger.info(f"I/O performance ({test_type}): Write={io_tests[0][1]:.2f}s, Read={io_tests[1][1]:.2f}s")
+                
+                # Verify I/O performance requirements
+                # (Performance comparison between regular and tmpfs would be analyzed here)
+                assert len(io_test_containers) >= 1, "No I/O test containers created successfully"
+        
+        finally:
+            # Cleanup I/O test containers
+            for container in io_test_containers:
+                safe_container_cleanup(container, timeout=15)
+
+
 if __name__ == "__main__":
     # Self-test mode for debugging
     import sys

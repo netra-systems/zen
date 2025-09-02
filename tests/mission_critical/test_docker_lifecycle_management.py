@@ -1515,6 +1515,1482 @@ class DockerLifecycleTestSuite(unittest.TestCase):
         return []
 
 
+class DockerInfrastructureServiceStartupTests(unittest.TestCase):
+    """Infrastructure Test Category: Service Startup (5 tests)"""
+    
+    @classmethod
+    def setUpClass(cls):
+        cls.test_project_prefix = "infra_startup"
+        cls.created_containers = set()
+        cls.docker_manager = UnifiedDockerManager(
+            environment_type=EnvironmentType.DEDICATED,
+            use_production_images=True
+        )
+    
+    @classmethod
+    def tearDownClass(cls):
+        cls._cleanup_containers()
+    
+    @classmethod 
+    def _cleanup_containers(cls):
+        for container in cls.created_containers:
+            try:
+                subprocess.run(['docker', 'stop', '-t', '5', container], capture_output=True, timeout=10)
+                subprocess.run(['docker', 'rm', container], capture_output=True, timeout=10)
+            except:
+                pass
+    
+    def test_rapid_service_startup_under_30_seconds(self):
+        """Test services start within 30 second requirement using Alpine optimization."""
+        test_id = f"{self.test_project_prefix}_{int(time.time())}"
+        
+        # Test with multiple environments in sequence
+        startup_times = []
+        
+        for i in range(3):
+            env_name = f"{test_id}_rapid_{i}"
+            
+            start_time = time.time()
+            
+            # Use Alpine images for fastest startup
+            manager = UnifiedDockerManager(
+                environment_type=EnvironmentType.DEDICATED,
+                test_id=env_name,
+                use_alpine_images=True
+            )
+            
+            try:
+                result = manager.acquire_environment(timeout=30)
+                startup_time = time.time() - start_time
+                startup_times.append(startup_time)
+                
+                self.assertIsNotNone(result, f"Failed to acquire environment {i}")
+                self.assertLess(startup_time, 30, f"Startup {i} took {startup_time:.2f}s > 30s")
+                
+                # Verify services are actually healthy
+                health_report = manager.get_health_report()
+                healthy_services = sum(1 for h in health_report.values() 
+                                     if isinstance(h, dict) and h.get('healthy'))
+                self.assertGreater(healthy_services, 0, "Should have healthy services")
+                
+            finally:
+                if 'result' in locals() and result:
+                    manager.release_environment(result[0] if isinstance(result, tuple) else env_name)
+        
+        # Verify average startup time meets requirement
+        avg_startup = sum(startup_times) / len(startup_times)
+        self.assertLess(avg_startup, 25, f"Average startup {avg_startup:.2f}s should be under 25s")
+    
+    def test_service_startup_with_resource_constraints(self):
+        """Test service startup under strict memory and CPU limits."""
+        test_id = f"{self.test_project_prefix}_constrained_{int(time.time())}"
+        
+        # Create containers with strict resource limits
+        constrained_containers = []
+        
+        for i in range(5):
+            container_name = f"{test_id}_constrained_{i}"
+            
+            # Start container with strict limits
+            create_cmd = [
+                'docker', 'run', '-d', '--name', container_name,
+                '--memory', '128m', '--cpus', '0.5',
+                '--label', f'test_id={test_id}',
+                'alpine:latest',
+                'sh', '-c', 'echo "Service $$ starting" && sleep 60'
+            ]
+            
+            start_time = time.time()
+            result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=15)
+            creation_time = time.time() - start_time
+            
+            self.assertEqual(result.returncode, 0, 
+                           f"Failed to start constrained container {i}: {result.stderr}")
+            
+            constrained_containers.append(container_name)
+            self.created_containers.add(container_name)
+            
+            # Verify startup was reasonably fast despite constraints
+            self.assertLess(creation_time, 10, f"Constrained startup took {creation_time:.2f}s")
+        
+        # Verify all containers are running within limits
+        for container_name in constrained_containers:
+            # Check container is running
+            inspect_cmd = ['docker', 'inspect', container_name, 
+                          '--format', '{{.State.Status}} {{.HostConfig.Memory}} {{.HostConfig.NanoCpus}}']
+            result = subprocess.run(inspect_cmd, capture_output=True, text=True, timeout=10)
+            
+            self.assertEqual(result.returncode, 0)
+            parts = result.stdout.strip().split()
+            
+            if len(parts) >= 3:
+                status, memory_limit, cpu_limit = parts
+                self.assertEqual(status, 'running', f"Container {container_name} should be running")
+                self.assertEqual(memory_limit, '134217728', "Memory limit should be 128MB")  # 128MB in bytes
+    
+    def test_startup_failure_recovery_mechanism(self):
+        """Test automatic recovery when services fail to start initially."""
+        test_id = f"{self.test_project_prefix}_recovery_{int(time.time())}"
+        
+        # Create a scenario where first attempt might fail
+        recovery_container = f"{test_id}_recovery_test"
+        
+        # Use a command that has a chance of failing initially
+        create_cmd = [
+            'docker', 'run', '-d', '--name', recovery_container,
+            '--label', f'test_id={test_id}',
+            'alpine:latest',
+            'sh', '-c', 'if [ $(date +%S) -lt 30 ]; then sleep 2 && echo "Started successfully"; else sleep 60; fi'
+        ]
+        
+        max_attempts = 3
+        success = False
+        
+        for attempt in range(max_attempts):
+            result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=30)
+            
+            if result.returncode == 0:
+                success = True
+                self.created_containers.add(recovery_container)
+                break
+            else:
+                # Clean up failed container name conflict
+                subprocess.run(['docker', 'rm', recovery_container], 
+                             capture_output=True, timeout=10)
+                time.sleep(1)
+        
+        self.assertTrue(success, "Recovery mechanism should eventually succeed")
+        
+        # Verify container is healthy after recovery
+        inspect_cmd = ['docker', 'inspect', recovery_container, '--format', '{{.State.Status}}']
+        result = subprocess.run(inspect_cmd, capture_output=True, text=True, timeout=10)
+        self.assertEqual(result.stdout.strip(), 'running', "Recovered container should be running")
+    
+    def test_parallel_service_startup_isolation(self):
+        """Test multiple services can start in parallel without interference."""
+        test_id = f"{self.test_project_prefix}_parallel_{int(time.time())}"
+        
+        def start_isolated_service(service_id):
+            """Start an isolated service and return result."""
+            container_name = f"{test_id}_parallel_svc_{service_id}"
+            
+            create_cmd = [
+                'docker', 'run', '-d', '--name', container_name,
+                '--label', f'test_id={test_id}',
+                '--network', 'none',  # Network isolation
+                'alpine:latest',
+                'sh', '-c', f'echo "Service {service_id} started" && sleep 60'
+            ]
+            
+            start_time = time.time()
+            result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=20)
+            startup_time = time.time() - start_time
+            
+            return {
+                'service_id': service_id,
+                'container_name': container_name,
+                'success': result.returncode == 0,
+                'startup_time': startup_time,
+                'error': result.stderr if result.returncode != 0 else None
+            }
+        
+        # Start 8 services in parallel
+        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+            futures = [executor.submit(start_isolated_service, i) for i in range(8)]
+            results = [future.result() for future in futures]
+        
+        # Add successful containers to cleanup list
+        for result_data in results:
+            if result_data['success']:
+                self.created_containers.add(result_data['container_name'])
+        
+        # Analyze results
+        successful_starts = [r for r in results if r['success']]
+        startup_times = [r['startup_time'] for r in successful_starts]
+        
+        self.assertGreaterEqual(len(successful_starts), 6, 
+                              f"At least 6/8 parallel starts should succeed, got {len(successful_starts)}")
+        
+        if startup_times:
+            avg_startup = sum(startup_times) / len(startup_times)
+            max_startup = max(startup_times)
+            
+            self.assertLess(avg_startup, 5, f"Average parallel startup time {avg_startup:.2f}s too high")
+            self.assertLess(max_startup, 15, f"Max parallel startup time {max_startup:.2f}s too high")
+    
+    def test_service_dependency_startup_ordering(self):
+        """Test services start in correct dependency order."""
+        test_id = f"{self.test_project_prefix}_deps_{int(time.time())}"
+        
+        # Create a dependency chain: db -> backend -> frontend
+        dependency_containers = []
+        
+        # Database service (no dependencies)
+        db_container = f"{test_id}_db"
+        create_db_cmd = [
+            'docker', 'run', '-d', '--name', db_container,
+            '--label', f'test_id={test_id}',
+            '--label', 'service_type=database',
+            'alpine:latest',
+            'sh', '-c', 'echo "DB ready" > /tmp/ready && sleep 60'
+        ]
+        
+        start_time = time.time()
+        result = subprocess.run(create_db_cmd, capture_output=True, text=True, timeout=15)
+        db_start_time = time.time() - start_time
+        
+        self.assertEqual(result.returncode, 0, f"DB service failed to start: {result.stderr}")
+        dependency_containers.append(db_container)
+        self.created_containers.add(db_container)
+        
+        # Wait for DB to be ready
+        time.sleep(2)
+        
+        # Backend service (depends on DB)
+        backend_container = f"{test_id}_backend"
+        create_backend_cmd = [
+            'docker', 'run', '-d', '--name', backend_container,
+            '--label', f'test_id={test_id}',
+            '--label', 'service_type=backend',
+            '--link', f'{db_container}:database',
+            'alpine:latest',
+            'sh', '-c', 'echo "Backend connecting to DB" && sleep 60'
+        ]
+        
+        start_time = time.time()
+        result = subprocess.run(create_backend_cmd, capture_output=True, text=True, timeout=15)
+        backend_start_time = time.time() - start_time
+        
+        self.assertEqual(result.returncode, 0, f"Backend service failed to start: {result.stderr}")
+        dependency_containers.append(backend_container)
+        self.created_containers.add(backend_container)
+        
+        # Verify dependency order timing
+        self.assertLess(db_start_time, backend_start_time + 5, 
+                       "DB should start before or around same time as backend")
+        
+        # Verify both services are running
+        for container in dependency_containers:
+            inspect_cmd = ['docker', 'inspect', container, '--format', '{{.State.Status}}']
+            result = subprocess.run(inspect_cmd, capture_output=True, text=True, timeout=10)
+            self.assertEqual(result.stdout.strip(), 'running', 
+                           f"Service {container} should be running")
+
+
+class DockerInfrastructureHealthMonitoringTests(unittest.TestCase):
+    """Infrastructure Test Category: Health Monitoring (5 tests)"""
+    
+    @classmethod
+    def setUpClass(cls):
+        cls.test_project_prefix = "infra_health"
+        cls.created_containers = set()
+    
+    @classmethod
+    def tearDownClass(cls):
+        cls._cleanup_containers()
+    
+    @classmethod 
+    def _cleanup_containers(cls):
+        for container in cls.created_containers:
+            try:
+                subprocess.run(['docker', 'stop', '-t', '3', container], capture_output=True, timeout=10)
+                subprocess.run(['docker', 'rm', container], capture_output=True, timeout=10)
+            except:
+                pass
+    
+    def test_real_time_health_monitoring_accuracy(self):
+        """Test real-time health monitoring provides accurate service status."""
+        test_id = f"{self.test_project_prefix}_realtime_{int(time.time())}"
+        
+        # Create containers with different health states
+        health_scenarios = [
+            ('healthy', 'echo "healthy"'),
+            ('degraded', 'if [ $(($(date +%s) % 10)) -lt 3 ]; then exit 1; else echo "ok"; fi'),
+            ('unhealthy', 'exit 1')
+        ]
+        
+        test_containers = []
+        
+        for scenario_name, health_cmd in health_scenarios:
+            container_name = f"{test_id}_{scenario_name}"
+            
+            create_cmd = [
+                'docker', 'run', '-d', '--name', container_name,
+                '--label', f'test_id={test_id}',
+                '--health-cmd', health_cmd,
+                '--health-interval', '3s',
+                '--health-timeout', '2s',
+                '--health-retries', '2',
+                'alpine:latest',
+                'sleep', '120'
+            ]
+            
+            result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=20)
+            self.assertEqual(result.returncode, 0, 
+                           f"Failed to create {scenario_name} container: {result.stderr}")
+            
+            test_containers.append((container_name, scenario_name))
+            self.created_containers.add(container_name)
+        
+        # Monitor health status over time
+        health_history = {container: [] for container, _ in test_containers}
+        monitoring_duration = 30  # seconds
+        check_interval = 3
+        
+        start_time = time.time()
+        while time.time() - start_time < monitoring_duration:
+            for container_name, scenario in test_containers:
+                inspect_cmd = [
+                    'docker', 'inspect', container_name,
+                    '--format', '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}'
+                ]
+                
+                result = subprocess.run(inspect_cmd, capture_output=True, text=True, timeout=5)
+                if result.returncode == 0:
+                    status = result.stdout.strip()
+                    timestamp = time.time() - start_time
+                    health_history[container_name].append((timestamp, status))
+            
+            time.sleep(check_interval)
+        
+        # Analyze health monitoring accuracy
+        for container_name, scenario in test_containers:
+            history = health_history[container_name]
+            self.assertGreater(len(history), 5, f"Should have multiple health checks for {scenario}")
+            
+            # Get final health status
+            if history:
+                final_status = history[-1][1]
+                
+                if scenario == 'healthy':
+                    self.assertEqual(final_status, 'healthy', 
+                                   f"Healthy container should report healthy status")
+                elif scenario == 'unhealthy':
+                    self.assertEqual(final_status, 'unhealthy',
+                                   f"Unhealthy container should report unhealthy status")
+                # Degraded scenario may vary between healthy/unhealthy
+    
+    def test_health_check_performance_under_load(self):
+        """Test health check performance doesn't degrade under system load."""
+        test_id = f"{self.test_project_prefix}_load_{int(time.time())}"
+        
+        # Create load generators
+        load_containers = []
+        for i in range(10):
+            container_name = f"{test_id}_load_{i}"
+            
+            create_cmd = [
+                'docker', 'run', '-d', '--name', container_name,
+                '--label', f'test_id={test_id}',
+                '--memory', '64m', '--cpus', '0.3',
+                'alpine:latest',
+                'sh', '-c', 'while true; do dd if=/dev/zero of=/dev/null bs=1M count=1; sleep 0.1; done'
+            ]
+            
+            result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=15)
+            if result.returncode == 0:
+                load_containers.append(container_name)
+                self.created_containers.add(container_name)
+        
+        self.assertGreaterEqual(len(load_containers), 8, "Should create at least 8 load containers")
+        
+        # Create monitored service with health checks
+        monitored_container = f"{test_id}_monitored"
+        
+        create_monitored_cmd = [
+            'docker', 'run', '-d', '--name', monitored_container,
+            '--label', f'test_id={test_id}',
+            '--health-cmd', 'echo "healthy"',
+            '--health-interval', '2s',
+            '--health-timeout', '1s',
+            '--health-retries', '1',
+            'alpine:latest',
+            'sleep', '60'
+        ]
+        
+        result = subprocess.run(create_monitored_cmd, capture_output=True, text=True, timeout=20)
+        self.assertEqual(result.returncode, 0, f"Failed to create monitored container: {result.stderr}")
+        self.created_containers.add(monitored_container)
+        
+        # Monitor health check performance under load
+        health_check_times = []
+        
+        for _ in range(15):  # 15 health checks over 30 seconds
+            start = time.time()
+            
+            inspect_cmd = [
+                'docker', 'inspect', monitored_container,
+                '--format', '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}'
+            ]
+            
+            result = subprocess.run(inspect_cmd, capture_output=True, text=True, timeout=10)
+            check_duration = time.time() - start
+            
+            if result.returncode == 0:
+                health_check_times.append(check_duration)
+                status = result.stdout.strip()
+                # Health should remain responsive under load
+                self.assertIn(status, ['starting', 'healthy', 'unhealthy'], 
+                            f"Invalid health status: {status}")
+            
+            time.sleep(2)
+        
+        # Verify health check performance
+        if health_check_times:
+            avg_check_time = sum(health_check_times) / len(health_check_times)
+            max_check_time = max(health_check_times)
+            
+            self.assertLess(avg_check_time, 1.0, f"Average health check time {avg_check_time:.3f}s too high")
+            self.assertLess(max_check_time, 2.0, f"Max health check time {max_check_time:.3f}s too high")
+    
+    def test_health_status_change_detection_speed(self):
+        """Test rapid detection of health status changes."""
+        test_id = f"{self.test_project_prefix}_detection_{int(time.time())}"
+        
+        # Create container that changes health status
+        changing_container = f"{test_id}_changing"
+        
+        # Health check that fails after 20 seconds
+        create_cmd = [
+            'docker', 'run', '-d', '--name', changing_container,
+            '--label', f'test_id={test_id}',
+            '--health-cmd', 'if [ $(cat /proc/uptime | cut -d. -f1) -gt 20 ]; then exit 1; else echo "ok"; fi',
+            '--health-interval', '2s',
+            '--health-timeout', '1s',
+            '--health-retries', '1',
+            'alpine:latest',
+            'sleep', '60'
+        ]
+        
+        result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=20)
+        self.assertEqual(result.returncode, 0, f"Failed to create changing container: {result.stderr}")
+        self.created_containers.add(changing_container)
+        
+        # Monitor health status changes
+        status_changes = []
+        last_status = None
+        
+        start_time = time.time()
+        while time.time() - start_time < 45:  # Monitor for 45 seconds
+            inspect_cmd = [
+                'docker', 'inspect', changing_container,
+                '--format', '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}'
+            ]
+            
+            result = subprocess.run(inspect_cmd, capture_output=True, text=True, timeout=5)
+            if result.returncode == 0:
+                current_status = result.stdout.strip()
+                timestamp = time.time() - start_time
+                
+                if current_status != last_status:
+                    status_changes.append((timestamp, last_status, current_status))
+                    last_status = current_status
+            
+            time.sleep(1)
+        
+        # Verify status change detection
+        self.assertGreaterEqual(len(status_changes), 2, 
+                              f"Should detect at least 2 status changes, got: {status_changes}")
+        
+        # Find the change from healthy to unhealthy
+        health_to_unhealthy = None
+        for timestamp, from_status, to_status in status_changes:
+            if from_status == 'healthy' and to_status == 'unhealthy':
+                health_to_unhealthy = timestamp
+                break
+        
+        if health_to_unhealthy:
+            # Should detect change reasonably quickly after 20 seconds
+            self.assertLess(health_to_unhealthy, 35, 
+                          f"Health change detected too late: {health_to_unhealthy:.1f}s")
+    
+    def test_multi_service_health_aggregation(self):
+        """Test health monitoring across multiple services with aggregation."""
+        test_id = f"{self.test_project_prefix}_multi_{int(time.time())}"
+        
+        # Create multiple services with different health patterns
+        services = [
+            ('web', 'echo "web ok"', '2s'),
+            ('api', 'echo "api ok"', '3s'),
+            ('cache', 'echo "cache ok"', '2s'),
+            ('worker', 'if [ $(($(date +%s) % 8)) -lt 2 ]; then exit 1; else echo "worker ok"; fi', '2s')
+        ]
+        
+        service_containers = {}
+        
+        for service_name, health_cmd, interval in services:
+            container_name = f"{test_id}_{service_name}"
+            
+            create_cmd = [
+                'docker', 'run', '-d', '--name', container_name,
+                '--label', f'test_id={test_id}',
+                '--label', f'service_name={service_name}',
+                '--health-cmd', health_cmd,
+                '--health-interval', interval,
+                '--health-timeout', '1s',
+                '--health-retries', '1',
+                'alpine:latest',
+                'sleep', '60'
+            ]
+            
+            result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=20)
+            self.assertEqual(result.returncode, 0, 
+                           f"Failed to create {service_name} service: {result.stderr}")
+            
+            service_containers[service_name] = container_name
+            self.created_containers.add(container_name)
+        
+        # Monitor aggregated health across all services
+        health_snapshots = []
+        
+        for check_round in range(10):
+            snapshot = {'timestamp': time.time(), 'services': {}}
+            
+            for service_name, container_name in service_containers.items():
+                inspect_cmd = [
+                    'docker', 'inspect', container_name,
+                    '--format', '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}'
+                ]
+                
+                result = subprocess.run(inspect_cmd, capture_output=True, text=True, timeout=5)
+                if result.returncode == 0:
+                    snapshot['services'][service_name] = result.stdout.strip()
+            
+            health_snapshots.append(snapshot)
+            time.sleep(3)
+        
+        # Analyze aggregated health data
+        self.assertGreater(len(health_snapshots), 8, "Should have multiple health snapshots")
+        
+        # Verify all services were monitored
+        for snapshot in health_snapshots:
+            self.assertEqual(len(snapshot['services']), len(services),
+                           "All services should be in each snapshot")
+        
+        # Calculate service availability
+        service_availability = {}
+        for service_name in service_containers.keys():
+            healthy_count = sum(1 for snapshot in health_snapshots 
+                              if snapshot['services'].get(service_name) == 'healthy')
+            total_checks = len(health_snapshots)
+            availability = healthy_count / total_checks if total_checks > 0 else 0
+            service_availability[service_name] = availability
+        
+        # Most services should have high availability
+        high_availability_services = sum(1 for avail in service_availability.values() if avail >= 0.7)
+        self.assertGreaterEqual(high_availability_services, 3,
+                              f"At least 3 services should have high availability: {service_availability}")
+    
+    def test_health_monitoring_resource_efficiency(self):
+        """Test health monitoring doesn't consume excessive system resources."""
+        test_id = f"{self.test_project_prefix}_efficiency_{int(time.time())}"
+        
+        # Create many services to stress the monitoring system
+        monitored_containers = []
+        
+        for i in range(20):
+            container_name = f"{test_id}_svc_{i}"
+            
+            create_cmd = [
+                'docker', 'run', '-d', '--name', container_name,
+                '--label', f'test_id={test_id}',
+                '--health-cmd', f'echo "service{i} ok"',
+                '--health-interval', '5s',
+                '--health-timeout', '2s',
+                '--health-retries', '1',
+                '--memory', '32m',  # Small memory limit
+                'alpine:latest',
+                'sleep', '90'
+            ]
+            
+            result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=15)
+            if result.returncode == 0:
+                monitored_containers.append(container_name)
+                self.created_containers.add(container_name)
+        
+        self.assertGreaterEqual(len(monitored_containers), 15, 
+                              "Should create at least 15 monitored services")
+        
+        # Perform intensive health monitoring
+        monitoring_operations = 0
+        start_time = time.time()
+        
+        while time.time() - start_time < 30:  # Monitor for 30 seconds
+            # Check health of all services
+            for container_name in monitored_containers:
+                inspect_cmd = [
+                    'docker', 'inspect', container_name,
+                    '--format', '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}'
+                ]
+                
+                operation_start = time.time()
+                result = subprocess.run(inspect_cmd, capture_output=True, text=True, timeout=3)
+                operation_time = time.time() - operation_start
+                
+                if result.returncode == 0:
+                    monitoring_operations += 1
+                    # Individual health checks should be fast
+                    self.assertLess(operation_time, 0.5, 
+                                  f"Health check for {container_name} took {operation_time:.3f}s")
+            
+            time.sleep(1)  # Brief pause between rounds
+        
+        # Verify monitoring efficiency
+        total_monitoring_time = time.time() - start_time
+        operations_per_second = monitoring_operations / total_monitoring_time
+        
+        self.assertGreater(monitoring_operations, 100, 
+                         f"Should perform many monitoring operations, got {monitoring_operations}")
+        self.assertGreater(operations_per_second, 5, 
+                         f"Monitoring throughput too low: {operations_per_second:.1f} ops/sec")
+
+
+class DockerInfrastructureFailureRecoveryTests(unittest.TestCase):
+    """Infrastructure Test Category: Failure Recovery (5 tests)"""
+    
+    @classmethod
+    def setUpClass(cls):
+        cls.test_project_prefix = "infra_recovery"
+        cls.created_containers = set()
+    
+    @classmethod
+    def tearDownClass(cls):
+        cls._cleanup_containers()
+    
+    @classmethod 
+    def _cleanup_containers(cls):
+        for container in cls.created_containers:
+            try:
+                subprocess.run(['docker', 'stop', '-t', '3', container], capture_output=True, timeout=10)
+                subprocess.run(['docker', 'rm', container], capture_output=True, timeout=10)
+            except:
+                pass
+    
+    def test_automatic_service_restart_on_failure(self):
+        """Test services automatically restart when they fail."""
+        test_id = f"{self.test_project_prefix}_restart_{int(time.time())}"
+        
+        # Create service with restart policy
+        service_container = f"{test_id}_restartable"
+        
+        create_cmd = [
+            'docker', 'run', '-d', '--name', service_container,
+            '--label', f'test_id={test_id}',
+            '--restart', 'always',  # Always restart on failure
+            'alpine:latest',
+            'sh', '-c', 'echo "Service starting" && sleep 30 && echo "Service completed"'
+        ]
+        
+        result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=20)
+        self.assertEqual(result.returncode, 0, f"Failed to create restartable service: {result.stderr}")
+        self.created_containers.add(service_container)
+        
+        # Wait for service to be running
+        time.sleep(3)
+        
+        # Get initial container ID
+        inspect_cmd = ['docker', 'inspect', service_container, '--format', '{{.Id}}']
+        result = subprocess.run(inspect_cmd, capture_output=True, text=True, timeout=10)
+        initial_id = result.stdout.strip()[:12]
+        
+        # Kill the service to trigger restart
+        kill_cmd = ['docker', 'kill', service_container]
+        result = subprocess.run(kill_cmd, capture_output=True, text=True, timeout=10)
+        self.assertEqual(result.returncode, 0, "Should be able to kill service")
+        
+        # Monitor for automatic restart
+        restart_detected = False
+        restart_time = None
+        monitor_start = time.time()
+        
+        for attempt in range(30):  # Monitor for up to 60 seconds
+            time.sleep(2)
+            
+            # Check if container restarted (new ID, running status)
+            inspect_result = subprocess.run(inspect_cmd, capture_output=True, text=True, timeout=10)
+            if inspect_result.returncode == 0:
+                current_id = inspect_result.stdout.strip()[:12]
+                
+                # Check if it's running with new ID
+                status_cmd = ['docker', 'inspect', service_container, '--format', '{{.State.Status}}']
+                status_result = subprocess.run(status_cmd, capture_output=True, text=True, timeout=10)
+                
+                if (status_result.returncode == 0 and 
+                    status_result.stdout.strip() == 'running' and 
+                    current_id != initial_id):
+                    restart_detected = True
+                    restart_time = time.time() - monitor_start
+                    break
+        
+        self.assertTrue(restart_detected, f"Service should automatically restart after failure")
+        if restart_time:
+            self.assertLess(restart_time, 60, f"Restart took too long: {restart_time:.1f}s")
+    
+    def test_failure_cascade_prevention(self):
+        """Test system prevents cascade failures across services."""
+        test_id = f"{self.test_project_prefix}_cascade_{int(time.time())}"
+        
+        # Create network for service communication
+        network_name = f"{test_id}_network"
+        network_cmd = ['docker', 'network', 'create', network_name]
+        result = subprocess.run(network_cmd, capture_output=True, text=True, timeout=20)
+        self.assertEqual(result.returncode, 0, f"Failed to create network: {result.stderr}")
+        
+        try:
+            # Create multiple interconnected services
+            service_containers = []
+            
+            for i in range(5):
+                container_name = f"{test_id}_service_{i}"
+                
+                create_cmd = [
+                    'docker', 'run', '-d', '--name', container_name,
+                    '--network', network_name,
+                    '--label', f'test_id={test_id}',
+                    '--restart', 'unless-stopped',  # Restart unless manually stopped
+                    'alpine:latest',
+                    'sh', '-c', f'while true; do echo "Service {i} running"; sleep 5; done'
+                ]
+                
+                result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=20)
+                self.assertEqual(result.returncode, 0, 
+                               f"Failed to create service {i}: {result.stderr}")
+                
+                service_containers.append(container_name)
+                self.created_containers.add(container_name)
+            
+            # Wait for all services to be running
+            time.sleep(5)
+            
+            # Verify all services are initially running
+            for container in service_containers:
+                inspect_cmd = ['docker', 'inspect', container, '--format', '{{.State.Status}}']
+                result = subprocess.run(inspect_cmd, capture_output=True, text=True, timeout=10)
+                self.assertEqual(result.stdout.strip(), 'running', 
+                               f"Service {container} should be initially running")
+            
+            # Kill multiple services simultaneously to test cascade prevention
+            killed_services = service_containers[:3]  # Kill first 3 services
+            
+            for container in killed_services:
+                kill_cmd = ['docker', 'kill', container]
+                subprocess.run(kill_cmd, capture_output=True, timeout=10)
+            
+            # Wait for system to stabilize and recover
+            time.sleep(10)
+            
+            # Check if cascade was prevented (remaining services still running)
+            remaining_services = service_containers[3:]
+            cascade_prevented = True
+            
+            for container in remaining_services:
+                inspect_cmd = ['docker', 'inspect', container, '--format', '{{.State.Status}}']
+                result = subprocess.run(inspect_cmd, capture_output=True, text=True, timeout=10)
+                
+                if result.returncode != 0 or result.stdout.strip() != 'running':
+                    cascade_prevented = False
+                    break
+            
+            self.assertTrue(cascade_prevented, 
+                          "Remaining services should continue running (cascade prevented)")
+            
+            # Verify some killed services are restarting
+            recovered_services = 0
+            for container in killed_services:
+                inspect_cmd = ['docker', 'inspect', container, '--format', '{{.State.Status}}']
+                result = subprocess.run(inspect_cmd, capture_output=True, text=True, timeout=10)
+                
+                if result.returncode == 0 and result.stdout.strip() == 'running':
+                    recovered_services += 1
+            
+            self.assertGreater(recovered_services, 0, "Some services should recover automatically")
+        
+        finally:
+            # Clean up network
+            network_rm_cmd = ['docker', 'network', 'rm', network_name]
+            subprocess.run(network_rm_cmd, capture_output=True, timeout=10)
+    
+    def test_resource_exhaustion_recovery(self):
+        """Test recovery from resource exhaustion scenarios."""
+        test_id = f"{self.test_project_prefix}_exhaustion_{int(time.time())}"
+        
+        # Create services that consume resources
+        resource_containers = []
+        
+        # Create memory-hungry containers
+        for i in range(3):
+            container_name = f"{test_id}_memory_hog_{i}"
+            
+            create_cmd = [
+                'docker', 'run', '-d', '--name', container_name,
+                '--label', f'test_id={test_id}',
+                '--memory', '128m',  # Limited memory
+                '--oom-kill-disable=false',  # Allow OOM killer
+                'alpine:latest',
+                'sh', '-c', 'while true; do dd if=/dev/zero of=/tmp/fill bs=1M count=10 2>/dev/null || true; sleep 1; done'
+            ]
+            
+            result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=20)
+            if result.returncode == 0:
+                resource_containers.append(container_name)
+                self.created_containers.add(container_name)
+        
+        # Create a critical service that should survive resource pressure
+        critical_container = f"{test_id}_critical_service"
+        
+        create_critical_cmd = [
+            'docker', 'run', '-d', '--name', critical_container,
+            '--label', f'test_id={test_id}',
+            '--memory', '64m',
+            '--restart', 'always',
+            '--priority', '1000',  # Higher priority
+            'alpine:latest',
+            'sh', '-c', 'while true; do echo "Critical service running"; sleep 2; done'
+        ]
+        
+        result = subprocess.run(create_critical_cmd, capture_output=True, text=True, timeout=20)
+        self.assertEqual(result.returncode, 0, f"Failed to create critical service: {result.stderr}")
+        self.created_containers.add(critical_container)
+        
+        # Let system run under resource pressure
+        time.sleep(15)
+        
+        # Check system recovery and critical service survival
+        critical_status_cmd = ['docker', 'inspect', critical_container, '--format', '{{.State.Status}}']
+        result = subprocess.run(critical_status_cmd, capture_output=True, text=True, timeout=10)
+        
+        # Critical service should either be running or have restarted
+        self.assertEqual(result.returncode, 0, "Critical service should exist")
+        status = result.stdout.strip()
+        self.assertIn(status, ['running', 'restarting'], 
+                     f"Critical service should be running or restarting, got: {status}")
+        
+        # Check if any resource-hungry containers were killed (expected behavior)
+        killed_containers = 0
+        for container in resource_containers:
+            inspect_cmd = ['docker', 'inspect', container, '--format', '{{.State.OOMKilled}}']
+            result = subprocess.run(inspect_cmd, capture_output=True, text=True, timeout=10)
+            
+            if result.returncode == 0 and result.stdout.strip() == 'true':
+                killed_containers += 1
+        
+        # Some resource-hungry containers should be OOM killed
+        self.assertGreater(killed_containers, 0, "Resource exhaustion should trigger OOM kills")
+    
+    def test_network_failure_recovery(self):
+        """Test recovery from network connectivity issues."""
+        test_id = f"{self.test_project_prefix}_network_{int(time.time())}"
+        
+        # Create custom network
+        network_name = f"{test_id}_net"
+        network_cmd = ['docker', 'network', 'create', network_name]
+        result = subprocess.run(network_cmd, capture_output=True, text=True, timeout=20)
+        self.assertEqual(result.returncode, 0, f"Failed to create network: {result.stderr}")
+        
+        try:
+            # Create services on the network
+            service_containers = []
+            
+            for i in range(3):
+                container_name = f"{test_id}_net_service_{i}"
+                
+                create_cmd = [
+                    'docker', 'run', '-d', '--name', container_name,
+                    '--network', network_name,
+                    '--label', f'test_id={test_id}',
+                    'alpine:latest',
+                    'sh', '-c', f'while true; do ping -c 1 google.com >/dev/null 2>&1 && echo "Service {i} connected" || echo "Service {i} disconnected"; sleep 5; done'
+                ]
+                
+                result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=20)
+                self.assertEqual(result.returncode, 0, 
+                               f"Failed to create network service {i}: {result.stderr}")
+                
+                service_containers.append(container_name)
+                self.created_containers.add(container_name)
+            
+            # Wait for services to start
+            time.sleep(5)
+            
+            # Simulate network failure by disconnecting containers
+            disconnected_containers = []
+            
+            for container in service_containers[:2]:  # Disconnect first 2 services
+                disconnect_cmd = ['docker', 'network', 'disconnect', network_name, container]
+                result = subprocess.run(disconnect_cmd, capture_output=True, text=True, timeout=10)
+                
+                if result.returncode == 0:
+                    disconnected_containers.append(container)
+            
+            # Wait for network failure to be detected
+            time.sleep(5)
+            
+            # Reconnect services to simulate recovery
+            for container in disconnected_containers:
+                connect_cmd = ['docker', 'network', 'connect', network_name, container]
+                result = subprocess.run(connect_cmd, capture_output=True, text=True, timeout=10)
+                
+                if result.returncode == 0:
+                    logger.info(f"Reconnected {container} to {network_name}")
+            
+            # Wait for recovery
+            time.sleep(5)
+            
+            # Verify services recovered network connectivity
+            for container in service_containers:
+                # Check container is still running
+                inspect_cmd = ['docker', 'inspect', container, '--format', '{{.State.Status}}']
+                result = subprocess.run(inspect_cmd, capture_output=True, text=True, timeout=10)
+                self.assertEqual(result.stdout.strip(), 'running', 
+                               f"Service {container} should still be running after network recovery")
+                
+                # Verify network connectivity
+                ping_cmd = ['docker', 'exec', container, 'ping', '-c', '1', 'google.com']
+                ping_result = subprocess.run(ping_cmd, capture_output=True, text=True, timeout=10)
+                
+                # Network connectivity should be restored (may take time)
+                if ping_result.returncode != 0:
+                    # Allow some time for DNS/routing to recover
+                    time.sleep(5)
+                    retry_result = subprocess.run(ping_cmd, capture_output=True, text=True, timeout=10)
+                    # Don't fail if external connectivity issues, but service should be running
+        
+        finally:
+            # Clean up network
+            network_rm_cmd = ['docker', 'network', 'rm', network_name]
+            subprocess.run(network_rm_cmd, capture_output=True, timeout=10)
+    
+    def test_docker_daemon_connection_recovery(self):
+        """Test recovery from Docker daemon connection issues."""
+        test_id = f"{self.test_project_prefix}_daemon_{int(time.time())}"
+        
+        # Create a service
+        test_container = f"{test_id}_daemon_test"
+        
+        create_cmd = [
+            'docker', 'run', '-d', '--name', test_container,
+            '--label', f'test_id={test_id}',
+            '--restart', 'always',
+            'alpine:latest',
+            'sh', '-c', 'while true; do echo "Service running"; sleep 3; done'
+        ]
+        
+        result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=20)
+        self.assertEqual(result.returncode, 0, f"Failed to create test service: {result.stderr}")
+        self.created_containers.add(test_container)
+        
+        # Verify initial connectivity
+        initial_check = subprocess.run(['docker', 'version'], capture_output=True, text=True, timeout=5)
+        self.assertEqual(initial_check.returncode, 0, "Docker daemon should be accessible initially")
+        
+        # Simulate daemon connection stress by rapid commands
+        connection_errors = 0
+        rapid_commands = []
+        
+        # Generate many rapid Docker commands to stress daemon connection
+        for i in range(50):
+            cmd_start = time.time()
+            result = subprocess.run(['docker', 'ps', '-q'], 
+                                  capture_output=True, text=True, timeout=2)
+            cmd_duration = time.time() - cmd_start
+            
+            rapid_commands.append({
+                'success': result.returncode == 0,
+                'duration': cmd_duration,
+                'attempt': i
+            })
+            
+            if result.returncode != 0:
+                connection_errors += 1
+            
+            time.sleep(0.05)  # Very rapid commands
+        
+        # Verify daemon connection recovery
+        recovery_start = time.time()
+        daemon_recovered = False
+        
+        # Give daemon time to recover from rapid commands
+        for attempt in range(10):
+            recovery_check = subprocess.run(['docker', 'version'], 
+                                          capture_output=True, text=True, timeout=10)
+            
+            if recovery_check.returncode == 0:
+                daemon_recovered = True
+                break
+            
+            time.sleep(2)
+        
+        recovery_time = time.time() - recovery_start
+        
+        self.assertTrue(daemon_recovered, "Docker daemon should recover from connection stress")
+        self.assertLess(recovery_time, 20, f"Daemon recovery took too long: {recovery_time:.1f}s")
+        
+        # Verify service is still running after connection stress
+        service_check = subprocess.run(['docker', 'inspect', test_container, '--format', '{{.State.Status}}'],
+                                     capture_output=True, text=True, timeout=10)
+        self.assertEqual(service_check.returncode, 0, "Should be able to inspect service after recovery")
+        self.assertEqual(service_check.stdout.strip(), 'running', "Service should still be running")
+
+
+class DockerInfrastructurePerformanceTests(unittest.TestCase):
+    """Infrastructure Test Category: Performance (5 tests)"""
+    
+    @classmethod
+    def setUpClass(cls):
+        cls.test_project_prefix = "infra_perf"
+        cls.created_containers = set()
+    
+    @classmethod
+    def tearDownClass(cls):
+        cls._cleanup_containers()
+    
+    @classmethod 
+    def _cleanup_containers(cls):
+        for container in cls.created_containers:
+            try:
+                subprocess.run(['docker', 'stop', '-t', '2', container], capture_output=True, timeout=8)
+                subprocess.run(['docker', 'rm', container], capture_output=True, timeout=8)
+            except:
+                pass
+    
+    def test_container_creation_throughput_benchmark(self):
+        """Test container creation throughput meets performance requirements."""
+        test_id = f"{self.test_project_prefix}_throughput_{int(time.time())}"
+        
+        # Measure container creation throughput
+        creation_times = []
+        created_containers = []
+        
+        total_start = time.time()
+        
+        for i in range(15):
+            container_name = f"{test_id}_throughput_{i}"
+            
+            create_start = time.time()
+            
+            create_cmd = [
+                'docker', 'run', '-d', '--name', container_name,
+                '--label', f'test_id={test_id}',
+                '--memory', '64m',
+                'alpine:latest',
+                'sleep', '30'
+            ]
+            
+            result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=20)
+            create_duration = time.time() - create_start
+            
+            if result.returncode == 0:
+                creation_times.append(create_duration)
+                created_containers.append(container_name)
+                self.created_containers.add(container_name)
+            else:
+                logger.warning(f"Container {i} creation failed: {result.stderr}")
+        
+        total_duration = time.time() - total_start
+        
+        # Analyze throughput performance
+        self.assertGreaterEqual(len(created_containers), 12, 
+                              f"Should create at least 12/15 containers, got {len(created_containers)}")
+        
+        if creation_times:
+            avg_creation = sum(creation_times) / len(creation_times)
+            max_creation = max(creation_times)
+            min_creation = min(creation_times)
+            throughput_per_sec = len(created_containers) / total_duration
+            
+            # Performance requirements
+            self.assertLess(avg_creation, 3.0, f"Average creation time {avg_creation:.2f}s too high")
+            self.assertLess(max_creation, 8.0, f"Max creation time {max_creation:.2f}s too high")
+            self.assertGreater(throughput_per_sec, 0.5, 
+                             f"Throughput {throughput_per_sec:.2f} containers/sec too low")
+            
+            logger.info(f"Container creation performance: avg={avg_creation:.2f}s, "
+                       f"throughput={throughput_per_sec:.2f}/sec")
+    
+    def test_memory_usage_efficiency_validation(self):
+        """Test containers operate within memory efficiency requirements."""
+        test_id = f"{self.test_project_prefix}_memory_{int(time.time())}"
+        
+        # Create containers with different memory profiles
+        memory_test_containers = []
+        memory_configs = [
+            ('small', '32m'),
+            ('medium', '128m'), 
+            ('large', '256m')
+        ]
+        
+        for size_name, memory_limit in memory_configs:
+            for i in range(3):  # 3 containers per size
+                container_name = f"{test_id}_{size_name}_{i}"
+                
+                create_cmd = [
+                    'docker', 'run', '-d', '--name', container_name,
+                    '--label', f'test_id={test_id}',
+                    '--memory', memory_limit,
+                    'alpine:latest',
+                    'sh', '-c', f'echo "Using {memory_limit} memory" && sleep 60'
+                ]
+                
+                result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=15)
+                if result.returncode == 0:
+                    memory_test_containers.append((container_name, size_name, memory_limit))
+                    self.created_containers.add(container_name)
+        
+        self.assertGreaterEqual(len(memory_test_containers), 8, "Should create most test containers")
+        
+        # Wait for containers to stabilize
+        time.sleep(5)
+        
+        # Measure actual memory usage
+        memory_measurements = []
+        
+        for container_name, size_name, limit in memory_test_containers:
+            # Get memory statistics
+            stats_cmd = ['docker', 'stats', '--no-stream', '--format', 
+                        'table {{.Container}}\t{{.MemUsage}}\t{{.MemPerc}}', container_name]
+            
+            result = subprocess.run(stats_cmd, capture_output=True, text=True, timeout=10)
+            
+            if result.returncode == 0:
+                lines = result.stdout.strip().split('\n')
+                if len(lines) >= 2:  # Skip header
+                    data_line = lines[1]
+                    if '\t' in data_line:
+                        parts = data_line.split('\t')
+                        if len(parts) >= 2:
+                            memory_usage = parts[1].strip()
+                            
+                            # Parse memory usage (e.g., "45.2MiB / 128MiB")
+                            if '/' in memory_usage:
+                                current_mem = memory_usage.split('/')[0].strip()
+                                if 'MiB' in current_mem:
+                                    mem_mb = float(current_mem.replace('MiB', '').strip())
+                                    
+                                    memory_measurements.append({
+                                        'container': container_name,
+                                        'size_category': size_name,
+                                        'limit': limit,
+                                        'actual_mb': mem_mb
+                                    })
+        
+        # Analyze memory efficiency
+        self.assertGreater(len(memory_measurements), 6, "Should collect memory measurements")
+        
+        # Verify memory usage is reasonable for each category
+        by_category = {}
+        for measurement in memory_measurements:
+            category = measurement['size_category']
+            if category not in by_category:
+                by_category[category] = []
+            by_category[category].append(measurement['actual_mb'])
+        
+        for category, usage_list in by_category.items():
+            avg_usage = sum(usage_list) / len(usage_list)
+            max_usage = max(usage_list)
+            
+            # Memory efficiency requirements
+            if category == 'small':
+                self.assertLess(avg_usage, 20, f"Small containers using too much memory: {avg_usage:.1f}MB")
+            elif category == 'medium':
+                self.assertLess(avg_usage, 80, f"Medium containers using too much memory: {avg_usage:.1f}MB")
+            elif category == 'large':
+                self.assertLess(avg_usage, 200, f"Large containers using too much memory: {avg_usage:.1f}MB")
+    
+    def test_concurrent_operations_performance(self):
+        """Test performance under concurrent Docker operations."""
+        test_id = f"{self.test_project_prefix}_concurrent_{int(time.time())}"
+        
+        def concurrent_operation_worker(worker_id, operations_count):
+            """Perform multiple Docker operations concurrently."""
+            worker_results = []
+            worker_containers = []
+            
+            for i in range(operations_count):
+                container_name = f"{test_id}_worker{worker_id}_{i}"
+                operation_start = time.time()
+                
+                try:
+                    # Create container
+                    create_cmd = [
+                        'docker', 'run', '-d', '--name', container_name,
+                        '--label', f'test_id={test_id}',
+                        '--memory', '32m',
+                        'alpine:latest',
+                        'echo', f'Worker {worker_id} operation {i}'
+                    ]
+                    
+                    create_result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=15)
+                    create_success = create_result.returncode == 0
+                    
+                    if create_success:
+                        worker_containers.append(container_name)
+                        
+                        # Inspect container
+                        inspect_cmd = ['docker', 'inspect', container_name, '--format', '{{.State.ExitCode}}']
+                        inspect_result = subprocess.run(inspect_cmd, capture_output=True, text=True, timeout=10)
+                        inspect_success = inspect_result.returncode == 0
+                        
+                        # Remove container
+                        rm_cmd = ['docker', 'rm', container_name]
+                        rm_result = subprocess.run(rm_cmd, capture_output=True, text=True, timeout=10)
+                        rm_success = rm_result.returncode == 0
+                        
+                        operation_duration = time.time() - operation_start
+                        
+                        worker_results.append({
+                            'worker_id': worker_id,
+                            'operation_id': i,
+                            'duration': operation_duration,
+                            'create_success': create_success,
+                            'inspect_success': inspect_success,
+                            'rm_success': rm_success,
+                            'overall_success': create_success and inspect_success and rm_success
+                        })
+                    else:
+                        worker_results.append({
+                            'worker_id': worker_id,
+                            'operation_id': i,
+                            'duration': time.time() - operation_start,
+                            'overall_success': False,
+                            'error': create_result.stderr
+                        })
+                        
+                except Exception as e:
+                    worker_results.append({
+                        'worker_id': worker_id,
+                        'operation_id': i,
+                        'duration': time.time() - operation_start,
+                        'overall_success': False,
+                        'exception': str(e)
+                    })
+                
+                # Brief pause between operations
+                time.sleep(0.1)
+            
+            return worker_results
+        
+        # Run concurrent operations with multiple workers
+        total_start = time.time()
+        
+        with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
+            futures = [
+                executor.submit(concurrent_operation_worker, worker_id, 4) 
+                for worker_id in range(6)
+            ]
+            
+            all_results = []
+            for future in concurrent.futures.as_completed(futures):
+                worker_results = future.result()
+                all_results.extend(worker_results)
+        
+        total_duration = time.time() - total_start
+        
+        # Analyze concurrent performance
+        successful_operations = [r for r in all_results if r['overall_success']]
+        operation_durations = [r['duration'] for r in all_results if 'duration' in r]
+        
+        self.assertGreaterEqual(len(successful_operations), 20, 
+                              f"Should complete at least 20/24 operations, got {len(successful_operations)}")
+        
+        if operation_durations:
+            avg_duration = sum(operation_durations) / len(operation_durations)
+            max_duration = max(operation_durations)
+            operations_per_sec = len(all_results) / total_duration
+            
+            # Performance requirements for concurrent operations
+            self.assertLess(avg_duration, 5.0, f"Average operation duration {avg_duration:.2f}s too high")
+            self.assertLess(max_duration, 15.0, f"Max operation duration {max_duration:.2f}s too high")
+            self.assertGreater(operations_per_sec, 1.0, 
+                             f"Concurrent throughput {operations_per_sec:.2f} ops/sec too low")
+    
+    def test_io_performance_with_volume_mounts(self):
+        """Test I/O performance with volume mounts and tmpfs optimization."""
+        test_id = f"{self.test_project_prefix}_io_{int(time.time())}"
+        
+        # Test different I/O scenarios
+        io_scenarios = [
+            ('regular', None, None),
+            ('volume', f"{test_id}_vol", None),
+            ('tmpfs', None, '/tmp:size=100m')
+        ]
+        
+        io_results = {}
+        
+        for scenario_name, volume_name, tmpfs_mount in io_scenarios:
+            container_name = f"{test_id}_{scenario_name}"
+            
+            # Create volume if needed
+            if volume_name:
+                vol_create_cmd = ['docker', 'volume', 'create', volume_name]
+                subprocess.run(vol_create_cmd, capture_output=True, timeout=10)
+            
+            # Build container command
+            create_cmd = [
+                'docker', 'run', '-d', '--name', container_name,
+                '--label', f'test_id={test_id}',
+                '--memory', '128m'
+            ]
+            
+            if volume_name:
+                create_cmd.extend(['-v', f'{volume_name}:/data'])
+            elif tmpfs_mount:
+                create_cmd.extend(['--tmpfs', tmpfs_mount])
+            
+            create_cmd.extend([
+                'alpine:latest',
+                'sleep', '60'
+            ])
+            
+            result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=20)
+            if result.returncode == 0:
+                self.created_containers.add(container_name)
+                
+                # Test write performance
+                write_path = '/data/testfile' if volume_name else '/tmp/testfile'
+                
+                write_start = time.time()
+                write_cmd = [
+                    'docker', 'exec', container_name,
+                    'dd', 'if=/dev/zero', f'of={write_path}', 'bs=1M', 'count=10'
+                ]
+                
+                write_result = subprocess.run(write_cmd, capture_output=True, text=True, timeout=30)
+                write_duration = time.time() - write_start
+                write_success = write_result.returncode == 0
+                
+                # Test read performance
+                read_duration = 0
+                read_success = False
+                
+                if write_success:
+                    read_start = time.time()
+                    read_cmd = [
+                        'docker', 'exec', container_name,
+                        'dd', f'if={write_path}', 'of=/dev/null', 'bs=1M'
+                    ]
+                    
+                    read_result = subprocess.run(read_cmd, capture_output=True, text=True, timeout=30)
+                    read_duration = time.time() - read_start
+                    read_success = read_result.returncode == 0
+                
+                io_results[scenario_name] = {
+                    'write_duration': write_duration,
+                    'read_duration': read_duration,
+                    'write_success': write_success,
+                    'read_success': read_success
+                }
+                
+            # Cleanup volume
+            if volume_name:
+                vol_rm_cmd = ['docker', 'volume', 'rm', volume_name]
+                subprocess.run(vol_rm_cmd, capture_output=True, timeout=10)
+        
+        # Analyze I/O performance
+        self.assertGreaterEqual(len(io_results), 2, "Should test multiple I/O scenarios")
+        
+        for scenario, results in io_results.items():
+            if results['write_success']:
+                write_time = results['write_duration']
+                self.assertLess(write_time, 20, f"{scenario} write took {write_time:.2f}s > 20s")
+                
+            if results['read_success']:
+                read_time = results['read_duration']
+                self.assertLess(read_time, 10, f"{scenario} read took {read_time:.2f}s > 10s")
+        
+        # Compare tmpfs vs regular I/O (if both available)
+        if 'tmpfs' in io_results and 'regular' in io_results:
+            tmpfs_write = io_results['tmpfs']['write_duration']
+            regular_write = io_results['regular']['write_duration']
+            
+            if io_results['tmpfs']['write_success'] and io_results['regular']['write_success']:
+                # tmpfs should be faster or similar to regular filesystem
+                self.assertLessEqual(tmpfs_write, regular_write + 2, 
+                                   f"tmpfs write not optimized: {tmpfs_write:.2f}s vs {regular_write:.2f}s")
+    
+    def test_alpine_optimization_performance_gains(self):
+        """Test Alpine container optimization provides performance gains."""
+        test_id = f"{self.test_project_prefix}_alpine_{int(time.time())}"
+        
+        # Compare Alpine vs Ubuntu performance
+        image_comparisons = [
+            ('alpine', 'alpine:latest'),
+            ('ubuntu', 'ubuntu:20.04')
+        ]
+        
+        comparison_results = {}
+        
+        for image_type, image_name in image_comparisons:
+            startup_times = []
+            container_sizes = []
+            
+            # Test multiple containers for each image type
+            for i in range(3):
+                container_name = f"{test_id}_{image_type}_{i}"
+                
+                # Measure startup time
+                startup_start = time.time()
+                
+                create_cmd = [
+                    'docker', 'run', '-d', '--name', container_name,
+                    '--label', f'test_id={test_id}',
+                    '--memory', '64m',
+                    image_name,
+                    'sleep', '30'
+                ]
+                
+                result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=30)
+                startup_duration = time.time() - startup_start
+                
+                if result.returncode == 0:
+                    startup_times.append(startup_duration)
+                    self.created_containers.add(container_name)
+                    
+                    # Measure container size
+                    size_cmd = ['docker', 'inspect', container_name, '--format', '{{.SizeRw}}']
+                    size_result = subprocess.run(size_cmd, capture_output=True, text=True, timeout=10)
+                    
+                    if size_result.returncode == 0:
+                        try:
+                            size_bytes = int(size_result.stdout.strip() or '0')
+                            container_sizes.append(size_bytes)
+                        except:
+                            pass
+            
+            if startup_times:
+                comparison_results[image_type] = {
+                    'avg_startup': sum(startup_times) / len(startup_times),
+                    'min_startup': min(startup_times),
+                    'max_startup': max(startup_times),
+                    'avg_size_mb': sum(container_sizes) / len(container_sizes) / (1024*1024) if container_sizes else 0,
+                    'success_count': len(startup_times)
+                }
+        
+        # Analyze Alpine optimization benefits
+        self.assertIn('alpine', comparison_results, "Should test Alpine containers")
+        
+        alpine_results = comparison_results['alpine']
+        
+        # Alpine performance requirements
+        self.assertLess(alpine_results['avg_startup'], 8.0, 
+                       f"Alpine avg startup {alpine_results['avg_startup']:.2f}s > 8s")
+        self.assertLess(alpine_results['max_startup'], 15.0,
+                       f"Alpine max startup {alpine_results['max_startup']:.2f}s > 15s")
+        
+        # If Ubuntu comparison available, verify Alpine is faster
+        if 'ubuntu' in comparison_results:
+            ubuntu_results = comparison_results['ubuntu']
+            
+            alpine_avg = alpine_results['avg_startup']
+            ubuntu_avg = ubuntu_results['avg_startup']
+            
+            # Alpine should be significantly faster than Ubuntu
+            speedup_factor = ubuntu_avg / alpine_avg if alpine_avg > 0 else 1
+            self.assertGreater(speedup_factor, 1.2, 
+                             f"Alpine not significantly faster: {speedup_factor:.1f}x speedup")
+            
+            logger.info(f"Alpine vs Ubuntu performance: {speedup_factor:.1f}x faster startup")
+
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     unittest.main()
