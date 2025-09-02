@@ -156,11 +156,35 @@ class SupervisorAgent(BaseAgent):
         return None
     
     
-    def _get_pipeline_executor_with_session(self, session: AsyncSession) -> PipelineExecutor:
-        """Create pipeline executor instance with given session - no global storage."""
-        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
-        engine = ExecutionEngine(self.registry)
-        return PipelineExecutor(engine, self.websocket_manager, session)
+    async def _get_pipeline_executor_with_session(self, session: AsyncSession) -> PipelineExecutor:
+        """Create pipeline executor instance with given session using factory pattern - no global storage."""
+        
+        # NEW: Use ExecutionEngineFactory instead of singleton ExecutionEngine
+        from netra_backend.app.agents.supervisor.execution_factory import get_execution_engine_factory
+        
+        if not self.user_context:
+            # Fallback to legacy if no user context (backward compatibility)
+            logger.warning("No user context available for factory pattern - falling back to legacy ExecutionEngine")
+            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            engine = ExecutionEngine(self.registry)
+            return PipelineExecutor(engine, self.websocket_manager, session)
+        
+        try:
+            # Get factory instance
+            execution_factory = get_execution_engine_factory()
+            
+            # Create isolated execution engine for this user
+            isolated_engine = await execution_factory.create_execution_engine(self.user_context)
+            
+            logger.info(f"✅ Created isolated execution engine for user {self.user_context.user_id} using factory pattern")
+            return PipelineExecutor(isolated_engine, self.websocket_manager, session)
+            
+        except Exception as e:
+            # Fallback to legacy pattern if factory fails
+            logger.warning(f"Factory execution engine creation failed, falling back to legacy: {e}")
+            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            engine = ExecutionEngine(self.registry)
+            return PipelineExecutor(engine, self.websocket_manager, session)
     
 
     # === SSOT Abstract Method Implementations ===

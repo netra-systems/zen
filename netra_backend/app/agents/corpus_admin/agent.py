@@ -6,10 +6,13 @@ improved reliability, and comprehensive monitoring.
 """
 
 import time
+import uuid
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
 if TYPE_CHECKING:
     from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+    from netra_backend.app.database.session_manager import DatabaseSessionManager
 
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.errors import ValidationError
@@ -97,8 +100,59 @@ class CorpusAdminSubAgent(BaseAgent):
         await self._validate_corpus_admin_dependencies()
         return True
     
+    async def execute_with_context(self, context: 'UserExecutionContext', stream_updates: bool = False) -> Dict[str, Any]:
+        """Execute corpus administration with proper session isolation.
+        
+        NEW: This method uses UserExecutionContext with database session isolation.
+        
+        Args:
+            context: User execution context with database session
+            stream_updates: Whether to stream progress updates
+            
+        Returns:
+            Dict with corpus administration results
+        """
+        logger.info(f"CorpusAdminSubAgent executing for user {context.user_id}, run {context.run_id}")
+        
+        # Validate session isolation
+        self._validate_session_isolation()
+        
+        # Import session manager dynamically to avoid circular dependency  
+        from netra_backend.app.database.session_manager import DatabaseSessionManager
+        
+        # Get database session manager for this request
+        session_manager = DatabaseSessionManager(context)
+        
+        try:
+            await self.emit_agent_started("Starting corpus administration...")
+            
+            # Check if corpus admin operation is needed
+            if not await self._is_corpus_admin_needed(context):
+                result = {"status": "skipped", "reason": "Corpus administration not required"}
+                await self.emit_agent_completed(result)
+                return result
+            
+            # Execute corpus administration workflow with session isolation
+            result = await self._execute_corpus_workflow_with_session(context, session_manager)
+            
+            await self.emit_agent_completed(result)
+            logger.info(f"CorpusAdminSubAgent completed for user {context.user_id}")
+            return result
+            
+        except Exception as e:
+            error_msg = f"Corpus administration failed: {str(e)}"
+            logger.error(error_msg)
+            await self.emit_error(error_msg, "CorpusAdminError")
+            
+            # Ensure session is rolled back on error
+            await session_manager.rollback()
+            raise
+        finally:
+            # Ensure session is closed
+            await session_manager.close()
+    
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
-        """Execute core corpus administration logic."""
+        """Execute core corpus administration logic (legacy compatibility)."""
         self._execution_monitor.start_operation(f"corpus_admin_execution_{context.run_id}")
         await self.send_status_update(context, "executing", "Starting corpus administration...")
         
@@ -321,3 +375,169 @@ class CorpusAdminSubAgent(BaseAgent):
         corpus_keywords = ["corpus", "knowledge base", "documentation", "reference data", "embeddings"]
         request_lower = state.user_request.lower()
         return any(keyword in request_lower for keyword in corpus_keywords)
+    
+    # === NEW: Session-based execution methods ===
+    
+    async def _is_corpus_admin_needed(self, context: 'UserExecutionContext') -> bool:
+        """Check if corpus administration is needed for this request.
+        
+        Args:
+            context: User execution context
+            
+        Returns:
+            True if corpus administration is required
+        """
+        # Check metadata for corpus indicators
+        metadata = context.metadata or {}
+        if metadata.get("requires_corpus_admin", False):
+            return True
+        
+        # Check for corpus-related keywords (if available in metadata)
+        user_request = metadata.get("user_request", "")
+        if user_request:
+            corpus_keywords = ["corpus", "knowledge base", "documentation", "reference data", "embeddings"]
+            request_lower = user_request.lower()
+            if any(keyword in request_lower for keyword in corpus_keywords):
+                return True
+        
+        # Default to requiring corpus admin for safety
+        logger.debug(f"No clear corpus admin requirement for user {context.user_id}, defaulting to required")
+        return True
+    
+    async def _execute_corpus_workflow_with_session(
+        self, context: 'UserExecutionContext', session_manager: 'DatabaseSessionManager'
+    ) -> Dict[str, Any]:
+        """Execute corpus administration workflow with session isolation.
+        
+        Args:
+            context: User execution context
+            session_manager: Database session manager for this request
+            
+        Returns:
+            Dictionary with corpus operation results
+        """
+        logger.info(f"Executing corpus workflow for user {context.user_id}")
+        
+        await self.emit_thinking("Analyzing corpus administration requirements...")
+        
+        # Create operation request from context
+        operation_request = await self._create_operation_request_from_context(context)
+        
+        await self.emit_thinking(f"Processing {operation_request.get('operation_type', 'unknown')} operation...")
+        
+        # Execute with proper session isolation
+        try:
+            # Use transaction for atomic operations
+            async with session_manager.transaction() as session:
+                # Execute corpus operations within transaction
+                result = await self._execute_corpus_operation_with_transaction(
+                    operation_request, context, session
+                )
+                
+                # Commit transaction on success
+                await session_manager.commit()
+                
+                logger.info(f"Corpus operation completed successfully for user {context.user_id}")
+                return {
+                    "status": "completed",
+                    "operation_type": operation_request.get("operation_type", "unknown"),
+                    "result": result,
+                    "user_id": context.user_id,
+                    "run_id": context.run_id
+                }
+                
+        except Exception as e:
+            logger.error(f"Corpus operation failed for user {context.user_id}: {e}")
+            # Session manager will handle rollback automatically
+            raise
+    
+    async def _create_operation_request_from_context(self, context: 'UserExecutionContext') -> Dict[str, Any]:
+        """Create corpus operation request from user context.
+        
+        Args:
+            context: User execution context
+            
+        Returns:
+            Dictionary with operation request details
+        """
+        metadata = context.metadata or {}
+        
+        return {
+            "operation_type": metadata.get("operation_type", "analyze"),
+            "user_request": metadata.get("user_request", ""),
+            "corpus_type": metadata.get("corpus_type", "general"),
+            "user_id": context.user_id,
+            "thread_id": context.thread_id,
+            "run_id": context.run_id
+        }
+    
+    async def _execute_corpus_operation_with_transaction(
+        self, operation_request: Dict[str, Any], context: 'UserExecutionContext', session: Any
+    ) -> Dict[str, Any]:
+        """Execute corpus operation within database transaction.
+        
+        Args:
+            operation_request: Operation request details
+            context: User execution context
+            session: Database session within transaction
+            
+        Returns:
+            Operation results
+        """
+        operation_type = operation_request.get("operation_type", "analyze")
+        
+        # Simulate corpus operations (replace with actual implementation)
+        if operation_type == "create":
+            result = await self._create_corpus_entry(operation_request, session)
+        elif operation_type == "update":
+            result = await self._update_corpus_entry(operation_request, session)
+        elif operation_type == "delete":
+            result = await self._delete_corpus_entry(operation_request, session)
+        else:
+            result = await self._analyze_corpus_requirements(operation_request, session)
+        
+        return result
+    
+    async def _create_corpus_entry(self, operation_request: Dict[str, Any], session: Any) -> Dict[str, Any]:
+        """Create new corpus entry (placeholder implementation)."""
+        logger.info(f"Creating corpus entry for user {operation_request.get('user_id')}")
+        # TODO: Implement actual corpus creation logic
+        return {
+            "action": "create",
+            "corpus_id": f"corpus_{uuid.uuid4().hex[:8]}",
+            "status": "created"
+        }
+    
+    async def _update_corpus_entry(self, operation_request: Dict[str, Any], session: Any) -> Dict[str, Any]:
+        """Update existing corpus entry (placeholder implementation)."""
+        logger.info(f"Updating corpus entry for user {operation_request.get('user_id')}")
+        # TODO: Implement actual corpus update logic
+        return {
+            "action": "update",
+            "corpus_id": operation_request.get("corpus_id", "unknown"),
+            "status": "updated"
+        }
+    
+    async def _delete_corpus_entry(self, operation_request: Dict[str, Any], session: Any) -> Dict[str, Any]:
+        """Delete corpus entry (placeholder implementation)."""
+        logger.info(f"Deleting corpus entry for user {operation_request.get('user_id')}")
+        # TODO: Implement actual corpus deletion logic
+        return {
+            "action": "delete",
+            "corpus_id": operation_request.get("corpus_id", "unknown"),
+            "status": "deleted"
+        }
+    
+    async def _analyze_corpus_requirements(self, operation_request: Dict[str, Any], session: Any) -> Dict[str, Any]:
+        """Analyze corpus requirements (placeholder implementation)."""
+        logger.info(f"Analyzing corpus requirements for user {operation_request.get('user_id')}")
+        # TODO: Implement actual corpus analysis logic
+        return {
+            "action": "analyze",
+            "requirements": {
+                "corpus_type": operation_request.get("corpus_type", "general"),
+                "estimated_size": "medium",
+                "processing_time": "moderate"
+            },
+            "status": "analyzed"
+        }

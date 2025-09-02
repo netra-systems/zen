@@ -1,4 +1,5 @@
 """Core dispatcher logic and initialization for tool dispatching."""
+import warnings
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from langchain_core.tools import BaseTool
@@ -206,4 +207,120 @@ class ToolDispatcher:
             diagnosis["critical_issues"].append("ToolDispatcher missing executor")
         
         return diagnosis
+    
+    # ===================== FACTORY METHODS FOR REQUEST-SCOPED DISPATCH =====================
+    
+    @staticmethod
+    async def create_request_scoped_dispatcher(
+        user_context,  # UserExecutionContext type hint avoided to prevent circular imports
+        tools: List[BaseTool] = None,
+        websocket_manager = None  # WebSocketManager type hint avoided
+    ):
+        """Create request-scoped tool dispatcher with complete user isolation.
+        
+        RECOMMENDED: Use this method for new code instead of creating ToolDispatcher directly.
+        This method creates proper per-request isolation and eliminates global state issues.
+        
+        Args:
+            user_context: UserExecutionContext for complete isolation
+            tools: Optional list of tools to register initially
+            websocket_manager: Optional WebSocket manager for event routing
+            
+        Returns:
+            RequestScopedToolDispatcher: Isolated dispatcher for this request
+            
+        Raises:
+            ValueError: If user_context is invalid or dependencies are unavailable
+        """
+        # Import here to avoid circular imports
+        from netra_backend.app.agents.tool_executor_factory import create_isolated_tool_dispatcher
+        
+        logger.info(f"🏭 Creating request-scoped dispatcher for user {user_context.user_id}")
+        
+        return await create_isolated_tool_dispatcher(
+            user_context=user_context,
+            tools=tools,
+            websocket_manager=websocket_manager
+        )
+    
+    @staticmethod
+    async def create_scoped_dispatcher_context(
+        user_context,  # UserExecutionContext type hint avoided
+        tools: List[BaseTool] = None,
+        websocket_manager = None  # WebSocketManager type hint avoided
+    ):
+        """Create scoped dispatcher context manager with automatic cleanup.
+        
+        RECOMMENDED: Use this for request handling to ensure proper cleanup.
+        
+        Args:
+            user_context: UserExecutionContext for complete isolation
+            tools: Optional list of tools to register initially
+            websocket_manager: Optional WebSocket manager for event routing
+            
+        Returns:
+            AsyncContextManager: Scoped dispatcher with automatic cleanup
+            
+        Example:
+            async with ToolDispatcher.create_scoped_dispatcher_context(context) as dispatcher:
+                result = await dispatcher.dispatch("my_tool", param1="value1")
+                # Automatic cleanup happens here
+        """
+        # Import here to avoid circular imports
+        from netra_backend.app.agents.tool_executor_factory import isolated_tool_dispatcher_scope
+        
+        logger.info(f"🏭 Creating scoped dispatcher context for user {user_context.user_id}")
+        
+        return isolated_tool_dispatcher_scope(
+            user_context=user_context,
+            tools=tools,
+            websocket_manager=websocket_manager
+        )
+    
+    # ===================== MIGRATION AND COMPATIBILITY METHODS =====================
+    
+    def _emit_global_state_warning(self, method_name: str) -> None:
+        """Emit warning about global state usage."""
+        warnings.warn(
+            f"ToolDispatcher.{method_name}() uses global state and may cause user isolation issues. "
+            f"Consider using ToolDispatcher.create_request_scoped_dispatcher() for new code. "
+            f"See netra_backend/app/agents/request_scoped_tool_dispatcher.py for details.",
+            UserWarning,
+            stacklevel=3
+        )
+        
+        logger.warning(f"⚠️ GLOBAL STATE USAGE: {method_name} called on shared ToolDispatcher instance")
+        logger.warning(f"⚠️ This may cause user isolation issues in concurrent scenarios")
+        logger.warning(f"⚠️ Consider migrating to RequestScopedToolDispatcher for better isolation")
+    
+    async def dispatch_with_isolation_warning(self, tool_name: str, **kwargs: Any) -> ToolResult:
+        """Dispatch tool execution with isolation warning."""
+        self._emit_global_state_warning("dispatch")
+        return await self.dispatch(tool_name, **kwargs)
+    
+    async def dispatch_tool_with_isolation_warning(
+        self,
+        tool_name: str,
+        parameters: Dict[str, Any],
+        state: DeepAgentState,
+        run_id: str
+    ) -> ToolDispatchResponse:
+        """Dispatch tool with state and isolation warning."""
+        self._emit_global_state_warning("dispatch_tool")
+        return await self.dispatch_tool(tool_name, parameters, state, run_id)
+    
+    def is_using_global_state(self) -> bool:
+        """Check if this dispatcher is using global state (shared executor)."""
+        return hasattr(self, 'executor') and hasattr(self.executor, 'websocket_bridge')
+    
+    def get_isolation_status(self) -> Dict[str, Any]:
+        """Get isolation status for debugging and monitoring."""
+        return {
+            'is_global_instance': self.is_using_global_state(),
+            'websocket_bridge_shared': self.get_websocket_bridge() is not None,
+            'has_websocket_support': self.has_websocket_support,
+            'executor_type': type(self.executor).__name__ if hasattr(self, 'executor') else None,
+            'warning_needed': self.is_using_global_state(),
+            'recommended_migration': 'RequestScopedToolDispatcher'
+        }
     
