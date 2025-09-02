@@ -36,69 +36,39 @@ class ToolDispatchResponse(BaseModel):
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
 class ToolDispatcher:
-    """Core tool dispatcher with modular architecture
+    """Core tool dispatcher with request-scoped architecture.
     
-    DEPRECATED WARNING: Direct instantiation of ToolDispatcher creates global state risks
-    and may cause user isolation issues in concurrent environments.
+    REQUIRED: Use factory methods for instantiation:
+    - ToolDispatcher.create_request_scoped_dispatcher() for isolated instances
+    - ToolDispatcher.create_scoped_dispatcher_context() for automatic cleanup
     
-    RECOMMENDED MIGRATION PATH:
-    1. Use ToolDispatcher.create_request_scoped_dispatcher() for new code
-    2. Use ToolDispatcher.create_scoped_dispatcher_context() for request handling
-    3. Migrate existing code to request-scoped patterns to prevent user data leaks
-    
-    REMOVAL TIMELINE: Global state methods will be deprecated in version 2.1.0
-    and removed in version 3.0.0 (planned for Q2 2025).
-    
-    CRITICAL SECURITY NOTES:
-    - Direct instantiation shares tool state between concurrent requests
-    - WebSocket bridges may deliver events to wrong users
-    - User context isolation is not guaranteed
-    - Memory leaks possible with long-running processes
+    Direct instantiation is no longer supported to ensure user isolation.
     """
     
     def __init__(self, tools: List[BaseTool] = None, websocket_bridge: Optional['AgentWebSocketBridge'] = None):
-        """Initialize tool dispatcher with optional AgentWebSocketBridge support.
+        """Private initializer - use factory methods instead.
         
-        DEPRECATED: This constructor creates global state that may cause user isolation issues.
-        Use create_request_scoped_dispatcher() or create_scoped_dispatcher_context() instead.
-        
-        Args:
-            tools: List of tools to register initially
-            websocket_bridge: AgentWebSocketBridge for real-time notifications (critical for chat)
-            
-        Migration Guide:
-            # OLD (unsafe global pattern):
-            dispatcher = ToolDispatcher(tools, websocket_bridge)
-            
-            # NEW (safe request-scoped pattern):
-            dispatcher = await ToolDispatcher.create_request_scoped_dispatcher(
-                user_context=user_context,
-                tools=tools,
-                websocket_manager=websocket_manager
-            )
-            
-            # OR use context manager for automatic cleanup:
-            async with ToolDispatcher.create_scoped_dispatcher_context(user_context) as dispatcher:
-                result = await dispatcher.dispatch("my_tool", param="value")
+        Direct instantiation is prevented to ensure user isolation.
+        Use ToolDispatcher.create_request_scoped_dispatcher() or
+        ToolDispatcher.create_scoped_dispatcher_context() instead.
         """
-        # Emit deprecation warning for direct instantiation
-        warnings.warn(
-            "Direct ToolDispatcher instantiation is deprecated and may cause user isolation issues. "
-            "Use ToolDispatcher.create_request_scoped_dispatcher() for new code or "
-            "ToolDispatcher.create_scoped_dispatcher_context() for request handling. "
-            "Global state will be removed in v3.0.0 (Q2 2025). "
-            "See netra_backend/app/agents/request_scoped_tool_dispatcher.py for migration examples.",
-            DeprecationWarning,
-            stacklevel=2
+        raise RuntimeError(
+            "Direct ToolDispatcher instantiation is no longer supported. "
+            "Use ToolDispatcher.create_request_scoped_dispatcher(user_context) or "
+            "ToolDispatcher.create_scoped_dispatcher_context(user_context) for proper user isolation."
         )
+    
+    @classmethod
+    def _init_from_factory(cls, tools: List[BaseTool] = None, websocket_bridge: Optional['AgentWebSocketBridge'] = None):
+        """Internal factory initializer for creating request-scoped instances.
         
-        logger.warning("🚨 DEPRECATED: ToolDispatcher direct instantiation uses global state")
-        logger.warning("⚠️ This may cause user isolation issues in concurrent scenarios")
-        logger.warning("📋 MIGRATION: Use create_request_scoped_dispatcher() for safer patterns")
-        logger.warning("📅 REMOVAL: Global state will be removed in v3.0.0 (Q2 2025)")
-        
-        self._init_components(websocket_bridge)
-        self._register_initial_tools(tools)
+        This method bypasses the __init__ RuntimeError and is only called
+        by the factory methods to create properly isolated instances.
+        """
+        instance = cls.__new__(cls)
+        instance._init_components(websocket_bridge)
+        instance._register_initial_tools(tools)
+        return instance
     
     @property
     def tools(self) -> Dict[str, Any]:
@@ -129,39 +99,10 @@ class ToolDispatcher:
         return self.registry.has_tool(tool_name)
     
     def register_tool(self, tool_name: str, tool_func, description: str = None) -> None:
-        """Register a tool function with the dispatcher - public interface for tests.
+        """Register a tool - only available on request-scoped instances.
         
-        DEPRECATED: Registering tools on global dispatcher instance may cause user isolation issues.
-        Tools registered on global instances are shared across all users and requests.
-        
-        SECURITY RISKS with global tool registration:
-        - Tools become available to all users (potential privilege escalation)
-        - Tool state shared between concurrent requests
-        - No user-specific tool configuration possible
-        - Memory leaks from tools that don't clean up properly
-        
-        Migration Example:
-            # OLD (unsafe global registration):
-            dispatcher.register_tool("my_tool", my_tool_func)
-            
-            # NEW (safe request-scoped registration):
-            async with ToolDispatcher.create_scoped_dispatcher_context(user_context) as dispatcher:
-                dispatcher.register_tool("my_tool", my_tool_func)  # Scoped to this request only
+        This method should only be called on instances created via factory methods.
         """
-        # Emit deprecation warning
-        warnings.warn(
-            f"ToolDispatcher.register_tool() called on global instance for tool '{tool_name}'. "
-            f"This registers the tool globally for all users and may cause security issues. "
-            f"Use create_request_scoped_dispatcher() for user-specific tool registration. "
-            f"Global state methods will be removed in v3.0.0 (Q2 2025).",
-            DeprecationWarning,
-            stacklevel=2
-        )
-        
-        logger.warning(f"🚨 GLOBAL TOOL REGISTRATION: register_tool('{tool_name}') on shared ToolDispatcher")
-        logger.warning("⚠️ This tool will be available to ALL users - potential security risk")
-        logger.warning("📋 MIGRATION: Use RequestScopedToolDispatcher for user-specific tools")
-        
         from langchain_core.tools import BaseTool
         
         # Create a simple tool wrapper if needed
@@ -191,38 +132,10 @@ class ToolDispatcher:
         self.registry.register_tool(tool_func)
     
     async def dispatch(self, tool_name: str, **kwargs: Any) -> ToolResult:
-        """Dispatch tool execution with proper typing
+        """Dispatch tool execution - only available on request-scoped instances.
         
-        DEPRECATED: This method uses global state and may cause user isolation issues.
-        Use create_request_scoped_dispatcher() with proper user context instead.
-        
-        SECURITY WARNING: Global dispatcher state can lead to:
-        - Tool results delivered to wrong users
-        - User data leaking between concurrent requests
-        - WebSocket events sent to incorrect sessions
-        - Memory corruption in high-concurrency scenarios
-        
-        Migration Example:
-            # OLD (unsafe):
-            result = await dispatcher.dispatch("my_tool", param="value")
-            
-            # NEW (safe):
-            async with ToolDispatcher.create_scoped_dispatcher_context(user_context) as dispatcher:
-                result = await dispatcher.dispatch("my_tool", param="value")
+        This method should only be called on instances created via factory methods.
         """
-        # Emit deprecation warning
-        warnings.warn(
-            f"ToolDispatcher.dispatch() called on global instance for tool '{tool_name}'. "
-            f"This may cause user isolation issues. Use create_request_scoped_dispatcher() instead. "
-            f"Global state methods will be removed in v3.0.0 (Q2 2025).",
-            DeprecationWarning,
-            stacklevel=2
-        )
-        
-        logger.warning(f"🚨 GLOBAL STATE USAGE: dispatch('{tool_name}') called on shared ToolDispatcher")
-        logger.warning("⚠️ This may cause user isolation issues in concurrent scenarios")
-        logger.warning("📋 MIGRATION: Use RequestScopedToolDispatcher for better isolation")
-        
         tool_input = self._create_tool_input(tool_name, kwargs)
         if not self.has_tool(tool_name):
             return self._create_error_result(tool_input, f"Tool {tool_name} not found")
@@ -245,39 +158,10 @@ class ToolDispatcher:
         state: DeepAgentState,
         run_id: str
     ) -> ToolDispatchResponse:
-        """Dispatch a tool with parameters - method expected by sub-agents
+        """Dispatch a tool with parameters - only available on request-scoped instances.
         
-        DEPRECATED: This method uses global state and may cause user isolation issues.
-        Use create_request_scoped_dispatcher() with proper user context instead.
-        
-        CRITICAL SECURITY RISKS with global state:
-        - Agent state may leak between users in concurrent requests
-        - Run IDs may be mixed up between different user sessions
-        - Tool execution may happen in wrong user context
-        - Memory corruption possible with shared DeepAgentState
-        
-        Migration Example:
-            # OLD (unsafe global state):
-            response = await dispatcher.dispatch_tool(tool_name, params, state, run_id)
-            
-            # NEW (safe request-scoped):
-            async with ToolDispatcher.create_scoped_dispatcher_context(user_context) as dispatcher:
-                response = await dispatcher.dispatch_tool(tool_name, params, state, run_id)
+        This method should only be called on instances created via factory methods.
         """
-        # Emit deprecation warning
-        warnings.warn(
-            f"ToolDispatcher.dispatch_tool() called on global instance for tool '{tool_name}' with run_id '{run_id}'. "
-            f"This may cause user isolation issues and agent state leaks. "
-            f"Use create_request_scoped_dispatcher() instead. "
-            f"Global state methods will be removed in v3.0.0 (Q2 2025).",
-            DeprecationWarning,
-            stacklevel=2
-        )
-        
-        logger.warning(f"🚨 GLOBAL STATE USAGE: dispatch_tool('{tool_name}', run_id='{run_id}') on shared ToolDispatcher")
-        logger.warning("⚠️ This may cause agent state leaks and user isolation issues")
-        logger.warning("📋 MIGRATION: Use RequestScopedToolDispatcher for proper user context isolation")
-        
         if not self.has_tool(tool_name):
             return self._create_tool_not_found_response(tool_name, run_id)
         
@@ -475,158 +359,5 @@ class ToolDispatcher:
             websocket_manager=websocket_manager
         )
     
-    # ===================== MIGRATION AND COMPATIBILITY METHODS =====================
-    
-    @staticmethod
-    def detect_unsafe_usage_patterns() -> Dict[str, Any]:
-        """Detect unsafe ToolDispatcher usage patterns in the current call stack.
-        
-        This utility method helps identify code that's using deprecated global patterns.
-        Useful for migration assessment and security audits.
-        
-        Returns:
-            Dict containing analysis of current usage patterns and security risks
-            
-        Example:
-            security_analysis = ToolDispatcher.detect_unsafe_usage_patterns()
-            if security_analysis['has_unsafe_patterns']:
-                logger.warning(f"Found unsafe patterns: {security_analysis['risks']}")
-        """
-        import inspect
-        import traceback
-        
-        analysis = {
-            'has_unsafe_patterns': False,
-            'risks': [],
-            'call_stack_analysis': [],
-            'migration_recommendations': []
-        }
-        
-        # Analyze call stack for unsafe patterns
-        try:
-            stack = inspect.stack()
-            for frame_info in stack[1:]:  # Skip current frame
-                filename = frame_info.filename
-                line_number = frame_info.lineno
-                function_name = frame_info.function
-                
-                # Check for direct ToolDispatcher instantiation
-                if 'ToolDispatcher(' in str(frame_info.code_context):
-                    analysis['has_unsafe_patterns'] = True
-                    analysis['risks'].append(f"Direct ToolDispatcher instantiation in {filename}:{line_number}")
-                    analysis['migration_recommendations'].append(
-                        f"Replace ToolDispatcher() with ToolDispatcher.create_request_scoped_dispatcher() "
-                        f"at {filename}:{line_number}"
-                    )
-                
-                analysis['call_stack_analysis'].append({
-                    'file': filename,
-                    'line': line_number,
-                    'function': function_name,
-                    'context': str(frame_info.code_context) if frame_info.code_context else None
-                })
-        except Exception as e:
-            analysis['call_stack_analysis'] = [f"Error analyzing call stack: {e}"]
-        
-        return analysis
-    
-    def _emit_global_state_warning(self, method_name: str) -> None:
-        """Emit warning about global state usage."""
-        warnings.warn(
-            f"ToolDispatcher.{method_name}() uses global state and may cause user isolation issues. "
-            f"Consider using ToolDispatcher.create_request_scoped_dispatcher() for new code. "
-            f"See netra_backend/app/agents/request_scoped_tool_dispatcher.py for details.",
-            UserWarning,
-            stacklevel=3
-        )
-        
-        logger.warning(f"⚠️ GLOBAL STATE USAGE: {method_name} called on shared ToolDispatcher instance")
-        logger.warning(f"⚠️ This may cause user isolation issues in concurrent scenarios")
-        logger.warning(f"⚠️ Consider migrating to RequestScopedToolDispatcher for better isolation")
-    
-    async def dispatch_with_isolation_warning(self, tool_name: str, **kwargs: Any) -> ToolResult:
-        """Dispatch tool execution with isolation warning."""
-        self._emit_global_state_warning("dispatch")
-        return await self.dispatch(tool_name, **kwargs)
-    
-    async def dispatch_tool_with_isolation_warning(
-        self,
-        tool_name: str,
-        parameters: Dict[str, Any],
-        state: DeepAgentState,
-        run_id: str
-    ) -> ToolDispatchResponse:
-        """Dispatch tool with state and isolation warning."""
-        self._emit_global_state_warning("dispatch_tool")
-        return await self.dispatch_tool(tool_name, parameters, state, run_id)
-    
-    def is_using_global_state(self) -> bool:
-        """Check if this dispatcher is using global state (shared executor)."""
-        return hasattr(self, 'executor') and hasattr(self.executor, 'websocket_bridge')
-    
-    def get_isolation_status(self) -> Dict[str, Any]:
-        """Get isolation status for debugging and monitoring."""
-        return {
-            'is_global_instance': self.is_using_global_state(),
-            'websocket_bridge_shared': self.get_websocket_bridge() is not None,
-            'has_websocket_support': self.has_websocket_support,
-            'executor_type': type(self.executor).__name__ if hasattr(self, 'executor') else None,
-            'warning_needed': self.is_using_global_state(),
-            'recommended_migration': 'RequestScopedToolDispatcher',
-            'security_risks': self._assess_security_risks(),
-            'migration_urgency': 'HIGH' if self.is_using_global_state() else 'LOW'
-        }
-    
-    def _assess_security_risks(self) -> List[str]:
-        """Assess security risks of current dispatcher configuration."""
-        risks = []
-        
-        if self.is_using_global_state():
-            risks.append("Global state may cause user isolation issues")
-            risks.append("WebSocket events may be delivered to wrong users")
-            risks.append("Tool state shared between concurrent requests")
-        
-        if self.get_websocket_bridge() is None:
-            risks.append("WebSocket bridge is None - events will be lost")
-        
-        if hasattr(self, 'registry') and len(self.registry.tools) > 0:
-            risks.append(f"Global tool registry has {len(self.registry.tools)} tools accessible to all users")
-        
-        return risks
-    
-    async def force_secure_migration_check(self) -> Dict[str, Any]:
-        """Force a security check and provide migration guidance.
-        
-        This method performs a comprehensive security assessment of the current
-        ToolDispatcher instance and provides specific migration guidance.
-        
-        Returns:
-            Dict with security analysis and specific migration steps
-        """
-        logger.warning("🔍 SECURITY AUDIT: Performing forced migration check")
-        
-        analysis = {
-            'timestamp': time.time(),
-            'security_status': 'UNSAFE' if self.is_using_global_state() else 'SAFE',
-            'isolation_status': self.get_isolation_status(),
-            'usage_patterns': self.detect_unsafe_usage_patterns(),
-            'migration_required': self.is_using_global_state(),
-            'migration_steps': []
-        }
-        
-        if self.is_using_global_state():
-            analysis['migration_steps'] = [
-                "1. Replace ToolDispatcher() with ToolDispatcher.create_request_scoped_dispatcher()",
-                "2. Ensure user_context is properly provided to factory method",
-                "3. Use async context manager for automatic cleanup",
-                "4. Test concurrent request handling to verify user isolation",
-                "5. Monitor logs for remaining deprecation warnings"
-            ]
-            
-            logger.error("🚨 SECURITY RISK: Global ToolDispatcher instance detected")
-            logger.error("⚠️ Migration required to prevent user isolation issues")
-        else:
-            logger.info("✅ SECURITY OK: Using safe request-scoped patterns")
-        
-        return analysis
+    # Legacy compatibility methods removed - use factory methods only
     
