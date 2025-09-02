@@ -110,7 +110,7 @@ class JWTHandler:
             # Early rejection of mock tokens for security
             if token and token.startswith("mock_"):
                 logger.error(f"Mock token detected in JWT validation: {token[:20]}...")
-                environment = os.getenv("ENVIRONMENT", "production").lower()
+                environment = get_env().get("ENVIRONMENT", "production").lower()
                 if environment not in ["test", "development"]:
                     raise ValueError("Mock tokens cannot be used outside test environment")
                 return None  # Reject mock tokens even in test env for JWT handler
@@ -282,7 +282,7 @@ class JWTHandler:
         # Early rejection of mock tokens for security
         if refresh_token and refresh_token.startswith("mock_"):
             logger.error(f"Mock token detected in refresh operation: {refresh_token[:20]}...")
-            environment = os.getenv("ENVIRONMENT", "production").lower()
+            environment = get_env().get("ENVIRONMENT", "production").lower()
             if environment not in ["test", "development"]:
                 raise ValueError("Mock tokens cannot be used outside test environment")
             return None  # Reject mock tokens even in test env for JWT handler
