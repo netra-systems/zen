@@ -409,7 +409,7 @@ class AgentExecutionRegistry:
         from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
         from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
         
-        run_id = f"run_{uuid.uuid4().hex[:12]}"
+        run_id = f"run_{thread_id}_{uuid.uuid4().hex[:8]}"
         
         # Create new execution context
         exec_context = AgentExecutionContext(
@@ -663,3 +663,72 @@ async def get_agent_execution_registry() -> AgentExecutionRegistry:
 async def initialize_registry() -> AgentExecutionRegistry:
     """Initialize registry singleton (convenience function)."""
     return await get_agent_execution_registry()
+
+
+def extract_thread_id_from_run_id(run_id: str) -> Optional[str]:
+    """Extract thread_id from a run_id with format 'run_{thread_id}_{uuid}' or None if invalid.
+    
+    Args:
+        run_id: Run ID in format 'run_{thread_id}_{uuid}' or legacy format
+        
+    Returns:
+        thread_id if extractable, None for legacy format or invalid format
+    """
+    if not run_id or not run_id.startswith('run_') or len(run_id) <= 4:
+        return None
+    
+    # Remove 'run_' prefix
+    run_suffix = run_id[4:]
+    
+    # Empty suffix is invalid
+    if not run_suffix:
+        return None
+    
+    # Split by '_' - should have at least 2 parts for new format
+    parts = run_suffix.split('_')
+    
+    # Legacy format: run_{uuid} (single part after splitting, no underscores)
+    if len(parts) == 1:
+        logger.debug(f"Legacy run_id format detected: {run_id}")
+        return None
+    
+    # New format: run_{thread_id}_{uuid} (multiple underscores)
+    # Join all parts except the last one as thread_id
+    # This handles thread_ids that may contain underscores
+    if len(parts) >= 2:
+        thread_id = '_'.join(parts[:-1])
+        # Thread ID should not be empty
+        if not thread_id:
+            return None
+        logger.debug(f"Extracted thread_id '{thread_id}' from run_id '{run_id}'")
+        return thread_id
+    
+    return None
+
+
+def validate_run_id_format(run_id: str, expected_thread_id: Optional[str] = None) -> bool:
+    """Validate run_id format and optionally check thread_id match.
+    
+    Args:
+        run_id: Run ID to validate
+        expected_thread_id: Expected thread ID (if provided, validates match)
+        
+    Returns:
+        True if valid format and thread_id matches (if provided)
+    """
+    if not run_id or not run_id.startswith('run_') or len(run_id) <= 4:
+        return False
+    
+    # Remove 'run_' prefix and check if there's actual content
+    run_suffix = run_id[4:]
+    if not run_suffix:
+        return False
+    
+    extracted_thread_id = extract_thread_id_from_run_id(run_id)
+    
+    # If no expected thread_id, just check if it's new format or legacy
+    if expected_thread_id is None:
+        return True  # Both legacy and new formats are valid
+    
+    # Check if extracted thread_id matches expected
+    return extracted_thread_id == expected_thread_id

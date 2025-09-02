@@ -25,7 +25,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.db.postgres import get_postgres_session
@@ -43,7 +43,7 @@ class MultiAgentOrchestrationTestManager:
         self.state_manager: Optional[StateManager] = None
         self.redis_manager = None  # Initialize Redis manager in current event loop
         self.llm_manager: Optional[AsyncMock] = None
-        self.active_agents: Dict[str, BaseSubAgent] = {}
+        self.active_agents: Dict[str, BaseAgent] = {}
         self.orchestration_state: Dict[str, Any] = {}
         
     async def setup_real_services(self) -> None:

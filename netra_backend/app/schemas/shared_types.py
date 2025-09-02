@@ -28,7 +28,7 @@ from netra_backend.app.core.serialization.unified_json_handler import (
 )
 
 if TYPE_CHECKING:
-    from netra_backend.app.agents.base_agent import BaseSubAgent
+    from netra_backend.app.agents.base_agent import BaseAgent
     from netra_backend.app.agents.state import DeepAgentState
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     from netra_backend.app.llm.llm_manager import LLMManager
@@ -269,7 +269,12 @@ class JitterType(str, Enum):
 
 
 class RetryConfig(BaseModel):
-    """Centralized retry configuration for all components."""
+    """Unified retry configuration for all reliability components - SSOT.
+    
+    Consolidates all retry logic variations across the system into a single
+    comprehensive configuration that supports both legacy and new retry patterns.
+    """
+    # Core retry configuration - compatible with existing code
     max_retries: int = Field(default=3, description="Maximum retry attempts")
     base_delay: float = Field(default=1.0, description="Base delay between retries")
     max_delay: float = Field(default=300.0, description="Maximum delay between retries")
@@ -278,6 +283,91 @@ class RetryConfig(BaseModel):
     backoff_factor: float = Field(default=2.0, description="Exponential backoff factor")
     timeout_seconds: int = Field(default=600, description="Operation timeout")
     jitter: bool = Field(default=True, description="Add jitter to delays")
+    
+    # Extended configuration for UnifiedRetryHandler compatibility
+    max_attempts: Optional[int] = Field(default=None, description="Max attempts (alias for max_retries)")
+    backoff_multiplier: float = Field(default=2.0, description="Backoff multiplier (alias for backoff_factor)")
+    jitter_range: float = Field(default=0.1, description="Jitter range (0-1)")
+    timeout_seconds_float: Optional[float] = Field(default=None, description="Timeout as float")
+    retryable_exceptions: List[str] = Field(default_factory=list, description="Exception names that should trigger retries")
+    non_retryable_exceptions: List[str] = Field(default_factory=list, description="Exception names that should not trigger retries")
+    circuit_breaker_enabled: bool = Field(default=False, description="Enable circuit breaker pattern")
+    circuit_breaker_failure_threshold: int = Field(default=5, description="Circuit breaker failure threshold")
+    circuit_breaker_recovery_timeout: float = Field(default=30.0, description="Circuit breaker recovery timeout")
+    metrics_enabled: bool = Field(default=True, description="Enable metrics collection")
+    
+    @field_validator('max_attempts', mode='before')
+    @classmethod
+    def sync_max_attempts(cls, v, info):
+        """Synchronize max_attempts with max_retries."""
+        if v is None and 'max_retries' in info.data:
+            return info.data['max_retries']
+        return v
+    
+    @field_validator('backoff_multiplier', mode='before') 
+    @classmethod
+    def sync_backoff_multiplier(cls, v, info):
+        """Synchronize backoff_multiplier with backoff_factor."""
+        if 'backoff_factor' in info.data:
+            return info.data['backoff_factor']
+        return v
+    
+    @field_validator('timeout_seconds_float', mode='before')
+    @classmethod
+    def sync_timeout_float(cls, v, info):
+        """Synchronize float timeout with int timeout."""
+        if v is None and 'timeout_seconds' in info.data:
+            return float(info.data['timeout_seconds'])
+        return v
+    
+    def get_max_attempts(self) -> int:
+        """Get max attempts, prioritizing max_attempts over max_retries."""
+        return self.max_attempts if self.max_attempts is not None else self.max_retries
+    
+    def get_backoff_multiplier(self) -> float:
+        """Get backoff multiplier with fallback to backoff_factor."""
+        return self.backoff_multiplier if self.backoff_multiplier != 2.0 else self.backoff_factor
+    
+    def get_timeout_seconds(self) -> float:
+        """Get timeout as float."""
+        return self.timeout_seconds_float if self.timeout_seconds_float is not None else float(self.timeout_seconds)
+    
+    def to_unified_config(self) -> Dict[str, Any]:
+        """Convert to UnifiedRetryHandler config format."""
+        try:
+            from netra_backend.app.core.resilience.unified_retry_handler import RetryStrategy
+        except ImportError:
+            # Fallback enum for testing
+            from enum import Enum
+            class RetryStrategy(Enum):
+                EXPONENTIAL = "exponential"
+                LINEAR = "linear"
+                FIXED = "fixed"
+                FIBONACCI = "fibonacci"
+        
+        # Map backoff strategy to unified format
+        strategy_mapping = {
+            BackoffStrategy.EXPONENTIAL: RetryStrategy.EXPONENTIAL,
+            BackoffStrategy.LINEAR: RetryStrategy.LINEAR,
+            BackoffStrategy.FIXED: RetryStrategy.FIXED,
+            BackoffStrategy.FIBONACCI: RetryStrategy.FIBONACCI
+        }
+        
+        return {
+            'max_attempts': self.get_max_attempts(),
+            'base_delay': self.base_delay,
+            'max_delay': self.max_delay,
+            'strategy': strategy_mapping.get(self.backoff_strategy, RetryStrategy.EXPONENTIAL),
+            'backoff_multiplier': self.get_backoff_multiplier(),
+            'jitter_range': self.jitter_range,
+            'timeout_seconds': self.get_timeout_seconds(),
+            'retryable_exceptions': tuple(getattr(__builtins__, exc, Exception) for exc in self.retryable_exceptions if hasattr(__builtins__, exc)),
+            'non_retryable_exceptions': tuple(getattr(__builtins__, exc, Exception) for exc in self.non_retryable_exceptions if hasattr(__builtins__, exc)),
+            'circuit_breaker_enabled': self.circuit_breaker_enabled,
+            'circuit_breaker_failure_threshold': self.circuit_breaker_failure_threshold,
+            'circuit_breaker_recovery_timeout': self.circuit_breaker_recovery_timeout,
+            'metrics_enabled': self.metrics_enabled
+        }
 
 
 class ValidationResult(BaseModel):

@@ -1,7 +1,7 @@
-"""Modern Data Analysis Engine with BaseExecutionInterface Integration
+"""Modern Data Analysis Engine with Standardized Execution Patterns
 
 Advanced data analysis capabilities with:
-- BaseExecutionInterface standardization
+- Reliable execution patterns
 - Integrated reliability patterns
 - Performance monitoring
 - Error handling improvements
@@ -17,9 +17,11 @@ from typing import Any, Dict, List, Optional
 
 import numpy as np
 
+from abc import ABC, abstractmethod
 from netra_backend.app.agents.base.interface import (
-    AgentExecutionMixin, BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus, WebSocketManagerProtocol
+    ExecutionContext, ExecutionResult, WebSocketManagerProtocol
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
@@ -37,15 +39,16 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class ModernAnalysisEngine(BaseExecutionInterface, AgentExecutionMixin):
-    """Modern analysis engine with BaseExecutionInterface integration.
+class ModernAnalysisEngine(ABC):
+    """Modern analysis engine with standardized execution patterns.
     
-    Provides standardized execution patterns for all analysis operations
+    Provides reliable execution workflows for all analysis operations
     with integrated monitoring and reliability features.
     """
     
     def __init__(self, websocket_manager: Optional[WebSocketManagerProtocol] = None):
-        super().__init__("ModernAnalysisEngine", websocket_manager)
+        self.agent_name = "ModernAnalysisEngine"
+        self.websocket_manager = websocket_manager
         self.execution_monitor = ExecutionMonitor()
         self.error_handler = ExecutionErrorHandler
         self.execution_engine = BaseExecutionEngine(monitor=self.execution_monitor)

@@ -1,10 +1,10 @@
 """
-Integration tests for BaseSubAgent with real services - CLAUDE.md compliant
+Integration tests for BaseAgent with real services - CLAUDE.md compliant
 Focus: Real-world scenarios with actual service interactions
 Coverage Target: LLM, WebSocket, Database, Multi-Agent, Error Recovery
 
 Business Value: Platform/Internal - Development Velocity and System Stability
-- Validates BaseSubAgent functions correctly with real services
+- Validates BaseAgent functions correctly with real services
 - Ensures timing collection works with actual LLM operations  
 - Tests WebSocket communication flows end-to-end
 - Validates database state persistence through agent lifecycle
@@ -21,7 +21,7 @@ from datetime import datetime
 import aiohttp
 
 # CLAUDE.md Compliance: Use absolute imports only
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.schemas.agent import SubAgentLifecycle
@@ -44,7 +44,7 @@ except ImportError:
 logger = central_logger.get_logger(__name__)
 
 
-class RealServiceTestAgent(BaseSubAgent):
+class RealServiceTestAgent(BaseAgent):
     """Test agent implementation for real service testing"""
     
     def __init__(self, llm_manager: Optional[LLMManager] = None, name: str = "RealServiceAgent"):
@@ -79,7 +79,7 @@ class RealServiceTestAgent(BaseSubAgent):
 
 @pytest.mark.integration
 class TestBaseAgentRealServices:
-    """Integration tests for BaseSubAgent with real service interactions"""
+    """Integration tests for BaseAgent with real service interactions"""
     
     @pytest.fixture
     async def real_llm_manager(self):

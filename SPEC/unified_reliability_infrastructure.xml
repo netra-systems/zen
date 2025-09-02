@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<reliability_infrastructure category="ssot_consolidation" date="2025-09-02" severity="critical">
+    <title>Unified Reliability Infrastructure - SSOT Consolidation Specification</title>
+    
+    <summary>
+        Consolidation of 15+ duplicate reliability manager implementations and 20+ retry logic 
+        variations into a single, canonical reliability infrastructure that maintains WebSocket 
+        event integration for chat functionality while providing consistent reliability patterns 
+        across all agents.
+    </summary>
+    
+    <business_value_justification>
+        <segment>Platform/Internal</segment>
+        <business_goal>Eliminate reliability infrastructure duplication, ensure consistent agent behavior</business_goal>
+        <value_impact>Unified reliability patterns, predictable failure handling, consistent SLA behavior</value_impact>
+        <strategic_impact>Reduced maintenance complexity, improved system reliability, faster agent development</strategic_impact>
+    </business_value_justification>
+
+    <current_violations>
+        <duplicate_implementations count="15+">
+            <reliability_managers>
+                <file>netra_backend/app/agents/base/reliability_manager.py</file>
+                <file>netra_backend/app/core/reliability.py</file>
+                <file>netra_backend/app/agents/base/reliability.py</file>
+                <file>netra_backend/app/core/agent_reliability_mixin.py</file>
+                <description>Multiple reliability managers with overlapping functionality</description>
+            </reliability_managers>
+            <retry_handlers>
+                <file>netra_backend/app/agents/base/retry_manager.py</file>
+                <file>netra_backend/app/core/reliability_retry.py</file>
+                <file>netra_backend/app/llm/enhanced_retry.py</file>
+                <file>netra_backend/app/core/resilience/unified_retry_handler.py</file>
+                <file>netra_backend/app/core/async_retry_logic.py</file>
+                <description>Multiple retry implementations with different strategies</description>
+            </retry_handlers>
+            <configuration_types>
+                <type>shared_types.RetryConfig</type>
+                <type>unified_retry_handler.RetryConfig</type>
+                <type>reliability_retry.ReliabilityRetryConfig</type>
+                <type>enhanced_retry.RetryStrategy</type>
+                <description>Multiple configuration types causing inconsistent behavior</description>
+            </configuration_types>
+        </duplicate_implementations>
+    </current_violations>
+
+    <canonical_architecture>
+        <component name="unified_retry_handler" file="netra_backend/app/core/resilience/unified_retry_handler.py">
+            <role>CANONICAL - Single source of truth for all retry logic</role>
+            <rationale>Most comprehensive implementation with 6 retry strategies, circuit breaker integration, domain-specific policies</rationale>
+            <features>
+                <feature>Exponential, linear, Fibonacci, adaptive backoff strategies</feature>
+                <feature>Configurable jitter types (full, equal, decorrelated)</feature>
+                <feature>Circuit breaker integration</feature>
+                <feature>Domain-specific retry policies (DB, LLM, Agent, API, WebSocket)</feature>
+                <feature>Async and sync execution support</feature>
+                <feature>Comprehensive error classification</feature>
+            </features>
+            <enhancements_required>
+                <enhancement>WebSocket event integration for chat functionality</enhancement>
+                <enhancement>Agent execution context awareness</enhancement>
+            </enhancements_required>
+        </component>
+
+        <component name="reliability_wrapper" file="netra_backend/app/core/reliability.py">
+            <role>CANONICAL - System-wide reliability coordination</role>
+            <rationale>Existing system-wide scope with error tracking and global registry</rationale>
+            <features>
+                <feature>Global agent reliability registry</feature>
+                <feature>Error history tracking (last 100 errors)</feature>
+                <feature>System-wide health monitoring</feature>
+                <feature>Circuit breaker status aggregation</feature>
+            </features>
+            <enhancements_required>
+                <enhancement>Integration with unified_retry_handler</enhancement>
+                <enhancement>WebSocket event notifications during reliability operations</enhancement>
+                <enhancement>Agent execution result formatting</enhancement>
+            </enhancements_required>
+        </component>
+
+        <component name="retry_config" file="netra_backend/app/schemas/shared_types.py">
+            <role>CANONICAL - Single configuration type for all retry operations</role>
+            <rationale>Already positioned as centralized config location</rationale>
+            <current_fields>
+                <field name="max_retries" type="int" default="3"/>
+                <field name="base_delay" type="float" default="1.0"/>
+                <field name="max_delay" type="float" default="300.0"/>
+                <field name="backoff_strategy" type="BackoffStrategy" default="EXPONENTIAL"/>
+                <field name="jitter_type" type="JitterType" default="FULL"/>
+                <field name="backoff_factor" type="float" default="2.0"/>
+                <field name="timeout_seconds" type="int" default="600"/>
+                <field name="jitter" type="bool" default="true"/>
+            </current_fields>
+            <required_enhancements>
+                <field name="retryable_exceptions" type="Tuple[Type[Exception], ...]"/>
+                <field name="non_retryable_exceptions" type="Tuple[Type[Exception], ...]"/>
+                <field name="circuit_breaker_enabled" type="bool" default="false"/>
+                <field name="circuit_breaker_failure_threshold" type="int" default="5"/>
+                <field name="circuit_breaker_recovery_timeout" type="float" default="30.0"/>
+                <field name="jitter_range" type="float" default="0.1"/>
+            </required_enhancements>
+        </component>
+    </canonical_architecture>
+
+    <websocket_integration_requirements>
+        <critical_events>
+            <event name="agent_started" description="Agent begins processing with reliability protection"/>
+            <event name="agent_thinking" description="Real-time reasoning with retry attempt visibility"/>
+            <event name="tool_executing" description="Tool execution with reliability patterns"/>
+            <event name="tool_completed" description="Tool completion with retry success/failure"/>
+            <event name="agent_completed" description="Agent completion after reliability operations"/>
+            <event name="reliability_failure" description="Circuit breaker open or retry exhausted"/>
+        </critical_events>
+        
+        <integration_pattern>
+            <description>
+                Reliability operations MUST send WebSocket events at key execution points
+                to maintain chat functionality and user experience.
+            </description>
+            <implementation>
+                <code_pattern>
+                    <![CDATA[
+class EnhancedReliabilityWrapper:
+    def __init__(self, agent_name: str, websocket_manager: Optional[WebSocketManager] = None):
+        self.retry_handler = UnifiedRetryHandler(agent_name, AGENT_RETRY_POLICY)
+        self.websocket_manager = websocket_manager
+    
+    async def execute_with_reliability_events(self, operation, operation_name, context):
+        # Send agent_thinking event
+        if self.websocket_manager:
+            await self.websocket_manager.send_event("agent_thinking", {
+                "operation": operation_name,
+                "agent": context.agent_name,
+                "retry_enabled": True
+            })
+        
+        # Execute with retry handler
+        result = await self.retry_handler.execute_with_retry_async(operation)
+        
+        # Send completion event
+        event_type = "agent_completed" if result.success else "reliability_failure"
+        if self.websocket_manager:
+            await self.websocket_manager.send_event(event_type, {
+                "operation": operation_name,
+                "success": result.success,
+                "attempts": result.total_attempts,
+                "total_time": result.total_time
+            })
+        
+        return result
+                    ]]>
+                </code_pattern>
+            </implementation>
+        </integration_pattern>
+    </websocket_integration_requirements>
+
+    <domain_specific_profiles>
+        <profile name="AGENT_RELIABILITY_PROFILE">
+            <retry_policy>AGENT_RETRY_POLICY</retry_policy>
+            <circuit_breaker_enabled>false</circuit_breaker_enabled>
+            <websocket_events>true</websocket_events>
+            <health_tracking>true</health_tracking>
+            <description>Standard profile for agent execution with WebSocket integration</description>
+        </profile>
+        
+        <profile name="LLM_RELIABILITY_PROFILE">
+            <retry_policy>LLM_RETRY_POLICY</retry_policy>
+            <circuit_breaker_enabled>true</circuit_breaker_enabled>
+            <websocket_events>false</websocket_events>
+            <health_tracking>true</health_tracking>
+            <description>LLM operations with circuit breaker but no WebSocket events</description>
+        </profile>
+        
+        <profile name="DATABASE_RELIABILITY_PROFILE">
+            <retry_policy>DATABASE_RETRY_POLICY</retry_policy>
+            <circuit_breaker_enabled>true</circuit_breaker_enabled>
+            <websocket_events>false</websocket_events>
+            <health_tracking>true</health_tracking>
+            <description>Database operations with aggressive retry and circuit breaking</description>
+        </profile>
+        
+        <profile name="WEBSOCKET_RELIABILITY_PROFILE">
+            <retry_policy>WEBSOCKET_RETRY_POLICY</retry_policy>
+            <circuit_breaker_enabled>false</circuit_breaker_enabled>
+            <websocket_events>false</websocket_events>
+            <health_tracking>true</health_tracking>
+            <description>WebSocket operations with quick retry, no circuit breaker</description>
+        </profile>
+    </domain_specific_profiles>
+
+    <migration_phases>
+        <phase number="1" priority="IMMEDIATE" risk="HIGH">
+            <name>Configuration Unification</name>
+            <description>Consolidate all RetryConfig types into single canonical type</description>
+            <actions>
+                <action>Enhance shared_types.RetryConfig with all fields from unified_retry_handler.RetryConfig</action>
+                <action>Create backward compatibility wrappers for existing config types</action>
+                <action>Update all imports to use canonical shared_types.RetryConfig</action>
+                <action>Add deprecation warnings to duplicate config types</action>
+            </actions>
+            <files_modified>
+                <file>netra_backend/app/schemas/shared_types.py</file>
+                <file>netra_backend/app/core/reliability_retry.py</file>
+                <file>netra_backend/app/llm/enhanced_retry.py</file>
+            </files_modified>
+            <backward_compatibility>
+                <wrapper_pattern>
+                    <![CDATA[
+@dataclass
+class ReliabilityRetryConfig:
+    """DEPRECATED: Use shared_types.RetryConfig instead"""
+    base_config: RetryConfig
+    
+    def __init__(self, **kwargs):
+        warnings.warn("ReliabilityRetryConfig is deprecated", DeprecationWarning)
+        self.base_config = RetryConfig(**kwargs)
+                    ]]>
+                </wrapper_pattern>
+            </backward_compatibility>
+        </phase>
+
+        <phase number="2" priority="CRITICAL_PATH" risk="CRITICAL">
+            <name>Reliability Manager Consolidation with WebSocket Integration</name>
+            <description>Enhance core/reliability.py as canonical manager with WebSocket support</description>
+            <actions>
+                <action>Enhance AgentReliabilityWrapper with UnifiedRetryHandler integration</action>
+                <action>Add WebSocket event notifications to reliability operations</action>
+                <action>Update all agent imports to use enhanced reliability wrapper</action>
+                <action>Create compatibility wrappers for existing reliability managers</action>
+            </actions>
+            <files_modified>
+                <file>netra_backend/app/core/reliability.py</file>
+                <file>netra_backend/app/agents/base/reliability_manager.py</file>
+                <file>netra_backend/app/agents/base/reliability.py</file>
+            </files_modified>
+            <websocket_requirements>
+                <requirement>All reliability operations MUST emit WebSocket events for agent execution</requirement>
+                <requirement>Retry attempts MUST be visible to users through agent_thinking events</requirement>
+                <requirement>Circuit breaker opens MUST emit reliability_failure events</requirement>
+            </websocket_requirements>
+        </phase>
+
+        <phase number="3" priority="HIGH" risk="MEDIUM">
+            <name>Retry Logic Consolidation</name>
+            <description>Make unified_retry_handler.py the canonical retry implementation</description>
+            <actions>
+                <action>Enhance UnifiedRetryHandler with agent execution context awareness</action>
+                <action>Create domain-specific wrapper functions for existing retry usage</action>
+                <action>Update all retry imports to use canonical implementation</action>
+                <action>Delete duplicate retry files after verification</action>
+            </actions>
+            <files_modified>
+                <file>netra_backend/app/core/resilience/unified_retry_handler.py</file>
+                <file>netra_backend/app/agents/base/retry_manager.py</file>
+                <file>netra_backend/app/core/reliability_retry.py</file>
+            </files_modified>
+            <files_deleted>
+                <file>netra_backend/app/core/async_retry_logic.py</file>
+                <file>netra_backend/app/core/enhanced_retry_strategies.py</file>
+                <file>netra_backend/app/core/retry_strategy_*.py (9 files)</file>
+            </files_deleted>
+        </phase>
+
+        <phase number="4" priority="MEDIUM" risk="LOW">
+            <name>Health Tracking Unification</name>
+            <description>Consolidate health tracking into canonical ReliabilityWrapper</description>
+            <actions>
+                <action>Integrate health metrics from all reliability managers</action>
+                <action>Create unified health reporting interface</action>
+                <action>Update monitoring integrations</action>
+                <action>Delete duplicate health tracking implementations</action>
+            </actions>
+        </phase>
+
+        <phase number="5" priority="CRITICAL" risk="HIGH">
+            <name>Testing and Validation</name>
+            <description>Comprehensive testing of unified reliability infrastructure</description>
+            <actions>
+                <action>Create reliability infrastructure test suite</action>
+                <action>Test WebSocket event integration with reliability patterns</action>
+                <action>Validate backward compatibility for all existing usage</action>
+                <action>Performance regression testing</action>
+                <action>Full chat flow testing with reliability failures</action>
+            </actions>
+            <test_requirements>
+                <requirement>All WebSocket events MUST be emitted during reliability operations</requirement>
+                <requirement>Chat functionality MUST work during agent retry attempts</requirement>
+                <requirement>Circuit breaker behavior MUST be consistent across agents</requirement>
+                <requirement>No performance degradation compared to current implementations</requirement>
+            </test_requirements>
+        </phase>
+    </migration_phases>
+
+    <compatibility_strategy>
+        <principle name="zero_breaking_changes">
+            <description>All existing reliability usage must continue working without modification</description>
+            <implementation>Create wrapper classes that delegate to canonical implementations</implementation>
+        </principle>
+        
+        <principle name="deprecation_warnings">
+            <description>All duplicate implementations emit warnings but continue working</description>
+            <implementation>Use Python warnings module with DeprecationWarning</implementation>
+        </principle>
+        
+        <principle name="gradual_adoption">
+            <description>New code uses canonical implementations, old code migrates gradually</description>
+            <implementation>Update imports and configurations one module at a time</implementation>
+        </principle>
+    </compatibility_strategy>
+
+    <risk_mitigation>
+        <risk level="CRITICAL" category="websocket_integration">
+            <description>Breaking chat functionality if WebSocket events aren't properly integrated</description>
+            <mitigation>
+                <action>Mandatory WebSocket event tests for all reliability patterns</action>
+                <action>Full chat flow testing with simulated reliability failures</action>
+                <action>Rollback plan to previous reliability managers if events fail</action>
+            </mitigation>
+        </risk>
+        
+        <risk level="HIGH" category="configuration_changes">
+            <description>Breaking existing retry configurations across all agents</description>
+            <mitigation>
+                <action>Comprehensive compatibility wrappers with field mapping</action>
+                <action>Gradual rollout with monitoring for configuration errors</action>
+                <action>Automated testing of all agent retry patterns</action>
+            </mitigation>
+        </risk>
+        
+        <risk level="MEDIUM" category="performance_impact">
+            <description>Unified handler might be slower than specialized implementations</description>
+            <mitigation>
+                <action>Performance benchmarking before and after migration</action>
+                <action>Optimization of hot paths in unified retry handler</action>
+                <action>Load testing with reliability operations under stress</action>
+            </mitigation>
+        </risk>
+    </risk_mitigation>
+
+    <success_criteria>
+        <technical_criteria>
+            <criterion>Single canonical ReliabilityManager used by all agents</criterion>
+            <criterion>Single canonical UnifiedRetryHandler for all retry logic</criterion>
+            <criterion>Single RetryConfig type across all modules</criterion>
+            <criterion>WebSocket events integrated with reliability patterns</criterion>
+            <criterion>All duplicate reliability files deleted</criterion>
+            <criterion>Zero SSOT violations in reliability infrastructure</criterion>
+        </technical_criteria>
+        
+        <business_criteria>
+            <criterion>All existing agent functionality preserved</criterion>
+            <criterion>Chat WebSocket events continue working during reliability operations</criterion>
+            <criterion>Consistent reliability behavior across all agents</criterion>
+            <criterion>No performance degradation in agent execution</criterion>
+            <criterion>Reduced maintenance complexity for reliability code</criterion>
+        </business_criteria>
+        
+        <operational_criteria>
+            <criterion>All tests passing with unified reliability infrastructure</criterion>
+            <criterion>Health monitoring working consistently across agents</criterion>
+            <criterion>Circuit breaker behavior consistent across system</criterion>
+            <criterion>Error handling patterns standardized</criterion>
+        </operational_criteria>
+    </success_criteria>
+
+    <files_to_delete_post_migration>
+        <category name="duplicate_reliability_managers">
+            <file>netra_backend/app/agents/base/reliability_manager.py</file>
+            <file>netra_backend/app/agents/base/reliability.py</file>
+            <file>netra_backend/app/core/agent_reliability_mixin.py</file>
+            <note>Convert to compatibility wrappers first, then delete after verification</note>
+        </category>
+        
+        <category name="duplicate_retry_handlers">
+            <file>netra_backend/app/core/async_retry_logic.py</file>
+            <file>netra_backend/app/core/enhanced_retry_strategies.py</file>
+            <file>netra_backend/app/core/retry_strategy_adaptive.py</file>
+            <file>netra_backend/app/core/retry_strategy_api.py</file>
+            <file>netra_backend/app/core/retry_strategy_base.py</file>
+            <file>netra_backend/app/core/retry_strategy_database.py</file>
+            <file>netra_backend/app/core/retry_strategy_executor.py</file>
+            <file>netra_backend/app/core/retry_strategy_factory.py</file>
+            <file>netra_backend/app/core/retry_strategy_manager.py</file>
+            <file>netra_backend/app/core/retry_strategy_memory.py</file>
+            <file>netra_backend/app/core/retry_strategy_types.py</file>
+            <note>All functionality consolidated into unified_retry_handler.py</note>
+        </category>
+        
+        <category name="duplicate_configuration_types">
+            <type>reliability_retry.ReliabilityRetryConfig</type>
+            <type>enhanced_retry.RetryStrategy</type>
+            <note>Convert to compatibility wrappers that delegate to shared_types.RetryConfig</note>
+        </category>
+    </files_to_delete_post_migration>
+
+    <implementation_priority>
+        <immediate_actions>
+            <action>Enhance shared_types.RetryConfig with comprehensive fields</action>
+            <action>Create backward compatibility wrappers for existing configs</action>
+            <action>Enhance core/reliability.py with WebSocket integration</action>
+        </immediate_actions>
+        
+        <critical_path_actions>
+            <action>Integration testing of WebSocket events with reliability patterns</action>
+            <action>Agent retry pattern validation across all agent types</action>
+            <action>Performance testing of unified reliability infrastructure</action>
+        </critical_path_actions>
+        
+        <final_actions>
+            <action>Delete duplicate implementations after full validation</action>
+            <action>Update documentation and architectural diagrams</action>
+            <action>Update LLM_MASTER_INDEX.md with canonical locations</action>
+        </final_actions>
+    </implementation_priority>
+
+    <monitoring_and_validation>
+        <metrics_to_track>
+            <metric name="reliability_operation_latency" description="Time for reliability operations"/>
+            <metric name="websocket_event_delivery_rate" description="Success rate of event delivery during reliability ops"/>
+            <metric name="agent_retry_success_rate" description="Success rate of retry attempts across agents"/>
+            <metric name="circuit_breaker_trip_rate" description="Rate of circuit breaker activations"/>
+            <metric name="configuration_compatibility_errors" description="Errors from config type mismatches"/>
+        </metrics_to_track>
+        
+        <validation_tests>
+            <test name="websocket_reliability_integration" description="WebSocket events during retry attempts"/>
+            <test name="configuration_backward_compatibility" description="All existing configs work with wrappers"/>
+            <test name="agent_reliability_consistency" description="All agents use same reliability patterns"/>
+            <test name="performance_regression" description="No slowdown in reliability operations"/>
+            <test name="error_handling_standardization" description="Consistent error responses across agents"/>
+        </validation_tests>
+    </monitoring_and_validation>
+</reliability_infrastructure>

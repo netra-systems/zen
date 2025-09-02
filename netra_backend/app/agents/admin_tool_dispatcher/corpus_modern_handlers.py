@@ -1,6 +1,6 @@
 """Modern Corpus Handler Implementations
 
-Individual modern handlers inheriting from BaseExecutionInterface.
+Individual modern handlers with standardized execution patterns.
 Each handler focuses on single corpus operation with reliability patterns.
 
 Business Value: Standardizes corpus operations for $10K+ customers.
@@ -13,7 +13,6 @@ from netra_backend.app.agents.admin_tool_dispatcher.corpus_handlers_base import 
 )
 from netra_backend.app.agents.admin_tool_dispatcher.corpus_models import CorpusToolType
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
     ExecutionContext,
 )
 from netra_backend.app.logging_config import central_logger
@@ -24,12 +23,14 @@ from netra_backend.app.services.synthetic_data_service import SyntheticDataServi
 logger = central_logger.get_logger(__name__)
 
 
-class ModernCorpusCreateHandler(BaseExecutionInterface, CorpusHandlerBase):
+class ModernCorpusCreateHandler(CorpusHandlerBase):
     """Modern corpus creation handler with reliability patterns."""
     
     def __init__(self, corpus_service: CorpusService, websocket_manager=None):
         """Initialize corpus creation handler."""
-        BaseExecutionInterface.__init__(self, "corpus_create", websocket_manager)
+        super().__init__()
+        self.agent_name = "corpus_create"
+        self.websocket_manager = websocket_manager
         self.corpus_service = corpus_service
         self.setup_reliability_components("corpus_create", 5, 30)
         
@@ -69,12 +70,14 @@ class ModernCorpusCreateHandler(BaseExecutionInterface, CorpusHandlerBase):
         }
 
 
-class ModernCorpusSyntheticHandler(BaseExecutionInterface, CorpusHandlerBase):
+class ModernCorpusSyntheticHandler(CorpusHandlerBase):
     """Modern synthetic data generation handler."""
     
     def __init__(self, synthetic_manager: SyntheticDataService, websocket_manager=None):
         """Initialize synthetic data handler."""
-        BaseExecutionInterface.__init__(self, "corpus_synthetic", websocket_manager)
+        super().__init__()
+        self.agent_name = "corpus_synthetic"
+        self.websocket_manager = websocket_manager
         self.synthetic_manager = synthetic_manager
         self.setup_reliability_components("corpus_synthetic", 3, 60)
         
@@ -114,12 +117,14 @@ class ModernCorpusSyntheticHandler(BaseExecutionInterface, CorpusHandlerBase):
         }
 
 
-class ModernCorpusOptimizationHandler(BaseExecutionInterface, CorpusHandlerBase):
+class ModernCorpusOptimizationHandler(CorpusHandlerBase):
     """Modern corpus optimization handler."""
     
     def __init__(self, corpus_service: CorpusService, websocket_manager=None):
         """Initialize optimization handler."""
-        BaseExecutionInterface.__init__(self, "corpus_optimize", websocket_manager)
+        super().__init__()
+        self.agent_name = "corpus_optimize"
+        self.websocket_manager = websocket_manager
         self.corpus_service = corpus_service
         self.setup_reliability_components("corpus_optimize", 3, 45)
         
@@ -167,12 +172,14 @@ class ModernCorpusOptimizationHandler(BaseExecutionInterface, CorpusHandlerBase)
         }
 
 
-class ModernCorpusExportHandler(BaseExecutionInterface, CorpusHandlerBase):
+class ModernCorpusExportHandler(CorpusHandlerBase):
     """Modern corpus export handler."""
     
     def __init__(self, corpus_service: CorpusService, websocket_manager=None):
         """Initialize export handler."""
-        BaseExecutionInterface.__init__(self, "corpus_export", websocket_manager)
+        super().__init__()
+        self.agent_name = "corpus_export"
+        self.websocket_manager = websocket_manager
         self.corpus_service = corpus_service
         self.setup_reliability_components("corpus_export", 3, 30)
         
@@ -210,12 +217,14 @@ class ModernCorpusExportHandler(BaseExecutionInterface, CorpusHandlerBase):
         }
 
 
-class ModernCorpusValidationHandler(BaseExecutionInterface, CorpusHandlerBase):
+class ModernCorpusValidationHandler(CorpusHandlerBase):
     """Modern corpus validation handler."""
     
     def __init__(self, corpus_service: CorpusService, websocket_manager=None):
         """Initialize validation handler."""
-        BaseExecutionInterface.__init__(self, "corpus_validate", websocket_manager)
+        super().__init__()
+        self.agent_name = "corpus_validate"
+        self.websocket_manager = websocket_manager
         self.corpus_service = corpus_service
         self.setup_reliability_components("corpus_validate", 5, 30)
         

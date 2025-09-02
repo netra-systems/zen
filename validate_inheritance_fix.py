@@ -10,7 +10,7 @@ sys.path.insert(0, str(project_root))
 
 from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.validation_sub_agent import ValidationSubAgent
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 
 def validate_single_inheritance():
     """Validate that agents now use single inheritance only."""

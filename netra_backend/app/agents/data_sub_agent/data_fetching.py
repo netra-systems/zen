@@ -2,7 +2,7 @@
 # ================================
 # Timestamp: 2025-08-18T00:00:00.000000+00:00
 # Agent: Claude Sonnet 4 claude-sonnet-4-20250514  
-# Context: Modernize data_fetching.py to use BaseExecutionInterface architecture
+# Context: Modernize data_fetching.py to use standardized execution architecture
 # Git: 8-18-25-AM | Modernizing to standard agent patterns
 # Change: Modernize | Scope: Module | Risk: Low
 # Session: data-sub-agent-modernization | Seq: 1
@@ -11,7 +11,7 @@
 """
 Data Fetching Engine - Modern Architecture
 
-Modernized data fetching using BaseExecutionInterface with:
+Modernized data fetching using standardized execution patterns with:
 - Standardized execution patterns
 - Integrated reliability management (circuit breaker, retry)
 - Comprehensive monitoring and error handling
@@ -27,11 +27,10 @@ from typing import TYPE_CHECKING, Any, Dict, Optional
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
+    
     ExecutionContext,
-    ExecutionResult,
-    ExecutionStatus,
-)
+    ExecutionResult)
+from netra_backend.app.schemas.core_enums import 
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability import ReliabilityManager
 
@@ -45,14 +44,15 @@ from netra_backend.app.schemas.shared_types import RetryConfig
 logger = central_logger.get_logger(__name__)
 
 
-class DataFetchingExecutionEngine(BaseExecutionInterface):
+class DataFetchingExecutionEngine:
     """Modern data fetching execution engine.
     
-    Implements BaseExecutionInterface with integrated reliability patterns.
+    Implements standardized execution patterns with integrated reliability features.
     """
     
     def __init__(self, websocket_manager=None):
-        super().__init__("data_fetching", websocket_manager)
+        self.agent_name = "data_fetching"
+        self.websocket_manager = websocket_manager
         self.execution_engine = self._create_execution_engine()
         self.data_operations = DataFetchingValidation()
 

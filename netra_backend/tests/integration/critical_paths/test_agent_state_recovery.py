@@ -32,7 +32,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 import pytest
 from netra_backend.app.schemas import User
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
 
@@ -268,7 +268,7 @@ class AgentStateRecoveryManager:
             "under_30s_recoveries": len([t for t in recovery_times if t < 30.0])
         }
 
-class RecoverableAgent(BaseSubAgent):
+class RecoverableAgent(BaseAgent):
     """Agent with state recovery capabilities."""
     
     def __init__(self, agent_id: str, recovery_manager: AgentStateRecoveryManager):
@@ -454,7 +454,7 @@ class RecoverableAgent(BaseSubAgent):
         }
     
     async def execute(self, input_data: Any) -> Any:
-        """Execute agent task - required by BaseSubAgent interface."""
+        """Execute agent task - required by BaseAgent interface."""
         # For test purposes, simulate basic task execution
         if self.is_crashed:
             raise RuntimeError("Agent is crashed")

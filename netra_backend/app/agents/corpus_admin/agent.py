@@ -1,5 +1,5 @@
 """
-Modernized Corpus Admin Agent with BaseExecutionInterface pattern (<300 lines).
+Modernized Corpus Admin Agent with standardized execution patterns (<300 lines).
 
 Business Value: Standardized execution patterns for corpus administration,
 improved reliability, and comprehensive monitoring.
@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional
 if TYPE_CHECKING:
     from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.errors import ValidationError
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
@@ -19,8 +19,9 @@ from netra_backend.app.agents.utils import extract_thread_id
 
 # Modern execution pattern imports
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus, WebSocketManagerProtocol
+    ExecutionContext, ExecutionResult, WebSocketManagerProtocol
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
@@ -43,7 +44,7 @@ from netra_backend.app.schemas.shared_types import RetryConfig
 logger = central_logger.get_logger(__name__)
 
 
-class CorpusAdminSubAgent(BaseSubAgent):
+class CorpusAdminSubAgent(BaseAgent):
     """Modernized corpus admin agent with standardized execution patterns."""
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
@@ -54,9 +55,9 @@ class CorpusAdminSubAgent(BaseSubAgent):
     
     def _init_base_agents(self, llm_manager: LLMManager, websocket_manager: Optional['WebSocketManager']) -> None:
         """Initialize base agent components."""
-        BaseSubAgent.__init__(self, llm_manager, name="CorpusAdminSubAgent",
+        BaseAgent.__init__(self, llm_manager, name="CorpusAdminSubAgent",
                             description="Agent specialized in corpus management and administration")
-        # Store agent name for BaseExecutionInterface compatibility
+        # Store agent name for standardized execution patterns
         self.agent_name = "CorpusAdminSubAgent"
         self.websocket_manager = websocket_manager
     
@@ -109,7 +110,7 @@ class CorpusAdminSubAgent(BaseSubAgent):
         return result
     
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
-        """Modernized execute using BaseExecutionEngine for backward compatibility."""
+        """Modernized execute using modern execution engine for backward compatibility."""
         log_agent_communication("Supervisor", "CorpusAdminSubAgent", run_id, "execute_request")
         context = self._create_execution_context(state, run_id, stream_updates)
         
@@ -257,17 +258,17 @@ class CorpusAdminSubAgent(BaseSubAgent):
     
     async def _send_initial_update(self, run_id: str, stream_updates: bool) -> None:
         """Send initial status update via WebSocket."""
-        # Implementation moved to BaseExecutionInterface
+        # Implementation uses standardized execution patterns
         pass
     
     async def _send_processing_update(self, operation_request, run_id: str, stream_updates: bool) -> None:
         """Send processing status update via WebSocket."""
-        # Implementation moved to BaseExecutionInterface
+        # Implementation uses standardized execution patterns
         pass
     
     async def _send_completion_update(self, result, run_id: str, stream_updates: bool, start_time: float) -> None:
         """Send completion status update via WebSocket."""
-        # Implementation moved to BaseExecutionInterface
+        # Implementation uses standardized execution patterns
         pass
     
     def _log_completion(self, result, run_id: str) -> None:

@@ -14,7 +14,7 @@ def test_original_violations_fixed():
     try:
         from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
         from netra_backend.app.agents.validation_sub_agent import ValidationSubAgent
-        from netra_backend.app.agents.base_agent import BaseSubAgent
+        from netra_backend.app.agents.base_agent import BaseAgent
         
         print("SUCCESS: Successfully imported agent classes")
     except Exception as e:
@@ -70,7 +70,7 @@ def test_original_violations_fixed():
     try:
         data_agent = DataSubAgent(None, None)
         
-        # Check that WebSocket methods are defined only in BaseSubAgent, not duplicated in subclasses
+        # Check that WebSocket methods are defined only in BaseAgent, not duplicated in subclasses
         websocket_methods_in_classes = {}
         for cls in data_agent.__class__.__mro__:
             if cls.__module__.startswith('netra_backend'):

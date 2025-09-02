@@ -1,5 +1,8 @@
 """Retry Manager Implementation for Agent Reliability
 
+⚠️  DEPRECATED: This class now delegates to UnifiedRetryHandler.
+Use UnifiedRetryHandler directly for new code.
+
 Retry logic with exponential backoff:
 - Configurable retry attempts and delays
 - Intelligent exception handling
@@ -10,10 +13,17 @@ Business Value: Handles transient failures gracefully, reducing false failures.
 """
 
 import asyncio
+import warnings
 from typing import Any, Awaitable, Callable, Dict
 
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerOpenException
 from netra_backend.app.agents.base.interface import ExecutionContext
+from netra_backend.app.core.resilience.unified_retry_handler import (
+    UnifiedRetryHandler,
+    RetryConfig as UnifiedRetryConfig,
+    RetryStrategy,
+    agent_retry_handler
+)
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.shared_types import RetryConfig
 
@@ -23,73 +33,78 @@ logger = central_logger.get_logger(__name__)
 class RetryManager:
     """Manages retry logic with exponential backoff.
     
+    ⚠️  DEPRECATED: This class now delegates to UnifiedRetryHandler.
+    Use UnifiedRetryHandler directly for new code.
+    
     Provides intelligent retry mechanisms for transient failures
     with configurable backoff strategies.
     """
     
     def __init__(self, config: RetryConfig):
+        warnings.warn(
+            "RetryManager is deprecated. Use UnifiedRetryHandler from "
+            "netra_backend.app.core.resilience.unified_retry_handler for better functionality.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
         self.config = config
+        
+        # Convert legacy config to unified config
+        unified_config = self._convert_to_unified_config(config)
+        self._unified_handler = UnifiedRetryHandler("agent_retry_manager", unified_config)
+        
+        logger.info("RetryManager created with UnifiedRetryHandler delegation")
+    
+    def _convert_to_unified_config(self, config: RetryConfig) -> UnifiedRetryConfig:
+        """Convert legacy RetryConfig to UnifiedRetryConfig."""
+        return UnifiedRetryConfig(
+            max_attempts=config.max_retries + 1,  # Legacy uses max_retries, unified uses max_attempts
+            base_delay=config.base_delay,
+            max_delay=config.max_delay,
+            strategy=RetryStrategy.EXPONENTIAL,
+            backoff_multiplier=2.0,
+            jitter_range=0.1,
+            timeout_seconds=None,
+            retryable_exceptions=(
+                ConnectionError,
+                TimeoutError,
+                CircuitBreakerOpenException,
+            ),
+            non_retryable_exceptions=(
+                ValueError,
+                TypeError,
+                AttributeError,
+            ),
+            circuit_breaker_enabled=False,
+            metrics_enabled=True
+        )
         
     async def execute_with_retry(self, func: Callable[[], Awaitable[Any]],
                                context: ExecutionContext) -> Any:
         """Execute function with retry logic."""
-        return await self._execute_retry_loop(func, context)
-    
-    async def _execute_retry_loop(self, func: Callable[[], Awaitable[Any]],
-                                 context: ExecutionContext) -> Any:
-        """Execute retry loop with attempts."""
-        last_exception = None
+        # Update context with retry information
+        async def context_aware_func():
+            context.retry_count = getattr(context, 'retry_count', 0)
+            return await func()
         
-        for attempt in range(self.config.max_retries + 1):
-            result = await self._attempt_execution(func, context, attempt)
-            if result["success"]:
-                return result["value"]
-            
-            last_exception = result["exception"]
-            if not self._should_retry_attempt(last_exception, attempt):
-                break
+        # Execute with unified retry handler
+        result = await self._unified_handler.execute_with_retry_async(context_aware_func)
         
-        raise last_exception
+        if result.success:
+            return result.result
+        else:
+            # Update context with final retry count
+            context.retry_count = result.total_attempts
+            raise result.final_exception
     
-    def _should_retry_attempt(self, exception: Exception, attempt: int) -> bool:
-        """Check if should retry this attempt."""
-        return self._should_retry(exception, attempt)
-    
-    async def _attempt_execution(self, func: Callable[[], Awaitable[Any]], 
-                               context: ExecutionContext, attempt: int) -> Dict[str, Any]:
-        """Attempt single execution with retry preparation."""
-        try:
-            await self._prepare_retry_attempt(attempt, context)
-            result = await func()
-            return self._create_success_result(result)
-        except Exception as e:
-            self._log_retry_attempt(context, attempt, e)
-            return self._create_failure_result(e)
-    
-    def _create_success_result(self, result: Any) -> Dict[str, Any]:
-        """Create success result dictionary."""
-        return {"success": True, "value": result, "exception": None}
-    
-    def _create_failure_result(self, exception: Exception) -> Dict[str, Any]:
-        """Create failure result dictionary."""
-        return {"success": False, "value": None, "exception": exception}
-    
-    async def _prepare_retry_attempt(self, attempt: int, context: ExecutionContext) -> None:
-        """Prepare context for retry attempt."""
-        if attempt > 0:
-            await self._wait_for_retry(attempt)
-            context.retry_count = attempt
-    
+    # Legacy compatibility methods - deprecated, delegate to unified handler
     def _should_retry(self, exception: Exception, attempt: int) -> bool:
-        """Check if operation should be retried."""
-        if attempt >= self.config.max_retries:
-            return False
-        
-        # Check if exception is retryable
-        return self._is_retryable_exception(exception)
+        """DEPRECATED: Check if operation should be retried."""
+        return self._unified_handler._should_retry(exception, attempt + 1) != self._unified_handler._should_retry.__class__.__name__.STOP
     
     def _is_retryable_exception(self, exception: Exception) -> bool:
-        """Check if exception is retryable."""
+        """DEPRECATED: Check if exception is retryable."""
         # Import here to avoid circular imports
         from netra_backend.app.agents.base.errors import AgentExecutionError
         
@@ -99,26 +114,10 @@ class RetryManager:
         return self._is_common_retryable_exception(exception)
     
     def _is_common_retryable_exception(self, exception: Exception) -> bool:
-        """Check if exception is a common retryable type."""
+        """DEPRECATED: Check if exception is a common retryable type."""
         retryable_types = (
             ConnectionError,
             TimeoutError,
             CircuitBreakerOpenException
         )
         return isinstance(exception, retryable_types)
-    
-    async def _wait_for_retry(self, attempt: int) -> None:
-        """Wait for exponential backoff delay."""
-        delay = min(
-            self.config.base_delay * (2 ** (attempt - 1)),
-            self.config.max_delay
-        )
-        await asyncio.sleep(delay)
-    
-    def _log_retry_attempt(self, context: ExecutionContext, 
-                          attempt: int, exception: Exception) -> None:
-        """Log retry attempt details."""
-        logger.warning(
-            f"Retry attempt {attempt}/{self.config.max_retries} for "
-            f"{context.agent_name}: {exception}"
-        )

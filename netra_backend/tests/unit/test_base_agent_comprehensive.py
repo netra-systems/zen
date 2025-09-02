@@ -1,5 +1,5 @@
 """
-Comprehensive unit tests for BaseSubAgent functionality
+Comprehensive unit tests for BaseAgent functionality
 Focus: Uncovered areas with minimal mocking
 Coverage Target: Timing, Correlation ID, Configuration, Logging, User Management
 """
@@ -7,7 +7,7 @@ Coverage Target: Timing, Correlation ID, Configuration, Logging, User Management
 import pytest
 import uuid
 from unittest.mock import Mock, patch, MagicMock, PropertyMock
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.schemas.agent import SubAgentLifecycle
@@ -16,8 +16,8 @@ from netra_backend.app.core.config import get_config
 import asyncio
 
 
-class ConcreteConcreteTestAgent(BaseSubAgent):
-    """Concrete test implementation of BaseSubAgent"""
+class ConcreteConcreteTestAgent(BaseAgent):
+    """Concrete test implementation of BaseAgent"""
     
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool = False) -> None:
         """Test execute implementation"""
@@ -29,7 +29,7 @@ class ConcreteConcreteTestAgent(BaseSubAgent):
 
 
 class TestBaseAgentComprehensive:
-    """Comprehensive test suite for BaseSubAgent uncovered functionality"""
+    """Comprehensive test suite for BaseAgent uncovered functionality"""
     
     @pytest.fixture
     def real_llm_manager(self):

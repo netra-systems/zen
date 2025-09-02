@@ -24,7 +24,7 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import patch
 
 from test_framework.environment_markers import env, env_requires, dev_and_staging
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.config import get_config
@@ -36,8 +36,8 @@ from netra_backend.app.websocket_core.manager import WebSocketManager
 UnifiedWebSocketManager = WebSocketManager  # Alias for backward compatibility
 
 
-class MockResponseAgent(BaseSubAgent):
-    """Test implementation of BaseSubAgent for response flow testing."""
+class MockResponseAgent(BaseAgent):
+    """Test implementation of BaseAgent for response flow testing."""
     
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool = True) -> None:
         """Test execute method for response generation."""
@@ -74,7 +74,7 @@ class AgentResponseFlowTester:
         agent.user_id = "test_user_response_001"
         return agent
     
-    async def simulate_response_generation(self, agent: BaseSubAgent, 
+    async def simulate_response_generation(self, agent: BaseAgent, 
                                          query: str) -> Dict[str, Any]:
         """Simulate complete response generation flow."""
         start_time = time.time()
@@ -143,7 +143,7 @@ class AgentResponseFlowTester:
         persistence_result = await self._simulate_response_persistence(response_data)
         return persistence_result["success"]
 
-    async def _generate_agent_response(self, agent: BaseSubAgent, state: DeepAgentState, 
+    async def _generate_agent_response(self, agent: BaseAgent, state: DeepAgentState, 
                                      query: str) -> str:
         """Generate response through agent."""
         # Simulate agent processing

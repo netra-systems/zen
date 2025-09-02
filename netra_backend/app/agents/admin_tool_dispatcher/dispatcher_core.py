@@ -2,7 +2,7 @@
 Modernized Admin Tool Dispatcher Core
 
 Provides AdminToolDispatcher with modern agent architecture:
-- Inherits from BaseExecutionInterface for consistency
+- Single inheritance from ToolDispatcher
 - Integrates ReliabilityManager for robust execution
 - Uses ExecutionMonitor for performance tracking
 - Implements ExecutionErrorHandler for error management
@@ -16,7 +16,7 @@ from langchain_core.tools import BaseTool
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
-from netra_backend.app.agents.base.interface import BaseExecutionInterface, ExecutionContext, ExecutionResult
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
@@ -38,8 +38,8 @@ from netra_backend.app.services.permission_service import PermissionService
 logger = central_logger
 
 
-class AdminToolDispatcher(ToolDispatcher, BaseExecutionInterface):
-    """Modernized admin tool dispatcher with BaseExecutionInterface compliance.
+class AdminToolDispatcher(ToolDispatcher):
+    """Modernized admin tool dispatcher.
     
     Provides advanced error handling, circuit breaker patterns, and monitoring.
     """
@@ -49,7 +49,6 @@ class AdminToolDispatcher(ToolDispatcher, BaseExecutionInterface):
                  websocket_manager=None) -> None:
         """Initialize with modern agent architecture components."""
         ToolDispatcher.__init__(self, tools or [])
-        BaseExecutionInterface.__init__(self, "AdminToolDispatcher", websocket_manager)
         self._setup_dispatcher_components(llm_manager, tool_dispatcher, db, user)
         self._initialize_modern_components()
     
@@ -64,7 +63,6 @@ class AdminToolDispatcher(ToolDispatcher, BaseExecutionInterface):
         retry_config = self._create_retry_config()
         self.reliability_manager = ReliabilityManager(circuit_config, retry_config)
         self.monitor = ExecutionMonitor()
-        self.execution_engine = BaseExecutionEngine(self.reliability_manager, self.monitor)
     
     def _set_manager_properties(self, llm_manager, tool_dispatcher, db, user) -> None:
         """Set manager properties and initialize state"""

@@ -511,8 +511,46 @@ class StartupOrchestrator:
         await self._validate_database_schema()
         self.logger.info("  ✓ Step 24: Database schema validated")
     
+    def _validate_critical_services_exist(self) -> None:
+        """Validate that all critical services exist and are not None."""
+        critical_services = {
+            'agent_service': 'Agent Service (handles agent interactions)',
+            'thread_service': 'Thread Service (manages chat threads)',
+            'corpus_service': 'Corpus Service (manages knowledge base)',
+            'agent_supervisor': 'Agent Supervisor (orchestrates agents)',
+            'llm_manager': 'LLM Manager (handles AI model connections)',
+            'db_session_factory': 'Database Session Factory',
+            'redis_manager': 'Redis Manager (handles caching)',
+            'tool_dispatcher': 'Tool Dispatcher (executes agent tools)',
+            'agent_websocket_bridge': 'WebSocket Bridge (real-time events)'
+        }
+        
+        missing_services = []
+        none_services = []
+        
+        for service_name, description in critical_services.items():
+            if not hasattr(self.app.state, service_name):
+                missing_services.append(f"{service_name} ({description})")
+            else:
+                service = getattr(self.app.state, service_name)
+                if service is None:
+                    none_services.append(f"{service_name} ({description})")
+        
+        if missing_services or none_services:
+            error_msg = "CRITICAL SERVICE VALIDATION FAILED:\n"
+            if missing_services:
+                error_msg += f"  Missing services: {', '.join(missing_services)}\n"
+            if none_services:
+                error_msg += f"  None services: {', '.join(none_services)}\n"
+            raise DeterministicStartupError(error_msg)
+        
+        self.logger.info("    ✓ All critical services validated")
+    
     async def _run_comprehensive_validation(self) -> None:
         """Run comprehensive startup validation."""
+        # CRITICAL: First validate all required services exist and are not None
+        self._validate_critical_services_exist()
+        
         try:
             from netra_backend.app.core.startup_validation import validate_startup
             
@@ -758,9 +796,9 @@ class StartupOrchestrator:
                 self.logger.info("    - Using existing AgentWebSocketBridge instance for tool dispatcher")
             else:
                 # Bridge not created yet - create basic instance
-                # Full integration will happen in Phase 4
+                # Full integration will happen in Phase 6 (WebSocket phase)
                 websocket_bridge = None  # Will be set during integration phase
-                self.logger.info("    - Tool dispatcher created without bridge (will be connected in Phase 4)")
+                self.logger.info("    - Tool dispatcher created without bridge (will be connected in Phase 6: WebSocket)")
         except Exception as e:
             self.logger.warning(f"Could not get AgentWebSocketBridge for tool dispatcher: {e}")
             websocket_bridge = None
@@ -837,6 +875,23 @@ class StartupOrchestrator:
         self.app.state.agent_service = AgentService(supervisor)
         self.app.state.thread_service = ThreadService()
         self.app.state.corpus_service = CorpusService()
+        
+        # CRITICAL VALIDATION: Ensure services are never None
+        critical_services = [
+            ('agent_supervisor', self.app.state.agent_supervisor),
+            ('agent_service', self.app.state.agent_service),
+            ('thread_service', self.app.state.thread_service),
+            ('corpus_service', self.app.state.corpus_service)
+        ]
+        
+        for service_name, service_instance in critical_services:
+            if service_instance is None:
+                raise DeterministicStartupError(
+                    f"CRITICAL: {service_name} is None after initialization. "
+                    f"This violates deterministic startup requirements."
+                )
+        
+        self.logger.info("    ✓ All critical services validated as non-None")
     
     def _register_message_handlers(self) -> None:
         """Register WebSocket message handlers - CRITICAL."""

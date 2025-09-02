@@ -30,7 +30,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.config import get_settings
 from netra_backend.app.db.database_manager import DatabaseManager as ConnectionManager

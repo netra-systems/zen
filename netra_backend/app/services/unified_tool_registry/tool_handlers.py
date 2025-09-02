@@ -56,18 +56,40 @@ class BasicToolHandlers:
     
     async def _list_agents_handler(self: "UnifiedToolRegistry", arguments: Dict[str, Any], user: User):
         """Handler for list_agents tool"""
-        from netra_backend.app.agents.supervisor import SupervisorAgent
+        # Get agents from registry instead of creating SupervisorAgent directly
+        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
         
-        supervisor = SupervisorAgent(self.db)
-        agents = supervisor.get_registered_agents()
-        
-        agent_list = []
-        for name, agent_class in agents.items():
-            agent_list.append({
-                "name": name,
-                "type": agent_class.__name__,
-                "capabilities": getattr(agent_class, 'capabilities', [])
-            })
+        # Access global registry or create one with minimal dependencies
+        # This avoids creating a SupervisorAgent without WebSocket bridge
+        try:
+            # Try to get registry from app state if available
+            registry = getattr(self, 'registry', None)
+            if not registry and hasattr(self, 'app'):
+                registry = getattr(self.app.state, 'agent_registry', None)
+            
+            if registry:
+                agents = registry.agents
+                agent_list = []
+                for name, agent_instance in agents.items():
+                    agent_list.append({
+                        "name": name,
+                        "type": type(agent_instance).__name__,
+                        "capabilities": getattr(type(agent_instance), 'capabilities', []),
+                        "websocket_enabled": agent_instance.has_websocket_context()
+                    })
+            else:
+                # Fallback: provide static list of known agent types
+                agent_list = [
+                    {"name": "triage", "type": "TriageSubAgent", "capabilities": ["user_intent_analysis", "routing"]},
+                    {"name": "data_analysis", "type": "DataSubAgent", "capabilities": ["data_processing", "analytics"]},
+                    {"name": "optimization", "type": "OptimizationsCoreSubAgent", "capabilities": ["cost_optimization", "performance_tuning"]},
+                    {"name": "actions", "type": "ActionsToMeetGoalsSubAgent", "capabilities": ["action_planning", "execution"]},
+                    {"name": "reporting", "type": "ReportingSubAgent", "capabilities": ["report_generation", "visualization"]},
+                    {"name": "synthetic_data", "type": "SyntheticDataSubAgent", "capabilities": ["data_generation", "augmentation"]}
+                ]
+        except Exception as e:
+            # Safe fallback if registry access fails
+            agent_list = [{"name": "error", "type": "Unknown", "capabilities": [], "error": str(e)}]
         
         return {
             "type": "text",

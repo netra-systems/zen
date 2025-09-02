@@ -285,3 +285,124 @@ class SecurityManager:
                     request.user_id,
                     request.context
                 )
+            
+            # Update metrics
+            self._update_security_metrics(
+                success=success,
+                execution_duration=execution_duration,
+                memory_used=memory_used
+            )
+            
+            # Record security event
+            if not success and self.emergency_monitor:
+                await self.emergency_monitor.record_violation(
+                    request.agent_name,
+                    request.user_id,
+                    error_message
+                )
+        
+        except Exception as e:
+            logger.error(f"Error recording execution completion: {e}")
+    
+    def _update_security_metrics(
+        self,
+        success: bool,
+        execution_duration: float,
+        memory_used: float
+    ) -> None:
+        """Update internal security metrics."""
+        if success:
+            self.metrics['successful_executions'] += 1
+        else:
+            self.metrics['failed_executions'] += 1
+        
+        self.metrics['total_executions'] += 1
+        self.metrics['total_execution_time'] += execution_duration
+        self.metrics['peak_memory_usage'] = max(
+            self.metrics['peak_memory_usage'],
+            memory_used
+        )
+    
+    async def get_security_status(self) -> Dict[str, Any]:
+        """Get comprehensive security system status."""
+        status = {
+            'enabled': True,
+            'config': {
+                'resource_protection': self.config.enable_resource_protection,
+                'circuit_breaker': self.config.enable_circuit_breaker,
+                'timeout_protection': self.config.enable_timeout_protection
+            },
+            'metrics': self.metrics.copy(),
+            'health': 'healthy'
+        }
+        
+        # Add component statuses
+        if self.resource_guard:
+            status['resource_guard'] = await self.resource_guard.get_status()
+        
+        if self.circuit_breaker:
+            status['circuit_breaker'] = self.circuit_breaker.get_system_status()
+        
+        if self.timeout_manager:
+            status['timeout_manager'] = self.timeout_manager.get_status()
+        
+        if self.emergency_monitor:
+            status['emergency_monitor'] = self.emergency_monitor.get_status()
+        
+        # Determine overall health
+        if self.emergency_monitor and self.emergency_monitor.is_shutdown_active():
+            status['health'] = 'emergency_shutdown'
+        elif self.metrics.get('violation_rate', 0) > 0.1:
+            status['health'] = 'degraded'
+        
+        return status
+    
+    async def emergency_shutdown(self, reason: str) -> None:
+        """Trigger emergency shutdown of all agent execution."""
+        logger.critical(f"EMERGENCY SHUTDOWN TRIGGERED: {reason}")
+        
+        # Activate emergency mode in all components
+        if self.emergency_monitor:
+            await self.emergency_monitor.activate_emergency_shutdown(reason)
+        
+        if self.circuit_breaker:
+            await self.circuit_breaker.open_all_circuits()
+        
+        if self.resource_guard:
+            await self.resource_guard.emergency_release_all()
+        
+        if self.timeout_manager:
+            await self.timeout_manager.cancel_all_timeouts()
+        
+        self.metrics['emergency_shutdowns'] += 1
+    
+    async def recover_from_emergency(self) -> bool:
+        """Attempt recovery from emergency shutdown."""
+        logger.info("Attempting recovery from emergency shutdown")
+        
+        try:
+            # Check if safe to recover
+            if self.emergency_monitor:
+                if not await self.emergency_monitor.is_safe_to_recover():
+                    logger.warning("Not safe to recover yet")
+                    return False
+            
+            # Reset components
+            if self.circuit_breaker:
+                await self.circuit_breaker.reset_all_circuits()
+            
+            if self.resource_guard:
+                await self.resource_guard.reset()
+            
+            if self.timeout_manager:
+                await self.timeout_manager.reset()
+            
+            if self.emergency_monitor:
+                await self.emergency_monitor.deactivate_emergency_shutdown()
+            
+            logger.info("Successfully recovered from emergency shutdown")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to recover from emergency: {e}")
+            return False

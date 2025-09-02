@@ -1,6 +1,6 @@
 """Core execution workflow coordination for DataSubAgent.
 
-Modernized with BaseExecutionInterface pattern:
+Modernized with standardized execution patterns:
 - Standardized execution patterns
 - Integrated reliability management
 - Comprehensive error handling
@@ -16,23 +16,23 @@ from typing import Any, Callable, Dict, Optional
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
     ExecutionContext,
     ExecutionResult,
-    ExecutionStatus,
     WebSocketManagerProtocol,
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.shared_types import RetryConfig
 
 
-class ExecutionCore(BaseExecutionInterface):
+class ExecutionCore:
     """Core execution workflow coordinator with modern patterns."""
     
     def __init__(self, execution_engine, websocket_manager: Optional[WebSocketManagerProtocol] = None):
-        super().__init__("DataSubAgent", websocket_manager)
+        self.agent_name = "DataSubAgent"
+        self.websocket_manager = websocket_manager
         self.engine = execution_engine
         self._init_modern_components()
         
@@ -150,7 +150,7 @@ class ExecutionCore(BaseExecutionInterface):
         return await self.error_handler.handle_execution_error(error, context)
     
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
-        """Execute agent-specific core logic (BaseExecutionInterface implementation)."""
+        """Execute agent-specific core logic with standardized execution patterns."""
         params = self.engine.parameter_processor.extract_analysis_params(context.state)
         result = await self.engine.analysis_router.perform_complete_analysis(
             params, context.run_id, context.stream_updates, 
@@ -163,7 +163,7 @@ class ExecutionCore(BaseExecutionInterface):
         return result
         
     async def validate_preconditions(self, context: ExecutionContext) -> bool:
-        """Validate execution preconditions (BaseExecutionInterface implementation)."""
+        """Validate execution preconditions with standardized validation patterns."""
         try:
             return await self._validate_analysis_preconditions(context)
         except Exception as e:

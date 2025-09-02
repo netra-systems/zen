@@ -6,7 +6,8 @@ Business Value: Ensures comprehensive data collection for accurate optimization 
 
 from typing import Any, Dict, Optional
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
+from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -16,7 +17,7 @@ from netra_backend.app.tools.data_helper import DataHelper
 logger = central_logger.get_logger(__name__)
 
 
-class DataHelperAgent(BaseSubAgent):
+class DataHelperAgent(BaseAgent):
     """Data Helper Agent for requesting additional data from users.
     
     This agent analyzes the context and generates comprehensive data requests
@@ -33,36 +34,136 @@ class DataHelperAgent(BaseSubAgent):
         super().__init__(
             llm_manager=llm_manager,
             name="data_helper",
-            description="Generates data requests when insufficient data is available"
+            description="Generates data requests when insufficient data is available",
+            enable_reliability=True,      # Get circuit breaker + retry
+            enable_execution_engine=True, # Get modern execution patterns
+            enable_caching=True,          # Optional caching infrastructure
         )
         self.tool_dispatcher = tool_dispatcher
         self.data_helper_tool = DataHelper(llm_manager)
     
+    # === SSOT Abstract Method Implementations ===
+    
+    async def validate_preconditions(self, context: ExecutionContext) -> bool:
+        """Validate execution preconditions for data request generation."""
+        if not context.state.user_request:
+            self.logger.warning(f"No user request provided for data helper in run_id: {context.run_id}")
+            return False
+        
+        # Check if user request has sufficient length for meaningful analysis
+        if len(context.state.user_request.strip()) < 10:
+            self.logger.warning(f"User request too short for data helper analysis in run_id: {context.run_id}")
+            return False
+        
+        return True
+    
+    async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+        """Execute core data request generation logic with WebSocket events."""
+        # Emit thinking event for reasoning visibility
+        await self.emit_thinking("Analyzing user request to identify data gaps...")
+        
+        try:
+            # Extract triage result from state
+            triage_result = getattr(context.state, 'triage_result', {})
+            
+            # Extract previous agent results from state
+            previous_results = self._extract_previous_results(context.state)
+            
+            # Emit tool execution transparency
+            await self.emit_tool_executing("data_helper", {
+                "user_request": context.state.user_request[:100] + "..." if len(context.state.user_request) > 100 else context.state.user_request,
+                "triage_result": bool(triage_result),
+                "previous_results_count": len(previous_results)
+            })
+            
+            # Generate data request using the tool
+            data_request_result = await self.data_helper_tool.generate_data_request(
+                user_request=context.state.user_request,
+                triage_result=triage_result,
+                previous_results=previous_results
+            )
+            
+            # Emit tool completion with sanitized results
+            await self.emit_tool_completed("data_helper", {
+                "success": data_request_result.get('success', False),
+                "data_request_generated": bool(data_request_result.get('data_request')),
+                "instructions_count": len(data_request_result.get('data_request', {}).get('user_instructions', '')),
+                "structured_items_count": len(data_request_result.get('data_request', {}).get('structured_items', []))
+            })
+            
+            # Update state with data request using context_tracking
+            if not context.state.context_tracking:
+                context.state.context_tracking = {}
+            
+            context.state.context_tracking['data_helper_result'] = data_request_result
+            context.state.context_tracking['data_helper'] = {
+                'success': data_request_result.get('success', False),
+                'data_request': data_request_result.get('data_request', {}),
+                'user_instructions': data_request_result.get('data_request', {}).get('user_instructions', ''),
+                'structured_items': data_request_result.get('data_request', {}).get('structured_items', [])
+            }
+            
+            # Emit progress completion
+            await self.emit_progress("Data request generated successfully", is_complete=True)
+            
+            # Log successful execution
+            logger.info(f"DataHelperAgent completed successfully for run_id: {context.run_id}")
+            
+            return {
+                'success': True,
+                'data_request': data_request_result.get('data_request', {}),
+                'user_instructions': data_request_result.get('data_request', {}).get('user_instructions', ''),
+                'structured_items': data_request_result.get('data_request', {}).get('structured_items', [])
+            }
+            
+        except Exception as e:
+            logger.error(f"Error in DataHelperAgent for run_id {context.run_id}: {str(e)}")
+            
+            # Emit error event
+            await self.emit_error(f"Data request generation failed: {str(e)}", "data_helper_error", {
+                "run_id": context.run_id,
+                "error_type": type(e).__name__
+            })
+            
+            # Add error to state using context_tracking
+            if not context.state.context_tracking:
+                context.state.context_tracking = {}
+            
+            context.state.context_tracking['data_helper'] = {
+                'success': False,
+                'error': str(e),
+                'fallback_message': self._get_fallback_message(context.state.user_request)
+            }
+            
+            # Return error result but don't re-raise (let BaseAgent handle)
+            return {
+                'success': False,
+                'error': str(e),
+                'fallback_message': self._get_fallback_message(context.state.user_request)
+            }
+    
+    # === Backward Compatibility Methods ===
+    
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool = False) -> None:
-        """Execute the agent - implements the abstract method from AgentLifecycleMixin.
+        """Execute the agent - backward compatibility method that delegates to modern execution.
         
         Args:
             state: Current agent state
             run_id: Run ID for tracking
-            stream_updates: Whether to stream updates (unused)
+            stream_updates: Whether to stream updates
         """
-        # Call the run method with extracted parameters from state
-        user_prompt = getattr(state, 'user_request', '')
-        thread_id = getattr(state, 'thread_id', '')
-        user_id = getattr(state, 'user_id', '')
-        
-        # Execute the run method and update state in place
-        updated_state = await self.run(
-            user_prompt=user_prompt,
-            thread_id=thread_id,
-            user_id=user_id,
+        # Create ExecutionContext for modern pattern
+        context = ExecutionContext(
             run_id=run_id,
-            state=state
+            agent_name=self.name,
+            state=state,
+            stream_updates=stream_updates,
+            thread_id=getattr(state, 'chat_thread_id', None),
+            user_id=getattr(state, 'user_id', None)
         )
         
-        # Copy updated attributes back to the original state
-        for key, value in updated_state.__dict__.items():
-            setattr(state, key, value)
+        # Delegate to BaseAgent's modern execution
+        await self.execute_modern(state, run_id, stream_updates)
     
     async def run(
         self,
@@ -72,7 +173,9 @@ class DataHelperAgent(BaseSubAgent):
         run_id: str,
         state: Optional[DeepAgentState] = None
     ) -> DeepAgentState:
-        """Execute the data helper agent.
+        """Execute the data helper agent - backward compatibility method.
+        
+        This method maintains backward compatibility while using the golden pattern internally.
         
         Args:
             user_prompt: The user's request
@@ -84,52 +187,51 @@ class DataHelperAgent(BaseSubAgent):
         Returns:
             Updated DeepAgentState with data request
         """
-        logger.info(f"DataHelperAgent starting for run_id: {run_id}")
+        logger.info(f"DataHelperAgent.run() starting for run_id: {run_id}")
         
         # Initialize state if not provided
         if state is None:
             state = DeepAgentState()
             state.user_request = user_prompt
+            state.chat_thread_id = thread_id
+            state.user_id = user_id
+        
+        # Create ExecutionContext for modern execution pattern
+        context = ExecutionContext(
+            run_id=run_id,
+            agent_name=self.name,
+            state=state,
+            stream_updates=True,  # Default to true for legacy compatibility
+            thread_id=thread_id,
+            user_id=user_id
+        )
         
         try:
-            # Extract triage result from state
-            triage_result = getattr(state, 'triage_result', {})
-            
-            # Extract previous agent results from state
-            previous_results = self._extract_previous_results(state)
-            
-            # Generate data request using the tool
-            data_request_result = await self.data_helper_tool.generate_data_request(
-                user_request=user_prompt,
-                triage_result=triage_result,
-                previous_results=previous_results
-            )
-            
-            # Update state with data request
-            state.data_helper_result = data_request_result
-            
-            # Add to agent outputs
-            if not hasattr(state, 'agent_outputs'):
-                state.agent_outputs = {}
-            state.agent_outputs['data_helper'] = {
-                'success': data_request_result.get('success', False),
-                'data_request': data_request_result.get('data_request', {}),
-                'user_instructions': data_request_result.get('data_request', {}).get('user_instructions', ''),
-                'structured_items': data_request_result.get('data_request', {}).get('structured_items', [])
-            }
-            
-            # Log successful execution
-            logger.info(f"DataHelperAgent completed successfully for run_id: {run_id}")
-            
+            # Use modern execution pattern through BaseAgent
+            if await self.validate_preconditions(context):
+                result = await self.execute_core_logic(context)
+                logger.info(f"DataHelperAgent.run() completed successfully for run_id: {run_id}")
+            else:
+                # Validation failed - add error to state using context_tracking
+                logger.error(f"Validation failed in DataHelperAgent.run() for run_id: {run_id}")
+                if not state.context_tracking:
+                    state.context_tracking = {}
+                
+                state.context_tracking['data_helper'] = {
+                    'success': False,
+                    'error': 'Validation failed: insufficient or invalid user request',
+                    'fallback_message': self._get_fallback_message(user_prompt)
+                }
+                
         except Exception as e:
-            logger.error(f"Error in DataHelperAgent for run_id {run_id}: {str(e)}")
-            
-            # Add error to state
-            if not hasattr(state, 'agent_outputs'):
-                state.agent_outputs = {}
-            state.agent_outputs['data_helper'] = {
+            # This should rarely happen as execute_core_logic handles its own exceptions
+            logger.error(f"Unexpected error in DataHelperAgent.run() for run_id {run_id}: {str(e)}")
+            if not state.context_tracking:
+                state.context_tracking = {}
+                
+            state.context_tracking['data_helper'] = {
                 'success': False,
-                'error': str(e),
+                'error': f"Unexpected error: {str(e)}",
                 'fallback_message': self._get_fallback_message(user_prompt)
             }
         
@@ -146,27 +248,27 @@ class DataHelperAgent(BaseSubAgent):
         """
         previous_results = []
         
-        # Check for agent outputs in state
-        if hasattr(state, 'agent_outputs') and state.agent_outputs:
-            for agent_name, output in state.agent_outputs.items():
-                if agent_name != 'data_helper':  # Don't include self
+        # Check for agent results in context_tracking
+        if state.context_tracking:
+            for agent_name, output in state.context_tracking.items():
+                if agent_name != 'data_helper' and agent_name != 'data_helper_result':  # Don't include self
                     previous_results.append({
                         'agent_name': agent_name,
                         'result': output
                     })
         
-        # Also check for specific result attributes
+        # Also check for specific result attributes on the state
         result_attributes = [
             'triage_result',
             'data_result',
-            'optimization_result',
-            'actions_result'
+            'optimizations_result',
+            'action_plan_result'
         ]
         
         for attr in result_attributes:
             if hasattr(state, attr):
                 value = getattr(state, attr)
-                if value and attr not in ['data_helper_result']:  # Don't include self
+                if value:  # Don't include None values
                     previous_results.append({
                         'agent_name': attr.replace('_result', ''),
                         'result': value
@@ -197,7 +299,7 @@ class DataHelperAgent(BaseSubAgent):
         message: str,
         context: Dict[str, Any]
     ) -> Dict[str, Any]:
-        """Process a message and generate data request.
+        """Process a message and generate data request - backward compatibility method.
         
         Args:
             message: The message to process
@@ -213,7 +315,7 @@ class DataHelperAgent(BaseSubAgent):
         run_id = context.get('run_id', 'default')
         state = context.get('state')
         
-        # Run the agent
+        # Run the agent using backward compatible method
         updated_state = await self.run(
             user_prompt=user_prompt,
             thread_id=thread_id,
@@ -222,9 +324,10 @@ class DataHelperAgent(BaseSubAgent):
             state=state
         )
         
-        # Return the result
+        # Return the result from context_tracking
+        agent_output = updated_state.context_tracking.get('data_helper', {}) if updated_state.context_tracking else {}
         return {
-            'success': True,
+            'success': agent_output.get('success', True),
             'state': updated_state,
-            'data_request': updated_state.agent_outputs.get('data_helper', {})
+            'data_request': agent_output
         }

@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
@@ -136,7 +136,7 @@ class TestSupervisorAgentRegistration:
         
         # Create mock agent
         # Mock: Agent service isolation for testing without LLM agent execution
-        mock_agent = Mock(spec=BaseSubAgent)
+        mock_agent = Mock(spec=BaseAgent)
         mock_agent.name = "test_agent"
         
         # Register agent
@@ -247,9 +247,9 @@ class TestSupervisorAgentProperties:
         
         # Create mock agents
         # Mock: Agent service isolation for testing without LLM agent execution
-        agent1 = Mock(spec=BaseSubAgent)
+        agent1 = Mock(spec=BaseAgent)
         # Mock: Agent service isolation for testing without LLM agent execution
-        agent2 = Mock(spec=BaseSubAgent)
+        agent2 = Mock(spec=BaseAgent)
         agents_list = [agent1, agent2]
         
         # Set sub_agents

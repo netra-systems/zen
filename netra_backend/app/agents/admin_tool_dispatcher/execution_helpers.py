@@ -2,7 +2,7 @@
 Modern Execution Helper Functions
 
 Modernized helpers using ExecutionContext, ExecutionResult patterns.
-Integrated with BaseExecutionInterface for standardized agent execution.
+Integrated with standardized execution patterns for consistent agent execution.
 
 Business Value: Standardizes admin tool execution patterns across all tools.
 """

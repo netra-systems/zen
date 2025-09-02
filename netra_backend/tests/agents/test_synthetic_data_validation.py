@@ -22,7 +22,7 @@ from uuid import UUID
 
 import pytest
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.synthetic_data_sub_agent import SyntheticDataSubAgent
 from netra_backend.app.agents.synthetic_data_generator import SyntheticDataGenerator

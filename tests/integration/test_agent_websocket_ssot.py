@@ -12,7 +12,7 @@ from typing import Dict, Any, List
 
 from netra_backend.app.agents.agent_communication import AgentCommunicationMixin
 from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
-from netra_backend.app.agents.base.interface import BaseExecutionInterface, ExecutionContext
+from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
@@ -70,10 +70,7 @@ class TestWebSocketSSOT:
         # Check AgentLifecycleMixin
         lifecycle_methods = [m for m in dir(AgentLifecycleMixin) if m in methods_to_check]
         
-        # Check BaseExecutionInterface
-        interface_methods = [m for m in dir(BaseExecutionInterface) if m in methods_to_check]
-        
-        # Count total occurrences
+        # Count total occurrences (legacy interface has been removed)
         all_occurrences = {}
         for method in methods_to_check:
             count = 0
@@ -85,9 +82,6 @@ class TestWebSocketSSOT:
             if method in lifecycle_methods:
                 count += 1
                 locations.append("AgentLifecycleMixin")
-            if method in interface_methods:
-                count += 1
-                locations.append("BaseExecutionInterface")
             
             all_occurrences[method] = {"count": count, "locations": locations}
         
@@ -113,7 +107,7 @@ class TestWebSocketSSOT:
             agent = TestCommAgent()
             await agent.emit_thinking("thinking...")
             
-            # Note: emit methods work through BaseSubAgent's WebSocketBridgeAdapter
+            # Note: emit methods work through BaseAgent's WebSocketBridgeAdapter
             # Test validates that the unified pattern works without errors
     
     @pytest.mark.asyncio  

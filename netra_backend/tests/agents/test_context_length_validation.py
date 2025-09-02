@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
@@ -209,7 +209,7 @@ class TestContextLengthValidation:
     async def test_agent_prompt_size_reporting(self, mock_llm_manager):
         """Test agents report prompt sizes for observability."""
         agents = [
-            BaseSubAgent(mock_llm_manager, name="TestAgent1"),
+            BaseAgent(mock_llm_manager, name="TestAgent1"),
             DataSubAgent(mock_llm_manager),
             TriageSubAgent(mock_llm_manager)
         ]
@@ -231,7 +231,7 @@ class TestContextLengthValidation:
     @pytest.mark.asyncio
     async def test_context_window_overflow_handling(self, mock_llm_manager):
         """Test handling when context exceeds model limits."""
-        agent = BaseSubAgent(mock_llm_manager, name="TestAgent")
+        agent = BaseAgent(mock_llm_manager, name="TestAgent")
         
         # Create context that exceeds Claude's 200k token limit
         # Approximately 4 chars per token
@@ -295,7 +295,7 @@ class TestContextMetricsAndObservability:
         mock_llm.generate = AsyncMock(return_value="response")
         
         agents = [
-            ("BaseSubAgent", BaseSubAgent(mock_llm, name="Base")),
+            ("BaseAgent", BaseAgent(mock_llm, name="Base")),
             ("DataSubAgent", DataSubAgent(mock_llm)),
             ("TriageSubAgent", TriageSubAgent(mock_llm)),
             ("SupervisorAgent", SupervisorAgent(mock_llm))
@@ -320,7 +320,7 @@ class TestContextMetricsAndObservability:
     async def test_token_usage_tracking(self):
         """Test tracking of token usage across agent lifecycle."""
         mock_llm = MagicMock(spec=LLMManager)
-        agent = BaseSubAgent(mock_llm, name="TestAgent")
+        agent = BaseAgent(mock_llm, name="TestAgent")
         
         # Initialize token tracking (if implemented)
         if hasattr(agent, 'token_budget'):
@@ -345,7 +345,7 @@ class TestContextMetricsAndObservability:
     async def test_context_size_alerting_thresholds(self):
         """Test alerting at different context size thresholds."""
         mock_llm = MagicMock(spec=LLMManager)
-        agent = BaseSubAgent(mock_llm, name="TestAgent")
+        agent = BaseAgent(mock_llm, name="TestAgent")
         
         thresholds = [
             (50000, "INFO"),     # 50k chars - info level

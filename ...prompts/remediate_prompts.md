@@ -66,3 +66,107 @@ FOR EACH ISSUE:
     3) failing tests and test suite must be complete, comphrensive, and difficult
 
 
+CRITICAL: Action and remediate STAGING_TEST_ACTION_PLAN.md
+FOR EACH ISSUE (repeat until all issues handled)
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+CRITICAL: Action and remediate STAGING_TEST_ACTION_PLAN.md
+FOR EACH ISSUE (repeat until all issues handled)
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+
+CRITICAL: Action and remediate SSOT_MAJOR_VIOLATIONS_AUDIT_REPORT.md
+FOR EACH ISSUE (repeat until all issues handled)
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+    
+LIFE OR DEATH CRITICAL ACTION item 7 AGENT_AUDIT_REPORT.md
+FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+
+LIFE OR DEATH CRITICAL: ACTION: STAGING_AUTH_E2E_TEST_REPORT.md
+FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+
+Plan
+1. move everything to base agent
+2. make triage the golden sample
+3. have it step through other agent to fix it in similar way
+4. keep auditing SSOT violations
+
+LIFE OR DEATH CRITICAL: ACTION: base_agent_ssot_violation_analysis_report.md
+FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+LIFE OR DEATH CRITICAL: ACTION: BASE_AGENT_AUDIT_REPORT.md
+FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+
+LIFE OR DEATH CRITICAL: ACTION: AUDIT_WEBSOCKET_BRIDGE_LIFECYCLE_20250902.md
+FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+
+LIFE OR DEATH CRITICAL: ACTION: Golden alignment for:
+ALL remaining non-golden agents
+Read docs\GOLDEN_AGENT_INDEX.md (and follow links and read related as needed)
+
+FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+
+LIFE OR DEATH CRITICAL: ACTION:
+AUDIT COMPLETION OF:
+SUPERVISOR_GOLDEN_PATTERN_AUDIT.md.
+FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+
+LIFE OR DEATH CRITICAL: ACTION:
+AUDIT COMPLETION OF:
+AUDIT_WEBSOCKET_BRIDGE_LIFECYCLE_20250902.md
+FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+
+LIFE OR DEATH CRITICAL: ACTION:
+AUDIT COMPLETION OF:
+BASEAGENT_REFACTORING_PLAN_20250902.md
+FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+LIFE OR DEATH CRITICAL: ACTION:
+AUDIT COMPLETION OF:
+SUPERVISOR_GOLDEN_PATTERN_AUDIT.md
+FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+

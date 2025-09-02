@@ -31,7 +31,9 @@ import httpx
 import pytest
 import pytest_asyncio
 
-from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
+# Use UnifiedCircuitBreaker directly for new code, legacy CircuitBreaker for compatibility
+from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitBreaker, get_unified_circuit_breaker_manager
+from netra_backend.app.core.circuit_breaker_core import CircuitBreaker  # Legacy compatibility
 from netra_backend.app.core.circuit_breaker_types import (
     CircuitBreakerOpenError,
     CircuitConfig,

@@ -13,7 +13,7 @@ def test_inheritance_structure_minimal():
     try:
         from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
         from netra_backend.app.agents.validation_sub_agent import ValidationSubAgent
-        from netra_backend.app.agents.base_agent import BaseSubAgent
+        from netra_backend.app.agents.base_agent import BaseAgent
         
         print("SUCCESS: Successfully imported agent classes")
     except Exception as e:
@@ -29,14 +29,14 @@ def test_inheritance_structure_minimal():
         data_bases = DataSubAgent.__bases__
         print(f"DataSubAgent bases: {[b.__name__ for b in data_bases]}")
         assert len(data_bases) == 1, f"Expected 1 base, got {len(data_bases)}"
-        assert data_bases[0] == BaseSubAgent, f"Expected BaseSubAgent, got {data_bases[0]}"
+        assert data_bases[0] == BaseAgent, f"Expected BaseAgent, got {data_bases[0]}"
         print("SUCCESS: DataSubAgent uses single inheritance correctly")
         
         # Check ValidationSubAgent inheritance
         validation_bases = ValidationSubAgent.__bases__
         print(f"ValidationSubAgent bases: {[b.__name__ for b in validation_bases]}")
         assert len(validation_bases) == 1, f"Expected 1 base, got {len(validation_bases)}"
-        assert validation_bases[0] == BaseSubAgent, f"Expected BaseSubAgent, got {validation_bases[0]}"
+        assert validation_bases[0] == BaseAgent, f"Expected BaseAgent, got {validation_bases[0]}"
         print("SUCCESS: ValidationSubAgent uses single inheritance correctly")
         
     except Exception as e:
@@ -65,29 +65,29 @@ def test_inheritance_structure_minimal():
         print(f"FAILED: MRO depth test failed: {e}")
         return False
     
-    # Test 3: BaseSubAgent structure
-    print("\n3. Testing BaseSubAgent Inheritance")
+    # Test 3: BaseAgent structure
+    print("\n3. Testing BaseAgent Inheritance")
     print("-" * 40)
     
     try:
-        base_bases = BaseSubAgent.__bases__
-        print(f"BaseSubAgent bases: {[b.__name__ for b in base_bases]}")
+        base_bases = BaseAgent.__bases__
+        print(f"BaseAgent bases: {[b.__name__ for b in base_bases]}")
         
         # Should only inherit from ABC
-        assert len(base_bases) == 1, f"BaseSubAgent should only inherit from ABC, got {len(base_bases)} bases"
-        print("SUCCESS: BaseSubAgent has simplified inheritance")
+        assert len(base_bases) == 1, f"BaseAgent should only inherit from ABC, got {len(base_bases)} bases"
+        print("SUCCESS: BaseAgent has simplified inheritance")
         
-        base_mro = BaseSubAgent.__mro__
+        base_mro = BaseAgent.__mro__
         netra_base_classes = [c for c in base_mro if c.__module__.startswith('netra_backend')]
         base_depth = len(netra_base_classes)
-        print(f"BaseSubAgent MRO depth: {base_depth}")
-        print(f"BaseSubAgent classes: {[c.__name__ for c in netra_base_classes]}")
+        print(f"BaseAgent MRO depth: {base_depth}")
+        print(f"BaseAgent classes: {[c.__name__ for c in netra_base_classes]}")
         
-        assert base_depth == 1, f"BaseSubAgent should have depth 1, got {base_depth}"
-        print("SUCCESS: BaseSubAgent has minimal inheritance depth")
+        assert base_depth == 1, f"BaseAgent should have depth 1, got {base_depth}"
+        print("SUCCESS: BaseAgent has minimal inheritance depth")
         
     except Exception as e:
-        print(f"FAILED: BaseSubAgent structure test failed: {e}")
+        print(f"FAILED: BaseAgent structure test failed: {e}")
         return False
     
     # Test 4: Method availability
@@ -120,7 +120,7 @@ def test_inheritance_structure_minimal():
     print("\nKey Achievements:")
     print("- DataSubAgent MRO depth: 2 (excellent)")
     print("- ValidationSubAgent MRO depth: 2 (excellent)")
-    print("- BaseSubAgent MRO depth: 1 (minimal)")
+    print("- BaseAgent MRO depth: 1 (minimal)")
     print("- Single inheritance pattern implemented correctly")
     print("- All required methods available")
     print("- No multiple inheritance conflicts")

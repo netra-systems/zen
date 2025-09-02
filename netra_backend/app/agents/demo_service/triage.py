@@ -2,7 +2,7 @@
 # ================================
 # Timestamp: 2025-08-18T12:00:00.000000+00:00
 # Agent: Claude Sonnet 4 claude-sonnet-4-20250514
-# Context: Modernize demo_agent/triage.py with BaseExecutionInterface
+# Context: Modernize demo_agent/triage.py with standardized execution patterns
 # Git: 8-18-25-AM | Current | Clean
 # Change: Modernize | Scope: Component | Risk: Low
 # Session: Demo Service Modernization
@@ -19,7 +19,7 @@ import time
 from typing import Any, Dict, List, Optional
 
 # Legacy compatibility
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.errors import (
     AgentExecutionError,
@@ -29,10 +29,10 @@ from netra_backend.app.agents.base.executor import BaseExecutionEngine
 
 # Modern execution patterns
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
     ExecutionContext,
     ExecutionResult,
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -43,7 +43,7 @@ from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocke
 logger = central_logger.get_logger(__name__)
 
 
-class DemoTriageService(BaseSubAgent, BaseExecutionInterface):
+class DemoTriageService(BaseAgent):
     """Specialized triage service for demo scenarios - Modernized.
     
     Implements modern execution patterns for reliable demo operations.
@@ -51,8 +51,8 @@ class DemoTriageService(BaseSubAgent, BaseExecutionInterface):
     """
     
     def __init__(self, llm_manager: LLMManager, websocket_manager: WebSocketManager):
-        BaseSubAgent.__init__(self, llm_manager, websocket_manager)
-        BaseExecutionInterface.__init__(self, "DemoTriageService", websocket_manager)
+        super().__init__(llm_manager, websocket_manager)
+        # Using single inheritance with standardized execution patterns
         self._initialize_modern_components()
         
     def _initialize_modern_components(self) -> None:

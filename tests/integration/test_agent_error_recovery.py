@@ -41,7 +41,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 import pytest
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
@@ -196,7 +196,7 @@ class WebSocketEventCollector:
         self.events.clear()
 
 
-class RealErrorInjectionAgent(BaseSubAgent):
+class RealErrorInjectionAgent(BaseAgent):
     """Real agent that simulates various failure conditions for recovery testing."""
     
     def __init__(self, agent_type: str, failure_config: Dict[str, Any], 

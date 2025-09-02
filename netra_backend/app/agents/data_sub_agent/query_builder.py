@@ -1,17 +1,17 @@
-"""Modernized Query Builder with BaseExecutionInterface support."""
+"""Modernized Query Builder with standardized execution patterns."""
 
 import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
+from abc import ABC, abstractmethod
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
     ExecutionContext,
     ExecutionResult,
-    ExecutionStatus,
     WebSocketManagerProtocol,
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.logging_config import central_logger as logger
 
@@ -34,7 +34,7 @@ class QueryExecutionMetrics:
     query_complexity_score: int = 0
 
 
-class QueryBuilder(BaseExecutionInterface):
+class QueryBuilder(ABC):
     """Build optimized ClickHouse queries with modern execution patterns."""
     
     # Marker to identify queries from this builder
@@ -42,7 +42,8 @@ class QueryBuilder(BaseExecutionInterface):
     
     def __init__(self, websocket_manager: Optional[WebSocketManagerProtocol] = None):
         """Initialize modernized query builder."""
-        super().__init__("QueryBuilder", websocket_manager)
+        # Using single inheritance pattern for simplicity
+        self.agent_name = "QueryBuilder"
         self._init_query_registry()
         self._init_performance_tracking()
         

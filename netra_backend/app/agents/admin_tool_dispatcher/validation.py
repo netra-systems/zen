@@ -24,9 +24,11 @@ from netra_backend.app.agents.admin_tool_dispatcher.validation_helpers import (
     ValidationHelpers,
 )
 from netra_backend.app.agents.base.errors import ValidationError
+from abc import ABC, abstractmethod
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface, ExecutionContext
+    ExecutionContext, ExecutionResult
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.db.models_postgres import User
@@ -49,11 +51,12 @@ class ValidationContext:
             self.metadata = {}
 
 
-class AdminToolValidator(BaseExecutionInterface):
+class AdminToolValidator(ABC):
     """Modern admin tool validator with execution context support."""
     
     def __init__(self, monitor: Optional[ExecutionMonitor] = None):
-        super().__init__("admin_tool_validator")
+        # Using single inheritance from modern execution patterns
+        self.agent_name = "admin_tool_validator"
         self.monitor = monitor or ExecutionMonitor()
         self.error_handler = ExecutionErrorHandler
         self.validation_helpers = ValidationHelpers()

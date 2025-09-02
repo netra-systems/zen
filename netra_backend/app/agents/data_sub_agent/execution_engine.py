@@ -2,16 +2,16 @@
 # ================================
 # Timestamp: 2025-08-18T12:00:00.000000+00:00
 # Agent: AGT-113 Elite Ultra Thinking Engineer
-# Context: Modernize execution_engine.py with BaseExecutionInterface
-# Git: 8-18-25-AM | Modernizing to BaseExecutionInterface patterns
+# Context: Modernize execution_engine.py with standardized execution patterns
+# Git: 8-18-25-AM | Modernizing to standardized execution patterns
 # Change: Modernize | Scope: Module | Risk: Low
 # Session: data-execution-modernization | Seq: 1
 # Review: Complete | Score: 100
 # ================================
 """
-Modernized DataSubAgent Execution Engine - BaseExecutionInterface Implementation
+Modernized DataSubAgent Execution Engine - Standardized Execution Implementation
 
-Modernized execution engine implementing BaseExecutionInterface with:
+Modernized execution engine implementing standardized execution patterns with:
 - Standardized execution patterns with reliability management
 - Circuit breaker protection and retry logic
 - Comprehensive monitoring and error handling
@@ -34,12 +34,11 @@ from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
     ExecutionContext,
     ExecutionResult,
-    ExecutionStatus,
     WebSocketManagerProtocol,
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.agents.data_sub_agent.execution_analysis import AnalysisRouter
@@ -58,8 +57,8 @@ from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.shared_types import RetryConfig
 
 
-class DataSubAgentExecutionEngine(BaseExecutionInterface):
-    """Modern DataSubAgent execution engine implementing BaseExecutionInterface.
+class DataSubAgentExecutionEngine:
+    """Modern DataSubAgent execution engine with standardized patterns.
     
     Provides standardized execution patterns with reliability management.
     """
@@ -67,8 +66,9 @@ class DataSubAgentExecutionEngine(BaseExecutionInterface):
     def __init__(self, clickhouse_ops: Any, query_builder: Any, 
                  analysis_engine: Any, redis_manager: Any, llm_manager: LLMManager,
                  websocket_manager: Optional[WebSocketManagerProtocol] = None) -> None:
-        """Initialize modern execution engine with BaseExecutionInterface."""
-        super().__init__("DataSubAgentExecution", websocket_manager)
+        """Initialize modern execution engine."""
+        self.agent_name = "DataSubAgentExecution"
+        self.websocket_manager = websocket_manager
         self._init_dependencies(clickhouse_ops, query_builder, analysis_engine, redis_manager, llm_manager)
         self._init_modern_execution_components()
         self._init_legacy_components()

@@ -21,9 +21,10 @@ from netra_backend.app.services.supply_research_service import SupplyResearchSer
 class ResearchExecutor:
     """Handles execution of research tasks and change notifications"""
     
-    def __init__(self, llm_manager: LLMManager, redis_manager: RedisManager):
+    def __init__(self, llm_manager: LLMManager, redis_manager: RedisManager, websocket_bridge=None):
         self.llm_manager = llm_manager
         self.redis_manager = redis_manager
+        self.websocket_bridge = websocket_bridge
     
     async def execute_scheduled_research(
         self,
@@ -61,6 +62,13 @@ class ResearchExecutor:
         """Run research agents for the schedule"""
         supply_service = SupplyResearchService(db)
         agent = SupplyResearcherAgent(self.llm_manager, db, supply_service)
+        
+        # Set WebSocket bridge if available for real-time research progress updates
+        if self.websocket_bridge:
+            run_id = f"research_{schedule.research_type}_{schedule.name}"
+            agent.set_websocket_bridge(self.websocket_bridge, run_id)
+            logger.debug(f"Set WebSocket bridge on SupplyResearcherAgent for run_id: {run_id}")
+        
         return await agent.process_scheduled_research(
             schedule.research_type,
             schedule.providers

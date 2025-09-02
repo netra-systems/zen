@@ -27,7 +27,7 @@ import pytest
 from testcontainers.postgres import PostgresContainer
 from testcontainers.redis import RedisContainer
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
@@ -105,7 +105,7 @@ class L3FailureRecoveryManager:
         sub_agents = []
         for i in range(network_size - 1):
             agent_id = f"subagent_{i}_{uuid.uuid4().hex[:6]}"
-            agent = BaseSubAgent(
+            agent = BaseAgent(
                 agent_id=agent_id,
                 agent_type=f"worker_agent",
                 state_manager=self.state_manager,
@@ -346,7 +346,7 @@ class L3FailureRecoveryManager:
             
             # Create replacement agent
             replacement_id = f"replacement_{failed_agent_id}_{uuid.uuid4().hex[:6]}"
-            replacement_agent = BaseSubAgent(
+            replacement_agent = BaseAgent(
                 agent_id=replacement_id,
                 agent_type=failed_state.agent_type,
                 state_manager=self.state_manager,

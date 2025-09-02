@@ -45,7 +45,7 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent  
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
 from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 
 from netra_backend.app.llm.llm_manager import LLMManager
 
@@ -165,7 +165,7 @@ class RealSubAgentExecutor:
         self.real_services = real_services
         
     async def create_sub_agent_with_websocket(self, agent_class, websocket_manager: WebSocketManager, 
-                                            connection_id: str) -> BaseSubAgent:
+                                            connection_id: str) -> BaseAgent:
         """Create a sub-agent instance with WebSocket integration."""
         
         # Create a simplified LLM manager for testing
@@ -188,7 +188,7 @@ class RealSubAgentExecutor:
             agent = DataSubAgent(llm_manager=TestLLMManager())
         else:
             # Generic sub-agent for testing
-            class TestSubAgent(BaseSubAgent):
+            class TestSubAgent(BaseAgent):
                 async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool = False):
                     # Emit events manually for testing
                     if hasattr(self, 'emit_thinking'):
@@ -209,7 +209,7 @@ class RealSubAgentExecutor:
         
         return agent
         
-    async def execute_sub_agent_flow(self, agent: BaseSubAgent, connection_id: str) -> None:
+    async def execute_sub_agent_flow(self, agent: BaseAgent, connection_id: str) -> None:
         """Execute a complete sub-agent flow with WebSocket events."""
         
         # Create state for execution
@@ -384,7 +384,7 @@ class TestWebSocketSubAgentEvents:
             executor = RealSubAgentExecutor(real_services)
             
             # Use a custom sub-agent that definitely uses tools
-            class ToolUsingSubAgent(BaseSubAgent):
+            class ToolUsingSubAgent(BaseAgent):
                 async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool = False):
                     # Emit required events for a realistic tool-using flow
                     if hasattr(self, 'emit_thinking'):
@@ -456,7 +456,7 @@ class TestWebSocketSubAgentEvents:
             await ws_manager.connect_user(connection_id, mock_ws, connection_id)
             
             # Create sub-agent that will encounter errors but handle them gracefully
-            class ErrorHandlingSubAgent(BaseSubAgent):
+            class ErrorHandlingSubAgent(BaseAgent):
                 async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool = False):
                     try:
                         if hasattr(self, 'emit_thinking'):

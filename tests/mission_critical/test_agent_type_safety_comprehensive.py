@@ -23,8 +23,7 @@ from netra_backend.app.agents.agent_communication import AgentCommunicationMixin
 from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
 from netra_backend.app.agents.base.interface import (
     ExecutionContext,
-    ExecutionResult,
-    BaseExecutionInterface
+    ExecutionResult
 )
 from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.validation_sub_agent import ValidationSubAgent
@@ -235,18 +234,9 @@ class TestAgentTypeSafetyCompliance:
     
     def test_protocol_compliance(self):
         """Test that all protocol implementations have correct signatures"""
-        # BaseExecutionInterface should be properly typed
-        protocol_methods = [
-            'execute_core_logic',
-            'format_result'
-        ]
-        
-        for method_name in protocol_methods:
-            if hasattr(BaseExecutionInterface, method_name):
-                method = getattr(BaseExecutionInterface, method_name)
-                # Should have annotations
-                assert hasattr(method, '__annotations__'), \
-                    f"Protocol method {method_name} lacks annotations"
+        # Skip this test as interface has been removed
+        # This test was checking legacy interface that is no longer needed
+        pytest.skip("Legacy interface has been removed - cleanup complete")
     
     def test_no_dead_websocket_methods(self):
         """Test that dead WebSocket methods are removed"""

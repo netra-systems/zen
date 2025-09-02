@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger as logger
@@ -35,7 +35,7 @@ class InitializationStatus(Enum):
 class InitializationResult:
     """Result of agent initialization."""
     status: InitializationStatus
-    agent: Optional[BaseSubAgent] = None
+    agent: Optional[BaseAgent] = None
     error: Optional[str] = None
     fallback_used: bool = False
     initialization_time_ms: float = 0
@@ -125,7 +125,7 @@ class AgentInitializationManager:
             None, lambda: agent_class(llm_manager, tool_dispatcher, **kwargs)
         )
     
-    async def _basic_health_check(self, agent: BaseSubAgent, agent_name: str) -> bool:
+    async def _basic_health_check(self, agent: BaseAgent, agent_name: str) -> bool:
         """Perform basic health check on initialized agent."""
         try:
             # Check required attributes
@@ -207,13 +207,13 @@ class AgentInitializationManager:
             logger.error(f"Failed to create minimal fallback for {agent_name}: {e}")
             return self._create_failed_result(str(e), start_time)
     
-    def _get_or_create_fallback_agent(self, agent_name: str) -> BaseSubAgent:
+    def _get_or_create_fallback_agent(self, agent_name: str) -> BaseAgent:
         """Get or create fallback agent instance."""
         if agent_name not in self._fallback_managers:
             self._fallback_managers[agent_name] = self._create_fallback_instance(agent_name)
         return self._fallback_managers[agent_name]
     
-    def _create_fallback_instance(self, agent_name: str) -> BaseSubAgent:
+    def _create_fallback_instance(self, agent_name: str) -> BaseAgent:
         """Create basic fallback agent instance."""
         from unittest.mock import Mock
         
@@ -248,7 +248,7 @@ class AgentInitializationManager:
             logger.debug(f"Fallback cleanup for run_id: {run_id}")
         return fallback_cleanup
     
-    async def _validate_agent_health(self, agent: BaseSubAgent, agent_name: str) -> None:
+    async def _validate_agent_health(self, agent: BaseAgent, agent_name: str) -> None:
         """Perform comprehensive health validation."""
         try:
             # Extended health checks for production readiness

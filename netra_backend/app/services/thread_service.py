@@ -118,7 +118,7 @@ class ThreadService(IThreadService):
     
     def _prepare_run_data(self, thread_id: str, assistant_id: str, model: str, instructions: Optional[str]) -> tuple[str, Dict[str, Any]]:
         """Prepare run data for creation"""
-        run_id = f"run_{uuid.uuid4()}"
+        run_id = f"run_{thread_id}_{uuid.uuid4().hex[:8]}"
         base_data = {"id": run_id, "object": "thread.run", "created_at": int(time.time()), "thread_id": thread_id}
         extended_data = {"assistant_id": assistant_id, "status": "in_progress", "model": model, "instructions": instructions, "tools": [], "file_ids": [], "metadata_": {}}
         return run_id, {**base_data, **extended_data}

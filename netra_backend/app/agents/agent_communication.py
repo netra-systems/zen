@@ -29,7 +29,7 @@ class AgentCommunicationMixin:
     @time_operation("send_websocket_update", TimingCategory.NETWORK)
     async def _send_update(self, run_id: str, data: NestedJsonDict) -> None:
         """Send WebSocket update with proper error recovery."""
-        # Use unified emit methods from BaseSubAgent's WebSocketBridgeAdapter
+        # Use unified emit methods from BaseAgent's WebSocketBridgeAdapter
         await self._execute_websocket_update_with_retry(run_id, data)
     
     async def _execute_websocket_update_with_retry(self, run_id: str, data: NestedJsonDict) -> None:
@@ -56,7 +56,7 @@ class AgentCommunicationMixin:
                 
     async def _attempt_websocket_update(self, run_id: str, data: NestedJsonDict) -> None:
         """Attempt to send WebSocket update using unified emit methods."""
-        # Use emit methods from BaseSubAgent's WebSocketBridgeAdapter
+        # Use emit methods from BaseAgent's WebSocketBridgeAdapter
         status = data.get("status", "")
         message = data.get("message", "")
         

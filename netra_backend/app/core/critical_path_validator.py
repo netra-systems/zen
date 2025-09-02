@@ -44,9 +44,9 @@ class CriticalPathValidator:
     Validates critical communication and initialization paths.
     
     Critical Paths That MUST Work:
-    1. WebSocket Context Propagation (agent -> tools -> UI)
-    2. Agent Registry and Enhancement Chain
-    3. Tool Dispatcher WebSocket Enhancement
+    1. WebSocket Bridge Propagation (agent -> tools -> UI)
+    2. Agent Registry and Bridge Integration
+    3. Tool Dispatcher WebSocket Support
     4. Message Handler Registration
     5. Supervisor -> Agent -> Tool execution chain
     """
@@ -67,7 +67,7 @@ class CriticalPathValidator:
         self.validations = []
         
         # Run all critical path validations
-        await self._validate_websocket_mixin_chain(app)
+        await self._validate_websocket_bridge_chain(app)
         await self._validate_agent_registry_chain(app)
         await self._validate_tool_dispatcher_enhancement(app)
         await self._validate_message_handler_chain(app)
@@ -100,8 +100,8 @@ class CriticalPathValidator:
         all_passed = len(critical_failures) == 0
         return all_passed, self.validations
     
-    async def _validate_websocket_mixin_chain(self, app) -> None:
-        """Validate WebSocket mixin is properly inherited and callable."""
+    async def _validate_websocket_bridge_chain(self, app) -> None:
+        """Validate WebSocket bridge is properly supported by all agents."""
         try:
             # Check if agents have the mixin
             if hasattr(app.state, 'agent_supervisor') and app.state.agent_supervisor:
@@ -112,60 +112,60 @@ class CriticalPathValidator:
                     agents_missing_context_setter = []
                     
                     for agent_name, agent in registry.agents.items():
-                        # Check if agent has WebSocketContextMixin methods
-                        has_mixin = hasattr(agent, 'set_websocket_context')
-                        has_emit = hasattr(agent, 'emit_thinking')
+                        # Check if agent has WebSocketBridge methods (new pattern)
+                        has_bridge_setter = hasattr(agent, 'set_websocket_bridge')
+                        has_emit = hasattr(agent, 'emit_thinking')  
                         has_propagate = hasattr(agent, 'propagate_websocket_context_to_state')
                         
-                        if not has_mixin:
+                        if not has_bridge_setter:
                             agents_missing_context_setter.append(agent_name)
                         if not (has_emit and has_propagate):
                             agents_missing_mixin.append(agent_name)
                     
                     if agents_missing_mixin or agents_missing_context_setter:
                         validation = CriticalPathValidation(
-                            component="WebSocket Mixin Chain",
-                            path="BaseSubAgent -> WebSocketContextMixin",
-                            check_type="inheritance",
+                            component="WebSocket Bridge Chain",
+                            path="BaseAgent -> AgentWebSocketBridge",
+                            check_type="bridge_support",
                             passed=False,
                             criticality=CriticalityLevel.CHAT_BREAKING,
-                            failure_reason=f"Agents missing WebSocket capabilities: {agents_missing_mixin or agents_missing_context_setter}",
-                            remediation="Ensure all agents inherit from BaseSubAgent which includes WebSocketContextMixin",
+                            failure_reason=f"Agents missing WebSocket bridge capabilities: {agents_missing_mixin or agents_missing_context_setter}",
+                            remediation="Ensure all agents inherit from BaseAgent which supports set_websocket_bridge",
                             metadata={
                                 "missing_mixin": agents_missing_mixin,
                                 "missing_setter": agents_missing_context_setter
                             }
                         )
-                        self.logger.error(f"❌ CRITICAL: WebSocket mixin not properly inherited by agents: {agents_missing_mixin or agents_missing_context_setter}")
+                        self.logger.error(f"❌ CRITICAL: WebSocket bridge not properly supported by agents: {agents_missing_mixin or agents_missing_context_setter}")
                     else:
                         validation = CriticalPathValidation(
-                            component="WebSocket Mixin Chain",
-                            path="BaseSubAgent -> WebSocketContextMixin",
-                            check_type="inheritance",
+                            component="WebSocket Bridge Chain",
+                            path="BaseAgent -> AgentWebSocketBridge",
+                            check_type="bridge_support",
                             passed=True,
                             criticality=CriticalityLevel.CHAT_BREAKING
                         )
-                        self.logger.info("✓ WebSocket mixin properly inherited by all agents")
+                        self.logger.info("✓ WebSocket bridge properly supported by all agents")
                     
                     self.validations.append(validation)
                 else:
                     self._add_critical_failure(
-                        "WebSocket Mixin Chain",
-                        "Registry not found - cannot validate mixin inheritance",
+                        "WebSocket Bridge Chain",
+                        "Registry not found - cannot validate bridge support",
                         "Ensure agent_supervisor has registry attribute"
                     )
             else:
                 self._add_critical_failure(
-                    "WebSocket Mixin Chain",
+                    "WebSocket Bridge Chain",
                     "Agent supervisor not initialized",
                     "Ensure agent supervisor is created during startup"
                 )
                 
         except Exception as e:
             self._add_critical_failure(
-                "WebSocket Mixin Chain",
+                "WebSocket Bridge Chain",
                 f"Validation failed: {e}",
-                "Check agent initialization and mixin imports"
+                "Check agent initialization and bridge imports"
             )
     
     async def _validate_agent_registry_chain(self, app) -> None:

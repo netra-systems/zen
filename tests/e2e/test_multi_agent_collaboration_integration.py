@@ -16,7 +16,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
@@ -28,7 +28,7 @@ from tests.e2e.agent_response_test_utilities import (
 )
 
 
-class MockCollaborationSubAgent(BaseSubAgent):
+class MockCollaborationSubAgent(BaseAgent):
     """Concrete test implementation for collaboration testing."""
     
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool = True) -> None:
@@ -105,7 +105,7 @@ class TestMultiAgentCollaboration:
         
         # Create multiple mock agents
         agents = [
-            BaseSubAgent(
+            BaseAgent(
                 llm_manager=collaboration_setup["llm_manager"],
                 name=f"Agent_{i}",
                 description=f"Test agent {i}"
@@ -126,7 +126,7 @@ class TestMultiAgentCollaboration:
         supervisor = collaboration_setup["supervisor"]
         
         # Create failing sub-agent
-        failing_agent = BaseSubAgent(
+        failing_agent = BaseAgent(
             llm_manager=collaboration_setup["llm_manager"],
             name="FailingAgent",
             description="Agent that fails"
@@ -148,12 +148,12 @@ class TestMultiAgentCollaboration:
         supervisor = collaboration_setup["supervisor"]
         
         # Create agents with different contexts
-        agent1 = BaseSubAgent(
+        agent1 = BaseAgent(
             llm_manager=collaboration_setup["llm_manager"],
             name="Agent1",
             description="First context agent"
         )
-        agent2 = BaseSubAgent(
+        agent2 = BaseAgent(
             llm_manager=collaboration_setup["llm_manager"],
             name="Agent2", 
             description="Second context agent"
@@ -171,7 +171,7 @@ class TestMultiAgentCollaboration:
         assert isolation_result["no_context_bleeding"] is True
     
     async def _execute_collaboration_flow(self, supervisor: SupervisorAgent, 
-                                        sub_agent: BaseSubAgent) -> Dict[str, Any]:
+                                        sub_agent: BaseAgent) -> Dict[str, Any]:
         """Execute complete collaboration flow."""
         try:
             # Step 1: Supervisor delegates to sub-agent
@@ -194,7 +194,7 @@ class TestMultiAgentCollaboration:
             return {"status": "failed", "error": str(e)}
     
     async def _execute_parallel_agents(self, supervisor: SupervisorAgent, 
-                                     agents: List[BaseSubAgent]) -> List[Dict[str, Any]]:
+                                     agents: List[BaseAgent]) -> List[Dict[str, Any]]:
         """Execute agents in parallel and aggregate results."""
         tasks = [agent.execute() for agent in agents]
         results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -212,7 +212,7 @@ class TestMultiAgentCollaboration:
         ]
     
     async def _execute_collaboration_with_errors(self, supervisor: SupervisorAgent,
-                                               failing_agent: BaseSubAgent) -> Dict[str, Any]:
+                                               failing_agent: BaseAgent) -> Dict[str, Any]:
         """Test collaboration with error scenarios."""
         try:
             # Attempt execution that will fail
@@ -226,8 +226,8 @@ class TestMultiAgentCollaboration:
                 "recovery_successful": recovery_result is not None
             }
     
-    async def _test_context_isolation(self, agent1: BaseSubAgent, 
-                                    agent2: BaseSubAgent) -> Dict[str, Any]:
+    async def _test_context_isolation(self, agent1: BaseAgent, 
+                                    agent2: BaseAgent) -> Dict[str, Any]:
         """Test context isolation between agents."""
         original_context1 = agent1.context.copy()
         original_context2 = agent2.context.copy()
@@ -258,7 +258,7 @@ async def test_tool_execution_integration():
     config = get_config()
     llm_manager = LLMManager(config)
     
-    agent = BaseSubAgent(llm_manager=llm_manager, name="ToolTestAgent")
+    agent = BaseAgent(llm_manager=llm_manager, name="ToolTestAgent")
     tool_dispatcher = ToolDispatcher()
     
     # Mock successful tool execution
@@ -285,7 +285,7 @@ async def test_supervisor_delegation_performance():
     tool_dispatcher = MagicNone  # TODO: Use real service instead of Mock
     
     supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
-    sub_agent = BaseSubAgent(llm_manager=llm_manager, name="PerfTestAgent")
+    sub_agent = BaseAgent(llm_manager=llm_manager, name="PerfTestAgent")
     
     # Test delegation speed
     start_time = time.time()

@@ -15,7 +15,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -43,7 +43,7 @@ class CoordinationTestLLMManager:
         return f"Test LLM response for: {prompt[:50]}..."
 
 
-class CoordinationTestAgent(BaseSubAgent):
+class CoordinationTestAgent(BaseAgent):
     """Real agent with coordination capabilities for testing."""
     
     def __init__(self, name: str, llm_manager: Optional[CoordinationTestLLMManager] = None):

@@ -1,11 +1,21 @@
 """Comprehensive reliability infrastructure for Netra agents.
 
+⚠️  MIGRATION TO UNIFIED RELIABILITY MANAGER ⚠️
+
+This module is being migrated to use UnifiedReliabilityManager as the SSOT.
+The AgentReliabilityWrapper class now delegates to the unified implementation
+while maintaining backward compatibility.
+
+For new code, use:
+    from netra_backend.app.core.reliability.unified_reliability_manager import get_reliability_manager
+
 This module provides the main reliability wrapper and system-wide
 health monitoring capabilities for all agent operations.
 """
 
 import asyncio
 import time
+import warnings
 from datetime import UTC, datetime, timedelta
 from typing import Any, Awaitable, Callable, Dict, List, Optional
 
@@ -16,11 +26,18 @@ from netra_backend.app.core.circuit_breaker import CircuitState as CircuitBreake
 from netra_backend.app.core.reliability_retry import RetryConfig, RetryHandler
 from netra_backend.app.logging_config import central_logger
 
+# Import unified reliability manager
+from netra_backend.app.core.reliability.unified_reliability_manager import get_reliability_manager
+
 logger = central_logger.get_logger(__name__)
 
 
 class AgentReliabilityWrapper:
-    """Comprehensive reliability wrapper for agent operations"""
+    """Comprehensive reliability wrapper for agent operations
+    
+    ⚠️  DEPRECATED: This class now delegates to UnifiedReliabilityManager.
+    Use get_reliability_manager() directly for new code.
+    """
     
     def __init__(
         self, 
@@ -28,8 +45,39 @@ class AgentReliabilityWrapper:
         circuit_breaker_config: Optional[CircuitBreakerConfig] = None,
         retry_config: Optional[RetryConfig] = None
     ):
+        warnings.warn(
+            "AgentReliabilityWrapper is deprecated. Use UnifiedReliabilityManager via "
+            "get_reliability_manager() for better functionality and WebSocket integration.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
         self.agent_name = agent_name
+        
+        # Convert legacy retry config to unified format if provided
+        if retry_config is None:
+            from netra_backend.app.schemas.shared_types import RetryConfig as UnifiedRetryConfig
+            retry_config = UnifiedRetryConfig()
+        elif hasattr(retry_config, 'max_retries'):
+            # Convert old-style RetryConfig to new format
+            from netra_backend.app.schemas.shared_types import RetryConfig as UnifiedRetryConfig
+            retry_config = UnifiedRetryConfig(
+                max_retries=retry_config.max_retries,
+                base_delay=retry_config.base_delay,
+                max_delay=retry_config.max_delay,
+                timeout_seconds=retry_config.timeout
+            )
+        
+        # Get unified manager instance
+        self._unified_manager = get_reliability_manager(
+            service_name=agent_name,
+            retry_config=retry_config
+        )
+        
+        # Keep legacy setup for compatibility
         self._setup_reliability_components(circuit_breaker_config, retry_config)
+        
+        logger.info(f"Created AgentReliabilityWrapper adapter for {agent_name} - consider migrating to UnifiedReliabilityManager")
     
     def _setup_reliability_components(
         self, 
@@ -70,8 +118,13 @@ class AgentReliabilityWrapper:
         timeout: Optional[float] = None
     ) -> Any:
         """Execute operation with full reliability protection"""
-        return await self._execute_with_circuit_breaker_check(
-            operation, operation_name, fallback, timeout
+        # Delegate to unified manager for enhanced functionality
+        return await self._unified_manager.execute_with_reliability(
+            operation=operation,
+            operation_name=operation_name,
+            fallback=fallback,
+            timeout=timeout,
+            emit_events=False  # Legacy mode doesn't emit WebSocket events by default
         )
     
     async def _execute_with_circuit_breaker_check(

@@ -27,7 +27,7 @@ import pytest
 from testcontainers.postgres import PostgresContainer
 from testcontainers.redis import RedisContainer
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
 
@@ -49,7 +49,7 @@ class L3ResourcePoolManager:
         self.state_manager: Optional[AgentStateManager] = None
         self.resource_pool: Optional[AgentResourcePool] = None
         self.resource_monitor: Optional[ResourceMonitor] = None
-        self.active_agents: Dict[str, BaseSubAgent] = {}
+        self.active_agents: Dict[str, BaseAgent] = {}
         self.resource_allocations: Dict[str, Dict[str, Any]] = {}
         self.pool_metrics = {
             "agents_created": 0,
@@ -139,7 +139,7 @@ class L3ResourcePoolManager:
                     agent_id = allocation_result["agent_id"]
                     
                     # Create actual agent
-                    agent = BaseSubAgent(
+                    agent = BaseAgent(
                         agent_id=agent_id,
                         agent_type="resource_test_agent",
                         state_manager=self.state_manager,

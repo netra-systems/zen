@@ -29,7 +29,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 import pytest
 from netra_backend.app.schemas import User
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
 
@@ -240,7 +240,7 @@ class ToolAuthorizationService:
                                         if log.get("agent_id") == agent_id])
         }
 
-class MockAuthorizedAgent(BaseSubAgent):
+class MockAuthorizedAgent(BaseAgent):
     """Mock agent that integrates with tool authorization system."""
     
     def __init__(self, agent_id: str, role: AgentRole, 

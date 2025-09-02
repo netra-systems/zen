@@ -1,4 +1,4 @@
-"""Modernized anomaly detection module implementing BaseExecutionInterface.
+"""Modernized anomaly detection module with standardized execution patterns.
 
 Business Value: Standardized anomaly detection with reliability patterns.
 Provides consistent execution workflow for anomaly detection operations.
@@ -14,11 +14,10 @@ from netra_backend.app.agents.base.errors import (
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
     ExecutionContext,
-    ExecutionResult,
-    ExecutionStatus,
+    ExecutionResult
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus 
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.logging_config import central_logger as logger
@@ -29,12 +28,13 @@ from netra_backend.app.schemas.shared_types import (
 )
 
 
-class AnomalyDetector(BaseExecutionInterface):
-    """Modernized anomaly detection with BaseExecutionInterface."""
+class AnomalyDetector:
+    """Modernized anomaly detection with reliable execution patterns."""
     
     def __init__(self, query_builder: Any, clickhouse_ops: Any, 
                  redis_manager: Any, websocket_manager=None) -> None:
-        super().__init__("AnomalyDetector", websocket_manager)
+        self.agent_name = "AnomalyDetector"
+        self.websocket_manager = websocket_manager
         self.query_builder = query_builder
         self.clickhouse_ops = clickhouse_ops
         self.redis_manager = redis_manager

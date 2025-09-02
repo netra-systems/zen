@@ -49,7 +49,7 @@ class RunRepository(BaseRepository[Run]):
         """Create a new run"""
         return await self.create(
             db=db,
-            id=f"run_{uuid.uuid4()}",
+            id=f"run_{thread_id}_{uuid.uuid4().hex[:8]}",
             object="thread.run",
             created_at=int(time.time()),
             thread_id=thread_id,

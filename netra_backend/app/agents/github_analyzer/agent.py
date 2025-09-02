@@ -8,7 +8,12 @@ import asyncio
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
+from netra_backend.app.agents.base.executor import (
+    BaseExecutionEngine, ExecutionStrategy, ExecutionWorkflowBuilder,
+    LambdaExecutionPhase, AgentMethodExecutionPhase
+)
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.github_analyzer.config_parser import (
     ConfigurationExtractor,
 )
@@ -32,7 +37,7 @@ from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.strict_types import TypedAgentResult
 
 
-class GitHubAnalyzerService(BaseSubAgent):
+class GitHubAnalyzerService(BaseAgent):
     """Service for analyzing GitHub repos to map AI operations."""
     
     def __init__(
@@ -71,6 +76,24 @@ class GitHubAnalyzerService(BaseSubAgent):
             retry_enabled=True,
             timeout_seconds=300
         )
+        self._init_execution_engine()
+    
+    def _init_execution_engine(self) -> None:
+        """Initialize BaseExecutionEngine with phases."""
+        # Create execution phases for GitHub analysis workflow
+        phase_1 = AgentMethodExecutionPhase("repository_access", self, "_execute_phase_1_method")
+        phase_2 = AgentMethodExecutionPhase("pattern_scanning", self, "_execute_phase_2_method", ["repository_access"])
+        phase_3 = AgentMethodExecutionPhase("config_extraction", self, "_execute_phase_3_method", ["repository_access"])
+        phase_4 = AgentMethodExecutionPhase("mapping_generation", self, "_execute_phase_4_method", ["pattern_scanning"])
+        phase_5 = AgentMethodExecutionPhase("final_map_creation", self, "_execute_phase_5_method", ["config_extraction", "mapping_generation"])
+        
+        # Build execution engine with pipeline strategy
+        self.execution_engine = ExecutionWorkflowBuilder() \
+            .add_phases([phase_1, phase_2, phase_3, phase_4, phase_5]) \
+            .set_strategy(ExecutionStrategy.PIPELINE) \
+            .add_pre_execution_hook(self._pre_execution_hook) \
+            .add_post_execution_hook(self._post_execution_hook) \
+            .build()
     
     @agent_type_safe
     async def execute(
@@ -78,10 +101,32 @@ class GitHubAnalyzerService(BaseSubAgent):
         state: DeepAgentState, 
         context: Dict[str, Any]
     ) -> TypedAgentResult:
-        """Execute repository analysis."""
+        """Execute repository analysis using BaseExecutionEngine."""
         try:
             await self._validate_input(context)
-            return await self._execute_analysis_phases(state, context)
+            
+            # Create execution context
+            execution_context = ExecutionContext(
+                run_id=context.get("run_id", "github_analysis"),
+                agent_name=self.name,
+                state=state,
+                stream_updates=context.get("stream_updates", False),
+                thread_id=context.get("thread_id"),
+                user_id=context.get("user_id"),
+                correlation_id=context.get("correlation_id")
+            )
+            
+            # Store analysis context in execution context
+            execution_context.analysis_context = context
+            
+            # Execute using BaseExecutionEngine with phases
+            result = await self.execution_engine.execute_phases(execution_context)
+            
+            if result.success:
+                return self._create_success_result(result.result.get("final_map_creation", {}).get("result_map", {}))
+            else:
+                return self._create_error_result(result.error)
+                
         except Exception as e:
             return await self._handle_execution_error(e)
     
@@ -91,15 +136,58 @@ class GitHubAnalyzerService(BaseSubAgent):
         logger.error(f"Analysis failed: {error_msg}")
         return self._create_error_result(error_msg)
     
-    async def _execute_analysis_phases(
-        self, 
-        state: DeepAgentState, 
-        context: Dict[str, Any]
-    ) -> TypedAgentResult:
-        """Execute all analysis phases."""
-        await self._report_progress(state, "Starting analysis", 0)
-        repo_url = context.get("repository_url")
-        return await self._run_sequential_phases(repo_url, state)
+    async def _pre_execution_hook(self, context: ExecutionContext) -> None:
+        """Pre-execution hook for setup."""
+        await self._report_progress(context.state, "Starting GitHub analysis", 0)
+        logger.info(f"Starting GitHub analysis for {context.analysis_context.get('repository_url')}")
+    
+    async def _post_execution_hook(self, context: ExecutionContext, phase_results: Dict[str, Any]) -> None:
+        """Post-execution hook for cleanup."""
+        await self._report_progress(context.state, "GitHub analysis complete", 100)
+        logger.info(f"GitHub analysis completed with {len(phase_results)} phases")
+    
+    # New phase execution methods for BaseExecutionEngine integration
+    async def _execute_phase_1_method(self, context: ExecutionContext, previous_results: Dict[str, Any]) -> Dict[str, Any]:
+        """Phase 1: Repository access - method wrapper."""
+        repo_url = context.analysis_context.get("repository_url")
+        repo_path = await self._access_repository(repo_url, context.state)
+        await self._report_progress(context.state, "Repository accessed", 20)
+        return {"repo_path": repo_path, "repo_url": repo_url}
+    
+    async def _execute_phase_2_method(self, context: ExecutionContext, previous_results: Dict[str, Any]) -> Dict[str, Any]:
+        """Phase 2: Pattern scanning - method wrapper."""
+        repo_path = previous_results["repository_access"]["repo_path"]
+        ai_patterns = await self._scan_patterns(repo_path, context.state)
+        await self._report_progress(context.state, "Patterns detected", 40)
+        return {"ai_patterns": ai_patterns}
+    
+    async def _execute_phase_3_method(self, context: ExecutionContext, previous_results: Dict[str, Any]) -> Dict[str, Any]:
+        """Phase 3: Config extraction - method wrapper."""
+        repo_path = previous_results["repository_access"]["repo_path"]
+        configs = await self._extract_configs(repo_path, context.state)
+        await self._report_progress(context.state, "Configurations extracted", 60)
+        return {"configs": configs}
+    
+    async def _execute_phase_4_method(self, context: ExecutionContext, previous_results: Dict[str, Any]) -> Dict[str, Any]:
+        """Phase 4: Mapping generation - method wrapper."""
+        ai_patterns = previous_results["pattern_scanning"]["ai_patterns"]
+        llm_map, tool_map = await self._generate_mappings(ai_patterns, context.state)
+        await self._report_progress(context.state, "Mapping complete", 80)
+        return {"llm_map": llm_map, "tool_map": tool_map}
+    
+    async def _execute_phase_5_method(self, context: ExecutionContext, previous_results: Dict[str, Any]) -> Dict[str, Any]:
+        """Phase 5: Final map creation - method wrapper."""
+        repo_url = previous_results["repository_access"]["repo_url"]
+        ai_patterns = previous_results["pattern_scanning"]["ai_patterns"]
+        configs = previous_results["config_extraction"]["configs"]
+        llm_map = previous_results["mapping_generation"]["llm_map"]
+        tool_map = previous_results["mapping_generation"]["tool_map"]
+        
+        result_map = await self._generate_final_map(
+            repo_url, ai_patterns, configs, llm_map, tool_map
+        )
+        await self._report_progress(context.state, "Analysis complete", 100)
+        return {"result_map": result_map}
     
     async def _run_sequential_phases(
         self, 

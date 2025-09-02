@@ -12,12 +12,12 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import Dict, Any
 
 from netra_backend.app.agents.agent_communication import AgentCommunicationMixin
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.schemas.agent import SubAgentLifecycle
 
 
-class TestAgentWithCommunication(BaseSubAgent, AgentCommunicationMixin):
+class TestAgentWithCommunication(BaseAgent, AgentCommunicationMixin):
     """Test agent that uses AgentCommunicationMixin"""
     
     def __init__(self, **kwargs):
@@ -143,8 +143,8 @@ class TestInitializationPatterns:
     """Test proper initialization patterns for agents"""
     
     def test_base_agent_initialization_with_ids(self):
-        """Test that BaseSubAgent can be initialized with agent_id and user_id"""
-        agent = BaseSubAgent(
+        """Test that BaseAgent can be initialized with agent_id and user_id"""
+        agent = BaseAgent(
             name="TestAgent",
             description="Test description",
             agent_id="custom_agent_123",  # Should accept agent_id
@@ -156,8 +156,8 @@ class TestInitializationPatterns:
         assert agent.user_id == "custom_user_456"   # Backward compatibility
     
     def test_base_agent_auto_generates_agent_id(self):
-        """Test that BaseSubAgent auto-generates agent_id if not provided"""
-        agent = BaseSubAgent(
+        """Test that BaseAgent auto-generates agent_id if not provided"""
+        agent = BaseAgent(
             name="TestAgent",
             description="Test description"
         )
@@ -169,9 +169,9 @@ class TestInitializationPatterns:
         # Should include correlation_id for uniqueness
         
     def test_mixin_compatibility(self):
-        """Test that AgentCommunicationMixin works with properly initialized BaseSubAgent"""
+        """Test that AgentCommunicationMixin works with properly initialized BaseAgent"""
         
-        class ProperlyInitializedAgent(BaseSubAgent, AgentCommunicationMixin):
+        class ProperlyInitializedAgent(BaseAgent, AgentCommunicationMixin):
             async def run(self, state, run_id: str, stream_updates: bool = False):
                 # Test that mixin methods can access expected attributes
                 await self._send_update(run_id, {"message": "test"})
@@ -229,7 +229,7 @@ class TestRuntimeBehavior:
             await agent.emit_agent_completed({"result": "success", "duration_ms": 1234.5})
             
             # Should complete without AttributeError
-            # Note: emit methods work through BaseSubAgent's WebSocketBridgeAdapter
+            # Note: emit methods work through BaseAgent's WebSocketBridgeAdapter
             # so we don't test the old notify methods anymore
 
 

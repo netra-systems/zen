@@ -8,17 +8,16 @@ import asyncio
 import time
 from typing import Any, Dict, Optional
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 
-# Modern Base Components
+# Modern Base Components (using simplified single inheritance architecture)
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
     ExecutionContext,
     ExecutionResult,
-    ExecutionStatus,
     WebSocketManagerProtocol,
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.agents.data_sub_agent.data_processing_operations import (
@@ -39,8 +38,11 @@ from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.strict_types import TypedAgentResult
 
 
-class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
-    """Core data analysis agent with modular architecture."""
+class DataSubAgent(BaseAgent):
+    """Core data analysis agent with modular architecture.
+    
+    Uses single inheritance pattern with ExecutionContext/ExecutionResult types.
+    """
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
                  websocket_manager: Optional[WebSocketManagerProtocol] = None,
@@ -58,9 +60,10 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
     def _init_base_interfaces(self, llm_manager: LLMManager, 
                             websocket_manager: Optional[WebSocketManagerProtocol]) -> None:
         """Initialize base interfaces with error handling."""
-        BaseSubAgent.__init__(self, llm_manager, name="DataSubAgent", 
-                            description="Advanced data analysis agent")
-        BaseExecutionInterface.__init__(self, "DataSubAgent", websocket_manager)
+        self.agent_name = "DataSubAgent"
+        self.llm_manager = llm_manager
+        self.websocket_manager = websocket_manager
+        # Using single inheritance pattern for simplicity
     
     def _init_core_systems(self, tool_dispatcher: ToolDispatcher, 
                           reliability_manager: Optional[ReliabilityManager]) -> None:
@@ -133,7 +136,7 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
         self._fallback_mode = True
         logger.warning("DataSubAgent running in fallback mode")
         
-    # Modern BaseExecutionInterface Implementation
+    # Modern Execution Interface Implementation
     async def validate_preconditions(self, context: ExecutionContext) -> bool:
         """Validate execution preconditions with fallback."""
         try:

@@ -1,6 +1,6 @@
 """Modern Execution Interface Implementation for DataSubAgent
 
-Separates BaseExecutionInterface methods to maintain 450-line limit.
+Separates standardized execution methods to maintain 450-line limit.
 Provides standardized execution patterns with modern reliability.
 
 Business Value: Modular modern execution patterns for data analysis.

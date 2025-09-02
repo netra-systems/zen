@@ -1,6 +1,6 @@
 """Modernized Corpus Admin Tool Handlers
 
-Modern agent architecture with BaseExecutionInterface inheritance.
+Modern agent architecture with standardized execution patterns.
 Provides corpus operations with full reliability and monitoring.
 
 Business Value: Standardizes corpus management for $10K+ customers.

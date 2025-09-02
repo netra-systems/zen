@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 
 from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.validation_sub_agent import ValidationSubAgent
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.agents.base.interface import ExecutionContext
 

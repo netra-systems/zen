@@ -1,15 +1,20 @@
 """Reliability Manager Implementation for Agent Health Monitoring
 
-Comprehensive reliability patterns combining:
-- Circuit breaker protection
-- Retry logic coordination
-- Health tracking and monitoring
-- Execution success/failure recording
+⚠️  MIGRATION TO UNIFIED RELIABILITY MANAGER ⚠️
 
-Business Value: Coordinates all reliability patterns for maximum system uptime.
+This module is being migrated to use UnifiedReliabilityManager as the SSOT.
+The ReliabilityManager class now delegates to the unified implementation
+while maintaining backward compatibility.
+
+For new code, use:
+    from netra_backend.app.core.reliability.unified_reliability_manager import get_reliability_manager
+
+Business Value: Coordinates all reliability patterns for maximum system uptime
+while consolidating duplicate implementations across the system.
 """
 
 import time
+import warnings
 from typing import Any, Awaitable, Callable, Dict
 
 from netra_backend.app.agents.base.circuit_breaker import (
@@ -25,11 +30,17 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.schemas.shared_types import RetryConfig
 
+# Import the unified implementation
+from netra_backend.app.core.reliability.unified_reliability_manager import get_reliability_manager
+
 logger = central_logger.get_logger(__name__)
 
 
 class ReliabilityManager:
     """Manages comprehensive reliability patterns.
+    
+    ⚠️  DEPRECATED: This class now delegates to UnifiedReliabilityManager.
+    Use get_reliability_manager() directly for new code.
     
     Combines circuit breaker, retry logic, and health monitoring
     for robust agent execution.
@@ -37,10 +48,29 @@ class ReliabilityManager:
     
     def __init__(self, circuit_breaker_config: CircuitBreakerConfig,
                  retry_config: RetryConfig):
+        warnings.warn(
+            "ReliabilityManager is deprecated. Use UnifiedReliabilityManager via "
+            "get_reliability_manager() for better functionality and WebSocket integration.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
+        # Extract service name for unified manager
+        service_name = getattr(circuit_breaker_config, 'name', 'agent_reliability')
+        
+        # Get unified manager instance
+        self._unified_manager = get_reliability_manager(
+            service_name=service_name,
+            retry_config=retry_config
+        )
+        
+        # Keep legacy interfaces for compatibility
         legacy_config = self._convert_to_legacy_config(circuit_breaker_config)
         self.circuit_breaker = CircuitBreaker(legacy_config)
         self.retry_manager = RetryManager(retry_config)
         self._health_stats = self._initialize_health_stats()
+        
+        logger.info(f"Created ReliabilityManager adapter for {service_name} - consider migrating to UnifiedReliabilityManager")
     
     def _convert_to_legacy_config(self, config: CircuitBreakerConfig) -> CircuitBreakerConfig:
         """Convert CircuitConfig to legacy format for compatibility."""
@@ -66,11 +96,30 @@ class ReliabilityManager:
                                      execute_func: Callable[[], Awaitable[ExecutionResult]]
                                      ) -> ExecutionResult:
         """Execute with full reliability patterns."""
-        self._health_stats["total_executions"] += 1
-        
+        # Delegate to unified manager for better functionality
         try:
-            return await self._execute_and_record_success(context, execute_func)
+            operation_name = getattr(context, 'operation_name', 'agent_operation')
+            
+            # Use unified manager with WebSocket event support
+            result = await self._unified_manager.execute_with_reliability(
+                operation=execute_func,
+                operation_name=operation_name,
+                context=context,
+                emit_events=True  # Enable WebSocket events for reliability
+            )
+            
+            # Update legacy health stats for compatibility
+            self._health_stats["total_executions"] += 1
+            self._health_stats["successful_executions"] += 1
+            
+            return result
+            
         except Exception as e:
+            # Update legacy health stats
+            self._health_stats["total_executions"] += 1
+            self._health_stats["failed_executions"] += 1
+            
+            # Create compatible error result
             return await self._handle_execution_failure(context, e)
     
     async def _execute_and_record_success(self, context: ExecutionContext,
@@ -177,11 +226,22 @@ class ReliabilityManager:
     
     def get_health_status(self) -> Dict[str, Any]:
         """Get comprehensive reliability health status."""
+        # Get enhanced status from unified manager
+        unified_status = self._unified_manager.get_health_status()
+        
+        # Merge with legacy stats for compatibility
         success_rate = self._calculate_success_rate()
         health_status = self._determine_health_status(success_rate)
         retry_config_data = self._get_retry_config_data()
         
-        return self._build_health_status_dict(health_status, success_rate, retry_config_data)
+        legacy_status = self._build_health_status_dict(health_status, success_rate, retry_config_data)
+        
+        # Combine unified and legacy status
+        combined_status = {**unified_status, **legacy_status}
+        combined_status["uses_unified_manager"] = True
+        combined_status["legacy_compatibility"] = True
+        
+        return combined_status
     
     def _build_health_status_dict(self, health_status: str, success_rate: float,
                                  retry_config_data: Dict[str, Any]) -> Dict[str, Any]:

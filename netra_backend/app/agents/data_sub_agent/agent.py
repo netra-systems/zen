@@ -1,6 +1,6 @@
-"""Modernized DataSubAgent with BaseExecutionInterface Integration
+"""Modern DataSubAgent with optimized execution patterns
 
-Clean modern implementation following BaseExecutionInterface pattern:
+Clean implementation with:
 - Standardized execution workflow with reliability management
 - Comprehensive monitoring and error handling
 - Circuit breaker protection and retry logic
@@ -14,17 +14,16 @@ import asyncio
 import time
 from typing import Any, Dict, Optional
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 
 # Modern Base Components
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
     ExecutionContext,
     ExecutionResult,
-    ExecutionStatus,
     WebSocketManagerProtocol,
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 
@@ -42,22 +41,22 @@ from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.strict_types import TypedAgentResult
 
 
-class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
-    """Advanced data gathering and analysis agent with ClickHouse integration."""
+class DataSubAgent(BaseAgent):
+    """Advanced data gathering and analysis agent with ClickHouse integration.
     
-    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
-                 websocket_manager: Optional[WebSocketManagerProtocol] = None,
+    Uses single inheritance pattern with ExecutionContext/ExecutionResult types.
+    """
+    
+    def __init__(self, llm_manager: LLMManager, 
+                 tool_dispatcher: ToolDispatcher,
                  reliability_manager: Optional[ReliabilityManager] = None) -> None:
-        self._init_base_interfaces(llm_manager, websocket_manager)
+        self._init_base_interfaces(llm_manager)
         self._init_core_systems(tool_dispatcher, reliability_manager)
         self._init_component_helpers()
     
-    def _init_base_interfaces(self, llm_manager: LLMManager, 
-                            websocket_manager: Optional[WebSocketManagerProtocol]) -> None:
+    def _init_base_interfaces(self, llm_manager: LLMManager) -> None:
         """Initialize base interfaces and agent identity."""
-        BaseSubAgent.__init__(self, llm_manager, name="DataSubAgent", 
-                            description="Advanced data gathering and analysis agent with ClickHouse integration.")
-        BaseExecutionInterface.__init__(self, "DataSubAgent", websocket_manager)
+        self.llm_manager = llm_manager
     
     def _init_core_systems(self, tool_dispatcher: ToolDispatcher, 
                           reliability_manager: Optional[ReliabilityManager]) -> None:
@@ -106,7 +105,7 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
         from netra_backend.app.agents.data_sub_agent.extended_operations import ExtendedOperations
         self.extended_ops = ExtendedOperations(self)
         
-    # Modern BaseExecutionInterface Implementation
+    # Modern Execution Interface Implementation
     async def validate_preconditions(self, context: ExecutionContext) -> bool:
         """Validate execution preconditions for data analysis."""
         try:

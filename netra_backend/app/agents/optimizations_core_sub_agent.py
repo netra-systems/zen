@@ -1,6 +1,6 @@
 """Optimizations Core Sub-Agent with Modern Execution Patterns
 
-Modernized agent providing AI optimization strategies using BaseExecutionInterface.
+Modernized agent providing AI optimization strategies.
 Integrates ExecutionErrorHandler, ReliabilityManager, and ExecutionMonitor for 99.9% reliability.
 
 Business Value: Core optimization recommendations drive customer cost savings.
@@ -11,11 +11,9 @@ import json
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.interface import (
-    AgentExecutionMixin,
-    BaseExecutionInterface,
     ExecutionContext,
     ExecutionResult,
     WebSocketManagerProtocol,
@@ -43,13 +41,11 @@ from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.shared_types import RetryConfig
 
 
-class OptimizationsCoreSubAgent(BaseSubAgent, AgentExecutionMixin):
+class OptimizationsCoreSubAgent(BaseAgent):
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
-        BaseSubAgent.__init__(self, llm_manager, name="OptimizationsCoreSubAgent", 
-                             description="This agent formulates optimization strategies.")
-        # Set properties for BaseExecutionInterface compatibility  
-        self.agent_name = "OptimizationsCoreSubAgent"
-        # WebSocket events are handled via set_websocket_bridge() from BaseSubAgent
+        super().__init__(llm_manager, name="OptimizationsCoreSubAgent", 
+                        description="This agent formulates optimization strategies.")
+        # WebSocket events are handled via set_websocket_bridge() from BaseAgent
         self.tool_dispatcher = tool_dispatcher
         self._initialize_modern_components()
     
@@ -82,7 +78,7 @@ class OptimizationsCoreSubAgent(BaseSubAgent, AgentExecutionMixin):
         """Check if we have data and triage results to work with."""
         return state.data_result is not None and state.triage_result is not None
     
-    # BaseExecutionInterface Implementation
+    # Execution Pattern Implementation
     async def validate_preconditions(self, context: ExecutionContext) -> bool:
         """Validate execution preconditions for optimization analysis."""
         return await self._validate_optimization_preconditions(context)

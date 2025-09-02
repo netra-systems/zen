@@ -466,3 +466,33 @@ class SystemCircuitBreaker:
         
         # If no fallback available, return a basic fallback
         return "triage"  # Always fallback to triage as last resort
+
+
+# DEPRECATED: Create global instances with deprecation warnings
+def create_system_circuit_breaker() -> SystemCircuitBreaker:
+    """DEPRECATED: Create system circuit breaker. Use UnifiedCircuitBreakerManager instead."""
+    warnings.warn(
+        "create_system_circuit_breaker() is deprecated. "
+        "Use get_unified_circuit_breaker_manager() directly for new code.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    return SystemCircuitBreaker()
+
+
+# DEPRECATED: Global instances for backward compatibility
+_system_circuit_breaker: Optional[SystemCircuitBreaker] = None
+
+
+def get_system_circuit_breaker() -> SystemCircuitBreaker:
+    """DEPRECATED: Get global system circuit breaker. Use UnifiedCircuitBreakerManager instead."""
+    warnings.warn(
+        "get_system_circuit_breaker() is deprecated. "
+        "Use get_unified_circuit_breaker_manager() directly for new code.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    global _system_circuit_breaker
+    if _system_circuit_breaker is None:
+        _system_circuit_breaker = SystemCircuitBreaker()
+    return _system_circuit_breaker

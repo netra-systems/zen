@@ -1,4 +1,4 @@
-"""Modern Correlation Analysis Module with BaseExecutionInterface
+"""Modern Correlation Analysis Module with Standardized Execution Patterns
 
 Business Value: Provides reliable correlation analysis for mid-tier and enterprise customers.
 Enables data-driven insights that justify AI spend optimization decisions.
@@ -12,11 +12,10 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface,
     ExecutionContext,
-    ExecutionResult,
-    ExecutionStatus,
+    ExecutionResult
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus 
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.core.exceptions_base import NetraException, ValidationError
 from netra_backend.app.core.system_health_monitor import system_health_monitor
@@ -24,12 +23,13 @@ from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.shared_types import RetryConfig
 
 
-class CorrelationAnalyzer(BaseExecutionInterface):
+class CorrelationAnalyzer:
     """Modern correlation analysis with reliability patterns."""
     
     def __init__(self, query_builder: Any, clickhouse_ops: Any, redis_manager: Any,
                  websocket_manager=None) -> None:
-        super().__init__("CorrelationAnalyzer", websocket_manager)
+        self.agent_name = "CorrelationAnalyzer"
+        self.websocket_manager = websocket_manager
         self._initialize_core_components(query_builder, clickhouse_ops, redis_manager)
         self._initialize_reliability_manager()
         self._register_health_monitoring()

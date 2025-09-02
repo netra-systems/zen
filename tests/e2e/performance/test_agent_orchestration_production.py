@@ -1,7 +1,7 @@
 """E2E Test: Agent Orchestration Production Integration
 
 from shared.isolated_environment import get_env
-CRITICAL: Real agent orchestration with actual BaseSubAgent and DeepAgentState.
+CRITICAL: Real agent orchestration with actual BaseAgent and DeepAgentState.
 Tests production agent workflows with real LLM integration.
 
 Business Value Justification (BVJ):
@@ -13,7 +13,7 @@ Business Value Justification (BVJ):
 COMPLIANCE:
 - File size: <300 lines (strict requirement)  
 - Functions: <8 lines each
-- Real BaseSubAgent integration
+- Real BaseAgent integration
 - DeepAgentState management
 - Production workflow testing
 """
@@ -25,15 +25,15 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.user_plan import PlanTier
 
 
-class TestableSubAgent(BaseSubAgent):
-    """Concrete implementation of BaseSubAgent for testing."""
+class TestableSubAgent(BaseAgent):
+    """Concrete implementation of BaseAgent for testing."""
     
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Test implementation of execute method."""
@@ -65,7 +65,7 @@ class ProductionAgentOrchestrator:
         self.active_agents = {}
         self.execution_metrics = {}
     
-    async def create_agent(self, agent_type: str, name: str) -> BaseSubAgent:
+    async def create_agent(self, agent_type: str, name: str) -> BaseAgent:
         """Create production agent instance."""
         agent = TestableSubAgent(
             llm_manager=self.llm_manager,
@@ -76,7 +76,7 @@ class ProductionAgentOrchestrator:
         self.active_agents[name] = agent
         return agent
     
-    async def execute_agent_workflow(self, agent: BaseSubAgent, task: str) -> Dict[str, Any]:
+    async def execute_agent_workflow(self, agent: BaseAgent, task: str) -> Dict[str, Any]:
         """Execute agent workflow with real state management."""
         start_time = time.time()
         
@@ -99,7 +99,7 @@ class ProductionAgentOrchestrator:
         
         return result
     
-    async def _run_workflow_stages(self, agent: BaseSubAgent, 
+    async def _run_workflow_stages(self, agent: BaseAgent, 
                                   state: DeepAgentState, task: str) -> Dict[str, Any]:
         """Run agent workflow through all stages."""
         stages = ["analysis", "planning", "execution", "validation"]
@@ -115,7 +115,7 @@ class ProductionAgentOrchestrator:
         final_stage = getattr(state.metadata, 'stage', 'validation') if hasattr(state, 'metadata') else 'validation'
         return {"status": "success", "final_stage": final_stage}
     
-    async def _execute_stage(self, agent: BaseSubAgent, state: DeepAgentState, stage: str, task: str) -> Dict[str, Any]:
+    async def _execute_stage(self, agent: BaseAgent, state: DeepAgentState, stage: str, task: str) -> Dict[str, Any]:
         """Execute a single workflow stage."""
         try:
             # Simulate stage execution
@@ -263,7 +263,7 @@ class TestAgentOrchestrationProduction:
         """Check if real LLM testing is enabled."""
         return get_env().get("TEST_USE_REAL_LLM", "false").lower() == "true"
     
-    async def _execute_coordination_workflow(self, orchestrator, agents: List[BaseSubAgent]):
+    async def _execute_coordination_workflow(self, orchestrator, agents: List[BaseAgent]):
         """Execute coordinated workflow across multiple agents."""
         results = []
         for i, agent in enumerate(agents):
@@ -285,7 +285,7 @@ class TestAgentOrchestrationProduction:
         except Exception as e:
             return {"status": "recovered", "error_handled": str(e)[:100]}
     
-    async def _execute_stage(self, agent: BaseSubAgent, state: DeepAgentState,
+    async def _execute_stage(self, agent: BaseAgent, state: DeepAgentState,
                            stage: str, task: str) -> Dict[str, Any]:
         """Execute individual workflow stage."""
         await asyncio.sleep(0.1)  # Simulate stage processing

@@ -5,7 +5,8 @@ Main base agent class that composes functionality from focused modular component
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, Optional, Any, List
+from typing import Dict, Optional, Any, List, Callable, Awaitable
+import time
 
 # Remove mixin imports since we're using single inheritance now
 # from netra_backend.app.agents.agent_communication import AgentCommunicationMixin
@@ -24,8 +25,24 @@ from netra_backend.app.schemas.agent import SubAgentLifecycle
 # Import timing components
 from netra_backend.app.agents.base.timing_collector import ExecutionTimingCollector
 
+# Import reliability and execution infrastructure using UnifiedRetryHandler as SSOT foundation
+from netra_backend.app.core.resilience.unified_retry_handler import (
+    UnifiedRetryHandler,
+    RetryConfig,
+    AGENT_RETRY_POLICY
+)
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.schemas.core_enums import ExecutionStatus
+from netra_backend.app.core.unified_error_handler import agent_error_handler
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.config import agent_config
+from netra_backend.app.agents.utils import extract_thread_id
 
-class BaseSubAgent(ABC):
+
+class BaseAgent(ABC):
     """Base agent class with simplified single inheritance pattern.
     
     Uses WebSocketBridgeAdapter for centralized WebSocket event emission through
@@ -46,7 +63,18 @@ class BaseSubAgent(ABC):
     - Observability features
     """
     
-    def __init__(self, llm_manager: Optional[LLMManager] = None, name: str = "BaseSubAgent", description: str = "This is the base sub-agent.", agent_id: Optional[str] = None, user_id: Optional[str] = None):
+    def __init__(self, 
+                 llm_manager: Optional[LLMManager] = None, 
+                 name: str = "BaseAgent", 
+                 description: str = "This is the base sub-agent.", 
+                 agent_id: Optional[str] = None, 
+                 user_id: Optional[str] = None,
+                 enable_reliability: bool = True,
+                 enable_execution_engine: bool = True,
+                 enable_caching: bool = False,
+                 tool_dispatcher: Optional[ToolDispatcher] = None,
+                 redis_manager: Optional[RedisManager] = None):
+        
         # Initialize with simple single inheritance pattern
         super().__init__()
         
@@ -71,6 +99,30 @@ class BaseSubAgent(ABC):
         
         # Initialize timing collector
         self.timing_collector = ExecutionTimingCollector(agent_name=name)
+        
+        # Initialize core properties pattern
+        self.tool_dispatcher = tool_dispatcher
+        self.redis_manager = redis_manager
+        self.cache_ttl = 3600  # Default cache TTL
+        self.max_retries = 3   # Default retry count
+        
+        # Initialize unified reliability management (SSOT pattern with UnifiedRetryHandler)
+        self._enable_reliability = enable_reliability
+        self._unified_reliability_handler = None
+        if enable_reliability:
+            self._init_unified_reliability_infrastructure()
+        
+        # Initialize execution engine (unified SSOT)
+        self._enable_execution_engine = enable_execution_engine
+        self._execution_engine = None
+        self._execution_monitor = None
+        if enable_execution_engine:
+            self._init_execution_infrastructure()
+        
+        # Initialize caching (optional SSOT)
+        self._enable_caching = enable_caching
+        if enable_caching and redis_manager:
+            self._init_caching_infrastructure()
 
     # === State Management Methods (from AgentStateMixin) ===
     
@@ -142,10 +194,18 @@ class BaseSubAgent(ABC):
     
     # === Abstract Methods ===
     
-    @abstractmethod
     async def execute(self, state: Optional[DeepAgentState], run_id: str = "", stream_updates: bool = False) -> Any:
-        """Execute the agent. Subclasses must implement this method."""
-        pass
+        """Execute the agent. Default implementation uses modern execution patterns.
+        
+        Subclasses can override this method or implement execute_core_logic() for business logic.
+        """
+        if hasattr(self, 'execute_modern') and self._enable_execution_engine:
+            # Use modern execution if available
+            result = await self.execute_modern(state, run_id, stream_updates)
+            return result.result if result.success else None
+        else:
+            # Fallback for agents that haven't implemented execute_core_logic yet
+            raise NotImplementedError("Subclasses must implement either execute() or execute_core_logic()")
 
     def _get_subagent_logging_enabled(self) -> bool:
         """Get subagent logging configuration setting."""
@@ -182,6 +242,16 @@ class BaseSubAgent(ABC):
                     self.timing_collector.complete_execution()
         except Exception as e:
             self.logger.warning(f"Error cleaning up timing collector during shutdown: {e}")
+        
+        # Cleanup unified reliability infrastructure
+        try:
+            if hasattr(self, '_unified_reliability_handler') and self._unified_reliability_handler:
+                # Circuit breaker cleanup if enabled
+                circuit_status = self._unified_reliability_handler.get_circuit_breaker_status()
+                if circuit_status:
+                    self.logger.debug(f"Cleaned up unified reliability handler during shutdown")
+        except Exception as e:
+            self.logger.warning(f"Error cleaning up unified reliability handler during shutdown: {e}")
         
         # Subclasses can override to add specific shutdown logic
     
@@ -245,3 +315,285 @@ class BaseSubAgent(ABC):
     def has_websocket_context(self) -> bool:
         """Check if WebSocket bridge is available."""
         return self._websocket_adapter.has_websocket_bridge()
+    
+    # === SSOT Reliability Management Infrastructure ===
+    
+    def _init_unified_reliability_infrastructure(self) -> None:
+        """Initialize unified reliability infrastructure using UnifiedRetryHandler as SSOT foundation."""
+        # Create custom retry configuration for agents based on AGENT_RETRY_POLICY
+        custom_config = RetryConfig(
+            max_attempts=getattr(agent_config.retry, 'max_retries', AGENT_RETRY_POLICY.max_attempts),
+            base_delay=getattr(agent_config.retry, 'base_delay', AGENT_RETRY_POLICY.base_delay),
+            max_delay=getattr(agent_config.retry, 'max_delay', AGENT_RETRY_POLICY.max_delay),
+            strategy=AGENT_RETRY_POLICY.strategy,
+            backoff_multiplier=AGENT_RETRY_POLICY.backoff_multiplier,
+            jitter_range=AGENT_RETRY_POLICY.jitter_range,
+            timeout_seconds=getattr(agent_config.timeout, 'default_timeout', AGENT_RETRY_POLICY.timeout_seconds),
+            retryable_exceptions=AGENT_RETRY_POLICY.retryable_exceptions,
+            non_retryable_exceptions=AGENT_RETRY_POLICY.non_retryable_exceptions,
+            circuit_breaker_enabled=getattr(agent_config, 'circuit_breaker_enabled', False),
+            circuit_breaker_failure_threshold=getattr(agent_config, 'failure_threshold', 5),
+            circuit_breaker_recovery_timeout=getattr(agent_config.timeout, 'default_timeout', 30.0),
+            metrics_enabled=True
+        )
+        
+        # Initialize single unified reliability handler (SSOT)
+        self._unified_reliability_handler = UnifiedRetryHandler(
+            service_name=f"agent_{self.name}",
+            config=custom_config
+        )
+    
+    def _init_execution_infrastructure(self) -> None:
+        """Initialize unified execution infrastructure (SSOT pattern)."""
+        self._execution_monitor = ExecutionMonitor(max_history_size=1000)
+        # Note: BaseExecutionEngine will be updated separately to use UnifiedRetryHandler
+        # For now, passing None to avoid breaking changes
+        self._execution_engine = BaseExecutionEngine(
+            reliability_manager=None,  # Will be integrated with UnifiedRetryHandler in future update
+            monitor=self._execution_monitor
+        )
+    
+    def _init_caching_infrastructure(self) -> None:
+        """Initialize optional caching infrastructure (SSOT pattern)."""
+        # Caching infrastructure can be extended here when needed
+        self.logger.debug(f"Caching infrastructure initialized for {self.name}")
+    
+    # === SSOT Property Access Pattern ===
+    
+    @property
+    def unified_reliability_handler(self) -> Optional[UnifiedRetryHandler]:
+        """Get unified reliability handler (SSOT pattern)."""
+        return self._unified_reliability_handler
+    
+    @property
+    def reliability_manager(self) -> Optional[UnifiedRetryHandler]:
+        """Get reliability manager - now delegates to unified handler for backward compatibility."""
+        return self._unified_reliability_handler
+    
+    @property
+    def legacy_reliability(self) -> Optional[UnifiedRetryHandler]:
+        """Get legacy reliability wrapper - now delegates to unified handler for backward compatibility."""
+        return self._unified_reliability_handler
+    
+    @property
+    def execution_engine(self) -> Optional[BaseExecutionEngine]:
+        """Get execution engine (SSOT pattern)."""
+        return self._execution_engine
+    
+    @property
+    def execution_monitor(self) -> Optional[ExecutionMonitor]:
+        """Get execution monitor (SSOT pattern)."""
+        return self._execution_monitor
+    
+    # === SSOT Standardized Execution Patterns ===
+    
+    async def execute_with_reliability(self, 
+                                      operation: Callable[[], Awaitable[Any]], 
+                                      operation_name: str,
+                                      fallback: Optional[Callable[[], Awaitable[Any]]] = None,
+                                      timeout: Optional[float] = None) -> Any:
+        """Execute operation with unified reliability patterns using UnifiedRetryHandler (SSOT)."""
+        if not self._unified_reliability_handler:
+            raise RuntimeError(f"Reliability not enabled for {self.name}")
+        
+        # Use UnifiedRetryHandler for unified execution with retry logic
+        result = await self._unified_reliability_handler.execute_with_retry_async(
+            operation
+        )
+        
+        if result.success:
+            return result.result
+        elif fallback:
+            # Try fallback if primary operation failed
+            self.logger.info(f"{self.name}.{operation_name}: Primary operation failed, trying fallback")
+            fallback_result = await self._unified_reliability_handler.execute_with_retry_async(
+                fallback
+            )
+            if fallback_result.success:
+                return fallback_result.result
+            else:
+                raise fallback_result.final_exception
+        else:
+            raise result.final_exception
+    
+    async def execute_modern(self, state: DeepAgentState, run_id: str, 
+                           stream_updates: bool = False) -> ExecutionResult:
+        """Execute using modern execution engine patterns with unified reliability (SSOT)."""
+        if not self._execution_engine:
+            raise RuntimeError(f"Modern execution engine not enabled for {self.name}")
+        
+        context = ExecutionContext(
+            run_id=run_id,
+            agent_name=self.name,
+            state=state,
+            stream_updates=stream_updates,
+            thread_id=getattr(state, 'thread_id', None),
+            user_id=getattr(state, 'user_id', None),
+            start_time=time.time(),
+            correlation_id=self.correlation_id
+        )
+        
+        # Use unified reliability handler for execution if available
+        if self._unified_reliability_handler:
+            try:
+                # Wrap execution in unified retry logic
+                async def execute_operation():
+                    return await self._execution_engine.execute(self, context)
+                
+                result = await self._unified_reliability_handler.execute_with_retry_async(
+                    execute_operation
+                )
+                
+                if result.success:
+                    return result.result
+                else:
+                    # Create error result
+                    return ExecutionResult(
+                        success=False,
+                        status=ExecutionStatus.FAILED,
+                        error=str(result.final_exception),
+                        execution_time_ms=result.total_time * 1000,
+                        retry_count=result.total_attempts - 1 if result.total_attempts > 0 else 0
+                    )
+            except Exception as e:
+                return ExecutionResult(
+                    success=False,
+                    status=ExecutionStatus.FAILED,
+                    error=str(e),
+                    execution_time_ms=0,
+                    retry_count=0
+                )
+        else:
+            # Fallback to direct execution if reliability not enabled
+            return await self._execution_engine.execute(self, context)
+    
+    # === SSOT Abstract Methods for Execution Patterns ===
+    
+    async def validate_preconditions(self, context: ExecutionContext) -> bool:
+        """Validate execution preconditions. Subclasses should override."""
+        return True
+    
+    async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+        """Execute core business logic. Subclasses should override."""
+        # Default implementation that can be overridden
+        await self.emit_thinking(f"Executing {self.name} core logic")
+        return {"status": "completed", "message": f"{self.name} executed successfully"}
+    
+    async def send_status_update(self, context: ExecutionContext, status: str, message: str) -> None:
+        """Send status update via WebSocket bridge."""
+        if status == "executing":
+            await self.emit_thinking(message)
+        elif status == "completed":
+            await self.emit_progress(message, is_complete=True)
+        elif status == "failed":
+            await self.emit_error(message)
+        else:
+            await self.emit_progress(message)
+    
+    # Backward compatibility for _send_update pattern
+    async def send_legacy_update(self, run_id: str, status: str, message: str, 
+                               result: Optional[Dict[str, Any]] = None) -> None:
+        """Send update in legacy format for backward compatibility."""
+        update = {"status": status, "message": message}
+        if result:
+            update["result"] = result
+        await self._send_update(run_id, update)
+    
+    # === SSOT Health Status Infrastructure ===
+    
+    def get_health_status(self) -> Dict[str, Any]:
+        """Get comprehensive agent health status using unified reliability handler (SSOT pattern)."""
+        health_status = {
+            "agent_name": self.name,
+            "state": self.state.value,
+            "websocket_available": self.has_websocket_context(),
+            "uses_unified_reliability": True  # Flag to indicate new architecture
+        }
+        
+        # Get unified reliability handler status
+        if self._unified_reliability_handler:
+            circuit_status = self._unified_reliability_handler.get_circuit_breaker_status()
+            if circuit_status:
+                health_status["unified_reliability"] = {
+                    "circuit_breaker": circuit_status,
+                    "service_name": self._unified_reliability_handler.service_name,
+                    "config": {
+                        "max_attempts": self._unified_reliability_handler.config.max_attempts,
+                        "strategy": self._unified_reliability_handler.config.strategy.value,
+                        "circuit_breaker_enabled": self._unified_reliability_handler.config.circuit_breaker_enabled
+                    }
+                }
+        
+        if self._execution_engine:
+            health_status["modern_execution"] = self._execution_engine.get_health_status()
+        
+        if self._execution_monitor:
+            health_status["monitoring"] = self._execution_monitor.get_health_status()
+        
+        # Determine overall health
+        health_status["overall_status"] = self._determine_overall_health_status(health_status)
+        
+        return health_status
+    
+    def get_circuit_breaker_status(self) -> Dict[str, Any]:
+        """Get circuit breaker status using unified reliability handler (SSOT pattern)."""
+        if self._unified_reliability_handler:
+            status = self._unified_reliability_handler.get_circuit_breaker_status()
+            if status:
+                return status
+        return {"status": "not_available", "reason": "reliability not enabled or circuit breaker disabled"}
+    
+    def _determine_overall_health_status(self, health_data: Dict[str, Any]) -> str:
+        """Determine overall health status from component health data."""
+        # Check unified reliability status
+        if "unified_reliability" in health_data:
+            circuit_status = health_data["unified_reliability"].get("circuit_breaker", {})
+            if circuit_status.get("state") == "OPEN":
+                return "degraded"
+        
+        if "modern_execution" in health_data:
+            modern_status = health_data["modern_execution"].get("monitor", {}).get("status", "unknown")
+            if modern_status != "healthy":
+                return "degraded"
+        
+        return "healthy"
+    
+    # === SSOT WebSocket Update Infrastructure ===
+    
+    async def _send_update(self, run_id: str, update: Dict[str, Any]) -> None:
+        """Send update via AgentWebSocketBridge for standardized emission (SSOT pattern)."""
+        try:
+            from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
+            
+            bridge = await get_agent_websocket_bridge()
+            status = update.get('status', 'processing')
+            message = update.get('message', '')
+            
+            # Map update status to appropriate bridge notification
+            if status == 'processing':
+                await bridge.notify_agent_thinking(run_id, self.name, message)
+            elif status == 'completed' or status == 'completed_with_fallback':
+                await bridge.notify_agent_completed(run_id, self.name, 
+                                                   result=update.get('result'), 
+                                                   execution_time_ms=None)
+            else:
+                # Custom status updates
+                await bridge.notify_custom(run_id, self.name, f"agent_{status}", update)
+            
+        except Exception as e:
+            self.logger.debug(f"Failed to send WebSocket update via bridge: {e}")
+    
+    async def send_processing_update(self, run_id: str, message: str = "") -> None:
+        """Send processing status update (SSOT pattern)."""
+        await self._send_update(run_id, {"status": "processing", "message": message})
+    
+    async def send_completion_update(self, run_id: str, result: Optional[Dict[str, Any]] = None, 
+                                   fallback: bool = False) -> None:
+        """Send completion status update (SSOT pattern)."""
+        status = "completed_with_fallback" if fallback else "completed"
+        update = {"status": status, "result": result}
+        if not fallback:
+            update["message"] = "Operation completed successfully"
+        else:
+            update["message"] = "Operation completed with fallback method"
+        await self._send_update(run_id, update)

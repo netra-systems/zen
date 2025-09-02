@@ -25,7 +25,7 @@ import pytest
 
 # Use absolute imports following CLAUDE.md standards
 from shared.isolated_environment import get_env
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.redis_manager import RedisManager
 from test_framework.test_patterns import L3IntegrationTest
@@ -85,7 +85,7 @@ class RealAgentCommunicationTest:
     async def create_real_communication_test_agent(self, agent_id: str, agent_type: str, llm_manager):
         """Create a real agent for communication testing."""
         
-        class CommunicationTestAgent(BaseSubAgent):
+        class CommunicationTestAgent(BaseAgent):
             def __init__(self, agent_id: str, agent_type: str, llm_manager):
                 super().__init__(llm_manager=llm_manager, name=agent_id, 
                                description=f"Real {agent_type} communication test agent")

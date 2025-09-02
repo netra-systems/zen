@@ -39,9 +39,9 @@ Netra Apex creates and captures value proportional to customer AI/LLM/Agent spen
 
 📚 **[LLM Master Index](LLM_MASTER_INDEX.md)** - Master navigation hub for all documentation and specifications
 📖 **[CLAUDE.md](CLAUDE.md)** - Principal engineering philosophy and AI factory patterns
+🏆 **[Golden Agent Index](docs/GOLDEN_AGENT_INDEX.md)** - Definitive guide to agent implementation patterns
 🧪 **[Test Runner Guide](SPEC/test_runner_guide.xml)** - Comprehensive testing guide and unified test runner
 🔧 **[Scripts](scripts/)** - Development and operation tools
-📚 **[LLM Master Index](LLM_MASTER_INDEX.md)** - Complete file navigation index
 🔍 **[SPEC/](SPEC/)** - Living source of truth (XML specifications)
 🏭 **[AI Native Meta Process](SPEC/ai_native_meta_process.md)** - AI factory methodology for 99.99% correctness
 

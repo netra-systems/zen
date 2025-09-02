@@ -7,7 +7,7 @@ import asyncio
 import time
 from typing import Any, Dict, List, Optional
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
@@ -15,7 +15,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class EnhancedExecutionAgent(BaseSubAgent):
+class EnhancedExecutionAgent(BaseAgent):
     """Enhanced agent that properly sends WebSocket notifications during execution."""
     
     def __init__(self, llm_manager: LLMManager, name: str = "EnhancedAgent",

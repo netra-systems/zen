@@ -819,19 +819,48 @@ class AuthService:
         logger.info(f"Password reset email sent to {email}")
     
     async def _retry_with_exponential_backoff(self, operation, max_retries: int = 3, base_delay: float = 1.0):
-        """Execute operation with exponential backoff retry logic"""
-        for attempt in range(max_retries):
-            try:
-                return await operation()
-            except Exception as e:
-                if attempt == max_retries - 1:
-                    # Last attempt failed, re-raise the exception
-                    raise e
+        """Execute operation with exponential backoff retry logic using UnifiedRetryHandler"""
+        try:
+            # Import here to avoid circular dependencies
+            from netra_backend.app.core.resilience.unified_retry_handler import (
+                UnifiedRetryHandler, RetryConfig, RetryStrategy
+            )
+            
+            # Create configuration for unified retry handler
+            retry_config = RetryConfig(
+                max_attempts=max_retries,
+                base_delay=base_delay,
+                strategy=RetryStrategy.EXPONENTIAL,
+                backoff_multiplier=2.0,
+                jitter_range=0.1,
+                timeout_seconds=None,
+                retryable_exceptions=(Exception,),
+                circuit_breaker_enabled=False,
+                metrics_enabled=True
+            )
+            
+            handler = UnifiedRetryHandler("auth_service", retry_config)
+            result = await handler.execute_with_retry_async(operation)
+            
+            if result.success:
+                return result.result
+            else:
+                raise result.final_exception
                 
-                # Calculate delay with exponential backoff
-                delay = base_delay * (2 ** attempt)
-                logger.warning(f"Operation failed on attempt {attempt + 1}/{max_retries}, retrying in {delay}s: {e}")
-                await asyncio.sleep(delay)
+        except ImportError:
+            # Fall back to legacy implementation if UnifiedRetryHandler not available
+            for attempt in range(max_retries):
+                try:
+                    return await operation()
+                except Exception as e:
+                    if attempt == max_retries - 1:
+                        # Last attempt failed, re-raise the exception
+                        raise e
+                    
+                    # Calculate delay with exponential backoff
+                    delay = base_delay * (2 ** attempt)
+                    logger.warning(f"Operation failed on attempt {attempt + 1}/{max_retries}, retrying in {delay}s: {e}")
+                    await asyncio.sleep(delay)
     
     async def _audit_log_with_retry(self, event_type: str, 
                                   user_id: Optional[str] = None,

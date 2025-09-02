@@ -16,7 +16,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
@@ -38,7 +38,7 @@ class TestContextWindowIsolation:
     @pytest.fixture
     def base_agent(self, mock_llm_manager):
         """Create base agent instance."""
-        return BaseSubAgent(
+        return BaseAgent(
             llm_manager=mock_llm_manager,
             name="TestAgent",
             description="Test agent"
@@ -48,8 +48,8 @@ class TestContextWindowIsolation:
     async def test_context_isolation_between_agents(self, mock_llm_manager):
         """Test that context is isolated between different agent instances."""
         # Create two agent instances
-        agent1 = BaseSubAgent(mock_llm_manager, name="Agent1")
-        agent2 = BaseSubAgent(mock_llm_manager, name="Agent2")
+        agent1 = BaseAgent(mock_llm_manager, name="Agent1")
+        agent2 = BaseAgent(mock_llm_manager, name="Agent2")
         
         # Set different context for each agent
         agent1.context = {"data": "agent1_private_data", "sensitive": "secret1"}
@@ -67,7 +67,7 @@ class TestContextWindowIsolation:
     @pytest.mark.asyncio
     async def test_context_window_size_limit(self, mock_llm_manager):
         """Test that prompts exceeding context window are handled."""
-        agent = BaseSubAgent(mock_llm_manager, name="TestAgent")
+        agent = BaseAgent(mock_llm_manager, name="TestAgent")
         
         # Create a prompt that exceeds typical context window
         large_prompt = "x" * 200000  # 200k characters
@@ -97,7 +97,7 @@ class TestContextWindowIsolation:
     @pytest.mark.asyncio
     async def test_token_counting_accuracy(self, mock_llm_manager):
         """Test accurate token counting for prompts."""
-        agent = BaseSubAgent(mock_llm_manager, name="TestAgent")
+        agent = BaseAgent(mock_llm_manager, name="TestAgent")
         
         test_cases = [
             ("Hello world", 2),  # Simple text
@@ -118,7 +118,7 @@ class TestContextWindowIsolation:
         
         # Create multiple agents
         for i in range(100):
-            agent = BaseSubAgent(mock_llm_manager, name=f"Agent{i}")
+            agent = BaseAgent(mock_llm_manager, name=f"Agent{i}")
             agent.context = {"data": "x" * 10000}  # 10KB per agent
             agents.append(agent)
         
@@ -159,7 +159,7 @@ class TestContextWindowIsolation:
     @pytest.mark.asyncio
     async def test_context_size_monitoring(self, mock_llm_manager):
         """Test monitoring and reporting of context sizes."""
-        agent = BaseSubAgent(mock_llm_manager, name="TestAgent")
+        agent = BaseAgent(mock_llm_manager, name="TestAgent")
         
         # Add various data to context
         agent.context = {
@@ -181,7 +181,7 @@ class TestContextWindowIsolation:
     async def test_parallel_agent_context_isolation(self, mock_llm_manager):
         """Test context isolation when agents run in parallel."""
         agents = [
-            BaseSubAgent(mock_llm_manager, name=f"Agent{i}")
+            BaseAgent(mock_llm_manager, name=f"Agent{i}")
             for i in range(10)
         ]
         
@@ -223,7 +223,7 @@ class TestContextWindowIsolation:
     @pytest.mark.asyncio
     async def test_context_overflow_error_handling(self, mock_llm_manager):
         """Test graceful handling of context overflow errors."""
-        agent = BaseSubAgent(mock_llm_manager, name="TestAgent")
+        agent = BaseAgent(mock_llm_manager, name="TestAgent")
         
         # Simulate context overflow
         huge_context = {"data": "x" * 1000000}  # 1MB context
@@ -248,7 +248,7 @@ class TestTokenCountingAndLimits:
     async def test_max_tokens_enforcement(self):
         """Test that max_tokens parameter is enforced."""
         mock_llm = MagicMock(spec=LLMManager)
-        agent = BaseSubAgent(mock_llm, name="TestAgent")
+        agent = BaseAgent(mock_llm, name="TestAgent")
         
         # Configure max tokens
         max_tokens = 1000
@@ -281,7 +281,7 @@ class TestTokenCountingAndLimits:
     async def test_token_budget_tracking(self):
         """Test tracking of token usage against budget."""
         mock_llm = MagicMock(spec=LLMManager)
-        agent = BaseSubAgent(mock_llm, name="TestAgent")
+        agent = BaseAgent(mock_llm, name="TestAgent")
         
         # Set token budget
         agent.token_budget = 10000
@@ -307,7 +307,7 @@ class TestContextObservability:
     async def test_context_size_metrics_collection(self):
         """Test collection of context size metrics."""
         mock_llm = MagicMock(spec=LLMManager)
-        agent = BaseSubAgent(mock_llm, name="TestAgent")
+        agent = BaseAgent(mock_llm, name="TestAgent")
         
         # Add data to context
         agent.context = {
@@ -328,7 +328,7 @@ class TestContextObservability:
     async def test_context_metrics_reporting(self):
         """Test reporting of context metrics to monitoring system."""
         mock_llm = MagicMock(spec=LLMManager)
-        agent = BaseSubAgent(mock_llm, name="TestAgent")
+        agent = BaseAgent(mock_llm, name="TestAgent")
         
         with patch('netra_backend.app.agents.base_agent.metrics_collector') as mock_metrics:
             # Trigger metrics reporting
@@ -347,7 +347,7 @@ class TestContextObservability:
     async def test_context_overflow_alerting(self):
         """Test alerting when context approaches limits."""
         mock_llm = MagicMock(spec=LLMManager)
-        agent = BaseSubAgent(mock_llm, name="TestAgent")
+        agent = BaseAgent(mock_llm, name="TestAgent")
         
         # Set context near limit
         agent.context = {"data": "x" * 120000}  # Near 128k limit
@@ -369,7 +369,7 @@ class TestAgentContextIsolationFailures:
     async def test_missing_context_window_validation(self):
         """Test that context window validation is missing."""
         mock_llm = MagicMock(spec=LLMManager)
-        agent = BaseSubAgent(mock_llm, name="TestAgent")
+        agent = BaseAgent(mock_llm, name="TestAgent")
         
         # This should fail because validation is not implemented
         huge_prompt = "x" * 200000
@@ -380,7 +380,7 @@ class TestAgentContextIsolationFailures:
     async def test_missing_token_counting(self):
         """Test that token counting is not implemented."""
         mock_llm = MagicMock(spec=LLMManager)
-        agent = BaseSubAgent(mock_llm, name="TestAgent")
+        agent = BaseAgent(mock_llm, name="TestAgent")
         
         # This should fail because method doesn't exist
         token_count = agent._estimate_token_count("test text")
@@ -391,7 +391,7 @@ class TestAgentContextIsolationFailures:
     async def test_missing_context_metrics(self):
         """Test that context metrics collection is missing."""
         mock_llm = MagicMock(spec=LLMManager)
-        agent = BaseSubAgent(mock_llm, name="TestAgent")
+        agent = BaseAgent(mock_llm, name="TestAgent")
         
         # This should fail because method doesn't exist
         metrics = agent._get_context_metrics()

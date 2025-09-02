@@ -27,7 +27,7 @@ import pytest
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
@@ -53,7 +53,7 @@ def mock_justified(reason: str):
     return decorator
 
 
-class MockSubAgent(BaseSubAgent):
+class MockSubAgent(BaseAgent):
     """Mock sub-agent for testing collaboration scenarios"""
     
     def __init__(self, name: str, response_content: str, should_fail: bool = False):

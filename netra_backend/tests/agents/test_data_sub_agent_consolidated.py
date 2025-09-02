@@ -271,7 +271,7 @@ class TestDataSubAgentConsolidated:
     
     @pytest.mark.asyncio
     async def test_execution_context_interface(self, data_sub_agent):
-        """Test BaseExecutionInterface implementation."""
+        """Test standardized execution interface implementation."""
         # Create execution context
         state = DeepAgentState(
             agent_input={"analysis_type": "performance"},
@@ -293,7 +293,7 @@ class TestDataSubAgentConsolidated:
             "metrics": {}
         })
         
-        # Execute via BaseExecutionInterface
+        # Execute via standardized execution interface
         result = await data_sub_agent.execute_core_logic(context)
         
         # Validate execution result

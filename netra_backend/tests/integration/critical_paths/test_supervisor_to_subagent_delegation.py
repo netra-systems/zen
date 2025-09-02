@@ -26,7 +26,7 @@ import pytest
 from testcontainers.postgres import PostgresContainer
 from testcontainers.redis import RedisContainer
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
 
@@ -49,7 +49,7 @@ class L3AgentDelegationManager:
     
     def __init__(self):
         self.supervisor_agent: Optional[SupervisorAgent] = None
-        self.sub_agents: Dict[str, BaseSubAgent] = {}
+        self.sub_agents: Dict[str, BaseAgent] = {}
         self.active_delegations: Dict[str, Dict[str, Any]] = {}
         self.state_manager: Optional[AgentStateManager] = None
         self.redis_client = None
@@ -213,13 +213,13 @@ class L3AgentDelegationManager:
                 "state_persisted": False
             }
     
-    async def _spawn_sub_agent(self, agent_type: str, task_id: str, delegation_context: Any) -> Optional[BaseSubAgent]:
+    async def _spawn_sub_agent(self, agent_type: str, task_id: str, delegation_context: Any) -> Optional[BaseAgent]:
         """Spawn real sub-agent with proper initialization."""
         try:
             agent_id = f"{agent_type}_{task_id}_{uuid.uuid4().hex[:6]}"
             
             # Create sub-agent with real dependencies
-            sub_agent = BaseSubAgent(
+            sub_agent = BaseAgent(
                 agent_id=agent_id,
                 agent_type=agent_type,
                 state_manager=self.state_manager,
@@ -248,7 +248,7 @@ class L3AgentDelegationManager:
             logger.error(f"Failed to spawn sub-agent {agent_type}: {e}")
             return None
     
-    async def _execute_with_sub_agent(self, sub_agent: BaseSubAgent, task: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_with_sub_agent(self, sub_agent: BaseAgent, task: Dict[str, Any]) -> Dict[str, Any]:
         """Execute task with spawned sub-agent."""
         execution_start = time.time()
         

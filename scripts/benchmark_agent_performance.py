@@ -27,7 +27,7 @@ from uuid import uuid4
 # Add netra_backend to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from netra_backend.app.agents.base_sub_agent import BaseSubAgent
+from netra_backend.app.agents.base_sub_agent import BaseAgent
 from netra_backend.app.agents.corpus_admin_sub_agent import CorpusAdminSubAgent
 from netra_backend.app.agents.synthetic_data_sub_agent import SyntheticDataSubAgent
 from netra_backend.app.agents.supply_researcher_sub_agent import SupplyResearcherAgent
@@ -299,7 +299,7 @@ class AgentPerformanceBenchmark:
         
         return benchmark
     
-    async def _execute_scenario(self, agent: BaseSubAgent, scenario: Dict[str, Any]) -> Any:
+    async def _execute_scenario(self, agent: BaseAgent, scenario: Dict[str, Any]) -> Any:
         """Execute a single test scenario"""
         # Different execution based on agent type
         if isinstance(agent, SupervisorAgent):

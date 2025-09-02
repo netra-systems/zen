@@ -27,7 +27,7 @@ import pytest
 from testcontainers.postgres import PostgresContainer
 from testcontainers.redis import RedisContainer
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
 
@@ -41,7 +41,7 @@ from test_framework.mocks.database_mocks import MockDatabaseSession
 
 logger = logging.getLogger(__name__)
 
-class MockTenantAgent(BaseSubAgent):
+class MockTenantAgent(BaseAgent):
     """Mock agent for testing tenant isolation."""
     
     def __init__(self, agent_id: str, agent_type: str, state_manager, redis_client):
@@ -73,7 +73,7 @@ class L3ContextIsolationManager:
         self.postgres_service = None
         self.state_manager: Optional[AgentStateManager] = None
         self.isolation_manager: Optional[ContextIsolationManager] = None
-        self.tenant_agents: Dict[str, List[BaseSubAgent]] = {}
+        self.tenant_agents: Dict[str, List[BaseAgent]] = {}
         self.context_boundaries: Dict[str, Set[str]] = {}
         self.isolation_violations: List[Dict[str, Any]] = []
         self.isolation_metrics = {
@@ -288,7 +288,7 @@ class L3ContextIsolationManager:
                 "reason": f"Access denied: {str(e)}"
             }
     
-    async def _verify_state_isolation(self, agent_a: BaseSubAgent, agent_b: BaseSubAgent) -> Dict[str, Any]:
+    async def _verify_state_isolation(self, agent_a: BaseAgent, agent_b: BaseAgent) -> Dict[str, Any]:
         """Verify state isolation between agents from different tenants."""
         try:
             # Load states
