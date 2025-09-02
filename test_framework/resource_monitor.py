@@ -54,11 +54,12 @@ except ImportError:
 
 # CLAUDE.md compliance: Use IsolatedEnvironment for all environment access
 try:
-    from shared.isolated_environment import get_env
+    from shared.isolated_environment import getenv
 except ImportError:
     # Fallback if shared module not available in path
     import os
-    def get_env(key: str, default=None):
+    def getenv(key: str, default=None):
+        """Fallback environment variable getter."""
         return os.environ.get(key, default)
 
 # Import existing Docker utilities for integration
@@ -245,11 +246,11 @@ class DockerResourceMonitor:
             cleanup_aggressive: Use aggressive cleanup strategies (default: False)
         """
         # Configure limits from parameters or environment
-        self.max_memory_gb = max_memory_gb or float(get_env("DOCKER_MAX_MEMORY_GB", self.DEFAULT_MAX_MEMORY_GB))
-        self.max_containers = max_containers or int(get_env("DOCKER_MAX_CONTAINERS", self.DEFAULT_MAX_CONTAINERS))
-        self.max_networks = max_networks or int(get_env("DOCKER_MAX_NETWORKS", self.DEFAULT_MAX_NETWORKS))
-        self.max_volumes = max_volumes or int(get_env("DOCKER_MAX_VOLUMES", self.DEFAULT_MAX_VOLUMES))
-        self.max_disk_gb = max_disk_gb or float(get_env("DOCKER_MAX_DISK_GB", self.DEFAULT_MAX_DISK_GB))
+        self.max_memory_gb = max_memory_gb or float(getenv("DOCKER_MAX_MEMORY_GB", self.DEFAULT_MAX_MEMORY_GB))
+        self.max_containers = max_containers or int(getenv("DOCKER_MAX_CONTAINERS", self.DEFAULT_MAX_CONTAINERS))
+        self.max_networks = max_networks or int(getenv("DOCKER_MAX_NETWORKS", self.DEFAULT_MAX_NETWORKS))
+        self.max_volumes = max_volumes or int(getenv("DOCKER_MAX_VOLUMES", self.DEFAULT_MAX_VOLUMES))
+        self.max_disk_gb = max_disk_gb or float(getenv("DOCKER_MAX_DISK_GB", self.DEFAULT_MAX_DISK_GB))
         
         # Cleanup configuration
         self.enable_auto_cleanup = enable_auto_cleanup
