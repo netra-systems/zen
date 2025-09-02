@@ -357,6 +357,72 @@ class UnifiedDockerManager:
         pid = os.getpid()
         return hashlib.md5(f"{timestamp}_{pid}".encode()).hexdigest()[:8]
     
+    def get_database_credentials(self) -> Dict[str, str]:
+        """
+        Get environment-specific database credentials based on current configuration.
+        
+        Returns:
+            Dict containing 'user', 'password', and 'database' keys
+            
+        Business Value: Eliminates database connection failures due to hardcoded credentials
+        """
+        # Alpine containers have special credentials regardless of environment
+        if self.use_alpine:
+            return self.ALPINE_CREDENTIALS.copy()
+            
+        # Use environment-specific credentials
+        credentials = self.ENVIRONMENT_CREDENTIALS.get(self.environment_type)
+        if not credentials:
+            logger.warning(f"No credentials found for environment {self.environment_type}, falling back to SHARED")
+            credentials = self.ENVIRONMENT_CREDENTIALS[EnvironmentType.SHARED]
+            
+        return credentials.copy()
+    
+    def detect_environment(self) -> EnvironmentType:
+        """
+        Detect the current environment from running containers or compose files.
+        
+        Returns:
+            EnvironmentType based on detection logic
+            
+        Business Value: Automatic environment detection prevents credential mismatches
+        """
+        # Try to detect from running containers first
+        try:
+            result = subprocess.run(
+                ["docker", "ps", "--format", "{{.Names}}", "--filter", "status=running"],
+                capture_output=True, text=True, timeout=10
+            )
+            if result.returncode == 0:
+                container_names = result.stdout.strip().split('\n') if result.stdout.strip() else []
+                
+                # Check for Alpine test containers
+                if any('alpine' in name.lower() for name in container_names):
+                    return EnvironmentType.SHARED  # Alpine containers use SHARED environment type
+                
+                # Check for development containers (dev- prefix)
+                if any(name.startswith('dev-') for name in container_names):
+                    return EnvironmentType.DEVELOPMENT
+                    
+                # Check for test containers (test- prefix)  
+                if any(name.startswith('test-') for name in container_names):
+                    return EnvironmentType.SHARED
+                    
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError) as e:
+            logger.debug(f"Could not detect environment from containers: {e}")
+        
+        # Fallback to compose file detection
+        compose_file = self._get_compose_file()
+        if 'alpine' in compose_file.lower():
+            return EnvironmentType.SHARED
+        elif 'test' in compose_file.lower():
+            return EnvironmentType.SHARED
+        elif 'docker-compose.yml' == compose_file:
+            return EnvironmentType.DEVELOPMENT
+            
+        # Final fallback to configured environment type
+        return self.environment_type
+    
     def _initialize_port_allocator(self) -> DynamicPortAllocator:
         """Initialize the dynamic port allocator based on environment type."""
         # Map environment types to port ranges

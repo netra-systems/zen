@@ -920,6 +920,10 @@ class AgentWebSocketBridge(MonitorableComponent):
         Business Value: Users see immediate feedback that AI is working on their problem
         """
         try:
+            # CRITICAL VALIDATION: Check run_id context before emission
+            if not self._validate_event_context(run_id, "agent_started", agent_name):
+                return False
+            
             if not self._websocket_manager:
                 logger.warning(f"🚨 EMISSION BLOCKED: WebSocket manager unavailable for agent_started (run_id={run_id}, agent={agent_name})")
                 return False
@@ -1468,6 +1472,176 @@ class AgentWebSocketBridge(MonitorableComponent):
             logger.error(f"🚨 EMISSION EXCEPTION: notify_custom failed (run_id={run_id}, type={notification_type}): {e}")
             return False
     
+    # ===================== CORE EVENT EMISSION METHOD =====================
+    
+    async def emit_agent_event(
+        self,
+        event_type: str,
+        data: Dict[str, Any],
+        run_id: Optional[str] = None,
+        agent_name: Optional[str] = None
+    ) -> bool:
+        """
+        Core method for emitting agent events with context validation.
+        
+        CRITICAL SECURITY: This method validates that events are only sent with proper user context,
+        preventing events from being misrouted to wrong users.
+        
+        Args:
+            event_type: Type of event to emit
+            data: Event payload data
+            run_id: Unique execution identifier (REQUIRED for routing)
+            agent_name: Optional agent name for logging
+            
+        Returns:
+            bool: True if event was successfully queued/sent
+            
+        Raises:
+            ValueError: If run_id is invalid or context validation fails
+            
+        Business Impact: Prevents WebSocket events from being misrouted to wrong users,
+                        ensuring data privacy and security.
+        """
+        try:
+            # CRITICAL VALIDATION: Check run_id context
+            if not self._validate_event_context(run_id, event_type, agent_name):
+                return False
+            
+            if not self._websocket_manager:
+                logger.warning(f"🚨 EMISSION BLOCKED: WebSocket manager unavailable for {event_type} (run_id={run_id})")
+                return False
+            
+            # Build standardized event
+            event_payload = {
+                "type": event_type,
+                "run_id": run_id,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                **data
+            }
+            
+            # Add agent_name if provided
+            if agent_name:
+                event_payload["agent_name"] = agent_name
+            
+            # CRYSTAL CLEAR EMISSION: Resolve thread_id and emit
+            thread_id = await self._resolve_thread_id_from_run_id(run_id)
+            if not thread_id:
+                logger.error(f"🚨 EMISSION FAILED: Cannot resolve thread_id for run_id={run_id}")
+                return False
+            
+            # EMIT TO USER CHAT
+            success = await self._websocket_manager.send_to_thread(thread_id, event_payload)
+            
+            if success:
+                logger.debug(f"✅ EMISSION SUCCESS: {event_type} → thread={thread_id} (run_id={run_id})")
+            else:
+                logger.error(f"🚨 EMISSION FAILED: {event_type} send failed (run_id={run_id})")
+            
+            return success
+            
+        except Exception as e:
+            logger.error(f"🚨 EMISSION EXCEPTION: emit_agent_event failed (event_type={event_type}, run_id={run_id}): {e}")
+            return False
+    
+    def _validate_event_context(self, run_id: Optional[str], event_type: str, agent_name: Optional[str] = None) -> bool:
+        """
+        Validate WebSocket event context to ensure proper user isolation.
+        
+        CRITICAL SECURITY: This validation prevents events from being sent without proper context,
+        which could result in events being delivered to wrong users or global broadcast.
+        
+        Args:
+            run_id: Run identifier to validate
+            event_type: Type of event being emitted (for logging)
+            agent_name: Optional agent name (for logging)
+            
+        Returns:
+            bool: True if context is valid and event should be sent
+            
+        Security Impact: Prevents cross-user data leakage and ensures WebSocket events
+                        are only sent to the correct user context.
+        """
+        try:
+            # CRITICAL CHECK: run_id cannot be None
+            if run_id is None:
+                logger.error(f"🚨 CONTEXT VALIDATION FAILED: run_id is None for {event_type} "
+                           f"(agent={agent_name or 'unknown'}). This would cause event misrouting!")
+                logger.error(f"🚨 SECURITY RISK: Events with None run_id can be delivered to wrong users!")
+                return False
+            
+            # CRITICAL CHECK: run_id cannot be 'registry' (system context)
+            if run_id == 'registry':
+                logger.error(f"🚨 CONTEXT VALIDATION FAILED: run_id='registry' for {event_type} "
+                           f"(agent={agent_name or 'unknown'}). System context cannot emit user events!")
+                logger.error(f"🚨 SECURITY RISK: Registry context events would be broadcast to all users!")
+                return False
+            
+            # VALIDATION CHECK: run_id should be a non-empty string
+            if not isinstance(run_id, str) or not run_id.strip():
+                logger.error(f"🚨 CONTEXT VALIDATION FAILED: Invalid run_id '{run_id}' for {event_type} "
+                           f"(agent={agent_name or 'unknown'}). run_id must be non-empty string!")
+                return False
+            
+            # VALIDATION CHECK: run_id should not contain suspicious patterns
+            if self._is_suspicious_run_id(run_id):
+                logger.warning(f"⚠️ CONTEXT VALIDATION WARNING: Suspicious run_id pattern '{run_id}' for {event_type} "
+                              f"(agent={agent_name or 'unknown'}). Event will be sent but flagged for monitoring.")
+                # Allow but log for monitoring - some legitimate run_ids might trigger this
+            
+            # Context validation passed
+            logger.debug(f"✅ CONTEXT VALIDATION PASSED: run_id={run_id} for {event_type} is valid")
+            return True
+            
+        except Exception as e:
+            logger.error(f"🚨 CONTEXT VALIDATION EXCEPTION: Validation failed for {event_type} "
+                        f"(run_id={run_id}, agent={agent_name or 'unknown'}): {e}")
+            return False
+    
+    def _is_suspicious_run_id(self, run_id: str) -> bool:
+        """
+        Check if a run_id contains suspicious patterns that might indicate invalid context.
+        
+        This helps detect potentially invalid run_ids that could cause security issues
+        or indicate bugs in the calling code.
+        
+        Args:
+            run_id: Run ID to check for suspicious patterns
+            
+        Returns:
+            bool: True if run_id contains suspicious patterns
+        """
+        if not run_id or not isinstance(run_id, str):
+            return True
+        
+        run_id_lower = run_id.lower()
+        
+        # Suspicious patterns that indicate invalid context
+        suspicious_patterns = [
+            # System/generic identifiers that shouldn't be user run_ids
+            "system", "global", "broadcast", "admin", "root", "default",
+            # Test artifacts that might leak into production
+            "test", "mock", "fake", "dummy", "placeholder", "example",
+            # Empty/null-like values
+            "null", "none", "undefined", "empty", "",
+            # Debug/development patterns
+            "debug", "dev", "local", "temp", "temporary"
+        ]
+        
+        # Check for exact matches or contained patterns
+        for pattern in suspicious_patterns:
+            if pattern in run_id_lower:
+                return True
+        
+        # Check for overly short identifiers (less than 3 chars)
+        if len(run_id.strip()) < 3:
+            return True
+        
+        # Check for patterns that look like system identifiers
+        if run_id_lower.startswith(('sys_', 'system_', 'global_', 'admin_')):
+            return True
+        
+        return False
+
     # ===================== HELPER METHODS =====================
     
     async def _resolve_thread_id_from_run_id(self, run_id: str) -> Optional[str]:
