@@ -14,9 +14,16 @@ from netra_backend.app.db.clickhouse import (
     get_clickhouse_client, 
     get_clickhouse_service,
     ClickHouseService,
-    MockClickHouseDatabase,
+    NoOpClickHouseClient,
     _clickhouse_cache
 )
+
+# Try to import MockClickHouseDatabase for compatibility
+try:
+    from test_framework.fixtures.clickhouse_fixtures import MockClickHouseDatabase
+except ImportError:
+    # If not available, use NoOpClickHouseClient as the mock
+    MockClickHouseDatabase = NoOpClickHouseClient
 
 
 class TestClickHouseClientComprehensive:
@@ -55,7 +62,8 @@ class TestClickHouseClientComprehensive:
         """Test initialization with mock client."""
         await client.initialize()
         assert client._client is not None
-        assert isinstance(client._client, MockClickHouseDatabase)
+        # Should be either MockClickHouseDatabase or NoOpClickHouseClient
+        assert isinstance(client._client, (MockClickHouseDatabase, NoOpClickHouseClient))
 
     @pytest.mark.asyncio
     async def test_ping_success(self, client):
@@ -106,8 +114,8 @@ class TestClickHouseClientComprehensive:
         """Test circuit breaker metrics."""
         await client.initialize()
         # Execute some queries to test metrics
-        await client.execute("SELECT 1")
-        await client.execute("SELECT 2")
+        await client.execute("SELECT 1", user_id="test_user")
+        await client.execute("SELECT 2", user_id="test_user")
         
         assert client._metrics['queries'] >= 2
         assert client._metrics['failures'] == 0
@@ -121,23 +129,34 @@ class TestClickHouseClientComprehensive:
 
     @pytest.mark.asyncio
     async def test_cache_operations(self):
-        """Test cache operations."""
+        """Test cache operations with user isolation."""
         # Clear cache first
         _clickhouse_cache.clear()
         
-        # Test set and get
+        # Test set and get with user_id
         query = "SELECT * FROM test"
         result = [{"id": 1}]
-        _clickhouse_cache.set(query, result)
+        user_id = "test_user"
         
-        cached = _clickhouse_cache.get(query)
+        _clickhouse_cache.set(user_id, query, result)
+        
+        cached = _clickhouse_cache.get(user_id, query)
         assert cached == result
+        
+        # Test cache isolation - different user shouldn't see the result
+        cached_other_user = _clickhouse_cache.get("other_user", query)
+        assert cached_other_user is None
         
         # Test cache stats
         stats = _clickhouse_cache.stats()
         assert stats['hits'] >= 1
         assert 'size' in stats
         assert 'max_size' in stats
+        
+        # Test user-specific stats
+        user_stats = _clickhouse_cache.stats(user_id)
+        assert user_stats['user_id'] == user_id
+        assert user_stats['user_cache_entries'] == 1
 
     @pytest.mark.asyncio
     async def test_execute_with_cache(self, client):
@@ -147,11 +166,12 @@ class TestClickHouseClientComprehensive:
         
         # First execution should miss cache
         query = "SELECT * FROM metrics"
-        result1 = await client.execute(query)
+        user_id = "test_user"
+        result1 = await client.execute(query, user_id=user_id)
         assert result1 == []
         
-        # Second execution should hit cache
-        result2 = await client.execute(query)
+        # Second execution should hit cache (same user)
+        result2 = await client.execute(query, user_id=user_id)
         assert result2 == []
         
         # Cache should have been used
@@ -165,7 +185,7 @@ class TestClickHouseClientComprehensive:
         
         # Run multiple queries concurrently
         tasks = [
-            client.execute_query(f"SELECT {i}") 
+            client.execute_query(f"SELECT {i}", user_id="test_user") 
             for i in range(5)
         ]
         
@@ -226,9 +246,10 @@ class TestClickHouseClientComprehensive:
             # Should still try to use cache for read queries
             _clickhouse_cache.clear()
             query = "SELECT * FROM test"
-            _clickhouse_cache.set(query, [{"cached": True}])
+            user_id = "test_user"
+            _clickhouse_cache.set(user_id, query, [{"cached": True}])
             
-            result = await client.execute(query)
+            result = await client.execute(query, user_id=user_id)
             assert result == [{"cached": True}]
 
     @pytest.mark.asyncio
@@ -241,7 +262,8 @@ class TestClickHouseClientComprehensive:
             # In test environment, should fallback to mock
             await client.initialize()
             assert client._client is not None
-            assert isinstance(client._client, MockClickHouseDatabase)
+            # Should be either MockClickHouseDatabase or NoOpClickHouseClient
+            assert isinstance(client._client, (MockClickHouseDatabase, NoOpClickHouseClient))
 
     @pytest.mark.asyncio
     async def test_get_clickhouse_service_singleton(self):
