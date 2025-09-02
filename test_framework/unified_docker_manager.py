@@ -2130,12 +2130,23 @@ class UnifiedDockerManager:
         """Check health of a specific service with async implementation."""
         start_time = time.time()
         
-        for attempt in range(self.config.health_check_retries):
+        # Get service-specific configuration
+        service_config = self.SERVICES.get(service, {})
+        health_timeout = service_config.get('health_timeout', self.config.health_check_timeout)
+        health_retries = service_config.get('health_retries', self.config.health_check_retries)
+        health_start_period = service_config.get('health_start_period', 20)
+        
+        # Wait for start period if this is ClickHouse (initial startup delay)
+        if service == "clickhouse":
+            logger.info(f"Waiting {health_start_period}s for ClickHouse initial startup...")
+            await asyncio.sleep(health_start_period)
+        
+        for attempt in range(health_retries):
             try:
                 if service in ["postgres", "redis", "clickhouse"]:
                     # Database services - check port connectivity
                     is_healthy = await self._check_port_connectivity(
-                        mapping.host, mapping.external_port, self.config.health_check_timeout
+                        mapping.host, mapping.external_port, health_timeout
                     )
                     if is_healthy:
                         response_time = (time.time() - start_time) * 1000
@@ -2161,9 +2172,10 @@ class UnifiedDockerManager:
                             last_check=time.time()
                         )
                 
-                # Wait before retry
-                if attempt < self.config.health_check_retries - 1:
-                    await asyncio.sleep(self.config.health_check_interval)
+                # Wait before retry (longer for ClickHouse)
+                retry_interval = 5.0 if service == "clickhouse" else self.config.health_check_interval
+                if attempt < health_retries - 1:
+                    await asyncio.sleep(retry_interval)
                     
             except Exception as e:
                 logger.debug(f"Health check attempt {attempt + 1} failed for {service}: {e}")
@@ -2175,7 +2187,7 @@ class UnifiedDockerManager:
             is_healthy=False,
             port=mapping.external_port,
             response_time_ms=response_time,
-            error_message=f"Failed after {self.config.health_check_retries} attempts",
+            error_message=f"Failed after {health_retries} attempts",
             last_check=time.time()
         )
 

@@ -144,9 +144,9 @@ x-clickhouse-base: &clickhouse-base
     - default
   <<: *default-logging
 
-# ClickHouse Health Check
+# ClickHouse Health Check (with extended timeout for slow startup)
 x-clickhouse-healthcheck: &clickhouse-healthcheck
-  test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
+  test: ["CMD", "wget", "--spider", "-q", "http://localhost:8123/ping"]
 
 # ============================================
 # APPLICATION SERVICE CONFIGURATIONS
@@ -265,7 +265,10 @@ x-clickhouse-dev-complete: &clickhouse-dev-complete
   <<: *dev-defaults
   healthcheck:
     <<: *clickhouse-healthcheck
-    <<: *dev-healthcheck
+    interval: 15s
+    timeout: 10s
+    retries: 20
+    start_period: 60s
   deploy:
     resources:
       limits:
@@ -281,7 +284,10 @@ x-clickhouse-test-complete: &clickhouse-test-complete
   <<: *test-resources
   healthcheck:
     <<: *clickhouse-healthcheck
-    <<: *default-healthcheck
+    interval: 10s
+    timeout: 10s
+    retries: 20
+    start_period: 60s
 
 # Complete Backend Service Development Configuration
 x-backend-dev-complete: &backend-dev-complete

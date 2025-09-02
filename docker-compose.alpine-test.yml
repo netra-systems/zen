@@ -87,10 +87,10 @@ services:
       - alpine-test-clickhouse-data:/var/lib/clickhouse
     healthcheck:
       test: ["CMD", "wget", "-q", "-O-", "http://localhost:8123/ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 15
-      start_period: 45s
+      interval: 10s
+      timeout: 10s
+      retries: 20
+      start_period: 60s
     networks:
       - default
     deploy:
