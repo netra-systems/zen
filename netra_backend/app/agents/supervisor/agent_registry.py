@@ -13,23 +13,18 @@ if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
     from netra_backend.app.agents.state import DeepAgentState
     from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
-from netra_backend.app.agents.actions_to_meet_goals_sub_agent import (
-    ActionsToMeetGoalsSubAgent,
-)
-from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.agents.corpus_admin_sub_agent import CorpusAdminSubAgent
-from netra_backend.app.agents.data_helper_agent import DataHelperAgent
+    from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
+    from netra_backend.app.agents.base_agent import BaseAgent
+    from netra_backend.app.agents.corpus_admin_sub_agent import CorpusAdminSubAgent
+    from netra_backend.app.agents.data_helper_agent import DataHelperAgent
+    from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
+    from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
+    from netra_backend.app.agents.synthetic_data_sub_agent import SyntheticDataSubAgent
+    from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+    from netra_backend.app.agents.goals_triage_sub_agent import GoalsTriageSubAgent
 
-# DataSubAgent is imported later to avoid circular dependency
-from netra_backend.app.agents.optimizations_core_sub_agent import (
-    OptimizationsCoreSubAgent,
-)
-from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
-from netra_backend.app.agents.synthetic_data_sub_agent import SyntheticDataSubAgent
-
-# Import all sub-agents
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
-from netra_backend.app.agents.goals_triage_sub_agent import GoalsTriageSubAgent
+# All agent imports moved to TYPE_CHECKING to avoid circular dependencies
+# Agents are imported lazily when needed in registration methods
 from netra_backend.app.core.agent_execution_tracker import get_execution_tracker
 from netra_backend.app.core.reliability.unified_reliability_manager import (
     get_reliability_manager,
@@ -68,7 +63,7 @@ class AgentRegistry:
         
         self.llm_manager = llm_manager
         self.tool_dispatcher = tool_dispatcher
-        self.agents: Dict[str, BaseAgent] = {}
+        self.agents: Dict[str, 'BaseAgent'] = {}
         self.websocket_bridge: Optional['AgentWebSocketBridge'] = None
         self.websocket_manager: Optional['WebSocketManager'] = None
         self._agents_registered = False
@@ -143,14 +138,21 @@ class AgentRegistry:
     
     def _register_core_workflow_agents(self, DataSubAgent) -> None:
         """Register core workflow agents."""
+        # Lazy import to avoid circular dependency
+        from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
         self.register("triage", TriageSubAgent())
         self.register("data", DataSubAgent(
             self.llm_manager, self.tool_dispatcher))
     
     def _register_optimization_agents(self) -> None:
         """Register optimization and action agents."""
+        # Lazy import to avoid circular dependency
+        from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
         self.register("optimization", OptimizationsCoreSubAgent(
             self.llm_manager, self.tool_dispatcher))
+        
+        # Lazy import to avoid circular dependency
+        from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
         self.register("actions", ActionsToMeetGoalsSubAgent(
             self.llm_manager, self.tool_dispatcher))
     
@@ -162,7 +164,7 @@ class AgentRegistry:
         self._register_synthetic_data_agent()
         self._register_corpus_admin_agent()
     
-    def register(self, name: str, agent: BaseAgent) -> None:
+    def register(self, name: str, agent: 'BaseAgent') -> None:
         """
         Register a sub-agent (DEPRECATED - causes user context leakage).
         
@@ -206,7 +208,7 @@ class AgentRegistry:
         self.registration_errors.pop(name, None)
         logger.debug(f"Registered agent: {name} (with deprecation warning)")
     
-    async def register_agent_safely(self, name: str, agent_class: Type[BaseAgent], **kwargs) -> bool:
+    async def register_agent_safely(self, name: str, agent_class: Type['BaseAgent'], **kwargs) -> bool:
         """Register an agent safely with error handling.
         
         Args:
@@ -247,7 +249,7 @@ class AgentRegistry:
             self.registration_errors[name] = error_msg
             return False
     
-    def get(self, name: str) -> Optional[BaseAgent]:
+    def get(self, name: str) -> Optional['BaseAgent']:
         """Get agent by name"""
         return self.agents.get(name)
     
@@ -327,29 +329,39 @@ class AgentRegistry:
         """List registered agent names"""
         return list(self.agents.keys())
     
-    def get_all_agents(self) -> List[BaseAgent]:
+    def get_all_agents(self) -> List['BaseAgent']:
         """Get all registered agents"""
         return list(self.agents.values())
     
     def _register_reporting_agent(self) -> None:
         """Register reporting agent."""
+        # Lazy import to avoid circular dependency
+        from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
         self.register("reporting", ReportingSubAgent())
     
     def _register_goals_triage_agent(self) -> None:
         """Register goals triage agent."""
+        # Lazy import to avoid circular dependency
+        from netra_backend.app.agents.goals_triage_sub_agent import GoalsTriageSubAgent
         self.register("goals_triage", GoalsTriageSubAgent())
     
     def _register_synthetic_data_agent(self) -> None:
         """Register synthetic data agent."""
+        # Lazy import to avoid circular dependency
+        from netra_backend.app.agents.synthetic_data_sub_agent import SyntheticDataSubAgent
         self.register("synthetic_data", SyntheticDataSubAgent(
             self.llm_manager, self.tool_dispatcher))
     
     def _register_data_helper_agent(self) -> None:
         """Register data helper agent."""
+        # Lazy import to avoid circular dependency
+        from netra_backend.app.agents.data_helper_agent import DataHelperAgent
         self.register("data_helper", DataHelperAgent(self.llm_manager, self.tool_dispatcher))
     
     def _register_corpus_admin_agent(self) -> None:
         """Register corpus admin agent."""
+        # Lazy import to avoid circular dependency
+        from netra_backend.app.agents.corpus_admin_sub_agent import CorpusAdminSubAgent
         self.register("corpus_admin", CorpusAdminSubAgent(
             self.llm_manager, self.tool_dispatcher))
 

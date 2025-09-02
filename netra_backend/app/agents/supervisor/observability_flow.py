@@ -12,6 +12,7 @@ from netra_backend.app.agents.supervisor.observability_flow_builders import (
     FlowDataBuilder,
 )
 from netra_backend.app.agents.supervisor.observability_todo_tracker import TodoTracker
+from netra_backend.app.core.serialization.unified_json_handler import backend_json_handler
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -161,8 +162,7 @@ class SupervisorObservabilityLogger:
     def _log_json_data(self, log_prefix: str, data: Dict[str, Any]) -> None:
         """Log data as JSON format."""
         if self.log_format == "json":
-            import json
-            logger.info(f"{log_prefix}: {json.dumps(data)}")
+            logger.info(f"{log_prefix}: {backend_json_handler.dumps(data)}")
 
     def get_active_flows(self) -> Dict[str, Dict[str, Any]]:
         """Get currently active flows."""

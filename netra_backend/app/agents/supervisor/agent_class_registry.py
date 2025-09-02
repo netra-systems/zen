@@ -15,11 +15,13 @@ Architecture: Immutable after initialization, thread-safe for concurrent reads.
 """
 
 import threading
-from typing import Any, Dict, Optional, Type, List, Set
+from typing import Any, Dict, Optional, Type, List, Set, TYPE_CHECKING
 from dataclasses import dataclass
 from abc import ABC
 
-from netra_backend.app.agents.base_agent import BaseAgent
+if TYPE_CHECKING:
+    from netra_backend.app.agents.base_agent import BaseAgent
+
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -30,7 +32,7 @@ class AgentClassInfo:
     """Immutable information about a registered agent class."""
     
     name: str
-    agent_class: Type[BaseAgent]
+    agent_class: Type['BaseAgent']
     description: str
     version: str
     dependencies: tuple  # Tuple for immutability
@@ -38,6 +40,8 @@ class AgentClassInfo:
     
     def __post_init__(self) -> None:
         """Validate agent class info after initialization."""
+        # Import BaseAgent lazily for validation
+        from netra_backend.app.agents.base_agent import BaseAgent
         if not issubclass(self.agent_class, BaseAgent):
             raise ValueError(f"Agent class {self.agent_class.__name__} must inherit from BaseAgent")
         
@@ -103,7 +107,7 @@ class AgentClassRegistry:
     
     def register(self, 
                  name: str, 
-                 agent_class: Type[BaseAgent], 
+                 agent_class: Type['BaseAgent'], 
                  description: str = "",
                  version: str = "1.0.0",
                  dependencies: Optional[List[str]] = None,
@@ -194,7 +198,7 @@ class AgentClassRegistry:
                 f"{list(self._agent_classes.keys())}"
             )
     
-    def get_agent_class(self, name: str) -> Optional[Type[BaseAgent]]:
+    def get_agent_class(self, name: str) -> Optional[Type['BaseAgent']]:
         """
         Get agent class by name (RUNTIME - THREAD-SAFE).
         
@@ -228,7 +232,7 @@ class AgentClassRegistry:
         """
         return sorted(self._agent_classes.keys())
     
-    def get_all_agent_classes(self) -> Dict[str, Type[BaseAgent]]:
+    def get_all_agent_classes(self) -> Dict[str, Type['BaseAgent']]:
         """
         Get all registered agent classes (RUNTIME - THREAD-SAFE).
         
@@ -317,6 +321,8 @@ class AgentClassRegistry:
         if not isinstance(agent_class, type):
             raise TypeError(f"agent_class must be a class type, got {type(agent_class)}")
         
+        # Import BaseAgent lazily for validation
+        from netra_backend.app.agents.base_agent import BaseAgent
         if not issubclass(agent_class, BaseAgent):
             raise TypeError(
                 f"Agent class {agent_class.__name__} must inherit from BaseAgent"

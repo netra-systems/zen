@@ -48,6 +48,9 @@ from netra_backend.app.core.agent_execution_tracker import (
     get_execution_tracker,
     ExecutionState
 )
+from netra_backend.app.agents.supervisor.data_access_integration import (
+    UserExecutionEngineExtensions
+)
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -136,8 +139,11 @@ class UserExecutionEngine:
         # Initialize components with user context
         self._init_components()
         
+        # Integrate data access capabilities for user-scoped ClickHouse and Redis access
+        UserExecutionEngineExtensions.integrate_data_access(self)
+        
         logger.info(f"✅ Created UserExecutionEngine {self.engine_id} for user {context.user_id} "
-                   f"(max_concurrent: {self.max_concurrent}, run_id: {context.run_id})")
+                   f"(max_concurrent: {self.max_concurrent}, run_id: {context.run_id}) with data access capabilities")
     
     def _init_components(self) -> None:
         """Initialize execution components with user context."""
@@ -562,6 +568,9 @@ class UserExecutionEngine:
             # Clean up user WebSocket emitter
             if self.websocket_emitter:
                 await self.websocket_emitter.cleanup()
+            
+            # Clean up data access capabilities
+            await UserExecutionEngineExtensions.cleanup_data_access(self)
             
             # Clear all user state
             self.active_runs.clear()

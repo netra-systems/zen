@@ -63,20 +63,20 @@ logger = central_logger.get_logger(__name__)
 
 
 class ExecutionEngine:
-    """Handles agent execution orchestration with UserExecutionContext support.
+    """Request-scoped agent execution orchestration.
     
-    NEW Features (Split Architecture):
+    REQUIRED: Use factory methods for instantiation:
+    - create_request_scoped_engine() for isolated instances
+    - ExecutionContextManager for automatic cleanup
+    
+    Direct instantiation is no longer supported to ensure user isolation.
+    
+    Features:
     - UserExecutionContext integration for complete user isolation
     - UserWebSocketEmitter support for per-user event emission
     - Request-scoped execution with no global state sharing
-    - Enhanced isolation verification and context validation
-    
-    Existing Features:
     - Semaphore-based concurrency control for 5+ concurrent users
     - Guaranteed WebSocket event delivery with proper sequencing
-    - Backlog handling with user feedback
-    - Periodic updates for long-running operations
-    - Resource management and cleanup
     """
     
     MAX_HISTORY_SIZE = 100  # Prevent memory leak
@@ -85,58 +85,61 @@ class ExecutionEngine:
     
     def __init__(self, registry: 'AgentRegistry', websocket_bridge, 
                  user_context: Optional['UserExecutionContext'] = None):
-        """Initialize ExecutionEngine with optional UserExecutionContext support.
+        """Private initializer - use factory methods instead.
         
-        DEPRECATION WARNING: Direct ExecutionEngine instantiation uses global state.
-        For concurrent user support, use create_request_scoped_engine() instead.
+        Direct instantiation is prevented to ensure user isolation.
+        Use create_request_scoped_engine() for proper request-scoped execution.
         
         Args:
             registry: Agent registry for agent lookup
             websocket_bridge: WebSocket bridge for event emission
             user_context: Optional UserExecutionContext for per-request isolation
         """
-        import warnings
-        
-        # Issue deprecation warning for direct instantiation
-        warnings.warn(
-            "Direct ExecutionEngine instantiation is deprecated due to global state issues. "
-            "Use create_request_scoped_engine() for safe concurrent execution.",
-            DeprecationWarning,
-            stacklevel=2
+        raise RuntimeError(
+            "Direct ExecutionEngine instantiation is no longer supported. "
+            "Use create_request_scoped_engine(user_context, registry, websocket_bridge) "
+            "for proper user isolation and concurrent execution safety."
         )
+    
+    @classmethod
+    def _init_from_factory(cls, registry: 'AgentRegistry', websocket_bridge,
+                          user_context: Optional['UserExecutionContext'] = None):
+        """Internal factory initializer for creating request-scoped instances.
         
-        logger.warning(
-            "⚠️ ExecutionEngine created with global state - not safe for concurrent users! "
-            "Consider migrating to RequestScopedExecutionEngine."
-        )
-        self.registry = registry
-        self.websocket_bridge = websocket_bridge
+        This method bypasses the __init__ RuntimeError and is only called
+        by factory methods to create properly isolated instances.
+        """
+        instance = cls.__new__(cls)
+        instance.registry = registry
+        instance.websocket_bridge = websocket_bridge
         
         # NEW: Store UserExecutionContext for per-request isolation
-        self.user_context = user_context
+        instance.user_context = user_context
         
         # Compatibility: Create WebSocketNotifier for tests expecting it
         # If websocket_bridge is a WebSocketManager, wrap it with WebSocketNotifier
         if websocket_bridge and not hasattr(websocket_bridge, 'notify_agent_started'):
             # Bridge is a WebSocketManager, wrap it with deprecated WebSocketNotifier for compatibility
             from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-            self.websocket_notifier = WebSocketNotifier(websocket_bridge)
+            instance.websocket_notifier = WebSocketNotifier(websocket_bridge)
         else:
             # Bridge is already an AgentWebSocketBridge or compatible object
-            self.websocket_notifier = websocket_bridge
+            instance.websocket_notifier = websocket_bridge
             
         # NOTE: These remain as instance variables but are now scoped per ExecutionEngine instance
         # In the new architecture, each user request gets its own ExecutionEngine instance
-        self.active_runs: Dict[str, AgentExecutionContext] = {}
-        self.run_history: List[AgentExecutionResult] = []
-        self.execution_tracker = get_execution_tracker()
-        self._init_components()
-        self._init_death_monitoring()
+        instance.active_runs = {}
+        instance.run_history = []
+        instance.execution_tracker = get_execution_tracker()
+        instance._init_components()
+        instance._init_death_monitoring()
         
-        if self.user_context:
-            logger.info(f"ExecutionEngine initialized with UserExecutionContext for user {self.user_context.user_id}")
+        if instance.user_context:
+            logger.info(f"ExecutionEngine initialized with UserExecutionContext for user {instance.user_context.user_id}")
         else:
             logger.info("ExecutionEngine initialized in legacy mode (no UserExecutionContext)")
+        
+        return instance
         
     def _init_components(self) -> None:
         """Initialize execution components."""
@@ -1187,36 +1190,7 @@ def create_execution_context_manager(registry: 'AgentRegistry',
     )
 
 
-@staticmethod
-def create_legacy_engine_with_warnings(registry: 'AgentRegistry',
-                                      websocket_bridge,
-                                      user_context: Optional['UserExecutionContext'] = None) -> 'ExecutionEngine':
-    """Create legacy ExecutionEngine with deprecation warnings.
-    
-    DEPRECATED: This method creates the legacy ExecutionEngine which uses global state.
-    Use create_request_scoped_engine() for new code.
-    
-    Args:
-        registry: Agent registry for agent lookup
-        websocket_bridge: WebSocket bridge for event emission
-        user_context: Optional UserExecutionContext (ignored in legacy mode)
-        
-    Returns:
-        ExecutionEngine: Legacy execution engine with global state
-    """
-    import warnings
-    
-    warnings.warn(
-        "ExecutionEngine with global state is deprecated. "
-        "Use create_request_scoped_engine() or ExecutionContextManager for safe concurrent execution. "
-        "See RequestScopedExecutionEngine for migration guidance.",
-        DeprecationWarning,
-        stacklevel=2
-    )
-    
-    logger.warning("⚠️ Creating legacy ExecutionEngine with global state - not safe for concurrent users!")
-    
-    return ExecutionEngine(registry, websocket_bridge, user_context)
+# Legacy factory method removed - use create_request_scoped_engine() only
 
 
 # Migration helper to detect global state usage

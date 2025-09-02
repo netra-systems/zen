@@ -4,12 +4,12 @@ Implements complete observability with metrics, logs, and traces.
 Business Value: Enables real-time monitoring and performance optimization.
 """
 
-import json
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.core.serialization.unified_json_handler import backend_json_handler
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -164,7 +164,7 @@ class SupervisorObservability:
             "timestamp": datetime.now(timezone.utc).isoformat(),
             **data
         }
-        logger.info(f"Supervisor trace event: {json.dumps(log_data)}")
+        logger.info(f"Supervisor trace event: {backend_json_handler.dumps(log_data)}")
     
     def _log_error_event(self, agent_name: str, error: str) -> None:
         """Log error event with structured data."""
@@ -174,7 +174,7 @@ class SupervisorObservability:
             "error": error,
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
-        logger.error(f"Supervisor agent error: {json.dumps(log_data)}")
+        logger.error(f"Supervisor agent error: {backend_json_handler.dumps(log_data)}")
     
     def reset_metrics(self) -> None:
         """Reset metrics for fresh start."""
