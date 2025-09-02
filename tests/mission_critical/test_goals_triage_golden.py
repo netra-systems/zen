@@ -27,7 +27,7 @@ from netra_backend.app.agents.goals_triage_sub_agent import (
     GoalTriageResult
 )
 from netra_backend.app.schemas.registry import DeepAgentState
-from test_framework.fixtures.agent_fixtures import create_test_execution_context
+# We'll create execution context directly following the pattern
 
 
 class TestGoalsTriageSubAgentGoldenPattern:
@@ -49,10 +49,12 @@ class TestGoalsTriageSubAgentGoldenPattern:
             thread_id="thread_goals_test",
             correlation_id="test_correlation_123"
         )
-        return create_test_execution_context(
+        return ExecutionContext(
             run_id="run_goals_test_123",
+            agent_name="GoalsTriageSubAgent",
             state=state,
-            agent_name="GoalsTriageSubAgent"
+            stream_updates=True,
+            metadata={"description": "Test goal triage execution"}
         )
 
     async def test_golden_pattern_inheritance(self, agent):
@@ -143,7 +145,13 @@ class TestGoalsTriageSubAgentGoldenPattern:
     async def test_validate_preconditions_no_request(self, agent):
         """Test precondition validation failure with no user request."""
         state = DeepAgentState(user_request="", thread_id="test")
-        context = create_test_execution_context("test_run", state, "GoalsTriageSubAgent")
+        context = ExecutionContext(
+            run_id="test_run",
+            agent_name="GoalsTriageSubAgent", 
+            state=state,
+            stream_updates=True,
+            metadata={"description": "Test validation"}
+        )
         
         result = await agent.validate_preconditions(context)
         assert result is False
@@ -151,7 +159,13 @@ class TestGoalsTriageSubAgentGoldenPattern:
     async def test_validate_preconditions_no_goals_warning(self, agent):
         """Test that non-goal requests still pass validation but log warning."""
         state = DeepAgentState(user_request="What is the weather today?", thread_id="test")
-        context = create_test_execution_context("test_run", state, "GoalsTriageSubAgent")
+        context = ExecutionContext(
+            run_id="test_run",
+            agent_name="GoalsTriageSubAgent", 
+            state=state,
+            stream_updates=True,
+            metadata={"description": "Test validation"}
+        )
         
         with patch.object(agent.logger, 'warning') as mock_warning:
             result = await agent.validate_preconditions(context)
@@ -198,7 +212,13 @@ class TestGoalsTriageSubAgentGoldenPattern:
     async def test_goal_triage_single_goal(self, agent):
         """Test triaging a single goal with full analysis."""
         state = DeepAgentState(user_request="test", thread_id="test")
-        context = create_test_execution_context("test_run", state, "GoalsTriageSubAgent")
+        context = ExecutionContext(
+            run_id="test_run",
+            agent_name="GoalsTriageSubAgent", 
+            state=state,
+            stream_updates=True,
+            metadata={"description": "Test validation"}
+        )
         
         # Mock LLM response with detailed analysis
         agent.llm_manager.ask_llm.return_value = json.dumps({
@@ -231,7 +251,13 @@ class TestGoalsTriageSubAgentGoldenPattern:
     async def test_goal_triage_fallback_analysis(self, agent):
         """Test fallback goal analysis when LLM fails."""
         state = DeepAgentState(user_request="test", thread_id="test")
-        context = create_test_execution_context("test_run", state, "GoalsTriageSubAgent")
+        context = ExecutionContext(
+            run_id="test_run",
+            agent_name="GoalsTriageSubAgent", 
+            state=state,
+            stream_updates=True,
+            metadata={"description": "Test validation"}
+        )
         
         # Mock LLM to fail
         agent.llm_manager.ask_llm.side_effect = Exception("Analysis failed")
@@ -299,7 +325,13 @@ class TestGoalsTriageSubAgentGoldenPattern:
         ]
         
         state = DeepAgentState(user_request="test", thread_id="test")
-        context = create_test_execution_context("test_run", state, "GoalsTriageSubAgent")
+        context = ExecutionContext(
+            run_id="test_run",
+            agent_name="GoalsTriageSubAgent", 
+            state=state,
+            stream_updates=True,
+            metadata={"description": "Test validation"}
+        )
         
         plan = await agent._create_prioritized_plan(context, triage_results)
         
@@ -424,7 +456,13 @@ class TestGoalsTriageSubAgentRealLLMIntegration:
         """
         
         state = DeepAgentState(user_request=complex_request, thread_id="complex_test")
-        context = create_test_execution_context("complex_run", state, "GoalsTriageSubAgent")
+        context = ExecutionContext(
+            run_id="complex_run",
+            agent_name="GoalsTriageSubAgent", 
+            state=state,
+            stream_updates=True,
+            metadata={"description": "Complex business scenario test"}
+        )
         
         # Mock realistic LLM responses
         real_agent.llm_manager.ask_llm.side_effect = [
@@ -495,7 +533,13 @@ class TestGoalsTriageSubAgentErrorHandling:
     async def test_malformed_llm_response_handling(self, agent):
         """Test handling of malformed LLM responses."""
         state = DeepAgentState(user_request="Optimize our business", thread_id="test")
-        context = create_test_execution_context("test_run", state, "GoalsTriageSubAgent")
+        context = ExecutionContext(
+            run_id="test_run",
+            agent_name="GoalsTriageSubAgent", 
+            state=state,
+            stream_updates=True,
+            metadata={"description": "Test validation"}
+        )
         
         # Mock malformed JSON response
         agent.llm_manager.ask_llm.return_value = "This is not valid JSON {malformed"
@@ -512,7 +556,13 @@ class TestGoalsTriageSubAgentErrorHandling:
     async def test_empty_request_handling(self, agent):
         """Test handling of empty or whitespace-only requests."""
         state = DeepAgentState(user_request="   \n\t  ", thread_id="test")
-        context = create_test_execution_context("test_run", state, "GoalsTriageSubAgent")
+        context = ExecutionContext(
+            run_id="test_run",
+            agent_name="GoalsTriageSubAgent", 
+            state=state,
+            stream_updates=True,
+            metadata={"description": "Test validation"}
+        )
         
         result = await agent.validate_preconditions(context)
         assert result is False
@@ -521,7 +571,13 @@ class TestGoalsTriageSubAgentErrorHandling:
         """Test handling of extremely long user requests."""
         long_request = "Our goal is to " + "optimize business processes " * 1000
         state = DeepAgentState(user_request=long_request, thread_id="test")
-        context = create_test_execution_context("test_run", state, "GoalsTriageSubAgent")
+        context = ExecutionContext(
+            run_id="test_run",
+            agent_name="GoalsTriageSubAgent", 
+            state=state,
+            stream_updates=True,
+            metadata={"description": "Test validation"}
+        )
         
         # Should handle without crashing
         result = await agent.validate_preconditions(context)

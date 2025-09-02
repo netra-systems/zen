@@ -378,7 +378,7 @@ class MockFactory:
     
     # ========== Agent Mocks ==========
     
-    def create_agent_mock(self, agent_type: str = "generic") -> AsyncMock:
+    def create_agent_mock(self, agent_type: str = "generic", agent_id: str = None, user_id: str = None) -> AsyncMock:
         """Create agent mock with standard interface."""
         agent_mock = AsyncMock()
         
@@ -386,6 +386,8 @@ class MockFactory:
         agent_mock.initialize = AsyncMock()
         agent_mock.process_request = AsyncMock(return_value=self._create_test_agent_response())
         agent_mock.cleanup = AsyncMock()
+        agent_mock.run = AsyncMock(return_value=self._create_test_agent_response())
+        agent_mock.recover = AsyncMock(return_value=True)
         
         # State management
         agent_mock.get_state = AsyncMock(return_value={})
@@ -397,13 +399,80 @@ class MockFactory:
         agent_mock.execute_tool = AsyncMock(return_value={"result": "tool_executed"})
         agent_mock.list_tools = Mock(return_value=["tool1", "tool2"])
         
-        # Properties
+        # Properties with configurable values
         agent_mock.agent_type = agent_type
+        agent_mock.agent_id = agent_id or f"test_agent_{uuid.uuid4().hex[:8]}"
+        agent_mock.user_id = user_id
+        agent_mock.thread_id = None
+        agent_mock.db_session = None
         agent_mock.is_busy = False
         agent_mock.last_activity = datetime.now()
+        agent_mock.error_count = 0
+        agent_mock.last_error = None
+        agent_mock.should_fail = False
+        agent_mock.failure_message = "Test failure"
+        agent_mock.execution_time = 0.1
+        
+        # Agent state enum simulation
+        from enum import Enum
+        class AgentState(Enum):
+            IDLE = "idle"
+            ACTIVE = "active"
+            RUNNING = "running"
+            ERROR = "error"
+            RECOVERING = "recovering"
+        
+        agent_mock.state = AgentState.IDLE
+        agent_mock.AgentState = AgentState
         
         self.registry.register_mock(f"agent_{agent_type}", agent_mock)
         return agent_mock
+    
+    def create_orchestrator_mock(self) -> AsyncMock:
+        """Create agent orchestrator mock."""
+        orchestrator_mock = AsyncMock()
+        
+        # Orchestrator properties
+        orchestrator_mock.agents = {}
+        orchestrator_mock.agent_pool = []
+        orchestrator_mock.error_threshold = 3
+        orchestrator_mock.recovery_timeout = 5.0
+        orchestrator_mock.retry_delay = 0.1
+        orchestrator_mock.execution_timeout = 0.5
+        orchestrator_mock.max_concurrent_agents = 10
+        orchestrator_mock.max_pool_size = 5
+        orchestrator_mock.metrics = {
+            "agents_created": 0,
+            "tasks_executed": 0, 
+            "errors_handled": 0,
+            "total_executions": 0,
+            "failed_executions": 0,
+            "total_execution_time": 0.0,
+            "concurrent_peak": 0,
+        }
+        orchestrator_mock._active_agents_override = None
+        
+        # Orchestrator methods
+        orchestrator_mock.get_or_create_agent = AsyncMock(return_value=self.create_agent_mock())
+        orchestrator_mock.execute_agent_task = AsyncMock(return_value={"status": "completed"})
+        orchestrator_mock.handle_agent_error = AsyncMock(return_value=True)
+        orchestrator_mock.release_agent = AsyncMock()
+        orchestrator_mock.get_orchestration_metrics = Mock(return_value=orchestrator_mock.metrics)
+        
+        # Active agents property simulation
+        def get_active_agents():
+            if orchestrator_mock._active_agents_override is not None:
+                return orchestrator_mock._active_agents_override
+            return len(orchestrator_mock.agents)
+        
+        def set_active_agents(value):
+            orchestrator_mock._active_agents_override = value
+            
+        orchestrator_mock.active_agents = property(get_active_agents)
+        orchestrator_mock.orchestration_metrics = property(lambda: orchestrator_mock.metrics)
+        
+        self.registry.register_mock("orchestrator", orchestrator_mock)
+        return orchestrator_mock
     
     def create_tool_executor_mock(self) -> AsyncMock:
         """Create tool executor mock."""

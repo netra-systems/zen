@@ -48,6 +48,9 @@ class ExecutionContext:
         if not hasattr(self, 'timestamp'):
             self.timestamp = self.start_time or datetime.now(timezone.utc)
         
+        # Store the explicitly provided thread_id for validation
+        self._explicit_thread_id = self.thread_id
+        
         # Validate run_id format
         if not IDManager.validate_run_id(self.run_id):
             # For backwards compatibility, allow invalid run_ids but log warning
@@ -64,23 +67,26 @@ class ExecutionContext:
                     f"Thread ID mismatch: run_id contains '{extracted}' but "
                     f"explicit thread_id is '{self._explicit_thread_id}'. Using extracted value."
                 )
+        
+        # Clear thread_id to force property getter logic
+        self.thread_id = None
     
     @property
     def thread_id(self) -> Optional[str]:
         """Get thread_id, deriving from run_id if needed (SSOT pattern)."""
-        if self._thread_id is None:
+        if self._cached_thread_id is None:
             # Try to extract from run_id first (SSOT priority)
             extracted = IDManager.extract_thread_id(self.run_id)
             if extracted:
-                self._thread_id = extracted
+                self._cached_thread_id = extracted
             elif self._explicit_thread_id:
                 # Fall back to explicitly provided thread_id for backwards compatibility
-                self._thread_id = self._explicit_thread_id
+                self._cached_thread_id = self._explicit_thread_id
             elif hasattr(self.state, 'chat_thread_id') and self.state.chat_thread_id:
                 # Final fallback to state's chat_thread_id for legacy support
-                self._thread_id = self.state.chat_thread_id
+                self._cached_thread_id = self.state.chat_thread_id
         
-        return self._thread_id
+        return self._cached_thread_id
     
     @thread_id.setter
     def thread_id(self, value: Optional[str]) -> None:
@@ -94,8 +100,7 @@ class ExecutionContext:
                     f"Setting thread_id='{value}' but run_id contains '{extracted}'. "
                     "This violates SSOT. Consider regenerating run_id."
                 )
-        self._thread_id = value
-        self._explicit_thread_id = value
+        self._cached_thread_id = value
     
     def __hash__(self) -> int:
         """Make ExecutionContext hashable using run_id and agent_name."""
