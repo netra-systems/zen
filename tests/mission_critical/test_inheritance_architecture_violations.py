@@ -47,9 +47,9 @@ class TestInheritanceArchitectureViolations:
         """Test that multiple inheritance creates complex Method Resolution Order."""
         mro = data_agent.__class__.__mro__
         
-        # Check that BaseSubAgent is in MRO (BaseExecutionInterface removed for single inheritance)
+        # Check that BaseSubAgent is in MRO (single inheritance pattern)
         assert BaseSubAgent in mro, "BaseSubAgent not in MRO"
-        # BaseExecutionInterface removed - agents now use single inheritance
+        # Agents now use single inheritance pattern
         
         # VIOLATION: Complex MRO with multiple base classes
         # The MRO should be simple and linear, not complex with multiple inheritance paths
@@ -100,7 +100,7 @@ class TestInheritanceArchitectureViolations:
                 BaseSubAgent.__init__(self, llm_manager, name="TestAgent")
                 TestAgent.init_calls.append("BaseSubAgent")
                 
-                # BaseExecutionInterface removed - using composition pattern
+                # Using composition pattern for execution logic
             
             async def execute_core_logic(self, context):
                 return {}
@@ -172,7 +172,7 @@ class TestInheritanceArchitectureViolations:
     
     def test_interface_contract_violations(self, data_agent):
         """Test that interface contracts are violated by inheritance structure."""
-        # BaseExecutionInterface requires these abstract methods
+        # Agent interface requires these abstract methods
         required_methods = ['execute_core_logic', 'validate_preconditions']
         
         for method_name in required_methods:

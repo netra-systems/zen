@@ -26,7 +26,7 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from netra_backend.app.agents.base_agent import BaseSubAgent
-# BaseExecutionInterface removed - using protocol-based approach
+# Using protocol-based approach for agent execution
 from netra_backend.app.agents.agent_communication import AgentCommunicationMixin
 from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
 from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent

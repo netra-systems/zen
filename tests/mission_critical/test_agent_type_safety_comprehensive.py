@@ -234,9 +234,9 @@ class TestAgentTypeSafetyCompliance:
     
     def test_protocol_compliance(self):
         """Test that all protocol implementations have correct signatures"""
-        # Skip this test as BaseExecutionInterface has been removed
+        # Skip this test as interface has been removed
         # This test was checking legacy interface that is no longer needed
-        pytest.skip("BaseExecutionInterface has been removed - legacy cleanup complete")
+        pytest.skip("Legacy interface has been removed - cleanup complete")
     
     def test_no_dead_websocket_methods(self):
         """Test that dead WebSocket methods are removed"""
