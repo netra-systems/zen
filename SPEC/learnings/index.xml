@@ -18,6 +18,40 @@
         </workflow>
     </retrieval-protocol>
     
+    <learning id="golden-agent-index-2025-09-02">
+        <title>Golden Agent Index - Comprehensive Agent Implementation Guide</title>
+        <category>Agent/Implementation/SSOT</category>
+        <keywords>agent, golden-pattern, baseagent, migration, ssot, websocket, implementation, architecture</keywords>
+        <path>../../docs/GOLDEN_AGENT_INDEX.md</path>
+        <critical-takeaway>
+            The Golden Agent Index serves as the Single Source of Truth for all agent implementations.
+            All agents MUST inherit from BaseAgent and follow established patterns. WebSocket integration
+            is critical for chat value delivery. Comprehensive migration checklist and patterns ensure
+            consistent implementation across all agents.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>Core agent architecture affecting 100% of AI value delivery</business-impact>
+        <prevention>
+            Always consult Golden Agent Index before creating or modifying agents. Follow migration
+            checklist completely. Validate with compliance scripts. Never bypass BaseAgent infrastructure.
+        </prevention>
+        <implementation-patterns>
+            <pattern>BaseAgent Inheritance - All agents must inherit from BaseAgent</pattern>
+            <pattern>WebSocket Events - Required events for chat value delivery</pattern>
+            <pattern>Error Handling - Resilience by default patterns</pattern>
+        </implementation-patterns>
+        <testing-strategies>
+            <strategy>Mission Critical Tests - test_websocket_agent_events_suite.py</strategy>
+            <strategy>MRO Auditing - mro_auditor.py for inheritance validation</strategy>
+            <strategy>Compliance Validation - validate_agent_patterns.py</strategy>
+        </testing-strategies>
+        <related-learnings>
+            <learning-ref>ssot_consolidation_20250825.xml</learning-ref>
+            <learning-ref>unified_agent_testing_implementation.xml</learning-ref>
+            <learning-ref>websocket_agent_integration_critical.xml</learning-ref>
+        </related-learnings>
+    </learning>
+    
     <learning id="websocket-silent-failure-prevention-masterclass-2025-09-01">
         <title>WebSocket Silent Failure Prevention - Comprehensive Masterclass</title>
         <category>WebSocket/SilentFailure/Prevention</category>

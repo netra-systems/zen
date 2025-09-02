@@ -105,3 +105,22 @@ Plan
 2. make triage the golden sample
 3. have it step through other agent to fix it in similar way
 4. keep auditing SSOT violations
+
+LIFE OR DEATH CRITICAL: ACTION: base_agent_ssot_violation_analysis_report.md
+FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+LIFE OR DEATH CRITICAL: ACTION: BASE_AGENT_AUDIT_REPORT.md
+FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+
+LIFE OR DEATH CRITICAL: ACTION: AUDIT_WEBSOCKET_BRIDGE_LIFECYCLE_20250902.md
+FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult

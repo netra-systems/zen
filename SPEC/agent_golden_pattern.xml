@@ -1,0 +1,455 @@
+<?xml version="1.0" encoding="utf-8"?>
+<specification>
+  <metadata>
+    <title>Agent Golden Pattern Specification</title>
+    <version>1.0</version>
+    <created>2025-01-02</created>
+    <purpose>Defines the mandatory golden pattern for all Netra agents using BaseAgent SSOT infrastructure</purpose>
+    <business_impact>CRITICAL - Enables consistent agent development with 25% velocity improvement and 90% SSOT compliance</business_impact>
+    <supersedes>
+      <spec>unified_agent_architecture.xml</spec>
+      <spec>agent_architecture.xml</spec>
+      <spec>subagents.xml</spec>
+    </supersedes>
+    <last_edited>2025-01-02T00:00:00.000000</last_edited>
+  </metadata>
+  
+  <overview>
+    <description>
+      This specification establishes the mandatory golden pattern for all Netra agents based on the 
+      BaseAgent SSOT infrastructure. The pattern demonstrated through TriageSubAgent eliminates 
+      infrastructure duplication, ensures consistent WebSocket events for chat value, and provides 
+      standardized reliability patterns across all agents.
+    </description>
+    <key_principles>
+      <principle id="GP-001">SSOT Enforcement: BaseAgent contains ALL infrastructure, agents contain ONLY business logic</principle>
+      <principle id="GP-002">Clean Inheritance: Single inheritance from BaseSubAgent, no mixin complexity</principle>
+      <principle id="GP-003">WebSocket Standardization: All agents emit standardized events for chat experience</principle>
+      <principle id="GP-004">Reliability Integration: All agents use inherited circuit breaker and retry patterns</principle>
+      <principle id="GP-005">Business Logic Focus: Agents focus exclusively on domain-specific processing</principle>
+      <principle id="GP-006">Infrastructure Access: Infrastructure accessed through BaseAgent properties only</principle>
+    </key_principles>
+  </overview>
+
+  <golden_pattern_architecture>
+    <base_agent_infrastructure>
+      <file>netra_backend/app/agents/base_agent.py</file>
+      <lines>535</lines>
+      <description>SSOT for ALL agent infrastructure patterns</description>
+      
+      <infrastructure_components>
+        <component name="WebSocket Events" lines="272-318">
+          <methods>
+            <method>emit_thinking(thought, step_number=None)</method>
+            <method>emit_progress(content, is_complete=False)</method>
+            <method>emit_tool_executing(tool_name, parameters=None)</method>
+            <method>emit_tool_completed(tool_name, result=None)</method>
+            <method>emit_agent_completed(result=None)</method>
+            <method>emit_error(error_message, error_type=None)</method>
+          </methods>
+          <purpose>Standardized real-time chat communication</purpose>
+        </component>
+        
+        <component name="Reliability Management" lines="322-401">
+          <methods>
+            <method>_init_reliability_infrastructure()</method>
+            <method>execute_with_reliability(operation, name, fallback=None)</method>
+            <method>get_circuit_breaker_status()</method>
+          </methods>
+          <purpose>Circuit breaker, retry logic, health monitoring</purpose>
+        </component>
+        
+        <component name="Execution Infrastructure" lines="403-442">
+          <methods>
+            <method>execute_modern(state, run_id, stream_updates)</method>
+            <method>validate_preconditions(context)</method>
+            <method>execute_core_logic(context)</method>
+            <method>send_status_update(context, status, message)</method>
+          </methods>
+          <purpose>Modern execution patterns with monitoring</purpose>
+        </component>
+        
+        <component name="Health Monitoring" lines="455-495">
+          <methods>
+            <method>get_health_status()</method>
+            <method>_determine_overall_health_status(health_data)</method>
+          </methods>
+          <purpose>Comprehensive health status reporting</purpose>
+        </component>
+        
+        <component name="State Management" lines="131-185">
+          <methods>
+            <method>set_state(new_state)</method>
+            <method>get_state()</method>
+            <method>_is_valid_transition(from_state, to_state)</method>
+          </methods>
+          <purpose>Lifecycle and state transition management</purpose>
+        </component>
+      </infrastructure_components>
+      
+      <configuration_options>
+        <option name="enable_reliability" default="True">Enable circuit breaker and retry patterns</option>
+        <option name="enable_execution_engine" default="True">Enable modern execution infrastructure</option>
+        <option name="enable_caching" default="False">Enable Redis caching (optional)</option>
+        <option name="llm_manager" default="None">LLM manager instance (auto-created if None)</option>
+        <option name="tool_dispatcher" default="None">Tool dispatcher instance (auto-created if None)</option>
+        <option name="redis_manager" default="None">Redis manager instance (auto-created if None)</option>
+      </configuration_options>
+    </base_agent_infrastructure>
+    
+    <golden_pattern_example>
+      <file>netra_backend/app/agents/triage_sub_agent.py</file>
+      <lines>178</lines>
+      <description>Golden standard implementation using BaseAgent infrastructure</description>
+      
+      <structure>
+        <section name="Imports and Setup" lines="1-32">Business logic imports only</section>
+        <section name="Class Declaration" lines="34-39">Clean BaseAgent inheritance</section>
+        <section name="Initialization" lines="41-51">Infrastructure enablement, business logic setup</section>
+        <section name="Abstract Methods" lines="54-92">Required BaseAgent method implementations</section>
+        <section name="Legacy Compatibility" lines="121-144">Backward compatibility patterns</section>
+        <section name="Business Logic" lines="157-178">Domain-specific helper methods</section>
+        <section name="Infrastructure Code" lines="0">Zero infrastructure duplication</section>
+      </structure>
+      
+      <key_patterns>
+        <pattern name="Clean Initialization">
+          <code>
+            def __init__(self):
+                super().__init__(
+                    name="TriageSubAgent",
+                    description="Enhanced triage agent using BaseAgent infrastructure",
+                    enable_reliability=True,      # Get circuit breaker + retry
+                    enable_execution_engine=True, # Get modern execution patterns
+                    enable_caching=True,          # Get caching infrastructure
+                )
+                # Initialize ONLY business logic components
+                self.triage_core = TriageCore(self.redis_manager)
+                self.processor = TriageProcessor(self.triage_core, self.llm_manager)
+          </code>
+        </pattern>
+        
+        <pattern name="Validation Implementation">
+          <code>
+            async def validate_preconditions(self, context: ExecutionContext) -> bool:
+                """Validate execution preconditions for triage."""
+                if not context.state.user_request:
+                    self.logger.warning(f"No user request provided for triage in run_id: {context.run_id}")
+                    return False
+                validation = self.triage_core.validator.validate_request(context.state.user_request)
+                if not validation.is_valid:
+                    self._set_validation_error_result(context.state, context.run_id, validation)
+                    return False
+                return True
+          </code>
+        </pattern>
+        
+        <pattern name="Business Logic with Events">
+          <code>
+            async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+                """Execute core triage logic with modern patterns and WebSocket events."""
+                start_time = time.time()
+                
+                # WebSocket events for user visibility
+                await self.emit_thinking("Starting triage analysis for user request")
+                await self.emit_thinking("Analyzing user request and determining category...")
+                
+                # Business logic with progress updates
+                await self.emit_progress("Extracting entities and determining intent...")
+                triage_result = await self._get_or_compute_triage_result(context.state, context.run_id, start_time)
+                
+                await self.emit_progress("Finalizing triage results and recommendations...")
+                result = await self._finalize_triage_result(context.state, context.run_id, context.stream_updates, triage_result)
+                
+                # Completion event
+                await self.emit_progress("Triage analysis completed successfully", is_complete=True)
+                
+                return result
+          </code>
+        </pattern>
+        
+        <pattern name="Reliability Integration">
+          <code>
+            async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
+                """Execute the enhanced triage logic - uses BaseAgent's reliability infrastructure"""
+                await self.execute_with_reliability(
+                    lambda: self._execute_triage_main(state, run_id, stream_updates),
+                    "execute_triage",
+                    fallback=lambda: self._execute_triage_fallback(state, run_id, stream_updates)
+                )
+          </code>
+        </pattern>
+      </key_patterns>
+    </golden_pattern_example>
+  </golden_pattern_architecture>
+
+  <mandatory_requirements>
+    <requirement id="MR-001" priority="CRITICAL">
+      <title>Single Inheritance Pattern</title>
+      <description>All agents MUST inherit from BaseSubAgent only</description>
+      <implementation>
+        <code>class YourAgent(BaseSubAgent):</code>
+        <forbidden>Multiple inheritance, mixin patterns</forbidden>
+      </implementation>
+      <validation>MRO analysis must show clean single inheritance chain</validation>
+    </requirement>
+    
+    <requirement id="MR-002" priority="CRITICAL">
+      <title>Infrastructure Elimination</title>
+      <description>Agents MUST contain zero infrastructure code</description>
+      <forbidden_patterns>
+        <pattern>WebSocket handler implementations</pattern>
+        <pattern>Retry logic or circuit breaker implementations</pattern>
+        <pattern>Execution engine implementations</pattern>
+        <pattern>Health monitoring implementations</pattern>
+        <pattern>State management implementations</pattern>
+      </forbidden_patterns>
+      <validation>Code review must verify no infrastructure duplication</validation>
+    </requirement>
+    
+    <requirement id="MR-003" priority="CRITICAL">
+      <title>Abstract Method Implementation</title>
+      <description>Agents MUST implement required abstract methods</description>
+      <required_methods>
+        <method>async def validate_preconditions(self, context: ExecutionContext) -> bool</method>
+        <method>async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]</method>
+      </required_methods>
+      <implementation>Business logic only, use inherited infrastructure</implementation>
+    </requirement>
+    
+    <requirement id="MR-004" priority="CRITICAL">
+      <title>WebSocket Event Integration</title>
+      <description>Agents MUST emit standardized WebSocket events for chat experience</description>
+      <required_events>
+        <event>emit_thinking() for reasoning visibility</event>
+        <event>emit_progress() for status updates</event>
+        <event>emit_tool_executing/completed() for tool transparency</event>
+      </required_events>
+      <validation>E2E tests must verify WebSocket event emission</validation>
+    </requirement>
+    
+    <requirement id="MR-005" priority="HIGH">
+      <title>Infrastructure Access Pattern</title>
+      <description>Infrastructure MUST be accessed through BaseAgent properties only</description>
+      <allowed_access>
+        <access>self.reliability_manager</access>
+        <access>self.execution_engine</access>
+        <access>self.execution_monitor</access>
+        <access>self.timing_collector</access>
+        <access>self.emit_*()</access>
+        <access>self.execute_with_reliability()</access>
+        <access>self.get_health_status()</access>
+      </allowed_access>
+      <forbidden_access>
+        <access>Direct WebSocket bridge imports</access>
+        <access>Direct reliability wrapper imports</access>
+        <access>Custom infrastructure implementations</access>
+      </forbidden_access>
+    </requirement>
+  </mandatory_requirements>
+
+  <development_guidelines>
+    <guideline name="Agent Structure">
+      <target_size>150-200 lines for typical agent</target_size>
+      <max_size>300 lines (requires architecture review)</max_size>
+      <sections>
+        <section>Imports (business logic only)</section>
+        <section>Class declaration with BaseAgent inheritance</section>
+        <section>Initialization with infrastructure enablement</section>
+        <section>Abstract method implementations</section>
+        <section>Business logic helpers</section>
+        <section>Legacy compatibility (if needed)</section>
+      </sections>
+    </guideline>
+    
+    <guideline name="Business Logic Focus">
+      <description>Agents should contain only domain-specific business logic</description>
+      <includes>
+        <item>Domain validation methods</item>
+        <item>Business processing algorithms</item>
+        <item>Domain-specific data transformations</item>
+        <item>Business rule implementations</item>
+      </includes>
+      <excludes>
+        <item>WebSocket communication code</item>
+        <item>Retry and circuit breaker logic</item>
+        <item>Health monitoring implementations</item>
+        <item>State management infrastructure</item>
+      </excludes>
+    </guideline>
+    
+    <guideline name="WebSocket Event Usage">
+      <description>Strategic use of WebSocket events for optimal chat experience</description>
+      <patterns>
+        <pattern name="Reasoning Visibility">Use emit_thinking() to show AI reasoning steps</pattern>
+        <pattern name="Progress Updates">Use emit_progress() for status and partial results</pattern>
+        <pattern name="Tool Transparency">Use emit_tool_*() to show tool usage</pattern>
+        <pattern name="Error Communication">Use emit_error() for user-friendly error reporting</pattern>
+      </patterns>
+      <frequency>Balance information value with event spam prevention</frequency>
+    </guideline>
+  </development_guidelines>
+
+  <testing_requirements>
+    <requirement id="TR-001" priority="CRITICAL">
+      <title>Business Logic Testing</title>
+      <description>Focus testing on business logic, rely on BaseAgent for infrastructure</description>
+      <test_focus>
+        <focus>Domain-specific validation methods</focus>
+        <focus>Business processing algorithms</focus>
+        <focus>Integration with business logic components</focus>
+        <focus>WebSocket event emission patterns</focus>
+      </test_focus>
+      <mock_strategy>Mock BaseAgent infrastructure sparingly, test business integration</mock_strategy>
+    </requirement>
+    
+    <requirement id="TR-002" priority="HIGH">
+      <title>Integration Testing</title>
+      <description>Test with real BaseAgent infrastructure</description>
+      <test_scenarios>
+        <scenario>Test with real WebSocket bridge for event verification</scenario>
+        <scenario>Test reliability patterns under simulated failures</scenario>
+        <scenario>Test health monitoring integration</scenario>
+        <scenario>Test modern execution patterns end-to-end</scenario>
+      </test_scenarios>
+    </requirement>
+    
+    <requirement id="TR-003" priority="HIGH">
+      <title>E2E Chat Experience Testing</title>
+      <description>Validate complete chat experience with real WebSocket connections</description>
+      <validation>
+        <check>All required events are emitted in correct sequence</check>
+        <check>Event content provides meaningful user value</check>
+        <check>Error scenarios provide clear user communication</check>
+        <check>Performance meets chat experience requirements</check>
+      </validation>
+    </requirement>
+  </testing_requirements>
+
+  <migration_strategy>
+    <assessment_phase>
+      <task>Analyze existing agent structure and identify infrastructure duplication</task>
+      <task>Create MRO analysis report for complex inheritance patterns</task>
+      <task>Map business logic methods that should be preserved</task>
+      <task>Identify interface changes affecting consumers</task>
+    </assessment_phase>
+    
+    <infrastructure_removal_phase>
+      <task>Remove WebSocket handler implementations</task>
+      <task>Remove retry logic and circuit breaker code</task>
+      <task>Remove custom execution engines</task>
+      <task>Remove state management duplication</task>
+      <task>Remove mixin inheritance patterns</task>
+    </infrastructure_removal_phase>
+    
+    <base_agent_integration_phase>
+      <task>Change to single BaseAgent inheritance</task>
+      <task>Update constructor with infrastructure enablement flags</task>
+      <task>Implement required abstract methods</task>
+      <task>Add WebSocket event emissions</task>
+      <task>Update business logic to use inherited infrastructure</task>
+    </base_agent_integration_phase>
+    
+    <validation_phase>
+      <task>Run comprehensive test suite</task>
+      <task>Validate WebSocket event emission</task>
+      <task>Test reliability patterns under failure scenarios</task>
+      <task>Verify performance meets requirements</task>
+      <task>Confirm zero infrastructure duplication</task>
+    </validation_phase>
+  </migration_strategy>
+
+  <success_metrics>
+    <metric name="Code Reduction">
+      <target>60-80% reduction in agent code size</target>
+      <measurement>Lines of code before vs after migration</measurement>
+    </metric>
+    
+    <metric name="SSOT Compliance">
+      <target>100% - zero infrastructure duplication</target>
+      <measurement>Code review and automated compliance checks</measurement>
+    </metric>
+    
+    <metric name="Development Velocity">
+      <target>25% improvement in new agent development time</target>
+      <measurement>Time tracking for new agent implementation</measurement>
+    </metric>
+    
+    <metric name="Chat Experience Quality">
+      <target>100% WebSocket event standardization</target>
+      <measurement>E2E test validation of event emission patterns</measurement>
+    </metric>
+    
+    <metric name="Reliability Consistency">
+      <target>100% agents using standardized reliability patterns</target>
+      <measurement>Health monitoring and circuit breaker integration verification</measurement>
+    </metric>
+  </success_metrics>
+
+  <compliance_validation>
+    <automated_checks>
+      <check name="MRO Analysis">Validate clean single inheritance hierarchy</check>
+      <check name="Infrastructure Detection">Scan for prohibited infrastructure patterns</check>
+      <check name="Method Implementation">Verify required abstract methods implemented</check>
+      <check name="Import Analysis">Check for prohibited infrastructure imports</check>
+    </automated_checks>
+    
+    <manual_reviews>
+      <review name="Code Structure Review">Verify business logic focus and infrastructure elimination</review>
+      <review name="WebSocket Event Review">Validate appropriate event usage for chat experience</review>
+      <review name="Performance Review">Ensure performance meets chat experience requirements</review>
+      <review name="Documentation Review">Verify golden pattern adherence documentation</review>
+    </manual_reviews>
+    
+    <validation_commands>
+      <command>python -c "from your.agent import YourAgent; import inspect; print(inspect.getmro(YourAgent))"</command>
+      <command>grep -r "emit_thinking\|emit_progress" your_agent_file.py</command>
+      <command>python tests/unified_test_runner.py --category integration --file test_your_agent.py</command>
+      <command>python -c "from your.agent import YourAgent; agent = YourAgent(); print(agent.get_health_status())"</command>
+    </validation_commands>
+  </compliance_validation>
+
+  <documentation_requirements>
+    <requirement name="Golden Pattern Guide">
+      <file>docs/agent_golden_pattern_guide.md</file>
+      <content>Comprehensive guide with examples and anti-patterns</content>
+    </requirement>
+    
+    <requirement name="Migration Checklist">
+      <file>docs/agent_migration_checklist.md</file>
+      <content>Step-by-step migration process with validation</content>
+    </requirement>
+    
+    <requirement name="Architecture Decision Record">
+      <file>docs/adr/agent_ssot_consolidation.md</file>
+      <content>Business rationale and implementation decisions</content>
+    </requirement>
+    
+    <requirement name="Quick Reference">
+      <file>docs/agent_quick_reference.md</file>
+      <content>Developer quick start guide and common patterns</content>
+    </requirement>
+  </documentation_requirements>
+
+  <business_value_tracking>
+    <cost_savings>
+      <metric>Engineering time saved through reduced infrastructure duplication</metric>
+      <target>$50K+ annual savings</target>
+    </cost_savings>
+    
+    <revenue_protection>
+      <metric>Improved chat reliability protecting primary value delivery channel</metric>
+      <target>Consistent WebSocket events across all agents</target>
+    </revenue_protection>
+    
+    <competitive_advantage>
+      <metric>Faster time-to-market for new agent features</metric>
+      <target>25% reduction in development time</target>
+    </competitive_advantage>
+    
+    <customer_experience>
+      <metric>Consistent AI interaction quality across platform</metric>
+      <target>Standardized chat experience for all agent types</target>
+    </customer_experience>
+  </business_value_tracking>
+</specification>
