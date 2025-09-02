@@ -38,24 +38,17 @@ class TriageSubAgent(BaseSubAgent):
     (reliability, execution, WebSocket events) inherited from BaseAgent.
     """
     
-    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
-                 redis_manager: Optional[RedisManager] = None):
+    def __init__(self):
         # Initialize BaseAgent with full infrastructure
         super().__init__(
-            llm_manager=llm_manager,
             name="TriageSubAgent", 
             description="Enhanced triage agent using BaseAgent infrastructure",
             enable_reliability=True,      # Get circuit breaker + retry
             enable_execution_engine=True, # Get modern execution patterns
-            enable_caching=True,         # Get Redis caching support
-            tool_dispatcher=tool_dispatcher,
-            redis_manager=redis_manager
-        )
-        
-        # Initialize ONLY triage-specific components
-        self.triage_core = TriageCore(redis_manager)
-        self.processor = TriageProcessor(self.triage_core, llm_manager)
-        self.websocket_handler = WebSocketHandler(self._send_update)
+            enable_caching=True,
+        )   
+        self.triage_core = TriageCore(self.redis_manager)
+        self.processor = TriageProcessor(self.triage_core, self.llm_manager)
 
     # Implement BaseAgent's abstract methods for triage-specific logic
     async def validate_preconditions(self, context: ExecutionContext) -> bool:
@@ -149,17 +142,6 @@ class TriageSubAgent(BaseSubAgent):
             correlation_id=self.correlation_id
         )
         return await self.execute_core_logic(context)
-    
-    async def _execute_triage_fallback(self, state: DeepAgentState, run_id: str, stream_updates: bool):
-        """Fallback triage when main operation fails"""
-        logger.warning(f"Using fallback triage for run_id: {run_id}")
-        fallback_result = self.triage_core.create_fallback_result(state.user_request)
-        triage_result = fallback_result.model_dump()
-        triage_result["metadata"] = {"fallback_used": True, "triage_duration_ms": 100, "cache_hit": False}
-        state.triage_result = triage_result
-        if stream_updates:
-            await self._send_update(run_id, {"status": "completed_with_fallback", "message": "Triage completed with fallback method", "result": triage_result})
-        return triage_result
 
     async def check_entry_conditions(self, state: DeepAgentState, run_id: str) -> bool:
         """Check if we have a user request to triage"""
@@ -171,8 +153,6 @@ class TriageSubAgent(BaseSubAgent):
             metadata = state.triage_result.get("metadata", {})
             if metadata:
                 self.logger.debug(f"Triage metrics for run_id {run_id}: {metadata}")
-    
-    # Health status methods now inherited from BaseAgent - no override needed
 
     # Triage-specific helper methods (business logic only)
     def _validate_request(self, request: str): 
