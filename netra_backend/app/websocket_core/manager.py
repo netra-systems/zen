@@ -797,7 +797,26 @@ class WebSocketManager:
 _websocket_manager: Optional[WebSocketManager] = None
 
 def get_websocket_manager() -> WebSocketManager:
-    """Get global WebSocket manager instance."""
+    """Get global WebSocket manager instance.
+    
+    DEPRECATED: This singleton pattern can cause cross-user connection conflicts
+    and prevent proper user isolation in concurrent scenarios.
+    
+    For new code, consider:
+    - WebSocketBridgeFactory for per-user WebSocket handling
+    - Factory patterns for user-isolated connections
+    
+    Note: WebSocketManager itself may remain singleton for infrastructure,
+    but user-specific connections should be handled via factory patterns.
+    """
+    import warnings
+    warnings.warn(
+        "WebSocketManager singleton may cause user isolation issues. "
+        "Consider using WebSocketBridgeFactory for per-user WebSocket handling.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
     global _websocket_manager
     if _websocket_manager is None:
         try:

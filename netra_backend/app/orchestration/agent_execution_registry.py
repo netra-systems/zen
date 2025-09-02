@@ -649,7 +649,28 @@ _registry_instance: Optional[AgentExecutionRegistry] = None
 
 
 async def get_agent_execution_registry() -> AgentExecutionRegistry:
-    """Get singleton Agent Execution Registry instance."""
+    """Get singleton Agent Execution Registry instance.
+    
+    DEPRECATED: This singleton pattern prevents user isolation and can cause
+    execution context conflicts between concurrent users.
+    
+    For new code, use:
+    - ExecutionEngineFactory.create_execution_engine() for per-user isolation
+    - FactoryAdapter.get_execution_engine() for gradual migration
+    
+    Business Impact: Singleton pattern prevents concurrent user support and
+    can cause execution conflicts. Migration to factory patterns enables
+    safe concurrent user operations.
+    """
+    import warnings
+    warnings.warn(
+        "get_agent_execution_registry() singleton is deprecated. "
+        "Use ExecutionEngineFactory for user isolation. "
+        "Singleton execution registry can cause context conflicts between users.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
     global _registry_instance
     
     if _registry_instance is None:

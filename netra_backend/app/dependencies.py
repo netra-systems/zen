@@ -18,6 +18,16 @@ from netra_backend.app.websocket_core import get_websocket_manager
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 
+# CRITICAL: Import session management for per-request isolation
+from netra_backend.app.database.session_manager import (
+    DatabaseSessionManager,
+    SessionScopeValidator,
+    validate_agent_session_isolation,
+    managed_session,
+    SessionIsolationError,
+    SessionManagerError
+)
+
 # NEW: Split architecture imports
 from netra_backend.app.agents.supervisor.user_execution_context import (
     UserExecutionContext,
@@ -56,22 +66,35 @@ if TYPE_CHECKING:
 
 logger = central_logger.get_logger(__name__)
 
-# Session validation utilities
+# Session validation utilities - ENHANCED with SessionScopeValidator
 def validate_session_is_request_scoped(session: AsyncSession, context: str = "unknown") -> None:
     """Validate that a session is request-scoped and not globally stored.
+    
+    ENHANCED: Now uses SessionScopeValidator for comprehensive validation.
     
     Args:
         session: Database session to validate
         context: Context description for logging
         
     Raises:
-        RuntimeError: If session appears to be globally stored
+        SessionIsolationError: If session appears to be globally stored
     """
-    if hasattr(session, '_global_storage_flag') and session._global_storage_flag:
-        logger.error(f"CRITICAL: Globally stored session detected in {context}")
-        raise RuntimeError(f"Session in {context} must be request-scoped, not globally stored")
+    try:
+        # Use new validator for comprehensive checking
+        SessionScopeValidator.validate_request_scoped(session)
         
-    logger.debug(f"Validated session {id(session)} is request-scoped for {context}")
+        # Legacy validation for backward compatibility
+        if hasattr(session, '_global_storage_flag') and session._global_storage_flag:
+            logger.error(f"CRITICAL: Globally stored session detected in {context}")
+            raise SessionIsolationError(f"Session in {context} must be request-scoped, not globally stored")
+        
+        logger.debug(f"Validated session {id(session)} is request-scoped for {context}")
+        
+    except SessionIsolationError:
+        raise
+    except Exception as e:
+        logger.error(f"Session validation failed in {context}: {e}")
+        raise SessionIsolationError(f"Session validation failed in {context}: {e}")
 
 def mark_session_as_global(session: AsyncSession) -> None:
     """Mark a session as globally stored (for validation purposes).
@@ -95,10 +118,17 @@ def ensure_session_lifecycle_logging(session: AsyncSession, operation: str) -> N
     logger.debug(f"Session {id(session)} lifecycle: {operation}")
 
 def _validate_session_type(session) -> None:
-    """Validate session is AsyncSession type."""
+    """Validate session is AsyncSession type and tag with request context."""
     if not isinstance(session, AsyncSession):
         logger.error(f"Invalid session type: {type(session)}")
         raise RuntimeError(f"Expected AsyncSession, got {type(session)}")
+    
+    # Tag session as request-scoped
+    if not hasattr(session, 'info'):
+        session.info = {}
+    session.info['is_request_scoped'] = True
+    session.info['validated_at'] = datetime.now().isoformat()
+    
     logger.debug(f"Dependency injected session type: {type(session).__name__}")
     if session:
         ensure_session_lifecycle_logging(session, "validated_dependency_injection")
@@ -290,9 +320,17 @@ def create_user_execution_context(user_id: str,
     
     try:
         # CRITICAL: Validate that session is not from global storage
-        if db_session and hasattr(db_session, '_global_storage_flag'):
-            logger.error("CRITICAL: Attempted to pass globally stored session to UserExecutionContext")
-            raise RuntimeError("Database sessions must be request-scoped, not globally stored")
+        if db_session:
+            # Use enhanced session validation
+            validate_session_is_request_scoped(db_session, "create_user_execution_context")
+            
+            # Tag session with user context for validation
+            SessionScopeValidator.tag_session(
+                session=db_session,
+                user_id=user_id,
+                run_id=run_id or str(uuid.uuid4()),
+                request_id=str(uuid.uuid4())
+            )
         
         # Generate run_id if not provided
         if not run_id:
@@ -476,6 +514,128 @@ async def get_request_scoped_message_handler_dependency(
     return await get_request_scoped_message_handler(context, supervisor, request)
 
 RequestScopedMessageHandlerDep = Annotated[Any, Depends(get_request_scoped_message_handler_dependency)]
+
+# Factory pattern dependencies for singleton migration
+
+async def get_factory_adapter_dependency(request: Request):
+    """Get FactoryAdapter from app state for gradual migration."""
+    if not hasattr(request.app.state, 'factory_adapter'):
+        raise HTTPException(
+            status_code=500, 
+            detail="Factory adapter not initialized - startup failure"
+        )
+    return request.app.state.factory_adapter
+
+FactoryAdapterDep = Annotated[Any, Depends(get_factory_adapter_dependency)]
+
+async def get_execution_engine_factory_dependency(request: Request):
+    """Get ExecutionEngineFactory from app state."""
+    if not hasattr(request.app.state, 'execution_engine_factory'):
+        raise HTTPException(
+            status_code=500,
+            detail="ExecutionEngineFactory not initialized - startup failure"
+        )
+    return request.app.state.execution_engine_factory
+
+ExecutionEngineFactoryDep = Annotated[Any, Depends(get_execution_engine_factory_dependency)]
+
+async def get_agent_instance_factory_dependency(request: Request):
+    """Get AgentInstanceFactory from app state."""
+    if not hasattr(request.app.state, 'agent_instance_factory'):
+        raise HTTPException(
+            status_code=500,
+            detail="AgentInstanceFactory not initialized - startup failure"
+        )
+    return request.app.state.agent_instance_factory
+
+AgentInstanceFactoryDep = Annotated[Any, Depends(get_agent_instance_factory_dependency)]
+
+async def get_factory_execution_engine(
+    user_id: str,
+    thread_id: Optional[str] = None,
+    run_id: Optional[str] = None,
+    route_path: Optional[str] = None,
+    factory_adapter: FactoryAdapterDep = None
+):
+    """Get execution engine using factory pattern or legacy singleton based on migration configuration.
+    
+    This dependency provides the appropriate execution engine based on the factory adapter configuration.
+    It enables gradual migration from singleton to factory patterns.
+    
+    Args:
+        user_id: User identifier for request-scoped context
+        thread_id: Optional thread identifier 
+        run_id: Optional run identifier
+        route_path: Route path for route-specific feature flags
+        factory_adapter: Factory adapter instance from app state
+        
+    Returns:
+        Either IsolatedExecutionEngine (factory) or ExecutionEngine (legacy singleton)
+    """
+    from netra_backend.app.services.factory_adapter import create_request_context
+    
+    try:
+        # Create request context for factory pattern
+        request_context = create_request_context(
+            user_id=user_id,
+            thread_id=thread_id,
+            request_id=run_id
+        )
+        
+        # Get execution engine via factory adapter (handles migration logic)
+        return await factory_adapter.get_execution_engine(
+            request_context=request_context,
+            route_path=route_path
+        )
+        
+    except Exception as e:
+        logger.error(f"Failed to get factory execution engine for user {user_id}: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to create execution engine: {str(e)}"
+        )
+
+async def get_factory_websocket_bridge(
+    user_id: str,
+    thread_id: Optional[str] = None,
+    run_id: Optional[str] = None,
+    route_path: Optional[str] = None,
+    factory_adapter: FactoryAdapterDep = None
+):
+    """Get WebSocket bridge using factory pattern or legacy singleton.
+    
+    Args:
+        user_id: User identifier for request-scoped context
+        thread_id: Optional thread identifier
+        run_id: Optional run identifier  
+        route_path: Route path for route-specific feature flags
+        factory_adapter: Factory adapter instance from app state
+        
+    Returns:
+        Either UserWebSocketEmitter (factory) or AgentWebSocketBridge (legacy)
+    """
+    from netra_backend.app.services.factory_adapter import create_request_context
+    
+    try:
+        # Create request context for factory pattern
+        request_context = create_request_context(
+            user_id=user_id,
+            thread_id=thread_id,
+            request_id=run_id
+        )
+        
+        # Get WebSocket bridge via factory adapter
+        return await factory_adapter.get_websocket_bridge(
+            request_context=request_context,
+            route_path=route_path
+        )
+        
+    except Exception as e:
+        logger.error(f"Failed to get factory WebSocket bridge for user {user_id}: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to create WebSocket bridge: {str(e)}"
+        )
 
 def get_agent_service(request: Request) -> "AgentService":
     """Get agent service from app state.

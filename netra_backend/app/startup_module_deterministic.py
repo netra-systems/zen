@@ -269,71 +269,75 @@ class StartupOrchestrator:
         if not hasattr(self.app.state, 'health_service') or self.app.state.health_service is None:
             raise DeterministicStartupError("Health service initialization failed")
         self.logger.info("  ✓ Step 14: Health service initialized")
+        
+        # Step 15: Factory Pattern Initialization (CRITICAL for singleton removal)
+        await self._initialize_factory_patterns()
+        self.logger.info("  ✓ Step 15: Factory patterns initialized")
     
     async def _phase6_websocket_setup(self) -> None:
         """Phase 6: WEBSOCKET - WebSocket integration and real-time communication."""
         self.logger.info("PHASE 6: WEBSOCKET - WebSocket Integration")
         
-        # Step 15: WebSocket Manager (CRITICAL - Initialize before integrations)
+        # Step 16: WebSocket Manager (CRITICAL - Initialize before integrations)
         await self._initialize_websocket()
-        self.logger.info("  ✓ Step 15: WebSocket manager initialized")
+        self.logger.info("  ✓ Step 16: WebSocket manager initialized")
         
-        # Step 16: Complete bridge integration with all dependencies
+        # Step 17: Complete bridge integration with all dependencies
         await self._perform_complete_bridge_integration()
-        self.logger.info("  ✓ Step 16: Bridge integration completed")
+        self.logger.info("  ✓ Step 17: Bridge integration completed")
         
-        # Step 17: Verify tool dispatcher has WebSocket support
+        # Step 18: Verify tool dispatcher has WebSocket support
         await self._verify_tool_dispatcher_websocket_support()
-        self.logger.info("  ✓ Step 17: Tool dispatcher WebSocket support verified")
+        self.logger.info("  ✓ Step 18: Tool dispatcher WebSocket support verified")
         
-        # Step 18: Message handler registration
+        # Step 19: Message handler registration
         self._register_message_handlers()
-        self.logger.info("  ✓ Step 18: Message handlers registered")
+        self.logger.info("  ✓ Step 19: Message handlers registered")
         
-        # Step 19: Verify AgentWebSocketBridge health
+        # Step 20: Verify AgentWebSocketBridge health
         await self._verify_bridge_health()
-        self.logger.info("  ✓ Step 19: AgentWebSocketBridge health verified")
+        self.logger.info("  ✓ Step 20: AgentWebSocketBridge health verified")
         
-        # Step 20: Verify WebSocket events can actually be sent
+        # Step 21: Verify WebSocket events can actually be sent
         await self._verify_websocket_events()
-        self.logger.info("  ✓ Step 20: WebSocket event delivery verified")
+        self.logger.info("  ✓ Step 21: WebSocket event delivery verified")
     
     async def _phase7_finalize(self) -> None:
         """Phase 7: FINALIZE - Final validation and optional services."""
         self.logger.info("PHASE 7: FINALIZE - Validation & Optional Services")
         
-        # Step 21: Connection monitoring (CRITICAL)
+        # Step 22: Connection monitoring (CRITICAL)
         await self._start_connection_monitoring()
-        self.logger.info("  ✓ Step 21: Connection monitoring started")
+        self.logger.info("  ✓ Step 22: Connection monitoring started")
         
-        # Step 22: Comprehensive startup validation
+        # Step 23: Comprehensive startup validation
         await self._run_comprehensive_validation()
-        self.logger.info("  ✓ Step 22: Comprehensive validation completed")
+        self.logger.info("  ✓ Step 23: Comprehensive validation completed")
         
-        # Step 23: Critical path validation (CHAT FUNCTIONALITY)
+        # Step 24: Critical path validation (CHAT FUNCTIONALITY)
         await self._run_critical_path_validation()
-        self.logger.info("  ✓ Step 23: Critical path validation completed")
+        self.logger.info("  ✓ Step 24: Critical path validation completed")
         
-        # Step 24: ClickHouse (optional)
+        # Step 25: ClickHouse (optional)
         try:
             await self._initialize_clickhouse()
-            self.logger.info("  ✓ Step 24: ClickHouse initialized")
+            self.logger.info("  ✓ Step 25: ClickHouse initialized")
         except Exception as e:
-            self.logger.warning(f"  ⚠ Step 24: ClickHouse skipped: {e}")
+            self.logger.warning(f"  ⚠ Step 25: ClickHouse skipped: {e}")
         
-        # Step 25: Performance Manager (optional)
+        # Step 26: Performance Manager (optional)
         try:
             await self._initialize_performance_manager()
-            self.logger.info("  ✓ Step 25: Performance manager initialized")
+            self.logger.info("  ✓ Step 26: Performance manager initialized")
         except Exception as e:
-            self.logger.warning(f"  ⚠ Step 25: Performance manager skipped: {e}")
+            self.logger.warning(f"  ⚠ Step 26: Performance manager skipped: {e}")
         
-        # Step 26: Advanced Monitoring (optional)
+        # Step 27: Advanced Monitoring (optional)
         try:
             await self._initialize_monitoring()
-            self.logger.info("  ✓ Step 26: Advanced monitoring started")
+            self.logger.info("  ✓ Step 27: Advanced monitoring started")
         except Exception as e:
-            self.logger.warning(f"  ⚠ Step 26: Advanced monitoring skipped: {e}")
+            self.logger.warning(f"  ⚠ Step 27: Advanced monitoring skipped: {e}")
     
     # DEPRECATED METHODS - keeping temporarily for reference during transition
     async def _phase4_integration_enhancement(self) -> None:
@@ -1055,6 +1059,93 @@ class StartupOrchestrator:
         health_service = await setup_backend_health_service()
         self.app.state.health_service = health_service
         self.logger.debug("Health service registry initialized with comprehensive checks")
+    
+    async def _initialize_factory_patterns(self) -> None:
+        """Initialize factory patterns for singleton removal - CRITICAL."""
+        from netra_backend.app.agents.supervisor.execution_factory import ExecutionEngineFactory, get_execution_engine_factory
+        from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory, get_websocket_bridge_factory
+        from netra_backend.app.agents.supervisor.agent_instance_factory import (
+            get_agent_instance_factory,
+            configure_agent_instance_factory
+        )
+        from netra_backend.app.services.factory_adapter import FactoryAdapter, AdapterConfig
+        from netra_backend.app.websocket_core import get_websocket_manager
+        
+        self.logger.info("    - Initializing factory patterns for singleton removal...")
+        
+        try:
+            # 1. Initialize ExecutionEngineFactory
+            execution_factory = get_execution_engine_factory()
+            
+            # Configure execution factory with dependencies
+            if hasattr(self.app.state, 'agent_supervisor'):
+                supervisor = self.app.state.agent_supervisor
+                if hasattr(supervisor, 'agent_registry'):
+                    execution_factory.configure(
+                        agent_registry=supervisor.agent_registry,
+                        websocket_bridge=self.app.state.agent_websocket_bridge
+                    )
+                    self.logger.info("    ✓ ExecutionEngineFactory configured with agent registry")
+                else:
+                    self.logger.warning("    ⚠ Agent supervisor has no registry - factory configuration limited")
+            else:
+                self.logger.warning("    ⚠ Agent supervisor not available - factory configuration limited")
+            
+            self.app.state.execution_engine_factory = execution_factory
+            
+            # 2. Initialize WebSocketBridgeFactory
+            websocket_factory = get_websocket_bridge_factory()
+            websocket_factory.configure(
+                websocket_manager=get_websocket_manager(),
+                agent_bridge=self.app.state.agent_websocket_bridge
+            )
+            self.app.state.websocket_bridge_factory = websocket_factory
+            self.logger.info("    ✓ WebSocketBridgeFactory configured")
+            
+            # 3. Initialize AgentInstanceFactory
+            agent_instance_factory = await configure_agent_instance_factory(
+                websocket_bridge=self.app.state.agent_websocket_bridge,
+                websocket_manager=get_websocket_manager()
+            )
+            self.app.state.agent_instance_factory = agent_instance_factory
+            self.logger.info("    ✓ AgentInstanceFactory configured")
+            
+            # 4. Initialize FactoryAdapter for backward compatibility
+            adapter_config = AdapterConfig.from_env()
+            factory_adapter = FactoryAdapter(
+                execution_engine_factory=execution_factory,
+                websocket_bridge_factory=websocket_factory,
+                config=adapter_config
+            )
+            
+            # Configure legacy components for fallback
+            if hasattr(self.app.state, 'agent_supervisor'):
+                factory_adapter._legacy_websocket_bridge = self.app.state.agent_websocket_bridge
+                self.logger.info("    ✓ FactoryAdapter configured with legacy fallback")
+            
+            self.app.state.factory_adapter = factory_adapter
+            
+            # 5. Enable factories for select routes (gradual migration)
+            critical_routes = [
+                "/api/agents/run_agent_v2",
+                "/api/agents/v2/{run_id}/status",
+                "/api/agents/v2/{run_id}/state", 
+                "/api/agents/v2/thread/{thread_id}/runs"
+            ]
+            
+            for route in critical_routes:
+                await factory_adapter.enable_factory_for_route(route)
+                self.logger.info(f"    ✓ Factory pattern enabled for route: {route}")
+            
+            # Log factory initialization summary
+            status = factory_adapter.get_migration_status()
+            self.logger.info("    📊 Factory Pattern Migration Status:")
+            self.logger.info(f"      Migration Mode: {status['migration_mode']}")
+            self.logger.info(f"      Routes Enabled: {len(status['route_flags'])}")
+            self.logger.info(f"      Legacy Fallback: {'Enabled' if status['config']['legacy_fallback_enabled'] else 'Disabled'}")
+            
+        except Exception as e:
+            raise DeterministicStartupError(f"Factory pattern initialization failed: {e}")
     
     async def _validate_database_schema(self) -> None:
         """Validate database schema - CRITICAL."""
