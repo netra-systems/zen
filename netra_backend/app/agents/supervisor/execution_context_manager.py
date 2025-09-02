@@ -15,7 +15,7 @@ import time
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from typing import Any, AsyncGenerator, Dict, List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -83,7 +83,7 @@ class ExecutionContextManager:
         logger.info(f"ExecutionContextManager initialized with max_concurrent={max_concurrent_per_request}")
     
     @asynccontextmanager
-    async def execution_scope(self, user_context: UserExecutionContext):
+    async def execution_scope(self, user_context: UserExecutionContext) -> AsyncGenerator['RequestExecutionScope', None]:
         """Create an isolated execution scope for a user request.
         
         This async context manager provides:
