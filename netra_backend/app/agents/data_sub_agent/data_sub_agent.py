@@ -1,7 +1,14 @@
-"""DataSubAgent - Consolidated Data Analysis Agent
+"""DataSubAgent - Golden Pattern Implementation
 
-Single, clean implementation providing reliable data insights for AI cost optimization.
-Replaces 62+ fragmented files with focused, maintainable architecture.
+Consolidated data analysis agent following the golden pattern established by TriageSubAgent.
+Replaces 66+ fragmented files with single SSOT implementation using BaseAgent infrastructure.
+
+Follows Golden Pattern:
+- Inherits from BaseAgent (single inheritance)
+- Implements validate_preconditions() and execute_core_logic() only
+- Uses inherited WebSocket events, reliability, and execution infrastructure
+- Contains ONLY data analysis business logic
+- NO infrastructure duplication
 
 Business Value: Critical for identifying 15-30% cost savings opportunities.
 BVJ: Enterprise | Performance Fee Capture | $10K+ monthly revenue per customer
