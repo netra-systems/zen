@@ -286,7 +286,8 @@ class UnifiedDockerManager:
                  mode: ServiceMode = ServiceMode.DOCKER,
                  use_alpine: bool = False,  # Add Alpine container support
                  rebuild_images: bool = True,  # Rebuild images by default for freshness
-                 rebuild_backend_only: bool = True):  # Only rebuild backend by default
+                 rebuild_backend_only: bool = True,  # Only rebuild backend by default
+                 pull_policy: str = "missing"):  # Docker pull policy: always, never, missing (default)
         """
         Initialize unified Docker manager with orchestration capabilities.
         
@@ -308,6 +309,7 @@ class UnifiedDockerManager:
         self.use_alpine = use_alpine
         self.rebuild_images = rebuild_images
         self.rebuild_backend_only = rebuild_backend_only
+        self.pull_policy = pull_policy  # Control Docker Hub access
         
         # Port discovery and allocation
         self.port_discovery = DockerPortDiscovery(use_test_services=True)
@@ -2585,16 +2587,41 @@ class UnifiedDockerManager:
             if self.rebuild_images:
                 backend_services = ['backend', 'auth', 'alpine-test-backend', 'alpine-test-auth', 'test-backend', 'test-auth']
                 
+                # Check for missing base images before building
+                if not self._check_base_images():
+                    logger.warning("⚠️ Missing base images detected. Build may fail if Docker Hub is rate limited.")
+                    logger.warning("   Consider pulling base images manually or using --pull never")
+                
+                # Add pull policy to build commands
+                pull_flag = []
+                if self.pull_policy == "never":
+                    pull_flag = ["--pull", "never"]  # Never pull from Docker Hub
+                elif self.pull_policy == "always":
+                    pull_flag = ["--pull", "always"]  # Always pull (may hit rate limits)
+                # Default "missing" - only pull if image doesn't exist locally
+                
                 if self.rebuild_backend_only:
                     services_to_build = [s for s in services_to_start if s in backend_services]
                     if services_to_build:
-                        build_cmd = ["docker-compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + services_to_build
-                        logger.info(f"🔨 Building backend services: {services_to_build}")
-                        subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
+                        build_cmd = ["docker-compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + pull_flag + services_to_build
+                        logger.info(f"🔨 Building backend services with pull_policy={self.pull_policy}: {services_to_build}")
+                        result = subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
+                        if result.returncode != 0:
+                            if "429 Too Many Requests" in result.stderr or "toomanyrequests" in result.stderr.lower():
+                                logger.error("❌ Docker Hub rate limit hit! Cannot pull base images.")
+                                logger.error("   Solution: Use pull_policy='never' or wait for rate limit reset")
+                                return False
+                            logger.error(f"Build failed: {result.stderr}")
                 else:
-                    build_cmd = ["docker-compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + services_to_start
-                    logger.info(f"🔨 Building all services: {services_to_start}")
-                    subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
+                    build_cmd = ["docker-compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + pull_flag + services_to_start
+                    logger.info(f"🔨 Building all services with pull_policy={self.pull_policy}: {services_to_start}")
+                    result = subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
+                    if result.returncode != 0:
+                        if "429 Too Many Requests" in result.stderr or "toomanyrequests" in result.stderr.lower():
+                            logger.error("❌ Docker Hub rate limit hit! Cannot pull base images.")
+                            logger.error("   Solution: Use pull_policy='never' or wait for rate limit reset")
+                            return False
+                        logger.error(f"Build failed: {result.stderr}")
             
             cmd = ["docker-compose", "-f", compose_file,
                    "-p", self._get_project_name(), "up", "-d"] + services_to_start
@@ -2614,6 +2641,57 @@ class UnifiedDockerManager:
         if wait_healthy:
             return self.wait_for_services(services, timeout=self.HEALTH_CHECK_TIMEOUT)
             
+        return True
+    
+    def _check_base_images(self) -> bool:
+        """
+        Check if required base images are available locally.
+        
+        CRITICAL: This prevents Docker Hub pulls during builds.
+        Returns True if all base images are available, False otherwise.
+        """
+        # Base images required for building our services
+        required_base_images = [
+            "python:3.11-alpine",
+            "python:3.11-alpine3.19",
+            "node:18-alpine",
+            "postgres:15-alpine",
+            "redis:7-alpine", 
+            "rabbitmq:3-alpine",
+            "clickhouse/clickhouse-server:23-alpine"
+        ]
+        
+        missing_images = []
+        available_images = []
+        
+        for image in required_base_images:
+            try:
+                # Check if image exists locally
+                cmd = ["docker", "images", "-q", image]
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+                
+                if result.returncode == 0 and result.stdout.strip():
+                    available_images.append(image)
+                else:
+                    missing_images.append(image)
+            except Exception as e:
+                logger.debug(f"Error checking image {image}: {e}")
+                missing_images.append(image)
+        
+        if missing_images:
+            logger.warning(f"⚠️ Missing {len(missing_images)} base images:")
+            for img in missing_images:
+                logger.warning(f"   - {img}")
+            
+            if self.pull_policy == "never":
+                logger.error("❌ pull_policy='never' but base images are missing!")
+                logger.error("   Build will fail without these images.")
+            elif self.pull_policy == "missing":
+                logger.info("ℹ️ Docker will try to pull missing images (may hit rate limits)")
+            
+            return False
+        
+        logger.debug(f"✅ All {len(available_images)} base images available locally")
         return True
     
     async def graceful_shutdown(self, services: Optional[List[str]] = None, timeout: int = 30) -> bool:
@@ -3215,12 +3293,22 @@ class ServiceOrchestrator(UnifiedDockerManager):
     """Legacy compatibility class - redirects to UnifiedDockerManager"""
     
     def __init__(self, config: Optional[OrchestrationConfig] = None, use_alpine: bool = False,
-                 rebuild_images: bool = True, rebuild_backend_only: bool = True):
-        """Initialize with legacy ServiceOrchestrator interface"""
+                 rebuild_images: bool = True, rebuild_backend_only: bool = True,
+                 pull_policy: str = "missing"):
+        """Initialize with legacy ServiceOrchestrator interface
+        
+        Args:
+            config: Orchestration configuration
+            use_alpine: Use Alpine-based containers
+            rebuild_images: Whether to rebuild images
+            rebuild_backend_only: Only rebuild backend services
+            pull_policy: Docker pull policy - 'always', 'never', or 'missing' (default)
+        """
         super().__init__(config=config, environment_type=EnvironmentType.SHARED, 
                         use_production_images=True, use_alpine=use_alpine,
-                        rebuild_images=rebuild_images, rebuild_backend_only=rebuild_backend_only)
-        logger.info("ServiceOrchestrator is deprecated - using UnifiedDockerManager")
+                        rebuild_images=rebuild_images, rebuild_backend_only=rebuild_backend_only,
+                        pull_policy=pull_policy)
+        logger.info(f"ServiceOrchestrator using pull_policy='{pull_policy}' to prevent Docker Hub rate limits")
 
 
 # Removed duplicate UnifiedDockerManager class that was causing circular inheritance

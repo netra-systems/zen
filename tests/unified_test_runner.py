@@ -2298,6 +2298,13 @@ def main():
     )
     
     parser.add_argument(
+        "--docker-pull-policy",
+        choices=["always", "never", "missing"],
+        default="missing",
+        help="Docker pull policy for base images (default: missing - only pull if not cached locally)"
+    )
+    
+    parser.add_argument(
         "--show-warnings",
         action="store_true",
         help="Show warning messages (backend pytest)"
@@ -2505,6 +2512,15 @@ def main():
         )
     
     args = parser.parse_args()
+    
+    # Set Docker pull policy in environment for UnifiedDockerManager
+    # This prevents Docker Hub rate limit issues by controlling when images are pulled
+    if hasattr(args, 'docker_pull_policy'):
+        os.environ['DOCKER_PULL_POLICY'] = args.docker_pull_policy
+        if args.docker_pull_policy == 'never':
+            print("ℹ️ Docker pull policy set to 'never' - will only use locally cached images")
+        elif args.docker_pull_policy == 'always':
+            print("⚠️ Docker pull policy set to 'always' - may hit Docker Hub rate limits")
     
     # Handle special operations
     if args.list_categories:
