@@ -46,8 +46,12 @@ except ImportError:
 
 
 @pytest.fixture(scope="session", autouse=True)
-async def real_services_manager():
-    """Use REAL services for mission-critical tests - NO MOCKS."""
+def real_services_manager():
+    """Use REAL services for mission-critical tests - NO MOCKS.
+    
+    FIXED: Converted from async to sync session-scoped fixture to avoid
+    ScopeMismatch with pytest-asyncio function-scoped event loops.
+    """
     manager = get_real_services()
     
     # For now, skip service availability check to prevent hanging
@@ -67,8 +71,12 @@ def validate_e2e_environment():
 
 
 @pytest.fixture(scope="session")
-async def dev_launcher():
-    """Real dev launcher for actual service connections."""
+def dev_launcher():
+    """Real dev launcher for actual service connections.
+    
+    FIXED: Converted from async to sync session-scoped fixture to avoid
+    ScopeMismatch with pytest-asyncio function-scoped event loops.
+    """
     # This would normally start real services if needed
     yield None
 

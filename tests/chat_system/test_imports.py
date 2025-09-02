@@ -10,7 +10,20 @@ import sys
 import os
 from pathlib import Path
 
-# Add project root to path
+# Use test framework's environment setup
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
+
+# Import isolated environment FIRST
+from shared.isolated_environment import get_env
+
+# Set test environment
+env = get_env()
+env.set("ENVIRONMENT", "testing", "test")
+env.set("SERVICE_SECRET", "test-secret-minimum-32-chars-long", "test")
+env.set("JWT_SECRET", "test-jwt-secret-minimum-32-chars", "test")
+env.set("LLM_MODE", "mock", "test")
+env.set("TESTING", "true", "test")
 
 import pytest
 

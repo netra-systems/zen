@@ -287,13 +287,18 @@ class TestCriticalServiceSmoke:
         from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.schemas.config import AppConfig
         
-        # Create LLM manager with mock settings
+        # Create complete mock settings
         mock_settings = Mock(spec=AppConfig)
-        mock_settings.llm_mode = "real"
+        mock_settings.llm_mode = "mock"  # Use mock mode for tests
         mock_settings.llm_provider = "openai"
         mock_settings.openai_api_key = "test-key"
         mock_settings.llm_configs = {}
         mock_settings.environment = "testing"
+        mock_settings.llm_heartbeat_interval_seconds = 60
+        mock_settings.llm_cache_enabled = False
+        mock_settings.llm_retry_max_attempts = 3
+        mock_settings.llm_timeout_seconds = 30
+        
         manager = LLMManager(mock_settings)
         
         # Verify basic structure

@@ -1,4 +1,3 @@
-from shared.isolated_environment import get_env
 #!/usr/bin/env python
 """MISSION CRITICAL TEST SUITE: WebSocket Agent Events - FIXED FOR REAL SERVICES
 
@@ -30,6 +29,9 @@ import random
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
+
+# Import environment after path setup
+from shared.isolated_environment import get_env
 
 # Check if staging mode is enabled
 STAGING_MODE = get_env().get('WEBSOCKET_TEST_STAGING', 'false').lower() == 'true'
