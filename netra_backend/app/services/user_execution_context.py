@@ -25,6 +25,7 @@ user requests.
 """
 
 import uuid
+import copy
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional, Union, TYPE_CHECKING
@@ -228,9 +229,9 @@ class UserExecutionContext:
                     f"{dict_name} contains reserved keys: {conflicting_keys}"
                 )
         
-        # Ensure metadata isolation by creating copies
-        object.__setattr__(self, 'agent_context', self.agent_context.copy())
-        object.__setattr__(self, 'audit_metadata', self.audit_metadata.copy())
+        # Ensure metadata isolation by creating deep copies
+        object.__setattr__(self, 'agent_context', copy.deepcopy(self.agent_context))
+        object.__setattr__(self, 'audit_metadata', copy.deepcopy(self.audit_metadata))
     
     def _initialize_audit_trail(self) -> None:
         """Initialize audit trail metadata."""
@@ -382,8 +383,8 @@ class UserExecutionContext:
                 f"Current depth: {self.operation_depth}"
             )
         
-        # Build enhanced agent context
-        child_agent_context = self.agent_context.copy()
+        # Build enhanced agent context with deep copy for isolation
+        child_agent_context = copy.deepcopy(self.agent_context)
         child_agent_context.update({
             'parent_operation': self.agent_context.get('operation_name', 'root'),
             'operation_name': operation_name,
@@ -393,8 +394,8 @@ class UserExecutionContext:
         if additional_agent_context:
             child_agent_context.update(additional_agent_context)
         
-        # Build enhanced audit metadata
-        child_audit_metadata = self.audit_metadata.copy()
+        # Build enhanced audit metadata with deep copy for isolation
+        child_audit_metadata = copy.deepcopy(self.audit_metadata)
         child_audit_metadata.update({
             'parent_request_id': self.request_id,
             'operation_name': operation_name,
@@ -445,8 +446,8 @@ class UserExecutionContext:
             db_session=db_session,
             websocket_client_id=self.websocket_client_id,
             created_at=self.created_at,
-            agent_context=self.agent_context.copy(),
-            audit_metadata=self.audit_metadata.copy(),
+            agent_context=copy.deepcopy(self.agent_context),
+            audit_metadata=copy.deepcopy(self.audit_metadata),
             operation_depth=self.operation_depth,
             parent_request_id=self.parent_request_id
         )
@@ -474,8 +475,8 @@ class UserExecutionContext:
             db_session=self.db_session,
             websocket_client_id=connection_id,
             created_at=self.created_at,
-            agent_context=self.agent_context.copy(),
-            audit_metadata=self.audit_metadata.copy(),
+            agent_context=copy.deepcopy(self.agent_context),
+            audit_metadata=copy.deepcopy(self.audit_metadata),
             operation_depth=self.operation_depth,
             parent_request_id=self.parent_request_id
         )
@@ -542,8 +543,8 @@ class UserExecutionContext:
             'request_id': self.request_id,
             'websocket_client_id': self.websocket_client_id,
             'created_at': self.created_at.isoformat(),
-            'agent_context': self.agent_context.copy(),
-            'audit_metadata': self.audit_metadata.copy(),
+            'agent_context': copy.deepcopy(self.agent_context),
+            'audit_metadata': copy.deepcopy(self.audit_metadata),
             'operation_depth': self.operation_depth,
             'parent_request_id': self.parent_request_id,
             'has_db_session': self.db_session is not None

@@ -527,7 +527,7 @@ class TestAgentRegistryMigration:
         llm_manager = MagicMock()
         tool_dispatcher = MagicMock()
         
-        with patch('netra_backend.app.agents.supervisor.agent_registry.warnings.warn'):
+        with patch('warnings.warn'):
             registry = AgentRegistry(llm_manager, tool_dispatcher)
         
         # Manually register some test agents
@@ -606,7 +606,7 @@ class TestBackwardCompatibility:
         llm_manager = MagicMock()
         tool_dispatcher = MagicMock()
         
-        with patch('netra_backend.app.agents.supervisor.agent_registry.warnings.warn'):
+        with patch('warnings.warn'):
             legacy_registry = AgentRegistry(llm_manager, tool_dispatcher)
         
         # Register test agents
