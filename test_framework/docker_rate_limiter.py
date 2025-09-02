@@ -330,9 +330,9 @@ def docker_health_check() -> bool:
 # Legacy compatibility for direct subprocess usage
 def safe_subprocess_run(cmd: List[str], **kwargs) -> subprocess.CompletedProcess:
     """
-    Legacy compatibility wrapper for subprocess.run with Docker rate limiting.
+    Legacy compatibility wrapper for subprocess.run with CRITICAL Docker force flag validation.
     
-    This function maintains backward compatibility while adding rate limiting.
+    This function maintains backward compatibility while adding CRITICAL security enforcement.
     
     Args:
         cmd: Command as list of strings
@@ -340,9 +340,12 @@ def safe_subprocess_run(cmd: List[str], **kwargs) -> subprocess.CompletedProcess
         
     Returns:
         subprocess.CompletedProcess result
+        
+    Raises:
+        DockerForceFlagViolation: If Docker command contains force flags (CRITICAL SECURITY)
     """
     if len(cmd) > 0 and cmd[0] in ['docker', 'docker-compose']:
-        # Use rate limiter for Docker commands
+        # 🚨 CRITICAL: Use rate limiter with force flag protection for Docker commands
         result = execute_docker_command(cmd, **kwargs)
         
         # Convert to subprocess.CompletedProcess for compatibility
