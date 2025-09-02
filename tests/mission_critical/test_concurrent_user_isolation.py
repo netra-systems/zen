@@ -41,7 +41,7 @@ from contextlib import asynccontextmanager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.agents.supervisor.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.tool_dispatcher_core import ToolDispatcher
 from netra_backend.app.agents.base_agent import BaseAgent
 
 
