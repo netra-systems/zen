@@ -15,10 +15,25 @@ import uuid
 
 from netra_backend.app.services.websocket_bridge_factory import (
     WebSocketConnectionPool,
-    WebSocketConnection,
-    ConnectionStatus,
-    ConnectionMetrics
+    UserWebSocketConnection as WebSocketConnection
 )
+
+# Mock missing classes if needed
+class ConnectionStatus:
+    INITIALIZING = "initializing"
+    HEALTHY = "healthy"
+    UNHEALTHY = "unhealthy"
+    FAILED = "failed"
+    CLOSED = "closed"
+
+class ConnectionMetrics:
+    def __init__(self):
+        self.total_connections = 0
+        self.total_users = 0
+        self.healthy_connections = 0
+        self.unhealthy_connections = 0
+        self.total_messages = 0
+        self.total_errors = 0
 
 
 class TestWebSocketConnection:

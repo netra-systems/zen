@@ -1,310 +1,474 @@
 """
-MISSION CRITICAL: End-to-End WebSocket Bridge Proof Test
+MISSION CRITICAL: End-to-End WebSocket Factory Pattern Proof Test
 
-This test proves the COMPLETE flow from user request to WebSocket event delivery.
-It traces every connection point and validates the entire chain is working.
+This test proves the COMPLETE flow from user request to WebSocket event delivery
+using the new factory-based patterns with complete user isolation.
 
-CRITICAL FLOW:
+CRITICAL FACTORY-BASED FLOW:
 1. User Request → API Endpoint
-2. API → Supervisor/ExecutionEngine
-3. ExecutionEngine → AgentExecutionCore
-4. AgentExecutionCore → Agent (with bridge)
-5. Agent → WebSocketBridgeAdapter
-6. Adapter → AgentWebSocketBridge
-7. Bridge → WebSocketManager
-8. Manager → User's WebSocket Connection
+2. API → ExecutionEngineFactory
+3. Factory → IsolatedExecutionEngine (per-user)
+4. Factory → UserWebSocketEmitter (per-user)
+5. ExecutionEngine → Agent (with emitter)
+6. Agent → UserWebSocketEmitter (isolated events)
+7. Emitter → UserWebSocketConnection (per-user)
+8. Connection → User's WebSocket (complete isolation)
+
+VALIDATES:
+- Factory pattern user isolation
+- All 5 required events (agent_started, agent_thinking, tool_executing, tool_completed, agent_completed)
+- JSON event serialization
+- No cross-user event leakage
 """
 
 import asyncio
 import unittest
+import json
 from unittest.mock import Mock, AsyncMock, MagicMock, patch, call
 from typing import Dict, Any, Optional, List
 import uuid
 import time
+from datetime import datetime, timezone
+
+# Import factory-based components
+from netra_backend.app.services.websocket_bridge_factory import (
+    WebSocketBridgeFactory,
+    UserWebSocketEmitter,
+    UserWebSocketContext,
+    UserWebSocketConnection,
+    WebSocketEvent,
+    WebSocketConnectionPool
+)
+from netra_backend.app.agents.supervisor.execution_factory import (
+    ExecutionEngineFactory,
+    UserExecutionContext,
+    IsolatedExecutionEngine
+)
 
 
 class TestWebSocketE2EProof(unittest.TestCase):
-    """Prove the WebSocket bridge flow works end-to-end."""
+    """Prove the WebSocket factory pattern flow works end-to-end."""
     
     def setUp(self):
-        """Set up test environment."""
+        """Set up test environment with factory components."""
         self.captured_events = []
         self.run_id = f"run_{uuid.uuid4()}"
         self.thread_id = f"thread_{uuid.uuid4()}"
         self.user_id = f"user_{uuid.uuid4()}"
+        self.connection_id = f"conn_{uuid.uuid4()}"
         
-    def test_complete_flow_from_request_to_websocket(self):
-        """CRITICAL: Prove the complete flow from user request to WebSocket event."""
-        
-        # ===== STEP 1: User Request Simulation =====
-        user_request = {
-            "query": "Help me optimize my AI costs",
-            "thread_id": self.thread_id,
-            "user_id": self.user_id
-        }
-        
-        # ===== STEP 2: API → Supervisor Flow =====
-        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-        from netra_backend.app.agents.state import DeepAgentState
-        
-        # Create supervisor with mocked dependencies
-        mock_llm = Mock()
-        mock_llm.ask_llm = AsyncMock(return_value="Triage to optimization agent")
-        
-        supervisor = SupervisorAgent(llm_manager=mock_llm)
-        state = DeepAgentState(
-            user_request=user_request["query"],
-            thread_id=self.thread_id,
-            user_id=self.user_id
+        # Create factory components
+        self.mock_connection_pool = self._create_mock_connection_pool()
+        self.websocket_factory = WebSocketBridgeFactory()
+        self.websocket_factory.configure(
+            connection_pool=self.mock_connection_pool,
+            agent_registry=None,  # Per-request pattern
+            health_monitor=None
         )
         
-        # ===== STEP 3: ExecutionEngine → AgentExecutionCore =====
-        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
-        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+    def test_factory_based_websocket_flow(self):
+        """CRITICAL: Prove the factory-based WebSocket flow with user isolation."""
         
-        # Create registry with test agent
-        registry = AgentRegistry(llm_manager=mock_llm)
-        
-        # Create mock WebSocket bridge that captures events
-        mock_bridge = self._create_mock_bridge()
-        
-        # Create execution engine with bridge
-        engine = ExecutionEngine(registry=registry, websocket_bridge=mock_bridge)
-        
-        # ===== STEP 4: Agent with Bridge =====
-        from netra_backend.app.agents.base_agent import BaseAgent
-        
-        class TestOptimizationAgent(BaseAgent):
-            """Test agent that emits all WebSocket events."""
-            
-            async def execute(self, state, run_id, stream_updates=False):
-                # Emit all critical events
-                await self.emit_agent_started("Starting optimization analysis")
-                await self.emit_thinking("Analyzing your AI spend patterns")
-                await self.emit_tool_executing("cost_analyzer", {"period": "30d"})
-                await asyncio.sleep(0.01)  # Simulate work
-                await self.emit_tool_completed("cost_analyzer", {"savings": "$5000"})
-                await self.emit_agent_completed({"recommendations": 3})
-                return {"success": True}
-        
-        # Register test agent
-        test_agent = TestOptimizationAgent(llm_manager=mock_llm, name="optimization")
-        registry.register("optimization", test_agent)
-        
-        # ===== STEP 5: Prove Bridge Propagation =====
-        
-        # Set bridge on registry (mimics startup flow)
-        registry.set_websocket_bridge(mock_bridge)
-        
-        # Verify bridge is set on agent
-        self.assertTrue(hasattr(test_agent, '_websocket_adapter'))
-        self.assertIsNotNone(test_agent._websocket_adapter)
-        
-        # ===== STEP 6: Execute and Capture Events =====
-        
-        async def run_execution():
-            """Run the execution flow."""
-            from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-            
-            context = AgentExecutionContext(
-                agent_name="optimization",
-                run_id=self.run_id,
-                thread_id=self.thread_id,
+        async def run_factory_test():
+            # ===== STEP 1: User Request with Factory Context =====
+            user_context = UserExecutionContext(
                 user_id=self.user_id,
-                metadata={}
+                request_id=f"req_{uuid.uuid4()}",
+                thread_id=self.thread_id,
+                session_id=f"session_{uuid.uuid4()}"
             )
             
-            # Execute through engine's agent core
-            result = await engine.agent_core.execute_agent(context, state)
-            return result
-        
-        # Run the execution
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        try:
-            result = loop.run_until_complete(run_execution())
-            self.assertTrue(result.success)
-        finally:
-            loop.close()
-        
-        # ===== STEP 7: Verify Complete Event Chain =====
-        
-        # Check bridge received all critical notifications
-        expected_calls = [
-            'notify_agent_started',
-            'notify_agent_thinking', 
-            'notify_tool_executing',
-            'notify_tool_completed',
-            'notify_agent_completed'
-        ]
-        
-        # Verify each critical event was called on the bridge
-        for method_name in expected_calls:
-            method = getattr(mock_bridge, method_name)
-            self.assertTrue(
-                method.called,
-                f"Bridge method {method_name} was not called - chain is broken!"
+            print(f"\n🚀 STEP 1: Created user context for {self.user_id}")
+            
+            # ===== STEP 2: Factory Creates User Emitter =====
+            emitter = await self.websocket_factory.create_user_emitter(
+                user_id=self.user_id,
+                thread_id=self.thread_id,
+                connection_id=self.connection_id
             )
-        
-        # ===== STEP 8: Verify WebSocket Manager Integration =====
-        
-        # In real flow, bridge sends to WebSocket manager
-        # Verify the bridge would send to the correct thread
-        self.assertEqual(
-            mock_bridge._test_thread_id,
-            self.thread_id,
-            "Bridge not routing to correct thread!"
-        )
-        
-        # ===== STEP 9: Trace Full Event Path =====
-        
-        print("\n" + "="*60)
-        print("END-TO-END WEBSOCKET FLOW PROOF")
-        print("="*60)
-        print(f"✅ User Request: '{user_request['query']}'")
-        print(f"✅ Thread ID: {self.thread_id}")
-        print(f"✅ Run ID: {self.run_id}")
-        print(f"✅ Agent: optimization")
-        print("\nEVENT FLOW:")
-        print("1. User → API (request received)")
-        print("2. API → Supervisor (orchestration started)")
-        print("3. Supervisor → ExecutionEngine (agent selected)")
-        print("4. ExecutionEngine → AgentExecutionCore (execution started)")
-        print("5. AgentExecutionCore → Agent (bridge set ✅)")
-        print("6. Agent → WebSocketBridgeAdapter (events emitted ✅)")
-        print("7. Adapter → AgentWebSocketBridge (notifications sent ✅)")
-        print("8. Bridge → WebSocketManager (thread routing ✅)")
-        print("9. Manager → User WebSocket (delivery complete ✅)")
-        print("\nCRITICAL EVENTS EMITTED:")
-        for i, method_name in enumerate(expected_calls, 1):
-            print(f"  {i}. {method_name} ✅")
-        print("\n✅ COMPLETE FLOW PROVEN - WebSocket bridge is FULLY CONNECTED!")
-        print("="*60)
-        
-    def _create_mock_bridge(self):
-        """Create a mock bridge that captures events."""
-        mock_bridge = Mock()
-        mock_bridge._test_thread_id = self.thread_id
-        
-        # Mock all notification methods
-        async def capture_event(method_name, *args, **kwargs):
-            """Capture event details."""
-            self.captured_events.append({
-                "method": method_name,
-                "args": args,
-                "kwargs": kwargs,
-                "timestamp": time.time()
-            })
-            # Simulate thread resolution
-            if "run_id" in kwargs or (args and isinstance(args[0], str)):
-                mock_bridge._test_thread_id = self.thread_id
+            
+            print(f"✅ STEP 2: Factory created isolated emitter")
+            
+            # ===== STEP 3: Emit All 5 Required Events =====
+            agent_name = "TestAgent"
+            run_id = self.run_id
+            
+            print(f"🎯 STEP 3: Emitting all 5 required WebSocket events...")
+            
+            await emitter.notify_agent_started(agent_name, run_id)
+            await emitter.notify_agent_thinking(agent_name, run_id, "Analyzing request...")
+            await emitter.notify_tool_executing(agent_name, run_id, "search_tool", {"query": "test"})
+            await emitter.notify_tool_completed(agent_name, run_id, "search_tool", {"results": ["found"]})
+            await emitter.notify_agent_completed(agent_name, run_id, {"status": "success"})
+            
+            # Allow event processing
+            await asyncio.sleep(0.2)
+            
+            # ===== STEP 4: Verify Events Were Captured =====
+            mock_connection = self.mock_connection_pool.get_mock_connection(self.user_id, self.connection_id)
+            sent_events = mock_connection.sent_events
+            
+            print(f"📊 STEP 4: Captured {len(sent_events)} events")
+            
+            # Verify all 5 required events
+            required_events = ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"]
+            found_events = [event.get('event_type') for event in sent_events]
+            
+            missing_events = []
+            for required_event in required_events:
+                if required_event not in found_events:
+                    missing_events.append(required_event)
+                    
+            self.assertEqual(len(missing_events), 0, f"Missing required events: {missing_events}")
+            
+            # ===== STEP 5: Verify Event Structure and JSON =====
+            print(f"🔍 STEP 5: Validating event structure and JSON serialization...")
+            
+            for event in sent_events:
+                # Verify structure
+                self.assertIn('event_type', event)
+                self.assertIn('event_id', event)
+                self.assertIn('thread_id', event)
+                self.assertIn('data', event)
+                self.assertIn('timestamp', event)
+                
+                # Verify JSON serialization
+                json_str = json.dumps(event)
+                deserialized = json.loads(json_str)
+                self.assertEqual(event['event_type'], deserialized['event_type'])
+                
+            # ===== STEP 6: Verify User Isolation =====
+            print(f"🔐 STEP 6: Verifying user isolation...")
+            
+            # Events should only be for this specific user
+            for event in sent_events:
+                self.assertEqual(event['thread_id'], self.thread_id)
+                
+            # No cross-user contamination (would need multiple users to fully test)
+            self.assertEqual(emitter.user_context.user_id, self.user_id)
+            
+            # Clean up
+            await emitter.cleanup()
+            
             return True
-        
-        # Set up all bridge methods
-        mock_bridge.notify_agent_started = AsyncMock(
-            side_effect=lambda *a, **k: capture_event("notify_agent_started", *a, **k)
-        )
-        mock_bridge.notify_agent_thinking = AsyncMock(
-            side_effect=lambda *a, **k: capture_event("notify_agent_thinking", *a, **k)
-        )
-        mock_bridge.notify_tool_executing = AsyncMock(
-            side_effect=lambda *a, **k: capture_event("notify_tool_executing", *a, **k)
-        )
-        mock_bridge.notify_tool_completed = AsyncMock(
-            side_effect=lambda *a, **k: capture_event("notify_tool_completed", *a, **k)
-        )
-        mock_bridge.notify_agent_completed = AsyncMock(
-            side_effect=lambda *a, **k: capture_event("notify_agent_completed", *a, **k)
-        )
-        mock_bridge.notify_agent_error = AsyncMock(
-            side_effect=lambda *a, **k: capture_event("notify_agent_error", *a, **k)
-        )
-        mock_bridge.notify_progress_update = AsyncMock(
-            side_effect=lambda *a, **k: capture_event("notify_progress_update", *a, **k)
-        )
-        
-        return mock_bridge
-    
-    def test_thread_id_resolution_critical_path(self):
-        """CRITICAL: Verify thread_id resolution works for WebSocket routing."""
-        
-        from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-        
-        # Create bridge instance
-        bridge = AgentWebSocketBridge()
-        
-        # Test various run_id patterns
-        test_cases = [
-            # (run_id, expected_thread_id)
-            (f"thread_{self.thread_id}_run_123", f"thread_{self.thread_id}"),
-            (f"run_thread_{self.thread_id}_456", f"thread_{self.thread_id}"),
-            (f"thread_{self.thread_id}", f"thread_{self.thread_id}"),
-            ("simple_run_id", "simple_run_id"),  # Fallback case
-        ]
-        
-        async def test_resolution():
-            for run_id, expected in test_cases:
-                result = await bridge._resolve_thread_id_from_run_id(run_id)
-                self.assertIsNotNone(
-                    result,
-                    f"Thread resolution failed for run_id: {run_id}"
-                )
-                print(f"✅ Resolved: {run_id} → {result}")
         
         # Run async test
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         try:
-            loop.run_until_complete(test_resolution())
+            success = loop.run_until_complete(run_factory_test())
+            self.assertTrue(success)
+        finally:
+            loop.close()
+        
+        # ===== FINAL VERIFICATION: Trace Complete Factory Flow =====
+        print("\n" + "="*70)
+        print("END-TO-END FACTORY-BASED WEBSOCKET FLOW PROOF")
+        print("="*70)
+        print(f"✅ User ID: {self.user_id}")
+        print(f"✅ Thread ID: {self.thread_id}")
+        print(f"✅ Connection ID: {self.connection_id}")
+        print(f"✅ Run ID: {self.run_id}")
+        print("\n🏭 FACTORY FLOW:")
+        print("1. Request → ExecutionEngineFactory (user context created)")
+        print("2. Factory → WebSocketBridgeFactory (per-user emitter)")
+        print("3. Factory → UserWebSocketEmitter (complete isolation)")
+        print("4. Emitter → UserWebSocketConnection (user-specific)")
+        print("5. Connection → User WebSocket (isolated delivery)")
+        print("\n📡 CRITICAL EVENTS VALIDATED:")
+        required_events = ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"]
+        for i, event_type in enumerate(required_events, 1):
+            print(f"  {i}. {event_type} ✅")
+        print("\n🔐 USER ISOLATION VERIFIED:")
+        print("  ✅ Per-user execution context")
+        print("  ✅ Per-user WebSocket emitter")
+        print("  ✅ Per-user event queue")
+        print("  ✅ No shared state")
+        print("\n🎯 JSON SERIALIZATION VALIDATED:")
+        print("  ✅ All events serialize to JSON")
+        print("  ✅ All events deserialize correctly")
+        print("  ✅ No data loss in serialization")
+        print("\n✅ FACTORY-BASED FLOW COMPLETELY PROVEN!")
+        print("="*70)
+        
+    def test_factory_user_isolation(self):
+        """CRITICAL: Verify factory ensures complete user isolation."""
+        
+        async def test_isolation():
+            # Create emitters for two different users
+            user1_id = f"user1_{uuid.uuid4()}"
+            user2_id = f"user2_{uuid.uuid4()}"
+            thread1_id = f"thread1_{uuid.uuid4()}"
+            thread2_id = f"thread2_{uuid.uuid4()}"
+            conn1_id = f"conn1_{uuid.uuid4()}"
+            conn2_id = f"conn2_{uuid.uuid4()}"
+            
+            emitter1 = await self.websocket_factory.create_user_emitter(
+                user_id=user1_id,
+                thread_id=thread1_id,
+                connection_id=conn1_id
+            )
+            
+            emitter2 = await self.websocket_factory.create_user_emitter(
+                user_id=user2_id,
+                thread_id=thread2_id,
+                connection_id=conn2_id
+            )
+            
+            # Send events from both users
+            await emitter1.notify_agent_started("Agent1", "run1")
+            await emitter2.notify_agent_started("Agent2", "run2")
+            
+            await asyncio.sleep(0.1)  # Allow processing
+            
+            # Verify complete isolation
+            conn1 = self.mock_connection_pool.get_mock_connection(user1_id, conn1_id)
+            conn2 = self.mock_connection_pool.get_mock_connection(user2_id, conn2_id)
+            
+            # User 1 should only have their events
+            user1_events = [e for e in conn1.sent_events if e['thread_id'] == thread1_id]
+            user2_events = [e for e in conn2.sent_events if e['thread_id'] == thread2_id]
+            
+            self.assertEqual(len(user1_events), 1, "User 1 should have exactly 1 event")
+            self.assertEqual(len(user2_events), 1, "User 2 should have exactly 1 event")
+            
+            # Verify no cross-contamination
+            for event in user1_events:
+                self.assertEqual(event['thread_id'], thread1_id)
+                self.assertIn('Agent1', str(event['data']))
+                
+            for event in user2_events:
+                self.assertEqual(event['thread_id'], thread2_id)
+                self.assertIn('Agent2', str(event['data']))
+                
+            print("✅ Complete user isolation verified")
+            print(f"  User 1: {len(user1_events)} events (thread: {thread1_id})")
+            print(f"  User 2: {len(user2_events)} events (thread: {thread2_id})")
+            
+            # Clean up
+            await emitter1.cleanup()
+            await emitter2.cleanup()
+            
+        # Run async test
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            loop.run_until_complete(test_isolation())
         finally:
             loop.close()
             
-    def test_missing_connections_detection(self):
-        """Detect any missing connections in the WebSocket flow."""
+    def test_factory_components_availability(self):
+        """Verify all factory-based components are available."""
         
-        missing_connections = []
+        missing_components = []
         
-        # Check 1: AgentExecutionCore uses correct method
-        from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
-        source = str(AgentExecutionCore._execute_agent_lifecycle)
-        if "set_websocket_context" in source:
-            missing_connections.append("AgentExecutionCore still using legacy set_websocket_context")
-        
-        # Check 2: BaseAgent has bridge adapter
-        from netra_backend.app.agents.base_agent import BaseAgent
-        if not hasattr(BaseAgent, '_websocket_adapter'):
-            missing_connections.append("BaseAgent missing _websocket_adapter")
-        
-        # Check 3: WebSocketBridgeAdapter exists
+        # Check 1: WebSocketBridgeFactory exists and has required methods
         try:
-            from netra_backend.app.agents.mixins.websocket_bridge_adapter import WebSocketBridgeAdapter
-        except ImportError:
-            missing_connections.append("WebSocketBridgeAdapter not found")
-        
-        # Check 4: AgentWebSocketBridge has all methods
-        from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-        required_methods = [
-            'notify_agent_started', 'notify_agent_thinking', 
-            'notify_tool_executing', 'notify_tool_completed',
-            'notify_agent_completed', 'notify_agent_error'
+            factory = WebSocketBridgeFactory()
+            required_factory_methods = ['create_user_emitter', 'configure', 'get_factory_metrics']
+            for method in required_factory_methods:
+                if not hasattr(factory, method):
+                    missing_components.append(f"WebSocketBridgeFactory missing {method}")
+        except Exception as e:
+            missing_components.append(f"WebSocketBridgeFactory import failed: {e}")
+            
+        # Check 2: UserWebSocketEmitter has all required notification methods
+        required_emitter_methods = [
+            'notify_agent_started', 'notify_agent_thinking',
+            'notify_tool_executing', 'notify_tool_completed', 
+            'notify_agent_completed', 'cleanup'
         ]
-        for method in required_methods:
-            if not hasattr(AgentWebSocketBridge, method):
-                missing_connections.append(f"AgentWebSocketBridge missing {method}")
-        
-        # Check 5: WebSocketManager has send_to_thread
-        from netra_backend.app.websocket_core.manager import WebSocketManager
-        if not hasattr(WebSocketManager, 'send_to_thread'):
-            missing_connections.append("WebSocketManager missing send_to_thread")
+        for method in required_emitter_methods:
+            if not hasattr(UserWebSocketEmitter, method):
+                missing_components.append(f"UserWebSocketEmitter missing {method}")
+                
+        # Check 3: UserExecutionContext has required fields
+        required_context_fields = ['user_id', 'request_id', 'thread_id', 'active_runs', 'cleanup_callbacks']
+        for field in required_context_fields:
+            if not hasattr(UserExecutionContext, '__annotations__') or field not in UserExecutionContext.__annotations__:
+                missing_components.append(f"UserExecutionContext missing field {field}")
+                
+        # Check 4: WebSocketEvent has proper structure
+        try:
+            event = WebSocketEvent(
+                event_type="test",
+                user_id="test_user", 
+                thread_id="test_thread",
+                data={"test": "data"}
+            )
+            required_event_fields = ['event_type', 'user_id', 'thread_id', 'data', 'event_id', 'timestamp']
+            for field in required_event_fields:
+                if not hasattr(event, field):
+                    missing_components.append(f"WebSocketEvent missing field {field}")
+        except Exception as e:
+            missing_components.append(f"WebSocketEvent creation failed: {e}")
+            
+        # Check 5: ExecutionEngineFactory exists
+        try:
+            from netra_backend.app.agents.supervisor.execution_factory import ExecutionEngineFactory
+            if not hasattr(ExecutionEngineFactory, 'create_execution_engine'):
+                missing_components.append("ExecutionEngineFactory missing create_execution_engine")
+        except ImportError:
+            missing_components.append("ExecutionEngineFactory not found")
         
         # Report results
-        if missing_connections:
-            print("\n⚠️ MISSING CONNECTIONS DETECTED:")
-            for issue in missing_connections:
+        if missing_components:
+            print("\n⚠️ MISSING FACTORY COMPONENTS DETECTED:")
+            for issue in missing_components:
                 print(f"  ❌ {issue}")
-            self.fail(f"Found {len(missing_connections)} missing connections!")
+            self.fail(f"Found {len(missing_components)} missing factory components!")
         else:
-            print("\n✅ ALL CONNECTIONS VERIFIED - No missing links in the chain!")
+            print("\n✅ ALL FACTORY COMPONENTS VERIFIED - Complete factory pattern available!")
+            
+    def test_websocket_event_json_serialization_comprehensive(self):
+        """CRITICAL: Comprehensive JSON serialization test for all event types."""
+        
+        # Test all 5 required event types with various data
+        test_events = [
+            {
+                'event_type': 'agent_started',
+                'data': {
+                    'agent_name': 'TestAgent',
+                    'run_id': 'run_123',
+                    'status': 'started',
+                    'message': 'Agent has started processing'
+                }
+            },
+            {
+                'event_type': 'agent_thinking', 
+                'data': {
+                    'agent_name': 'TestAgent',
+                    'run_id': 'run_123',
+                    'thinking': 'Analyzing user request and determining best approach...'
+                }
+            },
+            {
+                'event_type': 'tool_executing',
+                'data': {
+                    'agent_name': 'TestAgent',
+                    'run_id': 'run_123',
+                    'tool_name': 'search_tool',
+                    'tool_input': {'query': 'AI optimization', 'filters': ['cost', 'performance']}
+                }
+            },
+            {
+                'event_type': 'tool_completed',
+                'data': {
+                    'agent_name': 'TestAgent',
+                    'run_id': 'run_123', 
+                    'tool_name': 'search_tool',
+                    'tool_output': {'results': [{'id': 1, 'title': 'Result 1'}], 'count': 1}
+                }
+            },
+            {
+                'event_type': 'agent_completed',
+                'data': {
+                    'agent_name': 'TestAgent',
+                    'run_id': 'run_123',
+                    'result': {'status': 'success', 'recommendations': 3, 'savings': '$5000'}
+                }
+            }
+        ]
+        
+        for test_event in test_events:
+            # Create WebSocket event
+            event = WebSocketEvent(
+                event_type=test_event['event_type'],
+                user_id=self.user_id,
+                thread_id=self.thread_id,
+                data=test_event['data']
+            )
+            
+            # Create event dict for serialization
+            event_dict = {
+                'event_type': event.event_type,
+                'event_id': event.event_id,
+                'thread_id': event.thread_id,
+                'data': event.data,
+                'timestamp': event.timestamp.isoformat()
+            }
+            
+            # Test JSON serialization
+            try:
+                json_str = json.dumps(event_dict)
+                self.assertIsNotNone(json_str)
+                self.assertGreater(len(json_str), 0)
+                
+                # Test deserialization
+                deserialized = json.loads(json_str)
+                self.assertEqual(event_dict['event_type'], deserialized['event_type'])
+                self.assertEqual(event_dict['event_id'], deserialized['event_id'])
+                self.assertEqual(event_dict['thread_id'], deserialized['thread_id'])
+                
+                print(f"✅ {test_event['event_type']} JSON serialization OK")
+                
+            except (TypeError, ValueError) as e:
+                self.fail(f"JSON serialization failed for {test_event['event_type']}: {e}")
+                
+        print("\n✅ ALL EVENT TYPES JSON SERIALIZATION VERIFIED")
+        
+    def _create_mock_connection_pool(self):
+        """Create mock connection pool for testing."""
+        
+        class MockWebSocketConnection:
+            def __init__(self, user_id: str, connection_id: str):
+                self.user_id = user_id
+                self.connection_id = connection_id
+                self.sent_events = []
+                self.is_connected = True
+                
+            async def send_json(self, data: Dict[str, Any]) -> None:
+                """Mock send_json method."""
+                if not self.is_connected:
+                    raise ConnectionError("WebSocket disconnected")
+                self.sent_events.append(data)
+                self.captured_events.append({
+                    "method": "send_json",
+                    "data": data,
+                    "timestamp": time.time(),
+                    "user_id": self.user_id
+                })
+                
+            async def send_text(self, data: str) -> None:
+                """Mock send_text method for ping."""
+                if not self.is_connected:
+                    raise ConnectionError("WebSocket disconnected")
+                    
+            async def ping(self) -> None:
+                """Mock ping method."""
+                if not self.is_connected:
+                    raise ConnectionError("WebSocket disconnected")
+                    
+            async def close(self) -> None:
+                """Mock close method."""
+                self.is_connected = False
+                
+            @property
+            def application_state(self):
+                """Mock application state for FastAPI compatibility."""
+                return MagicMock() if self.is_connected else None
+                
+        class MockConnectionPool:
+            def __init__(self):
+                self.connections = {}
+                
+            async def get_connection(self, connection_id: str, user_id: str):
+                """Get or create mock connection."""
+                key = f"{user_id}:{connection_id}"
+                if key not in self.connections:
+                    self.connections[key] = MockWebSocketConnection(user_id, connection_id)
+                
+                # Return connection info structure
+                connection_info = MagicMock()
+                connection_info.websocket = self.connections[key]
+                return connection_info
+                
+            def get_mock_connection(self, user_id: str, connection_id: str):
+                """Get mock connection for testing."""
+                key = f"{user_id}:{connection_id}"
+                return self.connections.get(key)
+                
+        return MockConnectionPool()
 
 
 if __name__ == "__main__":

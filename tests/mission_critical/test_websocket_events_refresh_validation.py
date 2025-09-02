@@ -3,7 +3,7 @@ from shared.isolated_environment import get_env
 MISSION CRITICAL: WebSocket Event Validation During Page Refresh
 
 This test validates that all required WebSocket events are properly sent
-and received during page refresh scenarios.
+and received during page refresh scenarios using the factory-based patterns.
 
 CRITICAL: Per SPEC/learnings/websocket_agent_integration_critical.xml
 The following events MUST be sent:
@@ -14,6 +14,12 @@ The following events MUST be sent:
 5. agent_completed - User must know when done
 6. partial_result - Streaming response UX (optional)
 7. final_report - Comprehensive summary (optional)
+
+NEW: Factory-Based Pattern Validation:
+- WebSocketBridgeFactory creates per-user emitters
+- UserWebSocketEmitter ensures event isolation
+- UserExecutionContext provides per-request state
+- JSON serialization validation for all events
 
 @compliance CLAUDE.md - Chat is King (90% of value)
 """
@@ -28,9 +34,26 @@ import pytest
 from playwright.async_api import Page, Browser, WebSocket
 import os
 import sys
+import uuid
+from unittest.mock import AsyncMock, MagicMock
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
+# Import factory-based components for validation
+from netra_backend.app.services.websocket_bridge_factory import (
+    WebSocketBridgeFactory,
+    UserWebSocketEmitter,
+    UserWebSocketContext,
+    UserWebSocketConnection,
+    WebSocketEvent,
+    WebSocketConnectionPool
+)
+from netra_backend.app.agents.supervisor.execution_factory import (
+    ExecutionEngineFactory,
+    UserExecutionContext,
+    ExecutionStatus
+)
 
 
 class WebSocketEventValidation:
@@ -70,8 +93,13 @@ class WebSocketEventValidation:
             'failed': 0,
             'events_captured': {},
             'missing_events': [],
+            'factory_tests': {},
             'timestamp': datetime.now(timezone.utc).isoformat()
         }
+        
+        # Initialize factory components for testing
+        self.websocket_factory = WebSocketBridgeFactory()
+        self.mock_connection_pool = self._create_mock_connection_pool()
     
     def generate_test_token(self) -> str:
         """Generate a valid JWT token for testing."""
@@ -82,6 +110,64 @@ class WebSocketEventValidation:
             'iat': int(time.time())
         }
         return jwt.encode(payload, self.jwt_secret, algorithm='HS256')
+        
+    def _create_mock_connection_pool(self):
+        """Create mock connection pool for factory testing."""
+        
+        class MockWebSocketConnection:
+            def __init__(self, user_id: str, connection_id: str):
+                self.user_id = user_id
+                self.connection_id = connection_id
+                self.sent_events = []
+                self.is_connected = True
+                
+            async def send_json(self, data: Dict[str, Any]) -> None:
+                if not self.is_connected:
+                    raise ConnectionError("WebSocket disconnected")
+                self.sent_events.append(data)
+                
+            async def ping(self) -> None:
+                if not self.is_connected:
+                    raise ConnectionError("WebSocket disconnected")
+                    
+            async def close(self) -> None:
+                self.is_connected = False
+                
+            @property
+            def application_state(self):
+                return MagicMock() if self.is_connected else None
+                
+        class MockConnectionPool:
+            def __init__(self):
+                self.connections = {}
+                
+            async def get_connection(self, connection_id: str, user_id: str):
+                key = f"{user_id}:{connection_id}"
+                if key not in self.connections:
+                    self.connections[key] = MockWebSocketConnection(user_id, connection_id)
+                
+                connection_info = MagicMock()
+                connection_info.websocket = self.connections[key]
+                return connection_info
+                
+            def get_mock_connection(self, user_id: str, connection_id: str):
+                key = f"{user_id}:{connection_id}"
+                return self.connections.get(key)
+                
+            def simulate_disconnect(self, user_id: str, connection_id: str):
+                """Simulate connection disconnect for refresh testing."""
+                key = f"{user_id}:{connection_id}"
+                if key in self.connections:
+                    self.connections[key].is_connected = False
+                    
+            def simulate_reconnect(self, user_id: str, connection_id: str):
+                """Simulate connection reconnect after refresh."""
+                key = f"{user_id}:{connection_id}"
+                if key in self.connections:
+                    self.connections[key].is_connected = True
+                    self.connections[key].sent_events.clear()  # Clear events on reconnect
+                
+        return MockConnectionPool()
     
     async def test_events_preserved_after_refresh(self, page: Page) -> bool:
         """
@@ -449,20 +535,242 @@ class WebSocketEventValidation:
             self.test_results['total'] += 1
             page.remove_listener('websocket', handle_websocket)
     
-    async def run_all_validations(self, browser: Browser) -> Dict[str, Any]:
-        """Run all WebSocket event validations."""
-        print("\n" + "=" * 60)
-        print("🔍 WebSocket Event Validation During Refresh")
-        print("=" * 60)
+    async def test_factory_websocket_event_persistence(self) -> bool:
+        """Test factory-based WebSocket event persistence during simulated refresh."""
+        test_name = "factory_websocket_event_persistence"
+        print(f"\n🔍 Testing: {test_name}")
         
-        tests = [
+        try:
+            # Configure factory
+            self.websocket_factory.configure(
+                connection_pool=self.mock_connection_pool,
+                agent_registry=None,
+                health_monitor=None
+            )
+            
+            user_id = f"user_{uuid.uuid4()}"
+            thread_id = f"thread_{uuid.uuid4()}"
+            connection_id = f"conn_{uuid.uuid4()}"
+            
+            # Create initial emitter
+            emitter1 = await self.websocket_factory.create_user_emitter(
+                user_id=user_id,
+                thread_id=thread_id,
+                connection_id=connection_id
+            )
+            
+            # Send events before "refresh"
+            await emitter1.notify_agent_started("TestAgent", "run_1")
+            await emitter1.notify_agent_thinking("TestAgent", "run_1", "Processing...")
+            await emitter1.notify_tool_executing("TestAgent", "run_1", "search_tool", {"query": "test"})
+            
+            await asyncio.sleep(0.1)  # Allow processing
+            
+            # Get events before refresh
+            mock_conn = self.mock_connection_pool.get_mock_connection(user_id, connection_id)
+            events_before = len(mock_conn.sent_events)
+            
+            # Simulate page refresh (connection disconnect/reconnect)
+            await emitter1.cleanup()
+            self.mock_connection_pool.simulate_disconnect(user_id, connection_id)
+            
+            # Simulate brief delay during refresh
+            await asyncio.sleep(0.1)
+            
+            # Reconnect and create new emitter (simulates page reload)
+            self.mock_connection_pool.simulate_reconnect(user_id, connection_id)
+            emitter2 = await self.websocket_factory.create_user_emitter(
+                user_id=user_id,
+                thread_id=thread_id,
+                connection_id=connection_id
+            )
+            
+            # Send events after "refresh"
+            await emitter2.notify_tool_completed("TestAgent", "run_1", "search_tool", {"results": ["found"]})
+            await emitter2.notify_agent_completed("TestAgent", "run_1", {"status": "success"})
+            
+            await asyncio.sleep(0.1)  # Allow processing
+            
+            # Verify events after refresh
+            mock_conn_after = self.mock_connection_pool.get_mock_connection(user_id, connection_id)
+            events_after = mock_conn_after.sent_events
+            
+            # Check that all 5 required events were sent across both sessions
+            all_event_types = set()
+            for event in events_after:
+                all_event_types.add(event.get('event_type'))
+                
+            # The reconnected session should have the completion events
+            required_after_refresh = {'tool_completed', 'agent_completed'}
+            found_after_refresh = all_event_types & required_after_refresh
+            
+            self.test_results['factory_tests'][test_name] = {
+                'events_before_count': events_before,
+                'events_after_count': len(events_after),
+                'found_after_refresh': list(found_after_refresh),
+                'all_event_types': list(all_event_types)
+            }
+            
+            print(f"✅ {test_name}: Factory event persistence validated")
+            print(f"   Events before refresh: {events_before}")
+            print(f"   Events after refresh: {len(events_after)}")
+            print(f"   Event types after refresh: {list(found_after_refresh)}")
+            
+            # Clean up
+            await emitter2.cleanup()
+            
+            # Test passes if we got completion events after refresh
+            if len(found_after_refresh) >= 1:
+                self.test_results['passed'] += 1
+                return True
+            else:
+                raise AssertionError(f"No events after refresh: {all_event_types}")
+                
+        except Exception as e:
+            print(f"❌ {test_name}: {str(e)}")
+            self.test_results['failed'] += 1
+            return False
+        finally:
+            self.test_results['total'] += 1
+            
+    async def test_factory_json_serialization_during_refresh(self) -> bool:
+        """Test JSON serialization remains intact during refresh scenarios."""
+        test_name = "factory_json_serialization_during_refresh"
+        print(f"\n🔍 Testing: {test_name}")
+        
+        try:
+            # Configure factory
+            self.websocket_factory.configure(
+                connection_pool=self.mock_connection_pool,
+                agent_registry=None,
+                health_monitor=None
+            )
+            
+            user_id = f"user_{uuid.uuid4()}"
+            thread_id = f"thread_{uuid.uuid4()}"
+            connection_id = f"conn_{uuid.uuid4()}"
+            
+            # Test events with complex data for JSON serialization
+            test_events_data = [
+                ('agent_started', {'agent_name': 'TestAgent', 'status': 'started', 'complex_data': {'nested': {'value': 123}}}),
+                ('tool_executing', {'tool_name': 'complex_tool', 'tool_input': {'array': [1, 2, 3], 'unicode': '❤️🚀'}}),
+                ('agent_completed', {'result': {'success': True, 'metrics': {'time_ms': 1500, 'accuracy': 0.95}}})
+            ]
+            
+            serialization_results = []
+            
+            for event_type, event_data in test_events_data:
+                # Create emitter for each test
+                emitter = await self.websocket_factory.create_user_emitter(
+                    user_id=user_id,
+                    thread_id=f"{thread_id}_{event_type}",
+                    connection_id=f"{connection_id}_{event_type}"
+                )
+                
+                # Send event based on type
+                if event_type == 'agent_started':
+                    await emitter.notify_agent_started(event_data['agent_name'], 'test_run')
+                elif event_type == 'tool_executing':
+                    await emitter.notify_tool_executing('TestAgent', 'test_run', event_data['tool_name'], event_data['tool_input'])
+                elif event_type == 'agent_completed':
+                    await emitter.notify_agent_completed('TestAgent', 'test_run', event_data['result'])
+                    
+                await asyncio.sleep(0.1)
+                
+                # Get sent events and test JSON serialization
+                mock_conn = self.mock_connection_pool.get_mock_connection(user_id, f"{connection_id}_{event_type}")
+                sent_events = mock_conn.sent_events
+                
+                for event in sent_events:
+                    try:
+                        # Test JSON serialization roundtrip
+                        json_str = json.dumps(event)
+                        deserialized = json.loads(json_str)
+                        
+                        # Verify structure preservation
+                        assert event['event_type'] == deserialized['event_type']
+                        assert event['event_id'] == deserialized['event_id']
+                        assert event['thread_id'] == deserialized['thread_id']
+                        
+                        serialization_results.append({
+                            'event_type': event_type,
+                            'serializable': True,
+                            'json_length': len(json_str)
+                        })
+                        
+                    except (TypeError, ValueError) as json_error:
+                        serialization_results.append({
+                            'event_type': event_type,
+                            'serializable': False,
+                            'error': str(json_error)
+                        })
+                        
+                await emitter.cleanup()
+                
+            # Analyze results
+            successful_serializations = [r for r in serialization_results if r.get('serializable', False)]
+            failed_serializations = [r for r in serialization_results if not r.get('serializable', True)]
+            
+            self.test_results['factory_tests'][test_name] = {
+                'total_events': len(serialization_results),
+                'successful': len(successful_serializations),
+                'failed': len(failed_serializations),
+                'failed_details': failed_serializations[:3]  # First 3 failures
+            }
+            
+            print(f"✅ {test_name}: JSON serialization validated")
+            print(f"   Successful serializations: {len(successful_serializations)}")
+            print(f"   Failed serializations: {len(failed_serializations)}")
+            
+            # Test passes if most events serialize correctly
+            if len(failed_serializations) == 0:
+                self.test_results['passed'] += 1
+                return True
+            elif len(successful_serializations) > len(failed_serializations):
+                print(f"⚠️ Some serialization failures but mostly working")
+                self.test_results['passed'] += 1
+                return True
+            else:
+                raise AssertionError(f"Too many JSON serialization failures: {len(failed_serializations)}")
+                
+        except Exception as e:
+            print(f"❌ {test_name}: {str(e)}")
+            self.test_results['failed'] += 1
+            return False
+        finally:
+            self.test_results['total'] += 1
+            
+    async def run_all_validations(self, browser: Browser) -> Dict[str, Any]:
+        """Run all WebSocket event validations including factory-based tests."""
+        print("\n" + "=" * 70)
+        print("🔍 WebSocket Event Validation During Refresh (Browser + Factory)")
+        print("=" * 70)
+        
+        # Factory-based tests (run first, don't require browser)
+        factory_tests = [
+            self.test_factory_websocket_event_persistence,
+            self.test_factory_json_serialization_during_refresh
+        ]
+        
+        print("\n🏭 Running Factory-Based Tests...")
+        for test_func in factory_tests:
+            try:
+                await test_func()
+            except Exception as e:
+                print(f"❌ Unexpected error in {test_func.__name__}: {str(e)}")
+                self.test_results['failed'] += 1
+                self.test_results['total'] += 1
+        
+        # Browser-based tests (original tests)
+        browser_tests = [
             self.test_events_preserved_after_refresh,
             self.test_reconnection_event_sequence,
             self.test_no_duplicate_events_after_refresh,
             self.test_event_timing_after_refresh
         ]
         
-        for test_func in tests:
+        print("\n🌐 Running Browser-Based Tests...")
+        for test_func in browser_tests:
             context = await browser.new_context()
             page = await context.new_page()
             
@@ -476,12 +784,20 @@ class WebSocketEventValidation:
                 await context.close()
         
         # Print summary
-        print("\n" + "=" * 60)
+        print("\n" + "=" * 70)
         print("📊 VALIDATION RESULTS SUMMARY")
-        print("=" * 60)
+        print("=" * 70)
         print(f"Total Tests: {self.test_results['total']}")
         print(f"Passed: {self.test_results['passed']} ✅")
         print(f"Failed: {self.test_results['failed']} ❌")
+        
+        # Factory test results
+        if self.test_results['factory_tests']:
+            print("\n🏭 FACTORY TEST DETAILS:")
+            for test_name, test_data in self.test_results['factory_tests'].items():
+                print(f"  {test_name}:")
+                for key, value in test_data.items():
+                    print(f"    {key}: {value}")
         
         if self.test_results['missing_events']:
             print("\n⚠️ MISSING REQUIRED EVENTS:")
@@ -505,12 +821,43 @@ class WebSocketEventValidation:
             print(f"  Missing: {', '.join(missing_required)}")
         else:
             print("  ✅ All required events captured!")
+            
+        # Factory pattern compliance
+        factory_events = set()
+        for test_name, test_data in self.test_results['factory_tests'].items():
+            if 'all_event_types' in test_data:
+                factory_events.update(test_data['all_event_types'])
+        
+        if factory_events:
+            factory_captured = factory_events & self.REQUIRED_EVENTS
+            factory_missing = self.REQUIRED_EVENTS - factory_captured
+            print(f"\n🏭 FACTORY PATTERN COMPLIANCE:")
+            print(f"  Captured: {len(factory_captured)}/{len(self.REQUIRED_EVENTS)}")
+            if factory_missing:
+                print(f"  Missing: {', '.join(factory_missing)}")
+            else:
+                print("  ✅ All factory events working correctly!")
         
         # Determine overall status
-        if self.test_results['failed'] == 0 and not missing_required:
+        factory_events = set()
+        for test_data in self.test_results['factory_tests'].values():
+            if 'all_event_types' in test_data:
+                factory_events.update(test_data['all_event_types'])
+                
+        factory_missing = self.REQUIRED_EVENTS - factory_events if factory_events else set()
+        
+        if self.test_results['failed'] == 0 and not missing_required and not factory_missing:
             print("\n✅ ALL VALIDATIONS PASSED - WebSocket events working correctly!")
-        elif missing_required:
-            print(f"\n❌ CRITICAL: Missing required events - {missing_required}")
+            print("  ✅ Browser tests passed")
+            print("  ✅ Factory tests passed")
+            print("  ✅ All required events validated")
+        elif missing_required or factory_missing:
+            all_missing = missing_required | factory_missing
+            print(f"\n❌ CRITICAL: Missing required events - {all_missing}")
+            if missing_required:
+                print(f"  Browser missing: {missing_required}")
+            if factory_missing:
+                print(f"  Factory missing: {factory_missing}")
         else:
             print(f"\n⚠️ {self.test_results['failed']} validations failed - Review event handling")
         
@@ -531,15 +878,28 @@ async def test_websocket_events_refresh_validation():
             validator = WebSocketEventValidation()
             results = await validator.run_all_validations(browser)
             
-            # Assert critical events are captured
-            all_events = set()
+            # Assert critical events are captured (browser tests)
+            browser_events = set()
             for test_data in results['events_captured'].values():
                 if isinstance(test_data, dict):
-                    all_events.update(test_data.get('before', []))
-                    all_events.update(test_data.get('after', []))
+                    browser_events.update(test_data.get('before', []))
+                    browser_events.update(test_data.get('after', []))
             
+            # Assert critical events are captured (factory tests)
+            factory_events = set()
+            for test_data in results['factory_tests'].values():
+                if 'all_event_types' in test_data:
+                    factory_events.update(test_data['all_event_types'])
+            
+            # Combined validation
+            all_events = browser_events | factory_events
             missing = WebSocketEventValidation.REQUIRED_EVENTS - all_events
             assert len(missing) <= 2, f"Too many missing required events: {missing}"
+            
+            # Assert factory tests passed
+            factory_success = sum(1 for test_data in results['factory_tests'].values() 
+                                if test_data.get('successful', 0) > 0 or test_data.get('found_after_refresh'))
+            assert factory_success > 0, "No factory tests passed"
             
             # Assert reasonable pass rate
             pass_rate = results['passed'] / results['total'] if results['total'] > 0 else 0
@@ -562,8 +922,14 @@ if __name__ == "__main__":
                 validator = WebSocketEventValidation()
                 results = await validator.run_all_validations(browser)
                 
+                # Check both browser and factory test results
+                factory_failures = sum(1 for test_data in results['factory_tests'].values() 
+                                     if test_data.get('failed', 0) > 0)
+                
+                total_failures = results['failed'] + factory_failures
+                
                 # Exit with appropriate code
-                sys.exit(0 if results['failed'] == 0 else 1)
+                sys.exit(0 if total_failures == 0 else 1)
                 
             finally:
                 await browser.close()

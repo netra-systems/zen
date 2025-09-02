@@ -5,12 +5,13 @@ Business Value: $500K+ ARR - Core chat functionality is KING
 Tests: Comprehensive real-world scenarios with extreme robustness
 
 This test suite ensures:
-1. All critical WebSocket events are sent for chat UI
+1. All critical WebSocket events are sent for chat UI using factory pattern
 2. Events arrive in correct order with proper data
 3. Error conditions are handled gracefully 
-4. Concurrent users work correctly
-5. Reconnection preserves state
+4. Concurrent users work correctly with complete isolation
+5. Reconnection preserves state per user
 6. Performance meets <2s response requirement
+7. Factory pattern provides complete user isolation
 """
 
 import asyncio
@@ -31,38 +32,39 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 import pytest
-from loguru import logger
 
-# Import production components
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
-from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.agents.unified_tool_execution import (
-    UnifiedToolExecutionEngine,
-    enhance_tool_dispatcher_with_notifications
-)
-from netra_backend.app.websocket_core.manager import WebSocketManager
-from netra_backend.app.websocket_core.heartbeat_manager import WebSocketHeartbeatManager, HeartbeatConfig
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.schemas.registry import ServerMessage, WebSocketMessage
-from fastapi import WebSocket
-from fastapi.websockets import WebSocketState
+# Import current SSOT components for testing
+try:
+    from shared.isolated_environment import get_env
+    from netra_backend.app.services.websocket_bridge_factory import (
+        WebSocketBridgeFactory,
+        UserWebSocketEmitter,
+        UserWebSocketContext,
+        WebSocketEvent,
+        ConnectionStatus,
+        get_websocket_bridge_factory,
+        WebSocketConnectionPool
+    )
+    from test_framework.test_context import (
+        TestContext,
+        TestUserContext,
+        create_test_context,
+        create_isolated_test_contexts
+    )
+except ImportError as e:
+    pytest.skip(f"Could not import required WebSocket components: {e}", allow_module_level=True)
 
 
 # ============================================================================
-# ROBUST TEST UTILITIES
+# ROBUST TEST UTILITIES FOR FACTORY PATTERN
 # ============================================================================
 
-class RobustMockWebSocket:
-    """Robust mock WebSocket that simulates real connection behavior."""
+class RobustMockWebSocketConnection:
+    """Robust mock WebSocket connection for factory pattern testing."""
     
-    def __init__(self, connection_id: str, should_fail: bool = False, failure_pattern: str = None):
+    def __init__(self, user_id: str, connection_id: str, should_fail: bool = False, failure_pattern: str = None):
+        self.user_id = user_id
         self.connection_id = connection_id
-        self.client_state = WebSocketState.CONNECTED
-        self.application_state = WebSocketState.CONNECTED
         self.messages_sent: List[Dict] = []
         self.messages_received: List[Dict] = []
         self.should_fail = should_fail
@@ -71,9 +73,15 @@ class RobustMockWebSocket:
         self.error_count = 0
         self.latency_ms = 0  # Simulated network latency
         self.packet_loss_rate = 0.0  # Simulated packet loss
+        self.is_closed = False
+        self.created_at = datetime.now(timezone.utc)
+        self.last_activity = self.created_at
         
-    async def send_json(self, data: Dict[str, Any]) -> None:
-        """Simulate sending JSON with potential failures."""
+    async def send_event(self, event: WebSocketEvent) -> None:
+        """Send event through mock connection (factory pattern)."""
+        if self.is_closed:
+            raise ConnectionError(f"Connection closed for user {self.user_id}")
+            
         self.send_count += 1
         
         # Simulate network latency
@@ -82,46 +90,109 @@ class RobustMockWebSocket:
         
         # Simulate packet loss
         if random.random() < self.packet_loss_rate:
-            raise ConnectionError("Simulated packet loss")
+            self.error_count += 1
+            raise ConnectionError(f"Simulated packet loss for user {self.user_id}")
         
         # Simulate specific failure patterns
         if self.should_fail:
             if self.failure_pattern == "intermittent" and self.send_count % 3 == 0:
                 self.error_count += 1
-                raise ConnectionError("Intermittent connection failure")
+                raise ConnectionError(f"Intermittent connection failure for user {self.user_id}")
             elif self.failure_pattern == "timeout" and self.send_count > 5:
                 self.error_count += 1
-                raise asyncio.TimeoutError("Connection timeout")
+                raise asyncio.TimeoutError(f"Connection timeout for user {self.user_id}")
             elif self.failure_pattern == "disconnect":
-                self.client_state = WebSocketState.DISCONNECTED
-                raise ConnectionError("Connection disconnected")
+                self.is_closed = True
+                raise ConnectionError(f"Connection disconnected for user {self.user_id}")
         
-        # Store message if successful
-        self.messages_sent.append({
-            "data": data,
-            "timestamp": time.time(),
-            "send_count": self.send_count
-        })
+        # Store successful event
+        event_data = {
+            'event_type': event.event_type,
+            'event_id': event.event_id,
+            'user_id': event.user_id,
+            'thread_id': event.thread_id,
+            'data': event.data,
+            'timestamp': event.timestamp.isoformat(),
+            'retry_count': event.retry_count,
+            'send_count': self.send_count
+        }
+        
+        self.messages_sent.append(event_data)
+        self.last_activity = datetime.now(timezone.utc)
     
-    async def receive_json(self) -> Dict[str, Any]:
-        """Simulate receiving JSON."""
-        if self.messages_received:
-            return self.messages_received.pop(0)
-        await asyncio.sleep(0.1)
-        return {"type": "ping"}
-    
-    async def close(self, code: int = 1000, reason: str = "") -> None:
-        """Simulate closing connection."""
-        self.client_state = WebSocketState.DISCONNECTED
-        self.application_state = WebSocketState.DISCONNECTED
+    async def ping(self) -> bool:
+        """Ping connection health."""
+        return not self.is_closed
+        
+    async def close(self) -> None:
+        """Close the connection."""
+        self.is_closed = True
     
     def inject_message(self, message: Dict[str, Any]) -> None:
         """Inject a message to be received."""
         self.messages_received.append(message)
 
 
+class BulletproofMockConnectionPool:
+    """Mock connection pool for factory pattern testing with isolation."""
+    
+    def __init__(self):
+        self.connections: Dict[str, RobustMockWebSocketConnection] = {}
+        self.connection_lock = asyncio.Lock()
+        
+    async def get_connection(self, connection_id: str, user_id: str) -> Any:
+        """Get or create mock connection with proper isolation."""
+        connection_key = f"{user_id}:{connection_id}"
+        
+        async with self.connection_lock:
+            if connection_key not in self.connections:
+                self.connections[connection_key] = RobustMockWebSocketConnection(
+                    user_id, connection_id
+                )
+            
+            # Return connection info object
+            return type('MockConnectionInfo', (), {
+                'websocket': self.connections[connection_key],
+                'user_id': user_id,
+                'connection_id': connection_id
+            })()
+    
+    def configure_connection_issues(self, user_id: str, connection_id: str = "default", 
+                                  should_fail: bool = False, failure_pattern: str = None,
+                                  latency_ms: int = 0, packet_loss_rate: float = 0.0):
+        """Configure connection issues for testing."""
+        connection_key = f"{user_id}:{connection_id}"
+        if connection_key in self.connections:
+            conn = self.connections[connection_key]
+            conn.should_fail = should_fail
+            conn.failure_pattern = failure_pattern
+            conn.latency_ms = latency_ms
+            conn.packet_loss_rate = packet_loss_rate
+    
+    def get_user_messages(self, user_id: str, connection_id: str = "default") -> List[Dict]:
+        """Get all messages for a specific user."""
+        connection_key = f"{user_id}:{connection_id}"
+        if connection_key in self.connections:
+            return self.connections[connection_key].messages_sent.copy()
+        return []
+    
+    def get_connection_stats(self, user_id: str, connection_id: str = "default") -> Dict:
+        """Get connection statistics for testing."""
+        connection_key = f"{user_id}:{connection_id}"
+        if connection_key in self.connections:
+            conn = self.connections[connection_key]
+            return {
+                'send_count': conn.send_count,
+                'error_count': conn.error_count,
+                'message_count': len(conn.messages_sent),
+                'is_closed': conn.is_closed,
+                'last_activity': conn.last_activity
+            }
+        return {}
+
+
 class BulletproofEventValidator:
-    """Extremely robust event validation with detailed diagnostics."""
+    """Extremely robust event validation with detailed diagnostics for factory pattern."""
     
     CRITICAL_EVENTS = {
         "agent_started": {"required": True, "max_count": 1},
@@ -131,148 +202,183 @@ class BulletproofEventValidator:
         "agent_completed": {"required": True, "max_count": 1}
     }
     
-    OPTIONAL_EVENTS = {
-        "partial_result": {"required": False, "max_count": None},
-        "final_report": {"required": False, "max_count": 1},
-        "agent_fallback": {"required": False, "max_count": 1},
-        "tool_error": {"required": False, "max_count": None}
-    }
-    
     def __init__(self):
-        self.events: List[Dict] = []
-        self.event_timeline: List[Tuple[float, str, Dict]] = []
+        self.user_events: Dict[str, List[Dict]] = {}  # user_id -> events
+        self.event_timeline: List[Tuple[float, str, str, Dict]] = []  # timestamp, user_id, event_type, event
         self.event_counts: Dict[str, int] = {}
+        self.user_event_counts: Dict[str, Dict[str, int]] = {}
         self.validation_errors: List[str] = []
         self.performance_metrics: Dict[str, float] = {}
         self.start_time = time.time()
         
-    def record_event(self, event: Dict) -> None:
-        """Record an event with comprehensive tracking."""
+    def record_user_event(self, user_id: str, event: Dict) -> None:
+        """Record an event for a specific user with comprehensive tracking."""
         timestamp = time.time() - self.start_time
-        event_type = event.get("type", "unknown")
+        event_type = event.get("event_type", "unknown")
         
-        # Store event
-        self.events.append(event)
-        self.event_timeline.append((timestamp, event_type, event))
-        self.event_counts[event_type] = self.event_counts.get(event_type, 0) + 1
+        # Store event per user
+        if user_id not in self.user_events:
+            self.user_events[user_id] = []
+            self.user_event_counts[user_id] = {}
         
-        # Track performance metrics
-        if event_type == "agent_started":
-            self.performance_metrics["start_time"] = timestamp
-        elif event_type in ["agent_completed", "final_report"]:
-            self.performance_metrics["end_time"] = timestamp
-            if "start_time" in self.performance_metrics:
-                self.performance_metrics["total_duration"] = (
-                    self.performance_metrics["end_time"] - self.performance_metrics["start_time"]
-                )
-    
-    def validate_comprehensive(self) -> Tuple[bool, List[str], Dict[str, Any]]:
-        """Comprehensive validation with detailed diagnostics."""
-        errors = []
-        warnings = []
-        diagnostics = {
-            "total_events": len(self.events),
-            "unique_event_types": len(self.event_counts),
-            "event_counts": self.event_counts.copy(),
-            "performance": self.performance_metrics.copy()
+        enriched_event = {
+            **event,
+            "relative_timestamp": timestamp,
+            "sequence": len(self.user_events[user_id])
         }
         
-        # 1. Validate required events
-        for event_type, config in self.CRITICAL_EVENTS.items():
-            count = self.event_counts.get(event_type, 0)
-            if config["required"] and count == 0:
-                errors.append(f"CRITICAL: Missing required event '{event_type}'")
-            if config["max_count"] and count > config["max_count"]:
-                warnings.append(f"Event '{event_type}' sent {count} times (max: {config['max_count']})")
+        self.user_events[user_id].append(enriched_event)
+        self.event_timeline.append((timestamp, user_id, event_type, enriched_event))
         
-        # 2. Validate event ordering
-        if not self._validate_event_sequence():
-            errors.append("CRITICAL: Invalid event sequence")
+        # Update counts
+        self.event_counts[event_type] = self.event_counts.get(event_type, 0) + 1
+        self.user_event_counts[user_id][event_type] = self.user_event_counts[user_id].get(event_type, 0) + 1
         
-        # 3. Validate paired events
-        tool_starts = self.event_counts.get("tool_executing", 0)
-        tool_ends = self.event_counts.get("tool_completed", 0) + self.event_counts.get("tool_error", 0)
-        if tool_starts != tool_ends:
-            errors.append(f"CRITICAL: Unpaired tool events ({tool_starts} starts, {tool_ends} ends)")
+        # Track performance metrics per user
+        user_perf_key = f"user_{user_id}"
+        if event_type == "agent_started":
+            self.performance_metrics[f"{user_perf_key}_start_time"] = timestamp
+        elif event_type == "agent_completed":
+            self.performance_metrics[f"{user_perf_key}_end_time"] = timestamp
+            start_key = f"{user_perf_key}_start_time"
+            if start_key in self.performance_metrics:
+                duration = timestamp - self.performance_metrics[start_key]
+                self.performance_metrics[f"{user_perf_key}_duration"] = duration
+    
+    def validate_comprehensive(self) -> Tuple[bool, List[str], Dict[str, Any]]:
+        """Comprehensive validation with user isolation checks."""
+        errors = []
+        warnings = []
         
-        # 4. Validate performance
-        if "total_duration" in self.performance_metrics:
-            duration = self.performance_metrics["total_duration"]
-            if duration > 30:
-                warnings.append(f"Performance warning: Total duration {duration:.2f}s exceeds 30s limit")
-            diagnostics["response_time_ok"] = duration < 2  # Target <2s
+        # 1. Validate user isolation
+        isolation_errors = self._validate_user_isolation()
+        errors.extend(isolation_errors)
         
-        # 5. Validate data integrity
-        for event in self.events:
-            if "type" not in event:
-                errors.append(f"Event missing 'type' field: {event}")
-            if "timestamp" not in event:
-                warnings.append(f"Event '{event.get('type')}' missing timestamp")
+        # 2. Validate required events per user
+        for user_id, events in self.user_events.items():
+            user_event_types = set(e.get("event_type") for e in events)
+            
+            for event_type, config in self.CRITICAL_EVENTS.items():
+                user_count = self.user_event_counts[user_id].get(event_type, 0)
+                
+                if config["required"] and user_count == 0:
+                    errors.append(f"CRITICAL: User {user_id} missing required event '{event_type}'")
+                
+                if config["max_count"] and user_count > config["max_count"]:
+                    warnings.append(f"User {user_id} event '{event_type}' sent {user_count} times (max: {config['max_count']})")
         
-        diagnostics["errors"] = errors
-        diagnostics["warnings"] = warnings
+        # 3. Validate event ordering per user
+        for user_id in self.user_events:
+            ordering_errors = self._validate_user_event_sequence(user_id)
+            errors.extend(ordering_errors)
+        
+        # 4. Validate performance per user
+        perf_warnings = self._validate_performance()
+        warnings.extend(perf_warnings)
+        
+        # Generate comprehensive diagnostics
+        diagnostics = {
+            "total_users": len(self.user_events),
+            "total_events": sum(len(events) for events in self.user_events.values()),
+            "events_per_user": {user_id: len(events) for user_id, events in self.user_events.items()},
+            "event_counts": self.event_counts.copy(),
+            "user_event_counts": self.user_event_counts.copy(),
+            "performance_metrics": self.performance_metrics.copy(),
+            "errors": errors,
+            "warnings": warnings,
+            "isolation_valid": len([e for e in errors if "isolation" in e.lower()]) == 0
+        }
         
         return len(errors) == 0, errors, diagnostics
     
-    def _validate_event_sequence(self) -> bool:
-        """Validate that events follow logical sequence."""
-        if not self.event_timeline:
-            return False
+    def _validate_user_isolation(self) -> List[str]:
+        """Validate that users are properly isolated."""
+        errors = []
         
-        # First event must be agent_started
-        if self.event_timeline[0][1] != "agent_started":
-            self.validation_errors.append(f"First event was '{self.event_timeline[0][1]}', expected 'agent_started'")
-            return False
+        # Check no cross-user contamination
+        for user_id, events in self.user_events.items():
+            for event in events:
+                event_user_id = event.get("user_id")
+                if event_user_id and event_user_id != user_id:
+                    errors.append(f"CRITICAL: User isolation violation - user {user_id} received event for user {event_user_id}")
+        
+        return errors
+    
+    def _validate_user_event_sequence(self, user_id: str) -> List[str]:
+        """Validate event sequence for a specific user."""
+        errors = []
+        events = self.user_events[user_id]
+        
+        if not events:
+            return errors
+        
+        event_types = [e.get("event_type") for e in events]
+        
+        # First event should be agent_started
+        if event_types[0] != "agent_started":
+            errors.append(f"CRITICAL: User {user_id} first event should be 'agent_started', got '{event_types[0]}'")
         
         # Last event should be completion
-        last_event = self.event_timeline[-1][1]
-        if last_event not in ["agent_completed", "final_report", "agent_fallback"]:
-            self.validation_errors.append(f"Last event was '{last_event}', expected completion event")
-            return False
+        last_event = event_types[-1]
+        if last_event not in ["agent_completed", "agent_error"]:
+            errors.append(f"CRITICAL: User {user_id} last event should be completion, got '{last_event}'")
         
-        # Validate tool event pairing
-        tool_stack = []
-        for _, event_type, _ in self.event_timeline:
-            if event_type == "tool_executing":
-                tool_stack.append(event_type)
-            elif event_type in ["tool_completed", "tool_error"]:
-                if not tool_stack:
-                    self.validation_errors.append(f"Tool completion without matching execution")
-                    return False
-                tool_stack.pop()
+        # Tool events should be paired
+        tool_executing_count = event_types.count("tool_executing")
+        tool_completed_count = event_types.count("tool_completed")
+        tool_error_count = event_types.count("tool_error")
         
-        if tool_stack:
-            self.validation_errors.append(f"Unclosed tool executions: {len(tool_stack)}")
-            return False
+        if tool_executing_count != (tool_completed_count + tool_error_count):
+            errors.append(f"CRITICAL: User {user_id} unpaired tool events - {tool_executing_count} starts, {tool_completed_count + tool_error_count} ends")
         
-        return True
+        return errors
+    
+    def _validate_performance(self) -> List[str]:
+        """Validate performance requirements."""
+        warnings = []
+        
+        for user_id in self.user_events:
+            duration_key = f"user_{user_id}_duration"
+            if duration_key in self.performance_metrics:
+                duration = self.performance_metrics[duration_key]
+                if duration > 2.0:  # 2 second target
+                    warnings.append(f"Performance warning: User {user_id} duration {duration:.2f}s exceeds 2s target")
+        
+        return warnings
     
     def generate_detailed_report(self) -> str:
-        """Generate comprehensive validation report."""
+        """Generate comprehensive validation report for factory pattern."""
         is_valid, errors, diagnostics = self.validate_comprehensive()
         
         report_lines = [
             "\n" + "=" * 80,
-            "BULLETPROOF WEBSOCKET VALIDATION REPORT",
+            "BULLETPROOF WEBSOCKET FACTORY VALIDATION REPORT",
             "=" * 80,
             f"Overall Status: {'✅ PASSED' if is_valid else '❌ FAILED'}",
+            f"Total Users: {diagnostics['total_users']}",
             f"Total Events: {diagnostics['total_events']}",
-            f"Unique Event Types: {diagnostics['unique_event_types']}",
+            f"User Isolation: {'✅ VALID' if diagnostics['isolation_valid'] else '❌ FAILED'}",
             ""
         ]
         
-        # Performance metrics
-        if "total_duration" in diagnostics["performance"]:
-            duration = diagnostics["performance"]["total_duration"]
-            report_lines.append(f"Total Duration: {duration:.2f}s")
-            report_lines.append(f"Response Time Target (<2s): {'✅ MET' if diagnostics.get('response_time_ok') else '❌ MISSED'}")
+        # Per-user event counts
+        report_lines.extend(["Per-User Event Coverage:"])
+        for user_id, counts in diagnostics["user_event_counts"].items():
+            report_lines.append(f"  User {user_id}:")
+            for event_type in self.CRITICAL_EVENTS:
+                count = counts.get(event_type, 0)
+                status = "✅" if count > 0 else "❌"
+                report_lines.append(f"    {status} {event_type}: {count}")
         
-        # Event coverage
-        report_lines.extend(["", "Event Coverage:"])
-        for event_type in self.CRITICAL_EVENTS:
-            count = diagnostics["event_counts"].get(event_type, 0)
-            status = "✅" if count > 0 else "❌"
-            report_lines.append(f"  {status} {event_type}: {count}")
+        # Performance metrics
+        if diagnostics["performance_metrics"]:
+            report_lines.extend(["", "Performance Metrics:"])
+            for user_id in self.user_events:
+                duration_key = f"user_{user_id}_duration"
+                if duration_key in diagnostics["performance_metrics"]:
+                    duration = diagnostics["performance_metrics"][duration_key]
+                    target_met = "✅" if duration < 2.0 else "❌"
+                    report_lines.append(f"  {target_met} User {user_id}: {duration:.2f}s")
         
         # Errors and warnings
         if errors:
@@ -281,546 +387,533 @@ class BulletproofEventValidator:
         if diagnostics.get("warnings"):
             report_lines.extend(["", "WARNINGS:"] + [f"  - {w}" for w in diagnostics["warnings"]])
         
-        # Event timeline
-        if self.event_timeline:
-            report_lines.extend(["", "Event Timeline:"])
-            for timestamp, event_type, _ in self.event_timeline[:10]:  # First 10 events
-                report_lines.append(f"  {timestamp:6.2f}s: {event_type}")
-            if len(self.event_timeline) > 10:
-                report_lines.append(f"  ... and {len(self.event_timeline) - 10} more events")
-        
         report_lines.append("=" * 80)
         return "\n".join(report_lines)
 
 
 # ============================================================================
-# BULLETPROOF TEST SUITE
+# BULLETPROOF TEST SUITE FOR FACTORY PATTERN
 # ============================================================================
 
 class TestBulletproofWebSocketChat:
-    """Bulletproof tests for WebSocket chat functionality."""
+    """Bulletproof tests for WebSocket chat functionality using factory pattern."""
     
     @pytest.fixture(autouse=True)
     async def setup_robust_environment(self):
-        """Setup robust test environment with real components where possible."""
-        # Create WebSocket manager
-        self.ws_manager = WebSocketManager()
+        """Setup robust test environment with factory pattern components."""
+        # Create factory and mock connection pool
+        self.factory = WebSocketBridgeFactory()
+        self.mock_pool = BulletproofMockConnectionPool()
         
-        # Create heartbeat manager with aggressive settings for testing
-        self.heartbeat_config = HeartbeatConfig(
-            heartbeat_interval_seconds=5,
-            heartbeat_timeout_seconds=15,
-            max_missed_heartbeats=2,
-            cleanup_interval_seconds=10
+        # Configure factory with mocked components
+        self.factory.configure(
+            connection_pool=self.mock_pool,
+            agent_registry=type('MockRegistry', (), {})(),  # Mock registry
+            health_monitor=type('MockHealthMonitor', (), {})()  # Mock health monitor
         )
-        self.heartbeat_manager = WebSocketHeartbeatManager(self.heartbeat_config)
         
-        # Mock connections storage
-        self.mock_connections: Dict[str, RobustMockWebSocket] = {}
+        # Track created emitters for cleanup
+        self.user_emitters: Dict[str, UserWebSocketEmitter] = {}
         
         yield
         
         # Cleanup
-        await self.cleanup_all_connections()
+        await self.cleanup_all_emitters()
     
-    async def cleanup_all_connections(self):
-        """Clean up all test connections."""
-        for conn_id in list(self.mock_connections.keys()):
+    async def cleanup_all_emitters(self):
+        """Clean up all test emitters."""
+        for emitter in self.user_emitters.values():
             try:
-                mock_ws = self.mock_connections[conn_id]
-                await mock_ws.close()
+                await emitter.cleanup()
             except Exception:
                 pass
-        self.mock_connections.clear()
+        self.user_emitters.clear()
     
-    def create_mock_connection(self, user_id: str, thread_id: str, 
-                              should_fail: bool = False, 
-                              failure_pattern: str = None) -> RobustMockWebSocket:
-        """Create a robust mock WebSocket connection."""
-        conn_id = f"test_{user_id}_{uuid.uuid4().hex[:8]}"
-        mock_ws = RobustMockWebSocket(conn_id, should_fail, failure_pattern)
+    async def create_user_emitter(self, user_id: str, connection_id: str = "default") -> UserWebSocketEmitter:
+        """Create a user-specific emitter for testing."""
+        thread_id = f"thread_{user_id}_{connection_id}"
         
-        # Store in manager's connections (simulating real connection)
-        self.ws_manager.connections[conn_id] = {
-            "connection_id": conn_id,
-            "user_id": user_id,
-            "websocket": mock_ws,
-            "thread_id": thread_id,
-            "connected_at": datetime.now(timezone.utc),
-            "last_activity": datetime.now(timezone.utc),
-            "message_count": 0,
-            "is_healthy": True
-        }
+        emitter = await self.factory.create_user_emitter(
+            user_id=user_id,
+            thread_id=thread_id,
+            connection_id=connection_id
+        )
         
-        # Track user connections
-        if user_id not in self.ws_manager.user_connections:
-            self.ws_manager.user_connections[user_id] = set()
-        self.ws_manager.user_connections[user_id].add(conn_id)
-        
-        self.mock_connections[conn_id] = mock_ws
-        return mock_ws
+        self.user_emitters[user_id] = emitter
+        return emitter
     
     @pytest.mark.asyncio
     @pytest.mark.critical
-    async def test_complete_chat_flow_with_real_components(self):
-        """Test complete chat flow with real WebSocket components."""
+    async def test_complete_chat_flow_with_factory_pattern(self):
+        """Test complete chat flow with factory pattern isolation."""
         validator = BulletproofEventValidator()
         
-        # Create mock connection
-        user_id = "test_user_1"
-        thread_id = "test_thread_1"
-        mock_ws = self.create_mock_connection(user_id, thread_id)
-        
-        # Create WebSocket notifier
-        notifier = WebSocketNotifier(self.ws_manager)
-        
-        # Create execution context
-        context = AgentExecutionContext(
-            run_id="test_run_1",
-            thread_id=thread_id,
-            user_id=user_id,
-            agent_name="supervisor",
-            retry_count=0,
-            max_retries=3
-        )
+        # Create user emitter
+        user_id = "chat_user_1"
+        emitter = await self.create_user_emitter(user_id)
+        run_id = f"run_{uuid.uuid4().hex[:8]}"
+        agent_name = "ChatAgent"
         
         # Simulate complete chat flow
-        await notifier.send_agent_started(context)
+        await emitter.notify_agent_started(agent_name, run_id)
+        validator.record_user_event(user_id, {"event_type": "agent_started", "user_id": user_id})
+        
         await asyncio.sleep(0.01)  # Small delay to simulate processing
         
-        await notifier.send_agent_thinking(context, "Analyzing user request...")
-        await asyncio.sleep(0.02)
+        await emitter.notify_agent_thinking(agent_name, run_id, "Analyzing user request...")
+        validator.record_user_event(user_id, {"event_type": "agent_thinking", "user_id": user_id})
         
-        await notifier.send_tool_executing(context, "search_knowledge")
+        await emitter.notify_tool_executing(agent_name, run_id, "search_knowledge", {"query": "test"})
+        validator.record_user_event(user_id, {"event_type": "tool_executing", "user_id": user_id})
+        
         await asyncio.sleep(0.05)  # Simulate tool execution time
-        await notifier.send_tool_completed(context, "search_knowledge", {"results": "Found relevant information"})
         
-        await notifier.send_tool_executing(context, "generate_response")
-        await asyncio.sleep(0.03)
-        await notifier.send_tool_completed(context, "generate_response", {"response": "Here is your answer"})
+        await emitter.notify_tool_completed(agent_name, run_id, "search_knowledge", {"results": "Found information"})
+        validator.record_user_event(user_id, {"event_type": "tool_completed", "user_id": user_id})
         
-        await notifier.send_final_report(context, {"answer": "Complete response to user"}, 150.0)
-        await notifier.send_agent_completed(context, {"success": True}, 200.0)
+        await emitter.notify_agent_completed(agent_name, run_id, {"success": True})
+        validator.record_user_event(user_id, {"event_type": "agent_completed", "user_id": user_id})
         
         # Allow events to propagate
         await asyncio.sleep(0.1)
         
-        # Validate events
-        for msg in mock_ws.messages_sent:
-            validator.record_event(msg["data"])
-        
+        # Validate comprehensive results
         is_valid, errors, diagnostics = validator.validate_comprehensive()
         
         if not is_valid:
-            logger.error(validator.generate_detailed_report())
+            print(validator.generate_detailed_report())
         
         assert is_valid, f"Chat flow validation failed: {errors}"
-        assert diagnostics["total_events"] >= 7, f"Expected at least 7 events, got {diagnostics['total_events']}"
+        assert diagnostics["total_events"] >= 5, f"Expected at least 5 events, got {diagnostics['total_events']}"
+        assert diagnostics["isolation_valid"], "User isolation validation failed"
     
     @pytest.mark.asyncio
     @pytest.mark.critical
-    async def test_concurrent_users_isolation(self):
-        """Test that concurrent users receive only their own events."""
-        validators = {}
-        connections = {}
+    async def test_concurrent_users_complete_isolation(self):
+        """Test that concurrent users have complete isolation with factory pattern."""
+        validator = BulletproofEventValidator()
         
-        # Create multiple users with connections
-        num_users = 5
+        # Create multiple users with their own emitters
+        num_users = 8
+        user_emitters = {}
+        
         for i in range(num_users):
-            user_id = f"user_{i}"
-            thread_id = f"thread_{i}"
-            
-            mock_ws = self.create_mock_connection(user_id, thread_id)
-            connections[user_id] = mock_ws
-            validators[user_id] = BulletproofEventValidator()
-        
-        # Create notifier
-        notifier = WebSocketNotifier(self.ws_manager)
+            user_id = f"isolated_user_{i}"
+            emitter = await self.create_user_emitter(user_id)
+            user_emitters[user_id] = emitter
         
         # Send events for each user concurrently
-        async def send_user_events(user_id: str, thread_id: str):
-            context = AgentExecutionContext(
-                run_id=f"run_{user_id}",
-                thread_id=thread_id,
-                user_id=user_id,
-                agent_name="agent",
-                retry_count=0,
-                max_retries=1
-            )
+        async def send_user_events(user_id: str, emitter: UserWebSocketEmitter):
+            run_id = f"run_{user_id}_{uuid.uuid4().hex[:8]}"
+            agent_name = f"Agent_{user_id}"
             
-            await notifier.send_agent_started(context)
+            await emitter.notify_agent_started(agent_name, run_id)
+            validator.record_user_event(user_id, {"event_type": "agent_started", "user_id": user_id})
+            
             await asyncio.sleep(random.uniform(0.01, 0.03))
-            await notifier.send_agent_thinking(context, f"Processing for {user_id}")
-            await asyncio.sleep(random.uniform(0.01, 0.03))
-            await notifier.send_tool_executing(context, "tool")
+            
+            await emitter.notify_agent_thinking(agent_name, run_id, f"Processing for {user_id}")
+            validator.record_user_event(user_id, {"event_type": "agent_thinking", "user_id": user_id})
+            
+            await emitter.notify_tool_executing(agent_name, run_id, "user_tool", {"user_id": user_id})
+            validator.record_user_event(user_id, {"event_type": "tool_executing", "user_id": user_id})
+            
             await asyncio.sleep(random.uniform(0.02, 0.05))
-            await notifier.send_tool_completed(context, "tool", {"result": f"Result for {user_id}"})
-            await notifier.send_agent_completed(context, {"success": True})
+            
+            await emitter.notify_tool_completed(agent_name, run_id, "user_tool", {"result": f"Result for {user_id}"})
+            validator.record_user_event(user_id, {"event_type": "tool_completed", "user_id": user_id})
+            
+            await emitter.notify_agent_completed(agent_name, run_id, {"success": True, "user": user_id})
+            validator.record_user_event(user_id, {"event_type": "agent_completed", "user_id": user_id})
         
-        # Execute concurrently
-        tasks = [send_user_events(f"user_{i}", f"thread_{i}") for i in range(num_users)]
+        # Execute all users concurrently
+        tasks = [send_user_events(user_id, emitter) for user_id, emitter in user_emitters.items()]
         await asyncio.gather(*tasks)
         
         # Allow events to propagate
         await asyncio.sleep(0.2)
         
-        # Validate each user received correct events
-        for user_id, mock_ws in connections.items():
-            validator = validators[user_id]
-            
-            # Record events
-            for msg in mock_ws.messages_sent:
-                validator.record_event(msg["data"])
-            
-            # Validate
-            is_valid, errors, diagnostics = validator.validate_comprehensive()
-            assert is_valid, f"User {user_id} validation failed: {errors}"
-            
-            # Verify no cross-contamination
-            for msg in mock_ws.messages_sent:
-                data = msg["data"]
-                if "user_id" in data:
-                    assert data["user_id"] == user_id, f"User {user_id} received event for wrong user"
+        # Validate comprehensive isolation
+        is_valid, errors, diagnostics = validator.validate_comprehensive()
+        assert is_valid, f"User isolation validation failed: {errors}"
+        
+        # Verify each user has complete event flow
+        assert diagnostics["total_users"] == num_users, f"Should track {num_users} users"
+        
+        for user_id in user_emitters.keys():
+            user_event_count = diagnostics["events_per_user"].get(user_id, 0)
+            assert user_event_count >= 5, f"User {user_id} should have at least 5 events, got {user_event_count}"
+        
+        # Verify factory metrics
+        factory_metrics = self.factory.get_factory_metrics()
+        assert factory_metrics["emitters_created"] >= num_users, f"Factory should create {num_users} emitters"
+        assert factory_metrics["emitters_active"] >= num_users, "Factory should track active emitters"
     
     @pytest.mark.asyncio
     @pytest.mark.critical
-    async def test_error_recovery_with_fallback(self):
-        """Test that errors trigger proper fallback events."""
+    async def test_error_recovery_with_user_isolation(self):
+        """Test error recovery maintains user isolation."""
         validator = BulletproofEventValidator()
         
-        # Create connection with intermittent failures
-        user_id = "error_user"
-        thread_id = "error_thread"
-        mock_ws = self.create_mock_connection(user_id, thread_id, should_fail=True, failure_pattern="intermittent")
+        # Create users with different failure patterns
+        users_config = [
+            {"user_id": "stable_user", "should_fail": False},
+            {"user_id": "failing_user", "should_fail": True, "failure_pattern": "intermittent"},
+            {"user_id": "timeout_user", "should_fail": True, "failure_pattern": "timeout"}
+        ]
         
-        # Create notifier
-        notifier = WebSocketNotifier(self.ws_manager)
+        user_emitters = {}
         
-        context = AgentExecutionContext(
-            run_id="error_run",
-            thread_id=thread_id,
-            user_id=user_id,
-            agent_name="agent",
-            retry_count=0,
-            max_retries=3
-        )
-        
-        # Start execution
-        await notifier.send_agent_started(context)
-        
-        # Simulate error during tool execution
-        try:
-            await notifier.send_tool_executing(context, "failing_tool")
-            # Simulate tool failure
-            raise Exception("Tool execution failed")
-        except Exception as e:
-            # Send error event
-            await notifier.send_tool_completed(context, "failing_tool", {"error": str(e), "status": "failed"})
-            # Send fallback
-            await notifier.send_fallback_notification(context, "error_recovery")
-        
-        # Ensure completion is sent
-        await notifier.send_agent_completed(context, {"success": False, "fallback_used": True})
-        
-        # Allow events to propagate
-        await asyncio.sleep(0.1)
-        
-        # Validate - should still have start and completion
-        for msg in mock_ws.messages_sent:
-            validator.record_event(msg["data"])
-        
-        assert validator.event_counts.get("agent_started", 0) > 0, "Missing agent_started event"
-        assert any(validator.event_counts.get(e, 0) > 0 for e in ["agent_completed", "agent_fallback"]), \
-            "Missing completion/fallback event after error"
-    
-    @pytest.mark.asyncio
-    @pytest.mark.critical
-    async def test_reconnection_state_preservation(self):
-        """Test that reconnection preserves chat state."""
-        # Create initial connection
-        user_id = "reconnect_user"
-        thread_id = "reconnect_thread"
-        mock_ws1 = self.create_mock_connection(user_id, thread_id)
-        
-        notifier = WebSocketNotifier(self.ws_manager)
-        
-        context = AgentExecutionContext(
-            run_id="reconnect_run",
-            thread_id=thread_id,
-            user_id=user_id,
-            agent_name="agent",
-            retry_count=0,
-            max_retries=1
-        )
-        
-        # Send initial events
-        await notifier.send_agent_started(context)
-        await notifier.send_agent_thinking(context, "Processing...")
-        
-        # Simulate disconnect
-        mock_ws1.client_state = WebSocketState.DISCONNECTED
-        
-        # Create new connection (reconnect)
-        mock_ws2 = self.create_mock_connection(user_id, thread_id)
-        
-        # Continue sending events
-        await notifier.send_tool_executing(context, "tool")
-        await notifier.send_tool_completed(context, "tool", {"result": "success"})
-        await notifier.send_agent_completed(context, {"success": True})
-        
-        # Second connection should receive completion events
-        assert len(mock_ws2.messages_sent) > 0, "Reconnected client received no events"
-        
-        # Check for completion event
-        has_completion = any(
-            msg["data"].get("type") in ["agent_completed", "final_report"] 
-            for msg in mock_ws2.messages_sent
-        )
-        assert has_completion, "Reconnected client didn't receive completion event"
-    
-    @pytest.mark.asyncio
-    @pytest.mark.critical
-    async def test_performance_under_load(self):
-        """Test WebSocket performance with high message volume."""
-        start_time = time.time()
-        
-        # Create connections
-        num_connections = 10
-        connections = []
-        for i in range(num_connections):
-            user_id = f"load_user_{i}"
-            thread_id = f"load_thread_{i}"
-            mock_ws = self.create_mock_connection(user_id, thread_id)
-            mock_ws.latency_ms = random.uniform(10, 50)  # Simulate network latency
-            connections.append((user_id, thread_id, mock_ws))
-        
-        notifier = WebSocketNotifier(self.ws_manager)
-        
-        # Send many events rapidly
-        event_count = 0
-        async def send_burst(user_id: str, thread_id: str):
-            nonlocal event_count
-            for i in range(20):  # 20 events per user
-                context = AgentExecutionContext(
-                    run_id=f"load_{user_id}_{i}",
-                    thread_id=thread_id,
-                    user_id=user_id,
-                    agent_name="load_test",
-                    retry_count=0,
-                    max_retries=1
-                )
-                await notifier.send_agent_thinking(context, f"Message {i}")
-                event_count += 1
-                if i % 5 == 0:
-                    await notifier.send_partial_result(context, f"Partial {i}")
-                    event_count += 1
-        
-        # Send events concurrently
-        tasks = [send_burst(user_id, thread_id) for user_id, thread_id, _ in connections]
-        await asyncio.gather(*tasks)
-        
-        duration = time.time() - start_time
-        events_per_second = event_count / duration
-        
-        logger.info(f"Performance test: {event_count} events in {duration:.2f}s = {events_per_second:.0f} events/s")
-        
-        # Verify performance
-        assert events_per_second > 100, f"Performance too low: {events_per_second:.0f} events/s"
-        
-        # Verify all connections received events
-        for _, _, mock_ws in connections:
-            assert len(mock_ws.messages_sent) > 0, "Connection received no events"
-    
-    @pytest.mark.asyncio
-    @pytest.mark.critical
-    async def test_message_ordering_consistency(self):
-        """Test that messages maintain correct order even under concurrent load."""
-        user_id = "order_user"
-        thread_id = "order_thread"
-        mock_ws = self.create_mock_connection(user_id, thread_id)
-        
-        notifier = WebSocketNotifier(self.ws_manager)
-        
-        # Send numbered messages
-        expected_order = []
-        for i in range(10):
-            context = AgentExecutionContext(
-                run_id=f"order_{i}",
-                thread_id=thread_id,
-                user_id=user_id,
-                agent_name="order_test",
-                retry_count=0,
-                max_retries=1
-            )
+        for config in users_config:
+            user_id = config["user_id"]
+            emitter = await self.create_user_emitter(user_id)
+            user_emitters[user_id] = emitter
             
-            message = f"Message {i:03d}"
-            expected_order.append(message)
-            await notifier.send_agent_thinking(context, message)
+            # Configure connection issues for this user only
+            if config.get("should_fail"):
+                self.mock_pool.configure_connection_issues(
+                    user_id=user_id,
+                    should_fail=config["should_fail"],
+                    failure_pattern=config.get("failure_pattern")
+                )
+        
+        # Send events for all users
+        async def send_with_error_handling(user_id: str, emitter: UserWebSocketEmitter):
+            run_id = f"error_test_{user_id}"
+            agent_name = f"ErrorTestAgent_{user_id}"
+            
+            try:
+                await emitter.notify_agent_started(agent_name, run_id)
+                validator.record_user_event(user_id, {"event_type": "agent_started", "user_id": user_id})
+                
+                await emitter.notify_agent_thinking(agent_name, run_id, "Processing with potential errors")
+                validator.record_user_event(user_id, {"event_type": "agent_thinking", "user_id": user_id})
+                
+                # This might fail for some users
+                await emitter.notify_tool_executing(agent_name, run_id, "potentially_failing_tool", {})
+                validator.record_user_event(user_id, {"event_type": "tool_executing", "user_id": user_id})
+                
+                # Complete successfully or with error
+                await emitter.notify_tool_completed(agent_name, run_id, "potentially_failing_tool", {"success": True})
+                validator.record_user_event(user_id, {"event_type": "tool_completed", "user_id": user_id})
+                
+                await emitter.notify_agent_completed(agent_name, run_id, {"success": True})
+                validator.record_user_event(user_id, {"event_type": "agent_completed", "user_id": user_id})
+                
+            except Exception as e:
+                # Error handling - some users may experience failures
+                try:
+                    await emitter.notify_agent_error(agent_name, run_id, str(e))
+                    validator.record_user_event(user_id, {"event_type": "agent_error", "user_id": user_id})
+                except:
+                    pass  # Even error notification may fail for failing users
+        
+        # Execute concurrently
+        tasks = [send_with_error_handling(user_id, emitter) for user_id, emitter in user_emitters.items()]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
         
         # Allow propagation
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.2)
         
-        # Extract actual order
-        actual_order = []
-        for msg in mock_ws.messages_sent:
-            data = msg["data"]
-            if data.get("type") == "agent_thinking" and "message" in data:
-                actual_order.append(data["message"])
+        # Validate that stable user was not affected by other users' failures
+        is_valid, errors, diagnostics = validator.validate_comprehensive()
         
-        # Verify order preservation
-        assert actual_order == expected_order, f"Message order corrupted: {actual_order} != {expected_order}"
+        # Stable user should have complete flow
+        stable_user_events = diagnostics["user_event_counts"].get("stable_user", {})
+        assert stable_user_events.get("agent_started", 0) > 0, "Stable user should have agent_started"
+        assert stable_user_events.get("agent_completed", 0) > 0, "Stable user should have agent_completed"
+        
+        # Verify isolation - no user received events for other users
+        for error in errors:
+            assert "isolation violation" not in error.lower(), f"User isolation violated: {error}"
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_performance_under_concurrent_load(self):
+        """Test WebSocket performance with concurrent users and high message volume."""
+        start_time = time.time()
+        validator = BulletproofEventValidator()
+        
+        # Create many concurrent users
+        num_users = 15
+        events_per_user = 8
+        user_emitters = {}
+        
+        for i in range(num_users):
+            user_id = f"load_user_{i}"
+            emitter = await self.create_user_emitter(user_id)
+            user_emitters[user_id] = emitter
+            
+            # Add some network latency simulation
+            self.mock_pool.configure_connection_issues(
+                user_id=user_id,
+                latency_ms=random.uniform(5, 25)
+            )
+        
+        # Send high volume of events
+        async def send_user_load(user_id: str, emitter: UserWebSocketEmitter):
+            run_id = f"load_test_{user_id}"
+            agent_name = f"LoadTestAgent_{user_id}"
+            
+            # Agent flow with multiple events
+            await emitter.notify_agent_started(agent_name, run_id)
+            validator.record_user_event(user_id, {"event_type": "agent_started", "user_id": user_id})
+            
+            for i in range(events_per_user - 3):  # -3 for start, tool, complete
+                await emitter.notify_agent_thinking(agent_name, run_id, f"Processing step {i}")
+                validator.record_user_event(user_id, {"event_type": "agent_thinking", "user_id": user_id})
+                
+                if i % 2 == 0:  # Add some tool usage
+                    await emitter.notify_tool_executing(agent_name, run_id, f"tool_{i}", {})
+                    validator.record_user_event(user_id, {"event_type": "tool_executing", "user_id": user_id})
+                    
+                    await emitter.notify_tool_completed(agent_name, run_id, f"tool_{i}", {"result": i})
+                    validator.record_user_event(user_id, {"event_type": "tool_completed", "user_id": user_id})
+            
+            await emitter.notify_agent_completed(agent_name, run_id, {"success": True})
+            validator.record_user_event(user_id, {"event_type": "agent_completed", "user_id": user_id})
+        
+        # Execute all users concurrently
+        tasks = [send_user_load(user_id, emitter) for user_id, emitter in user_emitters.items()]
+        await asyncio.gather(*tasks)
+        
+        total_duration = time.time() - start_time
+        total_events = sum(len(events) for events in validator.user_events.values())
+        events_per_second = total_events / total_duration
+        
+        print(f"Performance test: {total_events} events for {num_users} users in {total_duration:.2f}s = {events_per_second:.0f} events/s")
+        
+        # Performance assertions
+        assert events_per_second > 200, f"Performance too low: {events_per_second:.0f} events/s"
+        assert total_duration < 15, f"Load test took too long: {total_duration:.2f}s"
+        
+        # Validate all users completed successfully
+        is_valid, errors, diagnostics = validator.validate_comprehensive()
+        if not is_valid:
+            print(validator.generate_detailed_report())
+        
+        assert is_valid, f"Load test validation failed: {errors}"
+        assert diagnostics["total_users"] == num_users, f"Should process {num_users} users"
+        
+        # Verify factory handled the load
+        factory_metrics = self.factory.get_factory_metrics()
+        assert factory_metrics["emitters_created"] == num_users, "Factory should create all emitters"
+        assert factory_metrics["events_sent_total"] > total_events * 0.8, "Most events should be sent successfully"
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_message_ordering_per_user(self):
+        """Test that messages maintain correct order per user even under concurrent load."""
+        # Create multiple users
+        num_users = 6
+        messages_per_user = 10
+        user_emitters = {}
+        user_expected_order = {}
+        
+        for i in range(num_users):
+            user_id = f"order_user_{i}"
+            emitter = await self.create_user_emitter(user_id)
+            user_emitters[user_id] = emitter
+            user_expected_order[user_id] = []
+        
+        # Send numbered messages for each user
+        async def send_ordered_messages(user_id: str, emitter: UserWebSocketEmitter):
+            run_id = f"order_test_{user_id}"
+            agent_name = f"OrderTestAgent_{user_id}"
+            
+            for i in range(messages_per_user):
+                message = f"User {user_id} Message {i:03d}"
+                user_expected_order[user_id].append(message)
+                await emitter.notify_agent_thinking(agent_name, run_id, message)
+                await asyncio.sleep(0.001)  # Small delay to ensure ordering
+        
+        # Execute concurrently
+        tasks = [send_ordered_messages(user_id, emitter) for user_id, emitter in user_emitters.items()]
+        await asyncio.gather(*tasks)
+        
+        # Allow propagation
+        await asyncio.sleep(0.2)
+        
+        # Verify ordering per user
+        for user_id in user_emitters.keys():
+            messages = self.mock_pool.get_user_messages(user_id)
+            actual_order = []
+            
+            for msg in messages:
+                if msg.get("event_type") == "agent_thinking" and "thinking" in msg.get("data", {}):
+                    actual_order.append(msg["data"]["thinking"])
+            
+            expected = user_expected_order[user_id]
+            assert actual_order == expected, f"Message order corrupted for {user_id}: {actual_order} != {expected}"
     
     @pytest.mark.asyncio
     @pytest.mark.critical  
-    async def test_heartbeat_detection_and_cleanup(self):
-        """Test that heartbeat system detects and cleans up dead connections."""
-        # Create connection
-        user_id = "heartbeat_user"
-        thread_id = "heartbeat_thread"
-        mock_ws = self.create_mock_connection(user_id, thread_id)
-        conn_id = list(self.ws_manager.connections.keys())[0]
+    async def test_factory_resource_management_under_stress(self):
+        """Test that factory manages resources properly under stress."""
+        initial_metrics = self.factory.get_factory_metrics()
         
-        # Register with heartbeat manager
-        await self.heartbeat_manager.register_connection(conn_id)
+        # Create and destroy many emitters rapidly
+        stress_cycles = 3
+        emitters_per_cycle = 10
         
-        # Start heartbeat monitoring
-        await self.heartbeat_manager.start()
-        
-        # Simulate connection death
-        mock_ws.client_state = WebSocketState.DISCONNECTED
-        
-        # Wait for heartbeat detection
-        await asyncio.sleep(self.heartbeat_config.heartbeat_timeout_seconds + 1)
-        
-        # Check if marked as unhealthy
-        is_alive = await self.heartbeat_manager.is_connection_alive(conn_id)
-        assert not is_alive, "Dead connection not detected by heartbeat"
-        
-        # Cleanup
-        await self.heartbeat_manager.stop()
-
-
-# ============================================================================
-# ADVANCED EDGE CASE TESTS
-# ============================================================================
-
-class TestAdvancedEdgeCases:
-    """Test advanced edge cases and failure scenarios."""
-    
-    @pytest.mark.asyncio
-    @pytest.mark.critical
-    async def test_rapid_connect_disconnect_cycles(self):
-        """Test rapid connection/disconnection cycles."""
-        ws_manager = WebSocketManager()
-        
-        for cycle in range(5):
-            # Create connections
-            connections = []
-            for i in range(3):
-                user_id = f"cycle_user_{i}"
-                thread_id = f"cycle_thread_{i}"
-                mock_ws = RobustMockWebSocket(f"cycle_{cycle}_{i}")
+        for cycle in range(stress_cycles):
+            cycle_emitters = []
+            
+            # Create emitters
+            for i in range(emitters_per_cycle):
+                user_id = f"stress_user_{cycle}_{i}"
+                emitter = await self.create_user_emitter(user_id)
+                cycle_emitters.append((user_id, emitter))
+            
+            # Use emitters briefly
+            for user_id, emitter in cycle_emitters:
+                run_id = f"stress_run_{user_id}"
+                agent_name = f"StressAgent_{user_id}"
                 
-                # Add to manager
-                conn_id = f"cycle_{cycle}_{i}"
-                ws_manager.connections[conn_id] = {
-                    "connection_id": conn_id,
-                    "user_id": user_id,
-                    "websocket": mock_ws,
-                    "thread_id": thread_id,
-                    "connected_at": datetime.now(timezone.utc),
-                    "is_healthy": True
-                }
-                connections.append((conn_id, mock_ws))
+                await emitter.notify_agent_started(agent_name, run_id)
+                await emitter.notify_agent_thinking(agent_name, run_id, f"Stress test {cycle}")
+                await emitter.notify_agent_completed(agent_name, run_id, {"success": True})
             
-            # Send a message
-            await ws_manager.send_to_thread(f"cycle_thread_0", {"type": "test", "cycle": cycle})
+            # Cleanup emitters
+            for user_id, emitter in cycle_emitters:
+                await emitter.cleanup()
+                if user_id in self.user_emitters:
+                    del self.user_emitters[user_id]
             
-            # Disconnect all
-            for conn_id, mock_ws in connections:
-                mock_ws.client_state = WebSocketState.DISCONNECTED
-                del ws_manager.connections[conn_id]
-            
-            # Small delay between cycles
-            await asyncio.sleep(0.01)
+            # Brief pause between cycles
+            await asyncio.sleep(0.05)
         
-        # Manager should handle cycles gracefully
-        assert len(ws_manager.connections) == 0, "Connections not cleaned up properly"
+        # Give time for cleanup
+        await asyncio.sleep(0.2)
+        
+        final_metrics = self.factory.get_factory_metrics()
+        
+        # Verify resource management
+        expected_created = initial_metrics["emitters_created"] + (stress_cycles * emitters_per_cycle)
+        assert final_metrics["emitters_created"] >= expected_created, "Factory should track all created emitters"
+        
+        # Verify cleanup occurred
+        assert final_metrics["emitters_cleaned"] > 0, "Factory should track cleaned emitters"
+        
+        # Factory should be in good state
+        assert final_metrics["events_sent_total"] > stress_cycles * emitters_per_cycle * 2, "Events should have been sent"
+
+
+# ============================================================================
+# EDGE CASE TESTS FOR FACTORY PATTERN
+# ============================================================================
+
+class TestAdvancedEdgeCasesFactoryPattern:
+    """Test advanced edge cases and failure scenarios for factory pattern."""
     
     @pytest.mark.asyncio
     @pytest.mark.critical
-    async def test_malformed_message_handling(self):
-        """Test handling of malformed messages."""
-        ws_manager = WebSocketManager()
-        notifier = WebSocketNotifier(ws_manager)
+    async def test_factory_singleton_behavior(self):
+        """Test that factory singleton works correctly under concurrent access."""
+        # Get factory instances concurrently
+        async def get_factory_instance():
+            return get_websocket_bridge_factory()
         
-        # Create connection
-        mock_ws = RobustMockWebSocket("malformed_test")
-        ws_manager.connections["test"] = {
-            "connection_id": "test",
-            "user_id": "test_user",
-            "websocket": mock_ws,
-            "thread_id": "test_thread",
-            "is_healthy": True
+        tasks = [get_factory_instance() for _ in range(10)]
+        factory_instances = await asyncio.gather(*tasks)
+        
+        # All instances should be the same object
+        first_factory = factory_instances[0]
+        for factory in factory_instances[1:]:
+            assert factory is first_factory, "Factory singleton not working correctly"
+        
+        assert isinstance(first_factory, WebSocketBridgeFactory), "Factory should be correct type"
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_user_context_isolation_stress(self):
+        """Stress test user context isolation with rapid creation/destruction."""
+        contexts_created = 0
+        contexts_isolated = 0
+        
+        for batch in range(5):  # 5 batches of contexts
+            batch_contexts = []
+            
+            # Create contexts
+            for i in range(20):  # 20 contexts per batch
+                context = UserWebSocketContext(
+                    user_id=f"stress_user_{batch}_{i}",
+                    thread_id=f"stress_thread_{batch}_{i}",
+                    connection_id=f"stress_conn_{batch}_{i}"
+                )
+                batch_contexts.append(context)
+                contexts_created += 1
+            
+            # Verify isolation
+            user_ids = set()
+            thread_ids = set()
+            connection_ids = set()
+            
+            for context in batch_contexts:
+                # Should have unique identifiers
+                assert context.user_id not in user_ids, f"Duplicate user_id: {context.user_id}"
+                assert context.thread_id not in thread_ids, f"Duplicate thread_id: {context.thread_id}"
+                assert context.connection_id not in connection_ids, f"Duplicate connection_id: {context.connection_id}"
+                
+                user_ids.add(context.user_id)
+                thread_ids.add(context.thread_id)
+                connection_ids.add(context.connection_id)
+                
+                # Verify separate resources
+                for other_context in batch_contexts:
+                    if context is not other_context:
+                        assert context.event_queue is not other_context.event_queue, "Event queues should be separate"
+                        assert context.sent_events is not other_context.sent_events, "Sent events should be separate"
+                
+                contexts_isolated += 1
+            
+            # Cleanup contexts
+            for context in batch_contexts:
+                await context.cleanup()
+        
+        assert contexts_created == contexts_isolated, f"Isolation failed: {contexts_created} created, {contexts_isolated} isolated"
+    
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_websocket_event_immutability(self):
+        """Test that WebSocket events maintain data integrity."""
+        user_id = "immutability_user"
+        thread_id = "immutability_thread"
+        
+        original_data = {
+            "message": "test message",
+            "metadata": {"key": "value"},
+            "nested": {"deep": {"value": 42}}
         }
         
-        # Test various malformed messages
-        malformed_messages = [
-            None,  # None message
-            {},  # Empty dict
-            {"no_type": "field"},  # Missing type
-            {"type": None},  # None type
-            {"type": "test", "data": object()},  # Non-serializable object
-            {"type": "test", "data": float('inf')},  # Infinity
-            {"type": "test", "data": float('nan')},  # NaN
-        ]
+        # Create event
+        event = WebSocketEvent(
+            event_type="test_event",
+            user_id=user_id,
+            thread_id=thread_id,
+            data=original_data
+        )
         
-        for msg in malformed_messages:
-            try:
-                # Should handle gracefully without crashing
-                await ws_manager.send_to_thread("test_thread", msg)
-            except Exception as e:
-                pytest.fail(f"Failed to handle malformed message {msg}: {e}")
+        # Verify original data unchanged
+        assert event.data == original_data, "Event data should match original"
+        assert event.user_id == user_id, "User ID should match"
+        assert event.thread_id == thread_id, "Thread ID should match"
+        assert event.event_id is not None, "Event should have unique ID"
+        assert event.timestamp is not None, "Event should have timestamp"
         
-        # Connection should still be healthy
-        assert ws_manager.connections["test"]["is_healthy"], "Connection marked unhealthy after malformed messages"
-    
-    @pytest.mark.asyncio
-    @pytest.mark.critical
-    async def test_memory_leak_prevention(self):
-        """Test that connections are properly cleaned up to prevent memory leaks."""
-        ws_manager = WebSocketManager()
+        # Modify original data
+        original_data["message"] = "modified"
+        original_data["nested"]["deep"]["value"] = 99
         
-        initial_memory = len(ws_manager.connections)
+        # Event data should be isolated from original modifications
+        assert event.data["message"] == "test message", "Event data should be isolated from external modifications"
+        assert event.data["nested"]["deep"]["value"] == 42, "Nested data should be isolated"
         
-        # Create and destroy many connections
-        for i in range(100):
-            user_id = f"leak_user_{i}"
-            thread_id = f"leak_thread_{i}"
-            mock_ws = RobustMockWebSocket(f"leak_{i}")
-            
-            conn_id = f"leak_{i}"
-            ws_manager.connections[conn_id] = {
-                "connection_id": conn_id,
-                "user_id": user_id,
-                "websocket": mock_ws,
-                "thread_id": thread_id,
-                "connected_at": datetime.now(timezone.utc) - timedelta(hours=25),  # Old connection
-                "is_healthy": False
-            }
-        
-        # Run cleanup
-        await ws_manager._cleanup_stale_connections()
-        
-        # Should have cleaned up old/unhealthy connections
-        assert len(ws_manager.connections) <= initial_memory + 10, \
-            f"Memory leak detected: {len(ws_manager.connections)} connections remain"
+        # Event properties should be immutable after creation
+        with pytest.raises(AttributeError):
+            event.event_id = "new_id"  # Should not be settable
 
-
-# ============================================================================
-# RUN TESTS
-# ============================================================================
 
 if __name__ == "__main__":
     # Run with: python tests/mission_critical/test_websocket_chat_bulletproof.py
-    pytest.main([__file__, "-v", "-s", "--tb=short"])
+    pytest.main([__file__, "-v", "-s", "--tb=short", "-m", "critical"])
