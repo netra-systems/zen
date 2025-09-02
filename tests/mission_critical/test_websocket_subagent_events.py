@@ -35,10 +35,10 @@ from loguru import logger
 from test_framework.real_services import get_real_services, RealServicesManager
 from test_framework.environment_isolation import isolated_test_env
 
-# Import production components for real testing
+# Import production components for real testing with factory pattern
+from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory, UserWebSocketEmitter
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
-from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.agents.state import DeepAgentState
 
 # Import available sub-agent classes
@@ -66,23 +66,32 @@ class RealWebSocketEventValidator:
         "agent_completed"     # Sub-agent finishes
     }
     
-    def __init__(self, connection_id: str, timeout: float = 30.0):
-        self.connection_id = connection_id
+    def __init__(self, user_id: str, thread_id: str, timeout: float = 30.0):
+        self.user_id = user_id
+        self.thread_id = thread_id
         self.timeout = timeout
         self.events: List[Dict] = []
         self.event_timeline: List[tuple] = []  # (timestamp, event_type, event)
         self.start_time = time.time()
         self.validation_errors: List[str] = []
         
-    def record_event(self, event: Dict) -> None:
+    def record_event(self, event_type: str, data: Dict[str, Any]) -> None:
         """Record WebSocket event with timestamp."""
         timestamp = time.time() - self.start_time
-        event_type = event.get("type", "unknown")
+        
+        event = {
+            "type": event_type,
+            "user_id": self.user_id,
+            "thread_id": self.thread_id,
+            "data": data,
+            "timestamp": timestamp,
+            "received_at": time.time()
+        }
         
         self.events.append(event)
         self.event_timeline.append((timestamp, event_type, event))
         
-        logger.info(f"📡 Event: {event_type} at {timestamp:.2f}s - {event.get('message', '')}")
+        logger.info(f"📡 Event: {event_type} at {timestamp:.2f}s - {data.get('message', '')}")
         
     def validate_basic_sub_agent_flow(self) -> tuple[bool, List[str]]:
         """Validate that basic sub-agent WebSocket event flow occurred correctly."""
@@ -159,14 +168,14 @@ Required Events Coverage:
 # ============================================================================
 
 class RealSubAgentExecutor:
-    """Executes real sub-agents with proper WebSocket integration."""
+    """Executes real sub-agents with proper WebSocket integration using factory pattern."""
     
     def __init__(self, real_services: RealServicesManager):
         self.real_services = real_services
         
-    async def create_sub_agent_with_websocket(self, agent_class, websocket_manager: WebSocketManager, 
-                                            connection_id: str) -> BaseAgent:
-        """Create a sub-agent instance with WebSocket integration."""
+    async def create_sub_agent_with_websocket(self, agent_class, factory: WebSocketBridgeFactory, 
+                                            user_id: str, thread_id: str) -> tuple[BaseAgent, UserWebSocketEmitter]:
+        """Create a sub-agent instance with WebSocket integration using factory pattern."""
         
         # Create a simplified LLM manager for testing
         class TestLLMManager:
@@ -179,6 +188,9 @@ class RealSubAgentExecutor:
                     "confidence": 0.9
                 }
         
+        # Create WebSocket emitter for this specific user
+        emitter = await factory.create_user_emitter(user_id, thread_id, connection_id=f"conn_{user_id}")
+        
         # Create agent instance
         if agent_class == TriageSubAgent:
             agent = TriageSubAgent(llm_manager=TestLLMManager())
@@ -189,40 +201,48 @@ class RealSubAgentExecutor:
         else:
             # Generic sub-agent for testing
             class TestSubAgent(BaseAgent):
+                def __init__(self, name: str):
+                    super().__init__()
+                    self.name = name
+                    self.emitter = None
+                    
+                def set_emitter(self, emitter: UserWebSocketEmitter):
+                    self.emitter = emitter
+                    
                 async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool = False):
-                    # Emit events manually for testing
-                    if hasattr(self, 'emit_thinking'):
-                        await self.emit_thinking("Processing test request...")
-                        
-                    if hasattr(self, 'emit_tool_executing'):
-                        await self.emit_tool_executing("test_tool", {"param": "value"})
+                    if self.emitter:
+                        # Emit required events using factory pattern
+                        await self.emitter.notify_agent_started(self.name, {"status": "started"})
+                        await self.emitter.notify_agent_thinking("Processing test request...")
+                        await self.emitter.notify_tool_executing("test_tool", {"param": "value"})
                         await asyncio.sleep(0.1)  # Simulate tool execution
-                        await self.emit_tool_completed("test_tool", {"result": "success"})
+                        await self.emitter.notify_tool_completed("test_tool", {"result": "success"})
+                        await self.emitter.notify_agent_completed(self.name, {"result": "Test execution completed", "status": "success"})
                         
                     return {"result": "Test execution completed", "status": "success"}
                     
             agent = TestSubAgent(name=f"Test{agent_class.__name__}")
         
-        # Set WebSocket context for event emission
-        agent.websocket_manager = websocket_manager
-        agent.user_id = connection_id
+        # Set emitter on agent for event emission
+        if hasattr(agent, 'set_emitter'):
+            agent.set_emitter(emitter)
         
-        return agent
+        return agent, emitter
         
-    async def execute_sub_agent_flow(self, agent: BaseAgent, connection_id: str) -> None:
+    async def execute_sub_agent_flow(self, agent: BaseAgent, user_id: str, thread_id: str) -> None:
         """Execute a complete sub-agent flow with WebSocket events."""
         
         # Create state for execution
         state = DeepAgentState()
-        state.user_request = f"Test request for {agent.name}"
-        state.chat_thread_id = connection_id
-        state.user_id = connection_id
+        state.user_request = f"Test request for {getattr(agent, 'name', 'TestAgent')}"
+        state.chat_thread_id = thread_id
+        state.user_id = user_id
         
         # Generate unique run ID
         run_id = f"test-run-{uuid.uuid4().hex[:8]}"
         
         # Execute the agent with stream updates enabled
-        logger.info(f"Executing {agent.name} with WebSocket events...")
+        logger.info(f"Executing {getattr(agent, 'name', 'TestAgent')} with WebSocket events...")
         
         try:
             result = await agent.execute(state, run_id, stream_updates=True)
