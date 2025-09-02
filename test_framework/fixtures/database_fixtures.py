@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Database-related test fixtures - Single Source of Truth for Test Database Sessions.
 

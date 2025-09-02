@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Test decorators for feature flags and conditional testing.
 
 This module provides decorators for managing test execution based on feature flags,

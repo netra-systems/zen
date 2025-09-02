@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Configuration management for the unified test framework.
 
@@ -220,9 +221,9 @@ class ConfigurationManager(IConfigurationManager):
         
         # Add GCP-specific settings
         staging_config['gcp'] = {
-            'project_id': os.getenv('GCP_PROJECT_ID', 'netra-staging'),
-            'region': os.getenv('GCP_REGION', 'us-central1'),
-            'service_account': os.getenv('GCP_SERVICE_ACCOUNT'),
+            'project_id': get_env().get('GCP_PROJECT_ID', 'netra-staging'),
+            'region': get_env().get('GCP_REGION', 'us-central1'),
+            'service_account': get_env().get('GCP_SERVICE_ACCOUNT'),
             'log_filters': {
                 'errors': 'severity>=ERROR',
                 'websocket': 'jsonPayload.event_type="websocket"',
@@ -245,7 +246,7 @@ class ConfigurationManager(IConfigurationManager):
             'project_name': 'netra-test',
             'build_args': {
                 'TEST_MODE': 'true',
-                'ENABLE_DEBUG': os.getenv('ENABLE_DEBUG', 'false')
+                'ENABLE_DEBUG': get_env().get('ENABLE_DEBUG', 'false')
             }
         }
         

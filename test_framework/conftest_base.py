@@ -34,10 +34,18 @@ import pytest
 # Import Docker test manager for service orchestration
 from test_framework.docker_test_manager import (
     DockerTestManager,
-    ServiceMode,
-    get_test_manager,
-    setup_test_services
+    ServiceMode
 )
+
+# Singleton instance of DockerTestManager
+_test_manager_instance = None
+
+def get_test_manager() -> DockerTestManager:
+    """Get or create the singleton DockerTestManager instance."""
+    global _test_manager_instance
+    if _test_manager_instance is None:
+        _test_manager_instance = DockerTestManager()
+    return _test_manager_instance
 
 # Use centralized environment management for test framework
 try:
@@ -46,7 +54,7 @@ except ImportError:
     # Fallback for standalone execution
     class FallbackEnv:
         def get(self, key, default=None):
-            return os.getenv(key, default)  # @marked: Fallback environment wrapper
+            return get_env().get(key, default)  # @marked: Fallback environment wrapper
         def set(self, key, value, source="test_framework"):
             os.environ[key] = value  # @marked: Fallback environment wrapper
         def enable_isolation(self):

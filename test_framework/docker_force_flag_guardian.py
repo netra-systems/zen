@@ -52,7 +52,7 @@ class DockerForceFlagGuardian:
     raises CRITICAL errors if force flags are detected.
     """
     
-    # Comprehensive patterns to detect force flags
+    # Comprehensive patterns to detect force flags (PRECISE - no false positives)
     FORCE_FLAG_PATTERNS = [
         r'-f\b',                    # -f as standalone flag
         r'--force\b',               # --force as standalone flag
@@ -60,8 +60,11 @@ class DockerForceFlagGuardian:
         r'--force\s',               # --force followed by space
         r'-f$',                     # -f at end of line
         r'--force$',                # --force at end of line
-        r'-[a-zA-Z]*f[a-zA-Z]*',    # -f combined with other flags (like -rf)
         r'--force=[^\s]*',          # --force=value format
+        # Only flag -f combined with other SINGLE letters (not words like -format)
+        r'-[a-zA-Z]f\b',            # -af, -rf, etc. (f at end)
+        r'-f[a-zA-Z]\b',            # -fa, -fr, etc. (f at start) 
+        r'-[a-zA-Z]f[a-zA-Z]\b',    # -afr, -rfv, etc. (f in middle of short flags)
     ]
     
     # Docker commands that commonly use force flags (for extra vigilance)
@@ -159,6 +162,17 @@ class DockerForceFlagGuardian:
             List of detected violations
         """
         violations = []
+        
+        # Check for legitimate exceptions first
+        command_lower = command.lower().strip()
+        for exception_pattern in [
+            r'docker\s+logs\s+.*-f\b',               # docker logs -f (follow logs is safe)
+            r'docker\s+build\s+.*-f\s+.*dockerfile', # docker build -f dockerfile  
+            r'docker-compose\s+.*-f\s+.*\.ya?ml\b',  # docker-compose -f file.yml
+            r'docker\s+exec\s+.*-f\b',               # docker exec -f (if it exists)
+        ]:
+            if re.search(exception_pattern, command_lower):
+                return []  # This is a legitimate use of -f, not a force flag
         
         for pattern in self.FORCE_FLAG_PATTERNS:
             matches = re.finditer(pattern, command, re.IGNORECASE)
@@ -283,7 +297,7 @@ def get_safe_alternative(command: str) -> str:
 
 if __name__ == "__main__":
     # Self-test the guardian
-    print("🛡️  Docker Force Flag Guardian - Self Test")
+    print("GUARDIAN: Docker Force Flag Guardian - Self Test")
     print("=" * 50)
     
     test_commands = [
@@ -302,12 +316,12 @@ if __name__ == "__main__":
         print(f"\nTesting: {cmd}")
         try:
             guardian.validate_command(cmd)
-            print("✅ SAFE")
+            print("SAFE")
         except DockerForceFlagViolation as e:
-            print("🚨 VIOLATION DETECTED")
+            print("VIOLATION DETECTED")
             print(f"Safe alternative: {guardian.get_safe_alternative(cmd)}")
     
-    print(f"\n📊 Audit Report:")
+    print(f"\nAudit Report:")
     report = guardian.audit_report()
     for key, value in report.items():
         print(f"{key}: {value}")

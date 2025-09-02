@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Real LLM testing configuration for Netra Apex E2E tests.
 
 This module provides centralized configuration and management for real LLM testing
@@ -519,7 +520,7 @@ def pytest_unconfigure_real_llm():
         logger.info(f"  Budget utilization: {stats['cost_summary']['budget_utilization']:.2%}")
         
         # Save usage report if configured
-        if os.getenv("LLM_SAVE_USAGE_REPORT", "false").lower() == "true":
+        if get_env().get("LLM_SAVE_USAGE_REPORT", "false").lower() == "true":
             report_path = Path("test_reports") / "llm_usage_report.json"
             report_path.parent.mkdir(exist_ok=True)
             
