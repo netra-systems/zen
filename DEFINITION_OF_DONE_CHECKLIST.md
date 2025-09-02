@@ -254,6 +254,8 @@ python scripts/deploy_to_gcp.py --project netra-production --run-checks
 - [ ] `/test_framework/ssot/database_test_utility.py` (SSOT Database Testing)
 - [ ] `/test_framework/ssot/websocket_test_utility.py` (SSOT WebSocket Testing)
 - [ ] `/test_framework/ssot/docker_test_utility.py` (SSOT Docker Orchestration)
+- [ ] `/test_framework/ssot/orchestration.py` (SSOT Orchestration Configuration)
+- [ ] `/test_framework/ssot/orchestration_enums.py` (SSOT Orchestration Enums)
 - [ ] `/test_framework/unified_docker_manager.py` (ONLY Docker manager allowed)
 
 **SSOT Architecture Requirements:**
@@ -262,6 +264,8 @@ python scripts/deploy_to_gcp.py --project netra-production --run-checks
 - [ ] **Test Runner SSOT:** ALL test execution through `tests/unified_test_runner.py` - NO direct pytest
 - [ ] **Environment SSOT:** ALL environment access through `IsolatedEnvironment` - NO os.environ
 - [ ] **Docker SSOT:** ALL Docker operations through `UnifiedDockerManager` - NO custom Docker scripts
+- [ ] **Orchestration SSOT:** ALL orchestration availability from `test_framework.ssot.orchestration` - NO try-except imports
+- [ ] **Orchestration Enums SSOT:** ALL orchestration enums from `test_framework.ssot.orchestration_enums` - NO duplicates
 - [ ] **Real Services First:** MOCKS ARE FORBIDDEN in integration/E2E tests - Use real services
 
 **Test Categories (Priority Order):**
@@ -289,9 +293,13 @@ python tests/mission_critical/test_ssot_compliance_suite.py
 - [ ] Run: `python tests/mission_critical/test_ssot_compliance_suite.py`
 - [ ] Run: `python tests/mission_critical/test_mock_policy_violations.py`
 - [ ] Run: `python test_framework/tests/test_ssot_framework.py`
+- [ ] Run: `python test_framework/tests/test_ssot_orchestration.py`
 - [ ] Verify: NO direct pytest execution in scripts/CI
 - [ ] Verify: ALL tests inherit from SSOT BaseTestCase
 - [ ] Verify: NO duplicate mock implementations exist
+- [ ] Verify: NO duplicate orchestration enum definitions
+- [ ] Verify: NO try-except import patterns for orchestration availability
+- [ ] Verify: ALL orchestration modules use SSOT imports
 
 **Documentation & Specifications:**
 - [ ] **SSOT Spec:** `SPEC/test_infrastructure_ssot.xml` (Canonical architecture)
@@ -306,6 +314,9 @@ python tests/mission_critical/test_ssot_compliance_suite.py
 - [ ] ❌ Direct os.environ access instead of IsolatedEnvironment
 - [ ] ❌ Cross-service test imports violating service boundaries
 - [ ] ❌ Integration tests using mocks instead of real services
+- [ ] ❌ Try-except import patterns for orchestration availability
+- [ ] ❌ Duplicate orchestration enum definitions
+- [ ] ❌ Direct orchestration imports bypassing SSOT modules
 
 **SSOT Migration Status:**
 - [ ] ✅ BaseTestCase consolidated (6,096 duplicate implementations eliminated)
@@ -313,6 +324,9 @@ python tests/mission_critical/test_ssot_compliance_suite.py
 - [ ] ✅ Test runners consolidated (unified_test_runner.py as SSOT)
 - [ ] ✅ Docker management unified (UnifiedDockerManager only)
 - [ ] ✅ Environment management unified (IsolatedEnvironment compliance 94.5%)
+- [ ] ✅ Orchestration availability unified (OrchestrationConfig SSOT)
+- [ ] ✅ Orchestration enums consolidated (15+ duplicate definitions eliminated)
+- [ ] ✅ Try-except import patterns eliminated from orchestration
 - [ ] ✅ Backwards compatibility maintained during transition
 
 ---
