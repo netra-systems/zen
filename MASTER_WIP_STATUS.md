@@ -1,6 +1,6 @@
 # Master Work-In-Progress and System Status Index
 
-> **Last Generated:** 2025-08-31 | **Methodology:** [SPEC/master_wip_index.xml](SPEC/master_wip_index.xml)
+> **Last Generated:** 2025-09-02 | **Methodology:** [SPEC/master_wip_index.xml](SPEC/master_wip_index.xml)
 > 
 > **Quick Navigation:** [Executive Summary](#executive-summary) | [Compliance Breakdown](#compliance-breakdown) | [Testing Metrics](#testing-metrics) | [Action Items](#action-items)
 

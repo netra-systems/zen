@@ -1,4 +1,5 @@
 # Golden Agent Index 🏆
+**Last Updated:** 2025-09-02
 
 ## The Definitive Guide to Agent Implementation in Netra Apex
 
