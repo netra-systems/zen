@@ -1476,8 +1476,25 @@ class AgentWebSocketBridge(MonitorableComponent):
         
         CRITICAL: This method ensures notifications reach the correct user chat thread.
         Enhanced with ThreadRunRegistry for 100% reliable resolution.
+        
+        Priority order:
+        1. ThreadRunRegistry lookup (if available) - MOST RELIABLE
+        2. Orchestrator resolution (if available)
+        3. Direct thread_id format check (if run_id starts with "thread_" and has valid format)
+        4. Pattern extraction (extract thread_id from embedded patterns)
+        5. Return None (don't fallback to run_id)
         """
         try:
+            # Input validation
+            if not run_id or not isinstance(run_id, str):
+                logger.debug(f"Invalid run_id input: {run_id}")
+                return None
+            
+            run_id = run_id.strip()
+            if not run_id:
+                logger.debug("Empty run_id after stripping")
+                return None
+            
             # PRIORITY 1: Check ThreadRunRegistry first (MOST RELIABLE)
             if self._thread_registry:
                 try:
@@ -1499,44 +1516,99 @@ class AgentWebSocketBridge(MonitorableComponent):
                 except Exception as e:
                     logger.debug(f"Orchestrator thread_id resolution failed for run_id={run_id}: {e}")
             
-            # PRIORITY 3: Fallback pattern extraction (FRAGILE)
+            # PRIORITY 3: Direct thread_id format check (CRITICAL FIX)
+            # If run_id starts with "thread_" and has a valid format, use it directly
+            if run_id.startswith("thread_"):
+                # Validate it's a proper thread format
+                if self._is_valid_thread_format(run_id):
+                    logger.debug(f"✅ DIRECT THREAD_ID: run_id={run_id} is already a valid thread_id")
+                    return run_id
+                else:
+                    logger.debug(f"⚠️ INVALID THREAD FORMAT: run_id={run_id} starts with 'thread_' but invalid format")
+            
+            # PRIORITY 4: Pattern extraction from embedded patterns (FALLBACK)
             # Many run_ids contain or reference thread_id
             if "thread_" in run_id:
                 # Extract thread_id from run_id if embedded
                 parts = run_id.split("_")
                 for i, part in enumerate(parts):
                     if part == "thread" and i + 1 < len(parts):
+                        # Build potential thread_id - try to find complete valid thread pattern
+                        # First try just the next part
                         extracted_thread = f"thread_{parts[i + 1]}"
-                        logger.debug(f"⚠️ PATTERN EXTRACTION: run_id={run_id} → thread_id={extracted_thread}")
-                        return extracted_thread
+                        
+                        # For patterns like "user_123_thread_456_session", we want "thread_456"
+                        # But we need to exclude cases where the original run_id starts with "thread_"
+                        # and is malformed (like "thread_123_")
+                        
+                        # Skip if this is the direct case already handled above
+                        if run_id.startswith("thread_") and run_id == extracted_thread + "_":
+                            # This means run_id is something like "thread_123_" which is invalid
+                            logger.debug(f"⚠️ SKIPPING PATTERN EXTRACTION: {run_id} is malformed direct thread_id")
+                            continue
+                        
+                        if self._is_valid_thread_format(extracted_thread):
+                            logger.debug(f"⚠️ PATTERN EXTRACTION: run_id={run_id} → thread_id={extracted_thread}")
+                            return extracted_thread
+                        else:
+                            logger.debug(f"⚠️ INVALID EXTRACTED THREAD: {extracted_thread} from run_id={run_id}")
             
-            # PRIORITY 4: If we have a registry available, try alternate resolution
-            if self._registry and hasattr(self._registry, 'get_thread_for_run'):
-                try:
-                    thread_id = await self._registry.get_thread_for_run(run_id)
-                    if thread_id:
-                        logger.debug(f"✅ ALT REGISTRY RESOLUTION: run_id={run_id} → thread_id={thread_id}")
-                        return thread_id
-                except Exception as e:
-                    logger.debug(f"Registry thread_id resolution failed for run_id={run_id}: {e}")
-            
-            # PRIORITY 5: Last fallback - assume run_id can be used directly if it looks like thread_id
-            if run_id.startswith("thread_"):
-                logger.debug(f"⚠️ DIRECT USAGE: Treating run_id={run_id} as thread_id")
-                return run_id
-            
-            # ALL RESOLUTION METHODS FAILED
-            logger.error(f"🚨 COMPLETE RESOLUTION FAILURE: Unable to resolve thread_id for run_id={run_id}")
-            logger.error(f"   - ThreadRunRegistry available: {self._thread_registry is not None}")
-            logger.error(f"   - Orchestrator available: {self._orchestrator is not None}")
-            logger.error(f"   - Pattern extraction failed: No 'thread_' in run_id")
-            logger.error(f"   - Registry fallback failed: {self._registry is not None}")
+            # PRIORITY 5: Return None (don't fallback to run_id)
+            logger.debug(f"🚨 NO RESOLUTION: Unable to resolve thread_id for run_id={run_id}")
+            logger.debug(f"   - ThreadRunRegistry available: {self._thread_registry is not None}")
+            logger.debug(f"   - Orchestrator available: {self._orchestrator is not None}")
+            logger.debug(f"   - Direct format check: {'passed' if run_id.startswith('thread_') else 'failed'}")
+            logger.debug(f"   - Pattern extraction: {'attempted' if 'thread_' in run_id else 'not applicable'}")
             
             return None
             
         except Exception as e:
             logger.error(f"🚨 CRITICAL EXCEPTION: Exception resolving thread_id for run_id={run_id}: {e}")
             return None
+    
+    def _is_valid_thread_format(self, thread_id: str) -> bool:
+        """
+        Validate if a string is a valid thread_id format.
+        
+        Valid formats:
+        - thread_abc123
+        - thread_user_session_789
+        - thread_12345
+        - thread_agent_execution_456
+        
+        Invalid formats:
+        - thread_ (incomplete)
+        - thread__ (double underscore)
+        - thread_123_ (trailing underscore)
+        """
+        if not thread_id or not isinstance(thread_id, str):
+            return False
+        
+        # Must start with "thread_"
+        if not thread_id.startswith("thread_"):
+            return False
+        
+        # Extract the part after "thread_"
+        suffix = thread_id[7:]  # Remove "thread_" prefix
+        
+        # Must have content after "thread_"
+        if not suffix:
+            return False
+        
+        # Must not have trailing underscore
+        if suffix.endswith("_"):
+            return False
+        
+        # Must not have double underscores
+        if "__" in thread_id:
+            return False
+        
+        # Must contain only alphanumeric characters and underscores
+        import re
+        if not re.match(r'^[a-zA-Z0-9_]+$', suffix):
+            return False
+        
+        return True
     
     def _sanitize_parameters(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """Sanitize tool parameters for user display, removing sensitive data."""

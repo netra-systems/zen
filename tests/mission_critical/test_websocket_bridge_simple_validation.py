@@ -43,10 +43,10 @@ def test_thread_resolution_patterns():
     
     # Test cases for pattern-based resolution
     test_cases = [
-        # Direct thread patterns (currently has a bug - pattern extraction runs before direct usage)
+        # Direct thread patterns (FIXED - now direct usage runs before pattern extraction)
         ("thread_12345", "thread_12345"),  # Simple case works
         ("thread_abc123", "thread_abc123"),  # Simple case works  
-        ("thread_user_session_789", "thread_user"),  # BUG: Should be "thread_user_session_789" but pattern extraction takes precedence
+        ("thread_user_session_789", "thread_user_session_789"),  # FIXED: Now returns full thread_id due to correct priority
         
         # Embedded patterns (these work correctly)
         ("run_thread_67890", "thread_67890"),
@@ -55,7 +55,9 @@ def test_thread_resolution_patterns():
         ("prefix_thread_abc123_suffix", "thread_abc123"),
         
         # Edge cases
-        ("thread_", "thread_"),  # Incomplete pattern - BUG: Should probably be None but pattern extraction returns "thread_"  
+        ("thread_", None),  # FIXED: Incomplete pattern now correctly returns None due to validation
+        ("thread__invalid", None),  # Double underscore - invalid format
+        ("thread_123_", None),  # Trailing underscore - invalid format
         ("no_pattern_here", None),  # No pattern
         ("", None),  # Empty string
     ]
