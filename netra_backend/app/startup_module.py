@@ -775,17 +775,28 @@ def _create_agent_supervisor(app: FastAPI) -> None:
         if supervisor is None:
             raise RuntimeError("Supervisor creation returned None")
         
-        # CRITICAL: Ensure WebSocket enhancement for agent events
-        if hasattr(supervisor, 'registry') and hasattr(supervisor.registry, 'tool_dispatcher'):
-            if not getattr(supervisor.registry.tool_dispatcher, '_websocket_enhanced', False):
-                logger.warning("Tool dispatcher not enhanced with WebSocket - attempting enhancement")
-                # Try to enhance it now
-                from netra_backend.app.websocket_core import get_websocket_manager
-                ws_manager = get_websocket_manager()
-                if ws_manager:
-                    supervisor.registry.set_websocket_manager(ws_manager)
-                    if not getattr(supervisor.registry.tool_dispatcher, '_websocket_enhanced', False):
-                        raise RuntimeError("Failed to enhance tool dispatcher with WebSocket notifications")
+        # CRITICAL: Validate WebSocket infrastructure for agent events
+        # Note: SupervisorAgent using UserExecutionContext pattern creates per-request tool dispatchers
+        # so we validate that the WebSocket infrastructure is properly initialized instead
+        if hasattr(supervisor, 'websocket_bridge') and supervisor.websocket_bridge:
+            logger.info("✅ SupervisorAgent has WebSocket bridge - agent events will be enabled")
+            
+            # Validate WebSocket bridge has required methods
+            required_methods = ['emit_agent_thinking', 'emit_user_notification']
+            missing_methods = [method for method in required_methods if not hasattr(supervisor.websocket_bridge, method)]
+            if missing_methods:
+                logger.error(f"🚨 WebSocket bridge missing required methods: {missing_methods}")
+                raise RuntimeError(f"WebSocket bridge incomplete - missing methods: {missing_methods}")
+        else:
+            logger.error("🚨 CRITICAL: SupervisorAgent missing WebSocket bridge - agent events will be broken!")
+            raise RuntimeError("SupervisorAgent must have WebSocket bridge for agent event notifications")
+        
+        # Validate WebSocket manager is available for per-request enhancement
+        from netra_backend.app.websocket_core import get_websocket_manager
+        ws_manager = get_websocket_manager()
+        if not ws_manager:
+            logger.error("🚨 CRITICAL: WebSocket manager not available - per-request tool dispatcher enhancement will fail!")
+            raise RuntimeError("WebSocket manager must be available for tool dispatcher enhancement")
         
         _setup_agent_state(app, supervisor)
         

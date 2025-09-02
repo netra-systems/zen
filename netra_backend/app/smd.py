@@ -1250,22 +1250,34 @@ class StartupOrchestrator:
             
             self.app.state.execution_engine_factory = execution_factory
             
-            # 2. Initialize WebSocketBridgeFactory
+            # 2. Initialize WebSocketConnectionPool first (required by factory)
+            from netra_backend.app.services.websocket_connection_pool import get_websocket_connection_pool
+            connection_pool = get_websocket_connection_pool()
+            self.app.state.websocket_connection_pool = connection_pool
+            self.logger.info("    ✓ WebSocketConnectionPool initialized")
+            
+            # 3. Initialize WebSocketBridgeFactory
             # CRITICAL FIX: Always initialize websocket_factory to prevent "not associated with a value" error
             websocket_factory = get_websocket_bridge_factory()
             
-            # Configure with proper parameters - will be properly configured later
-            # TODO: Get proper connection pool and health monitor instances
+            # Configure with proper parameters including connection pool
             if hasattr(self.app.state, 'agent_supervisor'):
+                # Create a simple health monitor for now
+                class SimpleHealthMonitor:
+                    async def check_health(self):
+                        return {"status": "healthy"}
+                
+                health_monitor = SimpleHealthMonitor()
+                
                 websocket_factory.configure(
-                    connection_pool=None,  # Will be set later
+                    connection_pool=connection_pool,
                     agent_registry=self.app.state.agent_supervisor.registry,
-                    health_monitor=None  # Will be set later
+                    health_monitor=health_monitor
                 )
             self.app.state.websocket_bridge_factory = websocket_factory
-            self.logger.info("    ✓ WebSocketBridgeFactory configured")
+            self.logger.info("    ✓ WebSocketBridgeFactory configured with connection pool")
             
-            # 3. Initialize AgentInstanceFactory
+            # 4. Initialize AgentInstanceFactory
             agent_instance_factory = await configure_agent_instance_factory(
                 websocket_bridge=self.app.state.agent_websocket_bridge,
                 websocket_manager=get_websocket_manager()
@@ -1273,7 +1285,7 @@ class StartupOrchestrator:
             self.app.state.agent_instance_factory = agent_instance_factory
             self.logger.info("    ✓ AgentInstanceFactory configured")
             
-            # 4. Initialize FactoryAdapter for backward compatibility
+            # 5. Initialize FactoryAdapter for backward compatibility
             adapter_config = AdapterConfig.from_env()
             factory_adapter = FactoryAdapter(
                 execution_engine_factory=execution_factory,
@@ -1288,7 +1300,7 @@ class StartupOrchestrator:
             
             self.app.state.factory_adapter = factory_adapter
             
-            # 5. Enable factories for select routes (gradual migration)
+            # 6. Enable factories for select routes (gradual migration)
             critical_routes = [
                 "/api/agents/run_agent_v2",
                 "/api/agents/v2/{run_id}/status",
