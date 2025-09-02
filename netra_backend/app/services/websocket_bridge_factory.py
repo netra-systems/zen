@@ -582,7 +582,10 @@ class UserWebSocketEmitter:
             
     async def _deliver_event_with_retries(self, event: WebSocketEvent) -> None:
         """Deliver event with retry mechanism."""
+        from netra_backend.app.monitoring.websocket_metrics import record_websocket_event
+        
         async with self._delivery_lock:
+            start_time = time.time()
             while event.retry_count <= event.max_retries:
                 try:
                     # Attempt delivery through user-specific connection
@@ -602,6 +605,15 @@ class UserWebSocketEmitter:
                     # Update factory metrics
                     self.factory._factory_metrics['events_sent_total'] += 1
                     
+                    # Record metrics
+                    latency_ms = (time.time() - start_time) * 1000
+                    record_websocket_event(
+                        user_id=self.user_context.user_id,
+                        event_type=event.event_type,
+                        latency_ms=latency_ms,
+                        success=True
+                    )
+                    
                     # Trim sent events to prevent memory leak
                     if len(self.user_context.sent_events) > 100:
                         self.user_context.sent_events = self.user_context.sent_events[-50:]
@@ -618,6 +630,8 @@ class UserWebSocketEmitter:
                         await asyncio.sleep(min(2 ** (event.retry_count - 1), 30))
                         
             # All retries failed
+            from netra_backend.app.monitoring.websocket_metrics import record_websocket_event
+            
             logger.error(f"Event delivery permanently failed for user {self.user_context.user_id}: {event.event_id}")
             self.user_context.failed_events.append({
                 'event_id': event.event_id,
@@ -630,8 +644,19 @@ class UserWebSocketEmitter:
             # Update factory metrics
             self.factory._factory_metrics['events_failed_total'] += 1
             
+            # Record failure metrics
+            latency_ms = (time.time() - start_time) * 1000
+            record_websocket_event(
+                user_id=self.user_context.user_id,
+                event_type=event.event_type,
+                latency_ms=latency_ms,
+                success=False
+            )
+            
     async def _check_connection_health(self) -> None:
         """Check and maintain connection health."""
+        from netra_backend.app.monitoring.websocket_metrics import record_websocket_connection
+        
         try:
             is_healthy = await self.connection.ping()
             
@@ -641,6 +666,10 @@ class UserWebSocketEmitter:
                 self.user_context.reconnect_attempts = 0
             else:
                 await self._handle_unhealthy_connection()
+                record_websocket_connection(
+                    user_id=self.user_context.user_id,
+                    event="error"
+                )
                 
         except Exception as e:
             logger.error(f"Health check failed for user {self.user_context.user_id}: {e}")
@@ -726,6 +755,8 @@ class UserWebSocketEmitter:
         
     async def cleanup(self) -> None:
         """Clean up emitter resources."""
+        from netra_backend.app.monitoring.websocket_metrics import record_factory_event
+        
         try:
             # Cancel event processor
             if self._processor_task and not self._processor_task.done():
@@ -746,6 +777,9 @@ class UserWebSocketEmitter:
             # Clear pending events
             self._pending_events.clear()
             self._event_batch.clear()
+            
+            # Record factory destruction
+            record_factory_event("destroyed")
             
             # Notify factory of cleanup
             await self.factory.cleanup_user_context(
@@ -770,6 +804,10 @@ class WebSocketConnectionPool:
         # Initialize monitoring
         self.notification_monitor = get_websocket_notification_monitor()
         
+        # Initialize metrics
+        from netra_backend.app.monitoring.websocket_metrics import get_websocket_metrics_collector
+        self.metrics_collector = get_websocket_metrics_collector()
+        
     async def start_health_monitoring(self) -> None:
         """Start connection health monitoring."""
         if not self._health_monitor_task:
@@ -791,6 +829,8 @@ class WebSocketConnectionPool:
             
     async def add_user_connection(self, user_id: str, connection_id: str, websocket: Any) -> None:
         """Add new user connection to pool."""
+        from netra_backend.app.monitoring.websocket_metrics import record_websocket_connection
+        
         connection_key = f"{user_id}:{connection_id}"
         
         async with self._connection_lock:
@@ -814,18 +854,32 @@ class WebSocketConnectionPool:
                 user_id, "unknown", connection_id
             )
             
+            # Record connection metrics
+            record_websocket_connection(user_id, "created")
+            
     async def remove_user_connection(self, user_id: str, connection_id: str) -> None:
         """Remove user connection from pool."""
+        from netra_backend.app.monitoring.websocket_metrics import record_websocket_connection
+        
         connection_key = f"{user_id}:{connection_id}"
         
         async with self._connection_lock:
             if connection_key in self._connections:
-                await self._connections[connection_key].close()
+                connection = self._connections[connection_key]
+                lifetime_seconds = (datetime.now(timezone.utc) - connection.created_at).total_seconds()
+                
+                await connection.close()
                 del self._connections[connection_key]
                 
                 # MONITORING: Track connection lost
                 self.notification_monitor.track_connection_lost(
                     user_id, "unknown", connection_id, "Connection removed from pool"
+                )
+                
+                # Record connection metrics
+                record_websocket_connection(
+                    user_id, "closed", 
+                    lifetime_seconds=lifetime_seconds
                 )
                 
     async def _monitor_connections(self) -> None:
