@@ -175,8 +175,16 @@ async def test_agent_instance_factory():
     
     # Create and configure factory
     factory = AgentInstanceFactory()
+    
+    # Also create a legacy registry to provide LLM manager and tool dispatcher
+    import warnings
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", DeprecationWarning)
+        legacy_registry = AgentRegistry(MockLLMManager(), MockToolDispatcher())
+    
     factory.configure(
         agent_class_registry=agent_class_registry,
+        agent_registry=legacy_registry,  # Provide for dependencies
         websocket_bridge=websocket_bridge
     )
     
@@ -244,8 +252,16 @@ async def test_websocket_isolation():
     websocket_bridge = MockAgentWebSocketBridge()
     
     factory = AgentInstanceFactory()
+    
+    # Create legacy registry for dependencies (suppress warning)
+    import warnings
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", DeprecationWarning)
+        legacy_registry = AgentRegistry(MockLLMManager(), MockToolDispatcher())
+    
     factory.configure(
         agent_class_registry=agent_class_registry,
+        agent_registry=legacy_registry,
         websocket_bridge=websocket_bridge
     )
     

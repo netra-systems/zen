@@ -30,20 +30,43 @@ class TestWebSocketBridgeIsolation:
     def mock_llm_manager(self):
         """Create mock LLM manager."""
         mock = MagicMock(spec=LLMManager)
-        return mock
+        try:
+            yield mock
+        finally:
+            # Clean up any resources associated with mock
+            mock.reset_mock()
+            del mock
     
     @pytest.fixture
     def mock_tool_dispatcher(self):
         """Create mock tool dispatcher."""
         mock = MagicMock(spec=ToolDispatcher)
-        return mock
+        try:
+            yield mock
+        finally:
+            # Clean up any resources associated with mock
+            mock.reset_mock()
+            del mock
     
     @pytest.fixture
-    def mock_websocket_manager(self):
+    async def mock_websocket_manager(self):
         """Create mock WebSocket manager."""
         mock = AsyncMock(spec=WebSocketManager)
         mock.send_agent_event = AsyncMock()
-        return mock
+        
+        try:
+            yield mock
+        finally:
+            # Clean up any resources associated with mock
+            try:
+                # Reset all async mocks
+                mock.reset_mock()
+                if hasattr(mock, 'close'):
+                    await mock.close()
+            except Exception:
+                pass
+            finally:
+                del mock
     
     @pytest.mark.asyncio
     async def test_singleton_bridge_shared_across_users(self):
