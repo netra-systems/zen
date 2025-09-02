@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Config Validator Tests - Decision Engine and Utilities
 Tests for decision engine, utility functions, and main validation entry point.

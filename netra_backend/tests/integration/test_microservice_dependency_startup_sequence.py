@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Microservice Dependency Startup Sequence Integration Test
 
@@ -60,7 +61,7 @@ def docker_integration_available() -> bool:
     import os
     
     # Only enable Docker integration tests if explicitly requested
-    if not os.getenv("DOCKER_INTEGRATION_TESTS"):
+    if not get_env().get("DOCKER_INTEGRATION_TESTS"):
         return False
         
     try:

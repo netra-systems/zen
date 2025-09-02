@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Tests for LLM Test Manager - Real LLM testing framework validation
 

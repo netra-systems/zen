@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Simplified Staging Test Helpers for Critical Path Tests
 
 Business Value Justification (BVJ):
@@ -55,9 +56,9 @@ class StagingTestSuite:
         self.test_client = None
         self._setup_complete = False
         self.base_urls = {
-            "backend": os.getenv("BACKEND_URL", "http://localhost:8000"),
-            "auth": os.getenv("AUTH_URL", "http://localhost:8001"),
-            "frontend": os.getenv("FRONTEND_URL", "http://localhost:3000")
+            "backend": get_env().get("BACKEND_URL", "http://localhost:8000"),
+            "auth": get_env().get("AUTH_URL", "http://localhost:8001"),
+            "frontend": get_env().get("FRONTEND_URL", "http://localhost:3000")
         }
         
         # Add env_config attribute for compatibility with L4 tests
@@ -76,15 +77,15 @@ class StagingTestSuite:
         env_config.services.backend = self.base_urls["backend"]
         env_config.services.auth = self.base_urls["auth"]
         env_config.services.frontend = self.base_urls["frontend"]
-        env_config.services.websocket = os.getenv("WEBSOCKET_URL", "ws://localhost:8000/ws")
+        env_config.services.websocket = get_env().get("WEBSOCKET_URL", "ws://localhost:8000/ws")
         
         # Add additional service endpoints that may be used by L4 tests
-        env_config.database_url = os.getenv("DATABASE_URL", "postgresql://user:pass@localhost:5432/netra_test")
-        env_config.redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+        env_config.database_url = get_env().get("DATABASE_URL", "postgresql://user:pass@localhost:5432/netra_test")
+        env_config.redis_url = get_env().get("REDIS_URL", "redis://localhost:6379")
         env_config.clickhouse = type('ClickHouse', (), {})()
-        env_config.clickhouse.host = os.getenv("CLICKHOUSE_HOST", "localhost")
-        env_config.clickhouse.port = int(os.getenv("CLICKHOUSE_PORT", "8123"))
-        env_config.clickhouse.database = os.getenv("CLICKHOUSE_DB", "netra_test")
+        env_config.clickhouse.host = get_env().get("CLICKHOUSE_HOST", "localhost")
+        env_config.clickhouse.port = int(get_env().get("CLICKHOUSE_PORT", "8123"))
+        env_config.clickhouse.database = get_env().get("CLICKHOUSE_DB", "netra_test")
         
         # Add database and cache objects for compatibility
         env_config.database = type('Database', (), {})()
@@ -109,7 +110,7 @@ class StagingTestSuite:
         """Validate staging environment prerequisites."""
         # Basic validation - just log if missing
         required_env_vars = ["DATABASE_URL", "REDIS_URL"]
-        missing_vars = [var for var in required_env_vars if not os.getenv(var)]
+        missing_vars = [var for var in required_env_vars if not get_env().get(var)]
         if missing_vars:
             print(f"Warning: Missing staging environment variables: {missing_vars}")
     
@@ -222,11 +223,11 @@ def validate_staging_environment() -> tuple[bool, List[str]]:
     """Validate staging environment configuration and return issues."""
     required_vars = ["DATABASE_URL", "REDIS_URL"]
     
-    issues = [f"Missing: {var}" for var in required_vars if not os.getenv(var)]
+    issues = [f"Missing: {var}" for var in required_vars if not get_env().get(var)]
     
     # Basic URL validation
     for var, prefix in [("DATABASE_URL", "postgresql://"), ("REDIS_URL", "redis://")]:
-        value = os.getenv(var, "")
+        value = get_env().get(var, "")
         if value and not value.startswith(prefix):
             issues.append(f"{var} invalid format")
     

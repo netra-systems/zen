@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Real Service Test Helpers
 
@@ -440,11 +441,11 @@ async def real_service_test_context(
 def get_service_config() -> Dict[str, Optional[str]]:
     """Get service configuration from environment variables."""
     return {
-        "postgres_url": os.getenv("DATABASE_URL"),
-        "redis_url": os.getenv("REDIS_URL", "redis://localhost:6379"),
-        "openai_key": os.getenv("OPENAI_API_KEY"),
-        "anthropic_key": os.getenv("ANTHROPIC_API_KEY"),
-        "auth_service_url": os.getenv("AUTH_SERVICE_URL", "http://localhost:8001")
+        "postgres_url": get_env().get("DATABASE_URL"),
+        "redis_url": get_env().get("REDIS_URL", "redis://localhost:6379"),
+        "openai_key": get_env().get("OPENAI_API_KEY"),
+        "anthropic_key": get_env().get("ANTHROPIC_API_KEY"),
+        "auth_service_url": get_env().get("AUTH_SERVICE_URL", "http://localhost:8001")
     }
 
 

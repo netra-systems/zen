@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Multi-Agent Real Service Integration Tests
 
@@ -48,11 +49,11 @@ logger = logging.getLogger(__name__)
 
 # Environment variable configuration for real services
 REAL_SERVICES_CONFIG = {
-    "openai_api_key": os.getenv("OPENAI_API_KEY"),
-    "anthropic_api_key": os.getenv("ANTHROPIC_API_KEY"),
-    "postgres_url": os.getenv("DATABASE_URL"),
-    "redis_url": os.getenv("REDIS_URL", "redis://localhost:6379"),
-    "auth_service_url": os.getenv("AUTH_SERVICE_URL", "http://localhost:8001"),
+    "openai_api_key": get_env().get("OPENAI_API_KEY"),
+    "anthropic_api_key": get_env().get("ANTHROPIC_API_KEY"),
+    "postgres_url": get_env().get("DATABASE_URL"),
+    "redis_url": get_env().get("REDIS_URL", "redis://localhost:6379"),
+    "auth_service_url": get_env().get("AUTH_SERVICE_URL", "http://localhost:8001"),
 }
 
 # Skip conditions for services

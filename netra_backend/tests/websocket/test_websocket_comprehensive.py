@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Comprehensive WebSocket tests covering all requirements from SPEC/websockets.xml.
 
 Tests cover:

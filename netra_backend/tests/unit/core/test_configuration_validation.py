@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Test configuration validation and environment management."""
 import pytest
 from unittest.mock import Mock, patch

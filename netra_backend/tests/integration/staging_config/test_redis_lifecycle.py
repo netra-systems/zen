@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Test Redis Lifecycle
 
@@ -40,8 +41,8 @@ class TestRedisLifecycle(StagingConfigTestBase):
                 self.redis_host = 'redis-staging'
                 self.redis_port = 6379
         except AssertionError:
-            self.redis_host = os.getenv('REDIS_HOST', 'redis-staging')
-            self.redis_port = int(os.getenv('REDIS_PORT', '6379'))
+            self.redis_host = get_env().get('REDIS_HOST', 'redis-staging')
+            self.redis_port = int(get_env().get('REDIS_PORT', '6379'))
             
     def test_redis_connectivity(self):
         """Test basic Redis connectivity."""
@@ -243,7 +244,7 @@ class TestRedisLifecycle(StagingConfigTestBase):
         self.skip_if_not_staging()
         
         # Check if Sentinel is configured
-        sentinel_hosts = os.getenv('REDIS_SENTINELS', '').split(',')
+        sentinel_hosts = get_env().get('REDIS_SENTINELS', '').split(',')
         
         if not sentinel_hosts or sentinel_hosts == ['']:
             self.skipTest("Redis Sentinel not configured")
@@ -263,7 +264,7 @@ class TestRedisLifecycle(StagingConfigTestBase):
             sentinel = Sentinel(sentinels)
             
             # Discover master
-            master_name = os.getenv('REDIS_MASTER_NAME', 'mymaster')
+            master_name = get_env().get('REDIS_MASTER_NAME', 'mymaster')
             master = sentinel.master_for(
                 master_name,
                 decode_responses=True

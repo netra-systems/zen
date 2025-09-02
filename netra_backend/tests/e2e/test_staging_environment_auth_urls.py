@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 End-to-End Test for Staging Environment Auth URLs
 Validates that the entire auth flow uses correct staging URLs in production-like environment
@@ -152,11 +153,11 @@ class TestStagingEnvironmentAuthURLs:
         # This test ensures environment variables aren't being overridden
         
         # Check raw environment variables
-        assert os.getenv("ENVIRONMENT") == "staging", \
+        assert get_env().get("ENVIRONMENT") == "staging", \
             "ENVIRONMENT should be set to staging"
-        assert os.getenv("FRONTEND_URL") == "https://app.staging.netrasystems.ai", \
+        assert get_env().get("FRONTEND_URL") == "https://app.staging.netrasystems.ai", \
             "FRONTEND_URL should be staging URL"
-        assert os.getenv("AUTH_SERVICE_URL") == "https://auth.staging.netrasystems.ai", \
+        assert get_env().get("AUTH_SERVICE_URL") == "https://auth.staging.netrasystems.ai", \
             "AUTH_SERVICE_URL should be staging URL"
         
         # Verify no localhost URLs in environment
@@ -212,7 +213,7 @@ class TestStagingEnvironmentAuthURLs:
         
         # Simulate OAuth provider configuration check
         oauth_config = {
-            "client_id": os.getenv("GOOGLE_CLIENT_ID"),
+            "client_id": get_env().get("GOOGLE_CLIENT_ID"),
             "authorized_redirect_uris": [expected_callback],
             "authorized_javascript_origins": [frontend_url]
         }

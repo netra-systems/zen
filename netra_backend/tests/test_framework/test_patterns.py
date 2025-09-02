@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Test patterns and base classes for integration tests."""
 
 import os
@@ -13,8 +14,8 @@ import sys
 class L3IntegrationTest:
     """Base class for L3 integration tests."""
     
-    backend_url = os.getenv("BACKEND_URL", "http://localhost:8080")
-    auth_url = os.getenv("AUTH_URL", "http://localhost:8081")
+    backend_url = get_env().get("BACKEND_URL", "http://localhost:8080")
+    auth_url = get_env().get("AUTH_URL", "http://localhost:8081")
     
     @classmethod
     def setup_class(cls):

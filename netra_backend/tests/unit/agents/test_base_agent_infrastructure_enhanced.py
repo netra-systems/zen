@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 ENHANCED BASE AGENT INFRASTRUCTURE TEST SUITE

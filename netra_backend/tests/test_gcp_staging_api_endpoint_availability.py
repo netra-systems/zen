@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 GCP Staging API Endpoint Availability Tests
 Failing tests that replicate API endpoint 404 issues found in staging logs

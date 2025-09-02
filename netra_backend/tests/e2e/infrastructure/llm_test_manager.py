@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Real LLM Testing Framework Manager - Core orchestration module
 
@@ -63,8 +64,8 @@ class LLMTestManager:
     def _load_config_from_env(self) -> LLMTestConfig:
         """Load configuration from environment variables."""
         # Test-specific configuration from environment for LLM testing
-        enabled = os.getenv("ENABLE_REAL_LLM_TESTING", "false").lower() == "true"
-        models_str = os.getenv("LLM_TEST_MODELS", "gemini-pro")  # Default to Gemini for testing
+        enabled = get_env().get("ENABLE_REAL_LLM_TESTING", "false").lower() == "true"
+        models_str = get_env().get("LLM_TEST_MODELS", "gemini-pro")  # Default to Gemini for testing
         models = self._parse_models_from_string(models_str)
         # When real LLM is enabled, never fall back to mocks
         fallback_to_mock = False if enabled else True
@@ -107,7 +108,7 @@ class LLMTestManager:
     def _create_openai_client(self, model: LLMTestModel) -> Optional[Any]:
         """Create OpenAI client."""
         # For test clients, read API key directly for test setup
-        api_key = os.getenv("GOOGLE_API_KEY")
+        api_key = get_env().get("GOOGLE_API_KEY")
         if not api_key or api_key.startswith("test-"):
             if self.config.enabled and not self.config.fallback_to_mock:
                 raise NetraException(
@@ -129,7 +130,7 @@ class LLMTestManager:
     def _create_anthropic_client(self, model: LLMTestModel) -> Optional[Any]:
         """Create Anthropic client."""
         # For test clients, read API key directly for test setup
-        api_key = os.getenv("ANTHROPIC_API_KEY")
+        api_key = get_env().get("ANTHROPIC_API_KEY")
         if not api_key or api_key.startswith("test-"):
             if self.config.enabled and not self.config.fallback_to_mock:
                 raise NetraException(
@@ -151,7 +152,7 @@ class LLMTestManager:
     def _create_gemini_client(self, model: LLMTestModel) -> Optional[Any]:
         """Create Gemini client."""
         # For test clients, read API key directly for test setup
-        api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
+        api_key = get_env().get("GOOGLE_API_KEY") or get_env().get("GEMINI_API_KEY")
         if not api_key or api_key.startswith("test-"):
             if self.config.enabled and not self.config.fallback_to_mock:
                 raise NetraException(

@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Migration Configuration Staging Issues - Failing Tests
 
 Tests that expose database migration configuration failures found during GCP staging logs audit.

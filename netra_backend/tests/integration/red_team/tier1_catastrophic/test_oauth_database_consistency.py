@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 RED TEAM TEST 3: OAuth Flow Database State Consistency
 
@@ -95,7 +96,7 @@ class TestOAuthDatabaseConsistency:
     async def real_auth_db_session(self):
         """Real auth database session - will fail if auth DB not available."""
         # Auth service database URL (may be different from main DB)
-        auth_db_url = os.getenv("AUTH_DATABASE_URL")
+        auth_db_url = get_env().get("AUTH_DATABASE_URL")
         if not auth_db_url:
             # Fallback to main DB URL for testing
             config = get_unified_config()

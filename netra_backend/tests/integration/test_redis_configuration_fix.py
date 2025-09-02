@@ -19,7 +19,7 @@ class TestRedisConfigurationFix:
         config = get_config()
         
         # Check if REDIS_URL is set in environment
-        env_redis_url = os.getenv('REDIS_URL')
+        env_redis_url = get_env().get('REDIS_URL')
         
         print(f"Environment REDIS_URL: {env_redis_url}")
         print(f"Config redis_url: {config.redis_url}")
@@ -82,7 +82,7 @@ class TestRedisConfigurationFix:
             print(f"Set REDIS_URL environment variable to: {default_redis_url}")
             
             # Verify the environment variable is set
-            assert os.getenv('REDIS_URL') == default_redis_url
+            assert get_env().get('REDIS_URL') == default_redis_url
             
             print("Fix applied: REDIS_URL environment variable set")
 

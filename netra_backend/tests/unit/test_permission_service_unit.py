@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Comprehensive unit tests for PermissionService - FREE TIER CRITICAL.
 
 BUSINESS VALUE JUSTIFICATION:

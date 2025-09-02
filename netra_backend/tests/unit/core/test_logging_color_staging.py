@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Test that ANSI color codes are properly disabled in staging/production environments."""
 
 import os

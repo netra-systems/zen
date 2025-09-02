@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Test Suite: Central Configuration Usage Validation
 
 Business Value Justification (BVJ):

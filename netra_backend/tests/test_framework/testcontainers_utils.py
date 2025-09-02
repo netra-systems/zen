@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Testcontainers utilities for integration tests."""
 
 import os
@@ -14,9 +15,9 @@ class ContainerHelper:
     def __init__(self):
         """Initialize test container helper."""
         self.containers = {}
-        self.redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
-        self.postgres_url = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/netra_test")
-        self.clickhouse_url = os.getenv("CLICKHOUSE_URL", "clickhouse://localhost:9000")
+        self.redis_url = get_env().get("REDIS_URL", "redis://localhost:6379")
+        self.postgres_url = get_env().get("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/netra_test")
+        self.clickhouse_url = get_env().get("CLICKHOUSE_URL", "clickhouse://localhost:9000")
     
     async def start_redis(self) -> str:
         """Start Redis container or return existing URL."""
