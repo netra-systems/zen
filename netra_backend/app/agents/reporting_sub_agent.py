@@ -227,4 +227,74 @@ class ReportingSubAgent(BaseAgent):
             if metadata:
                 self.logger.debug(f"Reporting metrics for run_id {run_id}: {metadata}")
 
+    # Fallback methods for testing and error recovery
+    def _create_fallback_reporting_operation(self, state: DeepAgentState, run_id: str, stream_updates: bool):
+        """Create a fallback reporting operation for error recovery."""
+        async def fallback_operation():
+            logger.warning(f"Using fallback reporting operation for run_id: {run_id}")
+            return self._create_default_fallback_report(state)
+        return fallback_operation
+
+    def _create_fallback_summary(self, state: DeepAgentState) -> Dict[str, Any]:
+        """Create fallback summary from current state."""
+        return {
+            "status": "Analysis completed with limitations",
+            "data_analyzed": bool(state.data_result),
+            "optimizations_provided": bool(state.optimizations_result),
+            "action_plan_created": bool(state.action_plan_result),
+            "fallback_used": True
+        }
+
+    def _create_fallback_metadata(self) -> Dict[str, Any]:
+        """Create fallback metadata for error scenarios."""
+        return {
+            "fallback_used": True,
+            "reason": "Primary report generation failed",
+            "timestamp": time.time()
+        }
+
+    # Modern execution pattern methods
+    def _create_execution_context(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> 'ExecutionContext':
+        """Create execution context for modern execution patterns."""
+        from netra_backend.app.agents.base.interface import ExecutionContext
+        from netra_backend.app.agents.utils import extract_thread_id
+        from datetime import datetime, timezone
+        
+        return ExecutionContext(
+            run_id=run_id,
+            agent_name=self.name,
+            state=state,
+            stream_updates=stream_updates,
+            thread_id=extract_thread_id(state),
+            user_id=getattr(state, 'user_id', None),
+            start_time=datetime.now(timezone.utc),
+            correlation_id=getattr(self, 'correlation_id', None)
+        )
+
+    def _create_success_execution_result(self, result: Dict[str, Any], execution_time_ms: float) -> 'ExecutionResult':
+        """Create successful execution result."""
+        from netra_backend.app.agents.base.interface import ExecutionResult
+        from netra_backend.app.schemas.core_enums import ExecutionStatus
+        
+        return ExecutionResult(
+            success=True,
+            status=ExecutionStatus.COMPLETED,
+            result=result,
+            execution_time_ms=execution_time_ms,
+            error=None
+        )
+
+    def _create_error_execution_result(self, error_message: str, execution_time_ms: float) -> 'ExecutionResult':
+        """Create error execution result."""
+        from netra_backend.app.agents.base.interface import ExecutionResult
+        from netra_backend.app.schemas.core_enums import ExecutionStatus
+        
+        return ExecutionResult(
+            success=False,
+            status=ExecutionStatus.FAILED,
+            result=None,
+            execution_time_ms=execution_time_ms,
+            error=error_message
+        )
+
     # All infrastructure methods (WebSocket, monitoring, health status) inherited from BaseAgent
