@@ -1,8 +1,12 @@
 # ToolDispatcher Security Migration Guide
 
+## 📚 Essential Architecture References
+
+> **⚠️ MUST READ**: The **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** document provides comprehensive diagrams and explanations of the Factory-based isolation patterns that this migration implements. Review it before proceeding with migration.
+
 ## 🚨 CRITICAL SECURITY ISSUE: Global ToolDispatcher Patterns
 
-This guide addresses **critical security vulnerabilities** in the current ToolDispatcher implementation that create user isolation issues and potential data leaks.
+This guide addresses **critical security vulnerabilities** in the current ToolDispatcher implementation that create user isolation issues and potential data leaks. The solution implements the Factory patterns described in the **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)**.
 
 ## 📋 Migration Timeline
 

@@ -1,16 +1,37 @@
 # Netra Agent System Architecture Documentation
 
+## 🔗 Critical Architecture References
+
+> **⚠️ IMPORTANT**: Before working with the agent system, review the **[User Context Architecture](../USER_CONTEXT_ARCHITECTURE.md)** which describes the Factory-based isolation patterns that ensure complete user separation and eliminate shared state issues.
+
 ## Table of Contents
 1. [Overview](#overview)
-2. [LLM Infrastructure](#llm-infrastructure)
-3. [Agent Architecture](#agent-architecture)
-4. [Structured Output System](#structured-output-system)
-5. [Implementation Details](#implementation-details)
-6. [Testing & Validation](#testing--validation)
+2. [User Isolation & Execution Context](#user-isolation--execution-context)
+3. [LLM Infrastructure](#llm-infrastructure)
+4. [Agent Architecture](#agent-architecture)
+5. [Structured Output System](#structured-output-system)
+6. [Implementation Details](#implementation-details)
+7. [Testing & Validation](#testing--validation)
 
 ## Overview
 
-The Netra platform uses a sophisticated multi-agent AI system built on LangChain and various LLM providers. The system emphasizes type safety, structured outputs, and provider flexibility.
+The Netra platform uses a sophisticated multi-agent AI system built on LangChain and various LLM providers. The system emphasizes type safety, structured outputs, provider flexibility, and **complete user isolation through Factory patterns**.
+
+### Key Architecture Documents
+- **[User Context Architecture](../USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns, execution engines, and user isolation
+- [WebSocket Modernization](../WEBSOCKET_MODERNIZATION_REPORT.md) - WebSocket event isolation
+- [Tool Dispatcher Migration](../TOOL_DISPATCHER_MIGRATION_GUIDE.md) - Request-scoped tool execution
+
+## User Isolation & Execution Context
+
+The agent system implements complete user isolation through the Factory pattern architecture described in the **[User Context Architecture](../USER_CONTEXT_ARCHITECTURE.md)**:
+
+- **ExecutionEngineFactory**: Creates per-request execution engines
+- **UserExecutionContext**: Maintains isolated state for each user request
+- **IsolatedExecutionEngine**: Executes agents with no shared state
+- **UserWebSocketEmitter**: Delivers events to specific users only
+
+This ensures that concurrent users never share state or receive cross-user notifications.
 
 ## LLM Infrastructure
 

@@ -2,6 +2,8 @@
 
 ## 🏗️ Architecture Overview
 
+-- [Documentation Index](./index.md)
+
 ### 📚 Key Architecture Documents
 
 - **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** - **CRITICAL**: Complete guide to the new Factory-based user isolation architecture with execution engines and WebSocket event emitters

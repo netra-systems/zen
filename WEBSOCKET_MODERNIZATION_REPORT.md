@@ -4,9 +4,13 @@
 **Status:** ✅ COMPLETED  
 **Migration Success Rate:** 85.7% (6/7 tests passing)
 
+## 🏗️ Architecture Context
+
+> **📚 IMPORTANT**: This modernization implements the user isolation patterns described in the **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)**. The Factory-based WebSocket architecture ensures complete event isolation between concurrent users.
+
 ## Executive Summary
 
-Successfully migrated the Netra system from deprecated WebSocket implementations to modern `websockets` library patterns, eliminating critical deprecation warnings and improving WebSocket reliability.
+Successfully migrated the Netra system from deprecated WebSocket implementations to modern `websockets` library patterns, eliminating critical deprecation warnings and improving WebSocket reliability. The implementation follows the Factory patterns detailed in the **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** to ensure complete user isolation.
 
 ## Root Cause Analysis
 

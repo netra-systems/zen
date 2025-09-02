@@ -1,8 +1,12 @@
 # Critical Security Implementation Summary
 
+## 📚 Architecture Foundation
+
+> **⚠️ ESSENTIAL READING**: The **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** document provides the complete architectural foundation for these security implementations, including detailed diagrams of the Factory-based isolation patterns.
+
 ## 🚨 CRITICAL DEPRECATION WARNINGS IMPLEMENTED
 
-This document summarizes the **critical security deprecation warnings** added to prevent use of unsafe global tool dispatcher patterns.
+This document summarizes the **critical security deprecation warnings** added to prevent use of unsafe global tool dispatcher patterns. These warnings guide migration to the Factory-based architecture described in the **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)**.
 
 ## ✅ Implementation Complete
 
