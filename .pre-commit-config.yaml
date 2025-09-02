@@ -111,3 +111,23 @@ repos:
         pass_filenames: false
         stages: [manual]
         description: 'Comprehensive duplicate detection across entire codebase'
+        
+      # CRITICAL SECURITY: Docker Force Flag Prohibition
+      - id: docker-force-flag-prohibition
+        name: Docker Force Flag Prohibition
+        entry: python scripts/enforce_docker_force_prohibition.py
+        language: system
+        files: '\.(py|sh|yml|yaml|md|txt)$'
+        stages: [commit]
+        pass_filenames: true
+        description: 'CRITICAL: Prevents Docker -f/--force flags that cause daemon crashes ($2M+ ARR impact)'
+        
+      # DOCKER SECURITY AUDIT: Comprehensive Docker command validation
+      - id: docker-security-audit
+        name: Docker Security Audit
+        entry: python scripts/audit_docker_commands.py --strict
+        language: system
+        files: '\.(py|sh|dockerfile|yml|yaml)$'
+        stages: [commit]
+        pass_filenames: true
+        description: 'Audits all Docker commands for security violations and unsafe patterns'
