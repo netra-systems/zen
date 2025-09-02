@@ -18,7 +18,7 @@ RUN apk add --no-cache \
 # Set working directory
 WORKDIR /build
 
-# Copy and install requirements
+# Copy and install requirements from root directory
 COPY requirements.txt .
 RUN pip install --no-cache-dir --user \
     --no-warn-script-location \
@@ -49,6 +49,8 @@ COPY --from=builder --chown=netra:netra /root/.local /home/netra/.local
 COPY --chown=netra:netra netra_backend /app/netra_backend
 COPY --chown=netra:netra shared /app/shared
 COPY --chown=netra:netra alembic /app/alembic
+COPY --chown=netra:netra scripts /app/scripts
+COPY --chown=netra:netra SPEC /app/SPEC
 
 # Set environment
 ENV PATH=/home/netra/.local/bin:$PATH

@@ -2,8 +2,6 @@
 # Uses Alpine Linux base images for minimal memory footprint
 # This file extends docker-compose.yml with alpine-based images
 
-version: '3.8'
-
 services:
   # Alpine-based PostgreSQL (50% smaller)
   postgres:
@@ -57,11 +55,9 @@ services:
   auth:
     build:
       context: .
-      dockerfile: ./docker/auth.Dockerfile
-      target: production  # Use production build stage
+      dockerfile: ./docker/auth.alpine.Dockerfile
       args:
         BUILD_ENV: production
-        BASE_IMAGE: python:3.11-alpine
     deploy:
       resources:
         limits:
@@ -79,11 +75,9 @@ services:
   backend:
     build:
       context: .
-      dockerfile: ./docker/backend.Dockerfile
-      target: production  # Use production build stage
+      dockerfile: ./docker/backend.alpine.Dockerfile
       args:
         BUILD_ENV: production
-        BASE_IMAGE: python:3.11-alpine
     deploy:
       resources:
         limits:
@@ -105,12 +99,10 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: ./docker/frontend.Dockerfile
-      target: production  # Use production build stage
+      dockerfile: ./docker/frontend.alpine.Dockerfile
       args:
         BUILD_ENV: production
         NODE_ENV: production
-        BASE_IMAGE: node:18-alpine
     deploy:
       resources:
         limits:
