@@ -524,9 +524,9 @@ class ClickHouseFactory:
             try:
                 # Create user-isolated ClickHouse client
                 client = UserClickHouseClient(
-                    user_id=user_context.user_id,
-                    request_id=user_context.request_id,
-                    thread_id=user_context.thread_id
+                    user_context.user_id,
+                    user_context.request_id,
+                    user_context.thread_id
                 )
                 
                 # Initialize the client

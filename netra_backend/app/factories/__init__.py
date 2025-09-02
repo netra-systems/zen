@@ -16,6 +16,7 @@ Key Factories:
 - ClickHouseAccessFactory: User-scoped ClickHouse contexts  
 - RedisAccessFactory: User-scoped Redis contexts
 - ClickHouseFactory: User-isolated ClickHouse instances with connection pooling
+- RedisFactory: User-isolated Redis instances with connection management
 """
 
 from netra_backend.app.factories.data_access_factory import (
@@ -28,6 +29,11 @@ from netra_backend.app.factories.clickhouse_factory import (
     UserClickHouseClient,
     get_clickhouse_factory
 )
+from netra_backend.app.factories.redis_factory import (
+    RedisFactory,
+    UserRedisClient,
+    get_redis_factory
+)
 
 __all__ = [
     "DataAccessFactory",
@@ -35,5 +41,8 @@ __all__ = [
     "RedisAccessFactory",
     "ClickHouseFactory",
     "UserClickHouseClient", 
-    "get_clickhouse_factory"
+    "get_clickhouse_factory",
+    "RedisFactory",
+    "UserRedisClient",
+    "get_redis_factory"
 ]
