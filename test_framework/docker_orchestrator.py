@@ -24,6 +24,11 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from shared.isolated_environment import IsolatedEnvironment
 from test_framework.port_conflict_fix import DockerPortManager, PortConflictResolver
+from test_framework.docker_rate_limiter import (
+    DockerRateLimiter,
+    execute_docker_command,
+    get_docker_rate_limiter
+)
 
 logger = logging.getLogger(__name__)
 
@@ -64,18 +69,18 @@ class DockerOrchestrator:
         self.docker_client = self._verify_docker()
         self._executor = ThreadPoolExecutor(max_workers=4)
         self.port_manager = DockerPortManager(environment='test')
+        self.docker_rate_limiter = get_docker_rate_limiter()
         # Clean up stale containers on init
         PortConflictResolver.cleanup_stale_docker_containers()
         
     def _verify_docker(self) -> bool:
         """Verify Docker is available"""
         try:
-            result = subprocess.run(
+            docker_result = self.docker_rate_limiter.execute_docker_command(
                 ["docker", "version"],
-                capture_output=True,
-                text=True,
                 timeout=5
             )
+            result = subprocess.CompletedProcess(["docker", "version"], docker_result.returncode, docker_result.stdout, docker_result.stderr)
             if result.returncode != 0:
                 raise RuntimeError("Docker not available")
             return True
@@ -279,11 +284,12 @@ class DockerOrchestrator:
     def _create_network(self, network_name: str):
         """Create Docker network for test environment"""
         try:
-            subprocess.run(
+            docker_result = self.docker_rate_limiter.execute_docker_command(
                 ["docker", "network", "create", network_name],
-                check=True,
-                capture_output=True
+                timeout=30
             )
+            if docker_result.returncode != 0:
+                raise subprocess.CalledProcessError(docker_result.returncode, ["docker", "network", "create", network_name], docker_result.stderr)
             logger.info(f"Created network: {network_name}")
         except subprocess.CalledProcessError as e:
             if "already exists" not in e.stderr.decode():
@@ -327,11 +333,11 @@ class DockerOrchestrator:
             config.build_context
         ]
         
-        result = subprocess.run(
+        docker_result = self.docker_rate_limiter.execute_docker_command(
             build_args,
-            capture_output=True,
-            text=True
+            timeout=300  # 5 minutes for builds
         )
+        result = subprocess.CompletedProcess(build_args, docker_result.returncode, docker_result.stdout, docker_result.stderr)
         
         if result.returncode != 0:
             raise RuntimeError(f"Build failed: {result.stderr}")
@@ -409,7 +415,8 @@ class DockerOrchestrator:
         if config.command:
             run_args.extend(config.command.split())
             
-        result = subprocess.run(run_args, capture_output=True, text=True)
+        docker_result = self.docker_rate_limiter.execute_docker_command(run_args, timeout=60)
+        result = subprocess.CompletedProcess(run_args, docker_result.returncode, docker_result.stdout, docker_result.stderr)
         
         if result.returncode != 0:
             raise RuntimeError(f"Failed to start {config.name}: {result.stderr}")
@@ -420,11 +427,11 @@ class DockerOrchestrator:
         start_time = time.time()
         
         while time.time() - start_time < timeout:
-            result = subprocess.run(
+            docker_result = self.docker_rate_limiter.execute_docker_command(
                 ["docker", "inspect", config.name],
-                capture_output=True,
-                text=True
+                timeout=10
             )
+            result = subprocess.CompletedProcess(["docker", "inspect", config.name], docker_result.returncode, docker_result.stdout, docker_result.stderr)
             
             if result.returncode == 0:
                 data = json.loads(result.stdout)
@@ -451,15 +458,15 @@ class DockerOrchestrator:
         container_name = f"netra-dev-{service}"
         
         # Stop existing container
-        subprocess.run(
+        self.docker_rate_limiter.execute_docker_command(
             ["docker", "stop", container_name],
-            capture_output=True
+            timeout=30
         )
         
         # Remove existing container
-        subprocess.run(
+        self.docker_rate_limiter.execute_docker_command(
             ["docker", "rm", container_name],
-            capture_output=True
+            timeout=30
         )
         
         # Rebuild with latest code
@@ -470,16 +477,17 @@ class DockerOrchestrator:
             f"dev-{service}"
         ]
         
-        result = subprocess.run(build_args, capture_output=True, text=True)
+        docker_result = self.docker_rate_limiter.execute_docker_command(build_args, timeout=300)
+        result = subprocess.CompletedProcess(build_args, docker_result.returncode, docker_result.stdout, docker_result.stderr)
         
         if result.returncode != 0:
             logger.error(f"Failed to rebuild {service}: {result.stderr}")
             return
             
         # Start the service
-        subprocess.run(
+        self.docker_rate_limiter.execute_docker_command(
             ["docker-compose", "up", "-d", f"dev-{service}"],
-            capture_output=True
+            timeout=120
         )
         
         logger.info(f"Refreshed {service} with latest changes")
@@ -498,19 +506,19 @@ class DockerOrchestrator:
         
         # Stop and remove containers
         for config in test_env.services.values():
-            subprocess.run(
+            self.docker_rate_limiter.execute_docker_command(
                 ["docker", "stop", config.name],
-                capture_output=True
+                timeout=30
             )
-            subprocess.run(
+            self.docker_rate_limiter.execute_docker_command(
                 ["docker", "rm", config.name],
-                capture_output=True
+                timeout=30
             )
             
         # Remove network
-        subprocess.run(
+        self.docker_rate_limiter.execute_docker_command(
             ["docker", "network", "rm", test_env.network_name],
-            capture_output=True
+            timeout=30
         )
         
         # Remove from tracking

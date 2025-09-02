@@ -294,6 +294,10 @@ class UnifiedDockerManager:
         env = get_env()
         self.environment = env.get("TEST_ENV", "test")
         
+        # Cleanup scheduler integration (optional)
+        self._cleanup_scheduler = None
+        self._enable_cleanup_scheduler = env.get("ENABLE_DOCKER_CLEANUP_SCHEDULER", "false").lower() == "true"
+        
         # Ensure PROJECT_ROOT is set for docker-compose file detection
         if not env.get("PROJECT_ROOT"):
             # Calculate project root from this file's location
@@ -2286,6 +2290,190 @@ class UnifiedDockerManager:
                 logger.error(f"  - {issue.title}")
         
         return report
+    
+    # =====================================
+    # CLEANUP SCHEDULER INTEGRATION
+    # =====================================
+    
+    def enable_cleanup_scheduler(self, 
+                                schedule_config: Optional[object] = None,
+                                resource_thresholds: Optional[object] = None) -> bool:
+        """
+        Enable the Docker cleanup scheduler for this manager.
+        
+        Args:
+            schedule_config: Optional ScheduleConfig instance
+            resource_thresholds: Optional ResourceThresholds instance
+            
+        Returns:
+            True if scheduler was enabled successfully
+        """
+        if not self._enable_cleanup_scheduler:
+            logger.debug("Cleanup scheduler is disabled via environment variable")
+            return False
+        
+        try:
+            # Import here to avoid circular imports
+            from test_framework.docker_cleanup_scheduler import (
+                DockerCleanupScheduler, ScheduleConfig, ResourceThresholds
+            )
+            
+            if self._cleanup_scheduler is None:
+                self._cleanup_scheduler = DockerCleanupScheduler(
+                    docker_manager=self,
+                    rate_limiter=self.config.rate_limiter if hasattr(self.config, 'rate_limiter') else None,
+                    schedule_config=schedule_config,
+                    resource_thresholds=resource_thresholds
+                )
+                
+                # Add callbacks for test session tracking
+                self._cleanup_scheduler.add_pre_cleanup_callback(self._pre_cleanup_check)
+                self._cleanup_scheduler.add_post_cleanup_callback(self._post_cleanup_handler)
+                
+                result = self._cleanup_scheduler.start()
+                if result:
+                    logger.info("Docker cleanup scheduler enabled and started")
+                else:
+                    logger.error("Failed to start cleanup scheduler")
+                return result
+            else:
+                logger.debug("Cleanup scheduler already enabled")
+                return True
+                
+        except Exception as e:
+            logger.error(f"Failed to enable cleanup scheduler: {e}")
+            return False
+    
+    def disable_cleanup_scheduler(self) -> bool:
+        """
+        Disable the Docker cleanup scheduler.
+        
+        Returns:
+            True if scheduler was disabled successfully
+        """
+        if self._cleanup_scheduler is not None:
+            try:
+                result = self._cleanup_scheduler.stop()
+                self._cleanup_scheduler = None
+                logger.info("Docker cleanup scheduler disabled")
+                return result
+            except Exception as e:
+                logger.error(f"Failed to disable cleanup scheduler: {e}")
+                return False
+        return True
+    
+    def get_cleanup_scheduler_status(self) -> Optional[Dict[str, Any]]:
+        """
+        Get status of the cleanup scheduler.
+        
+        Returns:
+            Scheduler statistics dictionary or None if scheduler not enabled
+        """
+        if self._cleanup_scheduler is not None:
+            return self._cleanup_scheduler.get_statistics()
+        return None
+    
+    def register_with_cleanup_scheduler(self, test_id: Optional[str] = None) -> str:
+        """
+        Register the current test session with the cleanup scheduler.
+        
+        Args:
+            test_id: Optional test identifier (uses self.test_id if None)
+            
+        Returns:
+            The registered test ID
+        """
+        session_id = test_id or self.test_id
+        if self._cleanup_scheduler is not None:
+            self._cleanup_scheduler.register_test_session(session_id)
+            logger.debug(f"Registered test session {session_id} with cleanup scheduler")
+        return session_id
+    
+    def unregister_from_cleanup_scheduler(self, test_id: Optional[str] = None, 
+                                        trigger_cleanup: bool = True) -> None:
+        """
+        Unregister test session from cleanup scheduler.
+        
+        Args:
+            test_id: Optional test identifier (uses self.test_id if None)
+            trigger_cleanup: Whether to trigger post-test cleanup
+        """
+        session_id = test_id or self.test_id
+        if self._cleanup_scheduler is not None:
+            self._cleanup_scheduler.unregister_test_session(session_id, trigger_cleanup)
+            logger.debug(f"Unregistered test session {session_id} from cleanup scheduler")
+    
+    def trigger_manual_cleanup(self, cleanup_types: Optional[List] = None) -> List:
+        """
+        Trigger manual cleanup through the scheduler if available.
+        
+        Args:
+            cleanup_types: Optional list of CleanupType enums
+            
+        Returns:
+            List of CleanupResult objects
+        """
+        if self._cleanup_scheduler is not None:
+            return self._cleanup_scheduler.trigger_manual_cleanup(cleanup_types, force=True)
+        else:
+            logger.warning("Cleanup scheduler not available for manual cleanup")
+            # Fallback to existing cleanup method
+            try:
+                self.cleanup_orphaned_containers()
+                return []
+            except Exception as e:
+                logger.error(f"Fallback cleanup failed: {e}")
+                return []
+    
+    def _pre_cleanup_check(self) -> bool:
+        """
+        Pre-cleanup callback to check if cleanup should proceed.
+        
+        Returns:
+            True if cleanup should proceed
+        """
+        # Check if any critical services are starting up
+        try:
+            if hasattr(self, '_starting_services') and self._starting_services:
+                logger.info("Skipping cleanup - services are starting")
+                return False
+            
+            # Check if we're in the middle of a restart operation
+            now = time.time()
+            for service, restart_times in self._restart_history.items():
+                if restart_times and (now - restart_times[-1]) < 60:  # Within last minute
+                    logger.info(f"Skipping cleanup - {service} recently restarted")
+                    return False
+            
+            return True
+            
+        except Exception as e:
+            logger.warning(f"Error in pre-cleanup check: {e}")
+            return True  # Proceed with cleanup on error
+    
+    def _post_cleanup_handler(self, results: List) -> None:
+        """
+        Post-cleanup callback to handle cleanup results.
+        
+        Args:
+            results: List of CleanupResult objects
+        """
+        try:
+            total_space_freed = sum(r.space_freed_mb for r in results if r.success)
+            total_items_removed = sum(r.items_removed for r in results if r.success)
+            failed_operations = [r for r in results if not r.success]
+            
+            if total_space_freed > 0 or total_items_removed > 0:
+                logger.info(f"Cleanup completed: {total_items_removed} items removed, "
+                           f"{total_space_freed:.1f} MB freed")
+            
+            if failed_operations:
+                logger.warning(f"Some cleanup operations failed: {len(failed_operations)}")
+                for result in failed_operations:
+                    logger.debug(f"  {result.cleanup_type.value}: {result.error_message}")
+                    
+        except Exception as e:
+            logger.warning(f"Error in post-cleanup handler: {e}")
 
 
 # Convenience functions for backward compatibility and async orchestration
