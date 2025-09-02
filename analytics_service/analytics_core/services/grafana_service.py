@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Grafana Integration Service for Analytics Platform
 
@@ -71,16 +72,16 @@ class GrafanaService:
             clickhouse_url: ClickHouse connection URL
             redis_url: Redis connection URL
         """
-        self.grafana_url = grafana_url or os.getenv(
+        self.grafana_url = grafana_url or get_env().get(
             'GRAFANA_API_URL', 'http://localhost:3000'
         )
-        self.grafana_user = grafana_user or os.getenv('GRAFANA_USER', 'admin')
-        self.grafana_password = grafana_password or os.getenv('GRAFANA_PASSWORD', 'admin')
+        self.grafana_user = grafana_user or get_env().get('GRAFANA_USER', 'admin')
+        self.grafana_password = grafana_password or get_env().get('GRAFANA_PASSWORD', 'admin')
         
-        self.clickhouse_url = clickhouse_url or os.getenv(
+        self.clickhouse_url = clickhouse_url or get_env().get(
             'CLICKHOUSE_ANALYTICS_URL', 'clickhouse://localhost:8123/analytics'
         )
-        self.redis_url = redis_url or os.getenv(
+        self.redis_url = redis_url or get_env().get(
             'REDIS_ANALYTICS_URL', 'redis://localhost:6379/2'
         )
         
