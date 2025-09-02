@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Test that verifies the WebSocket validator fix works correctly.
 
