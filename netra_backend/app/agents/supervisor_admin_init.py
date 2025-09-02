@@ -100,11 +100,9 @@ def _create_supervisor_instance(
     return SupervisorAgent(
         db_session=db,
         llm_manager=llm_manager,
-        websocket_manager=websocket_manager,
-        tool_dispatcher=tool_dispatcher,
-        config=config,
-        user_id=str(user.id) if user else None,
-        thread_id=thread_id
+        websocket_bridge=websocket_manager,  # Correct parameter name - expects websocket_bridge
+        tool_dispatcher=tool_dispatcher
+        # Note: config, user_id, thread_id are not part of SupervisorAgent constructor
     )
 
 
