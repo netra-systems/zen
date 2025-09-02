@@ -18,8 +18,8 @@ from netra_backend.app.services.database.mcp_client_repository import (
 logger = central_logger.get_logger(__name__)
 
 
-class MCPToolExecutor:
-    """Handles tool discovery and execution for MCP servers."""
+class ServiceMCPToolExecutor:
+    """Handles tool discovery and execution for MCP servers with DB tracking."""
     
     def __init__(self):
         self.tool_repo = MCPToolExecutionRepository()
@@ -146,3 +146,7 @@ class MCPToolExecutor:
                 del self.cache[key]
         else:
             self.cache.clear()
+
+
+# Backward compatibility alias - DEPRECATED
+MCPToolExecutor = ServiceMCPToolExecutor

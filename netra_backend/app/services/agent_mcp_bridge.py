@@ -94,8 +94,8 @@ class MCPToolDiscoveryService:
         )
 
 
-class MCPToolExecutor:
-    """Executes MCP tools on behalf of agents."""
+class AgentMCPToolExecutor:
+    """Executes MCP tools on behalf of agents with permission context."""
     
     def __init__(self, mcp_service: MCPClientService):
         self.mcp_service = mcp_service
@@ -241,7 +241,7 @@ class AgentMCPBridge:
     def __init__(self, mcp_service: Optional[MCPClientService] = None):
         self.mcp_service = mcp_service or MCPClientService()
         self.tool_discovery = MCPToolDiscoveryService(self.mcp_service)
-        self.tool_executor = MCPToolExecutor(self.mcp_service)
+        self.tool_executor = AgentMCPToolExecutor(self.mcp_service)
         self.result_transformer = MCPResultTransformer()
     
     async def discover_tools(self, context: MCPAgentContext,
@@ -286,3 +286,7 @@ class AgentMCPBridge:
             return True
         except Exception:
             return False
+
+
+# Backward compatibility alias - DEPRECATED
+MCPToolExecutor = AgentMCPToolExecutor
