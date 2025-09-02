@@ -500,9 +500,9 @@ class SupervisorAgent(BaseAgent):
 
     async def run(self, user_prompt: str, thread_id: str, 
                   user_id: str, run_id: str) -> DeepAgentState:
-        """Run the supervisor agent workflow - backward compatibility method.
+        """Run the supervisor agent workflow with user isolation.
         
-        This method maintains backward compatibility while using the golden pattern internally.
+        This method maintains backward compatibility while using split architecture internally.
         
         Args:
             user_prompt: The user's request
@@ -513,7 +513,23 @@ class SupervisorAgent(BaseAgent):
         Returns:
             Updated DeepAgentState with orchestration results
         """
-        logger.info(f"SupervisorAgent.run() starting for run_id: {run_id}")
+        logger.info(f"SupervisorAgent.run() starting for run_id: {run_id}, user_id: {user_id}")
+        
+        # CRITICAL: Ensure we have proper user context for isolation
+        if not self.user_context or self.user_context.user_id != user_id:
+            logger.warning(f"Creating UserExecutionContext for run {run_id} - this should be done at request level")
+            try:
+                # Create temporary user context for backward compatibility
+                self.user_context = UserContext.from_request(
+                    user_id=user_id,
+                    thread_id=thread_id,
+                    run_id=run_id
+                )
+                logger.info("✅ Created temporary UserExecutionContext for backward compatibility")
+            except Exception as e:
+                logger.error(f"Failed to create UserExecutionContext: {e}")
+                # Continue without context but log the risk
+                logger.error("⚠️ CRITICAL: Running without UserExecutionContext - user isolation NOT guaranteed!")
         
         # Initialize state
         state = DeepAgentState()
@@ -533,23 +549,27 @@ class SupervisorAgent(BaseAgent):
         
         async with self._execution_lock:
             try:
-                # Use modern execution pattern through BaseAgent
+                # Use NEW split architecture execution pattern
                 if await self.validate_preconditions(context):
                     result = await self.execute_core_logic(context)
-                    logger.info(f"SupervisorAgent.run() completed successfully for run_id: {run_id}")
+                    logger.info(f"SupervisorAgent.run() completed with user isolation for run_id: {run_id}, user_id: {user_id}")
                     return context.state  # Return updated state
                 else:
                     # Validation failed
-                    logger.error(f"Validation failed in SupervisorAgent.run() for run_id: {run_id}")
+                    logger.error(f"Validation failed in SupervisorAgent.run() for run_id: {run_id}, user_id: {user_id}")
                     return state
                     
             except Exception as e:
-                # Fallback to legacy execution helpers
-                logger.warning(f"Modern execution failed, falling back to legacy workflow: {e}")
+                # Fallback to legacy execution helpers (with user context if available)
+                logger.warning(f"Split architecture execution failed, falling back to legacy workflow: {e}")
                 try:
+                    # Log isolation breach warning
+                    if self.user_context:
+                        logger.warning(f"⚠️ Falling back to legacy workflow - user isolation may be compromised for user {self.user_context.user_id}")
+                    
                     return await self.execution_helpers.run_supervisor_workflow(state, run_id)
                 except Exception as fallback_error:
-                    logger.error(f"Legacy fallback also failed for run_id {run_id}: {fallback_error}")
+                    logger.error(f"Legacy fallback also failed for run_id {run_id}, user_id {user_id}: {fallback_error}")
                     return state
 
     def get_stats(self) -> Dict[str, Any]:

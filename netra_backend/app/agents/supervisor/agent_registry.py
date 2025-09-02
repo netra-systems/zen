@@ -547,3 +547,157 @@ class AgentRegistry:
     def get_agent_class_registry(self) -> Optional[AgentClassRegistry]:
         """Get the underlying AgentClassRegistry for new architecture migration."""
         return self._agent_class_registry
+    
+    # === Migration Helper Methods ===
+    
+    def get_infrastructure_registry(self) -> Optional[AgentClassRegistry]:
+        """Get the infrastructure-only registry (migration helper).
+        
+        Returns the global singleton AgentClassRegistry that stores agent classes
+        without per-user state. This is the preferred registry for new architecture.
+        
+        Returns:
+            AgentClassRegistry instance if available, None otherwise
+        """
+        if self._agent_class_registry:
+            return self._agent_class_registry
+        
+        try:
+            return get_agent_class_registry()
+        except Exception as e:
+            logger.warning(f"Could not get infrastructure registry: {e}")
+            return None
+    
+    def create_request_factory(self, user_context: 'UserExecutionContext') -> 'AgentInstanceFactory':
+        """Create per-request factory for user isolation (migration helper).
+        
+        Creates an AgentInstanceFactory configured for the specific user context.
+        This factory creates fresh agent instances per request with complete isolation.
+        
+        Args:
+            user_context: User execution context for the request
+            
+        Returns:
+            Configured AgentInstanceFactory for the request
+            
+        Raises:
+            ImportError: If AgentInstanceFactory not available
+            ValueError: If configuration fails
+        """
+        try:
+            from netra_backend.app.agents.supervisor.agent_instance_factory import (
+                AgentInstanceFactory, 
+                get_agent_instance_factory
+            )
+            
+            # Get or create factory instance
+            factory = get_agent_instance_factory()
+            
+            # Configure factory with current infrastructure components
+            if not hasattr(factory, '_websocket_bridge') or not factory._websocket_bridge:
+                factory.configure(
+                    agent_class_registry=self._agent_class_registry,
+                    agent_registry=self,  # Provide legacy registry for compatibility
+                    websocket_bridge=self.websocket_bridge,
+                    websocket_manager=self.websocket_manager
+                )
+                logger.info("✅ Configured AgentInstanceFactory with legacy AgentRegistry components")
+            
+            return factory
+            
+        except ImportError as e:
+            logger.error(f"AgentInstanceFactory not available: {e}")
+            raise ImportError("Cannot create request factory - AgentInstanceFactory not available")
+        except Exception as e:
+            logger.error(f"Failed to create request factory: {e}")
+            raise ValueError(f"Request factory creation failed: {e}")
+    
+    def migrate_to_new_architecture(self) -> Dict[str, Any]:
+        """Migrate agent registrations to new architecture (migration helper).
+        
+        This method helps transition from the old AgentRegistry to the new
+        AgentClassRegistry + AgentInstanceFactory pattern by:
+        1. Registering all agent classes in AgentClassRegistry
+        2. Providing migration status and recommendations
+        
+        Returns:
+            Dictionary with migration status and recommendations
+        """
+        from datetime import datetime, timezone
+        
+        migration_status = {
+            'agent_classes_migrated': 0,
+            'migration_errors': [],
+            'recommendations': [],
+            'infrastructure_registry_available': False,
+            'legacy_agents_count': len(self.agents),
+            'migration_complete': False
+        }
+        
+        # Check if infrastructure registry is available
+        infrastructure_registry = self.get_infrastructure_registry()
+        if not infrastructure_registry:
+            migration_status['migration_errors'].append("AgentClassRegistry not available")
+            return migration_status
+        
+        migration_status['infrastructure_registry_available'] = True
+        
+        # Migrate agent classes
+        for agent_name, agent_instance in self.agents.items():
+            try:
+                agent_class = type(agent_instance)
+                
+                # Skip if already registered
+                if infrastructure_registry.has_agent_class(agent_name):
+                    logger.debug(f"Agent class {agent_name} already registered in infrastructure registry")
+                    migration_status['agent_classes_migrated'] += 1
+                    continue
+                
+                # Register agent class
+                infrastructure_registry.register(
+                    name=agent_name,
+                    agent_class=agent_class,
+                    description=getattr(agent_instance, 'description', f"{agent_class.__name__} agent"),
+                    version=getattr(agent_instance, 'version', '1.0.0'),
+                    dependencies=getattr(agent_instance, 'dependencies', []),
+                    metadata={
+                        'migrated_from_legacy_registry': True,
+                        'migration_timestamp': datetime.now(timezone.utc).isoformat(),
+                        'original_instance_id': id(agent_instance)
+                    }
+                )
+                
+                migration_status['agent_classes_migrated'] += 1
+                logger.info(f"✅ Migrated agent class {agent_name} to infrastructure registry")
+                
+            except Exception as e:
+                error_msg = f"Failed to migrate agent {agent_name}: {e}"
+                migration_status['migration_errors'].append(error_msg)
+                logger.error(error_msg)
+        
+        # Provide recommendations
+        if migration_status['agent_classes_migrated'] == migration_status['legacy_agents_count']:
+            migration_status['migration_complete'] = True
+            migration_status['recommendations'].extend([
+                "All agent classes successfully migrated to AgentClassRegistry",
+                "Update calling code to use AgentInstanceFactory.create_agent_instance()",
+                "Stop using AgentRegistry.get() for agent instances",
+                "Use UserExecutionContext for proper user isolation",
+                "Consider freezing AgentClassRegistry after startup with .freeze()"
+            ])
+        else:
+            migration_status['recommendations'].extend([
+                f"Only {migration_status['agent_classes_migrated']}/{migration_status['legacy_agents_count']} agents migrated",
+                "Review migration errors and fix agent class registration issues",
+                "Some agents may require manual migration"
+            ])
+        
+        if migration_status['migration_errors']:
+            migration_status['recommendations'].append(
+                "Address migration errors before fully transitioning to new architecture"
+            )
+        
+        logger.info(f"Agent registry migration status: {migration_status['agent_classes_migrated']} classes migrated, "
+                   f"{len(migration_status['migration_errors'])} errors")
+        
+        return migration_status

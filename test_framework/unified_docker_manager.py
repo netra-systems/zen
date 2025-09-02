@@ -1270,7 +1270,13 @@ class UnifiedDockerManager:
                                         service = container_name.replace('netra-test-', '')
                                         if service.endswith('-1'):
                                             service = service[:-2]  # Remove '-1' suffix properly
-                                
+                                    
+                                    # Add the service to containers dict
+                                    if service and service in self.SERVICES:
+                                        containers[service] = container_name
+                    except Exception as e:
+                        logger.warning(f"Error in alternative detection method: {e}")
+                        
             except Exception as e:
                 logger.warning(f"Error detecting existing containers on attempt {attempt + 1}: {e}")
                 
@@ -1552,6 +1558,7 @@ class UnifiedDockerManager:
     def _get_actual_container_name(self, env_name: str, service_name: str) -> Optional[str]:
         """
         Get the actual container name for a service, handling different naming patterns.
+        Enhanced to use the new pattern-based parsing.
         
         Args:
             env_name: Environment name
@@ -1560,37 +1567,67 @@ class UnifiedDockerManager:
         Returns:
             Actual container name or None if not found
         """
-        # Try different naming patterns
+        # Get all container patterns
+        patterns = self._get_container_name_pattern()
+        project_dir = Path.cwd().name
+        
+        # Generate possible names based on environment and patterns
         possible_names = [
-            f"{env_name}_{service_name}_1",  # Standard compose format
-            f"{env_name}-{service_name}-1",   # Alternative compose format
-            f"netra-apex-test-{service_name}-1",  # Our test containers
-            f"netra-dev-{service_name}",     # Dev containers
-            f"netra-test-{service_name}-1",  # Test containers
-            f"netra_test_shared_{service_name}_1"  # Shared test containers
+            # Standard compose formats
+            f"{env_name}_{service_name}_1",
+            f"{env_name}-{service_name}-1",
+            # Project-based patterns
+            f"{project_dir}-dev-{service_name}-1",
+            f"{project_dir}_dev_{service_name}_1",
+            f"{project_dir}-test-{service_name}-1",
+            f"{project_dir}_test_{service_name}_1",
+            f"{project_dir}-alpine-test-{service_name}-1",
+            # Legacy patterns
+            f"netra-apex-test-{service_name}-1",
+            f"netra-dev-{service_name}",
+            f"netra-test-{service_name}-1",
+            f"netra_test_shared_{service_name}_1"
         ]
         
+        # Method 1: Try exact name matches
         for name in possible_names:
-            # Check if container exists
-            cmd = ["docker", "ps", "-a", "--filter", f"name={name}", "--format", "{{.Names}}"]
-            result = subprocess.run(cmd, capture_output=True, text=True)
+            try:
+                cmd = ["docker", "ps", "-a", "--filter", f"name=^{name}$", "--format", "{{.Names}}"]
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+                if result.returncode == 0 and result.stdout.strip():
+                    actual_name = result.stdout.strip().split('\n')[0]
+                    if actual_name:
+                        logger.debug(f"Found exact container match: {actual_name} for service {service_name}")
+                        return actual_name
+            except Exception as e:
+                logger.debug(f"Error checking container name {name}: {e}")
+        
+        # Method 2: Search all containers and parse with new logic
+        try:
+            cmd = ["docker", "ps", "--format", "{{.Names}}"]
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
             if result.returncode == 0 and result.stdout.strip():
-                actual_name = result.stdout.strip().split('\n')[0]  # Get first match
-                if actual_name:
-                    logger.debug(f"Found container {actual_name} for service {service_name}")
-                    return actual_name
+                container_names = result.stdout.strip().split('\n')
+                for container_name in container_names:
+                    if not container_name.strip():
+                        continue
+                    
+                    # Use new parser to extract service name
+                    parsed_service = self._parse_container_name_to_service(container_name)
+                    if parsed_service == service_name:
+                        logger.debug(f"Found container {container_name} via parsing for service {service_name}")
+                        return container_name
+                        
+                    # Fallback: check if service name is in container name and it's netra-related
+                    if (service_name in container_name and 
+                        'netra' in container_name.lower() and 
+                        not parsed_service):  # Only if parsing didn't work
+                        logger.debug(f"Found container {container_name} by fallback match for service {service_name}")
+                        return container_name
+        except Exception as e:
+            logger.debug(f"Error searching containers: {e}")
         
-        # If not found by exact match, try to find by service name pattern
-        cmd = ["docker", "ps", "--format", "{{.Names}}"]
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        if result.returncode == 0 and result.stdout.strip():
-            container_names = result.stdout.strip().split('\n')
-            for container_name in container_names:
-                # Check if service name is in container name
-                if service_name in container_name and 'netra' in container_name:
-                    logger.debug(f"Found container {container_name} by pattern match for service {service_name}")
-                    return container_name
-        
+        logger.debug(f"No container found for service {service_name} in environment {env_name}")
         return None
     
     def _is_existing_container_healthy(self, container_name: str) -> bool:
