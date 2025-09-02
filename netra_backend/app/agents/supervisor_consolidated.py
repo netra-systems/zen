@@ -267,6 +267,160 @@ class SupervisorAgent(BaseAgent):
             self.flow_logger.complete_flow(flow_id)
             return updated_state
     
+    async def _create_isolated_agent_instances(self) -> Dict[str, BaseAgent]:
+        """Create isolated agent instances for this user request using AgentInstanceFactory."""
+        if not self.user_context:
+            raise RuntimeError("UserExecutionContext required for creating isolated agents")
+        
+        agent_instances = {}
+        
+        # Get list of agent names to instantiate
+        agent_names = self._get_required_agent_names()
+        
+        for agent_name in agent_names:
+            try:
+                logger.debug(f"Creating isolated instance of {agent_name} for user {self.user_context.user_id}")
+                
+                # Use AgentInstanceFactory to create isolated instance
+                agent_instance = await self.agent_instance_factory.create_agent_instance(
+                    agent_name=agent_name,
+                    user_context=self.user_context
+                )
+                
+                agent_instances[agent_name] = agent_instance
+                logger.info(f"✅ Created isolated {agent_name} instance for user {self.user_context.user_id}")
+                
+            except Exception as e:
+                logger.error(f"Failed to create isolated {agent_name} instance: {e}")
+                # Continue with other agents - non-critical agents can fail
+                continue
+        
+        if not agent_instances:
+            raise RuntimeError("Failed to create any isolated agent instances")
+        
+        logger.info(f"Created {len(agent_instances)} isolated agent instances for user {self.user_context.user_id}")
+        return agent_instances
+    
+    def _get_required_agent_names(self) -> List[str]:
+        """Get list of required agent names for orchestration."""
+        # Core agents required for most workflows
+        core_agents = ["triage", "data", "optimization", "actions"]
+        
+        # Optional agents that enhance functionality
+        optional_agents = ["reporting", "goals_triage", "data_helper", "synthetic_data"]
+        
+        # Return core agents first, then optionals
+        return core_agents + optional_agents
+    
+    async def _execute_workflow_with_isolated_agents(self, 
+                                                   agent_instances: Dict[str, BaseAgent],
+                                                   flow_id: str, 
+                                                   state: DeepAgentState, 
+                                                   run_id: str) -> DeepAgentState:
+        """Execute workflow using isolated agent instances."""
+        if not self.user_context:
+            raise RuntimeError("UserExecutionContext required for workflow execution")
+        
+        logger.info(f"Executing workflow with {len(agent_instances)} isolated agents for user {self.user_context.user_id}")
+        
+        # Update state with user context information
+        state.user_id = self.user_context.user_id
+        state.chat_thread_id = self.user_context.thread_id
+        
+        # Execute workflow steps using isolated instances
+        # Start with triage to determine workflow path
+        if "triage" in agent_instances:
+            try:
+                await self._emit_thinking("Running triage with isolated agent instance...")
+                triage_agent = agent_instances["triage"]
+                
+                # Execute triage with proper user context
+                triage_result = await self._execute_agent_with_context(
+                    triage_agent, state, run_id, "triage"
+                )
+                
+                # Update state based on triage results
+                if hasattr(triage_result, 'final_answer'):
+                    state.workflow_decision = str(triage_result.final_answer)
+                
+            except Exception as e:
+                logger.error(f"Triage execution failed for user {self.user_context.user_id}: {e}")
+                # Continue with fallback workflow
+        
+        # Execute additional agents based on workflow decision
+        await self._execute_workflow_agents(agent_instances, state, run_id)
+        
+        return state
+    
+    async def _execute_agent_with_context(self, 
+                                         agent: BaseAgent, 
+                                         state: DeepAgentState, 
+                                         run_id: str,
+                                         agent_name: str) -> Any:
+        """Execute an agent instance with proper user context and error handling."""
+        try:
+            # Execute agent with state
+            if hasattr(agent, 'execute_modern'):
+                # Use modern execution pattern
+                result = await agent.execute_modern(state, run_id, stream_updates=True)
+            elif hasattr(agent, 'execute'):
+                # Use legacy execution pattern
+                result = await agent.execute(state, run_id, stream_updates=True)
+            else:
+                # Try run method as fallback
+                result = await agent.run(
+                    state.user_request or "Process request",
+                    self.user_context.thread_id,
+                    self.user_context.user_id,
+                    run_id
+                )
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Agent {agent_name} execution failed for user {self.user_context.user_id}: {e}")
+            raise
+    
+    async def _execute_workflow_agents(self, 
+                                      agent_instances: Dict[str, BaseAgent], 
+                                      state: DeepAgentState, 
+                                      run_id: str) -> None:
+        """Execute workflow agents in proper sequence with user isolation."""
+        # Define execution order
+        execution_order = ["data", "optimization", "actions", "reporting"]
+        
+        for agent_name in execution_order:
+            if agent_name in agent_instances:
+                try:
+                    await self._emit_thinking(f"Running {agent_name} with isolated instance...")
+                    await self._execute_agent_with_context(
+                        agent_instances[agent_name], state, run_id, agent_name
+                    )
+                except Exception as e:
+                    logger.warning(f"Agent {agent_name} failed for user {self.user_context.user_id}: {e}")
+                    # Continue with other agents
+                    continue
+    
+    async def _emit_thinking(self, message: str) -> None:
+        """Emit thinking message via user-specific WebSocket emitter."""
+        if self.user_context:
+            # Get WebSocket emitter from factory
+            try:
+                factory = get_agent_instance_factory()
+                if hasattr(factory, '_websocket_emitters'):
+                    context_id = f"{self.user_context.user_id}_{self.user_context.thread_id}_{self.user_context.run_id}"
+                    emitter_key = f"{context_id}_emitter"
+                    if emitter_key in factory._websocket_emitters:
+                        await factory._websocket_emitters[emitter_key].notify_agent_thinking(
+                            "Supervisor", message
+                        )
+                        return
+            except Exception as e:
+                logger.debug(f"Failed to use factory WebSocket emitter: {e}")
+        
+        # Fallback to BaseAgent emit_thinking
+        await self.emit_thinking(message)
+    
     async def _run_hooks(self, event: str, state: DeepAgentState, **kwargs) -> None:
         """Run registered hooks for an event."""
         for hook in self.hooks.get(event, []):
@@ -274,6 +428,52 @@ class SupervisorAgent(BaseAgent):
                 await hook(state, **kwargs)
             except Exception as e:
                 self.logger.warning(f"Hook execution failed for event {event}: {e}")
+    
+    # === Factory Methods for Split Architecture ===
+    
+    @classmethod
+    async def create_with_user_context(cls,
+                                     llm_manager: LLMManager,
+                                     websocket_bridge: AgentWebSocketBridge,
+                                     tool_dispatcher: ToolDispatcher,
+                                     user_context: UserContext,
+                                     db_session_factory=None) -> 'SupervisorAgent':
+        """Factory method to create SupervisorAgent with UserExecutionContext.
+        
+        This is the PREFERRED way to create a SupervisorAgent in the new architecture.
+        
+        Args:
+            llm_manager: LLM manager instance
+            websocket_bridge: WebSocket bridge for agent notifications
+            tool_dispatcher: Tool dispatcher for agent operations
+            user_context: Per-request user execution context
+            db_session_factory: Optional database session factory
+            
+        Returns:
+            SupervisorAgent configured for the specific user context
+        """
+        supervisor = cls(
+            llm_manager=llm_manager,
+            websocket_bridge=websocket_bridge,
+            tool_dispatcher=tool_dispatcher,
+            db_session_factory=db_session_factory,
+            user_context=user_context
+        )
+        
+        # Configure the agent instance factory if it's not already configured
+        try:
+            factory = get_agent_instance_factory()
+            if not hasattr(factory, '_websocket_bridge') or not factory._websocket_bridge:
+                # Configure factory with current components
+                factory.configure(
+                    agent_registry=supervisor.registry,  # Legacy registry for transition
+                    websocket_bridge=websocket_bridge
+                )
+                logger.info("✅ Configured AgentInstanceFactory for SupervisorAgent")
+        except Exception as e:
+            logger.warning(f"Failed to configure AgentInstanceFactory: {e}")
+        
+        return supervisor
     
     # === Backward Compatibility Methods ===
     
