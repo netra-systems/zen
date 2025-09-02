@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "environment",
-    "generated_at": "2025-09-01T14:15:56.858372",
+    "generated_at": "2025-09-01T19:24:20.101988",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 149
+    "total_literals": 148
   },
   "literals": {
     "AI21_API_KEY": {
@@ -177,7 +177,7 @@
       "category": "environment",
       "locations": [
         "netra_backend/app/core/error_codes.py:15",
-        "netra_backend/app/core/unified_error_handler.py:173"
+        "netra_backend/app/core/unified_error_handler.py:211"
       ]
     },
     "AUTH_FAST_TEST_MODE": {
@@ -217,6 +217,7 @@
       "category": "environment",
       "locations": [
         "netra_backend/app/core/configuration/services.py:347",
+        "netra_backend/app/routes/auth_routes/debug_helpers.py:60",
         "scripts/deploy_to_gcp.py:95",
         "scripts/fix_authentication_system.py:91",
         "scripts/fix_authentication_system.py:285"
@@ -242,8 +243,8 @@
         "netra_backend/app/core/health_checkers.py:809",
         "netra_backend/app/core/network_constants.py:224",
         "netra_backend/app/routes/auth_proxy.py:25",
-        "netra_backend/app/routes/system_info.py:299",
-        "auth_service/auth_core/config.py:199"
+        "netra_backend/app/routes/auth_routes/debug_helpers.py:23",
+        "netra_backend/app/routes/system_info.py:299"
       ]
     },
     "AUTH_TOKEN_EXPIRED": {
@@ -265,7 +266,7 @@
       "category": "environment",
       "locations": [
         "netra_backend/app/core/error_codes.py:16",
-        "netra_backend/app/core/unified_error_handler.py:174"
+        "netra_backend/app/core/unified_error_handler.py:212"
       ]
     },
     "AUTH_URL": {
@@ -701,6 +702,7 @@
         "netra_backend/app/core/project_utils.py:96",
         "netra_backend/app/core/project_utils.py:110",
         "netra_backend/app/routes/auth_proxy.py:35",
+        "netra_backend/app/routes/auth_routes/debug_helpers.py:62",
         "shared/config_builder_base.py:105"
       ]
     },
@@ -937,7 +939,7 @@
       "value": "REDIS_DISABLED",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/config.py:326",
+        "auth_service/auth_core/config.py:340",
         "scripts/deploy_to_gcp.py:129",
         "scripts/verify_deployment_env_vars.py:63"
       ]
@@ -974,7 +976,7 @@
         "netra_backend/app/core/configuration/database.py:465",
         "netra_backend/app/redis_manager.py:101",
         "netra_backend/app/redis_manager.py:101",
-        "auth_service/auth_core/redis_manager.py:78",
+        "auth_service/auth_core/redis_manager.py:79",
         "scripts/test/run_staging_tests.py:48",
         "scripts/test/validate_staging_tests.py:19",
         "shared/redis_config_builder.py:585"
@@ -1121,8 +1123,8 @@
         "netra_backend/app/redis_manager.py:102",
         "netra_backend/app/redis_manager.py:102",
         "netra_backend/app/routes/health.py:350",
-        "auth_service/auth_core/redis_manager.py:64",
-        "auth_service/auth_core/redis_manager.py:101",
+        "auth_service/auth_core/redis_manager.py:65",
+        "auth_service/auth_core/redis_manager.py:99",
         "scripts/test/run_staging_tests.py:47"
       ]
     },
@@ -1309,7 +1311,6 @@
       "value": "TEST_AUTH_PORT",
       "category": "environment",
       "locations": [
-        "scripts/run_e2e_tests_with_docker.py:76",
         "shared/port_discovery.py:88"
       ]
     },
@@ -1318,13 +1319,6 @@
       "category": "environment",
       "locations": [
         "scripts/demo_real_llm_testing.py:44"
-      ]
-    },
-    "TEST_REDIS_PORT": {
-      "value": "TEST_REDIS_PORT",
-      "category": "environment",
-      "locations": [
-        "scripts/run_e2e_tests_with_docker.py:79"
       ]
     },
     "TWILIO_AUTH_TOKEN": {
