@@ -42,6 +42,7 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.llm.observability import log_agent_communication
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.serialization.unified_json_handler import safe_json_dumps
 
 logger = central_logger.get_logger(__name__)
 
@@ -176,7 +177,7 @@ class SyntheticDataSubAgent(BaseAgent):
         # Store in context metadata
         context.metadata['approval_message'] = approval_message
         context.metadata['requires_approval'] = True
-        context.metadata['workload_profile'] = profile.model_dump()
+        context.metadata['workload_profile'] = safe_json_dumps(profile)
         
         # Send approval update
         if stream_updates:
@@ -192,7 +193,7 @@ class SyntheticDataSubAgent(BaseAgent):
         )
         
         # Store result in context metadata
-        context.metadata['synthetic_data_result'] = result.model_dump()
+        context.metadata['synthetic_data_result'] = safe_json_dumps(result)
         
         # Send completion update
         if stream_updates:
@@ -227,7 +228,7 @@ class SyntheticDataSubAgent(BaseAgent):
         """Handle generation errors with context."""
         self.logger.error(f"Synthetic data generation failed for run_id {context.run_id}: {error}")
         error_result = self.error_handler.create_error_result(error)
-        context.metadata['synthetic_data_result'] = error_result.model_dump()
+        context.metadata['synthetic_data_result'] = safe_json_dumps(error_result)
         context.metadata['error'] = str(error)
         await self.error_handler.send_error_update_if_needed(stream_updates, context.run_id, error)
 
@@ -240,7 +241,7 @@ class SyntheticDataSubAgent(BaseAgent):
         self.logger.error(f"Synthetic data generation failed for run_id {run_id}: {error}")
         error_result = self.error_handler.create_error_result(error)
         if hasattr(state, 'synthetic_data_result'):
-            state.synthetic_data_result = error_result.model_dump()
+            state.synthetic_data_result = safe_json_dumps(error_result)
         await self.error_handler.send_error_update_if_needed(stream_updates, run_id, error)
 
     async def _determine_workload_profile(self, state) -> WorkloadProfile:

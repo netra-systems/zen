@@ -51,6 +51,7 @@ from netra_backend.app.agents.synthetic_data_sub_agent_workflow import (
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.serialization.unified_json_handler import safe_json_dumps
 from netra_backend.app.schemas.shared_types import RetryConfig
 
 logger = central_logger.get_logger(__name__)
@@ -287,7 +288,7 @@ class ModernSyntheticDataSubAgent(BaseAgent):
         )
         
         # Store in context metadata instead of global state
-        context.metadata['synthetic_data_result'] = result.model_dump()
+        context.metadata['synthetic_data_result'] = safe_json_dumps(result)
         context.metadata['approval_message'] = approval_message
         context.metadata['requires_approval'] = True
         
@@ -295,7 +296,7 @@ class ModernSyntheticDataSubAgent(BaseAgent):
         if stream_updates:
             await self.emit_progress(f"⏳ {approval_message}")
         
-        return result.model_dump()
+        return safe_json_dumps(result)
 
     async def _execute_data_generation_with_context(self, context: UserExecutionContext, 
                                                    profile: 'WorkloadProfile', stream_updates: bool) -> Dict[str, Any]:
@@ -319,13 +320,13 @@ class ModernSyntheticDataSubAgent(BaseAgent):
         )
         
         # Store result in context
-        context.metadata['synthetic_data_result'] = result.model_dump()
+        context.metadata['synthetic_data_result'] = safe_json_dumps(result)
         
         if stream_updates:
             records_count = result.generation_status.records_generated
             await self.emit_progress(f"✅ Successfully generated {records_count:,} synthetic records", is_complete=True)
         
-        return result.model_dump()
+        return safe_json_dumps(result)
 
     # Legacy support methods (for backward compatibility)
     async def _check_synthetic_data_conditions(self, state) -> bool:
