@@ -155,11 +155,31 @@ class ReportingSubAgent(BaseAgent):
     
     def _create_report_result(self, data: Dict[str, Any]) -> 'ReportResult':
         """Convert dictionary to ReportResult object."""
-        from netra_backend.app.agents.state import ReportResult
+        from netra_backend.app.agents.state import ReportResult, ReportSection
+        
+        # Convert string sections to ReportSection objects
+        sections_data = data.get("sections", [])
+        sections = []
+        for i, section in enumerate(sections_data):
+            if isinstance(section, str):
+                sections.append(ReportSection(
+                    section_id=f"section_{i}",
+                    title=section.capitalize(),
+                    content=f"Content for {section}",
+                    section_type="standard"
+                ))
+            elif isinstance(section, dict):
+                sections.append(ReportSection(
+                    section_id=section.get("section_id", f"section_{i}"),
+                    title=section.get("title", f"Section {i}"),
+                    content=section.get("content", ""),
+                    section_type=section.get("section_type", "standard")
+                ))
+        
         return ReportResult(
             report_type="analysis",
             content=data.get("report", "No content available"),
-            sections=data.get("sections", []),
+            sections=sections,
             metadata=data.get("metadata", {})
         )
 

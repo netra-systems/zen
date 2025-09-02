@@ -95,8 +95,8 @@ class AgentRegistry:
     
     def _register_core_agents(self) -> None:
         """Register core workflow agents."""
-        # Import DataSubAgent here to avoid circular dependency
-        from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
+        # Import DataSubAgent here to avoid circular dependency - GOLDEN PATTERN SSOT IMPLEMENTATION
+        from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
         
         self._register_workflow_agents(DataSubAgent)
     

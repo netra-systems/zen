@@ -57,8 +57,9 @@ class ThreadTestDataFactory:
     @staticmethod
     def create_run_data(thread_id: str, assistant_id: str, **kwargs) -> Dict[str, Any]:
         """Create run data with defaults."""
+        from netra_backend.app.utils.run_id_generator import generate_run_id
         return {
-            "id": f"run_{uuid.uuid4().hex[:8]}",
+            "id": generate_run_id(thread_id, "test_fixture"),
             "object": "thread.run",
             "created_at": int(time.time()),
             "thread_id": thread_id,

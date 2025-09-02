@@ -61,11 +61,11 @@ class WebSocketBridgeAdapter:
             return
         
         try:
-            metadata = {"message": message} if message else {}
+            context = {"message": message} if message else {}
             await self._bridge.notify_agent_started(
                 self._run_id, 
                 self._agent_name,
-                metadata=metadata
+                context=context
             )
         except Exception as e:
             logger.debug(f"Failed to emit agent_started: {e}")
@@ -76,12 +76,11 @@ class WebSocketBridgeAdapter:
             return
         
         try:
-            metadata = {"step_number": step_number} if step_number else {}
             await self._bridge.notify_agent_thinking(
                 self._run_id,
                 self._agent_name,
-                thought,
-                metadata=metadata
+                thought,  # reasoning parameter
+                step_number=step_number
             )
         except Exception as e:
             logger.debug(f"Failed to emit thinking: {e}")
@@ -93,12 +92,11 @@ class WebSocketBridgeAdapter:
             return
         
         try:
-            metadata = {"parameters": parameters} if parameters else {}
             await self._bridge.notify_tool_executing(
                 self._run_id,
                 self._agent_name,
                 tool_name,
-                metadata=metadata
+                parameters=parameters
             )
         except Exception as e:
             logger.debug(f"Failed to emit tool_executing: {e}")
@@ -110,12 +108,11 @@ class WebSocketBridgeAdapter:
             return
         
         try:
-            metadata = {"result": result} if result else {}
             await self._bridge.notify_tool_completed(
                 self._run_id,
                 self._agent_name,
                 tool_name,
-                metadata=metadata
+                result=result
             )
         except Exception as e:
             logger.debug(f"Failed to emit tool_completed: {e}")
@@ -126,11 +123,10 @@ class WebSocketBridgeAdapter:
             return
         
         try:
-            metadata = {"result": result} if result else {}
             await self._bridge.notify_agent_completed(
                 self._run_id,
                 self._agent_name,
-                metadata=metadata
+                result=result
             )
         except Exception as e:
             logger.debug(f"Failed to emit agent_completed: {e}")
@@ -161,16 +157,16 @@ class WebSocketBridgeAdapter:
             return
         
         try:
-            metadata = {
+            error_context = {
                 "error_type": error_type or "general",
                 "details": error_details
-            } if error_type or error_details else {}
+            } if error_type or error_details else None
             
             await self._bridge.notify_agent_error(
                 self._run_id,
                 self._agent_name,
                 error_message,
-                metadata=metadata
+                error_context=error_context
             )
         except Exception as e:
             logger.debug(f"Failed to emit error: {e}")
