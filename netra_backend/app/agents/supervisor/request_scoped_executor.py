@@ -355,7 +355,7 @@ class RequestScopedAgentExecutor:
             await self._event_emitter.notify_agent_thinking(
                 context.run_id,
                 context.agent_name,
-                f"Processing request: {getattr(state, 'user_prompt', 'Task')[:100]}...",
+                f"Processing request: {getattr(state, 'user_request', 'Task')[:100]}...",
                 step_number=2
             )
             
@@ -453,8 +453,8 @@ class RequestScopedAgentExecutor:
                 "agent_name": context.agent_name,
                 "success": True,
                 "duration_ms": result.duration * 1000 if result.duration else 0,
-                "user_prompt": getattr(state, 'user_prompt', 'N/A'),
-                "final_answer": getattr(state, 'final_answer', 'Completed'),
+                "user_request": getattr(state, 'user_request', 'N/A'),
+                "final_report": getattr(state, 'final_report', 'Completed'),
                 "step_count": getattr(state, 'step_count', 0),
                 "status": "completed"
             }

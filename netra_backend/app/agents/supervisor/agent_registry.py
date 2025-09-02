@@ -31,14 +31,36 @@ from netra_backend.app.core.reliability.unified_reliability_manager import (
     create_agent_reliability_manager
 )
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.supervisor.agent_class_registry import AgentClassRegistry, get_agent_class_registry
 
 logger = central_logger.get_logger(__name__)
 
 
 class AgentRegistry:
-    """Manages agent registration and lifecycle with enhanced safety features and health monitoring."""
+    """
+    DEPRECATED: Legacy agent registration and lifecycle management.
+    
+    This registry is maintained for backward compatibility during the transition to
+    the new architecture using AgentClassRegistry and AgentInstanceFactory.
+    
+    New code should use:
+    - AgentClassRegistry for storing agent classes (infrastructure)
+    - AgentInstanceFactory for creating per-request agent instances
+    
+    CRITICAL: This registry still manages global singleton WebSocket state which
+    causes user context leakage. Use AgentInstanceFactory for proper isolation.
+    """
     
     def __init__(self, llm_manager: 'LLMManager', tool_dispatcher: 'ToolDispatcher'):
+        # Issue deprecation warning
+        import warnings
+        warnings.warn(
+            "AgentRegistry is deprecated. Use AgentClassRegistry + AgentInstanceFactory for "
+            "proper user isolation. This registry shares WebSocket state between users.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
         self.llm_manager = llm_manager
         self.tool_dispatcher = tool_dispatcher
         self.agents: Dict[str, BaseAgent] = {}
@@ -47,6 +69,14 @@ class AgentRegistry:
         self._agents_registered = False
         self.registration_errors: Dict[str, str] = {}
         self.execution_tracker = get_execution_tracker()
+        
+        # Delegate to AgentClassRegistry for infrastructure-level class storage
+        self._agent_class_registry: Optional[AgentClassRegistry] = None
+        try:
+            self._agent_class_registry = get_agent_class_registry()
+            logger.debug("Connected AgentRegistry to AgentClassRegistry for class delegation")
+        except Exception as e:
+            logger.warning(f"Could not connect to AgentClassRegistry: {e}")
         
         # Unified reliability manager for agent operations
         self.reliability_manager = None
