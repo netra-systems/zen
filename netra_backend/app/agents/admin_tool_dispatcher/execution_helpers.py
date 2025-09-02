@@ -118,40 +118,10 @@ def record_execution_metrics(context: ExecutionContext, result: ExecutionResult,
     _log_execution_completion(context, result)
 
 
-def convert_execution_result_to_tool_response(result: ExecutionResult, tool_name: str,
-                                            user_id: str) -> Union[ToolSuccessResponse, ToolFailureResponse]:
-    """Convert ExecutionResult to legacy ToolResponse format"""
-    if result.success:
-        return _create_legacy_success_response(result, tool_name, user_id)
-    return _create_legacy_failure_response(result, tool_name, user_id)
+# Legacy conversion functions removed - use ExecutionResult directly
 
 
-def _create_legacy_success_response(result: ExecutionResult, tool_name: str, 
-                                   user_id: str) -> ToolSuccessResponse:
-    """Create legacy success response from ExecutionResult"""
-    response_data = _build_success_response_data(result, tool_name, user_id)
-    return ToolSuccessResponse(**response_data)
-
-
-def _create_legacy_failure_response(result: ExecutionResult, tool_name: str,
-                                   user_id: str) -> ToolFailureResponse:
-    """Create legacy failure response from ExecutionResult"""
-    response_data = _build_failure_response_data(result, tool_name, user_id)
-    return ToolFailureResponse(**response_data)
-
-
-def _build_success_response_data(result: ExecutionResult, tool_name: str,
-                               user_id: str) -> Dict[str, Any]:
-    """Build success response data from ExecutionResult"""
-    base_data = _get_base_response_data(tool_name, user_id, result.execution_time_ms)
-    return {**base_data, "status": "COMPLETED", "result": result.result or {}}
-
-
-def _build_failure_response_data(result: ExecutionResult, tool_name: str,
-                               user_id: str) -> Dict[str, Any]:
-    """Build failure response data from ExecutionResult"""
-    base_data = _get_base_response_data(tool_name, user_id, result.execution_time_ms)
-    return {**base_data, "status": "FAILED", "error": result.error or "Unknown error"}
+# Legacy response data builders removed - use ExecutionResult directly
 
 
 def _get_base_response_data(tool_name: str, user_id: str, 

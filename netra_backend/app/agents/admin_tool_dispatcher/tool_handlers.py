@@ -1,13 +1,3 @@
-# AI AGENT MODIFICATION METADATA - AGT-003
-# ===============================================
-# Timestamp: 2025-08-18T12:17:00.000000+00:00
-# Agent: Claude Sonnet 4 claude-sonnet-4-20250514  
-# Context: Modernized tool_handlers.py with 100% compliance
-# Git: 8-18-25-AM | Admin tool dispatcher modernization
-# Change: Modernize | Scope: Module | Risk: Low
-# Session: admin-tool-modernization | Seq: 003
-# Review: Pending | Score: 100
-# ===============================================
 """
 Modernized Admin Tool Handler Functions
 
@@ -65,51 +55,16 @@ async def execute_synthetic_generator(action: str, user: User, db: AsyncSession,
     return await execute_admin_tool('synthetic_generator', user, db, action, **kwargs)
 
 
-async def execute_user_admin(action: str, user: User, db: AsyncSession, **kwargs) -> Dict[str, Any]:
-    """Legacy wrapper - use create_modern_tool_handler instead"""
-    return await execute_admin_tool('user_admin', user, db, action, **kwargs)
+# Legacy wrapper functions removed - use create_modern_tool_handler directly
 
 
-async def execute_system_configurator(action: str, user: User, db: AsyncSession, **kwargs) -> Dict[str, Any]:
-    """Legacy wrapper - use create_modern_tool_handler instead"""
-    return await execute_admin_tool('system_configurator', user, db, action, **kwargs)
+# Legacy tool executor functions removed - use create_modern_tool_handler
 
 
-async def execute_log_analyzer(action: str, user: User, db: AsyncSession, **kwargs) -> Dict[str, Any]:
-    """Legacy wrapper - use create_modern_tool_handler instead"""
-    return await execute_admin_tool('log_analyzer', user, db, action, **kwargs)
-
-
-def get_tool_executor(tool_name: str) -> Optional[Callable]:
-    """Legacy function - use create_modern_tool_handler instead"""
-    executor_map = _build_tool_executor_map()
-    return executor_map.get(tool_name)
-
-
-def get_corpus_action_handlers() -> Dict[str, Callable]:
-    """Legacy function - use CorpusManagerHandler instead"""
-    return {'create': handle_corpus_create, 'list': handle_corpus_list, 'validate': handle_corpus_validate}
-
-
-# Legacy handlers (simplified for backward compatibility)
-async def handle_corpus_create(user: User, db: AsyncSession, **kwargs) -> Dict[str, Any]:
-    """Legacy function"""
-    params = extract_corpus_create_params(kwargs, user)
-    result = await _execute_corpus_creation(params, db)
-    return _create_corpus_response(result)
-
-
-async def handle_corpus_list(db: AsyncSession) -> Dict[str, Any]:
-    """Legacy function"""
-    from netra_backend.app.core.configuration.services import corpus_service
-
-    from netra_backend.app.agents.admin_tool_dispatcher.tool_handler_helpers import create_corpus_list_response
-    corpora = await corpus_service.list_corpora(db)
-    return create_corpus_list_response(corpora)
-
+# Legacy corpus handlers removed - use CorpusManagerHandler directly
 
 async def handle_corpus_validate(**kwargs) -> Dict[str, Any]:
-    """Legacy function"""
+    """Validate corpus - kept for compatibility"""
     from .tool_handler_helpers import (
         check_corpus_id_required,
         create_corpus_validation_response,

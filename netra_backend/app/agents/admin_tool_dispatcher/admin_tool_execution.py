@@ -148,16 +148,15 @@ class AdminToolExecutionEngine:
         return {"data": result, "formatted": True}
 
 
-# Global execution engine instance for backward compatibility
-_execution_engine = AdminToolExecutionEngine()
-
+# Global execution engine removed - use factory methods for isolation
 
 async def dispatch_admin_tool(dispatcher, tool_name: str, tool_input, **kwargs):
-    """Main dispatch function - backward compatible interface."""
-    _execution_engine.dispatcher_instance = dispatcher
+    """Main dispatch function - requires UserExecutionContext."""
+    engine = AdminToolExecutionEngine()
+    engine.dispatcher_instance = dispatcher
     context = _create_execution_context(dispatcher, tool_name, kwargs)
-    result = await _execution_engine.execution_engine.execute(_execution_engine, context)
-    return _convert_to_tool_response(result, tool_name, dispatcher, kwargs)
+    result = await engine.execution_engine.execute(engine, context)
+    return result  # Return ExecutionResult directly
 
 
 def _create_execution_context(dispatcher, tool_name: str, kwargs: Dict[str, Any]) -> ExecutionContext:
@@ -205,56 +204,10 @@ def _generate_run_id(tool_name: str) -> str:
     return generate_run_id(thread_id, f"admin_tool_{tool_name}")
 
 
-def _convert_to_tool_response(result: ExecutionResult, tool_name: str, 
-                             dispatcher, kwargs: Dict[str, Any]) -> ToolResponse:
-    """Convert ExecutionResult to ToolResponse for backward compatibility."""
-    if result.success:
-        return _create_success_response(result, tool_name, dispatcher, kwargs)
-    return _create_failure_response(result, tool_name, dispatcher)
+# Legacy response conversion functions removed - use ExecutionResult directly
 
 
-def _create_success_response(result: ExecutionResult, tool_name: str,
-                           dispatcher, kwargs: Dict[str, Any]) -> ToolSuccessResponse:
-    """Create success response from ExecutionResult."""
-    user_id = _get_user_id_from_dispatcher(dispatcher)
-    metadata = _create_response_metadata(kwargs)
-    return ToolSuccessResponse(tool_name=tool_name, status=ToolStatus.COMPLETED, user_id=user_id, execution_time_ms=result.execution_time_ms, result=result.result or {}, metadata=metadata)
-
-
-def _get_user_id_from_dispatcher(dispatcher) -> str:
-    """Get user ID from dispatcher safely."""
-    return getattr(dispatcher.user, 'id', 'unknown')
-
-
-def _create_failure_response(result: ExecutionResult, tool_name: str,
-                           dispatcher) -> ToolFailureResponse:
-    """Create failure response from ExecutionResult."""
-    user_id = _get_user_id_from_dispatcher(dispatcher)
-    error_msg = result.error or "Execution failed"
-    return ToolFailureResponse(tool_name=tool_name, status=ToolStatus.FAILED, user_id=user_id, execution_time_ms=result.execution_time_ms, error=error_msg)
-
-
-def _create_response_metadata(kwargs: Dict[str, Any]) -> Dict[str, Any]:
-    """Create metadata for response."""
-    return {
-        "admin_action": True,
-        "action": kwargs.get('action', 'default'),
-        "modern_execution": True
-    }
-
-
-# =============================================================================
-# BACKWARD COMPATIBILITY FUNCTIONS - Legacy interface support
-# =============================================================================
-
-
-async def validate_tool_permissions(dispatcher, tool_name: str, 
-                                   start_time: datetime) -> Optional[ToolResponse]:
-    """Legacy validation function for backward compatibility."""
-    engine = AdminToolExecutionEngine()
-    if not engine._check_permissions_and_access(dispatcher, tool_name):
-        return _create_permission_denied_response(tool_name, start_time)
-    return None
+# Legacy compatibility functions removed - use modern permission checks
 
 
 def _create_permission_denied_response(tool_name: str, start_time: datetime) -> ToolFailureResponse:
