@@ -1,6 +1,7 @@
 """
 Integrated Test Runner with Docker Orchestration
-Combines unified test runner capabilities with Docker environment management
+Provides specialized Docker orchestration features (Alpine isolation, file watching, service refresh)
+while delegating basic test execution to unified_test_runner.py as SSOT
 """
 
 import os
@@ -169,35 +170,29 @@ class IntegratedTestRunner:
         env_vars: Optional[Dict[str, str]] = None,
         parallel: bool = False
     ) -> Dict[str, Any]:
-        """Run a specific test suite"""
+        """Run a specific test suite using unified_test_runner.py as SSOT"""
         
         # Prepare environment
         test_env = os.environ.copy()
         if env_vars:
             test_env.update(env_vars)
             
-        # Determine test command
-        if test_suite == "unit":
-            cmd = ["pytest", "tests/unit", "-v"]
-        elif test_suite == "integration":
-            cmd = ["pytest", "tests/integration", "-v"]
-        elif test_suite == "api":
-            cmd = ["pytest", "tests/api", "-v"]
-        elif test_suite == "e2e":
-            cmd = ["pytest", "tests/e2e", "-v"]
-        elif test_suite == "websocket":
-            cmd = ["pytest", "tests/websocket", "-v"]
-        elif test_suite == "agent":
-            cmd = ["pytest", "tests/agent", "-v"]
-        elif test_suite == "performance":
-            cmd = ["pytest", "tests/performance", "-v"]
-        else:
-            cmd = ["pytest", f"tests/{test_suite}", "-v"]
-            
+        # Use unified_test_runner.py as SSOT for test execution
+        cmd = [
+            "python", 
+            str(PROJECT_ROOT / "tests" / "unified_test_runner.py"),
+            "--category", test_suite
+        ]
+        
+        # Add parallel execution if requested
         if parallel:
-            cmd.extend(["-n", "auto"])
+            cmd.extend(["--parallel-execution"])
             
-        # Run tests
+        # Use real services for orchestrated environments
+        if env_vars and any(key.startswith("TEST_") for key in env_vars):
+            cmd.extend(["--real-services"])
+            
+        # Run tests via unified runner
         start_time = time.time()
         
         try:
