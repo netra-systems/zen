@@ -249,7 +249,8 @@ class UnifiedDockerManager:
                  environment_type: EnvironmentType = EnvironmentType.SHARED,
                  test_id: Optional[str] = None,
                  use_production_images: bool = True,  # Default to memory-optimized production images
-                 mode: ServiceMode = ServiceMode.DOCKER):
+                 mode: ServiceMode = ServiceMode.DOCKER,
+                 use_alpine: bool = False):  # Add Alpine container support
         """
         Initialize unified Docker manager with orchestration capabilities.
         
@@ -259,12 +260,14 @@ class UnifiedDockerManager:
             test_id: Unique test identifier for dedicated environments
             use_production_images: Use production Docker images for memory efficiency
             mode: Service execution mode (docker, local, mock)
+            use_alpine: Use Alpine-based Docker compose files for minimal container size
         """
         self.config = config or OrchestrationConfig()
         self.environment_type = environment_type
         self.test_id = test_id or self._generate_test_id()
         self.use_production_images = use_production_images
         self.mode = mode
+        self.use_alpine = use_alpine
         
         # Port discovery and allocation
         self.port_discovery = DockerPortDiscovery(use_test_services=True)
@@ -736,6 +739,40 @@ class UnifiedDockerManager:
         """Create new Docker environment with automatic conflict resolution"""
         compose_file = self._get_compose_file()
         
+        # Build images first if requested
+        if self.rebuild_images:
+            project_name = self._get_project_name()
+            
+            if self.rebuild_backend_only:
+                # Determine backend service names based on compose file
+                if "alpine" in compose_file:
+                    services_to_build = ["alpine-test-backend", "alpine-test-auth"]
+                else:
+                    services_to_build = ["test-backend", "test-auth"]
+                
+                logger.info(f"🔨 Building backend services: {services_to_build}")
+                build_cmd = [
+                    "docker-compose", "-f", compose_file,
+                    "-p", project_name, "build"
+                ] + services_to_build
+            else:
+                logger.info("🔨 Building all Docker images...")
+                build_cmd = [
+                    "docker-compose", "-f", compose_file,
+                    "-p", project_name, "build"
+                ]
+            
+            try:
+                result = self.docker_rate_limiter.execute_docker_command(
+                    build_cmd, timeout=300
+                )
+                if result.returncode == 0:
+                    logger.info("✅ Successfully built Docker images")
+                else:
+                    logger.warning(f"⚠️ Failed to build images: {result.stderr}")
+            except Exception as e:
+                logger.warning(f"⚠️ Error building images: {e}")
+        
         # SSOT: Clean up any conflicting containers first
         logger.info(f"🧹 Checking for conflicting containers before creating {env_name}")
         self._cleanup_conflicting_containers(env_name)
@@ -790,6 +827,48 @@ class UnifiedDockerManager:
         else:
             # All retries failed
             raise RuntimeError(f"Failed to create environment after {max_retries} attempts: {result.stderr}")
+        
+        # Wait for containers to be created and healthy
+        logger.info(f"⏳ Waiting for containers to be created...")
+        max_wait = 30  # seconds
+        start_time = time.time()
+        containers_found = False
+        
+        while time.time() - start_time < max_wait:
+            # Check if containers exist
+            existing_containers = self._detect_existing_containers_by_project(self._get_project_name())
+            if existing_containers:
+                logger.info(f"✅ Found {len(existing_containers)} containers")
+                containers_found = True
+                break
+            
+            logger.debug(f"Waiting for containers... ({int(time.time() - start_time)}s elapsed)")
+            time.sleep(2)
+        
+        if not containers_found:
+            # Try to create them again
+            logger.warning("⚠️ Containers not found after waiting, attempting to create again...")
+            cmd = [
+                "docker-compose",
+                "-f", compose_file,
+                "-p", self._get_project_name(),
+                "up", "-d", "--force-recreate"
+            ]
+            
+            docker_result = self.docker_rate_limiter.execute_docker_command(cmd, timeout=120, env=env)
+            
+            # Wait again for containers
+            start_time = time.time()
+            while time.time() - start_time < max_wait:
+                existing_containers = self._detect_existing_containers_by_project(self._get_project_name())
+                if existing_containers:
+                    logger.info(f"✅ Found {len(existing_containers)} containers after recreation")
+                    containers_found = True
+                    break
+                time.sleep(2)
+            
+            if not containers_found:
+                raise RuntimeError(f"Failed to create containers for project {self._get_project_name()}")
         
         # Wait for services to be healthy
         self._wait_for_healthy(env_name)
@@ -885,15 +964,31 @@ class UnifiedDockerManager:
         self.docker_rate_limiter.execute_docker_command(cmd, timeout=60)
     
     def _get_compose_file(self) -> str:
-        """Get appropriate docker-compose file"""
-        compose_files = [
-            "docker-compose.test.yml",
-            "docker-compose.yml"
-        ]
+        """Get appropriate docker-compose file based on Alpine setting and environment type"""
+        if self.use_alpine:
+            # Use Alpine compose files when Alpine support is enabled
+            if self.environment_type == EnvironmentType.TEST:
+                compose_files = [
+                    "docker-compose.alpine-test.yml",
+                    "docker-compose.test.yml",  # Fallback to regular test compose
+                    "docker-compose.yml"
+                ]
+            else:
+                compose_files = [
+                    "docker-compose.alpine.yml",
+                    "docker-compose.yml"  # Fallback to regular compose
+                ]
+        else:
+            # Use regular compose files
+            compose_files = [
+                "docker-compose.test.yml",
+                "docker-compose.yml"
+            ]
         
         # First check in current directory
         for file_path in compose_files:
             if Path(file_path).exists():
+                logger.info(f"Selected Docker compose file: {file_path} (Alpine: {self.use_alpine}, Environment: {self.environment_type.value})")
                 return file_path
         
         # Then check in project root (absolute path from env)
@@ -904,6 +999,7 @@ class UnifiedDockerManager:
             for file_name in compose_files:
                 full_path = project_path / file_name
                 if full_path.exists():
+                    logger.info(f"Selected Docker compose file: {full_path} (Alpine: {self.use_alpine}, Environment: {self.environment_type.value})")
                     return str(full_path)
         
         # Finally check common parent directories
@@ -912,9 +1008,50 @@ class UnifiedDockerManager:
             for file_name in compose_files:
                 full_path = parent / file_name
                 if full_path.exists():
+                    logger.info(f"Selected Docker compose file: {full_path} (Alpine: {self.use_alpine}, Environment: {self.environment_type.value})")
                     return str(full_path)
         
         raise RuntimeError(f"No docker-compose files found. Expected: {', '.join(compose_files)}")
+    
+    def _detect_existing_containers_by_project(self, project_name: str) -> Dict[str, str]:
+        """
+        Detect existing containers for a specific Docker Compose project.
+        
+        Args:
+            project_name: The Docker Compose project name
+            
+        Returns:
+            Dictionary mapping service name to container name
+        """
+        containers = {}
+        
+        try:
+            # List containers for this specific project
+            cmd = ["docker", "ps", "--format", "{{.Names}}", "--filter", f"label=com.docker.compose.project={project_name}"]
+            result = self.docker_rate_limiter.execute_docker_command(cmd, timeout=10)
+            
+            if result.returncode == 0 and result.stdout:
+                container_names = result.stdout.strip().split('\n')
+                for name in container_names:
+                    if name:
+                        # Extract service name from container name
+                        # Format is usually: projectname_servicename_1
+                        parts = name.split('_')
+                        if len(parts) >= 2:
+                            service = parts[1]
+                            containers[service] = name
+                        elif '-' in name:
+                            # Alternative format: projectname-servicename-1
+                            parts = name.split('-')
+                            if len(parts) >= 2:
+                                service = parts[-2] if parts[-1].isdigit() else parts[-1]
+                                containers[service] = name
+            
+            return containers
+            
+        except Exception as e:
+            logger.warning(f"Error detecting containers for project {project_name}: {e}")
+            return {}
     
     def _detect_existing_dev_containers(self) -> Dict[str, str]:
         """
@@ -1522,6 +1659,29 @@ class UnifiedDockerManager:
             env_key = f"{service.upper()}_MEMORY_LIMIT"
             env[env_key] = config.get("memory_limit", "512m")
         
+        # Build services if needed
+        if self.rebuild_images:
+            backend_services = ['backend', 'auth', 'alpine-test-backend', 'alpine-test-auth', 'test-backend', 'test-auth']
+            
+            if self.rebuild_backend_only and any(s in backend_services for s in service_names):
+                # Build backend services
+                services_to_build = [s for s in service_names if s in backend_services]
+                if services_to_build:
+                    build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + services_to_build
+                    logger.info(f"🔨 Building backend services: {services_to_build}")
+                    
+                    result = subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
+                    if result.returncode != 0:
+                        logger.warning(f"⚠️ Failed to build services: {result.stderr}")
+            elif not self.rebuild_backend_only:
+                # Build all requested services
+                build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + service_names
+                logger.info(f"🔨 Building all requested services: {service_names}")
+                
+                result = subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
+                if result.returncode != 0:
+                    logger.warning(f"⚠️ Failed to build services: {result.stderr}")
+        
         cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "up", "-d"] + service_names
         logger.info(f"🚀 Executing: {' '.join(cmd)}")
         
@@ -2047,7 +2207,24 @@ class UnifiedDockerManager:
             env["DEV_BACKEND_PORT"] = str(ports.get("backend", 8000))
             env["DEV_FRONTEND_PORT"] = str(ports.get("frontend", 3000))
             
-            cmd = ["docker-compose", "-f", self._get_compose_file(),
+            # Build images if requested
+            compose_file = self._get_compose_file()
+            
+            if self.rebuild_images:
+                backend_services = ['backend', 'auth', 'alpine-test-backend', 'alpine-test-auth', 'test-backend', 'test-auth']
+                
+                if self.rebuild_backend_only:
+                    services_to_build = [s for s in services_to_start if s in backend_services]
+                    if services_to_build:
+                        build_cmd = ["docker-compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + services_to_build
+                        logger.info(f"🔨 Building backend services: {services_to_build}")
+                        subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
+                else:
+                    build_cmd = ["docker-compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + services_to_start
+                    logger.info(f"🔨 Building all services: {services_to_start}")
+                    subprocess.run(build_cmd, capture_output=True, text=True, timeout=300, env=env)
+            
+            cmd = ["docker-compose", "-f", compose_file,
                    "-p", self._get_project_name(), "up", "-d"] + services_to_start
             
             try:
