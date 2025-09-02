@@ -148,7 +148,14 @@ class AgentE2ETestBase:
         with patch.object(state_persistence_service, 'save_agent_state', mock_save_state):
             with patch.object(state_persistence_service, 'load_agent_state', mock_load_state):
                 with patch.object(state_persistence_service, 'get_thread_context', mock_get_context):
-                    supervisor = Supervisor(db_session, llm_manager, websocket_manager, tool_dispatcher)
+                    # Create AgentWebSocketBridge (no arguments)
+                    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+                    websocket_bridge = AgentWebSocketBridge()
+                    # Set websocket_manager on the bridge
+                    websocket_bridge.websocket_manager = websocket_manager
+                    
+                    # Supervisor now takes 3 arguments: llm_manager, websocket_bridge, tool_dispatcher
+                    supervisor = Supervisor(llm_manager, websocket_bridge, tool_dispatcher)
                     supervisor.thread_id = str(uuid.uuid4())
                     supervisor.user_id = str(uuid.uuid4())
                     return supervisor

@@ -29,7 +29,7 @@ class TestCriticalWiring:
     @pytest.mark.timeout(5)
     async def test_websocket_to_tool_dispatcher_wiring(self):
         """SMOKE: WebSocket manager properly wired to tool dispatcher."""
-        from netra_backend.app.agents.base.tool_dispatcher import ToolDispatcher
+        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
         
         # Create mock components
         mock_websocket = Mock()
@@ -60,8 +60,8 @@ class TestCriticalWiring:
         # Create mock WebSocket
         mock_websocket = Mock()
         
-        # Wire WebSocket to registry
-        registry.set_websocket_manager(mock_websocket)
+        # Wire WebSocket to registry (async method)
+        await registry.set_websocket_manager(mock_websocket)
         
         # Verify wiring
         assert hasattr(registry, '_websocket_manager'), "Registry missing WebSocket manager"
@@ -285,13 +285,20 @@ class TestCriticalServiceSmoke:
     async def test_llm_manager_available(self):
         """SMOKE: LLM manager is available after startup."""
         from netra_backend.app.llm.llm_manager import LLMManager
+        from netra_backend.app.schemas.config import AppConfig
         
-        # Create LLM manager
-        manager = LLMManager()
+        # Create LLM manager with mock settings
+        mock_settings = Mock(spec=AppConfig)
+        mock_settings.llm_mode = "real"
+        mock_settings.llm_provider = "openai"
+        mock_settings.openai_api_key = "test-key"
+        mock_settings.llm_configs = {}
+        mock_settings.environment = "testing"
+        manager = LLMManager(mock_settings)
         
         # Verify basic structure
-        assert hasattr(manager, 'get_llm_client')
-        assert callable(manager.get_llm_client)
+        assert hasattr(manager, 'get_llm')
+        assert callable(manager.get_llm)
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(5)
@@ -299,12 +306,15 @@ class TestCriticalServiceSmoke:
         """SMOKE: Key manager is available after startup."""
         from netra_backend.app.services.key_manager import KeyManager
         
-        # Create key manager
-        manager = KeyManager()
+        # Create key manager with required fields
+        manager = KeyManager(
+            jwt_secret_key="a" * 32,  # Minimum 32 characters
+            fernet_key=KeyManager.generate_key()
+        )
         
         # Verify basic structure
-        assert hasattr(manager, 'get_secret')
-        assert callable(manager.get_secret)
+        assert hasattr(manager, 'jwt_secret_key')
+        assert hasattr(manager, 'fernet_key')
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(5)
