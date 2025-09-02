@@ -41,7 +41,7 @@ class ThreadService(IThreadService):
     async def _send_thread_created_event(self, user_id: str) -> None:
         """Send thread created WebSocket event"""
         thread_id = f"thread_{user_id}"
-        await manager.send_message(user_id, {"type": "thread_created", "payload": {"thread_id": thread_id, "timestamp": time.time()}})
+        await manager.send_to_user(user_id, {"type": "thread_created", "payload": {"thread_id": thread_id, "timestamp": time.time()}})
     
     async def _execute_with_uow(self, operation, db: Optional[AsyncSession] = None, *args, **kwargs):
         """Execute operation with unit of work pattern"""
@@ -130,7 +130,7 @@ class ThreadService(IThreadService):
         if thread and thread.metadata_:
             user_id = thread.metadata_.get("user_id")
             if user_id:
-                await manager.send_message(user_id, {"type": "agent_started", "payload": {"run_id": run_id, "agent_name": agent_name, "thread_id": thread_id, "timestamp": time.time()}})
+                await manager.send_to_user(user_id, {"type": "agent_started", "payload": {"run_id": run_id, "agent_name": agent_name, "thread_id": thread_id, "timestamp": time.time()}})
     
     async def _create_run_with_uow(self, uow, run_data: Dict[str, Any], thread_id: str, assistant_id: str, run_id: str) -> Run:
         """Create run using unit of work"""
@@ -193,7 +193,7 @@ class ThreadService(IThreadService):
         # Validate that the thread exists and belongs to the user
         thread = await self.get_thread(thread_id, user_id, db)
         if thread:
-            await manager.send_message(user_id, {
+            await manager.send_to_user(user_id, {
                 "type": "thread_switched", 
                 "payload": {"thread_id": thread_id}
             })
@@ -207,7 +207,7 @@ class ThreadService(IThreadService):
             async with get_unit_of_work(db) as uow:
                 success = await uow.threads.delete(uow.session, thread_id)
                 if success:
-                    await manager.send_message(user_id, {
+                    await manager.send_to_user(user_id, {
                         "type": "thread_deleted", 
                         "payload": {"thread_id": thread_id}
                     })
