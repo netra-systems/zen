@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Core Database Manager - Universal database connectivity
 Handles driver compatibility and SSL parameter resolution across all services
@@ -192,20 +193,20 @@ class CoreDatabaseManager:
             Environment type (development, staging, production)
         """
         # Check various environment indicators
-        env_var = os.getenv("ENVIRONMENT", "").lower()
+        env_var = get_env().get("ENVIRONMENT", "").lower()
         if env_var:
             return env_var
         
-        netra_env = os.getenv("NETRA_ENVIRONMENT", "").lower()
+        netra_env = get_env().get("NETRA_ENVIRONMENT", "").lower()
         if netra_env:
             return netra_env
         
         # Check if running in Cloud Run (indicates staging/production)
-        if os.getenv("K_SERVICE"):
+        if get_env().get("K_SERVICE"):
             return "production"  # Default for Cloud Run
         
         # Check Cloud SQL indicators
-        database_url = os.getenv("DATABASE_URL", "")
+        database_url = get_env().get("DATABASE_URL", "")
         if CoreDatabaseManager.is_cloud_sql_connection(database_url):
             return "staging"  # Likely staging if using Cloud SQL
         

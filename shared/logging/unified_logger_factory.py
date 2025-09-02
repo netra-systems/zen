@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Unified Logger Factory - Single source of truth for all logging initialization
 Eliminates 489+ duplicate logging patterns across the codebase.
