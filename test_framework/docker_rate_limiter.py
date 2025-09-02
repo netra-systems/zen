@@ -229,12 +229,13 @@ class DockerRateLimiter:
             self.min_interval = original_interval
     
     def get_statistics(self) -> Dict[str, Any]:
-        """Get rate limiter statistics."""
+        """Get rate limiter statistics including CRITICAL force flag violations."""
         with self._lock:
             return {
                 "total_operations": self._total_operations,
                 "failed_operations": self._failed_operations,
                 "rate_limited_operations": self._rate_limited_operations,
+                "force_flag_violations": self._force_flag_violations,
                 "success_rate": (
                     (self._total_operations - self._failed_operations) / self._total_operations * 100
                     if self._total_operations > 0 else 0
@@ -244,7 +245,9 @@ class DockerRateLimiter:
                 "rate_limit_percentage": (
                     self._rate_limited_operations / self._total_operations * 100
                     if self._total_operations > 0 else 0
-                )
+                ),
+                "force_flag_guardian_status": "ACTIVE - ZERO TOLERANCE ENFORCED",
+                "guardian_audit_report": self.force_flag_guardian.audit_report()
             }
     
     def reset_statistics(self):
@@ -253,6 +256,7 @@ class DockerRateLimiter:
             self._total_operations = 0
             self._failed_operations = 0
             self._rate_limited_operations = 0
+            self._force_flag_violations = 0
     
     def health_check(self) -> bool:
         """
@@ -296,7 +300,7 @@ def get_docker_rate_limiter() -> DockerRateLimiter:
 
 def execute_docker_command(cmd: List[str], **kwargs) -> DockerCommandResult:
     """
-    Convenience function to execute Docker command with rate limiting.
+    Convenience function to execute Docker command with CRITICAL force flag validation and rate limiting.
     
     Args:
         cmd: Docker command as list of strings
@@ -304,6 +308,9 @@ def execute_docker_command(cmd: List[str], **kwargs) -> DockerCommandResult:
         
     Returns:
         DockerCommandResult with execution details
+        
+    Raises:
+        DockerForceFlagViolation: If force flags detected (CRITICAL SECURITY)
     """
     rate_limiter = get_docker_rate_limiter()
     return rate_limiter.execute_docker_command(cmd, **kwargs)

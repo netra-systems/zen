@@ -540,6 +540,163 @@ class MockFactory:
         self.registry.register_mock("http_client", http_mock)
         return http_mock
     
+    # ========== WebSocket Mocks ==========
+    
+    def create_websocket_connection_mock(self) -> AsyncMock:
+        """Create WebSocket connection mock."""
+        ws_mock = AsyncMock()
+        
+        # Connection state
+        ws_mock.connected = True
+        ws_mock.closed = False
+        ws_mock.user_id = None
+        ws_mock.thread_id = None
+        ws_mock.connection_id = f"ws_{uuid.uuid4().hex[:8]}"
+        
+        # Connection methods
+        ws_mock.connect = AsyncMock()
+        ws_mock.disconnect = AsyncMock()
+        ws_mock.close = AsyncMock()
+        ws_mock.ping = AsyncMock()
+        ws_mock.pong = AsyncMock()
+        
+        # Message methods
+        ws_mock.send = AsyncMock()
+        ws_mock.send_text = AsyncMock()
+        ws_mock.send_json = AsyncMock()
+        ws_mock.receive = AsyncMock()
+        ws_mock.receive_text = AsyncMock()
+        ws_mock.receive_json = AsyncMock()
+        
+        # Context manager support
+        ws_mock.__aenter__ = AsyncMock(return_value=ws_mock)
+        ws_mock.__aexit__ = AsyncMock(return_value=None)
+        
+        self.registry.register_mock("websocket_connection", ws_mock)
+        return ws_mock
+    
+    def create_websocket_server_mock(self) -> AsyncMock:
+        """Create WebSocket server mock for testing high-volume scenarios."""
+        server_mock = AsyncMock()
+        
+        # Server properties
+        server_mock.connections = {}
+        server_mock.message_queue = []
+        server_mock.is_running = True
+        server_mock.port = 8765
+        server_mock.host = "localhost"
+        
+        # Server methods
+        server_mock.start = AsyncMock()
+        server_mock.stop = AsyncMock()
+        server_mock.broadcast = AsyncMock()
+        server_mock.send_to_connection = AsyncMock()
+        server_mock.get_connection = AsyncMock()
+        server_mock.add_connection = AsyncMock()
+        server_mock.remove_connection = AsyncMock()
+        
+        self.registry.register_mock("websocket_server", server_mock)
+        return server_mock
+    
+    # ========== Service Manager Mocks ==========
+    
+    def create_service_manager_mock(self) -> AsyncMock:
+        """Create service manager mock."""
+        manager_mock = AsyncMock()
+        
+        # Service tracking
+        manager_mock.services = {}
+        manager_mock.health_status = {}
+        manager_mock.service_configs = {}
+        
+        # Service management methods
+        manager_mock.start_service = AsyncMock(return_value=True)
+        manager_mock.stop_service = AsyncMock(return_value=True)
+        manager_mock.restart_service = AsyncMock(return_value=True)
+        manager_mock.get_service_status = AsyncMock(return_value="running")
+        manager_mock.list_services = Mock(return_value=[])
+        manager_mock.health_check = AsyncMock(return_value={"status": "healthy"})
+        
+        # Service discovery
+        manager_mock.register_service = AsyncMock()
+        manager_mock.discover_service = AsyncMock()
+        manager_mock.get_service_endpoint = Mock(return_value="http://localhost:8000")
+        
+        self.registry.register_mock("service_manager", manager_mock)
+        return manager_mock
+    
+    def create_service_factory_mock(self) -> Mock:
+        """Create service factory mock."""
+        factory_mock = Mock()
+        
+        # Factory methods
+        factory_mock.create_service = Mock(return_value=self.create_service_manager_mock())
+        factory_mock.get_service = Mock(return_value=self.create_service_manager_mock())
+        factory_mock.create_database_service = Mock(return_value=self.create_database_session_mock())
+        factory_mock.create_auth_service = Mock(return_value=self.create_auth_service_mock())
+        factory_mock.create_websocket_service = Mock(return_value=self.create_websocket_manager_mock())
+        
+        # Service registry
+        factory_mock.registered_services = {}
+        factory_mock.register = Mock()
+        factory_mock.unregister = Mock()
+        factory_mock.list_registered = Mock(return_value=[])
+        
+        self.registry.register_mock("service_factory", factory_mock)
+        return factory_mock
+    
+    # ========== Environment and Configuration Mocks ==========
+    
+    def create_config_loader_mock(self) -> Mock:
+        """Create configuration loader mock."""
+        config_mock = Mock()
+        
+        # Configuration data
+        config_mock.config_data = {}
+        config_mock.environment = "test"
+        config_mock.config_file_path = "/test/config.yaml"
+        
+        # Configuration methods
+        config_mock.load = Mock(return_value=config_mock.config_data)
+        config_mock.get = Mock(side_effect=lambda key, default=None: config_mock.config_data.get(key, default))
+        config_mock.set = Mock(side_effect=lambda key, value: config_mock.config_data.update({key: value}))
+        config_mock.reload = Mock()
+        config_mock.save = Mock()
+        
+        # Environment-specific methods
+        config_mock.load_environment = Mock(return_value=config_mock.config_data)
+        config_mock.get_database_url = Mock(return_value="postgresql://test:test@localhost:5432/test_db")
+        config_mock.get_redis_url = Mock(return_value="redis://localhost:6379/0")
+        
+        self.registry.register_mock("config_loader", config_mock)
+        return config_mock
+    
+    def create_environment_mock(self) -> Mock:
+        """Create environment mock for testing."""
+        env_mock = Mock()
+        
+        # Environment variables
+        env_mock.env_vars = {
+            "ENVIRONMENT": "test",
+            "DEBUG": "true",
+            "DATABASE_URL": "postgresql://test:test@localhost:5432/test_db",
+            "REDIS_URL": "redis://localhost:6379/0"
+        }
+        
+        # Environment methods
+        env_mock.get = Mock(side_effect=lambda key, default=None: env_mock.env_vars.get(key, default))
+        env_mock.set = Mock(side_effect=lambda key, value: env_mock.env_vars.update({key: value}))
+        env_mock.get_bool = Mock(side_effect=lambda key, default=False: str(env_mock.env_vars.get(key, default)).lower() == "true")
+        env_mock.get_int = Mock(side_effect=lambda key, default=0: int(env_mock.env_vars.get(key, default)))
+        env_mock.get_float = Mock(side_effect=lambda key, default=0.0: float(env_mock.env_vars.get(key, default)))
+        
+        # Environment validation
+        env_mock.validate_required = Mock(return_value=True)
+        env_mock.get_missing_vars = Mock(return_value=[])
+        
+        self.registry.register_mock("environment", env_mock)
+        return env_mock
+    
     # ========== Specialized Mock Utilities ==========
     
     def create_context_manager_mock(self, return_value: Any = None) -> AsyncMock:
