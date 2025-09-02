@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Test Environment Setup for Real LLM Testing
 
@@ -102,7 +103,7 @@ class TestEnvironmentValidator:
         for provider, key_options in provider_keys.items():
             found_key = None
             for key in key_options:
-                if os.getenv(key):
+                if get_env().get(key):
                     found_key = key
                     break
             
@@ -354,8 +355,8 @@ class TestEnvironmentOrchestrator:
         """Validate requirements for a test session with comprehensive checks."""
         # Get database URL with TEST_ preference
         database_url = (
-            os.getenv('TEST_DATABASE_URL') or 
-            os.getenv('DATABASE_URL', '')
+            get_env().get('TEST_DATABASE_URL') or 
+            get_env().get('DATABASE_URL', '')
         )
         
         if not database_url:
