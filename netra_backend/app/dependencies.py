@@ -1,7 +1,8 @@
-from typing import TYPE_CHECKING, Annotated, AsyncGenerator
+from typing import TYPE_CHECKING, Annotated, AsyncGenerator, Optional
 from contextlib import asynccontextmanager
+import uuid
 
-from fastapi import Depends, Request
+from fastapi import Depends, Request, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Import from the single source of truth for database sessions
@@ -11,6 +12,34 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.security_service import SecurityService
 from netra_backend.app.websocket_core import get_websocket_manager
+
+# NEW: Split architecture imports
+from netra_backend.app.agents.supervisor.user_execution_context import (
+    UserExecutionContext,
+    validate_user_context
+)
+from netra_backend.app.agents.supervisor.agent_instance_factory import (
+    get_agent_instance_factory,
+    configure_agent_instance_factory
+)
+from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+
+# NEW: Factory pattern imports
+from netra_backend.app.agents.supervisor.execution_factory import (
+    ExecutionEngineFactory, 
+    ExecutionFactoryConfig,
+    UserExecutionContext as FactoryUserExecutionContext
+)
+from netra_backend.app.services.websocket_bridge_factory import (
+    WebSocketBridgeFactory,
+    WebSocketFactoryConfig,
+    WebSocketConnectionPool
+)
+from netra_backend.app.services.factory_adapter import (
+    FactoryAdapter,
+    AdapterConfig,
+    create_request_context
+)
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor_consolidated import (
@@ -60,11 +89,15 @@ def get_security_service(request: Request) -> SecurityService:
 LLMManagerDep = Annotated[LLMManager, Depends(get_llm_manager)]
 
 def get_agent_supervisor(request: Request) -> "Supervisor":
-    """Get agent supervisor from app state.
+    """Get agent supervisor from app state - LEGACY mode.
+    
+    DEPRECATED: This returns a global supervisor instance without user isolation.
+    For new code, use get_user_supervisor_factory() to create per-request supervisors.
     
     The supervisor is initialized at startup with WebSocket manager,
     so it should already have WebSocket capabilities when retrieved here.
     """
+    logger.warning("Using legacy get_agent_supervisor - user isolation NOT guaranteed!")
     supervisor = request.app.state.agent_supervisor
     
     # Verify supervisor has WebSocket capabilities
@@ -81,6 +114,132 @@ def get_agent_supervisor(request: Request) -> "Supervisor":
         logger.warning("Supervisor lacks agent_registry - WebSocket events may not work")
     
     return supervisor
+
+
+def create_user_execution_context(user_id: str,
+                                  thread_id: str, 
+                                  run_id: Optional[str] = None,
+                                  db_session: Optional[AsyncSession] = None,
+                                  websocket_connection_id: Optional[str] = None) -> UserExecutionContext:
+    """Create UserExecutionContext for per-request isolation.
+    
+    This function is the recommended way to create user contexts for new requests.
+    
+    Args:
+        user_id: Unique user identifier
+        thread_id: Thread identifier for conversation
+        run_id: Optional run identifier (auto-generated if not provided)
+        db_session: Optional database session
+        websocket_connection_id: Optional WebSocket connection identifier
+        
+    Returns:
+        UserExecutionContext: Isolated context for the request
+        
+    Raises:
+        HTTPException: If context creation fails
+    """
+    try:
+        # Generate run_id if not provided
+        if not run_id:
+            run_id = str(uuid.uuid4())
+        
+        # Create user execution context
+        user_context = UserExecutionContext.from_request(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            db_session=db_session,
+            websocket_connection_id=websocket_connection_id
+        )
+        
+        logger.info(f"Created UserExecutionContext for user {user_id}, run {run_id}")
+        return user_context
+        
+    except Exception as e:
+        logger.error(f"Failed to create UserExecutionContext: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to create user execution context: {str(e)}"
+        )
+
+
+async def get_user_supervisor_factory(request: Request,
+                                     user_id: str,
+                                     thread_id: str,
+                                     run_id: Optional[str] = None,
+                                     db_session: AsyncSession = Depends(get_db_dependency)) -> "Supervisor":
+    """Factory to create per-request SupervisorAgent with UserExecutionContext.
+    
+    This is the PREFERRED way to get a SupervisorAgent in the new split architecture.
+    It creates a completely isolated supervisor instance for each request.
+    
+    Args:
+        request: FastAPI request object
+        user_id: User identifier from request
+        thread_id: Thread identifier from request
+        run_id: Optional run identifier (auto-generated if not provided)
+        db_session: Request-scoped database session
+        
+    Returns:
+        SupervisorAgent: Isolated supervisor instance for this request
+        
+    Raises:
+        HTTPException: If supervisor creation fails
+    """
+    try:
+        # Create UserExecutionContext for this request
+        user_context = create_user_execution_context(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            db_session=db_session
+        )
+        
+        # Get required components from app state
+        llm_manager = get_llm_manager(request)
+        
+        # Get WebSocket bridge from app state
+        websocket_bridge = getattr(request.app.state, 'websocket_bridge', None)
+        if not websocket_bridge:
+            logger.error("WebSocket bridge not available in app state")
+            raise HTTPException(
+                status_code=500,
+                detail="WebSocket bridge not configured"
+            )
+        
+        # Get tool dispatcher from legacy supervisor for now
+        legacy_supervisor = request.app.state.agent_supervisor
+        tool_dispatcher = legacy_supervisor.tool_dispatcher if legacy_supervisor else None
+        if not tool_dispatcher:
+            logger.error("Tool dispatcher not available")
+            raise HTTPException(
+                status_code=500,
+                detail="Tool dispatcher not configured"
+            )
+        
+        # Create isolated SupervisorAgent using factory method
+        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        supervisor = await SupervisorAgent.create_with_user_context(
+            llm_manager=llm_manager,
+            websocket_bridge=websocket_bridge,
+            tool_dispatcher=tool_dispatcher,
+            user_context=user_context,
+            db_session_factory=lambda: db_session
+        )
+        
+        logger.info(f"✅ Created isolated SupervisorAgent for user {user_id}, run {run_id or 'auto'}")
+        return supervisor
+        
+    except Exception as e:
+        logger.error(f"Failed to create isolated SupervisorAgent: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to create isolated supervisor: {str(e)}"
+        )
+
+
+# Type alias for the new isolated supervisor dependency
+IsolatedSupervisorDep = Annotated["Supervisor", Depends(get_user_supervisor_factory)]
 
 def get_agent_service(request: Request) -> "AgentService":
     """Get agent service from app state.
@@ -154,7 +313,14 @@ def get_corpus_service(request: Request) -> "CorpusService":
     return corpus_service
 
 def get_message_handler_service(request: Request):
-    """Get message handler service from app state or create one."""
+    """Get message handler service from app state or create one.
+    
+    DEPRECATED: This creates MessageHandlerService with global supervisor.
+    For new code, create MessageHandlerService with isolated supervisor using
+    get_user_supervisor_factory().
+    """
+    logger.warning("Using legacy get_message_handler_service - consider using isolated supervisor")
+    
     # Try to get from app state first
     if hasattr(request.app.state, 'message_handler_service'):
         return request.app.state.message_handler_service
@@ -174,3 +340,53 @@ def get_message_handler_service(request: Request):
         # Backward compatibility: if WebSocket manager isn't available, still work without it
         logger.warning(f"Failed to get WebSocket manager for MessageHandlerService: {e}, creating without WebSocket support")
         return MessageHandlerService(supervisor, thread_service)
+
+
+async def get_isolated_message_handler_service(user_id: str,
+                                              thread_id: str,
+                                              run_id: Optional[str],
+                                              request: Request,
+                                              db_session: AsyncSession = Depends(get_db_dependency)):
+    """Create MessageHandlerService with isolated supervisor for this request.
+    
+    This is the PREFERRED way to get MessageHandlerService in the new architecture.
+    
+    Args:
+        user_id: User identifier from request
+        thread_id: Thread identifier from request  
+        run_id: Optional run identifier
+        request: FastAPI request object
+        db_session: Request-scoped database session
+        
+    Returns:
+        MessageHandlerService: Service with isolated supervisor
+    """
+    try:
+        # Get isolated supervisor for this request
+        supervisor = await get_user_supervisor_factory(
+            request=request,
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            db_session=db_session
+        )
+        
+        # Get thread service
+        thread_service = get_thread_service(request)
+        
+        # Get WebSocket manager
+        websocket_manager = get_websocket_manager()
+        
+        # Create MessageHandlerService with isolated components
+        from netra_backend.app.services.message_handlers import MessageHandlerService
+        message_service = MessageHandlerService(supervisor, thread_service, websocket_manager)
+        
+        logger.info(f"✅ Created isolated MessageHandlerService for user {user_id}")
+        return message_service
+        
+    except Exception as e:
+        logger.error(f"Failed to create isolated MessageHandlerService: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to create isolated message handler: {str(e)}"
+        )

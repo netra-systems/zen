@@ -527,8 +527,13 @@ class TestAgentRegistryMigration:
         llm_manager = MagicMock()
         tool_dispatcher = MagicMock()
         
+        # Create and configure infrastructure registry for testing
+        test_infrastructure_registry = create_test_registry()
+        
         with patch('warnings.warn'):
-            registry = AgentRegistry(llm_manager, tool_dispatcher)
+            with patch('netra_backend.app.agents.supervisor.agent_registry.get_agent_class_registry', 
+                      return_value=test_infrastructure_registry):
+                registry = AgentRegistry(llm_manager, tool_dispatcher)
         
         # Manually register some test agents
         registry.register("mock_agent_1", MockAgent("mock_agent_1"))
