@@ -51,6 +51,12 @@ from netra_backend.app.agents.supervisor.agent_instance_factory import (
     UserWebSocketEmitter,
     get_agent_instance_factory
 )
+# NEW: Import user execution engine components for delegation
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.execution_engine_factory import (
+    get_execution_engine_factory,
+    user_execution_engine
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -245,7 +251,23 @@ class ExecutionEngine:
         """Execute a single agent with UserExecutionContext support and concurrency control.
         
         NEW: Supports UserExecutionContext for complete user isolation and per-user WebSocket events.
+        RECOMMENDED: Use create_user_engine() or UserExecutionEngine directly for new code.
         """
+        # NEW: If UserExecutionContext is available, delegate to UserExecutionEngine
+        if self.user_context:
+            logger.info(f"Delegating execution to UserExecutionEngine for user {self.user_context.user_id}")
+            try:
+                user_engine = await self.create_user_engine(self.user_context)
+                result = await user_engine.execute_agent(context, state)
+                await user_engine.cleanup()
+                return result
+            except Exception as e:
+                logger.warning(f"UserExecutionEngine delegation failed, falling back to legacy: {e}")
+                # Fall through to legacy execution
+        
+        # LEGACY: Global state execution (deprecated)
+        logger.warning("Using legacy ExecutionEngine with global state - consider migrating to UserExecutionEngine")
+        
         # FAIL-FAST: Validate context before any processing
         self._validate_execution_context(context)
         
@@ -999,6 +1021,76 @@ class ExecutionEngine:
         
         # WebSocket bridge shutdown is handled separately
         logger.info("ExecutionEngine shutdown complete")
+    
+    # ============================================================================
+    # NEW DELEGATION METHODS FOR USER ISOLATION
+    # ============================================================================
+    
+    async def create_user_engine(self, context: UserExecutionContext) -> UserExecutionEngine:
+        """Create UserExecutionEngine for complete user isolation.
+        
+        RECOMMENDED: Use this method for new code requiring user isolation.
+        
+        Args:
+            context: User execution context for isolation
+            
+        Returns:
+            UserExecutionEngine: Isolated execution engine for the user
+            
+        Raises:
+            RuntimeError: If user engine creation fails
+        """
+        try:
+            factory = await get_execution_engine_factory()
+            return await factory.create_for_user(context)
+        except Exception as e:
+            logger.error(f"Failed to create UserExecutionEngine: {e}")
+            raise RuntimeError(f"User engine creation failed: {e}")
+    
+    @staticmethod
+    async def execute_with_user_isolation(context: UserExecutionContext,
+                                         agent_context: AgentExecutionContext,
+                                         state: DeepAgentState) -> AgentExecutionResult:
+        """Execute agent with complete user isolation (static method).
+        
+        RECOMMENDED: Use this static method for new code requiring complete isolation.
+        
+        Args:
+            context: User execution context for isolation
+            agent_context: Agent execution context
+            state: Deep agent state for execution
+            
+        Returns:
+            AgentExecutionResult: Results of isolated execution
+            
+        Usage:
+            result = await ExecutionEngine.execute_with_user_isolation(
+                user_context, agent_context, state
+            )
+        """
+        async with user_execution_engine(context) as engine:
+            return await engine.execute_agent(agent_context, state)
+    
+    def has_user_context(self) -> bool:
+        """Check if this engine has UserExecutionContext support."""
+        return self.user_context is not None
+    
+    def get_isolation_status(self) -> Dict[str, Any]:
+        """Get isolation status information for this engine.
+        
+        Returns:
+            Dictionary with isolation status and recommendations
+        """
+        return {
+            'has_user_context': self.has_user_context(),
+            'user_id': self.user_context.user_id if self.user_context else None,
+            'run_id': self.user_context.run_id if self.user_context else None,
+            'isolation_level': 'user_isolated' if self.user_context else 'global_state',
+            'recommended_migration': not self.has_user_context(),
+            'migration_method': 'create_user_engine() or ExecutionEngine.execute_with_user_isolation()',
+            'active_runs_count': len(self.active_runs),
+            'global_state_warning': not self.has_user_context()
+        }
 
 
 # ============================================================================

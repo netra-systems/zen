@@ -17,21 +17,34 @@ logger = central_logger.get_logger(__name__)
 
 
 class StateCheckpointManager:
-    """Manages state checkpointing and persistence."""
+    """Manages state checkpointing and persistence.
     
-    def __init__(self, db_session):
-        self.db_session = db_session
+    CRITICAL: This class no longer stores db_session as instance variable.
+    Database sessions must be passed as parameters to methods that need them.
+    """
+    
+    def __init__(self):
+        """Initialize without global session storage."""
+        # REMOVED: self.db_session = db_session (global session storage removed)
         self.state_persistence = state_persistence_service
         self.current_checkpoint_id: Optional[str] = None
         self.auto_checkpoint_interval = 300  # 5 minutes
         self.last_checkpoint_time: Optional[datetime] = None
     
     async def create_initial_checkpoint(self, state: DeepAgentState, run_id: str,
-                                       thread_id: str, user_id: str) -> None:
-        """Create initial state checkpoint."""
+                                       thread_id: str, user_id: str, db_session) -> None:
+        """Create initial state checkpoint.
+        
+        Args:
+            state: State to checkpoint
+            run_id: Run identifier
+            thread_id: Thread identifier
+            user_id: User identifier
+            db_session: Database session for checkpoint operations
+        """
         request = self._build_initial_checkpoint_request(
             state, run_id, thread_id, user_id)
-        success, checkpoint_id = await self._save_checkpoint_request(request)
+        success, checkpoint_id = await self._save_checkpoint_request(request, db_session)
         self._handle_checkpoint_save_result(success, checkpoint_id)
     
     def _build_initial_checkpoint_request(self, state: DeepAgentState, 
@@ -42,9 +55,9 @@ class StateCheckpointManager:
             state, run_id, thread_id, user_id, 
             CheckpointType.AUTO, AgentPhase.INITIALIZATION, True)
     
-    async def _save_checkpoint_request(self, request: StatePersistenceRequest):
+    async def _save_checkpoint_request(self, request: StatePersistenceRequest, db_session):
         """Save checkpoint request to database."""
-        session = await get_session_from_factory(self.db_session)
+        session = await get_session_from_factory(db_session)
         state = self._convert_request_to_state(request)
         success = await self._persist_state_data(request, state, session)
         return success, request.run_id
@@ -80,13 +93,23 @@ class StateCheckpointManager:
         logger.info(f"Created initial checkpoint {checkpoint_id}")
     
     async def save_state_checkpoint(self, state: DeepAgentState, run_id: str,
-                                   thread_id: str, user_id: str, 
+                                   thread_id: str, user_id: str, db_session,
                                    checkpoint_type: CheckpointType = CheckpointType.AUTO,
                                    agent_phase: Optional[AgentPhase] = None) -> bool:
-        """Save state checkpoint with specified type."""
+        """Save state checkpoint with specified type.
+        
+        Args:
+            state: State to checkpoint
+            run_id: Run identifier
+            thread_id: Thread identifier
+            user_id: User identifier
+            db_session: Database session for checkpoint operations
+            checkpoint_type: Type of checkpoint to create
+            agent_phase: Optional phase information
+        """
         request = self._build_checkpoint_request(
             state, run_id, thread_id, user_id, checkpoint_type, agent_phase)
-        return await self._execute_checkpoint_save(request, run_id)
+        return await self._execute_checkpoint_save(request, run_id, db_session)
     
     def _build_checkpoint_request(self, state: DeepAgentState, run_id: str,
                                  thread_id: str, user_id: str,
@@ -156,10 +179,10 @@ class StateCheckpointManager:
         return checkpoint_type == CheckpointType.PHASE_TRANSITION
     
     async def _execute_checkpoint_save(self, request: StatePersistenceRequest,
-                                      run_id: str) -> bool:
+                                      run_id: str, db_session) -> bool:
         """Execute checkpoint save operation."""
         try:
-            success, checkpoint_id = await self._save_checkpoint_request(request)
+            success, checkpoint_id = await self._save_checkpoint_request(request, db_session)
             if success:
                 self._finalize_checkpoint_save(checkpoint_id, run_id)
             return success
@@ -174,12 +197,20 @@ class StateCheckpointManager:
         logger.debug(f"Saved checkpoint {checkpoint_id} for run {run_id}")
     
     async def auto_checkpoint_if_needed(self, state: DeepAgentState, run_id: str,
-                                        thread_id: str, user_id: str) -> bool:
-        """Create automatic checkpoint if time threshold exceeded."""
+                                        thread_id: str, user_id: str, db_session) -> bool:
+        """Create automatic checkpoint if time threshold exceeded.
+        
+        Args:
+            state: State to potentially checkpoint
+            run_id: Run identifier
+            thread_id: Thread identifier
+            user_id: User identifier
+            db_session: Database session for checkpoint operations
+        """
         if not self._should_create_auto_checkpoint():
             return False
         return await self.save_state_checkpoint(
-            state, run_id, thread_id, user_id, CheckpointType.AUTO)
+            state, run_id, thread_id, user_id, db_session, CheckpointType.AUTO)
     
     def _should_create_auto_checkpoint(self) -> bool:
         """Check if auto checkpoint is needed."""
@@ -190,8 +221,17 @@ class StateCheckpointManager:
     
     async def create_phase_transition_checkpoint(self, state: DeepAgentState, 
                                                 run_id: str, thread_id: str, 
-                                                user_id: str, phase: AgentPhase) -> bool:
-        """Create checkpoint at phase transitions."""
+                                                user_id: str, phase: AgentPhase, db_session) -> bool:
+        """Create checkpoint at phase transitions.
+        
+        Args:
+            state: State to checkpoint
+            run_id: Run identifier
+            thread_id: Thread identifier
+            user_id: User identifier
+            phase: Agent phase being transitioned to
+            db_session: Database session for checkpoint operations
+        """
         return await self.save_state_checkpoint(
-            state, run_id, thread_id, user_id, 
+            state, run_id, thread_id, user_id, db_session,
             CheckpointType.PHASE_TRANSITION, phase)

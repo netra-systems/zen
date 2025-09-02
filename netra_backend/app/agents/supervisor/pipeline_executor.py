@@ -30,14 +30,23 @@ logger = central_logger.get_logger(__name__)
 
 
 class PipelineExecutor:
-    """Handles pipeline execution logic for supervisor agent."""
+    """Handles pipeline execution logic for supervisor agent.
+    
+    CRITICAL: This class no longer stores db_session as instance variable.
+    Database sessions must be passed as parameters to methods that need them.
+    """
     
     def __init__(self, engine: ExecutionEngine, 
-                 websocket_manager: 'WebSocketManager',
-                 db_session: AsyncSession):
+                 websocket_manager: 'WebSocketManager'):
+        """Initialize without global session storage.
+        
+        Args:
+            engine: Execution engine for running agents
+            websocket_manager: WebSocket manager for notifications
+        """
         self.engine = engine
         self.websocket_manager = websocket_manager
-        self.db_session = db_session
+        # REMOVED: self.db_session = db_session (global session storage removed)
         self.state_persistence = self._get_persistence_service()
         self.flow_logger = get_supervisor_flow_logger()
     
@@ -52,11 +61,19 @@ class PipelineExecutor:
     
     async def execute_pipeline(self, pipeline: List[PipelineStep],
                               state: DeepAgentState, run_id: str,
-                              context: Dict[str, str]) -> None:
-        """Execute the agent pipeline."""
+                              context: Dict[str, str], db_session) -> None:
+        """Execute the agent pipeline.
+        
+        Args:
+            pipeline: Pipeline steps to execute
+            state: Agent state
+            run_id: Run identifier
+            context: Execution context
+            db_session: Database session for persistence operations
+        """
         flow_context = self._prepare_flow_context(pipeline)
         exec_context = self._build_execution_context(run_id, context)
-        await self._execute_pipeline_with_flow(pipeline, state, exec_context, flow_context)
+        await self._execute_pipeline_with_flow(pipeline, state, exec_context, flow_context, db_session)
         self.flow_logger.complete_flow(flow_context['flow_id'])
     
     def _build_execution_context(self, run_id: str, 
@@ -89,9 +106,9 @@ class PipelineExecutor:
     async def _execute_pipeline_with_flow(self, pipeline: List[PipelineStep],
                                          state: DeepAgentState,
                                          exec_context: AgentExecutionContext,
-                                         flow_context: Dict[str, Any]) -> None:
+                                         flow_context: Dict[str, Any], db_session) -> None:
         """Execute pipeline with flow context."""
-        await self._run_pipeline_with_hooks(pipeline, state, exec_context, flow_context['flow_id'])
+        await self._run_pipeline_with_hooks(pipeline, state, exec_context, flow_context['flow_id'], db_session)
     
     def _log_step_transitions_start(self, pipeline: List[PipelineStep], flow_id: str) -> None:
         """Log start of all step transitions."""
@@ -108,21 +125,21 @@ class PipelineExecutor:
     async def _run_pipeline_with_hooks(self, pipeline: List[PipelineStep],
                                       state: DeepAgentState,
                                       context: AgentExecutionContext,
-                                      flow_id: str) -> None:
+                                      flow_id: str, db_session) -> None:
         """Run pipeline with error handling."""
         try:
-            await self._execute_and_process(pipeline, state, context, flow_id)
+            await self._execute_and_process(pipeline, state, context, flow_id, db_session)
         except Exception as e:
             await self._handle_pipeline_error(state, e)
     
     async def _execute_and_process(self, pipeline: List[PipelineStep],
                                   state: DeepAgentState,
                                   context: AgentExecutionContext,
-                                  flow_id: str) -> None:
+                                  flow_id: str, db_session) -> None:
         """Execute pipeline and process results with batched state persistence."""
         self._log_pipeline_execution_type(flow_id, pipeline)
         results = await self._execute_with_step_logging(pipeline, context, state, flow_id)
-        await self._process_results_with_batching(results, state, context)
+        await self._process_results_with_batching(results, state, context, db_session)
     
     async def _handle_pipeline_error(self, state: DeepAgentState, 
                                     error: Exception) -> None:
@@ -139,7 +156,7 @@ class PipelineExecutor:
     
     async def _process_results_with_batching(self, results: List[AgentExecutionResult],
                                            state: DeepAgentState,
-                                           context: AgentExecutionContext) -> None:
+                                           context: AgentExecutionContext, db_session) -> None:
         """Process execution results with optimized batched state merging and persistence."""
         # Send orchestration notification about combining results
         await self._send_orchestration_notification(
@@ -190,7 +207,7 @@ class PipelineExecutor:
             
             # Use the optimized persistence service if available
             success, snapshot_id = await self.state_persistence.save_agent_state(
-                persistence_request, self.db_session
+                persistence_request, db_session
             )
             
             if success:
@@ -225,16 +242,22 @@ class PipelineExecutor:
         return results
     
     async def finalize_state(self, state: DeepAgentState, 
-                            context: Dict[str, str]) -> None:
-        """Finalize and persist state."""
-        await self._persist_final_state(state, context)
+                            context: Dict[str, str], db_session) -> None:
+        """Finalize and persist state.
+        
+        Args:
+            state: Agent state to finalize
+            context: Execution context
+            db_session: Database session for persistence operations
+        """
+        await self._persist_final_state(state, context, db_session)
         await self._notify_completion(state, context)
     
     async def _persist_final_state(self, state: DeepAgentState,
-                                  context: Dict[str, str]) -> None:
+                                  context: Dict[str, str], db_session) -> None:
         """Save final state to persistence."""
         request = self._build_persistence_request(state, context)
-        session = await get_session_from_factory(self.db_session)
+        session = await get_session_from_factory(db_session)
         await self.state_persistence.save_agent_state(request, session)
     
     def _build_persistence_request(self, state: DeepAgentState, 
