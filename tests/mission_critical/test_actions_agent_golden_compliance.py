@@ -186,46 +186,139 @@ class ActionsAgentGoldenComplianceValidator:
             'send_status_update', 'get_health_status'
         ]
         
-        for method in required_methods:
-            if not hasattr(agent_instance, method):
-                self.violations.append(f"Missing required method: {method}")
+            if hasattr(agent_instance, method):
+                method_obj = getattr(agent_instance, method)
+                if callable(method_obj):
+                    methods_found += 1
+                    
+                    # Check if async methods are properly async
+                    async_methods = ['execute', 'execute_core_logic', 'validate_preconditions',
+                                   'emit_thinking', 'emit_agent_started', 'emit_agent_completed',
+                                   'emit_tool_executing', 'emit_tool_completed', 'shutdown']
+                    if method in async_methods and not asyncio.iscoroutinefunction(method_obj):
+                        self.warnings.append(f"Method {method} should be async")
+                else:
+                    self.warnings.append(f"Method {method} exists but is not callable")
             else:
-                score += 5.0
+                self.violations.append(f"MISSING: Required method {method}")
+                
+        scores["required_methods"] = (methods_found / len(required_methods)) * 100.0
         
-        # Check for proper initialization
-        if hasattr(agent_instance, 'reliability_manager'):
-            score += 10.0
-        if hasattr(agent_instance, 'execution_engine'):
-            score += 10.0
-        if hasattr(agent_instance, 'monitor'):
-            score += 10.0
+        # 3. Infrastructure Initialization
+        infrastructure_components = [
+            '_websocket_adapter', 'timing_collector', 'unified_reliability_handler',
+            'execution_engine', 'execution_monitor'
+        ]
         
-        # Check for WebSocket integration
-        if hasattr(agent_instance, '_websocket_adapter'):
-            score += 15.0
+        infra_score = 0.0
+        for component in infrastructure_components:
+            if hasattr(agent_instance, component):
+                component_obj = getattr(agent_instance, component)
+                if component_obj is not None:
+                    infra_score += 20.0
+                    
+        scores["infrastructure_init"] = min(infra_score, 100.0)
         
-        return min(score, max_score) / max_score
+        # 4. State Management
+        try:
+            current_state = agent_instance.get_state()
+            if current_state is not None:
+                scores["state_management"] += 40.0
+                
+            # Test state transition
+            from netra_backend.app.schemas.agent import SubAgentLifecycle
+            if hasattr(agent_instance, 'set_state'):
+                scores["state_management"] += 30.0
+                
+            # Test context and identification
+            if hasattr(agent_instance, 'context') and isinstance(agent_instance.context, dict):
+                scores["state_management"] += 15.0
+                
+            if hasattr(agent_instance, 'agent_id') and agent_instance.agent_id:
+                scores["state_management"] += 15.0
+                
+        except Exception as e:
+            self.warnings.append(f"State management validation failed: {e}")
+            
+        # 5. Session Isolation
+        session_isolation_score = 100.0  # Start with perfect score
+        
+        # Check for forbidden session storage
+        forbidden_patterns = ['AsyncSession', 'Session', '_session', 'db_session']
+        for attr_name in dir(agent_instance):
+            if not attr_name.startswith('__'):
+                try:
+                    attr_value = getattr(agent_instance, attr_name)
+                    if hasattr(attr_value, '__class__'):
+                        class_name = attr_value.__class__.__name__
+                        for pattern in forbidden_patterns:
+                            if pattern in class_name:
+                                self.violations.append(f"Session isolation violation: {attr_name} stores {class_name}")
+                                session_isolation_score -= 25.0
+                except:
+                    pass  # Skip attributes that can't be accessed
+                    
+        scores["session_isolation"] = max(session_isolation_score, 0.0)
+        
+        return scores
     
-    def validate_websocket_event_coverage(self, ws_manager: MockWebSocketManager, 
-                                         thread_id: str) -> float:
-        """Validate ALL 5 required WebSocket events are sent."""
-        required_compliance = ws_manager.get_required_event_compliance(thread_id)
+    def validate_comprehensive_websocket_events(self, ws_capture: ComprehensiveWebSocketCapture, 
+                                               thread_id: str) -> Dict[str, float]:
+        """Validate comprehensive WebSocket event coverage across all test scenarios."""
+        scores = {
+            "websocket_bridge": 0.0,
+            "critical_events": 0.0,
+            "event_timing": 0.0,
+            "error_events": 0.0,
+            "event_integrity": 0.0
+        }
         
-        total_required = len(required_compliance)
-        events_present = sum(1 for present in required_compliance.values() if present)
+        event_analysis = ws_capture.get_comprehensive_event_compliance(thread_id)
         
-        if total_required == 0:
-            self.violations.append("CRITICAL: No WebSocket events detected")
-            return 0.0
+        # 1. WebSocket Bridge Integration Score
+        if event_analysis["total_events"] > 0:
+            scores["websocket_bridge"] = 100.0
         
-        coverage_ratio = events_present / total_required
+        # 2. Critical Events Score
+        critical_compliance = event_analysis["critical_compliance"]
+        critical_present = sum(1 for present in critical_compliance.values() if present)
+        total_critical = len(critical_compliance)
         
-        # Log missing events
-        for event, present in required_compliance.items():
+        if total_critical > 0:
+            scores["critical_events"] = (critical_present / total_critical) * 100.0
+            
+        # Log missing critical events
+        for event, present in critical_compliance.items():
             if not present:
                 self.violations.append(f"CRITICAL: Missing required WebSocket event: {event}")
         
-        return coverage_ratio
+        # 3. Event Timing Score
+        timing_analysis = event_analysis["timing_analysis"]
+        if timing_analysis["average_interval"] > 0:
+            # Good timing: events should be spaced reasonably (not too fast, not too slow)
+            avg_interval = timing_analysis["average_interval"]
+            if 0.01 <= avg_interval <= 2.0:  # Between 10ms and 2s
+                scores["event_timing"] = 100.0
+            elif avg_interval < 5.0:  # Still acceptable
+                scores["event_timing"] = 75.0
+            else:
+                scores["event_timing"] = 50.0
+                
+        # 4. Error Events Score (if error events present)
+        optional_coverage = event_analysis["optional_coverage"]
+        if optional_coverage.get("agent_error", False):
+            scores["error_events"] = 100.0
+        else:
+            scores["error_events"] = 50.0  # Not always expected
+            
+        # 5. Event Integrity Score
+        if event_analysis["unique_event_types"] >= 3:  # At least 3 different event types
+            scores["event_integrity"] = 80.0
+            
+        if event_analysis["total_events"] >= 5:  # At least 5 total events
+            scores["event_integrity"] += 20.0
+            
+        return scores
     
     def validate_ssot_compliance(self, agent_instance) -> float:
         """Validate SSOT compliance - no infrastructure duplication."""
