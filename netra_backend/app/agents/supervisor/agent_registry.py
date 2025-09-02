@@ -372,11 +372,30 @@ class AgentRegistry:
         # CRITICAL: Enhance tool dispatcher with WebSocket notifications
         if self.tool_dispatcher and websocket_manager:
             try:
-                from netra_backend.app.agents.websocket_tool_enhancement import enhance_tool_dispatcher_with_notifications
-                enhance_tool_dispatcher_with_notifications(self.tool_dispatcher, websocket_manager)
-                logger.info("✅ Tool dispatcher enhanced with WebSocket notifications")
+                # Check if tool dispatcher supports modern WebSocket enhancement
+                if hasattr(self.tool_dispatcher, 'set_websocket_manager'):
+                    # Modern tool dispatcher with WebSocket support
+                    self.tool_dispatcher.set_websocket_manager(websocket_manager)
+                    logger.info("✅ Tool dispatcher enhanced with WebSocket manager (modern pattern)")
+                elif hasattr(self.tool_dispatcher, 'enhance_with_websocket'):
+                    # Alternative modern enhancement method
+                    self.tool_dispatcher.enhance_with_websocket(websocket_manager)
+                    logger.info("✅ Tool dispatcher enhanced with WebSocket (alternative pattern)")
+                else:
+                    # Fallback to legacy enhancement
+                    from netra_backend.app.agents.websocket_tool_enhancement import enhance_tool_dispatcher_with_notifications
+                    enhance_tool_dispatcher_with_notifications(self.tool_dispatcher, websocket_manager)
+                    logger.info("✅ Tool dispatcher enhanced with WebSocket notifications (legacy pattern)")
+                    logger.warning("⚠️ Using legacy WebSocket enhancement - consider upgrading tool dispatcher")
+            except ImportError as e:
+                logger.error(f"WebSocket enhancement module not available: {e}")
             except Exception as e:
                 logger.error(f"Failed to enhance tool dispatcher with WebSocket: {e}")
+        else:
+            if not self.tool_dispatcher:
+                logger.warning("Cannot enhance tool dispatcher: tool_dispatcher is None")
+            if not websocket_manager:
+                logger.warning("Cannot enhance tool dispatcher: websocket_manager is None")
         
         # Update reliability manager with WebSocket capabilities
         if self.reliability_manager:
