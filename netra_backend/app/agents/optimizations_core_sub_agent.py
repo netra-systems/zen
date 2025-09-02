@@ -132,7 +132,7 @@ class OptimizationsCoreSubAgent(BaseAgent):
     
     def _extract_and_validate_result(self, llm_response_str: str, run_id: str) -> Dict[str, Any]:
         """Extract and validate JSON result from LLM response."""
-        optimizations_result = llm_parser.extract_json_from_response(llm_response_str)
+        optimizations_result = extract_json_from_response(llm_response_str)
         if not optimizations_result:
             logger.warning(f"Could not extract JSON from LLM response for run_id: {run_id}. Using default optimizations.")
             optimizations_result = {"optimizations": []}
@@ -170,18 +170,6 @@ class OptimizationsCoreSubAgent(BaseAgent):
             "reason": "Primary optimization analysis failed"
         }
     
-    def get_health_status(self) -> Dict[str, Any]:
-        """Get comprehensive agent health status."""
-        return {
-            "agent_name": self.agent_name,
-            "reliability": self.reliability_manager.get_health_status(),
-            "monitoring": self.monitor.get_health_status(),
-            "error_handler": "available"
-        }
-    
-    def get_circuit_breaker_status(self) -> Dict[str, Any]:
-        """Get circuit breaker status."""
-        return self.reliability_manager.circuit_breaker.get_status()
     
     def _create_optimizations_result(self, data: Dict[str, Any]) -> 'OptimizationsResult':
         """Convert dictionary to OptimizationsResult object."""

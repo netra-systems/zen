@@ -160,8 +160,8 @@ python tests/mission_critical/test_websocket_agent_events_suite.py
 - TriageAgent
 - ValidationSubAgent
 - SyntheticDataSubAgent
-- ReportingSubAgent
-- DataSubAgent (2025-09-01)
+- ReportingSubAgent (2025-09-02) - Gold standard implementation
+- **DataSubAgent (2025-09-02) - SSOT Consolidation Complete** ⭐
 
 ### In Progress 🚧
 - SupervisorAgent
@@ -225,7 +225,7 @@ This index is a **living document** and must be updated when:
 - New documentation is created
 - Compliance requirements evolve
 
-**Last Updated:** 2025-09-02  
+**Last Updated:** 2025-09-02 (ReportingSubAgent migration completed)  
 **Maintained By:** Engineering Team  
 **Review Cycle:** Weekly during active development
 
