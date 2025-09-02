@@ -1303,12 +1303,13 @@ class TestErrorScenariosAndEdgeCases:
                 db_session=MagicMock()
             )
         
-        # Test invalid configuration
-        with pytest.raises(ValueError, match="AgentRegistry cannot be None"):
-            factory.configure(None, MagicMock())
-        
+        # Test invalid configuration - WebSocket bridge is checked first
         with pytest.raises(ValueError, match="AgentWebSocketBridge cannot be None"):
-            factory.configure(MagicMock(), None)
+            factory.configure(agent_registry=None, websocket_bridge=None)
+        
+        # Test missing WebSocket bridge
+        with pytest.raises(ValueError, match="AgentWebSocketBridge cannot be None"):
+            factory.configure(agent_registry=MagicMock(), websocket_bridge=None)
     
     @pytest.mark.asyncio 
     async def test_context_creation_parameter_validation(self,
