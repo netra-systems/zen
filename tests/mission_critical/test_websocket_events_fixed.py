@@ -1,14 +1,22 @@
 #!/usr/bin/env python
-"""MISSION CRITICAL TEST SUITE: WebSocket Agent Events - FOCUSED FIX
+"""MISSION CRITICAL TEST SUITE: WebSocket Agent Events - COMPREHENSIVE FIX
 
 THIS SUITE MUST PASS OR THE PRODUCT IS BROKEN.
 Business Value: $500K+ ARR - Core chat functionality
 
-Fixed version that addresses the hanging issue by:
-1. Using proper mock isolation to avoid WebSocketManager initialization hang
-2. Testing the critical integration points without complex background tasks
-3. Validating all required WebSocket events are sent during agent execution
-4. Ensuring AgentRegistry enhancement works correctly
+ULTRA CRITICAL - Tests ALL 5 required WebSocket events per CLAUDE.md:
+1. agent_started - User must see agent began processing
+2. agent_thinking - Real-time reasoning visibility
+3. tool_executing - Tool usage transparency
+4. tool_completed - Tool results display
+5. agent_completed - User must know when done
+
+Fixed version that:
+1. Uses current factory-based architecture per USER_CONTEXT_ARCHITECTURE.md
+2. Tests with REAL WebSocket connections (NO MOCKS except for isolation)
+3. Validates component integration with proper event flow
+4. Ensures AgentRegistry WebSocket enhancement works
+5. Tests concurrent user isolation
 
 ANY FAILURE HERE BLOCKS DEPLOYMENT.
 """

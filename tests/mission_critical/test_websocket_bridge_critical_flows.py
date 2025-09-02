@@ -1,4 +1,3 @@
-from shared.isolated_environment import get_env
 #!/usr/bin/env python
 """
 MISSION CRITICAL: Comprehensive WebSocket Bridge Critical Flows Test Suite
@@ -55,26 +54,23 @@ os.environ['TEST_COLLECTION_MODE'] = '1'
 
 # Import critical components
 try:
-    from netra_backend.app.utils.run_id_generator import (
-        generate_run_id,
-        extract_thread_id_from_run_id,
-        validate_run_id_format,
-        is_legacy_run_id,
-        migrate_legacy_run_id_to_standard,
-        RUN_ID_PREFIX,
-        RUN_ID_SEPARATOR
-    )
-    from netra_backend.app.services.thread_run_registry import (
-        ThreadRunRegistry,
-        RegistryConfig,
-        RunMapping,
-        MappingState,
-        get_thread_run_registry,
-        initialize_thread_run_registry
+    from shared.isolated_environment import get_env
+    from netra_backend.app.services.websocket_bridge_factory import (
+        WebSocketBridgeFactory,
+        UserWebSocketEmitter,
+        UserWebSocketContext,
+        WebSocketEvent,
+        ConnectionStatus,
+        get_websocket_bridge_factory
     )
     from netra_backend.app.services.agent_websocket_bridge import (
-        AgentWebSocketBridge,
-        IntegrationState
+        AgentWebSocketBridge
+    )
+    from test_framework.test_context import (
+        TestContext,
+        TestUserContext,
+        create_test_context,
+        create_isolated_test_contexts
     )
 except ImportError as e:
     pytest.skip(f"Could not import required WebSocket bridge modules: {e}", allow_module_level=True)
@@ -97,9 +93,26 @@ class MockWebSocketManager:
         }
         self.is_healthy = True
         self.network_partitioned = False
+        
+        # Add required WebSocket events tracking
+        self.required_events = {
+            "agent_started",
+            "agent_thinking", 
+            "tool_executing",
+            "tool_completed",
+            "agent_completed"
+        }
     
     async def send_to_thread(self, thread_id: str, message: Dict) -> bool:
         """Mock WebSocket send with realistic failure scenarios."""
+        return await self._send_message_internal(thread_id, message)
+        
+    async def send_event(self, event: WebSocketEvent) -> bool:
+        """Send WebSocket event (new factory pattern)."""
+        return await self._send_message_internal(event.thread_id, event.data)
+        
+    async def _send_message_internal(self, thread_id: str, message: Dict) -> bool:
+        """Internal message sending logic."""
         start_time = time.time()
         self.call_metrics['total_calls'] += 1
         
