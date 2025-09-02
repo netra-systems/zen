@@ -1267,9 +1267,166 @@ class UnifiedDockerManager:
             
         return containers
     
+    def _get_container_name_pattern(self) -> Dict[str, str]:
+        """
+        Get container name patterns based on environment type and project structure.
+        
+        Returns:
+            Dictionary mapping pattern types to their regex patterns
+        """
+        # Determine project name from current directory
+        project_dir = Path.cwd().name
+        
+        patterns = {
+            # Development containers (manual docker-compose up)
+            "dev": f"{project_dir}-dev-{{service}}-1",
+            "dev_underscore": f"{project_dir}_dev_{{service}}_1",
+            
+            # Test containers (automated)
+            "test": f"{project_dir}-test-{{service}}-1", 
+            "test_underscore": f"{project_dir}_test_{{service}}_1",
+            
+            # Alpine test containers  
+            "alpine_test": f"{project_dir}-alpine-test-{{service}}-1",
+            
+            # Legacy patterns
+            "legacy_dev": "netra-dev-{service}",
+            "legacy_apex_test": "netra-apex-test-{service}-1",
+            "legacy_test": "netra-test-{service}-1",
+            "legacy_shared": "netra_test_shared_{service}_1"
+        }
+        
+        logger.debug(f"🏷️ Container name patterns for project '{project_dir}': {list(patterns.keys())}")
+        return patterns
+    
+    def _parse_container_name_to_service(self, container_name: str) -> Optional[str]:
+        """
+        Parse container name to extract service name using all known patterns.
+        
+        Args:
+            container_name: Full container name
+            
+        Returns:
+            Service name if parsed successfully, None otherwise
+        """
+        patterns = self._get_container_name_pattern()
+        project_dir = Path.cwd().name
+        
+        # Try each pattern
+        if container_name.startswith(f'{project_dir}-dev-'):
+            service = container_name.replace(f'{project_dir}-dev-', '')
+            if service.endswith('-1'):
+                service = service[:-2]
+            return service
+        elif container_name.startswith(f'{project_dir}_dev_'):
+            service = container_name.replace(f'{project_dir}_dev_', '')
+            if service.endswith('_1'):
+                service = service[:-2] 
+            return service
+        elif container_name.startswith(f'{project_dir}-test-'):
+            service = container_name.replace(f'{project_dir}-test-', '')
+            if service.endswith('-1'):
+                service = service[:-2]
+            return service
+        elif container_name.startswith(f'{project_dir}_test_'):
+            service = container_name.replace(f'{project_dir}_test_', '')
+            if service.endswith('_1'):
+                service = service[:-2]
+            return service
+        elif container_name.startswith(f'{project_dir}-alpine-test-'):
+            service = container_name.replace(f'{project_dir}-alpine-test-', '')
+            if service.endswith('-1'):
+                service = service[:-2]
+            return service
+        # Legacy patterns
+        elif container_name.startswith('netra-dev-'):
+            return container_name.replace('netra-dev-', '')
+        elif container_name.startswith('netra-apex-test-'):
+            service = container_name.replace('netra-apex-test-', '')
+            if service.endswith('-1'):
+                service = service[:-2]
+            return service
+        elif container_name.startswith('netra-test-'):
+            service = container_name.replace('netra-test-', '')
+            if service.endswith('-1'):
+                service = service[:-2]
+            return service
+        elif container_name.startswith('netra_test_shared_'):
+            service = container_name.replace('netra_test_shared_', '')
+            if service.endswith('_1'):
+                service = service[:-2]
+            return service
+        
+        logger.debug(f"⚠️ Could not parse service name from container: {container_name}")
+        return None
+    
+    def _discover_ports_from_docker_ps(self) -> Dict[str, int]:
+        """
+        Discover ports by parsing docker ps output directly.
+        This method handles cases where containers don't match expected patterns.
+        
+        Returns:
+            Dictionary mapping service name to external port
+        """
+        ports = {}
+        
+        try:
+            # Get running containers with ports
+            cmd = ["docker", "ps", "--format", "table {{.Names}}\t{{.Ports}}"]
+            docker_result = self.docker_rate_limiter.execute_docker_command(cmd, timeout=10)
+            result = subprocess.CompletedProcess(cmd, docker_result.returncode, docker_result.stdout, docker_result.stderr)
+            
+            if result.returncode != 0 or not result.stdout.strip():
+                logger.debug("No containers found via docker ps")
+                return ports
+            
+            lines = result.stdout.strip().split('\n')
+            # Skip header line
+            container_lines = [line for line in lines[1:] if line.strip()]
+            
+            for line in container_lines:
+                parts = line.split('\t', 1)
+                if len(parts) != 2:
+                    continue
+                    
+                container_name = parts[0].strip()
+                ports_str = parts[1].strip()
+                
+                # Only process netra-related containers
+                if 'netra' not in container_name.lower():
+                    continue
+                
+                # Extract service name
+                service = self._parse_container_name_to_service(container_name)
+                if not service:
+                    continue
+                
+                # Parse ports string like "0.0.0.0:8000->8000/tcp, 0.0.0.0:5432->5432/tcp"
+                if ports_str and '->' in ports_str:
+                    port_mappings = ports_str.split(', ')
+                    for mapping in port_mappings:
+                        if '->' in mapping:
+                            # Extract host port from "0.0.0.0:HOST->CONTAINER/tcp"
+                            host_part = mapping.split('->')[0].strip()
+                            if ':' in host_part:
+                                host_port = int(host_part.split(':')[-1])
+                                # Match with known service ports to avoid wrong mappings
+                                if service in self.SERVICES:
+                                    internal_port = self.SERVICES[service].get("default_port", 8000)
+                                    container_part = mapping.split('->')[1].strip()
+                                    if container_part.startswith(str(internal_port)):
+                                        ports[service] = host_port
+                                        logger.debug(f"🔌 {service}: discovered {internal_port} -> {host_port} from docker ps")
+                                        break
+            
+        except Exception as e:
+            logger.warning(f"Error parsing docker ps output: {e}")
+        
+        return ports
+    
     def _discover_ports_from_existing_containers(self, containers: Dict[str, str]) -> Dict[str, int]:
         """
-        Discover port mappings from existing containers.
+        Discover port mappings from existing containers with enhanced fallback logic.
         
         Args:
             containers: Dictionary mapping service name to container name
@@ -1279,6 +1436,7 @@ class UnifiedDockerManager:
         """
         ports = {}
         
+        # First try: Use docker port command for specific containers
         for service, container_name in containers.items():
             try:
                 # Get port mapping for this container
@@ -1301,46 +1459,54 @@ class UnifiedDockerManager:
                             ports[service] = internal_port
                             logger.debug(f"🔌 {service}: using internal port {internal_port}")
                     else:
-                        # No port mapping found, use internal port
-                        ports[service] = internal_port
-                        logger.debug(f"🔌 {service}: no mapping found, using internal port {internal_port}")
+                        logger.debug(f"🔌 {service}: no port mapping found for {container_name}")
                 else:
                     logger.warning(f"⚠️ Unknown service: {service}")
                     
             except Exception as e:
-                # Handle Docker connectivity issues gracefully
-                if "pipe" in str(e).lower() or "connect" in str(e).lower():
-                    logger.warning(f"Docker connectivity issue for {service}, using default port")
-                    if service in self.SERVICES:
-                        if service in self.allocated_ports:
-                            ports[service] = self.allocated_ports[service]
-                        else:
-                            ports[service] = self.SERVICES[service].get("default_port", 8000)
-                else:
-                    logger.warning(f"Error discovering port for {service}: {e}")
-                    # Use default port as fallback
-                    if service in self.SERVICES:
-                        if service in self.allocated_ports:
-                            ports[service] = self.allocated_ports[service]
-                        else:
-                            ports[service] = self.SERVICES[service].get("default_port", 8000)
+                logger.debug(f"Error getting port for {service} ({container_name}): {e}")
         
-        # If we have no ports discovered due to Docker issues, use default dev ports
-        if not ports and containers:
-            logger.warning("🔄 Using default development ports due to Docker connectivity issues")
-            dev_ports = {
-                "backend": 8000,
-                "auth": 8001, 
-                "frontend": 3000,
-                "postgres": 5432,
-                "redis": 6379,
-                "clickhouse": 8123
-            }
+        # Second try: Parse docker ps output if we're missing ports
+        missing_services = [s for s in containers.keys() if s not in ports]
+        if missing_services:
+            logger.info(f"🔍 Trying docker ps parsing for missing services: {missing_services}")
+            docker_ps_ports = self._discover_ports_from_docker_ps()
+            for service, port in docker_ps_ports.items():
+                if service in missing_services:
+                    ports[service] = port
+        
+        # Third try: Use environment-specific default ports
+        still_missing = [s for s in containers.keys() if s not in ports]
+        if still_missing:
+            logger.warning(f"🔄 Using environment-appropriate default ports for: {still_missing}")
             
-            for service in containers.keys():
-                if service in dev_ports:
-                    ports[service] = dev_ports[service]
-                    logger.info(f"🔌 {service}: using default dev port {dev_ports[service]}")
+            # Determine environment type from container names
+            sample_container = next(iter(containers.values()))
+            if 'dev' in sample_container:
+                default_ports = {
+                    "backend": 8000,
+                    "auth": 8081,
+                    "frontend": 3000,
+                    "postgres": 5432,
+                    "redis": 6379
+                }
+            else:  # test environment
+                default_ports = {
+                    "backend": 8000,
+                    "auth": 8081, 
+                    "frontend": 3000,
+                    "postgres": 5434,  # Test postgres typically on different port
+                    "redis": 6381
+                }
+            
+            for service in still_missing:
+                if service in default_ports:
+                    ports[service] = default_ports[service]
+                    logger.info(f"🔌 {service}: using default port {default_ports[service]}")
+                elif service in self.SERVICES:
+                    default_port = self.SERVICES[service].get("default_port", 8000)
+                    ports[service] = default_port
+                    logger.info(f"🔌 {service}: using service default port {default_port}")
         
         logger.info(f"📍 Discovered ports: {ports}")
         return ports
@@ -1984,11 +2150,12 @@ class UnifiedDockerManager:
             env.set("REDIS_URL", redis_url, source="unified_docker_manager")
 
     def _build_service_url_from_port(self, service: str, port: int) -> Optional[str]:
-        """Build service URL from service name and port."""
+        """Build service URL from service name and port using environment-specific credentials."""
         if service in ["backend", "auth", "frontend"]:
             return f"http://localhost:{port}"
         elif service == "postgres":
-            return f"postgresql://test:test@localhost:{port}/netra_test"
+            creds = self.get_database_credentials()
+            return f"postgresql://{creds['user']}:{creds['password']}@localhost:{port}/{creds['database']}"
         elif service == "redis":
             return f"redis://localhost:{port}/1"
         elif service == "clickhouse":
@@ -1996,11 +2163,12 @@ class UnifiedDockerManager:
         return None
 
     def _build_service_url(self, service: str, mapping: ServicePortMapping) -> Optional[str]:
-        """Build service URL from port mapping."""
+        """Build service URL from port mapping using environment-specific credentials."""
         if service in ["backend", "auth", "frontend"]:
             return f"http://{mapping.host}:{mapping.external_port}"
         elif service == "postgres":
-            return f"postgresql://test:test@{mapping.host}:{mapping.external_port}/netra_test"
+            creds = self.get_database_credentials()
+            return f"postgresql://{creds['user']}:{creds['password']}@{mapping.host}:{mapping.external_port}/{creds['database']}"
         elif service == "redis":
             return f"redis://{mapping.host}:{mapping.external_port}/1"
         elif service == "clickhouse":

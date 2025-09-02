@@ -159,19 +159,48 @@ class AgentRegistry:
         self._register_corpus_admin_agent()
     
     def register(self, name: str, agent: BaseAgent) -> None:
-        """Register a sub-agent"""
+        """
+        Register a sub-agent (DEPRECATED - causes user context leakage).
+        
+        WARNING: This method sets WebSocket bridge with None run_id which
+        breaks per-user isolation and causes WebSocket events to be mixed.
+        
+        Use AgentInstanceFactory.create_agent_instance() instead for proper
+        per-user isolation with real run_id from UserExecutionContext.
+        """
         if name in self.agents:
             logger.debug(f"Agent {name} already registered, skipping")
             return
             
-        # Set WebSocket bridge on agent if available and agent supports it
+        # CRITICAL ISSUE: Setting WebSocket bridge with None run_id
+        # This causes placeholder 'registry' run_id and breaks user isolation
         if self.websocket_bridge and hasattr(agent, 'set_websocket_bridge'):
-            # Note: run_id will be set dynamically during execution, not during registration
+            logger.warning(
+                f"⚠️ DEPRECATED: Setting WebSocket bridge on {name} with None run_id - "
+                f"this breaks user isolation! Use AgentInstanceFactory instead."
+            )
+            # Note: This is the problematic line that uses placeholder run_id
             agent.set_websocket_bridge(self.websocket_bridge, None)
+        
         self.agents[name] = agent
+        
+        # NEW: Also register agent class in AgentClassRegistry for new architecture
+        if self._agent_class_registry and not self._agent_class_registry.has_agent_class(name):
+            try:
+                agent_class = type(agent)
+                self._agent_class_registry.register(
+                    name=name,
+                    agent_class=agent_class,
+                    description=getattr(agent, 'description', f"{agent_class.__name__} agent"),
+                    version=getattr(agent, 'version', '1.0.0')
+                )
+                logger.debug(f"Registered agent class {name} in AgentClassRegistry")
+            except Exception as e:
+                logger.warning(f"Failed to register agent class {name} in AgentClassRegistry: {e}")
+        
         # Clear any previous registration errors
         self.registration_errors.pop(name, None)
-        logger.debug(f"Registered agent: {name}")
+        logger.debug(f"Registered agent: {name} (with deprecation warning)")
     
     async def register_agent_safely(self, name: str, agent_class: Type[BaseAgent], **kwargs) -> bool:
         """Register an agent safely with error handling.
