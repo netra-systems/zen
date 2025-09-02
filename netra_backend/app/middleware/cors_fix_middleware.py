@@ -41,7 +41,7 @@ class CORSFixMiddleware(BaseHTTPMiddleware):
         logger.info(f"CORSFixMiddleware initialized with {len(self.allowed_origins)} origins for {self.cors.environment}")
     
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
-        """Enhanced CORS processing with security features."""
+        """Enhanced CORS processing with security features and error handling."""
         origin = request.headers.get("origin")
         request_id = request.headers.get("x-request-id", "unknown")
         path = request.url.path
@@ -62,8 +62,30 @@ class CORSFixMiddleware(BaseHTTPMiddleware):
             )
             # Continue processing but log the event
         
-        # Get the response from the next middleware
-        response = await call_next(request)
+        try:
+            # Get the response from the next middleware
+            response = await call_next(request)
+        except Exception as e:
+            # On error, create an error response with CORS headers
+            logger.error(f"Error processing request: {e}")
+            
+            # Create error response
+            from fastapi.responses import JSONResponse
+            response = JSONResponse(
+                status_code=500,
+                content={"error": "Internal server error"}
+            )
+            
+            # Add CORS headers to error response if origin is allowed
+            if origin and self.cors.origins.is_allowed(origin, service_to_service=is_s2s):
+                response.headers["Access-Control-Allow-Origin"] = origin
+                response.headers["Access-Control-Allow-Credentials"] = "true"
+                response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
+                response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With, X-Service-Name"
+                response.headers["Access-Control-Expose-Headers"] = "X-Trace-ID, X-Request-ID, Content-Length, Content-Type, Vary"
+                response.headers["Vary"] = "Origin"
+            
+            return response
         
         # Check if CORS headers are present (indicating CORSMiddleware ran)
         has_cors_headers = (
@@ -76,21 +98,28 @@ class CORSFixMiddleware(BaseHTTPMiddleware):
         if origin:
             response.headers["Vary"] = "Origin"
         
-        # If CORS headers exist but Access-Control-Allow-Origin is missing, add it
-        if has_cors_headers and "access-control-allow-origin" not in response.headers:
-            if origin:
-                # Use enhanced origin validation with service-to-service bypass
-                if self.cors.origins.is_allowed(origin, service_to_service=is_s2s):
-                    response.headers["Access-Control-Allow-Origin"] = origin
-                    logger.debug(f"Added missing Access-Control-Allow-Origin header for {origin}")
-                else:
-                    # SEC-002: Log CORS validation failure
-                    self.cors.security.log_security_event(
-                        event_type="cors_validation_failure",
-                        origin=origin,
-                        path=path,
-                        request_id=request_id,
-                        additional_info={"is_service_to_service": is_s2s}
-                    )
+        # Always ensure CORS headers are present for allowed origins (including error responses)
+        if origin and self.cors.origins.is_allowed(origin, service_to_service=is_s2s):
+            # If no CORS headers at all, add full set
+            if not has_cors_headers and "access-control-allow-origin" not in response.headers:
+                response.headers["Access-Control-Allow-Origin"] = origin
+                response.headers["Access-Control-Allow-Credentials"] = "true"
+                response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
+                response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With, X-Service-Name"
+                response.headers["Access-Control-Expose-Headers"] = "X-Trace-ID, X-Request-ID, Content-Length, Content-Type, Vary"
+                logger.debug(f"Added full CORS headers for {origin} on response with status {response.status_code}")
+            # If CORS headers exist but Access-Control-Allow-Origin is missing, add it
+            elif has_cors_headers and "access-control-allow-origin" not in response.headers:
+                response.headers["Access-Control-Allow-Origin"] = origin
+                logger.debug(f"Added missing Access-Control-Allow-Origin header for {origin}")
+        elif origin and not self.cors.origins.is_allowed(origin, service_to_service=is_s2s):
+            # SEC-002: Log CORS validation failure
+            self.cors.security.log_security_event(
+                event_type="cors_validation_failure",
+                origin=origin,
+                path=path,
+                request_id=request_id,
+                additional_info={"is_service_to_service": is_s2s}
+            )
         
         return response
