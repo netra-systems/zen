@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Test Script: Real JWT Token E2E Test Validation
@@ -179,8 +180,8 @@ class RealJWTTokenE2EValidator:
             # Check key environment variables
             env_checks = {
                 "JWT_AVAILABLE": JWT_AVAILABLE,
-                "TESTING_ENV": os.getenv("TESTING") == "1",
-                "JWT_SECRET": bool(os.getenv("JWT_SECRET")),
+                "TESTING_ENV": get_env().get("TESTING") == "1",
+                "JWT_SECRET": bool(get_env().get("JWT_SECRET")),
             }
             
             passed_checks = sum(1 for check in env_checks.values() if check)

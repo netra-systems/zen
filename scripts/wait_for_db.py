@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Database connection wait script for Docker containers.
@@ -24,18 +25,18 @@ logger = logging.getLogger(__name__)
 def get_database_config() -> Dict[str, Any]:
     """Get database configuration from environment variables."""
     return {
-        'host': os.getenv('POSTGRES_HOST', 'postgres'),
-        'port': int(os.getenv('POSTGRES_PORT', 5432)),
-        'user': os.getenv('POSTGRES_USER', 'netra'),
-        'password': os.getenv('POSTGRES_PASSWORD', 'netra123'),
-        'database': os.getenv('POSTGRES_DB', 'netra_dev')
+        'host': get_env().get('POSTGRES_HOST', 'postgres'),
+        'port': int(get_env().get('POSTGRES_PORT', 5432)),
+        'user': get_env().get('POSTGRES_USER', 'netra'),
+        'password': get_env().get('POSTGRES_PASSWORD', 'netra123'),
+        'database': get_env().get('POSTGRES_DB', 'netra_dev')
     }
 
 def get_redis_config() -> Dict[str, Any]:
     """Get Redis configuration from environment variables."""
     return {
-        'host': os.getenv('REDIS_HOST', 'redis'),
-        'port': int(os.getenv('REDIS_PORT', 6379)),
+        'host': get_env().get('REDIS_HOST', 'redis'),
+        'port': int(get_env().get('REDIS_PORT', 6379)),
         'db': 0
     }
 
@@ -92,8 +93,8 @@ def wait_for_redis(config: Dict[str, Any], max_attempts: int = 30, delay: int = 
 
 def wait_for_clickhouse(max_attempts: int = 30, delay: int = 2) -> bool:
     """Wait for ClickHouse to be ready."""
-    host = os.getenv('CLICKHOUSE_HOST', 'clickhouse')
-    port = int(os.getenv('CLICKHOUSE_HTTP_PORT', 8123))
+    host = get_env().get('CLICKHOUSE_HOST', 'clickhouse')
+    port = int(get_env().get('CLICKHOUSE_HTTP_PORT', 8123))
     
     logger.info(f"Waiting for ClickHouse at {host}:{port}")
     
@@ -137,7 +138,7 @@ def main():
         sys.exit(1)
     
     # ClickHouse is optional in some environments
-    if os.getenv('CLICKHOUSE_ENABLED', 'true').lower() == 'true':
+    if get_env().get('CLICKHOUSE_ENABLED', 'true').lower() == 'true':
         if wait_for_clickhouse():
             services_ready.append("ClickHouse")
         else:

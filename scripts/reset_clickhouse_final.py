@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Final ClickHouse reset script using Docker for local and env vars for cloud."""
 
 import os

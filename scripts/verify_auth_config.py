@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Verify Auth Configuration Script
@@ -77,8 +78,8 @@ def verify_environment_config(env: str) -> Dict[str, any]:
         client_id_var = 'GOOGLE_OAUTH_CLIENT_ID_DEV'
         client_secret_var = 'GOOGLE_OAUTH_CLIENT_SECRET_DEV'
     
-    client_id = os.getenv(client_id_var) or os.getenv('GOOGLE_CLIENT_ID')
-    client_secret = os.getenv(client_secret_var) or os.getenv('GOOGLE_CLIENT_SECRET')
+    client_id = get_env().get(client_id_var) or get_env().get('GOOGLE_CLIENT_ID')
+    client_secret = get_env().get(client_secret_var) or get_env().get('GOOGLE_CLIENT_SECRET')
     
     if client_id:
         print(f"  [OK] Client ID configured ({client_id_var})")

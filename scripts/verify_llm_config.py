@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python
 """Verify that LLM configuration is properly set to use Gemini 2.5 Pro as default for tests."""
 

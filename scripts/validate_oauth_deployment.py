@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Pre-deployment OAuth Validation Script
@@ -42,7 +43,7 @@ class OAuthDeploymentValidator:
         self.environment = environment.lower()
         self.validation_errors: List[str] = []
         self.validation_warnings: List[str] = []
-        self.project_id = os.getenv("GCP_PROJECT_ID") or "netra-staging"
+        self.project_id = get_env().get("GCP_PROJECT_ID") or "netra-staging"
         
         print(f"OAuth Deployment Validator")
         print(f"Environment: {self.environment}")
@@ -55,12 +56,12 @@ class OAuthDeploymentValidator:
         
         # Environment-specific variables to check
         env_vars_to_check = {
-            "GOOGLE_CLIENT_ID": os.getenv("GOOGLE_CLIENT_ID"),
-            "GOOGLE_CLIENT_SECRET": os.getenv("GOOGLE_CLIENT_SECRET"),
-            "GOOGLE_OAUTH_CLIENT_ID_STAGING": os.getenv("GOOGLE_OAUTH_CLIENT_ID_STAGING"),
-            "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": os.getenv("GOOGLE_OAUTH_CLIENT_SECRET_STAGING"),
-            "GOOGLE_OAUTH_CLIENT_ID_PRODUCTION": os.getenv("GOOGLE_OAUTH_CLIENT_ID_PRODUCTION"),
-            "GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION": os.getenv("GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION"),
+            "GOOGLE_CLIENT_ID": get_env().get("GOOGLE_CLIENT_ID"),
+            "GOOGLE_CLIENT_SECRET": get_env().get("GOOGLE_CLIENT_SECRET"),
+            "GOOGLE_OAUTH_CLIENT_ID_STAGING": get_env().get("GOOGLE_OAUTH_CLIENT_ID_STAGING"),
+            "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": get_env().get("GOOGLE_OAUTH_CLIENT_SECRET_STAGING"),
+            "GOOGLE_OAUTH_CLIENT_ID_PRODUCTION": get_env().get("GOOGLE_OAUTH_CLIENT_ID_PRODUCTION"),
+            "GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION": get_env().get("GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION"),
         }
         
         # Required variables for each environment

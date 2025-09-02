@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 WebSocket Staging Setup Validation Script
@@ -86,7 +87,7 @@ async def validate_staging_setup():
     }
     
     for var_name, description in env_vars.items():
-        value = os.getenv(var_name)
+        value = get_env().get(var_name)
         has_value = bool(value)
         print_status(var_name, has_value, description)
         
@@ -119,7 +120,7 @@ async def validate_staging_setup():
         print("  FAIL WebSocket staging setup needs attention")
         print("\n  Required actions:")
         
-        if not os.getenv("E2E_OAUTH_SIMULATION_KEY"):
+        if not get_env().get("E2E_OAUTH_SIMULATION_KEY"):
             print("    1. Set E2E_OAUTH_SIMULATION_KEY environment variable")
             print("       Contact team lead for staging OAuth simulation key")
         

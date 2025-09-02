@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 JWT Secret Consistency Validation Script
@@ -45,7 +46,7 @@ def validate_jwt_secret_consistency():
     
     results = {
         "timestamp": datetime.now().isoformat(),
-        "environment": os.getenv("ENVIRONMENT", "development"),
+        "environment": get_env().get("ENVIRONMENT", "development"),
         "tests": [],
         "summary": {
             "total": 0,
@@ -146,8 +147,8 @@ def validate_jwt_secret_consistency():
     # Test 3: Environment variable priority
     print("\nTest 3: Environment Variable Priority")
     try:
-        jwt_secret_key = os.getenv("JWT_SECRET_KEY")
-        jwt_secret = os.getenv("JWT_SECRET")
+        jwt_secret_key = get_env().get("JWT_SECRET_KEY")
+        jwt_secret = get_env().get("JWT_SECRET")
         
         print(f"   JWT_SECRET_KEY: {'SET' if jwt_secret_key else 'NOT SET'}")
         print(f"   JWT_SECRET: {'SET' if jwt_secret else 'NOT SET'}")

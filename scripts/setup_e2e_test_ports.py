@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """Setup E2E Test Ports for Docker and Local Testing
 

@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Claude Code session end hook - automatically commits changes to the current branch.

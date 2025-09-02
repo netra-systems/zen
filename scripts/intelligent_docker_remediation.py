@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Intelligent Docker Remediation System
@@ -881,7 +882,7 @@ class DockerRemediationSystem:
             
             missing_vars = []
             for var in required_vars:
-                if not os.getenv(var):
+                if not get_env().get(var):
                     missing_vars.append(var)
             
             if missing_vars:

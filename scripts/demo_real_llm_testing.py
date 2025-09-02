@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Demo script for Real LLM Testing Configuration
@@ -41,7 +42,7 @@ async def demo_environment_validation():
     
     # Test database validation
     print("\n1. Database Validation:")
-    database_url = os.getenv('TEST_DATABASE_URL', os.getenv('DATABASE_URL', 'postgresql://localhost/netra_test'))
+    database_url = get_env().get('TEST_DATABASE_URL', get_env().get('DATABASE_URL', 'postgresql://localhost/netra_test'))
     try:
         db_valid = await validator.validate_database_connection(database_url)
         print(f"   Database connection: {'PASSED' if db_valid else 'FAILED'}")

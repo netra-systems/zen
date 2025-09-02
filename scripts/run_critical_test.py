@@ -13,8 +13,8 @@ env_path = Path(__file__).parent / '.env'
 load_dotenv(env_path, override=True)
 
 # Ensure GEMINI_API_KEY is set from .env
-gemini_key = os.getenv('GEMINI_API_KEY')
-if not os.getenv('GEMINI_API_KEY'):
+gemini_key = get_env().get('GEMINI_API_KEY')
+if not get_env().get('GEMINI_API_KEY'):
     env.set('GEMINI_API_KEY', gemini_key, "test")
     print(f"Set GEMINI_API_KEY directly")
 
@@ -36,13 +36,13 @@ env.set('ENVIRONMENT', 'testing', "test")
 
 # Print configuration
 print("\nEnvironment configuration:")
-print(f"  ENVIRONMENT: {os.getenv('ENVIRONMENT')}")
-print(f"  GEMINI_API_KEY: {'Set' if os.getenv('GEMINI_API_KEY') else 'Not set'}")
-print(f"  GOOGLE_API_KEY: {'Set' if os.getenv('GOOGLE_API_KEY') else 'Not set'}")
-print(f"  TEST_GOOGLE_API_KEY: {'Set' if os.getenv('TEST_GOOGLE_API_KEY') else 'Not set'}")
-print(f"  TEST_GEMINI_API_KEY: {'Set' if os.getenv('TEST_GEMINI_API_KEY') else 'Not set'}")
-print(f"  ENABLE_REAL_LLM_TESTING: {os.getenv('ENABLE_REAL_LLM_TESTING')}")
-print(f"  TEST_LLM_MODE: {os.getenv('TEST_LLM_MODE')}")
+print(f"  ENVIRONMENT: {get_env().get('ENVIRONMENT')}")
+print(f"  GEMINI_API_KEY: {'Set' if get_env().get('GEMINI_API_KEY') else 'Not set'}")
+print(f"  GOOGLE_API_KEY: {'Set' if get_env().get('GOOGLE_API_KEY') else 'Not set'}")
+print(f"  TEST_GOOGLE_API_KEY: {'Set' if get_env().get('TEST_GOOGLE_API_KEY') else 'Not set'}")
+print(f"  TEST_GEMINI_API_KEY: {'Set' if get_env().get('TEST_GEMINI_API_KEY') else 'Not set'}")
+print(f"  ENABLE_REAL_LLM_TESTING: {get_env().get('ENABLE_REAL_LLM_TESTING')}")
+print(f"  TEST_LLM_MODE: {get_env().get('TEST_LLM_MODE')}")
 print()
 
 # Run pytest with the critical test

@@ -80,7 +80,7 @@ def test_middleware_environment_defaults():
     middleware_file = script_dir / "app/middleware/tool_permission_middleware.py"
     with open(middleware_file, 'r') as f:
         content = f.read()
-        if 'os.getenv("ENVIRONMENT", "staging")' in content:
+        if 'get_env().get("ENVIRONMENT", "staging")' in content:
             print("[PASS] ToolPermissionMiddleware defaults to staging")
         else:
             raise AssertionError("ToolPermissionMiddleware does not default to staging")
@@ -89,7 +89,7 @@ def test_middleware_environment_defaults():
     compliance_file = script_dir / "app/routes/factory_compliance.py"
     with open(compliance_file, 'r') as f:
         content = f.read()
-        if 'os.getenv("ENVIRONMENT", "staging")' in content:
+        if 'get_env().get("ENVIRONMENT", "staging")' in content:
             print("[PASS] Factory compliance defaults to staging")
         else:
             raise AssertionError("Factory compliance does not default to staging")
@@ -98,7 +98,7 @@ def test_middleware_environment_defaults():
     status_file = script_dir / "app/services/factory_status/factory_status_integration.py"
     with open(status_file, 'r') as f:
         content = f.read()
-        if 'os.getenv("ENVIRONMENT", "staging")' in content:
+        if 'get_env().get("ENVIRONMENT", "staging")' in content:
             print("[PASS] Factory status integration defaults to staging")
         else:
             raise AssertionError("Factory status integration does not default to staging")

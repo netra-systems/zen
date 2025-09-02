@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """Script to fix remaining specific syntax errors in test files"""
 

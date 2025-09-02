@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """Test auth service database session management and DatabaseURLBuilder integration."""
 
 import sys
