@@ -208,7 +208,8 @@ class DockerResourceMonitor:
     """
     
     # Default resource limits (configurable via environment)
-    DEFAULT_MAX_MEMORY_GB = 4.0
+    # These represent Docker-specific thresholds for monitoring
+    DEFAULT_MAX_MEMORY_GB = 8.0  # Increased to more reasonable limit
     DEFAULT_MAX_CONTAINERS = 20
     DEFAULT_MAX_NETWORKS = 15
     DEFAULT_MAX_VOLUMES = 10
@@ -391,22 +392,26 @@ class DockerResourceMonitor:
         try:
             memory = psutil.virtual_memory()
             
-            # For memory monitoring, we track how much of the system's total memory is used
-            # Our max_limit represents the threshold we're comfortable with for Docker operations
-            # But we report against total system memory to be realistic
-            max_limit = memory.total  # Use actual system total
-            docker_threshold_bytes = self.max_memory_gb * 1024**3
+            # For system memory monitoring, we use system memory percentage
+            # But track Docker-specific memory consumption if possible
+            percentage = memory.percent  # psutil already calculates this correctly
             
-            # Calculate percentage of system memory used
-            percentage = (memory.used / memory.total) * 100
+            # Our threshold is based on available memory vs what we need for Docker
+            docker_threshold_gb = self.max_memory_gb
+            available_gb = memory.available / 1024**3
             
-            # But for reporting purposes, show our Docker-specific threshold
-            # This way we can warn when approaching Docker limits
+            # If available memory is less than our Docker threshold, we're in a risky state
+            if available_gb < docker_threshold_gb:
+                # Calculate how much over our comfortable threshold we are
+                overage_gb = docker_threshold_gb - available_gb
+                overage_percentage = (overage_gb / docker_threshold_gb) * 100
+                # Adjust percentage to reflect Docker-specific concerns
+                percentage = min(percentage + overage_percentage, 100.0)
             
             return ResourceUsage(
                 resource_type=ResourceType.MEMORY,
                 current_usage=float(memory.used),
-                max_limit=max_limit,
+                max_limit=float(memory.total),
                 percentage=percentage,
                 threshold_level=self._get_threshold_level(percentage / 100),
                 unit="bytes"

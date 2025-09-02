@@ -320,7 +320,7 @@ def run_all_tests():
                 'success': success,
                 'duration': duration
             }
-            status = "✓ PASS" if success else "✗ FAIL"
+            status = "[PASS]" if success else "[FAIL]"
             print(f"Result: {status} ({duration:.2f}s)")
         except Exception as e:
             results[test_name] = {
@@ -328,7 +328,7 @@ def run_all_tests():
                 'duration': 0,
                 'error': str(e)
             }
-            print(f"Result: ✗ FAIL (Exception: {e})")
+            print(f"Result: [FAIL] (Exception: {e})")
     
     # Summary
     print("\n" + "=" * 50)
