@@ -153,7 +153,8 @@ class ExtremeMemoryTracker:
         self.tracemalloc_enabled = False
         
         # Start memory tracking
-        self.baseline_memory_mb = self._get_memory_usage()
+        baseline_data = self._get_memory_usage()
+        self.baseline_memory_mb = baseline_data['rss_mb']
         self.peak_memory_mb = self.baseline_memory_mb
         
     def start_tracemalloc(self):
