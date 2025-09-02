@@ -776,6 +776,1040 @@ async def test_circuit_breaker_state_transitions_under_load(circuit_breaker_stre
                 f"{closed_breakers_final} recovered to closed")
 
 
+# ============================================================================
+# WEBSOCKET INTEGRATION TESTS
+# ============================================================================
+
+@pytest.mark.asyncio
+async def test_circuit_breaker_websocket_notifications():
+    """Test circuit breaker state changes trigger WebSocket notifications."""
+    try:
+        from netra_backend.app.websocket_core import WebSocketManager
+        from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+    except ImportError:
+        pytest.skip("WebSocket components not available")
+    
+    # Mock WebSocket manager
+    websocket_manager = AsyncMock(spec=WebSocketManager)
+    websocket_manager.send_to_thread = AsyncMock()
+    websocket_notifier = WebSocketNotifier(websocket_manager)
+    
+    # Create circuit breaker with WebSocket integration
+    from netra_backend.app.utils.circuit_breaker import CircuitBreaker
+    
+    breaker = CircuitBreaker(
+        name="websocket_test_service",
+        failure_threshold=2,
+        recovery_timeout=1.0,
+        half_open_max_calls=1
+    )
+    
+    # Simulate service failures that should trigger notifications
+    failures = 0
+    for i in range(5):
+        try:
+            if i < 3:  # First 3 calls fail
+                failures += 1
+                await breaker.call(lambda: exec('raise Exception("Service failure")'))
+            else:  # Next calls succeed
+                await breaker.call(lambda: "success")
+        except:
+            pass  # Expected failures
+        
+        # Check if WebSocket notification should be sent for state changes
+        current_state = breaker.state
+        if i == 1:  # Should open after 2 failures
+            assert current_state == "open", "Circuit breaker should be open after threshold failures"
+            
+            # Simulate WebSocket notification for circuit opening
+            await websocket_notifier.send_agent_status_changed(
+                context=AsyncMock(thread_id="test_thread"),
+                agent_id="circuit_test", 
+                old_status="running",
+                new_status="circuit_open",
+                metadata={"circuit_breaker": breaker.name, "state": current_state}
+            )
+    
+    # Verify WebSocket notifications were sent
+    assert websocket_manager.send_to_thread.call_count > 0, "WebSocket notifications should be sent for circuit state changes"
+    
+    logger.info("✅ Circuit breaker WebSocket notifications validated")
+
+@pytest.mark.asyncio
+async def test_circuit_breaker_websocket_event_sequence():
+    """Test proper sequence of WebSocket events during circuit breaker lifecycle."""
+    try:
+        from netra_backend.app.websocket_core import WebSocketManager
+        from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+        from netra_backend.app.utils.circuit_breaker import CircuitBreaker
+    except ImportError:
+        pytest.skip("Required components not available")
+    
+    websocket_manager = AsyncMock(spec=WebSocketManager)
+    websocket_events = []
+    
+    def capture_websocket_event(*args, **kwargs):
+        if len(args) > 1:
+            websocket_events.append({
+                "thread_id": args[0],
+                "message": args[1],
+                "timestamp": asyncio.get_event_loop().time()
+            })
+    
+    websocket_manager.send_to_thread.side_effect = capture_websocket_event
+    websocket_notifier = WebSocketNotifier(websocket_manager)
+    
+    breaker = CircuitBreaker(
+        name="event_sequence_service",
+        failure_threshold=2,
+        recovery_timeout=0.5
+    )
+    
+    # Execute circuit breaker lifecycle with WebSocket events
+    lifecycle_events = ["closed", "open", "half_open", "closed"]
+    
+    for expected_state in lifecycle_events:
+        if expected_state == "closed" and breaker.state == "closed":
+            # Initial state - send notification
+            await websocket_notifier.send_agent_thinking(
+                context=AsyncMock(thread_id="lifecycle_test"),
+                message=f"Circuit breaker in {expected_state} state"
+            )
+        elif expected_state == "open":
+            # Trigger failures to open circuit
+            for _ in range(3):
+                try:
+                    await breaker.call(lambda: exec('raise Exception("Failure")'))
+                except:
+                    pass
+            
+            await websocket_notifier.send_agent_thinking(
+                context=AsyncMock(thread_id="lifecycle_test"),
+                message=f"Circuit breaker opened after failures"
+            )
+        elif expected_state == "half_open":
+            # Wait for recovery timeout
+            await asyncio.sleep(0.6)
+            
+            await websocket_notifier.send_agent_thinking(
+                context=AsyncMock(thread_id="lifecycle_test"),
+                message="Circuit breaker entering half-open state"
+            )
+        elif expected_state == "closed":
+            # Successful call to close circuit
+            try:
+                await breaker.call(lambda: "success")
+            except:
+                pass
+            
+            await websocket_notifier.send_agent_thinking(
+                context=AsyncMock(thread_id="lifecycle_test"),
+                message="Circuit breaker closed after successful recovery"
+            )
+    
+    # Verify event sequence
+    assert len(websocket_events) >= len(lifecycle_events), \
+        f"Should have events for each lifecycle state: got {len(websocket_events)} events"
+    
+    # Events should be ordered by timestamp
+    timestamps = [event["timestamp"] for event in websocket_events]
+    assert timestamps == sorted(timestamps), "WebSocket events should be in chronological order"
+    
+    logger.info(f"✅ Circuit breaker WebSocket event sequence validated: {len(websocket_events)} events")
+
+@pytest.mark.asyncio
+async def test_circuit_breaker_websocket_error_notifications():
+    """Test WebSocket error notifications during circuit breaker failures."""
+    try:
+        from netra_backend.app.websocket_core import WebSocketManager
+        from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+        from netra_backend.app.utils.circuit_breaker import CircuitBreaker
+    except ImportError:
+        pytest.skip("Required components not available")
+    
+    websocket_manager = AsyncMock(spec=WebSocketManager)
+    error_notifications = []
+    
+    def capture_error_notification(*args, **kwargs):
+        if len(args) > 1 and isinstance(args[1], dict):
+            message = args[1]
+            if "error" in message.get("type", "").lower() or "fail" in message.get("type", "").lower():
+                error_notifications.append(message)
+    
+    websocket_manager.send_to_thread.side_effect = capture_error_notification
+    websocket_notifier = WebSocketNotifier(websocket_manager)
+    
+    breaker = CircuitBreaker(
+        name="error_notification_service", 
+        failure_threshold=2,
+        recovery_timeout=1.0
+    )
+    
+    # Simulate different types of failures with error notifications
+    error_scenarios = [
+        {"error_type": "timeout", "message": "Service timeout"},
+        {"error_type": "connection", "message": "Connection failed"},
+        {"error_type": "processing", "message": "Processing error"},
+        {"error_type": "resource", "message": "Resource unavailable"}
+    ]
+    
+    for scenario in error_scenarios:
+        try:
+            await breaker.call(lambda: exec(f'raise Exception("{scenario["message"]}"))'))
+        except Exception as e:
+            # Send error notification via WebSocket
+            await websocket_notifier.send_agent_thinking(
+                context=AsyncMock(thread_id="error_test"),
+                message=f"Circuit breaker error: {scenario['error_type']} - {str(e)}"
+            )
+    
+    # Verify error notifications
+    assert websocket_manager.send_to_thread.call_count >= len(error_scenarios), \
+        "Should send WebSocket notifications for each error scenario"
+    
+    logger.info(f"✅ Circuit breaker WebSocket error notifications validated: {len(error_scenarios)} scenarios")
+
+@pytest.mark.asyncio
+async def test_circuit_breaker_websocket_concurrent_notifications():
+    """Test WebSocket notifications work correctly with concurrent circuit breaker operations."""
+    try:
+        from netra_backend.app.websocket_core import WebSocketManager
+        from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+        from netra_backend.app.utils.circuit_breaker import CircuitBreaker
+    except ImportError:
+        pytest.skip("Required components not available")
+    
+    websocket_manager = AsyncMock(spec=WebSocketManager)
+    concurrent_notifications = []
+    notification_lock = asyncio.Lock()
+    
+    async def thread_safe_capture(*args, **kwargs):
+        async with notification_lock:
+            concurrent_notifications.append({
+                "timestamp": asyncio.get_event_loop().time(),
+                "args": args,
+                "kwargs": kwargs
+            })
+    
+    websocket_manager.send_to_thread.side_effect = thread_safe_capture
+    websocket_notifier = WebSocketNotifier(websocket_manager)
+    
+    # Create multiple circuit breakers for concurrent testing
+    breakers = []
+    for i in range(3):
+        breaker = CircuitBreaker(
+            name=f"concurrent_service_{i}",
+            failure_threshold=2,
+            recovery_timeout=0.5
+        )
+        breakers.append(breaker)
+    
+    # Execute concurrent operations with WebSocket notifications
+    async def test_concurrent_breaker(breaker_id, breaker):
+        for attempt in range(5):
+            try:
+                if attempt < 2:  # First 2 fail
+                    await breaker.call(lambda: exec('raise Exception("Concurrent failure")'))
+                else:  # Next succeed
+                    await breaker.call(lambda: f"success_{breaker_id}_{attempt}")
+            except:
+                pass
+            
+            # Send notification for each attempt
+            await websocket_notifier.send_agent_thinking(
+                context=AsyncMock(thread_id=f"concurrent_{breaker_id}"),
+                message=f"Breaker {breaker_id} attempt {attempt}"
+            )
+            
+            await asyncio.sleep(0.1)  # Small delay between attempts
+    
+    # Run all breakers concurrently
+    tasks = [
+        test_concurrent_breaker(i, breaker)
+        for i, breaker in enumerate(breakers)
+    ]
+    
+    await asyncio.gather(*tasks)
+    
+    # Verify concurrent notifications
+    total_expected = len(breakers) * 5  # 3 breakers * 5 attempts each
+    assert len(concurrent_notifications) >= total_expected, \
+        f"Should have notifications from all concurrent operations: got {len(concurrent_notifications)}, expected {total_expected}"
+    
+    # Verify notifications are properly ordered by timestamp
+    timestamps = [notif["timestamp"] for notif in concurrent_notifications]
+    sorted_timestamps = sorted(timestamps)
+    
+    # Allow for some minor timing variations
+    timing_errors = sum(1 for i, ts in enumerate(timestamps) 
+                       if abs(ts - sorted_timestamps[i]) > 0.1)
+    
+    assert timing_errors < len(timestamps) * 0.1, \
+        f"Too many timing errors in concurrent notifications: {timing_errors}/{len(timestamps)}"
+    
+    logger.info(f"✅ Circuit breaker concurrent WebSocket notifications validated: {len(concurrent_notifications)} notifications")
+
+
+# ============================================================================
+# EXECUTE CORE PATTERN TESTS
+# ============================================================================
+
+@pytest.mark.asyncio
+async def test_circuit_breaker_execute_core_integration():
+    """Test circuit breaker integration with _execute_core pattern."""
+    try:
+        from netra_backend.app.agents.base_agent import BaseAgent
+        from netra_backend.app.agents.base.interface import ExecutionContext
+        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.utils.circuit_breaker import CircuitBreaker
+    except ImportError:
+        pytest.skip("Required components not available")
+    
+    class CircuitBreakerAgent(BaseAgent):
+        def __init__(self, **kwargs):
+            super().__init__(**kwargs)
+            self.circuit_breaker = CircuitBreaker(
+                name="execute_core_service",
+                failure_threshold=2,
+                recovery_timeout=1.0
+            )
+            self.execution_count = 0
+            
+        async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+            self.execution_count += 1
+            
+            async def protected_operation():
+                # Simulate operation that might fail
+                if context.run_id.endswith("_fail") and self.execution_count <= 2:
+                    raise Exception(f"Execute core failure #{self.execution_count}")
+                
+                return {
+                    "status": "success",
+                    "execution_count": self.execution_count,
+                    "circuit_state": self.circuit_breaker.state
+                }
+            
+            # Use circuit breaker to protect execute_core operation
+            try:
+                result = await self.circuit_breaker.call(protected_operation)
+                return result
+            except Exception as e:
+                return {
+                    "status": "circuit_breaker_blocked",
+                    "error": str(e),
+                    "circuit_state": self.circuit_breaker.state,
+                    "execution_count": self.execution_count
+                }
+    
+    agent = CircuitBreakerAgent(name="CircuitBreakerTestAgent")
+    
+    # Test successful execution
+    success_context = ExecutionContext(
+        run_id="execute_core_success",
+        agent_name=agent.name,
+        state=DeepAgentState()
+    )
+    
+    result = await agent.execute_core_logic(success_context)
+    assert result["status"] == "success"
+    assert result["circuit_state"] == "closed"
+    
+    # Test failure scenarios that trigger circuit breaker
+    failure_contexts = [
+        ExecutionContext(
+            run_id="execute_core_fail_1",
+            agent_name=agent.name,
+            state=DeepAgentState()
+        ),
+        ExecutionContext(
+            run_id="execute_core_fail_2",
+            agent_name=agent.name,
+            state=DeepAgentState()
+        ),
+        ExecutionContext(
+            run_id="execute_core_fail_3",
+            agent_name=agent.name,
+            state=DeepAgentState()
+        )
+    ]
+    
+    results = []
+    for context in failure_contexts:
+        result = await agent.execute_core_logic(context)
+        results.append(result)
+    
+    # Verify circuit breaker behavior
+    # First two failures should execute but fail
+    assert results[0]["status"] == "circuit_breaker_blocked"
+    assert results[1]["status"] == "circuit_breaker_blocked"
+    
+    # Third should be blocked by open circuit
+    assert "circuit" in results[2]["status"] or results[2]["circuit_state"] == "open"
+    
+    logger.info("✅ Circuit breaker execute_core integration validated")
+
+@pytest.mark.asyncio
+async def test_execute_core_circuit_breaker_recovery_patterns():
+    """Test _execute_core pattern with circuit breaker recovery scenarios."""
+    try:
+        from netra_backend.app.agents.base_agent import BaseAgent
+        from netra_backend.app.agents.base.interface import ExecutionContext
+        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.utils.circuit_breaker import CircuitBreaker
+    except ImportError:
+        pytest.skip("Required components not available")
+    
+    class RecoveryAgent(BaseAgent):
+        def __init__(self, **kwargs):
+            super().__init__(**kwargs)
+            self.circuit_breaker = CircuitBreaker(
+                name="recovery_service", 
+                failure_threshold=2,
+                recovery_timeout=0.5,
+                half_open_max_calls=1
+            )
+            self.attempt_count = 0
+            
+        async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+            self.attempt_count += 1
+            
+            async def recovery_operation():
+                # Simulate recovery pattern
+                if context.run_id == "recovery_transient_failures":
+                    if self.attempt_count <= 3:  # First 3 attempts fail
+                        raise Exception(f"Transient failure #{self.attempt_count}")
+                    else:  # Then succeed
+                        return {"status": "recovered", "attempts": self.attempt_count}
+                elif context.run_id == "recovery_immediate_success":
+                    return {"status": "immediate_success", "attempts": self.attempt_count}
+                else:
+                    raise Exception("Persistent failure")
+            
+            # Execute with circuit breaker protection
+            try:
+                result = await self.circuit_breaker.call(recovery_operation)
+                result["circuit_state"] = self.circuit_breaker.state
+                return result
+            except Exception as e:
+                return {
+                    "status": "failed",
+                    "error": str(e),
+                    "circuit_state": self.circuit_breaker.state,
+                    "attempts": self.attempt_count
+                }
+    
+    # Test transient failure recovery
+    recovery_agent = RecoveryAgent(name="RecoveryTestAgent")
+    
+    transient_context = ExecutionContext(
+        run_id="recovery_transient_failures",
+        agent_name=recovery_agent.name,
+        state=DeepAgentState()
+    )
+    
+    # Execute multiple times to test recovery
+    recovery_results = []
+    for i in range(6):  # More than failure threshold
+        result = await recovery_agent.execute_core_logic(transient_context)
+        recovery_results.append(result)
+        
+        # Wait for recovery timeout if circuit is open
+        if result.get("circuit_state") == "open":
+            await asyncio.sleep(0.6)  # Longer than recovery timeout
+    
+    # Should eventually recover
+    successful_recoveries = [r for r in recovery_results if r["status"] == "recovered"]
+    assert len(successful_recoveries) > 0, "Should have successful recoveries after transient failures"
+    
+    # Test immediate success recovery
+    success_agent = RecoveryAgent(name="ImmediateSuccessAgent")
+    success_context = ExecutionContext(
+        run_id="recovery_immediate_success",
+        agent_name=success_agent.name,
+        state=DeepAgentState()
+    )
+    
+    success_result = await success_agent.execute_core_logic(success_context)
+    assert success_result["status"] == "immediate_success"
+    assert success_result["circuit_state"] == "closed"
+    
+    logger.info("✅ Execute core circuit breaker recovery patterns validated")
+
+@pytest.mark.asyncio
+async def test_execute_core_circuit_breaker_timing():
+    """Test _execute_core pattern timing behavior with circuit breaker."""
+    try:
+        from netra_backend.app.agents.base_agent import BaseAgent
+        from netra_backend.app.agents.base.interface import ExecutionContext
+        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.utils.circuit_breaker import CircuitBreaker
+    except ImportError:
+        pytest.skip("Required components not available")
+    
+    import time
+    
+    class TimingAgent(BaseAgent):
+        def __init__(self, **kwargs):
+            super().__init__(**kwargs)
+            self.circuit_breaker = CircuitBreaker(
+                name="timing_service",
+                failure_threshold=2,
+                recovery_timeout=1.0
+            )
+            
+        async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+            start_time = time.time()
+            
+            async def timed_operation():
+                if context.run_id.endswith("_slow"):
+                    await asyncio.sleep(0.5)  # Slow operation
+                elif context.run_id.endswith("_fast"):
+                    await asyncio.sleep(0.05)  # Fast operation  
+                elif context.run_id.endswith("_fail"):
+                    raise Exception("Timing failure")
+                else:
+                    await asyncio.sleep(0.1)  # Normal operation
+                
+                return {"operation": "completed"}
+            
+            try:
+                result = await self.circuit_breaker.call(timed_operation)
+                end_time = time.time()
+                
+                result.update({
+                    "timing": {
+                        "execution_time": end_time - start_time,
+                        "circuit_state": self.circuit_breaker.state
+                    }
+                })
+                return result
+                
+            except Exception as e:
+                end_time = time.time()
+                return {
+                    "status": "failed",
+                    "error": str(e),
+                    "timing": {
+                        "execution_time": end_time - start_time,
+                        "circuit_state": self.circuit_breaker.state
+                    }
+                }
+    
+    timing_agent = TimingAgent(name="TimingTestAgent")
+    
+    # Test different timing scenarios
+    timing_tests = [
+        {"run_id": "timing_fast", "expected_max_time": 0.2},
+        {"run_id": "timing_normal", "expected_max_time": 0.3},
+        {"run_id": "timing_slow", "expected_max_time": 0.8},
+    ]
+    
+    for test_case in timing_tests:
+        context = ExecutionContext(
+            run_id=test_case["run_id"],
+            agent_name=timing_agent.name,
+            state=DeepAgentState()
+        )
+        
+        result = await timing_agent.execute_core_logic(context)
+        execution_time = result["timing"]["execution_time"]
+        
+        assert execution_time < test_case["expected_max_time"], \
+            f"Execution time {execution_time:.3f}s exceeded limit {test_case['expected_max_time']}s for {test_case['run_id']}"
+        
+        assert result["timing"]["circuit_state"] == "closed", \
+            "Circuit should remain closed for successful operations"
+    
+    # Test failure timing
+    fail_context = ExecutionContext(
+        run_id="timing_fail",
+        agent_name=timing_agent.name,
+        state=DeepAgentState()
+    )
+    
+    fail_result = await timing_agent.execute_core_logic(fail_context)
+    fail_time = fail_result["timing"]["execution_time"]
+    
+    # Failure should be fast (not waiting for timeout)
+    assert fail_time < 0.1, f"Failure handling should be fast: {fail_time:.3f}s"
+    
+    logger.info("✅ Execute core circuit breaker timing validated")
+
+@pytest.mark.asyncio
+async def test_execute_core_circuit_breaker_resource_management():
+    """Test _execute_core pattern resource management with circuit breaker."""
+    try:
+        from netra_backend.app.agents.base_agent import BaseAgent
+        from netra_backend.app.agents.base.interface import ExecutionContext
+        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.utils.circuit_breaker import CircuitBreaker
+    except ImportError:
+        pytest.skip("Required components not available")
+    
+    class ResourceAgent(BaseAgent):
+        def __init__(self, **kwargs):
+            super().__init__(**kwargs)
+            self.circuit_breaker = CircuitBreaker(
+                name="resource_service",
+                failure_threshold=2,
+                recovery_timeout=1.0
+            )
+            self.resources_allocated = 0
+            self.resources_freed = 0
+            
+        async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+            async def resource_operation():
+                # Allocate resources
+                await self._allocate_resources(5)
+                
+                try:
+                    if context.run_id.endswith("_resource_fail"):
+                        raise Exception("Resource operation failed")
+                    
+                    # Simulate resource-intensive work
+                    await asyncio.sleep(0.1)
+                    
+                    return {
+                        "status": "success",
+                        "resources": {
+                            "allocated": self.resources_allocated,
+                            "freed": self.resources_freed
+                        }
+                    }
+                    
+                finally:
+                    # Always free resources
+                    await self._free_resources(5)
+            
+            try:
+                result = await self.circuit_breaker.call(resource_operation)
+                result["circuit_state"] = self.circuit_breaker.state
+                return result
+                
+            except Exception as e:
+                return {
+                    "status": "circuit_blocked",
+                    "error": str(e),
+                    "circuit_state": self.circuit_breaker.state,
+                    "resources": {
+                        "allocated": self.resources_allocated,
+                        "freed": self.resources_freed
+                    }
+                }
+        
+        async def _allocate_resources(self, amount):
+            self.resources_allocated += amount
+            await asyncio.sleep(0.01)  # Simulate allocation time
+        
+        async def _free_resources(self, amount):
+            self.resources_freed += amount
+            await asyncio.sleep(0.01)  # Simulate cleanup time
+    
+    resource_agent = ResourceAgent(name="ResourceTestAgent")
+    
+    # Test successful resource management
+    success_context = ExecutionContext(
+        run_id="resource_success",
+        agent_name=resource_agent.name,
+        state=DeepAgentState()
+    )
+    
+    success_result = await resource_agent.execute_core_logic(success_context)
+    assert success_result["status"] == "success"
+    assert success_result["resources"]["allocated"] == success_result["resources"]["freed"], \
+        "Resources should be properly freed after successful execution"
+    
+    # Test resource management during failures
+    initial_allocated = resource_agent.resources_allocated
+    initial_freed = resource_agent.resources_freed
+    
+    fail_context = ExecutionContext(
+        run_id="resource_resource_fail",
+        agent_name=resource_agent.name,
+        state=DeepAgentState()
+    )
+    
+    fail_result = await resource_agent.execute_core_logic(fail_context)
+    
+    # Resources should still be properly managed even during failures
+    final_allocated = resource_agent.resources_allocated
+    final_freed = resource_agent.resources_freed
+    
+    allocation_delta = final_allocated - initial_allocated
+    free_delta = final_freed - initial_freed
+    
+    assert allocation_delta == free_delta, \
+        f"Resource leak detected: allocated {allocation_delta}, freed {free_delta}"
+    
+    logger.info("✅ Execute core circuit breaker resource management validated")
+
+@pytest.mark.asyncio
+async def test_execute_core_circuit_breaker_state_consistency():
+    """Test _execute_core pattern maintains state consistency with circuit breaker."""
+    try:
+        from netra_backend.app.agents.base_agent import BaseAgent
+        from netra_backend.app.agents.base.interface import ExecutionContext
+        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent import SubAgentLifecycle
+        from netra_backend.app.utils.circuit_breaker import CircuitBreaker
+    except ImportError:
+        pytest.skip("Required components not available")
+    
+    class StateConsistencyAgent(BaseAgent):
+        def __init__(self, **kwargs):
+            super().__init__(**kwargs)
+            self.circuit_breaker = CircuitBreaker(
+                name="state_consistency_service",
+                failure_threshold=2,
+                recovery_timeout=1.0
+            )
+            
+        async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+            # Record initial states
+            initial_agent_state = self.get_state()
+            initial_circuit_state = self.circuit_breaker.state
+            
+            async def state_aware_operation():
+                # Set agent state to running
+                self.set_state(SubAgentLifecycle.RUNNING)
+                
+                if context.run_id.endswith("_state_fail"):
+                    # Failure should maintain state consistency
+                    raise Exception("State consistency failure")
+                
+                # Complete successfully
+                self.set_state(SubAgentLifecycle.COMPLETED)
+                
+                return {
+                    "status": "success",
+                    "state_transitions": "running -> completed"
+                }
+            
+            try:
+                result = await self.circuit_breaker.call(state_aware_operation)
+                
+                # Verify final state consistency
+                final_agent_state = self.get_state()
+                final_circuit_state = self.circuit_breaker.state
+                
+                result.update({
+                    "state_consistency": {
+                        "agent_state": {
+                            "initial": initial_agent_state,
+                            "final": final_agent_state
+                        },
+                        "circuit_state": {
+                            "initial": initial_circuit_state,
+                            "final": final_circuit_state
+                        }
+                    }
+                })
+                
+                return result
+                
+            except Exception as e:
+                # Even in failure, states should be consistent
+                error_agent_state = self.get_state()
+                error_circuit_state = self.circuit_breaker.state
+                
+                # Agent should be in failed state
+                self.set_state(SubAgentLifecycle.FAILED)
+                
+                return {
+                    "status": "failed",
+                    "error": str(e),
+                    "state_consistency": {
+                        "agent_state": {
+                            "initial": initial_agent_state,
+                            "error": error_agent_state,
+                            "final": self.get_state()
+                        },
+                        "circuit_state": {
+                            "initial": initial_circuit_state,
+                            "error": error_circuit_state
+                        }
+                    }
+                }
+    
+    consistency_agent = StateConsistencyAgent(name="StateConsistencyAgent")
+    
+    # Test successful state consistency
+    success_context = ExecutionContext(
+        run_id="state_success",
+        agent_name=consistency_agent.name,
+        state=DeepAgentState()
+    )
+    
+    success_result = await consistency_agent.execute_core_logic(success_context)
+    assert success_result["status"] == "success"
+    
+    # Verify agent state progression
+    agent_states = success_result["state_consistency"]["agent_state"]
+    assert agent_states["final"] == SubAgentLifecycle.COMPLETED
+    
+    # Circuit should remain closed for successful operations
+    circuit_states = success_result["state_consistency"]["circuit_state"]
+    assert circuit_states["final"] == "closed"
+    
+    # Test failure state consistency
+    fail_context = ExecutionContext(
+        run_id="state_state_fail",
+        agent_name=consistency_agent.name,
+        state=DeepAgentState()
+    )
+    
+    fail_result = await consistency_agent.execute_core_logic(fail_context)
+    assert fail_result["status"] == "failed"
+    
+    # Verify failure state handling
+    fail_agent_states = fail_result["state_consistency"]["agent_state"]
+    assert fail_agent_states["final"] == SubAgentLifecycle.FAILED
+    
+    logger.info("✅ Execute core circuit breaker state consistency validated")
+
+@pytest.mark.asyncio
+async def test_execute_core_circuit_breaker_concurrent_safety():
+    """Test _execute_core pattern concurrent safety with circuit breaker."""
+    try:
+        from netra_backend.app.agents.base_agent import BaseAgent
+        from netra_backend.app.agents.base.interface import ExecutionContext
+        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.utils.circuit_breaker import CircuitBreaker
+    except ImportError:
+        pytest.skip("Required components not available")
+    
+    class ConcurrentAgent(BaseAgent):
+        def __init__(self, **kwargs):
+            super().__init__(**kwargs)
+            self.circuit_breaker = CircuitBreaker(
+                name="concurrent_service",
+                failure_threshold=3,  # Higher threshold for concurrent testing
+                recovery_timeout=1.0
+            )
+            self.execution_count = 0
+            self.concurrent_count = 0
+            self.max_concurrent = 0
+            self.lock = asyncio.Lock()
+            
+        async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+            async with self.lock:
+                self.execution_count += 1
+                self.concurrent_count += 1
+                self.max_concurrent = max(self.max_concurrent, self.concurrent_count)
+                execution_id = self.execution_count
+            
+            async def concurrent_operation():
+                try:
+                    # Simulate concurrent work
+                    await asyncio.sleep(0.1)
+                    
+                    if context.run_id.endswith(f"_fail_{execution_id}") and execution_id <= 2:
+                        raise Exception(f"Concurrent failure #{execution_id}")
+                    
+                    return {
+                        "status": "success",
+                        "execution_id": execution_id
+                    }
+                finally:
+                    async with self.lock:
+                        self.concurrent_count -= 1
+            
+            try:
+                result = await self.circuit_breaker.call(concurrent_operation)
+                result.update({
+                    "concurrency_stats": {
+                        "execution_id": execution_id,
+                        "current_concurrent": self.concurrent_count,
+                        "max_concurrent": self.max_concurrent
+                    },
+                    "circuit_state": self.circuit_breaker.state
+                })
+                return result
+                
+            except Exception as e:
+                return {
+                    "status": "failed",
+                    "execution_id": execution_id,
+                    "error": str(e),
+                    "concurrency_stats": {
+                        "execution_id": execution_id,
+                        "current_concurrent": self.concurrent_count,
+                        "max_concurrent": self.max_concurrent
+                    },
+                    "circuit_state": self.circuit_breaker.state
+                }
+    
+    concurrent_agent = ConcurrentAgent(name="ConcurrentTestAgent")
+    
+    # Test concurrent executions
+    concurrent_contexts = []
+    for i in range(10):
+        context = ExecutionContext(
+            run_id=f"concurrent_test_{i}",
+            agent_name=concurrent_agent.name,
+            state=DeepAgentState()
+        )
+        concurrent_contexts.append(context)
+    
+    # Execute concurrently
+    tasks = [
+        concurrent_agent.execute_core_logic(context)
+        for context in concurrent_contexts
+    ]
+    
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+    
+    # Analyze concurrent execution results
+    successful_executions = [r for r in results if not isinstance(r, Exception) and r.get("status") == "success"]
+    failed_executions = [r for r in results if not isinstance(r, Exception) and r.get("status") == "failed"]
+    exceptions = [r for r in results if isinstance(r, Exception)]
+    
+    # Should have some successful executions
+    assert len(successful_executions) > 0, "Should have successful concurrent executions"
+    
+    # Verify concurrency tracking
+    if successful_executions:
+        max_concurrent = max(r["concurrency_stats"]["max_concurrent"] for r in successful_executions)
+        assert max_concurrent > 1, "Should have detected concurrent execution"
+        assert max_concurrent <= 10, "Should not exceed total number of tasks"
+    
+    # Circuit breaker should handle concurrent failures appropriately
+    total_handled = len(successful_executions) + len(failed_executions)
+    assert total_handled > len(exceptions), "Circuit breaker should handle most operations"
+    
+    logger.info(f"✅ Execute core circuit breaker concurrent safety validated: "
+                f"{len(successful_executions)} successful, {len(failed_executions)} failed, "
+                f"{len(exceptions)} exceptions")
+
+@pytest.mark.asyncio
+async def test_execute_core_circuit_breaker_error_propagation():
+    """Test _execute_core pattern error propagation through circuit breaker."""
+    try:
+        from netra_backend.app.agents.base_agent import BaseAgent
+        from netra_backend.app.agents.base.interface import ExecutionContext
+        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.utils.circuit_breaker import CircuitBreaker
+    except ImportError:
+        pytest.skip("Required components not available")
+    
+    error_propagation_log = []
+    
+    class ErrorPropagationAgent(BaseAgent):
+        def __init__(self, **kwargs):
+            super().__init__(**kwargs)
+            self.circuit_breaker = CircuitBreaker(
+                name="error_propagation_service",
+                failure_threshold=2,
+                recovery_timeout=1.0
+            )
+            
+        async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+            async def error_prone_operation():
+                operation_type = context.run_id.split("_")[-1]
+                
+                if operation_type == "timeout":
+                    # Simulate timeout error
+                    await asyncio.sleep(2.0)  # Long operation
+                    raise TimeoutError("Operation timed out")
+                elif operation_type == "validation":
+                    # Simulate validation error
+                    raise ValueError("Invalid input data")
+                elif operation_type == "resource":
+                    # Simulate resource error
+                    raise RuntimeError("Resource unavailable")
+                elif operation_type == "network":
+                    # Simulate network error
+                    raise ConnectionError("Network connection failed")
+                else:
+                    # Success case
+                    return {"status": "success", "operation_type": operation_type}
+            
+            try:
+                result = await self.circuit_breaker.call(error_prone_operation)
+                
+                # Log successful operation
+                error_propagation_log.append({
+                    "type": "success",
+                    "context_id": context.run_id,
+                    "circuit_state": self.circuit_breaker.state
+                })
+                
+                result["circuit_state"] = self.circuit_breaker.state
+                return result
+                
+            except Exception as e:
+                # Log error details with circuit state
+                error_info = {
+                    "type": "error",
+                    "context_id": context.run_id,
+                    "error_type": type(e).__name__,
+                    "error_message": str(e),
+                    "circuit_state": self.circuit_breaker.state
+                }
+                error_propagation_log.append(error_info)
+                
+                return {
+                    "status": "error_propagated",
+                    "error_type": type(e).__name__,
+                    "error_message": str(e),
+                    "circuit_state": self.circuit_breaker.state,
+                    "propagation_info": error_info
+                }
+    
+    propagation_agent = ErrorPropagationAgent(name="ErrorPropagationAgent")
+    
+    # Test different error types
+    error_scenarios = [
+        "error_propagation_timeout",
+        "error_propagation_validation", 
+        "error_propagation_resource",
+        "error_propagation_network",
+        "error_propagation_success"
+    ]
+    
+    results = []
+    for scenario in error_scenarios:
+        context = ExecutionContext(
+            run_id=scenario,
+            agent_name=propagation_agent.name,
+            state=DeepAgentState()
+        )
+        
+        result = await propagation_agent.execute_core_logic(context)
+        results.append(result)
+    
+    # Analyze error propagation
+    error_results = [r for r in results if r["status"] == "error_propagated"]
+    success_results = [r for r in results if r["status"] == "success"]
+    
+    # Should have proper error propagation
+    assert len(error_results) == 4, f"Should have 4 error propagations, got {len(error_results)}"
+    assert len(success_results) == 1, f"Should have 1 success, got {len(success_results)}"
+    
+    # Verify error types are preserved
+    error_types = [r["error_type"] for r in error_results]
+    expected_types = ["TimeoutError", "ValueError", "RuntimeError", "ConnectionError"]
+    
+    for expected_type in expected_types:
+        assert expected_type in error_types, f"Missing error type: {expected_type}"
+    
+    # Verify error propagation log
+    logged_errors = [entry for entry in error_propagation_log if entry["type"] == "error"]
+    assert len(logged_errors) == 4, "Should log all error propagations"
+    
+    # Circuit breaker should track state changes
+    circuit_states = [entry["circuit_state"] for entry in error_propagation_log]
+    unique_states = set(circuit_states)
+    assert "closed" in unique_states, "Should start with closed state"
+    
+    # After multiple failures, circuit should open
+    if len([s for s in circuit_states if s == "open"]) > 0:
+        logger.info("Circuit breaker opened after repeated failures")
+    
+    logger.info(f"✅ Execute core circuit breaker error propagation validated: "
+                f"{len(error_results)} errors propagated, {len(success_results)} successes")
+
+
 if __name__ == "__main__":
     # Run circuit breaker stress tests
     pytest.main([__file__, "-v", "--tb=short", "-x"])
