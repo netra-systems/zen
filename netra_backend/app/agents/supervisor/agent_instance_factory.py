@@ -334,8 +334,8 @@ class AgentInstanceFactory:
                                            user_id: str,
                                            thread_id: str,
                                            run_id: str,
-                                           db_session: AsyncSession,
-                                           session_id: Optional[str] = None,
+                                           db_session: Optional[AsyncSession] = None,
+                                           websocket_connection_id: Optional[str] = None,
                                            metadata: Optional[Dict[str, Any]] = None) -> UserExecutionContext:
         """
         Create isolated user execution context with all required resources.
@@ -344,8 +344,8 @@ class AgentInstanceFactory:
             user_id: Unique user identifier
             thread_id: Thread identifier for WebSocket routing
             run_id: Unique run identifier for this execution
-            db_session: Request-scoped database session
-            session_id: Optional session identifier
+            db_session: Optional request-scoped database session
+            websocket_connection_id: Optional WebSocket connection ID
             metadata: Optional metadata for the context
             
         Returns:
@@ -355,14 +355,11 @@ class AgentInstanceFactory:
             ValueError: If factory not configured or invalid parameters
             RuntimeError: If context creation fails
         """
-        if not self._agent_registry or not self._websocket_bridge:
+        if not self._websocket_bridge:
             raise ValueError("Factory not configured - call configure() first")
         
         if not user_id or not thread_id or not run_id:
             raise ValueError("user_id, thread_id, and run_id are required")
-        
-        if not db_session:
-            raise ValueError("db_session is required for request isolation")
         
         start_time = time.time()
         context_id = f"{user_id}_{thread_id}_{run_id}"
@@ -370,18 +367,15 @@ class AgentInstanceFactory:
         try:
             logger.info(f"Creating user execution context: {context_id}")
             
-            # Create user execution context
-            context = UserExecutionContext(
+            # Create user execution context using the proper immutable class
+            context = UserExecutionContext.from_request(
                 user_id=user_id,
                 thread_id=thread_id,
                 run_id=run_id,
                 db_session=db_session,
-                session_id=session_id
+                websocket_connection_id=websocket_connection_id,
+                metadata=metadata or {}
             )
-            
-            # Add metadata if provided
-            if metadata:
-                context.request_metadata.update(metadata)
             
             # Create user-specific WebSocket emitter
             websocket_emitter = UserWebSocketEmitter(
@@ -390,25 +384,28 @@ class AgentInstanceFactory:
                 run_id=run_id,
                 websocket_bridge=self._websocket_bridge
             )
-            context.websocket_emitter = websocket_emitter
             
-            # Register cleanup callback for WebSocket emitter
-            context.add_cleanup_callback(websocket_emitter.cleanup)
+            # Store the emitter in a way that works with immutable context
+            # We'll need to track these separately since context is immutable
+            emitter_key = f"{context_id}_emitter"
+            self._websocket_emitters = getattr(self, '_websocket_emitters', {})
+            self._websocket_emitters[emitter_key] = websocket_emitter
             
             # Register run-thread mapping for reliable WebSocket routing
             if self._websocket_bridge:
                 try:
-                    mapping_success = await self._websocket_bridge.register_run_thread_mapping(
-                        run_id=run_id,
-                        thread_id=thread_id,
-                        metadata={
-                            'user_id': user_id,
-                            'created_at': context.created_at.isoformat(),
-                            'factory_context_id': context_id
-                        }
-                    )
-                    if not mapping_success:
-                        logger.warning(f"Failed to register run-thread mapping for {context_id}")
+                    if hasattr(self._websocket_bridge, 'register_run_thread_mapping'):
+                        mapping_success = await self._websocket_bridge.register_run_thread_mapping(
+                            run_id=run_id,
+                            thread_id=thread_id,
+                            metadata={
+                                'user_id': user_id,
+                                'created_at': context.created_at.isoformat(),
+                                'factory_context_id': context_id
+                            }
+                        )
+                        if not mapping_success:
+                            logger.warning(f"Failed to register run-thread mapping for {context_id}")
                 except Exception as e:
                     logger.error(f"Error registering run-thread mapping for {context_id}: {e}")
             

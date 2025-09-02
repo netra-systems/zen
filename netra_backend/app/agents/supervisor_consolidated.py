@@ -1,14 +1,17 @@
-"""Supervisor Agent - Golden Pattern Implementation
+"""Supervisor Agent - Split Architecture Implementation
 
-Clean supervisor agent using BaseAgent infrastructure - SSOT compliant.
-Contains ONLY supervisor-specific business logic.
+Refactored supervisor agent using new split architecture:
+- Uses AgentInstanceFactory for per-request agent instantiation
+- Passes UserExecutionContext through entire execution chain
+- Removes global singleton patterns for proper user isolation
+- Implements UserWebSocketEmitter for per-user event emission
 
-Business Value: Orchestrates all sub-agents for optimal user experience.
-BVJ: ALL segments | Customer Experience | +40% reduction in orchestration failures
+Business Value: Enables safe concurrent user operations with zero context leakage.
+BVJ: ALL segments | Platform Stability | Complete user isolation for production deployment
 """
 
 import asyncio
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.base_agent import BaseAgent
@@ -17,7 +20,22 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.utils import extract_thread_id
 from netra_backend.app.logging_config import central_logger
 
-# Business logic components only
+# New split architecture components
+from netra_backend.app.agents.supervisor.agent_instance_factory import (
+    AgentInstanceFactory, 
+    UserExecutionContext,
+    get_agent_instance_factory
+)
+from netra_backend.app.agents.supervisor.agent_class_registry import (
+    AgentClassRegistry,
+    get_agent_class_registry
+)
+from netra_backend.app.agents.supervisor.user_execution_context import (
+    UserExecutionContext as UserContext,
+    validate_user_context
+)
+
+# Legacy components for backward compatibility during transition
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.modern_execution_helpers import SupervisorExecutionHelpers
 from netra_backend.app.agents.supervisor.workflow_execution import SupervisorWorkflowExecutor
@@ -28,46 +46,58 @@ from netra_backend.app.agents.supervisor.observability_flow import get_superviso
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.state_persistence import state_persistence_service
+from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 logger = central_logger.get_logger(__name__)
 
 
 class SupervisorAgent(BaseAgent):
-    """Golden pattern supervisor agent with BaseAgent infrastructure.
+    """Split architecture supervisor agent with per-request isolation.
     
-    Contains ONLY supervisor-specific business logic - all infrastructure
-    (reliability, execution, WebSocket events) inherited from BaseAgent.
+    CRITICAL: This supervisor uses the new split architecture to ensure:
+    - Complete user isolation (no shared state between requests)
+    - Per-request agent instantiation via AgentInstanceFactory  
+    - UserExecutionContext passed through entire execution chain
+    - UserWebSocketEmitter for per-user event emission
+    
+    The supervisor coordinates agent orchestration while maintaining strict
+    isolation boundaries to prevent user data leakage in concurrent scenarios.
     """
     
     def __init__(self, 
                  llm_manager: LLMManager,
-                 websocket_bridge,
+                 websocket_bridge: AgentWebSocketBridge,
                  tool_dispatcher: ToolDispatcher,
-                 db_session_factory=None):
-        # Initialize BaseAgent with full infrastructure
+                 db_session_factory=None,
+                 user_context: Optional[UserContext] = None):
+        # Initialize BaseAgent with infrastructure (no global state)
         super().__init__(
             llm_manager=llm_manager,
             name="Supervisor",
-            description="Orchestrates sub-agents for optimal user experience",
+            description="Orchestrates sub-agents with complete user isolation",
             enable_reliability=True,      # Get circuit breaker + retry
             enable_execution_engine=True, # Get modern execution patterns
-            enable_caching=True,          # Optional caching infrastructure
+            enable_caching=False,         # Disable caching for isolation
             tool_dispatcher=tool_dispatcher
         )
         
-        # Initialize ONLY business logic components
-        self.db_session_factory = db_session_factory  # For on-demand session creation
-        self.websocket_bridge = websocket_bridge  # Legacy compatibility
+        # NEW: Store per-request user context (NO global state)
+        self.user_context = user_context  # Per-request isolation
+        self.db_session_factory = db_session_factory
+        self.websocket_bridge = websocket_bridge
         self.state_persistence = state_persistence_service
         
-        # Initialize agent registry and business logic components
-        self._init_business_components(llm_manager, tool_dispatcher, websocket_bridge)
+        # NEW: Split architecture components
+        self.agent_instance_factory = get_agent_instance_factory()
+        self.agent_class_registry = get_agent_class_registry()
         
-        # Initialize state management components (without global db_session)
-        self._init_state_management_components()
+        # Legacy components for backward compatibility during transition
+        self._init_legacy_compatibility_components(llm_manager, tool_dispatcher, websocket_bridge)
         
-        # Execution lock for supervisor coordination
+        # Per-request execution lock (not global!)
         self._execution_lock = asyncio.Lock()
+        
+        logger.info(f"SupervisorAgent initialized with user context: {user_context.user_id if user_context else 'None'}")
 
     def _init_business_components(self, llm_manager: LLMManager,
                                  tool_dispatcher: ToolDispatcher,
