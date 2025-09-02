@@ -13,15 +13,24 @@ Business Value Justification (BVJ):
 import uuid
 import asyncio
 from datetime import datetime, timezone
-from typing import Optional, Dict, Any, AsyncContextManager
+from typing import Optional, Dict, Any, AsyncContextManager, TYPE_CHECKING
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+
+# Use TYPE_CHECKING to avoid circular imports
+if TYPE_CHECKING:
+    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 
 logger = central_logger.get_logger(__name__)
+
+# Lazy import function to avoid circular imports
+def _get_user_execution_context_type():
+    """Lazy import of UserExecutionContext to avoid circular imports."""
+    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+    return UserExecutionContext
 
 
 class SessionManagerError(Exception):
@@ -52,7 +61,7 @@ class DatabaseSessionManager:
     CRITICAL: Sessions managed by this class are NEVER stored globally.
     """
     
-    def __init__(self, context: UserExecutionContext):
+    def __init__(self, context: "UserExecutionContext"):
         """Initialize session manager with user context.
         
         Args:
@@ -61,6 +70,7 @@ class DatabaseSessionManager:
         Raises:
             SessionManagerError: If context is invalid or session is missing
         """
+        UserExecutionContext = _get_user_execution_context_type()
         if not isinstance(context, UserExecutionContext):
             raise SessionManagerError(f"Invalid context type: {type(context)}")
         
@@ -323,7 +333,7 @@ class SessionScopeValidator:
         logger.debug(f"Tagged session {id(session)} with user {user_id}, run {run_id}")
     
     @staticmethod
-    def validate_session_context(session: AsyncSession, context: UserExecutionContext) -> bool:
+    def validate_session_context(session: AsyncSession, context: "UserExecutionContext") -> bool:
         """Ensure session matches user context.
         
         Args:
@@ -382,7 +392,7 @@ class SessionScopeValidator:
 
 # Utility functions for session lifecycle management
 
-async def create_session_manager(context: UserExecutionContext) -> DatabaseSessionManager:
+async def create_session_manager(context: "UserExecutionContext") -> DatabaseSessionManager:
     """Create session manager from user context.
     
     Args:
@@ -398,7 +408,7 @@ async def create_session_manager(context: UserExecutionContext) -> DatabaseSessi
 
 
 @asynccontextmanager
-async def managed_session(context: UserExecutionContext) -> AsyncContextManager[DatabaseSessionManager]:
+async def managed_session(context: "UserExecutionContext") -> AsyncContextManager[DatabaseSessionManager]:
     """Context manager for database session with automatic cleanup.
     
     Args:

@@ -1,4 +1,3 @@
-from shared.isolated_environment import get_env
 """
 Application startup management module.
 Handles initialization of logging, database connections, services, and health checks.
@@ -9,8 +8,27 @@ import os
 import sys
 import time
 from pathlib import Path
-from netra_backend.app.core.project_utils import get_project_root as _get_project_root
 from typing import Optional, Tuple
+
+# CRITICAL: Set up paths BEFORE any imports that depend on them
+def _setup_paths():
+    """Set up Python path and environment BEFORE importing anything else."""
+    try:
+        # Get the project root first
+        project_root = Path(__file__).parent.parent.parent
+        if str(project_root) not in sys.path:
+            sys.path.insert(0, str(project_root))
+    except Exception as e:
+        # Fallback to current working directory
+        if str(Path.cwd()) not in sys.path:
+            sys.path.insert(0, str(Path.cwd()))
+
+# Call this immediately before any other imports
+_setup_paths()
+
+# NOW import shared modules after paths are set
+from shared.isolated_environment import get_env
+from netra_backend.app.core.project_utils import get_project_root as _get_project_root
 
 from fastapi import FastAPI
 

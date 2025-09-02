@@ -29,6 +29,7 @@ from typing import Dict, List, Optional, Any, Callable, TYPE_CHECKING
 from enum import Enum
 
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.monitoring.websocket_notification_monitor import get_websocket_notification_monitor
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -180,6 +181,9 @@ class WebSocketBridgeFactory:
         """Initialize the WebSocket bridge factory."""
         self.config = config or WebSocketFactoryConfig.from_env()
         
+        # Initialize monitoring
+        self.notification_monitor = get_websocket_notification_monitor()
+        
         # Infrastructure components (shared, thread-safe)
         self._connection_pool: Optional['WebSocketConnectionPool'] = None
         self._agent_registry: Optional['AgentRegistry'] = None
@@ -232,7 +236,12 @@ class WebSocketBridgeFactory:
         """
         if not self._connection_pool:
             raise RuntimeError("Factory not configured - call configure() first")
-            
+        
+        # MONITORING: Track bridge initialization start
+        correlation_id = self.notification_monitor.track_bridge_initialization_started(
+            user_id, thread_id, connection_id
+        )
+        
         start_time = time.time()
         
         try:
@@ -262,11 +271,24 @@ class WebSocketBridgeFactory:
             self._factory_metrics['emitters_active'] += 1
             
             creation_time_ms = (time.time() - start_time) * 1000
+            
+            # MONITORING: Track successful bridge initialization
+            self.notification_monitor.track_bridge_initialization_success(
+                correlation_id, creation_time_ms
+            )
+            
             logger.info(f"✅ UserWebSocketEmitter created for user {user_id} in {creation_time_ms:.1f}ms")
             
             return emitter
             
         except Exception as e:
+            creation_time_ms = (time.time() - start_time) * 1000
+            
+            # MONITORING: Track failed bridge initialization
+            self.notification_monitor.track_bridge_initialization_failed(
+                correlation_id, str(e), creation_time_ms
+            )
+            
             logger.error(f"❌ Failed to create WebSocket emitter for user {user_id}: {e}")
             raise RuntimeError(f"WebSocket emitter creation failed: {e}")
             
@@ -346,6 +368,9 @@ class UserWebSocketEmitter:
         self.delivery_config = delivery_config
         self.factory = factory
         
+        # Initialize monitoring
+        self.notification_monitor = get_websocket_notification_monitor()
+        
         # Event delivery tracking
         self._pending_events: Dict[str, WebSocketEvent] = {}
         self._delivery_lock = asyncio.Lock()
@@ -363,19 +388,28 @@ class UserWebSocketEmitter:
         
     async def notify_agent_started(self, agent_name: str, run_id: str) -> None:
         """Send agent started notification to specific user."""
-        event = WebSocketEvent(
-            event_type="agent_started",
+        # MONITORING: Use monitor context for comprehensive tracking
+        async with self.notification_monitor.monitor_notification(
             user_id=self.user_context.user_id,
             thread_id=self.user_context.thread_id,
-            data={
-                "agent_name": agent_name,
-                "run_id": run_id,
-                "status": "started",
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "message": f"{agent_name} has started processing your request"
-            }
-        )
-        await self._queue_event(event)
+            run_id=run_id,
+            agent_name=agent_name,
+            connection_id=self.user_context.connection_id
+        ) as correlation_id:
+            event = WebSocketEvent(
+                event_type="agent_started",
+                user_id=self.user_context.user_id,
+                thread_id=self.user_context.thread_id,
+                data={
+                    "agent_name": agent_name,
+                    "run_id": run_id,
+                    "status": "started",
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "message": f"{agent_name} has started processing your request",
+                    "correlation_id": correlation_id
+                }
+            )
+            await self._queue_event(event)
         
     async def notify_agent_thinking(self, agent_name: str, run_id: str, thinking: str) -> None:
         """Send agent thinking notification to specific user."""
@@ -687,6 +721,9 @@ class WebSocketConnectionPool:
         self._connection_lock = asyncio.Lock()
         self._health_monitor_task: Optional[asyncio.Task] = None
         
+        # Initialize monitoring
+        self.notification_monitor = get_websocket_notification_monitor()
+        
     async def start_health_monitoring(self) -> None:
         """Start connection health monitoring."""
         if not self._health_monitor_task:
@@ -715,10 +752,20 @@ class WebSocketConnectionPool:
                 # Close existing connection
                 await self._connections[connection_key].close()
                 
+                # MONITORING: Track connection restored (replacing existing)
+                self.notification_monitor.track_connection_restored(
+                    user_id, "unknown", connection_id
+                )
+                
             self._connections[connection_key] = UserWebSocketConnection(
                 user_id=user_id,
                 connection_id=connection_id,
                 websocket=websocket
+            )
+            
+            # MONITORING: Track connection established  
+            self.notification_monitor.track_connection_restored(
+                user_id, "unknown", connection_id
             )
             
     async def remove_user_connection(self, user_id: str, connection_id: str) -> None:
@@ -729,6 +776,11 @@ class WebSocketConnectionPool:
             if connection_key in self._connections:
                 await self._connections[connection_key].close()
                 del self._connections[connection_key]
+                
+                # MONITORING: Track connection lost
+                self.notification_monitor.track_connection_lost(
+                    user_id, "unknown", connection_id, "Connection removed from pool"
+                )
                 
     async def _monitor_connections(self) -> None:
         """Monitor connection health and cleanup stale connections."""
