@@ -42,6 +42,7 @@ from netra_backend.app.core.unified_error_handler import agent_error_handler
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.config import agent_config
+from netra_backend.app.agents.utils import extract_thread_id
 
 
 class BaseSubAgent(ABC):
@@ -70,7 +71,12 @@ class BaseSubAgent(ABC):
                  name: str = "BaseSubAgent", 
                  description: str = "This is the base sub-agent.", 
                  agent_id: Optional[str] = None, 
-                 user_id: Optional[str] = None):
+                 user_id: Optional[str] = None,
+                 enable_reliability: bool = True,
+                 enable_execution_engine: bool = True,
+                 enable_caching: bool = False,
+                 tool_dispatcher: Optional[ToolDispatcher] = None,
+                 redis_manager: Optional[RedisManager] = None):
         
         # Initialize with simple single inheritance pattern
         super().__init__()
@@ -96,6 +102,31 @@ class BaseSubAgent(ABC):
         
         # Initialize timing collector
         self.timing_collector = ExecutionTimingCollector(agent_name=name)
+        
+        # Initialize core properties pattern
+        self.tool_dispatcher = tool_dispatcher
+        self.redis_manager = redis_manager
+        self.cache_ttl = 3600  # Default cache TTL
+        self.max_retries = 3   # Default retry count
+        
+        # Initialize reliability management (unified SSOT)
+        self._enable_reliability = enable_reliability
+        self._reliability_manager = None
+        self._legacy_reliability = None
+        if enable_reliability:
+            self._init_reliability_infrastructure()
+        
+        # Initialize execution engine (unified SSOT)
+        self._enable_execution_engine = enable_execution_engine
+        self._execution_engine = None
+        self._execution_monitor = None
+        if enable_execution_engine:
+            self._init_execution_infrastructure()
+        
+        # Initialize caching (optional SSOT)
+        self._enable_caching = enable_caching
+        if enable_caching and redis_manager:
+            self._init_caching_infrastructure()
 
     # === State Management Methods (from AgentStateMixin) ===
     
@@ -208,6 +239,13 @@ class BaseSubAgent(ABC):
         except Exception as e:
             self.logger.warning(f"Error cleaning up timing collector during shutdown: {e}")
         
+        # Cleanup reliability infrastructure
+        try:
+            if hasattr(self, '_reliability_manager') and self._reliability_manager:
+                self._reliability_manager.reset_health_tracking()
+        except Exception as e:
+            self.logger.warning(f"Error cleaning up reliability manager during shutdown: {e}")
+        
         # Subclasses can override to add specific shutdown logic
     
     # WebSocket Bridge Integration Methods (SSOT Pattern)
@@ -270,3 +308,218 @@ class BaseSubAgent(ABC):
     def has_websocket_context(self) -> bool:
         """Check if WebSocket bridge is available."""
         return self._websocket_adapter.has_websocket_bridge()
+    
+    # === SSOT Reliability Management Infrastructure ===
+    
+    def _init_reliability_infrastructure(self) -> None:
+        """Initialize unified reliability infrastructure (SSOT pattern)."""
+        # Modern reliability manager
+        circuit_config = CircuitBreakerConfig(
+            name=self.name,
+            failure_threshold=getattr(agent_config, 'failure_threshold', 5),
+            recovery_timeout=getattr(agent_config.timeout, 'default_timeout', 60)
+        )
+        retry_config = RetryConfig(
+            max_retries=getattr(agent_config.retry, 'max_retries', 3),
+            base_delay=getattr(agent_config.retry, 'base_delay', 1.0),
+            max_delay=getattr(agent_config.retry, 'max_delay', 30.0)
+        )
+        self._reliability_manager = ReliabilityManager(circuit_config, retry_config)
+        
+        # Legacy reliability for backward compatibility
+        legacy_circuit_config = LegacyCircuitConfig(
+            failure_threshold=getattr(agent_config, 'failure_threshold', 5),
+            recovery_timeout=getattr(agent_config.timeout, 'default_timeout', 60),
+            name=self.name
+        )
+        legacy_retry_config = LegacyRetryConfig(
+            max_retries=getattr(agent_config.retry, 'max_retries', 3),
+            base_delay=getattr(agent_config.retry, 'base_delay', 1.0),
+            max_delay=getattr(agent_config.retry, 'max_delay', 30.0)
+        )
+        self._legacy_reliability = get_reliability_wrapper(self.name, legacy_circuit_config, legacy_retry_config)
+    
+    def _init_execution_infrastructure(self) -> None:
+        """Initialize unified execution infrastructure (SSOT pattern)."""
+        self._execution_monitor = ExecutionMonitor(max_history_size=1000)
+        self._execution_engine = BaseExecutionEngine(
+            reliability_manager=self._reliability_manager,
+            monitor=self._execution_monitor
+        )
+    
+    def _init_caching_infrastructure(self) -> None:
+        """Initialize optional caching infrastructure (SSOT pattern)."""
+        # Caching infrastructure can be extended here when needed
+        self.logger.debug(f"Caching infrastructure initialized for {self.name}")
+    
+    # === SSOT Property Access Pattern ===
+    
+    @property
+    def reliability_manager(self) -> Optional[ReliabilityManager]:
+        """Get modern reliability manager (SSOT pattern)."""
+        return self._reliability_manager
+    
+    @property
+    def legacy_reliability(self):
+        """Get legacy reliability wrapper for backward compatibility."""
+        return self._legacy_reliability
+    
+    @property
+    def execution_engine(self) -> Optional[BaseExecutionEngine]:
+        """Get execution engine (SSOT pattern)."""
+        return self._execution_engine
+    
+    @property
+    def execution_monitor(self) -> Optional[ExecutionMonitor]:
+        """Get execution monitor (SSOT pattern)."""
+        return self._execution_monitor
+    
+    # === SSOT Standardized Execution Patterns ===
+    
+    async def execute_with_reliability(self, 
+                                      operation: Callable[[], Awaitable[Any]], 
+                                      operation_name: str,
+                                      fallback: Optional[Callable[[], Awaitable[Any]]] = None,
+                                      timeout: Optional[float] = None) -> Any:
+        """Execute operation with unified reliability patterns (SSOT)."""
+        if not self._legacy_reliability:
+            raise RuntimeError(f"Reliability not enabled for {self.name}")
+        
+        return await self._legacy_reliability.execute_safely(
+            operation,
+            operation_name,
+            fallback=fallback,
+            timeout=timeout or getattr(agent_config.timeout, 'default_timeout', 60)
+        )
+    
+    async def execute_modern(self, state: DeepAgentState, run_id: str, 
+                           stream_updates: bool = False) -> ExecutionResult:
+        """Execute using modern execution engine patterns (SSOT)."""
+        if not self._execution_engine:
+            raise RuntimeError(f"Modern execution engine not enabled for {self.name}")
+        
+        context = ExecutionContext(
+            run_id=run_id,
+            agent_name=self.name,
+            state=state,
+            stream_updates=stream_updates,
+            thread_id=getattr(state, 'thread_id', None),
+            user_id=getattr(state, 'user_id', None),
+            start_time=time.time(),
+            correlation_id=self.correlation_id
+        )
+        return await self._execution_engine.execute(self, context)
+    
+    # === SSOT Abstract Methods for Execution Patterns ===
+    
+    async def validate_preconditions(self, context: ExecutionContext) -> bool:
+        """Validate execution preconditions. Subclasses should override."""
+        return True
+    
+    async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+        """Execute core business logic. Subclasses must override."""
+        raise NotImplementedError("Subclasses must implement execute_core_logic")
+    
+    async def send_status_update(self, context: ExecutionContext, status: str, message: str) -> None:
+        """Send status update via WebSocket bridge."""
+        if status == "executing":
+            await self.emit_thinking(message)
+        elif status == "completed":
+            await self.emit_progress(message, is_complete=True)
+        elif status == "failed":
+            await self.emit_error(message)
+        else:
+            await self.emit_progress(message)
+    
+    # Backward compatibility for _send_update pattern
+    async def send_legacy_update(self, run_id: str, status: str, message: str, 
+                               result: Optional[Dict[str, Any]] = None) -> None:
+        """Send update in legacy format for backward compatibility."""
+        update = {"status": status, "message": message}
+        if result:
+            update["result"] = result
+        await self._send_update(run_id, update)
+    
+    # === SSOT Health Status Infrastructure ===
+    
+    def get_health_status(self) -> Dict[str, Any]:
+        """Get comprehensive agent health status (SSOT pattern)."""
+        health_status = {
+            "agent_name": self.name,
+            "state": self.state.value,
+            "websocket_available": self.has_websocket_context()
+        }
+        
+        if self._legacy_reliability:
+            health_status["legacy_reliability"] = self._legacy_reliability.get_health_status()
+        
+        if self._execution_engine:
+            health_status["modern_execution"] = self._execution_engine.get_health_status()
+        
+        if self._execution_monitor:
+            health_status["monitoring"] = self._execution_monitor.get_health_status()
+        
+        # Determine overall health
+        health_status["overall_status"] = self._determine_overall_health_status(health_status)
+        
+        return health_status
+    
+    def get_circuit_breaker_status(self) -> Dict[str, Any]:
+        """Get circuit breaker status (SSOT pattern)."""
+        if self._legacy_reliability:
+            return self._legacy_reliability.circuit_breaker.get_status()
+        return {"status": "not_available", "reason": "reliability not enabled"}
+    
+    def _determine_overall_health_status(self, health_data: Dict[str, Any]) -> str:
+        """Determine overall health status from component health data."""
+        if "legacy_reliability" in health_data:
+            legacy_status = health_data["legacy_reliability"].get("overall_health", "unknown")
+            if legacy_status != "healthy":
+                return "degraded"
+        
+        if "modern_execution" in health_data:
+            modern_status = health_data["modern_execution"].get("monitor", {}).get("status", "unknown")
+            if modern_status != "healthy":
+                return "degraded"
+        
+        return "healthy"
+    
+    # === SSOT WebSocket Update Infrastructure ===
+    
+    async def _send_update(self, run_id: str, update: Dict[str, Any]) -> None:
+        """Send update via AgentWebSocketBridge for standardized emission (SSOT pattern)."""
+        try:
+            from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
+            
+            bridge = await get_agent_websocket_bridge()
+            status = update.get('status', 'processing')
+            message = update.get('message', '')
+            
+            # Map update status to appropriate bridge notification
+            if status == 'processing':
+                await bridge.notify_agent_thinking(run_id, self.name, message)
+            elif status == 'completed' or status == 'completed_with_fallback':
+                await bridge.notify_agent_completed(run_id, self.name, 
+                                                   result=update.get('result'), 
+                                                   execution_time_ms=None)
+            else:
+                # Custom status updates
+                await bridge.notify_custom(run_id, self.name, f"agent_{status}", update)
+            
+        except Exception as e:
+            self.logger.debug(f"Failed to send WebSocket update via bridge: {e}")
+    
+    async def send_processing_update(self, run_id: str, message: str = "") -> None:
+        """Send processing status update (SSOT pattern)."""
+        await self._send_update(run_id, {"status": "processing", "message": message})
+    
+    async def send_completion_update(self, run_id: str, result: Optional[Dict[str, Any]] = None, 
+                                   fallback: bool = False) -> None:
+        """Send completion status update (SSOT pattern)."""
+        status = "completed_with_fallback" if fallback else "completed"
+        update = {"status": status, "result": result}
+        if not fallback:
+            update["message"] = "Operation completed successfully"
+        else:
+            update["message"] = "Operation completed with fallback method"
+        await self._send_update(run_id, update)
