@@ -211,7 +211,21 @@ class WebSocketBridgeFactory:
                  connection_pool: 'WebSocketConnectionPool',
                  agent_registry: 'AgentRegistry',
                  health_monitor: Any) -> None:
-        """Configure factory with infrastructure components."""
+        """Configure factory with infrastructure components.
+        
+        Args:
+            connection_pool: WebSocket connection pool for managing connections
+            agent_registry: Registry for agent operations
+            health_monitor: Health monitoring component
+            
+        Raises:
+            ValueError: If critical components are None
+        """
+        if connection_pool is None:
+            raise ValueError("Connection pool cannot be None - factory requires valid connection pool")
+        if agent_registry is None:
+            raise ValueError("Agent registry cannot be None - factory requires valid registry")
+            
         self._connection_pool = connection_pool
         self._agent_registry = agent_registry
         self._health_monitor = health_monitor
@@ -252,10 +266,27 @@ class WebSocketBridgeFactory:
                 user_id, thread_id, connection_id
             )
             
-            # Get user-specific WebSocket connection
-            connection = await self._connection_pool.get_user_connection(
-                user_id, connection_id
+            # Get user-specific WebSocket connection from pool
+            connection_info = await self._connection_pool.get_connection(
+                connection_id, user_id
             )
+            
+            # Create or get UserWebSocketConnection wrapper
+            if connection_info:
+                # Wrap the actual WebSocket in our UserWebSocketConnection
+                connection = UserWebSocketConnection(
+                    user_id=user_id,
+                    connection_id=connection_id,
+                    websocket=connection_info.websocket
+                )
+            else:
+                # If no existing connection, create a placeholder
+                # This will queue events until actual connection is established
+                connection = UserWebSocketConnection(
+                    user_id=user_id,
+                    connection_id=connection_id,
+                    websocket=None  # Will be set when client connects
+                )
             
             # Create user-specific emitter
             emitter = UserWebSocketEmitter(
@@ -824,17 +855,30 @@ class UserWebSocketConnection:
             raise ConnectionError(f"Connection closed for user {self.user_id}")
             
         try:
-            # For now, just log the event - this would be replaced with real WebSocket sending
+            # Send actual WebSocket event
+            event_data = {
+                'event_type': event.event_type,
+                'event_id': event.event_id,
+                'thread_id': event.thread_id,
+                'data': event.data,
+                'timestamp': event.timestamp.isoformat()
+            }
+            
+            # Send via actual WebSocket if available
+            if self.websocket is not None:
+                # Check if websocket has send_json method (FastAPI WebSocket)
+                if hasattr(self.websocket, 'send_json'):
+                    await self.websocket.send_json(event_data)
+                # Check if it has send method (generic WebSocket)
+                elif hasattr(self.websocket, 'send'):
+                    import json
+                    await self.websocket.send(json.dumps(event_data))
+                else:
+                    # Fallback to logging if WebSocket type is unknown
+                    logger.warning(f"WebSocket type unknown, logging event: {event.event_type}")
+                    
             logger.debug(f"📤 WebSocket event sent to user {self.user_id}: {event.event_type}")
             self.last_activity = datetime.now(timezone.utc)
-            
-            # In real implementation, would do:
-            # await self.websocket.send_json({
-            #     'event_type': event.event_type,
-            #     'event_id': event.event_id,
-            #     'data': event.data,
-            #     'timestamp': event.timestamp.isoformat()
-            # })
             
         except Exception as e:
             self._closed = True
@@ -846,7 +890,20 @@ class UserWebSocketConnection:
             return False
             
         try:
-            # For now, assume connection is healthy - this would be replaced with real ping
+            # Perform actual ping if WebSocket supports it
+            if self.websocket is not None:
+                # Check if websocket has ping method
+                if hasattr(self.websocket, 'ping'):
+                    await self.websocket.ping()
+                # Check if it's a FastAPI WebSocket (check application_state)
+                elif hasattr(self.websocket, 'application_state'):
+                    from fastapi.websockets import WebSocketState
+                    # Check if connection is still open
+                    if self.websocket.application_state == WebSocketState.CONNECTED:
+                        # Send a ping frame using send_text with empty message
+                        if hasattr(self.websocket, 'send_text'):
+                            await self.websocket.send_text("")  # Empty message as ping
+            
             self.last_activity = datetime.now(timezone.utc)
             return True
         except Exception:
