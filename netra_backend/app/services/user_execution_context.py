@@ -575,7 +575,7 @@ class UserExecutionContext:
             'parent_request_id': self.parent_request_id,
             'has_db_session': self.db_session is not None,
             'has_websocket': self.websocket_client_id is not None,
-            'audit_metadata': self.audit_metadata.copy(),
+            'audit_metadata': copy.deepcopy(self.audit_metadata),
             'context_age_seconds': (datetime.now(timezone.utc) - self.created_at).total_seconds()
         }
     

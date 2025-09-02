@@ -1,6 +1,7 @@
 """Agent registry and management for supervisor."""
 
 import asyncio
+import time
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type
 
 if TYPE_CHECKING:
@@ -8,6 +9,10 @@ if TYPE_CHECKING:
     from netra_backend.app.llm.llm_manager import LLMManager
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
     from netra_backend.app.websocket_core.manager import WebSocketManager
+    from netra_backend.app.services.factory_adapter import FactoryAdapter
+    from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
+    from netra_backend.app.agents.state import DeepAgentState
+    from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import (
     ActionsToMeetGoalsSubAgent,
 )
@@ -701,3 +706,209 @@ class AgentRegistry:
                    f"{len(migration_status['migration_errors'])} errors")
         
         return migration_status
+    
+    # === Factory Pattern Integration Methods ===
+    
+    def configure_factory_adapter(self, factory_adapter: 'FactoryAdapter') -> None:
+        """Configure registry to work with FactoryAdapter for seamless migration.
+        
+        Args:
+            factory_adapter: FactoryAdapter instance for migration support
+        """
+        try:
+            self._factory_adapter = factory_adapter
+            logger.info("✅ AgentRegistry configured with FactoryAdapter for seamless migration")
+        except Exception as e:
+            logger.error(f"Failed to configure FactoryAdapter: {e}")
+            raise RuntimeError(f"FactoryAdapter configuration failed: {e}")
+    
+    def get_factory_compatible_execution_engine(self, 
+                                               user_context: Optional['UserExecutionContext'] = None,
+                                               **legacy_kwargs) -> 'ExecutionEngine':
+        """Get execution engine compatible with factory patterns.
+        
+        This method provides a bridge for existing code to get execution engines
+        that work with both legacy and factory patterns.
+        
+        Args:
+            user_context: Optional UserExecutionContext for factory pattern
+            **legacy_kwargs: Legacy parameters for backward compatibility
+            
+        Returns:
+            ExecutionEngine: Engine instance compatible with factory patterns
+        """
+        try:
+            # If we have a factory adapter, use it to get the appropriate engine
+            if hasattr(self, '_factory_adapter') and self._factory_adapter:
+                request_context = None
+                if user_context:
+                    request_context = {
+                        'user_id': user_context.user_id,
+                        'request_id': user_context.run_id,
+                        'thread_id': user_context.thread_id,
+                        'registry': self,
+                        'websocket_bridge': self.websocket_bridge
+                    }
+                
+                # Use factory adapter to get appropriate engine
+                return self._factory_adapter.get_execution_engine(
+                    request_context=request_context,
+                    **legacy_kwargs
+                )
+            else:
+                # Create legacy execution engine
+                from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+                return ExecutionEngine(self, self.websocket_bridge, user_context)
+                
+        except Exception as e:
+            logger.error(f"Failed to get factory-compatible execution engine: {e}")
+            # Fallback to direct creation
+            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            return ExecutionEngine(self, self.websocket_bridge, user_context)
+    
+    def create_user_execution_context(self, 
+                                    user_id: str, 
+                                    thread_id: str,
+                                    run_id: Optional[str] = None,
+                                    session_id: Optional[str] = None) -> 'UserExecutionContext':
+        """Create a UserExecutionContext for factory pattern migration.
+        
+        Args:
+            user_id: Unique user identifier
+            thread_id: Thread identifier for WebSocket routing
+            run_id: Optional run identifier
+            session_id: Optional session identifier
+            
+        Returns:
+            UserExecutionContext: Context for user-isolated execution
+        """
+        try:
+            from netra_backend.app.agents.supervisor.execution_factory import UserExecutionContext
+            import uuid
+            
+            if not run_id:
+                run_id = f"run_{user_id}_{int(time.time() * 1000)}"
+            
+            context = UserExecutionContext(
+                user_id=user_id,
+                request_id=run_id,
+                thread_id=thread_id,
+                session_id=session_id
+            )
+            
+            logger.debug(f"Created UserExecutionContext for user {user_id}")
+            return context
+            
+        except ImportError as e:
+            logger.error(f"UserExecutionContext not available: {e}")
+            raise ImportError("Factory patterns not available - ensure execution_factory.py is present")
+        except Exception as e:
+            logger.error(f"Failed to create UserExecutionContext: {e}")
+            raise ValueError(f"UserExecutionContext creation failed: {e}")
+    
+    async def execute_with_user_isolation(self, 
+                                        agent_name: str,
+                                        user_id: str,
+                                        thread_id: str,
+                                        state: 'DeepAgentState',
+                                        run_id: Optional[str] = None) -> 'AgentExecutionResult':
+        """Execute agent with complete user isolation using factory patterns.
+        
+        This method provides a high-level interface for executing agents with
+        complete user isolation, automatically handling context creation and cleanup.
+        
+        Args:
+            agent_name: Name of the agent to execute
+            user_id: Unique user identifier
+            thread_id: Thread identifier for WebSocket routing
+            state: Agent state containing user message, context, etc.
+            run_id: Optional run identifier
+            
+        Returns:
+            AgentExecutionResult: Results of agent execution
+        """
+        try:
+            # Create user execution context
+            user_context = self.create_user_execution_context(
+                user_id=user_id,
+                thread_id=thread_id,
+                run_id=run_id
+            )
+            
+            # Get factory-compatible execution engine
+            execution_engine = self.get_factory_compatible_execution_engine(
+                user_context=user_context
+            )
+            
+            # Create execution context
+            from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+            from datetime import datetime, timezone
+            
+            execution_context = AgentExecutionContext(
+                run_id=user_context.request_id,
+                agent_name=agent_name,
+                state=state,
+                user_id=user_id,
+                thread_id=thread_id,
+                started_at=datetime.now(timezone.utc)
+            )
+            
+            # Execute agent with isolation
+            result = await execution_engine.execute_agent(execution_context, state)
+            
+            logger.info(f"✅ Agent {agent_name} executed with user isolation for user {user_id}")
+            return result
+            
+        except Exception as e:
+            logger.error(f"Failed to execute agent {agent_name} with user isolation: {e}")
+            raise RuntimeError(f"User-isolated agent execution failed: {e}")
+        finally:
+            # Clean up user context if it was created
+            if 'user_context' in locals():
+                try:
+                    await user_context.cleanup()
+                except Exception as cleanup_error:
+                    logger.warning(f"User context cleanup failed: {cleanup_error}")
+    
+    def get_factory_integration_status(self) -> Dict[str, Any]:
+        """Get status of factory pattern integration.
+        
+        Returns:
+            Dictionary with integration status and recommendations
+        """
+        from datetime import datetime, timezone
+        
+        status = {
+            'factory_adapter_configured': hasattr(self, '_factory_adapter') and self._factory_adapter is not None,
+            'infrastructure_registry_available': self._agent_class_registry is not None,
+            'websocket_bridge_available': self.websocket_bridge is not None,
+            'agents_count': len(self.agents),
+            'integration_features': {
+                'user_execution_context': True,  # Always available through import
+                'factory_compatible_engine': True,
+                'user_isolated_execution': True
+            },
+            'migration_recommendations': [],
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+        # Provide recommendations
+        if not status['factory_adapter_configured']:
+            status['migration_recommendations'].append(
+                "Configure FactoryAdapter with configure_factory_adapter() for seamless migration"
+            )
+        
+        if not status['infrastructure_registry_available']:
+            status['migration_recommendations'].append(
+                "Infrastructure registry not available - some factory features may be limited"
+            )
+        
+        if status['factory_adapter_configured'] and status['infrastructure_registry_available']:
+            status['migration_recommendations'].extend([
+                "Factory pattern integration is ready",
+                "Use execute_with_user_isolation() for user-isolated agent execution",
+                "Consider migrating existing code to factory patterns",
+                "Use get_factory_compatible_execution_engine() for gradual migration"
+            ])
+        
+        return status

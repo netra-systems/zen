@@ -95,19 +95,26 @@ async def test_basic_agent_instance_factory():
     
     assert context.user_id == "test_user"
     assert context.db_session == mock_session
-    assert context.websocket_emitter is not None
+    
+    # Check that WebSocket emitter is stored in factory
+    emitter_key = f"test_user_test_thread_test_run_emitter"
+    assert hasattr(factory, '_websocket_emitters')
+    assert emitter_key in factory._websocket_emitters
     
     # Test agent creation
     agent = await factory.create_agent_instance("test_agent", context)
     assert agent is not None
     
-    # Test cleanup
+    # Test cleanup (the context is immutable, so we check factory state)
     await factory.cleanup_user_context(context)
-    assert context._is_cleaned
+    
+    # Verify context was removed from active contexts
+    context_id = f"test_user_test_thread_test_run"
+    assert context_id not in factory._active_contexts
 
 
 if __name__ == "__main__":
     asyncio.run(test_agent_class_registry_basic())
     asyncio.run(test_user_execution_context_validation())
     asyncio.run(test_basic_agent_instance_factory())
-    print("✅ All simple integration tests passed!")
+    print("All simple integration tests passed!")
