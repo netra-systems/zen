@@ -1233,18 +1233,18 @@ CMD ["npm", "start"]
         Returns:
             True if all tests pass, False otherwise
         """
+        # Determine environment based on project ID (before try block so it's always defined)
+        if self.project_id == "netra-production":
+            environment = "production"
+        elif self.project_id == "netra-staging":
+            environment = "staging"
+        else:
+            environment = "development"
+            
         try:
             # Import the test module
             sys.path.insert(0, str(self.project_root))
             from tests.post_deployment.test_auth_integration import PostDeploymentAuthTest
-            
-            # Determine environment based on project ID
-            if self.project_id == "netra-production":
-                environment = "production"
-            elif self.project_id == "netra-staging":
-                environment = "staging"
-            else:
-                environment = "development"
             
             print(f"\nTesting {environment} environment...")
             
