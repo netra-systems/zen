@@ -1,6 +1,7 @@
-from typing import TYPE_CHECKING, Annotated, AsyncGenerator, Optional
+from typing import TYPE_CHECKING, Annotated, AsyncGenerator, Optional, Union, Dict, Any
 from contextlib import asynccontextmanager
 import uuid
+import time
 
 from fastapi import Depends, Request, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -390,3 +391,483 @@ async def get_isolated_message_handler_service(user_id: str,
             status_code=500,
             detail=f"Failed to create isolated message handler: {str(e)}"
         )
+
+
+# === Factory Pattern Dependencies ===
+
+def get_execution_engine_factory(request: Request) -> ExecutionEngineFactory:
+    """Get ExecutionEngineFactory from app state.
+    
+    The factory should be initialized during app startup and configured
+    with infrastructure components (agent_registry, websocket_bridge_factory, db_pool).
+    
+    Returns:
+        ExecutionEngineFactory: Configured factory for creating isolated execution engines
+        
+    Raises:
+        HTTPException: If factory not configured
+    """
+    try:
+        factory = getattr(request.app.state, 'execution_engine_factory', None)
+        if not factory:
+            logger.error("ExecutionEngineFactory not found in app state - ensure it's configured during startup")
+            raise HTTPException(
+                status_code=500,
+                detail="ExecutionEngineFactory not configured"
+            )
+        
+        return factory
+        
+    except Exception as e:
+        logger.error(f"Failed to get ExecutionEngineFactory: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"ExecutionEngineFactory error: {str(e)}"
+        )
+
+
+def get_websocket_bridge_factory(request: Request) -> WebSocketBridgeFactory:
+    """Get WebSocketBridgeFactory from app state.
+    
+    The factory should be initialized during app startup and configured
+    with infrastructure components (connection_pool, agent_registry, health_monitor).
+    
+    Returns:
+        WebSocketBridgeFactory: Configured factory for creating isolated WebSocket emitters
+        
+    Raises:
+        HTTPException: If factory not configured
+    """
+    try:
+        factory = getattr(request.app.state, 'websocket_bridge_factory', None)
+        if not factory:
+            logger.error("WebSocketBridgeFactory not found in app state - ensure it's configured during startup")
+            raise HTTPException(
+                status_code=500,
+                detail="WebSocketBridgeFactory not configured"
+            )
+        
+        return factory
+        
+    except Exception as e:
+        logger.error(f"Failed to get WebSocketBridgeFactory: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"WebSocketBridgeFactory error: {str(e)}"
+        )
+
+
+def get_factory_adapter(request: Request) -> FactoryAdapter:
+    """Get FactoryAdapter from app state.
+    
+    The adapter should be initialized during app startup with both factories
+    and configured for backward compatibility and gradual migration.
+    
+    Returns:
+        FactoryAdapter: Configured adapter for factory pattern migration
+        
+    Raises:
+        HTTPException: If adapter not configured
+    """
+    try:
+        adapter = getattr(request.app.state, 'factory_adapter', None)
+        if not adapter:
+            logger.error("FactoryAdapter not found in app state - ensure it's configured during startup")
+            raise HTTPException(
+                status_code=500,
+                detail="FactoryAdapter not configured"
+            )
+        
+        return adapter
+        
+    except Exception as e:
+        logger.error(f"Failed to get FactoryAdapter: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"FactoryAdapter error: {str(e)}"
+        )
+
+
+async def get_factory_execution_engine(
+    user_id: str,
+    thread_id: str,
+    request_id: Optional[str] = None,
+    session_id: Optional[str] = None,
+    request: Request = None
+) -> "IsolatedExecutionEngine":
+    """Create isolated ExecutionEngine using factory pattern.
+    
+    This dependency provides a completely isolated execution engine for each request,
+    eliminating shared state issues and enabling concurrent user support.
+    
+    Args:
+        user_id: Unique user identifier
+        thread_id: Thread identifier for WebSocket routing
+        request_id: Optional request identifier (auto-generated if not provided)
+        session_id: Optional session identifier
+        request: FastAPI request object
+        
+    Returns:
+        IsolatedExecutionEngine: User-isolated execution engine
+        
+    Raises:
+        HTTPException: If engine creation fails
+    """
+    try:
+        # Get factory from app state
+        factory = get_execution_engine_factory(request)
+        
+        # Create user execution context
+        if not request_id:
+            request_id = str(uuid.uuid4())
+        
+        user_context = FactoryUserExecutionContext(
+            user_id=user_id,
+            request_id=request_id,
+            thread_id=thread_id,
+            session_id=session_id
+        )
+        
+        # Create isolated execution engine
+        engine = await factory.create_execution_engine(user_context)
+        
+        logger.info(f"✅ Created isolated ExecutionEngine for user {user_id}")
+        return engine
+        
+    except Exception as e:
+        logger.error(f"Failed to create factory execution engine: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Factory execution engine creation failed: {str(e)}"
+        )
+
+
+async def get_factory_websocket_emitter(
+    user_id: str,
+    thread_id: str,
+    connection_id: Optional[str] = None,
+    request: Request = None
+) -> "UserWebSocketEmitter":
+    """Create isolated WebSocket emitter using factory pattern.
+    
+    This dependency provides a completely isolated WebSocket emitter for each user,
+    eliminating cross-user event leakage and ensuring reliable notifications.
+    
+    Args:
+        user_id: Unique user identifier
+        thread_id: Thread identifier for WebSocket routing
+        connection_id: Optional WebSocket connection identifier
+        request: FastAPI request object
+        
+    Returns:
+        UserWebSocketEmitter: User-isolated WebSocket emitter
+        
+    Raises:
+        HTTPException: If emitter creation fails
+    """
+    try:
+        # Get factory from app state
+        factory = get_websocket_bridge_factory(request)
+        
+        # Generate connection ID if not provided
+        if not connection_id:
+            connection_id = f"conn_{user_id}_{int(time.time() * 1000)}"
+        
+        # Create isolated WebSocket emitter
+        emitter = await factory.create_user_emitter(user_id, thread_id, connection_id)
+        
+        logger.info(f"✅ Created isolated WebSocketEmitter for user {user_id}")
+        return emitter
+        
+    except Exception as e:
+        logger.error(f"Failed to create factory WebSocket emitter: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Factory WebSocket emitter creation failed: {str(e)}"
+        )
+
+
+async def get_adaptive_execution_engine(
+    user_id: str,
+    thread_id: str,
+    request_id: Optional[str] = None,
+    route_path: Optional[str] = None,
+    request: Request = None
+) -> "Union[IsolatedExecutionEngine, ExecutionEngine]":
+    """Get execution engine using adaptive factory pattern.
+    
+    This dependency uses the FactoryAdapter to provide either factory-based
+    or legacy execution engines based on migration configuration and feature flags.
+    
+    Args:
+        user_id: Unique user identifier
+        thread_id: Thread identifier
+        request_id: Optional request identifier
+        route_path: Optional route path for route-specific feature flags
+        request: FastAPI request object
+        
+    Returns:
+        Either IsolatedExecutionEngine (factory) or ExecutionEngine (legacy)
+    """
+    try:
+        # Get factory adapter
+        adapter = get_factory_adapter(request)
+        
+        # Create request context for factory pattern
+        request_context = create_request_context(
+            user_id=user_id,
+            thread_id=thread_id,
+            request_id=request_id
+        )
+        
+        # Get appropriate engine through adapter
+        engine = await adapter.get_execution_engine(
+            request_context=request_context,
+            route_path=route_path
+        )
+        
+        logger.debug(f"Provided execution engine via adapter for user {user_id}")
+        return engine
+        
+    except Exception as e:
+        logger.error(f"Failed to get adaptive execution engine: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Adaptive execution engine error: {str(e)}"
+        )
+
+
+async def get_adaptive_websocket_bridge(
+    user_id: str,
+    thread_id: str,
+    connection_id: Optional[str] = None,
+    route_path: Optional[str] = None,
+    request: Request = None
+) -> "Union[UserWebSocketEmitter, AgentWebSocketBridge]":
+    """Get WebSocket bridge using adaptive factory pattern.
+    
+    This dependency uses the FactoryAdapter to provide either factory-based
+    or legacy WebSocket bridges based on migration configuration.
+    
+    Args:
+        user_id: Unique user identifier
+        thread_id: Thread identifier
+        connection_id: Optional WebSocket connection identifier
+        route_path: Optional route path for route-specific feature flags
+        request: FastAPI request object
+        
+    Returns:
+        Either UserWebSocketEmitter (factory) or AgentWebSocketBridge (legacy)
+    """
+    try:
+        # Get factory adapter
+        adapter = get_factory_adapter(request)
+        
+        # Create request context for factory pattern
+        request_context = create_request_context(
+            user_id=user_id,
+            thread_id=thread_id,
+            connection_id=connection_id
+        )
+        
+        # Get appropriate bridge through adapter
+        bridge = await adapter.get_websocket_bridge(
+            request_context=request_context,
+            route_path=route_path
+        )
+        
+        logger.debug(f"Provided WebSocket bridge via adapter for user {user_id}")
+        return bridge
+        
+    except Exception as e:
+        logger.error(f"Failed to get adaptive WebSocket bridge: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Adaptive WebSocket bridge error: {str(e)}"
+        )
+
+
+# Type aliases for dependency injection
+ExecutionEngineFactoryDep = Annotated[ExecutionEngineFactory, Depends(get_execution_engine_factory)]
+WebSocketBridgeFactoryDep = Annotated[WebSocketBridgeFactory, Depends(get_websocket_bridge_factory)]
+FactoryAdapterDep = Annotated[FactoryAdapter, Depends(get_factory_adapter)]
+
+
+# Utility function for route-specific factory configuration
+async def configure_route_factory_settings(
+    route_path: str,
+    enable_factory: bool,
+    request: Request
+) -> Dict[str, Any]:
+    """Configure factory settings for a specific route.
+    
+    This utility function enables/disables factory patterns for specific routes,
+    supporting gradual migration and A/B testing.
+    
+    Args:
+        route_path: Route path to configure
+        enable_factory: Whether to enable factory pattern for this route
+        request: FastAPI request object
+        
+    Returns:
+        Dictionary with configuration status
+    """
+    try:
+        adapter = get_factory_adapter(request)
+        
+        if enable_factory:
+            await adapter.enable_factory_for_route(route_path)
+        else:
+            await adapter.disable_factory_for_route(route_path)
+        
+        status = adapter.get_migration_status()
+        
+        logger.info(f"Configured factory pattern for route {route_path}: {'enabled' if enable_factory else 'disabled'}")
+        return {
+            'route_path': route_path,
+            'factory_enabled': enable_factory,
+            'migration_status': status,
+            'success': True
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to configure route factory settings: {e}")
+        return {
+            'route_path': route_path,
+            'factory_enabled': enable_factory,
+            'error': str(e),
+            'success': False
+        }
+
+
+# Helper function for startup configuration
+def configure_factory_dependencies(app) -> None:
+    """Configure factory pattern dependencies during app startup.
+    
+    This function should be called during FastAPI startup to initialize
+    all factory pattern components and configure them properly.
+    
+    Args:
+        app: FastAPI application instance
+    """
+    try:
+        logger.info("🏭 Configuring factory pattern dependencies...")
+        
+        # Create ExecutionEngineFactory
+        execution_factory_config = ExecutionFactoryConfig.from_env()
+        execution_factory = ExecutionEngineFactory(execution_factory_config)
+        
+        # Create WebSocketBridgeFactory
+        websocket_factory_config = WebSocketFactoryConfig.from_env()
+        websocket_factory = WebSocketBridgeFactory(websocket_factory_config)
+        
+        # Create WebSocket connection pool
+        connection_pool = WebSocketConnectionPool()
+        
+        # Configure WebSocket factory
+        websocket_factory.configure(
+            connection_pool=connection_pool,
+            agent_registry=getattr(app.state, 'agent_registry', None),
+            health_monitor=None  # Can be configured later if needed
+        )
+        
+        # Configure execution factory
+        execution_factory.configure(
+            agent_registry=getattr(app.state, 'agent_registry', None),
+            websocket_bridge_factory=websocket_factory,
+            db_connection_pool=getattr(app.state, 'db_pool', None)
+        )
+        
+        # Create FactoryAdapter
+        adapter_config = AdapterConfig.from_env()
+        factory_adapter = FactoryAdapter(execution_factory, websocket_factory, adapter_config)
+        
+        # Store in app state
+        app.state.execution_engine_factory = execution_factory
+        app.state.websocket_bridge_factory = websocket_factory
+        app.state.websocket_connection_pool = connection_pool
+        app.state.factory_adapter = factory_adapter
+        
+        # Configure agent registry to work with factory adapter
+        if hasattr(app.state, 'agent_registry'):
+            try:
+                app.state.agent_registry.configure_factory_adapter(factory_adapter)
+                logger.info("✅ Configured AgentRegistry with FactoryAdapter")
+            except Exception as e:
+                logger.warning(f"Failed to configure AgentRegistry with FactoryAdapter: {e}")
+        
+        logger.info("✅ Factory pattern dependencies configured successfully")
+        
+    except Exception as e:
+        logger.error(f"❌ Failed to configure factory pattern dependencies: {e}")
+        raise RuntimeError(f"Factory dependency configuration failed: {e}")
+
+
+# Health check function for factory patterns
+def get_factory_health_status(request: Request) -> Dict[str, Any]:
+    """Get health status of all factory pattern components.
+    
+    Args:
+        request: FastAPI request object
+        
+    Returns:
+        Dictionary with health status of all factory components
+    """
+    try:
+        status = {
+            'execution_factory': {'configured': False, 'healthy': False},
+            'websocket_factory': {'configured': False, 'healthy': False},
+            'factory_adapter': {'configured': False, 'healthy': False},
+            'overall_health': 'unknown'
+        }
+        
+        # Check ExecutionEngineFactory
+        try:
+            factory = get_execution_engine_factory(request)
+            status['execution_factory']['configured'] = True
+            metrics = factory.get_factory_metrics()
+            status['execution_factory']['healthy'] = True
+            status['execution_factory']['metrics'] = metrics
+        except Exception as e:
+            status['execution_factory']['error'] = str(e)
+        
+        # Check WebSocketBridgeFactory
+        try:
+            factory = get_websocket_bridge_factory(request)
+            status['websocket_factory']['configured'] = True
+            metrics = factory.get_factory_metrics()
+            status['websocket_factory']['healthy'] = True
+            status['websocket_factory']['metrics'] = metrics
+        except Exception as e:
+            status['websocket_factory']['error'] = str(e)
+        
+        # Check FactoryAdapter
+        try:
+            adapter = get_factory_adapter(request)
+            status['factory_adapter']['configured'] = True
+            migration_status = adapter.get_migration_status()
+            status['factory_adapter']['healthy'] = True
+            status['factory_adapter']['migration_status'] = migration_status
+        except Exception as e:
+            status['factory_adapter']['error'] = str(e)
+        
+        # Determine overall health
+        all_configured = all(status[component]['configured'] for component in 
+                           ['execution_factory', 'websocket_factory', 'factory_adapter'])
+        all_healthy = all(status[component]['healthy'] for component in 
+                        ['execution_factory', 'websocket_factory', 'factory_adapter'])
+        
+        if all_configured and all_healthy:
+            status['overall_health'] = 'healthy'
+        elif all_configured:
+            status['overall_health'] = 'degraded'
+        else:
+            status['overall_health'] = 'unhealthy'
+        
+        return status
+        
+    except Exception as e:
+        return {
+            'overall_health': 'error',
+            'error': str(e)
+        }
