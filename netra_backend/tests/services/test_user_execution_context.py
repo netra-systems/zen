@@ -471,6 +471,9 @@ class TestUserExecutionContextIsolation:
     
     def test_duplicate_id_warning(self, caplog):
         """Test warning for duplicate ID values."""
+        import logging
+        caplog.set_level(logging.WARNING, logger="netra_backend.app.services.user_execution_context")
+        
         duplicate_id = "same_id_123"
         context = UserExecutionContext(
             user_id=duplicate_id,
@@ -680,6 +683,9 @@ class TestManagedUserContext:
     @pytest.mark.asyncio
     async def test_managed_context_session_close_error(self, caplog):
         """Test managed context handles session close errors."""
+        import logging
+        caplog.set_level(logging.WARNING, logger="netra_backend.app.services.user_execution_context")
+        
         mock_session = AsyncMock()
         mock_session.close.side_effect = Exception("Close failed")
         
@@ -802,11 +808,14 @@ class TestUserExecutionContextIntegration:
     
     def test_context_equality_and_hashing(self):
         """Test context comparison and hashing behavior."""
+        request_id1 = str(uuid.uuid4())
+        request_id2 = str(uuid.uuid4())
+        
         context1 = UserExecutionContext(
             user_id="user_12345",
             thread_id="thread_67890",
             run_id="run_abcdef123456",
-            request_id="same-request-id-1234-5678"
+            request_id=request_id1
         )
         
         # Same IDs, different object
@@ -814,7 +823,7 @@ class TestUserExecutionContextIntegration:
             user_id="user_12345",
             thread_id="thread_67890",
             run_id="run_abcdef123456",
-            request_id="same-request-id-1234-5678"
+            request_id=request_id1
         )
         
         # Different request ID
@@ -822,7 +831,7 @@ class TestUserExecutionContextIntegration:
             user_id="user_12345",
             thread_id="thread_67890",
             run_id="run_abcdef123456",
-            request_id="different-request-id-1234"
+            request_id=request_id2
         )
         
         # Test equality (based on all fields due to dataclass)
