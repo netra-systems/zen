@@ -209,7 +209,7 @@ class TestEnvironmentManager:
             if not self.env.get("DATABASE_URL"):
                 # Set real PostgreSQL URL for testing
                 test_postgres_host = self.env.get("TEST_POSTGRES_HOST", "localhost")
-                test_postgres_port = self.env.get("TEST_POSTGRES_PORT", "5434")
+                test_postgres_port = self.env.get("TEST_POSTGRES_PORT", "5433")
                 test_postgres_user = self.env.get("TEST_POSTGRES_USER", "test_user")
                 test_postgres_password = self.env.get("TEST_POSTGRES_PASSWORD", "test_pass")
                 test_postgres_db = self.env.get("TEST_POSTGRES_DB", "netra_test")

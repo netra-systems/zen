@@ -8,10 +8,28 @@
 -- CREATE DATABASE netra_test_auth;
 -- CREATE DATABASE netra_test_backend; 
 
+-- Create netra role if it doesn't exist (for compatibility with development and e2e tests)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'netra') THEN
+        CREATE ROLE netra WITH LOGIN SUPERUSER PASSWORD 'netra123';
+    END IF;
+END
+$$;
+
 -- Grant permissions to test user
 GRANT ALL PRIVILEGES ON DATABASE netra_test TO test_user;
 -- GRANT ALL PRIVILEGES ON DATABASE netra_test_auth TO test_user;
 -- GRANT ALL PRIVILEGES ON DATABASE netra_test_backend TO test_user;
+
+-- Grant permissions to netra role for e2e test compatibility
+GRANT ALL PRIVILEGES ON DATABASE netra_test TO netra;
+
+-- Create netra database for backward compatibility with some e2e tests
+-- Note: This may fail if database already exists, which is okay
+\echo Creating netra database for e2e compatibility...
+CREATE DATABASE netra WITH OWNER netra;
+GRANT ALL PRIVILEGES ON DATABASE netra TO netra;
 
 -- Connect to main test database
 \c netra_test;
@@ -25,6 +43,12 @@ CREATE SCHEMA IF NOT EXISTS analytics;
 GRANT ALL ON SCHEMA auth TO test_user;
 GRANT ALL ON SCHEMA backend TO test_user; 
 GRANT ALL ON SCHEMA analytics TO test_user;
+
+-- Grant schema permissions to netra role for e2e test compatibility
+GRANT ALL ON SCHEMA auth TO netra;
+GRANT ALL ON SCHEMA backend TO netra; 
+GRANT ALL ON SCHEMA analytics TO netra;
+GRANT ALL ON SCHEMA public TO netra;
 
 -- Users table for authentication tests
 CREATE TABLE IF NOT EXISTS auth.users (
@@ -260,6 +284,16 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA analytics TO test_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA auth TO test_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA backend TO test_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA analytics TO test_user;
+
+-- Grant all permissions to netra role for e2e test compatibility
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA auth TO netra;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA backend TO netra;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA analytics TO netra;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA auth TO netra;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA backend TO netra;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA analytics TO netra;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO netra;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO netra;
 
 -- Success message
 SELECT 'Test database initialized successfully' as status;

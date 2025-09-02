@@ -758,8 +758,10 @@ class UnifiedTestRunner:
             env.set('WEBSOCKET_URL', env.get('WEBSOCKET_URL', 'ws://localhost:8000'), 'test_runner')
         elif args.real_services or running_e2e:
             configure_test_environment()
-            # Use TEST services for real service testing by default
-            self.port_discovery = DockerPortDiscovery(use_test_services=True)
+            # Use appropriate services based on environment
+            # For dev environment, use dev services; for test environment, use test services
+            use_test_services = (args.env != 'dev')
+            self.port_discovery = DockerPortDiscovery(use_test_services=use_test_services)
             env = get_env()
             env.set('USE_REAL_SERVICES', 'true', 'test_runner')
             # Use test-specific ports
@@ -1424,7 +1426,7 @@ class UnifiedTestRunner:
                 return False
         
         # Check services with discovered ports - use test defaults when in test mode
-        postgres_port = port_mappings['postgres'].external_port if 'postgres' in port_mappings else 5434
+        postgres_port = port_mappings['postgres'].external_port if 'postgres' in port_mappings else 5433
         redis_port = port_mappings['redis'].external_port if 'redis' in port_mappings else 6381
         backend_port = port_mappings['backend'].external_port if 'backend' in port_mappings else 8001
         
