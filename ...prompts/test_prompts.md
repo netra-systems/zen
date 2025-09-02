@@ -9,11 +9,17 @@
 - USING UNIFIED TEST RUNNER: One at a time, run all tests related to agents. spawn a new sub agent. Run the test. Fix the SUT. 
 - USING UNIFIED TEST RUNNER: Run integration tests related to agents. spawn a new sub agent. Run the test. Fix the system under test for failures. focus on tests MOST LIKELY TO FAIL first. 
 - USING UNIFIED TEST RUNNER: One at a time, step through each e2e real llm agent tests. spawn a new sub agent. Run the test. Fix the SUT.  MOST LIKELY TO FAIL first. 
-- USING UNIFIED TEST RUNNER: One at a time, step through each cypress real llm agent tests. spawn a new sub agent. Run the test. Fix the SUT.  MOST LIKELY TO FAIL first. 
+- USING UNIFIED TEST RUNNER: Docker test env: One at a time, step through each cypress real llm agent tests. spawn a new sub agent. Run the test. Fix the SUT.  MOST LIKELY TO FAIL first. 
+
+USING UNIFIED TEST RUNNER: Docker test env: Run "critical" tests. For each failure: spawn a new sub agent. Fix the SUT. Repeat until all tests pass or 100 times.
+
+USING UNIFIED TEST RUNNER: Docker test env: Run "chat is king" tests. For each failure: spawn a new sub agent. Fix the SUT. Repeat until all tests pass or 100 times.
 
 
-- USING UNIFIED TEST RUNNER: One at a time, step through each e2e REAL llm agent tests. spawn a new sub agent. Run the test. Fix the SUT.  MOST LIKELY TO FAIL first. 
+- USING UNIFIED TEST RUNNER: Using the "netra-dev" docker env. One at a time, step through each e2e REAL llm agent tests. spawn a new sub agent. Run the test. Fix the SUT.  MOST LIKELY TO FAIL first. 
  Fix all errors
+
+ USING UNIFIED TEST RUNNER: Using the netra test docker env. One at a time, step through each e2e REAL llm agent tests. spawn a new sub agent. Run the test. Fix the SUT.  MOST LIKELY TO FAIL first. 
 
 - USING UNIFIED TEST RUNNER: One at a time, for each step: spawn a new sub agent. run frontend tests -fast-fail (and think MOST LIKELY TO FAIL first). Fix the SUT.  
 REPEAT each step at least 100 times or still all tests pass.
@@ -39,13 +45,18 @@ USING UNIFIED TEST RUNNER:  STEP: Run tests most likely to fail and fail the fas
 
   USING UNIFIED TEST RUNNER: Run REGRESSION tests most likely to fail and fail the fastest first.  One at a time, step through each failure. spawn a new sub agent. Run the test. Fix the SUT. 
 
-    USING UNIFIED TEST RUNNER: Run unit and integration tests most likely to fail and fail the fastest first.  One at a time, step through each failure. spawn a new sub agent. Run the test. Fix the SUT. 
+    USING UNIFIED TEST RUNNER: If needed launch docker test (compose). Run unit and integration tests most likely to fail and fail the fastest first.  One at a time, step through each failure. spawn a new sub agent. Run the test. Fix the SUT. 
 
     
-    USING UNIFIED TEST RUNNER: Run most likely to fail and fail the fastest first AND be the most useful. Use test discovery. One at a time, step through each failure. spawn a new sub agent. Run the test. Fix the SUT. 
+    USING UNIFIED TEST RUNNER with DOCKER COMPOSE DEDICATED TEST ENV: Run most likely to fail and fail the fastest first AND be the most useful. Use test discovery. One at a time, step through each failure. spawn a new sub agent. Run the test. Fix the SUT. 
 
     AUDIT e2e tests most badly using mocks One at a time, step through each failure. spawn a new sub agent. Make the test more realistic and much tougher. Focus on the BASICS, the most expected critical paths. Run it. Fix the system under test.
 
    the POINT of the staging test is to run the test items with the STAGING SERVICES DIRECTLY e.g. make API and WS     │
 │   calls etc. the OAUTH SIMULATION should ONLY Be to mimic google oauth. make a plan to update this. must be able to run   │
 │   e2e testing concept against the ALREADY DEPLOYED staging env.
+
+
+ USING UNIFIED TEST RUNNER with DOCKER COMPOSE DEDICATED TEST ENV: Run most likely to fail and fail the fastest first AND be the most useful. Use test discovery. One at a time, step through each failure. spawn a new sub agent. Run the test. Fix the SUT. 
+ 
+  USING UNIFIED TEST RUNNER with DOCKER COMPOSE DEDICATED TEST ENV: Run E2e agent tests most likely to fail and fail the fastest first AND be the most useful. Use test discovery. One at a time, step through each failure. spawn a new sub agent. Run the test. Fix the SUT. 
