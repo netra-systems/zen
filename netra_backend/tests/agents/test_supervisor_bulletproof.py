@@ -36,7 +36,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.websocket_core import UnifiedWebSocketManager
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 
 
 class TestSupervisorAgentCore:
@@ -100,7 +100,7 @@ class TestSupervisorAgentCore:
     @pytest.fixture
     def mock_sub_agent(self):
         """Mock sub-agent for testing delegation."""
-        agent = MagicMock(spec=BaseSubAgent)
+        agent = MagicMock(spec=BaseAgent)
         agent.name = "TestAgent"
         agent.execute = AsyncMock(return_value=ExecutionResult(
             success=True,
@@ -403,7 +403,7 @@ class TestSupervisorOrchestration:
         # Register multiple mock agents
         agents = {}
         for name in ["research", "analyzer", "optimizer", "validator"]:
-            agent = MagicMock(spec=BaseSubAgent)
+            agent = MagicMock(spec=BaseAgent)
             agent.name = name
             agent.execute = AsyncMock(return_value=ExecutionResult(
                 success=True,
@@ -565,7 +565,7 @@ class TestSupervisorErrorHandling:
     async def test_agent_crash_recovery(self, supervisor_agent):
         """Test recovery when a sub-agent crashes during execution."""
         # Create crashing agent
-        crashing_agent = MagicMock(spec=BaseSubAgent)
+        crashing_agent = MagicMock(spec=BaseAgent)
         crashing_agent.name = "CrashingAgent"
         crashing_agent.execute = AsyncMock(
             side_effect=RuntimeError("Agent crashed unexpectedly")
@@ -767,7 +767,7 @@ class TestSupervisorIntegration:
         run_id = str(uuid.uuid4())
         
         # Mock agents for complete workflow
-        research_agent = MagicMock(spec=BaseSubAgent)
+        research_agent = MagicMock(spec=BaseAgent)
         research_agent.name = "ResearchAgent"
         research_agent.execute = AsyncMock(return_value=ExecutionResult(
             success=True,
@@ -775,7 +775,7 @@ class TestSupervisorIntegration:
             result={"files_analyzed": 50, "patterns_found": 10}
         ))
         
-        doc_agent = MagicMock(spec=BaseSubAgent)
+        doc_agent = MagicMock(spec=BaseAgent)
         doc_agent.name = "DocumentationAgent"
         doc_agent.execute = AsyncMock(return_value=ExecutionResult(
             success=True,
@@ -954,7 +954,7 @@ class TestSupervisorEdgeCases:
     async def test_circular_dependency_detection(self, supervisor_agent):
         """Test detection and handling of circular agent dependencies."""
         # Create agents with circular dependency
-        agent_a = MagicMock(spec=BaseSubAgent)
+        agent_a = MagicMock(spec=BaseAgent)
         agent_a.name = "AgentA"
         agent_a.execute = AsyncMock(return_value=ExecutionResult(
             success=True,
@@ -962,7 +962,7 @@ class TestSupervisorEdgeCases:
             result={"delegates_to": "AgentB"}
         ))
         
-        agent_b = MagicMock(spec=BaseSubAgent)
+        agent_b = MagicMock(spec=BaseAgent)
         agent_b.name = "AgentB"
         agent_b.execute = AsyncMock(return_value=ExecutionResult(
             success=True,

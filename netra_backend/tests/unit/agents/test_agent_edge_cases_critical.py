@@ -28,7 +28,7 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, Any, List
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.triage_sub_agent import TriageSubAgent
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig, CircuitBreakerState
@@ -40,7 +40,7 @@ from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.schemas.shared_types import RetryConfig
 
 
-class MockFailingAgent(BaseSubAgent):
+class MockFailingAgent(BaseAgent):
     """Agent that can simulate various failure modes for testing."""
     
     def __init__(self, *args, **kwargs):

@@ -1,10 +1,10 @@
 """Comprehensive Test Suite for Base Agent Reliability SSOT Features
 
-This test suite validates that BaseSubAgent provides SSOT reliability infrastructure
+This test suite validates that BaseAgent provides SSOT reliability infrastructure
 that all child agents can inherit, following the pattern shown in TriageSubAgent.
 
 CRITICAL: These tests are designed to fail initially (TDD approach) and pass after
-consolidation when BaseSubAgent gains comprehensive reliability features.
+consolidation when BaseAgent gains comprehensive reliability features.
 
 Business Value: Ensures all agents inherit consistent reliability patterns,
 eliminating SSOT violations and maintenance overhead.
@@ -17,12 +17,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Any, Dict, Optional
 
 # Import the classes we'll be testing
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.llm.llm_manager import LLMManager
 
-# Import reliability components that should be integrated into BaseSubAgent
+# Import reliability components that should be integrated into BaseAgent
 from netra_backend.app.core.resilience.domain_circuit_breakers import (
     AgentCircuitBreaker,
     AgentCircuitBreakerConfig
@@ -35,8 +35,8 @@ from netra_backend.app.schemas.shared_types import RetryConfig
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 
-class TestBaseAgentSubclass(BaseSubAgent):
-    """Test subclass of BaseSubAgent for testing inherited functionality."""
+class TestBaseAgentSubclass(BaseAgent):
+    """Test subclass of BaseAgent for testing inherited functionality."""
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -90,12 +90,12 @@ def deep_agent_state():
 
 
 class TestBaseAgentCircuitBreakerIntegration:
-    """Test that BaseSubAgent has proper circuit breaker initialization."""
+    """Test that BaseAgent has proper circuit breaker initialization."""
     
     def test_base_agent_has_circuit_breaker_attribute(self, test_agent):
-        """Test that BaseSubAgent initializes with circuit breaker."""
-        # This test SHOULD FAIL initially since BaseSubAgent doesn't have circuit_breaker yet
-        assert hasattr(test_agent, 'circuit_breaker'), "BaseSubAgent should have circuit_breaker attribute"
+        """Test that BaseAgent initializes with circuit breaker."""
+        # This test SHOULD FAIL initially since BaseAgent doesn't have circuit_breaker yet
+        assert hasattr(test_agent, 'circuit_breaker'), "BaseAgent should have circuit_breaker attribute"
         assert isinstance(test_agent.circuit_breaker, AgentCircuitBreaker), "circuit_breaker should be AgentCircuitBreaker instance"
     
     def test_circuit_breaker_configuration(self, test_agent):
@@ -151,12 +151,12 @@ class TestBaseAgentCircuitBreakerIntegration:
 
 
 class TestBaseAgentReliabilityManagerIntegration:
-    """Test that BaseSubAgent has reliability manager integration."""
+    """Test that BaseAgent has reliability manager integration."""
     
     def test_base_agent_has_reliability_manager(self, test_agent):
-        """Test that BaseSubAgent initializes with reliability manager."""
+        """Test that BaseAgent initializes with reliability manager."""
         # This test SHOULD FAIL initially
-        assert hasattr(test_agent, 'reliability_manager'), "BaseSubAgent should have reliability_manager attribute"
+        assert hasattr(test_agent, 'reliability_manager'), "BaseAgent should have reliability_manager attribute"
         assert isinstance(test_agent.reliability_manager, ReliabilityManager), "reliability_manager should be ReliabilityManager instance"
     
     def test_reliability_manager_configuration(self, test_agent):
@@ -207,12 +207,12 @@ class TestBaseAgentReliabilityManagerIntegration:
 
 
 class TestBaseAgentExecutionMonitorIntegration:
-    """Test that BaseSubAgent has execution monitor integration."""
+    """Test that BaseAgent has execution monitor integration."""
     
     def test_base_agent_has_execution_monitor(self, test_agent):
-        """Test that BaseSubAgent initializes with execution monitor."""
+        """Test that BaseAgent initializes with execution monitor."""
         # This test SHOULD FAIL initially
-        assert hasattr(test_agent, 'monitor'), "BaseSubAgent should have monitor attribute"
+        assert hasattr(test_agent, 'monitor'), "BaseAgent should have monitor attribute"
         assert isinstance(test_agent.monitor, ExecutionMonitor), "monitor should be ExecutionMonitor instance"
     
     def test_execution_monitor_configuration(self, test_agent):
@@ -326,7 +326,7 @@ class TestBaseAgentWebSocketNotificationsDuringFailures:
                 raise RuntimeError(f"Retry attempt {call_count[0]}")
             return await original_execute(*args, **kwargs)
         
-        # If BaseSubAgent has retry logic, it should emit thinking/progress during retries
+        # If BaseAgent has retry logic, it should emit thinking/progress during retries
         with patch.object(test_agent, 'execute', side_effect=mock_execute_with_retries):
             if hasattr(test_agent, 'reliability_manager') and hasattr(test_agent.reliability_manager, 'execute_with_retries'):
                 await test_agent.reliability_manager.execute_with_retries(
@@ -341,9 +341,9 @@ class TestBaseAgentHealthStatusReporting:
     """Test comprehensive health status reporting."""
     
     def test_base_agent_has_health_status_method(self, test_agent):
-        """Test that BaseSubAgent has get_health_status method."""
+        """Test that BaseAgent has get_health_status method."""
         # This test SHOULD FAIL initially
-        assert hasattr(test_agent, 'get_health_status'), "BaseSubAgent should have get_health_status method"
+        assert hasattr(test_agent, 'get_health_status'), "BaseAgent should have get_health_status method"
         
         health_status = test_agent.get_health_status()
         assert isinstance(health_status, dict), "Health status should be a dictionary"

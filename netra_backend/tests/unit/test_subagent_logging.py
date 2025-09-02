@@ -15,12 +15,12 @@ def mock_justified(reason):
         return func
     return decorator
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.observability import SubAgentLogger, get_subagent_logger
 
-class MockSubAgent(BaseSubAgent):
-    """Test implementation of BaseSubAgent."""
+class MockSubAgent(BaseAgent):
+    """Test implementation of BaseAgent."""
     
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Test execute method."""
@@ -87,8 +87,8 @@ class MockSubAgentLogger:
         assert "2048" in call_args
         assert "success" in call_args
 
-class TestBaseSubAgentLogging:
-    """Test BaseSubAgent logging integration."""
+class TestBaseAgentLogging:
+    """Test BaseAgent logging integration."""
     
     @pytest.fixture
     def test_agent(self):

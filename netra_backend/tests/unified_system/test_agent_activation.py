@@ -21,7 +21,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.base.execution_context import AgentExecutionContext
@@ -42,7 +42,7 @@ class AgentActivationEvent:
     success: bool = True
     error: Optional[str] = None
 
-class MockAnalysisAgent(BaseSubAgent):
+class MockAnalysisAgent(BaseAgent):
     """Mock analysis agent for testing."""
     
     def __init__(self):
@@ -77,7 +77,7 @@ class MockAnalysisAgent(BaseSubAgent):
         
         return execution_data
 
-class MockDebugAgent(BaseSubAgent):
+class MockDebugAgent(BaseAgent):
     """Mock debug agent for testing."""
     
     def __init__(self):
@@ -111,7 +111,7 @@ class MockDebugAgent(BaseSubAgent):
         
         return execution_data
 
-class MockOptimizationAgent(BaseSubAgent):
+class MockOptimizationAgent(BaseAgent):
     """Mock optimization agent for testing."""
     
     def __init__(self):
@@ -521,7 +521,7 @@ class TestAgentActivation:
         supervisor, registry, analysis_agent, debug_agent, optimization_agent, llm_manager = supervisor_with_registry
         
         # Create a failing agent
-        class FailingAgent(BaseSubAgent):
+        class FailingAgent(BaseAgent):
             def __init__(self, failure_type: str = "timeout"):
                 super().__init__()
                 self.failure_type = failure_type

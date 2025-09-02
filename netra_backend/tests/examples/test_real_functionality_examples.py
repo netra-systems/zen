@@ -35,7 +35,7 @@ import pytest
 from netra_backend.app.database import get_db_session as get_database_session
 from netra_backend.app.logging_config import central_logger
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.schemas.core_models import Thread, User
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.services.message_handlers import MessageHandlerService
@@ -238,9 +238,9 @@ class TestExternalAPIMocking:
         mock_openai.return_value = "Cost is $100/month"
         
         # Real agent logic - using base agent for example
-        from netra_backend.app.agents.base_agent import BaseSubAgent
-        # Note: Using BaseSubAgent as example - replace with actual cost analysis agent when available
-        agent = BaseSubAgent()  # Real agent, not mocked
+        from netra_backend.app.agents.base_agent import BaseAgent
+        # Note: Using BaseAgent as example - replace with actual cost analysis agent when available
+        agent = BaseAgent()  # Real agent, not mocked
         
         # Test mock setup (actual implementation would require specific agent)
         assert "100/month" in mock_openai.return_value

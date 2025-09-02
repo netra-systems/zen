@@ -23,7 +23,7 @@ import time
 from typing import Dict, Any, List
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 
-from netra_backend.app.agents.triage_sub_agent import TriageSubAgent
+from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.agents.triage_sub_agent.core import TriageCore
 from netra_backend.app.agents.triage_sub_agent.models import (
     TriageResult, Priority, Complexity, ExtractedEntities, UserIntent,

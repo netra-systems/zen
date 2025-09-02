@@ -48,7 +48,7 @@ class TestCleanup:
     @pytest.mark.asyncio
     async def test_cleanup(self, synthetic_data_agent, sample_agent_state):
         run_id = "test-run-123"
-        with patch('netra_backend.app.agents.base_agent.BaseSubAgent.cleanup', new_callable=AsyncMock) as mock_parent_cleanup:
+        with patch('netra_backend.app.agents.base_agent.BaseAgent.cleanup', new_callable=AsyncMock) as mock_parent_cleanup:
             await synthetic_data_agent.cleanup(sample_agent_state, run_id)
             mock_parent_cleanup.assert_called_once_with(sample_agent_state, run_id)
 

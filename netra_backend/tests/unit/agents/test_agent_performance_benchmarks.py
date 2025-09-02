@@ -30,7 +30,7 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, Any, List
 from unittest.mock import Mock, AsyncMock, patch
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.triage_sub_agent import TriageSubAgent
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -39,7 +39,7 @@ from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.schemas.registry import DeepAgentState
 
 
-class PerformanceAgent(BaseSubAgent):
+class PerformanceAgent(BaseAgent):
     """Agent optimized for performance testing."""
     
     def __init__(self, *args, **kwargs):

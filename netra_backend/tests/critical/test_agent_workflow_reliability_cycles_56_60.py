@@ -19,7 +19,7 @@ from datetime import datetime, timedelta
 
 from netra_backend.app.agents.workflow_engine import WorkflowEngine
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.base_sub_agent import BaseSubAgent
+from netra_backend.app.agents.base_sub_agent import BaseAgent
 from netra_backend.app.core.unified_logging import get_logger
 
 

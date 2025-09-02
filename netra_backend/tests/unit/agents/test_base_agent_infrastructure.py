@@ -18,7 +18,7 @@ import time
 from typing import Dict, Any, Optional
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
@@ -34,7 +34,7 @@ from netra_backend.app.schemas.core_enums import ExecutionStatus
 from shared.isolated_environment import get_env
 
 
-class MockBaseAgent(BaseSubAgent):
+class MockBaseAgent(BaseAgent):
     """Mock implementation for testing BaseAgent infrastructure."""
     
     def __init__(self, *args, **kwargs):
@@ -661,7 +661,7 @@ class TestBaseAgentPropertyInitialization:
         agent = MockBaseAgent(llm_manager=mock_llm_manager)
         
         # Verify default values
-        assert agent.name == "BaseSubAgent"  # Default name
+        assert agent.name == "BaseAgent"  # Default name
         assert agent.description == "This is the base sub-agent."
         assert agent.state == SubAgentLifecycle.PENDING
         assert agent.llm_manager == mock_llm_manager
