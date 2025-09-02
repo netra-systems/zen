@@ -237,7 +237,12 @@ class DockerCleaner:
         print(f"Found {len(images_to_remove)} old unused images")
         for image in images_to_remove:
             print(f"  Removing: {image['repo']}:{image['tag']} ({image['id'][:12]})")
-            self.run_command(['docker', 'rmi', '-f', image['id']])
+            # Try graceful removal first, then force if needed
+            result = self.run_command(['docker', 'rmi', image['id']], capture_output=True)
+            if result and result.returncode != 0:
+                # If graceful removal fails, use force (needed for images with dependencies)
+                print(f"    Graceful removal failed, using force removal")
+                self.run_command(['docker', 'rmi', '-f', image['id']])
             self.stats['images_removed'] += 1
     
     def clean_unused_volumes(self) -> None:

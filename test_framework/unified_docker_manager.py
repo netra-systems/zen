@@ -48,6 +48,8 @@ else:
 from shared.isolated_environment import get_env
 from test_framework.docker_port_discovery import DockerPortDiscovery, ServicePortMapping
 from test_framework.docker_introspection import DockerIntrospector, IntrospectionReport
+# CRITICAL: Import Docker rate limiter to prevent daemon crashes
+from test_framework.docker_rate_limiter import execute_docker_command
 from test_framework.dynamic_port_allocator import (
     DynamicPortAllocator, 
     PortRange, 
@@ -545,10 +547,8 @@ class UnifiedDockerManager:
             
             # Step 1: Stop gracefully with timeout
             logger.info(f"Gracefully stopping container: {container_name}")
-            stop_result = subprocess.run(
+            stop_result = execute_docker_command(
                 ["docker", "stop", "-t", str(timeout), container_name],
-                capture_output=True,
-                text=True,
                 timeout=timeout + 5
             )
             
@@ -572,10 +572,8 @@ class UnifiedDockerManager:
             
             # Step 4: Safe removal (WITHOUT -f flag)
             logger.info(f"Safely removing stopped container: {container_name}")
-            rm_result = subprocess.run(
+            rm_result = execute_docker_command(
                 ["docker", "rm", container_name],
-                capture_output=True,
-                text=True,
                 timeout=10
             )
             
@@ -2232,9 +2230,8 @@ class UnifiedDockerManager:
             # Clean up project-specific network if exists
             self._cleanup_network()
             
-            # Prune unused networks
-            subprocess.run(["docker", "network", "prune", "-f"], 
-                         capture_output=True, text=True, timeout=30)
+            # Prune unused networks using rate-limited execution
+            execute_docker_command(["docker", "network", "prune", "-f"], timeout=30)
             
             logger.info("Orphan cleanup completed successfully")
             return True
