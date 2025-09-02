@@ -284,11 +284,27 @@ class ExecutionEngineFactory:
             user_semaphore = await self._get_user_semaphore(user_context.user_id)
             
             # Create user-specific WebSocket event emitter
-            websocket_emitter = await self._websocket_bridge_factory.create_user_emitter(
-                user_context.user_id, 
-                user_context.thread_id,
-                f"conn_{user_context.user_id}_{int(time.time() * 1000)}"
-            )
+            websocket_emitter = None
+            if self._websocket_bridge_factory:
+                try:
+                    websocket_emitter = await self._websocket_bridge_factory.create_user_emitter(
+                        user_context.user_id, 
+                        user_context.thread_id,
+                        f"conn_{user_context.user_id}_{int(time.time() * 1000)}"
+                    )
+                except Exception as e:
+                    logger.warning(f"Failed to create WebSocket emitter via factory: {e}")
+            
+            # Fallback: Create isolated WebSocket emitter directly
+            if not websocket_emitter:
+                from netra_backend.app.websocket_core.isolated_event_emitter import IsolatedWebSocketEventEmitter
+                websocket_emitter = IsolatedWebSocketEventEmitter.create_for_user(
+                    user_id=user_context.user_id,
+                    thread_id=user_context.thread_id,
+                    run_id=user_context.request_id,
+                    websocket_manager=None  # Will be set when available
+                )
+                logger.info(f"Created fallback WebSocket emitter for user {user_context.user_id}")
             
             # Create isolated execution engine
             engine = IsolatedExecutionEngine(
@@ -401,6 +417,18 @@ class IsolatedExecutionEngine:
         
         self.user_context = user_context
         self.agent_registry = agent_registry  # Shared, immutable
+        
+        # CRITICAL: Validate WebSocket emitter
+        if websocket_emitter is None:
+            logger.warning(f"WebSocket emitter is None for user {user_context.user_id} - creating fallback")
+            from netra_backend.app.websocket_core.isolated_event_emitter import IsolatedWebSocketEventEmitter
+            websocket_emitter = IsolatedWebSocketEventEmitter.create_for_user(
+                user_id=user_context.user_id,
+                thread_id=user_context.thread_id,
+                run_id=user_context.request_id,
+                websocket_manager=None  # Will be set when available
+            )
+        
         self.websocket_emitter = websocket_emitter  # Per-user
         self.execution_semaphore = execution_semaphore  # Per-user
         self.execution_timeout = execution_timeout
@@ -409,7 +437,7 @@ class IsolatedExecutionEngine:
         # Initialize per-request components
         self._init_user_components()
         
-        logger.debug(f"IsolatedExecutionEngine initialized for user {user_context.user_id}")
+        logger.debug(f"IsolatedExecutionEngine initialized for user {user_context.user_id} with validated emitter")
         
     def _init_user_components(self) -> None:
         """Initialize user-specific execution components."""

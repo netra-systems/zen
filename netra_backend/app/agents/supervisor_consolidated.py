@@ -137,12 +137,21 @@ class SupervisorAgent(BaseAgent):
                 # Import here to avoid circular dependency
                 from netra_backend.app.agents.tool_dispatcher_core import ToolDispatcher
                 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+                from netra_backend.app.websocket_core.isolated_event_emitter import IsolatedWebSocketEventEmitter
                 
-                # Create request-scoped tool dispatcher for this user
+                # CRITICAL: Create WebSocket emitter BEFORE tool dispatcher
+                websocket_emitter = IsolatedWebSocketEventEmitter.create_for_user(
+                    user_id=context.user_id,
+                    thread_id=context.thread_id,
+                    run_id=context.run_id,
+                    websocket_manager=self.websocket_bridge.websocket_manager if hasattr(self.websocket_bridge, 'websocket_manager') else None
+                )
+                
+                # Create request-scoped tool dispatcher with proper emitter
                 async with ToolDispatcher.create_scoped_dispatcher_context(
                     user_context=context,
                     tools=self._get_user_tools(context),
-                    websocket_manager=self.websocket_bridge
+                    websocket_emitter=websocket_emitter  # Use emitter instead of manager
                 ) as tool_dispatcher:
                     # Store request-scoped dispatcher for this execution
                     self.tool_dispatcher = tool_dispatcher
@@ -151,6 +160,13 @@ class SupervisorAgent(BaseAgent):
                     self.registry = AgentRegistry(self._llm_manager, tool_dispatcher)
                     self.registry.register_default_agents()
                     self.registry.set_websocket_bridge(self.websocket_bridge)
+                    
+                    # CRITICAL: Enhance tool dispatcher with WebSocket notifications
+                    if hasattr(self.registry, 'set_websocket_manager'):
+                        # Use websocket_manager from bridge if available
+                        websocket_manager = getattr(self.websocket_bridge, 'websocket_manager', None)
+                        if websocket_manager:
+                            self.registry.set_websocket_manager(websocket_manager)
                     
                     # Create session manager for database operations
                     async with managed_session(context) as session_manager:
