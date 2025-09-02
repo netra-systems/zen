@@ -41,6 +41,10 @@ class TestLoadMetrics:
     error_rate: float = 0.0
 
 
+# Alias for backward compatibility
+LoadTestMetrics = TestLoadMetrics
+
+
 class TestConcurrentUserLoader:
     """Manages concurrent user load testing."""
     

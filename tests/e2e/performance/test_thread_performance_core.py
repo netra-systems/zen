@@ -370,6 +370,11 @@ class TestThreadPerformanceer:
         
         return summary
 
+
+# Alias for backward compatibility (fixing typo)
+ThreadPerformanceTester = TestThreadPerformanceer
+
+
 @pytest.fixture
 def thread_performance_tester(ws_thread_fixtures, thread_context_manager, performance_utils):
     """Thread performance tester fixture."""
