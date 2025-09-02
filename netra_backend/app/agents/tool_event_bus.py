@@ -23,7 +23,6 @@ from contextlib import asynccontextmanager
 
 if TYPE_CHECKING:
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-    from netra_backend.app.websocket_core.manager import WebSocketManager
     from netra_backend.app.services.websocket_event_emitter import WebSocketEventEmitter
 
 from netra_backend.app.logging_config import central_logger

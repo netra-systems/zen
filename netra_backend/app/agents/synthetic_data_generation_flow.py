@@ -12,7 +12,8 @@
 import time
 from typing import Any, Callable, Dict, Optional
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+from netra_backend.app.database.session_manager import DatabaseSessionManager
 from netra_backend.app.agents.synthetic_data_generator import (
     SyntheticDataGenerator,
     SyntheticDataResult,
@@ -38,21 +39,20 @@ class SyntheticDataGenerationFlow:
     
     async def execute_generation_flow(
         self, 
-        state: DeepAgentState, 
-        run_id: str,
+        context: UserExecutionContext, 
         stream_updates: bool, 
         start_time: float,
         workload_profile: WorkloadProfile,
         requires_approval: bool = False
     ) -> None:
-        """Execute the full generation flow."""
-        await self._send_initial_update(run_id, stream_updates)
+        """Execute the full generation flow with UserExecutionContext."""
+        await self._send_initial_update(context.run_id, stream_updates)
         
         if requires_approval and self._handle_approval:
-            await self._handle_approval(workload_profile, state, run_id, stream_updates)
+            await self._handle_approval(workload_profile, context, stream_updates)
             return
         
-        await self._execute_generation(workload_profile, state, run_id, stream_updates, start_time)
+        await self._execute_generation(workload_profile, context, stream_updates, start_time)
     
     async def _send_initial_update(self, run_id: str, stream_updates: bool) -> None:
         """Send initial status update"""
@@ -68,15 +68,14 @@ class SyntheticDataGenerationFlow:
     async def _execute_generation(
         self,
         profile: WorkloadProfile,
-        state: DeepAgentState,
-        run_id: str,
+        context: UserExecutionContext,
         stream_updates: bool,
         start_time: float
     ) -> None:
-        """Execute the actual data generation"""
-        await self._send_generation_update(profile, run_id, stream_updates)
-        result = await self._generate_and_store_result(profile, state, run_id, stream_updates)
-        await self._finalize_generation(result, run_id, stream_updates, start_time)
+        """Execute the actual data generation with context isolation"""
+        await self._send_generation_update(profile, context.run_id, stream_updates)
+        result = await self._generate_and_store_result(profile, context, stream_updates)
+        await self._finalize_generation(result, context.run_id, stream_updates, start_time)
     
     async def _send_generation_update(
         self, profile: WorkloadProfile, run_id: str, stream_updates: bool
@@ -92,11 +91,15 @@ class SyntheticDataGenerationFlow:
         })
     
     async def _generate_and_store_result(
-        self, profile: WorkloadProfile, state: DeepAgentState, run_id: str, stream_updates: bool
+        self, profile: WorkloadProfile, context: UserExecutionContext, stream_updates: bool
     ) -> SyntheticDataResult:
-        """Generate data and store result in state."""
-        result = await self.generator.generate_data(profile, run_id, stream_updates)
-        state.synthetic_data_result = result.model_dump()
+        """Generate data and store result with proper user isolation."""
+        result = await self.generator.generate_data(
+            profile, context.run_id, stream_updates, 
+            thread_id=context.thread_id, user_id=context.user_id
+        )
+        # Store result in context metadata instead of global state
+        context.metadata['synthetic_data_result'] = result.model_dump()
         return result
     
     async def _finalize_generation(
@@ -169,7 +172,7 @@ class GenerationFlowFactory:
         send_update_callback: Callable[[str, Dict[str, Any]], None],
         approval_handler: Optional[Callable] = None
     ) -> SyntheticDataGenerationFlow:
-        """Create a new generation flow instance"""
+        """Create a new generation flow instance with UserExecutionContext support"""
         return SyntheticDataGenerationFlow(
             generator=generator,
             send_update_callback=send_update_callback,
