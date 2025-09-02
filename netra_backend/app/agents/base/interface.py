@@ -3,7 +3,7 @@
 Core types for agent execution patterns.
 Contains ExecutionContext and ExecutionResult for standardized execution.
 
-Note: BaseExecutionInterface was removed as part of architecture simplification.
+Note: Legacy execution interface was removed as part of architecture simplification.
 All agents now use single inheritance from BaseSubAgent only.
 """
 
@@ -95,6 +95,6 @@ class ReliabilityManagerProtocol(Protocol):
         ...
 
 
-# Note: BaseExecutionInterface and AgentExecutionMixin classes have been removed
+# Note: Legacy execution interface and mixin classes have been removed
 # as part of architecture simplification. All agents now use single inheritance
 # from BaseSubAgent which already provides WebSocket functionality via WebSocketBridgeAdapter.
