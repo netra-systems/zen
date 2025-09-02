@@ -14,6 +14,10 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.security_service import SecurityService
 from netra_backend.app.websocket_core import get_websocket_manager
 
+# CRITICAL: Import for proper session lifecycle management
+from contextlib import asynccontextmanager
+from dataclasses import dataclass
+
 # NEW: Split architecture imports
 from netra_backend.app.agents.supervisor.user_execution_context import (
     UserExecutionContext,
@@ -52,23 +56,111 @@ if TYPE_CHECKING:
 
 logger = central_logger.get_logger(__name__)
 
+# Session validation utilities
+def validate_session_is_request_scoped(session: AsyncSession, context: str = "unknown") -> None:
+    """Validate that a session is request-scoped and not globally stored.
+    
+    Args:
+        session: Database session to validate
+        context: Context description for logging
+        
+    Raises:
+        RuntimeError: If session appears to be globally stored
+    """
+    if hasattr(session, '_global_storage_flag') and session._global_storage_flag:
+        logger.error(f"CRITICAL: Globally stored session detected in {context}")
+        raise RuntimeError(f"Session in {context} must be request-scoped, not globally stored")
+        
+    logger.debug(f"Validated session {id(session)} is request-scoped for {context}")
+
+def mark_session_as_global(session: AsyncSession) -> None:
+    """Mark a session as globally stored (for validation purposes).
+    
+    This is used to detect when globally stored sessions are being passed
+    to request-scoped contexts.
+    
+    Args:
+        session: Database session to mark
+    """
+    session._global_storage_flag = True
+    logger.debug(f"Marked session {id(session)} as globally stored")
+
+def ensure_session_lifecycle_logging(session: AsyncSession, operation: str) -> None:
+    """Log session lifecycle events for debugging.
+    
+    Args:
+        session: Database session
+        operation: Operation being performed
+    """
+    logger.debug(f"Session {id(session)} lifecycle: {operation}")
+
 def _validate_session_type(session) -> None:
     """Validate session is AsyncSession type."""
     if not isinstance(session, AsyncSession):
         logger.error(f"Invalid session type: {type(session)}")
         raise RuntimeError(f"Expected AsyncSession, got {type(session)}")
     logger.debug(f"Dependency injected session type: {type(session).__name__}")
+    if session:
+        ensure_session_lifecycle_logging(session, "validated_dependency_injection")
+
+@dataclass
+class RequestScopedContext:
+    """Request-scoped context that never stores sessions globally.
+    
+    CRITICAL: This context only holds request metadata, never database sessions.
+    Sessions are created and managed within the request scope only.
+    """
+    user_id: str
+    thread_id: str
+    run_id: Optional[str] = None
+    websocket_connection_id: Optional[str] = None
+    request_id: Optional[str] = None
+    
+    def __post_init__(self):
+        if not self.run_id:
+            self.run_id = str(uuid.uuid4())
+        if not self.request_id:
+            self.request_id = str(uuid.uuid4())
+            
+        # CRITICAL: Log that this context contains NO database sessions
+        logger.debug(f"Created RequestScopedContext {self.request_id} - NO sessions stored")
+
+@asynccontextmanager
+async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
+    """Create a request-scoped database session with proper lifecycle management.
+    
+    CRITICAL: This creates a fresh session for each request and ensures it's
+    properly closed after the request completes. Sessions are NEVER stored globally.
+    
+    Uses the single source of truth from netra_backend.app.database.
+    """
+    logger.debug("Creating new request-scoped database session")
+    
+    try:
+        async for session in get_db():
+            _validate_session_type(session)
+            logger.debug(f"Created database session: {id(session)}")
+            yield session
+            logger.debug(f"Request-scoped session {id(session)} completed")
+    except Exception as e:
+        logger.error(f"Failed to create request-scoped database session: {e}")
+        raise
+    finally:
+        logger.debug("Request-scoped database session lifecycle completed")
 
 async def get_db_dependency() -> AsyncGenerator[AsyncSession, None]:
     """Wrapper for database dependency with validation.
     
+    DEPRECATED: Use get_request_scoped_db_session for new code.
     Uses the single source of truth from netra_backend.app.database.
     """
+    logger.warning("Using deprecated get_db_dependency - consider get_request_scoped_db_session")
     async for session in get_db():
         _validate_session_type(session)
         yield session
 
 DbDep = Annotated[AsyncSession, Depends(get_db_dependency)]
+RequestScopedDbDep = Annotated[AsyncSession, Depends(get_request_scoped_db_session)]
 
 def get_llm_manager(request: Request) -> LLMManager:
     return request.app.state.llm_manager
@@ -93,13 +185,19 @@ def get_agent_supervisor(request: Request) -> "Supervisor":
     """Get agent supervisor from app state - LEGACY mode.
     
     DEPRECATED: This returns a global supervisor instance without user isolation.
-    For new code, use get_user_supervisor_factory() to create per-request supervisors.
+    For new code, use get_request_scoped_user_context() to create per-request contexts.
     
+    CRITICAL: This function NEVER passes database sessions to global objects.
     The supervisor is initialized at startup with WebSocket manager,
     so it should already have WebSocket capabilities when retrieved here.
     """
     logger.warning("Using legacy get_agent_supervisor - user isolation NOT guaranteed!")
     supervisor = request.app.state.agent_supervisor
+    
+    # CRITICAL: Verify that supervisor does not have stored database sessions
+    if hasattr(supervisor, '_stored_db_session') and supervisor._stored_db_session:
+        logger.error("CRITICAL: Global supervisor has stored database session - this violates request scoping!")
+        raise RuntimeError("Global supervisor must never store database sessions")
     
     # Verify supervisor has WebSocket capabilities
     if supervisor and hasattr(supervisor, 'agent_registry'):
@@ -117,6 +215,52 @@ def get_agent_supervisor(request: Request) -> "Supervisor":
     return supervisor
 
 
+async def get_request_scoped_user_context(
+    user_id: str,
+    thread_id: str,
+    run_id: Optional[str] = None,
+    websocket_connection_id: Optional[str] = None
+) -> RequestScopedContext:
+    """Create request-scoped user context WITHOUT storing database sessions.
+    
+    CRITICAL: This function creates context metadata only. Database sessions
+    must be obtained separately and never stored in the context.
+    
+    Args:
+        user_id: Unique user identifier
+        thread_id: Thread identifier for conversation
+        run_id: Optional run identifier (auto-generated if not provided)
+        websocket_connection_id: Optional WebSocket connection identifier
+        
+    Returns:
+        RequestScopedContext: Context with metadata only, no sessions
+        
+    Raises:
+        HTTPException: If context creation fails
+    """
+    try:
+        # Generate run_id if not provided
+        if not run_id:
+            run_id = str(uuid.uuid4())
+        
+        # Create request-scoped context (no session storage)
+        context = RequestScopedContext(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            websocket_connection_id=websocket_connection_id
+        )
+        
+        logger.info(f"Created RequestScopedContext for user {user_id}, run {run_id} - NO sessions stored")
+        return context
+        
+    except Exception as e:
+        logger.error(f"Failed to create RequestScopedContext: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to create request-scoped context: {str(e)}"
+        )
+
 def create_user_execution_context(user_id: str,
                                   thread_id: str, 
                                   run_id: Optional[str] = None,
@@ -124,13 +268,16 @@ def create_user_execution_context(user_id: str,
                                   websocket_connection_id: Optional[str] = None) -> UserExecutionContext:
     """Create UserExecutionContext for per-request isolation.
     
-    This function is the recommended way to create user contexts for new requests.
+    DEPRECATED: Use get_request_scoped_user_context for new code.
+    This function is kept for backward compatibility.
+    
+    CRITICAL: When db_session is provided, it must be request-scoped only.
     
     Args:
         user_id: Unique user identifier
         thread_id: Thread identifier for conversation
         run_id: Optional run identifier (auto-generated if not provided)
-        db_session: Optional database session
+        db_session: Optional database session (MUST be request-scoped)
         websocket_connection_id: Optional WebSocket connection identifier
         
     Returns:
@@ -139,7 +286,14 @@ def create_user_execution_context(user_id: str,
     Raises:
         HTTPException: If context creation fails
     """
+    logger.warning("Using deprecated create_user_execution_context - consider get_request_scoped_user_context")
+    
     try:
+        # CRITICAL: Validate that session is not from global storage
+        if db_session and hasattr(db_session, '_global_storage_flag'):
+            logger.error("CRITICAL: Attempted to pass globally stored session to UserExecutionContext")
+            raise RuntimeError("Database sessions must be request-scoped, not globally stored")
+        
         # Generate run_id if not provided
         if not run_id:
             run_id = str(uuid.uuid4())
@@ -164,22 +318,20 @@ def create_user_execution_context(user_id: str,
         )
 
 
-async def get_user_supervisor_factory(request: Request,
-                                     user_id: str,
-                                     thread_id: str,
-                                     run_id: Optional[str] = None,
-                                     db_session: AsyncSession = Depends(get_db_dependency)) -> "Supervisor":
-    """Factory to create per-request SupervisorAgent with UserExecutionContext.
+async def get_request_scoped_supervisor(
+    request: Request,
+    context: RequestScopedContext,
+    db_session: AsyncSession
+) -> "Supervisor":
+    """Create isolated SupervisorAgent with request-scoped database session.
     
-    This is the PREFERRED way to get a SupervisorAgent in the new split architecture.
-    It creates a completely isolated supervisor instance for each request.
+    CRITICAL: This function ensures database sessions are NEVER stored globally.
+    The supervisor is created fresh for each request with proper session lifecycle.
     
     Args:
         request: FastAPI request object
-        user_id: User identifier from request
-        thread_id: Thread identifier from request
-        run_id: Optional run identifier (auto-generated if not provided)
-        db_session: Request-scoped database session
+        context: Request-scoped context (contains no sessions)
+        db_session: Request-scoped database session (will be closed after request)
         
     Returns:
         SupervisorAgent: Isolated supervisor instance for this request
@@ -188,15 +340,23 @@ async def get_user_supervisor_factory(request: Request,
         HTTPException: If supervisor creation fails
     """
     try:
-        # Create UserExecutionContext for this request
+        # CRITICAL: Validate that session is not globally stored
+        if hasattr(db_session, '_global_storage_flag'):
+            logger.error("CRITICAL: Attempted to use globally stored session in request-scoped supervisor")
+            raise RuntimeError("Database sessions must be request-scoped only")
+            
+        logger.debug(f"Creating request-scoped supervisor for user {context.user_id}, session {id(db_session)}")
+        
+        # Create UserExecutionContext with request-scoped session
         user_context = create_user_execution_context(
-            user_id=user_id,
-            thread_id=thread_id,
-            run_id=run_id,
-            db_session=db_session
+            user_id=context.user_id,
+            thread_id=context.thread_id,
+            run_id=context.run_id,
+            db_session=db_session,  # This session will be closed after request
+            websocket_connection_id=context.websocket_connection_id
         )
         
-        # Get required components from app state
+        # Get required components from app state (these should be stateless)
         llm_manager = get_llm_manager(request)
         
         # Get WebSocket bridge from app state
@@ -218,6 +378,13 @@ async def get_user_supervisor_factory(request: Request,
                 detail="Tool dispatcher not configured"
             )
         
+        # CRITICAL: Create session factory that returns the request-scoped session
+        # This session will be automatically closed when the request completes
+        async def request_scoped_session_factory():
+            """Returns the request-scoped session - never creates new sessions."""
+            logger.debug(f"Returning request-scoped session {id(db_session)} to supervisor")
+            return db_session
+        
         # Create isolated SupervisorAgent using factory method
         from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
         supervisor = await SupervisorAgent.create_with_user_context(
@@ -225,22 +392,90 @@ async def get_user_supervisor_factory(request: Request,
             websocket_bridge=websocket_bridge,
             tool_dispatcher=tool_dispatcher,
             user_context=user_context,
-            db_session_factory=lambda: db_session
+            db_session_factory=request_scoped_session_factory  # Returns request-scoped session
         )
         
-        logger.info(f"✅ Created isolated SupervisorAgent for user {user_id}, run {run_id or 'auto'}")
+        logger.info(f"✅ Created request-scoped SupervisorAgent for user {context.user_id}, run {context.run_id}")
         return supervisor
         
     except Exception as e:
-        logger.error(f"Failed to create isolated SupervisorAgent: {e}")
+        logger.error(f"Failed to create request-scoped SupervisorAgent: {e}")
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to create isolated supervisor: {str(e)}"
+            detail=f"Failed to create request-scoped supervisor: {str(e)}"
         )
 
+async def get_user_supervisor_factory(request: Request,
+                                     user_id: str,
+                                     thread_id: str,
+                                     run_id: Optional[str] = None,
+                                     db_session: AsyncSession = Depends(get_db_dependency)) -> "Supervisor":
+    """Factory to create per-request SupervisorAgent with UserExecutionContext.
+    
+    DEPRECATED: Use get_request_scoped_supervisor for new code.
+    This function is kept for backward compatibility during transition.
+    
+    CRITICAL: This function has been updated to validate that sessions are request-scoped.
+    
+    Args:
+        request: FastAPI request object
+        user_id: User identifier from request
+        thread_id: Thread identifier from request
+        run_id: Optional run identifier (auto-generated if not provided)
+        db_session: Request-scoped database session
+        
+    Returns:
+        SupervisorAgent: Isolated supervisor instance for this request
+        
+    Raises:
+        HTTPException: If supervisor creation fails
+    """
+    logger.warning("Using deprecated get_user_supervisor_factory - consider get_request_scoped_supervisor")
+    
+    # Create context and delegate to new implementation
+    context = await get_request_scoped_user_context(
+        user_id=user_id,
+        thread_id=thread_id,
+        run_id=run_id
+    )
+    
+    return await get_request_scoped_supervisor(request, context, db_session)
 
-# Type alias for the new isolated supervisor dependency
+
+# Type aliases for dependency injection
+RequestScopedContextDep = Annotated[RequestScopedContext, Depends(get_request_scoped_user_context)]
+
+# Type alias for the new isolated supervisor dependency (DEPRECATED)
 IsolatedSupervisorDep = Annotated["Supervisor", Depends(get_user_supervisor_factory)]
+
+# New request-scoped supervisor dependency
+async def get_request_scoped_supervisor_dependency(
+    request: Request,
+    context: RequestScopedContextDep,
+    db_session: RequestScopedDbDep
+) -> "Supervisor":
+    """Dependency for getting request-scoped supervisor with proper session lifecycle.
+    
+    This is the PREFERRED way to inject supervisors in new code.
+    CRITICAL: Ensures database sessions are never stored globally.
+    """
+    return await get_request_scoped_supervisor(request, context, db_session)
+
+RequestScopedSupervisorDep = Annotated["Supervisor", Depends(get_request_scoped_supervisor_dependency)]
+
+# New request-scoped message handler dependency
+async def get_request_scoped_message_handler_dependency(
+    context: RequestScopedContextDep,
+    supervisor: RequestScopedSupervisorDep,
+    request: Request
+):
+    """Dependency for getting request-scoped message handler.
+    
+    This is the PREFERRED way to inject message handlers in new code.
+    """
+    return await get_request_scoped_message_handler(context, supervisor, request)
+
+RequestScopedMessageHandlerDep = Annotated[Any, Depends(get_request_scoped_message_handler_dependency)]
 
 def get_agent_service(request: Request) -> "AgentService":
     """Get agent service from app state.
@@ -317,18 +552,27 @@ def get_message_handler_service(request: Request):
     """Get message handler service from app state or create one.
     
     DEPRECATED: This creates MessageHandlerService with global supervisor.
-    For new code, create MessageHandlerService with isolated supervisor using
-    get_user_supervisor_factory().
+    For new code, use get_request_scoped_message_handler with proper session management.
+    
+    CRITICAL: This function validates that global supervisors don't store sessions.
     """
-    logger.warning("Using legacy get_message_handler_service - consider using isolated supervisor")
+    logger.warning("Using legacy get_message_handler_service - consider request-scoped message handler")
     
     # Try to get from app state first
     if hasattr(request.app.state, 'message_handler_service'):
-        return request.app.state.message_handler_service
+        service = request.app.state.message_handler_service
+        
+        # CRITICAL: Validate that service doesn't have stored database sessions
+        if hasattr(service, 'supervisor') and hasattr(service.supervisor, '_stored_db_session'):
+            if service.supervisor._stored_db_session:
+                logger.error("CRITICAL: Global message handler service has stored database session")
+                raise RuntimeError("Global services must never store database sessions")
+        
+        return service
     
     # Create one using available dependencies
     from netra_backend.app.services.message_handlers import MessageHandlerService
-    supervisor = get_agent_supervisor(request)
+    supervisor = get_agent_supervisor(request)  # This validates no stored sessions
     thread_service = get_thread_service(request)
     
     # CRITICAL FIX: Include WebSocket manager to enable real-time agent events
@@ -343,6 +587,45 @@ def get_message_handler_service(request: Request):
         return MessageHandlerService(supervisor, thread_service)
 
 
+async def get_request_scoped_message_handler(
+    context: RequestScopedContext,
+    supervisor: "Supervisor",
+    request: Request
+):
+    """Create MessageHandlerService with request-scoped supervisor.
+    
+    CRITICAL: This service uses a supervisor that has a request-scoped database session.
+    The session will be automatically closed when the request completes.
+    
+    Args:
+        context: Request-scoped context (contains no sessions)
+        supervisor: Request-scoped supervisor with session lifecycle management
+        request: FastAPI request object
+        
+    Returns:
+        MessageHandlerService: Service with request-scoped supervisor
+    """
+    try:
+        # Get thread service (stateless)
+        thread_service = get_thread_service(request)
+        
+        # Get WebSocket manager (stateless)
+        websocket_manager = get_websocket_manager()
+        
+        # Create MessageHandlerService with request-scoped components
+        from netra_backend.app.services.message_handlers import MessageHandlerService
+        message_service = MessageHandlerService(supervisor, thread_service, websocket_manager)
+        
+        logger.info(f"✅ Created request-scoped MessageHandlerService for user {context.user_id}")
+        return message_service
+        
+    except Exception as e:
+        logger.error(f"Failed to create request-scoped MessageHandlerService: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to create request-scoped message handler: {str(e)}"
+        )
+
 async def get_isolated_message_handler_service(user_id: str,
                                               thread_id: str,
                                               run_id: Optional[str],
@@ -350,7 +633,8 @@ async def get_isolated_message_handler_service(user_id: str,
                                               db_session: AsyncSession = Depends(get_db_dependency)):
     """Create MessageHandlerService with isolated supervisor for this request.
     
-    This is the PREFERRED way to get MessageHandlerService in the new architecture.
+    DEPRECATED: Use get_request_scoped_message_handler for new code.
+    This function is kept for backward compatibility.
     
     Args:
         user_id: User identifier from request
@@ -362,28 +646,19 @@ async def get_isolated_message_handler_service(user_id: str,
     Returns:
         MessageHandlerService: Service with isolated supervisor
     """
+    logger.warning("Using deprecated get_isolated_message_handler_service - consider get_request_scoped_message_handler")
+    
     try:
-        # Get isolated supervisor for this request
-        supervisor = await get_user_supervisor_factory(
-            request=request,
+        # Create context and supervisor using new approach
+        context = await get_request_scoped_user_context(
             user_id=user_id,
             thread_id=thread_id,
-            run_id=run_id,
-            db_session=db_session
+            run_id=run_id
         )
         
-        # Get thread service
-        thread_service = get_thread_service(request)
+        supervisor = await get_request_scoped_supervisor(request, context, db_session)
         
-        # Get WebSocket manager
-        websocket_manager = get_websocket_manager()
-        
-        # Create MessageHandlerService with isolated components
-        from netra_backend.app.services.message_handlers import MessageHandlerService
-        message_service = MessageHandlerService(supervisor, thread_service, websocket_manager)
-        
-        logger.info(f"✅ Created isolated MessageHandlerService for user {user_id}")
-        return message_service
+        return await get_request_scoped_message_handler(context, supervisor, request)
         
     except Exception as e:
         logger.error(f"Failed to create isolated MessageHandlerService: {e}")
