@@ -29,7 +29,7 @@ class TestSupervisorE2EWithRealLLM:
         env = get_env()
         
         # Database configuration for E2E tests - use the test PostgreSQL database
-        env.set("DATABASE_URL", "postgresql+asyncpg://test:test@localhost:5434/test", "e2e_test_setup")
+        env.set("DATABASE_URL", "postgresql+asyncpg://test:test@localhost:5433/test", "e2e_test_setup")
         env.set("TESTING", "1", "e2e_test_setup")
         env.set("ENVIRONMENT", "testing", "e2e_test_setup")
         

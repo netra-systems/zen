@@ -23,7 +23,7 @@ class PortDiscovery:
             "auth": 8081,
             "analytics": 8090,
             "frontend": 3000,
-            "postgres": 5432,
+            "postgres": 5433,  # Use dev PostgreSQL external port
             "redis": 6379,
             "clickhouse": 8123
         },

@@ -33,7 +33,7 @@ class TestDatabaseAuthLoggingFocused:
     def setup_test_db_config(self, isolated_test_env):
         """Set up test database configuration."""
         # Configure test environment with proper service URLs
-        postgres_url = 'postgresql://test_user:test_pass@localhost:5434/netra_test'
+        postgres_url = 'postgresql://test_user:test_pass@localhost:5433/netra_test'
         redis_url = 'redis://localhost:6381'
         
         # Set the URLs in isolated environment
@@ -52,7 +52,7 @@ class TestDatabaseAuthLoggingFocused:
         """Test that auth database connections don't produce authentication error logs."""
         # Test basic database connectivity first
         import psycopg
-        postgres_url = 'postgresql://test_user:test_pass@localhost:5434/netra_test'
+        postgres_url = 'postgresql://test_user:test_pass@localhost:5433/netra_test'
         
         try:
             with psycopg.connect(postgres_url, connect_timeout=5) as conn:
@@ -201,7 +201,7 @@ class TestDatabaseAuthLoggingFocused:
                 "postgresql://user:password123@localhost/dbname",
                 "postgresql+asyncpg://user:secret456@host/db?sslmode=require",
                 "postgres://admin:pass789@cloudsql/database",
-                "postgresql://test_user:test_pass@localhost:5434/netra_test",  # Match our test config
+                "postgresql://test_user:test_pass@localhost:5433/netra_test",  # Match our test config
             ]
             
             try:

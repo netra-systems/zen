@@ -160,7 +160,7 @@ class TestRepositoryFactory:
                 
             # Construct from components
             host = self.env.get("POSTGRES_HOST", "localhost")
-            port = self.env.get("POSTGRES_PORT", "5434")  # Test port
+            port = self.env.get("POSTGRES_PORT", "5433")  # Dev/test port
             user = self.env.get("POSTGRES_USER", "postgres")
             password = self.env.get("POSTGRES_PASSWORD", "postgres")
             db_name = self.env.get("POSTGRES_DB", "netra_test")
@@ -175,7 +175,7 @@ class TestRepositoryFactory:
                 
             # Construct auth database URL
             host = self.env.get("AUTH_POSTGRES_HOST", self.env.get("POSTGRES_HOST", "localhost"))
-            port = self.env.get("AUTH_POSTGRES_PORT", self.env.get("POSTGRES_PORT", "5434"))
+            port = self.env.get("AUTH_POSTGRES_PORT", self.env.get("POSTGRES_PORT", "5433"))
             user = self.env.get("AUTH_POSTGRES_USER", self.env.get("POSTGRES_USER", "postgres"))
             password = self.env.get("AUTH_POSTGRES_PASSWORD", self.env.get("POSTGRES_PASSWORD", "postgres"))
             db_name = self.env.get("AUTH_POSTGRES_DB", "auth_test")

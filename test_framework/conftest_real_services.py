@@ -80,7 +80,7 @@ if "pytest" in sys.modules or get_test_env_manager().env.get("PYTEST_CURRENT_TES
         
         # Service endpoints for real testing (Docker containers)
         env.set("TEST_POSTGRES_HOST", "localhost", source="real_services_conftest")
-        env.set("TEST_POSTGRES_PORT", "5434", source="real_services_conftest")
+        env.set("TEST_POSTGRES_PORT", "5433", source="real_services_conftest")
         env.set("TEST_POSTGRES_USER", "test_user", source="real_services_conftest")
         env.set("TEST_POSTGRES_PASSWORD", "test_pass", source="real_services_conftest")
         env.set("TEST_POSTGRES_DB", "netra_test", source="real_services_conftest")

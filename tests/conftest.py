@@ -657,7 +657,7 @@ class E2EEnvironmentValidator:
         # Check PostgreSQL with proper error handling
         postgres_urls = [
             E2E_CONFIG["postgres_url"],
-            "postgresql://test:test@localhost:5434/netra_test",
+            "postgresql://test:test@localhost:5433/netra_test",
             "postgresql://netra:netra123@localhost:5433/netra_dev"
         ]
         

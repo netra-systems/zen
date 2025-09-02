@@ -61,7 +61,7 @@ class DockerPortDiscovery:
         "backend": 8001,
         "auth": 8082,
         "frontend": 3001,
-        "postgres": 5434,
+        "postgres": 5433,  # Updated to use dev PostgreSQL port
         "redis": 6381,
         "clickhouse": 8123,
     }

@@ -24,7 +24,7 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 # Set up test environment
-env.set('DATABASE_URL', 'postgresql://test_user:test_pass@localhost:5434/netra_test', "test")
+env.set('DATABASE_URL', 'postgresql://test_user:test_pass@localhost:5433/netra_test', "test")
 env.set('REDIS_URL', 'redis://localhost:6381', "test")
 env.set('TESTING', 'true', "test")
 env.set('AUTH_TEST_MODE', 'true', "test")
@@ -38,7 +38,7 @@ def test_database_connection_no_auth_errors():
     # Test basic database connectivity first
     try:
         import psycopg
-        postgres_url = 'postgresql://test_user:test_pass@localhost:5434/netra_test'
+        postgres_url = 'postgresql://test_user:test_pass@localhost:5433/netra_test'
         
         with psycopg.connect(postgres_url, connect_timeout=5) as conn:
             with conn.cursor() as cur:
@@ -48,7 +48,7 @@ def test_database_connection_no_auth_errors():
         print("✅ Basic database connectivity test passed")
     except Exception as e:
         print(f"❌ PostgreSQL not available: {e}")
-        print("Skipping test - requires PostgreSQL on localhost:5434")
+        print("Skipping test - requires PostgreSQL on localhost:5433")
         return
     
     print("Testing auth service database connection logs...")
@@ -201,7 +201,7 @@ def test_database_manager_no_credential_logging():
             "postgresql://user:password123@localhost/dbname",
             "postgresql+asyncpg://user:secret456@host/db?sslmode=require", 
             "postgres://admin:pass789@cloudsql/database",
-            "postgresql://test_user:test_pass@localhost:5434/netra_test",
+            "postgresql://test_user:test_pass@localhost:5433/netra_test",
         ]
         
         try:

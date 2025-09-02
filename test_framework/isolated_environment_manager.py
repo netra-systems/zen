@@ -236,7 +236,7 @@ class DatabaseTestResource(TestResource):
     def _build_connection_url(self, env: IsolatedEnvironment) -> str:
         """Build PostgreSQL connection URL from environment."""
         host = env.get("TEST_POSTGRES_HOST", "localhost")
-        port = env.get("TEST_POSTGRES_PORT", "5434")
+        port = env.get("TEST_POSTGRES_PORT", "5433")
         user = env.get("TEST_POSTGRES_USER", "test_user")
         password = env.get("TEST_POSTGRES_PASSWORD", "test_pass")
         database = env.get("TEST_POSTGRES_DB", "netra_test")
