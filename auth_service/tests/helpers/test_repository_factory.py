@@ -20,7 +20,7 @@ from auth_service.auth_core.database.repository import (
 from shared.isolated_environment import get_env
 
 
-class TestRepositoryFactory:
+class RepositoryFactory:
     """Factory for creating test repository instances with proper isolation."""
     
     def __init__(self, use_real_db: bool = False):
@@ -112,54 +112,54 @@ class TestRepositoryFactory:
 
 
 @pytest.fixture
-async def test_repository_factory() -> AsyncGenerator[TestRepositoryFactory, None]:
+async def test_repository_factory() -> AsyncGenerator[RepositoryFactory, None]:
     """Pytest fixture for test repository factory with mock database."""
-    factory = TestRepositoryFactory(use_real_db=False)
+    factory = RepositoryFactory(use_real_db=False)
     await factory.initialize()
     yield factory
     await factory.cleanup()
 
 
 @pytest.fixture
-async def real_test_repository_factory() -> AsyncGenerator[TestRepositoryFactory, None]:
+async def real_test_repository_factory() -> AsyncGenerator[RepositoryFactory, None]:
     """Pytest fixture for test repository factory with real database."""
-    factory = TestRepositoryFactory(use_real_db=True)
+    factory = RepositoryFactory(use_real_db=True)
     await factory.initialize()
     yield factory
     await factory.cleanup()
 
 
 @pytest.fixture
-async def mock_user_repository(test_repository_factory: TestRepositoryFactory) -> AuthUserRepository:
+async def mock_user_repository(test_repository_factory: RepositoryFactory) -> AuthUserRepository:
     """Get mock user repository."""
     return await test_repository_factory.get_user_repository()
 
 
 @pytest.fixture
-async def mock_session_repository(test_repository_factory: TestRepositoryFactory) -> AuthSessionRepository:
+async def mock_session_repository(test_repository_factory: RepositoryFactory) -> AuthSessionRepository:
     """Get mock session repository."""
     return await test_repository_factory.get_session_repository()
 
 
 @pytest.fixture
-async def mock_audit_repository(test_repository_factory: TestRepositoryFactory) -> AuthAuditRepository:
+async def mock_audit_repository(test_repository_factory: RepositoryFactory) -> AuthAuditRepository:
     """Get mock audit repository."""
     return await test_repository_factory.get_audit_repository()
 
 
 @pytest.fixture
-async def real_user_repository(real_test_repository_factory: TestRepositoryFactory) -> AuthUserRepository:
+async def real_user_repository(real_test_repository_factory: RepositoryFactory) -> AuthUserRepository:
     """Get real user repository."""
     return await real_test_repository_factory.get_user_repository()
 
 
 @pytest.fixture
-async def real_session_repository(real_test_repository_factory: TestRepositoryFactory) -> AuthSessionRepository:
+async def real_session_repository(real_test_repository_factory: RepositoryFactory) -> AuthSessionRepository:
     """Get real session repository."""
     return await real_test_repository_factory.get_session_repository()
 
 
 @pytest.fixture
-async def real_audit_repository(real_test_repository_factory: TestRepositoryFactory) -> AuthAuditRepository:
+async def real_audit_repository(real_test_repository_factory: RepositoryFactory) -> AuthAuditRepository:
     """Get real audit repository."""
     return await real_test_repository_factory.get_audit_repository()
