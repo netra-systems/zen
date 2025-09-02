@@ -639,8 +639,12 @@ class AgentRegistry:
             'migration_complete': False
         }
         
-        # Check if infrastructure registry is available
-        infrastructure_registry = self.get_infrastructure_registry()
+        # Check if infrastructure registry is available - use instance registry first
+        infrastructure_registry = self._agent_class_registry
+        if not infrastructure_registry:
+            # Fallback to get_infrastructure_registry
+            infrastructure_registry = self.get_infrastructure_registry()
+        
         if not infrastructure_registry:
             migration_status['migration_errors'].append("AgentClassRegistry not available")
             return migration_status
