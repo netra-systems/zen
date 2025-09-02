@@ -21,6 +21,10 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.modern_execution_helpers import SupervisorExecutionHelpers
 from netra_backend.app.agents.supervisor.workflow_execution import SupervisorWorkflowExecutor
+from netra_backend.app.agents.supervisor.state_manager import SessionlessAgentStateManager
+from netra_backend.app.agents.supervisor.pipeline_builder import PipelineBuilder
+from netra_backend.app.agents.supervisor.pipeline_executor import PipelineExecutor
+from netra_backend.app.agents.supervisor.observability_flow import get_supervisor_flow_logger
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.state_persistence import state_persistence_service
@@ -36,10 +40,10 @@ class SupervisorAgent(BaseAgent):
     """
     
     def __init__(self, 
-                 db_session: AsyncSession,
                  llm_manager: LLMManager,
                  websocket_bridge,
-                 tool_dispatcher: ToolDispatcher):
+                 tool_dispatcher: ToolDispatcher,
+                 db_session_factory=None):
         # Initialize BaseAgent with full infrastructure
         super().__init__(
             llm_manager=llm_manager,
@@ -52,12 +56,15 @@ class SupervisorAgent(BaseAgent):
         )
         
         # Initialize ONLY business logic components
-        self.db_session = db_session
+        self.db_session_factory = db_session_factory  # For on-demand session creation
         self.websocket_bridge = websocket_bridge  # Legacy compatibility
         self.state_persistence = state_persistence_service
         
         # Initialize agent registry and business logic components
         self._init_business_components(llm_manager, tool_dispatcher, websocket_bridge)
+        
+        # Initialize state management components (without global db_session)
+        self._init_state_management_components()
         
         # Execution lock for supervisor coordination
         self._execution_lock = asyncio.Lock()
@@ -81,6 +88,41 @@ class SupervisorAgent(BaseAgent):
         
         # Legacy compatibility properties
         self._init_legacy_compatibility_components()
+    
+    def _init_state_management_components(self) -> None:
+        """Initialize state management components without global db_session storage.
+        
+        These components will receive sessions through method parameters or 
+        create sessions on-demand using the session factory.
+        """
+        # Note: No db_session passed - components will get sessions from factory or context
+        # Components are created without global session storage to ensure proper isolation
+        
+        # State management (will get sessions on-demand)
+        self.state_manager = SessionlessAgentStateManager()  # No global session storage
+        
+        # Pipeline components (will get sessions through context)
+        self.pipeline_builder = PipelineBuilder()
+        self.pipeline_executor = None  # Initialize lazily when needed with session
+        
+        # Flow logger for observability
+        self.flow_logger = get_supervisor_flow_logger()
+    
+    async def _get_session_for_operation(self):
+        """Get a database session for an operation.
+        
+        Returns a session context manager or None if no factory available.
+        """
+        if self.db_session_factory:
+            return self.db_session_factory()
+        return None
+    
+    
+    def _get_pipeline_executor_with_session(self, session: AsyncSession) -> PipelineExecutor:
+        """Create pipeline executor instance with given session - no global storage."""
+        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+        engine = ExecutionEngine(self.registry)
+        return PipelineExecutor(engine, self.websocket_manager, session)
     
     def _init_legacy_compatibility_components(self) -> None:
         """Initialize components needed for legacy compatibility."""
@@ -158,8 +200,17 @@ class SupervisorAgent(BaseAgent):
     # === Business Logic Methods ===
     
     async def _run_supervisor_workflow(self, state: DeepAgentState, run_id: str) -> DeepAgentState:
-        """Run supervisor workflow using business logic components."""
-        return await self.execution_helpers.run_supervisor_workflow(state, run_id)
+        """Run supervisor workflow using workflow executor directly."""
+        flow_id = self.flow_logger.generate_flow_id()
+        self.flow_logger.start_flow(flow_id, run_id, 4)  # 4 main workflow steps
+        
+        # Use workflow executor to run the actual workflow steps
+        updated_state = await self.workflow_executor.execute_workflow_steps(
+            flow_id, state.user_request, state.chat_thread_id, state.user_id, run_id
+        )
+        
+        self.flow_logger.complete_flow(flow_id)
+        return updated_state
     
     async def _run_hooks(self, event: str, state: DeepAgentState, **kwargs) -> None:
         """Run registered hooks for an event."""

@@ -60,7 +60,21 @@ class SupervisorWorkflowExecutor:
                                    thread_id: str, user_id: str, run_id: str) -> DeepAgentState:
         """Execute initialize state step."""
         self.supervisor.flow_logger.step_started(flow_id, "initialize_state", "state_management")
-        state = await self.supervisor.state_manager.initialize_state(user_prompt, thread_id, user_id, run_id)
+        
+        # Get session for state initialization
+        if self.supervisor.db_session_factory:
+            async with self.supervisor.db_session_factory() as session:
+                state = await self.supervisor.state_manager.initialize_state_with_session(
+                    session, user_prompt, thread_id, user_id, run_id)
+        else:
+            # Fallback: create state without database persistence
+            from netra_backend.app.agents.state import DeepAgentState
+            state = DeepAgentState()
+            state.user_request = user_prompt
+            state.chat_thread_id = thread_id
+            state.user_id = user_id
+            state.step_count = 0
+        
         self.supervisor.flow_logger.step_completed(flow_id, "initialize_state", "state_management")
         return state
     
