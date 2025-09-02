@@ -860,8 +860,10 @@ class StartupOrchestrator:
             raise DeterministicStartupError("AgentWebSocketBridge not available for supervisor initialization")
         
         # Create supervisor with bridge for proper WebSocket integration
+        # Note: SupervisorAgent expects db_session, not factory - using None for now
+        # as per golden pattern where agents get session from context
         supervisor = SupervisorAgent(
-            self.app.state.db_session_factory,
+            None,  # db_session provided per-request, not at init
             self.app.state.llm_manager,
             agent_websocket_bridge,
             self.app.state.tool_dispatcher

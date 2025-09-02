@@ -70,49 +70,67 @@ async def _ensure_database_tables_exist(logger: logging.Logger, graceful_startup
             else:
                 raise RuntimeError(error_msg)
         
-        # Check if tables exist
-        async with engine.begin() as conn:
-            result = await conn.execute(text("""
-                SELECT table_name 
-                FROM information_schema.tables 
-                WHERE table_schema = 'public' 
-                ORDER BY table_name
-            """))
-            
-            existing_tables = set(row[0] for row in result.fetchall())
-            expected_tables = set(Base.metadata.tables.keys())
-            missing_tables = expected_tables - existing_tables
+        # Check if tables exist - use separate transaction for each operation
+        async with engine.connect() as conn:
+            # Start a new transaction for the query
+            async with conn.begin() as trans:
+                try:
+                    result = await conn.execute(text("""
+                        SELECT table_name 
+                        FROM information_schema.tables 
+                        WHERE table_schema = 'public' 
+                        ORDER BY table_name
+                    """))
+                    
+                    existing_tables = set(row[0] for row in result.fetchall())
+                    expected_tables = set(Base.metadata.tables.keys())
+                    missing_tables = expected_tables - existing_tables
+                    # Commit the transaction
+                    await trans.commit()
+                except Exception as e:
+                    # Rollback on error to clean transaction state
+                    await trans.rollback()
+                    raise e
             
             if missing_tables:
                 logger.warning(f"Missing {len(missing_tables)} database tables: {missing_tables}")
                 logger.debug("Creating missing database tables automatically...")
                 
-                # Create missing tables with error handling for duplicates
-                try:
-                    await conn.run_sync(Base.metadata.create_all)
-                except Exception as create_error:
-                    # Handle duplicate table/constraint errors gracefully
-                    error_msg = str(create_error).lower()
-                    if any(keyword in error_msg for keyword in [
-                        'already exists', 'duplicate', 'relation', 
-                        'constraint', 'violates unique'
-                    ]):
-                        logger.warning(f"Some tables already exist during creation (expected): {create_error}")
-                        logger.debug("Continuing - tables may have been created by another process")
-                    else:
-                        # Re-raise unexpected errors
-                        raise create_error
+                # Create missing tables in a separate transaction
+                async with conn.begin() as trans:
+                    try:
+                        await conn.run_sync(Base.metadata.create_all)
+                        await trans.commit()
+                    except Exception as create_error:
+                        await trans.rollback()
+                        # Handle duplicate table/constraint errors gracefully
+                        error_msg = str(create_error).lower()
+                        if any(keyword in error_msg for keyword in [
+                            'already exists', 'duplicate', 'relation', 
+                            'constraint', 'violates unique'
+                        ]):
+                            logger.warning(f"Some tables already exist during creation (expected): {create_error}")
+                            logger.debug("Continuing - tables may have been created by another process")
+                        else:
+                            # Re-raise unexpected errors
+                            raise create_error
                 
-                # Verify tables were created
-                result = await conn.execute(text("""
-                    SELECT table_name 
-                    FROM information_schema.tables 
-                    WHERE table_schema = 'public' 
-                    ORDER BY table_name
-                """))
-                
-                new_existing_tables = set(row[0] for row in result.fetchall())
-                still_missing = expected_tables - new_existing_tables
+                # Verify tables were created in a new transaction
+                async with conn.begin() as trans:
+                    try:
+                        result = await conn.execute(text("""
+                            SELECT table_name 
+                            FROM information_schema.tables 
+                            WHERE table_schema = 'public' 
+                            ORDER BY table_name
+                        """))
+                        
+                        new_existing_tables = set(row[0] for row in result.fetchall())
+                        still_missing = expected_tables - new_existing_tables
+                        await trans.commit()
+                    except Exception as e:
+                        await trans.rollback()
+                        raise e
                 
                 if still_missing:
                     error_msg = f"Failed to create tables: {still_missing}"

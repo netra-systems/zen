@@ -127,47 +127,41 @@ from test_framework.environment_markers import TestEnvironment, filter_tests_by_
 # Cypress integration
 from test_framework.cypress_runner import CypressTestRunner, CypressExecutionOptions
 
-# Test Orchestrator integration
-try:
+# SSOT Orchestration integration
+from test_framework.ssot.orchestration import orchestration_config
+from test_framework.ssot.orchestration_enums import E2ETestCategory, ProgressOutputMode, OrchestrationMode
+
+# Test Orchestrator integration - using SSOT config
+if orchestration_config.orchestrator_available:
     from test_framework.orchestration.test_orchestrator_agent import (
         TestOrchestratorAgent, OrchestrationConfig, ExecutionMode,
         add_orchestrator_arguments, execute_with_orchestrator
     )
-    ORCHESTRATOR_AVAILABLE = True
-except ImportError:
-    ORCHESTRATOR_AVAILABLE = False
+else:
     TestOrchestratorAgent = None
     OrchestrationConfig = None
     ExecutionMode = None
     add_orchestrator_arguments = None
     execute_with_orchestrator = None
 
-# NEW: Master Orchestration Controller integration
-try:
+# Master Orchestration Controller integration - using SSOT config
+if orchestration_config.master_orchestration_available:
     from test_framework.orchestration.master_orchestration_controller import (
-        MasterOrchestrationController, MasterOrchestrationConfig, OrchestrationMode,
+        MasterOrchestrationController, MasterOrchestrationConfig,
         create_fast_feedback_controller, create_full_layered_controller,
         create_background_only_controller, create_hybrid_controller, create_legacy_controller
     )
-    from test_framework.orchestration.progress_streaming_agent import ProgressOutputMode
-    MASTER_ORCHESTRATION_AVAILABLE = True
-except ImportError:
-    MASTER_ORCHESTRATION_AVAILABLE = False
+else:
     MasterOrchestrationController = None
-    OrchestrationMode = None
-    ProgressOutputMode = None
 
-# Background E2E Agent integration
-try:
+# Background E2E Agent integration - using SSOT config
+if orchestration_config.background_e2e_available:
     from test_framework.orchestration.background_e2e_agent import (
-        BackgroundE2EAgent, E2ETestCategory, BackgroundTaskConfig,
+        BackgroundE2EAgent, BackgroundTaskConfig,
         add_background_e2e_arguments, handle_background_e2e_commands
     )
-    BACKGROUND_E2E_AVAILABLE = True
-except ImportError:
-    BACKGROUND_E2E_AVAILABLE = False
+else:
     BackgroundE2EAgent = None
-    E2ETestCategory = None
     BackgroundTaskConfig = None
     add_background_e2e_arguments = None
     handle_background_e2e_commands = None
@@ -327,86 +321,102 @@ class UnifiedTestRunner:
     
     def run(self, args: argparse.Namespace) -> int:
         """Main entry point for test execution."""
-        # Initialize components
-        self.initialize_components(args)
+        # CRITICAL: Clean up any existing test environment before starting
+        # This prevents Docker resource accumulation and daemon crashes
+        try:
+            self.cleanup_test_environment()
+        except Exception as e:
+            print(f"[WARNING] Pre-test cleanup failed, continuing anyway: {e}")
         
-        # Configure environment
-        self._configure_environment(args)
-        
-        # Check service availability if real services or E2E tests are requested
-        categories_to_run = self._determine_categories_to_run(args)
-        e2e_categories = {'e2e', 'e2e_critical', 'cypress'}
-        running_e2e = bool(set(categories_to_run) & e2e_categories)
-        
-        # Skip local service checks for staging - use remote staging services
-        if args.env != 'staging' and (args.real_services or args.real_llm or args.env in ['dev'] or running_e2e):
-            self._check_service_availability(args)
-        
-        # Start test tracking session
-        if self.test_tracker:
-            self.test_tracker.start_session(
-                environment=args.env,
-                categories=args.categories if hasattr(args, 'categories') else None
-            )
-        
-        # Determine categories to run
-        categories_to_run = self._determine_categories_to_run(args)
-        if not categories_to_run:
-            print("No categories to run based on selection criteria")
-            return 1
-        
-        # Handle resume functionality
-        if args.resume_from:
-            categories_to_run = self._handle_resume(categories_to_run, args.resume_from)
-        
-        # Create execution plan
-        self.execution_plan = self.category_system.create_execution_plan(
-            categories_to_run,
-            max_parallel=args.workers
-        )
-        
-        # Start progress tracking
-        if self.progress_tracker:
-            run_id = f"run_{int(time.time())}"
-            self.progress_tracker.start_run(
-                run_id=run_id,
-                categories=categories_to_run,
-                test_level="category",
-                parallel_workers=args.workers,
-                fail_fast=args.fast_fail,
-                real_llm=args.real_llm,
-                environment=args.env
-            )
-        
-        # Show execution plan
-        self._show_execution_plan(self.execution_plan, args)
-        
-        # Execute categories by phase
-        results = self._execute_categories_by_phases(self.execution_plan, args)
-        
-        # Complete progress tracking
-        if self.progress_tracker:
-            success = all(r["success"] for r in results.values())
-            self.progress_tracker.complete_run(success)
-        
-        # Generate report
-        self._generate_report(results, args)
-        
-        # End test tracking session
-        if self.test_tracker:
-            session_summary = self.test_tracker.end_session(metadata={
-                "args": vars(args),
-                "execution_plan": self.execution_plan.to_dict() if self.execution_plan and hasattr(self.execution_plan, 'to_dict') else None
-            })
-            print(f"\nSession Summary: {session_summary['total_tests']} tests, "
-                  f"{session_summary['passed']} passed, {session_summary['failed']} failed, "
-                  f"Pass rate: {session_summary['pass_rate']:.1f}%")
+        try:
+            # Initialize components
+            self.initialize_components(args)
             
-            # Show test tracking report if verbose
-            if args.verbose:
-                print("\n" + self.test_tracker.generate_report())
+            # Configure environment
+            self._configure_environment(args)
+            
+            # Check service availability if real services or E2E tests are requested
+            categories_to_run = self._determine_categories_to_run(args)
+            e2e_categories = {'e2e', 'e2e_critical', 'cypress'}
+            running_e2e = bool(set(categories_to_run) & e2e_categories)
+            
+            # Skip local service checks for staging - use remote staging services
+            if args.env != 'staging' and (args.real_services or args.real_llm or args.env in ['dev'] or running_e2e):
+                self._check_service_availability(args)
+            
+            # Start test tracking session
+            if self.test_tracker:
+                self.test_tracker.start_session(
+                    environment=args.env,
+                    categories=args.categories if hasattr(args, 'categories') else None
+                )
+            
+            # Determine categories to run
+            categories_to_run = self._determine_categories_to_run(args)
+            if not categories_to_run:
+                print("No categories to run based on selection criteria")
+                return 1
+            
+            # Handle resume functionality
+            if args.resume_from:
+                categories_to_run = self._handle_resume(categories_to_run, args.resume_from)
+            
+            # Create execution plan
+            self.execution_plan = self.category_system.create_execution_plan(
+                categories_to_run,
+                max_parallel=args.workers
+            )
+            
+            # Start progress tracking
+            if self.progress_tracker:
+                run_id = f"run_{int(time.time())}"
+                self.progress_tracker.start_run(
+                    run_id=run_id,
+                    categories=categories_to_run,
+                    test_level="category",
+                    parallel_workers=args.workers,
+                    fail_fast=args.fast_fail,
+                    real_llm=args.real_llm,
+                    environment=args.env
+                )
+            
+            # Show execution plan
+            self._show_execution_plan(self.execution_plan, args)
+            
+            # Execute categories by phase
+            results = self._execute_categories_by_phases(self.execution_plan, args)
+            
+            # Complete progress tracking
+            if self.progress_tracker:
+                success = all(r["success"] for r in results.values())
+                self.progress_tracker.complete_run(success)
+            
+            # Generate report
+            self._generate_report(results, args)
+            
+            # End test tracking session
+            if self.test_tracker:
+                session_summary = self.test_tracker.end_session(metadata={
+                    "args": vars(args),
+                    "execution_plan": self.execution_plan.to_dict() if self.execution_plan and hasattr(self.execution_plan, 'to_dict') else None
+                })
+                print(f"\nSession Summary: {session_summary['total_tests']} tests, "
+                      f"{session_summary['passed']} passed, {session_summary['failed']} failed, "
+                      f"Pass rate: {session_summary['pass_rate']:.1f}%")
+                
+                # Show test tracking report if verbose
+                if args.verbose:
+                    print("\n" + self.test_tracker.generate_report())
+            
+            return 0 if all(r["success"] for r in results.values()) else 1
         
-        return 0 if all(r["success"] for r in results.values()) else 1
+        finally:
+            # CRITICAL: Always cleanup test environment after tests complete
+            # This ensures cleanup runs even on failures or exceptions
+            try:
+                self.cleanup_test_environment()
+            except Exception as e:
+                print(f"[WARNING] Post-test cleanup failed: {e}")
     
     def _initialize_docker_environment(self, args, running_e2e: bool):
         """Initialize Docker environment - automatically starts services if needed."""
@@ -425,55 +435,7 @@ class UnifiedTestRunner:
         print("DOCKER SERVICE INITIALIZATION")
         print("="*60)
         
-        # Check if Docker services are already running
-        try:
-            # Try simple Docker manager first for better UX
-            from scripts.docker import SimpleDockerManager
-            docker_env = 'test' if args.env == 'test' else 'dev'
-            simple_manager = SimpleDockerManager(docker_env)
-            
-            # Check current status
-            print(f"[INFO] Checking Docker services for {docker_env} environment...")
-            status = simple_manager.status()
-            
-            # Check if critical services are running
-            critical_services = ['postgres', 'redis', 'backend', 'auth']
-            services_running = all(
-                status.get(service, '').lower() in ['running', 'up']
-                for service in critical_services
-            )
-            
-            if not services_running:
-                print("\n[INFO] Docker services not running. Starting them automatically...")
-                print("      (This may take 30-60 seconds on first run)")
-                
-                if simple_manager.start():
-                    print("[SUCCESS] Docker services started successfully!")
-                else:
-                    print("\n" + "="*60)
-                    print("❌ DOCKER STARTUP FAILED")
-                    print("="*60)
-                    print("\nTo fix this issue, try one of these commands:")
-                    print("  1. python scripts/docker.py start        # Start test environment")
-                    print("  2. python scripts/docker.py start dev    # Start dev environment")
-                    print("  3. docker-compose up -d                  # Manual startup")
-                    print("\nFor more help: python scripts/docker.py help")
-                    print("="*60 + "\n")
-                    
-                    if running_e2e or args.real_services:
-                        raise RuntimeError("Docker services required but failed to start")
-            else:
-                print("[SUCCESS] Docker services already running!")
-                
-        except ImportError:
-            print("[WARNING] Simple Docker manager not available, using legacy method")
-        except Exception as e:
-            print(f"[WARNING] Simple Docker startup failed: {e}")
-            print("         Falling back to legacy Docker initialization...")
-            
-        # Now use centralized Docker manager if available
         if not CENTRALIZED_DOCKER_AVAILABLE:
-            self._initialize_docker_fallback(args, running_e2e)
             return
         
         # Determine environment type
@@ -540,96 +502,142 @@ class UnifiedTestRunner:
             self.docker_ports = None
             self._initialize_docker_fallback(args, running_e2e)
     
-    def _initialize_docker_fallback(self, args, running_e2e: bool):
-        """Fallback Docker initialization using port discovery when centralized manager unavailable."""
-        if not DOCKER_DISCOVERY_AVAILABLE:
-            print("\n" + "="*60)
-            print("❌ DOCKER SETUP INCOMPLETE")
-            print("="*60)
-            print("\nDocker port discovery module not available.")
-            print("\nTo fix this issue:")
-            print("  1. Ensure Docker Desktop is installed and running")
-            print("  2. Start services manually: python scripts/docker.py start")
-            print("  3. Or use: docker-compose up -d")
-            print("="*60 + "\n")
-            
-            if running_e2e or args.real_services:
-                raise RuntimeError("Docker required for real service testing but not available")
-            return
-            
+
+    def cleanup_test_environment(self):
+        """Comprehensive cleanup of test environment to prevent Docker resource accumulation.
+        
+        This function:
+        - Stops test containers with docker-compose down --volumes --remove-orphans
+        - Removes orphaned containers with name pattern "test-"
+        - Removes orphaned networks with name pattern "netra-test-"
+        - Logs all cleanup actions
+        """
+        print("[INFO] Starting comprehensive test environment cleanup...")
+        
         try:
-            # Use Docker port discovery to find service ports
-            discovery = DockerPortDiscovery(use_test_services=True)
-            port_mappings = discovery.discover_all_ports()
+            # 1. Docker Compose cleanup with volumes and orphans
+            compose_files = [
+                self.project_root / "docker-compose.test.yml",
+                self.project_root / "docker-compose.yml"
+            ]
             
-            if port_mappings:
-                print(f"[INFO] Discovered Docker services via port discovery")
-                self.docker_ports = {}
-                for service, mapping in port_mappings.items():
-                    self.docker_ports[service] = mapping.external_port
-                    print(f"  - {service}: {mapping.external_port}")
-                    
-                # Set discovered ports in environment
-                env = get_env()
-                if 'backend' in self.docker_ports:
-                    env.set('BACKEND_PORT', str(self.docker_ports['backend']), 'docker_discovery')
-                if 'auth' in self.docker_ports:
-                    env.set('AUTH_SERVICE_PORT', str(self.docker_ports['auth']), 'docker_discovery')
-                if 'postgres' in self.docker_ports:
-                    env.set('POSTGRES_PORT', str(self.docker_ports['postgres']), 'docker_discovery')
-                if 'redis' in self.docker_ports:
-                    env.set('REDIS_PORT', str(self.docker_ports['redis']), 'docker_discovery')
-                if 'clickhouse' in self.docker_ports:
-                    env.set('CLICKHOUSE_PORT', str(self.docker_ports['clickhouse']), 'docker_discovery')
-            else:
-                print("\n[WARNING] No Docker services discovered")
-                print("         Try: python scripts/docker.py start")
-                    
-        except Exception as e:
-            print(f"\n[WARNING] Docker port discovery failed: {e}")
-            
-            # Try port conflict resolution if available
-            if PORT_CONFLICT_RESOLVER_AVAILABLE and PortConflictResolver:
-                print("[INFO] Attempting to resolve port conflicts...")
-                try:
-                    # Clean up stale containers
-                    cleaned = PortConflictResolver.cleanup_stale_docker_containers()
-                    if cleaned > 0:
-                        print(f"[INFO] Cleaned up {cleaned} stale Docker containers")
-                    
-                    # Reset port allocation state
-                    PortConflictResolver.reset_port_allocation_state()
-                    print("[INFO] Reset port allocation state")
-                    
-                    # Retry discovery
-                    discovery = DockerPortDiscovery(use_test_services=True)
-                    port_mappings = discovery.discover_all_ports()
-                    
-                    if port_mappings:
-                        print(f"[INFO] Successfully recovered after conflict resolution")
-                        self.docker_ports = {}
-                        for service, mapping in port_mappings.items():
-                            self.docker_ports[service] = mapping.external_port
-                        return
+            for compose_file in compose_files:
+                if compose_file.exists():
+                    print(f"[INFO] Cleaning up docker-compose from {compose_file}")
+                    try:
+                        result = subprocess.run([
+                            "docker-compose", "-f", str(compose_file),
+                            "down", "--volumes", "--remove-orphans"
+                        ], capture_output=True, text=True, timeout=60)
                         
-                except Exception as resolve_error:
-                    print(f"[ERROR] Conflict resolution failed: {resolve_error}")
+                        if result.returncode == 0:
+                            print(f"[INFO] Successfully cleaned up compose from {compose_file.name}")
+                        else:
+                            print(f"[WARNING] Compose cleanup from {compose_file.name} returned code {result.returncode}: {result.stderr}")
+                    except subprocess.TimeoutExpired:
+                        print(f"[WARNING] Timeout cleaning up compose from {compose_file.name}")
+                    except Exception as e:
+                        print(f"[WARNING] Error cleaning up compose from {compose_file.name}: {e}")
             
-            if running_e2e or args.real_services:
-                print("\n" + "="*60)
-                print("❌ DOCKER SERVICES REQUIRED")
-                print("="*60)
-                print(f"\nCannot run {('E2E' if running_e2e else 'real service')} tests without Docker.")
-                print("\nTo fix this issue:")
-                print("  1. Start Docker Desktop")
-                print("  2. Run: python scripts/docker.py start")
-                print("  3. Or use: docker-compose up -d")
-                print("\nFor more help: python scripts/docker.py help")
-                print("="*60 + "\n")
-                raise RuntimeError("Docker services required but not available")
+            # 2. Remove orphaned test containers
+            try:
+                print("[INFO] Removing orphaned test containers...")
+                result = subprocess.run([
+                    "docker", "ps", "-aq", "--filter", "name=test-"
+                ], capture_output=True, text=True, timeout=30)
+                
+                if result.returncode == 0 and result.stdout.strip():
+                    container_ids = result.stdout.strip().split('\n')
+                    print(f"[INFO] Found {len(container_ids)} test containers to remove")
+                    
+                    # Remove containers
+                    remove_result = subprocess.run([
+                        "docker", "rm", "-f"
+                    ] + container_ids, capture_output=True, text=True, timeout=60)
+                    
+                    if remove_result.returncode == 0:
+                        print(f"[INFO] Successfully removed {len(container_ids)} test containers")
+                    else:
+                        print(f"[WARNING] Failed to remove some test containers: {remove_result.stderr}")
+                else:
+                    print("[INFO] No orphaned test containers found")
+                    
+            except subprocess.TimeoutExpired:
+                print("[WARNING] Timeout removing orphaned test containers")
+            except Exception as e:
+                print(f"[WARNING] Error removing orphaned test containers: {e}")
+            
+            # 3. Remove orphaned test networks
+            try:
+                print("[INFO] Removing orphaned test networks...")
+                result = subprocess.run([
+                    "docker", "network", "ls", "--filter", "name=netra-test-", "-q"
+                ], capture_output=True, text=True, timeout=30)
+                
+                if result.returncode == 0 and result.stdout.strip():
+                    network_ids = result.stdout.strip().split('\n')
+                    print(f"[INFO] Found {len(network_ids)} test networks to remove")
+                    
+                    # Remove networks
+                    for network_id in network_ids:
+                        try:
+                            remove_result = subprocess.run([
+                                "docker", "network", "rm", network_id
+                            ], capture_output=True, text=True, timeout=30)
+                            
+                            if remove_result.returncode == 0:
+                                print(f"[INFO] Removed test network {network_id[:12]}")
+                            else:
+                                print(f"[WARNING] Failed to remove network {network_id[:12]}: {remove_result.stderr}")
+                        except Exception as e:
+                            print(f"[WARNING] Error removing network {network_id[:12]}: {e}")
+                else:
+                    print("[INFO] No orphaned test networks found")
+                    
+            except subprocess.TimeoutExpired:
+                print("[WARNING] Timeout removing orphaned test networks")
+            except Exception as e:
+                print(f"[WARNING] Error removing orphaned test networks: {e}")
+            
+            # 4. Clean up dangling volumes (test-specific)
+            try:
+                print("[INFO] Removing dangling test volumes...")
+                result = subprocess.run([
+                    "docker", "volume", "ls", "-f", "dangling=true", "--filter", "name=test", "-q"
+                ], capture_output=True, text=True, timeout=30)
+                
+                if result.returncode == 0 and result.stdout.strip():
+                    volume_names = result.stdout.strip().split('\n')
+                    print(f"[INFO] Found {len(volume_names)} dangling test volumes to remove")
+                    
+                    # Remove volumes
+                    remove_result = subprocess.run([
+                        "docker", "volume", "rm"
+                    ] + volume_names, capture_output=True, text=True, timeout=60)
+                    
+                    if remove_result.returncode == 0:
+                        print(f"[INFO] Successfully removed {len(volume_names)} dangling test volumes")
+                    else:
+                        print(f"[WARNING] Failed to remove some dangling volumes: {remove_result.stderr}")
+                else:
+                    print("[INFO] No dangling test volumes found")
+                    
+            except subprocess.TimeoutExpired:
+                print("[WARNING] Timeout removing dangling test volumes")
+            except Exception as e:
+                print(f"[WARNING] Error removing dangling test volumes: {e}")
+            
+            print("[INFO] Comprehensive test environment cleanup completed")
+            
+        except Exception as e:
+            print(f"[ERROR] Critical error during test environment cleanup: {e}")
     
     def _cleanup_docker_environment(self):
-        """Clean up Docker environment."""
+        """Clean up Docker environment (legacy method - calls comprehensive cleanup)."""
+        # First do the comprehensive cleanup
+        self.cleanup_test_environment()
+        
+        # Then do the original manager-specific cleanup
         if self.docker_manager and self.docker_environment:
             try:
                 print(f"[INFO] Releasing Docker environment: {self.docker_environment}")
@@ -1912,7 +1920,7 @@ async def execute_orchestration_mode(args) -> int:
     Returns:
         Exit code (0 for success, non-zero for failure)
     """
-    if not MASTER_ORCHESTRATION_AVAILABLE:
+    if not orchestration_config.master_orchestration_available:
         print("❌ Master Orchestration system not available. Please check imports.")
         print("Falling back to legacy mode...")
         return 1
@@ -2389,15 +2397,15 @@ def main():
     )
     
     # Add orchestrator arguments if available
-    if ORCHESTRATOR_AVAILABLE:
+    if orchestration_config.orchestrator_available:
         add_orchestrator_arguments(parser)
     
     # Add background E2E arguments if available
-    if BACKGROUND_E2E_AVAILABLE:
+    if orchestration_config.background_e2e_available:
         add_background_e2e_arguments(parser)
     
     # NEW: Add Master Orchestration Controller arguments (only if not already added)
-    if MASTER_ORCHESTRATION_AVAILABLE and not ORCHESTRATOR_AVAILABLE:
+    if orchestration_config.master_orchestration_available and not orchestration_config.orchestrator_available:
         orchestration_group = parser.add_argument_group('Master Orchestration System')
         
         orchestration_group.add_argument(
@@ -2426,8 +2434,8 @@ def main():
         )
     
     # Add Master Orchestration specific arguments (non-conflicting)
-    if MASTER_ORCHESTRATION_AVAILABLE:
-        if not ORCHESTRATOR_AVAILABLE:
+    if orchestration_config.master_orchestration_available:
+        if not orchestration_config.orchestrator_available:
             orchestration_group = parser.add_argument_group('Master Orchestration System')
         else:
             # Add to existing orchestration group
@@ -2525,7 +2533,7 @@ def main():
         return 0
     
     # NEW: Handle Master Orchestration Controller execution first
-    if MASTER_ORCHESTRATION_AVAILABLE and (
+    if orchestration_config.master_orchestration_available and (
         getattr(args, 'master_orchestration', False) or
         getattr(args, 'orchestration_status', False) or
         (getattr(args, 'use_layers', False) and getattr(args, 'websocket_thread_id', None))
@@ -2535,18 +2543,18 @@ def main():
         return asyncio.run(execute_orchestration_mode(args))
     
     # Handle orchestrator execution if requested (legacy orchestrator)
-    if ORCHESTRATOR_AVAILABLE and hasattr(args, 'use_layers') and args.use_layers:
+    if orchestration_config.orchestrator_available and hasattr(args, 'use_layers') and args.use_layers:
         # Use async executor for orchestrator
         import asyncio
         return asyncio.run(execute_with_orchestrator(args))
     
     # Handle orchestrator show commands (legacy orchestrator)
-    if ORCHESTRATOR_AVAILABLE and hasattr(args, 'show_layers') and args.show_layers:
+    if orchestration_config.orchestrator_available and hasattr(args, 'show_layers') and args.show_layers:
         import asyncio
         return asyncio.run(execute_with_orchestrator(args))
     
     # Handle background E2E commands if requested
-    if BACKGROUND_E2E_AVAILABLE:
+    if orchestration_config.background_e2e_available:
         background_exit_code = handle_background_e2e_commands(args, PROJECT_ROOT)
         if background_exit_code is not None:
             return background_exit_code

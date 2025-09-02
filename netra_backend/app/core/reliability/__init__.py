@@ -31,18 +31,20 @@ except ImportError:
         base_delay: float = 1.0
         max_delay: float = 30.0
 
-# Legacy wrapper support
-AgentReliabilityWrapper = None
-get_reliability_wrapper = None
-
-try:
-    # Try to get the wrapper functions if they exist
-    from netra_backend.app.core.reliability_wrapper import (
-        AgentReliabilityWrapper,
-        get_reliability_wrapper
+# Legacy wrapper support - delegate to unified manager
+def get_reliability_wrapper(
+    agent_name: str,
+    circuit_breaker_config: 'CircuitBreakerConfig' = None,
+    retry_config: 'RetryConfig' = None
+) -> 'UnifiedReliabilityManager':
+    """Legacy wrapper function - delegates to unified reliability manager."""
+    return get_reliability_manager(
+        service_name=agent_name,
+        retry_config=retry_config
     )
-except ImportError:
-    pass
+
+# Set AgentReliabilityWrapper as an alias for backward compatibility
+AgentReliabilityWrapper = UnifiedReliabilityManager
 
 __all__ = [
     'get_reliability_manager',
