@@ -45,6 +45,8 @@ services:
         limits:
           memory: 256M
           cpus: '0.25'
+        reservations:
+          memory: 128M
 
   alpine-test-redis:
     image: redis:7-alpine
@@ -74,6 +76,8 @@ services:
         limits:
           memory: 128M
           cpus: '0.1'
+        reservations:
+          memory: 64M
 
   alpine-test-clickhouse:
     image: clickhouse/clickhouse-server:23-alpine
@@ -103,6 +107,8 @@ services:
         limits:
           memory: 256M
           cpus: '0.2'
+        reservations:
+          memory: 128M
 
   # ============================================
   # ALPINE APPLICATION SERVICES
@@ -152,8 +158,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 1G
           cpus: '0.5'
+        reservations:
+          memory: 512M
 
   alpine-test-auth:
     image: netra-alpine-test-auth:latest
@@ -195,8 +203,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 512M
           cpus: '0.25'
+        reservations:
+          memory: 256M
 
   alpine-test-frontend:
     image: netra-alpine-test-frontend:latest
@@ -234,6 +244,8 @@ services:
         limits:
           memory: 256M
           cpus: '0.3'
+        reservations:
+          memory: 128M
 
 networks:
   default:
