@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import (
     ActionsToMeetGoalsSubAgent,
 )
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.corpus_admin_sub_agent import CorpusAdminSubAgent
 from netra_backend.app.agents.data_helper_agent import DataHelperAgent
 
@@ -35,7 +35,7 @@ class AgentRegistry:
     def __init__(self, llm_manager: 'LLMManager', tool_dispatcher: 'ToolDispatcher'):
         self.llm_manager = llm_manager
         self.tool_dispatcher = tool_dispatcher
-        self.agents: Dict[str, BaseSubAgent] = {}
+        self.agents: Dict[str, BaseAgent] = {}
         self.websocket_bridge: Optional['AgentWebSocketBridge'] = None
         self._agents_registered = False
         self.registration_errors: Dict[str, str] = {}
@@ -102,7 +102,7 @@ class AgentRegistry:
         self._register_synthetic_data_agent()
         self._register_corpus_admin_agent()
     
-    def register(self, name: str, agent: BaseSubAgent) -> None:
+    def register(self, name: str, agent: BaseAgent) -> None:
         """Register a sub-agent"""
         if name in self.agents:
             logger.debug(f"Agent {name} already registered, skipping")
@@ -116,7 +116,7 @@ class AgentRegistry:
         self.registration_errors.pop(name, None)
         logger.debug(f"Registered agent: {name}")
     
-    async def register_agent_safely(self, name: str, agent_class: Type[BaseSubAgent], **kwargs) -> bool:
+    async def register_agent_safely(self, name: str, agent_class: Type[BaseAgent], **kwargs) -> bool:
         """Register an agent safely with error handling.
         
         Args:
@@ -156,7 +156,7 @@ class AgentRegistry:
             self.registration_errors[name] = error_msg
             return False
     
-    def get(self, name: str) -> Optional[BaseSubAgent]:
+    def get(self, name: str) -> Optional[BaseAgent]:
         """Get agent by name"""
         return self.agents.get(name)
     
@@ -236,7 +236,7 @@ class AgentRegistry:
         """List registered agent names"""
         return list(self.agents.keys())
     
-    def get_all_agents(self) -> List[BaseSubAgent]:
+    def get_all_agents(self) -> List[BaseAgent]:
         """Get all registered agents"""
         return list(self.agents.values())
     

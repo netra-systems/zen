@@ -125,12 +125,12 @@ class CriticalPathValidator:
                     if agents_missing_mixin or agents_missing_context_setter:
                         validation = CriticalPathValidation(
                             component="WebSocket Mixin Chain",
-                            path="BaseSubAgent -> WebSocketContextMixin",
+                            path="BaseAgent -> WebSocketContextMixin",
                             check_type="inheritance",
                             passed=False,
                             criticality=CriticalityLevel.CHAT_BREAKING,
                             failure_reason=f"Agents missing WebSocket capabilities: {agents_missing_mixin or agents_missing_context_setter}",
-                            remediation="Ensure all agents inherit from BaseSubAgent which includes WebSocketContextMixin",
+                            remediation="Ensure all agents inherit from BaseAgent which includes WebSocketContextMixin",
                             metadata={
                                 "missing_mixin": agents_missing_mixin,
                                 "missing_setter": agents_missing_context_setter
@@ -140,7 +140,7 @@ class CriticalPathValidator:
                     else:
                         validation = CriticalPathValidation(
                             component="WebSocket Mixin Chain",
-                            path="BaseSubAgent -> WebSocketContextMixin",
+                            path="BaseAgent -> WebSocketContextMixin",
                             check_type="inheritance",
                             passed=True,
                             criticality=CriticalityLevel.CHAT_BREAKING

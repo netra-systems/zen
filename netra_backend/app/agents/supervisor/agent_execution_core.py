@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-    from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.execution_context import (
@@ -20,39 +20,47 @@ logger = central_logger.get_logger(__name__)
 class AgentExecutionCore:
     """Handles core agent execution logic."""
     
-    def __init__(self, registry: 'AgentRegistry', websocket_notifier: Optional['WebSocketNotifier'] = None):
+    def __init__(self, registry: 'AgentRegistry', websocket_bridge: Optional['AgentWebSocketBridge'] = None):
         self.registry = registry
-        self.websocket_notifier = websocket_notifier
+        self.websocket_bridge = websocket_bridge
     
     async def execute_agent(self, context: AgentExecutionContext,
                            state: DeepAgentState) -> AgentExecutionResult:
         """Execute a single agent with retry logic."""
         # Send agent started notification
-        if self.websocket_notifier:
-            await self.websocket_notifier.send_agent_started(context)
+        if self.websocket_bridge:
+            await self.websocket_bridge.notify_agent_started(
+                run_id=context.run_id,
+                agent_name=context.agent_name
+            )
         
         agent = self._get_agent_or_error(context.agent_name)
         if isinstance(agent, AgentExecutionResult):
             # Send error notification for agent not found
-            if self.websocket_notifier:
-                await self.websocket_notifier.send_agent_error(
-                    context, agent.error, "agent_not_found"
+            if self.websocket_bridge:
+                await self.websocket_bridge.notify_agent_error(
+                    run_id=context.run_id,
+                    agent_name=context.agent_name,
+                    error=agent.error or "Agent not found"
                 )
             return agent
             
         result = await self._run_agent_with_timing(agent, context, state)
         
         # Send completion or error notification based on result
-        if self.websocket_notifier:
+        if self.websocket_bridge:
             if result.success:
-                await self.websocket_notifier.send_agent_completed(
-                    context, 
-                    {"success": True, "agent_name": context.agent_name},
-                    (result.duration * 1000) if result.duration else 0
+                await self.websocket_bridge.notify_agent_completed(
+                    run_id=context.run_id,
+                    agent_name=context.agent_name,
+                    result={"success": True, "agent_name": context.agent_name},
+                    execution_time_ms=(result.duration * 1000) if result.duration else 0
                 )
             else:
-                await self.websocket_notifier.send_agent_error(
-                    context, result.error or "Unknown error", "execution_failure"
+                await self.websocket_bridge.notify_agent_error(
+                    run_id=context.run_id,
+                    agent_name=context.agent_name,
+                    error=result.error or "Unknown error"
                 )
         
         return result
@@ -86,21 +94,15 @@ class AgentExecutionCore:
         if hasattr(state, 'user_id') and state.user_id:
             agent._user_id = state.user_id
         
-        # CRITICAL: Propagate WebSocket context to sub-agents for event emission
-        if self.websocket_notifier:
-            # Try multiple methods for backward compatibility
-            if hasattr(agent, 'set_websocket_context'):
-                # Preferred method: pass both context and notifier
-                agent.set_websocket_context(context, self.websocket_notifier)
-                # CRITICAL: Also propagate context to state for tool execution
-                if hasattr(agent, 'propagate_websocket_context_to_state'):
-                    agent.propagate_websocket_context_to_state(state)
-            elif hasattr(agent, 'websocket_notifier'):
-                # Direct notifier assignment
-                agent.websocket_notifier = self.websocket_notifier
-            elif hasattr(agent, 'websocket_manager'):
-                # Fallback: set manager directly (existing pattern)
-                agent.websocket_manager = self.websocket_notifier.websocket_manager
+        # CRITICAL: Propagate WebSocket bridge to agents for event emission
+        if self.websocket_bridge:
+            # Use the proper bridge pattern - agents have set_websocket_bridge method
+            if hasattr(agent, 'set_websocket_bridge'):
+                # CRITICAL: Pass bridge and run_id to agent
+                agent.set_websocket_bridge(self.websocket_bridge, context.run_id)
+                logger.info(f"✅ WebSocket bridge set on agent {agent.__class__.__name__} for run_id={context.run_id}")
+            else:
+                logger.warning(f"⚠️ Agent {agent.__class__.__name__} does not support set_websocket_bridge method")
                 
         await agent.execute(state, context.run_id, True)
     

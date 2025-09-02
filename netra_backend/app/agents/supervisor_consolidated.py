@@ -18,7 +18,7 @@ from langchain_core.messages import SystemMessage
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.websockets import WebSocketDisconnect
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.errors import ValidationError
 from netra_backend.app.agents.utils import extract_thread_id
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
@@ -75,7 +75,7 @@ from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from netra_backend.app.services.state_persistence import state_persistence_service
 
 logger = central_logger.get_logger(__name__)
-class SupervisorAgent(BaseSubAgent):
+class SupervisorAgent(BaseAgent):
     """Refactored Supervisor agent with modular design."""
     
     def __init__(self, 
@@ -89,7 +89,7 @@ class SupervisorAgent(BaseSubAgent):
     
     def _init_base(self, llm_manager: LLMManager, websocket_bridge) -> None:
         """Initialize base agent with modern execution interface."""
-        BaseSubAgent.__init__(self, llm_manager, name="Supervisor", 
+        BaseAgent.__init__(self, llm_manager, name="Supervisor", 
                             description="The supervisor agent that orchestrates sub-agents")
         # Set properties for standardized execution patterns
         self.agent_name = "Supervisor"
@@ -187,7 +187,7 @@ class SupervisorAgent(BaseSubAgent):
         hook_types = ["before_agent", "after_agent", "on_error", "on_retry", "on_complete"]
         return {hook_type: [] for hook_type in hook_types}
     
-    def register_agent(self, name: str, agent: BaseSubAgent) -> None:
+    def register_agent(self, name: str, agent: BaseAgent) -> None:
         """Register a sub-agent."""
         self.registry.register(name, agent)
     
@@ -197,7 +197,7 @@ class SupervisorAgent(BaseSubAgent):
             self.hooks[event].append(handler)
     
     @property
-    def agents(self) -> Dict[str, BaseSubAgent]:
+    def agents(self) -> Dict[str, BaseAgent]:
         """Get all registered agents."""
         return self.registry.agents
     
