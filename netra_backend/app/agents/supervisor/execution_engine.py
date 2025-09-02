@@ -52,8 +52,17 @@ class ExecutionEngine:
     def __init__(self, registry: 'AgentRegistry', websocket_bridge):
         self.registry = registry
         self.websocket_bridge = websocket_bridge
-        # Compatibility alias for tests expecting websocket_notifier
-        self.websocket_notifier = websocket_bridge
+        
+        # Compatibility: Create WebSocketNotifier for tests expecting it
+        # If websocket_bridge is a WebSocketManager, wrap it with WebSocketNotifier
+        if websocket_bridge and not hasattr(websocket_bridge, 'notify_agent_started'):
+            # Bridge is a WebSocketManager, wrap it with deprecated WebSocketNotifier for compatibility
+            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+            self.websocket_notifier = WebSocketNotifier(websocket_bridge)
+        else:
+            # Bridge is already an AgentWebSocketBridge or compatible object
+            self.websocket_notifier = websocket_bridge
+            
         self.active_runs: Dict[str, AgentExecutionContext] = {}
         self.run_history: List[AgentExecutionResult] = []
         self.execution_tracker = get_execution_tracker()

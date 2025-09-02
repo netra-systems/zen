@@ -291,8 +291,17 @@ class AgentRegistry:
             self.llm_manager, self.tool_dispatcher))
 
     def set_websocket_manager(self, websocket_manager: 'WebSocketManager') -> None:
-        """Set WebSocket manager for reliability events."""
+        """Set WebSocket manager for reliability events and enhance tool dispatcher."""
         self.websocket_manager = websocket_manager
+        
+        # CRITICAL: Enhance tool dispatcher with WebSocket notifications
+        if self.tool_dispatcher and websocket_manager:
+            try:
+                from netra_backend.app.agents.websocket_tool_enhancement import enhance_tool_dispatcher_with_notifications
+                enhance_tool_dispatcher_with_notifications(self.tool_dispatcher, websocket_manager)
+                logger.info("✅ Tool dispatcher enhanced with WebSocket notifications")
+            except Exception as e:
+                logger.error(f"Failed to enhance tool dispatcher with WebSocket: {e}")
         
         # Update reliability manager with WebSocket capabilities
         if self.reliability_manager:
