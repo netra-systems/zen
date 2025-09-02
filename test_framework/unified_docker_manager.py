@@ -240,7 +240,10 @@ class UnifiedDockerManager:
             "container": "netra-clickhouse",
             "default_port": 8123,  # Internal container port
             "health_endpoint": "/ping",
-            "memory_limit": "1024m"  # Increased for better analytics performance
+            "memory_limit": "1024m",  # Increased for better analytics performance
+            "health_timeout": 10,  # Increased timeout for ClickHouse startup
+            "health_retries": 20,  # More retries for slow ClickHouse initialization
+            "health_start_period": 60  # Extended start period for ClickHouse
         }
     }
     
@@ -509,24 +512,37 @@ class UnifiedDockerManager:
                 json.dump(state, f, indent=2, default=str)
     
     def _get_environment_name(self) -> str:
-        """Get environment name based on type"""
-        if self.environment_type == EnvironmentType.SHARED:
-            return "netra_test_shared"
-        elif self.environment_type == EnvironmentType.DEDICATED:
-            return f"netra_test_{self.test_id}"
+        """Get environment name based on type and Alpine setting"""
+        # For dedicated environments, always use test_id regardless of Alpine
+        if self.environment_type == EnvironmentType.DEDICATED and self.test_id:
+            if self.use_alpine:
+                return f"netra_alpine_test_{self.test_id}"
+            else:
+                return f"netra_test_{self.test_id}"
+        # For shared environments
+        elif self.environment_type == EnvironmentType.SHARED:
+            if self.use_alpine:
+                return "netra_alpine_test_shared"
+            else:
+                return "netra_test_shared"
+        # Other environment types
         else:
-            return f"netra_{self.environment_type.value}"
+            prefix = "netra_alpine" if self.use_alpine else "netra"
+            return f"{prefix}_{self.environment_type.value}"
     
     def _get_project_name(self) -> str:
         """Get unique project name for Docker Compose isolation."""
         if not self._project_name:
             # Generate unique project name for parallel test isolation
+            # Include Alpine prefix for consistent naming
+            alpine_prefix = "alpine-" if self.use_alpine else ""
+            
             if self.environment_type == EnvironmentType.DEDICATED:
-                self._project_name = f"netra-test-{self.test_id}"
+                self._project_name = f"netra-{alpine_prefix}test-{self.test_id}"
             else:
                 # For shared environments, add a timestamp to ensure uniqueness
                 timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-                self._project_name = f"netra-{self.environment}-{timestamp}-{self.test_id[:8]}"
+                self._project_name = f"netra-{alpine_prefix}{self.environment}-{timestamp}-{self.test_id[:8]}"
         return self._project_name
     
     def _allocate_service_ports(self) -> Dict[str, int]:
