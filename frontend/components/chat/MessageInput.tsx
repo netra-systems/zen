@@ -126,6 +126,8 @@ export const MessageInput = forwardRef<MessageInputRef>((props, ref) => {
       <div className="flex items-end gap-2">
         <div className="flex-1 relative">
           <textarea
+            id="message-input"
+            name="message"
             ref={textareaRef}
             value={message}
             onChange={(e) => setMessage(e.target.value)}

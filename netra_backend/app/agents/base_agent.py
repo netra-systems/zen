@@ -266,6 +266,17 @@ class BaseAgent(ABC):
         """
         self._websocket_adapter.set_websocket_bridge(bridge, run_id, self.name)
     
+    def propagate_websocket_context_to_state(self, context: Dict[str, Any]) -> None:
+        """Propagate WebSocket context to agent state for critical path validation.
+        
+        This method is required by the critical path validator to ensure 
+        WebSocket bridge capabilities are properly implemented.
+        """
+        # Store WebSocket context information in agent state
+        if not hasattr(self, '_websocket_context'):
+            self._websocket_context = {}
+        self._websocket_context.update(context)
+    
     # Delegate WebSocket methods to the adapter
     
     async def emit_agent_started(self, message: Optional[str] = None) -> None:

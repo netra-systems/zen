@@ -136,7 +136,8 @@ class AgentRegistry:
             
         # Set WebSocket bridge on agent if available and agent supports it
         if self.websocket_bridge and hasattr(agent, 'set_websocket_bridge'):
-            agent.set_websocket_bridge(self.websocket_bridge)
+            # Note: run_id will be set dynamically during execution, using 'registry' as placeholder
+            agent.set_websocket_bridge(self.websocket_bridge, 'registry')
         self.agents[name] = agent
         # Clear any previous registration errors
         self.registration_errors.pop(name, None)
@@ -165,7 +166,8 @@ class AgentRegistry:
             
             # Set websocket bridge if available and agent supports it
             if self.websocket_bridge and hasattr(agent, 'set_websocket_bridge'):
-                agent.set_websocket_bridge(self.websocket_bridge)
+                # Note: run_id will be set dynamically during execution, using 'registry' as placeholder
+                agent.set_websocket_bridge(self.websocket_bridge, 'registry')
                 
             # Store the agent
             self.agents[name] = agent
@@ -366,7 +368,8 @@ class AgentRegistry:
         for agent_name, agent in self.agents.items():
             try:
                 if hasattr(agent, 'set_websocket_bridge'):
-                    agent.set_websocket_bridge(bridge)
+                    # Note: run_id will be set dynamically during execution, using 'registry' as placeholder
+                    agent.set_websocket_bridge(bridge, 'registry')
                     agent_count += 1
                 else:
                     logger.debug(f"Agent {agent_name} does not support WebSocket bridge pattern")

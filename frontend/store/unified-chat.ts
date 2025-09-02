@@ -37,7 +37,8 @@ const createInitialState = () => ({
   connectionError: null,
   
   // Initialization state
-  initialized: false,
+  // Store is immediately initialized - no async setup needed
+  initialized: true,
   
   // Agent tracking
   executedAgents: new Map<string, AgentExecution>(),
@@ -216,7 +217,13 @@ const updateConnectionStatus = (
   error: string | undefined,
   set: (partial: Partial<UnifiedChatState>) => void
 ): void => {
-  set({ isConnected, connectionError: error || null });
+  set({ 
+    isConnected, 
+    connectionError: error || null,
+    // Mark store as initialized once we have a connection status update
+    // This ensures the UI doesn't get stuck waiting for initialization
+    initialized: true
+  });
 };
 
 const setActiveThreadId = (
@@ -390,8 +397,8 @@ const resetEntireStore = (set: (partial: Partial<UnifiedChatState>) => void): vo
     isConnected: false,
     connectionError: null,
     
-    // Reset initialization state
-    initialized: false,
+    // Reset initialization state - store remains initialized after reset
+    initialized: true,
     
     // Reset agent tracking
     executedAgents: new Map(),

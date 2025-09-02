@@ -97,14 +97,17 @@ def _create_supervisor_instance(
     thread_id: Optional[str]
 ) -> SupervisorAgent:
     """Create supervisor agent instance."""
+    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+    
+    # Create proper websocket bridge instead of passing websocket_manager
+    websocket_bridge = AgentWebSocketBridge() if websocket_manager else None
+    
     return SupervisorAgent(
         db_session=db,
         llm_manager=llm_manager,
-        websocket_manager=websocket_manager,
-        tool_dispatcher=tool_dispatcher,
-        config=config,
-        user_id=str(user.id) if user else None,
-        thread_id=thread_id
+        websocket_bridge=websocket_bridge,  # Proper AgentWebSocketBridge instance
+        tool_dispatcher=tool_dispatcher
+        # Note: config, user_id, thread_id are not part of SupervisorAgent constructor
     )
 
 

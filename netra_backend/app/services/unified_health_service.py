@@ -30,6 +30,8 @@ class UnifiedHealthService:
         self._results_cache: Dict[str, HealthCheckResult] = {}
         self._cache_ttl = 30  # seconds
         self._last_check_time: Dict[str, float] = {}
+        self._is_shutting_down = False
+        self._shutdown_timestamp: Optional[float] = None
         
     async def register_check(self, config: HealthCheckConfig) -> None:
         """Register a new health check."""
@@ -92,6 +94,22 @@ class UnifiedHealthService:
     
     async def get_readiness(self) -> StandardHealthResponse:
         """Get readiness status - is the service ready to serve traffic?"""
+        # If shutting down, immediately return not ready
+        if self._is_shutting_down:
+            from datetime import datetime, UTC
+            return StandardHealthResponse(
+                status=HealthStatus.UNHEALTHY.value,
+                service_name=self.service_name,
+                version=self.version,
+                timestamp=datetime.now(UTC).isoformat(),
+                environment=self._get_environment(),
+                summary={
+                    "message": "Service is shutting down",
+                    "shutdown_elapsed_seconds": time.time() - self._shutdown_timestamp if self._shutdown_timestamp else 0
+                },
+                details=self.get_shutdown_status()
+            )
+        
         readiness_checks = [name for name, config in self._checks.items() 
                            if config.check_type == CheckType.READINESS]
         
@@ -337,3 +355,25 @@ class UnifiedHealthService:
     def _get_environment(self) -> str:
         """Get current environment."""
         return get_env().get('ENVIRONMENT', 'development')
+    
+    async def mark_shutting_down(self) -> None:
+        """Mark service as shutting down for graceful shutdown."""
+        self._is_shutting_down = True
+        self._shutdown_timestamp = time.time()
+        logger.info("Health service marked as shutting down")
+    
+    def is_shutting_down(self) -> bool:
+        """Check if service is in shutdown mode."""
+        return self._is_shutting_down
+    
+    def get_shutdown_status(self) -> Dict[str, Any]:
+        """Get shutdown status information."""
+        if not self._is_shutting_down:
+            return {"shutting_down": False}
+        
+        elapsed = time.time() - self._shutdown_timestamp if self._shutdown_timestamp else 0
+        return {
+            "shutting_down": True,
+            "shutdown_elapsed_seconds": elapsed,
+            "shutdown_timestamp": self._shutdown_timestamp
+        }

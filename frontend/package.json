@@ -166,7 +166,7 @@
     "broadcast-channel": "^7.1.0",
     "cross-env": "^10.0.0",
     "cross-fetch": "^4.1.0",
-    "cypress": "^14.5.3",
+    "cypress": "^14.5.4",
     "eslint": "^9",
     "eslint-config-next": "^15.1.0",
     "jest": "^30.0.5",

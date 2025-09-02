@@ -38,7 +38,7 @@ async def process_user_message_with_notifications(
         # Send agent_started notification
         await send_agent_started_notification(user_id, thread, run)
         response = await execute_and_persist(
-            supervisor, user_id, text, thread, run, db_session, thread_service
+            supervisor, text, user_id, thread, run, db_session, thread_service
         )
         await send_response_safely(user_id, response)
     except WebSocketDisconnect:
@@ -53,6 +53,33 @@ async def execute_and_persist(
     """Execute supervisor and persist response"""
     run_id = run.id if run else user_id
     thread_id = thread.id if thread else user_id
+    
+    # CRITICAL: Register run-thread mapping for WebSocket routing
+    # This ensures all agent events reach the correct user
+    try:
+        from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
+        bridge = await get_agent_websocket_bridge()
+        
+        # Register the mapping BEFORE execution
+        success = await bridge.register_run_thread_mapping(
+            run_id=run_id,
+            thread_id=thread_id,
+            metadata={
+                "user_id": user_id,
+                "user_request": text[:100] if text else "",
+                "source": "message_processing"
+            }
+        )
+        
+        if success:
+            logger.info(f"✅ Registered run-thread mapping: run_id={run_id} → thread_id={thread_id}")
+        else:
+            logger.warning(f"⚠️ Failed to register run-thread mapping for run_id={run_id}")
+            
+    except Exception as e:
+        logger.error(f"🚨 Error registering run-thread mapping: {e}")
+        # Continue execution even if registration fails
+    
     response = await supervisor.run(text, thread_id, user_id, run_id)
     if db_session and response and thread:
         await persist_response(thread, run, response, db_session, thread_service)
