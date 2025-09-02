@@ -13,6 +13,11 @@ import argparse
 from datetime import datetime, timedelta
 import re
 import os
+
+
+class SecurityError(Exception):
+    """Critical security exception for Docker force flag violations."""
+    pass
 from pathlib import Path
 
 # Add project root to path
@@ -64,18 +69,27 @@ class DockerCleaner:
                 print(f"[WARNING] Could not initialize centralized manager: {e}")
                 self.use_centralized = False
     
-    def run_command(self, cmd: List[str], capture_output: bool = True) -> Optional[str]:
+    def run_command(self, cmd: List[str], capture_output: bool = True, input_data: str = None) -> Optional[str]:
         """
-        Execute a Docker command.
+        Execute a Docker command with CRITICAL force flag protection.
         
         Args:
             cmd: Command to execute
             capture_output: Whether to capture output
+            input_data: Input to send to command (for interactive confirmations)
             
         Returns:
             Command output if captured, None otherwise
+            
+        Raises:
+            SecurityError: If force flags detected (CRITICAL PROTECTION)
         """
         try:
+            # 🚨 CRITICAL SECURITY: Validate command for force flags
+            cmd_str = ' '.join(cmd)
+            if any(flag in cmd_str for flag in ['-f', '--force']):
+                raise SecurityError(f"FORBIDDEN: Force flag detected in command: {cmd_str}")
+                
             if self.dry_run and any(action in cmd for action in ['rm', 'rmi', 'prune', 'remove']):
                 print(f"[DRY RUN] Would execute: {' '.join(cmd)}")
                 return None
@@ -84,6 +98,7 @@ class DockerCleaner:
                 cmd,
                 capture_output=capture_output,
                 text=True,
+                input=input_data,
                 check=True
             )
             return result.stdout if capture_output else None
@@ -323,9 +338,10 @@ class DockerCleaner:
             print("[DRY RUN] Would clean build cache")
         else:
             print("Cleaning build cache...")
+            # SAFE: Interactive confirmation (NO --force flag)
             output = self.run_command([
-                'docker', 'builder', 'prune', '--force', '--all'
-            ])
+                'docker', 'builder', 'prune', '--all'
+            ], input_data='y\n')
             if output:
                 # Extract reclaimed space from output
                 match = re.search(r'reclaimed:\s*([\d.]+\s*[KMGT]?B)', output, re.IGNORECASE)
@@ -341,7 +357,8 @@ class DockerCleaner:
         """
         print("\n=== System Prune ===")
         
-        cmd = ['docker', 'system', 'prune', '--force']
+        # SAFE: Interactive confirmation (NO --force flag)
+        cmd = ['docker', 'system', 'prune']
         if all_images:
             cmd.append('--all')
         cmd.append('--volumes')
@@ -350,7 +367,8 @@ class DockerCleaner:
             print(f"[DRY RUN] Would execute: {' '.join(cmd)}")
         else:
             print("Running system prune...")
-            output = self.run_command(cmd)
+            # SAFE: Provide interactive confirmation automatically
+            output = self.run_command(cmd, input_data='y\n')
             if output:
                 print(output)
     
