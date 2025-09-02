@@ -1,13 +1,13 @@
-"""Clean ActionsToMeetGoalsSubAgent using BaseAgent infrastructure (<200 lines).
+"""ActionsToMeetGoalsSubAgent - Golden Pattern Implementation
 
-Follows the golden pattern established by TriageSubAgent:
-- Inherits reliability management, execution patterns, WebSocket events from BaseAgent
+Fully compliant with the golden pattern established by TriageSubAgent:
+- Inherits all infrastructure from BaseAgent (reliability, execution, WebSocket events)
 - Contains ONLY action plan generation business logic
-- Clean single inheritance pattern with no infrastructure duplication
-- Full SSOT compliance
+- Clean single inheritance pattern with zero infrastructure duplication
+- Complete SSOT compliance for optimal maintainability
 
-Business Value: Action plan generation for optimization strategies.
-BVJ: ALL segments | Strategic Planning | Automated action plan creation
+Business Value: Actionable plan generation from optimization strategies
+BVJ: ALL segments | Strategic Planning | Converts insights to executable actions
 """
 
 import time
@@ -28,10 +28,12 @@ logger = central_logger.get_logger(__name__)
 
 
 class ActionsToMeetGoalsSubAgent(BaseAgent):
-    """Clean action plan generation agent using BaseAgent infrastructure.
+    """Golden Pattern Action Plan Generation Agent.
     
-    Contains ONLY action plan business logic - all infrastructure
-    (reliability, execution, WebSocket events) inherited from BaseAgent.
+    SSOT Compliance: Contains ONLY action plan business logic
+    - All infrastructure (reliability, execution, WebSocket events) inherited from BaseAgent
+    - WebSocket events critical for chat value delivery to users
+    - Zero infrastructure duplication - follows golden pattern exactly
     """
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
@@ -151,15 +153,8 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
 
     @validate_agent_input('ActionsToMeetGoalsSubAgent')
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
-        """Execute action plan generation - uses BaseAgent's reliability infrastructure."""
-        await self.execute_with_reliability(
-            lambda: self._execute_action_plan_main(state, run_id, stream_updates),
-            "execute_action_plan",
-            fallback=lambda: self._execute_action_plan_fallback(state, run_id, stream_updates)
-        )
-        
-    async def _execute_action_plan_main(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
-        """Main execution path using modern patterns."""
+        """Execute action plan generation using BaseAgent's golden pattern infrastructure."""
+        # Use BaseAgent's modern execution pattern with reliability
         context = ExecutionContext(
             run_id=run_id,
             agent_name=self.name,
@@ -168,25 +163,30 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
             metadata={"description": self.description}
         )
         
-        # Use BaseAgent's modern execution infrastructure
-        if not await self.validate_preconditions(context):
-            raise ValueError("Precondition validation failed")
-            
-        result = await self.execute_core_logic(context)
+        # Execute using BaseAgent's reliability infrastructure
+        await self.execute_with_reliability(
+            lambda: self._execute_main_logic(context),
+            "execute_action_plan",
+            fallback=lambda: self._execute_fallback_logic(context)
+        )
         
-    async def _execute_action_plan_fallback(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
-        """Fallback execution with default action plan - includes proper WebSocket events."""
-        if stream_updates:
-            # CRITICAL: Send WebSocket events even in fallback mode for user transparency
+    async def _execute_main_logic(self, context: ExecutionContext) -> None:
+        """Main execution logic using golden pattern."""
+        if not await self.validate_preconditions(context):
+            raise ValueError("Precondition validation failed for action plan generation")
+        await self.execute_core_logic(context)
+        
+    async def _execute_fallback_logic(self, context: ExecutionContext) -> None:
+        """Fallback execution with proper WebSocket events for user transparency."""
+        if context.stream_updates:
             await self.emit_agent_started("Creating fallback action plan due to processing issues")
             await self.emit_thinking("Switching to fallback action plan generation...")
             
-        self.logger.warning(f"Using fallback action plan for run_id: {run_id}")
+        self.logger.warning(f"Using fallback action plan for run_id: {context.run_id}")
         fallback_plan = ActionPlanBuilder.get_default_action_plan()
-        state.action_plan_result = fallback_plan
+        context.state.action_plan_result = fallback_plan
         
-        if stream_updates:
-            # CRITICAL: Complete the WebSocket event flow even in fallback
+        if context.stream_updates:
             await self.emit_agent_completed({
                 "success": True,
                 "fallback_used": True,

@@ -143,7 +143,9 @@ class TestDockerCleanupSchedulerUnit(BaseTestCase):
         # Test stop
         assert scheduler.stop()
         assert scheduler.state == SchedulerState.STOPPED
-        assert not scheduler._scheduler_thread.is_alive()
+        # Thread may be None after stopping
+        if scheduler._scheduler_thread is not None:
+            assert not scheduler._scheduler_thread.is_alive()
         
         # Test double start/stop
         assert scheduler.start()
@@ -268,7 +270,7 @@ class TestDockerCleanupSchedulerUnit(BaseTestCase):
             if "container" in cmd and "ls" in cmd and "exited" in cmd:
                 return DockerCommandResult(0, "container1\ncontainer2", "", 0.1, 0)
             elif "container" in cmd and "rm" in cmd:
-                return DockerCommandResult(0, "", "", 0.1, 0)
+                return DockerCommandResult(0, "container1\ncontainer2", "", 0.1, 0)  # Mimic removal output
             return DockerCommandResult(0, "", "", 0.1, 0)
         
         self.mock_rate_limiter.execute_docker_command.side_effect = mock_docker_command

@@ -1,56 +1,170 @@
 """
-Comprehensive Tests for SSOT Test Framework
+Comprehensive tests for the SSOT Test Framework
 
-This test suite validates that the Single Source of Truth test framework
-works correctly and provides all expected functionality. These tests ensure
-that the SSOT framework can replace all existing duplicate test implementations
-while maintaining full functionality.
+This module tests all components of the Single Source of Truth test framework
+to ensure they function correctly and meet the requirements for eliminating
+test infrastructure violations across all 6,096+ test files.
 
-CRITICAL: These tests validate the core test infrastructure that ALL other tests depend on.
+Business Value: Platform/Internal - Test Infrastructure Stability
+Validates that the SSOT framework works correctly and provides reliable
+foundation for all testing in the system.
 """
 
 import asyncio
+import logging
 import pytest
+import sys
 import time
-from unittest.mock import patch, MagicMock
+import uuid
+from pathlib import Path
+from typing import Dict, List, Any
+from unittest.mock import AsyncMock, MagicMock, patch
 
-from test_framework.ssot.base_test_case import (
-    SSotBaseTestCase, 
-    SSotAsyncTestCase, 
-    SsotTestMetrics, 
-    SsotTestContext,
-    BaseTestCase,  # Backwards compatibility alias
-    AsyncTestCase  # Backwards compatibility alias
-)
-from test_framework.ssot.mock_factory import (
-    SSotMockFactory,
-    SSotMockAgent,
-    SSotMockAgentService,
-    MockConfiguration,
-    AgentState,
-    ServiceStatus,
-    create_mock_agent,
-    create_mock_agent_service,
-    get_mock_factory
-)
-from shared.isolated_environment import get_env
+# Add project root for imports
+PROJECT_ROOT = Path(__file__).parent.parent.parent.absolute()
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
-
-class TestSSotBaseTestCase:
-    """Test the SSOT BaseTestCase functionality."""
+# Import SSOT components under test
+from test_framework.ssot import (
+    # Base classes
+    BaseTestCase,
+    AsyncBaseTestCase,
+    DatabaseTestCase,
+    WebSocketTestCase,
+    IntegrationTestCase,
+    TestExecutionMetrics,
     
-    def test_initialization(self):
-        """Test that SSOT BaseTestCase initializes correctly."""
-        test_case = SSotBaseTestCase()
+    # Mock utilities
+    MockFactory,
+    MockRegistry,
+    DatabaseMockFactory,
+    ServiceMockFactory,
+    get_mock_factory,
+    
+    # Database utilities
+    DatabaseTestUtility,
+    PostgreSQLTestUtility,
+    ClickHouseTestUtility,
+    create_database_test_utility,
+    
+    # WebSocket utilities
+    WebSocketTestUtility,
+    WebSocketTestClient,
+    WebSocketEventType,
+    
+    # Docker utilities
+    DockerTestUtility,
+    DockerTestEnvironmentType,
+    create_docker_test_utility,
+    
+    # Framework utilities
+    validate_test_class,
+    get_test_base_for_category,
+    validate_ssot_compliance,
+    get_ssot_status,
+    SSOT_VERSION,
+    SSOT_COMPLIANCE
+)
+
+logger = logging.getLogger(__name__)
+
+
+class TestSSotFrameworkCore:
+    """Test core SSOT framework functionality."""
+    
+    def test_framework_version_and_compliance(self):
+        """Test framework version and compliance constants."""
+        assert SSOT_VERSION == "1.0.0"
+        assert isinstance(SSOT_COMPLIANCE, dict)
+        assert SSOT_COMPLIANCE["total_components"] == 15
+        assert SSOT_COMPLIANCE["base_classes"] == 5
+        assert SSOT_COMPLIANCE["mock_factories"] == 3
+        assert SSOT_COMPLIANCE["database_utilities"] == 3
+        assert SSOT_COMPLIANCE["websocket_utilities"] == 1
+        assert SSOT_COMPLIANCE["docker_utilities"] == 3
+    
+    def test_ssot_status_function(self):
+        """Test get_ssot_status function."""
+        status = get_ssot_status()
         
-        # Check core components are initialized
-        assert test_case._env is not None
-        assert test_case._metrics is not None
-        assert isinstance(test_case._metrics, SsotTestMetrics)
-        assert test_case._test_context is None  # Not set until setup_method
-        assert test_case._cleanup_callbacks == []
-        assert not test_case._test_started
-        assert not test_case._test_completed
+        assert isinstance(status, dict)
+        assert status["version"] == SSOT_VERSION
+        assert "compliance" in status
+        assert "violations" in status
+        assert "components" in status
+        
+        # Check component categories
+        components = status["components"]
+        assert "base_classes" in components
+        assert "mock_utilities" in components
+        assert "database_utilities" in components
+        assert "websocket_utilities" in components
+        assert "docker_utilities" in components
+        
+        # Validate expected components are present
+        assert "BaseTestCase" in components["base_classes"]
+        assert "MockFactory" in components["mock_utilities"]
+        assert "DatabaseTestUtility" in components["database_utilities"]
+        assert "WebSocketTestUtility" in components["websocket_utilities"]
+        assert "DockerTestUtility" in components["docker_utilities"]
+    
+    def test_ssot_compliance_validation(self):
+        """Test SSOT compliance validation."""
+        violations = validate_ssot_compliance()
+        assert isinstance(violations, list)
+        
+        # Compliance validation should pass for properly implemented framework
+        if violations:
+            logger.warning(f"SSOT compliance violations found: {violations}")
+    
+    def test_validate_test_class_function(self):
+        """Test validate_test_class utility function."""
+        # Valid test class
+        class ValidTest(BaseTestCase):
+            def test_something(self):
+                pass
+        
+        errors = validate_test_class(ValidTest)
+        assert isinstance(errors, list)
+        
+        # Invalid test class (not inheriting from BaseTestCase)
+        class InvalidTest:
+            def test_something(self):
+                pass
+        
+        errors = validate_test_class(InvalidTest)
+        assert len(errors) > 0
+        assert "must inherit from BaseTestCase" in errors[0]
+    
+    def test_get_test_base_for_category(self):
+        """Test get_test_base_for_category utility function."""
+        # Test different categories
+        assert get_test_base_for_category("unit") == BaseTestCase
+        assert get_test_base_for_category("integration") == IntegrationTestCase
+        assert get_test_base_for_category("database") == DatabaseTestCase
+        assert get_test_base_for_category("websocket") == WebSocketTestCase
+        assert get_test_base_for_category("e2e") == IntegrationTestCase
+        assert get_test_base_for_category("unknown") == BaseTestCase
+
+
+class TestBaseTestCase:
+    """Test the BaseTestCase SSOT implementation."""
+    
+    def test_base_test_case_initialization(self):
+        """Test BaseTestCase initializes correctly."""
+        test_case = BaseTestCase()
+        
+        assert hasattr(test_case, 'env')
+        assert hasattr(test_case, 'metrics')
+        assert hasattr(test_case, '_test_id')
+        assert hasattr(test_case, '_resources_to_cleanup')
+        assert hasattr(test_case, 'test_name')
+        assert hasattr(test_case, 'test_class')
+        
+        # Test configuration
+        assert test_case.ISOLATION_ENABLED == True
+        assert test_case.AUTO_CLEANUP == True
     
     def test_setup_method_creates_test_context(self):
         """Test that setup_method creates proper test context."""

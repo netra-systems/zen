@@ -214,31 +214,31 @@ class UnifiedDockerManager:
             "container": "netra-frontend", 
             "default_port": 3000,  # Default for reference
             "health_endpoint": "/",
-            "memory_limit": "256m"  # Reduced for stability
+            "memory_limit": "1024m"  # Increased for better stability
         },
         "auth": {
             "container": "netra-auth",
             "default_port": 8001,  # Default for reference
             "health_endpoint": "/health",
-            "memory_limit": "512m"
+            "memory_limit": "1024m"  # Increased from 512m to prevent memory pressure (73% usage)
         },
         "postgres": {
             "container": "netra-postgres",
             "default_port": 5432,  # Default for reference
             "health_cmd": "pg_isready",
-            "memory_limit": "512m"
+            "memory_limit": "1024m"  # Increased for better performance
         },
         "redis": {
             "container": "netra-redis",
             "default_port": 6379,  # Default for reference
             "health_cmd": "redis-cli ping",
-            "memory_limit": "256m"
+            "memory_limit": "512m"  # Increased from 256m for better performance
         },
         "clickhouse": {
             "container": "netra-clickhouse",
             "default_port": 8123,  # Default for reference
             "health_endpoint": "/ping",
-            "memory_limit": "512m"
+            "memory_limit": "1024m"  # Increased for better analytics performance
         }
     }
     

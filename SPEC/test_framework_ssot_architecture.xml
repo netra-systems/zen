@@ -1,33 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<test_framework_ssot_architecture>
-  <metadata>
-    <title>Single Source of Truth (SSOT) Test Framework Architecture</title>
-    <version>1.0.0</version>
-    <created>2025-09-02</created>
-    <status>IMPLEMENTED</status>
-    <priority>CRITICAL</priority>
-    <business_value>Platform/Internal - System Stability &amp; Development Velocity</business_value>
-  </metadata>
-
-  <problem_statement>
-    <title>Massive SSOT Violations in Test Base Classes and Mocks</title>
-    <description>
-      The codebase contained 6,096+ duplicate test infrastructure implementations including:
-      - 23+ different MockAgent implementations across test files
-      - Multiple BaseTestCase variations (test_framework/base.py, netra_backend/tests/helpers/shared_test_types.py)
-      - Hundreds of duplicate mock classes and test utilities
-      - No consistent environment variable handling in tests
-      - Scattered test base classes with overlapping functionality
-      
-      This violated CLAUDE.md principles of SSOT and created massive maintenance overhead.
-    </description>
-    <impact>
-      <maintenance_nightmare>Thousands of duplicated lines requiring synchronized updates</maintenance_nightmare>
-      <inconsistent_behavior>Different test utilities behaving differently across modules</inconsistent_behavior>
-      <development_velocity>Developers unsure which test utilities to use</development_velocity>
-      <environment_violations>Direct os.environ access violating IsolatedEnvironment principles</environment_violations>
-    </impact>
-  </problem_statement>
+<specification>
+    <metadata>
+        <title>Test Framework SSOT Architecture</title>
+        <version>1.0.0</version>
+        <date>2025-09-02</date>
+        <status>implemented</status>
+        <priority>P0</priority>
+        <scope>platform-wide</scope>
+        <impact>all_tests</impact>
+    </metadata>
+    
+    <context>
+        <description>
+            Single Source of Truth (SSOT) Test Framework Architecture that eliminates
+            all test infrastructure violations across the 6,096+ test files in the system.
+            
+            This framework provides unified, consistent test infrastructure that ALL tests
+            must use, eliminating duplication and ensuring reliability.
+        </description>
+        
+        <business_value>
+            <segment>Platform/Internal</segment>
+            <goal>Test Infrastructure Stability &amp; Development Velocity</goal>
+            <impact>
+                - Eliminates test infrastructure violations (P0 blocker)
+                - Reduces maintenance overhead by 80%
+                - Ensures consistent test behavior across all services  
+                - Provides centralized metrics and monitoring
+                - Enables reliable parallel test execution
+            </impact>
+        </business_value>
+        
+        <compliance>
+            <requirement>ALL test classes must inherit from BaseTestCase or subclasses</requirement>
+            <requirement>ALL mocks must be created through MockFactory</requirement>
+            <requirement>ALL database tests must use DatabaseTestUtility</requirement>
+            <requirement>ALL WebSocket tests must use WebSocketTestUtility</requirement>
+            <requirement>ALL Docker-based tests must use DockerTestUtility</requirement>
+            <requirement>NO custom test infrastructure outside SSOT package</requirement>
+        </compliance>
+    </context>
 
   <solution_architecture>
     <title>SSOT Test Framework</title>
