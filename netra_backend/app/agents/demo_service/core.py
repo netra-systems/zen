@@ -68,9 +68,9 @@ class DemoService(BaseAgent):
         """Initialize modern agent architecture components."""
         circuit_config = self._create_circuit_config()
         retry_config = self._create_retry_config()
-        self.reliability_manager = ReliabilityManager(circuit_config, retry_config)
+        self._unified_reliability_handler = ReliabilityManager(circuit_config, retry_config)
         self.monitor = ExecutionMonitor()
-        self.execution_engine = BaseExecutionEngine(self.reliability_manager, self.monitor)
+        self.execution_engine = BaseExecutionEngine(self._unified_reliability_handler, self.monitor)
         
     async def execute(self, state: 'DeepAgentState', run_id: str, stream_updates: bool) -> None:
         """

@@ -21,10 +21,8 @@ from typing import Any, Dict, List, Optional
 # Legacy compatibility
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
-from netra_backend.app.agents.base.errors import (
-    AgentExecutionError,
-    ExecutionErrorHandler,
-)
+from netra_backend.app.agents.base.errors import AgentExecutionError
+from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 
 # Modern execution patterns
@@ -60,9 +58,9 @@ class DemoTriageService(BaseAgent):
         circuit_config = CircuitBreakerConfig("demo_triage", 5, 60)
         retry_config = RetryConfig(max_retries=3, base_delay=1.0, max_delay=8.0)
         
-        self.reliability_manager = ReliabilityManager(circuit_config, retry_config)
+        self._unified_reliability_handler = ReliabilityManager(circuit_config, retry_config)
         self.execution_monitor = ExecutionMonitor()
-        self.execution_engine = BaseExecutionEngine(self.reliability_manager, self.execution_monitor)
+        self.execution_engine = BaseExecutionEngine(self._unified_reliability_handler, self.execution_monitor)
         
     async def execute(self, state: 'DeepAgentState', run_id: str, stream_updates: bool) -> None:
         """
