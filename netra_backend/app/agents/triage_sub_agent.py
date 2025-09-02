@@ -126,8 +126,8 @@ class TriageSubAgent:
         if stream_updates:
             await self._send_processing_update(context, "Analyzing user request...")
         
-        # Create triage core and processor (per-request)
-        triage_core = TriageCore(redis_manager=None)  # No shared state
+        # Create triage core and processor (per-request) with UserExecutionContext
+        triage_core = TriageCore(context)  # Pass context for proper request isolation
         processor = TriageProcessor(triage_core, llm_manager=None)  # No shared LLM manager
         
         # Process the request
@@ -176,48 +176,6 @@ class TriageSubAgent:
             # For now, just log the update
             pass
             
-    async def _get_cached_result(self, context: UserExecutionContext, request_hash: str, 
-                               triage_core: TriageCore) -> Optional[Dict[str, Any]]:
-        """Get cached triage result if available.
-        
-        Args:
-            context: User execution context
-            request_hash: Hash of the request for caching
-            triage_core: Triage core instance
-            
-        Returns:
-            Cached result or None if not found
-        """
-        try:
-            cached_result = await triage_core.get_cached_result(request_hash)
-            if cached_result:
-                logger.debug(f"Cache hit for run {context.run_id}")
-                # Update metadata with cache info
-                cached_result.setdefault("metadata", {})
-                cached_result["metadata"]["cache_hit"] = True
-                cached_result["metadata"]["run_id"] = context.run_id
-                return cached_result
-        except Exception as e:
-            logger.warning(f"Cache lookup failed for run {context.run_id}: {e}")
-        
-        return None
-    
-    async def _cache_result(self, context: UserExecutionContext, request_hash: str, 
-                          result: Dict[str, Any], triage_core: TriageCore) -> None:
-        """Cache triage result.
-        
-        Args:
-            context: User execution context
-            request_hash: Hash of the request for caching
-            result: Result to cache
-            triage_core: Triage core instance
-        """
-        try:
-            await triage_core.cache_result(request_hash, result)
-            logger.debug(f"Cached result for run {context.run_id}")
-        except Exception as e:
-            logger.warning(f"Failed to cache result for run {context.run_id}: {e}")
-        
     async def _process_with_llm(self, context: UserExecutionContext, user_request: str, 
                               processor: TriageProcessor, start_time: float) -> Dict[str, Any]:
         """Process request with LLM.
@@ -277,6 +235,37 @@ class TriageSubAgent:
         })
         
         return triage_result
+
+    async def _get_cached_result(self, context: UserExecutionContext, request_hash: str, 
+                               triage_core: TriageCore) -> Optional[Dict[str, Any]]:
+        """Get cached triage result if available.
+        
+        Args:
+            context: User execution context
+            request_hash: Hash of the request for caching
+            triage_core: Triage core instance
+            
+        Returns:
+            Cached result or None if not found
+        """
+        # For now, return None - caching will be implemented later
+        # In full implementation, this would check Redis or other cache
+        logger.debug(f"Cache lookup for run {context.run_id} (hash: {request_hash[:8]}...)")
+        return None
+    
+    async def _cache_result(self, context: UserExecutionContext, request_hash: str, 
+                          result: Dict[str, Any], triage_core: TriageCore) -> None:
+        """Cache triage result.
+        
+        Args:
+            context: User execution context
+            request_hash: Hash of the request for caching
+            result: Result to cache
+            triage_core: Triage core instance
+        """
+        # For now, do nothing - caching will be implemented later
+        # In full implementation, this would store in Redis or other cache
+        logger.debug(f"Caching result for run {context.run_id} (hash: {request_hash[:8]}...)")
 
     async def _create_fallback_result(self, context: UserExecutionContext, user_request: str, 
                                      error_message: str) -> Dict[str, Any]:

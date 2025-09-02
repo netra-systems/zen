@@ -127,8 +127,8 @@ class TriageSubAgent:
         if stream_updates:
             await self._send_processing_update(context, "Analyzing user request...")
         
-        # Create triage core and processor (per-request)
-        triage_core = TriageCore(redis_manager=None)  # No shared state
+        # Create triage core and processor (per-request) with UserExecutionContext
+        triage_core = TriageCore(context)  # Pass context for proper request isolation
         processor = TriageProcessor(triage_core, llm_manager=None)  # No shared LLM manager
         
         # Process the request
