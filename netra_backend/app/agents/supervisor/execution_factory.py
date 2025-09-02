@@ -247,15 +247,22 @@ class ExecutionEngineFactory:
         logger.info("ExecutionEngineFactory initialized")
         
     def configure(self, 
-                 agent_registry: 'AgentRegistry',
+                 agent_registry: Optional['AgentRegistry'],
                  websocket_bridge_factory: 'WebSocketBridgeFactory',
                  db_connection_pool: Any) -> None:
-        """Configure factory with infrastructure components."""
+        """Configure factory with infrastructure components.
+        
+        Note: agent_registry can be None when using UserExecutionContext pattern
+        where registry is created per-request.
+        """
         self._agent_registry = agent_registry
         self._websocket_bridge_factory = websocket_bridge_factory
         self._db_connection_pool = db_connection_pool
         
-        logger.info("✅ ExecutionEngineFactory configured with infrastructure components")
+        if agent_registry:
+            logger.info("✅ ExecutionEngineFactory configured with agent registry")
+        else:
+            logger.info("✅ ExecutionEngineFactory configured (per-request registry pattern)")
         
     async def create_execution_engine(self, 
                                     user_context: UserExecutionContext) -> 'IsolatedExecutionEngine':
@@ -271,8 +278,8 @@ class ExecutionEngineFactory:
         Raises:
             RuntimeError: If factory not configured or resource limits exceeded
         """
-        if not self._agent_registry:
-            raise RuntimeError("Factory not configured - call configure() first")
+        # Note: agent_registry can be None when using UserExecutionContext pattern
+        # where registry is created per-request - this is valid
             
         start_time = time.time()
         

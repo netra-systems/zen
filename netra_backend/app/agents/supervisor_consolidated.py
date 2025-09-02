@@ -95,7 +95,9 @@ class SupervisorAgent(BaseAgent):
         # Store LLM manager for creating request-scoped registries
         self._llm_manager = llm_manager
         
-        # Temporary legacy registry placeholder - will be created per-request
+        # CRITICAL: No placeholder registry or mock dispatcher
+        # Registry is created per-request in execute() for complete isolation
+        # This follows CLAUDE.md: "Mocks = Abomination" principle
         self.registry = None
         
         # Per-request execution lock (not global!)
