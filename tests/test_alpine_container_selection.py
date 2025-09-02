@@ -83,7 +83,7 @@ class TestAlpineParameterAcceptance:
         for input_val, expected in test_cases:
             try:
                 manager = UnifiedDockerManager(
-                    environment_type=EnvironmentType.TEST,
+                    environment_type=EnvironmentType.SHARED,
                     use_alpine=input_val
                 )
                 assert bool(manager.use_alpine) == expected, f"Input {input_val} should result in {expected}"
@@ -144,7 +144,7 @@ services:
         with patch.dict(os.environ, {"PROJECT_ROOT": str(temp_project_dir)}):
             try:
                 manager = UnifiedDockerManager(
-                    environment_type=EnvironmentType.TEST,
+                    environment_type=EnvironmentType.SHARED,
                     use_alpine=True
                 )
                 compose_file = manager._get_compose_file()
@@ -172,7 +172,7 @@ services:
         with patch.dict(os.environ, {"PROJECT_ROOT": str(temp_project_dir)}):
             try:
                 manager = UnifiedDockerManager(
-                    environment_type=EnvironmentType.TEST,
+                    environment_type=EnvironmentType.SHARED,
                     use_alpine=False
                 )
                 compose_file = manager._get_compose_file()
@@ -190,7 +190,7 @@ services:
         with patch.dict(os.environ, {"PROJECT_ROOT": str(temp_project_dir)}):
             try:
                 manager = UnifiedDockerManager(
-                    environment_type=EnvironmentType.TEST,
+                    environment_type=EnvironmentType.SHARED,
                     use_alpine=True
                 )
                 compose_file = manager._get_compose_file()
@@ -208,7 +208,7 @@ services:
         with patch.dict(os.environ, {"PROJECT_ROOT": str(temp_project_dir)}):
             try:
                 manager = UnifiedDockerManager(
-                    environment_type=EnvironmentType.TEST,
+                    environment_type=EnvironmentType.SHARED,
                     use_alpine=True
                 )
                 compose_file = manager._get_compose_file()
@@ -247,7 +247,7 @@ class TestAlpineIntegration:
         # This will FAIL until Alpine support is implemented
         try:
             manager = UnifiedDockerManager(
-                environment_type=EnvironmentType.TEST,
+                environment_type=EnvironmentType.SHARED,
                 test_id="alpine_integration_test",
                 use_alpine=True
             )
@@ -281,7 +281,7 @@ class TestAlpineIntegration:
             
             # Test regular containers
             manager_regular = UnifiedDockerManager(
-                environment_type=EnvironmentType.TEST,
+                environment_type=EnvironmentType.SHARED,
                 test_id="memory_test_regular",
                 use_alpine=False
             )
@@ -298,7 +298,7 @@ class TestAlpineIntegration:
             
             # Test Alpine containers  
             manager_alpine = UnifiedDockerManager(
-                environment_type=EnvironmentType.TEST,
+                environment_type=EnvironmentType.SHARED,
                 test_id="memory_test_alpine",
                 use_alpine=True
             )
@@ -370,7 +370,7 @@ class TestAlpineIntegration:
         
         try:
             manager = UnifiedDockerManager(
-                environment_type=EnvironmentType.TEST,
+                environment_type=EnvironmentType.SHARED,
                 test_id="alpine_health_test",
                 use_alpine=True
             )
@@ -404,7 +404,7 @@ class TestAlpineEdgeCases:
         try:
             # Start with regular containers
             manager = UnifiedDockerManager(
-                environment_type=EnvironmentType.TEST,
+                environment_type=EnvironmentType.SHARED,
                 test_id="switch_test",
                 use_alpine=False
             )
@@ -414,7 +414,7 @@ class TestAlpineEdgeCases:
             
             # Create new manager with Alpine
             manager_alpine = UnifiedDockerManager(
-                environment_type=EnvironmentType.TEST,
+                environment_type=EnvironmentType.SHARED,
                 test_id="switch_test_alpine",
                 use_alpine=True
             )
@@ -432,13 +432,13 @@ class TestAlpineEdgeCases:
         """Test running Alpine and regular containers in parallel."""
         try:
             manager_regular = UnifiedDockerManager(
-                environment_type=EnvironmentType.TEST,
+                environment_type=EnvironmentType.SHARED,
                 test_id="parallel_regular",
                 use_alpine=False
             )
             
             manager_alpine = UnifiedDockerManager(
-                environment_type=EnvironmentType.TEST, 
+                environment_type=EnvironmentType.SHARED, 
                 test_id="parallel_alpine",
                 use_alpine=True
             )
@@ -464,7 +464,7 @@ class TestAlpineEdgeCases:
             
             # Start regular containers
             manager_regular = UnifiedDockerManager(
-                environment_type=EnvironmentType.TEST,
+                environment_type=EnvironmentType.SHARED,
                 test_id="cleanup_test",
                 use_alpine=False
             )
@@ -474,7 +474,7 @@ class TestAlpineEdgeCases:
             
             # Switch to Alpine containers (should handle conflicts)
             manager_alpine = UnifiedDockerManager(
-                environment_type=EnvironmentType.TEST,
+                environment_type=EnvironmentType.SHARED,
                 test_id="cleanup_test_alpine",  # Different test_id
                 use_alpine=True
             )
@@ -502,7 +502,7 @@ class TestAlpineEdgeCases:
             with patch.dict(os.environ, {"PROJECT_ROOT": str(temp_path)}):
                 try:
                     manager = UnifiedDockerManager(
-                        environment_type=EnvironmentType.TEST,
+                        environment_type=EnvironmentType.SHARED,
                         use_alpine=True
                     )
                     
@@ -527,7 +527,7 @@ class TestAlpinePerformanceBenchmarks:
             # Benchmark regular containers
             start_time = time.time()
             manager_regular = UnifiedDockerManager(
-                environment_type=EnvironmentType.TEST,
+                environment_type=EnvironmentType.SHARED,
                 test_id="benchmark_regular",
                 use_alpine=False
             )
@@ -541,7 +541,7 @@ class TestAlpinePerformanceBenchmarks:
             # Benchmark Alpine containers
             start_time = time.time()
             manager_alpine = UnifiedDockerManager(
-                environment_type=EnvironmentType.TEST,
+                environment_type=EnvironmentType.SHARED,
                 test_id="benchmark_alpine", 
                 use_alpine=True
             )
@@ -575,7 +575,7 @@ class TestAlpinePerformanceBenchmarks:
             )
             
             manager_alpine = UnifiedDockerManager(
-                environment_type=EnvironmentType.TEST,
+                environment_type=EnvironmentType.SHARED,
                 use_alpine=True
             )
             
@@ -710,7 +710,7 @@ class TestAlpineFullIntegration:
         # This test simulates the full unified test runner with Alpine
         try:
             manager = UnifiedDockerManager(
-                environment_type=EnvironmentType.TEST,
+                environment_type=EnvironmentType.SHARED,
                 use_alpine=True,
                 test_id="full_suite_test"
             )

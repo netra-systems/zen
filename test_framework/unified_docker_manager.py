@@ -2844,20 +2844,5 @@ class ServiceOrchestrator(UnifiedDockerManager):
         logger.info("ServiceOrchestrator is deprecated - using UnifiedDockerManager")
 
 
-class UnifiedDockerManager(UnifiedDockerManager):
-    """Legacy compatibility class - redirects to UnifiedDockerManager"""
-    
-    def __init__(self, 
-                 environment_type: EnvironmentType = EnvironmentType.SHARED,
-                 test_id: Optional[str] = None,
-                 use_production_images: bool = True,
-                 use_alpine: bool = False):
-        """Initialize with legacy UnifiedDockerManager interface"""
-        super().__init__(
-            config=OrchestrationConfig(),
-            environment_type=environment_type, 
-            test_id=test_id,
-            use_production_images=use_production_images,
-            use_alpine=use_alpine
-        )
-        logger.info("UnifiedDockerManager is deprecated - using UnifiedDockerManager")
+# Removed duplicate UnifiedDockerManager class that was causing circular inheritance
+# The main UnifiedDockerManager class (starting at line 192) is the correct implementation
