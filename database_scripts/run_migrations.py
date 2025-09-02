@@ -9,7 +9,7 @@ except ImportError:
     # Fallback for standalone execution
     class FallbackEnv:
         def get(self, key, default=None):
-            return os.getenv(key, default)
+            return get_env().get(key, default)
         def set(self, key, value, source="migration_script"):
             os.environ[key] = value
     
