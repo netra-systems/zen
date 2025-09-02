@@ -7,7 +7,7 @@ preventing Enterprise customer loss due to unreliable agent operations.
 NOTE: These tests are currently outdated due to significant evolution in agent architectures.
 The current agent implementations (SupervisorAgent, TriageSubAgent, DataSubAgent) have 
 complex constructors requiring dependencies like LLMManager, ToolDispatcher, AsyncSession, etc.,
-and follow the BaseExecutionInterface pattern which is incompatible with the simple
+and follow standardized execution patterns which are incompatible with the simple
 constructor patterns assumed by these tests.
 
 These tests need to be redesigned to work with the current agent architectures or
@@ -51,6 +51,6 @@ async def test_data_sub_agent_resource_exhaustion_recovery():
 @pytest.mark.agents
 async def test_agent_health_check_prevents_cascade_failures():
     """Test agent health checks prevent cascade failures in workflows."""
-    # FIXME: All agents now require complex dependency injection and follow BaseExecutionInterface pattern
+    # FIXME: All agents now require complex dependency injection and follow standardized execution patterns
     # These tests need to be rewritten as integration tests with proper mocking/dependency setup
     pass
