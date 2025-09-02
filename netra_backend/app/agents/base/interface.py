@@ -7,39 +7,95 @@ Note: Legacy execution interface was removed as part of architecture simplificat
 All agents now use single inheritance from BaseAgent only.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Callable, Coroutine, Dict, Optional, Protocol, Union, runtime_checkable
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.schemas.agent_result_types import TypedAgentResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus
+from netra_backend.app.core.id_manager import IDManager
 # Note: Direct bridge imports removed for SSOT compliance
 # Use emit_* methods from BaseAgent's WebSocketBridgeAdapter instead
 
 
 @dataclass
 class ExecutionContext:
-    """Standardized execution context for all agents."""
+    """Standardized execution context for all agents.
+    
+    CRITICAL: thread_id is now derived from run_id to ensure SSOT compliance.
+    The IDManager handles all ID generation and extraction.
+    """
     run_id: str
     agent_name: str
     state: DeepAgentState
     stream_updates: bool = False
-    thread_id: Optional[str] = None
     user_id: Optional[str] = None
     retry_count: int = 0
     max_retries: int = 3
     start_time: Optional[datetime] = None
     correlation_id: Optional[str] = None
     metadata: Optional[Dict[str, Union[str, int, float, bool, None]]] = None
+    thread_id: Optional[str] = None  # For backwards compatibility in __init__
+    _cached_thread_id: Optional[str] = field(default=None, init=False, repr=False)
 
     def __post_init__(self) -> None:
-        """Initialize metadata if not provided."""
+        """Initialize metadata and validate ID consistency."""
         if self.metadata is None:
             self.metadata = {}
+        
         # Add timestamp property for compatibility with error handling
         if not hasattr(self, 'timestamp'):
             self.timestamp = self.start_time or datetime.now(timezone.utc)
+        
+        # Validate run_id format
+        if not IDManager.validate_run_id(self.run_id):
+            # For backwards compatibility, allow invalid run_ids but log warning
+            # This allows gradual migration of existing code
+            import logging
+            logging.warning(f"Invalid run_id format: '{self.run_id}'. Should be 'run_{{thread_id}}_{{uuid8}}'")
+        
+        # If explicit thread_id was provided, validate consistency
+        if self._explicit_thread_id:
+            extracted = IDManager.extract_thread_id(self.run_id)
+            if extracted and extracted != self._explicit_thread_id:
+                import logging
+                logging.warning(
+                    f"Thread ID mismatch: run_id contains '{extracted}' but "
+                    f"explicit thread_id is '{self._explicit_thread_id}'. Using extracted value."
+                )
+    
+    @property
+    def thread_id(self) -> Optional[str]:
+        """Get thread_id, deriving from run_id if needed (SSOT pattern)."""
+        if self._thread_id is None:
+            # Try to extract from run_id first (SSOT priority)
+            extracted = IDManager.extract_thread_id(self.run_id)
+            if extracted:
+                self._thread_id = extracted
+            elif self._explicit_thread_id:
+                # Fall back to explicitly provided thread_id for backwards compatibility
+                self._thread_id = self._explicit_thread_id
+            elif hasattr(self.state, 'chat_thread_id') and self.state.chat_thread_id:
+                # Final fallback to state's chat_thread_id for legacy support
+                self._thread_id = self.state.chat_thread_id
+        
+        return self._thread_id
+    
+    @thread_id.setter
+    def thread_id(self, value: Optional[str]) -> None:
+        """Set thread_id with validation warning."""
+        if value:
+            # Check consistency with run_id
+            extracted = IDManager.extract_thread_id(self.run_id)
+            if extracted and extracted != value:
+                import logging
+                logging.warning(
+                    f"Setting thread_id='{value}' but run_id contains '{extracted}'. "
+                    "This violates SSOT. Consider regenerating run_id."
+                )
+        self._thread_id = value
+        self._explicit_thread_id = value
     
     def __hash__(self) -> int:
         """Make ExecutionContext hashable using run_id and agent_name."""

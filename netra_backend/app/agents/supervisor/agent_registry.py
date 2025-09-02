@@ -24,6 +24,7 @@ from netra_backend.app.agents.synthetic_data_sub_agent import SyntheticDataSubAg
 
 # Import all sub-agents
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.goals_triage_sub_agent import GoalsTriageSubAgent
 from netra_backend.app.core.agent_execution_tracker import get_execution_tracker
 from netra_backend.app.core.reliability.unified_reliability_manager import (
     get_reliability_manager,
@@ -78,7 +79,7 @@ class AgentRegistry:
         # Validate agent registration counts
         agent_count = len(self.agents)
         expected_agents = ["triage", "data", "optimization", "actions", 
-                          "reporting", "data_helper", "synthetic_data", "corpus_admin"]
+                          "reporting", "goals_triage", "data_helper", "synthetic_data", "corpus_admin"]
         expected_min = len(expected_agents)
         
         if agent_count == 0:
@@ -122,6 +123,7 @@ class AgentRegistry:
     def _register_auxiliary_agents(self) -> None:
         """Register auxiliary agents."""
         self._register_reporting_agent()
+        self._register_goals_triage_agent()
         self._register_data_helper_agent()
         self._register_synthetic_data_agent()
         self._register_corpus_admin_agent()
@@ -268,6 +270,10 @@ class AgentRegistry:
         """Register reporting agent."""
         self.register("reporting", ReportingSubAgent(
             self.llm_manager, self.tool_dispatcher))
+    
+    def _register_goals_triage_agent(self) -> None:
+        """Register goals triage agent."""
+        self.register("goals_triage", GoalsTriageSubAgent())
     
     def _register_synthetic_data_agent(self) -> None:
         """Register synthetic data agent."""
