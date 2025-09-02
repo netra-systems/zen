@@ -1,13 +1,36 @@
 """
 Mission Critical Validation Test: Docker Unified Fixes
+
+TEAM DELTA INFRASTRUCTURE TESTS: Comprehensive unified fixes verification
+LIFE OR DEATH CRITICAL: All P0 and P1 fixes must be validated and operational
+
 Validates all P0 and P1 fixes from DOCKER_UNIFIED_AUDIT_REPORT.md
+
+INFRASTRUCTURE VALIDATION:
+- Unified fixes verification and integration testing
+- Performance impact assessment of fixes
+- Regression testing for all fixed components
+- Compatibility validation across environments
+- Fix stability under load and stress conditions
+- Monitoring and alerting for fix degradation
 """
 
 import os
 import sys
 import pytest
+import time
+import threading
+import statistics
+import psutil
+import uuid
+import json
+import logging
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+from typing import Dict, List, Any, Optional, Tuple
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
+from datetime import datetime
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent
@@ -213,6 +236,559 @@ ghi789         netra-dev-auth          0.0.0.0:8081->8081/tcp   netra-core-gener
         
         # All fixes should be implemented
         assert all("✅" in status for status in fixes_validated.values())
+
+
+@dataclass
+class UnifiedFixMetrics:
+    """Metrics for unified fixes performance and reliability."""
+    fix_name: str
+    validation_time_ms: float
+    memory_usage_mb: float
+    cpu_usage_percent: float
+    success_rate: float
+    error_count: int
+    performance_regression: bool = False
+
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+
+class TestDockerUnifiedFixesInfrastructure:
+    """Infrastructure tests for Docker unified fixes verification."""
+    
+    def test_unified_fixes_performance_impact(self):
+        """Test performance impact of all unified fixes."""
+        logger.info("📊 Testing unified fixes performance impact")
+        
+        fix_metrics = []
+        
+        # Test 1: Database credential fix performance
+        start_time = time.time()
+        memory_before = psutil.virtual_memory().used / (1024 * 1024)
+        cpu_before = psutil.cpu_percent(interval=0.1)
+        
+        # Run credential fix operations multiple times
+        error_count = 0
+        for i in range(20):
+            try:
+                dev_manager = UnifiedDockerManager(environment_type=EnvironmentType.DEVELOPMENT)
+                creds = dev_manager.get_database_credentials()
+                assert creds['user'] == 'netra'
+            except Exception as e:
+                error_count += 1
+                logger.warning(f"Credential fix iteration {i} failed: {e}")
+        
+        validation_time = (time.time() - start_time) * 1000
+        memory_after = psutil.virtual_memory().used / (1024 * 1024)
+        cpu_after = psutil.cpu_percent(interval=0.1)
+        
+        fix_metrics.append(UnifiedFixMetrics(
+            fix_name="Database Credentials Fix",
+            validation_time_ms=validation_time,
+            memory_usage_mb=memory_after - memory_before,
+            cpu_usage_percent=cpu_after - cpu_before,
+            success_rate=(20 - error_count) / 20 * 100,
+            error_count=error_count
+        ))
+        
+        # Test 2: Port discovery fix performance
+        start_time = time.time()
+        memory_before = psutil.virtual_memory().used / (1024 * 1024)
+        
+        error_count = 0
+        mock_output = """
+CONTAINER ID   IMAGE                   PORTS                    NAMES
+abc123         netra-dev-backend       0.0.0.0:8000->8000/tcp   netra-core-generation-1-dev-backend-1
+def456         netra-dev-postgres      0.0.0.0:5433->5432/tcp   netra-core-generation-1-dev-postgres-1
+ghi789         netra-dev-auth          0.0.0.0:8081->8081/tcp   netra-core-generation-1-dev-auth-1
+        """
+        
+        for i in range(50):
+            try:
+                manager = UnifiedDockerManager()
+                ports = manager._discover_ports_from_docker_ps(mock_output)
+                assert ports['backend'] == 8000
+                assert ports['postgres'] == 5433
+                assert ports['auth'] == 8081
+            except Exception as e:
+                error_count += 1
+                logger.warning(f"Port discovery fix iteration {i} failed: {e}")
+        
+        validation_time = (time.time() - start_time) * 1000
+        memory_after = psutil.virtual_memory().used / (1024 * 1024)
+        
+        fix_metrics.append(UnifiedFixMetrics(
+            fix_name="Port Discovery Fix",
+            validation_time_ms=validation_time,
+            memory_usage_mb=memory_after - memory_before,
+            cpu_usage_percent=0,  # CPU not heavily impacted by this test
+            success_rate=(50 - error_count) / 50 * 100,
+            error_count=error_count
+        ))
+        
+        # Analyze performance impact
+        logger.info("✅ Unified fixes performance impact analysis:")
+        for metric in fix_metrics:
+            logger.info(f"   {metric.fix_name}:")
+            logger.info(f"     Validation time: {metric.validation_time_ms:.2f}ms")
+            logger.info(f"     Memory usage: {metric.memory_usage_mb:.2f}MB")
+            logger.info(f"     Success rate: {metric.success_rate:.1f}%")
+            logger.info(f"     Errors: {metric.error_count}")
+        
+        # Validate performance requirements
+        for metric in fix_metrics:
+            assert metric.validation_time_ms < 5000, f"{metric.fix_name} validation too slow: {metric.validation_time_ms:.2f}ms"
+            assert metric.memory_usage_mb < 50, f"{metric.fix_name} memory usage too high: {metric.memory_usage_mb:.2f}MB"
+            assert metric.success_rate >= 95, f"{metric.fix_name} success rate too low: {metric.success_rate:.1f}%"
+    
+    def test_unified_fixes_regression_testing(self):
+        """Test for regressions in all unified fixes."""
+        logger.info("🔄 Testing unified fixes regression testing")
+        
+        regression_test_results = []
+        
+        # Regression Test 1: Credential consistency across environments
+        environments_tested = []
+        for env_type in [EnvironmentType.DEVELOPMENT, EnvironmentType.SHARED]:
+            for use_alpine in [False, True]:
+                try:
+                    manager = UnifiedDockerManager(
+                        environment_type=env_type,
+                        use_alpine=use_alpine
+                    )
+                    creds = manager.get_database_credentials()
+                    
+                    # Validate credential structure
+                    required_keys = ['user', 'password', 'database']
+                    missing_keys = [key for key in required_keys if key not in creds]
+                    
+                    environments_tested.append({
+                        'env_type': env_type.name,
+                        'use_alpine': use_alpine,
+                        'credentials_complete': len(missing_keys) == 0,
+                        'missing_keys': missing_keys,
+                        'creds_values': {k: v for k, v in creds.items() if k != 'password'}  # Don't log passwords
+                    })
+                    
+                except Exception as e:
+                    environments_tested.append({
+                        'env_type': env_type.name,
+                        'use_alpine': use_alpine,
+                        'credentials_complete': False,
+                        'error': str(e)
+                    })
+        
+        successful_environments = sum(1 for env in environments_tested if env.get('credentials_complete', False))
+        total_environments = len(environments_tested)
+        
+        regression_test_results.append({
+            'test_name': 'Credential Consistency',
+            'success_rate': (successful_environments / total_environments) * 100,
+            'total_tested': total_environments,
+            'successful': successful_environments,
+            'details': environments_tested
+        })
+        
+        # Regression Test 2: Container name parsing consistency
+        test_cases = [
+            ("netra-core-generation-1-dev-backend-1", "backend"),
+            ("netra-core-generation-1-test-postgres-1", "postgres"),
+            ("netra-core-generation-1-alpine-test-redis-1", "redis"),
+            ("netra-backend", "backend"),
+            ("netra-postgres", "postgres"),
+            ("custom-container-auth-service", "auth"),  # Edge case
+            ("very-long-container-name-backend-service", "backend"),  # Edge case
+        ]
+        
+        parsing_results = []
+        for container_name, expected_service in test_cases:
+            try:
+                manager = UnifiedDockerManager()
+                parsed_service = manager._parse_container_name_to_service(container_name)
+                parsing_results.append({
+                    'container_name': container_name,
+                    'expected': expected_service,
+                    'actual': parsed_service,
+                    'success': parsed_service == expected_service
+                })
+            except Exception as e:
+                parsing_results.append({
+                    'container_name': container_name,
+                    'expected': expected_service,
+                    'actual': None,
+                    'success': False,
+                    'error': str(e)
+                })
+        
+        successful_parsing = sum(1 for result in parsing_results if result['success'])
+        regression_test_results.append({
+            'test_name': 'Container Name Parsing',
+            'success_rate': (successful_parsing / len(parsing_results)) * 100,
+            'total_tested': len(parsing_results),
+            'successful': successful_parsing,
+            'details': parsing_results
+        })
+        
+        # Analyze regression results
+        logger.info("✅ Unified fixes regression test results:")
+        for result in regression_test_results:
+            logger.info(f"   {result['test_name']}: {result['success_rate']:.1f}% ({result['successful']}/{result['total_tested']})")
+        
+        # Validate no regressions
+        for result in regression_test_results:
+            assert result['success_rate'] >= 90, f"Regression detected in {result['test_name']}: {result['success_rate']:.1f}% success rate"
+    
+    def test_unified_fixes_compatibility_validation(self):
+        """Test compatibility of fixes across different environments."""
+        logger.info("🌐 Testing unified fixes compatibility validation")
+        
+        compatibility_matrix = {}
+        
+        # Test compatibility across environment types
+        environment_combinations = [
+            (EnvironmentType.DEVELOPMENT, False, "Development Standard"),
+            (EnvironmentType.DEVELOPMENT, True, "Development Alpine"),
+            (EnvironmentType.SHARED, False, "Test Standard"),
+            (EnvironmentType.SHARED, True, "Test Alpine"),
+        ]
+        
+        for env_type, use_alpine, env_description in environment_combinations:
+            compatibility_results = []
+            
+            try:
+                manager = UnifiedDockerManager(
+                    environment_type=env_type,
+                    use_alpine=use_alpine
+                )
+                
+                # Test 1: Credential retrieval
+                try:
+                    creds = manager.get_database_credentials()
+                    compatibility_results.append({
+                        'feature': 'credential_retrieval',
+                        'success': True,
+                        'has_required_keys': all(key in creds for key in ['user', 'password', 'database'])
+                    })
+                except Exception as e:
+                    compatibility_results.append({
+                        'feature': 'credential_retrieval',
+                        'success': False,
+                        'error': str(e)
+                    })
+                
+                # Test 2: URL building
+                try:
+                    url = manager._build_service_url_from_port("postgres", 5432)
+                    compatibility_results.append({
+                        'feature': 'url_building',
+                        'success': True,
+                        'url_valid': url.startswith('postgresql://'),
+                        'has_credentials': '@' in url
+                    })
+                except Exception as e:
+                    compatibility_results.append({
+                        'feature': 'url_building',
+                        'success': False,
+                        'error': str(e)
+                    })
+                
+                # Test 3: Environment detection
+                try:
+                    has_detection = hasattr(manager, 'detect_environment')
+                    compatibility_results.append({
+                        'feature': 'environment_detection',
+                        'success': has_detection,
+                        'method_available': has_detection
+                    })
+                except Exception as e:
+                    compatibility_results.append({
+                        'feature': 'environment_detection',
+                        'success': False,
+                        'error': str(e)
+                    })
+                
+                # Test 4: Container name pattern generation
+                try:
+                    has_pattern_method = hasattr(manager, '_get_container_name_pattern')
+                    pattern = manager._get_container_name_pattern() if has_pattern_method else None
+                    compatibility_results.append({
+                        'feature': 'container_name_pattern',
+                        'success': has_pattern_method and pattern is not None,
+                        'pattern_generated': pattern is not None
+                    })
+                except Exception as e:
+                    compatibility_results.append({
+                        'feature': 'container_name_pattern',
+                        'success': False,
+                        'error': str(e)
+                    })
+                
+                compatibility_matrix[env_description] = compatibility_results
+                
+            except Exception as e:
+                compatibility_matrix[env_description] = [
+                    {'feature': 'manager_instantiation', 'success': False, 'error': str(e)}
+                ]
+        
+        # Analyze compatibility results
+        logger.info("✅ Unified fixes compatibility analysis:")
+        for env_desc, results in compatibility_matrix.items():
+            successful_features = sum(1 for r in results if r['success'])
+            total_features = len(results)
+            compatibility_rate = (successful_features / total_features) * 100
+            
+            logger.info(f"   {env_desc}: {compatibility_rate:.1f}% ({successful_features}/{total_features} features)")
+            for result in results:
+                status = "✓" if result['success'] else "✗"
+                logger.info(f"     {status} {result['feature']}")
+        
+        # Validate compatibility requirements
+        for env_desc, results in compatibility_matrix.items():
+            successful_features = sum(1 for r in results if r['success'])
+            total_features = len(results)
+            compatibility_rate = (successful_features / total_features) * 100
+            
+            assert compatibility_rate >= 75, f"Compatibility too low for {env_desc}: {compatibility_rate:.1f}%"
+    
+    def test_unified_fixes_stability_under_load(self):
+        """Test stability of fixes under concurrent load."""
+        logger.info("🚀 Testing unified fixes stability under load")
+        
+        stability_results = []
+        
+        def concurrent_credential_operation(thread_id: int) -> Dict[str, Any]:
+            """Concurrent credential operation for stability testing."""
+            try:
+                start_time = time.time()
+                
+                # Rotate through different environments
+                env_type = EnvironmentType.DEVELOPMENT if thread_id % 2 == 0 else EnvironmentType.SHARED
+                use_alpine = thread_id % 3 == 0
+                
+                manager = UnifiedDockerManager(
+                    environment_type=env_type,
+                    use_alpine=use_alpine
+                )
+                
+                creds = manager.get_database_credentials()
+                url = manager._build_service_url_from_port("postgres", 5432)
+                
+                operation_time = time.time() - start_time
+                
+                return {
+                    'thread_id': thread_id,
+                    'success': True,
+                    'operation_time': operation_time,
+                    'env_type': env_type.name,
+                    'use_alpine': use_alpine,
+                    'credentials_valid': all(key in creds for key in ['user', 'password', 'database']),
+                    'url_valid': url.startswith('postgresql://')
+                }
+            except Exception as e:
+                return {
+                    'thread_id': thread_id,
+                    'success': False,
+                    'error': str(e),
+                    'operation_time': time.time() - start_time if 'start_time' in locals() else 0
+                }
+        
+        # Execute concurrent operations
+        concurrent_threads = 15
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            futures = [executor.submit(concurrent_credential_operation, i) for i in range(concurrent_threads)]
+            
+            for future in futures:
+                try:
+                    result = future.result(timeout=15)
+                    stability_results.append(result)
+                except Exception as e:
+                    stability_results.append({
+                        'success': False,
+                        'error': f"Future timeout/error: {str(e)}",
+                        'operation_time': 15.0  # Timeout time
+                    })
+        
+        # Analyze stability results
+        successful_operations = sum(1 for r in stability_results if r.get('success', False))
+        failed_operations = len(stability_results) - successful_operations
+        
+        if stability_results:
+            operation_times = [r.get('operation_time', 0) for r in stability_results if r.get('success', False)]
+            avg_operation_time = statistics.mean(operation_times) if operation_times else 0
+            max_operation_time = max(operation_times) if operation_times else 0
+            
+            # Check credential and URL validity
+            valid_credentials = sum(1 for r in stability_results if r.get('credentials_valid', False))
+            valid_urls = sum(1 for r in stability_results if r.get('url_valid', False))
+        else:
+            avg_operation_time = 0
+            max_operation_time = 0
+            valid_credentials = 0
+            valid_urls = 0
+        
+        success_rate = (successful_operations / len(stability_results)) * 100 if stability_results else 0
+        
+        logger.info("✅ Unified fixes stability under load:")
+        logger.info(f"   Success rate: {success_rate:.1f}% ({successful_operations}/{len(stability_results)})")
+        logger.info(f"   Average operation time: {avg_operation_time:.3f}s")
+        logger.info(f"   Maximum operation time: {max_operation_time:.3f}s")
+        logger.info(f"   Valid credentials: {valid_credentials}/{successful_operations}")
+        logger.info(f"   Valid URLs: {valid_urls}/{successful_operations}")
+        logger.info(f"   Failed operations: {failed_operations}")
+        
+        # Validate stability requirements
+        assert success_rate >= 90, f"Stability success rate too low: {success_rate:.1f}%"
+        assert max_operation_time < 10.0, f"Maximum operation time too high: {max_operation_time:.3f}s"
+        assert failed_operations < successful_operations * 0.1, f"Too many failed operations: {failed_operations}"
+    
+    def test_unified_fixes_monitoring_readiness(self):
+        """Test monitoring and alerting readiness for fixes."""
+        logger.info("📊 Testing unified fixes monitoring readiness")
+        
+        monitoring_metrics = {}
+        
+        # Monitor 1: Credential retrieval metrics
+        credential_metrics = {
+            'successful_retrievals': 0,
+            'failed_retrievals': 0,
+            'average_retrieval_time_ms': 0,
+            'environments_tested': []
+        }
+        
+        retrieval_times = []
+        for env_type in [EnvironmentType.DEVELOPMENT, EnvironmentType.SHARED]:
+            for use_alpine in [False, True]:
+                try:
+                    start_time = time.time()
+                    manager = UnifiedDockerManager(
+                        environment_type=env_type,
+                        use_alpine=use_alpine
+                    )
+                    creds = manager.get_database_credentials()
+                    retrieval_time = (time.time() - start_time) * 1000
+                    
+                    retrieval_times.append(retrieval_time)
+                    credential_metrics['successful_retrievals'] += 1
+                    credential_metrics['environments_tested'].append({
+                        'env_type': env_type.name,
+                        'use_alpine': use_alpine,
+                        'retrieval_time_ms': retrieval_time,
+                        'status': 'success'
+                    })
+                    
+                except Exception as e:
+                    credential_metrics['failed_retrievals'] += 1
+                    credential_metrics['environments_tested'].append({
+                        'env_type': env_type.name,
+                        'use_alpine': use_alpine,
+                        'error': str(e),
+                        'status': 'failed'
+                    })
+        
+        credential_metrics['average_retrieval_time_ms'] = statistics.mean(retrieval_times) if retrieval_times else 0
+        monitoring_metrics['credential_retrieval'] = credential_metrics
+        
+        # Monitor 2: Port discovery metrics
+        port_discovery_metrics = {
+            'successful_discoveries': 0,
+            'failed_discoveries': 0,
+            'average_discovery_time_ms': 0,
+            'ports_discovered': []
+        }
+        
+        mock_outputs = [
+            """CONTAINER ID   IMAGE     PORTS                    NAMES
+abc123         backend   0.0.0.0:8000->8000/tcp   netra-backend-1""",
+            """CONTAINER ID   IMAGE       PORTS                    NAMES
+def456         postgres    0.0.0.0:5433->5432/tcp   netra-postgres-1""",
+            """CONTAINER ID   IMAGE   PORTS                    NAMES
+ghi789         auth    0.0.0.0:8081->8081/tcp   netra-auth-1"""
+        ]
+        
+        discovery_times = []
+        for i, mock_output in enumerate(mock_outputs):
+            try:
+                start_time = time.time()
+                manager = UnifiedDockerManager()
+                ports = manager._discover_ports_from_docker_ps(mock_output)
+                discovery_time = (time.time() - start_time) * 1000
+                
+                discovery_times.append(discovery_time)
+                port_discovery_metrics['successful_discoveries'] += 1
+                port_discovery_metrics['ports_discovered'].extend(list(ports.keys()))
+                
+            except Exception as e:
+                port_discovery_metrics['failed_discoveries'] += 1
+                logger.warning(f"Port discovery test {i} failed: {e}")
+        
+        port_discovery_metrics['average_discovery_time_ms'] = statistics.mean(discovery_times) if discovery_times else 0
+        monitoring_metrics['port_discovery'] = port_discovery_metrics
+        
+        # Monitor 3: Configuration loading metrics
+        config_metrics = {
+            'config_files_accessible': 0,
+            'config_files_inaccessible': 0,
+            'validation_success_rate': 0
+        }
+        
+        try:
+            config_path = project_root / "config" / "docker_environments.yaml"
+            if config_path.exists():
+                config_metrics['config_files_accessible'] += 1
+                
+                # Test config loader
+                try:
+                    loader = DockerConfigLoader()
+                    environments_validated = 0
+                    total_environments = len(list(DockerEnvironment))
+                    
+                    for env in DockerEnvironment:
+                        try:
+                            config = loader.get_environment_config(env)
+                            if config:
+                                environments_validated += 1
+                        except:
+                            pass
+                    
+                    config_metrics['validation_success_rate'] = (environments_validated / total_environments) * 100
+                    
+                except Exception as e:
+                    logger.warning(f"Config loader test failed: {e}")
+                    config_metrics['validation_success_rate'] = 0
+            else:
+                config_metrics['config_files_inaccessible'] += 1
+                
+        except Exception as e:
+            config_metrics['config_files_inaccessible'] += 1
+            logger.warning(f"Config file check failed: {e}")
+        
+        monitoring_metrics['configuration'] = config_metrics
+        
+        # Analyze monitoring readiness
+        logger.info("✅ Unified fixes monitoring readiness:")
+        
+        # Credential monitoring
+        cred_success_rate = (credential_metrics['successful_retrievals'] / 
+                            (credential_metrics['successful_retrievals'] + credential_metrics['failed_retrievals'])) * 100 if (credential_metrics['successful_retrievals'] + credential_metrics['failed_retrievals']) > 0 else 0
+        logger.info(f"   Credential retrieval: {cred_success_rate:.1f}% success, avg {credential_metrics['average_retrieval_time_ms']:.2f}ms")
+        
+        # Port discovery monitoring  
+        port_success_rate = (port_discovery_metrics['successful_discoveries'] / 
+                            (port_discovery_metrics['successful_discoveries'] + port_discovery_metrics['failed_discoveries'])) * 100 if (port_discovery_metrics['successful_discoveries'] + port_discovery_metrics['failed_discoveries']) > 0 else 0
+        logger.info(f"   Port discovery: {port_success_rate:.1f}% success, avg {port_discovery_metrics['average_discovery_time_ms']:.2f}ms")
+        
+        # Configuration monitoring
+        logger.info(f"   Configuration: {config_metrics['validation_success_rate']:.1f}% validation success")
+        
+        # Validate monitoring readiness
+        assert cred_success_rate >= 75, f"Credential retrieval monitoring readiness insufficient: {cred_success_rate:.1f}%"
+        assert port_success_rate >= 75, f"Port discovery monitoring readiness insufficient: {port_success_rate:.1f}%"
+        assert config_metrics['validation_success_rate'] >= 50, f"Configuration monitoring readiness insufficient: {config_metrics['validation_success_rate']:.1f}%"
+        
+        # Return metrics for potential external monitoring integration
+        return monitoring_metrics
 
 
 if __name__ == "__main__":

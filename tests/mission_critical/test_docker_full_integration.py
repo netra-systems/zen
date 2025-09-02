@@ -1010,6 +1010,1339 @@ class TestDockerCIPipelineSimulation:
         logger.info(f"✅ Rolling deployment simulated successfully with {deployment_success_rate:.1f}% success rate")
 
 
+class TestDockerInfrastructureServiceStartup:
+    """Test Docker infrastructure service startup scenarios - 5 comprehensive tests."""
+    
+    def test_rapid_multi_service_startup_sequence(self, integration_framework):
+        """Test rapid startup of multiple services in sequence."""
+        logger.info("🚀 Testing rapid multi-service startup sequence")
+        
+        def startup_sequence_scenario():
+            operations_completed = 0
+            operations_failed = 0
+            services_deployed = 0
+            error_messages = []
+            startup_times = []
+            
+            try:
+                services_to_deploy = ['nginx_web', 'redis_cache', 'postgres_db']
+                overall_start_time = time.time()
+                
+                for service_name in services_to_deploy:
+                    service_start_time = time.time()
+                    
+                    if integration_framework.deploy_service(integration_framework.service_configs[service_name]):
+                        service_deploy_time = time.time() - service_start_time
+                        startup_times.append(service_deploy_time)
+                        services_deployed += 1
+                        operations_completed += 1
+                        
+                        # Ensure service starts within 30 seconds (requirement)
+                        if service_deploy_time < 30:
+                            operations_completed += 1
+                        else:
+                            operations_failed += 1
+                            error_messages.append(f"{service_name} startup took {service_deploy_time:.2f}s > 30s")
+                    else:
+                        operations_failed += 1
+                        error_messages.append(f"{service_name} deployment failed")
+                
+                total_startup_time = time.time() - overall_start_time
+                average_startup_time = sum(startup_times) / len(startup_times) if startup_times else 0
+                
+                success = (services_deployed == len(services_to_deploy) and 
+                          operations_failed == 0 and
+                          average_startup_time < 25)  # Stricter than 30s requirement
+                
+                return {
+                    'success': success,
+                    'operations_completed': operations_completed,
+                    'operations_failed': operations_failed,
+                    'services_deployed': services_deployed,
+                    'error_messages': error_messages,
+                    'performance_metrics': {
+                        'total_startup_time': total_startup_time,
+                        'average_startup_time': average_startup_time,
+                        'fastest_startup': min(startup_times) if startup_times else 0,
+                        'slowest_startup': max(startup_times) if startup_times else 0
+                    }
+                }
+                
+            except Exception as e:
+                return {
+                    'success': False,
+                    'operations_completed': operations_completed,
+                    'operations_failed': operations_failed + 1,
+                    'services_deployed': services_deployed,
+                    'error_messages': error_messages + [str(e)]
+                }
+        
+        result = integration_framework.run_integration_scenario(
+            "Rapid Multi-Service Startup Sequence",
+            startup_sequence_scenario
+        )
+        
+        assert result.success, f"Rapid startup sequence failed: {result.error_messages}"
+        assert result.services_deployed >= 3, f"Expected 3 services, got {result.services_deployed}"
+        
+        avg_startup = result.performance_metrics.get('average_startup_time', 999)
+        assert avg_startup < 30, f"Average startup time {avg_startup:.2f}s exceeds 30s requirement"
+        
+        logger.info(f"✅ Rapid startup completed: {result.services_deployed} services, avg {avg_startup:.2f}s")
+    
+    def test_alpine_optimization_startup_performance(self, integration_framework):
+        """Test Alpine container optimization for faster startup."""
+        logger.info("🏔️ Testing Alpine container optimization startup performance")
+        
+        def alpine_startup_scenario():
+            operations_completed = 0
+            operations_failed = 0
+            services_deployed = 0
+            error_messages = []
+            alpine_times = []
+            regular_times = []
+            
+            try:
+                # Test Alpine containers startup
+                alpine_containers = [
+                    ('nginx_alpine_test', 'nginx:alpine'),
+                    ('redis_alpine_test', 'redis:alpine'),
+                    ('postgres_alpine_test', 'postgres:15-alpine')
+                ]
+                
+                for container_name, image in alpine_containers:
+                    start_time = time.time()
+                    
+                    result = execute_docker_command([
+                        'docker', 'run', '-d', '--name', container_name,
+                        '--memory', '256m', image
+                    ])
+                    
+                    if result.returncode == 0:
+                        alpine_time = time.time() - start_time
+                        alpine_times.append(alpine_time)
+                        integration_framework.test_containers.append(container_name)
+                        services_deployed += 1
+                        operations_completed += 1
+                        
+                        if alpine_time < 15:  # Alpine should be very fast
+                            operations_completed += 1
+                        else:
+                            operations_failed += 1
+                            error_messages.append(f"Alpine {container_name} too slow: {alpine_time:.2f}s")
+                    else:
+                        operations_failed += 1
+                        error_messages.append(f"Alpine {container_name} failed: {result.stderr}")
+                
+                # Compare with regular containers if time allows
+                if operations_failed == 0:
+                    regular_containers = [
+                        ('nginx_regular_test', 'nginx:latest'),
+                    ]
+                    
+                    for container_name, image in regular_containers:
+                        start_time = time.time()
+                        
+                        result = execute_docker_command([
+                            'docker', 'run', '-d', '--name', container_name,
+                            '--memory', '256m', image
+                        ])
+                        
+                        if result.returncode == 0:
+                            regular_time = time.time() - start_time
+                            regular_times.append(regular_time)
+                            integration_framework.test_containers.append(container_name)
+                            operations_completed += 1
+                
+                avg_alpine_time = sum(alpine_times) / len(alpine_times) if alpine_times else 0
+                avg_regular_time = sum(regular_times) / len(regular_times) if regular_times else 0
+                
+                performance_improvement = ((avg_regular_time - avg_alpine_time) / avg_regular_time * 100 
+                                         if avg_regular_time > 0 else 0)
+                
+                success = (services_deployed >= 3 and 
+                          operations_failed == 0 and
+                          avg_alpine_time < 15)
+                
+                return {
+                    'success': success,
+                    'operations_completed': operations_completed,
+                    'operations_failed': operations_failed,
+                    'services_deployed': services_deployed,
+                    'error_messages': error_messages,
+                    'performance_metrics': {
+                        'average_alpine_startup': avg_alpine_time,
+                        'average_regular_startup': avg_regular_time,
+                        'performance_improvement_percent': performance_improvement,
+                        'alpine_containers_tested': len(alpine_times)
+                    }
+                }
+                
+            except Exception as e:
+                return {
+                    'success': False,
+                    'operations_completed': operations_completed,
+                    'operations_failed': operations_failed + 1,
+                    'services_deployed': services_deployed,
+                    'error_messages': error_messages + [str(e)]
+                }
+        
+        result = integration_framework.run_integration_scenario(
+            "Alpine Optimization Startup Performance",
+            alpine_startup_scenario
+        )
+        
+        assert result.success, f"Alpine optimization test failed: {result.error_messages}"
+        
+        avg_alpine = result.performance_metrics.get('average_alpine_startup', 999)
+        assert avg_alpine < 15, f"Alpine startup {avg_alpine:.2f}s not optimized enough"
+        
+        logger.info(f"✅ Alpine optimization validated: avg {avg_alpine:.2f}s startup time")
+    
+    def test_concurrent_service_startup_load(self, integration_framework):
+        """Test concurrent startup of multiple services under load."""
+        logger.info("⚡ Testing concurrent service startup under load")
+        
+        def concurrent_startup_scenario():
+            operations_completed = 0
+            operations_failed = 0
+            services_deployed = 0
+            error_messages = []
+            concurrent_results = []
+            
+            def deploy_service_concurrently(service_info):
+                service_name, image = service_info
+                container_name = f"{service_name}_{uuid.uuid4().hex[:6]}"
+                
+                try:
+                    start_time = time.time()
+                    
+                    result = execute_docker_command([
+                        'docker', 'run', '-d', '--name', container_name,
+                        '--memory', '128m', '--cpus', '0.5', image, 'sleep', '60'
+                    ])
+                    
+                    deploy_time = time.time() - start_time
+                    
+                    if result.returncode == 0:
+                        return {
+                            'container_name': container_name,
+                            'success': True,
+                            'deploy_time': deploy_time,
+                            'message': f"Successfully deployed {container_name}"
+                        }
+                    else:
+                        return {
+                            'container_name': container_name,
+                            'success': False,
+                            'deploy_time': deploy_time,
+                            'message': f"Failed to deploy {container_name}: {result.stderr}"
+                        }
+                        
+                except Exception as e:
+                    return {
+                        'container_name': container_name,
+                        'success': False,
+                        'deploy_time': time.time() - start_time if 'start_time' in locals() else 0,
+                        'message': f"Exception deploying {container_name}: {e}"
+                    }
+            
+            try:
+                # Define services for concurrent deployment
+                concurrent_services = [
+                    ('nginx_concurrent', 'nginx:alpine'),
+                    ('redis_concurrent', 'redis:alpine'),
+                    ('alpine_concurrent_1', 'alpine:latest'),
+                    ('alpine_concurrent_2', 'alpine:latest'),
+                    ('alpine_concurrent_3', 'alpine:latest'),
+                    ('postgres_concurrent', 'postgres:15-alpine')
+                ]
+                
+                # Deploy all services concurrently
+                with ThreadPoolExecutor(max_workers=6) as executor:
+                    futures = [
+                        executor.submit(deploy_service_concurrently, service_info)
+                        for service_info in concurrent_services
+                    ]
+                    
+                    for future in as_completed(futures, timeout=45):
+                        try:
+                            result_data = future.result()
+                            concurrent_results.append(result_data)
+                            
+                            if result_data['success']:
+                                operations_completed += 1
+                                services_deployed += 1
+                                integration_framework.test_containers.append(result_data['container_name'])
+                                
+                                # Check if deployment was fast enough
+                                if result_data['deploy_time'] < 30:
+                                    operations_completed += 1
+                                else:
+                                    operations_failed += 1
+                                    error_messages.append(f"Slow deployment: {result_data['deploy_time']:.2f}s")
+                            else:
+                                operations_failed += 1
+                                error_messages.append(result_data['message'])
+                                
+                        except Exception as e:
+                            operations_failed += 1
+                            error_messages.append(f"Concurrent deployment exception: {e}")
+                
+                successful_deployments = [r for r in concurrent_results if r['success']]
+                avg_deploy_time = (sum(r['deploy_time'] for r in successful_deployments) / 
+                                 len(successful_deployments) if successful_deployments else 0)
+                
+                success = (len(successful_deployments) >= len(concurrent_services) * 0.9 and 
+                          avg_deploy_time < 25)
+                
+                return {
+                    'success': success,
+                    'operations_completed': operations_completed,
+                    'operations_failed': operations_failed,
+                    'services_deployed': services_deployed,
+                    'error_messages': error_messages,
+                    'performance_metrics': {
+                        'concurrent_success_rate': len(successful_deployments) / len(concurrent_services) * 100,
+                        'average_concurrent_deploy_time': avg_deploy_time,
+                        'fastest_concurrent_deploy': min(r['deploy_time'] for r in successful_deployments) if successful_deployments else 0,
+                        'slowest_concurrent_deploy': max(r['deploy_time'] for r in successful_deployments) if successful_deployments else 0
+                    }
+                }
+                
+            except Exception as e:
+                return {
+                    'success': False,
+                    'operations_completed': operations_completed,
+                    'operations_failed': operations_failed + 1,
+                    'services_deployed': services_deployed,
+                    'error_messages': error_messages + [str(e)]
+                }
+        
+        result = integration_framework.run_integration_scenario(
+            "Concurrent Service Startup Load Test",
+            concurrent_startup_scenario
+        )
+        
+        assert result.success, f"Concurrent startup test failed: {result.error_messages}"
+        
+        success_rate = result.performance_metrics.get('concurrent_success_rate', 0)
+        assert success_rate >= 80, f"Concurrent success rate {success_rate:.1f}% too low"
+        
+        avg_time = result.performance_metrics.get('average_concurrent_deploy_time', 999)
+        assert avg_time < 30, f"Average concurrent deploy time {avg_time:.2f}s too high"
+        
+        logger.info(f"✅ Concurrent startup validated: {success_rate:.1f}% success, {avg_time:.2f}s avg time")
+    
+    def test_resource_constrained_startup(self, integration_framework):
+        """Test service startup under resource constraints (< 500MB memory)."""
+        logger.info("🧠 Testing resource-constrained service startup")
+        
+        def resource_constrained_scenario():
+            operations_completed = 0
+            operations_failed = 0
+            services_deployed = 0
+            error_messages = []
+            memory_usage = []
+            
+            try:
+                # Deploy services with strict memory limits
+                constrained_services = [
+                    ('nginx_constrained', 'nginx:alpine', '128m'),
+                    ('redis_constrained', 'redis:alpine', '64m'),
+                    ('alpine_constrained_1', 'alpine:latest', '32m'),
+                    ('alpine_constrained_2', 'alpine:latest', '32m'),
+                    ('alpine_constrained_3', 'alpine:latest', '32m')
+                ]
+                
+                total_memory_allocated = 0
+                
+                for service_name, image, memory_limit in constrained_services:
+                    container_name = f"{service_name}_{uuid.uuid4().hex[:6]}"
+                    memory_mb = int(memory_limit.replace('m', ''))
+                    total_memory_allocated += memory_mb
+                    
+                    # Ensure total allocation stays under 500MB
+                    if total_memory_allocated <= 500:
+                        start_time = time.time()
+                        
+                        result = execute_docker_command([
+                            'docker', 'run', '-d', '--name', container_name,
+                            '--memory', memory_limit,
+                            '--memory-reservation', memory_limit,
+                            image, 'sleep', '60'
+                        ])
+                        
+                        deploy_time = time.time() - start_time
+                        
+                        if result.returncode == 0:
+                            integration_framework.test_containers.append(container_name)
+                            services_deployed += 1
+                            operations_completed += 1
+                            memory_usage.append(memory_mb)
+                            
+                            # Verify memory limit is enforced
+                            inspect_result = execute_docker_command([
+                                'docker', 'inspect', container_name, '--format', '{{.HostConfig.Memory}}'
+                            ])
+                            
+                            if inspect_result.returncode == 0:
+                                memory_bytes = int(inspect_result.stdout.strip())
+                                expected_bytes = memory_mb * 1024 * 1024
+                                
+                                if memory_bytes == expected_bytes:
+                                    operations_completed += 1
+                                else:
+                                    operations_failed += 1
+                                    error_messages.append(f"Memory limit mismatch for {container_name}")
+                            
+                            # Check startup time under constraints
+                            if deploy_time < 30:
+                                operations_completed += 1
+                            else:
+                                operations_failed += 1
+                                error_messages.append(f"Constrained startup too slow: {deploy_time:.2f}s")
+                                
+                        else:
+                            operations_failed += 1
+                            error_messages.append(f"Failed to deploy {container_name}: {result.stderr}")
+                    else:
+                        break  # Would exceed 500MB limit
+                
+                total_memory_used = sum(memory_usage)
+                memory_efficiency = services_deployed / (total_memory_used / 100) if total_memory_used > 0 else 0
+                
+                success = (services_deployed >= 4 and 
+                          total_memory_used <= 500 and
+                          operations_failed <= 1)
+                
+                return {
+                    'success': success,
+                    'operations_completed': operations_completed,
+                    'operations_failed': operations_failed,
+                    'services_deployed': services_deployed,
+                    'error_messages': error_messages,
+                    'performance_metrics': {
+                        'total_memory_allocated_mb': total_memory_used,
+                        'memory_efficiency_services_per_100mb': memory_efficiency,
+                        'average_memory_per_service': total_memory_used / services_deployed if services_deployed > 0 else 0,
+                        'memory_utilization_percent': total_memory_used / 500 * 100
+                    }
+                }
+                
+            except Exception as e:
+                return {
+                    'success': False,
+                    'operations_completed': operations_completed,
+                    'operations_failed': operations_failed + 1,
+                    'services_deployed': services_deployed,
+                    'error_messages': error_messages + [str(e)]
+                }
+        
+        result = integration_framework.run_integration_scenario(
+            "Resource-Constrained Service Startup",
+            resource_constrained_scenario
+        )
+        
+        assert result.success, f"Resource-constrained startup failed: {result.error_messages}"
+        
+        memory_used = result.performance_metrics.get('total_memory_allocated_mb', 999)
+        assert memory_used <= 500, f"Memory usage {memory_used}MB exceeds 500MB limit"
+        
+        efficiency = result.performance_metrics.get('memory_efficiency_services_per_100mb', 0)
+        assert efficiency >= 0.5, f"Memory efficiency {efficiency:.2f} services/100MB too low"
+        
+        logger.info(f"✅ Resource-constrained startup: {memory_used}MB used, {efficiency:.2f} services/100MB")
+    
+    def test_startup_failure_recovery(self, integration_framework):
+        """Test automatic recovery mechanisms during startup failures."""
+        logger.info("🔄 Testing startup failure recovery mechanisms")
+        
+        def startup_recovery_scenario():
+            operations_completed = 0
+            operations_failed = 0
+            services_deployed = 0
+            error_messages = []
+            recovery_attempts = []
+            
+            try:
+                # Test scenarios that should cause initial failures but then recover
+                recovery_tests = [
+                    {
+                        'name': 'port_conflict_recovery',
+                        'first_container': 'nginx_conflict_1',
+                        'second_container': 'nginx_conflict_2',
+                        'image': 'nginx:alpine',
+                        'port': '8080'
+                    },
+                    {
+                        'name': 'resource_exhaustion_recovery',
+                        'first_container': 'memory_hog_1',
+                        'second_container': 'memory_normal_1',
+                        'image': 'alpine:latest',
+                        'port': '8081'
+                    }
+                ]
+                
+                for test_case in recovery_tests:
+                    recovery_start_time = time.time()
+                    
+                    # Create initial container that will cause conflict
+                    first_result = execute_docker_command([
+                        'docker', 'run', '-d', '--name', test_case['first_container'],
+                        '-p', f"{test_case['port']}:80" if 'nginx' in test_case['image'] else f"{test_case['port']}:8000",
+                        test_case['image'], 'sleep', '30'
+                    ])
+                    
+                    if first_result.returncode == 0:
+                        integration_framework.test_containers.append(test_case['first_container'])
+                        operations_completed += 1
+                        
+                        # Now try to create second container (should initially fail due to port conflict)
+                        second_result = execute_docker_command([
+                            'docker', 'run', '-d', '--name', test_case['second_container'],
+                            '-p', f"{test_case['port']}:80" if 'nginx' in test_case['image'] else f"{test_case['port']}:8000",
+                            test_case['image'], 'sleep', '30'
+                        ])
+                        
+                        if second_result.returncode != 0:  # Expected failure
+                            operations_completed += 1  # This failure is expected
+                            
+                            # Simulate recovery by using different port
+                            recovery_port = str(int(test_case['port']) + 100)
+                            recovery_result = execute_docker_command([
+                                'docker', 'run', '-d', '--name', f"{test_case['second_container']}_recovered",
+                                '-p', f"{recovery_port}:80" if 'nginx' in test_case['image'] else f"{recovery_port}:8000",
+                                test_case['image'], 'sleep', '30'
+                            ])
+                            
+                            recovery_time = time.time() - recovery_start_time
+                            
+                            if recovery_result.returncode == 0:
+                                integration_framework.test_containers.append(f"{test_case['second_container']}_recovered")
+                                services_deployed += 1
+                                operations_completed += 1
+                                recovery_attempts.append({
+                                    'test_name': test_case['name'],
+                                    'recovery_time': recovery_time,
+                                    'success': True
+                                })
+                            else:
+                                operations_failed += 1
+                                error_messages.append(f"Recovery failed for {test_case['name']}")
+                                recovery_attempts.append({
+                                    'test_name': test_case['name'],
+                                    'recovery_time': recovery_time,
+                                    'success': False
+                                })
+                        else:
+                            # Unexpected success - clean up second container
+                            integration_framework.test_containers.append(test_case['second_container'])
+                            services_deployed += 1
+                            operations_completed += 1
+                    else:
+                        operations_failed += 1
+                        error_messages.append(f"Failed to create initial container for {test_case['name']}")
+                
+                successful_recoveries = [r for r in recovery_attempts if r['success']]
+                recovery_success_rate = len(successful_recoveries) / len(recovery_attempts) * 100 if recovery_attempts else 0
+                avg_recovery_time = (sum(r['recovery_time'] for r in successful_recoveries) / 
+                                   len(successful_recoveries) if successful_recoveries else 0)
+                
+                success = (recovery_success_rate >= 80 and 
+                          avg_recovery_time < 10 and
+                          services_deployed >= 2)
+                
+                return {
+                    'success': success,
+                    'operations_completed': operations_completed,
+                    'operations_failed': operations_failed,
+                    'services_deployed': services_deployed,
+                    'error_messages': error_messages,
+                    'performance_metrics': {
+                        'recovery_success_rate': recovery_success_rate,
+                        'average_recovery_time': avg_recovery_time,
+                        'recovery_attempts': len(recovery_attempts),
+                        'successful_recoveries': len(successful_recoveries)
+                    }
+                }
+                
+            except Exception as e:
+                return {
+                    'success': False,
+                    'operations_completed': operations_completed,
+                    'operations_failed': operations_failed + 1,
+                    'services_deployed': services_deployed,
+                    'error_messages': error_messages + [str(e)]
+                }
+        
+        result = integration_framework.run_integration_scenario(
+            "Startup Failure Recovery Test",
+            startup_recovery_scenario
+        )
+        
+        assert result.success, f"Startup recovery test failed: {result.error_messages}"
+        
+        recovery_rate = result.performance_metrics.get('recovery_success_rate', 0)
+        assert recovery_rate >= 80, f"Recovery success rate {recovery_rate:.1f}% too low"
+        
+        recovery_time = result.performance_metrics.get('average_recovery_time', 999)
+        assert recovery_time < 10, f"Average recovery time {recovery_time:.2f}s too high"
+        
+        logger.info(f"✅ Startup recovery validated: {recovery_rate:.1f}% success, {recovery_time:.2f}s avg recovery")
+
+
+class TestDockerInfrastructureHealthMonitoring:
+    """Test Docker infrastructure health monitoring scenarios - 5 comprehensive tests."""
+    
+    def test_comprehensive_health_check_validation(self, integration_framework):
+        """Test comprehensive health check mechanisms across all services."""
+        logger.info("🏥 Testing comprehensive health check validation")
+        
+        def health_check_scenario():
+            operations_completed = 0
+            operations_failed = 0
+            services_deployed = 0
+            error_messages = []
+            health_results = []
+            
+            try:
+                # Deploy services with custom health checks
+                health_check_services = [
+                    {
+                        'name': 'nginx_health_test',
+                        'image': 'nginx:alpine',
+                        'port': 8090,
+                        'health_cmd': 'curl -f http://localhost:80 || exit 1',
+                        'health_interval': '5s',
+                        'health_timeout': '3s',
+                        'health_retries': 3
+                    },
+                    {
+                        'name': 'redis_health_test',
+                        'image': 'redis:alpine',
+                        'port': 6390,
+                        'health_cmd': 'redis-cli ping',
+                        'health_interval': '3s',
+                        'health_timeout': '2s',
+                        'health_retries': 5
+                    }
+                ]
+                
+                for service_config in health_check_services:
+                    container_name = f"{service_config['name']}_{uuid.uuid4().hex[:6]}"
+                    
+                    # Deploy with health check
+                    result = execute_docker_command([
+                        'docker', 'run', '-d', '--name', container_name,
+                        '-p', f"{service_config['port']}:{service_config['port'] if 'redis' in service_config['name'] else 80}",
+                        '--health-cmd', service_config['health_cmd'],
+                        '--health-interval', service_config['health_interval'],
+                        '--health-timeout', service_config['health_timeout'],
+                        '--health-retries', str(service_config['health_retries']),
+                        service_config['image']
+                    ])
+                    
+                    if result.returncode == 0:
+                        integration_framework.test_containers.append(container_name)
+                        services_deployed += 1
+                        operations_completed += 1
+                        
+                        # Monitor health check status
+                        health_start_time = time.time()
+                        max_health_wait = 30
+                        
+                        while time.time() - health_start_time < max_health_wait:
+                            inspect_result = execute_docker_command([
+                                'docker', 'inspect', container_name, '--format', 
+                                '{{.State.Health.Status}} {{.State.Running}}'
+                            ])
+                            
+                            if inspect_result.returncode == 0:
+                                status_parts = inspect_result.stdout.strip().split()
+                                health_status = status_parts[0] if status_parts else 'none'
+                                is_running = status_parts[1] == 'true' if len(status_parts) > 1 else False
+                                
+                                if health_status == 'healthy':
+                                    health_check_time = time.time() - health_start_time
+                                    health_results.append({
+                                        'service': service_config['name'],
+                                        'health_status': 'healthy',
+                                        'health_check_time': health_check_time,
+                                        'running': is_running
+                                    })
+                                    operations_completed += 1
+                                    break
+                                elif health_status == 'unhealthy':
+                                    health_results.append({
+                                        'service': service_config['name'],
+                                        'health_status': 'unhealthy',
+                                        'health_check_time': time.time() - health_start_time,
+                                        'running': is_running
+                                    })
+                                    operations_failed += 1
+                                    error_messages.append(f"{service_config['name']} became unhealthy")
+                                    break
+                                
+                                time.sleep(2)
+                            else:
+                                break
+                        else:
+                            # Timeout waiting for health check
+                            operations_failed += 1
+                            error_messages.append(f"{service_config['name']} health check timeout")
+                            health_results.append({
+                                'service': service_config['name'],
+                                'health_status': 'timeout',
+                                'health_check_time': max_health_wait,
+                                'running': False
+                            })
+                    else:
+                        operations_failed += 1
+                        error_messages.append(f"Failed to deploy {service_config['name']}: {result.stderr}")
+                
+                healthy_services = [r for r in health_results if r['health_status'] == 'healthy']
+                health_success_rate = len(healthy_services) / len(health_results) * 100 if health_results else 0
+                avg_health_time = (sum(r['health_check_time'] for r in healthy_services) / 
+                                 len(healthy_services) if healthy_services else 0)
+                
+                success = (health_success_rate >= 80 and 
+                          avg_health_time < 20 and
+                          services_deployed >= 2)
+                
+                return {
+                    'success': success,
+                    'operations_completed': operations_completed,
+                    'operations_failed': operations_failed,
+                    'services_deployed': services_deployed,
+                    'error_messages': error_messages,
+                    'performance_metrics': {
+                        'health_success_rate': health_success_rate,
+                        'average_health_check_time': avg_health_time,
+                        'healthy_services': len(healthy_services),
+                        'total_health_checks': len(health_results)
+                    }
+                }
+                
+            except Exception as e:
+                return {
+                    'success': False,
+                    'operations_completed': operations_completed,
+                    'operations_failed': operations_failed + 1,
+                    'services_deployed': services_deployed,
+                    'error_messages': error_messages + [str(e)]
+                }
+        
+        result = integration_framework.run_integration_scenario(
+            "Comprehensive Health Check Validation",
+            health_check_scenario
+        )
+        
+        assert result.success, f"Health check validation failed: {result.error_messages}"
+        
+        health_rate = result.performance_metrics.get('health_success_rate', 0)
+        assert health_rate >= 80, f"Health check success rate {health_rate:.1f}% too low"
+        
+        avg_time = result.performance_metrics.get('average_health_check_time', 999)
+        assert avg_time < 20, f"Average health check time {avg_time:.2f}s too high"
+        
+        logger.info(f"✅ Health check validation: {health_rate:.1f}% success, {avg_time:.2f}s avg time")
+    
+    def test_uptime_monitoring_99_99_percent(self, integration_framework):
+        """Test uptime monitoring to achieve 99.99% uptime requirement."""
+        logger.info("⏰ Testing uptime monitoring for 99.99% uptime requirement")
+        
+        def uptime_monitoring_scenario():
+            operations_completed = 0
+            operations_failed = 0
+            services_deployed = 0
+            error_messages = []
+            uptime_metrics = []
+            
+            try:
+                # Deploy services for uptime monitoring
+                uptime_services = [
+                    ('nginx_uptime', 'nginx:alpine'),
+                    ('redis_uptime', 'redis:alpine'),
+                ]
+                
+                for service_name, image in uptime_services:
+                    container_name = f"{service_name}_{uuid.uuid4().hex[:6]}"
+                    
+                    result = execute_docker_command([
+                        'docker', 'run', '-d', '--name', container_name,
+                        '--restart', 'unless-stopped',
+                        '--memory', '256m',
+                        image
+                    ])
+                    
+                    if result.returncode == 0:
+                        integration_framework.test_containers.append(container_name)
+                        services_deployed += 1
+                        operations_completed += 1
+                        
+                        # Monitor uptime over a short period (simulate longer period)
+                        monitoring_duration = 30  # seconds
+                        check_interval = 2  # seconds
+                        monitoring_start = time.time()
+                        
+                        uptime_checks = 0
+                        successful_checks = 0
+                        downtime_events = []
+                        
+                        while time.time() - monitoring_start < monitoring_duration:
+                            check_start = time.time()
+                            
+                            # Check if container is running
+                            inspect_result = execute_docker_command([
+                                'docker', 'inspect', container_name, '--format', '{{.State.Running}}'
+                            ])
+                            
+                            uptime_checks += 1
+                            
+                            if inspect_result.returncode == 0 and inspect_result.stdout.strip() == 'true':
+                                successful_checks += 1
+                                operations_completed += 1
+                            else:
+                                downtime_events.append({
+                                    'time': time.time(),
+                                    'duration': check_interval
+                                })
+                                operations_failed += 1
+                                error_messages.append(f"Downtime detected for {container_name}")
+                            
+                            # Wait for next check
+                            elapsed = time.time() - check_start
+                            if elapsed < check_interval:
+                                time.sleep(check_interval - elapsed)
+                        
+                        uptime_percentage = (successful_checks / uptime_checks * 100) if uptime_checks > 0 else 0
+                        total_downtime = sum(event['duration'] for event in downtime_events)
+                        
+                        uptime_metrics.append({
+                            'service': service_name,
+                            'uptime_percentage': uptime_percentage,
+                            'total_downtime_seconds': total_downtime,
+                            'downtime_events': len(downtime_events),
+                            'monitoring_duration': monitoring_duration
+                        })
+                        
+                        # Validate 99.99% uptime requirement
+                        if uptime_percentage >= 99.99:
+                            operations_completed += 1
+                        else:
+                            operations_failed += 1
+                            error_messages.append(f"{service_name} uptime {uptime_percentage:.2f}% < 99.99%")
+                    else:
+                        operations_failed += 1
+                        error_messages.append(f"Failed to deploy {service_name}: {result.stderr}")
+                
+                avg_uptime = (sum(m['uptime_percentage'] for m in uptime_metrics) / 
+                            len(uptime_metrics) if uptime_metrics else 0)
+                total_downtime = sum(m['total_downtime_seconds'] for m in uptime_metrics)
+                
+                success = (avg_uptime >= 99.99 and 
+                          total_downtime == 0 and
+                          services_deployed >= 2)
+                
+                return {
+                    'success': success,
+                    'operations_completed': operations_completed,
+                    'operations_failed': operations_failed,
+                    'services_deployed': services_deployed,
+                    'error_messages': error_messages,
+                    'performance_metrics': {
+                        'average_uptime_percentage': avg_uptime,
+                        'total_downtime_seconds': total_downtime,
+                        'services_monitored': len(uptime_metrics),
+                        'uptime_requirement_met': avg_uptime >= 99.99
+                    }
+                }
+                
+            except Exception as e:
+                return {
+                    'success': False,
+                    'operations_completed': operations_completed,
+                    'operations_failed': operations_failed + 1,
+                    'services_deployed': services_deployed,
+                    'error_messages': error_messages + [str(e)]
+                }
+        
+        result = integration_framework.run_integration_scenario(
+            "Uptime Monitoring 99.99% Requirement",
+            uptime_monitoring_scenario
+        )
+        
+        assert result.success, f"Uptime monitoring failed: {result.error_messages}"
+        
+        avg_uptime = result.performance_metrics.get('average_uptime_percentage', 0)
+        assert avg_uptime >= 99.99, f"Average uptime {avg_uptime:.2f}% below 99.99% requirement"
+        
+        downtime = result.performance_metrics.get('total_downtime_seconds', 999)
+        assert downtime == 0, f"Detected {downtime}s downtime, expected 0"
+        
+        logger.info(f"✅ Uptime monitoring validated: {avg_uptime:.2f}% uptime, {downtime}s downtime")
+    
+    def test_zero_port_conflict_monitoring(self, integration_framework):
+        """Test monitoring and prevention of port conflicts."""
+        logger.info("🚢 Testing zero port conflict monitoring")
+        
+        def port_conflict_scenario():
+            operations_completed = 0
+            operations_failed = 0
+            services_deployed = 0
+            error_messages = []
+            port_allocations = []
+            
+            try:
+                # Test dynamic port allocation to prevent conflicts
+                base_ports = [8100, 8200, 8300, 8400, 8500]
+                
+                for i, base_port in enumerate(base_ports):
+                    # Find available port dynamically
+                    allocated_port = None
+                    
+                    for port_offset in range(50):  # Try up to 50 ports
+                        test_port = base_port + port_offset
+                        
+                        try:
+                            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                                result = sock.connect_ex(('localhost', test_port))
+                                if result != 0:  # Port is available
+                                    allocated_port = test_port
+                                    break
+                        except:
+                            continue
+                    
+                    if allocated_port:
+                        container_name = f"port_test_{i}_{uuid.uuid4().hex[:6]}"
+                        
+                        # Deploy service with allocated port
+                        result = execute_docker_command([
+                            'docker', 'run', '-d', '--name', container_name,
+                            '-p', f'{allocated_port}:80',
+                            'nginx:alpine'
+                        ])
+                        
+                        if result.returncode == 0:
+                            integration_framework.test_containers.append(container_name)
+                            services_deployed += 1
+                            operations_completed += 1
+                            
+                            port_allocations.append({
+                                'container': container_name,
+                                'requested_base': base_port,
+                                'allocated_port': allocated_port,
+                                'offset': allocated_port - base_port
+                            })
+                            
+                            # Verify port is actually in use
+                            time.sleep(2)
+                            try:
+                                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                                    sock.settimeout(5)
+                                    result = sock.connect_ex(('localhost', allocated_port))
+                                    if result == 0:  # Port is in use (good)
+                                        operations_completed += 1
+                                    else:
+                                        operations_failed += 1
+                                        error_messages.append(f"Port {allocated_port} not in use after deployment")
+                            except Exception as e:
+                                operations_failed += 1
+                                error_messages.append(f"Port verification failed: {e}")
+                        else:
+                            operations_failed += 1
+                            error_messages.append(f"Failed to deploy on port {allocated_port}: {result.stderr}")
+                    else:
+                        operations_failed += 1
+                        error_messages.append(f"Could not find available port starting from {base_port}")
+                
+                # Verify no port conflicts occurred
+                allocated_ports = [p['allocated_port'] for p in port_allocations]
+                unique_ports = set(allocated_ports)
+                
+                if len(allocated_ports) == len(unique_ports):
+                    operations_completed += 1  # No conflicts detected
+                else:
+                    operations_failed += 1
+                    error_messages.append("Port conflicts detected in allocations")
+                
+                # Calculate port efficiency
+                avg_offset = (sum(p['offset'] for p in port_allocations) / 
+                            len(port_allocations) if port_allocations else 0)
+                
+                success = (len(unique_ports) == len(allocated_ports) and
+                          services_deployed >= 4 and
+                          avg_offset < 10)  # Efficient port allocation
+                
+                return {
+                    'success': success,
+                    'operations_completed': operations_completed,
+                    'operations_failed': operations_failed,
+                    'services_deployed': services_deployed,
+                    'error_messages': error_messages,
+                    'performance_metrics': {
+                        'zero_port_conflicts': len(allocated_ports) == len(unique_ports),
+                        'port_allocation_efficiency': avg_offset,
+                        'total_ports_allocated': len(allocated_ports),
+                        'unique_ports_allocated': len(unique_ports)
+                    }
+                }
+                
+            except Exception as e:
+                return {
+                    'success': False,
+                    'operations_completed': operations_completed,
+                    'operations_failed': operations_failed + 1,
+                    'services_deployed': services_deployed,
+                    'error_messages': error_messages + [str(e)]
+                }
+        
+        result = integration_framework.run_integration_scenario(
+            "Zero Port Conflict Monitoring",
+            port_conflict_scenario
+        )
+        
+        assert result.success, f"Port conflict monitoring failed: {result.error_messages}"
+        
+        zero_conflicts = result.performance_metrics.get('zero_port_conflicts', False)
+        assert zero_conflicts, "Port conflicts detected - should be zero"
+        
+        efficiency = result.performance_metrics.get('port_allocation_efficiency', 999)
+        assert efficiency < 10, f"Port allocation efficiency {efficiency:.1f} too high"
+        
+        logger.info(f"✅ Zero port conflicts achieved with {efficiency:.1f} average port offset")
+    
+    def test_real_time_performance_monitoring(self, integration_framework):
+        """Test real-time performance monitoring of Docker services."""
+        logger.info("📊 Testing real-time performance monitoring")
+        
+        def performance_monitoring_scenario():
+            operations_completed = 0
+            operations_failed = 0
+            services_deployed = 0
+            error_messages = []
+            performance_data = []
+            
+            try:
+                # Deploy services for performance monitoring
+                monitoring_services = [
+                    ('nginx_perf', 'nginx:alpine'),
+                    ('redis_perf', 'redis:alpine')
+                ]
+                
+                for service_name, image in monitoring_services:
+                    container_name = f"{service_name}_{uuid.uuid4().hex[:6]}"
+                    
+                    result = execute_docker_command([
+                        'docker', 'run', '-d', '--name', container_name,
+                        '--memory', '256m',
+                        '--cpus', '0.5',
+                        image
+                    ])
+                    
+                    if result.returncode == 0:
+                        integration_framework.test_containers.append(container_name)
+                        services_deployed += 1
+                        operations_completed += 1
+                        
+                        # Monitor performance metrics
+                        monitoring_duration = 15  # seconds
+                        monitoring_start = time.time()
+                        
+                        service_metrics = {
+                            'service_name': service_name,
+                            'cpu_samples': [],
+                            'memory_samples': [],
+                            'network_samples': []
+                        }
+                        
+                        while time.time() - monitoring_start < monitoring_duration:
+                            # Get container stats
+                            stats_result = execute_docker_command([
+                                'docker', 'stats', container_name, '--no-stream', '--format', 
+                                'table {{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}'
+                            ])
+                            
+                            if stats_result.returncode == 0:
+                                stats_lines = stats_result.stdout.strip().split('\n')
+                                if len(stats_lines) > 1:  # Skip header line
+                                    stats_data = stats_lines[1].split('\t')
+                                    if len(stats_data) >= 3:
+                                        try:
+                                            # Parse CPU percentage
+                                            cpu_percent = float(stats_data[0].replace('%', ''))
+                                            service_metrics['cpu_samples'].append(cpu_percent)
+                                            
+                                            # Parse memory usage (format: used/total)
+                                            memory_data = stats_data[1].split('/')
+                                            if len(memory_data) >= 1:
+                                                memory_used = memory_data[0].strip()
+                                                # Convert to MB if needed
+                                                if 'MiB' in memory_used:
+                                                    memory_mb = float(memory_used.replace('MiB', ''))
+                                                elif 'MB' in memory_used:
+                                                    memory_mb = float(memory_used.replace('MB', ''))
+                                                else:
+                                                    memory_mb = 0
+                                                service_metrics['memory_samples'].append(memory_mb)
+                                            
+                                            operations_completed += 1
+                                            
+                                        except (ValueError, IndexError):
+                                            operations_failed += 1
+                                            error_messages.append(f"Failed to parse stats for {container_name}")
+                            else:
+                                operations_failed += 1
+                                error_messages.append(f"Failed to get stats for {container_name}")
+                            
+                            time.sleep(3)
+                        
+                        # Calculate performance metrics
+                        if service_metrics['cpu_samples'] and service_metrics['memory_samples']:
+                            avg_cpu = sum(service_metrics['cpu_samples']) / len(service_metrics['cpu_samples'])
+                            max_cpu = max(service_metrics['cpu_samples'])
+                            avg_memory = sum(service_metrics['memory_samples']) / len(service_metrics['memory_samples'])
+                            max_memory = max(service_metrics['memory_samples'])
+                            
+                            performance_data.append({
+                                'service': service_name,
+                                'avg_cpu_percent': avg_cpu,
+                                'max_cpu_percent': max_cpu,
+                                'avg_memory_mb': avg_memory,
+                                'max_memory_mb': max_memory,
+                                'samples_collected': len(service_metrics['cpu_samples'])
+                            })
+                            
+                            # Validate performance within limits
+                            if avg_cpu < 80 and avg_memory < 200:  # Reasonable limits
+                                operations_completed += 1
+                            else:
+                                operations_failed += 1
+                                error_messages.append(f"Performance limits exceeded for {service_name}")
+                        else:
+                            operations_failed += 1
+                            error_messages.append(f"No performance data collected for {service_name}")
+                    else:
+                        operations_failed += 1
+                        error_messages.append(f"Failed to deploy {service_name}: {result.stderr}")
+                
+                # Overall performance analysis
+                total_samples = sum(p['samples_collected'] for p in performance_data)
+                avg_cpu_across_services = (sum(p['avg_cpu_percent'] for p in performance_data) / 
+                                         len(performance_data) if performance_data else 0)
+                avg_memory_across_services = (sum(p['avg_memory_mb'] for p in performance_data) / 
+                                            len(performance_data) if performance_data else 0)
+                
+                success = (services_deployed >= 2 and 
+                          total_samples >= 10 and
+                          avg_cpu_across_services < 50 and
+                          avg_memory_across_services < 150)
+                
+                return {
+                    'success': success,
+                    'operations_completed': operations_completed,
+                    'operations_failed': operations_failed,
+                    'services_deployed': services_deployed,
+                    'error_messages': error_messages,
+                    'performance_metrics': {
+                        'total_performance_samples': total_samples,
+                        'average_cpu_percent': avg_cpu_across_services,
+                        'average_memory_mb': avg_memory_across_services,
+                        'services_monitored': len(performance_data),
+                        'monitoring_duration_seconds': monitoring_duration
+                    }
+                }
+                
+            except Exception as e:
+                return {
+                    'success': False,
+                    'operations_completed': operations_completed,
+                    'operations_failed': operations_failed + 1,
+                    'services_deployed': services_deployed,
+                    'error_messages': error_messages + [str(e)]
+                }
+        
+        result = integration_framework.run_integration_scenario(
+            "Real-time Performance Monitoring",
+            performance_monitoring_scenario
+        )
+        
+        assert result.success, f"Performance monitoring failed: {result.error_messages}"
+        
+        samples = result.performance_metrics.get('total_performance_samples', 0)
+        assert samples >= 10, f"Insufficient performance samples: {samples}"
+        
+        cpu_avg = result.performance_metrics.get('average_cpu_percent', 999)
+        assert cpu_avg < 50, f"Average CPU usage {cpu_avg:.1f}% too high"
+        
+        memory_avg = result.performance_metrics.get('average_memory_mb', 999)
+        assert memory_avg < 150, f"Average memory usage {memory_avg:.1f}MB too high"
+        
+        logger.info(f"✅ Performance monitoring: {samples} samples, {cpu_avg:.1f}% CPU, {memory_avg:.1f}MB memory")
+    
+    def test_health_monitoring_under_load(self, integration_framework):
+        """Test health monitoring system under load conditions."""
+        logger.info("🏋️ Testing health monitoring under load conditions")
+        
+        def health_under_load_scenario():
+            operations_completed = 0
+            operations_failed = 0
+            services_deployed = 0
+            error_messages = []
+            load_test_results = []
+            
+            try:
+                # Deploy services that will be under load
+                load_services = [
+                    ('nginx_load', 'nginx:alpine'),
+                    ('redis_load', 'redis:alpine')
+                ]
+                
+                for service_name, image in load_services:
+                    container_name = f"{service_name}_{uuid.uuid4().hex[:6]}"
+                    
+                    # Deploy with health check
+                    health_cmd = 'curl -f http://localhost:80 || exit 1' if 'nginx' in image else 'redis-cli ping'
+                    
+                    result = execute_docker_command([
+                        'docker', 'run', '-d', '--name', container_name,
+                        '--memory', '128m',
+                        '--cpus', '0.3',
+                        '--health-cmd', health_cmd,
+                        '--health-interval', '2s',
+                        '--health-timeout', '1s',
+                        '--health-retries', '2',
+                        image
+                    ])
+                    
+                    if result.returncode == 0:
+                        integration_framework.test_containers.append(container_name)
+                        services_deployed += 1
+                        operations_completed += 1
+                        
+                        # Generate load on the service
+                        load_containers = []
+                        
+                        # Create load generators
+                        for i in range(3):  # 3 load generators per service
+                            load_generator_name = f"load_gen_{service_name}_{i}_{uuid.uuid4().hex[:4]}"
+                            
+                            if 'nginx' in service_name:
+                                load_cmd = f'while true; do wget -q -O /dev/null --timeout=1 http://{container_name}:80 2>/dev/null || true; sleep 0.1; done'
+                            else:
+                                load_cmd = f'while true; do redis-cli -h {container_name} ping >/dev/null 2>&1 || true; sleep 0.1; done'
+                            
+                            load_result = execute_docker_command([
+                                'docker', 'run', '-d', '--name', load_generator_name,
+                                '--link', container_name,
+                                'alpine:latest', 'sh', '-c', f'apk add --no-cache wget redis >/dev/null 2>&1; {load_cmd}'
+                            ])
+                            
+                            if load_result.returncode == 0:
+                                load_containers.append(load_generator_name)
+                                integration_framework.test_containers.append(load_generator_name)
+                        
+                        # Monitor health under load
+                        load_monitoring_duration = 20
+                        monitoring_start = time.time()
+                        
+                        health_checks = 0
+                        healthy_checks = 0
+                        unhealthy_checks = 0
+                        
+                        while time.time() - monitoring_start < load_monitoring_duration:
+                            inspect_result = execute_docker_command([
+                                'docker', 'inspect', container_name, '--format', 
+                                '{{.State.Health.Status}} {{.State.Running}}'
+                            ])
+                            
+                            if inspect_result.returncode == 0:
+                                status_parts = inspect_result.stdout.strip().split()
+                                health_status = status_parts[0] if status_parts else 'none'
+                                is_running = status_parts[1] == 'true' if len(status_parts) > 1 else False
+                                
+                                health_checks += 1
+                                
+                                if health_status == 'healthy' and is_running:
+                                    healthy_checks += 1
+                                    operations_completed += 1
+                                elif health_status == 'unhealthy':
+                                    unhealthy_checks += 1
+                                    operations_failed += 1
+                                    error_messages.append(f"{service_name} unhealthy under load")
+                            
+                            time.sleep(2)
+                        
+                        health_success_rate = (healthy_checks / health_checks * 100) if health_checks > 0 else 0
+                        
+                        load_test_results.append({
+                            'service': service_name,
+                            'health_success_rate': health_success_rate,
+                            'total_health_checks': health_checks,
+                            'healthy_checks': healthy_checks,
+                            'unhealthy_checks': unhealthy_checks,
+                            'load_generators': len(load_containers)
+                        })
+                        
+                        # Validate health success rate under load
+                        if health_success_rate >= 90:  # 90% healthy under load
+                            operations_completed += 1
+                        else:
+                            operations_failed += 1
+                            error_messages.append(f"{service_name} health rate {health_success_rate:.1f}% < 90% under load")
+                    else:
+                        operations_failed += 1
+                        error_messages.append(f"Failed to deploy {service_name}: {result.stderr}")
+                
+                # Overall load test analysis
+                avg_health_rate = (sum(r['health_success_rate'] for r in load_test_results) / 
+                                 len(load_test_results) if load_test_results else 0)
+                total_health_checks = sum(r['total_health_checks'] for r in load_test_results)
+                
+                success = (avg_health_rate >= 90 and
+                          services_deployed >= 2 and
+                          total_health_checks >= 20)
+                
+                return {
+                    'success': success,
+                    'operations_completed': operations_completed,
+                    'operations_failed': operations_failed,
+                    'services_deployed': services_deployed,
+                    'error_messages': error_messages,
+                    'performance_metrics': {
+                        'average_health_success_rate_under_load': avg_health_rate,
+                        'total_health_checks_under_load': total_health_checks,
+                        'services_load_tested': len(load_test_results),
+                        'load_test_duration_seconds': load_monitoring_duration
+                    }
+                }
+                
+            except Exception as e:
+                return {
+                    'success': False,
+                    'operations_completed': operations_completed,
+                    'operations_failed': operations_failed + 1,
+                    'services_deployed': services_deployed,
+                    'error_messages': error_messages + [str(e)]
+                }
+        
+        result = integration_framework.run_integration_scenario(
+            "Health Monitoring Under Load",
+            health_under_load_scenario
+        )
+        
+        assert result.success, f"Health monitoring under load failed: {result.error_messages}"
+        
+        health_rate = result.performance_metrics.get('average_health_success_rate_under_load', 0)
+        assert health_rate >= 90, f"Health success rate under load {health_rate:.1f}% < 90%"
+        
+        total_checks = result.performance_metrics.get('total_health_checks_under_load', 0)
+        assert total_checks >= 20, f"Insufficient health checks under load: {total_checks}"
+        
+        logger.info(f"✅ Health under load validated: {health_rate:.1f}% success rate, {total_checks} checks")
+
+
 if __name__ == "__main__":
     # Direct execution for debugging and validation
     framework = DockerIntegrationFramework()
