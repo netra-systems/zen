@@ -52,6 +52,8 @@ class ExecutionEngine:
     def __init__(self, registry: 'AgentRegistry', websocket_bridge):
         self.registry = registry
         self.websocket_bridge = websocket_bridge
+        # Compatibility alias for tests expecting websocket_notifier
+        self.websocket_notifier = websocket_bridge
         self.active_runs: Dict[str, AgentExecutionContext] = {}
         self.run_history: List[AgentExecutionResult] = []
         self.execution_tracker = get_execution_tracker()

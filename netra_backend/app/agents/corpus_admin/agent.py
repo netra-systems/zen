@@ -12,7 +12,6 @@ if TYPE_CHECKING:
     from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.errors import ValidationError
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.utils import extract_thread_id
@@ -24,7 +23,7 @@ from netra_backend.app.agents.base.interface import (
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
-from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.core.reliability import get_reliability_manager
 from netra_backend.app.agents.corpus_admin.models import (
     CorpusMetadata,
     CorpusOperation,
@@ -71,17 +70,17 @@ class CorpusAdminSubAgent(BaseAgent):
     def _init_modern_execution_infrastructure(self) -> None:
         """Initialize modern execution infrastructure."""
         self._execution_monitor = ExecutionMonitor()
-        self._unified_reliability_handler = self._create_reliability_manager()
-        self._execution_engine = BaseExecutionEngine(self._unified_reliability_handler, self._execution_monitor)
+        self.reliability_manager = self._create_reliability_manager()
+        self.execution_engine = BaseExecutionEngine(self.reliability_manager, self._execution_monitor)
         self.error_handler = ExecutionErrorHandler
     
-    def _create_reliability_manager(self) -> ReliabilityManager:
+    def _create_reliability_manager(self):
         """Create reliability manager with corpus admin configuration."""
-        circuit_config = CircuitBreakerConfig(
-            name="corpus_admin", failure_threshold=3, recovery_timeout=30
-        )
         retry_config = RetryConfig(max_retries=3, base_delay=1.0, max_delay=10.0)
-        return ReliabilityManager(circuit_config, retry_config)
+        return get_reliability_manager(
+            service_name="corpus_admin",
+            retry_config=retry_config
+        )
     
     async def check_entry_conditions(self, state: DeepAgentState, run_id: str) -> bool:
         """Check if conditions are met for corpus administration"""

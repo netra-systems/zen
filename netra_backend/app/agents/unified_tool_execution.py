@@ -61,6 +61,8 @@ class UnifiedToolExecutionEngine:
     ):
         """Initialize unified tool execution engine."""
         self.websocket_bridge = websocket_bridge
+        # Compatibility alias for tests expecting websocket_notifier
+        self.websocket_notifier = websocket_bridge
         self.permission_service = permission_service
         
         # Security and resource management
