@@ -135,8 +135,16 @@ class DockerLifecycleTestSuite(unittest.TestCase):
             if result.returncode == 0 and result.stdout.strip():
                 container_ids = result.stdout.strip().split('\n')
                 for container_id in container_ids:
-                    subprocess.run(['docker', 'rm', '-f', container_id], 
-                                 capture_output=True, timeout=10)
+                    # Use safe removal instead of docker rm -f
+                    try:
+                        # Stop gracefully first
+                        subprocess.run(['docker', 'stop', '-t', '10', container_id], 
+                                     capture_output=True, timeout=15)
+                        # Then remove without force
+                        subprocess.run(['docker', 'rm', container_id], 
+                                     capture_output=True, timeout=10)
+                    except Exception:
+                        pass  # Continue with other containers
             
             # Remove test networks
             result = subprocess.run(
@@ -266,7 +274,9 @@ class DockerLifecycleTestSuite(unittest.TestCase):
             self.assertIn("test data", result.stdout)
             
             # Remove container
-            rm_cmd = ['docker', 'rm', '-f', container_name]
+            # Use safe removal instead of docker rm -f
+            stop_cmd = ['docker', 'stop', '-t', '10', container_name]
+            rm_cmd = ['docker', 'rm', container_name]
             result = subprocess.run(rm_cmd, capture_output=True, text=True, timeout=10)
             self.assertEqual(result.returncode, 0, f"Failed to remove container: {result.stderr}")
             
@@ -278,7 +288,8 @@ class DockerLifecycleTestSuite(unittest.TestCase):
             
         finally:
             # Clean up volume
-            subprocess.run(['docker', 'volume', 'rm', '-f', volume_name], 
+            # Use safe volume removal (volumes typically don't need -f)
+            subprocess.run(['docker', 'volume', 'rm', volume_name], 
                          capture_output=True, timeout=10)
 
     # =============================================================================
@@ -934,7 +945,10 @@ class DockerLifecycleTestSuite(unittest.TestCase):
         self.assertIn("already in use", result.stderr.lower(), "Error should indicate name conflict")
         
         # Test conflict resolution by removing existing container
-        rm_cmd = ['docker', 'rm', '-f', conflict_container_name]
+        # Use safe removal instead of docker rm -f
+        stop_cmd = ['docker', 'stop', '-t', '10', conflict_container_name]
+        subprocess.run(stop_cmd, capture_output=True)
+        rm_cmd = ['docker', 'rm', conflict_container_name]
         result = subprocess.run(rm_cmd, capture_output=True, text=True, timeout=10)
         self.assertEqual(result.returncode, 0, f"Failed to remove conflicting container: {result.stderr}")
         
