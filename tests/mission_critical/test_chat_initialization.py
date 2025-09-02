@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 MISSION CRITICAL: Chat Initialization Test Suite
 
@@ -32,10 +33,10 @@ class ChatInitializationTester:
     """Mission critical tester for chat initialization."""
     
     def __init__(self):
-        self.frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:3000')
-        self.backend_url = os.getenv('BACKEND_URL', 'http://localhost:8000')
-        self.auth_url = os.getenv('AUTH_SERVICE_URL', 'http://localhost:8081')
-        self.jwt_secret = os.getenv('JWT_SECRET', 'test-secret-key')
+        self.frontend_url = get_env().get('FRONTEND_URL', 'http://localhost:3000')
+        self.backend_url = get_env().get('BACKEND_URL', 'http://localhost:8000')
+        self.auth_url = get_env().get('AUTH_SERVICE_URL', 'http://localhost:8081')
+        self.jwt_secret = get_env().get('JWT_SECRET', 'test-secret-key')
         self.test_results: Dict[str, Any] = {
             'total': 0,
             'passed': 0,

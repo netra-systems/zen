@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python
 """MISSION CRITICAL TEST SUITE: WebSocket Agent Events - FIXED FOR REAL SERVICES
 
@@ -31,7 +32,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 # Check if staging mode is enabled
-STAGING_MODE = os.getenv('WEBSOCKET_TEST_STAGING', 'false').lower() == 'true'
+STAGING_MODE = get_env().get('WEBSOCKET_TEST_STAGING', 'false').lower() == 'true'
 
 import pytest
 from loguru import logger

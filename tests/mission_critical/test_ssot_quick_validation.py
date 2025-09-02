@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Quick SSOT Compliance Validation - No External Dependencies
 

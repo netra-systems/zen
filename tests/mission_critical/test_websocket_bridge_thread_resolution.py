@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python
 """MISSION CRITICAL: WebSocket Bridge Thread Resolution Comprehensive Tests
 

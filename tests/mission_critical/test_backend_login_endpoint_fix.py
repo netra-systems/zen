@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 """
 Mission critical test for backend login endpoint 500 error fix.
 Validates the comprehensive error handling and recovery system for auth service communication.
@@ -373,7 +374,7 @@ class TestBackendLoginEndpointIntegration:
         # This test will use actual environment variables and should be run in staging
         # Skip if not in appropriate test environment
         import os
-        if os.getenv("ENVIRONMENT") not in ["staging", "testing"]:
+        if get_env().get("ENVIRONMENT") not in ["staging", "testing"]:
             pytest.skip("Integration test requires staging/testing environment")
         
         response = client.post(

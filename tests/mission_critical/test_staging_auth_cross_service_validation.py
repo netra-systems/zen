@@ -46,7 +46,7 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 try:
-    from shared.isolated_environment import IsolatedEnvironment
+    from shared.isolated_environment import IsolatedEnvironment, get_env
     from shared.jwt_secret_manager import SharedJWTSecretManager
     from auth_service.auth_core.config import AuthConfig
     from auth_service.auth_core.core.jwt_handler import JWTHandler
@@ -362,8 +362,12 @@ class TestStagingCrossServiceJWTValidation:
         assert auth_secret == shared_secret, \
             "AUTH SERVICE AND SHARED MANAGER HAVE DIFFERENT JWT SECRETS!"
         
-        # Test 2: Secret source analysis
-        with patch.dict(os.environ, {"ENVIRONMENT": "staging"}, clear=False):
+        # Test 2: Secret source analysis - Migrated from patch.dict(os.environ)
+        env = get_env()
+        env.enable_isolation()
+        original_environment = env.get("ENVIRONMENT")
+        env.set("ENVIRONMENT", "staging", "test_staging_analysis")
+        try:
             # Clear cache to force re-loading
             SharedJWTSecretManager.clear_cache()
             
@@ -381,6 +385,12 @@ class TestStagingCrossServiceJWTValidation:
             
             assert fresh_secret == auth_secret, \
                 "JWT secret changed after cache clear - inconsistent loading!"
+        finally:
+            # Restore original environment
+            if original_environment:
+                env.set("ENVIRONMENT", original_environment, "test_cleanup")
+            else:
+                env.delete("ENVIRONMENT", "test_cleanup")
         
         # Test 3: Secret strength validation
         assert len(auth_secret) >= 32, \

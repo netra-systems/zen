@@ -1,3 +1,4 @@
+from shared.isolated_environment import get_env
 #!/usr/bin/env python
 """INTEGRATION WebSocket Bridge Test with Real Agent Classes
 
