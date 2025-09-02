@@ -180,12 +180,21 @@
 - [ ] ExecutionEngine has WebSocketNotifier
 - [ ] EnhancedToolExecutionEngine wraps tool execution
 
+**Factory Pattern Validation (CRITICAL - NEW 2025-09-02):**
+- [ ] Factory methods create unique instances (no shared singletons)
+- [ ] User execution contexts properly isolated between requests
+- [ ] No shared state between concurrent users
+- [ ] WebSocket events delivered only to correct user
+- [ ] Memory growth bounded per user (not global accumulation)
+
 **Tests:**
 - [ ] Run: `python tests/mission_critical/test_websocket_agent_events_suite.py`
+- [ ] Run: `python tests/mission_critical/test_singleton_removal_phase2.py` (NEW - CRITICAL)
 - [ ] Run E2E agent tests with real services
 
 **Learnings to Review:**
 - [ ] `SPEC/supervisor_adaptive_workflow.xml`
+- [ ] `SPEC/learnings/singleton_removal_phase2_20250902_084436.xml` (NEW - CRITICAL)
 - [ ] `SPEC/learnings/state_persistence_optimization.xml`
 
 ---
