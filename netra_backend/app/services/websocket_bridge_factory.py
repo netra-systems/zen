@@ -223,14 +223,17 @@ class WebSocketBridgeFactory:
         """
         if connection_pool is None:
             raise ValueError("Connection pool cannot be None - factory requires valid connection pool")
-        if agent_registry is None:
-            raise ValueError("Agent registry cannot be None - factory requires valid registry")
+        # Note: agent_registry can be None when using UserExecutionContext pattern
+        # where registry is created per-request - this is valid
             
         self._connection_pool = connection_pool
         self._agent_registry = agent_registry
         self._health_monitor = health_monitor
         
-        logger.info("✅ WebSocketBridgeFactory configured with infrastructure components")
+        if agent_registry:
+            logger.info("✅ WebSocketBridgeFactory configured with agent registry")
+        else:
+            logger.info("✅ WebSocketBridgeFactory configured (per-request registry pattern)")
         
     async def create_user_emitter(self, 
                                 user_id: str, 
@@ -403,6 +406,16 @@ class UserWebSocketEmitter:
         
         # Initialize monitoring
         self.notification_monitor = get_websocket_notification_monitor()
+        
+        # Initialize metrics collector
+        from netra_backend.app.monitoring.websocket_metrics import (
+            get_websocket_metrics_collector,
+            record_factory_event
+        )
+        self.metrics_collector = get_websocket_metrics_collector()
+        
+        # Record factory creation for this user
+        record_factory_event("created")
         
         # Event delivery tracking
         self._pending_events: Dict[str, WebSocketEvent] = {}

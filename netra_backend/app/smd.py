@@ -890,20 +890,10 @@ class StartupOrchestrator:
         # Create supervisor with bridge for proper WebSocket integration
         # Note: SupervisorAgent uses UserExecutionContext pattern - no database sessions in constructor
         # SupervisorAgent expects 2 args: llm_manager and websocket_bridge (no tool_dispatcher)
-        
-        # Debug logging to see what we're passing
-        self.logger.info(f"DEBUG: llm_manager type: {type(self.app.state.llm_manager)}")
-        self.logger.info(f"DEBUG: agent_websocket_bridge type: {type(agent_websocket_bridge)}")
-        
-        try:
-            supervisor = SupervisorAgent(
-                self.app.state.llm_manager,
-                agent_websocket_bridge
-            )
-        except TypeError as e:
-            self.logger.error(f"DEBUG: TypeError creating SupervisorAgent: {e}")
-            self.logger.error(f"DEBUG: Args: llm_manager={self.app.state.llm_manager}, bridge={agent_websocket_bridge}")
-            raise
+        supervisor = SupervisorAgent(
+            self.app.state.llm_manager,
+            agent_websocket_bridge
+        )
         
         if supervisor is None:
             raise DeterministicStartupError("Supervisor creation returned None")
@@ -1242,19 +1232,18 @@ class StartupOrchestrator:
             execution_factory = get_execution_engine_factory()
             
             # Configure execution factory with dependencies
+            # Note: With UserExecutionContext pattern, registry is created per-request
+            # so we don't configure it here - it will be provided at runtime
             if hasattr(self.app.state, 'agent_supervisor'):
                 supervisor = self.app.state.agent_supervisor
-                if hasattr(supervisor, 'registry'):
-                    # Get websocket factory (will be properly initialized below)
-                    temp_websocket_factory = get_websocket_bridge_factory()
-                    execution_factory.configure(
-                        agent_registry=supervisor.registry,
-                        websocket_bridge_factory=temp_websocket_factory,
-                        db_connection_pool=None  # Will be set later if needed
-                    )
-                    self.logger.info("    ✓ ExecutionEngineFactory configured with agent registry")
-                else:
-                    self.logger.warning("    ⚠ Agent supervisor has no registry - factory configuration limited")
+                # Get websocket factory (will be properly initialized below)
+                temp_websocket_factory = get_websocket_bridge_factory()
+                execution_factory.configure(
+                    agent_registry=None,  # Per-request in UserExecutionContext pattern
+                    websocket_bridge_factory=temp_websocket_factory,
+                    db_connection_pool=None  # Will be set later if needed
+                )
+                self.logger.info("    ✓ ExecutionEngineFactory configured (registry will be per-request)")
             else:
                 self.logger.warning("    ⚠ Agent supervisor not available - factory configuration limited")
             
@@ -1279,9 +1268,10 @@ class StartupOrchestrator:
                 
                 health_monitor = SimpleHealthMonitor()
                 
+                # Note: With UserExecutionContext pattern, registry is created per-request
                 websocket_factory.configure(
                     connection_pool=connection_pool,
-                    agent_registry=self.app.state.agent_supervisor.registry,
+                    agent_registry=None,  # Per-request in UserExecutionContext pattern
                     health_monitor=health_monitor
                 )
             self.app.state.websocket_bridge_factory = websocket_factory
