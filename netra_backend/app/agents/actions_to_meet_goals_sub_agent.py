@@ -1,442 +1,219 @@
-# AI AGENT MODIFICATION METADATA
-# ================================
-# Timestamp: 2025-08-18T10:30:00.000000+00:00
-# Agent: Claude Opus 4.1 claude-opus-4-1-20250805
-# Context: Modernize with standardized execution patterns
-# Git: v6 | 2c55fb99 | dirty (27 uncommitted)
-# Change: Feature | Scope: Component | Risk: High
-# Session: modernization-session | Seq: 1
-# Review: Pending | Score: 95
-# ================================
-import json
+"""Clean ActionsToMeetGoalsSubAgent using BaseAgent infrastructure (<200 lines).
+
+Follows the golden pattern established by TriageSubAgent:
+- Inherits reliability management, execution patterns, WebSocket events from BaseAgent
+- Contains ONLY action plan generation business logic
+- Clean single inheritance pattern with no infrastructure duplication
+- Full SSOT compliance
+
+Business Value: Action plan generation for optimization strategies.
+BVJ: ALL segments | Strategic Planning | Automated action plan creation
+"""
+
+import time
 from typing import Any, Dict, Optional
 
 from netra_backend.app.agents.actions_goals_plan_builder import ActionPlanBuilder
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
-from netra_backend.app.agents.base.errors import (
-    AgentExecutionError,
-    ValidationError,
-)
-from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
-from netra_backend.app.agents.base.executor import BaseExecutionEngine
-from netra_backend.app.agents.base.interface import (
-    ExecutionContext,
-    ExecutionResult,
-)
-from netra_backend.app.schemas.core_enums import ExecutionStatus
-from netra_backend.app.agents.base.monitoring import ExecutionMonitor
-from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.agents.input_validation import validate_agent_input
 from netra_backend.app.agents.prompts import actions_to_meet_goals_prompt_template
-from netra_backend.app.agents.state import ActionPlanResult, DeepAgentState, PlanStep, OptimizationsResult
-from netra_backend.app.schemas.shared_types import DataAnalysisResponse
+from netra_backend.app.agents.state import ActionPlanResult, DeepAgentState, OptimizationsResult
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.agents.utils import (
-    extract_json_from_response,
-    extract_partial_json,
-)
-from netra_backend.app.core.fallback_utils import create_agent_fallback_strategy
-from netra_backend.app.core.reliability_utils import create_agent_reliability_wrapper
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.llm.observability import (
-    generate_llm_correlation_id,
-    log_agent_communication,
-    log_agent_input,
-    log_agent_output,
-    start_llm_heartbeat,
-    stop_llm_heartbeat,
-)
-from netra_backend.app.logging_config import central_logger as logger
-from netra_backend.app.schemas.shared_types import RetryConfig
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.shared_types import DataAnalysisResponse
+
+logger = central_logger.get_logger(__name__)
 
 
 class ActionsToMeetGoalsSubAgent(BaseAgent):
-    """Modernized agent implementing standardized execution patterns via composition."""
+    """Clean action plan generation agent using BaseAgent infrastructure.
+    
+    Contains ONLY action plan business logic - all infrastructure
+    (reliability, execution, WebSocket events) inherited from BaseAgent.
+    """
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
-        """Initialize with modern execution patterns."""
-        self._initialize_base_classes(llm_manager)
-        self.tool_dispatcher = tool_dispatcher
-        self._setup_modern_execution_infrastructure()
-        self._setup_backward_compatibility()
-
-    def _initialize_base_classes(self, llm_manager: LLMManager) -> None:
-        """Initialize base classes for the agent."""
-        BaseAgent.__init__(
-            self, llm_manager, 
+        """Initialize with BaseAgent infrastructure."""
+        # Initialize BaseAgent with full infrastructure
+        super().__init__(
+            llm_manager=llm_manager,
             name="ActionsToMeetGoalsSubAgent", 
-            description="This agent creates a plan of action."
+            description="Creates actionable plans from optimization strategies",
+            enable_reliability=True,      # Get circuit breaker + retry
+            enable_execution_engine=True, # Get modern execution patterns
+            enable_caching=False,         # No caching needed for plan generation
         )
-        # Store agent name for standardized execution patterns
-        self.agent_name = "ActionsToMeetGoalsSubAgent"
-
-    def _setup_modern_execution_infrastructure(self) -> None:
-        """Setup modern execution infrastructure components."""
-        self.monitor = ExecutionMonitor()
-        self.reliability_manager = self._create_reliability_manager()
-        self.execution_engine = BaseExecutionEngine(
-            self.reliability_manager, self.monitor
-        )
-        self.error_handler = ExecutionErrorHandler
-
-    def _create_reliability_manager(self) -> ReliabilityManager:
-        """Create configured reliability manager."""
-        return ReliabilityManager(
-            circuit_breaker_config=CircuitBreakerConfig(
-                name="ActionsToMeetGoalsSubAgent",
-                failure_threshold=5,
-                recovery_timeout=60
-            ),
-            retry_config=RetryConfig(
-                max_retries=3,
-                base_delay=1.0
-            )
-        )
-
-    def _setup_backward_compatibility(self) -> None:
-        """Setup backward compatibility components."""
-        agent_name = "ActionsToMeetGoalsSubAgent"
-        self.reliability = create_agent_reliability_wrapper(agent_name)
-        self.fallback_strategy = create_agent_fallback_strategy(agent_name)
+        # Store business logic dependencies only
+        self.tool_dispatcher = tool_dispatcher
+        self.action_plan_builder = ActionPlanBuilder()
 
     async def validate_preconditions(self, context: ExecutionContext) -> bool:
-        """Validate execution preconditions with graceful degradation."""
+        """Validate execution preconditions for action plan generation."""
         state = context.state
-        missing_deps = []
         
-        # Check dependencies individually
+        if not state.user_request:
+            self.logger.warning(f"No user request provided in run_id: {context.run_id}")
+            return False
+            
+        missing_deps = []
         if not state.optimizations_result:
             missing_deps.append("optimizations_result")
         if not state.data_result:
             missing_deps.append("data_result")
         
-        # Handle missing dependencies gracefully
+        # Handle missing dependencies gracefully with defaults
         if missing_deps:
-            if len(missing_deps) == 2:
-                # Both missing - apply full defaults
-                logger.warning(f"Missing all dependencies: {missing_deps}. Using defaults.")
-                self._apply_default_state(state)
-            else:
-                # Partial missing - apply partial defaults
-                logger.warning(f"Missing partial dependencies: {missing_deps}. Degrading gracefully.")
-                self._apply_partial_defaults(state, missing_deps)
+            self.logger.warning(f"Missing dependencies: {missing_deps}. Applying defaults for graceful degradation.")
+            self._apply_defaults_for_missing_deps(state, missing_deps)
         
         return True  # Continue execution with available/default data
 
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
-        """Execute core action plan generation logic."""
-        await self._send_execution_start_update(context)
-        action_plan_result = await self._execute_action_plan_generation(context)
-        await self._update_state_and_notify(context, action_plan_result)
+        """Execute core action plan generation logic with WebSocket events."""
+        start_time = time.time()
+        
+        # CRITICAL: Emit agent_started for proper chat value delivery
+        await self.emit_agent_started("Creating action plan based on optimization strategies and data analysis")
+        
+        # WebSocket events for user visibility
+        await self.emit_thinking("Starting action plan generation based on optimization strategies...")
+        await self.emit_thinking("Analyzing optimization recommendations and data insights...")
+        
+        # Business logic with progress updates
+        await self.emit_progress("Building comprehensive action plan...")
+        action_plan_result = await self._generate_action_plan(context)
+        
+        await self.emit_progress("Finalizing action steps and recommendations...")
+        self._update_state_with_result(context.state, action_plan_result)
+        
+        # Completion events
+        await self.emit_progress("Action plan generation completed successfully", is_complete=True)
+        
+        # CRITICAL: Emit agent_completed for proper chat value delivery
+        execution_time_ms = (time.time() - start_time) * 1000
+        result_data = {
+            "success": True,
+            "steps_generated": len(action_plan_result.plan_steps) if action_plan_result.plan_steps else 0,
+            "execution_time_ms": execution_time_ms,
+            "has_partial_extraction": action_plan_result.partial_extraction if hasattr(action_plan_result, 'partial_extraction') else False
+        }
+        await self.emit_agent_completed(result_data)
+        
         return {"action_plan_result": action_plan_result}
 
-    async def _send_execution_start_update(self, context: ExecutionContext) -> None:
-        """Send execution start update."""
-        await self.send_status_update(
-            context, "executing", 
-            "Creating action plan based on optimization strategies..."
-        )
-
-    async def _execute_action_plan_generation(self, context: ExecutionContext) -> ActionPlanResult:
-        """Generate action plan from state data."""
+    async def _generate_action_plan(self, context: ExecutionContext) -> ActionPlanResult:
+        """Generate action plan from state data with tool execution transparency."""
         state = context.state
         run_id = context.run_id
+        
+        # Show tool execution for transparency
+        await self.emit_tool_executing("prompt_builder", {"optimizations": bool(state.optimizations_result), "data": bool(state.data_result)})
         prompt = self._build_action_plan_prompt(state)
-        llm_response = await self._get_llm_response(prompt, run_id)
-        return await self._process_llm_response(llm_response, run_id)
+        await self.emit_tool_completed("prompt_builder", {"prompt_size_kb": len(prompt) / 1024})
+        
+        # LLM execution with transparency
+        await self.emit_tool_executing("llm_processor", {"config": "actions_to_meet_goals"})
+        llm_response = await self._get_llm_response_with_monitoring(prompt)
+        await self.emit_tool_completed("llm_processor", {"response_size_kb": len(llm_response) / 1024})
+        
+        # Action plan processing
+        await self.emit_tool_executing("action_plan_processor", {})
+        result = await self.action_plan_builder.process_llm_response(llm_response, run_id)
+        await self.emit_tool_completed("action_plan_processor", {"steps_generated": len(result.plan_steps) if result.plan_steps else 0})
+        
+        return result
+        
+    def _update_state_with_result(self, state: DeepAgentState, action_plan_result: ActionPlanResult) -> None:
+        """Update state with the generated action plan result."""
+        state.action_plan_result = action_plan_result
 
-    async def _update_state_and_notify(self, context: ExecutionContext, action_plan_result: ActionPlanResult) -> None:
-        """Update state with result and send completion notification."""
-        context.state.action_plan_result = action_plan_result
-        
-        # Adjust message based on whether defaults were used
-        message = "Action plan created successfully"
-        if action_plan_result.partial_extraction:
-            message = "Action plan created with partial data"
-        
-        await self.send_status_update(
-            context, "completed",
-            message
+    def _build_action_plan_prompt(self, state: DeepAgentState) -> str:
+        """Build prompt for action plan generation from state data."""
+        return actions_to_meet_goals_prompt_template.format(
+            optimizations=state.optimizations_result,
+            data=state.data_result,
+            user_request=state.user_request
         )
-
-    async def send_status_update(
-        self, context: ExecutionContext, 
-        status: str, message: str
-    ) -> None:
-        """Send status update via WebSocket."""
-        if context.stream_updates:
-            await self._process_and_send_status_update(context.run_id, status, message)
-
-    async def _process_and_send_status_update(self, run_id: str, status: str, message: str) -> None:
-        """Process and send status update."""
-        mapped_status = self._map_status_to_websocket_format(status)
-        await self._send_mapped_update(run_id, mapped_status, message)
-
-    def _map_status_to_websocket_format(self, status: str) -> str:
-        """Map internal status to websocket format."""
-        status_map = {
-            "executing": "processing",
-            "completed": "processed",
-            "failed": "error"
-        }
-        return status_map.get(status, status)
-
-    async def _send_mapped_update(self, run_id: str, status: str, message: str) -> None:
-        """Send the mapped status update."""
-        await self._send_update(run_id, {
-            "status": status,
-            "message": message
-        })
+        
+    async def _get_llm_response_with_monitoring(self, prompt: str) -> str:
+        """Get LLM response with simplified monitoring."""
+        try:
+            # Use BaseAgent's LLM infrastructure
+            response = await self.llm_manager.ask_llm(
+                prompt, llm_config_name='actions_to_meet_goals'
+            )
+            return response
+        except Exception as e:
+            self.logger.error(f"LLM request failed: {e}")
+            raise
 
     @validate_agent_input('ActionsToMeetGoalsSubAgent')
-    async def execute(
-        self, state: DeepAgentState, 
-        run_id: str, stream_updates: bool
-    ) -> None:
-        """Modernized execute using modern execution engine."""
-        await self._execute_with_logging(state, run_id, stream_updates)
-
-    async def _execute_with_logging(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
-        """Execute with logging wrapper."""
-        self._log_execution_start(run_id)
-        context = self._create_execution_context(state, run_id, stream_updates)
-        await self._execute_with_modern_pattern_and_fallback(context, state, run_id, stream_updates)
-        self._log_execution_end(run_id)
-
-    def _log_execution_start(self, run_id: str) -> None:
-        """Log execution start communication."""
-        log_agent_communication(
-            "Supervisor", "ActionsToMeetGoalsSubAgent", 
-            run_id, "execute_request"
+    async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
+        """Execute action plan generation - uses BaseAgent's reliability infrastructure."""
+        await self.execute_with_reliability(
+            lambda: self._execute_action_plan_main(state, run_id, stream_updates),
+            "execute_action_plan",
+            fallback=lambda: self._execute_action_plan_fallback(state, run_id, stream_updates)
         )
-
-    def _create_execution_context(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> ExecutionContext:
-        """Create execution context for the request."""
-        return ExecutionContext(
+        
+    async def _execute_action_plan_main(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
+        """Main execution path using modern patterns."""
+        context = ExecutionContext(
             run_id=run_id,
             agent_name=self.name,
             state=state,
             stream_updates=stream_updates,
             metadata={"description": self.description}
         )
-
-    async def _execute_with_modern_pattern_and_fallback(
-        self, context: ExecutionContext, state: DeepAgentState, 
-        run_id: str, stream_updates: bool
-    ) -> None:
-        """Execute with modern pattern and fallback on failure."""
-        try:
-            await self._execute_with_modern_pattern(context, state, run_id)
-        except Exception as e:
-            await self._execute_fallback_workflow(state, run_id, stream_updates)
-
-    async def _execute_with_modern_pattern(self, context: ExecutionContext, state: DeepAgentState, run_id: str) -> None:
-        """Execute using modern execution pattern."""
-        result = await self.execution_engine.execute(self, context)
-        if not result.success:
-            await self._handle_execution_failure(result, state, run_id)
-
-    def _log_execution_end(self, run_id: str) -> None:
-        """Log execution end communication."""
-        log_agent_communication(
-            "ActionsToMeetGoalsSubAgent", "Supervisor",
-            run_id, "execute_response"
-        )
-
-    async def _handle_execution_failure(
-        self, result: ExecutionResult,
-        state: DeepAgentState, run_id: str
-    ) -> None:
-        """Handle execution failure with fallback."""
-        logger.error(f"Execution failed: {result.error}")
+        
+        # Use BaseAgent's modern execution infrastructure
+        if not await self.validate_preconditions(context):
+            raise ValueError("Precondition validation failed")
+            
+        result = await self.execute_core_logic(context)
+        
+    async def _execute_action_plan_fallback(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
+        """Fallback execution with default action plan - includes proper WebSocket events."""
+        if stream_updates:
+            # CRITICAL: Send WebSocket events even in fallback mode for user transparency
+            await self.emit_agent_started("Creating fallback action plan due to processing issues")
+            await self.emit_thinking("Switching to fallback action plan generation...")
+            
+        self.logger.warning(f"Using fallback action plan for run_id: {run_id}")
         fallback_plan = ActionPlanBuilder.get_default_action_plan()
         state.action_plan_result = fallback_plan
-
-    async def _execute_fallback_workflow(
-        self, state: DeepAgentState,
-        run_id: str, stream_updates: bool
-    ) -> None:
-        """Backward compatibility fallback workflow."""
-        main_executor = self._create_main_executor(state, run_id, stream_updates)
-        fallback_executor = self._create_fallback_executor(state, run_id, stream_updates)
-        result = await self._execute_with_protection(
-            main_executor, fallback_executor, run_id
-        )
-        await self._apply_reliability_protection(result)
-
-    def _apply_default_state(self, state: DeepAgentState) -> None:
-        """Apply default values for completely missing state."""
-        if not state.optimizations_result:
-            state.optimizations_result = OptimizationsResult(
-                optimization_type="default",
-                recommendations=["Manual review required - no optimization data available"],
-                confidence_score=0.1
-            )
         
-        if not state.data_result:
-            state.data_result = DataAnalysisResponse(
-                query="Default query - no data available",
-                results=[],
-                insights={"status": "No data analysis available"},
-                metadata={"source": "default"},
-                recommendations=["Collect data for analysis"]
-            )
-    
-    def _apply_partial_defaults(self, state: DeepAgentState, missing_deps: list) -> None:
-        """Apply defaults only for missing dependencies."""
+        if stream_updates:
+            # CRITICAL: Complete the WebSocket event flow even in fallback
+            await self.emit_agent_completed({
+                "success": True,
+                "fallback_used": True,
+                "steps_generated": len(fallback_plan.plan_steps) if fallback_plan.plan_steps else 0,
+                "message": "Action plan created using fallback method"
+            })
+
+    def _apply_defaults_for_missing_deps(self, state: DeepAgentState, missing_deps: list) -> None:
+        """Apply default values for missing dependencies to enable graceful degradation."""
         if "optimizations_result" in missing_deps and not state.optimizations_result:
             state.optimizations_result = OptimizationsResult(
-                optimization_type="partial",
-                recommendations=["Limited optimization - data analysis available but no optimization analysis"],
-                confidence_score=0.3
+                optimization_type="default",
+                recommendations=["Manual review required - limited optimization data available"],
+                confidence_score=0.2
             )
         
         if "data_result" in missing_deps and not state.data_result:
             state.data_result = DataAnalysisResponse(
-                query="Partial query - using optimization data only",
+                query="Default query - using available context",
                 results=[],
-                insights={"status": "Using optimization data only - no direct data analysis"},
-                metadata={"source": "partial_default"},
-                recommendations=state.optimizations_result.recommendations if state.optimizations_result else []
+                insights={"status": "Limited data analysis - using optimization context"},
+                metadata={"source": "default_graceful_degradation"},
+                recommendations=["Collect additional data for comprehensive analysis"]
             )
     
-    def _build_action_plan_prompt(self, state: DeepAgentState) -> str:
-        """Build prompt for action plan generation."""
-        return actions_to_meet_goals_prompt_template.format(
-            optimizations=state.optimizations_result,
-            data=state.data_result,
-            user_request=state.user_request
-        )
-
-    async def _get_llm_response(self, prompt: str, run_id: str) -> str:
-        """Get LLM response with monitoring."""
-        correlation_id = self._prepare_llm_request(prompt, run_id)
-        return await self._execute_monitored_llm_request(prompt, correlation_id)
-
-    async def _execute_monitored_llm_request(self, prompt: str, correlation_id: str) -> str:
-        """Execute LLM request with monitoring cleanup."""
-        try:
-            response = await self._execute_llm_request(prompt, correlation_id)
-            self._finalize_llm_request_success(response, correlation_id)
-            return response
-        finally:
-            stop_llm_heartbeat(correlation_id)
-
-    def _prepare_llm_request(self, prompt: str, run_id: str) -> str:
-        """Prepare LLM request with logging and monitoring setup."""
-        correlation_id = generate_llm_correlation_id()
-        start_llm_heartbeat(correlation_id, "ActionsToMeetGoalsSubAgent")
-        self._log_prompt_size(prompt, run_id)
-        log_agent_input(
-            "ActionsToMeetGoalsSubAgent", "LLM",
-            len(prompt), correlation_id
-        )
-        return correlation_id
-
-    async def _execute_llm_request(self, prompt: str, correlation_id: str) -> str:
-        """Execute the actual LLM request."""
-        return await self.llm_manager.ask_llm(
-            prompt, llm_config_name='actions_to_meet_goals'
-        )
-
-    def _finalize_llm_request_success(self, response: str, correlation_id: str) -> None:
-        """Finalize successful LLM request with output logging."""
-        log_agent_output(
-            "LLM", "ActionsToMeetGoalsSubAgent",
-            len(response) if response else 0,
-            "success", correlation_id
-        )
-
-    async def _process_llm_response(
-        self, llm_response: str, run_id: str
-    ) -> ActionPlanResult:
-        """Process LLM response to ActionPlanResult."""
-        result = await ActionPlanBuilder.process_llm_response(llm_response, run_id)
-        
-        # Mark as partial if we used default state
-        if hasattr(self, '_used_defaults'):
-            self._mark_partial_result(result)
-        
-        return result
-    
-    def _mark_partial_result(self, result: ActionPlanResult) -> None:
-        """Mark result as partial with metadata."""
-        result.partial_extraction = True
-        if not result.error:
-            result.error = "Generated with partial data - some dependencies were missing"
-
-    def _get_default_action_plan(self) -> ActionPlanResult:
-        """Get default action plan for failures."""
-        return ActionPlanBuilder.get_default_action_plan()
-
-    # Legacy compatibility methods
-    def _create_main_executor(self, state, run_id, stream_updates):
-        """Legacy main executor."""
-        async def execute():
-            await self._send_processing_update(run_id, stream_updates)
-            prompt = self._build_action_plan_prompt(state)
-            response = await self._get_llm_response(prompt, run_id)
-            result = await self._process_llm_response(response, run_id)
-            state.action_plan_result = result
-            return result
-        return execute
-
-    def _create_fallback_executor(self, state, run_id, stream_updates):
-        """Legacy fallback executor."""
-        async def fallback():
-            plan = ActionPlanBuilder.get_default_action_plan()
-            state.action_plan_result = plan
-            return plan
-        return fallback
-
-    async def _execute_with_protection(self, main, fallback, run_id):
-        """Legacy protection wrapper."""
-        return await self.fallback_strategy.execute_with_fallback(
-            main, fallback, "action_plan_generation", run_id
-        )
-
-    async def _apply_reliability_protection(self, result):
-        """Legacy reliability wrapper."""
-        async def op():
-            return result
-        await self.reliability.execute_safely(op, "execute", timeout=45.0)
-
-    async def _send_processing_update(self, run_id, stream_updates):
-        """Legacy processing update."""
-        if stream_updates:
-            await self._send_update(run_id, {
-                "status": "processing",
-                "message": "Creating action plan..."
-            })
-
-    def _log_prompt_size(self, prompt: str, run_id: str):
-        """Log large prompt warning."""
-        size_mb = len(prompt) / (1024 * 1024)
-        if size_mb > 1:
-            logger.info(f"Large prompt ({size_mb:.2f}MB) for {run_id}")
-
-    def get_health_status(self) -> dict:
-        """Get comprehensive health status."""
-        return {
-            "agent": self.name,
-            "modern_health": self.monitor.get_health_status(),
-            "reliability": self.reliability_manager.get_health_status(),
-            "legacy_health": self.reliability.get_health_status()
-        }
-
-    def get_performance_metrics(self) -> dict:
-        """Get performance metrics."""
-        return self.monitor.get_agent_metrics(self.name)
-
-    def get_circuit_breaker_status(self) -> dict:
-        """Get circuit breaker status."""
-        return self.reliability_manager.get_circuit_breaker_status()
-
-    async def check_entry_conditions(
-        self, state: DeepAgentState, run_id: str
-    ) -> bool:
-        """Legacy entry condition check - always return True for graceful degradation."""
+    async def check_entry_conditions(self, state: DeepAgentState, run_id: str) -> bool:
+        """Legacy entry condition check - maintained for backward compatibility."""
         # Apply defaults if needed for backward compatibility
         if not state.optimizations_result or not state.data_result:
             missing = []
@@ -445,10 +222,7 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
             if not state.data_result:
                 missing.append("data_result")
             
-            logger.warning(f"Legacy check_entry_conditions: missing {missing}, applying defaults")
-            if len(missing) == 2:
-                self._apply_default_state(state)
-            else:
-                self._apply_partial_defaults(state, missing)
+            self.logger.warning(f"Legacy check_entry_conditions: missing {missing}, applying defaults")
+            self._apply_defaults_for_missing_deps(state, missing)
         
         return True  # Always allow execution with defaults
