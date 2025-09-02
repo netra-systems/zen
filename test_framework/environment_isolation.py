@@ -100,7 +100,7 @@ class TestEnvironmentManager:
     preventing global os.environ pollution.
     """
     
-    # Default test environment variables
+    # Default test environment variables (will be modified based on USE_REAL_SERVICES)
     BASE_TEST_ENV = {
         "TESTING": "1",
         "NETRA_ENV": "testing", 
@@ -108,23 +108,12 @@ class TestEnvironmentManager:
         "LOG_LEVEL": "ERROR",
         "TEST_COLLECTION_MODE": "0",
         
-        # Database configuration - Using separate components per database_connectivity_architecture.xml
-        # For test environment, DatabaseURLBuilder's TestBuilder will use SQLite memory by default
-        # We set USE_MEMORY_DB to ensure SQLite is used for tests
-        "USE_MEMORY_DB": "true",
-        # Clear all database config to let TestBuilder use memory database
-        "POSTGRES_HOST": "",
-        "POSTGRES_USER": "",
-        "POSTGRES_PASSWORD": "",
-        "POSTGRES_DB": "",
-        "POSTGRES_PORT": "",
-        # Clear legacy DATABASE_URL to ensure central config manager is used
-        "DATABASE_URL": "",
-        "DATABASE_HOST": "",
-        "DATABASE_USER": "",
-        "DATABASE_PASSWORD": "",
-        "DATABASE_NAME": "",
-        "DATABASE_PORT": "",
+        # Database configuration - will be set dynamically based on USE_REAL_SERVICES
+        # For test environment without real services, DatabaseURLBuilder's TestBuilder will use SQLite memory
+        # For real services, we'll use actual PostgreSQL
+        # Note: These will be overridden in _ensure_database_config_consistency()
+        # "USE_MEMORY_DB": "true",  # Don't set by default - let _ensure_database_config_consistency handle it
+        # Don't clear database config here - let _ensure_database_config_consistency handle it
         
         # Redis configuration
         "REDIS_URL": "redis://localhost:6379/1",
@@ -206,7 +195,40 @@ class TestEnvironmentManager:
         - Clear any legacy DATABASE_URL to ensure central config manager is used
         - DatabaseURLBuilder's TestBuilder will handle SQLite memory database
         - USE_MEMORY_DB=true ensures tests use SQLite in-memory
+        - UNLESS USE_REAL_SERVICES=true, then use real PostgreSQL
         """
+        # Check if real services are requested
+        use_real_services = self.env.get("USE_REAL_SERVICES", "false").lower() == "true"
+        
+        if use_real_services:
+            # Real services requested - preserve PostgreSQL configuration
+            # Clear USE_MEMORY_DB to allow real database
+            self.env.set("USE_MEMORY_DB", "false", source="real_services_config")
+            
+            # Ensure real PostgreSQL configuration is set
+            if not self.env.get("DATABASE_URL"):
+                # Set real PostgreSQL URL for testing
+                test_postgres_host = self.env.get("TEST_POSTGRES_HOST", "localhost")
+                test_postgres_port = self.env.get("TEST_POSTGRES_PORT", "5434")
+                test_postgres_user = self.env.get("TEST_POSTGRES_USER", "test_user")
+                test_postgres_password = self.env.get("TEST_POSTGRES_PASSWORD", "test_pass")
+                test_postgres_db = self.env.get("TEST_POSTGRES_DB", "netra_test")
+                
+                database_url = f"postgresql://{test_postgres_user}:{test_postgres_password}@{test_postgres_host}:{test_postgres_port}/{test_postgres_db}"
+                self.env.set("DATABASE_URL", database_url, source="real_services_postgres_url")
+                print(f"[INFO] Using real PostgreSQL for testing: {database_url}")
+            
+            # Also ensure Redis is configured for real services
+            if not self.env.get("REDIS_URL") or self.env.get("REDIS_URL") == "redis://localhost:6379/1":
+                test_redis_host = self.env.get("TEST_REDIS_HOST", "localhost")
+                test_redis_port = self.env.get("TEST_REDIS_PORT", "6381")
+                redis_url = f"redis://{test_redis_host}:{test_redis_port}/1"
+                self.env.set("REDIS_URL", redis_url, source="real_services_redis_url")
+                print(f"[INFO] Using real Redis for testing: {redis_url}")
+                
+            return  # Don't clear PostgreSQL config for real services
+        
+        # Not using real services - use memory database as before
         # Clear any legacy DATABASE_URL to prevent conflicts
         database_url = self.env.get("DATABASE_URL")
         if database_url and database_url.strip():
@@ -316,21 +338,10 @@ def isolated_test_env():
     for key, value in manager.BASE_TEST_ENV.items():
         env.set(key, value, source="isolated_test_env_fixture")
     
-    # Ensure database configuration consistency
-    # Use the env instance directly for consistency check
-    database_url = env.get("DATABASE_URL")
-    individual_db_vars = [
-        "DATABASE_HOST", "DATABASE_USER", "DATABASE_PASSWORD", 
-        "DATABASE_NAME", "DATABASE_PORT",
-        "POSTGRES_HOST", "POSTGRES_USER", "POSTGRES_PASSWORD", 
-        "POSTGRES_DB", "POSTGRES_PORT"
-    ]
-    
-    if database_url:
-        # DATABASE_URL is set, ensure individual components are cleared
-        for var in individual_db_vars:
-            if env.get(var):
-                env.set(var, "", source="isolated_test_env_consistency_clear")
+    # Ensure database configuration consistency using the manager's method
+    manager = get_test_env_manager()
+    manager.env = env  # Use the current env instance
+    manager._ensure_database_config_consistency()
     
     yield env
     

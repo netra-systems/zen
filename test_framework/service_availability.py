@@ -484,8 +484,16 @@ class ServiceAvailabilityChecker:
         for key in ['CLICKHOUSE_URL', 'CLICKHOUSE_HOST', 'TEST_CLICKHOUSE_URL']:
             value = get_env(key)
             if value:
+                # If it's a clickhouse:// URL, convert to http://
+                if value.startswith('clickhouse://'):
+                    # Parse the URL and convert to HTTP format
+                    from urllib.parse import urlparse
+                    parsed = urlparse(value)
+                    host = parsed.hostname or 'localhost'
+                    port = parsed.port or 8123
+                    return f"http://{host}:{port}"
                 # If it's just a host, construct URL
-                if not value.startswith('http'):
+                elif not value.startswith('http'):
                     port = get_env('CLICKHOUSE_PORT', '8123')
                     value = f"http://{value}:{port}"
                 return value

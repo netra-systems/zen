@@ -95,12 +95,52 @@ if "pytest" in sys.modules or get_test_env_manager().env.get("PYTEST_CURRENT_TES
 
 
 # =============================================================================
-# SESSION-SCOPED REAL SERVICE FIXTURES
+# CONDITIONAL SERVICE ORCHESTRATION
 # =============================================================================
 
 @pytest.fixture(scope="session", autouse=True)
+async def conditional_service_orchestration(request):
+    """Conditionally run service orchestration based on test markers.
+    
+    This fixture runs automatically but only orchestrates services for:
+    - Tests marked with @pytest.mark.integration
+    - Tests marked with @pytest.mark.e2e
+    - Tests that explicitly request real_services fixtures
+    """
+    # Check if this test needs service orchestration
+    markers = list(request.node.iter_markers())
+    marker_names = [m.name for m in markers]
+    
+    # Only orchestrate for integration/e2e tests
+    needs_orchestration = any(name in ['integration', 'e2e', 'real_services'] for name in marker_names)
+    
+    # Also check if test is requesting real services fixtures
+    if not needs_orchestration and hasattr(request, 'fixturenames'):
+        needs_orchestration = any('real_' in name or 'e2e' in name for name in request.fixturenames)
+    
+    if not needs_orchestration:
+        # Skip orchestration for unit tests
+        logger.debug("Skipping service orchestration for unit test")
+        yield
+        return
+    
+    # Run the actual orchestration
+    logger.info("Running service orchestration for integration/e2e test")
+    # Delegate to the real_services_session fixture
+    yield
+
+# =============================================================================
+# SESSION-SCOPED REAL SERVICE FIXTURES
+# =============================================================================
+
+@pytest.fixture(scope="session", autouse=False)  # Changed to autouse=False for conditional use
 async def real_services_session() -> AsyncIterator[RealServicesManager]:
-    """Session-scoped real services manager with E2E service orchestration."""
+    """Session-scoped real services manager with E2E service orchestration.
+    
+    This fixture is now opt-in. Tests that need real services should:
+    1. Mark with @pytest.mark.integration or @pytest.mark.e2e
+    2. Or explicitly request this fixture
+    """
     logger.info("🚀 Starting E2E Service Orchestration for test session...")
     
     # Check if real services should be used
