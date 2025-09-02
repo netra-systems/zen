@@ -197,6 +197,14 @@ class MessageHandlerService(IMessageHandlerService):
             else:
                 logger.warning(f"⚠️ Failed to register run-thread mapping for run_id={run.id}")
                 
+            # CRITICAL: Set WebSocket bridge on SupervisorAgent for real-time events
+            # This enables emit_thinking, emit_progress, and other WebSocket events
+            if hasattr(self.supervisor, 'set_websocket_bridge'):
+                self.supervisor.set_websocket_bridge(bridge, run.id, "SupervisorAgent")
+                logger.info(f"✅ Set WebSocket bridge on SupervisorAgent for run_id={run.id}")
+            else:
+                logger.warning(f"⚠️ SupervisorAgent doesn't have set_websocket_bridge method")
+                
         except Exception as e:
             logger.error(f"🚨 Error registering run-thread mapping: {e}")
             # Continue execution even if registration fails
