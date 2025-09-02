@@ -200,7 +200,7 @@ class MessageHandlerService(IMessageHandlerService):
             # CRITICAL: Set WebSocket bridge on SupervisorAgent for real-time events
             # This enables emit_thinking, emit_progress, and other WebSocket events
             if hasattr(self.supervisor, 'set_websocket_bridge'):
-                self.supervisor.set_websocket_bridge(bridge, run.id, "SupervisorAgent")
+                self.supervisor.set_websocket_bridge(bridge, run.id)
                 logger.info(f"✅ Set WebSocket bridge on SupervisorAgent for run_id={run.id}")
             else:
                 logger.warning(f"⚠️ SupervisorAgent doesn't have set_websocket_bridge method")
