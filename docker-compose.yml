@@ -49,6 +49,8 @@ services:
         limits:
           memory: 256M
           cpus: '0.25'
+        reservations:
+          memory: 128M
 
   # Dev Redis Cache
   dev-redis:
@@ -73,6 +75,8 @@ services:
         limits:
           memory: 128M
           cpus: '0.1'
+        reservations:
+          memory: 64M
 
   # Dev ClickHouse Analytics (Optional - can be ephemeral)
   dev-clickhouse:
@@ -104,6 +108,8 @@ services:
         limits:
           memory: 512M
           cpus: '0.2'
+        reservations:
+          memory: 256M
 
   # Dev Auth Service
   dev-auth:
@@ -168,8 +174,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 512M
           cpus: '0.25'
+        reservations:
+          memory: 256M
 
   # Dev Backend Service
   dev-backend:
@@ -245,8 +253,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 2048M
+          memory: 1G
           cpus: '0.4'
+        reservations:
+          memory: 512M
 
   # Dev Frontend Service
   dev-frontend:
@@ -286,6 +296,8 @@ services:
         limits:
           memory: 512M
           cpus: '0.3'
+        reservations:
+          memory: 256M
 
   # ============================================
   # TEST ENVIRONMENT
