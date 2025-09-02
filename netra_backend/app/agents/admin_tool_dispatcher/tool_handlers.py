@@ -38,7 +38,7 @@ from netra_backend.app.agents.admin_tool_dispatcher.tool_handlers_core import (
     UserAdminHandler,
     create_modern_tool_handler,
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.logging_config import central_logger
 
@@ -49,60 +49,35 @@ logger = central_logger
 async def execute_admin_tool(tool_name: str, user: User, db: AsyncSession, action: str, **kwargs) -> Dict[str, Any]:
     """Modern admin tool execution with standardized execution patterns"""
     handler = create_modern_tool_handler(tool_name)
-    context = handler.create_execution_context(
-        DeepAgentState(params={'action': action, 'user': user, 'db': db, 'kwargs': kwargs}), 
-        f"{tool_name}_{action}"
-    )
+    user_context = _create_user_execution_context_for_tool(tool_name, user, db, action, kwargs)
+    context = handler.create_execution_context(user_context, f"{tool_name}_{action}")
     return await handler.execute_core_logic(context)
 
 
 # Legacy wrapper functions for backward compatibility 
 async def execute_corpus_manager(action: str, user: User, db: AsyncSession, **kwargs) -> Dict[str, Any]:
     """Legacy wrapper - use create_modern_tool_handler instead"""
-    handler = create_modern_tool_handler('corpus_manager')
-    context = _create_handler_context(handler, action, user, db, kwargs, 'corpus')
-    result = await handler.execute_core_logic(context)
-    return result
+    return await execute_admin_tool('corpus_manager', user, db, action, **kwargs)
 
 
 async def execute_synthetic_generator(action: str, user: User, db: AsyncSession, **kwargs) -> Dict[str, Any]:
     """Legacy wrapper - use create_modern_tool_handler instead"""
-    handler = create_modern_tool_handler('synthetic_generator')
-    context = handler.create_execution_context(
-        DeepAgentState(params={'action': action, 'user': user, 'db': db, 'kwargs': kwargs}), 
-        f"synthetic_{action}"
-    )
-    return await handler.execute_core_logic(context)
+    return await execute_admin_tool('synthetic_generator', user, db, action, **kwargs)
 
 
 async def execute_user_admin(action: str, user: User, db: AsyncSession, **kwargs) -> Dict[str, Any]:
     """Legacy wrapper - use create_modern_tool_handler instead"""
-    handler = create_modern_tool_handler('user_admin')
-    context = handler.create_execution_context(
-        DeepAgentState(params={'action': action, 'user': user, 'db': db, 'kwargs': kwargs}), 
-        f"user_{action}"
-    )
-    return await handler.execute_core_logic(context)
+    return await execute_admin_tool('user_admin', user, db, action, **kwargs)
 
 
 async def execute_system_configurator(action: str, user: User, db: AsyncSession, **kwargs) -> Dict[str, Any]:
     """Legacy wrapper - use create_modern_tool_handler instead"""
-    handler = create_modern_tool_handler('system_configurator')
-    context = handler.create_execution_context(
-        DeepAgentState(params={'action': action, 'user': user, 'db': db, 'kwargs': kwargs}), 
-        f"system_{action}"
-    )
-    return await handler.execute_core_logic(context)
+    return await execute_admin_tool('system_configurator', user, db, action, **kwargs)
 
 
 async def execute_log_analyzer(action: str, user: User, db: AsyncSession, **kwargs) -> Dict[str, Any]:
     """Legacy wrapper - use create_modern_tool_handler instead"""
-    handler = create_modern_tool_handler('log_analyzer')
-    context = handler.create_execution_context(
-        DeepAgentState(params={'action': action, 'user': user, 'db': db, 'kwargs': kwargs}), 
-        f"log_{action}"
-    )
-    return await handler.execute_core_logic(context)
+    return await execute_admin_tool('log_analyzer', user, db, action, **kwargs)
 
 
 def get_tool_executor(tool_name: str) -> Optional[Callable]:
@@ -168,10 +143,27 @@ __all__ = [
 
 
 # Helper functions for compliance (25-line limit)
+def _create_user_execution_context_for_tool(tool_name: str, user: User, db: AsyncSession, action: str, kwargs: Dict[str, Any]) -> UserExecutionContext:
+    """Create UserExecutionContext for admin tool execution."""
+    import uuid
+    user_id = getattr(user, 'id', None) if user else f"admin_user_{uuid.uuid4().hex[:8]}"
+    thread_id = f"admin_{tool_name}_{action}_{user_id}"
+    run_id = f"admin_run_{tool_name}_{uuid.uuid4().hex[:8]}"
+    
+    metadata = {'action': action, 'user': user, 'db': db, 'kwargs': kwargs, 'tool_name': tool_name}
+    
+    return UserExecutionContext.from_request(
+        user_id=user_id,
+        thread_id=thread_id,
+        run_id=run_id,
+        db_session=db,
+        metadata=metadata
+    )
+
 def _create_handler_context(handler, action: str, user: User, db: AsyncSession, kwargs: Dict[str, Any], prefix: str):
     """Create execution context for handler."""
-    params = {'action': action, 'user': user, 'db': db, 'kwargs': kwargs}
-    return handler.create_execution_context(DeepAgentState(params=params), f"{prefix}_{action}")
+    user_context = _create_user_execution_context_for_tool(prefix, user, db, action, kwargs)
+    return handler.create_execution_context(user_context, f"{prefix}_{action}")
 
 
 def _build_tool_executor_map() -> Dict[str, Callable]:

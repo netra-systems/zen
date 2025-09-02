@@ -71,17 +71,26 @@ class AdminToolExecutionEngine:
 
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
         """Execute admin tool with modern patterns."""
-        dispatcher = self.dispatcher_instance
-        tool_name = context.metadata.get('tool_name')
-        kwargs = context.metadata.get('kwargs', {})
-        return await self._execute_tool_with_validation(dispatcher, tool_name, kwargs)
+        # Extract data from UserExecutionContext in the state
+        user_context = context.state
+        tool_name = user_context.metadata.get('tool_name')
+        kwargs = user_context.metadata.get('kwargs', {})
+        user = user_context.metadata.get('user')
+        db = user_context.metadata.get('db') or user_context.db_session
+        
+        return await self._execute_tool_with_validation_modern(tool_name, user, db, kwargs)
 
 
     async def validate_preconditions(self, context: ExecutionContext) -> bool:
         """Validate admin tool execution preconditions."""
-        dispatcher = self.dispatcher_instance
-        tool_name = context.metadata.get('tool_name')
-        return self._check_permissions_and_access(dispatcher, tool_name)
+        user_context = context.state
+        tool_name = user_context.metadata.get('tool_name')
+        admin_enabled = user_context.metadata.get('dispatcher_admin_enabled', False)
+        user = user_context.metadata.get('user')
+        
+        if not admin_enabled:
+            return False
+        return self._validate_tool_access_modern(user, tool_name)
 
 
     def _check_permissions_and_access(self, dispatcher, tool_name: str) -> bool:
@@ -95,6 +104,11 @@ class AdminToolExecutionEngine:
         """Validate specific tool access."""
         from netra_backend.app.agents.admin_tool_dispatcher.validation import validate_admin_tool_access
         return validate_admin_tool_access(dispatcher.user, tool_name)
+        
+    def _validate_tool_access_modern(self, user, tool_name: str) -> bool:
+        """Validate specific tool access for modern execution."""
+        from netra_backend.app.agents.admin_tool_dispatcher.validation import validate_admin_tool_access
+        return validate_admin_tool_access(user, tool_name)
 
 
     async def _execute_tool_with_validation(self, dispatcher, tool_name: str, 
@@ -112,6 +126,19 @@ class AdminToolExecutionEngine:
         return await execute_admin_tool(
             tool_name, dispatcher.user, dispatcher.db, action, **kwargs
         )
+        
+    async def _execute_tool_with_validation_modern(self, tool_name: str, user, db, 
+                                                   kwargs: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute tool with validation using modern pattern."""
+        action = kwargs.get('action', 'default')
+        result = await self._execute_tool_by_name_modern(tool_name, user, db, action, kwargs)
+        return self._format_execution_result(result)
+        
+    async def _execute_tool_by_name_modern(self, tool_name: str, user, db, 
+                                          action: str, kwargs: Dict[str, Any]) -> Any:
+        """Execute admin tool by name using modern pattern."""
+        from netra_backend.app.agents.admin_tool_dispatcher.tool_handlers import execute_admin_tool
+        return await execute_admin_tool(tool_name, user, db, action, **kwargs)
 
 
     def _format_execution_result(self, result: Any) -> Dict[str, Any]:
@@ -135,16 +162,39 @@ async def dispatch_admin_tool(dispatcher, tool_name: str, tool_input, **kwargs):
 
 def _create_execution_context(dispatcher, tool_name: str, kwargs: Dict[str, Any]) -> ExecutionContext:
     """Create execution context for modern interface."""
-    from netra_backend.app.agents.state import DeepAgentState
-    state = DeepAgentState(user_id=getattr(dispatcher.user, 'id', 'unknown'))
-    metadata = _build_context_metadata(tool_name, kwargs, dispatcher)
+    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
+    
+    user_id = getattr(dispatcher.user, 'id', 'unknown')
+    thread_id = f"admin_{tool_name}_{user_id}"
     run_id = _generate_run_id(tool_name)
-    return ExecutionContext(run_id=run_id, agent_name="admin_tool_execution", state=state, metadata=metadata)
+    
+    # Create UserExecutionContext with metadata instead of DeepAgentState
+    user_context = UserExecutionContext.from_request(
+        user_id=user_id,
+        thread_id=thread_id, 
+        run_id=run_id,
+        db_session=getattr(dispatcher, 'db', None),
+        metadata=_build_context_metadata(tool_name, kwargs, dispatcher)
+    )
+    
+    return ExecutionContext(
+        run_id=run_id, 
+        agent_name="admin_tool_execution", 
+        state=user_context, 
+        metadata=user_context.metadata
+    )
 
 
 def _build_context_metadata(tool_name: str, kwargs: Dict[str, Any], dispatcher) -> Dict[str, Any]:
     """Build metadata for execution context."""
-    return {'tool_name': tool_name, 'kwargs': kwargs, 'dispatcher': dispatcher}
+    return {
+        'tool_name': tool_name, 
+        'kwargs': kwargs, 
+        'action': kwargs.get('action', 'default'),
+        'user': dispatcher.user,
+        'db': getattr(dispatcher, 'db', None),
+        'dispatcher_admin_enabled': getattr(dispatcher, 'admin_tools_enabled', False)
+    }
 
 
 def _generate_run_id(tool_name: str) -> str:
