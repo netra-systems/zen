@@ -12,7 +12,7 @@ from typing import Dict, List, Set
 
 from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.validation_sub_agent import ValidationSubAgent
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -48,14 +48,14 @@ class TestInheritanceRefactorValidation:
         data_bases = data_agent.__class__.__bases__
         
         assert len(data_bases) == 1, f"DataSubAgent should have single inheritance, got {len(data_bases)} bases: {data_bases}"
-        assert data_bases[0] == BaseSubAgent, f"DataSubAgent should only inherit from BaseSubAgent, got {data_bases[0]}"
+        assert data_bases[0] == BaseAgent, f"DataSubAgent should only inherit from BaseAgent, got {data_bases[0]}"
         
         # Check ValidationSubAgent inheritance
         validation_mro = validation_agent.__class__.__mro__
         validation_bases = validation_agent.__class__.__bases__
         
         assert len(validation_bases) == 1, f"ValidationSubAgent should have single inheritance, got {len(validation_bases)} bases: {validation_bases}"
-        assert validation_bases[0] == BaseSubAgent, f"ValidationSubAgent should only inherit from BaseSubAgent, got {validation_bases[0]}"
+        assert validation_bases[0] == BaseAgent, f"ValidationSubAgent should only inherit from BaseAgent, got {validation_bases[0]}"
     
     def test_mro_depth_acceptable(self, data_agent, validation_agent):
         """Test that Method Resolution Order depth is now acceptable (≤ 3)."""
@@ -79,7 +79,7 @@ class TestInheritanceRefactorValidation:
             assert not has_execute_core_logic, f"{agent_name} should not have execute_core_logic() method - SSOT violation"
     
     def test_websocket_methods_available(self, data_agent, validation_agent):
-        """Test that WebSocket methods are available through BaseSubAgent."""
+        """Test that WebSocket methods are available through BaseAgent."""
         expected_websocket_methods = [
             'emit_thinking',
             'emit_progress', 
@@ -90,7 +90,7 @@ class TestInheritanceRefactorValidation:
         
         for agent_name, agent in [("DataSubAgent", data_agent), ("ValidationSubAgent", validation_agent)]:
             for method_name in expected_websocket_methods:
-                assert hasattr(agent, method_name), f"{agent_name} should have {method_name} method from BaseSubAgent"
+                assert hasattr(agent, method_name), f"{agent_name} should have {method_name} method from BaseAgent"
     
     def test_no_duplicate_websocket_methods(self, data_agent, validation_agent):
         """Test that WebSocket methods are not duplicated across inheritance hierarchy."""
@@ -222,7 +222,7 @@ class TestWebSocketEventIntegration:
         websocket_methods = ['emit_thinking', 'emit_progress', 'emit_error', 'emit_tool_executing', 'emit_tool_completed']
         
         for method in websocket_methods:
-            assert hasattr(data_agent, method), f"Should have {method} from BaseSubAgent bridge"
+            assert hasattr(data_agent, method), f"Should have {method} from BaseAgent bridge"
             assert callable(getattr(data_agent, method)), f"{method} should be callable"
     
     @pytest.mark.asyncio

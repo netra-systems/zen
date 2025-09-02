@@ -18,7 +18,7 @@ def test_inheritance_structure():
     try:
         from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
         from netra_backend.app.agents.validation_sub_agent import ValidationSubAgent
-        from netra_backend.app.agents.base_agent import BaseSubAgent
+        from netra_backend.app.agents.base_agent import BaseAgent
         from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
         
@@ -37,14 +37,14 @@ def test_inheritance_structure():
         data_bases = DataSubAgent.__bases__
         print(f"DataSubAgent bases: {[b.__name__ for b in data_bases]}")
         assert len(data_bases) == 1, f"Expected 1 base, got {len(data_bases)}"
-        assert data_bases[0] == BaseSubAgent, f"Expected BaseSubAgent, got {data_bases[0]}"
+        assert data_bases[0] == BaseAgent, f"Expected BaseAgent, got {data_bases[0]}"
         print("SUCCESS: DataSubAgent uses single inheritance correctly")
         
         # Check ValidationSubAgent inheritance
         validation_bases = ValidationSubAgent.__bases__
         print(f"ValidationSubAgent bases: {[b.__name__ for b in validation_bases]}")
         assert len(validation_bases) == 1, f"Expected 1 base, got {len(validation_bases)}"
-        assert validation_bases[0] == BaseSubAgent, f"Expected BaseSubAgent, got {validation_bases[0]}"
+        assert validation_bases[0] == BaseAgent, f"Expected BaseAgent, got {validation_bases[0]}"
         print("SUCCESS: ValidationSubAgent uses single inheritance correctly")
         
     except Exception as e:

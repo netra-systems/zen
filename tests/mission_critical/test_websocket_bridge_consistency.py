@@ -25,7 +25,7 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 # Using protocol-based approach for agent execution
 from netra_backend.app.agents.agent_communication import AgentCommunicationMixin
 from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
@@ -259,7 +259,7 @@ class TestWebSocketBridgeConsistency:
         assert bridge1 is bridge2, "Bridge should be a singleton"
         
         # Test that agents can set and use bridge
-        agent = BaseSubAgent(
+        agent = BaseAgent(
             agent_id="test-agent",
             name="Test Agent"
         )
@@ -398,7 +398,7 @@ class TestWebSocketBridgeIntegration:
         mock_manager = AsyncMock()
         bridge.websocket_manager = mock_manager
         
-        agent = BaseSubAgent(agent_id="test", name="Test")
+        agent = BaseAgent(agent_id="test", name="Test")
         agent.set_websocket_bridge(bridge, "error-run")
         
         # Emit error
@@ -422,7 +422,7 @@ class TestWebSocketBridgeIntegration:
         ]
         # Add more base agents
         for i in range(3):
-            agents.append(BaseSubAgent(agent_id=f"agent-{i}", name=f"Agent {i}"))
+            agents.append(BaseAgent(agent_id=f"agent-{i}", name=f"Agent {i}"))
         
         # Set bridge for all
         for i, agent in enumerate(agents):

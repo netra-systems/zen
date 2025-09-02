@@ -13,7 +13,7 @@ import pytest
 
 from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.validation_sub_agent import ValidationSubAgent
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -47,8 +47,8 @@ class TestInheritanceArchitectureViolations:
         """Test that multiple inheritance creates complex Method Resolution Order."""
         mro = data_agent.__class__.__mro__
         
-        # Check that BaseSubAgent is in MRO (single inheritance pattern)
-        assert BaseSubAgent in mro, "BaseSubAgent not in MRO"
+        # Check that BaseAgent is in MRO (single inheritance pattern)
+        assert BaseAgent in mro, "BaseAgent not in MRO"
         # Agents now use single inheritance pattern
         
         # VIOLATION: Complex MRO with multiple base classes
@@ -89,7 +89,7 @@ class TestInheritanceArchitectureViolations:
     
     def test_initialization_order_confusion(self, mock_llm_manager, mock_tool_dispatcher):
         """Test that multiple __init__ calls create initialization confusion."""
-        class TestAgent(BaseSubAgent):
+        class TestAgent(BaseAgent):
             init_calls = []
             
             def __init__(self, llm_manager, tool_dispatcher):
@@ -97,8 +97,8 @@ class TestInheritanceArchitectureViolations:
                 TestAgent.init_calls = []
                 
                 # Single parent __init__ method
-                BaseSubAgent.__init__(self, llm_manager, name="TestAgent")
-                TestAgent.init_calls.append("BaseSubAgent")
+                BaseAgent.__init__(self, llm_manager, name="TestAgent")
+                TestAgent.init_calls.append("BaseAgent")
                 
                 # Using composition pattern for execution logic
             
@@ -238,7 +238,7 @@ class TestInheritanceArchitectureViolations:
     def test_method_resolution_order_conflicts(self):
         """Test for potential MRO conflicts with diamond inheritance."""
         # Create a test case that exposes MRO issues
-        class ConflictTestAgent(BaseSubAgent):
+        class ConflictTestAgent(BaseAgent):
             def __init__(self):
                 # Single inheritance - no MRO conflicts
                 super().__init__()
@@ -277,10 +277,10 @@ class TestMissionCriticalInheritanceFixes:
         from netra_backend.app.agents.validation_sub_agent import ValidationSubAgent
         
         for AgentClass in [DataSubAgent, ValidationSubAgent]:
-            # Should only inherit from BaseSubAgent
+            # Should only inherit from BaseAgent
             bases = AgentClass.__bases__
             assert len(bases) == 1, f"{AgentClass.__name__} should have single inheritance"
-            assert bases[0] == BaseSubAgent, f"{AgentClass.__name__} should only inherit from BaseSubAgent"
+            assert bases[0] == BaseAgent, f"{AgentClass.__name__} should only inherit from BaseAgent"
     
     @pytest.mark.skip(reason="Will pass after inheritance is fixed")  
     def test_no_duplicate_methods(self):

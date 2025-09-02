@@ -44,7 +44,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
@@ -230,7 +230,7 @@ class PipelinePerformanceMetrics:
         }
 
 
-class PerformanceProfiledAgent(BaseSubAgent):
+class PerformanceProfiledAgent(BaseAgent):
     """Agent wrapper that captures detailed performance metrics."""
     
     def __init__(self, agent_type: str, workflow_id: str):

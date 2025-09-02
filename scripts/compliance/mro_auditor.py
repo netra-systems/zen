@@ -138,7 +138,7 @@ class MROAuditor:
         
         # Known deep hierarchies in the codebase
         deep_bases = {
-            'BaseSubAgent': 3,
+            'BaseAgent': 3,
             'BaseAgent': 4,
             'AgentLifecycleMixin': 2,
             'WebSocketBridgeAdapter': 2
@@ -174,7 +174,7 @@ class MROAuditor:
         # Known diamond patterns in the codebase
         if len(parents) >= 2:
             # Check for common base classes that create diamonds
-            common_bases = {'BaseAgent', 'BaseSubAgent'}
+            common_bases = {'BaseAgent', 'BaseAgent'}
             parent_names = {p.split('.')[-1] for p in parents}
             
             if len(parent_names & common_bases) >= 2:
