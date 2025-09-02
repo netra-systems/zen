@@ -36,7 +36,6 @@ from netra_backend.app.agents.corpus_admin.models import (
 from netra_backend.app.agents.corpus_admin.operations import CorpusOperationHandler
 from netra_backend.app.agents.corpus_admin.parsers import CorpusRequestParser
 from netra_backend.app.agents.corpus_admin.validators import CorpusApprovalValidator
-from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.llm.observability import log_agent_communication
@@ -85,22 +84,22 @@ class CorpusAdminSubAgent(BaseAgent):
             retry_config=retry_config
         )
     
-    async def check_entry_conditions(self, state: DeepAgentState, run_id: str) -> bool:
+    async def check_entry_conditions(self, context: 'UserExecutionContext') -> bool:
         """Check if conditions are met for corpus administration"""
-        if self._is_admin_mode_request(state) or self._has_corpus_keywords(state):
+        if await self._is_corpus_admin_needed(context):
             return True
         
-        logger.info(f"Corpus administration not required for run_id: {run_id}")
+        logger.info(f"Corpus administration not required for run_id: {context.run_id}")
         return False
     
-    async def validate_preconditions(self, context: ExecutionContext) -> bool:
+    async def validate_preconditions(self, context: 'UserExecutionContext') -> bool:
         """Validate execution preconditions for corpus administration."""
-        await self._validate_state_requirements(context.state)
+        await self._validate_context_requirements(context)
         await self._validate_execution_resources(context)
         await self._validate_corpus_admin_dependencies()
         return True
     
-    async def execute_with_context(self, context: 'UserExecutionContext', stream_updates: bool = False) -> Dict[str, Any]:
+    async def execute(self, context: 'UserExecutionContext', stream_updates: bool = False) -> Dict[str, Any]:
         """Execute corpus administration with proper session isolation.
         
         NEW: This method uses UserExecutionContext with database session isolation.
@@ -151,109 +150,17 @@ class CorpusAdminSubAgent(BaseAgent):
             # Ensure session is closed
             await session_manager.close()
     
-    async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
-        """Execute core corpus administration logic (legacy compatibility)."""
-        self._execution_monitor.start_operation(f"corpus_admin_execution_{context.run_id}")
-        await self.send_status_update(context, "executing", "Starting corpus administration...")
-        
-        result = await self._execute_corpus_administration_workflow(context)
-        
-        self._execution_monitor.complete_operation(f"corpus_admin_execution_{context.run_id}")
-        await self.send_status_update(context, "completed", "Corpus administration completed")
-        return result
     
-    async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
-        """Modernized execute using modern execution engine for backward compatibility."""
-        log_agent_communication("Supervisor", "CorpusAdminSubAgent", run_id, "execute_request")
-        context = self._create_execution_context(state, run_id, stream_updates)
-        
-        try:
-            result = await self._execute_with_reliability_manager(context)
-            await self._handle_execution_result(result, context)
-        except Exception as e:
-            await self._handle_execution_exception(e, context, state, run_id, stream_updates)
     
-    def _create_execution_context(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> ExecutionContext:
-        """Create execution context for modern pattern."""
-        return ExecutionContext(
-            run_id=run_id, agent_name=self.name, state=state,
-            stream_updates=stream_updates, thread_id=extract_thread_id(state, run_id),
-            user_id=getattr(state, 'user_id', 'default_user')
-        )
     
-    async def _execute_with_reliability_manager(self, context: ExecutionContext):
-        """Execute with modern pattern using reliability manager."""
-        # Create async wrapper to avoid coroutine warning
-        async def execute_wrapper():
-            return await self.execution_engine.execute(self, context)
-        
-        return await self.reliability_manager.execute_with_reliability(
-            context, execute_wrapper
-        )
     
-    async def _handle_execution_result(self, result, context: ExecutionContext) -> None:
-        """Handle result with error handler."""
-        if not result.success:
-            await self.error_handler.handle_execution_error(result.error, context)
+    async def _validate_context_requirements(self, context: 'UserExecutionContext') -> None:
+        """Validate required context attributes."""
+        metadata = context.metadata or {}
+        if not metadata.get('user_request'):
+            raise ValidationError("Missing required user_request in context metadata")
     
-    async def _handle_execution_exception(
-        self, e: Exception, context: ExecutionContext, state: DeepAgentState, run_id: str, stream_updates: bool
-    ) -> None:
-        """Handle execution exception with error handler and fallback."""
-        await self.error_handler.handle_execution_error(e, context)
-        logger.error(f"Modern execution failed, falling back to legacy: {e}")
-        await self._execute_legacy_workflow(state, run_id, stream_updates)
-    
-    async def _execute_with_error_handling(
-        self, state: DeepAgentState, run_id: str, stream_updates: bool, start_time: float
-    ) -> None:
-        """Execute with error handling wrapper"""
-        try:
-            await self._execute_corpus_operation_workflow(state, run_id, stream_updates, start_time)
-        except Exception as e:
-            await self._handle_execution_error(e, state, run_id, stream_updates)
-            raise
-    
-    async def _execute_corpus_operation_workflow(
-        self, state: DeepAgentState, run_id: str, stream_updates: bool, start_time: float
-    ) -> None:
-        """Execute the complete corpus operation workflow."""
-        await self._send_initial_update(run_id, stream_updates)
-        operation_request = await self.parser.parse_operation_request(state.user_request)
-        await self._process_operation_with_approval(operation_request, state, run_id, stream_updates, start_time)
-        log_agent_communication("CorpusAdminSubAgent", "Supervisor", run_id, "execute_response")
-    
-    async def _process_operation_with_approval(
-        self, operation_request, state: DeepAgentState, run_id: str, stream_updates: bool, start_time: float
-    ) -> None:
-        """Process operation with approval check"""
-        approval_required = await self._handle_approval_check(operation_request, state, run_id, stream_updates)
-        if not approval_required:
-            await self._complete_corpus_operation(operation_request, state, run_id, stream_updates, start_time)
-    
-    async def _complete_corpus_operation(
-        self, operation_request, state: DeepAgentState, run_id: str, stream_updates: bool, start_time: float
-    ) -> None:
-        """Complete the corpus operation execution."""
-        await self._send_processing_update(operation_request, run_id, stream_updates)
-        result = await self.operations.execute_operation(operation_request, run_id, stream_updates)
-        
-        await self._finalize_operation_result(result, state, run_id, stream_updates, start_time)
-    
-    async def _finalize_operation_result(
-        self, result, state: DeepAgentState, run_id: str, stream_updates: bool, start_time: float
-    ) -> None:
-        """Finalize operation result and send updates"""
-        state.corpus_admin_result = result.model_dump()
-        await self._send_completion_update(result, run_id, stream_updates, start_time)
-        self._log_completion(result, run_id)
-    
-    async def _validate_state_requirements(self, state: DeepAgentState) -> None:
-        """Validate required state attributes."""
-        if not hasattr(state, 'user_request') or not state.user_request:
-            raise ValidationError("Missing required user_request in state")
-    
-    async def _validate_execution_resources(self, context: ExecutionContext) -> None:
+    async def _validate_execution_resources(self, context: 'UserExecutionContext') -> None:
         """Validate execution resources are available."""
         if not self.parser or not self.operations:
             raise ValidationError("Corpus admin components not initialized")
@@ -263,26 +170,11 @@ class CorpusAdminSubAgent(BaseAgent):
         if not self.reliability_manager.get_health_status().get('overall_health') == 'healthy':
             logger.warning("Corpus admin dependencies in degraded state")
     
-    async def _execute_corpus_administration_workflow(self, context: ExecutionContext) -> Dict[str, Any]:
-        """Execute corpus administration workflow with monitoring."""
-        updated_state = await self._run_corpus_admin_workflow(context.state, context.run_id, context.stream_updates)
-        return {"corpus_admin_result": "completed", "updated_state": updated_state}
     
-    async def _run_corpus_admin_workflow(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> DeepAgentState:
-        """Run corpus admin workflow using legacy methods."""
-        start_time = time.time()
-        await self._execute_corpus_operation_workflow(state, run_id, stream_updates, start_time)
-        return state
-    
-    async def _execute_legacy_workflow(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
-        """Legacy execution workflow for backward compatibility."""
-        start_time = time.time()
-        await self._execute_with_error_handling(state, run_id, stream_updates, start_time)
-    
-    async def cleanup(self, state: DeepAgentState, run_id: str) -> None:
+    async def cleanup(self, context: 'UserExecutionContext') -> None:
         """Cleanup after execution"""
-        await super().cleanup(state, run_id)
-        self._log_final_metrics(state)
+        # Perform any necessary cleanup
+        self._log_final_metrics(context)
     
     def get_health_status(self) -> Dict[str, Any]:
         """Get comprehensive health status from modern execution infrastructure."""
@@ -295,19 +187,6 @@ class CorpusAdminSubAgent(BaseAgent):
             status["reliability"] = self.reliability_manager.get_health_status()
         return status
     
-    async def _handle_execution_error(self, e: Exception, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
-        """Handle execution error with proper error handling."""
-        logger.error(f"Corpus admin execution error: {e}")
-        # Store error in state for supervisor handling
-        state.corpus_admin_error = str(e)
-    
-    async def _handle_approval_check(
-        self, operation_request, state: DeepAgentState, run_id: str, stream_updates: bool
-    ) -> bool:
-        """Handle approval check for corpus operation"""
-        return await self.validator.validate_approval_required(
-            operation_request, state, run_id, stream_updates
-        )
     
     async def _send_initial_update(self, run_id: str, stream_updates: bool) -> None:
         """Send initial status update via WebSocket."""
@@ -331,16 +210,13 @@ class CorpusAdminSubAgent(BaseAgent):
                    f"success={result.success}, "
                    f"affected={result.affected_documents}")
     
-    def _log_final_metrics(self, state: DeepAgentState) -> None:
+    def _log_final_metrics(self, context: 'UserExecutionContext') -> None:
         """Log final metrics."""
-        if self._has_valid_result(state):
-            result = state.corpus_admin_result
+        metadata = context.metadata or {}
+        if 'corpus_admin_result' in metadata:
+            result = metadata['corpus_admin_result']
             metrics_message = self._build_metrics_message(result)
             logger.info(metrics_message)
-    
-    def _has_valid_result(self, state: DeepAgentState) -> bool:
-        """Check if state has valid corpus admin result."""
-        return hasattr(state, 'corpus_admin_result') and bool(state.corpus_admin_result)
     
     def _build_metrics_message(self, result: dict) -> str:
         """Build metrics message for logging."""
@@ -353,28 +229,6 @@ class CorpusAdminSubAgent(BaseAgent):
         """Get corpus name from result."""
         return result.get('corpus_metadata', {}).get('corpus_name')
     
-    def _is_admin_mode_request(self, state: DeepAgentState) -> bool:
-        """Check if request is admin mode or corpus-related."""
-        triage_result = state.triage_result or {}
-        
-        if isinstance(triage_result, dict):
-            return self._check_admin_indicators(triage_result)
-        return False
-    
-    def _check_admin_indicators(self, triage_result: dict) -> bool:
-        """Check if triage result indicates admin or corpus operation."""
-        category = triage_result.get("category", "")
-        is_admin = triage_result.get("is_admin_mode", False)
-        return "corpus" in category.lower() or "admin" in category.lower() or is_admin
-    
-    def _has_corpus_keywords(self, state: DeepAgentState) -> bool:
-        """Check if user request contains corpus keywords."""
-        if not state.user_request:
-            return False
-        
-        corpus_keywords = ["corpus", "knowledge base", "documentation", "reference data", "embeddings"]
-        request_lower = state.user_request.lower()
-        return any(keyword in request_lower for keyword in corpus_keywords)
     
     # === NEW: Session-based execution methods ===
     

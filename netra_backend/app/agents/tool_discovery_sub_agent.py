@@ -23,7 +23,8 @@ from netra_backend.app.agents.input_validation import validate_agent_input
 from netra_backend.app.agents.triage_sub_agent.models import ExtractedEntities, ToolRecommendation
 from netra_backend.app.agents.triage_sub_agent.tool_recommender import ToolRecommender
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext, validate_user_context
+from netra_backend.app.database.session_manager import DatabaseSessionManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -50,10 +51,49 @@ class ToolDiscoverySubAgent(BaseAgent):
         self.tool_recommender = ToolRecommender()
         self.discovery_cache = {}  # In-memory cache for fast lookups
 
-    # Implement BaseAgent's abstract methods for tool discovery logic
-    async def validate_preconditions(self, context: ExecutionContext) -> bool:
+    async def execute(self, context: UserExecutionContext, stream_updates: bool = False) -> Dict[str, Any]:
+        """Execute tool discovery using UserExecutionContext.
+        
+        Args:
+            context: User execution context with request data
+            stream_updates: Whether to send streaming updates
+            
+        Returns:
+            Tool discovery results
+        """
+        # Validate context
+        context = validate_user_context(context)
+        
+        start_time = time.time()
+        
+        try:
+            # Create database session manager
+            session_mgr = DatabaseSessionManager(context)
+            
+            # Validate preconditions
+            if not await self._validate_preconditions(context):
+                raise AgentValidationError("Invalid preconditions for tool discovery")
+                
+            # Execute core logic
+            result = await self._execute_core_logic(context, start_time)
+            return result
+            
+        except Exception as e:
+            await self.emit_error(f"Tool discovery failed: {str(e)}", error_type="DiscoveryError")
+            raise AgentValidationError(f"Tool discovery execution failed: {str(e)}")
+        finally:
+            # Ensure proper cleanup
+            try:
+                if 'session_mgr' in locals():
+                    await session_mgr.cleanup()
+            except Exception as cleanup_e:
+                logger.error(f"Session cleanup error: {cleanup_e}")
+    
+    async def _validate_preconditions(self, context: UserExecutionContext) -> bool:
         """Validate execution preconditions for tool discovery."""
-        if not context.state.user_request:
+        user_request = context.metadata.get('user_request', '')
+        
+        if not user_request:
             self.logger.warning(f"No user request provided for tool discovery in run_id: {context.run_id}")
             await self.emit_error(
                 "No user request provided for tool discovery", 
@@ -62,7 +102,7 @@ class ToolDiscoverySubAgent(BaseAgent):
             return False
             
         # Validate that user request has sufficient content for tool discovery
-        if len(context.state.user_request.strip()) < 10:
+        if len(user_request.strip()) < 10:
             self.logger.warning(f"User request too short for meaningful tool discovery in run_id: {context.run_id}")
             await self.emit_error(
                 "User request too short for meaningful tool discovery", 
@@ -72,60 +112,55 @@ class ToolDiscoverySubAgent(BaseAgent):
             
         return True
         
-    async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+    async def _execute_core_logic(self, context: UserExecutionContext, start_time: float) -> Dict[str, Any]:
         """Execute core tool discovery logic with real-time WebSocket events."""
-        start_time = time.time()
+        user_request = context.metadata.get('user_request', '')
         
         # CRITICAL: WebSocket events for chat value delivery
         await self.emit_thinking("Starting intelligent tool discovery for your request...")
         
-        try:
-            # Step 1: Analyze user request for intent and context
-            await self.emit_thinking("Analyzing your request to understand intent and context...")
-            await self.emit_progress("Extracting key entities and concepts from your request...")
-            
-            extracted_entities = await self._extract_entities_from_request(context.state.user_request)
-            
-            # Step 2: Categorize the request
-            await self.emit_thinking("Categorizing your request to identify relevant tool categories...")
-            await self.emit_progress("Determining the most appropriate tool categories...")
-            
-            categories = await self._categorize_request(context.state.user_request, extracted_entities)
-            
-            # Step 3: Discover and recommend tools
-            await self.emit_thinking("Discovering tools that match your specific needs...")
-            await self.emit_tool_executing("tool_recommendation_engine", {"categories": categories})
-            
-            tool_recommendations = await self._discover_tools(categories, extracted_entities)
-            
-            await self.emit_tool_completed("tool_recommendation_engine", {
-                "found_tools": len(tool_recommendations),
-                "categories_analyzed": len(categories)
-            })
-            
-            # Step 4: Enhance recommendations with usage guidance
-            await self.emit_progress("Enhancing recommendations with usage guidance and examples...")
-            
-            enhanced_recommendations = await self._enhance_recommendations(tool_recommendations, context.state.user_request)
-            
-            # Step 5: Finalize results
-            await self.emit_thinking("Finalizing tool discovery results with prioritized recommendations...")
-            
-            result = await self._finalize_discovery_result(
-                context.state, context.run_id, enhanced_recommendations, categories, start_time
-            )
-            
-            # CRITICAL: Completion events for chat value
-            await self.emit_progress(
-                f"Tool discovery completed! Found {len(enhanced_recommendations)} relevant tools.", 
-                is_complete=True
-            )
-            
-            return result
-            
-        except Exception as e:
-            await self.emit_error(f"Tool discovery failed: {str(e)}", error_type="DiscoveryError")
-            raise AgentValidationError(f"Tool discovery execution failed: {str(e)}")
+        # Step 1: Analyze user request for intent and context
+        await self.emit_thinking("Analyzing your request to understand intent and context...")
+        await self.emit_progress("Extracting key entities and concepts from your request...")
+        
+        extracted_entities = await self._extract_entities_from_request(user_request)
+        
+        # Step 2: Categorize the request
+        await self.emit_thinking("Categorizing your request to identify relevant tool categories...")
+        await self.emit_progress("Determining the most appropriate tool categories...")
+        
+        categories = await self._categorize_request(user_request, extracted_entities)
+        
+        # Step 3: Discover and recommend tools
+        await self.emit_thinking("Discovering tools that match your specific needs...")
+        await self.emit_tool_executing("tool_recommendation_engine", {"categories": categories})
+        
+        tool_recommendations = await self._discover_tools(categories, extracted_entities)
+        
+        await self.emit_tool_completed("tool_recommendation_engine", {
+            "found_tools": len(tool_recommendations),
+            "categories_analyzed": len(categories)
+        })
+        
+        # Step 4: Enhance recommendations with usage guidance
+        await self.emit_progress("Enhancing recommendations with usage guidance and examples...")
+        
+        enhanced_recommendations = await self._enhance_recommendations(tool_recommendations, user_request)
+        
+        # Step 5: Finalize results
+        await self.emit_thinking("Finalizing tool discovery results with prioritized recommendations...")
+        
+        result = await self._finalize_discovery_result(
+            context, enhanced_recommendations, categories, start_time
+        )
+        
+        # CRITICAL: Completion events for chat value
+        await self.emit_progress(
+            f"Tool discovery completed! Found {len(enhanced_recommendations)} relevant tools.", 
+            is_complete=True
+        )
+        
+        return result
 
     async def _extract_entities_from_request(self, user_request: str) -> ExtractedEntities:
         """Extract entities and concepts from user request."""
@@ -259,8 +294,7 @@ class ToolDiscoverySubAgent(BaseAgent):
     
     async def _finalize_discovery_result(
         self, 
-        state: DeepAgentState, 
-        run_id: str, 
+        context: UserExecutionContext, 
         recommendations: List[Dict[str, Any]], 
         categories: List[str], 
         start_time: float
@@ -273,15 +307,14 @@ class ToolDiscoverySubAgent(BaseAgent):
             "analyzed_categories": categories, 
             "total_tools_found": len(recommendations),
             "discovery_metadata": {
-                "run_id": run_id,
+                "run_id": context.run_id,
                 "duration_ms": duration_ms,
                 "agent": self.name,
                 "timestamp": time.time()
             }
         }
         
-        # Store result in state for other agents
-        if not hasattr(state, 'tool_discovery_result'):
-            state.tool_discovery_result = result
+        # Store result in context metadata for other agents
+        context.metadata['tool_discovery_result'] = result
         
         return result

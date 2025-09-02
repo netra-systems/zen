@@ -21,7 +21,8 @@ from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.agents.agent_error_types import AgentValidationError
 from netra_backend.app.core.exceptions_agent import AgentError
 from netra_backend.app.agents.input_validation import validate_agent_input
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext, validate_user_context
+from netra_backend.app.database.session_manager import DatabaseSessionManager
 from netra_backend.app.agents.utils import extract_json_from_response, extract_thread_id
 from netra_backend.app.llm.observability import (
     generate_llm_correlation_id,
@@ -36,78 +37,51 @@ logger = central_logger.get_logger(__name__)
 
 
 class SummaryExtractorSubAgent(BaseAgent):
-    """Golden Pattern SummaryExtractorSubAgent - Clean business logic only.
+    """SummaryExtractorSubAgent using UserExecutionContext pattern.
     
-    Contains ONLY summary extraction business logic - all infrastructure 
-    (reliability, execution, WebSocket events) inherited from BaseAgent.
-    Follows golden pattern: <200 lines, proper error handling, WebSocket events.
+    Migrated to use UserExecutionContext for request isolation and state management.
+    - Uses UserExecutionContext for all per-request data
+    - No global state or session storage
+    - DatabaseSessionManager for database operations
+    - Complete request isolation
     
     Extracts actionable summaries from various data sources to provide users
     with clear, concise insights that enable quick understanding and decision-making.
     """
     
     def __init__(self):
-        # Initialize BaseAgent with full infrastructure
+        # Initialize BaseAgent
         super().__init__(
             name="SummaryExtractorSubAgent", 
-            description="Golden Pattern summary extraction agent using BaseAgent infrastructure",
-            enable_reliability=True,      # Get circuit breaker + retry
-            enable_execution_engine=True, # Get modern execution patterns
-            enable_caching=True,         # Get Redis caching for performance
+            description="Summary extraction agent using UserExecutionContext pattern",
+            enable_reliability=True,
+            enable_execution_engine=True,
+            enable_caching=True,
         )
 
-    # Implement BaseAgent's abstract methods for summary-specific logic
-    async def validate_preconditions(self, context: ExecutionContext) -> bool:
-        """Validate execution preconditions for summary extraction."""
-        state = context.state
+    async def execute(self, context: UserExecutionContext, stream_updates: bool = False) -> Dict[str, Any]:
+        """Execute summary extraction using UserExecutionContext.
         
-        # Check for data to summarize - can be from various sources
-        data_sources = [
-            (state.data_result, "data_result"),
-            (state.triage_result, "triage_result"), 
-            (state.optimizations_result, "optimizations_result"),
-            (state.action_plan_result, "action_plan_result"),
-            (getattr(state, 'raw_data', None), "raw_data"),
-            (getattr(state, 'analysis_data', None), "analysis_data")
-        ]
-        
-        available_data = [(data, name) for data, name in data_sources if data]
-        if not available_data:
-            error_msg = "No data available to extract summaries from"
-            self.logger.warning(f"{error_msg} for run_id: {context.run_id}")
-            raise AgentValidationError(error_msg, context={"run_id": context.run_id, "checked_sources": [name for _, name in data_sources]})
+        Args:
+            context: User execution context with request data
+            stream_updates: Whether to send streaming updates
             
-        return True
-    
-    async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
-        """Execute core summary extraction logic with WebSocket events."""
+        Returns:
+            Summary extraction results
+        """
+        # Validate context
+        context = validate_user_context(context)
+        
         try:
-            # Emit thinking events for user visibility
-            await self.emit_thinking("Starting intelligent summary extraction from your data")
-            await self.emit_thinking("Analyzing available data sources for key insights...")
+            # Create database session manager
+            session_mgr = DatabaseSessionManager(context)
             
-            # Collect and analyze available data
-            await self.emit_progress("Collecting data from all available sources...")
-            collected_data = self._collect_available_data(context.state)
-            
-            await self.emit_thinking(f"Found {len(collected_data)} data sources to summarize")
-            
-            # Extract summaries from each data source
-            await self.emit_progress("Extracting key insights and patterns...")
-            summaries = await self._extract_summaries_from_data(collected_data, context.run_id)
-            
-            # Generate comprehensive summary
-            await self.emit_thinking("Synthesizing findings into comprehensive summary...")
-            comprehensive_summary = await self._generate_comprehensive_summary(summaries, context.run_id)
-            
-            # Process and format results
-            await self.emit_progress("Formatting summary results for optimal readability...")
-            result = self._format_summary_result(comprehensive_summary, summaries, collected_data)
-            
-            # Send completion update (note: summary_result field doesn't exist in DeepAgentState yet)
-            await self._send_summary_completion_update(context.run_id, context.stream_updates, result)
-            
-            await self.emit_progress("Summary extraction completed successfully", is_complete=True)
+            # Validate preconditions
+            if not await self._validate_preconditions(context):
+                raise AgentValidationError("No data available to extract summaries from")
+                
+            # Execute core logic
+            result = await self._execute_core_logic(context)
             return result
             
         except Exception as e:
@@ -115,20 +89,80 @@ class SummaryExtractorSubAgent(BaseAgent):
             error_msg = f"Summary extraction failed: {str(e)}"
             self.logger.error(f"{error_msg} for run_id: {context.run_id}")
             raise AgentError(error_msg, context={"run_id": context.run_id})
+        finally:
+            # Ensure proper cleanup
+            try:
+                if 'session_mgr' in locals():
+                    await session_mgr.cleanup()
+            except Exception as cleanup_e:
+                logger.error(f"Session cleanup error: {cleanup_e}")
+    
+    async def _validate_preconditions(self, context: UserExecutionContext) -> bool:
+        """Validate execution preconditions for summary extraction."""
+        # Check for data to summarize - can be from various sources in context metadata
+        data_sources = [
+            (context.metadata.get('data_result'), "data_result"),
+            (context.metadata.get('triage_result'), "triage_result"), 
+            (context.metadata.get('optimizations_result'), "optimizations_result"),
+            (context.metadata.get('action_plan_result'), "action_plan_result"),
+            (context.metadata.get('raw_data'), "raw_data"),
+            (context.metadata.get('analysis_data'), "analysis_data")
+        ]
+        
+        available_data = [(data, name) for data, name in data_sources if data]
+        if not available_data:
+            error_msg = "No data available to extract summaries from"
+            self.logger.warning(f"{error_msg} for run_id: {context.run_id}")
+            return False
+            
+        return True
+    
+    async def _execute_core_logic(self, context: UserExecutionContext) -> Dict[str, Any]:
+        """Execute core summary extraction logic with WebSocket events."""
+        # Emit thinking events for user visibility
+        await self.emit_thinking("Starting intelligent summary extraction from your data")
+        await self.emit_thinking("Analyzing available data sources for key insights...")
+        
+        # Collect and analyze available data
+        await self.emit_progress("Collecting data from all available sources...")
+        collected_data = self._collect_available_data(context)
+        
+        await self.emit_thinking(f"Found {len(collected_data)} data sources to summarize")
+        
+        # Extract summaries from each data source
+        await self.emit_progress("Extracting key insights and patterns...")
+        summaries = await self._extract_summaries_from_data(collected_data, context.run_id)
+        
+        # Generate comprehensive summary
+        await self.emit_thinking("Synthesizing findings into comprehensive summary...")
+        comprehensive_summary = await self._generate_comprehensive_summary(summaries, context.run_id)
+        
+        # Process and format results
+        await self.emit_progress("Formatting summary results for optimal readability...")
+        result = self._format_summary_result(comprehensive_summary, summaries, collected_data)
+        
+        # Store result in context metadata
+        context.metadata['summary_result'] = result
+        
+        # Send completion update
+        await self._send_summary_completion_update(context.run_id, True, result)
+        
+        await self.emit_progress("Summary extraction completed successfully", is_complete=True)
+        return result
 
-    def _collect_available_data(self, state: DeepAgentState) -> Dict[str, Any]:
+    def _collect_available_data(self, context: UserExecutionContext) -> Dict[str, Any]:
         """Collect all available data sources for summarization."""
         collected = {}
         
-        # Collect from various state attributes
+        # Collect from various context metadata
         data_mappings = {
-            'data_analysis': state.data_result,
-            'triage_analysis': state.triage_result,
-            'optimizations': state.optimizations_result, 
-            'action_plan': state.action_plan_result,
-            'raw_data': getattr(state, 'raw_data', None),
-            'analysis_data': getattr(state, 'analysis_data', None),
-            'user_request': getattr(state, 'user_request', None)
+            'data_analysis': context.metadata.get('data_result'),
+            'triage_analysis': context.metadata.get('triage_result'),
+            'optimizations': context.metadata.get('optimizations_result'), 
+            'action_plan': context.metadata.get('action_plan_result'),
+            'raw_data': context.metadata.get('raw_data'),
+            'analysis_data': context.metadata.get('analysis_data'),
+            'user_request': context.metadata.get('user_request')
         }
         
         for key, data in data_mappings.items():
