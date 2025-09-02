@@ -71,54 +71,11 @@ except ImportError:
     def get_env():
         return os.environ
 
-
-class ProgressOutputMode(Enum):
-    """Output modes for progress streaming"""
-    CONSOLE = "console"
-    JSON = "json"
-    WEBSOCKET = "websocket"
-    LOG = "log"
-    SILENT = "silent"
+# SSOT Orchestration enums import
+from test_framework.ssot.orchestration_enums import ProgressOutputMode, ProgressEventType
 
 
-class ProgressEventType(Enum):
-    """Extended progress event types for streaming"""
-    # Layer events
-    LAYER_STARTED = "layer_started"
-    LAYER_COMPLETED = "layer_completed"
-    LAYER_FAILED = "layer_failed"
-    LAYER_SKIPPED = "layer_skipped"
-    
-    # Category events
-    CATEGORY_STARTED = "category_started"
-    CATEGORY_COMPLETED = "category_completed"
-    CATEGORY_FAILED = "category_failed"
-    CATEGORY_PROGRESS = "category_progress"
-    CATEGORY_SKIPPED = "category_skipped"
-    
-    # Test events
-    TEST_STARTED = "test_started"
-    TEST_COMPLETED = "test_completed"
-    TEST_FAILED = "test_failed"
-    TEST_SKIPPED = "test_skipped"
-    
-    # Background events
-    BACKGROUND_QUEUED = "background_queued"
-    BACKGROUND_STARTED = "background_started" 
-    BACKGROUND_COMPLETED = "background_completed"
-    BACKGROUND_FAILED = "background_failed"
-    
-    # System events
-    SERVICE_STARTED = "service_started"
-    SERVICE_STOPPED = "service_stopped"
-    RESOURCE_ALLOCATED = "resource_allocated"
-    RESOURCE_RELEASED = "resource_released"
-    ERROR_OCCURRED = "error_occurred"
-    
-    # Orchestration events
-    ORCHESTRATION_STARTED = "orchestration_started"
-    ORCHESTRATION_COMPLETED = "orchestration_completed"
-    ORCHESTRATION_FAILED = "orchestration_failed"
+# ProgressOutputMode and ProgressEventType now imported from SSOT orchestration_enums
 
 
 @dataclass

@@ -52,6 +52,9 @@ except ImportError:
     def get_env():
         return os.environ
 
+# SSOT Orchestration enums import
+from test_framework.ssot.orchestration_enums import ExecutionStrategy
+
 
 class LayerExecutionResult(NamedTuple):
     """Result of layer execution"""
@@ -79,12 +82,7 @@ class CategoryExecutionResult(NamedTuple):
     metadata: Dict[str, Any]
 
 
-class ExecutionStrategy(Enum):
-    """Category execution strategies within layers"""
-    SEQUENTIAL = "sequential"
-    PARALLEL_UNLIMITED = "parallel_unlimited"
-    PARALLEL_LIMITED = "parallel_limited"
-    HYBRID_SMART = "hybrid_smart"
+# ExecutionStrategy now imported from SSOT orchestration_enums
 
 
 @dataclass

@@ -65,72 +65,20 @@ try:
 except ImportError:
     get_env = lambda k, d=None: os.environ.get(k, d)
 
+# SSOT Orchestration integration
+from test_framework.ssot.orchestration import orchestration_config
+from test_framework.ssot.orchestration_enums import (
+    BackgroundTaskStatus, E2ETestCategory, BackgroundTaskConfig, BackgroundTaskResult
+)
+
 # Progress tracking integration
-try:
+if orchestration_config.orchestrator_available:
     from test_framework.orchestration.test_orchestrator_agent import AgentCommunicationMessage
-    ORCHESTRATOR_AVAILABLE = True
-except ImportError:
-    ORCHESTRATOR_AVAILABLE = False
+else:
     AgentCommunicationMessage = None
 
 
-class BackgroundTaskStatus(Enum):
-    """Status of background E2E tasks"""
-    QUEUED = "queued"
-    STARTING = "starting"
-    RUNNING = "running"
-    COMPLETED = "completed"
-    FAILED = "failed"
-    CANCELLED = "cancelled"
-    TIMEOUT = "timeout"
-
-
-class E2ETestCategory(Enum):
-    """E2E test categories handled by background agent"""
-    CYPRESS = "cypress"
-    E2E = "e2e"
-    PERFORMANCE = "performance"
-    E2E_CRITICAL = "e2e_critical"
-
-
-@dataclass
-class BackgroundTaskConfig:
-    """Configuration for background E2E task execution"""
-    category: E2ETestCategory
-    environment: str = "development"
-    use_real_services: bool = True
-    use_real_llm: bool = True
-    timeout_minutes: int = 30
-    max_retries: int = 2
-    cpu_limit_percent: Optional[int] = None
-    memory_limit_gb: Optional[int] = None
-    priority: int = 1  # Lower numbers = higher priority
-    
-    # Service dependencies
-    services_required: Set[str] = field(default_factory=lambda: {
-        "postgres", "redis", "clickhouse", "backend", "frontend"
-    })
-    
-    # Additional execution options
-    additional_args: List[str] = field(default_factory=list)
-    env_vars: Dict[str, str] = field(default_factory=dict)
-
-
-@dataclass
-class BackgroundTaskResult:
-    """Result of background E2E task execution"""
-    task_id: str
-    category: E2ETestCategory
-    status: BackgroundTaskStatus
-    exit_code: Optional[int] = None
-    stdout: str = ""
-    stderr: str = ""
-    duration_seconds: float = 0.0
-    start_time: Optional[datetime] = None
-    end_time: Optional[datetime] = None
-    test_counts: Dict[str, int] = field(default_factory=dict)
-    error_message: Optional[str] = None
-    resource_usage: Dict[str, Any] = field(default_factory=dict)
+# Enums and dataclasses now imported from SSOT orchestration_enums
 
 
 @dataclass
@@ -992,7 +940,7 @@ class BackgroundE2EAgent:
     
     async def _notify_orchestrator(self, message_type: str, payload: Dict[str, Any]):
         """Notify orchestrator about task events"""
-        if self.communication and ORCHESTRATOR_AVAILABLE:
+        if self.communication and orchestration_config.orchestrator_available:
             try:
                 await self.communication.send_message(
                     self.agent_id, "orchestrator", message_type, payload
@@ -1007,7 +955,7 @@ class BackgroundE2EAgent:
     
     async def handle_message(self, message):
         """Handle messages from orchestrator"""
-        if not ORCHESTRATOR_AVAILABLE or not message:
+        if not orchestration_config.orchestrator_available or not message:
             return
             
         try:
