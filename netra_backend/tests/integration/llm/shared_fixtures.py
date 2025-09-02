@@ -28,7 +28,7 @@ env.set("TESTING", "1", "test")
 env.set("ENVIRONMENT", "testing", "test")
 env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
@@ -167,7 +167,7 @@ def llm_test_agent(mock_llm_manager):
     """Create test agent with LLM manager."""
     from netra_backend.app.agents.base.interface import ExecutionContext
     
-    class TestAgent(BaseSubAgent):
+    class TestAgent(BaseAgent):
         def __init__(self, llm_manager):
             super().__init__(llm_manager, name="test_agent")
         

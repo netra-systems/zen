@@ -165,9 +165,9 @@ class TestAgentOrchestrationIntegration:
 
         """Test agent retry mechanism with proper exponential backoff"""
         # Will fail - no proper backoff implementation
-        from netra_backend.app.agents.base.agent import BaseSubAgent
+        from netra_backend.app.agents.base.agent import BaseAgent
         
-        agent = BaseSubAgent()
+        agent = BaseAgent()
 
         # Mock: Async component isolation for testing without real async operations
         agent.llm_client = AsyncMock(side_effect=Exception("Rate limited"))

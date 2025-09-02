@@ -5,7 +5,7 @@ and BaseAgent infrastructure patterns including inheritance, WebSocket events,
 reliability patterns, and end-to-end execution flows.
 
 This test suite validates:
-1. Inheritance pattern integration (TriageSubAgent → BaseSubAgent)
+1. Inheritance pattern integration (TriageSubAgent → BaseAgent)
 2. WebSocket event emission during triage execution  
 3. Reliability wrapper integration with fallbacks
 4. Modern execution patterns with ExecutionContext
@@ -23,8 +23,8 @@ import time
 from typing import Dict, Any
 from unittest.mock import Mock, AsyncMock, patch, call
 
-from netra_backend.app.agents.triage_sub_agent import TriageSubAgent
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
@@ -38,7 +38,7 @@ from netra_backend.app.schemas.core_enums import ExecutionStatus
 
 
 class TestTriageBaseAgentInheritance:
-    """Test inheritance patterns and method resolution between TriageSubAgent and BaseSubAgent."""
+    """Test inheritance patterns and method resolution between TriageSubAgent and BaseAgent."""
     
     @pytest.fixture
     def mock_llm_manager(self):
@@ -68,18 +68,18 @@ class TestTriageBaseAgentInheritance:
         )
     
     def test_inheritance_chain_integrity(self, triage_agent):
-        """Test that TriageSubAgent properly inherits from BaseSubAgent."""
+        """Test that TriageSubAgent properly inherits from BaseAgent."""
         # Verify inheritance chain
-        assert isinstance(triage_agent, BaseSubAgent)
+        assert isinstance(triage_agent, BaseAgent)
         assert isinstance(triage_agent, TriageSubAgent)
         
         # Verify MRO (Method Resolution Order)
         mro = type(triage_agent).__mro__
-        assert BaseSubAgent in mro
+        assert BaseAgent in mro
         assert TriageSubAgent in mro
         
-        # Verify BaseSubAgent comes after TriageSubAgent in MRO
-        base_index = mro.index(BaseSubAgent)
+        # Verify BaseAgent comes after TriageSubAgent in MRO
+        base_index = mro.index(BaseAgent)
         triage_index = mro.index(TriageSubAgent)
         assert triage_index < base_index
         
@@ -115,9 +115,9 @@ class TestTriageBaseAgentInheritance:
         execute_method = triage_agent.execute
         assert execute_method.__qualname__.startswith('TriageSubAgent')
         
-        # But should have BaseSubAgent's infrastructure methods
+        # But should have BaseAgent's infrastructure methods
         shutdown_method = triage_agent.shutdown
-        assert shutdown_method.__qualname__.startswith('BaseSubAgent')
+        assert shutdown_method.__qualname__.startswith('BaseAgent')
         
         # Triage-specific methods should be from TriageSubAgent
         validate_method = triage_agent.validate_preconditions

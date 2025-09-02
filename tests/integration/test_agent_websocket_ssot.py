@@ -107,7 +107,7 @@ class TestWebSocketSSOT:
             agent = TestCommAgent()
             await agent.emit_thinking("thinking...")
             
-            # Note: emit methods work through BaseSubAgent's WebSocketBridgeAdapter
+            # Note: emit methods work through BaseAgent's WebSocketBridgeAdapter
             # Test validates that the unified pattern works without errors
     
     @pytest.mark.asyncio  

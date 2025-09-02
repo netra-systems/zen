@@ -21,7 +21,7 @@ import pytest
 
 # Use absolute imports following CLAUDE.md standards
 from shared.isolated_environment import get_env
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from test_framework.fixtures.agent_fixtures import agent_test_helper
@@ -92,7 +92,7 @@ class RealResult:
         return []
 
 
-class RealTestAgent(BaseSubAgent):
+class RealTestAgent(BaseAgent):
     """Real agent implementation for testing - no mocks allowed per CLAUDE.md."""
     
     def __init__(self, agent_id: str, agent_type: str = "test_agent", llm_manager=None, **kwargs):
@@ -168,7 +168,7 @@ class AgentLifecycleManager:
         """Real load state implementation."""
         return self.state_manager.db_session.state_storage.get(agent_id)
         
-    async def create_agent(self, agent_type: str, agent_id: str = None, **kwargs) -> BaseSubAgent:
+    async def create_agent(self, agent_type: str, agent_id: str = None, **kwargs) -> BaseAgent:
         """Create and initialize an agent with state tracking."""
         if agent_id is None:
             agent_id = f"{agent_type}_{uuid.uuid4().hex[:8]}"

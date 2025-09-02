@@ -1,7 +1,7 @@
-"""Integration test for timing collector in BaseSubAgent
+"""Integration test for timing collector in BaseAgent
 
 Tests the execution timing collection functionality integrated
-into BaseSubAgent and verifies that timing data is properly collected
+into BaseAgent and verifies that timing data is properly collected
 during agent execution.
 
 Business Value: Validates performance monitoring capabilities
@@ -14,13 +14,13 @@ from typing import Optional
 
 import pytest
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.timing_decorators import time_operation, TimingCategory
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
 
 
-class TimedTestAgent(BaseSubAgent):
+class TimedTestAgent(BaseAgent):
     """Test agent with timing instrumentation."""
     
     def __init__(self, llm_manager: Optional[LLMManager] = None):
@@ -183,7 +183,7 @@ async def test_timing_critical_path():
 async def test_timing_with_errors():
     """Test timing collection when operations fail."""
     
-    class ErrorTestAgent(BaseSubAgent):
+    class ErrorTestAgent(BaseAgent):
         """Agent that throws errors for testing."""
         
         @time_operation("failing_operation", TimingCategory.PROCESSING)

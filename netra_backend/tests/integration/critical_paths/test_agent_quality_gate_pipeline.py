@@ -29,7 +29,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 import pytest
 from netra_backend.app.schemas import User
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
 
@@ -101,7 +101,7 @@ class QualityGateTestManager:
             return 0.0
         return len(self.quality_failures) / total_attempts
 
-class MockQualityAwareAgent(BaseSubAgent):
+class MockQualityAwareAgent(BaseAgent):
     """Mock agent that integrates with quality gate pipeline."""
     
     def __init__(self, agent_id: str, quality_gate_service: QualityGateService):

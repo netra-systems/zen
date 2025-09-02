@@ -36,7 +36,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.core.circuit_breaker_types import CircuitBreakerOpenError
@@ -121,7 +121,7 @@ class OrchestrationScenario:
     concurrent_workflows: int = 1
     
 
-class MockAgentImplementation(BaseSubAgent):
+class MockAgentImplementation(BaseAgent):
     """Mock agent implementation for testing circuit breaker orchestration."""
     
     def __init__(self, agent_type: str, circuit_breaker: UnifiedCircuitBreaker,
@@ -143,8 +143,8 @@ class MockAgentImplementation(BaseSubAgent):
         self.state_data: Dict[str, Any] = {}
     
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
-        """Required abstract method implementation for BaseSubAgent."""
-        # This method is required by BaseSubAgent but we use execute_task for circuit breaker testing
+        """Required abstract method implementation for BaseAgent."""
+        # This method is required by BaseAgent but we use execute_task for circuit breaker testing
         task_data = {"run_id": run_id, "stream_updates": stream_updates}
         context = {"state": state}
         result = await self.execute_task(task_data, context)
