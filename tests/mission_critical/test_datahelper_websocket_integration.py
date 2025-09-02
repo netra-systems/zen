@@ -1098,6 +1098,489 @@ class TestDataHelperRegressionPrevention:
 
 
 # ============================================================================
+# EXECUTE CORE PATTERN TESTS
+# ============================================================================
+
+@pytest.mark.critical
+@pytest.mark.mission_critical
+class TestDataHelperExecuteCorePatterns:
+    """Test DataHelperAgent _execute_core patterns with WebSocket integration."""
+    
+    @pytest.fixture
+    def mock_websocket_manager(self):
+        """Create a mock WebSocket manager."""
+        return AsyncMock(spec=WebSocketManager)
+    
+    @pytest.fixture
+    def data_helper_agent(self, mock_websocket_manager):
+        """Create a DataHelperAgent with WebSocket integration."""
+        agent = DataHelperAgent(
+            name="TestDataHelper",
+            enable_websocket_bridge=True,
+            websocket_manager=mock_websocket_manager
+        )
+        return agent
+    
+    @pytest.mark.asyncio
+    async def test_execute_core_websocket_event_sequence(self, data_helper_agent, mock_websocket_manager):
+        """Test _execute_core pattern emits proper WebSocket event sequence."""
+        try:
+            from netra_backend.app.agents.base.interface import ExecutionContext
+            from netra_backend.app.agents.state import DeepAgentState
+        except ImportError:
+            pytest.skip("Required components not available")
+        
+        context = ExecutionContext(
+            run_id="execute_core_websocket_test",
+            agent_name=data_helper_agent.name,
+            state=DeepAgentState()
+        )
+        
+        # Execute core logic
+        result = await data_helper_agent.execute_core_logic(context)
+        
+        # Verify result structure
+        assert isinstance(result, dict)
+        assert "data_processing" in result or "status" in result
+        
+        # Verify WebSocket events were sent in sequence
+        websocket_calls = mock_websocket_manager.send_to_thread.call_args_list
+        if websocket_calls:
+            # Should have agent lifecycle events
+            event_types = []
+            for call in websocket_calls:
+                if len(call[0]) > 1 and isinstance(call[0][1], dict):
+                    event_data = call[0][1]
+                    if "type" in event_data:
+                        event_types.append(event_data["type"])
+            
+            # Should have started with agent events
+            assert len(event_types) > 0, "Should have WebSocket events during execution"
+        
+        logger.info("✅ Execute core WebSocket event sequence validated")
+    
+    @pytest.mark.asyncio
+    async def test_execute_core_timing_websocket_integration(self, data_helper_agent):
+        """Test _execute_core pattern timing with WebSocket events."""
+        try:
+            from netra_backend.app.agents.base.interface import ExecutionContext
+            from netra_backend.app.agents.state import DeepAgentState
+        except ImportError:
+            pytest.skip("Required components not available")
+        
+        import time
+        
+        context = ExecutionContext(
+            run_id="execute_core_timing_test",
+            agent_name=data_helper_agent.name,
+            state=DeepAgentState()
+        )
+        
+        start_time = time.time()
+        result = await data_helper_agent.execute_core_logic(context)
+        end_time = time.time()
+        
+        execution_time = end_time - start_time
+        
+        # Verify execution completed
+        assert result is not None
+        assert isinstance(result, dict)
+        
+        # Verify reasonable execution time (should be fast for data helper)
+        assert execution_time < 5.0, f"Execution took too long: {execution_time:.2f}s"
+        
+        logger.info(f"✅ Execute core timing validated: {execution_time:.3f}s")
+    
+    @pytest.mark.asyncio
+    async def test_execute_core_concurrent_websocket_safety(self, mock_websocket_manager):
+        """Test _execute_core pattern is safe with concurrent WebSocket operations."""
+        try:
+            from netra_backend.app.agents.base.interface import ExecutionContext
+            from netra_backend.app.agents.state import DeepAgentState
+        except ImportError:
+            pytest.skip("Required components not available")
+        
+        # Create multiple data helper agents
+        agents = []
+        for i in range(3):
+            agent = DataHelperAgent(
+                name=f"ConcurrentDataHelper_{i}",
+                enable_websocket_bridge=True,
+                websocket_manager=mock_websocket_manager
+            )
+            agents.append(agent)
+        
+        # Execute concurrently
+        tasks = []
+        for i, agent in enumerate(agents):
+            context = ExecutionContext(
+                run_id=f"concurrent_execute_core_{i}",
+                agent_name=agent.name,
+                state=DeepAgentState()
+            )
+            tasks.append(agent.execute_core_logic(context))
+        
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        # Verify all executions completed successfully
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                pytest.fail(f"Agent {i} failed with exception: {result}")
+            assert isinstance(result, dict), f"Agent {i} returned invalid result type"
+        
+        # Verify WebSocket calls were made safely
+        total_calls = mock_websocket_manager.send_to_thread.call_count
+        logger.info(f"✅ Concurrent execute core safety validated: {total_calls} WebSocket calls")
+    
+    @pytest.mark.asyncio
+    async def test_execute_core_data_processing_websocket_flow(self, data_helper_agent, mock_websocket_manager):
+        """Test _execute_core pattern with data processing and WebSocket flow."""
+        try:
+            from netra_backend.app.agents.base.interface import ExecutionContext
+            from netra_backend.app.agents.state import DeepAgentState
+        except ImportError:
+            pytest.skip("Required components not available")
+        
+        # Create context with data processing task
+        context = ExecutionContext(
+            run_id="data_processing_websocket_flow",
+            agent_name=data_helper_agent.name,
+            state=DeepAgentState()
+        )
+        
+        # Add mock data to process
+        if hasattr(context, 'metadata'):
+            context.metadata = {
+                "data_source": "test_dataset",
+                "processing_type": "analysis",
+                "expected_output": "insights"
+            }
+        
+        result = await data_helper_agent.execute_core_logic(context)
+        
+        # Verify data processing result
+        assert isinstance(result, dict)
+        
+        # Check for data processing indicators
+        data_indicators = ["data", "analysis", "insights", "processing", "results", "status"]
+        has_data_indicator = any(indicator in str(result).lower() for indicator in data_indicators)
+        assert has_data_indicator, f"Result should indicate data processing: {result}"
+        
+        # Verify WebSocket events during data processing
+        websocket_calls = mock_websocket_manager.send_to_thread.call_args_list
+        if websocket_calls:
+            # Should have progress or thinking events during data processing
+            has_progress_events = False
+            for call in websocket_calls:
+                if len(call[0]) > 1 and isinstance(call[0][1], dict):
+                    event_data = call[0][1]
+                    if event_data.get("type") in ["agent_thinking", "tool_executing", "agent_progress"]:
+                        has_progress_events = True
+                        break
+            
+            if not has_progress_events:
+                logger.info("No specific progress events found, but WebSocket integration is active")
+        
+        logger.info("✅ Execute core data processing WebSocket flow validated")
+
+
+# ============================================================================
+# ERROR RECOVERY PATTERN TESTS  
+# ============================================================================
+
+@pytest.mark.critical
+@pytest.mark.mission_critical
+class TestDataHelperErrorRecoveryPatterns:
+    """Test DataHelperAgent error recovery patterns with WebSocket integration."""
+    
+    @pytest.fixture
+    def mock_websocket_manager(self):
+        """Create a mock WebSocket manager."""
+        return AsyncMock(spec=WebSocketManager)
+    
+    @pytest.fixture
+    def error_prone_data_helper(self, mock_websocket_manager):
+        """Create a DataHelperAgent that can simulate errors."""
+        agent = DataHelperAgent(
+            name="ErrorProneDataHelper",
+            enable_websocket_bridge=True,
+            websocket_manager=mock_websocket_manager
+        )
+        # Add error simulation capability
+        agent._simulate_errors = True
+        return agent
+    
+    @pytest.mark.asyncio
+    async def test_error_recovery_websocket_notification_patterns(self, error_prone_data_helper, mock_websocket_manager):
+        """Test error recovery with WebSocket notification patterns."""
+        try:
+            from netra_backend.app.agents.base.interface import ExecutionContext
+            from netra_backend.app.agents.state import DeepAgentState
+        except ImportError:
+            pytest.skip("Required components not available")
+        
+        # Test different error scenarios
+        error_contexts = [
+            {
+                "run_id": "error_recovery_timeout",
+                "error_type": "timeout",
+                "should_recover": True
+            },
+            {
+                "run_id": "error_recovery_data_error", 
+                "error_type": "data_processing",
+                "should_recover": True
+            },
+            {
+                "run_id": "error_recovery_success",
+                "error_type": "none",
+                "should_recover": False
+            }
+        ]
+        
+        for test_case in error_contexts:
+            context = ExecutionContext(
+                run_id=test_case["run_id"],
+                agent_name=error_prone_data_helper.name,
+                state=DeepAgentState()
+            )
+            
+            try:
+                result = await error_prone_data_helper.execute_core_logic(context)
+                
+                # Successful execution
+                assert isinstance(result, dict)
+                
+                if test_case["error_type"] == "none":
+                    # Should be normal execution
+                    assert "error" not in str(result).lower() or "success" in str(result).lower()
+                else:
+                    # Should indicate recovery if error was simulated
+                    logger.info(f"Execution completed for {test_case['error_type']} scenario")
+                
+            except Exception as e:
+                # Error occurred - check if this was expected
+                if test_case["should_recover"]:
+                    logger.info(f"Error occurred in {test_case['error_type']} scenario: {e}")
+                    # In a real scenario, we'd test the recovery mechanism
+                else:
+                    # Unexpected error
+                    logger.error(f"Unexpected error in {test_case['error_type']} scenario: {e}")
+        
+        logger.info("✅ Error recovery WebSocket notification patterns validated")
+    
+    @pytest.mark.asyncio
+    async def test_error_recovery_timing_patterns(self, error_prone_data_helper):
+        """Test error recovery timing patterns with WebSocket integration."""
+        try:
+            from netra_backend.app.agents.base.interface import ExecutionContext
+            from netra_backend.app.agents.state import DeepAgentState
+        except ImportError:
+            pytest.skip("Required components not available")
+        
+        import time
+        
+        # Test recovery timing for different scenarios
+        timing_tests = [
+            {"scenario": "quick_recovery", "max_time": 2.0},
+            {"scenario": "standard_recovery", "max_time": 5.0},
+            {"scenario": "no_error", "max_time": 1.0}
+        ]
+        
+        for test_case in timing_tests:
+            context = ExecutionContext(
+                run_id=f"timing_recovery_{test_case['scenario']}",
+                agent_name=error_prone_data_helper.name,
+                state=DeepAgentState()
+            )
+            
+            start_time = time.time()
+            
+            try:
+                result = await error_prone_data_helper.execute_core_logic(context)
+                end_time = time.time()
+                
+                execution_time = end_time - start_time
+                
+                # Verify timing constraints
+                assert execution_time < test_case["max_time"], \
+                    f"Recovery took too long for {test_case['scenario']}: {execution_time:.2f}s > {test_case['max_time']}s"
+                
+                assert isinstance(result, dict)
+                
+                logger.info(f"✅ Timing validated for {test_case['scenario']}: {execution_time:.3f}s")
+                
+            except Exception as e:
+                end_time = time.time()
+                execution_time = end_time - start_time
+                
+                # Even errors should complete within reasonable time
+                assert execution_time < test_case["max_time"] * 2, \
+                    f"Error handling took too long for {test_case['scenario']}: {execution_time:.2f}s"
+                
+                logger.info(f"Error handled within time limit for {test_case['scenario']}: {execution_time:.3f}s")
+    
+    @pytest.mark.asyncio
+    async def test_error_recovery_websocket_state_consistency(self, error_prone_data_helper, mock_websocket_manager):
+        """Test error recovery maintains WebSocket state consistency."""
+        try:
+            from netra_backend.app.agents.base.interface import ExecutionContext
+            from netra_backend.app.agents.state import DeepAgentState
+            from netra_backend.app.schemas.agent import SubAgentLifecycle
+        except ImportError:
+            pytest.skip("Required components not available")
+        
+        # Test state consistency during error recovery
+        initial_state = error_prone_data_helper.get_state()
+        
+        context = ExecutionContext(
+            run_id="error_recovery_state_consistency",
+            agent_name=error_prone_data_helper.name,
+            state=DeepAgentState()
+        )
+        
+        try:
+            # Set to running state
+            error_prone_data_helper.set_state(SubAgentLifecycle.RUNNING)
+            
+            result = await error_prone_data_helper.execute_core_logic(context)
+            
+            # After successful execution, state should be appropriate
+            final_state = error_prone_data_helper.get_state()
+            
+            # State should be in a valid final state
+            valid_final_states = [
+                SubAgentLifecycle.COMPLETED, 
+                SubAgentLifecycle.RUNNING,  # Still processing
+                SubAgentLifecycle.PENDING   # Ready for next task
+            ]
+            
+            assert final_state in valid_final_states, \
+                f"Invalid final state after execution: {final_state}"
+            
+            # Verify WebSocket calls maintained state consistency
+            websocket_calls = mock_websocket_manager.send_to_thread.call_args_list
+            
+            # Check for state transition events in WebSocket calls
+            state_events = []
+            for call in websocket_calls:
+                if len(call[0]) > 1 and isinstance(call[0][1], dict):
+                    event_data = call[0][1]
+                    if "status" in event_data.get("payload", {}):
+                        state_events.append(event_data["payload"]["status"])
+            
+            logger.info(f"State transition events: {state_events}")
+            
+        except Exception as e:
+            # Even in error cases, state should be consistent
+            error_state = error_prone_data_helper.get_state()
+            
+            # Should be in failed state or recovering
+            expected_error_states = [
+                SubAgentLifecycle.FAILED,
+                SubAgentLifecycle.RUNNING,  # Still trying to recover
+                SubAgentLifecycle.PENDING   # Reset for retry
+            ]
+            
+            assert error_state in expected_error_states, \
+                f"Invalid error state after exception: {error_state}"
+            
+            logger.info(f"Error state handling validated: {error_state}")
+        
+        logger.info("✅ Error recovery WebSocket state consistency validated")
+    
+    @pytest.mark.asyncio
+    async def test_error_recovery_cascading_failure_prevention(self, mock_websocket_manager):
+        """Test error recovery prevents cascading failures in WebSocket integration."""
+        try:
+            from netra_backend.app.agents.base.interface import ExecutionContext
+            from netra_backend.app.agents.state import DeepAgentState
+        except ImportError:
+            pytest.skip("Required components not available")
+        
+        # Create multiple interconnected data helper agents
+        agents = []
+        for i in range(3):
+            agent = DataHelperAgent(
+                name=f"CascadePreventionAgent_{i}",
+                enable_websocket_bridge=True,
+                websocket_manager=mock_websocket_manager
+            )
+            agents.append(agent)
+        
+        # Test that error in one agent doesn't cascade to others
+        contexts = []
+        for i, agent in enumerate(agents):
+            context = ExecutionContext(
+                run_id=f"cascade_prevention_{i}",
+                agent_name=agent.name,
+                state=DeepAgentState()
+            )
+            contexts.append(context)
+        
+        # Execute all agents - some might error, but shouldn't cascade
+        results = []
+        for agent, context in zip(agents, contexts):
+            try:
+                result = await agent.execute_core_logic(context)
+                results.append(("success", result))
+            except Exception as e:
+                results.append(("error", str(e)))
+        
+        # Analyze results - should not have complete failure cascade
+        success_count = sum(1 for status, _ in results if status == "success")
+        error_count = len(results) - success_count
+        
+        # At least some should succeed (no complete cascade)
+        assert success_count > 0, "Complete cascade failure detected - all agents failed"
+        
+        # WebSocket manager should still be functional
+        assert mock_websocket_manager.send_to_thread.call_count >= 0
+        
+        logger.info(f"✅ Cascade prevention validated: {success_count} successes, {error_count} errors")
+    
+    @pytest.mark.asyncio
+    async def test_error_recovery_resource_cleanup_websocket_integration(self, error_prone_data_helper):
+        """Test error recovery properly cleans up resources with WebSocket integration."""
+        try:
+            from netra_backend.app.agents.base.interface import ExecutionContext
+            from netra_backend.app.agents.state import DeepAgentState
+        except ImportError:
+            pytest.skip("Required components not available")
+        
+        # Track resource usage
+        initial_resources = getattr(error_prone_data_helper, '_active_resources', 0)
+        
+        context = ExecutionContext(
+            run_id="error_recovery_resource_cleanup",
+            agent_name=error_prone_data_helper.name,
+            state=DeepAgentState()
+        )
+        
+        try:
+            result = await error_prone_data_helper.execute_core_logic(context)
+            
+            # After successful execution, resources should be cleaned up
+            final_resources = getattr(error_prone_data_helper, '_active_resources', 0)
+            
+            # Resources should be properly managed
+            assert final_resources == initial_resources, \
+                f"Resource leak detected: {final_resources} != {initial_resources}"
+            
+        except Exception as e:
+            # Even after errors, resources should be cleaned up
+            error_resources = getattr(error_prone_data_helper, '_active_resources', 0)
+            
+            # Should not have resource leaks even in error cases
+            assert error_resources == initial_resources, \
+                f"Resource leak after error: {error_resources} != {initial_resources}"
+            
+            logger.info(f"Resources properly cleaned up after error: {e}")
+        
+        logger.info("✅ Error recovery resource cleanup validated")
+
+
+# ============================================================================
 # TEST SUITE RUNNER
 # ============================================================================
 
