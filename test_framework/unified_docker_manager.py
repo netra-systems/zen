@@ -967,17 +967,13 @@ class UnifiedDockerManager:
         """Get appropriate docker-compose file based on Alpine setting and environment type"""
         if self.use_alpine:
             # Use Alpine compose files when Alpine support is enabled
-            if self.environment_type == EnvironmentType.TEST:
-                compose_files = [
-                    "docker-compose.alpine-test.yml",
-                    "docker-compose.test.yml",  # Fallback to regular test compose
-                    "docker-compose.yml"
-                ]
-            else:
-                compose_files = [
-                    "docker-compose.alpine.yml",
-                    "docker-compose.yml"  # Fallback to regular compose
-                ]
+            # Prioritize alpine-test.yml for test environments, alpine.yml for others
+            compose_files = [
+                "docker-compose.alpine-test.yml",
+                "docker-compose.alpine.yml",
+                "docker-compose.test.yml",  # Fallback to regular test compose
+                "docker-compose.yml"  # Final fallback
+            ]
         else:
             # Use regular compose files
             compose_files = [
@@ -2842,9 +2838,9 @@ async def pytest_orchestrate_services():
 class ServiceOrchestrator(UnifiedDockerManager):
     """Legacy compatibility class - redirects to UnifiedDockerManager"""
     
-    def __init__(self, config: Optional[OrchestrationConfig] = None):
+    def __init__(self, config: Optional[OrchestrationConfig] = None, use_alpine: bool = False):
         """Initialize with legacy ServiceOrchestrator interface"""
-        super().__init__(config=config, environment_type=EnvironmentType.SHARED, use_production_images=True)
+        super().__init__(config=config, environment_type=EnvironmentType.SHARED, use_production_images=True, use_alpine=use_alpine)
         logger.info("ServiceOrchestrator is deprecated - using UnifiedDockerManager")
 
 
@@ -2854,12 +2850,14 @@ class UnifiedDockerManager(UnifiedDockerManager):
     def __init__(self, 
                  environment_type: EnvironmentType = EnvironmentType.SHARED,
                  test_id: Optional[str] = None,
-                 use_production_images: bool = True):
+                 use_production_images: bool = True,
+                 use_alpine: bool = False):
         """Initialize with legacy UnifiedDockerManager interface"""
         super().__init__(
             config=OrchestrationConfig(),
             environment_type=environment_type, 
             test_id=test_id,
-            use_production_images=use_production_images
+            use_production_images=use_production_images,
+            use_alpine=use_alpine
         )
         logger.info("UnifiedDockerManager is deprecated - using UnifiedDockerManager")
