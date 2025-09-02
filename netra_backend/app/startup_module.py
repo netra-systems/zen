@@ -849,13 +849,13 @@ def _build_supervisor_agent(app: FastAPI):
     
     # Create the proper websocket bridge instance  
     websocket_bridge = AgentWebSocketBridge()
-    logger.debug(f"Creating supervisor with dependencies: db_session_factory={app.state.db_session_factory}, llm_manager={app.state.llm_manager}, tool_dispatcher={app.state.tool_dispatcher}")
+    logger.debug(f"Creating supervisor with dependencies: db_session_factory={app.state.db_session_factory}, llm_manager={app.state.llm_manager}")
     
+    # CRITICAL: No tool_dispatcher - created per-request for isolation
     return SupervisorAgent(
         app.state.llm_manager, 
-        websocket_bridge,  # Correct AgentWebSocketBridge instance
-        app.state.tool_dispatcher,
-        db_session_factory=app.state.db_session_factory  # Pass as optional parameter
+        websocket_bridge  # Correct AgentWebSocketBridge instance
+        # NO tool_dispatcher - created per-request
     )
 
 

@@ -154,8 +154,9 @@ class AgentE2ETestBase:
                     # Set websocket_manager on the bridge
                     websocket_bridge.websocket_manager = websocket_manager
                     
-                    # Supervisor now takes 3 arguments: llm_manager, websocket_bridge, tool_dispatcher
-                    supervisor = Supervisor(llm_manager, websocket_bridge, tool_dispatcher)
+                    # Supervisor now takes 2 arguments: llm_manager, websocket_bridge
+                    # tool_dispatcher is created per-request for isolation
+                    supervisor = Supervisor(llm_manager, websocket_bridge)
                     supervisor.thread_id = str(uuid.uuid4())
                     supervisor.user_id = str(uuid.uuid4())
                     return supervisor

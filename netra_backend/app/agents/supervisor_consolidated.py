@@ -38,7 +38,6 @@ from netra_backend.app.agents.supervisor.agent_class_registry import (
 )
 
 # Core dependencies
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
@@ -65,17 +64,16 @@ class SupervisorAgent(BaseAgent):
     
     def __init__(self, 
                  llm_manager: LLMManager,
-                 websocket_bridge: AgentWebSocketBridge,
-                 tool_dispatcher: ToolDispatcher):
+                 websocket_bridge: AgentWebSocketBridge):
         """Initialize SupervisorAgent with UserExecutionContext pattern.
         
-        CRITICAL: No user context or session storage in constructor.
-        All user-specific data comes through execute() method via context.
+        CRITICAL: No user context, session storage, or tool_dispatcher in constructor.
+        All user-specific data and tools come through execute() method via context.
+        Tool dispatcher is created per-request for complete isolation.
         
         Args:
             llm_manager: LLM manager for agent operations
             websocket_bridge: WebSocket bridge for notifications
-            tool_dispatcher: Tool dispatcher for agent operations
         """
         # Initialize BaseAgent with infrastructure (no global state)
         super().__init__(
@@ -84,8 +82,8 @@ class SupervisorAgent(BaseAgent):
             description="Orchestrates sub-agents with complete user isolation",
             enable_reliability=True,      # Get circuit breaker + retry
             enable_execution_engine=True, # Get modern execution patterns
-            enable_caching=False,         # Disable caching for isolation
-            tool_dispatcher=tool_dispatcher
+            enable_caching=False         # Disable caching for isolation
+            # NO tool_dispatcher parameter - created per-request
         )
         
         # Core infrastructure (NO user-specific data)
@@ -94,10 +92,11 @@ class SupervisorAgent(BaseAgent):
         self.agent_class_registry = get_agent_class_registry()
         self.flow_logger = get_supervisor_flow_logger()
         
-        # Temporary legacy registry for sub-agent access (will be removed)
-        self.registry = AgentRegistry(llm_manager, tool_dispatcher)
-        self.registry.register_default_agents()
-        self.registry.set_websocket_bridge(websocket_bridge)
+        # Store LLM manager for creating request-scoped registries
+        self._llm_manager = llm_manager
+        
+        # Temporary legacy registry placeholder - will be created per-request
+        self.registry = None
         
         # Per-request execution lock (not global!)
         self._execution_lock = asyncio.Lock()
@@ -135,17 +134,39 @@ class SupervisorAgent(BaseAgent):
         
         async with self._execution_lock:
             try:
-                # Create session manager for database operations
-                async with managed_session(context) as session_manager:
-                    # Execute supervisor orchestration
-                    result = await self._orchestrate_agents(context, session_manager, stream_updates)
+                # Import here to avoid circular dependency
+                from netra_backend.app.agents.tool_dispatcher_core import ToolDispatcher
+                from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+                
+                # Create request-scoped tool dispatcher for this user
+                async with ToolDispatcher.create_scoped_dispatcher_context(
+                    user_context=context,
+                    tools=self._get_user_tools(context),
+                    websocket_manager=self.websocket_bridge
+                ) as tool_dispatcher:
+                    # Store request-scoped dispatcher for this execution
+                    self.tool_dispatcher = tool_dispatcher
                     
-                    logger.info(f"SupervisorAgent.execute() completed for user {context.user_id}")
-                    return result
+                    # Create request-scoped registry for this user
+                    self.registry = AgentRegistry(self._llm_manager, tool_dispatcher)
+                    self.registry.register_default_agents()
+                    self.registry.set_websocket_bridge(self.websocket_bridge)
+                    
+                    # Create session manager for database operations
+                    async with managed_session(context) as session_manager:
+                        # Execute supervisor orchestration
+                        result = await self._orchestrate_agents(context, session_manager, stream_updates)
+                        
+                        logger.info(f"SupervisorAgent.execute() completed for user {context.user_id}")
+                        return result
                     
             except Exception as e:
                 logger.error(f"SupervisorAgent.execute() failed for user {context.user_id}: {e}")
                 raise RuntimeError(f"Supervisor execution failed: {e}") from e
+            finally:
+                # Clean up request-scoped resources
+                self.tool_dispatcher = None
+                self.registry = None
     
     async def _orchestrate_agents(self, context: UserExecutionContext, 
                                  session_manager: DatabaseSessionManager, 
@@ -259,11 +280,30 @@ class SupervisorAgent(BaseAgent):
             logger.warning(f"No user request provided for supervisor in run_id: {context.run_id}")
             return False
         
-        if not self.registry or not self.registry.agents:
-            logger.error(f"No agents registered for supervisor execution in run_id: {context.run_id}")
-            return False
-            
+        # Registry will be created per-request, so we don't check it here
         return True
+    
+    def _get_user_tools(self, context: UserExecutionContext) -> Dict[str, Any]:
+        """Get user-specific tools based on context.
+        
+        Args:
+            context: User execution context
+            
+        Returns:
+            Dictionary of tools available to this user
+        """
+        # Import tools here to avoid circular dependencies
+        from netra_backend.app.tools import get_standard_tools
+        
+        # Get standard tools available to all users
+        tools = get_standard_tools()
+        
+        # Add user-specific tools based on permissions/subscription
+        if context.metadata.get('premium_user'):
+            # Add premium tools if applicable
+            pass
+        
+        return tools
 
     async def _execute_workflow_with_isolated_agents(self, 
                                                    agent_instances: Dict[str, BaseAgent],
@@ -405,35 +445,25 @@ class SupervisorAgent(BaseAgent):
     @classmethod
     def create(cls,
                llm_manager: LLMManager,
-               websocket_bridge: AgentWebSocketBridge,
-               tool_dispatcher: ToolDispatcher) -> 'SupervisorAgent':
+               websocket_bridge: AgentWebSocketBridge) -> 'SupervisorAgent':
         """Factory method to create SupervisorAgent with UserExecutionContext pattern.
+        
+        CRITICAL: No tool_dispatcher parameter - created per-request for isolation.
         
         Args:
             llm_manager: LLM manager instance
             websocket_bridge: WebSocket bridge for agent notifications
-            tool_dispatcher: Tool dispatcher for agent operations
             
         Returns:
             SupervisorAgent configured for UserExecutionContext pattern
         """
         supervisor = cls(
             llm_manager=llm_manager,
-            websocket_bridge=websocket_bridge,
-            tool_dispatcher=tool_dispatcher
+            websocket_bridge=websocket_bridge
         )
         
-        # Configure the agent instance factory if needed
-        try:
-            factory = get_agent_instance_factory()
-            if not hasattr(factory, '_websocket_bridge') or not factory._websocket_bridge:
-                factory.configure(
-                    agent_registry=supervisor.registry,
-                    websocket_bridge=websocket_bridge
-                )
-                logger.info("✅ Configured AgentInstanceFactory for SupervisorAgent")
-        except Exception as e:
-            logger.warning(f"Failed to configure AgentInstanceFactory: {e}")
+        # Agent instance factory will be configured per-request
+        logger.info("✅ Created SupervisorAgent with per-request tool dispatcher pattern")
         
         return supervisor
 
