@@ -357,6 +357,12 @@ secrets:
     jwt_secret_key: test_jwt_secret_key
     service_secret: test_service_secret
     
+  alpine_development:
+    jwt_secret_key: dev-jwt-secret-key-must-be-at-least-32-characters
+    service_secret: test-secret-for-local-development-only-32chars
+    fernet_key: iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw=
+    secret_key: dev-secret-key-for-development
+    
   production:
     # Production secrets should be loaded from secure environment variables
     jwt_secret_key: "${JWT_SECRET_KEY}"

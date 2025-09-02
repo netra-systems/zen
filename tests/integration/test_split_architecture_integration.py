@@ -56,8 +56,10 @@ from netra_backend.app.agents.supervisor.agent_instance_factory import (
     configure_agent_instance_factory,
     get_agent_instance_factory
 )
-from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 from netra_backend.app.models.user_execution_context import UserExecutionContext as ModelsUserExecutionContext
+
+# Import supervisor UserExecutionContext
+from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext as SupervisorUserExecutionContext
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.websocket_core.manager import WebSocketManager
