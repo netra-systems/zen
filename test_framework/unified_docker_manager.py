@@ -1236,6 +1236,7 @@ class UnifiedDockerManager:
                 else:
                     logger.debug("No existing netra containers found after all attempts")
                     # Don't assume development containers exist - let orchestration handle it
+                    break
                 
             except subprocess.TimeoutExpired:
                 logger.warning(f"Docker command timed out on attempt {attempt + 1}")

@@ -12,8 +12,7 @@ from pathlib import Path
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
-from test_framework.unified_docker_manager import UnifiedDockerManager
-from test_framework.config.docker_config import DockerConfig
+from test_framework.unified_docker_manager import UnifiedDockerManager, OrchestrationConfig
 import logging
 
 # Configure logging
@@ -25,7 +24,7 @@ def test_container_name_patterns():
     print("\n=== Testing Container Name Patterns ===")
     
     # Create manager instance
-    config = DockerConfig()
+    config = OrchestrationConfig()
     manager = UnifiedDockerManager(config, test_id="port-discovery-test")
     
     # Test pattern generation
@@ -56,7 +55,7 @@ def test_docker_ps_parsing():
     """Test docker ps output parsing (simulated)"""
     print(f"\n=== Testing Docker PS Parsing ===")
     
-    config = DockerConfig()
+    config = OrchestrationConfig()
     manager = UnifiedDockerManager(config, test_id="port-discovery-test")
     
     # Simulate docker ps output parsing
@@ -94,7 +93,7 @@ def test_environment_detection():
     """Test environment-specific default port selection"""
     print(f"\n=== Testing Environment Detection ===")
     
-    config = DockerConfig()
+    config = OrchestrationConfig()
     manager = UnifiedDockerManager(config, test_id="port-discovery-test")
     
     # Test different container name patterns to verify environment detection

@@ -273,10 +273,21 @@ class TestUnitWebSocketComponents:
         # Create mock WebSocket manager for tests
         self.mock_ws_manager = MockWebSocketManager()
         
-        yield
-        
-        # Cleanup
-        self.mock_ws_manager.clear_messages()
+        try:
+            yield
+        finally:
+            # Enhanced cleanup with proper resource management
+            try:
+                self.mock_ws_manager.clear_messages()
+                # Clear any connections
+                if hasattr(self.mock_ws_manager, 'connections'):
+                    self.mock_ws_manager.connections.clear()
+                # Ensure garbage collection
+                del self.mock_ws_manager
+            except Exception as e:
+                # Log cleanup errors but don't fail test
+                import logging
+                logging.getLogger(__name__).warning(f"WebSocket mock cleanup warning: {e}")
     
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -421,10 +432,21 @@ class TestIntegrationWebSocketFlow:
         # Use mock WebSocket manager for reliable testing
         self.mock_ws_manager = MockWebSocketManager()
         
-        yield
-        
-        # Cleanup
-        self.mock_ws_manager.clear_messages()
+        try:
+            yield
+        finally:
+            # Enhanced cleanup with proper resource management
+            try:
+                self.mock_ws_manager.clear_messages()
+                # Clear any connections
+                if hasattr(self.mock_ws_manager, 'connections'):
+                    self.mock_ws_manager.connections.clear()
+                # Ensure garbage collection
+                del self.mock_ws_manager
+            except Exception as e:
+                # Log cleanup errors but don't fail test
+                import logging
+                logging.getLogger(__name__).warning(f"WebSocket integration mock cleanup warning: {e}")
     
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -586,10 +608,21 @@ class TestE2EWebSocketChatFlow:
         # Use mock WebSocket manager for reliable testing
         self.mock_ws_manager = MockWebSocketManager()
         
-        yield
-        
-        # Cleanup
-        self.mock_ws_manager.clear_messages()
+        try:
+            yield
+        finally:
+            # Enhanced cleanup with proper resource management
+            try:
+                self.mock_ws_manager.clear_messages()
+                # Clear any connections
+                if hasattr(self.mock_ws_manager, 'connections'):
+                    self.mock_ws_manager.connections.clear()
+                # Ensure garbage collection
+                del self.mock_ws_manager
+            except Exception as e:
+                # Log cleanup errors but don't fail test
+                import logging
+                logging.getLogger(__name__).warning(f"WebSocket E2E mock cleanup warning: {e}")
     
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -778,10 +811,21 @@ class TestRegressionPrevention:
         # Use mock WebSocket manager for reliable testing
         self.mock_ws_manager = MockWebSocketManager()
         
-        yield
-        
-        # Cleanup
-        self.mock_ws_manager.clear_messages()
+        try:
+            yield
+        finally:
+            # Enhanced cleanup with proper resource management
+            try:
+                self.mock_ws_manager.clear_messages()
+                # Clear any connections
+                if hasattr(self.mock_ws_manager, 'connections'):
+                    self.mock_ws_manager.connections.clear()
+                # Ensure garbage collection
+                del self.mock_ws_manager
+            except Exception as e:
+                # Log cleanup errors but don't fail test
+                import logging
+                logging.getLogger(__name__).warning(f"WebSocket regression mock cleanup warning: {e}")
     
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -907,8 +951,30 @@ class TestMonitoringIntegrationCritical:
     async def setup_monitoring_services(self):
         """Setup monitoring services for testing."""
         self.mock_ws_manager = MockWebSocketManager()
-        yield
-        self.mock_ws_manager.clear_messages()
+        
+        try:
+            yield
+        finally:
+            # Enhanced cleanup with proper resource management
+            try:
+                self.mock_ws_manager.clear_messages()
+                # Clear any connections
+                if hasattr(self.mock_ws_manager, 'connections'):
+                    self.mock_ws_manager.connections.clear()
+                # Force cleanup of any remaining references
+                if hasattr(self, '_monitoring_components'):
+                    for component in getattr(self, '_monitoring_components', []):
+                        if hasattr(component, 'stop_monitoring'):
+                            try:
+                                await component.stop_monitoring()
+                            except Exception:
+                                pass
+                # Ensure garbage collection
+                del self.mock_ws_manager
+            except Exception as e:
+                # Log cleanup errors but don't fail test
+                import logging
+                logging.getLogger(__name__).warning(f"WebSocket monitoring mock cleanup warning: {e}")
     
     @pytest.mark.asyncio
     @pytest.mark.critical
