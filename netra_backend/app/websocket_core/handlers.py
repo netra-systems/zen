@@ -752,8 +752,9 @@ class MessageRouter:
     def __init__(self):
         self.handlers: List[MessageHandler] = [
             HeartbeatHandler(),
-            AgentRequestHandler(),  # Handle agent_request messages first
-            TestAgentHandler(),  # Add test agent handler for other test messages
+            # NOTE: AgentRequestHandler and TestAgentHandler removed - these are test-only handlers
+            # that should not be in production. Real agent handling is done by AgentMessageHandler
+            # which is registered dynamically in websocket.py
             UserMessageHandler(), 
             JsonRpcHandler(),
             ErrorHandler()
