@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 # Helper modules for consolidated implementation  
 from netra_backend.app.db.clickhouse import get_clickhouse_service
 
-# CONSOLIDATED IMPLEMENTATION - Primary export
+# GOLDEN PATTERN SSOT IMPLEMENTATION - Primary export (replaces 66+ fragmented files)
 from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.data_sub_agent.data_validator import DataValidator
 from netra_backend.app.agents.data_sub_agent.performance_analyzer import (
