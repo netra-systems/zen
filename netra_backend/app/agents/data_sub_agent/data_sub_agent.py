@@ -136,18 +136,48 @@ class DataSubAgent(BaseAgent):
         }
     
     async def _execute_analysis(self, request: Dict[str, Union[str, List[str], Optional[str]]]) -> Dict[str, Union[str, List[str], int, float, Dict[str, Any]]]:
-        """Execute data analysis based on request type."""
+        """Execute data analysis based on request type with WebSocket tool events."""
         analysis_type = request["type"]
         
+        try:
+            if analysis_type == "performance":
+                await self.emit_tool_executing("performance_analyzer", {"analysis_type": "performance", "timeframe": request.get("timeframe")})
+                result = await self.performance_analyzer.analyze_performance(request)
+                await self.emit_tool_completed("performance_analyzer", {"status": "success", "data_points": result.get("data_points", 0)})
+                return result
+            elif analysis_type == "cost_optimization":
+                await self.emit_tool_executing("cost_optimizer", {"analysis_type": "cost_optimization", "timeframe": request.get("timeframe")})
+                result = await self.cost_optimizer.analyze_costs(request)
+                await self.emit_tool_completed("cost_optimizer", {"status": "success", "savings_identified": result.get("savings_potential", {}).get("savings_percentage", 0)})
+                return result
+            elif analysis_type == "trend_analysis":
+                await self.emit_tool_executing("trend_analyzer", {"analysis_type": "trend_analysis", "timeframe": request.get("timeframe")})
+                result = await self.performance_analyzer.analyze_trends(request)
+                await self.emit_tool_completed("trend_analyzer", {"status": "success", "trends_found": len(result.get("trends", {}))})
+                return result
+            else:
+                # Default to performance analysis
+                await self.emit_tool_executing("performance_analyzer", {"analysis_type": "performance", "timeframe": request.get("timeframe")})
+                result = await self.performance_analyzer.analyze_performance(request)
+                await self.emit_tool_completed("performance_analyzer", {"status": "success", "data_points": result.get("data_points", 0)})
+                return result
+        except Exception as e:
+            # Emit error event for tool execution failure
+            tool_name = self._get_tool_name_for_analysis_type(analysis_type)
+            await self.emit_error(f"{tool_name} execution failed: {str(e)}", "tool_execution_error", {"analysis_type": analysis_type})
+            # Re-raise to be handled by base agent error handling
+            raise
+    
+    def _get_tool_name_for_analysis_type(self, analysis_type: str) -> str:
+        """Get tool name for analysis type for WebSocket events."""
         if analysis_type == "performance":
-            return await self.performance_analyzer.analyze_performance(request)
+            return "performance_analyzer"
         elif analysis_type == "cost_optimization":
-            return await self.cost_optimizer.analyze_costs(request)
+            return "cost_optimizer"
         elif analysis_type == "trend_analysis":
-            return await self.performance_analyzer.analyze_trends(request)
+            return "trend_analyzer"
         else:
-            # Default to performance analysis
-            return await self.performance_analyzer.analyze_performance(request)
+            return "performance_analyzer"  # default
     
     async def _generate_insights(self, analysis_result: Dict[str, Union[str, List[str], int, float, Dict[str, Any]]]) -> Dict[str, Union[str, float, int]]:
         """Generate actionable insights from analysis results."""
@@ -181,12 +211,16 @@ class DataSubAgent(BaseAgent):
         return insights
     
     async def _generate_llm_insights(self, analysis_result: Dict[str, Union[str, List[str], int, float, Dict[str, Any]]]) -> str:
-        """Generate AI-powered insights using LLM."""
+        """Generate AI-powered insights using LLM with WebSocket events."""
         try:
+            await self.emit_tool_executing("llm_insights_generator", {"analysis_summary": analysis_result.get("summary", "")})
             prompt = self._build_insights_prompt(analysis_result)
             response = await self.llm_manager.generate_response(prompt)
-            return response.get("content", "No insights generated")
+            insights = response.get("content", "No insights generated")
+            await self.emit_tool_completed("llm_insights_generator", {"status": "success", "insights_length": len(insights)})
+            return insights
         except Exception as e:
+            await self.emit_error(f"LLM insights generation failed: {str(e)}", "llm_execution_error")
             self.logger.warning(f"LLM insights generation failed: {e}")
             return "AI insights unavailable"
     
