@@ -47,7 +47,7 @@ logger = central_logger
 
 # Main modern admin tool execution function
 async def execute_admin_tool(tool_name: str, user: User, db: AsyncSession, action: str, **kwargs) -> Dict[str, Any]:
-    """Modern admin tool execution with BaseExecutionInterface"""
+    """Modern admin tool execution with standardized execution patterns"""
     handler = create_modern_tool_handler(tool_name)
     context = handler.create_execution_context(
         DeepAgentState(params={'action': action, 'user': user, 'db': db, 'kwargs': kwargs}), 

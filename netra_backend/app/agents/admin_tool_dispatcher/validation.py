@@ -55,7 +55,7 @@ class AdminToolValidator(ABC):
     """Modern admin tool validator with execution context support."""
     
     def __init__(self, monitor: Optional[ExecutionMonitor] = None):
-        # BaseExecutionInterface.__init__ removed - using single inheritance pattern
+        # Using single inheritance from modern execution patterns
         self.agent_name = "admin_tool_validator"
         self.monitor = monitor or ExecutionMonitor()
         self.error_handler = ExecutionErrorHandler
