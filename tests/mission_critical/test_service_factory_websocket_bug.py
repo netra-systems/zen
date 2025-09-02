@@ -104,7 +104,7 @@ class TestServiceFactoryWebSocketBug:
         and have all required dependencies.
         """
         # Import the validation from startup module
-        from netra_backend.app.startup_module_deterministic import DeterministicStartupError
+        from netra_backend.app.smd import DeterministicStartupError
         
         # Simulate what startup does - check for None services
         mock_app_state = Mock()

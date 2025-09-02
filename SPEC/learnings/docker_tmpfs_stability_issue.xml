@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Docker tmpfs Storage Stability Issues</title>
+    <category>Infrastructure</category>
+    <subcategory>Docker</subcategory>
+    <date>2025-01-02</date>
+    <severity>CRITICAL</severity>
+    <impact>System Crashes</impact>
+  </metadata>
+
+  <problem>
+    <description>
+      tmpfs volumes in Docker cause instability and crashes, particularly in Alpine-based containers
+      and during pytest test execution.
+    </description>
+    <symptoms>
+      - Docker containers crashing unexpectedly
+      - Database services failing to maintain data integrity
+      - Test suite failures due to storage issues
+      - Memory exhaustion in containerized environments
+      - Alpine containers particularly vulnerable to tmpfs issues
+    </symptoms>
+    <root_cause>
+      tmpfs is an in-memory filesystem that:
+      1. Consumes RAM directly, competing with application memory
+      2. Has no persistence across container restarts
+      3. Can cause out-of-memory conditions when data grows
+      4. Is particularly problematic in Alpine Linux due to its minimal memory footprint
+      5. Creates instability in test environments that need consistent storage
+    </root_cause>
+  </problem>
+
+  <solution>
+    <approach>Replace all tmpfs volumes with named Docker volumes for persistent storage</approach>
+    <implementation>
+      <file path="docker-compose.alpine-test.yml">
+        <change>
+          <from><![CDATA[
+    volumes:
+      - type: tmpfs
+        target: /var/lib/postgresql/data
+        tmpfs:
+          size: 1G
+          ]]></from>
+          <to><![CDATA[
+    volumes:
+      - alpine-test-postgres-data:/var/lib/postgresql/data
+          ]]></to>
+        </change>
+      </file>
+      
+      <file path="docker-compose.pytest.yml">
+        <change>
+          <from><![CDATA[
+    volumes:
+      - type: tmpfs
+        target: /data
+        tmpfs:
+          size: 1G
+          ]]></from>
+          <to><![CDATA[
+    volumes:
+      - pytest-redis-data:/data
+          ]]></to>
+        </change>
+      </file>
+      
+      <file path="config/docker_environments.yaml">
+        <change>
+          <from><![CDATA[
+    volume_config:
+      use_tmpfs: true
+      tmpfs_size:
+        postgres: 512m
+        redis: 256m
+        clickhouse: 512m
+          ]]></from>
+          <to><![CDATA[
+    volume_config:
+      use_tmpfs: false
+      # Using named volumes instead of tmpfs for stability
+      persistent_volumes:
+        postgres: alpine-test-postgres-data
+        redis: alpine-test-redis-data
+        clickhouse: alpine-test-clickhouse-data
+          ]]></to>
+        </change>
+      </file>
+    </implementation>
+    
+    <named_volumes>
+      All Docker Compose files must define named volumes at the bottom:
+      <example><![CDATA[
+volumes:
+  postgres-data:
+  redis-data:
+  clickhouse-data:
+      ]]></example>
+    </named_volumes>
+  </solution>
+
+  <prevention>
+    <rule id="1">
+      <description>NEVER use tmpfs volumes in production or test Docker configurations</description>
+      <rationale>tmpfs causes memory competition and data loss on restart</rationale>
+    </rule>
+    
+    <rule id="2">
+      <description>Always use named volumes for database storage</description>
+      <rationale>Named volumes provide persistence and stability</rationale>
+    </rule>
+    
+    <rule id="3">
+      <description>Document in CLAUDE.md that tmpfs is forbidden</description>
+      <rationale>Ensure all developers are aware of this critical issue</rationale>
+      <implementation>Added to CLAUDE.md: "Docker tmpfs storage = bad crashes"</implementation>
+    </rule>
+    
+    <rule id="4">
+      <description>For test isolation, use volume cleanup instead of tmpfs</description>
+      <alternative><![CDATA[
+# Clean volumes between test runs
+docker-compose down -v  # Removes volumes
+docker-compose up       # Creates fresh volumes
+      ]]></alternative>
+    </rule>
+  </prevention>
+
+  <testing>
+    <verification_steps>
+      1. Run docker-compose up for each environment
+      2. Verify containers start without memory issues
+      3. Check that data persists across container restarts
+      4. Monitor memory usage during test execution
+      5. Ensure no OOM (Out of Memory) kills occur
+    </verification_steps>
+    
+    <commands>
+      <command purpose="Check for tmpfs usage">
+        grep -r "tmpfs" docker-compose*.yml config/docker_environments.yaml
+      </command>
+      <command purpose="Verify volume configuration">
+        docker-compose config | grep -A5 "volumes:"
+      </command>
+      <command purpose="Monitor container memory">
+        docker stats --no-stream
+      </command>
+    </commands>
+  </testing>
+
+  <affected_files>
+    - docker-compose.alpine-test.yml
+    - docker-compose.pytest.yml
+    - config/docker_environments.yaml
+    - Any future Docker Compose configurations
+  </affected_files>
+
+  <references>
+    - CLAUDE.md (line 414: "Docker tmpfs storage = bad crashes")
+    - Docker documentation on storage drivers
+    - Alpine Linux memory management limitations
+  </references>
+
+  <keywords>
+    - tmpfs
+    - Docker
+    - Alpine
+    - memory
+    - crash
+    - stability
+    - volumes
+    - storage
+    - pytest
+  </keywords>
+</learning>

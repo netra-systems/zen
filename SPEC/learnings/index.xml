@@ -300,6 +300,23 @@
         <prevention>Use deterministic StartupOrchestrator with strict phases. No conditional paths for critical services. No setting services to None. Fail immediately if any chat component cannot initialize.</prevention>
     </learning>
     
+    <learning id="docker-tmpfs-stability-issue-2025-01-02">
+        <title>Docker tmpfs Storage Stability Issues</title>
+        <category>Infrastructure/Docker</category>
+        <keywords>docker, tmpfs, alpine, memory, crash, stability, volumes, storage, pytest</keywords>
+        <path>docker_tmpfs_stability_issue.xml</path>
+        <critical-takeaway>
+            tmpfs volumes in Docker cause instability and crashes, particularly in Alpine containers.
+            Root cause: tmpfs consumes RAM directly, has no persistence, causes OOM conditions.
+            Solution: Replace ALL tmpfs volumes with named Docker volumes for persistent storage.
+            Affects docker-compose.alpine-test.yml, docker-compose.pytest.yml, config/docker_environments.yaml.
+            NEVER use tmpfs in production or test environments.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>System crashes, test suite failures, complete service unavailability</business-impact>
+        <prevention>Always use named volumes for database storage. Clean volumes between test runs instead of using tmpfs. Monitor container memory usage. Document in CLAUDE.md that tmpfs is forbidden.</prevention>
+    </learning>
+    
     <learning id="auth-state-race-condition-2025-08-31">
         <title>Authentication State Race Condition During Initialization</title>
         <category>Frontend Authentication</category>

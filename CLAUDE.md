@@ -32,6 +32,18 @@ CRUCIAL: ULTRA THINK DEEPLY.
 
 -----
 
+## 🏗️ CRITICAL ARCHITECTURE DOCUMENTATION
+
+> **⚠️ MANDATORY READING**: The **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** is the authoritative guide to our Factory-based isolation patterns. This document explains how we ensure complete user isolation, eliminate shared state, and enable reliable concurrent execution for 10+ users. **READ THIS FIRST** before making any changes to execution engines, WebSocket events, or tool dispatchers.
+
+### Related Architecture Documents:
+- **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and execution isolation (START HERE)
+- [Tool Dispatcher Migration Guide](./TOOL_DISPATCHER_MIGRATION_GUIDE.md) - Migration from singleton to request-scoped
+- [WebSocket Modernization Report](./WEBSOCKET_MODERNIZATION_REPORT.md) - WebSocket isolation implementation
+- [Documentation Hub](./docs/index.md) - Central documentation index
+
+-----
+
 ## 1\. The Business Mandate: Value Capture and Growth
 
 Netra Apex succeeds by creating and capturing value from a customer's AI spend.
@@ -374,21 +386,6 @@ python scripts/docker_manual.py restart --services backend auth
 
 The platform supports Alpine-based containers for dramatic performance improvements:
 
-**Business Value:**
-- **50% smaller container sizes** (Python 3.11 Alpine: 150MB vs 300MB+ regular)
-- **3x faster startup times** for test environments
-- **40% lower memory usage** enabling more parallel test execution
-- **Faster CI/CD cycles** reducing time-to-market
-
-**Alpine vs Regular Containers:**
-
-| Feature | Alpine | Regular | Benefit |
-|---------|--------|---------|---------|
-| Image size | ~150MB | ~350MB | 60% smaller |
-| Startup time | ~5s | ~15s | 3x faster |
-| Memory usage | ~200MB | ~350MB | 43% less |
-| Security | Minimal attack surface | Full OS | Better security |
-
 **Usage Examples:**
 
 ```bash
@@ -413,10 +410,10 @@ python scripts/docker_manual.py status --alpine
 - **✓ Test environments** (default choice for speed)
 - **✓ CI/CD pipelines** (faster builds, lower resource usage)
 - **✓ Development** (when memory is constrained)
-- **✗ Production** (use regular images for debugging capabilities)
+
+Docker tmpfs storage = bad crashes
 
 **Performance Optimizations in Alpine:**
-- **tmpfs storage** for databases (ultra-fast I/O)
 - **Minimal base images** (python:3.11-alpine3.19)
 - **Resource limits** (prevents memory exhaustion)
 - **Optimized configurations** (fsync=off for test DB)

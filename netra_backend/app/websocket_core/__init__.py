@@ -78,6 +78,8 @@ from netra_backend.app.websocket_core.handlers import (
     ErrorHandler,
     MessageRouter,
     get_message_router,
+    get_router_handler_count,
+    list_registered_handlers,
     send_error_to_websocket,
     send_system_message
 )
@@ -127,6 +129,17 @@ from netra_backend.app.websocket_core.utils import (
     websocket_heartbeat_context
 )
 
+# Modern WebSocket abstraction
+from netra_backend.app.websocket_core.modern_websocket_abstraction import (
+    ModernWebSocketWrapper,
+    ModernWebSocketManager,
+    ModernWebSocketProtocol,
+    get_modern_websocket_manager,
+    websocket_connection_context,
+    WebSocketClientProtocol,
+    WebSocketServerProtocol
+)
+
 # Version info
 __version__ = "1.0.0"
 __description__ = "Unified WebSocket infrastructure for Netra backend"
@@ -166,7 +179,15 @@ __all__ = [
     "safe_websocket_close",
     "get_connection_monitor",
     "create_standard_message",
-    "create_error_message"
+    "create_error_message",
+    
+    # Modern WebSocket abstraction
+    "ModernWebSocketWrapper",
+    "ModernWebSocketManager",
+    "get_modern_websocket_manager",
+    "websocket_connection_context",
+    "WebSocketClientProtocol",
+    "WebSocketServerProtocol"
 ]
 
 # Legacy compatibility - these will be removed in future versions

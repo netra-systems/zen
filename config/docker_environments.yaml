@@ -164,11 +164,12 @@ environments:
       workers: 2
       
     volume_config:
-      use_tmpfs: true
-      tmpfs_size:
-        postgres: 512m
-        redis: 256m
-        clickhouse: 512m
+      use_tmpfs: false
+      # Using named volumes instead of tmpfs for stability
+      persistent_volumes:
+        postgres: alpine-test-postgres-data
+        redis: alpine-test-redis-data
+        clickhouse: alpine-test-clickhouse-data
         
   alpine_development:
     compose_file: docker-compose.alpine.yml

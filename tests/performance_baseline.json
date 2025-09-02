@@ -1,0 +1,35 @@
+{
+  "created": 1756839985.9200592,
+  "baselines": [
+    {
+      "test_name": "memory_optimization",
+      "baseline_duration_ms": 14954.044580459595,
+      "baseline_memory_mb": 208.66015625,
+      "baseline_throughput": 66.8715406470499,
+      "baseline_latency_ms": 14.954044580459595,
+      "established_date": 1756839899.1963956,
+      "version": "1.0",
+      "confidence_interval": 0.95
+    },
+    {
+      "test_name": "database_performance",
+      "baseline_duration_ms": 11353.590250015259,
+      "baseline_memory_mb": 212.4453125,
+      "baseline_throughput": 17.615573188378118,
+      "baseline_latency_ms": 56.767951250076294,
+      "established_date": 1756839946.0243316,
+      "version": "1.0",
+      "confidence_interval": 0.95
+    },
+    {
+      "test_name": "startup_performance",
+      "baseline_duration_ms": 1006.8302154541016,
+      "baseline_memory_mb": 212.6640625,
+      "baseline_throughput": 0.9932161199085379,
+      "baseline_latency_ms": 1006.8302154541016,
+      "established_date": 1756839947.0650852,
+      "version": "1.0",
+      "confidence_interval": 0.95
+    }
+  ]
+}

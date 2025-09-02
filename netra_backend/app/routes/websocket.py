@@ -170,6 +170,9 @@ async def websocket_endpoint(websocket: WebSocket):
         message_router = get_message_router()
         connection_monitor = get_connection_monitor()
         
+        # Log current handler count for debugging
+        logger.info(f"WebSocket message router has {len(message_router.handlers)} handlers before agent handler registration")
+        
         # Initialize MessageHandlerService and AgentMessageHandler
         from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
         from netra_backend.app.services.message_handlers import MessageHandlerService
@@ -209,7 +212,8 @@ async def websocket_endpoint(websocket: WebSocket):
                 
                 # Register agent handler with message router
                 message_router.add_handler(agent_handler)
-                logger.info("Registered real AgentMessageHandler for production agent pipeline")
+                logger.info(f"Registered real AgentMessageHandler for production agent pipeline")
+                logger.info(f"Total handlers after registration: {len(message_router.handlers)}")
             except Exception as e:
                 # CRITICAL: NO FALLBACK IN STAGING/PRODUCTION
                 if environment in ["staging", "production"] and not is_testing:
@@ -221,6 +225,7 @@ async def websocket_endpoint(websocket: WebSocket):
                     fallback_handler = _create_fallback_agent_handler()
                     message_router.add_handler(fallback_handler)
                     logger.info(f"Registered fallback AgentMessageHandler for {environment} environment")
+                    logger.info(f"Total handlers after fallback registration: {len(message_router.handlers)}")
         else:
             # CRITICAL: NO FALLBACK IN STAGING/PRODUCTION - CHAT IS KING
             if environment in ["staging", "production"] and not is_testing:
@@ -254,6 +259,11 @@ async def websocket_endpoint(websocket: WebSocket):
                 logger.info(f"🤖 Registered fallback AgentMessageHandler for {environment} - will handle CHAT messages!")
                 logger.info(f"🤖 Fallback handler can handle: {fallback_handler.supported_types}")
                 logger.info(f"🤖 Total handlers registered: {len(message_router.handlers)}")
+                
+                # List all registered handlers for debugging
+                for idx, handler in enumerate(message_router.handlers):
+                    handler_types = getattr(handler, 'supported_types', [])
+                    logger.info(f"  Handler {idx}: {handler.__class__.__name__} - supports {handler_types}")
         
         # Authenticate and establish secure connection AFTER accepting
         # CRITICAL FIX: Handle authentication errors gracefully without breaking message loop

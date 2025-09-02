@@ -24,7 +24,7 @@
   
   <solution>
     UNIFIED DETERMINISTIC STARTUP ONLY:
-    - Location: netra_backend/app/startup_module_deterministic.py
+    - Location: netra_backend/app/smd.py
     - Entry: run_deterministic_startup()
     - Philosophy: Fail-fast, no ambiguity, no conditional paths
   </solution>
@@ -102,7 +102,7 @@
     from netra_backend.app.startup_module import run_complete_startup
     
     Which internally calls:
-    from netra_backend.app.startup_module_deterministic import run_deterministic_startup
+    from netra_backend.app.smd import run_deterministic_startup
     
     NEVER use legacy startup functions directly.
   </migration_notes>

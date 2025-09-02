@@ -613,3 +613,19 @@ class IsolatedExecutionEngine:
             'execution_metrics': self.user_context.execution_metrics.copy(),
             'timestamp': datetime.now(timezone.utc).isoformat()
         }
+
+
+# Factory instance management
+_execution_engine_factory: Optional['ExecutionEngineFactory'] = None
+
+
+def get_execution_engine_factory() -> ExecutionEngineFactory:
+    """Get or create the singleton ExecutionEngineFactory instance.
+    
+    Returns:
+        ExecutionEngineFactory: The singleton factory instance
+    """
+    global _execution_engine_factory
+    if _execution_engine_factory is None:
+        _execution_engine_factory = ExecutionEngineFactory()
+    return _execution_engine_factory

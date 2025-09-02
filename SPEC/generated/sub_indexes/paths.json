@@ -512,7 +512,7 @@
       "value": "/5 startup fixes applied",
       "category": "paths",
       "locations": [
-        "netra_backend/app/startup_module_deterministic.py:1017"
+        "netra_backend/app/smd.py:1017"
       ]
     },
     "/60 seconds)": {
@@ -526,7 +526,7 @@
       "value": "/7",
       "category": "paths",
       "locations": [
-        "netra_backend/app/startup_module_deterministic.py:1103"
+        "netra_backend/app/smd.py:1103"
       ]
     },
     "/FI": {

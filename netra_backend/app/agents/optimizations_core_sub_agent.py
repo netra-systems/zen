@@ -12,11 +12,11 @@ BVJ: Growth & Enterprise | Performance & Cost Optimization | +30% cost reduction
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.agents.prompts import optimizations_core_prompt_template
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.utils import extract_json_from_response
+from netra_backend.app.database.session_manager import DatabaseSessionManager
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 
@@ -31,29 +31,32 @@ class OptimizationsCoreSubAgent(BaseAgent):
     """
     
     def __init__(self, llm_manager: Optional[LLMManager] = None, 
-                 tool_dispatcher: Optional[ToolDispatcher] = None):
+                 tool_dispatcher: Optional[ToolDispatcher] = None,
+                 websocket_manager: Optional[Any] = None):
         # Initialize BaseAgent with full infrastructure
         super().__init__(
             llm_manager=llm_manager,
             name="OptimizationsCoreSubAgent", 
-            description="Enhanced optimization agent using BaseAgent infrastructure",
+            description="Enhanced optimization agent using UserExecutionContext pattern",
             enable_reliability=True,      # Get circuit breaker + retry
             enable_execution_engine=True, # Get modern execution patterns
             enable_caching=True,          # Enable caching for optimization results
             tool_dispatcher=tool_dispatcher
         )
         self.tool_dispatcher = tool_dispatcher
+        self.websocket_manager = websocket_manager
 
-    # Implement BaseAgent's abstract methods for optimization-specific logic
-    async def validate_preconditions(self, context: ExecutionContext) -> bool:
+    async def _validate_context_data(self, context: UserExecutionContext) -> bool:
         """Validate execution preconditions for optimization analysis."""
-        state = context.state
+        # Get data from context metadata - agents store execution state there
+        data_result = context.metadata.get('data_result')
+        triage_result = context.metadata.get('triage_result')
         
-        if not state.data_result:
+        if not data_result:
             self.logger.warning(f"No data result available for optimization in run_id: {context.run_id}")
             return False
             
-        if not state.triage_result:
+        if not triage_result:
             self.logger.warning(f"No triage result available for optimization in run_id: {context.run_id}")
             return False
             
@@ -63,71 +66,114 @@ class OptimizationsCoreSubAgent(BaseAgent):
             
         return True
     
-    async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
-        """Execute optimization analysis core logic with WebSocket events."""
-        # Emit thinking event (agent_started is handled by orchestrator)
-        await self.emit_thinking("Starting optimization analysis based on data insights...")
+    async def execute(self, context: UserExecutionContext, stream_updates: bool = False) -> Dict[str, Any]:
+        """Execute optimization analysis with proper session isolation.
         
-        # Emit progress for strategy formulation
-        await self.emit_progress("Analyzing data patterns and formulating optimization strategies...")
+        Args:
+            context: User execution context with database session
+            stream_updates: Whether to stream progress updates
+            
+        Returns:
+            Dict with optimization analysis results
+            
+        Raises:
+            ValueError: If context validation fails
+        """
+        logger.info(f"OptimizationsCoreSubAgent executing for user {context.user_id}, run {context.run_id}")
+        
+        # Validate context at method entry
+        if not isinstance(context, UserExecutionContext):
+            raise ValueError(f"Invalid context type: {type(context)}")
+        
+        # Validate required data is available
+        if not await self._validate_context_data(context):
+            raise ValueError("Required data not available for optimization analysis")
+        
+        # Get database session manager for this request
+        session_manager = DatabaseSessionManager(context)
+        
+        try:
+            if stream_updates:
+                await self._emit_agent_started(context)
+            
+            # Execute optimization analysis workflow with session isolation
+            result = await self._execute_optimization_workflow(context, session_manager, stream_updates)
+            
+            if stream_updates:
+                await self._emit_agent_completed(context, result)
+            
+            logger.info(f"OptimizationsCoreSubAgent completed for user {context.user_id}")
+            return result
+            
+        except Exception as e:
+            error_msg = f"Optimization analysis failed: {str(e)}"
+            logger.error(error_msg)
+            
+            if stream_updates:
+                await self._emit_error(context, error_msg, "OptimizationError")
+            
+            # Ensure session is rolled back on error
+            if session_manager:
+                await session_manager.rollback()
+            raise
+        finally:
+            # Ensure session is closed
+            if session_manager:
+                await session_manager.close()
+    
+    async def _execute_optimization_workflow(self, context: UserExecutionContext, 
+                                           session_manager: DatabaseSessionManager, 
+                                           stream_updates: bool) -> Dict[str, Any]:
+        """Execute optimization analysis workflow with session isolation."""
+        if stream_updates:
+            await self._emit_thinking(context, "Starting optimization analysis based on data insights...")
+            await self._emit_progress(context, "Analyzing data patterns and formulating optimization strategies...")
         
         # Build prompt and execute LLM
-        prompt = self._build_optimization_prompt(context.state)
+        prompt = self._build_optimization_prompt(context)
         
-        # Emit tool executing event for LLM
-        await self.emit_tool_executing("llm_analysis", {
-            "model": "optimizations_core",
-            "prompt_length": len(prompt)
-        })
+        if stream_updates:
+            await self._emit_tool_executing(context, "llm_analysis", {
+                "model": "optimizations_core",
+                "prompt_length": len(prompt)
+            })
         
         try:
             llm_response = await self.llm_manager.ask_llm(prompt, llm_config_name='optimizations_core')
             
-            # Emit tool completed event
-            await self.emit_tool_completed("llm_analysis", {
-                "response_length": len(llm_response),
-                "status": "success"
-            })
+            if stream_updates:
+                await self._emit_tool_completed(context, "llm_analysis", {
+                    "response_length": len(llm_response),
+                    "status": "success"
+                })
             
         except Exception as e:
-            await self.emit_tool_completed("llm_analysis", {
-                "status": "error",
-                "error": str(e)
-            })
+            if stream_updates:
+                await self._emit_tool_completed(context, "llm_analysis", {
+                    "status": "error",
+                    "error": str(e)
+                })
             raise
         
         # Process the response
-        await self.emit_progress("Processing optimization recommendations...")
+        if stream_updates:
+            await self._emit_progress(context, "Processing optimization recommendations...")
+        
         result = await self._process_optimization_response(llm_response, context)
         
-        # Emit completion event
-        await self.emit_progress("Optimization strategies formulated successfully", is_complete=True)
+        if stream_updates:
+            await self._emit_progress(context, "Optimization strategies formulated successfully", is_complete=True)
         
         return result
     
-    # Legacy compatibility method
-    async def check_entry_conditions(self, state: DeepAgentState, run_id: str) -> bool:
-        """Check if we have data and triage results to work with."""
-        return state.data_result is not None and state.triage_result is not None
-    
-    # Backward Compatibility - Original execute method using BaseAgent infrastructure
-    async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
-        """Execute with backward compatibility (delegates to BaseAgent patterns)."""
-        # Use BaseAgent's execute_modern method which handles reliability and execution patterns
-        result = await self.execute_modern(state, run_id, stream_updates)
-        
-        if result.success:
-            state.optimizations_result = self._create_optimizations_result(result.result)
-        else:
-            # Create fallback result on failure
-            fallback_result = self._create_default_fallback_result()
-            state.optimizations_result = self._create_optimizations_result(fallback_result)
-    
     async def _process_optimization_response(self, llm_response_str: str, 
-                                           context: ExecutionContext) -> Dict[str, Any]:
-        """Process LLM response and update state."""
+                                           context: UserExecutionContext) -> Dict[str, Any]:
+        """Process LLM response and update context metadata."""
         optimizations_result = self._extract_and_validate_result(llm_response_str, context.run_id)
-        context.state.optimizations_result = self._create_optimizations_result(optimizations_result)
+        
+        # Store result in context metadata for other agents to access
+        context.metadata['optimizations_result'] = self._create_optimizations_result(optimizations_result)
+        
         return optimizations_result
     
     def _extract_and_validate_result(self, llm_response_str: str, run_id: str) -> Dict[str, Any]:
@@ -138,12 +184,12 @@ class OptimizationsCoreSubAgent(BaseAgent):
             optimizations_result = {"optimizations": []}
         return optimizations_result
     
-    def _build_optimization_prompt(self, state: DeepAgentState) -> str:
-        """Build the optimization prompt from state data."""
+    def _build_optimization_prompt(self, context: UserExecutionContext) -> str:
+        """Build the optimization prompt from context data."""
         return optimizations_core_prompt_template.format(
-            data=state.data_result,
-            triage_result=state.triage_result,
-            user_request=state.user_request
+            data=context.metadata.get('data_result'),
+            triage_result=context.metadata.get('triage_result'),
+            user_request=context.metadata.get('user_request')
         )
     
     def _create_default_fallback_result(self) -> Dict[str, Any]:
@@ -171,13 +217,11 @@ class OptimizationsCoreSubAgent(BaseAgent):
         }
     
     
-    def _create_optimizations_result(self, data: Dict[str, Any]) -> 'OptimizationsResult':
-        """Convert dictionary to OptimizationsResult object."""
-        from netra_backend.app.agents.state import OptimizationsResult
-        
+    def _create_optimizations_result(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Convert dictionary to structured optimization result."""
         recommendations = self._extract_recommendations(data)
         processed_recommendations = self._process_recommendations(recommendations)
-        return self._build_optimizations_result(data, processed_recommendations)
+        return self._build_optimizations_result_dict(data, processed_recommendations)
     
     def _extract_recommendations(self, data: Dict[str, Any]) -> Any:
         """Extract recommendations from data dict."""
@@ -203,11 +247,10 @@ class OptimizationsCoreSubAgent(BaseAgent):
             return rec.get("description", str(rec))
         return str(rec)
     
-    def _build_optimizations_result(self, data: Dict[str, Any], recommendations: List[str]) -> 'OptimizationsResult':
-        """Build OptimizationsResult from processed data."""
-        from netra_backend.app.agents.state import OptimizationsResult
+    def _build_optimizations_result_dict(self, data: Dict[str, Any], recommendations: List[str]) -> Dict[str, Any]:
+        """Build optimization result dictionary from processed data."""
         result_params = self._build_optimization_result_params(data, recommendations)
-        return OptimizationsResult(**result_params)
+        return result_params
     
     def _build_optimization_result_params(self, data: Dict[str, Any], recommendations: List[str]) -> Dict[str, Any]:
         """Build parameters dictionary for OptimizationsResult."""
@@ -234,3 +277,76 @@ class OptimizationsCoreSubAgent(BaseAgent):
     def _get_optimization_type(self, data: Dict[str, Any]) -> str:
         """Extract optimization type from data with fallback."""
         return data.get("optimization_type", data.get("type", "general"))
+    
+    # WebSocket Event Methods for Streaming Support
+    
+    async def _emit_agent_started(self, context: UserExecutionContext) -> None:
+        """Emit agent started event."""
+        if hasattr(self, 'websocket_manager') and self.websocket_manager:
+            await self.websocket_manager.send_agent_started(
+                context.user_id,
+                context.run_id,
+                self.__class__.__name__,
+                "Starting optimization analysis..."
+            )
+    
+    async def _emit_agent_completed(self, context: UserExecutionContext, result: Dict[str, Any]) -> None:
+        """Emit agent completed event."""
+        if hasattr(self, 'websocket_manager') and self.websocket_manager:
+            await self.websocket_manager.send_agent_completed(
+                context.user_id,
+                context.run_id,
+                self.__class__.__name__,
+                result
+            )
+    
+    async def _emit_thinking(self, context: UserExecutionContext, message: str) -> None:
+        """Emit agent thinking event."""
+        if hasattr(self, 'websocket_manager') and self.websocket_manager:
+            await self.websocket_manager.send_agent_thinking(
+                context.user_id,
+                context.run_id,
+                self.__class__.__name__,
+                message
+            )
+    
+    async def _emit_progress(self, context: UserExecutionContext, message: str, is_complete: bool = False) -> None:
+        """Emit progress update event."""
+        if hasattr(self, 'websocket_manager') and self.websocket_manager:
+            await self.websocket_manager.send_progress_update(
+                context.user_id,
+                context.run_id,
+                message,
+                is_complete
+            )
+    
+    async def _emit_tool_executing(self, context: UserExecutionContext, tool_name: str, params: Dict[str, Any]) -> None:
+        """Emit tool executing event."""
+        if hasattr(self, 'websocket_manager') and self.websocket_manager:
+            await self.websocket_manager.send_tool_executing(
+                context.user_id,
+                context.run_id,
+                tool_name,
+                params
+            )
+    
+    async def _emit_tool_completed(self, context: UserExecutionContext, tool_name: str, result: Dict[str, Any]) -> None:
+        """Emit tool completed event."""
+        if hasattr(self, 'websocket_manager') and self.websocket_manager:
+            await self.websocket_manager.send_tool_completed(
+                context.user_id,
+                context.run_id,
+                tool_name,
+                result
+            )
+    
+    async def _emit_error(self, context: UserExecutionContext, error_message: str, error_type: str) -> None:
+        """Emit error event."""
+        if hasattr(self, 'websocket_manager') and self.websocket_manager:
+            await self.websocket_manager.send_agent_error(
+                context.user_id,
+                context.run_id,
+                self.__class__.__name__,
+                error_message,
+                error_type
+            )

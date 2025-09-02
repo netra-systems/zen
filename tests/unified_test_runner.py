@@ -440,7 +440,7 @@ class UnifiedTestRunner:
         
         # Determine environment type - default to DEDICATED for unique names
         # E2E tests should always use dedicated environments
-        if 'e2e' in args.categories or hasattr(args, 'docker_dedicated') and args.docker_dedicated:
+        if (args.categories and 'e2e' in args.categories) or (hasattr(args, 'docker_dedicated') and args.docker_dedicated):
             env_type = EnvironmentType.DEDICATED
         else:
             # For unit/integration tests, still default to DEDICATED for isolation

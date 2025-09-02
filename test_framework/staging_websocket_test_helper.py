@@ -47,7 +47,7 @@ class StagingWebSocketTestHelper:
         self.auth_client = auth_client or StagingAuthClient()
         
         # Connection management
-        self.websocket: Optional[websockets.WebSocketClientProtocol] = None
+        self.websocket: Optional[websockets.ClientConnection] = None
         self.is_connected = False
         self.connection_start_time: Optional[datetime] = None
         self.current_token: Optional[str] = None

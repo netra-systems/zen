@@ -16,11 +16,8 @@ services:
     ports:
       - "${ALPINE_TEST_POSTGRES_PORT:-5435}:5432"
     volumes:
-      # Use tmpfs for ultra-fast ephemeral storage
-      - type: tmpfs
-        target: /var/lib/postgresql/data
-        tmpfs:
-          size: 512M
+      # Use named volume for persistent storage
+      - alpine-test-postgres-data:/var/lib/postgresql/data
     command: |
       postgres
         -c shared_buffers=128MB
@@ -28,24 +25,23 @@ services:
         -c fsync=off
         -c synchronous_commit=off
         -c full_page_writes=off
-        -c checkpoint_segments=32
         -c checkpoint_completion_target=0.9
         -c wal_buffers=16MB
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U test"]
-      interval: 2s
-      timeout: 1s
-      retries: 10
-      start_period: 5s
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 30s
     networks:
       - default
     deploy:
       resources:
         limits:
-          memory: 512M
-          cpus: '0.25'
+          memory: 1G
+          cpus: '0.5'
         reservations:
-          memory: 256M
+          memory: 512M
 
   alpine-test-redis:
     image: redis:7-alpine
@@ -59,24 +55,22 @@ services:
     ports:
       - "${ALPINE_TEST_REDIS_PORT:-6382}:6379"
     volumes:
-      - type: tmpfs
-        target: /data
-        tmpfs:
-          size: 256M
+      - alpine-test-redis-data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 2s
-      timeout: 1s
-      retries: 5
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 20s
     networks:
       - default
     deploy:
       resources:
         limits:
-          memory: 256M
-          cpus: '0.1'
+          memory: 512M
+          cpus: '0.25'
         reservations:
-          memory: 128M
+          memory: 256M
 
   alpine-test-clickhouse:
     image: clickhouse/clickhouse-server:23-alpine
@@ -90,24 +84,22 @@ services:
       - "${ALPINE_TEST_CLICKHOUSE_HTTP:-8126}:8123"
       - "${ALPINE_TEST_CLICKHOUSE_TCP:-9003}:9000"
     volumes:
-      - type: tmpfs
-        target: /var/lib/clickhouse
-        tmpfs:
-          size: 512M
+      - alpine-test-clickhouse-data:/var/lib/clickhouse
     healthcheck:
       test: ["CMD", "wget", "-q", "-O-", "http://localhost:8123/ping"]
-      interval: 3s
-      timeout: 2s
-      retries: 10
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 45s
     networks:
       - default
     deploy:
       resources:
         limits:
-          memory: 512M
-          cpus: '0.2'
+          memory: 1G
+          cpus: '0.5'
         reservations:
-          memory: 256M
+          memory: 512M
 
   # ============================================
   # ALPINE APPLICATION SERVICES
@@ -148,19 +140,19 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 3s
-      timeout: 2s
-      retries: 10
-      start_period: 15s
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 60s
     networks:
       - default
     deploy:
       resources:
         limits:
-          memory: 2G
-          cpus: '0.5'
+          memory: 4G
+          cpus: '1.0'
         reservations:
-          memory: 1G
+          memory: 2G
 
   alpine-test-auth:
     image: netra-alpine-test-auth:latest
@@ -193,19 +185,19 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
-      interval: 3s
-      timeout: 2s
-      retries: 10
-      start_period: 15s
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 60s
     networks:
       - default
     deploy:
       resources:
         limits:
-          memory: 1G
-          cpus: '0.25'
+          memory: 2G
+          cpus: '1.0'
         reservations:
-          memory: 512M
+          memory: 1G
 
   alpine-test-frontend:
     image: netra-alpine-test-frontend:latest
@@ -253,4 +245,8 @@ networks:
     driver_opts:
       com.docker.network.driver.mtu: 1500
 
-# No persistent volumes - everything is ephemeral for test isolation
+# Named volumes for persistent storage
+volumes:
+  alpine-test-postgres-data:
+  alpine-test-redis-data:
+  alpine-test-clickhouse-data:

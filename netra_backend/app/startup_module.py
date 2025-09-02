@@ -1,4 +1,3 @@
-from shared.isolated_environment import get_env
 """
 Application startup management module.
 Handles initialization of logging, database connections, services, and health checks.
@@ -9,8 +8,27 @@ import os
 import sys
 import time
 from pathlib import Path
-from netra_backend.app.core.project_utils import get_project_root as _get_project_root
 from typing import Optional, Tuple
+
+# CRITICAL: Set up paths BEFORE any imports that depend on them
+def _setup_paths():
+    """Set up Python path and environment BEFORE importing anything else."""
+    try:
+        # Get the project root first
+        project_root = Path(__file__).parent.parent.parent
+        if str(project_root) not in sys.path:
+            sys.path.insert(0, str(project_root))
+    except Exception as e:
+        # Fallback to current working directory
+        if str(Path.cwd()) not in sys.path:
+            sys.path.insert(0, str(Path.cwd()))
+
+# Call this immediately before any other imports
+_setup_paths()
+
+# NOW import shared modules after paths are set
+from shared.isolated_environment import get_env
+from netra_backend.app.core.project_utils import get_project_root as _get_project_root
 
 from fastapi import FastAPI
 
@@ -702,8 +720,42 @@ def _create_tool_registry(app: FastAPI):
 
 
 def _create_tool_dispatcher(tool_registry):
-    """Create tool dispatcher instance."""
+    """Create tool dispatcher instance.
+    
+    DEPRECATED WARNING: This function creates a global ToolDispatcher instance
+    that may cause user isolation issues in production environments.
+    
+    MIGRATION NEEDED: Replace with request-scoped dispatcher factory pattern:
+    - Use ToolDispatcher.create_request_scoped_dispatcher() in request handlers
+    - Use ToolDispatcher.create_scoped_dispatcher_context() for automatic cleanup
+    - Remove global dispatcher from startup module
+    
+    SECURITY RISKS:
+    - Global tool dispatcher shared between all users
+    - WebSocket events may be delivered to wrong users
+    - Tool state not isolated per request
+    - Memory leaks possible with concurrent requests
+    """
+    import warnings
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+    from netra_backend.app.logging_config import central_logger
+    
+    logger = central_logger.get_logger(__name__)
+    
+    # Emit deprecation warning
+    warnings.warn(
+        "startup_module._create_tool_dispatcher() creates global state that may cause user isolation issues. "
+        "Replace with request-scoped factory patterns. "
+        "Global dispatcher will be removed in v3.0.0 (Q2 2025).",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
+    logger.warning("🚨 DEPRECATED: Creating global ToolDispatcher in startup module")
+    logger.warning("⚠️ This creates security risks and user isolation issues")
+    logger.warning("📋 MIGRATION: Remove global dispatcher, use request-scoped patterns")
+    logger.warning("📅 REMOVAL: Global startup dispatcher will be removed in v3.0.0")
+    
     return ToolDispatcher(tool_registry.get_tools([]))
 
 
@@ -1158,7 +1210,7 @@ async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
     If chat cannot work, the service MUST NOT start.
     """
     # ALWAYS use deterministic startup - this is the SSOT
-    from netra_backend.app.startup_module_deterministic import run_deterministic_startup
+    from netra_backend.app.smd import run_deterministic_startup
     return await run_deterministic_startup(app)
 
 
@@ -1218,7 +1270,7 @@ async def _deprecated_legacy_startup(app: FastAPI) -> Tuple[float, logging.Logge
             
             # DEPRECATED - Robust startup manager removed - use deterministic only
             logger.error("Robust startup manager has been removed - using deterministic startup")
-            from netra_backend.app.startup_module_deterministic import run_deterministic_startup
+            from netra_backend.app.smd import run_deterministic_startup
             return await run_deterministic_startup(app)
             
             # CRITICAL: Set startup_complete flag for health endpoint

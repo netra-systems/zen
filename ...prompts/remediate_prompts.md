@@ -241,12 +241,55 @@ LIFE OR DEATH CRITICAL: ACTION:
 
 
 LIFE OR DEATH CRITICAL: ACTION:
-Phase 2 Item 2:
+Phase 2 Item 3:
 AUDIT_REPORT_AGENT_INFRA_USER_CONFUSION.md
  FOR EACH sub task in item:
     1) don't believe the report fully - check latest system and think about it yourself
     2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
     3) failing tests and test suite must be complete, comphrensive, and difficult
 
+LIFE OR DEATH CRITICAL: ACTION:
+DOCKER_UNIFIED_AUDIT_REPORT.md P0 and P1
+ FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
 
 "Design the work for Paralell agents" seems good
+
+
+LIFE OR DEATH CRITICAL: ACTION:
+DOCKER_BACKEND_FIVE_WHYS_BUG_REPORT.md
+ FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+LIFE OR DEATH CRITICAL: ACTION:
+PARALLEL_AGENT_UPDATE_PLAN.md Phase 0
+ FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+
+LIFE OR DEATH CRITICAL: ACTION:
+PARALLEL_AGENT_UPDATE_PLAN.md Phase 1
+ FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+LIFE OR DEATH CRITICAL: ACTION:
+PARALLEL_AGENT_UPDATE_PLAN.md Phase 2
+ FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult
+
+LIFE OR DEATH CRITICAL: ACTION:
+TOOL_DISPATCHER_AUDIT_REPORT.md
+ FOR EACH sub task in item:
+    1) don't believe the report fully - check latest system and think about it yourself
+    2) Use multi-agent (3-7 best most relevant agents) to complete actual work.
+    3) failing tests and test suite must be complete, comphrensive, and difficult

@@ -809,7 +809,7 @@ The platform includes comprehensive WebSocket event monitoring to prevent silent
 | **Event Monitor** | `netra_backend/app/websocket_core/event_monitor.py` | Runtime event flow monitoring |
 | **Heartbeat Manager** | `netra_backend/app/websocket_core/heartbeat_manager.py` | Connection health tracking |
 | **WebSocket Manager** | `netra_backend/app/websocket_core/manager.py` | Enhanced with health checks |
-| **Startup Verification** | `netra_backend/app/startup_module_deterministic.py` | WebSocket functionality validation |
+| **Startup Verification** | `netra_backend/app/smd.py` | WebSocket functionality validation |
 
 ### Monitoring Configuration Variables
 ```yaml

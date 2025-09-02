@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [ main, staging, production ]
     paths:
-      - 'netra_backend/app/startup_module_deterministic.py'
+      - 'netra_backend/app/smd.py'
       - 'netra_backend/app/main.py'
       - 'netra_backend/app/routes/health*.py'
       - 'netra_backend/app/agents/supervisor/**'
@@ -15,7 +15,7 @@ on:
   push:
     branches: [ main, staging, production ]
     paths:
-      - 'netra_backend/app/startup_module_deterministic.py'
+      - 'netra_backend/app/smd.py'
       - 'netra_backend/app/main.py'
       - 'netra_backend/app/routes/health*.py'
   workflow_dispatch:

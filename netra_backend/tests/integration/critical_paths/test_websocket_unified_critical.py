@@ -68,7 +68,7 @@ class WebSocketTestClient:
     def __init__(self, endpoint: str, headers: Optional[Dict] = None):
         self.endpoint = endpoint
         self.headers = headers or {}
-        self.websocket: Optional[websockets.WebSocketClientProtocol] = None
+        self.websocket: Optional[websockets.ClientConnection] = None
         self.messages: List[Dict] = []
         self.connected = False
         self.connection_error: Optional[Exception] = None

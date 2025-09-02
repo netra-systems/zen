@@ -19,10 +19,10 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore", DeprecationWarning)
     import websockets
     try:
-        from websockets import WebSocketServerProtocol
+        from websockets import ServerConnection as WebSocketServerProtocol
     except ImportError:
         # Fallback for older versions
-        from websockets.server import WebSocketServerProtocol
+        from websockets import ServerConnection as WebSocketServerProtocol
 
 from tests.e2e.resource_isolation.test_infrastructure import TenantAgent
 
@@ -168,7 +168,7 @@ class TenantAgentManager:
         logger.info(f"Created {len(connected_agents)} mock agent connections for CPU isolation testing")
         return connected_agents
 
-    async def _establish_single_connection(self, agent: TenantAgent) -> Optional[WebSocketServerProtocol]:
+    async def _establish_single_connection(self, agent: TenantAgent) -> Optional[websockets.ServerConnection]:
         """Establish a single WebSocket connection."""
         try:
             # Add authentication headers

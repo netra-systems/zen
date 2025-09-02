@@ -766,6 +766,11 @@ class MessageRouter:
             "handler_errors": 0,
             "message_types": {}
         }
+        
+        # Log initialization for debugging
+        logger.info(f"MessageRouter initialized with {len(self.handlers)} base handlers")
+        for handler in self.handlers:
+            logger.debug(f"  - {handler.__class__.__name__}: {getattr(handler, 'supported_types', [])}")
     
     def add_handler(self, handler: MessageHandler) -> None:
         """Add a message handler to the router."""
@@ -911,7 +916,22 @@ def get_message_router() -> MessageRouter:
     global _message_router
     if _message_router is None:
         _message_router = MessageRouter()
+        logger.info(f"MessageRouter singleton created with {len(_message_router.handlers)} handlers")
     return _message_router
+
+def get_router_handler_count() -> int:
+    """Get count of registered handlers in the message router."""
+    global _message_router
+    if _message_router is None:
+        return 0
+    return len(_message_router.handlers)
+
+def list_registered_handlers() -> List[str]:
+    """List all registered handler class names."""
+    global _message_router
+    if _message_router is None:
+        return []
+    return [handler.__class__.__name__ for handler in _message_router.handlers]
 
 
 # Utility functions for sending messages

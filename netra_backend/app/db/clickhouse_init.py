@@ -130,13 +130,32 @@ async def _initialize_tables_with_client(client, verbose: bool = False) -> None:
     await _verify_table_creation(client, verbose)
 
 async def initialize_clickhouse_tables(verbose: bool = False) -> None:
-    """Initialize all required ClickHouse tables."""
+    """Initialize all required ClickHouse tables with robust connection handling."""
     if _should_skip_initialization() or _check_clickhouse_mode() or _check_development_config():
         return
     
     config = config_manager.get_config()
     verbose = verbose or getattr(config, 'verbose_tables', False)
     
+    # Try to use connection manager for robust table initialization
+    try:
+        from netra_backend.app.core.clickhouse_connection_manager import get_clickhouse_connection_manager
+        
+        connection_manager = get_clickhouse_connection_manager()
+        if connection_manager and connection_manager.connection_health.state.value not in ["disconnected", "failed"]:
+            logger.info("Using ClickHouse connection manager for table initialization")
+            
+            # Use connection manager's robust connection handling
+            async with connection_manager.get_connection() as client:
+                await _initialize_tables_with_client(client, verbose)
+            return
+            
+    except ImportError:
+        logger.debug("Connection manager not available, using direct client")
+    except Exception as e:
+        logger.warning(f"Connection manager failed for table init, falling back to direct client: {e}")
+    
+    # Fallback to direct client connection
     try:
         async with get_clickhouse_client() as client:
             await _initialize_tables_with_client(client, verbose)
