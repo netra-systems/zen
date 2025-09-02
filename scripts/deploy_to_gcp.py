@@ -91,7 +91,7 @@ class GCPDeployer:
                 environment_vars={
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
-                    "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
+                    "AUTH_SERVICE_URL": "https://netra-auth-service-pnovr5vsba-uc.a.run.app",
                     "AUTH_SERVICE_ENABLED": "true",  # CRITICAL: Enable auth service integration
                     "SERVICE_ID": "netra-backend",  # CRITICAL: Required for service-to-service auth
                     "FRONTEND_URL": "https://app.staging.netrasystems.ai",
@@ -119,7 +119,7 @@ class GCPDeployer:
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
                     "FRONTEND_URL": "https://app.staging.netrasystems.ai",
-                    "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
+                    "AUTH_SERVICE_URL": "https://netra-auth-service-pnovr5vsba-uc.a.run.app",
                     "SERVICE_ID": "auth-service",  # CRITICAL: Required for service-to-service auth
                     "JWT_ALGORITHM": "HS256",
                     "JWT_ACCESS_EXPIRY_MINUTES": "15",

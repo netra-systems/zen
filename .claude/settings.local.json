@@ -33,7 +33,14 @@
       "Bash(uvicorn:*)",
       "Bash(docker logs:*)",
       "WebSearch",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(gcloud auth:*)",
+      "Bash(gcloud config:*)",
+      "Bash(gcloud services enable:*)",
+      "Bash(gcloud services list:*)",
+      "Bash(gcloud logging read:*)"
     ],
     "deny": []
   },

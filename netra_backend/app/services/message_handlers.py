@@ -175,6 +175,33 @@ class MessageHandlerService(IMessageHandlerService):
         self, user_request: str, thread: Thread, user_id: str, run: Run
     ) -> Any:
         """Execute supervisor run"""
+        # CRITICAL: Register run-thread mapping for WebSocket routing
+        # This ensures all agent events reach the correct user
+        try:
+            from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
+            bridge = await get_agent_websocket_bridge()
+            
+            # Register the mapping BEFORE execution
+            success = await bridge.register_run_thread_mapping(
+                run_id=run.id,
+                thread_id=thread.id,
+                metadata={
+                    "user_id": user_id,
+                    "user_request": user_request[:100] if user_request else "",
+                    "timestamp": run.created_at
+                }
+            )
+            
+            if success:
+                logger.info(f"✅ Registered run-thread mapping: run_id={run.id} → thread_id={thread.id}")
+            else:
+                logger.warning(f"⚠️ Failed to register run-thread mapping for run_id={run.id}")
+                
+        except Exception as e:
+            logger.error(f"🚨 Error registering run-thread mapping: {e}")
+            # Continue execution even if registration fails
+        
+        # Execute the supervisor
         return await self.supervisor.run(user_request, thread.id, user_id, run.id)
     
     async def _save_response(
