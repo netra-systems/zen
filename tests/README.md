@@ -19,6 +19,23 @@ python tests/unified_test_runner.py --category integration --no-coverage --fast-
 python tests/unified_test_runner.py --categories smoke unit integration api --real-llm --env staging
 ```
 
+## 🔴 Mission Critical Tests (Run Before Deployment)
+
+### Core Business Value Protection
+```bash
+# WebSocket chat delivery - MUST PASS
+python tests/mission_critical/test_websocket_agent_events_suite.py
+
+# SSOT compliance validation
+python tests/mission_critical/test_no_ssot_violations.py
+
+# Docker orchestration stability
+python tests/mission_critical/test_orchestration_integration.py
+
+# Complete mission critical suite
+python tests/unified_test_runner.py --category mission_critical --real-services
+```
+
 ## 🚀 Quick Start
 
 ### Run all tests with failures first and parallel execution:
@@ -47,6 +64,14 @@ python test_summary.py --html
 ```
 
 ## 📊 Test Categories
+
+### 0. **Mission Critical Tests** (`/tests/mission_critical/`)
+- 120+ tests protecting core business value
+- WebSocket event delivery validation
+- Agent golden pattern compliance
+- Docker stability and orchestration
+- SSOT violation detection
+- Infrastructure resilience patterns
 
 ### 1. **Authentication Tests** (`test_auth.py`)
 - Password hashing and verification
