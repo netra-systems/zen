@@ -438,24 +438,36 @@ class UnifiedTestRunner:
         if not CENTRALIZED_DOCKER_AVAILABLE:
             return
         
-        # Determine environment type
-        use_shared = env.get('TEST_USE_SHARED_DOCKER', 'true').lower() == 'true'
-        if hasattr(args, 'docker_dedicated') and args.docker_dedicated:
+        # Determine environment type - default to DEDICATED for unique names
+        # E2E tests should always use dedicated environments
+        if 'e2e' in args.categories or hasattr(args, 'docker_dedicated') and args.docker_dedicated:
             env_type = EnvironmentType.DEDICATED
         else:
-            env_type = EnvironmentType.SHARED
+            # For unit/integration tests, still default to DEDICATED for isolation
+            # Can be overridden with TEST_USE_SHARED_DOCKER=true
+            use_shared = env.get('TEST_USE_SHARED_DOCKER', 'false').lower() == 'true'
+            env_type = EnvironmentType.SHARED if use_shared else EnvironmentType.DEDICATED
         
         # Check if we should use production images
         use_production = env.get('TEST_USE_PRODUCTION_IMAGES', 'true').lower() == 'true'
         
-        # Initialize centralized Docker manager
+        # Initialize centralized Docker manager with Alpine and rebuild defaults
+        # Get options from command line or use defaults
+        use_alpine = not (hasattr(args, 'no_alpine') and args.no_alpine)
+        rebuild_images = not (hasattr(args, 'no_rebuild') and args.no_rebuild)
+        rebuild_backend_only = not (hasattr(args, 'rebuild_all') and args.rebuild_all)
+        
         self.docker_manager = UnifiedDockerManager(
             environment_type=env_type,
-            test_id=f"test_run_{int(time.time())}",
-            use_production_images=use_production
+            test_id=f"test_run_{int(time.time())}_{os.getpid()}",  # More unique ID
+            use_production_images=use_production,
+            use_alpine=use_alpine,  # Use Alpine images by default for minimal size
+            rebuild_images=rebuild_images,  # Rebuild images by default for freshness
+            rebuild_backend_only=rebuild_backend_only  # Only rebuild backend by default since that's where most changes are
         )
         
-        print(f"[INFO] Using Docker environment: type={env_type.value}, production_images={use_production}")
+        print(f"[INFO] Using Docker environment: type={env_type.value}, alpine={use_alpine}, "
+              f"rebuild={rebuild_images}, backend_only={rebuild_backend_only}, production={use_production}")
         
         # Acquire environment with locking
         try:
@@ -2394,6 +2406,24 @@ def main():
         "--docker-stats",
         action="store_true",
         help="Show Docker management statistics after test run"
+    )
+    
+    docker_group.add_argument(
+        "--no-alpine",
+        action="store_true",
+        help="Use regular images instead of Alpine (Alpine is default)"
+    )
+    
+    docker_group.add_argument(
+        "--no-rebuild",
+        action="store_true",
+        help="Don't rebuild Docker images (rebuilding is default)"
+    )
+    
+    docker_group.add_argument(
+        "--rebuild-all",
+        action="store_true",
+        help="Rebuild all services, not just backend (default is backend only)"
     )
     
     # Add orchestrator arguments if available
