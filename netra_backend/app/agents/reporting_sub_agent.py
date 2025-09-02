@@ -12,7 +12,7 @@ import json
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.interface import (
     ExecutionContext, ExecutionResult, WebSocketManagerProtocol
@@ -39,7 +39,7 @@ from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.shared_types import RetryConfig
 
 
-class ReportingSubAgent(BaseSubAgent):
+class ReportingSubAgent(BaseAgent):
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
                  websocket_manager: Optional[WebSocketManagerProtocol] = None):
         super().__init__(llm_manager, name="ReportingSubAgent", description="This agent generates a final report.")

@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional
 if TYPE_CHECKING:
     from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.core.resilience.domain_circuit_breakers import (
     AgentCircuitBreaker,
     AgentCircuitBreakerConfig
@@ -45,7 +45,7 @@ from netra_backend.app.schemas.shared_types import RetryConfig
 logger = central_logger.get_logger(__name__)
 
 
-class TriageSubAgent(BaseSubAgent):
+class TriageSubAgent(BaseAgent):
     """Modernized triage agent with standardized execution patterns."""
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher, 
@@ -59,7 +59,7 @@ class TriageSubAgent(BaseSubAgent):
     def _init_base_triage_agent(self, llm_manager: LLMManager, 
                                websocket_manager: Optional[WebSocketManagerProtocol]) -> None:
         """Initialize base agent with modern execution interface."""
-        BaseSubAgent.__init__(self, llm_manager, name="TriageSubAgent", 
+        BaseAgent.__init__(self, llm_manager, name="TriageSubAgent", 
                             description="Modernized triage agent with advanced categorization.")
         # Store agent name and websocket manager for standardized execution patterns
         self.agent_name = "TriageSubAgent"
@@ -88,21 +88,21 @@ class TriageSubAgent(BaseSubAgent):
         )
         self.circuit_breaker = AgentCircuitBreaker("TriageSubAgent", config=circuit_config)
         retry_config = RetryConfig(max_retries=2, base_delay=1.0, max_delay=10.0)
-        self.reliability_manager = ReliabilityManager(circuit_config, retry_config)
+        self._reliability_manager = ReliabilityManager(circuit_config, retry_config)
     
     def _init_execution_engine(self) -> None:
         """Initialize base execution engine."""
-        self.execution_engine = BaseExecutionEngine(
-            reliability_manager=self.reliability_manager,
-            monitor=getattr(self, 'monitor', None)
+        self._execution_engine = BaseExecutionEngine(
+            reliability_manager=self._reliability_manager,
+            monitor=getattr(self, '_execution_monitor', None)
         )
     
     def _init_monitoring_system(self) -> None:
         """Initialize execution monitoring system."""
-        self.monitor = ExecutionMonitor(max_history_size=1000)
+        self._execution_monitor = ExecutionMonitor(max_history_size=1000)
         # Update engine with monitor after creation
-        if hasattr(self, 'execution_engine'):
-            self.execution_engine.monitor = self.monitor
+        if hasattr(self, '_execution_engine'):
+            self._execution_engine.monitor = self._execution_monitor
     
     def _init_modular_components(self) -> None:
         """Initialize modular components for delegation."""
@@ -129,7 +129,7 @@ class TriageSubAgent(BaseSubAgent):
         
         start_time = time.time()
         try:
-            result = await self.execution_engine.execute(self, context)
+            result = await self._execution_engine.execute(self, context)
             await self._process_execution_result(state, result)
             
             # Agent completed is handled by orchestrator
@@ -248,9 +248,9 @@ class TriageSubAgent(BaseSubAgent):
     
     def get_health_status(self) -> dict:
         """Get comprehensive agent health status."""
-        health_data = self.reliability_manager.get_health_status()
-        health_data["execution_engine"] = self.execution_engine.get_health_status()
-        health_data["monitor"] = self.monitor.get_health_status()
+        health_data = self._reliability_manager.get_health_status()
+        health_data["execution_engine"] = self._execution_engine.get_health_status()
+        health_data["monitor"] = self._execution_monitor.get_health_status()
         return health_data
     
     # Backward compatibility methods - delegation to existing components

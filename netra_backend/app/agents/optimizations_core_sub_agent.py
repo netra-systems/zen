@@ -11,7 +11,7 @@ import json
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.interface import (
     ExecutionContext,
@@ -41,11 +41,11 @@ from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.shared_types import RetryConfig
 
 
-class OptimizationsCoreSubAgent(BaseSubAgent):
+class OptimizationsCoreSubAgent(BaseAgent):
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
         super().__init__(llm_manager, name="OptimizationsCoreSubAgent", 
                         description="This agent formulates optimization strategies.")
-        # WebSocket events are handled via set_websocket_bridge() from BaseSubAgent
+        # WebSocket events are handled via set_websocket_bridge() from BaseAgent
         self.tool_dispatcher = tool_dispatcher
         self._initialize_modern_components()
     

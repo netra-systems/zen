@@ -14,7 +14,7 @@ import asyncio
 import time
 from typing import Any, Dict, Optional
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 
 # Modern Base Components
@@ -41,7 +41,7 @@ from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.strict_types import TypedAgentResult
 
 
-class DataSubAgent(BaseSubAgent):
+class DataSubAgent(BaseAgent):
     """Advanced data gathering and analysis agent with ClickHouse integration.
     
     Uses single inheritance pattern with ExecutionContext/ExecutionResult types.

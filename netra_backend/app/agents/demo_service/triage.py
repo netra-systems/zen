@@ -19,7 +19,7 @@ import time
 from typing import Any, Dict, List, Optional
 
 # Legacy compatibility
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.errors import (
     AgentExecutionError,
@@ -43,7 +43,7 @@ from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocke
 logger = central_logger.get_logger(__name__)
 
 
-class DemoTriageService(BaseSubAgent):
+class DemoTriageService(BaseAgent):
     """Specialized triage service for demo scenarios - Modernized.
     
     Implements modern execution patterns for reliable demo operations.

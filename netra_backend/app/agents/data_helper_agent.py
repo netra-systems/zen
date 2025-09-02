@@ -6,7 +6,7 @@ Business Value: Ensures comprehensive data collection for accurate optimization 
 
 from typing import Any, Dict, Optional
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -16,7 +16,7 @@ from netra_backend.app.tools.data_helper import DataHelper
 logger = central_logger.get_logger(__name__)
 
 
-class DataHelperAgent(BaseSubAgent):
+class DataHelperAgent(BaseAgent):
     """Data Helper Agent for requesting additional data from users.
     
     This agent analyzes the context and generates comprehensive data requests

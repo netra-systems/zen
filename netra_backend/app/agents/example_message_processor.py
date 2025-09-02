@@ -14,7 +14,7 @@ from uuid import uuid4
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.interfaces import AgentStateProtocol, BaseAgentProtocol
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
@@ -25,7 +25,7 @@ from netra_backend.app.websocket_core import get_websocket_manager as get_manage
 logger = central_logger.get_logger(__name__)
 
 
-class ExampleMessageProcessor(BaseSubAgent):
+class ExampleMessageProcessor(BaseAgent):
     """Agent specialized for processing example messages with real-time feedback"""
     
     def __init__(self, llm_manager: Optional[LLMManager] = None):

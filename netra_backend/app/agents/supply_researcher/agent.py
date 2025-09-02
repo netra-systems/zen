@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supply_researcher.data_extractor import (
     SupplyDataExtractor,
@@ -29,7 +29,7 @@ from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.services.supply_research_service import SupplyResearchService
 
 
-class SupplyResearcherAgent(BaseSubAgent):
+class SupplyResearcherAgent(BaseAgent):
     """Agent for researching and updating AI supply information"""
     
     def __init__(

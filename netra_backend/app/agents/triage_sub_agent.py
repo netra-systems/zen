@@ -13,7 +13,7 @@ BVJ: ALL segments | Customer Experience | +25% reduction in triage failures
 import time
 from typing import Any, Dict, Optional
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.agents.input_validation import validate_agent_input
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -31,7 +31,7 @@ from netra_backend.app.schemas.registry import DeepAgentState
 logger = central_logger.get_logger(__name__)
 
 
-class TriageSubAgent(BaseSubAgent):
+class TriageSubAgent(BaseAgent):
     """Clean triage agent using BaseAgent infrastructure.
     
     Contains ONLY triage-specific business logic - all infrastructure 

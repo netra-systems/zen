@@ -12,8 +12,8 @@ import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, TypedDict
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
-# WebSocketContextMixin removed - BaseSubAgent now handles WebSocket via bridge
+from netra_backend.app.agents.base_agent import BaseAgent
+# WebSocketContextMixin removed - BaseAgent now handles WebSocket via bridge
 # Using single inheritance with standardized execution patterns
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.core.type_validators import agent_type_safe
@@ -68,10 +68,10 @@ class AgentHealthStatus(TypedDict):
 
 
 
-class ValidationSubAgent(BaseSubAgent):
+class ValidationSubAgent(BaseAgent):
     """Example validation sub-agent with comprehensive WebSocket event emissions.
     
-    WebSocket events are handled through BaseSubAgent's bridge adapter.
+    WebSocket events are handled through BaseAgent's bridge adapter.
     Demonstrates the complete pattern for sub-agents to provide real-time feedback
     during validation operations including:
     - Agent startup notifications
@@ -87,7 +87,7 @@ class ValidationSubAgent(BaseSubAgent):
         # Initialize base class only - single inheritance pattern
         super().__init__(llm_manager, name="ValidationSubAgent", 
                         description="Comprehensive validation with real-time feedback")
-        # WebSocketContextMixin removed - using BaseSubAgent's bridge
+        # WebSocketContextMixin removed - using BaseAgent's bridge
         # Using single inheritance with standardized execution patterns
         
         # Initialize core components

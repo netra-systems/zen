@@ -12,7 +12,7 @@ import json
 from typing import Any, Dict, Optional
 
 from netra_backend.app.agents.actions_goals_plan_builder import ActionPlanBuilder
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.errors import (
     AgentExecutionError,
@@ -51,7 +51,7 @@ from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.shared_types import RetryConfig
 
 
-class ActionsToMeetGoalsSubAgent(BaseSubAgent):
+class ActionsToMeetGoalsSubAgent(BaseAgent):
     """Modernized agent implementing standardized execution patterns via composition."""
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
@@ -63,7 +63,7 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
 
     def _initialize_base_classes(self, llm_manager: LLMManager) -> None:
         """Initialize base classes for the agent."""
-        BaseSubAgent.__init__(
+        BaseAgent.__init__(
             self, llm_manager, 
             name="ActionsToMeetGoalsSubAgent", 
             description="This agent creates a plan of action."

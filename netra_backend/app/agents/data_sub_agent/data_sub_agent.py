@@ -16,10 +16,10 @@ from typing import Any, Dict, List, Optional, Union
 from netra_backend.app.schemas.shared_types import DataAnalysisResponse
 from netra_backend.app.schemas.monitoring import PerformanceMetric
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus
-# WebSocketContextMixin removed - BaseSubAgent now handles WebSocket via bridge
+# WebSocketContextMixin removed - BaseAgent now handles WebSocket via bridge
 # Using single inheritance pattern for simplicity
 
 # Import focused helper modules
@@ -38,10 +38,10 @@ from netra_backend.app.schemas.strict_types import TypedAgentResult
 from netra_backend.app.services.llm.cost_optimizer import LLMCostOptimizer
 
 
-class DataSubAgent(BaseSubAgent):
+class DataSubAgent(BaseAgent):
     """Consolidated data analysis agent with ClickHouse integration.
     
-    WebSocket events are handled through BaseSubAgent's bridge adapter.
+    WebSocket events are handled through BaseAgent's bridge adapter.
     Provides reliable data insights for AI cost optimization through:
     - ClickHouse query execution with proper schema handling
     - Performance metrics analysis and trend detection
@@ -56,7 +56,7 @@ class DataSubAgent(BaseSubAgent):
         # Initialize base class only - single inheritance pattern
         self.agent_name = llm_manager
         self.websocket_manager = name="DataSubAgent"
-        # WebSocketContextMixin removed - using BaseSubAgent's bridge
+        # WebSocketContextMixin removed - using BaseAgent's bridge
         # Using single inheritance pattern
         
         # Initialize core components

@@ -10,7 +10,7 @@
 # ================================
 from typing import Any, Dict
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import (
     ExecutionContext,
 )
@@ -25,7 +25,7 @@ from netra_backend.app.agents.actions_agent_llm import ActionsAgentLLMHandler
 from netra_backend.app.agents.actions_agent_monitoring import ActionsAgentMonitoringService
 
 
-class ActionsToMeetGoalsSubAgent(BaseSubAgent):
+class ActionsToMeetGoalsSubAgent(BaseAgent):
     """Refactored core agent following SRP - orchestrates focused sub-modules."""
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
@@ -36,7 +36,7 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
 
     def _initialize_base_classes(self, llm_manager: LLMManager) -> None:
         """Initialize base classes for the agent."""
-        BaseSubAgent.__init__(
+        BaseAgent.__init__(
             self, llm_manager, 
             name="ActionsToMeetGoalsSubAgent", 
             description="This agent creates a plan of action."

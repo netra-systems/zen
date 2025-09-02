@@ -9,7 +9,7 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Protocol
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult, WebSocketManagerProtocol
 from netra_backend.app.schemas.core_enums import ExecutionStatus
@@ -57,7 +57,7 @@ logger = central_logger.get_logger(__name__)
 
 
 
-class ModernSyntheticDataSubAgent(BaseSubAgent):
+class ModernSyntheticDataSubAgent(BaseAgent):
     """Modern synthetic data sub-agent with standardized execution patterns.
     
     Provides reliable synthetic data generation with:
@@ -70,7 +70,7 @@ class ModernSyntheticDataSubAgent(BaseSubAgent):
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
                  reliability_manager: Optional[ReliabilityManager] = None):
-        # Initialize BaseSubAgent with proper parameters
+        # Initialize BaseAgent with proper parameters
         super().__init__(
             llm_manager=llm_manager,
             name="ModernSyntheticDataSubAgent",
@@ -256,7 +256,7 @@ class ModernSyntheticDataSubAgent(BaseSubAgent):
         try:
             from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
             
-            # Use BaseSubAgent's WebSocket methods instead of direct bridge access
+            # Use BaseAgent's WebSocket methods instead of direct bridge access
             status = update_data.get('status', 'processing')
             message = update_data.get('message', '')
             
@@ -286,8 +286,8 @@ class ModernSyntheticDataSubAgent(BaseSubAgent):
     
     async def execute(self, state: Optional[DeepAgentState], run_id: str = "", 
                      stream_updates: bool = False) -> Any:
-        """Execute agent with modern patterns (implements BaseSubAgent abstract method)."""
-        # Use BaseSubAgent's WebSocket event emission capabilities
+        """Execute agent with modern patterns (implements BaseAgent abstract method)."""
+        # Use BaseAgent's WebSocket event emission capabilities
         await self.emit_agent_started("Starting synthetic data generation")
         
         context = ExecutionContext(

@@ -23,7 +23,7 @@ Business Value: Customer-facing demo reliability and performance.
 from datetime import UTC, datetime
 from typing import Any, Dict, Optional
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus
@@ -38,7 +38,7 @@ from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocke
 logger = central_logger.get_logger(__name__)
 
 
-class DemoService(BaseSubAgent):
+class DemoService(BaseAgent):
     """
     Modernized demo service with standardized execution patterns.
     

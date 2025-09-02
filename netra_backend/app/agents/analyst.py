@@ -9,7 +9,7 @@ with business grounding validation.
 
 from typing import Any, Dict, List, Optional
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
@@ -18,7 +18,7 @@ from netra_backend.app.tools.sandboxed_interpreter import SandboxedInterpreter
 logger = central_logger.get_logger(__name__)
 
 
-class AnalystAgent(BaseSubAgent):
+class AnalystAgent(BaseAgent):
     """Performs analysis with sandboxed execution for calculations (<300 lines)."""
     
     def __init__(self, llm_manager: LLMManager, 

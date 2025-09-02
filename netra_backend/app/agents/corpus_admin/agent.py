@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional
 if TYPE_CHECKING:
     from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.errors import ValidationError
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
@@ -44,7 +44,7 @@ from netra_backend.app.schemas.shared_types import RetryConfig
 logger = central_logger.get_logger(__name__)
 
 
-class CorpusAdminSubAgent(BaseSubAgent):
+class CorpusAdminSubAgent(BaseAgent):
     """Modernized corpus admin agent with standardized execution patterns."""
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
@@ -55,7 +55,7 @@ class CorpusAdminSubAgent(BaseSubAgent):
     
     def _init_base_agents(self, llm_manager: LLMManager, websocket_manager: Optional['WebSocketManager']) -> None:
         """Initialize base agent components."""
-        BaseSubAgent.__init__(self, llm_manager, name="CorpusAdminSubAgent",
+        BaseAgent.__init__(self, llm_manager, name="CorpusAdminSubAgent",
                             description="Agent specialized in corpus management and administration")
         # Store agent name for standardized execution patterns
         self.agent_name = "CorpusAdminSubAgent"

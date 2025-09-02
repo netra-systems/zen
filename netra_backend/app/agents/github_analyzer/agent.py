@@ -8,7 +8,7 @@ import asyncio
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.github_analyzer.config_parser import (
     ConfigurationExtractor,
 )
@@ -32,7 +32,7 @@ from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.strict_types import TypedAgentResult
 
 
-class GitHubAnalyzerService(BaseSubAgent):
+class GitHubAnalyzerService(BaseAgent):
     """Service for analyzing GitHub repos to map AI operations."""
     
     def __init__(

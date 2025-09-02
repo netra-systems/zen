@@ -12,7 +12,7 @@
 import time
 from typing import List, Optional
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 
 # Import modular components
@@ -44,7 +44,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class SyntheticDataSubAgent(BaseSubAgent):
+class SyntheticDataSubAgent(BaseAgent):
     """Sub-agent dedicated to synthetic data generation"""
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
