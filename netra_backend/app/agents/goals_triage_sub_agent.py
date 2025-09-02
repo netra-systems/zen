@@ -18,6 +18,15 @@ from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 from netra_backend.app.database.session_manager import DatabaseSessionManager
+from netra_backend.app.core.serialization.unified_json_handler import (
+    LLMResponseParser,
+    JSONErrorFixer,
+    UnifiedJSONHandler
+)
+from netra_backend.app.core.unified_error_handler import agent_error_handler
+from netra_backend.app.schemas.shared_types import ErrorContext
+from datetime import datetime, timezone
+from uuid import uuid4
 
 logger = central_logger.get_logger(__name__)
 
@@ -181,7 +190,21 @@ class GoalsTriageSubAgent(BaseAgent):
             return goals
             
         except Exception as e:
-            self.logger.error(f"Failed to extract goals via LLM: {e}")
+            # Create error context with user execution context details
+            error_context = ErrorContext(
+                trace_id=str(uuid4()),
+                operation="goal_extraction",
+                agent_name="GoalsTriageSubAgent",
+                operation_name="extract_goals_from_request",
+                user_id=context.user_id,
+                run_id=context.run_id,
+                timestamp=datetime.now(timezone.utc),
+                details={"user_request_length": len(user_request)}
+            )
+            
+            # Handle error using unified error handler
+            await agent_error_handler.handle_error(e, error_context)
+            
             await self.emit_tool_completed("goal_extractor", {"error": str(e), "fallback_used": True})
             
             # Fallback: use basic text analysis
@@ -263,7 +286,24 @@ class GoalsTriageSubAgent(BaseAgent):
             )
             
         except Exception as e:
-            self.logger.error(f"Failed to analyze goal via LLM: {e}")
+            # Create error context with user execution context details
+            error_context = ErrorContext(
+                trace_id=str(uuid4()),
+                operation="goal_analysis",
+                agent_name="GoalsTriageSubAgent",
+                operation_name="analyze_single_goal",
+                user_id=context.user_id,
+                run_id=context.run_id,
+                timestamp=datetime.now(timezone.utc),
+                details={
+                    "goal_index": goal_index,
+                    "goal_text": goal[:100],  # First 100 chars for context
+                    "goal_length": len(goal)
+                }
+            )
+            
+            # Handle error using unified error handler
+            await agent_error_handler.handle_error(e, error_context)
             
             # Fallback analysis
             return self._create_fallback_goal_analysis(goal, goal_index)
@@ -333,17 +373,16 @@ class GoalsTriageSubAgent(BaseAgent):
         }
 
     def _parse_goals_from_llm_response(self, response: str) -> List[str]:
-        """Parse goals from LLM response, with fallback parsing."""
-        try:
-            import json
-            # Try to parse as JSON array
-            goals = json.loads(response)
-            if isinstance(goals, list):
-                return [str(goal) for goal in goals if goal]
-        except Exception:
-            pass
+        """Parse goals from LLM response using SSOT unified JSON handler."""
+        # Use SSOT LLMResponseParser for safe JSON parsing
+        parser = LLMResponseParser()
+        parsed_goals = parser.safe_json_parse(response, fallback=None)
         
-        # Fallback: extract goals from text
+        # If we got a valid list, process it
+        if isinstance(parsed_goals, list):
+            return [str(goal) for goal in parsed_goals if goal]
+        
+        # Fallback: extract goals from text using existing logic
         lines = response.strip().split('\n')
         goals = []
         for line in lines:
@@ -359,23 +398,43 @@ class GoalsTriageSubAgent(BaseAgent):
         return goals if goals else ["Improve business performance and user satisfaction"]
 
     def _parse_goal_analysis_response(self, response: str) -> Dict[str, Any]:
-        """Parse goal analysis response from LLM."""
-        try:
-            import json
-            return json.loads(response)
-        except Exception:
-            # Fallback analysis
-            return {
-                "priority": "medium",
-                "category": "operational",
-                "confidence_score": 0.6,
-                "rationale": "Automated analysis based on standard business priorities",
-                "estimated_impact": "Positive impact on business operations expected",
-                "resource_requirements": {"time": "moderate", "people": "2-3 team members", "budget": "standard"},
-                "timeline_estimate": "3-6 months",
-                "dependencies": [],
-                "risk_assessment": {"probability": "low", "impact": "manageable", "mitigation": "standard risk management"}
-            }
+        """Parse goal analysis response from LLM using SSOT unified JSON handler."""
+        # Use SSOT LLMResponseParser for proper JSON handling with error recovery
+        parser = LLMResponseParser()
+        parsed_response = parser.ensure_agent_response_is_json(response)
+        
+        # If we got a valid parsed response with expected structure, use it
+        if isinstance(parsed_response, dict) and parsed_response.get("parsed", True):
+            # Remove metadata fields added by ensure_agent_response_is_json if present
+            clean_response = {k: v for k, v in parsed_response.items() 
+                            if k not in ["type", "parsed", "message"]}
+            if clean_response:
+                return clean_response
+        
+        # If parsing failed or response is malformed, use fallback with error recovery
+        if isinstance(parsed_response, dict) and not parsed_response.get("parsed", True):
+            # Log the parsing issue for debugging
+            self.logger.warning(f"LLM response parsing failed: {parsed_response.get('message', 'Unknown error')}")
+            
+            # Try to recover using JSONErrorFixer if we have raw_response
+            if "raw_response" in parsed_response:
+                error_fixer = JSONErrorFixer()
+                recovered = error_fixer.recover_truncated_json(parsed_response["raw_response"])
+                if recovered and isinstance(recovered, dict):
+                    return recovered
+        
+        # Final fallback analysis
+        return {
+            "priority": "medium",
+            "category": "operational",
+            "confidence_score": 0.6,
+            "rationale": "Automated analysis based on standard business priorities",
+            "estimated_impact": "Positive impact on business operations expected",
+            "resource_requirements": {"time": "moderate", "people": "2-3 team members", "budget": "standard"},
+            "timeline_estimate": "3-6 months",
+            "dependencies": [],
+            "risk_assessment": {"probability": "low", "impact": "manageable", "mitigation": "standard risk management"}
+        }
 
     def _extract_goals_fallback(self, user_request: str) -> List[str]:
         """Fallback goal extraction using basic text analysis."""
@@ -526,7 +585,21 @@ class GoalsTriageSubAgent(BaseAgent):
             return result
             
         except Exception as e:
-            self.logger.error(f"GoalsTriageSubAgent failed for user {context.user_id}: {e}")
+            # Create error context with user execution context details
+            error_context = ErrorContext(
+                trace_id=str(uuid4()),
+                operation="execute",
+                agent_name="GoalsTriageSubAgent",
+                operation_name="execute",
+                user_id=context.user_id,
+                run_id=context.run_id,
+                thread_id=context.thread_id,
+                timestamp=datetime.now(timezone.utc),
+                details={"stream_updates": stream_updates}
+            )
+            
+            # Handle error using unified error handler
+            await agent_error_handler.handle_error(e, error_context)
             
             # Execute fallback logic if main execution fails
             if stream_updates:
@@ -539,7 +612,20 @@ class GoalsTriageSubAgent(BaseAgent):
             try:
                 await session_manager.close()
             except Exception as cleanup_error:
-                self.logger.error(f"Session cleanup error: {cleanup_error}")
+                # Create error context for cleanup failure
+                cleanup_error_context = ErrorContext(
+                    trace_id=str(uuid4()),
+                    operation="session_cleanup",
+                    agent_name="GoalsTriageSubAgent",
+                    operation_name="execute_cleanup",
+                    user_id=context.user_id,
+                    run_id=context.run_id,
+                    timestamp=datetime.now(timezone.utc),
+                    details={"cleanup_operation": "session_manager.close()"}
+                )
+                
+                # Handle cleanup error using unified error handler
+                await agent_error_handler.handle_error(cleanup_error, cleanup_error_context)
         
     def _validate_context(self, context: UserExecutionContext) -> None:
         """Validate UserExecutionContext for goal triage.

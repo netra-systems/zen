@@ -24,6 +24,7 @@ from netra_backend.app.agents.triage_sub_agent.processing_monitoring import (
     TriageProcessingMonitor,
 )
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.serialization.unified_json_handler import safe_json_loads
 
 logger = central_logger.get_logger(__name__)
 
@@ -51,21 +52,18 @@ class TriageProcessor:
         self.processing_monitor = TriageProcessingMonitor(self.monitor) if self.monitor else None
         self.error_helper = TriageProcessingErrorHelper()
     
-    async def process_with_llm(self, state, run_id, start_time, user_context: Optional['UserExecutionContext'] = None):
+    async def process_with_llm(self, state, run_id, start_time, user_context: 'UserExecutionContext'):
         """Process request with LLM using UserExecutionContext pattern.
         
         Args:
             state: Agent state
             run_id: Execution run ID
             start_time: Processing start time
-            user_context: UserExecutionContext for request isolation (SSOT)
+            user_context: UserExecutionContext for request isolation (REQUIRED)
         """
-        # Use UserExecutionContext if provided (new pattern), otherwise fallback for compatibility
-        if user_context:
-            return await self._process_with_user_context(user_context, state, start_time)
-        else:
-            # Legacy path for backward compatibility
-            return await self._process_with_legacy_monitoring(state, run_id, start_time)
+        if not user_context:
+            raise ValueError("UserExecutionContext is required for processing")
+        return await self._process_with_user_context(user_context, state, start_time)
     
     async def _process_with_user_context(self, user_context: 'UserExecutionContext', state, start_time: float):
         """Process with UserExecutionContext for proper isolation."""
@@ -89,25 +87,6 @@ class TriageProcessor:
         finally:
             self._update_processing_metrics()
     
-    async def _process_with_legacy_monitoring(self, state, run_id, start_time: float):
-        """Legacy processing path for backward compatibility."""
-        # Create minimal context for legacy path
-        from netra_backend.app.agents.base.interface import ExecutionContext
-        context = ExecutionContext(
-            run_id=run_id,
-            agent_name=self.agent.name if self.agent else "TriageProcessor",
-            state=state
-        )
-        
-        if self.monitor:
-            self.monitor.start_execution(context)
-        
-        try:
-            return await self._execute_llm_processing(context, start_time)
-        except Exception as e:
-            return await self._handle_processing_error(context, e, start_time)
-        finally:
-            self._update_processing_metrics()
     
     async def _execute_llm_processing_with_context(self, user_context: 'UserExecutionContext', state, start_time: float):
         """Execute LLM processing with UserExecutionContext."""
@@ -115,11 +94,6 @@ class TriageProcessor:
         triage_result = await self._retry_llm_processing(state, user_context.run_id, retry_count)
         return self._finalize_processing_result_with_context(triage_result, user_context, state, start_time, retry_count)
     
-    async def _execute_llm_processing(self, context, start_time: float):
-        """Legacy LLM processing for backward compatibility."""
-        retry_count = 0
-        triage_result = await self._retry_llm_processing(context.state, context.run_id, retry_count)
-        return self._finalize_processing_result(triage_result, context, start_time, retry_count)
     
     def _finalize_processing_result_with_context(self, triage_result, user_context: 'UserExecutionContext',
                                                 state, start_time: float, retry_count: int):
@@ -128,12 +102,6 @@ class TriageProcessor:
             triage_result = self._create_fallback_triage_result(state, user_context.run_id)
         return self._add_metadata(triage_result, start_time, retry_count)
     
-    def _finalize_processing_result(self, triage_result, context, 
-                                  start_time: float, retry_count: int):
-        """Legacy finalization for backward compatibility."""
-        if not triage_result:
-            triage_result = self._create_fallback_triage_result(context.state, context.run_id)
-        return self._add_metadata(triage_result, start_time, retry_count)
     
     def _build_enhanced_prompt(self, user_request):
         """Build enhanced prompt for LLM processing."""
@@ -162,20 +130,6 @@ class TriageProcessor:
         # Note: We need state from somewhere - might need to pass it
         return self.error_helper.create_error_fallback_result({}, start_time)
     
-    async def _handle_processing_error(self, context, 
-                                     error: Exception, start_time: float):
-        """Legacy error handling for backward compatibility."""
-        if self.monitor:
-            self.monitor.record_error(context, error)
-        
-        self.error_helper.log_processing_error(error, context.run_id)
-        
-        # Use agent's error handler if available
-        if self.error_handler:
-            from netra_backend.app.core.unified_error_handler import agent_error_handler
-            error_result = await agent_error_handler.handle_execution_error(error, context)
-        
-        return self.error_helper.create_error_fallback_result(context.state, start_time)
     
     async def _fallback_llm_processing(self, enhanced_prompt, run_id, struct_error):
         """Fallback to regular LLM with JSON extraction and monitoring."""
@@ -217,9 +171,8 @@ class TriageProcessor:
     def _parse_json_parameters(self, parameters_str):
         """Parse JSON string parameters with fallback."""
         try:
-            import json
-            return json.loads(parameters_str)
-        except (json.JSONDecodeError, TypeError):
+            return safe_json_loads(parameters_str, {})
+        except (TypeError, ValueError):
             return {}
     
     def enrich_triage_result(self, triage_result, user_request):
@@ -407,38 +360,7 @@ class TriageProcessor:
         return None
 
 
-class WebSocketHandler:
-    """WebSocket handler that delegates to agent's WebSocket capabilities.
-    
-    DEPRECATED: This class violates SSOT. Use agent's built-in WebSocket methods:
-    - agent.emit_agent_completed()
-    - agent.emit_progress()
-    - agent.emit_thinking()
-    """
-    
-    def __init__(self, agent: Optional['TriageSubAgent'] = None, send_update_func=None):
-        """Initialize with reference to agent for SSOT WebSocket access.
-        
-        Args:
-            agent: Parent agent with WebSocket capabilities
-            send_update_func: Legacy function (deprecated)
-        """
-        self.agent = agent
-        self._send_update = send_update_func  # Legacy support
-        self.logger = logger
-    
-    async def send_final_update(self, run_id, triage_result):
-        """Send final update via agent's WebSocket bridge (SSOT)."""
-        if self.agent and hasattr(self.agent, 'emit_agent_completed'):
-            # Use agent's SSOT WebSocket emission
-            await self.agent.emit_agent_completed(result=triage_result)
-        elif self._send_update:
-            # Legacy fallback
-            await self._send_update(run_id, triage_result)
-    
-    def get_websocket_metrics(self) -> Dict[str, int]:
-        """Get WebSocket metrics from agent's monitor (SSOT)."""
-        if self.agent and hasattr(self.agent, '_execution_monitor'):
-            # Get metrics from the monitor's global metrics
-            return {'websocket_messages_sent': self.agent._execution_monitor._global_metrics.websocket_messages_sent}
-        return {}
+# WebSocketHandler class removed - use agent's built-in WebSocket methods:
+# - agent.emit_agent_completed()
+# - agent.emit_progress()
+# - agent.emit_thinking()

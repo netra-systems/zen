@@ -13,6 +13,7 @@ BVJ: ALL segments | Customer Experience | +25% reduction in triage failures
 import time
 from typing import Any, Dict, Optional
 
+from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext, validate_user_context
 from netra_backend.app.agents.triage_sub_agent.core import TriageCore
 from netra_backend.app.agents.triage_sub_agent.models import TriageResult
@@ -23,7 +24,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TriageSubAgent:
+class TriageSubAgent(BaseAgent):
     """Triage agent using UserExecutionContext pattern.
     
     Handles user request triage with complete request isolation.
@@ -36,8 +37,12 @@ class TriageSubAgent:
         CRITICAL: No sessions or global state stored in instance variables.
         All per-request data flows through UserExecutionContext.
         """
-        self.name = "TriageSubAgent"
-        logger.debug(f"Initialized {self.name} with no stored state")
+        # Call BaseAgent.__init__() with appropriate parameters
+        super().__init__(
+            name="TriageSubAgent",
+            description="First contact triage agent for ALL users - CRITICAL revenue impact"
+        )
+        logger.debug(f"Initialized {self.name} with BaseAgent capabilities and no stored state")
         
 
     async def execute(self, context: UserExecutionContext, stream_updates: bool = False) -> Dict[str, Any]:
@@ -67,17 +72,35 @@ class TriageSubAgent:
         try:
             logger.info(f"Starting triage execution for user {context.user_id}, run {context.run_id}")
             
+            # Emit agent started event via BaseAgent WebSocket capabilities
+            await self.emit_agent_started("Starting user request triage analysis...")
+            
             # Validate request
             await self._validate_request(context, user_request, db_manager)
             
             # Execute triage logic
             result = await self._execute_triage_logic(context, user_request, stream_updates, db_manager)
             
+            # Emit agent completed event via BaseAgent WebSocket capabilities
+            await self.emit_agent_completed({
+                "triage_category": result.get("category", "unknown"),
+                "confidence_score": result.get("confidence_score", 0.0),
+                "intent": result.get("intent", "unknown")
+            })
+            
             logger.info(f"Triage execution completed for run {context.run_id}")
             return result
             
         except Exception as e:
             logger.error(f"Triage execution failed for run {context.run_id}: {e}")
+            
+            # Emit error event via BaseAgent WebSocket capabilities
+            await self.emit_error(
+                error_message=f"Triage processing failed: {str(e)}",
+                error_type="TriageExecutionError",
+                error_details={"run_id": context.run_id, "user_id": context.user_id}
+            )
+            
             # Create fallback result
             return await self._create_fallback_result(context, user_request, str(e))
         finally:
@@ -165,16 +188,19 @@ class TriageSubAgent:
             raise
     
     async def _send_processing_update(self, context: UserExecutionContext, message: str) -> None:
-        """Send processing status update.
+        """Send processing status update via BaseAgent WebSocket capabilities.
         
         Args:
             context: User execution context
             message: Status message to send
         """
-        if context.websocket_connection_id:
-            logger.debug(f"Sending update for run {context.run_id}: {message}")
-            # Here you would integrate with WebSocket system
-            # For now, just log the update
+        try:
+            # Use BaseAgent's WebSocket capabilities for proper event emission
+            await self.emit_thinking(message)
+            logger.debug(f"Sent WebSocket thinking update for run {context.run_id}: {message}")
+        except Exception as e:
+            # Graceful fallback - don't fail triage if WebSocket fails
+            logger.debug(f"Failed to send WebSocket update for run {context.run_id}: {e}")
             pass
     
     async def _get_cached_result(self, context: UserExecutionContext, request_hash: str, 

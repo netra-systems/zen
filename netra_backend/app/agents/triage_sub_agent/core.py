@@ -22,7 +22,6 @@ from netra_backend.app.agents.triage_sub_agent.models import (
 )
 from netra_backend.app.agents.triage_sub_agent.tool_recommender import ToolRecommender
 from netra_backend.app.agents.triage_sub_agent.validator import RequestValidator
-from netra_backend.app.agents.utils import extract_json_from_response
 from netra_backend.app.core.serialization.unified_json_handler import (
     LLMResponseParser,
     JSONErrorFixer,
@@ -184,7 +183,7 @@ class TriageCore:
             fixer = JSONErrorFixer()
             fixed = fixer.fix_common_json_errors(result)
             try:
-                parsed = json.loads(fixed)
+                parsed = safe_json_loads(fixed)
                 return parsed if isinstance(parsed, dict) else None
             except json.JSONDecodeError:
                 # Try recovery as last resort
