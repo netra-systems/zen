@@ -512,7 +512,8 @@ class UnifiedTestRunner:
             self.docker_manager = None
             self.docker_environment = None
             self.docker_ports = None
-            self._initialize_docker_fallback(args, running_e2e)
+            print("[WARNING] Docker initialization failed, continuing without Docker management")
+            # Continue without Docker - tests will use existing services if available
     
 
     def cleanup_test_environment(self):
